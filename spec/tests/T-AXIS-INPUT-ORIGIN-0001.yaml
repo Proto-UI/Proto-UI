@@ -1,0 +1,43 @@
+id: T-AXIS-INPUT-ORIGIN-0001
+type: test
+title: Axis Input authored origin and lease conformance
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Real Adapter mounts and synthetic geometry verify the bounded shared seam; independent native and compiler acceptance remains separate.
+summary: Checks finite opt-in origin facts, one capture owner, original hit retention and retired callbacks.
+cases:
+  - id: T-AXIS-INPUT-ORIGIN-0001-CASE-FACT
+    title: Opt-in facts reject missing, invalid and changing origins
+    covers: [C-AXIS-INPUT-ORIGIN-0001-FACT]
+    expectation: Declared originRole resolves ordered same-owner targets, rejects invalid indices and preserves the old non-opted-in sample shape.
+  - id: T-AXIS-INPUT-ORIGIN-0001-CASE-LEASE
+    title: One capture retains the original part across moves and retires reassociated targets
+    covers: [C-AXIS-INPUT-ORIGIN-0001-LEASE]
+    expectation: Capture retargeting cannot change origin; detach, replacement or logical owner reassociation produces one cancel and suppresses stale end.
+implementations:
+  - id: module-origins
+    kind: module-test
+    status: active
+    path: packages/modules/axis-input/test/axis-input.test.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-ORIGIN-0001-CASE-FACT, T-AXIS-INPUT-ORIGIN-0001-CASE-LEASE]
+  - id: four-adapter-origins
+    kind: adapter-test
+    status: active
+    path: packages/adapters/base/test/fixtures/axis-input-conformance.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-ORIGIN-0001-CASE-FACT, T-AXIS-INPUT-ORIGIN-0001-CASE-LEASE]
+    notes:
+      - Real React, Vue 3, Vue 2 and Web Component mounts exercise this shared fixture. Its explicitly supplied rect and CSS extents are synthetic geometry, not native layout evidence.
+verifies:
+  contracts:
+    - id: C-AXIS-INPUT-ORIGIN-0001
+      anchors: [C-AXIS-INPUT-ORIGIN-0001-FACT, C-AXIS-INPUT-ORIGIN-0001-LEASE]
+sources:
+  - path: packages/modules/axis-input/test/axis-input.test.ts
+  - path: packages/adapters/base/test/fixtures/axis-input-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Added finite origin and lifetime oracles without native input or compiler equivalence claims.
+tags: [axis-input, anatomy, lifecycle, test]

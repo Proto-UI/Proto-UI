@@ -1,0 +1,62 @@
+{
+  "results": [
+    {
+      "name": "final-unit",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/core/test/feedback/percentage-root-translation.test.ts",
+        "packages/adapters/web-component/test/shadow-percentage-translation.test.ts",
+        "packages/adapters/web-component/test/shadow-s2-admission.test.ts",
+        "--pool=forks",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tmp/s67-percentage-unit-03.json"
+      ],
+      "startedAt": "2026-11-23T12:54:37.527499+00:00",
+      "finishedAt": "2026-11-23T12:54:48.661285+00:00",
+      "exitCode": 0,
+      "result": {
+        "numTotalTests": 64,
+        "numPassedTests": 64,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "success": true
+      }
+    },
+    {
+      "name": "spec-authoring",
+      "command": [
+        "node",
+        "--max-old-space-size=1536",
+        "--import",
+        "tsx",
+        "scripts/spec/check-lifecycle-authoring.mjs",
+        "--base",
+        "a3895208"
+      ],
+      "startedAt": "2026-11-23T12:54:48.663452+00:00",
+      "finishedAt": "2026-11-23T12:55:00.339715+00:00",
+      "exitCode": 1
+    }
+  ],
+  "sourceHashes": {
+    "packages/core/src/spec/feedback/application-role.ts": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab",
+    "packages/core/src/internal.ts": "2b16d692f539b0addc652c8fb9cc03b51064d3eba8424fbf836161b289a9eda7",
+    "packages/core/test/feedback/percentage-root-translation.test.ts": "46ca13d147a9bf32a4e4c8c01a95863d4d3de4f919aaacb5641ac23d5d2fc7b4",
+    "packages/cli/src/services/proto-style-css.ts": "69a115c1b350c829ff6e1ef48d046a462cf8bfb522c67e2df99b9b13bb14f475",
+    "packages/modules/expose-state-web/src/impl.ts": "beb69796805bfb02c04637b1f7a30e7c8afbb724549c00b659100a916e5bd6bc",
+    "packages/modules/expose-state-web/src/types.ts": "dc3517153a28d6d6823708c54ce9b860e474340dbcd1afebd4bd8c9eb9bbf9c2",
+    "packages/adapters/web-component/src/adapt.ts": "6550769f2d69be29656c6ace03e0577e146fd151512cf9a120da5bb4e0d34572",
+    "packages/adapters/web-component/src/shadow-split-effects.ts": "b50d9762c6ef6ee47ac5dfda0bbb280c231210367c175afd648895d83e1b417b",
+    "packages/adapters/web-component/src/shadow-percentage-source.ts": "5725b3e50ae0bbcd14b01c244bf7db856f6cd7d6281bbd45b635cdcc086d7dd7",
+    "packages/adapters/web-component/test/shadow-percentage-translation.test.ts": "c80d78a8a6085ccb473545f65e4a3de1cb8deb12fd00d9ab3f60f088d7f60584",
+    "packages/adapters/web-component/test/shadow-s2-admission.test.ts": "2b98f69be986807744d09bf04dee55d7e9074f2037fb44ce691576b0d8f211a3",
+    "spec/decisions/D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001.yaml": "34efaa094c276fe688531f4f40a0968e75797212c50dde99aa82bcadcf9cad79",
+    "spec/modules/M-EXPOSE-STATE-WEB-0001.yaml": "1003753a10cb943afa354a4678f856acaae0766be922a7e2af321da933524570",
+    "spec/tests/T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001.yaml": "4c4ee1fd743c42d54191d20be21ff0e21397bf5f52a4fd16f12ff3d6d5275c94"
+  }
+}

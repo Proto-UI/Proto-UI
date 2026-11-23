@@ -1,0 +1,35 @@
+id: HC-FEEDBACK-SHADER-PRESENTATION-0001
+type: host-cap
+title: A view-owned WebGL2 provider publishes complete shader output
+status: draft
+since: 0.3.0-alpha.2
+summary: The host owns GPU allocation, output decoding, input-transparent paint and exact cleanup.
+lifecycleRationale:
+  en: WebGL2 execution establishes only the implemented source and kernels. Hardware GPU, optical material, app backing source and non-Web backend acceptance remain separate.
+statement:
+  en: The shader presentation sink consumes a current style snapshot, physical binding generation/revision identity and one immutable shader declaration. Release permanently retires that generation; restoring a replaced capability receives a newer generation even within the same mounted view. It prepares current semantic style before physical projection, owns all GPU objects and publishes through the same root's complete fallback/output paint lease. No host object crosses into Prototype IR.
+criteria:
+  - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-EXECUTION
+    text:
+      en: Compile the exact versioned first-party GLSL ES 3.00 programs, verify compile/link status and required interfaces, render into complete RGBA8 framebuffer attachments and check GL failure. Retain top-left source interpretation and premultiplied linear intermediate math. Final publication converts linear RGB to sRGB after unpremultiplication and emits a browser image with truthful alpha; independent CPU arithmetic and actual GPU readback test each conversion boundary.
+  - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-OWNERSHIP
+    text:
+      en: The provider does not add a canvas to the semantic child tree, alter event hit targets, capture an external page/window or install an alternate component state owner. Inline paint restoration removes only writes the provider still owns. External replacement wins. Root and Document replacement retires the old image decode and all GL resources. Context loss prevents old publication, installs the opaque fallback when its paint lease is still held, and cannot revive an old generation on restore.
+  - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-FAILURE
+    text:
+      en: Failed allocation, shader compile/link, attachment completeness, rendering, image decode or style publication yields an explicit diagnostic and retains the legal opaque fallback when physical paint capability remains. Cleanup attempts every acquired resource in reverse order even if one deletion throws. Cancellation, duplicate release and dispose are idempotent. Failed publication never discards an unrelated replacement writer.
+  - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-EVIDENCE
+    text:
+      en: Run one actual authored declaration through Runtime and ordinary generated React, Vue, Vue2 and Web Component imports. Real Chromium executes copy and tint, orientation and nontrivial alpha controls against an independently written CPU oracle, and tests fallback, generation retirement and disposal. Mock GL calls, successful shader syntax, token projection or a fixture matrix do not establish application adoption, physical GPU performance, arbitrary shader portability, Flutter, Qt or GPUI support.
+dependsOn:
+  contracts:
+    - C-FEEDBACK-SHADER-PRESENTATION-0001
+openQuestions:
+  - id: HC-FEEDBACK-SHADER-PRESENTATION-0001-Q-ADMISSION
+    question: Has the complete current-source WebGL2 failure, retirement and pixel evidence received independent host review for stable admission?
+    blocks:
+      - activation:HC-FEEDBACK-SHADER-PRESENTATION-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Bind the finite shader declaration to actual WebGL2 resources and current root paint ownership.

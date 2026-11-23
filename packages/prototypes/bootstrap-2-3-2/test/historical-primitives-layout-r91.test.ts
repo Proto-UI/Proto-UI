@@ -872,9 +872,19 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
     expect(root.getExposes().logicalCount.get()).toBe(2);
     expect(content.getAttribute('role')).toBe('list');
     expect(content.querySelector('button')).toBe(authored);
+    // Capture cleanup during retirement; a retained public callable must
+    // become unavailable after terminal disposal (C-EXPOSE-0008).
+    let retiredWindow: { materializedKeys: readonly string[] } | undefined;
+    const stop = collection.subscribe(() => {
+      retiredWindow = collection.snapshot();
+      stop();
+    });
     root.remove();
     await settle();
-    expect(collection.snapshot().materializedKeys).toEqual([]);
+    expect(retiredWindow).toBeDefined();
+    expect(retiredWindow!.materializedKeys).toEqual([]);
+    expect(() => collection.snapshot()).toThrow('after terminal disposal');
+    expect(() => collection.commit(stale, stale.keys)).toThrow('after terminal disposal');
   });
 
   for (const field of [false, true]) {

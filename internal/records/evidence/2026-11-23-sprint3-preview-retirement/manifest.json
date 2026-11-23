@@ -1,0 +1,194 @@
+{
+  "kind": "sprint3-preview-retirement-regression",
+  "baseline": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+  "scope": "Host protocol and production control evidence; not native browser or complete PR acceptance.",
+  "node": "v24.22.3",
+  "packageManager": "pnpm@10.32.1",
+  "baselineResult": {
+    "numTotalTests": 10,
+    "numPassedTests": 2,
+    "numFailedTests": 8,
+    "numPendingTests": 0,
+    "success": false
+  },
+  "candidateResult": {
+    "numTotalTests": 10,
+    "numPassedTests": 10,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  },
+  "productionControls": {
+    "tests": 35,
+    "pass": 35,
+    "fail": 0,
+    "skipped": 0
+  },
+  "sourceHashes": {
+    "apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts": "f159da1722e8c7b7e9e3ebf4772c077c841e60275cde2a8e1f482e5379df153e",
+    "scripts/analysis/browser-compiler-browser.mts": "81c264aada7399a13373aa763da419a52b562a5cf9917582ecdb2b582a716c50",
+    "packages/compiler/test/browser-preview-retirement.test.ts": "a852450dc5e4e28f489ca4dd17c126b766ac107191dc1ad86bdc441b56717b3d"
+  },
+  "upstreamPrecedent": "https://github.com/Proto-UI/Proto-UI/commit/d985f1a67",
+  "archive": {
+    "file": "raw.tar.gz",
+    "sha256": "83cf8c4e3627c1f43584807bd729332d00ed6191bbd3648e86c8e9ccc9f09b16",
+    "entries": [
+      {
+        "path": "retirement-baseline.json",
+        "bytes": 17792,
+        "sha256": "3b21a6d1b0a57602e278058fac3cfd5bca33365bfe10563fdb58b457f664262a"
+      },
+      {
+        "path": "retirement-baseline.log",
+        "bytes": 1301,
+        "sha256": "17cc177a2a51c64e86c1440ba9fae108817c8ca74971236569594a755d3ddc8c"
+      },
+      {
+        "path": "retirement-repaired.json",
+        "bytes": 4269,
+        "sha256": "a04dd053c03e5d77401de727820f1ab7dfabb6902de5a01dbf03326494ab21f6"
+      },
+      {
+        "path": "retirement-repaired.log",
+        "bytes": 1301,
+        "sha256": "12d3037b2f51c740e7b62c9adb552ecff9e1e780c5eb2f034c310bfb0851d045"
+      },
+      {
+        "path": "production-controls.log",
+        "bytes": 3281,
+        "sha256": "bedc3ad15dd7e14b559cee1ac5a20d29e795c8b6eb36bbfcdd1fbebb0d51cf99"
+      },
+      {
+        "path": "format.log",
+        "bytes": 66,
+        "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+      },
+      {
+        "path": "diff-check.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "repair-status.json",
+        "bytes": 18395,
+        "sha256": "527b727cff6692317647340c5868fe8cd42c5826c7c0c32adbac9029779172a6"
+      },
+      {
+        "path": "repair.py",
+        "bytes": 3911,
+        "sha256": "ca5a259dc11c17d5ad886098219b0152f46f50b6922f402ac2be81441a0b1e15"
+      },
+      {
+        "path": "candidate.patch",
+        "bytes": 4658,
+        "sha256": "5cd2fb3b9565d2e181bd5b29071ae7391f5a512868b743eae699a3f82871c9e1"
+      },
+      {
+        "path": "owner-coordination.json",
+        "bytes": 10009,
+        "sha256": "c2c195245c47436fb2f7d9cf04eb9c286864543df159ae75af8dd7aaa43f7bfa"
+      },
+      {
+        "path": "owner-coordination.log",
+        "bytes": 3410,
+        "sha256": "c5c2081a5bb4663c94a53228a8f5843fd6e97e27973ce0c510b238a0639d7707"
+      }
+    ]
+  },
+  "commands": [
+    {
+      "name": "retirement-baseline",
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/compiler/test/browser-preview-retirement.test.ts",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/retirement-baseline.json"
+      ],
+      "exitCode": 1,
+      "durationSeconds": 1.5180184841156006,
+      "log": "/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/retirement-baseline.log"
+    },
+    {
+      "name": "retirement-repaired",
+      "argv": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/compiler/test/browser-preview-retirement.test.ts",
+        "--maxWorkers=1",
+        "--no-file-parallelism",
+        "--reporter=json",
+        "--outputFile=/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/retirement-repaired.json"
+      ],
+      "exitCode": 0,
+      "durationSeconds": 1.1161179542541504,
+      "log": "/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/retirement-repaired.log"
+    },
+    {
+      "name": "production-controls",
+      "argv": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/compiler/browser-production.test.mjs",
+        "scripts/compiler/browser-delivery-index.test.mjs",
+        "scripts/compiler/browser-assets-production.test.mjs"
+      ],
+      "exitCode": 0,
+      "durationSeconds": 7.011107444763184,
+      "log": "/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/production-controls.log"
+    },
+    {
+      "name": "format",
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts",
+        "scripts/analysis/browser-compiler-browser.mts",
+        "packages/compiler/test/browser-preview-retirement.test.ts"
+      ],
+      "exitCode": 0,
+      "durationSeconds": 1.0164530277252197,
+      "log": "/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/format.log"
+    },
+    {
+      "name": "diff-check",
+      "argv": ["git", "diff", "--check"],
+      "exitCode": 0,
+      "durationSeconds": 0.5651824474334717,
+      "log": "/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/diff-check.log"
+    }
+  ],
+  "ownerCoordination": {
+    "selectedFiles": [
+      "packages/compiler/test/browser-preview-retirement.test.ts",
+      "packages/compiler/test/browser-revision-session.test.ts",
+      "packages/compiler/test/browser-client.test.ts"
+    ],
+    "total": 23,
+    "passed": 23,
+    "failed": 0,
+    "skipped": 0,
+    "includesProtocolCases": 10,
+    "argv": [
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "packages/compiler/test/browser-preview-retirement.test.ts",
+      "packages/compiler/test/browser-revision-session.test.ts",
+      "packages/compiler/test/browser-client.test.ts",
+      "--maxWorkers=1",
+      "--no-file-parallelism",
+      "--reporter=json",
+      "--outputFile=/tank/shared/projects/proto-ui-agent/sprint3-retirement-75d5e28a-ops/owner-coordination.json"
+    ]
+  }
+}

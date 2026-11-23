@@ -1,0 +1,20 @@
+{
+  "baseline": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+  "baselineFailureCount": 41,
+  "finalReceipt": "docs-general-fixtures-formatted.json",
+  "tests": {
+    "files": 5,
+    "passed": 87,
+    "failed": 0,
+    "skipped": 0
+  },
+  "files": {
+    "docs-general-fixtures-final.json": "dc2196267ad7df084542779df700d7bcfd20bb13221dc761aaef6edfcf9c4d2b",
+    "docs-general-fixtures-final.log.gz": "261afababcfba629d80719503133c825c98176d73bd7615ac4085d7da4a0c40d",
+    "docs-general-fixtures-first.log.gz": "a9d54168680d9bcde63e38be38e2dc4ea3c978b6401db7ab6958bd67683c3bc7",
+    "docs-general-fixtures-formatted.json": "df746e2ae03d543471f36e4b28da49a5567e4858bbec28fd26eac8d552a43220",
+    "docs-general-fixtures-formatted.log.gz": "058c84c49067d06216053fc15ba83504ad239e8ec2582e2537b9504f6a06850c",
+    "docs-general-fixtures-second.log.gz": "91f7d19555f124ce7b03b1878d05ac970535f389d562f6db14ce8c83c9304edc",
+    "original-failures.json": "c256ebacba7b8bb830d6684722a133056768ac45676c9171691cc428a6523376"
+  }
+}

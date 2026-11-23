@@ -107,6 +107,15 @@
     font-weight: 500;
   }
 
+  /* The no-JS / failed-enhancement rows use the selected family's radius,
+     matching the passive Surface's `default` radius after enhancement. */
+  [data-site-library-family='brutalist']
+    .sidebar-pane
+    .top-level
+    :is(a, summary):not([data-site-link-enhanced]) {
+    border-radius: var(--site-brutalist-radius);
+  }
+
   .sidebar-pane .top-level a:not([data-site-link-enhanced]):focus-visible,
   .sidebar-pane .top-level summary:not([data-site-link-enhanced]):focus-visible {
     outline: 2px solid var(--color-sidebar-ring);

@@ -50,6 +50,12 @@ The page explicitly selects Rhea: Root uses `gap-3`, Item uses `radius-2xl` and 
 
 Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
 
+## Read-only and explicit Form composition
+
+Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. A read-only Radio Group can still move roving focus with its supported navigation keys. Ordinary Root does not automatically register with Field or Form.
+
+Use `fieldRadioGroup` from `@proto.ui/prototypes-shadcn/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+
 ## API
 
 Passing `value` selects controlled mode. There is still no public `orientation` or `loop` prop.
@@ -59,6 +65,7 @@ Passing `value` selects controlled mode. There is still no public `orientation` 
   rows={[
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />

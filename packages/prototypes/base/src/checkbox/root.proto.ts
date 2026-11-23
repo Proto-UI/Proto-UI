@@ -1,273 +1,292 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asAccessible, asFocusable, asTrigger, asControlLabel } from '@proto.ui/hooks';
+import { asOptionalFieldControl } from '../field/control-binding.proto';
+import { createChoiceFieldReport } from '../field/choice-report';
+import { FIELD_CONTEXT, FIELD_LABEL_PAIR } from '../field/shared';
 import { CHECKBOX_CONTEXT, CHECKBOX_FAMILY } from './shared';
 import type { CheckboxRootAsHookContract, CheckboxRootExposes, CheckboxRootProps } from './types';
 
-function isEnterKeyboardCommit(ev: { key?: unknown } | undefined): boolean {
-  return ev?.key === 'Enter';
-}
-
-function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes>): void {
+export type CheckboxRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
+/** One semantic owner. Field registration is an explicit definition-time composition. */
+export function setupCheckboxRoot(
+  def: DefHandle<CheckboxRootProps, CheckboxRootExposes>,
+  options: CheckboxRootSetupOptions = {}
+): void {
+  const binding = options.fieldBinding ? asOptionalFieldControl() : null;
   const accessible = asAccessible();
-  // P-BASE-CHECKBOX-ROLE-CHECKED-INPUT, P-BASE-CHECKBOX-DISPLAY-AND-INPUT
-  // P-BASE-CHECKBOX-ROOT-SEMANTIC-OWNER
-  // P-BASE-CHECKBOX-ROOT-DOMAIN-ANCHOR
   def.anatomy.claim(CHECKBOX_FAMILY, { role: 'root' });
-
-  // P-BASE-CHECKBOX-PROTOCOL-INDEPENDENCE, P-BASE-CHECKBOX-TRIGGER-SEMANTICS
   asTrigger();
-
-  // P-BASE-CHECKBOX-PROP-CHECKED, P-BASE-CHECKBOX-PROP-DEFAULT-CHECKED
-  // P-BASE-CHECKBOX-PROP-DISABLED, P-BASE-CHECKBOX-PROP-NO-EVENT-CALLBACK
   def.props.define({
     checked: { type: 'boolean', empty: 'fallback' },
     defaultChecked: { type: 'boolean', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
+    readOnly: { type: 'boolean', empty: 'fallback' },
     indeterminate: { type: 'boolean', empty: 'fallback' },
     defaultIndeterminate: { type: 'boolean', empty: 'fallback' },
   });
   def.props.setDefaults({
     defaultChecked: false,
     disabled: false,
+    readOnly: false,
     defaultIndeterminate: false,
   });
-
-  // P-BASE-CHECKBOX-CHECKED-EXPOSE, P-BASE-CHECKBOX-DISABLED-EXPOSE
   const checked = def.state.bool('checked', false);
   const disabled = def.state.bool('disabled', false);
-  // P-BASE-CHECKBOX-POINTER-HOVER
+  const readOnly = def.state.bool('readOnly', false);
   const hovered = def.state.bool('hovered', false);
-  // P-BASE-CHECKBOX-PRESS-LIFECYCLE
   const pressed = def.state.bool('pressed', false);
-  // P-BASE-CHECKBOX-INDETERMINATE-STATE, P-BASE-CHECKBOX-INDETERMINATE-AUTHOR-CAPABILITY
   const indeterminate = def.state.bool('indeterminate', false);
-  // P-BASE-CHECKBOX-A11Y-CHECKED, P-BASE-CHECKBOX-A11Y-MIXED
   const checkedA11y = def.state.string('checkedA11y', 'false', {
     options: ['true', 'false', 'mixed'],
   });
-  // P-BASE-CHECKBOX-FOCUSABLE, P-BASE-CHECKBOX-DISABLED-REJECT-FOCUS
   const focusable = asFocusable<CheckboxRootProps>();
   focusable.configure({ disabled: false });
-
-  const focused = focusable.focused;
-  const focusVisible = focusable.focusVisible;
-
+  const focused = focusable.focused,
+    focusVisible = focusable.focusVisible;
   def.expose.state('checked', checked);
-  def.expose.state('indeterminate', indeterminate);
   def.expose.state('disabled', disabled);
+  def.expose.state('readOnly', readOnly);
   def.expose.state('hovered', hovered);
+  def.expose.state('pressed', pressed);
+  def.expose.state('indeterminate', indeterminate);
   def.expose.state('focused', focused);
   def.expose.state('focusVisible', focusVisible);
-  def.expose.state('pressed', pressed);
-  // P-BASE-CHECKBOX-REQUEST-FOCUS, P-BASE-CHECKBOX-DISABLED-REJECT-FOCUS
   def.expose.method('focusSelf', (options) => {
-    if (disabled.get()) return;
-    focusable.focusSelf(options);
+    if (!disabled.get()) focusable.focusSelf(options);
   });
-  // P-BASE-CHECKBOX-CHECKED-CHANGE-SIGNAL, P-BASE-CHECKBOX-CHECKED-CHANGE-PROTOCOL-NAME
   def.expose.event('checkedChange', { payload: 'json' });
   def.expose.event('indeterminateChange', { payload: 'json' });
-
-  // P-BASE-CHECKBOX-ACCESSIBLE-ROLE
   accessible.role('checkbox');
-  // P-BASE-CHECKBOX-ACCESSIBLE-NAME, P-BASE-CHECKBOX-STABLE-LABEL
   accessible.nameFromContent();
-  // P-BASE-CHECKBOX-A11Y-CHECKED, P-BASE-CHECKBOX-A11Y-MIXED
   accessible.state('checked', checkedA11y);
   accessible.state('disabled', disabled);
+  accessible.state('readOnly', readOnly);
   accessible.action('activate', { event: 'checkedChange' });
+  def.context.provide(CHECKBOX_CONTEXT, { checked: false, indeterminate: false, disabled: false });
 
-  let controlledChecked = false;
-  let controlledIndeterminate = false;
-
-  def.context.provide(CHECKBOX_CONTEXT, {
-    checked: false,
-    indeterminate: false,
-    disabled: false,
-  });
-
-  const publishContext = (run: RunHandle<CheckboxRootProps>) => {
-    // P-BASE-CHECKBOX-CONTEXT-SYNC, P-BASE-CHECKBOX-PART-CONTEXT-CONSUME
+  let currentRun: RunHandle<CheckboxRootProps> | null = null;
+  let mounted = false,
+    viewEpoch = 0,
+    operationEpoch = 0;
+  let checkedOwnerEpoch = 0;
+  let controlledChecked = false,
+    controlledIndeterminate = false;
+  let initialChecked = false,
+    initialIndeterminate = false;
+  const isCurrent = (run: RunHandle<CheckboxRootProps>, view: number, operation: number) =>
+    currentRun === run && viewEpoch === view && operationEpoch === operation;
+  const reportField = (reason: 'sync' | 'change' | 'blur' = 'sync') => {
+    if (binding && currentRun)
+      binding.report({ value: checked.get(), focused: focused.get(), composing: false, reason });
+  };
+  const reports = createChoiceFieldReport(
+    () => !!binding && !!currentRun && mounted && !!currentRun.context.tryRead(FIELD_CONTEXT),
+    () => checked.get(),
+    reportField
+  );
+  const publish = (run: RunHandle<CheckboxRootProps>) => {
+    const view = viewEpoch,
+      operation = operationEpoch;
+    if (currentRun !== run) return false;
     checkedA11y.set(
       indeterminate.get() ? 'mixed' : checked.get() ? 'true' : 'false',
-      'reason: checkbox root sync a11y checked'
+      'reason: checkbox canonical checked'
     );
+    if (!isCurrent(run, view, operation)) return false;
     run.context.update(CHECKBOX_CONTEXT, {
-      checked: !!checked.get(),
-      indeterminate: !!indeterminate.get(),
-      disabled: !!disabled.get(),
+      checked: checked.get(),
+      indeterminate: indeterminate.get(),
+      disabled: disabled.get(),
     });
+    return isCurrent(run, view, operation);
   };
-
-  const emitCheckedChange = (run: RunHandle<CheckboxRootProps>, detail: { checked: boolean; indeterminate: boolean }) => {
-    run.expose.emit('checkedChange', detail);
-  };
-
-  const clearTransientInteraction = (reason: string) => {
-    hovered.set(false, reason);
-    pressed.set(false, reason);
-  };
-
-  const syncDisabled = (run: RunHandle<CheckboxRootProps>, nextDisabled: boolean) => {
-    disabled.set(nextDisabled, 'reason: checkbox root sync disabled');
+  const syncPolicy = (run: RunHandle<CheckboxRootProps>) => {
+    if (currentRun !== run) return;
+    const p = run.props.get();
+    const nextDisabled = binding ? binding.state.fieldDisabled.get() : !!p.disabled;
+    const nextReadOnly = binding ? binding.state.fieldReadOnly.get() : !!p.readOnly;
+    if (nextDisabled !== disabled.get() || nextReadOnly !== readOnly.get()) {
+      operationEpoch++;
+      reports.cancel();
+    }
+    const view = viewEpoch,
+      operation = operationEpoch;
+    disabled.set(nextDisabled, 'reason: checkbox effective disabled');
+    if (!isCurrent(run, view, operation)) return;
+    readOnly.set(nextReadOnly, 'reason: checkbox effective readonly');
+    if (!isCurrent(run, view, operation)) return;
     focusable.setDisabled(nextDisabled);
-    if (nextDisabled) {
-      clearTransientInteraction('reason: checkbox root disabled => reset transient interaction');
+    if (!isCurrent(run, view, operation)) return;
+    if (nextDisabled || nextReadOnly) {
+      pressed.set(false, 'reason: checkbox edit policy retired press');
+      if (!isCurrent(run, view, operation)) return;
     }
-    publishContext(run);
+    if (nextDisabled) hovered.set(false, 'reason: checkbox disabled hover');
+    if (isCurrent(run, view, operation) && publish(run)) reportField();
   };
-
-  // P-BASE-CHECKBOX-CONTROLLED-CHECKED, P-BASE-CHECKBOX-CONTROLLED-EMITS-NEXT
-  // P-BASE-CHECKBOX-UNCONTROLLED-UPDATES-CHECKED
-  def.lifecycle.onCreated((run) => {
+  const syncOwner = (run: RunHandle<CheckboxRootProps>) => {
+    if (currentRun !== run) return;
+    const view = viewEpoch,
+      operation = operationEpoch,
+      p = run.props.get();
     controlledChecked = run.props.isProvided('checked');
     controlledIndeterminate = run.props.isProvided('indeterminate');
-    checked.set(
-      controlledChecked ? !!run.props.get().checked : !!run.props.get().defaultChecked,
-      'reason: checkbox root initialize checked'
-    );
-    indeterminate.set(
-      controlledIndeterminate
-        ? !!run.props.get().indeterminate
-        : !!run.props.get().defaultIndeterminate,
-      'reason: checkbox root initialize indeterminate'
-    );
-    syncDisabled(run, !!run.props.get().disabled);
-  });
-
-  def.lifecycle.onMounted((run) => {
-    publishContext(run);
-  });
-
-  // P-BASE-CHECKBOX-CONTROLLED-CHECKED
-  def.props.watch(['checked'], (run, next) => {
-    controlledChecked = run.props.isProvided('checked');
-    if (!controlledChecked) return;
-    checked.set(!!next.checked, 'reason: checkbox root controlled checked sync');
-    publishContext(run);
-  });
-
-  def.props.watch(['indeterminate'], (run, next) => {
-    controlledIndeterminate = run.props.isProvided('indeterminate');
-    if (controlledIndeterminate) {
-      indeterminate.set(
-        !!next.indeterminate,
-        'reason: checkbox root controlled indeterminate sync'
-      );
-    }
-    publishContext(run);
-  });
-
-  // P-BASE-CHECKBOX-DISABLED-EXPOSE, P-BASE-CHECKBOX-DISABLED-CLEAR-TRANSIENT
-  def.props.watch(['disabled'], (run, next) => {
-    syncDisabled(run, !!next.disabled);
-  });
-
-  // P-BASE-CHECKBOX-KEYBOARD-SPACE-ACTIVATION, P-BASE-CHECKBOX-KEYBOARD-ENTER-NOT-ACTIVATION
-  // P-BASE-CHECKBOX-KEYBOARD-SPACE-PREVENT-DEFAULT
-  def.event.onGlobal('key.down', (_run, ev) => {
-    const detail = ev;
-    if (disabled.get()) return;
-    if (!focused.get()) return;
-    if (detail?.key !== ' ') return;
-    ev.control.requestDefaultActionPrevention({
-      reason: 'checkbox.space-activation',
-      source: 'base-checkbox',
-    });
-  });
-
-  // P-BASE-CHECKBOX-POINTER-HOVER
-  def.event.on('pointer.enter', () => {
-    if (disabled.get()) return;
-    hovered.set(true, 'reason: checkbox root pointer.enter => hovered');
-  });
-  def.event.on('pointer.leave', () => {
-    hovered.set(false, 'reason: checkbox root pointer.leave => hovered');
-    pressed.set(false, 'reason: checkbox root pointer.leave => pressed');
-  });
-  def.event.on('pointer.cancel', () => {
-    hovered.set(false, 'reason: checkbox root pointer.cancel => hovered');
-    pressed.set(false, 'reason: checkbox root pointer.cancel => pressed');
-  });
-
-  // P-BASE-CHECKBOX-PRESS-LIFECYCLE
-  def.event.on('pointer.down', () => {
-    if (disabled.get()) return;
-    pressed.set(true, 'reason: checkbox root pointer.down => pressed');
-  });
-  def.event.on('pointer.up', () => {
-    pressed.set(false, 'reason: checkbox root pointer.up => pressed');
-  });
-
-  // P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED, P-BASE-CHECKBOX-ACTIVATION-CLEARS-INDETERMINATE
-  // P-BASE-CHECKBOX-DISABLED-SUPPRESS-ACTIVATION
-  const activate = (run: RunHandle<CheckboxRootProps>, isCurrent: () => boolean = () => true, event?: { key?: unknown }) => {
-    pressed.set(false, 'reason: checkbox root press.commit => pressed');
-    if (disabled.get() || isEnterKeyboardCommit(event)) return;
-    if (!isCurrent()) return;
-
-    const wasIndeterminate = indeterminate.get();
-    if (wasIndeterminate) {
-      if (!controlledIndeterminate) {
-        indeterminate.set(false, 'reason: press.commit => clear indeterminate');
-      }
-      if (!isCurrent()) return;
-      run.expose.emit('indeterminateChange', { indeterminate: false });
-      if (!isCurrent() || disabled.get()) return;
-    }
-
-    const nextChecked = !checked.get();
-    const nextIndeterminate = wasIndeterminate ? false : indeterminate.get();
-
     if (controlledChecked) {
-      emitCheckedChange(run, { checked: nextChecked, indeterminate: nextIndeterminate });
-      if (isCurrent()) publishContext(run);
-      return;
+      if (!!p.checked !== checked.get()) checkedOwnerEpoch++;
+      checked.set(!!p.checked, 'reason: checkbox controlled checked');
     }
-
-    checked.set(nextChecked, 'reason: press.commit => toggle checked');
-    if (!isCurrent()) return;
-    emitCheckedChange(run, { checked: nextChecked, indeterminate: nextIndeterminate });
-    if (isCurrent()) publishContext(run);
+    if (!isCurrent(run, view, operation)) return;
+    if (controlledIndeterminate)
+      indeterminate.set(!!p.indeterminate, 'reason: checkbox controlled mixed');
+    if (isCurrent(run, view, operation) && publish(run)) reportField();
   };
-  def.event.on('press.commit', (run, ev) => {
-    activate(run, undefined, ev);
+  def.lifecycle.onCreated((run) => {
+    currentRun = run;
+    controlledChecked = run.props.isProvided('checked');
+    controlledIndeterminate = run.props.isProvided('indeterminate');
+    initialChecked = controlledChecked
+      ? !!run.props.get().checked
+      : !!run.props.get().defaultChecked;
+    initialIndeterminate = controlledIndeterminate
+      ? !!run.props.get().indeterminate
+      : !!run.props.get().defaultIndeterminate;
+    checked.set(initialChecked, 'reason: checkbox initial canonical checked');
+    indeterminate.set(initialIndeterminate, 'reason: checkbox initial canonical mixed');
+    syncPolicy(run);
   });
-  asControlLabel().target<CheckboxRootProps>((run, request) => {
-    if (disabled.get() || !request.isCurrent()) return;
-    const isCurrent = () => !disabled.get() && request.isCurrent();
-    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
-    if (!isCurrent()) return;
-    activate(run, isCurrent);
+  def.lifecycle.onMounted((run) => {
+    currentRun = run;
+    mounted = true;
+    syncOwner(run);
+    syncPolicy(run);
   });
+  const retire = () => {
+    reports.cancel();
+    operationEpoch++;
+    viewEpoch++;
+    mounted = false;
+    currentRun = null;
+  };
+  def.lifecycle.onUnmounted(retire);
+  def.lifecycle.onBeforeDispose(retire);
+  def.props.watch(['checked', 'indeterminate'], syncOwner);
+  def.props.watch(['disabled', 'readOnly'], syncPolicy);
+  if (binding) {
+    for (const state of [binding.state.fieldDisabled, binding.state.fieldReadOnly])
+      state.watch(() => {
+        if (currentRun) syncPolicy(currentRun);
+      });
+    focused.watch((_run, event) => {
+      if (event.type === 'next') reportField(event.next ? 'sync' : 'blur');
+    });
+  }
+
+  const activate = (
+    run: RunHandle<CheckboxRootProps>,
+    ownerCurrent: () => boolean = () => true,
+    key?: string
+  ) => {
+    if (!mounted || currentRun !== run) return;
+    const view = viewEpoch,
+      operation = ++operationEpoch;
+    const live = () => isCurrent(run, view, operation) && ownerCurrent();
+    pressed.set(false, 'reason: checkbox press complete');
+    if (!live() || disabled.get() || readOnly.get() || key === 'Enter') return;
+    const before = checked.get(),
+      owner = checkedOwnerEpoch,
+      mixed = indeterminate.get();
+    if (mixed) {
+      if (!controlledIndeterminate)
+        indeterminate.set(false, 'reason: checkbox activation clears mixed');
+      if (!live()) return;
+      run.expose.emit('indeterminateChange', { indeterminate: false });
+      if (!live() || disabled.get() || readOnly.get()) return;
+      // A newer checked owner decision retires the old activation's checked stage.
+      // Confirming only mixed=false still allows the original boolean request.
+      if (checkedOwnerEpoch !== owner) {
+        if (!publish(run)) return;
+        reportField();
+        if (live()) reports.schedule(before);
+        return;
+      }
+    }
+    const next = !before;
+    if (!controlledChecked) checked.set(next, 'reason: checkbox accepted checked');
+    if (!live()) return;
+    run.expose.emit('checkedChange', {
+      checked: next,
+      indeterminate: mixed ? false : indeterminate.get(),
+    });
+    if (!live() || !publish(run)) return;
+    reportField();
+    if (live()) reports.schedule(before);
+  };
+  def.event.on('press.commit', (run, event) => activate(run, undefined, event?.key));
+  asControlLabel().target<CheckboxRootProps>(
+    (run, request) => {
+      if (!mounted || currentRun !== run || disabled.get() || !request.isCurrent()) return;
+      const view = viewEpoch,
+        operation = operationEpoch;
+      const live = () => isCurrent(run, view, operation) && request.isCurrent();
+      focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+      if (!live() || readOnly.get()) return;
+      // activate starts a new operation; the label lease remains independently checked.
+      activate(run, () => request.isCurrent());
+    },
+    options.fieldBinding ? FIELD_LABEL_PAIR : undefined
+  );
+  def.expose.method('resetValue', () => {
+    const run = currentRun;
+    if (!run || !mounted) return false;
+    const view = viewEpoch,
+      operation = ++operationEpoch,
+      owner = checkedOwnerEpoch;
+    const live = () => isCurrent(run, view, operation) && checkedOwnerEpoch === owner;
+    reports.cancel();
+    pressed.set(false, 'reason: checkbox reset retires press');
+    if (!live()) return true;
+    if (!controlledChecked) checked.set(initialChecked, 'reason: checkbox reset canonical checked');
+    if (!live()) return true;
+    if (!controlledIndeterminate)
+      indeterminate.set(initialIndeterminate, 'reason: checkbox reset canonical mixed');
+    if (!live() || !publish(run) || !live()) return true;
+    reportField();
+    if (!live()) return true;
+    if (controlledIndeterminate)
+      run.expose.emit('indeterminateChange', { indeterminate: initialIndeterminate });
+    if (!live()) return true;
+    if (controlledChecked)
+      run.expose.emit('checkedChange', {
+        checked: initialChecked,
+        indeterminate: initialIndeterminate,
+      });
+    return true;
+  });
+  def.event.onGlobal('key.down', (_run, event) => {
+    if (!disabled.get() && focused.get() && event?.key === ' ')
+      event.control.requestDefaultActionPrevention({
+        reason: 'checkbox.space-activation',
+        source: 'base-checkbox',
+      });
+  });
+  def.event.on('pointer.enter', () => {
+    if (!disabled.get()) hovered.set(true, 'reason: checkbox pointer hover');
+  });
+  const leave = () => {
+    hovered.set(false, 'reason: checkbox pointer left');
+    if (currentRun) pressed.set(false, 'reason: checkbox pointer retired');
+  };
+  def.event.on('pointer.leave', leave);
+  def.event.on('pointer.cancel', leave);
+  def.event.on('pointer.down', () => {
+    if (!disabled.get() && !readOnly.get()) pressed.set(true, 'reason: checkbox pointer press');
+  });
+  def.event.on('pointer.up', () => pressed.set(false, 'reason: checkbox pointer release'));
 }
 
-/*
- * P-BASE-CHECKBOX criteria outside Checkbox-root-internal prototype syntax:
- * - P-BASE-CHECKBOX-CLICK-DEFERRED: absence of a `click` expose event is the implementation.
- * - P-BASE-CHECKBOX-INDICATOR-PRESENTATIONAL-A11Y: owned by root semantics and indicator's absence of a11y control syntax.
- * - P-BASE-CHECKBOX-INDETERMINATE-PROP-DEFERRED: checked/defaultChecked remain core; indeterminate props are current advanced compatibility surface pending decision.
- * - P-BASE-CHECKBOX-INDETERMINATE-CHANGE-DEFERRED: `indeterminateChange` remains transitional because controlled direct props need a clear request path.
- * - P-BASE-CHECKBOX-INDETERMINATE-AUTHOR-CAPABILITY: asHook returns the indeterminate state handle; arbitrary post-mounted external state writes still need a future state observation or explicit sync capability to publish context immediately.
- * - P-BASE-CHECKBOX-PROP-LABEL-DEFERRED: accessible naming uses content/a11y projection; no `label` prop is accepted.
- * - P-BASE-CHECKBOX-FORM-INTEGRATION-DEFERRED: awaits Form prototype cataloging.
- * - P-BASE-CHECKBOX-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.
- * - P-BASE-CHECKBOX-AGGREGATE-DEFERRED: group/tree summary modeling is deferred beyond this atomic checkbox.
- */
-
-// P-BASE-CHECKBOX-AUTHORING-ENTRIES
 export const asCheckboxRoot = defineAsHook<
   CheckboxRootProps,
   CheckboxRootExposes,
   CheckboxRootAsHookContract
->({
-  name: 'as-checkbox-root',
-  setup: setupCheckboxRoot,
-});
-
-const checkboxRoot = definePrototype({
-  name: 'base-checkbox-root',
-  setup: setupCheckboxRoot,
-});
-
-export default checkboxRoot;
+>({ name: 'as-checkbox-root', setup: setupCheckboxRoot });
+export default definePrototype({ name: 'base-checkbox-root', setup: setupCheckboxRoot });

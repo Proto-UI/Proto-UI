@@ -14,6 +14,16 @@ statement:
 
 
 criteria:
+  - id: C-TEXT-CONTROL-0001-RESET
+    text:
+      en: >-
+        resetValue(value?) is callback-only and operates on the current mounted editing lease. An uncontrolled editor adopts the supplied canonical string, or its latest defaultValue when omitted, and returns true. A controlled editor retains owner truth and returns false; the caller must change owner Props to accept a different value. Both modes retire the previous composition and event lease before resetting editing state, without emitting an input or change proposal. Retained native callbacks and deferred restoration from the old lease cannot edit the reset or remounted target. Missing, uninitialized or detached editors and invalid non-string arguments return false without a reset; terminal disposal retains the existing capability lifetime error. Ordinary sync remains governed separately by editing-session preservation.
+
+
+      zh-CN: >-
+        resetValue(value?) 仅限 callback，操作当前已挂载的编辑 lease。非受控 editor 采用传入的 canonical string，省略时采用最近 defaultValue，并返回 true。 受控 editor 保留 owner truth 并返回 false；接受不同值须由调用者更新 owner Props。 两种模式均先撤销旧 composition 与 event lease，再重置编辑状态，不发出 input/change proposal。旧原生 callback 与延迟恢复不得写入重置或重挂载后的 target。缺失、未初始化、 未挂载 editor 或非字符串参数返回 false 且不重置；终态销毁保留现有能力生命周期错误。 普通 sync 仍受独立编辑会话保留规则约束。
+
+
   - id: C-TEXT-CONTROL-0001-A
     text:
       zh-CN: Static declaration 必须只表达 plain-text、line-mode（single 或 multiline）与 host-owned engine requirement；adapter 在首次 render 前选择物理 editor。当前 Web profile 对 single-line 解析为 `HTMLInputElement`，对 multiline 解析为 `HTMLTextAreaElement`，该 target 属于 adapter infrastructure，不属于 Template children。
@@ -28,8 +38,8 @@ criteria:
       en: input, change, compositionstart, compositionupdate, and compositionend must normalize native-order value, composing, data, and inputType facts without leaking the native Event object as a prototype event payload.
   - id: C-TEXT-CONTROL-0001-D
     text:
-      zh-CN: 首次同步确定 controlled 或 uncontrolled ownership 后，该模式必须保持稳定；controlled 编辑只构成 proposal，并在 callback boundary 后恢复 owner value。
-      en: The first synchronization must establish stable controlled or uncontrolled ownership; a controlled edit is only a proposal, and the owner value must be restored after the callback boundary.
+      zh-CN: 首次同步确定 controlled 或 uncontrolled ownership 后，该模式必须保持稳定；controlled 编辑只构成 proposal，并在 callback boundary 后恢复 owner value。在 input/change/compositionend 的回调内，未变的 owner 同步不得提前覆写不同的物理 candidate 或截断其 caret；明确的新 canonical owner 值仍立即有权更新。
+      en: The first synchronization must establish stable controlled or uncontrolled ownership; a controlled edit is only a proposal, and the owner value must be restored after the callback boundary. Within input/change/compositionend callbacks, synchronization of the unchanged owner must not prematurely replace a distinct physical candidate or truncate its caret; an explicitly different canonical owner value remains immediately authoritative.
   - id: C-TEXT-CONTROL-0001-E
     text:
       zh-CN: Controlled composition 期间不得恢复旧 value 或破坏 IME candidate/cursor；composition boundary 完成后才可以恢复未被 owner 接纳的 proposal。
@@ -74,6 +84,9 @@ dependsOn:
     - C-TEMPLATE-0002
     - C-EVENT-0002
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Catalog the existing resetValue editing-lease replacement and controlled-authority boundary.
   - version: 0.2.0-rc.7
     change: revised
     summary: Required wrapper-backed Text Control profiles to project Root visual intent onto the physical editor surface.

@@ -1,0 +1,160 @@
+import type {
+  DatePickerRootProps,
+  DatePickerRootExposes,
+  DatePickerRootAsHookContract,
+  DatePickerTriggerProps,
+  DatePickerTriggerExposes,
+  DatePickerTriggerAsHookContract,
+  DatePickerContentProps,
+  DatePickerContentExposes,
+  DatePickerContentAsHookContract,
+  DatePickerDayProps,
+  DatePickerDayExposes,
+  DatePickerDayAsHookContract,
+  DatePickerValueProps,
+  DatePickerValueExposes,
+  DatePickerValueAsHookContract,
+} from './types';
+export type * from './types';
+import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import { asCalendarRoot, asCalendarDay, CALENDAR_CONTEXT } from '../calendar';
+import { asPopoverRoot, asPopoverTrigger, asPopoverContent } from '../popover';
+import { POPOVER_CONTEXT, requestPopoverOpen } from '../popover/shared';
+
+function setupRoot(def: DefHandle<DatePickerRootProps, DatePickerRootExposes>) {
+  asPopoverRoot();
+  const calendar = asCalendarRoot();
+  let mounted = false;
+  let lastCompletion = 0;
+  let requestSession: { id: number; rootId: string; openSessionId: number } | null = null;
+  calendar.registerSelectionCapture(({ id, context }) => {
+    const popup = context.read(POPOVER_CONTEXT);
+    requestSession =
+      mounted && popup.open
+        ? { id, rootId: popup.rootId, openSessionId: popup.openSessionId }
+        : null;
+  });
+  def.context.subscribe(CALENDAR_CONTEXT, (run) => {
+    const next = run.context.read(CALENDAR_CONTEXT);
+    const completion = next.selectionCommit;
+    if (!completion || completion.id <= lastCompletion) return;
+    lastCompletion = completion.id;
+    const popup = run.context.read(POPOVER_CONTEXT);
+    if (
+      completion.id !== requestSession?.id ||
+      !mounted ||
+      requestSession.rootId !== popup.rootId ||
+      requestSession.openSessionId !== popup.openSessionId ||
+      !completion.complete ||
+      next.disabled ||
+      next.readOnly ||
+      !popup.open
+    )
+      return;
+    requestPopoverOpen(run, false, 'date-selection', completion.reason);
+  });
+  def.context.subscribe(POPOVER_CONTEXT);
+  def.lifecycle.onMounted(() => {
+    mounted = true;
+  });
+  def.lifecycle.onUnmounted(() => {
+    mounted = false;
+    requestSession = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    mounted = false;
+    requestSession = null;
+  });
+}
+export const asDatePickerRoot = defineAsHook<
+  DatePickerRootProps,
+  DatePickerRootExposes,
+  DatePickerRootAsHookContract
+>({ name: 'as-date-picker-root', setup: setupRoot });
+export const datePickerRoot = definePrototype({ name: 'base-date-picker-root', setup: setupRoot });
+function setupTrigger(_def: DefHandle<DatePickerTriggerProps, DatePickerTriggerExposes>) {
+  asPopoverTrigger();
+}
+export const asDatePickerTrigger = defineAsHook<
+  DatePickerTriggerProps,
+  DatePickerTriggerExposes,
+  DatePickerTriggerAsHookContract
+>({
+  name: 'as-date-picker-trigger',
+  setup: setupTrigger,
+});
+export const datePickerTrigger = definePrototype({
+  name: 'base-date-picker-trigger',
+  setup: setupTrigger,
+});
+function setupContent(_def: DefHandle<DatePickerContentProps, DatePickerContentExposes>) {
+  asPopoverContent();
+}
+export const asDatePickerContent = defineAsHook<
+  DatePickerContentProps,
+  DatePickerContentExposes,
+  DatePickerContentAsHookContract
+>({
+  name: 'as-date-picker-content',
+  setup: setupContent,
+});
+export const datePickerContent = definePrototype({
+  name: 'base-date-picker-content',
+  setup: setupContent,
+});
+function setupDay(_def: DefHandle<DatePickerDayProps, DatePickerDayExposes>) {
+  const calendar = asCalendarDay();
+  return calendar.render;
+}
+export const asDatePickerDay = defineAsHook<
+  DatePickerDayProps,
+  DatePickerDayExposes,
+  DatePickerDayAsHookContract
+>({ name: 'as-date-picker-day', setup: setupDay });
+export const datePickerDay = definePrototype({ name: 'base-date-picker-day', setup: setupDay });
+function setupValue(def: DefHandle<DatePickerValueProps, DatePickerValueExposes>) {
+  def.props.define({ placeholder: { type: 'string' } });
+  def.props.setDefaults({ placeholder: 'Pick a date' });
+  const display = def.state.string('displayValue', '');
+  def.expose.state('displayValue', display);
+  let mounted = false;
+  const sync = (run: RunHandle<{ placeholder?: string }>) => {
+    const c = run.context.read(CALENDAR_CONTEXT);
+    const text =
+      c.mode === 'multiple'
+        ? c.values.join(', ')
+        : c.mode === 'range'
+          ? c.range.from
+            ? c.range.to
+              ? `${c.range.from} – ${c.range.to}`
+              : `${c.range.from} …`
+            : ''
+          : c.value;
+    const next = text || run.props.get().placeholder || '';
+    if (next !== display.get()) {
+      display.set(next, 'date picker display');
+      if (mounted) run.update();
+    }
+  };
+  def.context.subscribe(CALENDAR_CONTEXT, sync);
+  def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted((run) => {
+    mounted = true;
+    sync(run);
+    run.update();
+  });
+  def.props.watchAll(sync);
+  def.lifecycle.onUnmounted(() => {
+    mounted = false;
+  });
+  return () => [display.get()];
+}
+export const asDatePickerValue = defineAsHook<
+  DatePickerValueProps,
+  DatePickerValueExposes,
+  DatePickerValueAsHookContract
+>({ name: 'as-date-picker-value', setup: setupValue });
+export const datePickerValue = definePrototype({
+  name: 'base-date-picker-value',
+  setup: setupValue,
+});

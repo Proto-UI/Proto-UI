@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
+import { installRenderingOpportunities } from '../../test-utils/rendering-opportunities';
 import { selectContent, selectItem, selectRoot, selectTrigger, selectValue } from '../src/select';
 
 type SelectRootElement = WebComponentAdapterElement<typeof selectRoot>;
@@ -285,56 +286,66 @@ describe('prototypes/brutalist: select', () => {
   it('retains the anchored panel for 150ms enter and 100ms leave', async () => {
     // T-BRUTALIST-SELECT-0001-CASE-6
     vi.useFakeTimers();
-    const { root, trigger, content, items } = createSelect();
-    await flush();
-    expect(content.getExposes().transitionState.get()).toBe('closed');
-    expect(content.getExposes().isPresent.get()).toBe(false);
+    const frame = installRenderingOpportunities();
+    try {
+      const { root, trigger, content, items } = createSelect();
+      await flush();
+      expect(content.getExposes().transitionState.get()).toBe('closed');
+      expect(content.getExposes().isPresent.get()).toBe(false);
 
-    trigger.click();
-    await settle();
-    expect(root.getExposes().open.get()).toBe(true);
-    expect(content.getExposes().transitionState.get()).toBe('entering');
-    expect(content.getExposes().isPresent.get()).toBe(true);
-    expect(content.parentElement).toBe(document.body);
-    expect(content.style.position).toBe('fixed');
-    expect(content.dataset.side).toBe('right');
-    for (const token of [
-      'w-[var(--proto-ui-anchor-width)]',
-      'min-w-[var(--proto-ui-anchor-width)]',
-      'duration-150',
-      'rounded-base',
-      'border-2',
-      'border-black',
-      'bg-background',
-      'text-foreground',
-      'animate-in',
-      'fade-in-0',
-      'zoom-in-95',
-      'slide-in-from-left-2',
-    ]) {
-      expect(styleContains(content, token)).toBe(true);
+      trigger.click();
+      await settle();
+      expect(root.getExposes().open.get()).toBe(true);
+      expect(content.getExposes().transitionState.get()).toBe('entering');
+      expect(content.getExposes().isPresent.get()).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(content.style.position).toBe('fixed');
+      expect(content.dataset.side).toBe('right');
+      for (const token of [
+        'w-[var(--proto-ui-anchor-width)]',
+        'min-w-[var(--proto-ui-anchor-width)]',
+        'duration-150',
+        'rounded-base',
+        'border-2',
+        'border-black',
+        'bg-background',
+        'text-foreground',
+        'animate-in',
+        'fade-in-0',
+        'zoom-in-95',
+        'slide-in-from-left-2',
+      ]) {
+        expect(styleContains(content, token)).toBe(true);
+      }
+      await vi.advanceTimersByTimeAsync(149);
+      await flush();
+      expect(content.getExposes().transitionState.get()).toBe('entering');
+      await vi.advanceTimersByTimeAsync(1);
+      await flush();
+      expect(content.getExposes().transitionState.get()).toBe('entered');
+
+      items[0]?.click();
+      await settle();
+      expect(root.getExposes().open.get()).toBe(false);
+      expect(content.getExposes().transitionState.get()).toBe('leaving');
+      expect(styleContains(content, 'animate-out')).toBe(true);
+      expect(styleContains(content, 'fade-out-0')).toBe(true);
+      expect(styleContains(content, 'zoom-out-95')).toBe(true);
+      await vi.advanceTimersByTimeAsync(99);
+      await flush();
+      expect(content.getExposes().transitionState.get()).toBe('leaving');
+      await vi.advanceTimersByTimeAsync(1);
+      await flush();
+      expect(content.getExposes().transitionState.get()).toBe('closed');
+      // Keep the 150/100ms semantic clocks above; physical portal retirement
+      // additionally crosses its independently owned two-frame conceal barrier.
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    } finally {
+      frame.restore();
     }
-    await vi.advanceTimersByTimeAsync(149);
-    await flush();
-    expect(content.getExposes().transitionState.get()).toBe('entering');
-    await vi.advanceTimersByTimeAsync(1);
-    await flush();
-    expect(content.getExposes().transitionState.get()).toBe('entered');
-
-    items[0]?.click();
-    await settle();
-    expect(root.getExposes().open.get()).toBe(false);
-    expect(content.getExposes().transitionState.get()).toBe('leaving');
-    expect(styleContains(content, 'animate-out')).toBe(true);
-    expect(styleContains(content, 'fade-out-0')).toBe(true);
-    expect(styleContains(content, 'zoom-out-95')).toBe(true);
-    await vi.advanceTimersByTimeAsync(99);
-    await flush();
-    expect(content.getExposes().transitionState.get()).toBe('leaving');
-    await vi.advanceTimersByTimeAsync(1);
-    await flush();
-    expect(content.getExposes().transitionState.get()).toBe('closed');
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
   });
 
   it('keeps selection check-only while active and focused items receive the accent pair', async () => {

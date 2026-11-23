@@ -505,4 +505,121 @@ describe('source-bound command profile transitions', () => {
     expect(tokens(body)).not.toContain('bg-muted');
     expect(document.activeElement).toBe(owner);
   });
+  it('withdraws source-specific passive focus and hover paint across primary, secondary and minimal profiles', async () => {
+    // Independent expectations from pinned cn-button clauses and 02cad611.
+    // These are deliberately not read from the implementation's profile maps.
+    const focusProfiles = [
+      { id: 'vega', ring: 'ring-3', ink: 'ring-ring/50' },
+      { id: 'nova', ring: 'ring-3', ink: 'ring-ring/50' },
+      { id: 'maia', ring: 'ring-3', ink: 'ring-ring/50' },
+      { id: 'lyra', ring: 'ring-1', ink: 'ring-ring/50' },
+      { id: 'mira', ring: 'ring-2', ink: 'ring-ring/30' },
+      { id: 'luma', ring: 'ring-3', ink: 'ring-ring/30' },
+      { id: 'sera', ring: 'ring-2', ink: 'ring-ring/30' },
+      { id: 'rhea', ring: 'ring-3', ink: 'ring-ring/30' },
+      { id: 'new-york-v4', ring: 'ring-3', ink: 'ring-ring/50' },
+      { id: 'new-york', ring: 'ring-3', ink: 'ring-ring/50' },
+    ] as const;
+    const body = element(surface);
+    const content = document.createTextNode('Passive appearance');
+    body.append(content);
+    mount(body);
+    await flush();
+    for (const profile of focusProfiles) {
+      const legacy = profile.id === 'new-york-v4' || profile.id === 'new-york';
+      const emphasisCases = [
+        {
+          emphasis: 'primary',
+          idle: 'bg-primary',
+          hover: legacy ? 'bg-primary/90' : 'bg-primary/80',
+        },
+        {
+          emphasis: 'secondary',
+          idle: 'bg-secondary',
+          hover: legacy
+            ? 'bg-secondary/80'
+            : 'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]',
+        },
+        { emphasis: 'minimal', idle: 'bg-transparent', hover: legacy ? 'bg-accent' : 'bg-muted' },
+      ] as const;
+      for (const { emphasis, idle, hover } of emphasisCases) {
+        const recipe = shadcnActionAppearance({
+          styleProfile: profile.id,
+          emphasis,
+          hovered: true,
+          focusVisible: true,
+          pressed: true,
+        });
+        // Exercise the runtime's explicit alias too, not only helper normalization.
+        setElementProps(body, { ...recipe.surface, actionProfile: profile.id });
+        await flush();
+        expect(tokens(body)).toContain(hover);
+        expect(tokens(body)).not.toContain(idle);
+        expect(tokens(body).filter((token) => /^ring-[123]$/.test(token))).toEqual([profile.ring]);
+        expect(tokens(body)).toContain(profile.ink);
+        expect(tokens(body)).toContain('border-ring');
+        expect(tokens(body).includes('border')).toBe(!legacy);
+        expect(tokens(body).includes('bg-clip-padding')).toBe(!legacy);
+        expect(tokens(body).includes('translate-y-px')).toBe(!legacy);
+        if (emphasis === 'minimal') {
+          expect(tokens(body)).toContain(legacy ? 'text-accent-foreground' : 'text-foreground');
+        }
+        setElementProps(body, {
+          ...recipe.surface,
+          actionProfile: profile.id,
+          hovered: false,
+          focusVisible: false,
+          pressed: false,
+          current: true,
+        });
+        await flush();
+        expect(tokens(body)).toContain(idle);
+        expect(tokens(body)).not.toContain(hover);
+        expect(tokens(body)).not.toContain('border-ring');
+        expect(tokens(body).filter((token) => token.startsWith('ring-'))).toEqual([]);
+        expect(tokens(body)).not.toContain('translate-y-px');
+        expect(tokens(body).includes('border-transparent')).toBe(!legacy);
+        expect(body.firstChild).toBe(content);
+        expect(body.getAttribute('role')).toBeNull();
+        expect(body.getAttribute('tabindex')).toBeNull();
+      }
+    }
+    setElementProps(body, { pressed: true });
+    await flush();
+    expect(tokens(body)).toContain('rounded-xl');
+    expect(tokens(body)).toContain('border-border');
+    expect(tokens(body)).not.toContain('border-transparent');
+    expect(tokens(body)).not.toContain('translate-y-px');
+  });
+
+  it('keeps passive dark minimal paint separate between modern and legacy recipes', async () => {
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
+    const body = element(surface);
+    mount(body);
+    for (const profile of [...profiles.map(({ id }) => id), 'new-york'] as const) {
+      const legacy = profile === 'new-york-v4' || profile === 'new-york';
+      const recipe = shadcnActionAppearance({
+        styleProfile: profile,
+        emphasis: 'minimal',
+        hovered: true,
+      });
+      setElementProps(body, { ...recipe.surface, actionProfile: profile });
+      await vi.waitFor(() =>
+        expect(tokens(body)).toContain(legacy ? 'bg-accent/50' : 'bg-muted/50')
+      );
+      expect(tokens(body)).not.toContain(legacy ? 'bg-muted/50' : 'bg-accent/50');
+      expect(tokens(body)).toContain(legacy ? 'text-accent-foreground' : 'text-foreground');
+      setElementProps(body, { ...recipe.surface, actionProfile: profile, hovered: false });
+      await flush();
+      expect(tokens(body)).toContain('bg-transparent');
+      expect(tokens(body)).not.toContain('bg-accent/50');
+      expect(tokens(body)).not.toContain('bg-muted/50');
+    }
+    setElementProps(body, {});
+    await flush();
+    expect(tokens(body)).toContain('bg-background');
+    expect(tokens(body)).not.toContain('bg-accent/50');
+    expect(tokens(body)).not.toContain('bg-muted/50');
+  });
 });

@@ -38,6 +38,22 @@ const profiles = Object.freeze({
     height: 760,
     intrinsic: 'viewBox',
     fonts: 'system',
+    systemFontRoles: Object.freeze([
+      Object.freeze({
+        classes: Object.freeze(['channel-label']),
+        genericFamily: 'monospace',
+        labels: Object.freeze(['event', 'feedback', 'props', 'expose', 'context']),
+      }),
+      Object.freeze({
+        classes: Object.freeze([
+          'actor-label',
+          'component-label',
+          'dimension-label',
+          'dimension-heading',
+        ]),
+        genericFamily: 'sans-serif',
+      }),
+    ]),
     revealDetailsId: 'legacy-information-flow-comparison',
   }),
 });
@@ -49,9 +65,11 @@ const assets = Object.freeze({
   'switch-activation': Object.freeze({
     en: Object.freeze([
       variant('desktop', '/diagrams/whitepaper-switch-activation.en.svg', 960, 920),
+      variant('mobile', '/diagrams/whitepaper-switch-activation.mobile.en.svg', 500, 1740),
     ]),
     'zh-cn': Object.freeze([
       variant('desktop', '/diagrams/whitepaper-switch-activation.zh-cn.svg', 960, 920),
+      variant('mobile', '/diagrams/whitepaper-switch-activation.mobile.zh-cn.svg', 500, 1740),
     ]),
   }),
   'evolution-feedback': Object.freeze({
@@ -67,17 +85,21 @@ const assets = Object.freeze({
   'conditional-consistency': Object.freeze({
     en: Object.freeze([
       variant('desktop', '/diagrams/whitepaper-conditional-consistency.en.svg', 960, 862),
+      variant('mobile', '/diagrams/whitepaper-conditional-consistency.mobile.en.svg', 500, 1920),
     ]),
     'zh-cn': Object.freeze([
       variant('desktop', '/diagrams/whitepaper-conditional-consistency.zh-cn.svg', 960, 862),
+      variant('mobile', '/diagrams/whitepaper-conditional-consistency.mobile.zh-cn.svg', 500, 1920),
     ]),
   }),
   'component-anatomy': Object.freeze({
     en: Object.freeze([
       variant('desktop', '/diagrams/whitepaper-component-anatomy.en.svg', 960, 920),
+      variant('mobile', '/diagrams/whitepaper-component-anatomy.mobile.en.svg', 500, 1740),
     ]),
     'zh-cn': Object.freeze([
       variant('desktop', '/diagrams/whitepaper-component-anatomy.zh-cn.svg', 960, 920),
+      variant('mobile', '/diagrams/whitepaper-component-anatomy.mobile.zh-cn.svg', 500, 1740),
     ]),
   }),
   'information-flow-model': Object.freeze({
@@ -90,7 +112,7 @@ const standardCases = Object.freeze([
   Object.freeze({ scenario: 'standard', viewport: viewport(1440, 1000) }),
   Object.freeze({ scenario: 'standard', viewport: viewport(390, 844) }),
 ]);
-const evolutionCases = Object.freeze([
+const responsiveCases = Object.freeze([
   ...standardCases,
   Object.freeze({ scenario: 'boundary-639', viewport: viewport(639, 1000) }),
   Object.freeze({ scenario: 'boundary-640', viewport: viewport(640, 1000) }),
@@ -137,13 +159,16 @@ export function diagramVariants(profile, locale) {
 export function selectDiagramVariant(profile, locale, width) {
   const variants = diagramVariants(profile, locale);
   assert.ok(Number.isSafeInteger(width) && width > 0, 'Invalid viewport width');
-  const name = profile.figure === 'evolution-feedback' && width <= 639 ? 'mobile' : 'desktop';
+  const name =
+    variants.some((item) => item.name === 'mobile') && width <= 639 ? 'mobile' : 'desktop';
   return variants.find((item) => item.name === name);
 }
 
 export function diagramEvidenceCases(profile) {
   assert.equal(selectDiagramProfile(profile?.figure), profile, 'Use an allowlisted profile');
-  return profile.figure === 'evolution-feedback' ? evolutionCases : standardCases;
+  return diagramVariants(profile, 'en').some((item) => item.name === 'mobile')
+    ? responsiveCases
+    : standardCases;
 }
 
 export function diagramEvidenceId(
@@ -165,9 +190,22 @@ export function diagramEvidenceId(
   );
   assert.match(revision, /^[a-f0-9]{40}$/);
   assert.match(svgSha256, /^[a-f0-9]{64}$/);
-  if (profile.figure === 'evolution-feedback') {
+  if (diagramVariants(profile, locale).some((item) => item.name === 'mobile')) {
     const selected = selectDiagramVariant(profile, locale, width);
     return `${profile.figure}-${selected.name}-${locale}-${theme}-${width}-${scenario}-${revision}-${svgSha256}`;
   }
   return `${profile.figure}-${locale}-${theme}-${width}-${revision}-${svgSha256}`;
+}
+
+// Expected geometry regions are explicit; a missing card cannot quietly pass a font probe.
+export function diagramExpectedMobileCards(profile) {
+  assert.equal(selectDiagramProfile(profile?.figure), profile, 'Use an allowlisted profile');
+  const counts = {
+    'component-anatomy': 2,
+    'switch-activation': 0,
+    'conditional-consistency': 4,
+    'evolution-feedback': 8,
+  };
+  assert.ok(Object.hasOwn(counts, profile.figure), 'A mobile geometry contract is required');
+  return counts[profile.figure];
 }

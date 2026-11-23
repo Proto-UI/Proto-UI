@@ -80,12 +80,22 @@ export function valueTypeEqual(a: ValueType, b: ValueType): boolean {
             field.name === other.name &&
             !!field.optional === !!other.optional &&
             !!field.readonly === !!other.readonly &&
+            field.accessor === other.accessor &&
             valueTypeEqual(field.type, other.type)
         )
       )
     );
   if (a.kind === 'callable' && b.kind === 'callable')
     return (
+      (a.lookup === undefined
+        ? b.lookup === undefined
+        : b.lookup !== undefined &&
+          a.lookup.length === b.lookup.length &&
+          a.lookup.every((entry) =>
+            b.lookup!.some(
+              (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
+            )
+          )) &&
       a.parameters.length === b.parameters.length &&
       a.parameters.every(
         (parameter, index) =>
@@ -119,7 +129,7 @@ export function containsRuntimeAuthority(type: ValueType): boolean {
   if (type.kind === 'object')
     return (
       (type.index !== undefined && containsRuntimeAuthority(type.index)) ||
-      type.fields.some((field) => containsRuntimeAuthority(field.type))
+      type.fields.some((field) => !!field.accessor || containsRuntimeAuthority(field.type))
     );
   if (type.kind === 'value-union') return type.members.some(containsRuntimeAuthority);
   return true;
@@ -146,7 +156,11 @@ export function erasesRuntimeAuthority(actual: ValueType, expected: ValueType): 
     )
       return true;
     return from.some((field) => {
-      const destination = to.find((other) => other.name === field.name)?.type ?? index;
+      const destinationField = to.find((other) => other.name === field.name);
+      // A scalar getter is still executable authority. A structural view must
+      // retain that fact even when its return value is ordinary public data.
+      if (field.accessor && field.accessor !== destinationField?.accessor) return true;
+      const destination = destinationField?.type ?? index;
       return destination === undefined
         ? containsRuntimeAuthority(field.type)
         : erasesRuntimeAuthority(field.type, destination);
@@ -213,6 +227,21 @@ export function valueAssignable(actual: ValueType, expected: ValueType): boolean
     typeof expected !== 'string' &&
     expected.kind === 'callable'
   ) {
+    // A precise lookup result is authority supplied by the actual capture getter,
+    // never by an arbitrary function with a superficially compatible signature.
+    // The map is complete: checkedCall interprets an absent key as undefined.
+    // Dropping entries would therefore erase real return values and capabilities.
+    if (
+      expected.lookup !== undefined &&
+      (actual.lookup === undefined ||
+        actual.lookup.length !== expected.lookup.length ||
+        !expected.lookup.every((entry) =>
+          actual.lookup!.some(
+            (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
+          )
+        ))
+    )
+      return false;
     if (minimumArgumentCount(actual.parameters) > minimumArgumentCount(expected.parameters))
       return false;
     return (
@@ -239,7 +268,7 @@ export function objectFields(
 }
 
 export function objectValueType(fields: ObjectValueType['fields']): ValueType {
-  return fields.every((field) => isDataValueType(field.type) && !field.readonly)
+  return fields.every((field) => isDataValueType(field.type) && !field.readonly && !field.accessor)
     ? {
         kind: 'record',
         fields: fields.map(({ name, type, optional }) => ({
@@ -251,6 +280,55 @@ export function objectValueType(fields: ObjectValueType['fields']): ValueType {
     : { kind: 'object', fields };
 }
 
+/** Copy invokes source getters; an absent optional field does not replace an existing getter. */
+export function spreadObjectField(
+  previous: ObjectValueType['fields'][number] | undefined,
+  incoming: ObjectValueType['fields'][number]
+): ObjectValueType['fields'][number] {
+  const { readonly: _readonly, accessor: _accessor, ...field } = incoming;
+  if (incoming.optional && previous?.accessor)
+    return {
+      name: field.name,
+      type: joinValueTypes([previous.type, field.type, 'void']),
+      readonly: true,
+      accessor: 'get',
+    };
+  return field;
+}
+
+/** Prove an outward JSON snapshot without erasing the expression's readonly view.
+ * Capabilities, callbacks, open dictionaries and nested undefined are never data. */
+export function dataBoundaryType(type: ValueType, top = true): DataType | undefined {
+  if (typeof type === 'string')
+    return ['boolean', 'number', 'string', 'null'].includes(type) || (top && type === 'void')
+      ? (type as DataType)
+      : undefined;
+  if (type.kind === 'literal') return type;
+  if (type.kind === 'array') {
+    const element = dataBoundaryType(type.element, false);
+    return element ? { kind: 'array', element } : undefined;
+  }
+  if (type.kind === 'union' || type.kind === 'value-union') {
+    const members = type.members.map((member) => dataBoundaryType(member, top));
+    return members.every((member): member is DataType => member !== undefined)
+      ? { kind: 'union', members }
+      : undefined;
+  }
+  if (
+    (type.kind === 'record' || type.kind === 'object') &&
+    !('index' in type && type.index !== undefined)
+  ) {
+    const fields: { name: string; type: DataType; optional?: boolean }[] = [];
+    for (const field of type.fields) {
+      const value = dataBoundaryType(field.type, false);
+      if (!value) return undefined;
+      fields.push({ name: field.name, type: value, ...(field.optional ? { optional: true } : {}) });
+    }
+    return { kind: 'record', fields };
+  }
+  return undefined;
+}
+
 /** JSON publication copies data; readonly source fields do not carry authority. */
 export function publishedDataType(type: ValueType): DataType | undefined {
   if (isDataValueType(type)) return type;
@@ -258,16 +336,13 @@ export function publishedDataType(type: ValueType): DataType | undefined {
   if (type.kind === 'object' && type.index === undefined) {
     const fields: { name: string; type: DataType; optional?: boolean }[] = [];
     for (const field of type.fields) {
+      // A readonly data field is copyable; a getter still carries executable authority.
+      if (field.accessor) return undefined;
       const data = publishedDataType(field.type);
       if (!data) return undefined;
       fields.push({ name: field.name, type: data, ...(field.optional ? { optional: true } : {}) });
     }
     return { kind: 'record', fields };
-  }
-  if (type.kind === 'value-union') {
-    const members = type.members.map(publishedDataType);
-    if (members.every((member): member is DataType => member !== undefined))
-      return parseDataType({ kind: 'union', members });
   }
   return undefined;
 }
@@ -327,10 +402,26 @@ export function checkedCall(
     )
       throw new TypeError(`Callable argument ${index + 1} type mismatch.`);
   });
+  const keys = args[0] === undefined ? [] : valueAlternatives(args[0]);
+  const result =
+    fn.lookup &&
+    keys.length &&
+    keys.every(
+      (key) => typeof key !== 'string' && key.kind === 'literal' && typeof key.value === 'string'
+    )
+      ? joinValueTypes(
+          keys.map(
+            (key) =>
+              fn.lookup!.find(
+                (entry) => entry.key === (key as { kind: 'literal'; value: string }).value
+              )?.type ?? 'void'
+          )
+        )
+      : fn.returnType;
   return optional &&
     valueAlternatives(type).some((member) => member === 'null' || member === 'void')
-    ? joinValueTypes([fn.returnType, 'void'])
-    : fn.returnType;
+    ? joinValueTypes([result, 'void'])
+    : result;
 }
 
 /** Every supplies these three values even when the callback declares fewer formals. */
@@ -353,26 +444,32 @@ export function intrinsicResult(
     if (!args.length || !expressions || expressions.length !== args.length)
       throw new TypeError('Object.assign requires a checked fresh target and own-data records.');
     const fields = new Map<string, ValueType>();
-    const copyRecord = (value: ExpressionIR, type: ValueType): void => {
+    const copyRecord = (value: ExpressionIR, type: ValueType, source = false): void => {
       if (
         value.kind !== 'record' ||
         typeof type === 'string' ||
-        type.kind !== 'record' ||
-        !isDataValueType(type) ||
+        (type.kind !== 'record' && !(source && type.kind === 'object')) ||
+        !objectFields(type)?.every((field) => isDataValueType(field.type)) ||
         value.entries.some(
-          (entry) => entry.key === '__proto__' || !isDataValueType(entry.value.type)
+          (entry) =>
+            entry.key === '__proto__' ||
+            (entry.accessor
+              ? !source ||
+                entry.value.kind !== 'function' ||
+                !isDataValueType(entry.value.function.returnType)
+              : !isDataValueType(entry.value.type))
         )
       )
         throw new TypeError(
-          'Object.assign requires direct finite own-data record literals without __proto__.'
+          'Object.assign requires a fresh data target and direct finite record sources without __proto__; source getters must return data.'
         );
-      for (const entry of value.entries) fields.set(entry.key, entry.value.type);
+      for (const field of objectFields(type)!) fields.set(field.name, field.type);
     };
     const target = expressions[0];
     const error = target.kind === 'intrinsic' && target.name === 'error' && args[0] === 'exception';
     if (!error) copyRecord(target, args[0]);
     for (let index = 1; index < expressions.length; index++)
-      copyRecord(expressions[index], args[index]);
+      copyRecord(expressions[index], args[index], true);
     return error
       ? 'exception'
       : objectValueType([...fields].map(([name, type]) => ({ name, type })));

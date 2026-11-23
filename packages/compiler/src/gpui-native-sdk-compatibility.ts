@@ -11,6 +11,7 @@ import {
 } from './gpui-native-sdk';
 import type { CompileResult, GeneratedModule } from './ir';
 import { gpuiComponentCargoManifest } from './gpui-native-manifest';
+import { unknownDiagnosticSpan } from './diagnostics';
 
 const hash = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
 const sameFile = (left: Stats, right: Stats) => left.dev === right.dev && left.ino === right.ino;
@@ -41,7 +42,7 @@ function failure(message: string, file: string): CompileResult<never> {
         code: 'PUI_GPUI_SDK_COMPATIBILITY',
         category: 'invalid-input',
         message,
-        span: { file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+        span: unknownDiagnosticSpan(file),
       },
     ],
   };

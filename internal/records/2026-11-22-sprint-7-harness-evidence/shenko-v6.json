@@ -1,0 +1,2207 @@
+{
+  "schema_version": 1,
+  "scope": "real Shenko live frontend; fixture HTTP/WS reads",
+  "upstream": {
+    "repository": "https://github.com/Proto-UI/Proto-UI.git",
+    "commit": "8ec14275018f98d7e23b5ad8ec7de474cf7aa3fa",
+    "previous_reviewed_commit": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "lock_sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "source_checkout": "/workspace/scratch/b8a4839de6ed/s7-harness-pin",
+    "build_receipt": {
+      "script": "scripts/build/public-packages.mjs",
+      "selected_package_count": 42,
+      "receipt_path": "/tmp/s7-public-build-final.json",
+      "receipt_sha256": "1d0d7ca0a7788245b0ea703e5f3f2f3b9d3ded4bbfd753b4d794038a4143bc36"
+    }
+  },
+  "bundle_manifest_sha256": "afde84df33e2df4fd7c79a0221601e8a33393bf0e512dfcaadc9902b692e0991",
+  "fixture": "committed mixed Chinese/English Markdown, stable owner/reply IDs, replay duplicates",
+  "physical_input": false,
+  "model_or_backend_acceptance": false,
+  "runs": [
+    {
+      "tab": "inspect",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 13789,
+          "extent": 14519,
+          "viewport": 730,
+          "endGap": 0,
+          "count": 60,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -110.5,
+          "focused": "",
+          "reading": "following_latest"
+        },
+        {
+          "name": "departed",
+          "top": 13757,
+          "extent": 15007,
+          "viewport": 730,
+          "endGap": 520,
+          "count": 62,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": 7.25,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "append-paused",
+          "top": 13827,
+          "extent": 15480,
+          "viewport": 730,
+          "endGap": 923,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": 7,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "history-reopened",
+          "top": 13827,
+          "extent": 15480,
+          "viewport": 730,
+          "endGap": 923,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": 7,
+          "focused": "",
+          "reading": "reading_history"
+        },
+        {
+          "name": "selected",
+          "top": 14619,
+          "extent": 15969,
+          "viewport": 730,
+          "endGap": 620,
+          "count": 66,
+          "key": "part.[\"reading-message-30\",\"text/0\"]",
+          "offset": -296.25,
+          "focused": "sk-button sk-button-secondary sk-button-sm",
+          "reading": "selecting_or_interacting"
+        },
+        {
+          "name": "selection-append",
+          "top": 14689,
+          "extent": 16442,
+          "viewport": 730,
+          "endGap": 1023,
+          "count": 68,
+          "key": "part.[\"reading-message-30\",\"text/0\"]",
+          "offset": -296.5,
+          "focused": "sk-button sk-button-secondary sk-button-sm",
+          "reading": "selecting_or_interacting"
+        },
+        {
+          "name": "new-subject-owner",
+          "top": 16200,
+          "extent": 16930,
+          "viewport": 730,
+          "endGap": 0,
+          "count": 70,
+          "key": "part.[\"reading-message-34\",\"text/0\"]",
+          "offset": -109.75,
+          "focused": "",
+          "reading": "following_latest"
+        }
+      ],
+      "checks": [
+        {
+          "name": "committed reply text reaches the actual conversation renderer",
+          "passed": true,
+          "details": {
+            "tab": "inspect"
+          }
+        },
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 14277,
+            "extent": 15007,
+            "viewport": 730,
+            "endGap": 0,
+            "count": 62,
+            "key": "part.[\"reading-message-30\",\"text/0\"]",
+            "offset": -109.75,
+            "focused": "composer-input",
+            "reading": "following_latest"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 13757,
+            "extent": 15007,
+            "viewport": 730,
+            "endGap": 520,
+            "count": 62,
+            "key": "part.[\"reading-message-29\",\"text/0\"]",
+            "offset": 7.25,
+            "focused": "composer-input",
+            "reading": "reading_history"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 13757,
+              "extent": 15007,
+              "viewport": 730,
+              "endGap": 520,
+              "count": 62,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": 7.25,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "paused": {
+              "top": 13827,
+              "extent": 15480,
+              "viewport": 730,
+              "endGap": 923,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": 7,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        },
+        {
+          "name": "reopening restores the saved reader key across replay materialization",
+          "passed": true,
+          "details": {
+            "paused": {
+              "top": 13827,
+              "extent": 15480,
+              "viewport": 730,
+              "endGap": 923,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": 7,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "restored": {
+              "top": 13827,
+              "extent": 15480,
+              "viewport": 730,
+              "endGap": 923,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": 7,
+              "focused": "",
+              "reading": "reading_history"
+            }
+          }
+        },
+        {
+          "name": "keyboard resume keeps focus on its surviving control",
+          "passed": true,
+          "details": {
+            "top": 14750,
+            "extent": 15480,
+            "viewport": 730,
+            "endGap": 0,
+            "count": 64,
+            "key": "part.[\"reading-message-31\",\"text/0\"]",
+            "offset": -110,
+            "focused": "sk-button sk-button-secondary sk-button-sm",
+            "reading": "following_latest"
+          }
+        },
+        {
+          "name": "resumed lease follows later appends",
+          "passed": true
+        },
+        {
+          "name": "selection and its anchor survive append",
+          "passed": true,
+          "details": {
+            "selected": {
+              "top": 14619,
+              "extent": 15969,
+              "viewport": 730,
+              "endGap": 620,
+              "count": 66,
+              "key": "part.[\"reading-message-30\",\"text/0\"]",
+              "offset": -296.25,
+              "focused": "sk-button sk-button-secondary sk-button-sm",
+              "reading": "selecting_or_interacting"
+            },
+            "selectionAppend": {
+              "top": 14689,
+              "extent": 16442,
+              "viewport": 730,
+              "endGap": 1023,
+              "count": 68,
+              "key": "part.[\"reading-message-30\",\"text/0\"]",
+              "offset": -296.5,
+              "focused": "sk-button sk-button-secondary sk-button-sm",
+              "reading": "selecting_or_interacting"
+            }
+          }
+        },
+        {
+          "name": "natural reader end arrival resumes later growth",
+          "passed": true
+        },
+        {
+          "name": "subject replacement retires the old lease and ignores its late callbacks",
+          "passed": true,
+          "details": {
+            "late": 4,
+            "replacement": {
+              "top": 16200,
+              "extent": 16930,
+              "viewport": 730,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-34\",\"text/0\"]",
+              "offset": -109.75,
+              "focused": "",
+              "reading": "following_latest"
+            },
+            "afterLate": {
+              "top": 16200,
+              "extent": 16930,
+              "viewport": 730,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-34\",\"text/0\"]",
+              "offset": -109.75,
+              "focused": "",
+              "reading": "following_latest"
+            }
+          }
+        },
+        {
+          "name": "dispose disconnects observers and ignores late observer callbacks",
+          "passed": true,
+          "details": {
+            "observers": 6,
+            "disconnected": 6,
+            "children": 0
+          }
+        },
+        {
+          "name": "render/replay/dispose issue no business writes",
+          "passed": true,
+          "details": [
+            "client_hello",
+            "client_hello"
+          ]
+        },
+        {
+          "name": "real App has no page errors",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "errors": [],
+      "status": "passed"
+    },
+    {
+      "tab": "im",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 9896,
+          "extent": 10632,
+          "viewport": 736,
+          "endGap": 0,
+          "count": 60,
+          "key": "part.[\"reading-message-28\",\"text/0\"]",
+          "offset": -145.453125,
+          "focused": ""
+        },
+        {
+          "name": "departed",
+          "top": 9736,
+          "extent": 10992,
+          "viewport": 736,
+          "endGap": 520,
+          "count": 62,
+          "key": "part.[\"reading-message-27\",\"text/0\"]",
+          "offset": -201.03125,
+          "focused": "composer-input"
+        },
+        {
+          "name": "append-paused",
+          "top": 9792,
+          "extent": 11336,
+          "viewport": 736,
+          "endGap": 808,
+          "count": 64,
+          "key": "part.[\"reading-message-27\",\"text/0\"]",
+          "offset": -200.84375,
+          "focused": "composer-input"
+        },
+        {
+          "name": "selected",
+          "top": 10340,
+          "extent": 11696,
+          "viewport": 736,
+          "endGap": 620,
+          "count": 66,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -101.125,
+          "focused": "sk-button sk-button-secondary sk-button-sm"
+        },
+        {
+          "name": "selection-append",
+          "top": 10396,
+          "extent": 12040,
+          "viewport": 736,
+          "endGap": 908,
+          "count": 68,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -100.9375,
+          "focused": "sk-button sk-button-secondary sk-button-sm"
+        },
+        {
+          "name": "new-subject-owner",
+          "top": 11664,
+          "extent": 12400,
+          "viewport": 736,
+          "endGap": 0,
+          "count": 70,
+          "key": "part.[\"reading-message-33\",\"text/0\"]",
+          "offset": -145.6875,
+          "focused": ""
+        }
+      ],
+      "checks": [
+        {
+          "name": "committed reply text reaches the actual conversation renderer",
+          "passed": true,
+          "details": {
+            "tab": "im"
+          }
+        },
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 10256,
+            "extent": 10992,
+            "viewport": 736,
+            "endGap": 0,
+            "count": 62,
+            "key": "part.[\"reading-message-29\",\"text/0\"]",
+            "offset": -145.5,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 9736,
+            "extent": 10992,
+            "viewport": 736,
+            "endGap": 520,
+            "count": 62,
+            "key": "part.[\"reading-message-27\",\"text/0\"]",
+            "offset": -201.03125,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 9736,
+              "extent": 10992,
+              "viewport": 736,
+              "endGap": 520,
+              "count": 62,
+              "key": "part.[\"reading-message-27\",\"text/0\"]",
+              "offset": -201.03125,
+              "focused": "composer-input"
+            },
+            "paused": {
+              "top": 9792,
+              "extent": 11336,
+              "viewport": 736,
+              "endGap": 808,
+              "count": 64,
+              "key": "part.[\"reading-message-27\",\"text/0\"]",
+              "offset": -200.84375,
+              "focused": "composer-input"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        },
+        {
+          "name": "keyboard resume keeps focus on its surviving control",
+          "passed": true,
+          "details": {
+            "top": 10600,
+            "extent": 11336,
+            "viewport": 736,
+            "endGap": 0,
+            "count": 64,
+            "key": "part.[\"reading-message-30\",\"text/0\"]",
+            "offset": -145.546875,
+            "focused": "sk-button sk-button-secondary sk-button-sm"
+          }
+        },
+        {
+          "name": "resumed lease follows later appends",
+          "passed": true
+        },
+        {
+          "name": "selection and its anchor survive append",
+          "passed": true,
+          "details": {
+            "selected": {
+              "top": 10340,
+              "extent": 11696,
+              "viewport": 736,
+              "endGap": 620,
+              "count": 66,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -101.125,
+              "focused": "sk-button sk-button-secondary sk-button-sm"
+            },
+            "selectionAppend": {
+              "top": 10396,
+              "extent": 12040,
+              "viewport": 736,
+              "endGap": 908,
+              "count": 68,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -100.9375,
+              "focused": "sk-button sk-button-secondary sk-button-sm"
+            }
+          }
+        },
+        {
+          "name": "natural reader end arrival resumes later growth",
+          "passed": true
+        },
+        {
+          "name": "subject replacement retires the old lease and ignores its late callbacks",
+          "passed": true,
+          "details": {
+            "late": 4,
+            "replacement": {
+              "top": 11664,
+              "extent": 12400,
+              "viewport": 736,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-33\",\"text/0\"]",
+              "offset": -145.6875,
+              "focused": ""
+            },
+            "afterLate": {
+              "top": 11664,
+              "extent": 12400,
+              "viewport": 736,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-33\",\"text/0\"]",
+              "offset": -145.6875,
+              "focused": ""
+            }
+          }
+        },
+        {
+          "name": "dispose disconnects observers and ignores late observer callbacks",
+          "passed": true,
+          "details": {
+            "observers": 6,
+            "disconnected": 6,
+            "children": 0
+          }
+        },
+        {
+          "name": "render/replay/dispose issue no business writes",
+          "passed": true,
+          "details": [
+            "client_hello"
+          ]
+        },
+        {
+          "name": "real App has no page errors",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "errors": [],
+      "status": "passed"
+    },
+    {
+      "tab": "inspect",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 17742,
+          "extent": 18432,
+          "viewport": 690,
+          "endGap": 0,
+          "count": 60,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -400.5,
+          "focused": "",
+          "reading": "following_latest"
+        },
+        {
+          "name": "departed",
+          "top": 17842,
+          "extent": 19052,
+          "viewport": 690,
+          "endGap": 520,
+          "count": 62,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -414.75,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "append-paused",
+          "top": 17912,
+          "extent": 19656,
+          "viewport": 690,
+          "endGap": 1054,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -415,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "history-reopened",
+          "top": 17912,
+          "extent": 19656,
+          "viewport": 690,
+          "endGap": 1054,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -415,
+          "focused": "",
+          "reading": "reading_history"
+        },
+        {
+          "name": "selected",
+          "top": 18966,
+          "extent": 20276,
+          "viewport": 690,
+          "endGap": 620,
+          "count": 66,
+          "key": "part.[\"reading-message-31\",\"text/0\"]",
+          "offset": -314.75,
+          "focused": "sk-button sk-button-secondary sk-button-sm",
+          "reading": "selecting_or_interacting"
+        },
+        {
+          "name": "selection-append",
+          "top": 19036,
+          "extent": 20880,
+          "viewport": 690,
+          "endGap": 1154,
+          "count": 68,
+          "key": "part.[\"reading-message-31\",\"text/0\"]",
+          "offset": -315,
+          "focused": "sk-button sk-button-secondary sk-button-sm",
+          "reading": "selecting_or_interacting"
+        },
+        {
+          "name": "new-subject-owner",
+          "top": 23120,
+          "extent": 23810,
+          "viewport": 690,
+          "endGap": 0,
+          "count": 70,
+          "key": "part.[\"reading-message-34\",\"text/0\"]",
+          "offset": -400.5,
+          "focused": "",
+          "reading": "following_latest"
+        }
+      ],
+      "checks": [
+        {
+          "name": "committed reply text reaches the actual conversation renderer",
+          "passed": true,
+          "details": {
+            "tab": "inspect"
+          }
+        },
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 18362,
+            "extent": 19052,
+            "viewport": 690,
+            "endGap": 0,
+            "count": 62,
+            "key": "part.[\"reading-message-30\",\"text/0\"]",
+            "offset": -400.5,
+            "focused": "composer-input",
+            "reading": "following_latest"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 17842,
+            "extent": 19052,
+            "viewport": 690,
+            "endGap": 520,
+            "count": 62,
+            "key": "part.[\"reading-message-29\",\"text/0\"]",
+            "offset": -414.75,
+            "focused": "composer-input",
+            "reading": "reading_history"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 17842,
+              "extent": 19052,
+              "viewport": 690,
+              "endGap": 520,
+              "count": 62,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -414.75,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "paused": {
+              "top": 17912,
+              "extent": 19656,
+              "viewport": 690,
+              "endGap": 1054,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -415,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        },
+        {
+          "name": "reopening restores the saved reader key across replay materialization",
+          "passed": true,
+          "details": {
+            "paused": {
+              "top": 17912,
+              "extent": 19656,
+              "viewport": 690,
+              "endGap": 1054,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -415,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "restored": {
+              "top": 17912,
+              "extent": 19656,
+              "viewport": 690,
+              "endGap": 1054,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -415,
+              "focused": "",
+              "reading": "reading_history"
+            }
+          }
+        },
+        {
+          "name": "keyboard resume keeps focus on its surviving control",
+          "passed": true,
+          "details": {
+            "top": 18966,
+            "extent": 19656,
+            "viewport": 690,
+            "endGap": 0,
+            "count": 64,
+            "key": "part.[\"reading-message-31\",\"text/0\"]",
+            "offset": -400.5,
+            "focused": "sk-button sk-button-secondary sk-button-sm",
+            "reading": "following_latest"
+          }
+        },
+        {
+          "name": "resumed lease follows later appends",
+          "passed": true
+        },
+        {
+          "name": "selection and its anchor survive append",
+          "passed": true,
+          "details": {
+            "selected": {
+              "top": 18966,
+              "extent": 20276,
+              "viewport": 690,
+              "endGap": 620,
+              "count": 66,
+              "key": "part.[\"reading-message-31\",\"text/0\"]",
+              "offset": -314.75,
+              "focused": "sk-button sk-button-secondary sk-button-sm",
+              "reading": "selecting_or_interacting"
+            },
+            "selectionAppend": {
+              "top": 19036,
+              "extent": 20880,
+              "viewport": 690,
+              "endGap": 1154,
+              "count": 68,
+              "key": "part.[\"reading-message-31\",\"text/0\"]",
+              "offset": -315,
+              "focused": "sk-button sk-button-secondary sk-button-sm",
+              "reading": "selecting_or_interacting"
+            }
+          }
+        },
+        {
+          "name": "natural reader end arrival resumes later growth",
+          "passed": true
+        },
+        {
+          "name": "subject replacement retires the old lease and ignores its late callbacks",
+          "passed": true,
+          "details": {
+            "late": 4,
+            "replacement": {
+              "top": 23120,
+              "extent": 23810,
+              "viewport": 690,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-34\",\"text/0\"]",
+              "offset": -400.5,
+              "focused": "",
+              "reading": "following_latest"
+            },
+            "afterLate": {
+              "top": 23120,
+              "extent": 23810,
+              "viewport": 690,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-34\",\"text/0\"]",
+              "offset": -400.5,
+              "focused": "",
+              "reading": "following_latest"
+            }
+          }
+        },
+        {
+          "name": "dispose disconnects observers and ignores late observer callbacks",
+          "passed": true,
+          "details": {
+            "observers": 6,
+            "disconnected": 6,
+            "children": 0
+          }
+        },
+        {
+          "name": "render/replay/dispose issue no business writes",
+          "passed": true,
+          "details": [
+            "client_hello",
+            "client_hello"
+          ]
+        },
+        {
+          "name": "real App has no page errors",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "errors": [],
+      "status": "passed"
+    },
+    {
+      "tab": "im",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 16230,
+          "extent": 17009,
+          "viewport": 779,
+          "endGap": 0,
+          "count": 60,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -234.5625,
+          "focused": ""
+        },
+        {
+          "name": "departed",
+          "top": 16283,
+          "extent": 17582,
+          "viewport": 779,
+          "endGap": 520,
+          "count": 62,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -215.375,
+          "focused": "composer-input"
+        },
+        {
+          "name": "append-paused",
+          "top": 16339,
+          "extent": 18139,
+          "viewport": 779,
+          "endGap": 1021,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -215.1875,
+          "focused": "composer-input"
+        },
+        {
+          "name": "selected",
+          "top": 17313,
+          "extent": 18712,
+          "viewport": 779,
+          "endGap": 620,
+          "count": 66,
+          "key": "part.[\"reading-message-31\",\"text/0\"]",
+          "offset": -115.53125,
+          "focused": "sk-button sk-button-secondary sk-button-sm"
+        },
+        {
+          "name": "selection-append",
+          "top": 17369,
+          "extent": 19269,
+          "viewport": 779,
+          "endGap": 1121,
+          "count": 68,
+          "key": "part.[\"reading-message-31\",\"text/0\"]",
+          "offset": -115.34375,
+          "focused": "sk-button sk-button-secondary sk-button-sm"
+        },
+        {
+          "name": "new-subject-owner",
+          "top": 19063,
+          "extent": 19842,
+          "viewport": 779,
+          "endGap": 0,
+          "count": 70,
+          "key": "part.[\"reading-message-34\",\"text/0\"]",
+          "offset": -234.953125,
+          "focused": ""
+        }
+      ],
+      "checks": [
+        {
+          "name": "committed reply text reaches the actual conversation renderer",
+          "passed": true,
+          "details": {
+            "tab": "im"
+          }
+        },
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 16803,
+            "extent": 17582,
+            "viewport": 779,
+            "endGap": 0,
+            "count": 62,
+            "key": "part.[\"reading-message-30\",\"text/0\"]",
+            "offset": -234.640625,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 16283,
+            "extent": 17582,
+            "viewport": 779,
+            "endGap": 520,
+            "count": 62,
+            "key": "part.[\"reading-message-29\",\"text/0\"]",
+            "offset": -215.375,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 16283,
+              "extent": 17582,
+              "viewport": 779,
+              "endGap": 520,
+              "count": 62,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -215.375,
+              "focused": "composer-input"
+            },
+            "paused": {
+              "top": 16339,
+              "extent": 18139,
+              "viewport": 779,
+              "endGap": 1021,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -215.1875,
+              "focused": "composer-input"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        },
+        {
+          "name": "keyboard resume keeps focus on its surviving control",
+          "passed": true,
+          "details": {
+            "top": 17360,
+            "extent": 18139,
+            "viewport": 779,
+            "endGap": 0,
+            "count": 64,
+            "key": "part.[\"reading-message-31\",\"text/0\"]",
+            "offset": -234.71875,
+            "focused": "sk-button sk-button-secondary sk-button-sm"
+          }
+        },
+        {
+          "name": "resumed lease follows later appends",
+          "passed": true
+        },
+        {
+          "name": "selection and its anchor survive append",
+          "passed": true,
+          "details": {
+            "selected": {
+              "top": 17313,
+              "extent": 18712,
+              "viewport": 779,
+              "endGap": 620,
+              "count": 66,
+              "key": "part.[\"reading-message-31\",\"text/0\"]",
+              "offset": -115.53125,
+              "focused": "sk-button sk-button-secondary sk-button-sm"
+            },
+            "selectionAppend": {
+              "top": 17369,
+              "extent": 19269,
+              "viewport": 779,
+              "endGap": 1121,
+              "count": 68,
+              "key": "part.[\"reading-message-31\",\"text/0\"]",
+              "offset": -115.34375,
+              "focused": "sk-button sk-button-secondary sk-button-sm"
+            }
+          }
+        },
+        {
+          "name": "natural reader end arrival resumes later growth",
+          "passed": true
+        },
+        {
+          "name": "subject replacement retires the old lease and ignores its late callbacks",
+          "passed": true,
+          "details": {
+            "late": 4,
+            "replacement": {
+              "top": 19063,
+              "extent": 19842,
+              "viewport": 779,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-34\",\"text/0\"]",
+              "offset": -234.953125,
+              "focused": ""
+            },
+            "afterLate": {
+              "top": 19063,
+              "extent": 19842,
+              "viewport": 779,
+              "endGap": 0,
+              "count": 70,
+              "key": "part.[\"reading-message-34\",\"text/0\"]",
+              "offset": -234.953125,
+              "focused": ""
+            }
+          }
+        },
+        {
+          "name": "dispose disconnects observers and ignores late observer callbacks",
+          "passed": true,
+          "details": {
+            "observers": 6,
+            "disconnected": 6,
+            "children": 0
+          }
+        },
+        {
+          "name": "render/replay/dispose issue no business writes",
+          "passed": true,
+          "details": [
+            "client_hello"
+          ]
+        },
+        {
+          "name": "real App has no page errors",
+          "passed": true,
+          "details": []
+        }
+      ],
+      "errors": [],
+      "status": "passed"
+    }
+  ],
+  "browser": {
+    "engine": "Chromium",
+    "version": "145.0.7632.6",
+    "headless": true
+  },
+  "status": "passed",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    }
+  ]
+}

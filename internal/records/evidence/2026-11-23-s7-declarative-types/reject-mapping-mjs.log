@@ -1,0 +1,9 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> proto-ui-declarative-catalog-study@0.0.0 check:types
+> node check-types.mjs
+
+[96mmapping.mjs[0m:[93m121[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'number'.
+
+[7m121[0m const strictJavaScriptControl = "invalid";
+[7m   [0m [91m      ~~~~~~~~~~~~~~~~~~~~~~~[0m

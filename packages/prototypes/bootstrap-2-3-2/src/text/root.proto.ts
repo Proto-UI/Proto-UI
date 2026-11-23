@@ -12,8 +12,8 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     // No selection override: document text is selectable, control text inherits
     // its actual owner's selection policy, including inside portaled controls.
     const inherited = asTextRoot();
-    // Named sizes preserve the defined rem scale; 2xl retains the archived
-    // 24.5px-at-16px heading size without fixing the consumer root size.
+    // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION preserves the scalable Text vocabulary.
+    // Its explicit 2xl exception is 24.5px at a 16px root, expressed in rem.
     // Choosing a visual size does not turn this passive slot into a heading.
     def.rule({
       when: (w) => w.prop('size').eq('xs'),

@@ -28,6 +28,7 @@ export default {
               {
                 'kind': 'proto',
                 'prototypeId': 'brutalist-dropdown-item',
+                'ref': 'profileAction',
                 'props': {
                   'value': 'profile',
                   'textValue': 'Profile',
@@ -173,6 +174,17 @@ export default {
                 'children': ['⇧⌘Q'],
               },
             ],
+          },
+          {
+            'kind': 'proto',
+            'prototypeId': 'brutalist-dropdown-item',
+            'ref': 'deleteAction',
+            'props': {
+              'value': 'delete',
+              'textValue': 'Delete',
+              'variant': 'destructive',
+            },
+            'children': ['Delete'],
           },
         ],
         'surfaceStyle': 'w-40',

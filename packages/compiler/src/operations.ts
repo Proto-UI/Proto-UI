@@ -12,12 +12,14 @@ import {
   valueTypeEqual,
   joinValueTypes,
   objectValueType,
+  dataBoundaryType,
   isTemplateChildType,
-  publishedDataType,
 } from './value-types';
 export { isTemplateChildType } from './value-types';
 import {
   COMPLETION_REQUEST_TYPE,
+  PRESENTATION_DECLARATION_TYPE,
+  SHADER_PRESENTATION_TYPE,
   PRESENTATION_COMPLETION_TYPE,
   PRESENTATION_FRAME_TYPE,
   PRESENTATION_OUTCOME_TYPE,
@@ -328,11 +330,36 @@ const relationSpecType: ValueType = {
     },
   ],
 };
+const textSelection: DataType = {
+  kind: 'union',
+  members: [
+    'null',
+    {
+      kind: 'record',
+      fields: [
+        { name: 'start', type: 'number' },
+        { name: 'end', type: 'number' },
+        {
+          name: 'direction',
+          type: {
+            kind: 'union',
+            members: [
+              { kind: 'literal', value: 'forward' },
+              { kind: 'literal', value: 'backward' },
+              { kind: 'literal', value: 'none' },
+            ],
+          },
+        },
+      ],
+    },
+  ],
+};
 const textSnapshot: DataType = {
   kind: 'record',
   fields: [
     { name: 'value', type: 'string' },
     { name: 'composing', type: 'boolean' },
+    { name: 'selection', optional: true, type: textSelection },
   ],
 };
 const textEvent: DataType = {
@@ -343,6 +370,7 @@ const textEvent: DataType = {
     { name: 'composing', type: 'boolean' },
     { name: 'data', type: { kind: 'union', members: ['string', 'null'] } },
     { name: 'inputType', type: { kind: 'union', members: ['string', 'null'] } },
+    { name: 'selection', optional: true, type: textSelection },
   ],
 };
 const imageSnapshot: DataType = {
@@ -579,6 +607,24 @@ export const OPERATION_RULES = {
     requiredCapabilities: ['style-projection'],
   }),
   'feedback.style.use': styleRule('def', 'feedback.style.use', setup, 'style-disposer'),
+  'feedback.material.shader': rule(
+    'def',
+    'feedback.material.shader',
+    setup,
+    'style-disposer',
+    [{ role: 'value', valueSchema: SHADER_PRESENTATION_TYPE }],
+    [effect('declare', 'style'), effect('write', 'style')],
+    { requiredCapabilities: ['style-projection'] }
+  ),
+  'feedback.style.presence': rule(
+    'def',
+    'feedback.style.presence',
+    setup,
+    'style-disposer',
+    [{ role: 'value', types: [PRESENTATION_DECLARATION_TYPE] }],
+    [effect('declare', 'presence'), effect('write', 'style')],
+    { requiredCapabilities: ['style-projection'] }
+  ),
   'feedback.style.release': rule(
     'style-disposer',
     'call',
@@ -1086,7 +1132,25 @@ export const OPERATION_RULES = {
       {
         role: 'value',
         optional: true,
-        valueSchema: objectValueType([{ name: 'when', type: 'state:boolean', optional: true }]),
+        valueSchema: {
+          kind: 'value-union',
+          members: [
+            'void',
+            {
+              kind: 'object',
+              fields: [
+                {
+                  name: 'when',
+                  optional: true,
+                  type: {
+                    kind: 'value-union',
+                    members: ['state:boolean', 'borrowed:boolean', 'observed:boolean'],
+                  },
+                },
+              ],
+            },
+          ],
+        },
       },
     ],
     [effect('declare', 'accessibility')],
@@ -1985,6 +2049,35 @@ export const OPERATION_RULES = {
     [record],
     [effect('declare', 'view')]
   ),
+  'scroll.sync': rule(
+    'scroll',
+    'sync',
+    callbackPhase,
+    'void',
+    [
+      {
+        role: 'value',
+        valueSchema: {
+          kind: 'record',
+          fields: [
+            {
+              name: 'axes',
+              optional: true,
+              type: {
+                kind: 'union',
+                members: [
+                  { kind: 'literal', value: 'horizontal' },
+                  { kind: 'literal', value: 'vertical' },
+                  { kind: 'literal', value: 'both' },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ],
+    [effect('write', 'view')]
+  ),
   'scroll.bindComposedChrome': rule(
     'scroll',
     'bindComposedChrome',
@@ -1999,6 +2092,14 @@ export const OPERATION_RULES = {
     callbackPhase,
     SCROLL_REQUEST_OUTCOME_TYPE,
     [{ role: 'value', valueSchema: SCROLL_REQUEST_TYPE }],
+    [effect('write', 'view')]
+  ),
+  'scroll.pauseFollowing': rule(
+    'scroll',
+    'pauseFollowing',
+    callbackPhase,
+    SCROLL_REQUEST_OUTCOME_TYPE,
+    [],
     [effect('write', 'view')]
   ),
   'scroll.getSnapshot': rule(
@@ -2025,6 +2126,14 @@ export const OPERATION_RULES = {
     [record],
     [effect('write', 'view')]
   ),
+  'textControl.resetValue': rule(
+    'text-control',
+    'resetValue',
+    callbackPhase,
+    'boolean',
+    [{ role: 'value', schema: { kind: 'union', members: ['string', 'void'] }, optional: true }],
+    [effect('write', 'view')]
+  ),
   'textControl.snapshot': rule(
     'text-control',
     'snapshot',
@@ -2032,14 +2141,6 @@ export const OPERATION_RULES = {
     { kind: 'union', members: [textSnapshot, 'null'] },
     [],
     [effect('read', 'view')]
-  ),
-  'textControl.resetValue': rule(
-    'text-control',
-    'resetValue',
-    callbackPhase,
-    'boolean',
-    [{ role: 'value', types: [{ kind: 'union', members: ['string', 'void'] }], optional: true }],
-    [effect('write', 'view')]
   ),
   'imageView.on': rule(
     'image-view',
@@ -2899,8 +3000,8 @@ export function validateOperationArguments(
         if (!bindings.eventPayloadType)
           reject('missing-signature', 'Emitted events require a declared payload signature.');
         else if (
-          !publishedDataType(argument.type) ||
-          !isAssignable(publishedDataType(argument.type)!, bindings.eventPayloadType)
+          !dataBoundaryType(argument.type) ||
+          !assignable(dataBoundaryType(argument.type)!, bindings.eventPayloadType)
         )
           reject('argument-type', 'Event payload does not match the declared signature.');
         break;

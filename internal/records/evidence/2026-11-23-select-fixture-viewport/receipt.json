@@ -1,0 +1,22 @@
+{
+  "baseHead": "05441c9fbed5a5b843c9be2ad58a452cf054bc21",
+  "sourceSha256": {
+    "packages/prototypes/base/test/select-alignment-owner.test.ts": "86228aa88a14d6b2b9d31ac23b631ce0ad02cb89e525780444068903e3382925",
+    "packages/prototypes/shadcn/test/select-alignment-owner.test.ts": "72e47fccaac05d241091023a7e861dc8cb8414524ec703a95b49dbd794cb3bd1"
+  },
+  "command": "node node_modules/vitest/vitest.mjs run packages/prototypes/base/test/select-alignment-owner.test.ts packages/prototypes/shadcn/test/select-alignment-owner.test.ts packages/prototypes/bootstrap-2-3-2/test/draft-overlay-projections.test.ts --pool=forks --no-file-parallelism",
+  "result": {
+    "files": 3,
+    "passed": 58,
+    "failed": 0,
+    "skipped": 0
+  },
+  "logs": {
+    "select-viewport-tests.log.gz": {
+      "uncompressedBytes": 208832,
+      "uncompressedSha256": "eab29d36c870733e9363f230e6f8f0cc47232cfde4c03c19c6495c79cb95cd70",
+      "gzipSha256": "bfc7b0ad21da7b8454825780c69fbb3a707fdcecabbbb9382e798c241a29487a"
+    }
+  },
+  "scope": "Controlled host geometry, not native browser positioning, performance or Apple/AT acceptance. The third file includes separately pending conceal-fixture corrections and is retained as combined regression context; this commit changes only the two Select geometry fixtures."
+}

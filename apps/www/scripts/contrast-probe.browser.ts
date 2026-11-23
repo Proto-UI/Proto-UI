@@ -49,6 +49,10 @@ interface ContrastShadow {
 }
 interface ContrastSurface {
   prototype: string | undefined;
+  owner: string | null;
+  generation: string | null;
+  hostNodeId: number;
+  physicalNodeId: number;
   ref: string | null;
   role: string | null;
   inactive: boolean;
@@ -132,6 +136,7 @@ export interface ContrastFrame {
   generation: string;
   theme: string | undefined;
   devicePixelRatio: number;
+  raster: { width: number; height: number };
   stateFingerprint: string;
   surfaces: ContrastSurface[];
 }
@@ -210,6 +215,47 @@ const authoredProjectionRootFilter = (
   };
 };
 
+const declaredNativeEditor = (
+  host: HTMLElement,
+  owner: string,
+  generation: string
+): HTMLElement => {
+  const kind =
+    host.dataset.projectionPrototype === 'brutalist-textarea-root'
+      ? 'Textarea'
+      : host.dataset.projectionPrototype === 'brutalist-input-root'
+        ? 'Input'
+        : null;
+  if (!kind) return host;
+  const editors: (HTMLInputElement | HTMLTextAreaElement)[] = [];
+  const visited = new Set<Node>();
+  const findEditor = (node: Node) => {
+    if (visited.has(node)) return;
+    visited.add(node);
+    if (
+      (kind === 'Input' && node instanceof HTMLInputElement) ||
+      (kind === 'Textarea' && node instanceof HTMLTextAreaElement)
+    )
+      editors.push(node as HTMLInputElement | HTMLTextAreaElement);
+    for (const child of composedChildren(node)) findEditor(child);
+  };
+  findEditor(host);
+  if (editors.length !== 1)
+    throw new Error(`Declared ${kind} requires exactly one current native editor target.`);
+  const element = editors[0];
+  for (let current: Element | null = element; current; current = composedParent(current)) {
+    const targetOwner = current.getAttribute('data-projection-owner');
+    const targetGeneration = current.getAttribute('data-projection-generation');
+    if (
+      (targetOwner !== null && targetOwner !== owner) ||
+      (targetGeneration !== null && targetGeneration !== generation)
+    )
+      throw new Error(`Declared ${kind} native editor crosses a foreign projection lease.`);
+    if (current === host) break;
+  }
+  return element;
+};
+
 const currentProjection = (
   scope: HTMLElement | null,
   boundary: ContrastAuthoredBoundary | null = null
@@ -232,36 +278,10 @@ const currentProjection = (
     }
   };
   visit(document);
-  const surfaces = roots.map((host) => {
-    const editor = host.dataset.projectionPrototype === 'brutalist-textarea-root';
-    let element: HTMLElement | null = host;
-    if (editor) {
-      const editors: HTMLTextAreaElement[] = [];
-      const visited = new Set<Node>();
-      const findEditor = (node: Node) => {
-        if (visited.has(node)) return;
-        visited.add(node);
-        if (node instanceof HTMLTextAreaElement) editors.push(node);
-        for (const child of composedChildren(node)) findEditor(child);
-      };
-      findEditor(host);
-      if (editors.length !== 1)
-        throw new Error('Declared Textarea requires exactly one current native editor target.');
-      element = editors[0];
-      for (let current: Element | null = element; current; current = composedParent(current)) {
-        const targetOwner = current.getAttribute('data-projection-owner');
-        const targetGeneration = current.getAttribute('data-projection-generation');
-        if (
-          (targetOwner !== null && targetOwner !== owner) ||
-          (targetGeneration !== null && targetGeneration !== generation)
-        )
-          throw new Error('Declared Textarea native editor crosses a foreign projection lease.');
-        if (current === host) break;
-      }
-    }
-    if (!element) throw new Error('Declared Textarea has no current native editor target.');
-    return { host, element };
-  });
+  const surfaces = roots.map((host) => ({
+    host,
+    element: declaredNativeEditor(host, owner, generation),
+  }));
   return { scope, owner, generation, surfaces };
 };
 
@@ -269,6 +289,10 @@ const currentProjection = (
 // They live only in the instrument; the subject DOM and author state are untouched.
 const stateNodes = new WeakMap<Node, number>();
 let nextStateNode = 1;
+const stateNodeIdentity = (node: Node): number => {
+  if (!stateNodes.has(node)) stateNodes.set(node, nextStateNode++);
+  return stateNodes.get(node)!;
+};
 const stateProperties = [
   'display',
   'visibility',
@@ -352,12 +376,12 @@ const readContrastStateInScope = (
 ): string => {
   const { owner, generation, surfaces } = currentProjection(scope, boundary);
   const snapshot = (node: Node): unknown => {
-    if (!stateNodes.has(node)) stateNodes.set(node, nextStateNode++);
+    const id = stateNodeIdentity(node);
     if (!(node instanceof Element)) {
       const range = document.createRange();
       range.selectNodeContents(node);
       return {
-        id: stateNodes.get(node),
+        id,
         text: node.textContent,
         rects: [...range.getClientRects()].map((box) => [box.x, box.y, box.width, box.height]),
       };
@@ -369,13 +393,10 @@ const readContrastStateInScope = (
     const rect = node.getBoundingClientRect();
     const assigned =
       node instanceof HTMLSlotElement
-        ? node.assignedNodes({ flatten: true }).map((child) => {
-            if (!stateNodes.has(child)) stateNodes.set(child, nextStateNode++);
-            return stateNodes.get(child);
-          })
+        ? node.assignedNodes({ flatten: true }).map(stateNodeIdentity)
         : null;
     return {
-      id: stateNodes.get(node),
+      id,
       tag: node.tagName,
       attributes: [...node.attributes].map(({ name, value }) => [name, value]).sort(),
       rect: [rect.x, rect.y, rect.width, rect.height],
@@ -564,18 +585,30 @@ const supportedSvgFillArea = (glyph: Element, style: CSSStyleDeclaration): boole
   }
 };
 
-const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf = false) => {
+const paintedBoxVisibility = (
+  element: Element,
+  boxes: readonly DOMRect[],
+  clipSelf = false,
+  straightBandWitness = false
+) => {
   const limits: string[] = [];
   const roundedOverflowClips: {
     prototype: string | null;
     owner: string | null;
     generation: string | null;
+    physicalNodeId: number;
     radii: string[];
+    borderWidths: string[];
+    borderBox: { x: number; y: number; width: number; height: number };
+    clientBox: { x: number; y: number; width: number; height: number };
+    targetBoxes: { x: number; y: number; width: number; height: number }[];
     overflowX: string;
     overflowY: string;
     fixedPx: boolean;
+    exactClientBox: boolean;
     safeInteriorOverlap: boolean;
     whollyInsideSafeRect: boolean;
+    whollyInsideStraightBand: boolean;
     boxCount: number;
     safeRect: { left: number; right: number; top: number; bottom: number } | null;
   }[] = [];
@@ -617,9 +650,45 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
     if (style.clip !== 'auto') limits.push('unsupported-legacy-clip');
     if (style.clipPath !== 'none' || style.maskImage !== 'none')
       limits.push('unsupported-clip-path-or-mask');
+    // overflow:clip can move its clip edge with overflow-clip-margin's
+    // reference box. This bounded shadow proof only handles client overflow
+    // edges; do not guess at a clip margin or its corner geometry.
+    if (straightBandWitness && (style.overflowX === 'clip' || style.overflowY === 'clip'))
+      limits.push('unsupported-inset-shadow-overflow-clip');
     if (!translationOnly(style)) limits.push('unsupported-transformed-paint');
-    if (style.contain.includes('paint')) limits.push('unsupported-paint-containment');
+    // The shorthand keywords also imply paint containment; content-visibility
+    // auto applies it even while the on-screen content is not skipped.
+    if (
+      /(?:^|\s)(?:paint|content|strict)(?:$|\s)/.test(style.contain) ||
+      style.contentVisibility === 'auto'
+    )
+      limits.push('unsupported-paint-containment');
     const rect = current.getBoundingClientRect();
+    const borderWidths = [
+      style.borderTopWidth,
+      style.borderRightWidth,
+      style.borderBottomWidth,
+      style.borderLeftWidth,
+    ];
+    const borderPixels = borderWidths.map((value) =>
+      /^(?:\d+(?:\.\d+)?|\.\d+)px$/.test(value) ? Number.parseFloat(value) : NaN
+    );
+    // client* rounds to integer CSS pixels. No clipping ancestor may enlarge
+    // a fractional edge when certifying a small inset-shadow patch, including
+    // square ancestors nested inside the rounded container.
+    const exactClientBox =
+      borderPixels.every(Number.isFinite) &&
+      current.clientTop === borderPixels[0] &&
+      current.clientLeft === borderPixels[3] &&
+      current.clientWidth === rect.width - borderPixels[1] - borderPixels[3] &&
+      current.clientHeight === rect.height - borderPixels[0] - borderPixels[2];
+    if (
+      straightBandWitness &&
+      (clipSelf || current !== element) &&
+      (style.overflowX !== 'visible' || style.overflowY !== 'visible') &&
+      !exactClientBox
+    )
+      limits.push('unsupported-inexact-client-overflow-clip');
     // Admit only a small proof domain: fixed-px rounded clipping cannot affect
     // a whole box inside the central inscribed rectangle. Other curved clips
     // remain unknown; intersecting client bounds are not proof of painted ink.
@@ -643,6 +712,7 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
         return [axes[0], axes[1] ?? axes[0]];
       });
       let safelyInside = false;
+      let whollyInsideStraightBand = false;
       let safeInteriorOverlap = false;
       let safeRect: { left: number; right: number; top: number; bottom: number } | null = null;
       const fixedPx = fixed.every((radius) => radius !== null) && translationOnly(style);
@@ -666,6 +736,23 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
             box.top >= safeTop &&
             box.bottom <= safeBottom
         );
+        // A bounded inset-shadow witness may also lie in either straight
+        // interior strip between the corner arcs. This proves only that small
+        // patch; whole-target and numeric readers keep the inscribed rectangle.
+        whollyInsideStraightBand =
+          straightBandWitness &&
+          exactClientBox &&
+          nonempty.every(
+            (box) =>
+              (box.left >= safeLeft &&
+                box.right <= safeRight &&
+                box.top >= rect.top + current.clientTop &&
+                box.bottom <= rect.top + current.clientTop + current.clientHeight) ||
+              (box.top >= safeTop &&
+                box.bottom <= safeBottom &&
+                box.left >= rect.left + current.clientLeft &&
+                box.right <= rect.left + current.clientLeft + current.clientWidth)
+          );
         safeRect = { left: safeLeft, right: safeRight, top: safeTop, bottom: safeBottom };
         safeInteriorOverlap = nonempty.every(
           (box) =>
@@ -677,16 +764,34 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
         prototype: current.getAttribute('data-projection-prototype'),
         owner: current.getAttribute('data-projection-owner'),
         generation: current.getAttribute('data-projection-generation'),
+        physicalNodeId: stateNodeIdentity(current),
         radii: cornerRadii,
+        borderWidths,
+        borderBox: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        clientBox: {
+          x: rect.left + current.clientLeft,
+          y: rect.top + current.clientTop,
+          width: current.clientWidth,
+          height: current.clientHeight,
+        },
+        targetBoxes: nonempty.map((box) => ({
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height,
+        })),
         overflowX: style.overflowX,
         overflowY: style.overflowY,
         fixedPx,
+        exactClientBox,
         safeInteriorOverlap,
         whollyInsideSafeRect: safelyInside,
+        whollyInsideStraightBand,
         boxCount: nonempty.length,
         safeRect,
       });
-      if (!safelyInside) limits.push('unsupported-rounded-overflow-clip');
+      if (!safelyInside && !whollyInsideStraightBand)
+        limits.push('unsupported-rounded-overflow-clip');
     }
     // A non-unit zoom anywhere in the chain invalidates the fixed-CSS-pixel
     // proof above; do not reinterpret transformed physical lengths as radii.
@@ -819,12 +924,101 @@ const paintWitnessBoxes = (element: Element, boxes: readonly DOMRect[]): readonl
   return stroke ? [stroke] : boxes;
 };
 
+// CSS Backgrounds 3 §6.1.1: a zero-offset, zero-blur positive inset spread
+// paints a band inside the padding edge. Certify only small interior patches of
+// an unrounded, single HTML box without native scrollbar geometry. Unsupported
+// shadows stay unknown; this does not supply perimeter/contrast measurements.
+// https://www.w3.org/TR/css-backgrounds-3/#shadow-shape
+const insetShadowWitnessBoxes = (element: Element): DOMRect[] => {
+  if (
+    element.namespaceURI !== 'http://www.w3.org/1999/xhtml' ||
+    element.getClientRects().length !== 1
+  )
+    return [];
+  const style = getComputedStyle(element);
+  if (
+    [
+      style.borderTopLeftRadius,
+      style.borderTopRightRadius,
+      style.borderBottomRightRadius,
+      style.borderBottomLeftRadius,
+    ].some((radius) => radius !== '0px')
+  )
+    return [];
+  const rect = element.getBoundingClientRect();
+  const borders = [
+    style.borderLeftWidth,
+    style.borderTopWidth,
+    style.borderRightWidth,
+    style.borderBottomWidth,
+  ];
+  if (borders.some((border) => !/^(?:\d+(?:\.\d+)?|\.\d+)px$/.test(border))) return [];
+  const [borderLeft, borderTop, borderRight, borderBottom] = borders.map(Number.parseFloat);
+  const width = rect.width - borderLeft - borderRight;
+  const height = rect.height - borderTop - borderBottom;
+  if (
+    !(width > 0 && height > 0) ||
+    width !== element.clientWidth ||
+    height !== element.clientHeight
+  )
+    return [];
+  const parts: string[] = [];
+  let depth = 0,
+    start = 0;
+  for (let index = 0; index < style.boxShadow.length; index++) {
+    const char = style.boxShadow[index];
+    if (char === '(') depth++;
+    if (char === ')') depth--;
+    if (char === ',' && depth === 0) {
+      parts.push(style.boxShadow.slice(start, index).trim());
+      start = index + 1;
+    }
+  }
+  if (style.boxShadow !== 'none') parts.push(style.boxShadow.slice(start).trim());
+  for (const part of parts) {
+    const match = part.match(/^(.+?)\s+0px\s+0px\s+0px\s+((?:\d+(?:\.\d+)?|\.\d+))px\s+inset$/);
+    if (!match || !nontransparentSourcePaint(match[1])) continue;
+    const spread = Number(match[2]);
+    if (!Number.isFinite(spread) || spread <= 0) continue;
+    const band = Math.min(spread, width / 2, height / 2);
+    const side = band / 2;
+    const left = rect.left + borderLeft,
+      top = rect.top + borderTop;
+    // Keep every patch away from the padding edge and the inner shadow edge.
+    // Source-model visibility below checks all ancestors and the viewport.
+    return [
+      new DOMRect(left + width / 2 - side / 2, top + band / 4, side, side),
+      new DOMRect(left + band / 4, top + height / 2 - side / 2, side, side),
+      new DOMRect(left + width / 2 - side / 2, top + height - (3 * band) / 4, side, side),
+      new DOMRect(left + width - (3 * band) / 4, top + height / 2 - side / 2, side, side),
+    ];
+  }
+  return [];
+};
+
 // This is a bounded source witness, not pixel segmentation or an occlusion
 // renderer. Never borrow ancestor fill to claim an otherwise invisible target.
-const hasSupportedPaint = (element: Element): boolean => {
+const readSupportedPaintWitness = (element: Element, includeInsetShadow = false) => {
+  type Witness = {
+    kind: string;
+    physicalNodeId: number;
+    boxes: { x: number; y: number; width: number; height: number }[];
+    visibility: ReturnType<typeof paintedBoxVisibility>;
+  };
+  const witness = (
+    node: Node,
+    kind: string,
+    boxes: readonly DOMRect[],
+    visibility: ReturnType<typeof paintedBoxVisibility>
+  ): Witness => ({
+    kind,
+    physicalNodeId: stateNodeIdentity(node),
+    boxes: boxes.map(({ x, y, width, height }) => ({ x, y, width, height })),
+    visibility,
+  });
   const visited = new Set<Node>();
-  const inspect = (node: Node): boolean => {
-    if (visited.has(node)) return false;
+  const inspect = (node: Node): Witness | null => {
+    if (visited.has(node)) return null;
     visited.add(node);
     if (node.nodeType === Node.TEXT_NODE) {
       const parent = (node as Text).assignedSlot ?? node.parentElement;
@@ -833,24 +1027,25 @@ const hasSupportedPaint = (element: Element): boolean => {
         parent.namespaceURI === 'http://www.w3.org/2000/svg' ||
         !node.textContent?.trim()
       )
-        return false;
+        return null;
       const style = getComputedStyle(parent);
       if (
         !(parseFloat(style.fontSize) > 0) ||
         !nontransparentSourcePaint(style.webkitTextFillColor || style.color)
       )
-        return false;
+        return null;
       const range = document.createRange();
       range.selectNodeContents(node);
-      const visibility = paintedBoxVisibility(parent, [...range.getClientRects()], true);
-      return visibility.visible && visibility.classification === 'source-model-visible';
+      const boxes = [...range.getClientRects()];
+      const visibility = paintedBoxVisibility(parent, boxes, true);
+      return visibility.visible && visibility.classification === 'source-model-visible'
+        ? witness(node, 'text', boxes, visibility)
+        : null;
     }
-    if (!(node instanceof Element)) return false;
+    if (!(node instanceof Element)) return null;
     const style = getComputedStyle(node);
-    const visibility = paintedBoxVisibility(
-      node,
-      paintWitnessBoxes(node, [...node.getClientRects()])
-    );
+    const boxes = paintWitnessBoxes(node, [...node.getClientRects()]);
+    const visibility = paintedBoxVisibility(node, boxes);
     if (visibility.visible && visibility.classification === 'source-model-visible') {
       if (node.namespaceURI === 'http://www.w3.org/2000/svg') {
         if (!node.closest('defs,clipPath,mask,marker,pattern')) {
@@ -859,7 +1054,7 @@ const hasSupportedPaint = (element: Element): boolean => {
             nontransparentSourcePaint(style.fill) &&
             supportedSvgFillArea(node, style)
           )
-            return true;
+            return witness(node, 'svg-fill', boxes, visibility);
           if (
             style.strokeOpacity === '1' &&
             nontransparentSourcePaint(style.stroke) &&
@@ -868,7 +1063,8 @@ const hasSupportedPaint = (element: Element): boolean => {
           ) {
             try {
               const length = (node as SVGGeometryElement).getTotalLength();
-              if (Number.isFinite(length) && length > 0) return true;
+              if (Number.isFinite(length) && length > 0)
+                return witness(node, 'svg-stroke', boxes, visibility);
             } catch {
               /* Unknown geometry is not paint proof. */
             }
@@ -883,7 +1079,7 @@ const hasSupportedPaint = (element: Element): boolean => {
           style.backgroundImage === 'none' &&
           nontransparentSourcePaint(style.backgroundColor)
         )
-          return true;
+          return witness(node, 'background', boxes, visibility);
         if (
           style.borderImageSource === 'none' &&
           ['top', 'right', 'bottom', 'left'].some(
@@ -893,14 +1089,24 @@ const hasSupportedPaint = (element: Element): boolean => {
               nontransparentSourcePaint(style.getPropertyValue(`border-${side}-color`))
           )
         )
-          return true;
+          return witness(node, 'border', boxes, visibility);
       }
     }
+    if (includeInsetShadow)
+      for (const box of insetShadowWitnessBoxes(node)) {
+        const shadowVisibility = paintedBoxVisibility(node, [box], false, true);
+        if (shadowVisibility.visible && shadowVisibility.classification === 'source-model-visible')
+          return witness(node, 'inset-shadow', [box], shadowVisibility);
+      }
     // Native/replaced content cannot be witnessed by stale defaultValue or DOM
     // fallback text. Their supported box paint still qualifies above.
     if (node.matches('textarea,input,select,canvas,img,video,audio,object,iframe,embed'))
-      return false;
-    return composedChildren(node).some(inspect);
+      return null;
+    for (const child of composedChildren(node)) {
+      const painted = inspect(child);
+      if (painted) return painted;
+    }
+    return null;
   };
   return inspect(element);
 };
@@ -909,7 +1115,7 @@ const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf
   const visibility = paintedBoxVisibility(element, boxes, clipSelf);
   // Preserve already-unsupported reasons (including the declared rounded-clip
   // domain) exactly. This adds no known-unsupported terminal exception.
-  if (visibility.classification !== 'source-model-visible' || hasSupportedPaint(element))
+  if (visibility.classification !== 'source-model-visible' || readSupportedPaintWitness(element))
     return visibility;
   return {
     ...visibility,
@@ -921,18 +1127,47 @@ const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf
 // Shared with every runner target: Playwright visibility alone admits
 // opacity-zero and fully clipped boxes. This observes the same paint limits as
 // the captured frame and never mutates the subject.
-export const readContrastPaintedVisibility = (element: Element) =>
-  paintedVisibility(element, paintWitnessBoxes(element, [...element.getClientRects()]));
+export const readContrastPaintedVisibility = (element: Element) => {
+  const visibility = paintedVisibility(
+    element,
+    paintWitnessBoxes(element, [...element.getClientRects()])
+  );
+  if (
+    visibility.visible &&
+    visibility.classification === 'unsupported' &&
+    visibility.limits.length > 0 &&
+    visibility.limits.every((limit) => limit === 'unsupported-rounded-overflow-clip')
+  ) {
+    const paintWitness = readSupportedPaintWitness(element, true);
+    if (paintWitness)
+      return {
+        ...visibility,
+        classification: 'source-model-visible',
+        limits: [],
+        // Presence may be established by a bounded owned paint witness inside
+        // every supported clip. The original target perimeter and its numeric
+        // measurements retain their whole-box limitations.
+        boxVisibility: visibility,
+        paintWitness,
+      };
+  }
+  return visibility;
+};
 
 // The runner and instrument calibration consume this exact browser function.
 // Supported bounds/opacity/clipping are required in addition to native state;
 // this is a source-model observation, not proof against arbitrary occlusion.
 export const readContrastTargetObservation = (element: Element) => {
   const visibility = readContrastPaintedVisibility(element);
+  const rect = element.getBoundingClientRect();
   return {
     achieved: visibility.visible && visibility.classification === 'source-model-visible',
     visibility,
     prototype: element.getAttribute('data-projection-prototype'),
+    owner: element.getAttribute('data-projection-owner'),
+    generation: element.getAttribute('data-projection-generation'),
+    physicalNodeId: stateNodeIdentity(element),
+    rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
     text: element.textContent,
     focused: document.activeElement === element,
     focusVisible: element.matches(':focus-visible'),
@@ -1157,6 +1392,16 @@ export const readContrastAuditSubject = (subject: ContrastAuditSubject) => {
     },
   };
 };
+// The passive reader uses the same authored boundary as anatomy and numeric
+// facts. Keep foreign in-content claims and extra current-owner body roots for
+// rejection; runtime picker Roots surrounding the retained consumer are not
+// authored parts, even though their metadata carries the same render lease.
+export const readSubjectContrastRoots = (subject: ContrastAuditSubject): HTMLElement[] => {
+  const boundary = readContrastAuditSubject(subject);
+  return [...document.querySelectorAll<HTMLElement>('[data-pui-root]')].filter(
+    authoredProjectionRootFilter(boundary.scope, boundary)
+  );
+};
 const requireContrastAuditSubject = (subject: ContrastAuditSubject) => {
   const boundary = readContrastAuditSubject(subject);
   if (!boundary.observation.achieved)
@@ -1182,7 +1427,16 @@ const readContrastAnatomyInScope = (
   const surfaces = roots.map((element, uid) => {
     let parent = composedParent(element);
     while (parent && !indices.has(parent as HTMLElement)) parent = composedParent(parent);
-    const visibility = readContrastPaintedVisibility(element);
+    const currentLease =
+      element.dataset.projectionOwner === owner &&
+      element.dataset.projectionGeneration === generation;
+    // Input's WC host wraps the actual editor. Bind focus and paint to that
+    // same physical editor used by the strict primary and fingerprint readers.
+    const physical =
+      element.dataset.projectionPrototype === 'brutalist-input-root' && currentLease
+        ? declaredNativeEditor(element, owner!, generation!)
+        : element;
+    const visibility = readContrastPaintedVisibility(physical);
     // TextControl's WC Adapter keeps its native editor as a direct owned
     // part; the other Web Adapters use the native input itself as the root.
     // Missing or ambiguous physical editors do not imply valid=false.
@@ -1218,12 +1472,10 @@ const readContrastAnatomyInScope = (
       ariaSelected: element.getAttribute('aria-selected'),
       ariaExpanded: element.getAttribute('aria-expanded'),
       ariaInvalid: validityTarget?.getAttribute('aria-invalid') ?? null,
-      hovered: element.matches(':hover'),
-      focused: document.activeElement === element,
+      hovered: physical.matches(':hover'),
+      focused: document.activeElement === physical,
       withinContent: !!authoredContent?.contains(element),
-      currentLease:
-        element.dataset.projectionOwner === owner &&
-        element.dataset.projectionGeneration === generation,
+      currentLease,
       painted: visibility.visible && visibility.classification === 'source-model-visible',
       visibility,
     };
@@ -1472,6 +1724,7 @@ const collectContrastFrameInScope = async (
     generation,
     theme: document.documentElement.dataset.theme,
     devicePixelRatio,
+    raster: { width: raster.width, height: raster.height },
     stateFingerprint,
     surfaces: surfaces.map(({ host, element }) => {
       const style = getComputedStyle(element),
@@ -1837,6 +2090,10 @@ const collectContrastFrameInScope = async (
       });
       return {
         prototype: host.dataset.projectionPrototype,
+        owner: host.getAttribute('data-projection-owner'),
+        generation: host.getAttribute('data-projection-generation'),
+        hostNodeId: stateNodeIdentity(host),
+        physicalNodeId: stateNodeIdentity(element),
         ref: host.dataset.demoRef ?? null,
         role: host.getAttribute('role'),
         inactive,

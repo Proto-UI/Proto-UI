@@ -137,10 +137,8 @@ export function classifyKnownUnsupportedContrastFrame(item, frame, raw) {
     raw.image.subarray(12, 16).toString('ascii') !== 'IHDR' ||
     !Array.isArray(facts.surfaces) ||
     facts.surfaces.length === 0 ||
-    facts.surfaces.filter((surface) => surface.prototype === VIEWPORT)
-      .length !== 1 ||
-    facts.surfaces.filter((surface) => surface.prototype === ROOT)
-      .length !== 1
+    facts.surfaces.filter((surface) => surface.prototype === VIEWPORT).length !== 1 ||
+    facts.surfaces.filter((surface) => surface.prototype === ROOT).length !== 1
   )
     return null;
   const name = `${item.family}-${item.runtime}-${item.theme}-rest`;
@@ -194,7 +192,7 @@ export function classifyKnownUnsupportedContrastFrame(item, frame, raw) {
   const scopeAttributes = Object.fromEntries(snapshot.scope.attributes);
   const themeAttributes = Object.fromEntries(snapshot.theme.attributes);
   if (
-    scopeAttributes['data-projection-owner'] !== owner ||
+    scopeAttributes['data-projection-scope'] !== owner ||
     scopeAttributes['data-projection-generation'] !== generation ||
     scopeAttributes['data-projection-family'] !== 'brutalist' ||
     scopeAttributes['data-projection-runtime'] !== item.runtime ||
@@ -219,7 +217,10 @@ export function classifyKnownUnsupportedContrastFrame(item, frame, raw) {
       target?.id !== surface.physicalNodeId ||
       !Array.isArray(host.attributes) ||
       !isDeepStrictEqual(target.rect, [
-        surface.rect.x, surface.rect.y, surface.rect.width, surface.rect.height,
+        surface.rect.x,
+        surface.rect.y,
+        surface.rect.width,
+        surface.rect.height,
       ]) ||
       surface.rect.x < 0 ||
       surface.rect.y < 0 ||
@@ -252,7 +253,10 @@ export function classifyKnownUnsupportedContrastFrame(item, frame, raw) {
     const visibility = { ...surface.visibility, visible: surface.visible };
     if (visibility.classification === 'source-model-visible' && visibility.limits?.length === 0)
       continue;
-    if (!soleRoundedLimit(visibility) || !ownedFixedClip(visibility, owner, generation, root, surface))
+    if (
+      !soleRoundedLimit(visibility) ||
+      !ownedFixedClip(visibility, owner, generation, root, surface)
+    )
       return null;
   }
   return {

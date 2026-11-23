@@ -21,7 +21,9 @@
           "hovered": false,
           "focused": false,
           "focusVisible": false,
-          "pressed": false
+          "pressed": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "focusSelf"
@@ -89,7 +91,9 @@
           "hovered": false,
           "focused": false,
           "focusVisible": false,
-          "pressed": false
+          "pressed": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "focusSelf"
@@ -249,7 +253,9 @@
         "sessionId": "switch-thumb",
         "revision": 1,
         "states": {
-          "checked": false
+          "checked": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "isChecked"
@@ -310,7 +316,9 @@
         "sessionId": "switch-thumb",
         "revision": 2,
         "states": {
-          "checked": false
+          "checked": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "isChecked"
@@ -403,7 +411,9 @@
           "hovered": false,
           "focused": false,
           "focusVisible": false,
-          "pressed": false
+          "pressed": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "focusSelf"
@@ -427,6 +437,13 @@
         "revision": 1,
         "name": "checked",
         "value": true
+      },
+      {
+        "kind": "expose.state",
+        "sessionId": "switch-checked",
+        "revision": 1,
+        "name": "percentage",
+        "value": 100
       },
       {
         "kind": "lifecycle",
@@ -478,7 +495,9 @@
           "hovered": false,
           "focused": false,
           "focusVisible": false,
-          "pressed": false
+          "pressed": false,
+          "percentage": 100,
+          "dragging": false
         },
         "methods": [
           "focusSelf"
@@ -638,7 +657,9 @@
         "sessionId": "switch-checked-thumb",
         "revision": 1,
         "states": {
-          "checked": false
+          "checked": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "isChecked"
@@ -699,7 +720,9 @@
         "sessionId": "switch-checked-thumb",
         "revision": 2,
         "states": {
-          "checked": false
+          "checked": false,
+          "percentage": 0,
+          "dragging": false
         },
         "methods": [
           "isChecked"
@@ -730,6 +753,13 @@
         "revision": 2,
         "name": "checked",
         "value": true
+      },
+      {
+        "kind": "expose.state",
+        "sessionId": "switch-checked-thumb",
+        "revision": 2,
+        "name": "percentage",
+        "value": 100
       },
       {
         "kind": "projection.install",

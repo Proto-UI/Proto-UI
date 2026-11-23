@@ -57,14 +57,16 @@ describe('Text public compiler consumption', () => {
         familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
       }
       if (family === 'bootstrap-2-3-2') {
-        // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION keeps the named rem scale,
-        // with the defined 24.5px-at-16px heading and 20/14 body ratio.
-        delete familyRequired['text-2xl'];
         delete familyRequired['leading-normal'];
+        // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION requires rem scaling, the
+        // archived 24.5px-at-16px-root 2xl size, 20/14 normal leading and
+        // 40px-at-16px-root 2xl relaxed leading. Muted ink is theme-owned.
+        delete familyRequired['text-2xl'];
         familyRequired['text-[1.53125rem]'] = 'font-size: 1.53125rem;';
         familyRequired['leading-[2.5rem]'] = 'line-height: 2.5rem;';
         familyRequired['leading-[1.1]'] = 'line-height: 1.1;';
         familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
+        familyRequired['text-muted-foreground'] = 'color: var(--pui-muted-foreground);';
         familyRequired['leading-[1.4285714285714286]'] = 'line-height: 1.4285714285714286;';
       }
       for (const [token, declaration] of Object.entries(familyRequired)) {
@@ -77,7 +79,7 @@ describe('Text public compiler consumption', () => {
           'font-heading',
           'font-mono',
           'text-foreground',
-          'text-muted-foreground',
+          ...(family === 'bootstrap-2-3-2' ? ['text-inherit'] : ['text-muted-foreground']),
         ])
       );
       expect(css).toContain('var(--pui-font-heading');
@@ -88,7 +90,13 @@ describe('Text public compiler consumption', () => {
             ? 'data-pui-style~="leading-[2.5rem]"'
             : 'data-pui-style~="leading-normal"'
         )
-      ).toBeGreaterThan(css.indexOf('data-pui-style~="text-5xl"'));
+      ).toBeGreaterThan(
+        css.indexOf(
+          family === 'bootstrap-2-3-2'
+            ? 'data-pui-style~="text-[1.53125rem]"'
+            : 'data-pui-style~="text-5xl"'
+        )
+      );
       expect(css).not.toMatch(/(?:^|\n)\s*(?:body|h1|h2|p|label|a)\s*\{/);
     }
   );

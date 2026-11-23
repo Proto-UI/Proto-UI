@@ -1,6 +1,6 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import { asTextareaRoot } from '@proto.ui/prototypes-base/textarea';
-import { BRUTALIST_FOCUS_TOKENS } from '../style';
+import { setupTextareaVisual } from './visual';
 import type { BrutalistTextareaRootExposes, BrutalistTextareaRootProps } from './types';
 
 export const BrutalistTextareaRoot = definePrototype<
@@ -16,19 +16,7 @@ export const BrutalistTextareaRoot = definePrototype<
       throw new Error('[brutalist-textarea] asTextareaRoot must project state handles.');
     }
 
-    def.feedback.style.use(
-      tw(
-        'flex min-h-[80px] w-full resize-y rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans font-medium text-sm text-foreground outline-none selection:bg-main selection:text-main-foreground'
-      )
-    );
-    def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
-    });
-    def.rule({
-      when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
-    });
+    setupTextareaVisual(def, state);
     return () => null;
   },
 });

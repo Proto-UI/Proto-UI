@@ -41,6 +41,27 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-toggle.astro?astro&type=script&index=0&lang.ts',
 ]);
+// These existing test routes own material-only GPU diagnostics, not controls or
+// demonstration framework runtimes. Admission requires their exact source edges;
+// none of these material modules becomes a permitted Website shell dependency.
+const REVIEWED_MATERIAL_DIAGNOSTIC_OWNERS = new Map([
+  [
+    'apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts',
+    'apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts',
+  ],
+  [
+    'apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts',
+    'apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts',
+  ],
+]);
+const REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES = new Set([
+  'packages/adapters/base/src/material/contact-profile.ts',
+  'packages/adapters/base/src/material/liquidgl-kernel.generated.ts',
+  'packages/adapters/base/src/material/program-inputs.ts',
+  'packages/adapters/base/src/material/program.ts',
+  'packages/adapters/base/src/material/style-tint-profile.ts',
+  'packages/adapters/base/src/material/style.ts',
+]);
 // Sitewide runtime consumers are admitted as exact entry/owner pairs, never
 // by a directory, filename prefix, or arbitrary reachability to shared chunks.
 const REVIEWED_SITE_RUNTIME_OWNERS = new Map([
@@ -122,6 +143,10 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/host/view-visibility.ts',
   'packages/adapters/base/src/index.ts',
   'packages/adapters/base/src/lifecycle/teardown.ts',
+  // Sprint 4 source-reviewed default WC shader capability. Only this exact
+  // public-entry closure is admitted; legacy optical/program modules stay lazy.
+  'packages/adapters/base/src/material/shader-webgl2.ts',
+  'packages/adapters/base/src/material/shader-webgl2-host.ts',
   'packages/adapters/base/src/platform/focus-entry.ts',
   'packages/adapters/base/src/platform/focus-order.ts',
   'packages/adapters/base/src/platform/instance-tree.ts',
@@ -145,8 +170,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/platform/instance-tree.ts',
   'packages/adapters/web-component/src/platform/meta.ts',
   'packages/adapters/web-component/src/props.ts',
-  // Accepted WC-owned opaque fallback/visual-node bookkeeping; this does not
-  // admit shader/compiler assets or opt-in installation into ordinary shells.
+  // Accepted WC-owned opaque fallback/visual-node bookkeeping. Its original
+  // allowance does not extend to other shader/compiler or opt-in assets.
   'packages/adapters/web-component/src/material/owned-texture-sink.ts',
   'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
   'packages/adapters/web-component/src/visual-surface.ts',
@@ -351,6 +376,98 @@ function closure(chunksByFileName, rootFileName, edgeFields) {
   return seen;
 }
 
+function collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName) {
+  const identity = root.facadeModuleId;
+  const owner = REVIEWED_MATERIAL_DIAGNOSTIC_OWNERS.get(identity);
+  const issues = [];
+  const records = bundleGraph.modules;
+  const modulesById = new Map();
+  let complete = Array.isArray(records);
+  for (const record of Array.isArray(records) ? records : []) {
+    if (
+      !record ||
+      typeof record.id !== 'string' ||
+      !record.id ||
+      modulesById.has(record.id) ||
+      !['imports', 'dynamicImports'].every(
+        (field) =>
+          Array.isArray(record[field]) && record[field].every((id) => typeof id === 'string')
+      )
+    ) {
+      complete = false;
+      continue;
+    }
+    modulesById.set(record.id, record);
+  }
+  for (const record of modulesById.values()) {
+    if ([...record.imports, ...record.dynamicImports].some((id) => !modulesById.has(id)))
+      complete = false;
+  }
+  const reachedChunks = closure(chunksByFileName, root.fileName, ['imports', 'dynamicImports']);
+  const emittedModules = new Set(
+    [...reachedChunks].flatMap((file) => chunksByFileName.get(file)?.moduleIds ?? [])
+  );
+  if (
+    [...emittedModules].some((id) => !modulesById.has(id)) ||
+    !modulesById.has(identity) ||
+    !modulesById.has(owner)
+  )
+    complete = false;
+  if (!complete) {
+    issues.push(
+      `material diagnostic entry \`${identity}\` requires complete unique module-edge provenance`
+    );
+  }
+  // Check emitted bytes even when the claimed module graph is invalid.
+  for (const id of emittedModules) {
+    if (
+      forbiddenFrameworkFamily(id) !== null ||
+      (isProtoUiAdapterModule(id) && !REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES.has(id))
+    )
+      issues.push(
+        `material diagnostic entry \`${identity}\` reaches an unreviewed runtime or Adapter module: ${id}`
+      );
+  }
+  if (!complete) return issues;
+  const rootModules = closure(modulesById, identity, ['imports', 'dynamicImports']);
+  const ownerModules = closure(modulesById, owner, ['imports', 'dynamicImports']);
+  if (!rootModules.has(owner) || !emittedModules.has(owner))
+    issues.push(
+      `material diagnostic entry \`${identity}\` must actually import its exact producer \`${owner}\``
+    );
+  if (
+    ![...emittedModules].some(
+      (id) => id === 'packages/adapters/base/src/material/program.ts' && ownerModules.has(id)
+    )
+  )
+    issues.push(`material diagnostic entry \`${identity}\` has no producer-owned optical program`);
+  for (const id of new Set([...rootModules, ...emittedModules])) {
+    if (
+      forbiddenFrameworkFamily(id) !== null ||
+      (isProtoUiAdapterModule(id) &&
+        (!REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES.has(id) || !ownerModules.has(id)))
+    )
+      issues.push(
+        `material diagnostic entry \`${identity}\` reaches a module outside its producer boundary: ${id}`
+      );
+  }
+  // Sharing a target chunk or a producer's dependency is insufficient. Follow
+  // every route-originating edge while stopping at the one reviewed producer;
+  // material reached by any remaining path is an unowned import bypass.
+  const seen = new Set();
+  const pending = [identity];
+  while (pending.length) {
+    const id = pending.pop();
+    if (id === owner || seen.has(id)) continue;
+    seen.add(id);
+    if (forbiddenFrameworkFamily(id) !== null || isProtoUiAdapterModule(id))
+      issues.push(`material diagnostic entry \`${identity}\` bypasses its exact producer: ${id}`);
+    const record = modulesById.get(id);
+    pending.push(...record.imports, ...record.dynamicImports);
+  }
+  return issues;
+}
+
 export function collectWebsiteProductionBundleIssues({
   rootDir = process.cwd(),
   graph,
@@ -415,6 +532,19 @@ export function collectWebsiteProductionBundleIssues({
     }
   }
   const routeOwnedDemoRoots = approvedDemoRoots.filter((chunk) => chunk.isEntry);
+  const materialDiagnosticRoots = chunks.filter(
+    (chunk) => chunk.isEntry && REVIEWED_MATERIAL_DIAGNOSTIC_OWNERS.has(chunk.facadeModuleId)
+  );
+  for (const root of materialDiagnosticRoots) {
+    if (
+      materialDiagnosticRoots.filter((entry) => entry.facadeModuleId === root.facadeModuleId)
+        .length !== 1
+    )
+      issues.push(
+        `material diagnostic entry \`${root.facadeModuleId}\` must have one unique route entry`
+      );
+    issues.push(...collectMaterialDiagnosticIssues(root, bundleGraph, chunksByFileName));
+  }
   const reviewedNullFacadeRuntimeChunks = chunks.filter(
     (chunk) =>
       (chunk.isEntry || chunk.isDynamicEntry) && reviewedNullFacadeRuntimeModules(chunk).length > 0
@@ -443,6 +573,7 @@ export function collectWebsiteProductionBundleIssues({
     (chunk) =>
       chunk.isEntry &&
       !APPROVED_DEMONSTRATION_ENTRY_FACADES.has(chunk.facadeModuleId) &&
+      !REVIEWED_MATERIAL_DIAGNOSTIC_OWNERS.has(chunk.facadeModuleId) &&
       !REVIEWED_DEMONSTRATION_RUNTIME_FACADES.has(chunk.facadeModuleId) &&
       reviewedNullFacadeRuntimeModules(chunk).length === 0
   );
@@ -466,7 +597,7 @@ export function collectWebsiteProductionBundleIssues({
   }
 
   const reachableEntryChunks = new Set();
-  for (const root of [...shellRoots, ...routeOwnedDemoRoots]) {
+  for (const root of [...shellRoots, ...routeOwnedDemoRoots, ...materialDiagnosticRoots]) {
     for (const fileName of closure(chunksByFileName, root.fileName, [
       'imports',
       'dynamicImports',

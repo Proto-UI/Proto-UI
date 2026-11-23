@@ -1,0 +1,9 @@
+# Sprint 3 main reconciliation after source publication
+
+The real PR #1713 source publication `b58511ca0fc5be3a4a4a73e4ab32a3a746e49771` initially became conflicting with main `39ca4f7729cde9a3ebb3abfd4fd987d9db57e4de`. An actual Git merge identified exactly one conflict: both branches appended independent guidance to `scripts/docs/README.md`.
+
+The resolution keeps the complete Sprint 3 release inventory and dispatch instructions, followed by the complete accepted-main documentation reference guide. Byte comparisons confirm both complete texts remain. Other accepted main documentation/README/checker changes merge normally. The runtime/Adapter/compiler source and three independently reviewed Image files have no additional changes.
+
+The [receipt](evidence/2026-11-23-sprint-continuation/sprint3/main-reconciliation/receipt.json) binds both parents, all README bytes, actual commands and raw logs. Public documentation checks pass: 305 bilingual primary routes, four library inventories and 435 maintained documents. The Agent operation structural checks pass (41 skills, 39 lazy leaves); the full Node fixture command did not yield a terminal summary and was interrupted with exit 130. It is incomplete, not an aggregate pass. The normal `tsx` Agent-document launcher failed on denied Unix-domain IPC before its generator; the same generator's direct `node --import tsx ... --check` entry passes, with the ignored local projection absent as expected.
+
+This is an additive conflict reconciliation. The earlier public head, original source archives, passing and failing receipts remain reachable. Full native/consumer/cycle and eligible platform acceptance remain open. No CI gating, product assertion, lifecycle or original deadline changed.

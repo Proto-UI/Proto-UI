@@ -820,7 +820,12 @@ for (const family of ['react', 'vue', 'vue2', 'wc'])
       else assert.deepEqual(issues, []);
     });
 
+const reviewedShaderProviders = [
+  'packages/adapters/base/src/material/shader-webgl2.ts',
+  'packages/adapters/base/src/material/shader-webgl2-host.ts',
+];
 const reviewedWcHelpers = [
+  ...reviewedShaderProviders,
   'packages/adapters/base/src/events/keyboard-press-owner.ts',
   'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/platform/portal-direction.ts',
@@ -909,6 +914,57 @@ for (const [entry, owner] of siteOwners) {
       .find((item) => item.id === 'apps/www/src/components/site-shadcn-controls.ts')
       .imports.push(target);
     return bridge;
+  }
+  test(`bridge origin: ${entry} admits the exact WC shader provider chain`, () => {
+    const { graph } = siteGraph();
+    const modules = 'packages/adapters/web-component/src/runtime/modules.ts';
+    const [provider, host] = reviewedShaderProviders;
+    const bridge = addReviewedBridgeTarget(graph, modules);
+    bridge.moduleIds.push(provider, host);
+    graph.modules.push(
+      { id: provider, imports: [host], dynamicImports: [] },
+      { id: host, imports: [], dynamicImports: [] }
+    );
+    graph.modules.find((item) => item.id === modules).imports.push(provider);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    // A nearby legacy material program has not acquired this owner allowance.
+    const adjacent = 'packages/adapters/base/src/material/program.ts';
+    bridge.moduleIds.push(adjacent);
+    graph.modules.push({ id: adjacent, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === provider).imports.push(adjacent);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(adjacent)
+      )
+    );
+  });
+  for (const target of reviewedShaderProviders) {
+    const forms =
+      owner === 'library-card-client.ts'
+        ? ['query API lookalike']
+        : ['direct owner', 'query API lookalike'];
+    for (const form of forms) {
+      test(`bridge origin: ${entry} rejects ${form} shader access: ${target}`, () => {
+        const { graph, root } = siteGraph();
+        addReviewedBridgeTarget(graph, target);
+        const importer =
+          form === 'direct owner'
+            ? `apps/www/src/components/${owner}`
+            : 'apps/www/src/components/site-shadcn-controls.ts?foreign';
+        let source = graph.modules.find((item) => item.id === importer);
+        if (!source) {
+          source = { id: importer, imports: [], dynamicImports: [] };
+          graph.modules.push(source);
+          root.moduleIds.push(importer);
+        }
+        source.imports.push(target);
+        const issues = collectWebsiteProductionBundleIssues({ graph });
+        assert.ok(
+          issues.some((issue) => issue.includes('unowned importer edge') && issue.includes(target)),
+          issues.join('\n')
+        );
+      });
+    }
   }
   test(`bridge origin: ${entry} admits router-owned pointer contact transitively`, () => {
     const { graph } = siteGraph();
@@ -1426,7 +1482,7 @@ const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)
 const materialBoundary = chunkFunction.body.statements.find(
   (node) =>
     ts.isIfStatement(node) &&
-    node.getText(configSource).includes('packages/adapters/base/src/material/')
+    node.getText(configSource).includes("startsWith('packages/adapters/base/src/material/')")
 );
 assert.ok(materialBoundary);
 const regroupMaterial = vm.runInNewContext(
@@ -1436,7 +1492,15 @@ const regroupMaterial = vm.runInNewContext(
 const optionalMaterialSources = fs
   .readdirSync(path.join(repositoryRoot, 'packages/adapters/base/src/material'))
   .filter((name) => name.endsWith('.ts'))
-  .map((name) => `packages/adapters/base/src/material/${name}`);
+  .map((name) => `packages/adapters/base/src/material/${name}`)
+  .filter((moduleId) => !reviewedShaderProviders.includes(moduleId));
+for (const moduleId of reviewedShaderProviders) {
+  test(`manual chunk binds the reviewed default shader provider: ${moduleId}`, () => {
+    assert.equal(classifyChunk(moduleId), 'site-shadcn-controls');
+    assert.equal(classifyChunk(`${moduleId}?used`), 'site-shadcn-controls');
+    assert.equal(classifyChunk(moduleId.replace('.ts', '-unreviewed.ts')), undefined);
+  });
+}
 for (const moduleId of optionalMaterialSources) {
   test(`manual chunk preserves existing lazy material boundary: ${moduleId}`, () => {
     assert.equal(classifyChunk(moduleId), undefined);
@@ -1585,3 +1649,171 @@ test('Liquid Card producer requires its exact route facade and stays outside ord
     )
   );
 });
+
+// These are source-edge graph controls, not rendered GPU acceptance evidence.
+const diagnosticMaterialModules = [
+  'contact-profile.ts',
+  'liquidgl-kernel.generated.ts',
+  'program-inputs.ts',
+  'program.ts',
+  'style-tint-profile.ts',
+  'style.ts',
+].map((name) => `packages/adapters/base/src/material/${name}`);
+function materialDiagnosticGraph(kind, dynamic = false) {
+  const graph = graphFixture();
+  const facade = `apps/www/src/pages/en/test/liquid-${kind}-diagnostic.astro?astro&type=script&index=0&lang.ts`;
+  const producer = `apps/www/src/content/docs/zh-cn/liquid-${kind}-diagnostic.ts`;
+  const entry = chunk('_astro/material-diagnostic.js', {
+    isEntry: true,
+    facadeModuleId: facade,
+    moduleIds: [facade, producer],
+    imports: dynamic ? [] : ['_astro/material-diagnostic-program.js'],
+    dynamicImports: dynamic ? ['_astro/material-diagnostic-program.js'] : [],
+  });
+  graph.chunks.push(
+    entry,
+    chunk('_astro/material-diagnostic-program.js', {
+      moduleIds: [...diagnosticMaterialModules],
+    })
+  );
+  graph.modules = [
+    { id: facade, imports: [producer], dynamicImports: [] },
+    {
+      id: producer,
+      imports: dynamic ? [] : [...diagnosticMaterialModules],
+      dynamicImports: dynamic ? [...diagnosticMaterialModules] : [],
+    },
+    ...diagnosticMaterialModules.map((id) => ({ id, imports: [], dynamicImports: [] })),
+  ];
+  return { graph, entry, facade, producer };
+}
+for (const kind of ['tint-stage', 'visible-refraction']) {
+  for (const dynamic of [false, true]) {
+    test(`material diagnostic admits only its exact ${kind} producer with ${dynamic ? 'dynamic' : 'static'} edges`, () => {
+      const { graph } = materialDiagnosticGraph(kind, dynamic);
+      assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    });
+  }
+  for (const mutation of [
+    'missing graph',
+    'duplicate record',
+    'dangling edge',
+    'missing emitted record',
+    'missing root',
+    'missing producer',
+  ]) {
+    test(`material diagnostic ${kind} rejects ${mutation}`, () => {
+      const { graph, facade, producer } = materialDiagnosticGraph(kind);
+      if (mutation === 'missing graph') delete graph.modules;
+      if (mutation === 'duplicate record') graph.modules.push({ ...graph.modules[0] });
+      if (mutation === 'dangling edge') graph.modules[1].imports.push('missing-source.ts');
+      if (mutation === 'missing emitted record') graph.modules.pop();
+      if (mutation === 'missing root')
+        graph.modules = graph.modules.filter((entry) => entry.id !== facade);
+      if (mutation === 'missing producer')
+        graph.modules = graph.modules.filter((entry) => entry.id !== producer);
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+          issue.includes('requires complete unique module-edge provenance')
+        )
+      );
+    });
+  }
+  test(`material diagnostic ${kind} rejects producer presence without a source import`, () => {
+    const { graph } = materialDiagnosticGraph(kind);
+    graph.modules[0].imports = [];
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+        issue.includes('must actually import its exact producer')
+      )
+    );
+  });
+  for (const via of ['direct', 'intermediate']) {
+    test(`material diagnostic ${kind} rejects ${via} bypass to its producer's same material`, () => {
+      const { graph } = materialDiagnosticGraph(kind);
+      const material = diagnosticMaterialModules[3];
+      if (via === 'direct') graph.modules[0].imports.push(material);
+      else {
+        graph.modules[0].dynamicImports.push('unreviewed-importer.ts');
+        graph.modules.push({
+          id: 'unreviewed-importer.ts',
+          imports: [material],
+          dynamicImports: [],
+        });
+      }
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+          issue.includes('bypasses its exact producer')
+        )
+      );
+    });
+  }
+  for (const id of [
+    'packages/adapters/web-component/src/index.ts',
+    'node_modules/react/index.js',
+    'node_modules/vue/dist/vue.runtime.esm.js',
+    'packages/adapters/base/src/material/unreviewed.ts',
+  ]) {
+    for (const dynamic of [false, true]) {
+      test(`material diagnostic ${kind} rejects ${dynamic ? 'dynamic' : 'static'} runtime or unreviewed module ${id}`, () => {
+        const { graph, entry } = materialDiagnosticGraph(kind);
+        entry[dynamic ? 'dynamicImports' : 'imports'].push('_astro/foreign-diagnostic.js');
+        graph.chunks.push(chunk('_astro/foreign-diagnostic.js', { moduleIds: [id] }));
+        graph.modules[1][dynamic ? 'dynamicImports' : 'imports'].push(id);
+        graph.modules.push({ id, imports: [], dynamicImports: [] });
+        assert.ok(
+          collectWebsiteProductionBundleIssues({ graph }).some(
+            (issue) =>
+              issue.includes('reaches an unreviewed runtime or Adapter module') &&
+              issue.includes(id)
+          )
+        );
+      });
+    }
+  }
+  test(`material diagnostic ${kind} does not admit a copied route`, () => {
+    const { graph, entry } = materialDiagnosticGraph(kind);
+    entry.facadeModuleId = entry.facadeModuleId.replace(
+      '-diagnostic.astro',
+      '-diagnostic-copy.astro'
+    );
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) =>
+          issue.includes('Website shell entry') && issue.includes('statically reaches forbidden')
+      )
+    );
+  });
+  for (const field of ['imports', 'dynamicImports']) {
+    test(`material diagnostic ${kind} does not authorize ordinary shell ${field}`, () => {
+      const { graph } = materialDiagnosticGraph(kind);
+      graph.chunks[0][field].push('_astro/material-diagnostic-program.js');
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('Website shell entry') && issue.includes('reaches forbidden')
+        )
+      );
+    });
+  }
+  test(`material diagnostic ${kind} keeps the global server-only wall`, () => {
+    const { graph, entry } = materialDiagnosticGraph(kind);
+    const id = 'apps/www/src/components/snapshot-prototype-style.ts';
+    entry.moduleIds.push(id);
+    graph.modules[1].imports.push(id);
+    graph.modules.push({ id, imports: [], dynamicImports: [] });
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+        issue.includes('server-only prerender module')
+      )
+    );
+  });
+  test(`material diagnostic ${kind} rejects duplicate route entries`, () => {
+    const { graph, entry } = materialDiagnosticGraph(kind);
+    graph.chunks.push({ ...entry, fileName: '_astro/duplicate-diagnostic.js' });
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+        issue.includes('one unique route entry')
+      )
+    );
+  });
+}

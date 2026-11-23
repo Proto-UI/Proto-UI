@@ -112,6 +112,12 @@ export interface ScrollSurfaceHandle<P extends PropsBaseType = PropsBaseType> {
   sync(patch: Readonly<{ axes?: ScrollAxes }>): void;
   bindComposedChrome(binding: ScrollComposedChromeBinding): void;
   request(request: ScrollSurfaceRequest): ScrollSurfaceRequestOutcome;
+  /**
+   * Pause the current end-follow lease without moving the reading position or
+   * focus. Cancels a pending end request; resume uses `to-end` or reader arrival.
+   * Unsupported, disabled, detached, or retired leases reject the command.
+   */
+  pauseFollowing(): ScrollSurfaceRequestOutcome;
   getSnapshot(): ScrollSurfaceSnapshot;
 }
 

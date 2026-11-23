@@ -5,6 +5,8 @@ import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src
 
 import type { ProjectionFamilyId } from './projection-families';
 
+export { scheduleProjectionThemeRead } from './projection-theme-read';
+
 /**
  * Website Shadcn theme inputs that the projection scope is allowed to read.
  * Keeping this list explicit prevents arbitrary page CSS from becoming an
@@ -146,48 +148,6 @@ export function resolveProjectionThemeSurfaceStyle(
   throw new Error(`[PrototypePreviewer] unsupported projection theme ${String(exhaustive)}.`);
 }
 
-const pendingPublicationReads = new WeakMap<Document, Array<() => void>>();
-
-/** Read each scope's live theme before any sampled publication resumes. */
-export function scheduleProjectionThemeRead<T>(scope: Element, read: () => T): Promise<T> {
-  const document = scope.ownerDocument;
-  return new Promise<T>((resolve, reject) => {
-    const sample = () => {
-      try {
-        resolve(read());
-      } catch (error) {
-        reject(error);
-      }
-    };
-    const pending = pendingPublicationReads.get(document);
-    if (pending) {
-      pending.push(sample);
-      return;
-    }
-    const batch = [sample];
-    pendingPublicationReads.set(document, batch);
-    const flush = () => {
-      pendingPublicationReads.delete(document);
-      for (const read of batch) read();
-    };
-    const view = document.defaultView as
-      | (Window & {
-          scheduler?: {
-            postTask(callback: () => void, options: { priority: 'user-blocking' }): Promise<void>;
-          };
-        })
-      | null;
-    const scheduleMicrotask = () => {
-      if (view) view.queueMicrotask(flush);
-      else queueMicrotask(flush);
-    };
-    // This batch gates first publication. Avoid leaving it behind other timers.
-    const task = view?.scheduler?.postTask?.(flush, { priority: 'user-blocking' });
-    if (task) void task.catch(scheduleMicrotask);
-    else scheduleMicrotask();
-  });
-}
-
 export function applyProjectionThemeSurfaceStyle(
   element: ProjectionThemeSurface,
   theme: ProjectionThemeSurfaceStyle,
@@ -299,6 +259,7 @@ export function watchProjectionThemeSurfaceStyle(
   };
 
   const observer = new view.MutationObserver((records) => {
+    if (cleaned || queued) return;
     // Identical attribute writes are observable mutations, but introduce no
     // new theme input. Real changes in the same delivery still resolve a new
     // complete theme map; no computed value is cached across deliveries.

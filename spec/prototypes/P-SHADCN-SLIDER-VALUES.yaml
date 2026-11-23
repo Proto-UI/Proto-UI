@@ -7,7 +7,7 @@ lifecycleRationale:
   en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
 summary: Six indexed Slider Values parts as a separate multi-value family, not scalar Thumb aliases.
 statement:
-  en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots, Track is structural, and the separate scalar family is untouched. Base gaps for pointer-origin association, grouped Field, native and Compiler admission are inherited, not resolved by family paint.
+  en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots, Track consumes shared input-origin facts, and the separate scalar family is untouched. The Base Track and optional grouped Field behavior are inherited; native and Compiler admission remain separate from family paint.
 criteria:
   - id: P-SHADCN-SLIDER-VALUES-INHERITANCE
     text:
@@ -17,7 +17,7 @@ criteria:
       en: Profile rail, range and thumb paint uses theme-relative radius tokens (including Rhea rounded-[var(--pui-radius-2xl)]) and owned decoration targets so painted geometry may differ from input geometry. Family paint never invents pointer capture or measurement ownership.
   - id: P-SHADCN-SLIDER-VALUES-BOUNDARY
     text:
-      en: 'Values Track stays structural: pointer origin/session association, grouped Field control, family-complete native input and Compiler translation remain open Base/host prerequisites recorded on P-BASE-SLIDER-VALUES, not closed here.'
+      en: 'Values Track inherits the shared-origin physical input and grouped Field contract recorded on P-BASE-SLIDER-VALUES. Family-complete native input and Compiler acceptance remain independent obligations.'
   - id: P-SHADCN-SLIDER-VALUES-CLOSURE
     text:
       en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
@@ -39,7 +39,7 @@ verifies:
 openQuestions:
   - id: P-SHADCN-SLIDER-VALUES-Q-POINTER
     question:
-      en: When do public pointer-origin/session association, grouped Field control and native/Compiler evidence admit the remaining Values scope?
+      en: When does independent native and Compiler evidence admit the remaining Values scope?
     blocks:
       - activation:P-SHADCN-SLIDER-VALUES
 sources:

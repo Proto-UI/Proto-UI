@@ -16,6 +16,14 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Direction and branch relationships
+
+Set Root `direction="rtl"` to exchange the horizontal navigation keys: Left expands or moves to a child, and Right collapses or moves to its parent. The LTR default uses the opposite mapping. Up/Down, Home/End and typeahead keep logical visible order. Shadcn and Brutalist Group indentation follows the writing direction.
+
+Give each `TreeGroup` the same `nodeKey` as its owning branch Item, and place that branch’s child Items inside the Group with `parentKey` pointing to the branch. Item controls Group, and Group is labelled by Item, through scoped keyed relationships. A removed, missing or ambiguous target does not leave a dangling relationship. Collapsing a branch hides its Group without deleting the authored hierarchy. If focus was inside the collapsed branch, the visible ancestor receives focus; focus outside this Tree stays outside.
+
+`readOnly` prevents selection changes while allowing navigation and expansion. Controlled `value` and `expandedKeys` remain committed until the application accepts their requests. Inserting, moving or removing authored Items updates the hierarchy without emitting a user selection request.
+
 ## API
 
 Tree is workspace source. There is no public `proto-ui add` target. Passing `value` or `expandedKeys` selects controlled mode for that fact.
@@ -25,6 +33,7 @@ Tree is workspace source. There is no public `proto-ui add` target. Passing `val
   rows={[
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: 'Tree' },
@@ -32,4 +41,3 @@ Tree is workspace source. There is no public `proto-ui add` target. Passing `val
 />
 
 These props belong to Root. Item defaults `nodeKey`, `parentKey`, and `textValue` to `''`, and `disabled` to `false`. Group accepts `nodeKey`. Toggle adds the Button props.
-

@@ -26,6 +26,151 @@ export async function readIndependentPagefindQueries(emptyQuery: string) {
   return observations;
 }
 
+/** Opt-in production diagnosis, never a readiness oracle. Only the two Search
+ * mounts' direct generation hosts are sampled; no layout or descendant walk.
+ * Phase times are MutationObserver delivery times, not mutation start times. */
+export function installSearchRuntimeTrace() {
+  (window as any).__puiSearchRuntime?.stop();
+  const root = document.querySelector<HTMLElement>('site-search');
+  if (!root) throw new Error('Missing Search owner for runtime diagnosis');
+  const mounts = [
+    {
+      kind: 'open',
+      element: root.querySelector<HTMLElement>('[data-search-command-mount="open"]'),
+    },
+    { kind: 'dialog', element: root.querySelector<HTMLElement>('[data-search-dialog-mount]') },
+  ];
+  const state = {
+    diagnosticOnly: true,
+    timeOrigin: performance.timeOrigin,
+    startedAt: performance.now(),
+    endedAt: null as number | null,
+    stopped: false,
+    phaseCount: 0,
+    resourceCount: 0,
+    longTaskCount: 0,
+    phases: [] as unknown[],
+    resources: [] as unknown[],
+    longTasks: [] as unknown[],
+    finalPhase: null as unknown,
+    supportedEntryTypes:
+      typeof PerformanceObserver === 'function'
+        ? PerformanceObserver.supportedEntryTypes.filter((type) =>
+            ['resource', 'longtask'].includes(type)
+          )
+        : [],
+  };
+  let previous = '';
+  const trace = {
+    record(reason: string) {
+      if (state.stopped) return;
+      const facts = {
+        connected: root.isConnected,
+        runtime: root.dataset.searchRuntime ?? null,
+        view: root.dataset.searchView ?? null,
+        preparation: root.dataset.searchPreparation ?? null,
+        generation: root.dataset.searchGeneration ?? null,
+        mounts: mounts.map(({ kind, element }) => ({
+          kind,
+          present: !!element,
+          owner: element?.dataset.projectionOwner ?? null,
+          hosts: Array.from(element?.children ?? [])
+            .filter((child) => child.hasAttribute('data-projection-generation-host'))
+            .map((child) => {
+              const host = child as HTMLElement;
+              return {
+                owner: host.dataset.projectionOwnerHost ?? null,
+                generation: host.dataset.projectionGenerationHost ?? null,
+                state: host.dataset.projectionGenerationState ?? null,
+                connected: host.isConnected,
+                inert: host.inert,
+                hidden: host.hidden,
+                childCount: host.childElementCount,
+                firstChild: host.firstElementChild?.localName ?? null,
+              };
+            }),
+        })),
+      };
+      const key = JSON.stringify(facts);
+      if (reason === 'mutation' && key === previous) return;
+      previous = key;
+      const phase = { at: performance.now(), atEpochMs: Date.now(), reason, facts };
+      state.finalPhase = phase;
+      state.phaseCount++;
+      if (state.phases.length < 96) state.phases.push(phase);
+    },
+    timing(entries: PerformanceEntry[]) {
+      if (state.stopped) return;
+      for (const entry of entries) {
+        // Include requests already in flight that finish during this window.
+        if (entry.startTime + entry.duration < state.startedAt) continue;
+        if (entry.entryType === 'longtask') {
+          state.longTaskCount++;
+          if (state.longTasks.length < 128)
+            state.longTasks.push({ startTime: entry.startTime, duration: entry.duration });
+        } else if (entry.entryType === 'resource') {
+          const resource = entry as PerformanceResourceTiming;
+          const url = new URL(resource.name, location.href);
+          if (url.origin !== location.origin) continue;
+          state.resourceCount++;
+          if (state.resources.length < 128)
+            state.resources.push({
+              url: `${url.origin}${url.pathname}`,
+              initiatorType: resource.initiatorType,
+              startTime: resource.startTime,
+              duration: resource.duration,
+              fetchStart: resource.fetchStart,
+              requestStart: resource.requestStart,
+              responseStart: resource.responseStart,
+              responseEnd: resource.responseEnd,
+              transferSize: resource.transferSize,
+              encodedBodySize: resource.encodedBodySize,
+              decodedBodySize: resource.decodedBodySize,
+            });
+        }
+      }
+    },
+    stop() {
+      if (!state.stopped) {
+        trace.timing(timing?.takeRecords() ?? []);
+        trace.record('stop');
+        state.endedAt = performance.now();
+        state.stopped = true;
+        mutation.disconnect();
+        timing?.disconnect();
+      }
+      return state;
+    },
+  };
+  const mutation = new MutationObserver(() => trace.record('mutation'));
+  mutation.observe(root, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: [
+      'data-search-runtime',
+      'data-search-view',
+      'data-search-preparation',
+      'data-search-generation',
+      'data-projection-owner',
+      'data-projection-generation-state',
+      'inert',
+      'hidden',
+    ],
+  });
+  const timing = state.supportedEntryTypes.length
+    ? new PerformanceObserver((list) => trace.timing(list.getEntries()))
+    : null;
+  timing?.observe({ entryTypes: state.supportedEntryTypes });
+  (window as any).__puiSearchRuntime = trace;
+  trace.record('install');
+}
+
+/** Self-contained browser callback; no imported helper is needed after transport. */
+export function stopSearchRuntimeTrace() {
+  return (window as any).__puiSearchRuntime?.stop() ?? null;
+}
+
 /** Both timestamps come from one page clock, never from a renewed Node-side wait. */
 export function homepageRollbackWasOnTime(
   evidence: { faultAt?: number | null; errorAt?: number | null },
@@ -95,9 +240,7 @@ export function searchRevealMatchesViewport(
     // while the whole ordinary row still fits the physical client viewport.
     return (
       (scrollTop === 0 && targetTop < viewportTop && targetBottom <= viewportBottom + 1) ||
-      (scrollTop === maxScrollTop &&
-        targetBottom > viewportBottom &&
-        targetTop >= viewportTop - 1)
+      (scrollTop === maxScrollTop && targetBottom > viewportBottom && targetTop >= viewportTop - 1)
     );
   }
   // An oversized row cannot be fully contained. Intersection alone would hide

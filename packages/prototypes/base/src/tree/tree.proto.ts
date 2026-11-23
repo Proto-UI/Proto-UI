@@ -19,6 +19,7 @@ import {
   defineAsHook,
   definePrototype,
   tw,
+  type AnatomyPartView,
   type DefHandle,
   type RunHandle,
 } from '@proto.ui/core';
@@ -30,9 +31,30 @@ import {
   asTrigger,
 } from '@proto.ui/hooks';
 import { asButton } from '../button';
-import { callOwner, readPartState } from '../collection-controls/shared';
+import { readPartState } from '../collection-controls/shared';
 import { treeEntries, type TreeNode, type TreeEntry } from './model';
 export * from './model';
+// A Context notification may arrive while a reparented/detaching view has lost
+// its Anatomy domain. This is absence, not permission to use the retired Root.
+function treeOwner(run: RunHandle<any>, method: string, ...args: unknown[]): unknown {
+  let root: AnatomyPartView | undefined;
+  try {
+    root = run.anatomy.partsOf(TREE_FAMILY, 'root')[0];
+  } catch (error) {
+    // CLAIM_INVALID also covers malformed roles/profiles and duplicate claims.
+    // Only the strict lookup's defined no-domain state denotes detachment.
+    if (
+      error instanceof Error &&
+      (error as { code?: string }).code === 'ANATOMY_CLAIM_INVALID' &&
+      error.message ===
+        `[Anatomy] current instance is not part of a valid domain for '${TREE_FAMILY.debugName}'`
+    )
+      return false;
+    throw error;
+  }
+  const action = root?.getExpose(method);
+  return typeof action === 'function' ? action(...args) : false;
+}
 export const TREE_FAMILY = createAnatomyFamily('base-tree', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -46,6 +68,7 @@ type TreeContext = {
   expandedKeys: string[];
   disabled: boolean;
   readOnly: boolean;
+  direction: 'ltr' | 'rtl';
   active: string;
   revision: number;
 };
@@ -55,6 +78,7 @@ const initial: TreeContext = {
   expandedKeys: [],
   disabled: false,
   readOnly: false,
+  direction: 'ltr',
   active: '',
   revision: 0,
 };
@@ -80,6 +104,7 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
     defaultExpandedKeys: { type: 'object', validator: stringArray, empty: 'fallback' },
     disabled: { type: 'boolean' },
     readOnly: { type: 'boolean' },
+    direction: { type: 'enum', options: ['ltr', 'rtl'] },
     a11yLabel: { type: 'string' },
   });
   def.props.setDefaults({
@@ -87,13 +112,20 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
     defaultExpandedKeys: [],
     disabled: false,
     readOnly: false,
+    direction: 'ltr',
     a11yLabel: 'Tree',
   });
   def.context.provide(TREE_CONTEXT, initial);
   def.context.subscribe(TREE_CONTEXT);
   const value = def.state.string('value', ''),
     invalid = def.state.bool('invalid', false),
-    label = def.state.string('a11yLabel', 'Tree');
+    label = def.state.string('a11yLabel', 'Tree'),
+    direction = def.state.string('direction', 'ltr');
+  for (const value of ['ltr', 'rtl'])
+    def.rule({
+      when: (w) => w.state(direction).eq(value),
+      intent: (i) => i.feedback.style.use(tw(value === 'rtl' ? 'direction-rtl' : 'direction-ltr')),
+    });
   const a = asAccessible();
   a.role('tree');
   a.name(label);
@@ -110,6 +142,11 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
     const epoch = viewEpoch;
     const p = run.props.get(),
       old = run.context.read(TREE_CONTEXT);
+    const previous = snapshot;
+    const parts = run.anatomy.partsOf(TREE_FAMILY, 'item');
+    const focused = parts.find((part) => readPartState<boolean>(part, 'focused'));
+    const focusedNode = focused?.getExpose('getNode');
+    const focusedKey = typeof focusedNode === 'function' ? (focusedNode() as TreeNode).key : '';
     try {
       snapshot = treeEntries(nodes(run), expanded);
       invalid.set(false, 'tree valid graph');
@@ -119,17 +156,41 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
     }
     if (owner !== run || viewEpoch !== epoch) return;
     const enabled = snapshot.filter((n) => n.visible && !n.disabled);
+    // Preserve logical focus when collapse/reparent hides the current item.
+    // Physical focus is repaired only if this Tree actually held it.
+    let ancestor = old.active;
+    const visited = new Set<string>();
+    while (ancestor && !enabled.some((n) => n.key === ancestor) && !visited.has(ancestor)) {
+      visited.add(ancestor);
+      ancestor =
+        (snapshot.find((n) => n.key === ancestor) ?? previous.find((n) => n.key === ancestor))
+          ?.parentKey ?? '';
+    }
     const active = enabled.some((n) => n.key === old.active)
       ? old.active
-      : (enabled.find((n) => n.key === value.get())?.key ?? enabled[0]?.key ?? '');
+      : (enabled.find((n) => n.key === ancestor)?.key ??
+        enabled.find((n) => n.key === value.get())?.key ??
+        enabled[0]?.key ??
+        '');
+    direction.set(p.direction ?? 'ltr', 'tree direction');
     run.context.update(TREE_CONTEXT, {
       value: value.get(),
       expandedKeys: expanded,
       disabled: !!p.disabled,
       readOnly: !!p.readOnly,
+      direction: p.direction ?? 'ltr',
       active,
       revision: old.revision + 1,
     });
+    if (owner !== run || viewEpoch !== epoch || p.disabled || !focusedKey || focusedKey === active)
+      return;
+    if (enabled.some((n) => n.key === focusedKey)) return;
+    const target = parts.find((part) => {
+      const getNode = part.getExpose('getNode');
+      return typeof getNode === 'function' && (getNode() as TreeNode).key === active;
+    });
+    const focusSelf = target?.getExpose('focusSelf');
+    if (typeof focusSelf === 'function') focusSelf({ reason: 'programmatic' });
   };
   def.expose.method('getTree', () => snapshot.map((n) => ({ ...n })));
   def.expose.method('getExpandedKeys', () => [...expanded]);
@@ -231,11 +292,16 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
     position = def.state.numberDiscrete('position', 1),
     setSize = def.state.numberDiscrete('setSize', 1),
     branch = def.state.bool('branch', false),
-    expandedText = def.state.string('expandedText', '');
+    expandedText = def.state.string('expandedText', ''),
+    relationshipKey = def.state.string('relationshipKey', '');
   const focus = asFocusable<TreeItemProps>();
   focus.configure({ disabled: false, navParticipation: 'none' });
   asTrigger();
   const a = asAccessible();
+  a.part(TREE_FAMILY, { key: relationshipKey });
+  a.relation('controls', {
+    target: { kind: 'part', family: TREE_FAMILY, role: 'group', key: relationshipKey },
+  });
   a.role('treeitem');
   a.action('activate');
   a.nameFromContent();
@@ -273,7 +339,8 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
     owner = run;
     const c = run.context.read(TREE_CONTEXT),
       key = run.props.get().nodeKey;
-    const entries = callOwner(run, TREE_FAMILY, 'getTree') as TreeEntry[] | false;
+    relationshipKey.set(key ?? '', 'tree item relationship identity');
+    const entries = treeOwner(run, 'getTree') as TreeEntry[] | false;
     const entry = entries ? entries.find((n) => n.key === key) : undefined;
     hidden.set(!entry?.visible, 'tree visibility');
     selected.set(c.value === key, 'tree selection');
@@ -291,11 +358,11 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
   def.lifecycle.onCreated(sync);
   def.lifecycle.onMounted((run) => {
     sync(run);
-    callOwner(run, TREE_FAMILY, 'refresh');
+    treeOwner(run, 'refresh');
   });
   def.props.watchAll((run) => {
     sync(run);
-    callOwner(run, TREE_FAMILY, 'refresh');
+    treeOwner(run, 'refresh');
   });
   def.lifecycle.onUnmounted(() => {
     owner = null;
@@ -311,8 +378,7 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
     if (c.active !== key) run.context.update(TREE_CONTEXT, { ...c, active: key });
   });
   def.event.on('press.commit', (run) => {
-    if (!disabled.get() && !hidden.get())
-      callOwner(run, TREE_FAMILY, 'requestValue', run.props.get().nodeKey);
+    if (!disabled.get() && !hidden.get()) treeOwner(run, 'requestValue', run.props.get().nodeKey);
   });
   def.event.on('key.down', (run, e) => {
     if (
@@ -324,7 +390,7 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
       e.metaKey
     )
       return;
-    const list = (callOwner(run, TREE_FAMILY, 'getTree') as TreeEntry[]).filter(
+    const list = ((treeOwner(run, 'getTree') || []) as TreeEntry[]).filter(
         (n) => n.visible && !n.disabled
       ),
       key = run.props.get().nodeKey ?? '',
@@ -332,18 +398,18 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
       entry = list[index];
     if (!entry) return;
     let target: string | undefined;
+    const forward = run.context.read(TREE_CONTEXT).direction === 'rtl' ? 'ArrowLeft' : 'ArrowRight';
+    const backward = forward === 'ArrowLeft' ? 'ArrowRight' : 'ArrowLeft';
     if (e.key === 'ArrowDown') target = list[index + 1]?.key;
     if (e.key === 'ArrowUp') target = list[index - 1]?.key;
     if (e.key === 'Home') target = list[0]?.key;
     if (e.key === 'End') target = list.at(-1)?.key;
-    if (e.key === 'ArrowRight') {
-      if (entry.branch && !expanded.get())
-        callOwner(run, TREE_FAMILY, 'requestExpanded', key, true);
+    if (e.key === forward) {
+      if (entry.branch && !expanded.get()) treeOwner(run, 'requestExpanded', key, true);
       else target = list.find((n) => n.parentKey === key)?.key;
     }
-    if (e.key === 'ArrowLeft') {
-      if (entry.branch && expanded.get())
-        callOwner(run, TREE_FAMILY, 'requestExpanded', key, false);
+    if (e.key === backward) {
+      if (entry.branch && expanded.get()) treeOwner(run, 'requestExpanded', key, false);
       else target = entry.parentKey;
     }
     if (e.key?.length === 1 && e.key !== ' ') {
@@ -376,7 +442,40 @@ export const asTreeItem = defineAsHook<TreeItemProps, TreeItemExposes, TreeItemC
 export const treeItem = definePrototype({ name: 'base-tree-item', setup: setupItem });
 function setupGroup(def: DefHandle<TreeGroupProps, TreeGroupExposes>) {
   def.anatomy.claim(TREE_FAMILY, { role: 'group' });
-  asAccessible().role('group');
+  def.props.define({ nodeKey: { type: 'string' } });
+  def.props.setDefaults({ nodeKey: '' });
+  const relationshipKey = def.state.string('relationshipKey', '');
+  const hidden = def.state.bool('hidden', true);
+  const direction = def.state.string('direction', 'ltr');
+  const accessible = asAccessible();
+  accessible.role('group');
+  accessible.part(TREE_FAMILY, { key: relationshipKey });
+  accessible.relation('labelledBy', {
+    target: { kind: 'part', family: TREE_FAMILY, role: 'item', key: relationshipKey },
+  });
+  accessible.state('hidden', hidden);
+  const sync = (run: RunHandle<TreeGroupProps>) => {
+    const key = run.props.get().nodeKey ?? '';
+    direction.set(run.context.read(TREE_CONTEXT).direction, 'tree group direction');
+    relationshipKey.set(key, 'tree group relationship identity');
+    const entries = treeOwner(run, 'getTree') as TreeEntry[] | false;
+    const entry = entries && entries.find((node) => node.key === key);
+    hidden.set(
+      !entry ||
+        !entry.branch ||
+        !entry.visible ||
+        !run.context.read(TREE_CONTEXT).expandedKeys.includes(key),
+      'tree group committed visibility'
+    );
+  };
+  def.context.subscribe(TREE_CONTEXT, sync);
+  def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
+  def.props.watchAll(sync);
+  def.rule({
+    when: (w) => w.state(hidden).eq(true),
+    intent: (i) => i.feedback.style.use(tw('hidden')),
+  });
 }
 export const asTreeGroup = defineAsHook<TreeGroupProps, TreeGroupExposes, TreeGroupAsHookContract>({
   name: 'as-tree-group',
@@ -389,7 +488,7 @@ function setupToggle(def: DefHandle<TreeToggleProps, TreeToggleExposes>) {
   def.anatomy.claim(TREE_FAMILY, { role: 'toggle' });
   def.props.define({ nodeKey: { type: 'string' } });
   const isDisabled = (run: RunHandle<TreeToggleProps>) => {
-    const entries = callOwner(run, TREE_FAMILY, 'getTree') as TreeEntry[] | false;
+    const entries = treeOwner(run, 'getTree') as TreeEntry[] | false;
     const entry = entries
       ? entries.find((node) => node.key === run.props.get().nodeKey)
       : undefined;
@@ -413,9 +512,8 @@ function setupToggle(def: DefHandle<TreeToggleProps, TreeToggleExposes>) {
   def.event.on('press.commit', (run) => {
     if (isDisabled(run)) return;
     const key = run.props.get().nodeKey ?? '';
-    callOwner(
+    treeOwner(
       run,
-      TREE_FAMILY,
       'requestExpanded',
       key,
       !run.context.read(TREE_CONTEXT).expandedKeys.includes(key)

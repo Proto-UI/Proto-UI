@@ -270,6 +270,7 @@ export function createSiteSearchComposition(options: {
       let entryPolicyManual = false;
       let prepareOpenerReturn: PrepareOpenerReturn | undefined;
       let cancelOpenerReturn: (() => void) | undefined;
+      let openerReturnArmed = false;
       let offPanelTransition: (() => void) | null = null;
       let panelTransitionOwner: unknown = null;
       type HintRequest = { target: HTMLElement; visible: boolean };
@@ -554,9 +555,11 @@ export function createSiteSearchComposition(options: {
           clearPublications();
           let finish: (() => void) | undefined;
           if (!open) {
-            const prepare = prepareOpenerReturn;
-            prepareOpenerReturn = undefined;
-            const restore = active && prepare?.(refs.panel);
+            // Each accepted opening owns one handback. Closed-state repaints
+            // cannot repeat it, and a later opening gets a fresh request.
+            const restore =
+              active && openerReturnArmed ? prepareOpenerReturn?.(refs.panel) : undefined;
+            openerReturnArmed = false;
             if (restore) finish = watchOpenerReturn(restore);
             // A closed generation hands the entry policy back and drops its
             // pending restore, so a later open of this generation is a normal
@@ -568,6 +571,7 @@ export function createSiteSearchComposition(options: {
           finish?.();
           return;
         }
+        openerReturnArmed = true;
         cancelOpenerReturn?.();
         // Capture before automatic Dialog entry, not when a late error arrives.
         // Keep this opening's identity across both author-slot commits below.
@@ -979,6 +983,7 @@ export function createSiteSearchComposition(options: {
         activateView = undefined;
         restoreViewFocus = undefined;
         prepareOpenerReturn = undefined;
+        openerReturnArmed = false;
         cancelOpenerReturn?.();
         paintEpoch++;
         pendingHint = undefined;

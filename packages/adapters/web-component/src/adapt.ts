@@ -110,6 +110,9 @@ import { completeCleanup, createWebComponentHostSession } from './runtime/sessio
 import { createShadowOwnerShell } from './shadow-owner-shell';
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
+import { captureShadowPercentageSource } from './shadow-percentage-source';
+import type { ExposeStatePort } from '@proto.ui/module-expose-state';
+import type { ExposeStateWebPort } from '@proto.ui/module-expose-state-web';
 import {
   createShadowSplitEffectsPort,
   hasVerifiedShadowSplitBaseRecipe,
@@ -120,6 +123,7 @@ import {
   abandonWebComponentPortalProjection,
   adoptWebComponentPortalProjections,
   isWebComponentPortaled,
+  beginWebComponentPortalViewAcquisition,
 } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
 import { createRebindableWebKeyedMetaSources } from './keyed-meta-sources';
@@ -673,6 +677,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       // Admit split effects before forwarding the mounted phase to observers.
       let admitViewProjection: (() => void) | null = null;
+      type PortalAcquisition = { epoch: number; release: () => void };
+      let portalAcquisition: PortalAcquisition | null = null;
+      let completedMountAcquisition: PortalAcquisition | null = null;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
@@ -761,7 +768,21 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           host: thisEl,
           root: nativeLinkTarget ?? thisRoot,
           shadowViewTarget: splitResources?.surface,
-          schedule,
+          schedule: (task) => {
+            const acquisition = completedMountAcquisition;
+            completedMountAcquisition = null;
+            schedule(() => {
+              try {
+                task();
+              } finally {
+                // The original mounted callback and its synchronous callback
+                // flush may acquire the first portal projection. Do not delay
+                // or reorder that task; retire only its own acquisition token.
+                acquisition?.release();
+                if (portalAcquisition === acquisition) portalAcquisition = null;
+              }
+            });
+          },
           rawPropsSource,
           getInstanceAssociations: () => getElementAssociations(thisEl),
           viewOperations: { capture: () => owner.captureViewOperation() },
@@ -790,11 +811,38 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           },
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: (event) => {
-            if (event.type === 'mount.phase' && event.phase === 'mounted') admitViewProjection?.();
-            opt.diagnostics?.onLifecycleEvent?.(event);
+            const finishingAcquisition =
+              event.type === 'mount.phase' &&
+              event.phase === 'mounted' &&
+              portalAcquisition?.epoch === event.epoch
+                ? portalAcquisition
+                : null;
             if (event.type === 'mount.phase') {
-              focusIngressReady = event.phase === 'mounted';
-              if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
+              if (event.phase === 'mounting') {
+                portalAcquisition?.release();
+                portalAcquisition = {
+                  epoch: event.epoch,
+                  release: beginWebComponentPortalViewAcquisition(thisEl),
+                };
+              } else if (event.phase !== 'mounted' && portalAcquisition?.epoch === event.epoch) {
+                portalAcquisition.release();
+                portalAcquisition = null;
+              }
+            }
+            try {
+              if (event.type === 'mount.phase' && event.phase === 'mounted')
+                admitViewProjection?.();
+              opt.diagnostics?.onLifecycleEvent?.(event);
+              if (event.type === 'mount.phase') {
+                focusIngressReady = event.phase === 'mounted';
+                if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
+              }
+            } finally {
+              // Runtime schedules this epoch after the complete notification
+              // returns. Publish its captured acquisition after any diagnostic
+              // or readiness reentry has finished scheduling a nested epoch.
+              if (event.type === 'mount.phase' && event.phase === 'mounted')
+                completedMountAcquisition = finishingAcquisition;
             }
           },
           getSlotProjector: () => this._slotProjector,
@@ -907,6 +955,21 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 surface: splitResources.surface.element,
                 artifact: splitResources.artifact.artifact,
                 prototypeName: proto.name,
+                capturePercentageSource: () => {
+                  const session = owner.session;
+                  return captureShadowPercentageSource({
+                    host: thisEl,
+                    exposeState: session?.caps.getPort<ExposeStatePort>('expose-state'),
+                    exposeStateWeb: session?.caps.getPort<ExposeStateWebPort>('expose-state-web'),
+                    isOwnerCurrent: () =>
+                      !!session &&
+                      owner.session === session &&
+                      !disposed &&
+                      !ownerResourcesReleased &&
+                      !this._terminalDisposing &&
+                      this._instanceToken === instanceToken,
+                  });
+                },
               })
             : undefined);
           const eventGate = (resources.eventGate = createEventGate());
@@ -967,6 +1030,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                     onChange: () => this._hostDisplay?.sync(),
                   }
                 ));
+          const applyTokens = applier.apply;
+          applier.apply = (tokens) => {
+            applyTokens(tokens);
+            // A live style commit supersedes a transport snapshot, including an
+            // explicit empty frame. Physical disconnect clear() does not.
+            if (this._applier === applier && this._pendingOwnedTokens !== null)
+              this._pendingOwnedTokens = Array.from(applier.getOwned());
+          };
           currentEventGate = eventGate;
           currentRouter = router;
           // Split owns its role-aware styles across synchronous DOM moves.
@@ -1292,16 +1363,24 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         if (!snapshot.present) {
           currentEventGate?.disable();
-          // Hide a closed portal without removing its compositor/layout surface
-          // until the existing rendering barrier can revoke that projection.
-          const concealed = isWebComponentPortaled(thisEl) && this._portalConceal.conceal();
+          // The shared marker immediately projects not-present intent. The
+          // existing barrier only delays physical retirement.
+          setViewDetached(true);
           if (
             ownerResourcesReleased ||
             this._terminalDisposing ||
             requestVersion !== latestIntentVersion
           )
             return;
-          if (!concealed) setViewDetached(true);
+          // Keep the owned conceal lease and its cleanup/reentry protection
+          // while the existing rendering barrier retains the portal projection.
+          if (isWebComponentPortaled(thisEl)) this._portalConceal.conceal();
+          if (
+            ownerResourcesReleased ||
+            this._terminalDisposing ||
+            requestVersion !== latestIntentVersion
+          )
+            return;
         }
         if (snapshot.present && wasConcealing && owner.hasView) {
           // The retained epoch never unmounted. Reveal it immediately so a
@@ -1423,7 +1502,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       // Invalidate only unfulfilled source operations. Terminal retirement keeps
       // its existing deferred policy; exact adapter-owned transport is retained.
       if (!isWebComponentOwnedRelocating(this)) this._withdrawViewOperations?.();
-      this._pendingOwnedTokens = this._applier ? Array.from(this._applier.getOwned()) : null;
+      // A queued connect may observe this element disconnected and return
+      // before restoring. A second disconnect must not replace the retained
+      // logical frame with the physically cleared token set.
+      if (this._pendingOwnedTokens === null)
+        this._pendingOwnedTokens = this._applier ? Array.from(this._applier.getOwned()) : null;
       this._applier?.clear();
       this._hostDisplay?.sync();
 

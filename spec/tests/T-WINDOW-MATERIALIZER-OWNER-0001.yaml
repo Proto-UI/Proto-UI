@@ -1,0 +1,65 @@
+id: T-WINDOW-MATERIALIZER-OWNER-0001
+type: test
+title: Window materializer ownership and retirement evidence
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: The bounded deterministic and real-adapter public recipe suites are recorded independently of pending native browser execution, assistive technology and stable semantic admission.
+summary: Verifies portable ownership and actual authored public consumption without replacing independent host or compiler acceptance.
+cases:
+  - id: T-WINDOW-MATERIALIZER-OWNER-0001-CASE-EXCLUSIVE
+    title: Only one current host acquires a logical collection
+    covers: [C-WINDOW-MATERIALIZER-OWNER-0001-EXCLUSIVE]
+    expectation: only-one-current-host-acquires-a-logical-collection
+  - id: T-WINDOW-MATERIALIZER-OWNER-0001-CASE-RETIRE
+    title: Retired or failed hosts clean resources and cannot revoke replacements
+    covers: [C-WINDOW-MATERIALIZER-OWNER-0001-RETIRE]
+    expectation: retired-or-failed-hosts-clean-resources-and-cannot-revoke-replacements
+  - id: T-WINDOW-MATERIALIZER-OWNER-0001-CASE-BOUNDARY
+    title: Real public Root disposal revokes outward calls and removes physical views
+    covers: [C-WINDOW-MATERIALIZER-OWNER-0001-BOUNDARY]
+    expectation: real-public-root-disposal-revokes-outward-calls-and-removes-physical-views
+verifies:
+  contracts: [C-WINDOW-MATERIALIZER-OWNER-0001]
+exercises:
+  prototypes: [P-BASE-VIRTUAL-LIST]
+implementations:
+  - id: source-conformance
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/virtual-list-owner.test.ts
+    required: true
+    consumesCases:
+      [
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-EXCLUSIVE,
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-RETIRE,
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-BOUNDARY,
+      ]
+  - id: public-web-adapter-recipes
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/collection-recipes.test.ts
+    required: true
+    consumesCases:
+      [
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-EXCLUSIVE,
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-RETIRE,
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-BOUNDARY,
+      ]
+  - id: native-public-recipes
+    kind: runtime-test
+    status: active
+    path: scripts/analysis/collections-recipes-browser.mjs
+    required: true
+    consumesCases:
+      [
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-EXCLUSIVE,
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-RETIRE,
+        T-WINDOW-MATERIALIZER-OWNER-0001-CASE-BOUNDARY,
+      ]
+    notes:
+      - Runner is implemented; current-candidate browser report is required separately and no native pass is inferred from source or happy-dom.
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Map deterministic ownership and public recipe evidence while keeping native, assistive technology and stable admission separate.
+tags: [sprint2, collections, ownership, conformance]

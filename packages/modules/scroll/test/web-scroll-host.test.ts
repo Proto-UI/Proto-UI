@@ -460,6 +460,34 @@ describe('module-scroll: Web scroll surface host', () => {
     expect(thumb.style.getPropertyValue('--proto-ui-scroll-thumb-offset')).toBe('36px');
 
     binding?.onEnd(moveSample(0, 40));
+    const followingSnapshots: ScrollSurfaceSnapshot[] = [];
+    lease.update({
+      config: {
+        axes: 'vertical',
+        projection: 'composed',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'composed',
+      composedChrome: {
+        scope: {},
+        controls: [{ getAxis: () => 'vertical', trackTarget: track, thumbTarget: thumb }],
+      },
+      onFacts: (facts) => followingSnapshots.push(facts),
+    });
+    lease.request({ kind: 'to', axis: 'vertical', position: 1 });
+    expect(lease.pauseFollowing!()).toBe(true);
+    const readerDrag = move.getBinding();
+    readerDrag?.onStart(moveSample(0, 4));
+    readerDrag?.onMove(moveSample(0, 100));
+    expect(target.scrollTop).toBe(300);
+    expect(followingSnapshots.at(-1)?.endFollow.state).toBe('paused');
+    readerDrag?.onMove(moveSample(0, 40));
+    expect(target.scrollTop).toBe(150);
+    expect(followingSnapshots.at(-1)?.endFollow.state).toBe('paused');
+    readerDrag?.onMove(moveSample(0, 100));
+    expect(target.scrollTop).toBe(300);
+    expect(followingSnapshots.at(-1)?.endFollow.state).toBe('following');
+    readerDrag?.onEnd(moveSample(0, 100));
     lease.update({
       config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',

@@ -3,6 +3,8 @@
 // do not admit ordinary website consumers, certify the optical algorithm, or
 // promote Liquid Glass from WIP / Experimental. Changed bytes require review.
 // Ownership and historical failures: internal/records/2026-11-22-regression-source-bindings.md.
+// Hover-only digest renewal: internal/records/2026-11-23-sprint4-source-admission-followup.md.
+// Exact reviewed source: Sprint 4 commit 53194e0c01e6073b9ba3e7852c755ab57cfbe12d.
 // The bounded Sprint 6 delta and exact new fixture are recorded separately in
 // internal/records/2026-11-22-sprint-6-coverage-source-bindings.md.
 export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
@@ -40,7 +42,7 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-hover.astro': Object.freeze({
-    sourceSha256: 'f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7',
+    sourceSha256: '4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c',
     specifiers: Object.freeze([
       '../../../../../../packages/prototypes/liquid-glass/src/theme',
       '@proto.ui/prototypes-liquid-glass/button',

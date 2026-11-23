@@ -1,0 +1,93 @@
+id: T-BASE-FIELD-CHOICES-0001
+type: test
+title: Explicit Field choice control ownership and lifecycle
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Source checks pass for the bounded contract; current public native recipe, physical input, assistive technology and non-Web acceptance remain separate.
+summary: Separate source semantics, real framework recipe consumers and native browser evidence.
+statement:
+  en: Preserve canonical-value, refusal, focus, reset and lifetime assertions across explicit Checkbox and Radio Group Field entries; synthetic DOM is not native input or AT acceptance.
+cases:
+  - id: T-BASE-FIELD-CHOICES-0001-CASE-VALUES
+    title: Canonical values and accepted changes
+    covers: [P-BASE-FIELD-CHOICES-VALUES, P-BASE-FIELD-CHOICES-REPORT]
+    expectation: Uncontrolled, synchronous and queued controlled owners report canonical boolean/string values. Rejection and no-op stay quiet for onChange, mixed display leaves the boolean required oracle unchanged, and manual validation remains available.
+  - id: T-BASE-FIELD-CHOICES-0001-CASE-POLICY
+    title: Focus and readOnly differ from disabled
+    covers: [P-BASE-FIELD-CHOICES-POLICY, P-BASE-FIELD-CHOICES-FOCUS]
+    expectation: Pointer/Space/Label and radio arrow proposals are blocked by readonly; focus and roving survive, internal focus migration is not blur, actual departure validates, disabled values are omitted, and exact Field IDREFs remain owned.
+  - id: T-BASE-FIELD-CHOICES-0001-CASE-RESET
+    title: Reset and terminal reentry
+    covers: [P-BASE-FIELD-CHOICES-RESET, P-BASE-FIELD-CHOICES-LIFETIME]
+    expectation: Initial baseline survives later defaults. Refused controlled reset does not overwrite canonical or dirty. Callback reset/unmount/dispose/reconnect and member replacement leave no stale proposal/report/lease.
+  - id: T-BASE-FIELD-CHOICES-0001-CASE-PROJECTIONS
+    title: Passive family Field projections
+    covers:
+      [
+        P-SHADCN-FIELD-CHOICES-INHERITANCE,
+        P-SHADCN-FIELD-CHOICES-STYLE,
+        P-BRUTALIST-FIELD-CHOICES-INHERITANCE,
+        P-BRUTALIST-FIELD-CHOICES-STYLE,
+        P-BRUTALIST-FIELD-CHOICES-SWITCH,
+      ]
+    expectation: Three public families preserve Base canonical values, focus and readOnly policy; styled explicit entries share ordinary paint. Brutalist Switch keeps the existing Switch Field reporting and draggable=false contract. Source checks alone do not establish native visual or AT acceptance.
+verifies:
+  prototypes:
+    - P-BASE-FIELD-CHOICES
+    - P-SHADCN-FIELD-CHOICES
+    - P-BRUTALIST-FIELD-CHOICES
+exercises:
+  prototypes: [P-BASE-FIELD-CHOICES, P-SHADCN-FIELD-CHOICES, P-BRUTALIST-FIELD-CHOICES]
+implementations:
+  - id: choice-semantic-source
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/field-choices.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-FIELD-CHOICES-0001-CASE-VALUES,
+        T-BASE-FIELD-CHOICES-0001-CASE-POLICY,
+        T-BASE-FIELD-CHOICES-0001-CASE-RESET,
+        T-BASE-FIELD-CHOICES-0001-CASE-PROJECTIONS,
+      ]
+  - id: choice-runtime-retirement
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/notification-retirement-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-FIELD-CHOICES-0001-CASE-RESET]
+  - id: choice-public-framework-recipes
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/field-choices-recipes.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-FIELD-CHOICES-0001-CASE-VALUES,
+        T-BASE-FIELD-CHOICES-0001-CASE-POLICY,
+        T-BASE-FIELD-CHOICES-0001-CASE-RESET,
+        T-BASE-FIELD-CHOICES-0001-CASE-PROJECTIONS,
+      ]
+    notes:
+      - Actual public DemoSpecs and four framework Adapters in a source DOM environment. Only CDN acquisition is replaced. Generated relative/inline-flex CSS supplies the existing Rhea Switch host prerequisite; no native geometry or input acceptance is inferred.
+  - id: choice-native-public-recipes
+    kind: adapter-test
+    status: planned
+    path: scripts/analysis/form-select-recipes-browser.mjs
+    required: true
+    consumesCases:
+      [
+        T-BASE-FIELD-CHOICES-0001-CASE-VALUES,
+        T-BASE-FIELD-CHOICES-0001-CASE-POLICY,
+        T-BASE-FIELD-CHOICES-0001-CASE-RESET,
+        T-BASE-FIELD-CHOICES-0001-CASE-PROJECTIONS,
+      ]
+    notes:
+      - The choices kind executes 12 independently recorded Base/Shadcn/Brutalist × WC/React/Vue/Vue2 public consumers. Its current native run remains pending; source tests do not establish native input or AT acceptance.
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define independent acceptance oracles before implementation; no browser or AT pass is inferred.
+tags: [field, conformance, draft]

@@ -67,7 +67,15 @@ describe('Nested Accordion terminal lifetime across real runtime hosts', () => {
         expect(content, name).not.toBeNull();
         expect(content.hasAttribute('data-open'), name).toBe(true);
         expect(content.getAttribute('aria-hidden'), name).toBe('false');
-        expect(content.className, name).toBe('p-3');
+        // Framework hosts retain the renderer's private ownership class in
+        // addition to the authored spacing. Native/WC hosts use data markers.
+        const classes = [...content.classList];
+        const ownership = classes.filter((token) => /^pui-owner-demo-\d+$/.test(token));
+        expect(ownership, name).toHaveLength(runtime === 'wc' ? 0 : 1);
+        expect(
+          classes.filter((token) => !ownership.includes(token)),
+          name
+        ).toEqual(['p-3']);
         expect(content.classList.contains('p-3'), name).toBe(true);
         // An unconditional utilities-layer block would override the Prototype's
         // lower-layer hidden selector for keepMounted content.

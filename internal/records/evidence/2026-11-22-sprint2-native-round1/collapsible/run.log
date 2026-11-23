@@ -1,0 +1,204 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/Proto-UI/Proto-UI[39m
+
+[2m1:55:27 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  // @vitest-environment node
+2  |  
+3  |  import { mkdir, writeFile } from 'node:fs/promises';
+   |                                              ^
+4  |  import { execFileSync } from 'node:child_process';
+5  |  import path from 'node:path';
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts[39m
+[2m1:55:27 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
+   |                                                                           ^
+2  |  // Shared server/browser plumbing for documentation browser regressions.
+3  |  // Extracted so a third suite does not need a third inline copy; the two existing
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts[39m
+[2m1:55:28 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  import type { Page } from 'playwright-core';
+2  |  
+3  |  /** Native viewport resize can precede the application matchMedia callback.
+   |                             ^
+4  |   * Sample the committed owner location, not transient visibility in the old row. */
+5  |  export function hasCommittedHeaderPreferencesDock(): boolean {
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/site-header-browser.ts[39m
+[2m1:55:28 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  // Serialized by Playwright. Observe the failed native surface without changing focus.
+   |                                                                           ^
+2  |  export function collectCollapsibleFocusFailure(elements: Element[]) {
+3  |    const element = elements.length === 1 ? elements[0] : null;
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/collapsible-focus-observation.ts[39m
+[2m1:55:28 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  import { mkdir, writeFile } from 'node:fs/promises';
+2  |  import path from 'node:path';
+   |                      ^
+3  |  import type { Browser, BrowserContext, CDPSession, Locator, Page } from 'playwright-core';
+4  |  
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/collapsible-focus-path-probe.ts[39m
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:19.909Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=1 requestMs=7 totalMs=7 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:20.162Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=2 requestMs=2 totalMs=260 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:20.413Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=3 requestMs=1 totalMs=511 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:20.665Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=4 requestMs=2 totalMs=763 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:20.917Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=5 requestMs=2 totalMs=1015 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:21.169Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=6 requestMs=2 totalMs=1267 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:21.420Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=7 requestMs=1 totalMs=1518 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:21.673Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=8 requestMs=2 totalMs=1771 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:21.925Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=9 requestMs=2 totalMs=2023 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:22.177Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=10 requestMs=2 totalMs=2275 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:22.427Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=11 requestMs=0 totalMs=2525 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:22.679Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=12 requestMs=1 totalMs=2777 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:22.929Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=13 requestMs=0 totalMs=3027 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:23.181Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=14 requestMs=1 totalMs=3279 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:23.432Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=15 requestMs=1 totalMs=3530 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:23.683Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=16 requestMs=1 totalMs=3781 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:35039
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:56:27.266Z http://127.0.0.1:35039/en/ui-libraries/shadcn/collapsible/ attempt=17 requestMs=3333 totalMs=7364 HTTP 200 OK
+
+ [32m✓[39m apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts [2m([22m[2m36 tests[22m[2m | [22m[33m18 skipped[39m[2m)[22m[33m 120431[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mwc preserves disclosure ownership through native input and view lifetimes [33m4824[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mreact preserves disclosure ownership through native input and view lifetimes [33m4054[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mvue preserves disclosure ownership through native input and view lifetimes [33m3712[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mvue2 preserves disclosure ownership through native input and view lifetimes [33m3624[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mwc preserves padding and wraps long text at 320px and 200% type [33m3032[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mreact preserves padding and wraps long text at 320px and 200% type [33m3491[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mvue preserves padding and wraps long text at 320px and 200% type [33m3410[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mvue2 preserves padding and wraps long text at 320px and 200% type [33m3380[2mms[22m[39m
+   [33m[2m✓[22m[39m shadcn Collapsible public browser evidence[2m > [22mrenders the Chinese narrow page through the same public disclosure [33m2624[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mwc preserves disclosure ownership through native input and view lifetimes [33m3370[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mreact preserves disclosure ownership through native input and view lifetimes [33m3636[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mvue preserves disclosure ownership through native input and view lifetimes [33m3333[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mvue2 preserves disclosure ownership through native input and view lifetimes [33m3375[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mwc preserves padding and wraps long text at 320px and 200% type [33m3013[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mreact preserves padding and wraps long text at 320px and 200% type [33m3363[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mvue preserves padding and wraps long text at 320px and 200% type [33m3285[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mvue2 preserves padding and wraps long text at 320px and 200% type [33m3216[2mms[22m[39m
+   [33m[2m✓[22m[39m brutalist Collapsible public browser evidence[2m > [22mrenders the Chinese narrow page through the same public disclosure [33m2358[2mms[22m[39m
+[2m1:57:28 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+2  |  
+3  |  import { mkdir } from 'node:fs/promises';
+4  |  import path from 'node:path';
+   |    ^
+5  |  import type { Browser, Locator } from 'playwright-core';
+6  |  import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts[39m
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:20.416Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=1 requestMs=7 totalMs=7 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:20.669Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=2 requestMs=2 totalMs=260 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:20.920Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=3 requestMs=1 totalMs=511 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:21.176Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=4 requestMs=5 totalMs=767 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:21.428Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=5 requestMs=1 totalMs=1019 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:21.680Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=6 requestMs=1 totalMs=1271 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:21.931Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=7 requestMs=1 totalMs=1522 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:22.182Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=8 requestMs=1 totalMs=1773 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:22.433Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=9 requestMs=1 totalMs=2024 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:22.686Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=10 requestMs=2 totalMs=2277 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:22.937Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=11 requestMs=1 totalMs=2528 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:23.189Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=12 requestMs=1 totalMs=2780 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:23.440Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=13 requestMs=1 totalMs=3031 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:23.691Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=14 requestMs=1 totalMs=3282 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:23.942Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=15 requestMs=1 totalMs=3533 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:24.194Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=16 requestMs=1 totalMs=3785 TypeError: fetch failed; cause=Error: connect ECONNREFUSED 127.0.0.1:36843
+
+[90mstdout[2m | apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts
+[22m[39m[server-readiness] 2026-11-22T13:58:27.904Z http://127.0.0.1:36843/en/ui-libraries/base/collapsible/ attempt=17 requestMs=3460 totalMs=7495 HTTP 200 OK
+
+ [32m✓[39m apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 77225[2mms[22m[39m
+   [33m[2m✓[22m[39m Base Collapsible public browser evidence[2m > [22mwc preserves disclosure ownership through native input and view lifetimes [33m4555[2mms[22m[39m
+   [33m[2m✓[22m[39m Base Collapsible public browser evidence[2m > [22mreact preserves disclosure ownership through native input and view lifetimes [33m3752[2mms[22m[39m
+   [33m[2m✓[22m[39m Base Collapsible public browser evidence[2m > [22mvue preserves disclosure ownership through native input and view lifetimes [33m3623[2mms[22m[39m
+   [33m[2m✓[22m[39m Base Collapsible public browser evidence[2m > [22mvue2 preserves disclosure ownership through native input and view lifetimes [33m3436[2mms[22m[39m
+   [33m[2m✓[22m[39m Base Collapsible public browser evidence[2m > [22mrenders the Chinese narrow page through the same public disclosure [33m2692[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m23 passed[39m[22m[2m | [22m[33m18 skipped[39m[90m (41)[39m
+[2m   Start at [22m 13:55:27
+[2m   Duration [22m 198.57s[2m (transform 116ms, setup 0ms, collect 551ms, tests 197.66s, environment 0ms, prepare 78ms)[22m
+
+JSON report written to /home/runner/work/_temp/sprint2-consumers/collapsible/report.json

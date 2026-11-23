@@ -316,6 +316,9 @@ describe('explicit separately compiled library linking', () => {
         id: 'owner',
         sourcePaths: { 'entry.proto.ts': 'Entry.tsx' },
       })
-    ).toMatchObject({ ok: false, diagnostics: [{ category: 'unsupported-input' }] });
+    ).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI4201', category: 'unsupported-input' }],
+    });
   });
 });

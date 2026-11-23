@@ -411,9 +411,19 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     expect(content.querySelector('span')).toBe(authored);
     expect(viewport.getExposes().scrollProjection.get()).toBe('system');
     expectNeutral(root, viewport, content);
+    // Observe the actual cleanup while the owner is retiring. C-EXPOSE-0008
+    // forbids calling a retained public callable after terminal disposal.
+    let retiredWindow: { committed: unknown } | undefined;
+    const stop = collection.subscribe(() => {
+      retiredWindow = collection.snapshot();
+      stop();
+    });
     root.remove();
     await flush();
-    expect(collection.snapshot().committed).toBeNull();
+    expect(retiredWindow).toBeDefined();
+    expect(retiredWindow!.committed).toBeNull();
+    expect(() => collection.snapshot()).toThrow('after terminal disposal');
+    expect(() => collection.commit(stale, stale.keys)).toThrow('after terminal disposal');
   });
 
   it('retains the Message Scroller surface and current message facts across retirement', async () => {

@@ -174,7 +174,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 456 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 460 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -280,6 +280,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-DROPDOWN-MENU-SHORTCUT | P-SHADCN-DROPDOWN-MENU-SHORTCUT | required missing | P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SHORTCUT | P-LIQUID-GLASS-DROPDOWN-MENU-SHORTCUT |
 | P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | P-BRUTALIST-DROPDOWN-MENU-TRIGGER | P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER | P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER |
 | P-BASE-FIELD | P-SHADCN-FIELD | P-BRUTALIST-FIELD | P-BOOTSTRAP-2-3-2-FIELD | P-LIQUID-GLASS-FIELD |
+| P-BASE-FIELD-CHOICES | P-SHADCN-FIELD-CHOICES | P-BRUTALIST-FIELD-CHOICES | required missing | required missing |
 | P-BASE-FIELD-CONTROL | P-SHADCN-FIELD-CONTROL | P-BRUTALIST-FIELD-CONTROL | P-BOOTSTRAP-2-3-2-FIELD-CONTROL | P-LIQUID-GLASS-FIELD-CONTROL |
 | P-BASE-FIELD-DESCRIPTION | P-SHADCN-FIELD-DESCRIPTION | P-BRUTALIST-FIELD-DESCRIPTION | P-BOOTSTRAP-2-3-2-FIELD-DESCRIPTION | P-LIQUID-GLASS-FIELD-DESCRIPTION |
 | P-BASE-FIELD-ERROR | P-SHADCN-FIELD-ERROR | P-BRUTALIST-FIELD-ERROR | P-BOOTSTRAP-2-3-2-FIELD-ERROR | P-LIQUID-GLASS-FIELD-ERROR |
@@ -323,7 +324,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-SLIDER | P-SHADCN-SLIDER | required missing | P-BOOTSTRAP-2-3-2-SLIDER | P-LIQUID-GLASS-SLIDER |
 | P-BASE-SLIDER-FIELD-THUMB | P-SHADCN-SLIDER-FIELD-THUMB | required missing | P-BOOTSTRAP-2-3-2-SLIDER-FIELD-THUMB | P-LIQUID-GLASS-SLIDER-FIELD-THUMB |
 | P-BASE-SLIDER-THUMB | P-SHADCN-SLIDER-THUMB | required missing | P-BOOTSTRAP-2-3-2-SLIDER-THUMB | P-LIQUID-GLASS-SLIDER-THUMB |
-| P-BASE-SLIDER-VALUES | P-SHADCN-SLIDER-VALUES | required missing | P-BOOTSTRAP-2-3-2-SLIDER-VALUES | P-LIQUID-GLASS-SLIDER-VALUES |
+| P-BASE-SLIDER-VALUES | P-SHADCN-SLIDER-VALUES | P-BRUTALIST-SLIDER-VALUES | P-BOOTSTRAP-2-3-2-SLIDER-VALUES | P-LIQUID-GLASS-SLIDER-VALUES |
 | P-BASE-SURFACE | P-SHADCN-SURFACE | P-BRUTALIST-SURFACE | P-BOOTSTRAP-2-3-2-SURFACE | P-LIQUID-GLASS-SURFACE |
 | P-BASE-SWITCH | P-SHADCN-SWITCH | P-BRUTALIST-SWITCH | P-BOOTSTRAP-2-3-2-SWITCH | P-LIQUID-GLASS-SWITCH |
 | P-BASE-SWITCH-THUMB | P-SHADCN-SWITCH-THUMB | P-BRUTALIST-SWITCH-THUMB | P-BOOTSTRAP-2-3-2-SWITCH-THUMB | P-LIQUID-GLASS-SWITCH-THUMB |

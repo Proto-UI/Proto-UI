@@ -177,14 +177,12 @@ describe('prototypes/shadcn: scroll-area', () => {
       expect(styleContains(horizontal, projected), projected).toBe(true);
     }
     for (const thumb of [verticalThumb, horizontalThumb]) {
-      for (const token of [
-        'relative',
-        'flex-1',
-        'rounded-full',
-        'bg-border',
-      ]) {
+      for (const token of ['relative', 'h-full', 'w-full', 'rounded-full', 'bg-border']) {
         expect(styleContains(thumb, token), `thumb/${token}`).toBe(true);
       }
+      // The host fixes flex-grow at zero while owning the scroll-axis size.
+      // A remaining flex-1 basis would collapse an empty cross-axis hit target.
+      expect(styleContains(thumb, 'flex-1')).toBe(false);
       expect(styleContains(thumb, 'border')).toBe(false);
       expect(styleContains(thumb, 'border-transparent')).toBe(false);
       expect(thumb.getAttribute('role')).toBeNull();

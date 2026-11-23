@@ -26,6 +26,33 @@ documentation-image-preview,
 [data-theme='dark'] .docs-image-full {
   color-scheme: dark;
 }
+[data-docs-image-reading-root],
+[data-docs-image-viewport] {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.docs-image-reading-layout {
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: var(--docs-image-reading-gutter, 6px);
+  grid-template-rows: var(--docs-image-tools-height, 40px) minmax(0, 1fr);
+  row-gap: var(--docs-image-reading-gutter, 6px);
+}
+[data-docs-image-reading-root] {
+  place-self: center;
+}
+.docs-image-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
 .docs-image-status {
   position: absolute;
   inset: 0;
@@ -48,6 +75,12 @@ documentation-image-preview,
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+/* Keep the clipped control inside the canvas instead of placing its bordered
+ * box after the full-height reading grid and creating an outer scroll range. */
+.docs-image-keyboard-close:not([data-focus-visible]) {
+  top: 0;
+  left: 0;
 }
 .docs-image-keyboard-close[data-focus-visible] {
   position: absolute;

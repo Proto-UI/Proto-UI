@@ -1,0 +1,74 @@
+{
+  "sourceHead": "9802e00c4c1705cdf5c32eb48eeb1e395f5d1e9e",
+  "sourceTree": "cc98705d33705af9b1a5a3d260781005da61c538",
+  "incomingMain": "b715b8a6d08c2c79417272c8d4ca9254984feadb",
+  "sourceStable": true,
+  "results": {
+    "vitest": {
+      "files": 5,
+      "passed": 62,
+      "failed": 1,
+      "skipped": 0
+    },
+    "mainNode": {
+      "passed": 29,
+      "failed": 0
+    },
+    "modelProtocol": {
+      "passed": 9,
+      "failed": 0
+    },
+    "consumerProtocol": {
+      "passed": 7,
+      "failed": 0
+    },
+    "total": {
+      "passed": 107,
+      "failed": 1,
+      "skipped": 0
+    }
+  },
+  "unresolvedFailure": "Original complete shadcn-switch-thumb Root-token inventory expects []; nine percentage/static translation expressions remain unsupported. This failure was not waived.",
+  "archives": [
+    {
+      "file": "focused-vitest.log.gz",
+      "bytes": 21168,
+      "sha256": "1b36ead3fa3856997dd6fe01768af875c08e774390012b10c1988fb0b4493a06"
+    },
+    {
+      "file": "formatter-preservation.json",
+      "bytes": 1402,
+      "sha256": "cc77d811c4b0139babe02907fdfb645d3a61a820fdb6a720e974558fc19eb67f"
+    },
+    {
+      "file": "independent-formatting-review.json",
+      "bytes": 1150,
+      "sha256": "e583af1d918d4a469a10ae9a86b38c19c41619ee108868817a5b6fbf973dc5a0"
+    },
+    {
+      "file": "main-consumer-protocol.log.gz",
+      "bytes": 334,
+      "sha256": "4a8389857d8447b0371ddb603ad53254eb37057cfab25fa6e867f237a438677a"
+    },
+    {
+      "file": "main-model-protocol.log.gz",
+      "bytes": 398,
+      "sha256": "a997f8a2dbd8105bfc2bee95ca6745c024d582a29b5b1b2fff1bb68a3a61a5f1"
+    },
+    {
+      "file": "main-node.log.gz",
+      "bytes": 1370,
+      "sha256": "1c4eb8dc07aadbb2cf3083740e7a8679acb3ba26e61f0fcaa3adfc8d3b596d78"
+    },
+    {
+      "file": "receipt.json.gz",
+      "bytes": 1060,
+      "sha256": "d6532f4bd5f418c38ddb4a98a91d3f55f8bdb5f1f2275ae4666f6a78551abc49"
+    },
+    {
+      "file": "vitest.json.gz",
+      "bytes": 3530,
+      "sha256": "a1b700275e4e3e1ab221187af4e56ea68daeafcb59c05e786836b0beb52b02d0"
+    }
+  ]
+}

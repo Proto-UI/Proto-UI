@@ -9,6 +9,7 @@ import {
 import {
   createRadioGroupItemId,
   notifyRadioGroupItemsChanged,
+  notifyRadioGroupFocus,
   RADIO_GROUP_CONTEXT,
   RADIO_GROUP_FAMILY,
   RADIO_GROUP_ITEM_CONTEXT,
@@ -102,10 +103,16 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     setRadioGroupCurrentItem(run, instanceId);
   };
 
-  const requestSelection = (run: RunHandle<RadioGroupItemProps>, isCurrent = () => true): boolean => {
+  const requestSelection = (
+    run: RunHandle<RadioGroupItemProps>,
+    isCurrent = () => true
+  ): boolean => {
+    const epoch = viewEpoch;
+    if (currentRun !== run) return false;
     const ownValue = run.props.get().value ?? '';
     const accepted = requestRadioGroupValue(run, ownValue);
-    if (accepted && isCurrent()) run.expose.emit('select', { value: ownValue });
+    if (accepted && currentRun === run && viewEpoch === epoch && isCurrent())
+      run.expose.emit('select', { value: ownValue });
     return accepted;
   };
 
@@ -113,11 +120,13 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     if (disabled.get()) return;
     const run = currentRun;
     if (!run) return;
+    const epoch = viewEpoch;
     setCurrent(run);
-    focusable.focusSelf(options);
+    if (currentRun === run && viewEpoch === epoch) focusable.focusSelf(options);
   });
 
   let currentRun: RunHandle<RadioGroupItemProps> | null = null;
+  let viewEpoch = 0;
 
   def.context.subscribe(RADIO_GROUP_CONTEXT, (run, next) => {
     currentRun = run;
@@ -135,9 +144,12 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     sync(run, run.context.read(RADIO_GROUP_CONTEXT));
   });
 
-  def.lifecycle.onUnmounted(() => {
+  const retire = () => {
     currentRun = null;
-  });
+    viewEpoch++;
+  };
+  def.lifecycle.onUnmounted(retire);
+  def.lifecycle.onBeforeDispose(retire);
 
   def.props.watch(['value', 'disabled'], (run) => {
     sync(run, run.context.read(RADIO_GROUP_CONTEXT));
@@ -145,10 +157,12 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
   });
 
   focused.watch((run, event) => {
-    if (event.type !== 'next' || !event.next || disabled.get()) return;
+    if (event.type !== 'next') return;
+    notifyRadioGroupFocus(run);
+    if (!event.next || disabled.get()) return;
     const group = run.context.read(RADIO_GROUP_CONTEXT);
     setCurrent(run);
-    if (group.currentItemId === instanceId) return;
+    if (group.readOnly || group.currentItemId === instanceId) return;
     requestSelection(run);
   });
 
@@ -166,22 +180,27 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     requestFocus?: () => void,
     key?: string
   ) => {
+    if (currentRun !== run) return;
+    const epoch = viewEpoch;
+    const alive = () => currentRun === run && viewEpoch === epoch && isCurrent();
     pressed.set(false, 'reason: radio item press commit => pressed reset');
-    if (disabled.get() || key === 'Enter' || !isCurrent()) return;
+    if (!alive() || disabled.get() || key === 'Enter') return;
     setCurrent(run);
-    if (disabled.get() || !isCurrent()) return;
+    if (!alive() || disabled.get()) return;
     requestFocus?.();
-    if (disabled.get() || !isCurrent()) return;
-    requestSelection(run, isCurrent);
+    if (!alive() || disabled.get()) return;
+    requestSelection(run, alive);
   };
   def.event.on('press.commit', (run, event) => {
     activate(run, undefined, undefined, event?.key);
   });
   asControlLabel().target<RadioGroupItemProps>((run, request) => {
     const isCurrent = () => !disabled.get() && request.isCurrent();
-    activate(run, isCurrent, () => focusable.focusSelf({
-      reason: request.source === 'pointer' ? 'pointer' : 'programmatic',
-    }));
+    activate(run, isCurrent, () =>
+      focusable.focusSelf({
+        reason: request.source === 'pointer' ? 'pointer' : 'programmatic',
+      })
+    );
   });
 
   def.event.on('pointer.enter', () => {
@@ -198,10 +217,12 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     setRadioGroupCurrentItem(run, group.selectedItemId);
   });
   def.event.on('pointer.down', (run) => {
-    if (disabled.get()) return;
+    if (currentRun !== run || disabled.get()) return;
+    const epoch = viewEpoch;
     pressed.set(true, 'reason: radio item pointer down');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     setCurrent(run);
-    focusable.focusSelf({ reason: 'pointer' });
+    if (currentRun === run && viewEpoch === epoch) focusable.focusSelf({ reason: 'pointer' });
   });
   def.event.on('pointer.up', () => {
     pressed.set(false, 'reason: radio item pointer up');

@@ -1,0 +1,39 @@
+{
+  "before": {
+    "head": "24a0616852a3a5a99f3b7d3b523cecc757b08bc2",
+    "status": " M apps/www/src/components/site-link-recipes.ts\n M apps/www/src/content/docs/zh-cn/demo-base-input.test.ts\n M apps/www/src/content/docs/zh-cn/demo-base-label.test.ts\n M apps/www/src/content/docs/zh-cn/demo-base-tree.test.ts\n M apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts\n M packages/compositions/chatui/test/private-boundary.test.ts\n M packages/spec/graph/test/shadcn-dropdown-evidence.test.ts\n M scripts/coverage-matrices/check-coverage-matrices.mjs\n M scripts/test/general-ci.mjs\n M scripts/test/regression-baseline.test.mjs\n",
+    "modifiedHashes": {
+      "apps/www/src/components/site-link-recipes.ts": "34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc",
+      "apps/www/src/content/docs/zh-cn/demo-base-input.test.ts": "777d37caba52ab8d3cae2e98fa38b5ace523c8ec91804ea6f0123e8a564a0482",
+      "apps/www/src/content/docs/zh-cn/demo-base-label.test.ts": "177ff76211900bcbb713256a73eea503d6fecb8ab3c65dc3915d5b24b67c9a7c",
+      "apps/www/src/content/docs/zh-cn/demo-base-tree.test.ts": "babbb7a113d7b9b742b801b9eeccd2f2e0d225a32923802909e2262ff869c4d2",
+      "apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts": "023bc35f3920f611250c2f841cb890ff24ab57074e0f3798db15b7351ea645ff",
+      "packages/compositions/chatui/test/private-boundary.test.ts": "24731c1b09cf3d194e170b2d8b093d2095eeb77c09c7b71593918051bb22e72c",
+      "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts": "23125e8fde9710789ac08ee63050dc7792e0f5c9b4a475b496cb604a9b523596",
+      "scripts/coverage-matrices/check-coverage-matrices.mjs": "554146f2d618bdd69b447bb209a00be9e4bd5e6b47b0cccb2f34a6c68331c8f0",
+      "scripts/test/general-ci.mjs": "f50622584f30655c76d6159d2e3e45606842045a94b93c1ae52b8260b9a0dc8b",
+      "scripts/test/regression-baseline.test.mjs": "cf35e24e56918ebba00d2cc3bf0cc7e91c1caa6e4aa26b2de76234b281bc219b"
+    }
+  },
+  "startedAt": 1795432129.649233,
+  "command": ["corepack", "pnpm@10.32.1", "build:packages"],
+  "nodeOptions": "--max-old-space-size=4096",
+  "exitCode": 0,
+  "completedAt": 1795432251.738585,
+  "after": {
+    "head": "24a0616852a3a5a99f3b7d3b523cecc757b08bc2",
+    "status": " M apps/www/src/components/site-link-recipes.ts\n M apps/www/src/content/docs/zh-cn/demo-base-input.test.ts\n M apps/www/src/content/docs/zh-cn/demo-base-label.test.ts\n M apps/www/src/content/docs/zh-cn/demo-base-tree.test.ts\n M apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts\n M packages/compositions/chatui/test/private-boundary.test.ts\n M packages/spec/graph/test/shadcn-dropdown-evidence.test.ts\n M scripts/coverage-matrices/check-coverage-matrices.mjs\n M scripts/test/general-ci.mjs\n M scripts/test/regression-baseline.test.mjs\n",
+    "modifiedHashes": {
+      "apps/www/src/components/site-link-recipes.ts": "34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc",
+      "apps/www/src/content/docs/zh-cn/demo-base-input.test.ts": "777d37caba52ab8d3cae2e98fa38b5ace523c8ec91804ea6f0123e8a564a0482",
+      "apps/www/src/content/docs/zh-cn/demo-base-label.test.ts": "177ff76211900bcbb713256a73eea503d6fecb8ab3c65dc3915d5b24b67c9a7c",
+      "apps/www/src/content/docs/zh-cn/demo-base-tree.test.ts": "babbb7a113d7b9b742b801b9eeccd2f2e0d225a32923802909e2262ff869c4d2",
+      "apps/www/src/content/docs/zh-cn/ghost-public-demo.test.ts": "023bc35f3920f611250c2f841cb890ff24ab57074e0f3798db15b7351ea645ff",
+      "packages/compositions/chatui/test/private-boundary.test.ts": "24731c1b09cf3d194e170b2d8b093d2095eeb77c09c7b71593918051bb22e72c",
+      "packages/spec/graph/test/shadcn-dropdown-evidence.test.ts": "23125e8fde9710789ac08ee63050dc7792e0f5c9b4a475b496cb604a9b523596",
+      "scripts/coverage-matrices/check-coverage-matrices.mjs": "554146f2d618bdd69b447bb209a00be9e4bd5e6b47b0cccb2f34a6c68331c8f0",
+      "scripts/test/general-ci.mjs": "f50622584f30655c76d6159d2e3e45606842045a94b93c1ae52b8260b9a0dc8b",
+      "scripts/test/regression-baseline.test.mjs": "cf35e24e56918ebba00d2cc3bf0cc7e91c1caa6e4aa26b2de76234b281bc219b"
+    }
+  }
+}

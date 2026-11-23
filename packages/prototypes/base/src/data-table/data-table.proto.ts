@@ -83,6 +83,7 @@ export const DATA_TABLE_CONTEXT = createContextKey<{
   readOnly: boolean;
   page: number;
   pageCount: number;
+  columnVisibility: Record<string, boolean>;
 }>('base-data-table');
 export const DATA_TABLE_ROW_CONTEXT = createContextKey<{ rowKey: string }>('base-data-table-row');
 function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
@@ -95,6 +96,16 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
       if (!Object.hasOwn(value, index) || typeof value[index] !== 'string') return false;
     return true;
   };
+  const stringMap = (value: unknown) =>
+    !!value &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.values(value).every((entry) => typeof entry === 'string');
+  const booleanMap = (value: unknown) =>
+    !!value &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    Object.values(value).every((entry) => typeof entry === 'boolean');
   def.props.define({
     rows: { type: 'object' },
     sortKey: { type: 'string' },
@@ -102,6 +113,8 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     sortDirection: { type: 'enum', options: ['none', 'ascending', 'descending'] },
     defaultSortDirection: { type: 'enum', options: ['none', 'ascending', 'descending'] },
     filter: { type: 'string' },
+    columnFilters: { type: 'object', validator: stringMap, empty: 'fallback' },
+    columnVisibility: { type: 'object', validator: booleanMap, empty: 'fallback' },
     page: { type: 'number' },
     defaultPage: { type: 'number' },
     pageSize: { type: 'number' },
@@ -115,6 +128,8 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     defaultSortKey: '',
     defaultSortDirection: 'none',
     filter: '',
+    columnFilters: {},
+    columnVisibility: {},
     defaultPage: 0,
     pageSize: 10,
     defaultSelectedKeys: [],
@@ -130,6 +145,7 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     readOnly: false,
     page: 0,
     pageCount: 1,
+    columnVisibility: {},
   });
   def.context.subscribe(DATA_TABLE_CONTEXT);
   let owner: RunHandle<DataTableRootProps> | null = null,
@@ -139,8 +155,10 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     selected: string[] = [],
     view = dataView([]);
   const rowCount = def.state.numberDiscrete('filteredCount', 0);
+  const pageSelection = def.state.string('pageSelection', 'none');
   let viewEpoch = 0;
   def.expose.state('filteredCount', rowCount);
+  def.expose.state('pageSelection', pageSelection);
   for (const name of ['sortChange', 'pageChange', 'selectionChange'] as const)
     def.expose.event(name, { payload: 'json' });
   const publish = (run: RunHandle<DataTableRootProps>) => {
@@ -150,11 +168,18 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
       sortKey,
       sortDirection,
       filter: p.filter,
+      columnFilters: p.columnFilters,
       page,
       pageSize: p.pageSize,
     });
     page = view.page;
     rowCount.set(view.filteredCount, 'data table filtered rows');
+    if (owner !== run || viewEpoch !== epoch) return;
+    const selectedCount = view.rows.filter((row) => selected.includes(row.id)).length;
+    pageSelection.set(
+      selectedCount === 0 ? 'none' : selectedCount === view.rows.length ? 'all' : 'some',
+      'data table current page selection'
+    );
     if (owner !== run || viewEpoch !== epoch) return;
     const c = run.context.read(DATA_TABLE_CONTEXT);
     run.context.update(DATA_TABLE_CONTEXT, {
@@ -166,9 +191,11 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
       readOnly: !!p.readOnly,
       page,
       pageCount: view.pageCount,
+      columnVisibility: { ...p.columnVisibility },
     });
   };
   def.expose.method('getRows', () => view.rows.map((row) => ({ ...row })));
+  def.expose.method('getSelectedKeys', () => [...selected]);
   def.expose.method(
     'getRecord',
     (id: string) => owner?.props.get().rows?.find((row) => row.id === id) ?? null
@@ -217,6 +244,24 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     publish(owner);
     if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('selectionChange', { selectedKeys: next });
+    return true;
+  });
+  def.expose.method('requestPageSelection', (select?: boolean) => {
+    if (!owner || owner.props.get().disabled || owner.props.get().readOnly || !view.rows.length)
+      return false;
+    const pageKeys = view.rows.map((row) => row.id);
+    const wanted = select ?? !pageKeys.every((key) => selected.includes(key));
+    const next = wanted
+      ? [...selected, ...pageKeys.filter((key) => !selected.includes(key))]
+      : selected.filter((key) => !pageKeys.includes(key));
+    if (next.length === selected.length && next.every((key, index) => key === selected[index]))
+      return false;
+    const current = owner,
+      epoch = viewEpoch;
+    if (!owner.props.isProvided('selectedKeys')) selected = next;
+    publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
+    owner.expose.emit('selectionChange', { selectedKeys: [...next] });
     return true;
   });
   const sync = (run: RunHandle<DataTableRootProps>, created = false) => {
@@ -269,14 +314,26 @@ function setupRow(def: DefHandle<DataTableRowProps, DataTableRowExposes>) {
   def.expose.state('rowKey', key);
   def.expose.state('selected', selected);
   const a = asAccessible();
+  a.action('activate');
   a.state('selected', selected);
   a.state('hidden', hidden);
   const focus = asFocusable<DataTableRowProps>();
   focus.configure({ disabled: false });
   def.expose.state('focused', focus.focused);
   def.expose.state('focusVisible', focus.focusVisible);
-  def.event.on('key.down', (_run, event) => {
-    if (focus.focused.get() && event.key === ' ')
+  def.event.on('key.down', (run, event) => {
+    const context = run.context.read(DATA_TABLE_CONTEXT);
+    if (
+      focus.focused.get() &&
+      key.get() &&
+      !hidden.get() &&
+      event.key === ' ' &&
+      !context.disabled &&
+      !context.readOnly &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey
+    )
       event.control.requestDefaultActionPrevention({
         reason: 'data-table.row-selection',
         source: 'base-data-table-row',
@@ -292,7 +349,6 @@ function setupRow(def: DefHandle<DataTableRowProps, DataTableRowExposes>) {
     key.set(id, 'data row slot identity');
     selected.set(!!id && c.selectedKeys.includes(id), 'data row selection');
     hidden.set(!p.header && !row, 'data row empty slot');
-    run.lifecycle.setPresent(!hidden.get());
     focus.setDisabled(!!p.header || c.disabled || hidden.get());
     run.context.update(DATA_TABLE_ROW_CONTEXT, { rowKey: id });
   };
@@ -315,21 +371,31 @@ export const asDataTableRow = defineAsHook<
 export const dataTableRow = definePrototype({ name: 'base-data-table-row', setup: setupRow });
 function setupCell(def: DefHandle<DataTableCellProps, DataTableCellExposes>) {
   tableCellBehavior();
-  def.props.define({ columnKey: { type: 'string' } });
-  def.props.setDefaults({ columnKey: '' });
-  def.context.subscribe(DATA_TABLE_CONTEXT);
+  def.props.define({ columnKey: { type: 'string' }, renderValue: { type: 'boolean' } });
+  def.props.setDefaults({ columnKey: '', renderValue: true });
   const value = def.state.string('displayValue', '');
+  const hidden = def.state.bool('hidden', false);
+  asAccessible().state('hidden', hidden);
+  def.rule({
+    when: (w) => w.state(hidden).eq(true),
+    intent: (i) => i.feedback.style.use(tw('hidden')),
+  });
   def.expose.state('displayValue', value);
   let mounted = false;
   const sync = (run: RunHandle<DataTableCellProps>) => {
     const id = run.context.read(DATA_TABLE_ROW_CONTEXT).rowKey;
     const row = callOwner(run, DATA_TABLE_FAMILY, 'getRecord', id) as DataRecord | null;
-    const next = String(row?.[run.props.get().columnKey ?? ''] ?? '');
+    const props = run.props.get();
+    const next = String(row?.[props.columnKey ?? ''] ?? '');
+    const visible =
+      run.context.read(DATA_TABLE_CONTEXT).columnVisibility[props.columnKey ?? ''] !== false;
+    hidden.set(!visible, 'data table column visibility');
     if (next !== value.get()) {
       value.set(next, 'data table cell value');
       if (mounted) run.update();
     }
   };
+  def.context.subscribe(DATA_TABLE_CONTEXT, sync);
   def.context.subscribe(DATA_TABLE_ROW_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   def.lifecycle.onMounted((run) => {
@@ -337,11 +403,15 @@ function setupCell(def: DefHandle<DataTableCellProps, DataTableCellExposes>) {
     sync(run);
     run.update();
   });
-  def.props.watchAll(sync);
+  def.props.watchAll((run) => {
+    sync(run);
+    if (mounted) run.update();
+  });
   def.lifecycle.onUnmounted(() => {
     mounted = false;
   });
-  return () => [value.get()];
+  return (render: import('@proto.ui/core').RendererHandle<any>) =>
+    render.read.props.get().renderValue ? [value.get()] : render.slot();
 }
 export const asDataTableCell = defineAsHook<
   DataTableCellProps,
@@ -357,18 +427,44 @@ function setupHeader(def: DefHandle<DataTableHeaderProps, DataTableHeaderExposes
   focus.configure({ disabled: false });
   asTrigger();
   const sort = def.state.string('sort', 'none');
+  const hidden = def.state.bool('hidden', false);
+  def.rule({
+    when: (w) => w.state(hidden).eq(true),
+    intent: (i) => i.feedback.style.use(tw('hidden')),
+  });
   def.expose.state('sort', sort);
-  asAccessible().state('sort', sort);
+  const accessible = asAccessible();
+  accessible.state('sort', sort);
+  accessible.state('hidden', hidden);
+  accessible.action('activate');
   const sync = (run: RunHandle<DataTableHeaderProps>) => {
     const c = run.context.read(DATA_TABLE_CONTEXT);
     sort.set(c.sortKey === run.props.get().headerKey ? c.sortDirection : 'none', 'column sort');
-    focus.setDisabled(c.disabled || !run.props.get().sortable);
+    const visible = c.columnVisibility[run.props.get().headerKey ?? ''] !== false;
+    hidden.set(!visible, 'data table column visibility');
+    focus.setDisabled(c.disabled || !run.props.get().sortable || !visible);
   };
   def.context.subscribe(DATA_TABLE_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   def.props.watchAll(sync);
+  def.event.on('key.down', (run, event) => {
+    if (
+      focus.focused.get() &&
+      run.props.get().sortable &&
+      !hidden.get() &&
+      !run.context.read(DATA_TABLE_CONTEXT).disabled &&
+      event.key === ' ' &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey
+    )
+      event.control.requestDefaultActionPrevention({
+        reason: 'data-table.header-sort',
+        source: 'base-data-table-header',
+      });
+  });
   def.event.on('press.commit', (run) => {
-    if (run.props.get().sortable)
+    if (run.props.get().sortable && !hidden.get())
       callOwner(run, DATA_TABLE_FAMILY, 'requestSort', run.props.get().headerKey);
   });
 }

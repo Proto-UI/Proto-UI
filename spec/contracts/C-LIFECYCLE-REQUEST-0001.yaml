@@ -1,0 +1,54 @@
+id: C-LIFECYCLE-REQUEST-0001
+type: contract
+title: Request execution owns a logical instance without host view epochs
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Sprint 5 selects a request-owned, zero-view-epoch realization for independent Runtime and private generated-consumer validation. Shared-definition review and complete target-specific SSR conformance remain required; this entity does not admit a canonical SSR target.
+  zh-CN: Sprint 5 选择 request-owned、零 view epoch 的实现方向，供 Runtime 与私有生成消费者独立验证。共享定义评审与各目标完整 SSR 一致性仍待完成；本实体不准入 canonical SSR target。
+summary: Setup and created belong to a fresh request owner; serialization is not a physical mount, and every response, failure or abort retires acquired resources.
+statement:
+  en: >-
+    A request-only execution creates a real logical Proto owner with zero host view epochs. Its setup runs once, created runs after setup and before request projection, and terminal disposal belongs to the request executor. A serialization pass may observe an alive owner without claiming mount, physical commit, mounted, updated or unmounted callbacks. The request's bounded projection policy is explicit; it cannot be inferred from the interactive Adapter lifecycle or used to turn detached ViewIntent into a physical view.
+
+
+  zh-CN: >-
+    request-only 执行创建一个真实逻辑 Proto owner，但 host view epoch 为零。setup 只执行一次，created 在 setup 后、request projection 前运行，terminal dispose 由请求执行器负责。序列化可以观察 alive owner，却不能宣称 mount、physical commit 或 mounted、updated、unmounted callback。请求必须明确其有界投影策略，不能由交互 Adapter 生命周期推导，也不能把 detached ViewIntent 当作实体 view。
+
+
+criteria:
+  - id: C-LIFECYCLE-REQUEST-0001-A
+    text: Each request allocates fresh instance, State and Context ownership. Setup and created run once per actual owner; repeated serialization of an already prepared owner does not repeat them. An initially detached ViewIntent suppresses projection without creating a mount epoch.
+  - id: C-LIFECYCLE-REQUEST-0001-B
+    text: Request projection follows created and performs no host mount, commit, native event binding or mount-scoped lifecycle callback. Physical view operations, focus, measurement, native input and view effects require explicit separately admitted capabilities; an unavailable operation is diagnosed rather than emulated by a hidden browser.
+  - id: C-LIFECYCLE-REQUEST-0001-C
+    text: The executor owns normal completion, synchronous setup/created/render failure, asynchronous serialization failure and request abort. It retires every acquired owner once before settling the response. A request already aborted does not execute setup. Synchronous authored work is not preempted; abort is observed at the next request boundary and prevents the next render, publication or response.
+  - id: C-LIFECYCLE-REQUEST-0001-D
+    text: Terminal retirement invalidates owner handles, pending Delay work, callback generations and asynchronous output. Abort during an outstanding serializer settles without waiting for uncooperative work; its later fulfillment or rejection cannot publish a response or revive the owner. Detached or terminal owners cannot receive a fabricated physical commit.
+  - id: C-LIFECYCLE-REQUEST-0001-E
+    text: An initiating failure or abort reason, including undefined, null, false, zero or an empty string, is preserved by identity after reachable cleanup. Secondary diagnostic or cleanup failures cannot replace it. Without an initiating failure, cleanup failure rejects completion; one failure retains its identity and multiple failures may be aggregated. Failed-created cleanup retains C-LIFECYCLE-0002-J and ordinary beforeDispose retains C-LIFECYCLE-0002-K.
+  - id: C-LIFECYCLE-REQUEST-0001-F
+    text: Concurrent requests may share immutable source, compiler artifacts and explicitly immutable definitions, but never live State, Context scope identity, callbacks, listeners, leases or mutable request data. A request's abort or cleanup must not terminate or change another request.
+  - id: C-LIFECYCLE-REQUEST-0001-G
+    text: Each implementation declares the supported projection, serialization and host capability closure, with source-bound Runtime versus generated-consumer evidence. A private execution path does not promote a target profile; canonical SSR remains explicitly unsupported until its independent target admission and complete consumer evidence are accepted.
+dependsOn:
+  contracts:
+    - C-LIFECYCLE-0001
+    - C-LIFECYCLE-0002
+    - C-LIFECYCLE-0008
+references:
+  contracts:
+    - C-LIFECYCLE-OWNER-INITIALIZATION-0001
+sources:
+  - path: internal/records/2026-11-22-sprint5-request-owner.md
+  - path: packages/runtime/src/instance/request.ts
+openQuestions:
+  - id: C-LIFECYCLE-REQUEST-0001-Q-ADMISSION
+    question: Complete independent shared-definition review and target-specific SSR consumer, capability and lifecycle acceptance before stable admission.
+    blocks:
+      - activation:C-LIFECYCLE-REQUEST-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Selected request-owned zero-view-epoch lifecycle, error precedence, terminal retirement and isolation for private Sprint 5 conformance without admitting public SSR.
+tags: [lifecycle, request, ssr, disposal, isolation]

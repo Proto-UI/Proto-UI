@@ -352,7 +352,9 @@ async function createPage(family: Family, errors: string[], allocated: (page: Pa
         : value.content.phase === 'closed' &&
           value.mask.phase === 'closed' &&
           value.content.detached &&
-          value.mask.detached;
+          value.mask.detached &&
+          !value.content.portaled &&
+          !value.mask.portaled;
     const subject = {
       sample,
       async ready() {
@@ -662,20 +664,29 @@ describe.each(['dialog', 'alert-dialog'] as const)(
           expect(Math.abs(value.content.top - value.referenceLeaveTop)).toBeLessThan(1);
         for (const part of ['content', 'mask'] as const) {
           const barrier = leaving.samples.filter(
-            (value) => value[part].phase === 'closed' && !value[part].detached
+            (value) => value[part].phase === 'closed' && value[part].portaled
           );
           expect(barrier.length, `${part}: observe the retained Portal barrier`).toBeGreaterThan(0);
           for (const value of barrier) {
             expect(value[part].portaled).toBe(true);
+            expect(value[part].connected).toBe(true);
+            expect(value[part].viewEpoch).toBe(entered[part].viewEpoch);
+            expect(value[part].unmounted).toBe(entered[part].unmounted);
+            expect(value[part].owner).toBe(entered[part].owner);
+            expect(value[part].detached).toBe(true);
             expect(value[part].present).toBe(false);
             expect(value[part].concealed).toBe(true);
             expect(value[part].inert).toBe(true);
           }
-          for (const value of leaving.samples.filter((value) => value[part].phase === 'closed'))
+          for (const value of leaving.samples.filter((value) => value[part].phase === 'closed')) {
+            expect(value[part].detached).toBe(true);
             expect(value[part].concealed, `${part}: closed must not recover visible paint`).toBe(
               true
             );
+          }
           expect(leaving.samples.at(-1)![part].detached).toBe(true);
+          expect(leaving.samples.at(-1)![part].portaled).toBe(false);
+          expect(leaving.samples.at(-1)![part].unmounted).toBe(entered[part].unmounted + 1);
         }
         await captureVisualJourney(page, family, 'enter-close', evidence, images);
       });
@@ -697,8 +708,12 @@ describe.each(['dialog', 'alert-dialog'] as const)(
           )) as Reversal;
           evidence.reversal = reversal;
           expect(reversal.closing.reason).toBe('condition');
-          expect(reversal.before.content.detached).toBe(false);
+          expect(reversal.before.content.detached).toBe(kind === 'barrier');
           expect(reversal.before.content.portaled).toBe(true);
+          expect(reversal.before.content.connected).toBe(true);
+          expect(reversal.before.content.viewEpoch).toBe(reversal.entered.content.viewEpoch);
+          expect(reversal.before.content.unmounted).toBe(reversal.entered.content.unmounted);
+          expect(reversal.before.content.owner).toBe(reversal.entered.content.owner);
           expect(reversal.after.content.phase).toBe('entering');
           expect(reversal.after.content.opacity).toBeCloseTo(
             kind === 'barrier' ? 0 : reversal.before.content.opacity,

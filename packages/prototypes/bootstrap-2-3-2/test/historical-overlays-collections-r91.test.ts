@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AdapterPrototype } from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { afterTwoHostFrames } from '../../test-utils/host-rendering';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_GET_PROTO_CAP,
@@ -145,6 +146,10 @@ async function completeTransitions(...elements: Host[]) {
     controls.complete();
   }
   await flush();
+  if (elements.some((element) => stateValue(element, 'transitionState') === 'closed')) {
+    await afterTwoHostFrames();
+    await flush();
+  }
 }
 
 afterEach(async () => {
@@ -513,15 +518,23 @@ describe('Bootstrap historical collection consumers', () => {
     expect(content.querySelectorAll(`historical-r91-${calendar.calendarGrid.name}`)).toHaveLength(
       1
     );
+    const openRequestCount = openRequests.length;
     await click(day);
     expect(valueRequests).toEqual([{ value: '2026-10-12' }]);
-    expect(openRequests.at(-1)).toEqual(
-      expect.objectContaining({ open: false, reason: 'date-selection' })
-    );
+    // C-CALENDAR-SELECTION-0001-PICKER: a controlled proposal cannot close the
+    // picker until its owner accepts the proposed selection.
+    expect(openRequests).toHaveLength(openRequestCount);
     expect(stateValue(root, 'value')).toBe('2026-10-01');
     expect(stateValue(root, 'open')).toBe(true);
     expect(value.textContent).toBe('2026-10-01');
     const acceptedProps = { ...ownerProps, value: '2026-10-12', open: false };
+    setElementProps(root, { ...acceptedProps, open: true });
+    await flush();
+    expect(openRequests).toHaveLength(openRequestCount + 1);
+    expect(openRequests.at(-1)).toEqual(
+      expect.objectContaining({ open: false, reason: 'date-selection' })
+    );
+    expect(stateValue(root, 'open')).toBe(true);
     setElementProps(root, acceptedProps);
     await flush();
     await completeTransitions(content);
@@ -595,11 +608,21 @@ describe('Bootstrap Table-derived DataTable consumers', () => {
     await click(f.rows[0]!);
     expect(stateValue(f.rows[0]!, 'selected')).toBe(true);
     expect(selections).toEqual([{ selectedKeys: ['b'] }]);
+    const retainedChildren = [...f.rows[1]!.childNodes];
     await click(f.next);
     expect(f.cells[0]!.textContent).toBe('Zeta');
-    expect(f.rows[1]!.hasAttribute('data-pui-view-detached')).toBe(true);
+    // C-DATA-TABLE-RECIPES-0001-VISIBILITY keeps the empty body's logical
+    // children and hides its paint/accessibility participation without L1 detach.
+    expect(f.rows[1]!.isConnected).toBe(true);
+    expect([...f.rows[1]!.childNodes]).toEqual(retainedChildren);
+    expect(f.rows[1]!.getAttribute('aria-hidden')).toBe('true');
+    expect(f.rows[1]!.tabIndex).toBe(-1);
+    expect((f.rows[1]!.getAttribute('data-pui-style') ?? '').split(/\s+/)).toContain('hidden');
     await click(f.previous);
     expect(f.cells[0]!.textContent).toBe('Alpha');
+    expect([...f.rows[1]!.childNodes]).toEqual(retainedChildren);
+    expect(f.rows[1]!.getAttribute('aria-hidden')).toBe('false');
+    expect((f.rows[1]!.getAttribute('data-pui-style') ?? '').split(/\s+/)).not.toContain('hidden');
     setElementProps(f.root, { rows: dataRows, pageSize: 2, readOnly: true });
     await flush();
     await click(f.rows[0]!);

@@ -1,20 +1,12 @@
-import {
-  cpSync,
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { cpSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 import { getAllPackages, ROOT_DIR, selectPackages } from './lib.mjs';
 import { readVersion } from './version-utils.mjs';
 import { runNoStylesConsumer } from './consumer-smoke-no-styles.mjs';
+import { parseConsumerArtifactArgs, reserveConsumerArtifacts } from './consumer-artifacts.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_DIR = join(__dirname, 'consumer-smoke', 'react-vite');
@@ -25,8 +17,15 @@ const RELEASE_ROOTS = [
   '@proto.ui/prototypes-base',
 ];
 
-const args = parseArgs(process.argv.slice(2));
-const workDir = args.workDir ?? mkdtempSync(join(tmpdir(), 'proto-ui-react-consumer-'));
+const args = parseConsumerArtifactArgs(process.argv.slice(2), ROOT_DIR);
+if (args.help) {
+  console.log('Usage: node scripts/release/consumer-smoke-react.mjs [--keep] [--work-dir <path>]');
+  process.exit(0);
+}
+const workDir = reserveConsumerArtifacts(args, {
+  rootDir: ROOT_DIR,
+  prefix: 'proto-ui-react-consumer-',
+});
 const releaseDir = join(workDir, 'release');
 const consumerDir = join(workDir, 'consumer');
 let succeeded = false;
@@ -229,31 +228,6 @@ function run(command, commandArgs, options = {}) {
   if (result.status !== 0) {
     throw new Error(`${command} ${commandArgs.join(' ')} exited with ${result.status}`);
   }
-}
-
-function parseArgs(argv) {
-  const parsed = { keep: false, workDir: null };
-  for (let index = 0; index < argv.length; index += 1) {
-    const arg = argv[index];
-    if (arg === '--') continue;
-    else if (arg === '--keep') parsed.keep = true;
-    else if (arg === '--work-dir') {
-      const value = argv[++index];
-      if (!value) throw new Error('--work-dir expects a path');
-      parsed.workDir = isAbsolute(value) ? value : resolve(ROOT_DIR, value);
-    } else if (arg === '--help' || arg === '-h') {
-      console.log(
-        'Usage: node scripts/release/consumer-smoke-react.mjs [--keep] [--work-dir <path>]'
-      );
-      process.exit(0);
-    } else {
-      throw new Error(`Unknown argument: ${arg}`);
-    }
-  }
-  if (parsed.workDir) {
-    rmSync(parsed.workDir, { recursive: true, force: true });
-  }
-  return parsed;
 }
 
 function toFileSpec(path) {

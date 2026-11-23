@@ -640,7 +640,16 @@ describe('WC portal conceal rendering barrier', () => {
     setElementProps(root, { open: false });
     (content.getExposes().controls as TransitionControls).complete();
     await flush();
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    const transitionState = content.getExposes().transitionState;
+    if (
+      typeof transitionState !== 'object' ||
+      transitionState === null ||
+      !('get' in transitionState) ||
+      typeof transitionState.get !== 'function'
+    )
+      throw new TypeError('Dialog Content must expose a readable transitionState.');
+    expect(transitionState.get()).toBe('closed');
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(getComputedStyle(content).visibility).toBe('hidden');
     expect(getComputedStyle(content).opacity).toBe('0');
     expect(content.hasAttribute('inert')).toBe(true);

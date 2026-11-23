@@ -1,0 +1,140 @@
+{
+  "kind": "normal-main-merge-with-original-controls",
+  "candidateParent": "1b76e8fc",
+  "integrationAncestor": "502693304fc8d7509402fdfb586b283681915231",
+  "mainParent": "7f38b3372b5d13094000faf87930545ef2334ea4",
+  "governedGeneralRepair": "5cd005102d136ef3776f1bb02218c8e5e5d44e82",
+  "conflictFiles": 9,
+  "resolvedBlocks": 24,
+  "sourceGate": {
+    "files": 28,
+    "total": 562,
+    "passed": 559,
+    "failed": 0,
+    "existingSkipped": 3,
+    "skips": [
+      {
+        "file": "compiler/test/native-support-migration.test.ts",
+        "name": "exact old CLI corpus capture captures actual Trigger Text Boundary and Modal output directories with complete provenance",
+        "status": "skipped"
+      },
+      {
+        "file": "compiler/test/scalar-conversions.test.ts",
+        "name": "executes emitted Rust conversions, floor and UTF-16 length against ECMAScript",
+        "status": "skipped"
+      },
+      {
+        "file": "compiler/test/scalar-round.test.ts",
+        "name": "executes generated Rust with JS ties, signed zero and precision edges",
+        "status": "skipped"
+      }
+    ],
+    "seconds": 101.08504104614258
+  },
+  "nativeConsumers": "pending; unmodified actual emissions transferred for Linux Cargo, no native/platform pass claimed by this receipt",
+  "rustDataScalarExecution": "two existing Rust execution cases skipped locally; not covered by the 559 source/consumer assertions",
+  "artifacts": [
+    {
+      "path": "resolution-ledger.json.gz",
+      "originalBytes": 11287,
+      "originalSha256": "89d5cebae4a1483f040029be4a862e7b1a8f03f35f380dcd30727918347fc6d7",
+      "compressedSha256": "ab3fcc45a9d6f9bfed341c24825b8cb15b348a42782db14752ff472410b4375c"
+    },
+    {
+      "path": "merged-first-command.json.gz",
+      "originalBytes": 2228,
+      "originalSha256": "91c391a0aa9b8e874a8fc4080afd25510ec2ff82ed059c77a470ea8cb16828ea",
+      "compressedSha256": "be6b2f5849cfd312793bc9cf2558133f66ff11318fa71efd9047a2d503169327"
+    },
+    {
+      "path": "merged-first-exit.json.gz",
+      "originalBytes": 59,
+      "originalSha256": "eaf7e41681c2e0acae5ec5dba5dda8a87976246d35c7127bef4436dae7fdc845",
+      "compressedSha256": "bb1d2609af002cb393321a1efe2d0730260bde6e9324e977743f0e5a95affad2"
+    },
+    {
+      "path": "merged-first.json.gz",
+      "originalBytes": 237920,
+      "originalSha256": "cb8908d85eb9a4e9055807cf520df7c5beb3118f983a66731e74f51b1dfbc2d1",
+      "compressedSha256": "060088797c54b68cdce03fe206e97b1ac7d989287d7a0c977e1c28dc03da44d4"
+    },
+    {
+      "path": "merged-first.stdout.log.gz",
+      "originalBytes": 94,
+      "originalSha256": "7e1435d3c4368ec0a84f8d553d23912b4f00f98c88385ce65bfad9cfdf20017d",
+      "compressedSha256": "985cc602ae0ddc5073f8a6c2c3e6fc4dd4233eb3eace9b31b2ebcc4b7075729a"
+    },
+    {
+      "path": "merged-first.stderr.log.gz",
+      "originalBytes": 746401,
+      "originalSha256": "7ad77b7dbd5af43d3047a4b463a09aac6d629092eb7fbb23a49a1d86a4a40546",
+      "compressedSha256": "d070343f821c810860d391cbddef9d1f375d14758deee14d2a70b75495141ba1"
+    },
+    {
+      "path": "merged-first-failures.json.gz",
+      "originalBytes": 31726,
+      "originalSha256": "29e122796ebb3009db9cb852a417715ad6de98f2354940fea5f1f233b59679b7",
+      "compressedSha256": "c919f379836e3422fd08ac5d532679f233e4c1e280bcb5ef47724d9afa476b47"
+    },
+    {
+      "path": "merged-final-command.json.gz",
+      "originalBytes": 2228,
+      "originalSha256": "411a71b508d346e0924e102ca11f1d2823c2ffdbca090aab1eb2e9edb9796b0f",
+      "compressedSha256": "716f7d5f0ce296dc8433160ea2b968a371ef2fa2e4a41688d74071ca91516de3"
+    },
+    {
+      "path": "merged-final-exit.json.gz",
+      "originalBytes": 59,
+      "originalSha256": "766090798a0e4f23e0cdb604154a2eb9a90953af8042a49a70900eb10eb4482e",
+      "compressedSha256": "8214c08f4dea8ae248624e1e09ca066c6fee74fd63236670a511642f09ddccf1"
+    },
+    {
+      "path": "merged-final.json.gz",
+      "originalBytes": 210242,
+      "originalSha256": "984fe30d3074e1392c9ca41b05c2c5125ce563f7a6d1dc9b8e6a8d853ba7a1e9",
+      "compressedSha256": "977f2063027e62c309b68d4d33284b52ac84c85c1971cef083f6dbe8d915d2b5"
+    },
+    {
+      "path": "merged-final.stdout.log.gz",
+      "originalBytes": 94,
+      "originalSha256": "7169441df761009ec2d404b2ee5f784614c187aded10cce54ce8c7beaa6c139f",
+      "compressedSha256": "a154c2a1576b36ebc9983f130f3c50aea24680d94d97fef5b0aba7e868f4c2f0"
+    },
+    {
+      "path": "merged-final.stderr.log.gz",
+      "originalBytes": 746401,
+      "originalSha256": "9e30710d5d857aad71bdd380cb1ef51f7358cb6f00bba19ac05163a6be7f396e",
+      "compressedSha256": "f4795b766cb0d0d74f8d481bfd1c65eab1528e478b6a1068515b962a25a89ead"
+    },
+    {
+      "path": "producer-numeric-action-exit.json.gz",
+      "originalBytes": 242,
+      "originalSha256": "5140ad4b288797cfe8e111aa02c19f0c14aa768631334643f60269339d78ddff",
+      "compressedSha256": "59055abab295dca9b733c183557c258a96e707f0c4784896820c4962f8732791"
+    },
+    {
+      "path": "producer-generated-exit.json.gz",
+      "originalBytes": 243,
+      "originalSha256": "e497bad397a45abe95676128eaf3e49d955aa1d0b73d2b78df20413d6a651dde",
+      "compressedSha256": "dc063dc2f65572b0fd78e3f22a91062391f2fd4697979eb8a2990a83e89fcd62"
+    },
+    {
+      "path": "producer-numeric-action.log.gz",
+      "originalBytes": 1206,
+      "originalSha256": "1c010d42edce4e8521fefdc13800ca5c3070d4f50487b048673d82720a7839bb",
+      "compressedSha256": "b4852e3ea1df096d37f8579af0b64cb00813f8f8d90ed17cee07b4a4d2037c85"
+    },
+    {
+      "path": "producer-generated.log.gz",
+      "originalBytes": 156,
+      "originalSha256": "e5870accf68482fce5b117a4b4ca13c0300365f093e8bbe0bcf6826aeeb4c7b7",
+      "compressedSha256": "e8ae1c4de8b858accea9778ba59d5627c5e6d534850a12f85018f31f7a98aa8c"
+    },
+    {
+      "path": "native-transfer-manifest.json.gz",
+      "originalBytes": 73799,
+      "originalSha256": "4d48f3f667cfdb01150ae02faf361375ea1108f42d5572831472fa450d401850",
+      "compressedSha256": "b19ef27e24e3e283ce20abbacffced0176d1a6a75440dfc08dc03a7c78a09c22"
+    }
+  ]
+}

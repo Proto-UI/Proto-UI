@@ -56,7 +56,9 @@ describe('Base Input documentation registration', () => {
       for (const child of node.children ?? []) visit(child);
     };
     visit((recipe as any).root);
-    expect(ids).toEqual(Array(4).fill('base-input-root'));
+    expect(ids.filter((id) => id === 'base-input-root')).toHaveLength(4);
+    expect(ids.filter((id) => id === 'base-button')).toHaveLength(4);
+    expect(ids.every((id) => id === 'base-input-root' || id === 'base-button')).toBe(true);
   });
   it('accepts normalized proposals once, preserves complete naming/value, and cleans up the owner', () => {
     const recipe = (
@@ -70,6 +72,7 @@ describe('Base Input documentation registration', () => {
     const status = document.createElement('div');
     host.append(controlled, sibling, status);
     const writes: Array<{ ref: string; props: Record<string, any> }> = [];
+    const ownerWrites = () => writes.filter((write) => write.ref === 'controlled');
     const cleanup = recipe.setup({
       host,
       refs: { controlled, status },
@@ -83,29 +86,35 @@ describe('Base Input documentation registration', () => {
         },
       },
     });
-    expect(writes[0]?.props).toMatchObject({
+    expect(ownerWrites()[0]?.props).toMatchObject({
       value: 'Owner-controlled value',
       ariaLabel: 'Controlled Base Input',
     });
-    const callback = writes[0]!.props.onValueChange;
+    const callback = ownerWrites()[0]!.props.onValueChange;
     callback({ value: 'Accepted callback' });
-    expect(writes[1]?.props).toMatchObject({
+    expect(ownerWrites()[1]?.props).toMatchObject({
       value: 'Accepted callback',
       ariaLabel: 'Controlled Base Input',
     });
+    // This unit mock has no adapter. Bare DOM events must not turn into an
+    // application bridge; the real four-runtime browser journey covers delivery.
     controlled.dispatchEvent(new Event('input', { bubbles: true }));
     controlled.dispatchEvent(
-      new CustomEvent('valueChange', { detail: { value: 'Accepted callback' }, bubbles: true })
+      new CustomEvent('valueChange', { detail: { value: 'DOM proposal' }, bubbles: true })
     );
     sibling.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'Wrong sibling' }, bubbles: true })
     );
-    expect(writes).toHaveLength(2);
+    expect(ownerWrites()).toHaveLength(2);
     controlled.dispatchEvent(
-      new CustomEvent('valueChange', { detail: { value: 'Accepted DOM proposal' }, bubbles: true })
+      new CustomEvent('valueChange', { detail: { value: 'Raw DOM proposal' }, bubbles: true })
     );
-    expect(writes[2]?.props).toMatchObject({
-      value: 'Accepted DOM proposal',
+    // This owner accepts the public normalized callback once. Raw host events
+    // are not a second proposal channel, including distinct synthetic values.
+    expect(ownerWrites()).toHaveLength(2);
+    callback({ value: 'Accepted next callback' });
+    expect(ownerWrites()[2]?.props).toMatchObject({
+      value: 'Accepted next callback',
       ariaLabel: 'Controlled Base Input',
     });
     cleanup();
@@ -113,6 +122,63 @@ describe('Base Input documentation registration', () => {
     controlled.dispatchEvent(
       new CustomEvent('valueChange', { detail: { value: 'Late DOM' }, bubbles: true })
     );
-    expect(writes).toHaveLength(3);
+    expect(ownerWrites()).toHaveLength(3);
+  });
+  it('forwards reset arguments to the public method and reports exposed results until cleanup', () => {
+    const recipe = (
+      recipes['./demo-base-input.demo.ts'] as { default: { setup: (ctx: any) => () => void } }
+    ).default;
+    const resetStatus = document.createElement('div');
+    const writes: Array<{ ref: string; props: Record<string, any> }> = [];
+    const callbacks = new Map<string, Record<string, any>>();
+    const calls: unknown[][] = [];
+    const cleanup = recipe.setup({
+      refs: { resetStatus },
+      api: {
+        setProps(ref: string, props: Record<string, any>) {
+          writes.push({ ref, props });
+          callbacks.set(ref, { ...callbacks.get(ref), ...props });
+        },
+        call(...args: unknown[]) {
+          calls.push(args);
+          return args[0] !== 'controlled';
+        },
+        getExposes(ref: string) {
+          return {
+            value: {
+              get: () =>
+                ref === 'controlled' ? 'Owner-controlled value' : 'Reported public value',
+            },
+          };
+        },
+      },
+    });
+    callbacks.get('setDefault')!.onClick();
+    expect(writes.at(-1)).toEqual({ ref: 'editable', props: { defaultValue: 'Latest default' } });
+    expect(calls).toHaveLength(0);
+    expect(resetStatus.textContent).toBe(
+      'Default changed to "Latest default"; current value: "Reported public value"'
+    );
+    callbacks.get('resetDefault')!.onClick();
+    expect(calls.at(-1)).toEqual(['editable', 'resetValue']);
+    expect(resetStatus.textContent).toBe(
+      'Reset accepted: true; value: "Reported public value"; editing events: 0'
+    );
+    callbacks.get('resetSample')!.onClick();
+    expect(calls.at(-1)).toEqual(['editable', 'resetValue', 'New\r\nvalue']);
+    callbacks.get('resetControlled')!.onClick();
+    expect(calls.at(-1)).toEqual(['controlled', 'resetValue', 'Replacement attempt']);
+    expect(resetStatus.textContent).toBe(
+      'Reset accepted: false; value: "Owner-controlled value"; editing events: 0'
+    );
+    cleanup();
+    const lastStatus = resetStatus.textContent;
+    const lastWrites = writes.length;
+    for (const ref of ['setDefault', 'resetDefault', 'resetSample', 'resetControlled']) {
+      callbacks.get(ref)!.onClick();
+    }
+    expect(calls).toHaveLength(3);
+    expect(writes).toHaveLength(lastWrites);
+    expect(resetStatus.textContent).toBe(lastStatus);
   });
 });

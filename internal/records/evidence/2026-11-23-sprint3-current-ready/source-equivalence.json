@@ -1,0 +1,42 @@
+{
+  "workingTree": "cd356b64b7e68f33a5e65fa41625079b10d2bc40",
+  "compilerPackageExactlyEqualTo": "7a64255233be57a65f725604dc4f9c14017b5dfd",
+  "files": {
+    "apps/www/astro.config.mjs": {
+      "sha256": "ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae",
+      "gitBlob": "5dde16daf48538bb88cac644f6a6ca12426d4255",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    },
+    "packages/compiler/src/gpui-native-scroll.ts": {
+      "sha256": "89bfcf8ebeef81381f5d8a499dbe6bdea66f12c7425246cf2f99bc8a63458247",
+      "gitBlob": "4c71bb25ec78b8b1274a9816af3b840f8db70ad6",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    },
+    "packages/compiler/src/gpui-source.ts": {
+      "sha256": "aa35758e4ce2c3a01594835c354bb0edcac841e5bf5529343ecb77da6776ac0c",
+      "gitBlob": "b547b24bd290c787595e8dec5391609dabae3be5",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    },
+    "packages/compiler/src/native-support/dom-modules.template.ts": {
+      "sha256": "f2a112375d7d3765bce795958e41467d95975f425dd03c971eab48a1416152b0",
+      "gitBlob": "839579e4f0c1d8b077083b5cf66bc65725382ee1",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    },
+    "packages/compiler/test/string-coercion.test.ts": {
+      "sha256": "33f81db3f9dec41fc7d5698f542f4663c8871f48e19d891703d96ac60f3106b6",
+      "gitBlob": "df64a477c8d3e3e7caf6cc26f63afb4f1eb7e333",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    },
+    "packages/compiler/test/text-reset-native.test.ts": {
+      "sha256": "cdf526573fb3c6911c8fa47204bac2589adc39c368ea8ee87c457f8ad0bcfa10",
+      "gitBlob": "f5735079ada4117808cb0c691283b4dead82989d",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    },
+    "packages/compiler/src/parser.ts": {
+      "sha256": "eb0e91ad96f3ed5037240c99caa15241a0d689b86dd24ae03e34f517ae6af40c",
+      "gitBlob": "c369fefcd710a1cdc562f468fc4c8c8b4feeb5a0",
+      "reference": "7a64255233be57a65f725604dc4f9c14017b5dfd"
+    }
+  },
+  "fixtureReview": "Independent governance_ready source review: exact copied dependency closure and package markers; no verifier/assertion changes; no blocking finding."
+}

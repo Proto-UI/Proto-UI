@@ -48,9 +48,12 @@ describe('@proto.ui/compositions-chatui: private package boundary', () => {
     ).toBe(false);
     for (const collection of ['prototypes', 'tests']) {
       expect(
-        readdirSync(resolve(process.cwd(), 'spec', collection)).filter((file) =>
-          /^[PT]-(?:BASE|CHATUI)-(?:MESSAGE|CODE-BLOCK)(?:[-.])/.test(file)
-        )
+        readdirSync(resolve(process.cwd(), 'spec', collection)).filter((file) => {
+          // This exact draft names the independent Base Message Scroller
+          // protocol, not this private Message composition or any alias.
+          if (collection === 'prototypes' && file === 'P-BASE-MESSAGE-SCROLLER.yaml') return false;
+          return /^[PT]-(?:BASE|CHATUI)-(?:MESSAGE|CODE-BLOCK)(?:[-.])/.test(file);
+        })
       ).toEqual([]);
     }
   });

@@ -1,0 +1,22 @@
+{
+  "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "file": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+  "kind": "diagnostic-only-not-clean-acceptance",
+  "originalSha256": "1da3edc6f320435bddb7318b0f4dc3160c160688f648025820962c56dc8c3278",
+  "instrumentedSha256": "7ae7d75091f88d4c6d33bafdb4661ef382344656334eed8aa7ba18a39f0b1765",
+  "expectedCases": 61,
+  "originalCases": 42,
+  "addedTargetRepetitions": 19,
+  "preserved": [
+    "all four original point coordinates",
+    "exact closest anchor/summary owner equality",
+    "all original assertions",
+    "all original 42 cases"
+  ],
+  "changes": [
+    "passive same-evaluation point details",
+    "post-observation diagnostic files and failure screenshot",
+    "unique capture suffixes preserve every repeated observation",
+    "nineteen additional fresh-context repetitions of the original failed mobile case"
+  ]
+}

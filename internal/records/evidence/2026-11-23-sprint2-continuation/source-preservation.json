@@ -1,0 +1,40 @@
+{
+  "repository": "Proto-UI/Proto-UI",
+  "remoteParent": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "originalHead": "0b754d1bc36be0d0d47d198f1c7e54ad7482cf1c",
+  "originalTree": "128316b69ee4ac24c65062bd3dc2daecdf410832",
+  "method": "Append a connector-authored continuation after the live remote parent. Preserve every original unpushed signed Git object in the adjacent verified bundle. The new service commit has its own identity and does not recreate the original SHAs. Product and existing evidence files match originalTree; only this additive provenance directory differs.",
+  "bundleSha256": "a789a4341087616fffb6e7b44b62d1b88565af3e3964262923e2aac0ec81332f",
+  "bundleBytes": 480746,
+  "commits": [
+    {
+      "sha": "a7058e0ecbe4d9e37a6b31dc38379cb908d957e8",
+      "tree": "07b66c6208a98722ee173d584e98350c2b082f27",
+      "author": "Codex <codex@openai.com>",
+      "message": "docs(sprint2): preserve mobile navigation failure and same-source diagnosis\n\nRetain the original 303/304 native result and the 7/20 repeated mobile\nhit-target failures, including exact reports, source patches, coordinates,\nreview records and one byte-identical representative screenshot.\n\nThe archive does not claim the original failure was photographed, identify\na specific scroll writer, or accept the pending repair and clean suite.\n\nSigned-off-by: Codex <codex@openai.com>\n\n",
+      "rawCommitSha256": "ca204ffd1dbcbb06980f3d264bedff57c92c8a8de38a7930b95432103a743178"
+    },
+    {
+      "sha": "333d9b58a8d8980732e36af6828d93c0b36b3608",
+      "tree": "dc30b33ca39f5ca6f0f56abe2156e0890912b33d",
+      "author": "Codex <codex@openai.com>",
+      "message": "test(site): observe mobile navigation after trusted reader takeover\n\nRetain all four native-owner hit probes and family geometry assertions. Wait for the actual enhanced group and leaf, use the visible scroll viewport for trusted wheel input, and freeze the scroll baseline before dispatch so passive delivery does not redefine it. Preserve failure observations. The same-source 61-case control passed; clean-candidate browser acceptance remains separate.\n\nSigned-off-by: Codex <codex@openai.com>\n\n",
+      "rawCommitSha256": "50d0ab067cdc63baea01053763026e6136cf0093e8fec8c75304b92e941b8352"
+    },
+    {
+      "sha": "0b754d1bc36be0d0d47d198f1c7e54ad7482cf1c",
+      "tree": "128316b69ee4ac24c65062bd3dc2daecdf410832",
+      "author": "Codex <codex@openai.com>",
+      "message": "docs(sprint2): retain successful mobile control and prior failures\n\nRecover the exact R1/R2 negative evidence and append R3 source-bound 61/61 result, immutable source bytes, strict wheel and native-hit observations, selected original captures, and complete capture inventory. Keep clean-head browser and full acceptance explicitly pending.\n\nSigned-off-by: Codex <codex@openai.com>\n\n",
+      "rawCommitSha256": "43c1b80eca3e0d5621ad8cd5fe76540ece87b90f184254a3aaf3039e20f12b93"
+    }
+  ],
+  "implementedBy": "OpenAI Codex",
+  "submittedUnder": "Current-user request to continue the seven Sprints; authenticated contributor cyjin-yl",
+  "validation": {
+    "sameProductSourceControl": "45043843835, 61/61, fixture hash e711131db264547dd7193f3ff8d6fa3fab82f6ca153b33a7d82fbe7d81250780",
+    "localSidebarModelTests": "61/61 on recovered candidate",
+    "cleanFinalBrowser": "not-run: local Chromium process singleton socket denied; remote device offline; workflow-dispatch transport unavailable",
+    "ready": false
+  }
+}

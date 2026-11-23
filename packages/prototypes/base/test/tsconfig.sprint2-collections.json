@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "../src/tree/**/*.ts",
+    "../src/data-table/**/*.ts",
+    "../src/virtual-list/**/*.ts",
+    "../../shadcn/src/tree/**/*.ts",
+    "../../brutalist/src/tree/**/*.ts",
+    "tree-hierarchy.test.ts",
+    "data-table-recipes.test.ts",
+    "virtual-list-owner.test.ts",
+    "../../../../apps/www/src/content/docs/zh-cn/data-table-recipes.shared.ts",
+    "../../../../types/runtime-retry-urls.d.ts",
+    "../../../../scripts/analysis/fixtures/collections-recipes-browser.ts",
+    "../../../../apps/www/src/components/PrototypePreviewer/collection-recipes.test.ts",
+    "../../../../apps/www/src/components/PrototypePreviewer/data-table-recipes.test.ts"
+  ],
+  "exclude": []
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "source": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+    "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/oldclose-before/packages/prototypes/base/src/calendar/calendar.proto.ts",
+    "bytes": 35842,
+    "sha256": "e24adfcf37a6ac5f7890351e41c898093fda16ed7278ce2e724d15f4a6f44790",
+    "matches2430aea": true
+  },
+  {
+    "source": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+    "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/oldclose-before/packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+    "bytes": 5774,
+    "sha256": "26e3e057639cc13bf67e99ce3ca6c8f61a02fb9113546e40441454eb3a047840",
+    "matches2430aea": true
+  },
+  {
+    "source": "packages/prototypes/base/src/popover/root.proto.ts",
+    "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/oldclose-before/packages/prototypes/base/src/popover/root.proto.ts",
+    "bytes": 4472,
+    "sha256": "c0cdf82266f048ce9321bfc9c260b5c5a2a39c0ef5167de3378454a74dbb3a47",
+    "matches2430aea": true
+  },
+  {
+    "source": "packages/prototypes/base/src/popover/shared.ts",
+    "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/oldclose-before/packages/prototypes/base/src/popover/shared.ts",
+    "bytes": 2592,
+    "sha256": "3d10b3a1583466f190f4f5ac64642b67172243648946cf4dcec97171aee9ca22",
+    "matches2430aea": true
+  },
+  {
+    "source": "spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+    "snapshot": "/workspace/scratch/44c416809288/evidence/datepicker-review-sources/oldclose-before/spec/contracts/C-CALENDAR-SELECTION-0001.yaml",
+    "bytes": 6240,
+    "sha256": "5129e2c9a54fbb98bd353f8e5d373c925c2d0069e106f775bcff6c8cd026ef09",
+    "matches2430aea": true
+  }
+]

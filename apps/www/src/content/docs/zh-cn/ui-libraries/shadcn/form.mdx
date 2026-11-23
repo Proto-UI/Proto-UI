@@ -24,9 +24,37 @@ FormSubmit 与 FormReset 提供明确类型的 disabled、hovered、pressed、fo
 
 当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。
 
+## 版本化校验与嵌套控件
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+此公开配方由消费者保留真实外部校验请求。提交会开始校验；“返回成功”或“返回错误”通过 `resolveValidation` 交回当前 `requestId`。可先编辑、复位或切换 readOnly，再返回旧结果，观察过期结果被拒绝。取消提交只退役 Form 的提交尝试；独立 Field 仍可接受当前校验结果，但不会完成已取消的提交。新的提交会取代上一次尝试。受控编辑通知在框架提交 owner 回应后读取 canonical 值，被拒绝的候选文本不会成为 Field 值。账号值由应用受控管理，嵌套 Fieldset 统一管理 Checkbox Group 与多行备注。禁用父组会从提交值中省略其字段，不改写控件所有者；Form 复位恢复非受控初值，并向受控所有者请求初值。示例不发起网络请求。
+
+## 显式选择控件字段
+
+<PrototypePreviewer
+  demoId="demo-shadcn-field-choices"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+`shadcn-field` 源码入口导出 `fieldCheckbox`、`fieldRadioGroup` 与 `fieldSwitch`。分别放入显式的 `FormField`，并组合相同家族的 Checkbox Indicator、Radio Items/Indicators 或 Switch Thumb。普通 Checkbox 与 Radio Group 不会因为存在 Form 祖先就自动注册字段。
+
+本示例由消费者控制 Checkbox 和 Radio 的值，Switch 使用非受控值。拒绝提案后，canonical 值与 dirty 保持不变；接受提案后，required 校验与提交读取新的 canonical 值。Checkbox 提交布尔 `checked`；当 checked 为 false 时，混合显示不能代替必填条件。Radio 提交 canonical 字符串；必填字段的空串视为缺值。
+
+只读由 Field 显式提供。Label 仍会聚焦对应控件，Radio 方向键仍能漫游焦点，但不产生新值提案。Fieldset 独立继承 disabled 策略，其参与字段会从 Form 值中移除。重置向受控 owner 请求实例创建时的值，并恢复非受控值；拒绝重置提案时 canonical 值与 dirty 保持不变。重置不会产生 change 校验。
+
+先暂存消费者回复，再更换控件实例，最后送达旧回复，可以观察消费者 revision 拒绝旧回复。“在下一次提案中更换”会在控件向外通知时更换真实实例，之后新 owner 仍可提交。这些示例使用四个 Web Adapter 共享的 draft 语义；原生输入与辅助技术验收另行记录。
+
 ## API
 
-Form 是工作区源码，没有公开的 `proto-ui add` 目标。
+源码 CLI 注册 `shadcn-form`。消费当前 0.3 draft 时应固定精确源码版本并使用对应工作区构建；本页不声称旧发布包已包含新配方。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -40,7 +68,4 @@ Form 是工作区源码，没有公开的 `proto-ui add` 目标。
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-FORM.yaml', 'P-BASE-FORM.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-FORM.yaml', 'P-BASE-FORM.yaml']} />

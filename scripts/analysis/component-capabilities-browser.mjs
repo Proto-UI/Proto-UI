@@ -15,6 +15,15 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { build } from 'esbuild';
 import {
+  assertNumberFieldImeTrace,
+  captureNumberFieldImeControl,
+  formatEvidenceError,
+  installNumberFieldImeTrace,
+  numberFieldImeText,
+  runNumberFieldImeOwners,
+  stopNumberFieldImeTrace,
+} from './number-field-ime-evidence.mjs';
+import {
   BRUTALIST_THEME,
   renderBrutalistThemeCss,
 } from '../../packages/prototypes/brutalist/src/theme.ts';
@@ -36,6 +45,8 @@ const families = select('PUI_BROWSER_FAMILIES', [
   'bootstrap-2-3-2',
   'liquid-glass',
 ]);
+const releaseFamilies = new Set(['base', 'shadcn', 'brutalist']);
+const familyScope = (family) => (releaseFamilies.has(family) ? '0.3' : 'experimental');
 const kinds = select('PUI_BROWSER_KINDS', [
   'resizable',
   'carousel',
@@ -46,17 +57,20 @@ const kinds = select('PUI_BROWSER_KINDS', [
 const output = path.resolve(process.env.PUI_EVIDENCE_DIR ?? '.tmp/component-capabilities-browser');
 await mkdir(output, { recursive: true });
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+const gitPaths = (...args) =>
+  execFileSync('git', ['ls-files', '-z', ...args], { encoding: 'utf8' })
+    .split('\0')
+    .filter(Boolean);
 const sourcePaths = [
   ...new Set([
-    ...git('ls-files', 'packages', 'apps/www/src/content/docs', 'scripts/analysis').split('\n'),
-    ...git(
-      'ls-files',
+    ...gitPaths('packages', 'apps/www/src/content/docs', 'scripts/analysis'),
+    ...gitPaths(
       '--others',
       '--exclude-standard',
       'packages',
       'apps/www/src/content/docs',
       'scripts/analysis'
-    ).split('\n'),
+    ),
   ]),
 ]
   .filter(Boolean)
@@ -138,7 +152,8 @@ const { chromium } = createRequire(new URL('../../apps/www/package.json', import
 const browser = await chromium.launch({
   headless: true,
   executablePath: process.env.PUI_CHROME_EXECUTABLE ?? '/usr/bin/chromium',
-  args: ['--no-sandbox'],
+  chromiumSandbox: true,
+  args: ['--disable-dev-shm-usage'],
 });
 report.environment.browser = browser.version();
 const page = await browser.newPage({
@@ -445,7 +460,17 @@ async function carousel(runtime, family, prefix) {
   };
 }
 
-async function numberFieldIme(runtime, family) {
+const imeControls = new Map();
+async function numberFieldImeControl(controlled) {
+  if (!imeControls.has(controlled)) {
+    const control = await captureNumberFieldImeControl(browser, controlled);
+    (report.numberFieldImeControls ??= []).push(control);
+    imeControls.set(controlled, control);
+  }
+  return imeControls.get(controlled);
+}
+
+async function numberFieldIme(runtime, family, prefix) {
   // CDP drives Chromium's native IME path; these are not dispatched DOM events
   // or a physical operating-system IME. insertText calls ImeCommitText:
   // https://chromedevtools.github.io/devtools-protocol/tot/Input/
@@ -453,52 +478,33 @@ async function numberFieldIme(runtime, family) {
   const evidence = {
     runtime,
     family,
+    releaseScope: familyScope(family),
     input: 'Chromium CDP imeSetComposition + insertText; physical IME not claimed',
     cases: [],
   };
   (report.numberFieldIme ??= []).push(evidence);
-  const client = await page.context().newCDPSession(page);
-  try {
-    for (const controlled of [false, true]) {
-      const result = { controlled, status: 'running', nativeEvents: [], componentEvents: [] };
-      evidence.cases.push(result);
-      await mount(runtime, family, 'number-field', controlled ? { value: 20.5 } : {});
-      const input = page.locator('#fixture input').first();
-      await input.click();
-      await input.press('Control+A');
-      await input.evaluate((element) => {
-        const events = [];
-        const record = (event) =>
-          events.push({
-            type: event.type,
-            isTrusted: event.isTrusted,
-            isComposing: typeof event.isComposing === 'boolean' ? event.isComposing : null,
-            data: typeof event.data === 'string' ? event.data : null,
-            inputType: typeof event.inputType === 'string' ? event.inputType : null,
-            value: element.value,
-          });
-        const types = [
-          'compositionstart',
-          'compositionupdate',
-          'beforeinput',
-          'input',
-          'compositionend',
-        ];
-        for (const type of types) element.addEventListener(type, record, true);
-        window.__puiNumberFieldIme = {
-          events,
-          dispose: () => {
-            for (const type of types) element.removeEventListener(type, record, true);
-          },
-        };
-      });
-      const text = controlled ? '3,5' : '1234,5';
+  await runNumberFieldImeOwners(
+    evidence,
+    async (controlled, result) => {
+      const failures = [];
+      let client;
+      const { candidates, text } = numberFieldImeText(controlled);
       const proposed = controlled ? 3.5 : 1234.5;
       const accepted = controlled ? 20.5 : proposed;
       const valueEvents = async (type) =>
         (await allEvents()).filter((event) => event.id === 'root' && event.type === type);
       try {
-        for (const candidate of [controlled ? '3' : '12', text]) {
+        result.stage = 'native-control';
+        const control = await numberFieldImeControl(controlled);
+        result.stage = 'mount';
+        await mount(runtime, family, 'number-field', controlled ? { value: 20.5 } : {});
+        const input = page.locator('#fixture input').first();
+        await input.click();
+        await input.press('Control+A');
+        await input.evaluate(installNumberFieldImeTrace);
+        client = await page.context().newCDPSession(page);
+        result.stage = 'composition';
+        for (const candidate of candidates) {
           await client.send('Input.imeSetComposition', {
             text: candidate,
             selectionStart: candidate.length,
@@ -531,6 +537,13 @@ async function numberFieldIme(runtime, family) {
           [],
           'composition end preserves edit boundary'
         );
+        // Capture before Enter: its unrelated insertLineBreak event is not
+        // part of the composition transaction. No event or trust bit is dropped.
+        result.compositionEvents = await page.evaluate(() => window.__puiNumberFieldIme.events);
+        result.pictures = [
+          await capture(`${prefix}-ime-${controlled ? 'controlled' : 'uncontrolled'}-candidate`),
+        ];
+        result.stage = 'owner-commit';
         await input.press('Enter');
         await page.evaluate(() => PuiCapabilities.settle());
         assert.equal(await read('root', 'getValue'), accepted);
@@ -544,6 +557,10 @@ async function numberFieldIme(runtime, family) {
           [accepted],
           'commit reports the accepted owner value, including refusal'
         );
+        result.pictures.push(
+          await capture(`${prefix}-ime-${controlled ? 'controlled' : 'uncontrolled'}-committed`)
+        );
+        result.stage = 'native-provenance';
         const native = await page.evaluate(() => window.__puiNumberFieldIme.events);
         assert.ok(native.length > 0, 'native composition events observed');
         // Chromium dispatches the compositionend that terminates a CDP
@@ -558,34 +575,42 @@ async function numberFieldIme(runtime, family) {
             .every((event) => event.type === 'compositionend'),
           'trusted native events except the insertText compositionend artifact'
         );
-        const start = native.findIndex((event) => event.type === 'compositionstart');
-        const end = native.findIndex((event) => event.type === 'compositionend');
-        assert.ok(start >= 0 && end > start, 'native composition lifecycle observed');
-        assert.ok(
-          native.slice(start + 1, end).some((event) => event.type === 'input' && event.isComposing),
-          'native composing input observed between composition boundaries'
+        assert.equal(control.status, 'passed', 'independent native IME control passed');
+        result.compositionTrace = assertNumberFieldImeTrace(
+          result.compositionEvents,
+          control.trace
         );
-        result.status = 'passed';
+        result.stage = 'complete';
       } catch (error) {
-        result.status = 'failed';
-        result.error = error.stack ?? String(error);
-        throw error;
+        failures.push(error);
       } finally {
-        result.nativeEvents = await page.evaluate(() => {
-          const recorder = window.__puiNumberFieldIme;
-          recorder?.dispose();
-          delete window.__puiNumberFieldIme;
-          return recorder?.events ?? [];
-        });
-        result.componentEvents = await allEvents();
+        for (const finalize of [
+          async () => {
+            result.nativeEvents = await page.evaluate(stopNumberFieldImeTrace);
+          },
+          async () => {
+            result.componentEvents = await allEvents();
+          },
+          async () => {
+            await client?.detach();
+          },
+        ]) {
+          try {
+            await finalize();
+          } catch (error) {
+            failures.push(error);
+          }
+        }
       }
-    }
-  } finally {
-    await client.detach();
-  }
+      if (failures.length === 1) throw failures[0];
+      if (failures.length)
+        throw new AggregateError(failures, 'Number Field IME case and cleanup failed');
+    },
+    () => writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n')
+  );
 }
 
-async function numberField(runtime, family, prefix) {
+async function numberFieldEditing(runtime, family, prefix) {
   await mount(runtime, family, 'number-field');
   const input = page.locator('#fixture input').first();
   assert.equal(await input.inputValue(), '20,5');
@@ -637,7 +662,6 @@ async function numberField(runtime, family, prefix) {
     0.001,
     'RTL label drag increases in the logical direction'
   );
-  await numberFieldIme(runtime, family);
   return {
     during,
     pictures,
@@ -648,8 +672,33 @@ async function numberField(runtime, family, prefix) {
       'controlled refusal',
       'live contact cancellation',
       'native RTL label drag',
-      'trusted native CDP composition preview and localized commit',
-      'native composition controlled refusal',
+    ],
+  };
+}
+
+async function numberField(runtime, family, prefix) {
+  const failures = [];
+  let editing;
+  try {
+    editing = await numberFieldEditing(runtime, family, prefix);
+  } catch (error) {
+    failures.push(error);
+    await page.mouse.up().catch((cleanupError) => failures.push(cleanupError));
+  }
+  // An earlier scrub/locale failure must not erase either owner's IME outcome.
+  try {
+    await numberFieldIme(runtime, family, prefix);
+  } catch (error) {
+    failures.push(error);
+  }
+  if (failures.length === 1) throw failures[0];
+  if (failures.length) throw new AggregateError(failures, 'Number Field editing and IME failed');
+  return {
+    ...editing,
+    checks: [
+      ...editing.checks,
+      'native CDP composition matches independent HTML input including every trust bit',
+      'native composition localized commit and controlled refusal',
     ],
   };
 }
@@ -809,6 +858,7 @@ async function datePicker(runtime, family, prefix) {
     () => document.querySelector('.cap-value')?.textContent.trim() === '2026-10-10 …'
   );
   const pictures = [await capture(`${prefix}-pending`)];
+  const completeEventStart = (await allEvents()).length;
   await page.locator('.cap-date-2026-10-14').click();
   await until('root', 'open', false);
   assert.deepEqual(await read('root', 'getRange'), { from: '2026-10-10', to: '2026-10-14' });
@@ -828,6 +878,14 @@ async function datePicker(runtime, family, prefix) {
   };
   assert.equal(closedPaint.contentVisible, false, 'closed popup is no longer painted');
   assert.equal(closedPaint.dayVisible, false, 'closed popup descendants are no longer painted');
+  assert.deepEqual(
+    (await allEvents())
+      .slice(completeEventStart)
+      .filter((e) => e.id === 'root')
+      .map((e) => e.type),
+    ['rangeChange', 'openChange'],
+    'uncontrolled completion delivers the proposal before its one close notification'
+  );
   pictures.push(await capture(`${prefix}-complete`));
   // Reopen through the real trigger to inspect the completed range retained
   // in the Date Picker's own styled day projections.
@@ -841,15 +899,77 @@ async function datePicker(runtime, family, prefix) {
   await page.locator('.cap-date-2026-10-14').click();
   assert.equal(await read('root', 'open'), true, 'refused controlled completion keeps popup open');
   assert.equal((await read('root', 'getRange')).to, undefined);
+  const controlledCallbacks = [];
+  for (const reopenOnSelection of [false, true]) {
+    await mount(runtime, family, 'date-picker', {
+      mode: 'range',
+      range: { from: '2026-10-10' },
+      acceptRange: true,
+      observeSelection: true,
+      reopenOnSelection,
+    });
+    await page.locator('.cap-trigger').click();
+    await until('content', 'transitionState', 'entered');
+    const eventStart = (await allEvents()).length;
+    await page.locator('.cap-date-2026-10-14').click();
+    await page.evaluate(() => PuiCapabilities.settle());
+    assert.deepEqual(await read('root', 'getRange'), { from: '2026-10-10', to: '2026-10-14' });
+    // A repeated ordinary owner commit must not revive a retired completion.
+    await update('root', { range: { from: '2026-10-10', to: '2026-10-14' } });
+    const observations = await page.evaluate(() => PuiCapabilities.selectionObservations());
+    assert.deepEqual(
+      observations,
+      [
+        {
+          type: 'rangeChange',
+          beforeOpen: true,
+          afterOwnerOpen: true,
+          afterReopenOpen: true,
+        },
+      ],
+      'owner acceptance cannot close the popup while its proposal callback is running'
+    );
+    const events = (await allEvents()).slice(eventStart).filter((e) => e.id === 'root');
+    assert.deepEqual(
+      events.map((e) => e.type),
+      reopenOnSelection
+        ? ['rangeChange', 'openChange', 'openChange']
+        : ['rangeChange', 'openChange']
+    );
+    assert.deepEqual(
+      events.filter((e) => e.type === 'openChange').map((e) => e.detail.open),
+      reopenOnSelection ? [false, true] : [false]
+    );
+    assert.deepEqual(
+      events.filter((e) => e.type === 'openChange').map((e) => e.detail.reason),
+      reopenOnSelection
+        ? ['consumer-selection-reopen', 'consumer-selection-reopen']
+        : ['date-selection']
+    );
+    assert.equal(
+      await read('root', 'open'),
+      reopenOnSelection,
+      'the retired selection must not close a popup reopened by the owner callback'
+    );
+    await until('content', 'transitionState', reopenOnSelection ? 'entered' : 'closed');
+    assert.equal(await page.locator('.cap-date-2026-10-14').isVisible(), reopenOnSelection);
+    controlledCallbacks.push({ reopenOnSelection, observations, events });
+    pictures.push(
+      await capture(`${prefix}-controlled-${reopenOnSelection ? 'reopened' : 'accepted'}`)
+    );
+  }
   return {
     closedPaint,
     rangePaint,
+    controlledCallbacks,
     pictures,
     checks: [
       'native popup and partial range',
       'accepted completion ends presence and hides popup descendants',
       'retained range reopens with family day paint',
       'controlled refusal remains open',
+      'controlled native range acceptance completes after the outward callback',
+      'callback close and reopen retires the old selection completion',
     ],
   };
 }
@@ -881,7 +1001,14 @@ try {
             [],
             'no uncaught browser errors during interaction or teardown'
           );
-          report.cases.push({ runtime, family, kind, status: 'passed', ...result });
+          report.cases.push({
+            runtime,
+            family,
+            releaseScope: familyScope(family),
+            kind,
+            status: 'passed',
+            ...result,
+          });
           console.log(`PASS ${prefix}`);
         } catch (error) {
           await page.mouse.up().catch(() => {});
@@ -893,9 +1020,10 @@ try {
           report.cases.push({
             runtime,
             family,
+            releaseScope: familyScope(family),
             kind,
             status: 'failed',
-            error: error.stack ?? String(error),
+            error: formatEvidenceError(error),
             browserErrors: errors.slice(errorStart),
             screenshot,
           });
@@ -910,6 +1038,20 @@ try {
   await browser.close();
 }
 const passed = report.cases.filter((c) => c.status === 'passed').length;
+report.summary = Object.fromEntries(
+  ['0.3', 'experimental'].map((scope) => {
+    const cases = report.cases.filter((entry) => entry.releaseScope === scope);
+    return [
+      scope,
+      {
+        selected: cases.length,
+        passed: cases.filter((entry) => entry.status === 'passed').length,
+        failed: cases.filter((entry) => entry.status === 'failed').length,
+      },
+    ];
+  })
+);
+await writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
 console.log(
   `${passed}/${report.cases.length} native component journeys passed; ${path.join(output, 'report.json')}`
 );

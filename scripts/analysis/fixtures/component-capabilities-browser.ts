@@ -33,27 +33,47 @@ import * as baseCarousel from '../../../packages/prototypes/base/src/carousel';
 import * as baseResizable from '../../../packages/prototypes/base/src/resizable';
 import * as baseCalendar from '../../../packages/prototypes/base/src/calendar';
 import * as basePicker from '../../../packages/prototypes/base/src/date-picker';
+import * as baseValues from '../../../packages/prototypes/base/src/slider';
+import * as baseOtp from '../../../packages/prototypes/base/src/input-otp';
+import * as baseForm from '../../../packages/prototypes/base/src/form';
+import * as baseField from '../../../packages/prototypes/base/src/field';
 import { labelRoot } from '../../../packages/prototypes/base/src/label';
 import * as shadcnNumber from '../../../packages/prototypes/shadcn/src/number-field';
 import * as shadcnCarousel from '../../../packages/prototypes/shadcn/src/carousel';
 import * as shadcnResizable from '../../../packages/prototypes/shadcn/src/resizable';
 import * as shadcnCalendar from '../../../packages/prototypes/shadcn/src/calendar';
 import * as shadcnPicker from '../../../packages/prototypes/shadcn/src/date-picker';
+import * as shadcnValues from '../../../packages/prototypes/shadcn/src/slider';
+import * as shadcnOtp from '../../../packages/prototypes/shadcn/src/input-otp';
+import * as shadcnForm from '../../../packages/prototypes/shadcn/src/form';
+import * as shadcnField from '../../../packages/prototypes/shadcn/src/field';
 import * as brutalistNumber from '../../../packages/prototypes/brutalist/src/number-field';
 import * as brutalistCarousel from '../../../packages/prototypes/brutalist/src/carousel';
 import * as brutalistResizable from '../../../packages/prototypes/brutalist/src/resizable';
 import * as brutalistCalendar from '../../../packages/prototypes/brutalist/src/calendar';
 import * as brutalistPicker from '../../../packages/prototypes/brutalist/src/date-picker';
+import * as brutalistValues from '../../../packages/prototypes/brutalist/src/slider';
+import * as brutalistOtp from '../../../packages/prototypes/brutalist/src/input-otp';
+import * as brutalistForm from '../../../packages/prototypes/brutalist/src/form';
+import * as brutalistField from '../../../packages/prototypes/brutalist/src/field';
 import * as bootstrapNumber from '../../../packages/prototypes/bootstrap-2-3-2/src/number-field';
 import * as bootstrapCarousel from '../../../packages/prototypes/bootstrap-2-3-2/src/carousel';
 import * as bootstrapResizable from '../../../packages/prototypes/bootstrap-2-3-2/src/resizable';
 import * as bootstrapCalendar from '../../../packages/prototypes/bootstrap-2-3-2/src/calendar';
 import * as bootstrapPicker from '../../../packages/prototypes/bootstrap-2-3-2/src/date-picker';
+import * as bootstrapValues from '../../../packages/prototypes/bootstrap-2-3-2/src/slider';
+import * as bootstrapOtp from '../../../packages/prototypes/bootstrap-2-3-2/src/input-otp';
+import * as bootstrapForm from '../../../packages/prototypes/bootstrap-2-3-2/src/form';
+import * as bootstrapField from '../../../packages/prototypes/bootstrap-2-3-2/src/field';
 import * as liquidNumber from '../../../packages/prototypes/liquid-glass/src/number-field';
 import * as liquidCarousel from '../../../packages/prototypes/liquid-glass/src/carousel';
 import * as liquidResizable from '../../../packages/prototypes/liquid-glass/src/resizable';
 import * as liquidCalendar from '../../../packages/prototypes/liquid-glass/src/calendar';
 import * as liquidPicker from '../../../packages/prototypes/liquid-glass/src/date-picker';
+import * as liquidValues from '../../../packages/prototypes/liquid-glass/src/slider';
+import * as liquidOtp from '../../../packages/prototypes/liquid-glass/src/input-otp';
+import * as liquidForm from '../../../packages/prototypes/liquid-glass/src/form';
+import * as liquidField from '../../../packages/prototypes/liquid-glass/src/field';
 
 const React = ReactRuntime as typeof ReactDeclarations;
 const { createPortal, flushSync } = ReactDOMRuntime as typeof ReactDOMDeclarations;
@@ -70,7 +90,14 @@ const Vue = VueRuntime as unknown as AdapterVueRuntime & {
 
 export type Runtime = 'wc' | 'react' | 'vue' | 'vue2' | 'vue3';
 export type Family = 'base' | 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
-export type Kind = 'number-field' | 'carousel' | 'resizable' | 'calendar' | 'date-picker';
+export type Kind =
+  | 'number-field'
+  | 'carousel'
+  | 'resizable'
+  | 'calendar'
+  | 'date-picker'
+  | 'slider-values'
+  | 'input-otp';
 type Props = Record<string, unknown>;
 type Style = Record<string, string>;
 type Node = {
@@ -85,13 +112,27 @@ type Handle = { getExposes(): Record<string, any> };
 export type EventRecord = { id: string; type: string; detail: unknown };
 
 const families = {
-  base: { ...baseNumber, ...baseCarousel, ...baseResizable, ...baseCalendar, ...basePicker },
+  base: {
+    ...baseNumber,
+    ...baseCarousel,
+    ...baseResizable,
+    ...baseCalendar,
+    ...basePicker,
+    ...baseValues,
+    ...baseOtp,
+    ...baseForm,
+    ...baseField,
+  },
   shadcn: {
     ...shadcnNumber,
     ...shadcnCarousel,
     ...shadcnResizable,
     ...shadcnCalendar,
     ...shadcnPicker,
+    ...shadcnValues,
+    ...shadcnOtp,
+    ...shadcnForm,
+    ...shadcnField,
   },
   brutalist: {
     ...brutalistNumber,
@@ -99,6 +140,10 @@ const families = {
     ...brutalistResizable,
     ...brutalistCalendar,
     ...brutalistPicker,
+    ...brutalistValues,
+    ...brutalistOtp,
+    ...brutalistForm,
+    ...brutalistField,
   },
   'bootstrap-2-3-2': {
     ...bootstrapNumber,
@@ -106,6 +151,10 @@ const families = {
     ...bootstrapResizable,
     ...bootstrapCalendar,
     ...bootstrapPicker,
+    ...bootstrapValues,
+    ...bootstrapOtp,
+    ...bootstrapForm,
+    ...bootstrapField,
   },
   'liquid-glass': {
     ...liquidNumber,
@@ -113,6 +162,10 @@ const families = {
     ...liquidResizable,
     ...liquidCalendar,
     ...liquidPicker,
+    ...liquidValues,
+    ...liquidOtp,
+    ...liquidForm,
+    ...liquidField,
   },
 };
 const eventNames = [
@@ -125,6 +178,10 @@ const eventNames = [
   'indexChange',
   'sizesChange',
   'sizesCommit',
+  'completed',
+  'validationRequest',
+  'submit',
+  'reset',
 ];
 let nodes = new Map<string, Node>();
 let handles = new Map<string, Handle>();
@@ -134,6 +191,16 @@ let redraw: (() => void) | undefined;
 let frameworkHandle: ((id: string) => Handle | undefined) | undefined;
 let activeRuntime: Runtime | undefined;
 let fixture: HTMLElement | undefined;
+let acceptValue = false;
+let acceptRange = false;
+let observeSelection = false;
+let reopenOnSelection = false;
+let selectionRecords: Array<{
+  type: string;
+  beforeOpen: boolean;
+  afterOwnerOpen: boolean;
+  afterReopenOpen: boolean;
+}> = [];
 
 const node = (
   id: string,
@@ -145,9 +212,42 @@ const node = (
 const copy = <T>(value: T): T => structuredClone(value);
 const record = (id: string, type: string, detail: unknown) => {
   records.push({ id, type, detail: copy(detail) });
+  const selection = id === 'root' && ['valueChange', 'rangeChange'].includes(type);
+  const exposed =
+    selection && observeSelection
+      ? (frameworkHandle ? frameworkHandle(id) : handles.get(id))?.getExposes()
+      : undefined;
+  const beforeOpen = exposed?.open?.get();
+  const property =
+    acceptValue && type === 'valueChange'
+      ? 'value'
+      : acceptRange && type === 'rangeChange'
+        ? 'range'
+        : undefined;
+  if (selection && property) {
+    const current = nodes.get(id);
+    if (current && detail && typeof detail === 'object' && property in detail) {
+      current.props = { ...current.props, [property]: copy((detail as Props)[property]) };
+      if (activeRuntime === 'wc') setElementProps(handles.get(id) as any, current.props);
+      else redraw?.();
+    }
+  }
+  if (exposed) {
+    const afterOwnerOpen = exposed.open.get();
+    if (reopenOnSelection) {
+      exposed.close('consumer-selection-reopen');
+      exposed.openPopover('consumer-selection-reopen');
+    }
+    selectionRecords.push({
+      type,
+      beforeOpen,
+      afterOwnerOpen,
+      afterReopenOpen: exposed.open.get(),
+    });
+  }
 };
 const callbacks = (id: string) =>
-  id === 'root' || id === 'inner'
+  ['root', 'inner', 'form', 'field'].includes(id)
     ? Object.fromEntries(
         eventNames.map((type) => [
           `on${type[0].toUpperCase()}${type.slice(1)}`,
@@ -158,6 +258,147 @@ const callbacks = (id: string) =>
 
 function tree(family: Family, kind: Kind, options: Props): Node {
   const p = families[family];
+  const {
+    withField,
+    acceptValue: _acceptValue,
+    acceptRange: _acceptRange,
+    observeSelection: _observeSelection,
+    reopenOnSelection: _reopenOnSelection,
+    ...rootProps
+  } = options;
+  const fieldWrap = (root: Node) =>
+    withField
+      ? node('form', p.formRoot, {}, [
+          node(
+            'field',
+            p.formField,
+            {
+              name: kind === 'input-otp' ? 'code' : 'range',
+              validationMode: 'onChange',
+              externalValidation: true,
+            },
+            [
+              node('fieldLabel', p.fieldLabel, {}, [
+                kind === 'input-otp' ? 'Verification code' : 'Price range',
+              ]),
+              root,
+              node('description', p.fieldDescription, {}, ['Choose an admitted value.']),
+              node('error', p.fieldError),
+            ]
+          ),
+          node('reset', p.formReset, {}, ['Reset form']),
+        ])
+      : root;
+  if (kind === 'input-otp')
+    return fieldWrap(
+      node(
+        'root',
+        p.inputOtpRoot,
+        {
+          defaultValue: '1234',
+          length: 4,
+          ariaLabel: 'Verification code',
+          ...rootProps,
+        },
+        [
+          node('input', withField ? p.inputOtpControl : p.inputOtpInput, {
+            surfaceStyle: { width: '220px', flex: '0 0 auto' },
+          }),
+          ...Array.from({ length: 4 }, (_, index) =>
+            node(
+              `slot${index}`,
+              p.inputOtpSlot,
+              { index },
+              [],
+              family === 'base'
+                ? {
+                    display: 'inline-flex',
+                    width: '36px',
+                    height: '40px',
+                    border: '1px solid #475569',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }
+                : {}
+            )
+          ),
+        ],
+        family === 'base'
+          ? { display: 'flex', alignItems: 'center', gap: '8px' }
+          : { width: '100%' }
+      )
+    );
+  if (kind === 'slider-values') {
+    const vertical = options.orientation === 'vertical',
+      rtl = options.direction === 'rtl';
+    const thumbStyle: Style =
+      family !== 'base'
+        ? {}
+        : {
+            position: 'absolute',
+            display: 'block',
+            width: '20px',
+            height: '20px',
+            border: '2px solid #0f172a',
+            background: 'white',
+            ...(vertical
+              ? {
+                  left: '50%',
+                  bottom: 'calc(var(--pui-percentage) * 1%)',
+                  transform: 'translate(-50%, 50%)',
+                }
+              : {
+                  [rtl ? 'right' : 'left']: 'calc(var(--pui-percentage) * 1%)',
+                  top: '50%',
+                  transform: rtl ? 'translate(50%, -50%)' : 'translate(-50%, -50%)',
+                }),
+          };
+    return fieldWrap(
+      node(
+        'root',
+        p.sliderValuesRoot,
+        {
+          defaultValue: [20, 80],
+          min: 0,
+          max: 100,
+          step: 1,
+          ariaLabel: 'Price range',
+          ...rootProps,
+        },
+        [
+          node('label', p.sliderValuesLabel, {}, ['Price range']),
+          node(
+            'track',
+            p.sliderValuesTrack,
+            {},
+            [
+              node('indicator', p.sliderValuesIndicator),
+              ...[0, 1].map((index) =>
+                node(
+                  `thumb${index}`,
+                  p.sliderValuesThumb,
+                  { index, ariaLabel: index ? 'Maximum price' : 'Minimum price' },
+                  [],
+                  thumbStyle
+                )
+              ),
+            ],
+            family === 'base'
+              ? {
+                  position: 'relative',
+                  display: 'block',
+                  width: vertical ? '12px' : '100%',
+                  height: vertical ? '260px' : '12px',
+                  background: '#cbd5e1',
+                }
+              : {}
+          ),
+          node('value', p.sliderValuesValue),
+        ],
+        { width: vertical ? '100px' : '480px', ...(vertical ? { height: '300px' } : {}) }
+      )
+    );
+  }
   if (kind === 'number-field') {
     return node(
       'root',
@@ -301,7 +542,7 @@ function tree(family: Family, kind: Kind, options: Props): Node {
     maxNights: 14,
     a11yLabel: 'Choose dates',
     ...(picker ? { defaultOpen: false } : {}),
-    ...options,
+    ...rootProps,
   };
   const first = new Date(`${props.month ?? props.defaultMonth}-01T00:00:00Z`);
   const weekStartsOn = Number(props.weekStartsOn ?? 0);
@@ -400,9 +641,24 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
   if (!(family in families)) throw new Error(`Unknown fixture family: ${family}`);
   if (!['wc', 'react', 'vue', 'vue2', 'vue3'].includes(runtime))
     throw new Error(`Unknown fixture runtime: ${runtime}`);
-  if (!['number-field', 'carousel', 'resizable', 'calendar', 'date-picker'].includes(kind))
+  if (
+    ![
+      'number-field',
+      'carousel',
+      'resizable',
+      'calendar',
+      'date-picker',
+      'slider-values',
+      'input-otp',
+    ].includes(kind)
+  )
     throw new Error(`Unknown fixture kind: ${kind}`);
   activeRuntime = runtime;
+  acceptValue = options.acceptValue === true;
+  acceptRange = options.acceptRange === true;
+  observeSelection = options.observeSelection === true;
+  reopenOnSelection = options.reopenOnSelection === true;
+  selectionRecords = [];
   records = [];
   fixture = document.getElementById('fixture') ?? document.createElement('div');
   if (!fixture.isConnected) {
@@ -431,7 +687,7 @@ export async function mount(runtime: Runtime, family: Family, kind: Kind, option
       if (current.associations) setElementAssociations(element, current.associations);
       setElementProps(element, current.props);
       handles.set(current.id, element);
-      if (current.id === 'root' || current.id === 'inner')
+      if (['root', 'inner', 'form', 'field'].includes(current.id))
         for (const type of eventNames)
           element.addEventListener(type, (event) => {
             // Nested roots emit bubbling events; each event has exactly one owner.
@@ -591,4 +847,14 @@ export async function call(id: string, key: string, ...args: unknown[]) {
 
 export function events(): EventRecord[] {
   return copy(records);
+}
+
+/** Callback observations from this ordinary consumer, never component overrides. */
+export function selectionObservations() {
+  return copy(selectionRecords);
+}
+
+/** Ordinary controlled consumer policy, independent of prototype state. */
+export function acceptValues(accept: boolean) {
+  acceptValue = accept;
 }

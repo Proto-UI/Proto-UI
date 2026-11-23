@@ -1,0 +1,521 @@
+{
+  "kind": "isolated-candidate-adoption-experiment",
+  "sourceCandidate": {
+    "head": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+    "tree": "f7b2851e7e6fa6b7d9e64fd1e687d316a4c51644",
+    "path": "/workspace/scratch/828b7e591003/Proto-UI-s3-candidate-consumer",
+    "clean": true,
+    "version": "0.3.0-alpha.2",
+    "lockSha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "nodeEngine": "24.x",
+    "packageManager": "pnpm@10.32.1"
+  },
+  "startedAt": "2026-11-22T11:41:11.987437+00:00",
+  "finishedAt": "2026-11-22T11:42:42.315328+00:00",
+  "executionStatus": "passed",
+  "commandObservations": [
+    {
+      "id": "upstream-install",
+      "cwd": "/workspace/scratch/828b7e591003/Proto-UI-s3-candidate-consumer",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "install",
+        "--offline",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:41:12.592503+00:00",
+      "finishedAt": "2026-11-22T11:41:14.365880+00:00",
+      "seconds": 1.773,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/upstream-install.stdout.log",
+        "bytes": 972,
+        "sha256": "1f936b117441507cbd60e77af070099bc561c889a90bdae1b567fd6532392861"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/upstream-install.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "shenko-install",
+      "cwd": "/workspace/scratch/828b7e591003/shenko-s3-candidate-consumer/crates/shenko-ui/web",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "install",
+        "--offline",
+        "--frozen-lockfile",
+        "--ignore-scripts"
+      ],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:41:14.512884+00:00",
+      "finishedAt": "2026-11-22T11:41:14.983241+00:00",
+      "seconds": 0.47,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-install.stdout.log",
+        "bytes": 375,
+        "sha256": "10eef2d61b82c9c7421224aeaece6fcd200d43821aef2f6eceaf71804c0d19ac"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-install.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "public-packages",
+      "cwd": "/workspace/scratch/828b7e591003/Proto-UI-s3-candidate-consumer",
+      "command": [
+        "node",
+        "scripts/build/public-packages.mjs",
+        "--package",
+        "@proto.ui/adapter-react",
+        "--package",
+        "@proto.ui/prototypes-shadcn",
+        "--package",
+        "@proto.ui/cli",
+        "--json"
+      ],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:41:15.120459+00:00",
+      "finishedAt": "2026-11-22T11:42:28.468436+00:00",
+      "seconds": 73.347,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/public-packages.stdout.json",
+        "bytes": 5187,
+        "sha256": "7e1a819a625c4e84f941951ce8cd08f38448e5f313bf80ec4c6a7d014505100c"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/public-packages.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "shenko-build",
+      "cwd": "/workspace/scratch/828b7e591003/shenko-s3-candidate-consumer/crates/shenko-ui/web",
+      "command": ["node", "build.mjs"],
+      "environment": {
+        "PROTO_UI_SOURCE": "/workspace/scratch/828b7e591003/Proto-UI-s3-candidate-consumer",
+        "PROTO_UI_BUILD_RECEIPT": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/public-packages.stdout.json"
+      },
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:42:28.635301+00:00",
+      "finishedAt": "2026-11-22T11:42:31.223195+00:00",
+      "seconds": 2.587,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-build.stdout.log",
+        "bytes": 581,
+        "sha256": "d790cd9a9a172cf060dea55f24cfaab0efe590c0ef855989858fb1ca0ca0ffd9"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-build.stderr.log",
+        "bytes": 420,
+        "sha256": "0a4951312f48909f7e3243110a760a606be8e83bb8c55c4702ef688837cde962"
+      }
+    },
+    {
+      "id": "shenko-types",
+      "cwd": "/workspace/scratch/828b7e591003/shenko-s3-candidate-consumer/crates/shenko-ui/web",
+      "command": ["corepack", "pnpm@10.32.1", "exec", "tsc", "--noEmit"],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:42:31.431588+00:00",
+      "finishedAt": "2026-11-22T11:42:35.255041+00:00",
+      "seconds": 3.823,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-types.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-types.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "shenko-tests",
+      "cwd": "/workspace/scratch/828b7e591003/shenko-s3-candidate-consumer/crates/shenko-ui/web",
+      "command": [
+        "node",
+        "--test",
+        "tests/files-boundaries.test.mjs",
+        "tests/frontend-modules.test.mjs",
+        "tests/lenses.test.mjs",
+        "tests/live-controller.test.mjs",
+        "tests/prototypes.test.mjs",
+        "tests/rich-document.test.mjs",
+        "tests/task-projection.test.mjs",
+        "tests/timeline-state.test.mjs"
+      ],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:42:35.438151+00:00",
+      "finishedAt": "2026-11-22T11:42:36.060128+00:00",
+      "seconds": 0.621,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-tests.stdout.log",
+        "bytes": 5000,
+        "sha256": "9f3782b6aa6d322a2d01981938d1a5b7a8456d148e6b6e117a9ed92ec528463b"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-tests.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "verdant-generate",
+      "cwd": "/workspace/scratch/828b7e591003/verdant-s3-candidate-consumer",
+      "command": [
+        "node",
+        "frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "/workspace/scratch/828b7e591003/Proto-UI-s3-candidate-consumer"
+      ],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:42:36.261316+00:00",
+      "finishedAt": "2026-11-22T11:42:39.169498+00:00",
+      "seconds": 2.907,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-generate.stdout.log",
+        "bytes": 412,
+        "sha256": "4fc493ef609db9c91b71dc3106b8e9f18b153a52315fea54e551d62c557c3f8f"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-generate.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "verdant-check",
+      "cwd": "/workspace/scratch/828b7e591003/verdant-s3-candidate-consumer",
+      "command": [
+        "node",
+        "frontend/proto-ui/tools/build-proto-ui.mjs",
+        "--upstream",
+        "/workspace/scratch/828b7e591003/Proto-UI-s3-candidate-consumer",
+        "--check"
+      ],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:42:39.404560+00:00",
+      "finishedAt": "2026-11-22T11:42:41.603486+00:00",
+      "seconds": 2.198,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-check.stdout.log",
+        "bytes": 410,
+        "sha256": "69a525b241344ce28fdafd8125461cc86a7526196f9cc4dfa7b2841ca4da984e"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-check.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "id": "verdant-rules",
+      "cwd": "/workspace/scratch/828b7e591003/verdant-s3-candidate-consumer",
+      "command": ["node", "frontend/proto-ui/tools/check-proto-ui-rules.mjs"],
+      "environment": {},
+      "status": "passed",
+      "returnCode": 0,
+      "startedAt": "2026-11-22T11:42:41.799864+00:00",
+      "finishedAt": "2026-11-22T11:42:41.915026+00:00",
+      "seconds": 0.114,
+      "stdout": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-rules.stdout.log",
+        "bytes": 297,
+        "sha256": "46f2925f6c07037a3e73f1c1cc9dffa014ffc42cb4b6d7515c5a3c01432bb21d"
+      },
+      "stderr": {
+        "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-rules.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "sourceReadback": {
+    "originalFourCheckoutsUnchanged": true,
+    "ordinaryAuthoredInputFilesUnchanged": true,
+    "compiledAuthoredSourceBindingsPass": true,
+    "recordedInputCounts": {
+      "shenko": 51,
+      "verdant": 8
+    }
+  },
+  "publicPackages": {
+    "requested": ["@proto.ui/adapter-react", "@proto.ui/prototypes-shadcn", "@proto.ui/cli"],
+    "built": 42,
+    "totalPublic": 47,
+    "omitted": [
+      "@proto.ui/adapter-vue",
+      "@proto.ui/adapter-vue2",
+      "@proto.ui/adapter-web-component",
+      "@proto.ui/prototypes-brutalist",
+      "@proto.ui/prototypes-lucide"
+    ],
+    "builtFileCount": 2326
+  },
+  "shenko": {
+    "baseHead": "972d87950f2a947ca2965852c5a1cd9496732498",
+    "baseTree": "6f7ed3e8cc35228e0cefe63f4c9bea337aad0ab2",
+    "previousPin": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "isolatedCandidatePin": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+    "generatedAssetCount": 12,
+    "licenseAssetCount": 4,
+    "realisation": {
+      "compiled": ["transport-badge", "message-bubble"],
+      "adapter": [
+        {
+          "family": "button",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "textarea",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "scroll-area",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "collapsible",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "drawer",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "toggle-group",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "input",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "separator",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        },
+        {
+          "family": "toggle",
+          "mode": "adapter",
+          "compiler_blocker": "shenko#335"
+        }
+      ]
+    },
+    "testCounts": {
+      "tests": 51,
+      "suites": 0,
+      "pass": 51,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "manifest": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/produced/shenko-static/build-manifest.json",
+      "bytes": 9018,
+      "sha256": "96747fe7e0fbc14deb816281d3481339914354a2762541699fd6f14f1aaae24a"
+    }
+  },
+  "verdant": {
+    "baseHead": "91a775546ebd21a87d76d76568195a6513437719",
+    "baseTree": "db7c40b3bb7bb3f74f8456f3185c352aaccc2f9b",
+    "previousPin": "e56b2d1a3d6b688a1cbc6930dab1d6757304d733",
+    "isolatedCandidatePin": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+    "authoredUnitCount": 1,
+    "artifactCount": 20,
+    "changedArtifactsFromBaseline": [
+      {
+        "path": ".proto-ui/gpui-native/src/gpui-native-owner.rs",
+        "previousSha256": "897c79b483fd54febce187ed62db95b64e7349c40434d526f87e629a6a165a39",
+        "candidateSha256": "51ea54fc254243dabcd26efa1fd1de3138edf6a0da63c9cc51c0144b2dc4f149"
+      },
+      {
+        "path": "Cargo.toml",
+        "previousSha256": "b2426d7f08c376224a42606281cc2875658082808dd15146b6f8aedcdfe0fc5e",
+        "candidateSha256": "c52f3c108e27d8258d967dcde38659aa047ca63cb2834569926f99843b1fa5e6"
+      },
+      {
+        "path": "Component.rs",
+        "previousSha256": "554b6e508268c0f782195ad3f728fb2eabf44a10b3a7c9be95e710a772964dc4",
+        "candidateSha256": "cfaec14b59ed189227bf64794d079ca771498cc5a3e23b35125d96320c026776"
+      },
+      {
+        "path": "Component.rs.map",
+        "previousSha256": "893edc7aeaaaf534056bbe2b096bc181e39e77b965a5f4ab23fd761fafa98aae",
+        "candidateSha256": "807326e8160b06552ae440def19cc60faa2c065109200b89de16d6d0caff24de"
+      },
+      {
+        "path": "provenance.json",
+        "previousSha256": "e41740062c9cd04345802968978978ded62388014b4df717b1d70d58c27fd7ca",
+        "candidateSha256": "9c2fc9647baa2827159578515dc585db9858bceda66d67666bdf30669f453ece"
+      }
+    ],
+    "freshCheck": {
+      "ok": true,
+      "mode": "check",
+      "unit": "pitch-gesture-surface",
+      "upstreamRevision": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+      "packageName": "generated-gpui-d06876dde058a10cffcd99a494a8113b",
+      "componentName": "PitchGestureSurface",
+      "artifacts": 20,
+      "outputDirectory": "frontend/proto-ui/generated/pitch-gesture-surface",
+      "receipt": "frontend/proto-ui/receipts/pitch-gesture-surface.json"
+    },
+    "admissionRuleCases": 5,
+    "receipt": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/produced/verdant/frontend/proto-ui/receipts/pitch-gesture-surface.json",
+      "bytes": 4285,
+      "sha256": "cf9637cc6b9fb9dcc29b1e77a9bbfdadf02edfb053cb0bf8fa71da7cb93833f6"
+    }
+  },
+  "selfReadbackChecks": {
+    "checks": 122,
+    "passed": 122,
+    "independentReview": false
+  },
+  "evidence": {
+    "preparation.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/preparation.json",
+      "bytes": 3353,
+      "sha256": "b7745df7380e14333ed4f0c55a409c19ae0991d74b7a90bb79a0d7c2649be2d9"
+    },
+    "pin-transitions.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/pin-transitions.json",
+      "bytes": 7159,
+      "sha256": "af2bb5c93604395e4ddfeec45fdf63cad61e06733fb3ef31a1a11c5529efcbf8"
+    },
+    "shenko-pin-transition.patch": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-pin-transition.patch",
+      "bytes": 686,
+      "sha256": "54862362a9f20552568c5a36ea18418fcdf5950d181870df0f341a8760e154ef"
+    },
+    "verdant-pin-transition.patch": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-pin-transition.patch",
+      "bytes": 525,
+      "sha256": "84219193ef28cacd5ec091cc5e5a6dcd7ad630332b14a74004f1d1d6d581aa78"
+    },
+    "execution.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/execution.json",
+      "bytes": 63469,
+      "sha256": "90aa5315db898274795d9e1b2978f0d47be9695912f9cc3f07a7d09835189929"
+    },
+    "artifact-readback.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/artifact-readback.json",
+      "bytes": 91280,
+      "sha256": "6a3ed0c07e3a502dfd20f220dc529f00416ea610462a9f3febfb19e35541d24a"
+    },
+    "authored-prototype-source-binding.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/authored-prototype-source-binding.json",
+      "bytes": 4294,
+      "sha256": "369c8eefb33897871b325809f604c967676c79ec5f0cf1f470e1e7613de69116"
+    },
+    "public-package-artifacts.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/public-package-artifacts.json",
+      "bytes": 602239,
+      "sha256": "007b2ea8da85152b1fd8f480be9d383644bebf364f70e4cf827a630e212489b8"
+    },
+    "shenko-generated-and-pin.patch": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/shenko-generated-and-pin.patch",
+      "bytes": 2298408,
+      "sha256": "5f24d0e14a941fbe919f654c3f32f82d104ea2ff8e7416762fb1a9261f0b5d95"
+    },
+    "verdant-generated-and-pin.patch": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/verdant-generated-and-pin.patch",
+      "bytes": 32543,
+      "sha256": "863af0d5e17a394f5e186e81ee95d5ce73193d3865c4d1a55c286d33775f371a"
+    },
+    "collector-enobufs-reproduction.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/collector-enobufs-reproduction.json",
+      "bytes": 938,
+      "sha256": "dae57e881deae2b4695eaa0292d6f61e3e7098aa5eee8793cd0508f0b0e86193"
+    },
+    "artifact-readback-command.json": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence/artifact-readback-command.json",
+      "bytes": 863,
+      "sha256": "52461033afc59a82482e13460aa30e0ee79fe53e0c3b45208f135ea5830b2455"
+    }
+  },
+  "limitations": [
+    "Self-readback, not independent acceptance.",
+    "Isolated explicit pin experiment; neither App main adopted or committed this pin.",
+    "Twelve Shenko assets include four licenses; two compiled authored prototypes remain distinct from nine Adapter families.",
+    "Twenty Verdant artifacts represent one authored unit, SDK, manifests and source map; no cargo/Rust build, GPUI runtime or AT execution.",
+    "No full browser/user-journey or Harness acceptance was performed by this experiment."
+  ],
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-22T12:03:21.521520+00:00",
+  "recordRole": "dated empirical record; no change to a normative contract, release gate, or application main pin",
+  "independentReadback": {
+    "reviewer": "root; did not implement or execute the candidate experiment",
+    "reviewedAt": "2026-11-22T11:49:53.361731+00:00",
+    "candidateSha": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+    "observationCount": 2395,
+    "passedObservationCount": 2395,
+    "failures": [],
+    "classification": "file/source/log/pin comparisons; not product tests, new command execution, native acceptance, or GitHub approval",
+    "evidence": {
+      "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-independent-review.json",
+      "bytes": 391077,
+      "sha256": "c51eea7eb26d46783153ed1fcc9f1c24bf7baf4007ccb353a6210bec206ac494"
+    },
+    "notClaim": "These are source, log and byte integrity checks, not additional application test cases, formal GitHub approval, browser or native GPUI acceptance."
+  },
+  "retainedArchive": {
+    "path": "/workspace/scratch/828b7e591003/s3-candidate-consumer-evidence.tar.gz",
+    "bytes": 2018924,
+    "sha256": "8816dcbbdb6230cc2eb16e50a7d6456267629b0d99940a516a7fa9c10d31bc3d"
+  },
+  "adoptionStatus": {
+    "shenko": "isolated worktree only; main pin not changed or committed",
+    "verdant": "isolated worktree only; main pin not changed or committed",
+    "applicationPushes": "none"
+  },
+  "trackedGeneratorOutputStatus": {
+    "shenko": [
+      "crates/shenko-ui/src/static/app.js",
+      "crates/shenko-ui/src/static/build-manifest.json",
+      "crates/shenko-ui/src/static/proto-ui-tokens.generated.css",
+      "crates/shenko-ui/web/upstream-pin.json"
+    ],
+    "verdant": [
+      "frontend/proto-ui/compiler.pin.json",
+      "frontend/proto-ui/generated/pitch-gesture-surface/.proto-ui/gpui-native/src/gpui-native-owner.rs",
+      "frontend/proto-ui/generated/pitch-gesture-surface/Cargo.toml",
+      "frontend/proto-ui/generated/pitch-gesture-surface/Component.rs",
+      "frontend/proto-ui/generated/pitch-gesture-surface/Component.rs.map",
+      "frontend/proto-ui/generated/pitch-gesture-surface/provenance.json",
+      "frontend/proto-ui/receipts/pitch-gesture-surface.json"
+    ]
+  }
+}

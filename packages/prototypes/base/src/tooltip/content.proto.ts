@@ -32,6 +32,7 @@ function setupTooltipContent(def: DefHandle<TooltipContentProps, TooltipContentE
   const accessible = asAccessible();
   def.anatomy.claim(TOOLTIP_FAMILY, { role: 'content' });
   const contentId = def.state.string('tooltipContentId', '');
+  accessible.part(TOOLTIP_FAMILY, { key: 'content' });
   accessible.id(contentId);
   accessible.role('tooltip');
 

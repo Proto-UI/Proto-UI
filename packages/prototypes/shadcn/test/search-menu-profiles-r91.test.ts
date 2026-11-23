@@ -588,9 +588,14 @@ describe('source-bound search and menu profiles', () => {
         expect(item.getExposes().focused).toBe(focused);
         expect(focused.get()).toBe(true);
         expect(item.getAttribute('role')).toBe(name === 'menubar' ? 'menuitem' : 'button');
-        expect(tokens(item)).toContain(
-          name === 'menubar' || profile.id === 'new-york-v4' ? 'bg-accent' : 'bg-muted'
-        );
+        if (name === 'menubar') {
+          // The pinned .cn-menubar-item focus recipe is an exposed-state
+          // selector; changing its profile does not resolve away that selector.
+          expect(item.hasAttribute('data-focused')).toBe(true);
+          expect(tokens(item)).toContain('data-[focused]:bg-accent');
+          expect(tokens(item)).toContain('data-[focused]:text-accent-foreground');
+        } else
+          expect(tokens(item)).toContain(profile.id === 'new-york-v4' ? 'bg-accent' : 'bg-muted');
         expect(proposals).toEqual([]);
       }
       item.click();

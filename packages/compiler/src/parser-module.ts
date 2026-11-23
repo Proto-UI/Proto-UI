@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { reject } from './diagnostics';
+import { reject, unknownDiagnosticSpan } from './diagnostics';
 import type { ParseOptions, SourceSpan } from './ir';
 import {
   isLocalSourceSpecifier,
@@ -19,12 +19,18 @@ import {
 import type { ModuleDeclarationIR } from './ir';
 import { hookAdmission } from './hook-admission';
 import {
+  inertCycleModule,
+  validateStaticModuleInitialization,
+} from './source-module-initialization';
+import {
   identifier,
   isSourceFunction,
   propertyName,
   rejectNode,
   scalarInitializer,
   staticDataInitializer,
+  staticCallableSelection,
+  staticGetterRecordInitializer,
   sourceSpan,
   unwrapSourceExpression,
   type FunctionNode,
@@ -38,6 +44,9 @@ export {
   rejectNode,
   scalarInitializer,
   staticDataInitializer,
+  staticScalarMembership,
+  staticCallableSelection,
+  staticGetterRecordInitializer,
   staticJoin,
   sourceSpan,
   unwrapSourceExpression,
@@ -102,6 +111,8 @@ export class SourceGraph {
   readonly sources: Record<string, string>;
   readonly sourceImports: Readonly<Record<string, string>>;
   private readonly loading = new Set<string>();
+  private readonly declarationsReady = new Set<SourceModule>();
+  readonly cyclicModules = new Set<SourceModule>();
   private readonly exportReads = new Map<SourceModule, ts.ExportAssignment>();
 
   constructor(input: string, options: ParseOptions) {
@@ -112,15 +123,7 @@ export class SourceGraph {
         sourceName(target),
       ])
     );
-    const span: SourceSpan = {
-      file: '<input>',
-      start: 0,
-      end: 0,
-      line: 1,
-      column: 1,
-      endLine: 1,
-      endColumn: 1,
-    };
+    const span = unknownDiagnosticSpan();
     for (const [file, text] of Object.entries(options.files ?? {})) {
       const identity = sourceName(file);
       if (Object.hasOwn(this.sources, identity) || typeof text !== 'string') {
@@ -281,6 +284,16 @@ export class SourceGraph {
             if (!declaration.initializer)
               rejectNode(declaration, 'PUI1004', 'A declaration requires an initializer.');
             const value = unwrapSourceExpression(declaration.initializer);
+            if (staticCallableSelection(value)) {
+              let authored = declaration.initializer;
+              while (ts.isParenthesizedExpression(authored)) authored = authored.expression;
+              if (authored !== value)
+                rejectNode(
+                  authored,
+                  'PUI1004',
+                  'Static module callable selection requires an explicit declaration annotation, not an erased type view.'
+                );
+            }
             if (scalarInitializer(value)) {
               const name = identifier(declaration.name);
               this.add(result, name, value, statement);
@@ -293,7 +306,11 @@ export class SourceGraph {
                 'PUI1004',
                 'Shared module mutable storage requires pure scalar data; owner closures and capabilities cannot escape into module storage.'
               );
-            if (!ts.isIdentifier(value) && staticDataInitializer(value)) {
+            if (
+              (!ts.isIdentifier(value) && staticDataInitializer(value)) ||
+              staticCallableSelection(value) ||
+              staticGetterRecordInitializer(value)
+            ) {
               this.add(result, identifier(declaration.name), value, statement);
               continue;
             }
@@ -408,6 +425,7 @@ export class SourceGraph {
       }
       // All runtime edges are checked, including empty binding lists and stars;
       // type-only edges retain provenance but never introduce runtime behavior.
+      this.declarationsReady.add(result);
       for (const edge of result.runtimeEdges) {
         if (this.hasSourceSpecifier(edge.specifier))
           this.importedModule(result, { module: edge.specifier, exported: '*', node: edge.node });
@@ -424,6 +442,7 @@ export class SourceGraph {
 
   /** Reject unresolved static exports, including those outside the selected entry. */
   validateExports(): void {
+    validateStaticModuleInitialization(this);
     for (const module of this.modules.values()) {
       for (const name of this.exportNames(module, new Set())) this.resolveExport(module, name);
       for (const [name, exported] of module.exports) {
@@ -436,7 +455,11 @@ export class SourceGraph {
       for (const [name, declaration] of module.declarations) {
         if (!ts.isIdentifier(declaration)) continue;
         const target = this.resolveBinding(module, name);
-        if (target.module !== null && !isSourceFunction(target.node))
+        if (
+          target.module !== null &&
+          !isSourceFunction(target.node) &&
+          !staticCallableSelection(target.node)
+        )
           rejectNode(
             declaration,
             'PUI1004',
@@ -629,12 +652,17 @@ export class SourceGraph {
         'PUI1003',
         `Local source ${imported.module} is absent from the explicit source graph.`
       );
-    if (this.loading.has(found))
-      rejectNode(
-        imported.node,
-        'PUI1008',
-        `Cyclic runtime source graph: ${module.file.fileName} -> ${found}.`
-      );
+    if (this.loading.has(found)) {
+      const names = [...this.loading];
+      const cycle = names.slice(names.indexOf(found)).map((name) => this.modules.get(name)!);
+      if (cycle.some((item) => !this.declarationsReady.has(item) || !inertCycleModule(item)))
+        rejectNode(
+          imported.node,
+          'PUI1008',
+          `Cyclic runtime source graph requires complete inert declarations: ${module.file.fileName} -> ${found}.`
+        );
+      cycle.forEach((item) => this.cyclicModules.add(item));
+    }
     return this.load(found);
   }
 

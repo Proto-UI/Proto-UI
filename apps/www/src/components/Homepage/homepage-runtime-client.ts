@@ -140,6 +140,8 @@ export function createHomepageContent(
 ): DemoSpec {
   if (group.locale) return createHomepageLocaleSelect(group.locale, family, runtime, isActive).demo;
   const children: DemoNode[] = group.links.map((link, index) => {
+    const announcement =
+      siteLinkAppearance(link) === 'text' && !!link.closest('.homepage-hero__eyebrow');
     const attrs: Record<string, string> = {};
     for (const name of ANCHOR_ATTRIBUTES) {
       const value = link.getAttribute(name);
@@ -162,14 +164,19 @@ export function createHomepageContent(
           kind: 'proto',
           prototypeId: `${family}-surface-root`,
           ref: `home-link-surface-${index}`,
-          surfaceStyle: linkSurfaceLayout(
-            family,
-            siteLinkAppearance(link),
-            siteLinkEmphasis(link),
-            undefined,
-            false,
-            navbarLinkContext(link)
-          ),
+          surfaceStyle: {
+            ...linkSurfaceLayout(
+              family,
+              siteLinkAppearance(link),
+              siteLinkEmphasis(link),
+              undefined,
+              false,
+              navbarLinkContext(link)
+            ),
+            // The native announcement already owns its pill padding and minimum
+            // height. An inner text-link target must not add a second line box.
+            ...(announcement ? { minHeight: '0', marginBottom: '0' } : {}),
+          },
           props: {
             ...linkSurfaceProps(
               family,
@@ -195,11 +202,24 @@ export function createHomepageContent(
                     prototypeId: `${family}-text-root`,
                     rootTag: 'span',
                     ref: `home-link-text-${index}`,
-                    surfaceStyle: navbarLinkTextStyle(
-                      family,
-                      siteLinkAppearance(link),
-                      navbarLinkContext(link)
-                    ),
+                    surfaceStyle: {
+                      ...navbarLinkTextStyle(
+                        family,
+                        siteLinkAppearance(link),
+                        navbarLinkContext(link)
+                      ),
+                      // Keep the authored announcement's cold-frame metrics while
+                      // the passive Text still owns its family and fact feedback.
+                      ...(announcement
+                        ? {
+                            fontFamily: 'inherit',
+                            fontSize: 'inherit',
+                            fontWeight: 'inherit',
+                            lineHeight: 'inherit',
+                            letterSpacing: 'inherit',
+                          }
+                        : {}),
+                    },
                     props: {
                       ...linkTextProps(
                         siteLinkAppearance(link),

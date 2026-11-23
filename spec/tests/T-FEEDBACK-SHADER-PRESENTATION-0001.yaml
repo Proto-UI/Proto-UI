@@ -1,0 +1,110 @@
+id: T-FEEDBACK-SHADER-PRESENTATION-0001
+type: test
+title: Shader graph admission, execution and retirement are independently observed
+status: draft
+since: 0.3.0-alpha.2
+summary: Own-data negatives, resource failure controls and a CPU oracle bound real Runtime and native shader consumers.
+lifecycleRationale:
+  en: Draft evidence inventory; individual actual runs are recorded separately, and no unexecuted backend or application consumer is counted as accepted.
+cases:
+  - id: T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SNAPSHOT
+    title: Reject unsafe data and excessive resources before allocation
+    covers:
+      [
+        C-FEEDBACK-SHADER-PRESENTATION-0001-SNAPSHOT,
+        C-FEEDBACK-SHADER-PRESENTATION-0001-GRAPH,
+        C-FEEDBACK-SHADER-PRESENTATION-0001-BOUNDS,
+      ]
+    expectation: Dense exact byte inputs survive copied/frozen snapshots. Accessors are not called; aliases cannot change snapshots; unsupported kernels, cycles, self reads, missing producer, alpha violations and excessive resources reject before allocation.
+  - id: T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER
+    title: Preserve the same authored declaration through Runtime and native source
+    covers:
+      [C-FEEDBACK-SHADER-PRESENTATION-0001-LOWERING, HC-FEEDBACK-SHADER-PRESENTATION-0001-EVIDENCE]
+    expectation: The same authored material shader declaration reaches Runtime and four native Web consumers, survives serialized IR validation and emits direct finite pass calls. Unsupported targets diagnose explicitly.
+  - id: T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-PIXELS
+    title: Compare actual WebGL2 output against independent CPU math
+    covers: [HC-FEEDBACK-SHADER-PRESENTATION-0001-EXECUTION]
+    expectation: Actual WebGL2 copy and tint output, top-left orientation, alpha and linear-to-sRGB conversion match independent CPU arithmetic within explicit RGBA8 rounding tolerance. First-party kernel source identities are retained.
+  - id: T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT
+    title: Retire resources and stale output while preserving opaque fallback
+    covers:
+      [
+        C-FEEDBACK-SHADER-PRESENTATION-0001-LIFETIME,
+        C-FEEDBACK-SHADER-PRESENTATION-0001-FALLBACK,
+        HC-FEEDBACK-SHADER-PRESENTATION-0001-OWNERSHIP,
+        HC-FEEDBACK-SHADER-PRESENTATION-0001-FAILURE,
+      ]
+    expectation: Initial preparation, missing support, compilation failure, context loss and failed decode preserve legal opaque fallback and children. Capability override and reset reacquire a fresh physical binding even within one mounted view; repeated reset does not reacquire, and later remount cannot regress the generation. Stale generations never publish or release their replacement; partial allocations clean up in reverse order; repeated release/disposal never double-delete or overwrite a new paint owner.
+implementations:
+  - id: shader-data-and-native-admission
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/shader-native.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SNAPSHOT,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER,
+      ]
+  - id: shader-feedback-owner
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/shader-presentation.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SNAPSHOT,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
+      ]
+  - id: shader-native-consumer-types
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/shader-native-types.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
+    notes:
+      - Strict complete native graphs separately check copy-only, tint-only and combined capability interfaces in every Web profile, including Vue2 checkJs.
+  - id: shader-native-project-closure
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/shader-native-project.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
+    notes:
+      - Independent copy/tint entries share only the project's reached kernel union. Each original entry's support bytes must match its canonical closure before union; modified or missing host, owner and kernel identity artifacts reject.
+  - id: shader-runtime-owner
+    kind: module-test
+    status: passing
+    path: packages/runtime/test/contract/shader-presentation.runtime.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
+      ]
+  - id: shader-webgl2-browser-consumers
+    kind: workspace-check
+    status: planned
+    path: packages/compiler/test/shader-presentation.browser.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-PIXELS,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
+      ]
+    notes:
+      - The executable suite requires sandboxed Chromium. Its local launch failure is not a passed GPU or consumer result; actual supported-executor receipts remain required.
+verifies:
+  contracts: [C-FEEDBACK-SHADER-PRESENTATION-0001]
+  hostCaps: [HC-FEEDBACK-SHADER-PRESENTATION-0001]
+openQuestions:
+  - id: T-FEEDBACK-SHADER-PRESENTATION-0001-Q-BROWSER
+    question: Has the actual browser suite executed against the reviewed candidate with every scenario reaching a terminal result and independent acceptance?
+    blocks:
+      - activation:T-FEEDBACK-SHADER-PRESENTATION-0001
+      - implementation:T-FEEDBACK-SHADER-PRESENTATION-0001#shader-webgl2-browser-consumers
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Freeze the executable validation obligations before Runtime and Compiler shader implementation.
