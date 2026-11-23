@@ -12,6 +12,10 @@
 - [ ] **严格 canonical 包预算仍未通过。** [候选 Actions 45262013762](https://github.com/Proto-UI/Proto-UI/actions/runs/45262013762) 为实际 clean/exact-source 6/9；baseline 9/9。工具链、压缩与 external 参数相同，三项超出为 React 149、Vue 136、WC 103 字节； [事实与原件](./evidence/2026-11-24-sprint4-canonical-cost/report.json)尚未决定新上限。
 - [ ] **正式独立 GitHub review、合并与原 Sprint 4 总体接受仍分别处理。**
 
+### 首轮归档缺口
+
+- [ ] **首轮上传遗漏的 70 个隐藏生成支持文件需由后继原件补足。** 三份 build manifest 声明 106 个 generated artifacts，首轮只上传其中 36 个；`.proto-ui` 下的 inline 22、static-data 22、scene 26 个文件被上传器默认过滤。已为隔离的证据目录显式启用隐藏文件上传；首轮 148 件原件保持不变，不宣称完整交付 106 件。
+
 ## 独立审查的范围
 
 | 控制组 | 符合预期 | 执行边界 |

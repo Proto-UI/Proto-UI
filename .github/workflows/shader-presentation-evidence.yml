@@ -60,5 +60,7 @@ jobs:
         with:
           name: shader-presentation-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/shader-presentation
+          # Include .proto-ui generated support from this isolated evidence directory.
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 30

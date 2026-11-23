@@ -32,5 +32,17 @@
     "followupBrowserResult": "not-run"
   },
   "browserWasRerunByThisReadback": false,
-  "originalJsonWasRewritten": false
+  "originalJsonWasRewritten": false,
+  "archiveLimitation": {
+    "declaredGeneratedArtifacts": 106,
+    "presentGeneratedArtifacts": 36,
+    "missingHiddenGeneratedArtifacts": 70,
+    "missingByFixture": {
+      "inline": 22,
+      "static-data": 22,
+      "scene": 26
+    },
+    "cause": "upload-artifact v4 default excludes hidden files",
+    "disposition": "Explicitly include hidden files from the existing isolated evidence directory; retain the first incomplete original unchanged."
+  }
 }
