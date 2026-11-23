@@ -183,12 +183,15 @@ describe('prototypes/shadcn: select', () => {
       await settle();
       expect(content.getExposes().transitionState.get()).toBe('closed');
       expect(styleContains(content, 'animate-out')).toBe(true);
-      // Semantic closure is immediate; the existing portaled host conceal
-      // barrier retires the physical view after two rendering opportunities.
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
-      expect(await frame()).toBeGreaterThan(0);
+      // Semantic closure is immediate: the closed view is retired at once.
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      // The portaled host still leaves the compositor before its projection is
+      // revoked, so the physical reparent waits for the conceal barrier's two
+      // rendering opportunities (packages/adapters/web-component/src/portal-conceal.ts).
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.parentElement).toBe(document.body);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.parentElement).not.toBe(document.body);
       expect(styleContains(content, 'animate-out')).toBe(false);
       await vi.advanceTimersByTimeAsync(100);
       await flush();
