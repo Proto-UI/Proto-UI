@@ -313,7 +313,7 @@ pub fn accessible_relation(owner:&OwnerWeak,key:Value,mut value:Value)->Value{
     else{assert!(matches!(target,Value::Json(Json::String(_))|Value::State(_)|Value::BorrowedState(_)|Value::Observed(_,_)|Value::ObjectRef(_)),"[A11y] relation target must be a string, State, or semantic-object ref");}
     owner.borrow_mut().modules.accessible_relations.insert(key.text(),value);Value::Undefined
 }
-pub fn accessible_action_spec(owner:&OwnerWeak,key:Value,spec:Value)->Value{let owner=setup(owner);let key=key.text();let event=text_or(spec.member("event",true),&format!("a11y:{key}"));let mut o=owner.borrow_mut();o.accessible_actions.insert(key.clone());o.modules.action_events.insert(key,event);Value::Undefined}
+pub fn accessible_action_spec(owner:&OwnerWeak,key:Value,spec:Value)->Value{let owner=setup(owner);let key=key.text();let event=text_or(spec.member("event",true),&default_accessibility_event(&key));let mut o=owner.borrow_mut();o.accessible_actions.insert(key.clone());o.modules.action_events.insert(key,event);Value::Undefined}
 #[derive(Clone)]
 pub struct NativeStateWatch{source:Value,previous:Value,callback:Value,active:Rc<Cell<bool>>,disconnected:bool}
 pub fn state_default(receiver:Value,value:Value)->Value{let (Value::State(state)|Value::BorrowedState(state))=receiver else{value_type_error("State handle required")};setup(&state.owner);let next=normalize_state(state.kind,value,&state.spec,true);*state.value.borrow_mut()=next;Value::Undefined}

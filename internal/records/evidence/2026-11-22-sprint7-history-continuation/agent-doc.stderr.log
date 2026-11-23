@@ -1,0 +1,19 @@
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'zod' imported from /workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/packages/spec/schema/src/index.ts
+    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:331:9)
+    at packageResolve (node:internal/modules/esm/resolve:784:25)
+    at moduleResolve (node:internal/modules/esm/resolve:873:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1006:11)
+    at nextResolve (node:internal/modules/esm/hooks:785:28)
+    at resolveBase (file:///workspace/scratch/b8a4839de6ed/s7-harness/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1795373294759:2:3744)
+    at resolveDirectory (file:///workspace/scratch/b8a4839de6ed/s7-harness/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1795373294759:2:4243)
+    at resolveTsPaths (file:///workspace/scratch/b8a4839de6ed/s7-harness/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1795373294759:2:4984)
+    at async resolve (file:///workspace/scratch/b8a4839de6ed/s7-harness/node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/esm/index.mjs?1795373294759:2:5355)
+    at async nextResolve (node:internal/modules/esm/hooks:785:22) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+
+Node.js v24.22.1

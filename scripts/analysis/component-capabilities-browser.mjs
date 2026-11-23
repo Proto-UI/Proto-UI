@@ -545,9 +545,18 @@ async function numberFieldIme(runtime, family) {
           'commit reports the accepted owner value, including refusal'
         );
         const native = await page.evaluate(() => window.__puiNumberFieldIme.events);
+        assert.ok(native.length > 0, 'native composition events observed');
+        // Chromium dispatches the compositionend that terminates a CDP
+        // Input.imeSetComposition composition via Input.insertText as
+        // untrusted; a plain <input> fixture with the identical CDP sequence
+        // reproduces it without product code. Every other event in the
+        // simulated composition is native, and this harness does not claim
+        // the physical-IME boundary.
         assert.ok(
-          native.length && native.every((event) => event.isTrusted),
-          'trusted native events'
+          native
+            .filter((event) => !event.isTrusted)
+            .every((event) => event.type === 'compositionend'),
+          'trusted native events except the insertText compositionend artifact'
         );
         const start = native.findIndex((event) => event.type === 'compositionstart');
         const end = native.findIndex((event) => event.type === 'compositionend');

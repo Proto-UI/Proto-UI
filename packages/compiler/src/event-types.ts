@@ -17,6 +17,12 @@ const optional = (...members: DataType[]): DataType => ({
 });
 /** Data members are admitted only on a proven portable payload, never its control or join. */
 export function eventPayloadMemberType(owner: ValueType, key: string): ValueType | undefined {
+  if (owner === 'a11y-value-event') {
+    if (key === 'control') return 'event-control';
+    if (key === 'type') return 'string';
+    if (key === 'value') return 'number';
+    return undefined;
+  }
   if (owner !== 'event') return undefined;
   if (key === 'control') return 'event-control';
   if (key === 'type') return 'string';
