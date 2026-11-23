@@ -11,9 +11,6 @@ export const SHADCN_BUTTON_WRAP_DEFAULT_SIZE_TOKENS =
 export const SHADCN_BUTTON_DEFAULT_VARIANT_TOKENS = 'bg-primary text-primary-foreground';
 export const SHADCN_BUTTON_OUTLINE_VARIANT_TOKENS =
   'border border-border bg-background text-foreground shadow-xs';
-// Keep the real existing hover until lawful borrowed-state consumer closure is fixed.
-// New York's /90 migration is separate; never preserve /80 via an unused seed.
-export const SHADCN_BUTTON_DEFAULT_HOVER_TOKENS = 'bg-primary/80';
 export const SHADCN_BUTTON_OUTLINE_HOVER_TOKENS = 'bg-accent text-accent-foreground';
 export const SHADCN_BUTTON_FOCUS_TOKENS = 'border-ring ring-3 ring-ring/50';
 export const SHADCN_BUTTON_DISABLED_TOKENS = 'pointer-events-none opacity-50';
