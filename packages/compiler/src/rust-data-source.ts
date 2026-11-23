@@ -21,6 +21,8 @@ export interface RustDataOptions {
   methods: readonly string[];
   /** Stable Cargo identity chosen by the embedding project. */
   crateName?: string;
+  /** Caller-declared Cargo license metadata for translated source; not inferred or SPDX-validated. */
+  sourceLicense?: string;
 }
 export interface RustDataMethod {
   name: string;
@@ -47,6 +49,7 @@ export interface RustDataModule {
     source: PrototypeIR['source'];
     irVersion: PrototypeIR['schemaVersion'];
     backend: 'rust-data-v1';
+    sourceLicense?: string;
     sourceResolution?: {
       version: 1;
       imports: Readonly<Record<string, string>>;
@@ -148,6 +151,17 @@ export function emitRustDataSource(
     return failure(
       'PUI_RUST_DATA_NAME',
       'Choose a non-reserved Cargo name of 1–64 lowercase ASCII letters, digits, underscores or hyphens, beginning with a letter.'
+    );
+  const sourceLicense = options.sourceLicense;
+  if (
+    sourceLicense !== undefined &&
+    (typeof sourceLicense !== 'string' ||
+      !sourceLicense.trim() ||
+      /[\u0000-\u001f\u007f-\u009f\uD800-\uDFFF]/u.test(sourceLicense))
+  )
+    return failure(
+      'PUI_RUST_DATA_LICENSE',
+      'sourceLicense must be a non-empty Unicode string without control characters or unpaired surrogates.'
     );
   const ir = gpuiLexicalNames(checked.value);
   const eligible = portableDataMethods(ir);
@@ -811,7 +825,11 @@ export function emitRustDataSource(
     const dependencies: RustDataModule['dependencies'] = features.has('number-text')
       ? [{ name: 'serde_json', version: '1.0', role: 'language-support' }]
       : [];
-    const manifest = `[package]\nname = ${JSON.stringify(crateName)}\nversion = "0.1.0"\nedition = "2021"\nlicense = "MIT"\npublish = false\n\n[lib]\npath = "lib.rs"\n\n[dependencies]\n${dependencies.map((dependency) => `${dependency.name} = ${JSON.stringify(dependency.version)}\n`).join('')}`;
+    // For well-formed Unicode without controls, JSON quoting is also a safe TOML basic string.
+    // This encodes caller metadata; it does not determine SPDX validity or licensing rights.
+    const licenseLine =
+      sourceLicense === undefined ? '' : 'license = ' + JSON.stringify(sourceLicense) + '\n';
+    const manifest = `[package]\nname = ${JSON.stringify(crateName)}\nversion = "0.1.0"\nedition = "2021"\n${licenseLine}publish = false\n\n[lib]\npath = "lib.rs"\n\n[dependencies]\n${dependencies.map((dependency) => `${dependency.name} = ${JSON.stringify(dependency.version)}\n`).join('')}`;
     return {
       ok: true,
       value: {
@@ -826,6 +844,7 @@ export function emitRustDataSource(
           source: input.source,
           irVersion: input.schemaVersion,
           backend: 'rust-data-v1',
+          ...(sourceLicense === undefined ? {} : { sourceLicense }),
         },
       },
     };

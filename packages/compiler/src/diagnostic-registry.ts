@@ -263,6 +263,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     meaning:
       'Rust data package or normalized public function names are invalid, reserved or colliding.',
   },
+  PUI_RUST_DATA_LICENSE: {
+    category: 'unsupported-input',
+    meaning:
+      'Rust data source-license metadata must be a non-empty Unicode string without control characters or unpaired surrogates.',
+  },
   PUI_RUST_DATA_PURITY: {
     category: 'unsupported-input',
     meaning: 'A selected Rust data function does not have a proven pure portable helper closure.',
