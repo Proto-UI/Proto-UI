@@ -927,7 +927,15 @@ export function intrinsicResult(
     if (
       args.length <= 1 &&
       args.every((type) =>
-        valueAlternatives(type).every((member) => member === 'unknown' || isDataValueType(member))
+        valueAlternatives(type).every(
+          (member) =>
+            member === 'unknown' ||
+            isDataValueType(member) ||
+            (typeof member !== 'string' &&
+              member.kind === 'value-array' &&
+              serializableDataType(member) !== undefined &&
+              !containsRuntimeAuthority(member))
+        )
       )
     )
       return 'string';
@@ -942,8 +950,6 @@ export function intrinsicResult(
     valueAssignable(args[0], 'number')
   )
     return 'number';
-  if (name === 'string' && args.length === 1 && (isDataValueType(args[0]) || args[0] === 'unknown'))
-    return 'string';
   if (name === 'object.freeze' && args.length === 1) {
     const value = args[0];
     // Object.freeze keeps the same array and only freezes its outer slots.

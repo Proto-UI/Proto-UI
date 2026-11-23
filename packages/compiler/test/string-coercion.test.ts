@@ -102,7 +102,9 @@ describe('native String conversion', () => {
     'new String(1);',
     'String(...[1]);',
     'String(()=>1);',
+    'String([()=>1]);',
     "String(def.state.number('count',0));",
+    "String([def.state.bool('enabled',false)]);",
     'String({toString:()=>1});',
   ])('keeps unsupported forms explicit: %s', (body) => {
     expect(parsePrototype(program(body)).ok).toBe(false);
@@ -115,6 +117,24 @@ describe('native String conversion', () => {
     );
     expect(conversions(ir)).toHaveLength(0);
   });
+
+  it.each(nativeOwnerProfiles)(
+    'converts the current contents of an ordinary mutable data array in %s',
+    async (profile) => {
+      const owner = await mountNativeOwner(
+        program(`
+        const values=[1,2];
+        def.expose.method('read',()=>String(values));
+        def.expose.method('append',()=>{values.push(3);return String(values);});
+      `),
+        profile
+      );
+      cleanup.push(owner.dispose);
+      expect(owner.handle.getExposes().read()).toBe('1,2');
+      expect(owner.handle.getExposes().append()).toBe('1,2,3');
+      expect(owner.handle.getExposes().read()).toBe('1,2,3');
+    }
+  );
 
   it('rechecks arity and result type in serialized IR', () => {
     const ir = portable(program('const value=String(1);'));
