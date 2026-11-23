@@ -153,6 +153,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     category: 'unsupported-input',
     meaning: 'Requested props-update policy or capability override is not admitted.',
   },
+  PUI4009: {
+    category: 'unsupported-input',
+    meaning:
+      'Native shader graph or its combination with another material owner is not admitted by the selected source profile.',
+  },
   PUI4101: {
     category: 'invalid-input',
     meaning: 'Project source/manifest entry is not a valid project.',

@@ -32,6 +32,7 @@ exports[`diagnostic registry > keeps a stable registered code set and category t
   "PUI4006:unsupported-input",
   "PUI4007:invalid-input",
   "PUI4008:unsupported-input",
+  "PUI4009:unsupported-input",
   "PUI4101:invalid-input",
   "PUI4102:unsupported-input",
   "PUI4201:invalid-input",

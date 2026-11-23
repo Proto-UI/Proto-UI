@@ -279,6 +279,8 @@ export function publishedDataType(type: ValueType): DataType | undefined {
   if (type.kind === 'object' && type.index === undefined) {
     const fields: { name: string; type: DataType; optional?: boolean }[] = [];
     for (const field of type.fields) {
+      // A readonly data field is copyable; a getter still carries executable authority.
+      if (field.accessor) return undefined;
       const data = publishedDataType(field.type);
       if (!data) return undefined;
       fields.push({ name: field.name, type: data, ...(field.optional ? { optional: true } : {}) });
