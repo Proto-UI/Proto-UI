@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded numeric package-budget transaction",
+  "date": "2026-11-23",
+  "pullRequest": [
+    1736,
+    1737,
+    1733
+  ],
+  "scope": "Only the five package ceilings whose measured gzip size grew past the previous ceiling through the merged 0.3 integration train (sprints 1-7, #1731 and the seven-sprint evidence corpus).",
+  "capabilityLifecycle": "draft, unchanged",
+  "sourceBefore": {
+    "head": "33ac501a90cbe0f074fdb05c7e862076a280ff76",
+    "tree": "ff5eca9845d8dece31b37a9e20a32d429e86aa21",
+    "workingTreeClean": true,
+    "measuredSourceMatchesHead": true,
+    "scope": [
+      "packages",
+      "scripts/analysis",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "fileCount": 7821,
+    "fingerprintSha256": "6186e1f473b8e7100dda876430d9875abfe1c54ad9a5ec0f52f874eb004c601c",
+    "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stableDuringMeasurement": true,
+    "requireClean": true,
+    "expectedSha": "33ac501a90cbe0f074fdb05c7e862076a280ff76"
+  },
+  "baseline": {
+    "source": {
+      "head": "9ecfeef2bfc418c4246ad4bb2f9adc669afa0049",
+      "note": "The previously recorded candidate for the same entries (sprint 4 transaction). No fresh baseline artifact exists for this train candidate; the growth is stated against that recorded candidate."
+    },
+    "reference": "internal/records/2026-11-23-sprint4-shader-package-budget.json"
+  },
+  "candidateBefore": {
+    "source": {
+      "head": "33ac501a90cbe0f074fdb05c7e862076a280ff76",
+      "note": "The integrated train candidate measured by the package-budget gate; the previous ceilings failed by the oldFailureBytes values below."
+    }
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": [
+      "es2020"
+    ],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "entries": [
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "oldCeiling": 12600,
+      "newCeiling": 12800,
+      "baselineGzipBytes": 12486,
+      "candidateGzipBytes": 12686,
+      "gzipGrowthBytes": 200,
+      "oldFailureBytes": 86,
+      "newHeadroomBytes": 114,
+      "headroomPercent": 0.8986,
+      "minifiedSha256": "2e460c614f7d36fd0f35a6228b54e696817d6d7c5aa809bef9e65a49fc7cba96",
+      "minifiedBytes": 40176
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "oldCeiling": 104000,
+      "newCeiling": 104300,
+      "baselineGzipBytes": 102972,
+      "candidateGzipBytes": 104143,
+      "gzipGrowthBytes": 1171,
+      "oldFailureBytes": 143,
+      "newHeadroomBytes": 157,
+      "headroomPercent": 0.1508,
+      "minifiedSha256": "aab043b5f55750e21ebcd1de68e0ba8b11456de6b762803af97c4139153fb4c3",
+      "minifiedBytes": 401965
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 172200,
+      "newCeiling": 172600,
+      "baselineGzipBytes": 170364,
+      "candidateGzipBytes": 172416,
+      "gzipGrowthBytes": 2052,
+      "oldFailureBytes": 216,
+      "newHeadroomBytes": 184,
+      "headroomPercent": 0.1067,
+      "minifiedSha256": "c14de1c4449b09d7a9843f208c98ac6b21f78c5f2ca7a7850a02fe500d2571d9",
+      "minifiedBytes": 606168
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 171000,
+      "newCeiling": 171400,
+      "baselineGzipBytes": 169119,
+      "candidateGzipBytes": 171179,
+      "gzipGrowthBytes": 2060,
+      "oldFailureBytes": 179,
+      "newHeadroomBytes": 221,
+      "headroomPercent": 0.1291,
+      "minifiedSha256": "5281b9b9c32d763593825c038df840d212272ec084c75f0711e1660e2a5ba151",
+      "minifiedBytes": 601571
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 205600,
+      "newCeiling": 207200,
+      "baselineGzipBytes": 203745,
+      "candidateGzipBytes": 206918,
+      "gzipGrowthBytes": 3173,
+      "oldFailureBytes": 1318,
+      "newHeadroomBytes": 282,
+      "headroomPercent": 0.1363,
+      "minifiedSha256": "9648bd691b2550cca635e6fa40f5d6034ae49404bd2fe5c3e5eed72997055548",
+      "minifiedBytes": 709161
+    }
+  ],
+  "unchangedCeilingEntries": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "ceiling": null,
+      "gzipBytes": 2941
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "ceiling": null,
+      "gzipBytes": 637391
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "ceiling": null,
+      "gzipBytes": 5338
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "ceiling": null,
+      "gzipBytes": 7871
+    }
+  ],
+  "headroomRationale": "114-282 gzip bytes per affected entry (0.07-0.90% of measured size) account for bounded symbol/compression variation around this integrated source. These fixed small margins do not budget any further capability or later Sprint combination. Any later integrated combination must be remeasured.",
+  "attribution": "The growth is the merged 0.3 train: the sprint slices (#1711 #1713 #1714 #1715 #1716 #1723), the authored GPUI control input and lifecycle slice (#1731) and the seven-sprint evidence corpus (#1733).",
+  "closureInspection": "Measured by the repository's own package-budget gate on the integrated candidate; the raw measurement is stored below and the gate's report is the canonical evidence.",
+  "localBeforeReproduction": "The gate failed on the integrated candidate with the five old ceilings (oldFailureBytes per entry).",
+  "preservedGate": "The whole-entry anti-regression gate, its measurement shape and the strict/advisory policy are unchanged; only the five measured ceilings change.",
+  "independentEvidence": [
+    "internal/records/2026-11-23-sprint4-shader-package-budget.json",
+    "internal/records/evidence/2026-11-23-train-package-budget/candidate.json"
+  ],
+  "rawEvidence": [
+    {
+      "path": "internal/records/evidence/2026-11-23-train-package-budget/candidate.json",
+      "rawSha256": "effc8565d3402699a5e487f4020e6ec265833b830822e49675fe6b094d97fdd9",
+      "rawBytes": 1547018,
+      "origin": "GitHub Actions artifact package-budgets-33ac501a90cbe0f074fdb05c7e862076a280ff76-45219138046-attempt-1.zip (report.json) from run 45219138046 on 33ac501a90cbe0f074fdb05c7e862076a280ff76"
+    }
+  ],
+  "currentValidation": "node --test scripts/analysis/test/package-budget-policy.test.mjs and the repository's package-budget gate on the next candidate.",
+  "rollback": "Revert the five ceiling values and this record to the previous numbers (12_600 / 104_000 / 172_200 / 171_000 / 205_600) and delete this record and its evidence directory.",
+  "remainingOutsideTransaction": "Any further integrated growth must be remeasured in a separate transaction."
+}
