@@ -1219,175 +1219,196 @@ describe('Shadow closeout native boundaries', () => {
         await page.setContent('<!doctype html><html><head></head><body></body></html>');
         await page.addScriptTag({ content: script });
         await page.mouse.move(600, 400);
-        await page.evaluate(({ artifact, mode }) => {
-          // beforeAll installs these exact local exports in this browser realm.
-          const fixtureWindow = window as unknown as SelectorOpacityWindow;
-          const p = fixtureWindow.Closeout;
-          let setups = 0;
-          const C = p.adapt(
-            p.define({
-              name: 'closeout-selector-owned-opacity',
-              setup(def) {
-                setups++;
-                def.feedback.style.use(p.tw('transition-opacity'));
-                const hovered = def.state.fromInteraction('hovered');
-                def.expose('hovered', hovered);
-                def.rule({
-                  when: (w) => w.state(hovered).eq(true),
-                  intent: (i) => i.feedback.style.use(p.tw('opacity-0')),
-                });
-                const decoration = def.feedback.style.declareDecoration();
-                return (r) => [r.decoration(decoration), r.slot()];
-              },
-            }),
-            { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
-          );
-          const host = new C();
-          host.style.cssText =
-            'position:fixed;left:20px;top:20px;display:block;width:200px;height:80px';
-          const caller = document.createTextNode('Original caller');
-          host.append(caller);
-          document.body.append(host);
-          const root = host.shadowRoot!;
-          const surface = root.querySelector('[part="surface"]') as HTMLElement;
-          const slot = surface.querySelector('slot')!;
-          const decoration = surface.querySelector('[data-pui-owned-decoration]');
-          // Private fields belong to the exact Adapter bundled by beforeAll.
-          const owner = host as unknown as {
-            _controller: object | null;
-            _runtimeGeneration: number;
-            _splitResources: object | null;
-          };
-          const controller = owner._controller;
-          const generation = owner._runtimeGeneration;
-          const resources = owner._splitResources;
-          const identity = () => ({
-            caller: caller.parentNode === host && slot.assignedNodes()[0] === caller,
-            surface: root.querySelector('[part="surface"]') === surface,
-            slot: surface.querySelector('slot') === slot,
-            decoration:
-              !!decoration && surface.querySelector('[data-pui-owned-decoration]') === decoration,
-            controller: !!controller && owner._controller === controller,
-            generation: owner._runtimeGeneration === generation,
-            resources: !!resources && owner._splitResources === resources,
-            setups,
-          });
-          const observer = new MutationObserver(() => {});
-          observer.observe(host, { attributes: true });
-          observer.observe(surface, { attributes: true });
-          const foreign = new CSSStyleSheet();
-          if (mode === 'foreign withdrawal') {
-            foreign.replaceSync('[part="surface"] { opacity: 0 !important; }');
-            root.adoptedStyleSheets = [...root.adoptedStyleSheets, foreign];
-          }
-          const fixture: SelectorOpacityFixture = {
-            snapshot: () => ({
-              compatMode: document.compatMode,
-              opacity: getComputedStyle(surface).opacity,
-              delay: getComputedStyle(surface).transitionDelay,
-              hovered: host.matches(':hover'),
-              qualifiedHovered: host.matches('[data-pui-split-root-style~="hover:opacity-0"]:hover'),
-              transitions: surface.getAnimations().length,
-              tokens: surface.getAttribute('data-pui-style'),
-              identity: identity(),
-            }),
-            leave: null,
-            withdrawForeign() {
-              // Same task: the pointer never enters and no owned selector changes.
-              foreign.replaceSync('');
-              sampleExit();
-            },
-            async dispose() {
-              observer.disconnect();
-              host.remove();
-              for (let frame = 0; frame < 10 && root.childNodes.length; frame++) {
-                const nextFrame = Promise.withResolvers<void>();
-                requestAnimationFrame(() => nextFrame.resolve());
-                await nextFrame.promise;
-              }
-              return {
-                owned: p.ownsSplitZeroOpacity(surface),
-                surfaceConnected: surface.isConnected,
-                nodes: root.childNodes.length,
-                caller: host.firstChild === caller,
-              };
-            },
-          };
-          function sampleExit(event?: PointerEvent) {
-            // Sample in the native input turn: no delay, pause, synthetic event,
-            // projection write or injected animation time holds the zero phase.
-            const opacity = getComputedStyle(surface).opacity;
-            const transition = surface.getAnimations().find(
-              (animation) =>
-                animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
+        await page.evaluate(
+          ({ artifact, mode }) => {
+            // beforeAll installs these exact local exports in this browser realm.
+            const fixtureWindow = window as unknown as SelectorOpacityWindow;
+            const p = fixtureWindow.Closeout;
+            let setups = 0;
+            const C = p.adapt(
+              p.define({
+                name: 'closeout-selector-owned-opacity',
+                setup(def) {
+                  setups++;
+                  def.feedback.style.use(p.tw('transition-opacity'));
+                  const hovered = def.state.fromInteraction('hovered');
+                  def.expose('hovered', hovered);
+                  def.rule({
+                    when: (w) => w.state(hovered).eq(true),
+                    intent: (i) => i.feedback.style.use(p.tw('opacity-0')),
+                  });
+                  const decoration = def.feedback.style.declareDecoration();
+                  return (r) => [r.decoration(decoration), r.slot()];
+                },
+              }),
+              { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
             );
-            const frames = (transition?.effect as KeyframeEffect | null)?.getKeyframes();
-            const exactTarget = (transition?.effect as KeyframeEffect | null)?.target === surface;
-            const progress = transition?.effect?.getComputedTiming().progress;
-            const projectionWrites = observer.takeRecords().length;
-            if (mode === 'external concealment') {
-              const external = new CSSStyleSheet();
-              external.replaceSync(
-                '[part="surface"] { opacity: 0 !important; transition: none !important; }'
-              );
-              root.adoptedStyleSheets = [...root.adoptedStyleSheets, external];
-            } else if (mode === 'another animation') {
-              surface.animate([{ opacity: 0 }, { opacity: 0 }], {
-                duration: 1000,
-                fill: 'both',
-              });
+            const host = new C();
+            host.style.cssText =
+              'position:fixed;left:20px;top:20px;display:block;width:200px;height:80px';
+            const caller = document.createTextNode('Original caller');
+            host.append(caller);
+            document.body.append(host);
+            const root = host.shadowRoot!;
+            const surface = root.querySelector('[part="surface"]') as HTMLElement;
+            const slot = surface.querySelector('slot')!;
+            const decoration = surface.querySelector('[data-pui-owned-decoration]');
+            // Private fields belong to the exact Adapter bundled by beforeAll.
+            const owner = host as unknown as {
+              _controller: object | null;
+              _runtimeGeneration: number;
+              _splitResources: object | null;
+            };
+            const controller = owner._controller;
+            const generation = owner._runtimeGeneration;
+            const resources = owner._splitResources;
+            const identity = () => ({
+              caller: caller.parentNode === host && slot.assignedNodes()[0] === caller,
+              surface: root.querySelector('[part="surface"]') === surface,
+              slot: surface.querySelector('slot') === slot,
+              decoration:
+                !!decoration && surface.querySelector('[data-pui-owned-decoration]') === decoration,
+              controller: !!controller && owner._controller === controller,
+              generation: owner._runtimeGeneration === generation,
+              resources: !!resources && owner._splitResources === resources,
+              setups,
+            });
+            const observer = new MutationObserver(() => {});
+            observer.observe(host, { attributes: true });
+            observer.observe(surface, { attributes: true });
+            const foreign = new CSSStyleSheet();
+            if (mode === 'foreign withdrawal') {
+              foreign.replaceSync('[part="surface"] { opacity: 0 !important; }');
+              root.adoptedStyleSheets = [...root.adoptedStyleSheets, foreign];
             }
-            const update = () => {
-              try {
-                host.update();
-                return null;
-              } catch (error) {
-                return String(error);
+            const fixture: SelectorOpacityFixture = {
+              snapshot: () => ({
+                compatMode: document.compatMode,
+                opacity: getComputedStyle(surface).opacity,
+                delay: getComputedStyle(surface).transitionDelay,
+                hovered: host.matches(':hover'),
+                qualifiedHovered: host.matches(
+                  '[data-pui-split-root-style~="hover:opacity-0"]:hover'
+                ),
+                transitions: surface.getAnimations().length,
+                tokens: surface.getAttribute('data-pui-style'),
+                identity: identity(),
+              }),
+              leave: null,
+              withdrawForeign() {
+                // Same task: the pointer never enters and no owned selector changes.
+                foreign.replaceSync('');
+                sampleExit();
+              },
+              async dispose() {
+                observer.disconnect();
+                host.remove();
+                for (let frame = 0; frame < 10 && root.childNodes.length; frame++) {
+                  const nextFrame = Promise.withResolvers<void>();
+                  requestAnimationFrame(() => nextFrame.resolve());
+                  await nextFrame.promise;
+                }
+                return {
+                  owned: p.ownsSplitZeroOpacity(surface),
+                  surfaceConnected: surface.isConnected,
+                  nodes: root.childNodes.length,
+                  caller: host.firstChild === caller,
+                };
+              },
+            };
+            function sampleExit(event?: PointerEvent) {
+              // Sample in the native input turn: no delay, pause, synthetic event,
+              // projection write or injected animation time holds the zero phase.
+              const opacity = getComputedStyle(surface).opacity;
+              const transition = surface
+                .getAnimations()
+                .find(
+                  (animation) =>
+                    animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
+                );
+              const frames = (transition?.effect as KeyframeEffect | null)?.getKeyframes();
+              const exactTarget = (transition?.effect as KeyframeEffect | null)?.target === surface;
+              const progress = transition?.effect?.getComputedTiming().progress;
+              const projectionWrites = observer.takeRecords().length;
+              if (mode === 'external concealment') {
+                const external = new CSSStyleSheet();
+                external.replaceSync(
+                  '[part="surface"] { opacity: 0 !important; transition: none !important; }'
+                );
+                root.adoptedStyleSheets = [...root.adoptedStyleSheets, external];
+              } else if (mode === 'another animation') {
+                surface.animate([{ opacity: 0 }, { opacity: 0 }], {
+                  duration: 1000,
+                  fill: 'both',
+                });
               }
-            };
-            const updates = [update(), update()];
-            fixture.leave = {
-              trusted: event?.isTrusted ?? false,
-              hovered: host.matches(':hover'),
-              opacity,
-              delay: getComputedStyle(surface).transitionDelay,
-              projectionWrites,
-              transition: !!transition,
-              exactTarget,
-              endpoints: [frames?.[0]?.opacity, frames?.at(-1)?.opacity],
-              progress,
-              concealedOpacity: getComputedStyle(surface).opacity,
-              owned: p.ownsSplitZeroOpacity(surface),
-              retainedTransition: !!transition && surface.getAnimations().includes(transition),
-              otherOpacityAnimation: surface.getAnimations().some((animation) =>
-                !(animation instanceof CSSTransition) &&
-                animation.effect instanceof KeyframeEffect &&
-                animation.effect.target === surface &&
-                animation.effect.getKeyframes().some((frame) => frame.opacity !== undefined)
-              ),
-              updates,
-              identity: identity(),
-            };
+              const update = () => {
+                try {
+                  host.update();
+                  return null;
+                } catch (error) {
+                  return String(error);
+                }
+              };
+              const updates = [update(), update()];
+              fixture.leave = {
+                trusted: event?.isTrusted ?? false,
+                hovered: host.matches(':hover'),
+                opacity,
+                delay: getComputedStyle(surface).transitionDelay,
+                projectionWrites,
+                transition: !!transition,
+                exactTarget,
+                endpoints: [frames?.[0]?.opacity, frames?.at(-1)?.opacity],
+                progress,
+                concealedOpacity: getComputedStyle(surface).opacity,
+                owned: p.ownsSplitZeroOpacity(surface),
+                retainedTransition: !!transition && surface.getAnimations().includes(transition),
+                otherOpacityAnimation: surface
+                  .getAnimations()
+                  .some(
+                    (animation) =>
+                      !(animation instanceof CSSTransition) &&
+                      animation.effect instanceof KeyframeEffect &&
+                      animation.effect.target === surface &&
+                      animation.effect.getKeyframes().some((frame) => frame.opacity !== undefined)
+                  ),
+                updates,
+                identity: identity(),
+              };
+            }
+            host.addEventListener('pointerleave', sampleExit, { once: true });
+            fixtureWindow.selectorOpacity = fixture;
+          },
+          {
+            artifact: renderProtoShadowSplitStyleArtifact([
+              'transition-opacity',
+              'hover:opacity-0',
+            ]),
+            mode,
           }
-          host.addEventListener('pointerleave', sampleExit, { once: true });
-          fixtureWindow.selectorOpacity = fixture;
-        }, {
-          artifact: renderProtoShadowSplitStyleArtifact(['transition-opacity', 'hover:opacity-0']),
-          mode,
-        });
+        );
         const identity = {
-          caller: true, surface: true, slot: true, decoration: true,
-          controller: true, generation: true, resources: true, setups: 1,
+          caller: true,
+          surface: true,
+          slot: true,
+          decoration: true,
+          controller: true,
+          generation: true,
+          resources: true,
+          setups: 1,
         };
         const expectSnapshot = async (expected: unknown) => {
           let lastSnapshot: unknown;
           try {
-            await expect.poll(async () => {
-              lastSnapshot = await page.evaluate(() =>
-                (window as unknown as SelectorOpacityWindow).selectorOpacity.snapshot()
-              );
-              return lastSnapshot;
-            }).toEqual(expected);
+            await expect
+              .poll(async () => {
+                lastSnapshot = await page.evaluate(() =>
+                  (window as unknown as SelectorOpacityWindow).selectorOpacity.snapshot()
+                );
+                return lastSnapshot;
+              })
+              .toEqual(expected);
           } catch (cause) {
             throw new Error(
               `Selector opacity ${mode}: last native snapshot ${JSON.stringify(lastSnapshot)}`,
@@ -1398,41 +1419,62 @@ describe('Shadow closeout native boundaries', () => {
         if (mode !== 'foreign withdrawal') await page.mouse.move(30, 30);
         await expectSnapshot({
           compatMode: 'CSS1Compat',
-          opacity: '0', delay: '0s', hovered: mode !== 'foreign withdrawal', transitions: 0,
+          opacity: '0',
+          delay: '0s',
+          hovered: mode !== 'foreign withdrawal',
+          transitions: 0,
           qualifiedHovered: mode !== 'foreign withdrawal',
-          tokens: 'transition-opacity hover:opacity-0', identity,
+          tokens: 'transition-opacity hover:opacity-0',
+          identity,
         });
         if (mode === 'foreign withdrawal') {
           await page.evaluate(() =>
             (window as unknown as SelectorOpacityWindow).selectorOpacity.withdrawForeign()
           );
         } else await page.mouse.move(600, 400);
-        const leave = await page.evaluate(() =>
-          (window as unknown as SelectorOpacityWindow).selectorOpacity.leave
+        const leave = await page.evaluate(
+          () => (window as unknown as SelectorOpacityWindow).selectorOpacity.leave
         );
         expect(leave, `Native exit observation: ${JSON.stringify(leave)}`).toMatchObject({
-          trusted: mode !== 'foreign withdrawal', hovered: false, opacity: '0', projectionWrites: 0,
-          transition: true, exactTarget: true, endpoints: ['0', '1'], progress: 0, identity,
+          trusted: mode !== 'foreign withdrawal',
+          hovered: false,
+          opacity: '0',
+          projectionWrites: 0,
+          transition: true,
+          exactTarget: true,
+          endpoints: ['0', '1'],
+          progress: 0,
+          identity,
           owned: mode === 'native',
           retainedTransition: mode !== 'external concealment',
           otherOpacityAnimation: mode === 'another animation',
           concealedOpacity: '0',
-          updates: mode === 'native'
-            ? [null, null]
-            : [expect.stringMatching(/decoration physical blueprint changed/),
-              expect.stringMatching(/decoration physical blueprint changed/)],
+          updates:
+            mode === 'native'
+              ? [null, null]
+              : [
+                  expect.stringMatching(/decoration physical blueprint changed/),
+                  expect.stringMatching(/decoration physical blueprint changed/),
+                ],
         });
         expect(leave?.delay).toBe('0s');
         if (mode === 'native') {
           await expectSnapshot({
-            compatMode: 'CSS1Compat', qualifiedHovered: false,
-            opacity: '1', delay: '0s', hovered: false, transitions: 0,
-            tokens: 'transition-opacity hover:opacity-0', identity,
+            compatMode: 'CSS1Compat',
+            qualifiedHovered: false,
+            opacity: '1',
+            delay: '0s',
+            hovered: false,
+            transitions: 0,
+            tokens: 'transition-opacity hover:opacity-0',
+            identity,
           });
         }
-        expect(await page.evaluate(() =>
-          (window as unknown as SelectorOpacityWindow).selectorOpacity.dispose()
-        )).toEqual({ owned: false, surfaceConnected: false, nodes: 0, caller: true });
+        expect(
+          await page.evaluate(() =>
+            (window as unknown as SelectorOpacityWindow).selectorOpacity.dispose()
+          )
+        ).toEqual({ owned: false, surfaceConnected: false, nodes: 0, caller: true });
         expect(errors).toEqual([]);
       } finally {
         await page.close();
@@ -1618,10 +1660,12 @@ describe('Shadow closeout native boundaries', () => {
             await Promise.resolve();
             const ruleTokens = surface.getAttribute('data-pui-style');
             const findOpacityTransition = () =>
-              surface.getAnimations().find(
-                (animation: Animation) =>
-                  animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
-              );
+              surface
+                .getAnimations()
+                .find(
+                  (animation: Animation) =>
+                    animation instanceof CSSTransition && animation.transitionProperty === 'opacity'
+                );
             findOpacityTransition()?.finish();
             const initialOpacity = getComputedStyle(surface).opacity;
             // Native CSS delay holds the withdrawal's actual zero phase.
@@ -3335,6 +3379,78 @@ describe('Shadow closeout native boundaries', () => {
       await page.close();
     }
   });
+
+  it.each(['input', 'textarea'] as const)(
+    'reprojects entry during native dir=auto %s input without an attribute change',
+    async (tag) => {
+      const page = await browser.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      try {
+        await page.addScriptTag({ content: script });
+        await page.addStyleTag({
+          content:
+            'body:has(#entry-direction-editor:dir(rtl)) #native-direction-entry button { visibility: hidden; }',
+        });
+        const initial = await page.evaluate(async (editorTag) => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-input-direction-entry',
+              setup() {
+                p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                return (r: any) => r.slot();
+              },
+            })
+          );
+          const editor = document.createElement(editorTag);
+          editor.id = 'entry-direction-editor';
+          editor.dir = 'auto';
+          editor.value = 'Latin';
+          const host = new C();
+          host.id = 'native-direction-entry';
+          const button = document.createElement('button');
+          button.textContent = 'Direction-dependent entry target';
+          host.append(button);
+          document.body.append(editor, host);
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          const snapshot = () => ({
+            fallback: host.getAttribute('tabindex'),
+            direction: getComputedStyle(editor).direction,
+            visibility: getComputedStyle(button).visibility,
+            dir: editor.getAttribute('dir'),
+          });
+          (window as any).entryDirectionObservations = [];
+          document.addEventListener('input', (event) => {
+            if (event.target !== editor) return;
+            // The observer runs in the same native input dispatch, after the
+            // Adapter's capture listeners and before later microtask repairs.
+            (window as any).entryDirectionObservations.push({
+              trusted: event.isTrusted,
+              ...snapshot(),
+            });
+          });
+          return snapshot();
+        }, tag);
+        expect(initial).toEqual({
+          fallback: null,
+          direction: 'ltr',
+          visibility: 'visible',
+          dir: 'auto',
+        });
+
+        await page.locator('#entry-direction-editor').fill('עברית');
+        await page.locator('#entry-direction-editor').fill('Latin');
+        expect(await page.evaluate(() => (window as any).entryDirectionObservations)).toEqual([
+          { trusted: true, fallback: '0', direction: 'rtl', visibility: 'hidden', dir: 'auto' },
+          { trusted: true, fallback: null, direction: 'ltr', visibility: 'visible', dir: 'auto' },
+        ]);
+        expect(errors).toEqual([]);
+      } finally {
+        await page.close();
+      }
+    }
+  );
 
   it('reprojects descendant entry at a native visibility transition endpoint', async () => {
     const page = await browser.newPage();

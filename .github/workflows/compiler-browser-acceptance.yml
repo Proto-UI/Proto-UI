@@ -82,9 +82,12 @@ jobs:
             packages/compiler/test/privileged-capture-metadata.test.ts \
             packages/compiler/test/capture-getter-presence.test.ts \
             packages/compiler/test/capture-host-presence.test.ts \
+            packages/compiler/test/json-boundary-provenance.test.ts \
+            packages/compiler/test/json-boundary-getter-consumer.test.ts \
             packages/compiler/test/request-owner-ssr.test.ts \
             packages/compiler/test/physical-control-ssr.test.ts \
             packages/compiler/test/owner-hydration-retirement.test.ts \
+            packages/compiler/test/vue-owner-hydration.test.ts \
             packages/compiler/test/button-ssr-server.test.ts \
             packages/compiler/test/gpui-a11y-value.test.ts \
             packages/compiler/test/gpui-capabilities.test.ts \
@@ -97,6 +100,7 @@ jobs:
             packages/compiler/test/gpui-sdk-compatibility.test.ts \
             packages/compiler/test/gpui-authored-inputs.test.ts \
             packages/compiler/test/string-coercion.test.ts \
+            packages/adapters/web-component/test/focus-entry-input-origin.test.ts \
             packages/runtime/test/contract/lifecycle.request.contract.test.ts \
             packages/runtime/test/contract/lifecycle.initial-data.contract.test.ts \
             packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts \

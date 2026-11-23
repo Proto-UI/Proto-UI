@@ -14,7 +14,7 @@ struct NativeScrollBinding{target:NativeScrollTarget,generation:u64,window:gpui:
 /// Dropping an old lease cannot detach a replacement or write foreign offsets.
 pub struct NativeScrollLease{owner:OwnerWeak,generation:u64}
 impl NativeScrollLease{
-    pub fn is_current(&self)->bool{self.owner.upgrade().is_some_and(|owner|{let o=owner.borrow();!o.disposed&&o.modules.scroll.external.as_ref().is_some_and(|binding|binding.generation==self.generation)})}
+    pub fn is_current(&self)->bool{self.owner.upgrade().is_some_and(|owner|{let o=owner.borrow();!o.disposed&&!o.disposing&&o.modules.scroll.external.as_ref().is_some_and(|binding|binding.generation==self.generation)})}
     /// Native wheels/touch may be consumed inside a virtualized child. This
     /// reports physical input only; it makes no authored navigation decision.
     pub fn note_input(&self,window:&mut Window)->bool{

@@ -154,30 +154,37 @@ jobs:
             --output "$RUNNER_TEMP/gpui-evidence/official-control-label-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/official-control-label-graph.log"
       - name: Build the default published native SDK
+        id: native_sdk
         run: |
           set -euo pipefail
           cargo +1.98.1 check --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --lib 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/default-check.log"
       - name: Execute generated Rust consumers and resource controls
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
       - name: Execute unchanged compiled Button Toggle and Label consumers
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
       - name: Execute the official Input delegate and physical ControlLabel consumer
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml" --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/official-control-label-consumer.log"
       - name: Verify bounded native text-selection style mapping
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test style_mapping -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/style-mapping-consumer.log"
       - name: Verify native accessibility activation through authored operations
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test a11y_activation -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/a11y-activation-consumer.log"
       - name: Execute the generated numeric accessibility action bridge
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           node --import tsx packages/compiler/test/fixtures/gpui-a11y-value/produce.mjs "$RUNNER_TEMP/gpui-evidence/numeric-action" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-producer.log"
@@ -191,14 +198,17 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test a11y_value -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-consumer.log"
       - name: Verify explicit native scroll pause against ordinary requests
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_pause -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-pause-consumer.log"
       - name: Verify native scroll reader displacement and append behavior
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_reader -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-reader-consumer.log"
       - name: Execute emitted SDK lifecycle and control regressions
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \

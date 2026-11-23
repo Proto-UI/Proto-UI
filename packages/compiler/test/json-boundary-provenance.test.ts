@@ -89,6 +89,17 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `run.expose.emit('changed',Object.assign({},{child:view}));`,
     ],
     [
+      'a copied getter retains its unsafe returned backing record',
+      view('undefined'),
+      `const copied={...{get child(){return view;}}};run.expose.emit('changed',copied);`,
+    ],
+    [
+      'Object.assign retains an unsafe getter return',
+      `const original={value:'ok',hidden:undefined};
+      const view:{value:string}=original;`,
+      `run.expose.emit('changed',Object.assign({}, {get child(){return view;}}));`,
+    ],
+    [
       'later mutation through an alias',
       `const original:{value:string,hidden:string|undefined}={value:'ok',hidden:'safe'};
       const view:Readonly<{value:string}>=original;`,
@@ -139,6 +150,11 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `run.expose.emit('changed',{value:String(42),count:Number('3')});`,
     ],
     ['ordinary arrays', '', `run.expose.emit('changed',{values:[1,2,3]});`],
+    [
+      'known nullish spread has no enumerable fields',
+      '',
+      `const empty: {unused?:string}|undefined=undefined;run.expose.emit('changed',{...empty,value:'safe'});`,
+    ],
     [
       'optional spread preserves an already safe existing field',
       `const flag=def.state.bool('flag',false);`,
