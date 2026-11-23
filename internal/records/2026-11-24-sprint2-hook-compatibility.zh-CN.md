@@ -81,3 +81,14 @@
 公开七成员现已可直接取回；其原 blob IDs 与哈希在 recovery JSON 中。原完整 archive 仍须从原保管位置取得，并校验已记录的压缩包 SHA、member manifest、Git tree、hidden membership 和 modes。历史已知位置为 `/workspace/worktrees/release03-issue-1154-wave-20261111`、 `/workspace/worktrees/compiler-core-default-slot-20261010` 和 `/tmp/p1154-1111/criterion1154-main-b252-run01` 等；本环境中没有这些目录。这些字符串是恢复线索，不是有效下载链接，也没有证明其他设备上不存在原件。
 
 原 DCO、独立审查、R1/R2/R3 红色原件、完整 source/archive、原两个复合 Issue 条件、13 条验收及真实非 Web/目标消费者仍按各自事实保留。本记录不关闭 #1154。
+
+## 有界设备来源检查
+
+对 `doesvm-3f08` 的已知旧工作目录 `/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono` 做了只读、有界查找。[原始调用结果](./evidence/2026-11-24-sprint2-hook-boundary/device-archive-search.json)保留成功、访问边界、超时和连接失败，SHA-256 为 `e0c65c96c79da9ef91133ecd23ff744d022a36b91f91d80688671b1a6ceba254`。
+
+- 成功读取该工作目录、`evidence`、`sprint2`、`evidence/s2-s3`、`evidence/s2-s3/short-batch-1`、`evidence/sprint12-final-d039-20261123`、`evidence/continuation-root-4deb` 和 `compiler-reconcile-r1` 的一级名称。没有在这些列出的成员中发现原 Hook archive。
+- `evidence` 内限定两层的 `*/*1154*` 没有文件；`*/*hook*` 命中普通 Git hooks / 格式修复记录。`*/*archive*` 的相关命中经读回为 11 月 23 日八个 Sprint 2 证据目录的原字节格式恢复提案，没有宣称原 13,091-member Hook 源码归档。`sprint2/internal` 的两层 `1154` 命中已公开的 dated record，不是新的原件。
+- 原 `/workspace/worktrees/release03-issue-1154-wave-20261111`、`/workspace/worktrees/compiler-core-default-slot-20261010`、`/tmp/p1154-1111` 被设备 relay 拒绝为 `path escapes root`。没有绕过这个访问边界，也不能据此记为“路径不存在”。
+- 首个两层列名 shell 调用超时；随后 `source`、Issue 引用的 `archive-scope-review.md` 精确路径及旧根两层名称匹配发生连接失败。这些未取得结果的请求不构成否定证据。
+
+因此本轮仍未恢复原压缩包、原 member manifest 或 R1/R2/R3 的执行文件。完整公开七成员已经恢复的事实保持有效；本次未作全设备扫描、未修改远端文件，也未拿新压缩包替换原 archive 身份。

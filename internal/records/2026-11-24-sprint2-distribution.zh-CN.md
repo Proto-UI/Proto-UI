@@ -83,3 +83,11 @@ node scripts/docs/check-public-docs.mjs
 生成源码、executable bytes、dependency payload、进程内单次观测及内存快照分别保留在原普通消费者 `costs.json` / `timing.json`，没有合并为 bundle 性能结论，没有宣称 production retained bundle 或 input-to-photon 接受。
 
 原 #1458 F11/F12/F13 完整接受、Vue3 family 修复、最终整合 head 与独立接受仍需分别记录。本次没有远端写入、registry 发布、版本升级或关闭 Issue。
+
+## #1055 F6 成本边界对账
+
+现有 `scripts/compiler/release-family-costs.mjs` 只能接受 `summary.ok === true` 的完整普通家族消费者结果，再对同一安装内的 Base Button（N=1）和 Base / Shadcn / Brutalist Button（N=3）执行 esbuild 0.25.12 的真实 browser ESM production bundle。它分别保留生成源码、helper 源码、retained output、gzip、support retained bytes、逐输入 hashes 和 metafile；目标依赖进入 bundle。当前旧来源的 Vue3 family 尚失败，所以没有绕过该 guard 用失败 summary 量成本。
+
+原 F6 的 text-watch 17.2 KiB、counter-press 110.7 KiB、三探针 224.5 KiB、Adapter 562.6 KiB 是同一 `excluding-React` 边界的历史报告。Issue 原说明仍记原 fixtures / captures 尚未公开；现有 Button 输入和依赖边界不同，不能据此宣称复现、更正或取代那四个数字。原始任务及构建参数须可读后，才可按同边界重放并诊断实际重复 module 身份。
+
+现有初始化段仅对已 import 的 production React，在 Happy DOM 各观察一次 1 / 3 owner 的 mount、真实 framework flush、dispose、Root 清空及旧 handles 退休。它不是 allocation / registration 数量、稳定的冷热分布、预算接受或 Adapter 比较。后续可用最终整合家族 green 的同一安装运行成本脚本，取得新来源的有界数据；原完整项目级去重、全部适用目标、初始化分配 / 注册预算和 cleanup / Context / Focus 反例继续独立保留。
