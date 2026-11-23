@@ -7,15 +7,34 @@ import {
 import type { BrowserCompileResult } from '../src/browser/protocol';
 
 /** Host protocol tests inject messages/time, not executed iframe or WASM evidence. */
-function preview() {
+function preview(listenerReady = true) {
   const host = document.createElement('div');
   document.body.append(host);
+  const provenanceSource = {
+    file: 'retirement-fixture.ts',
+    exportName: 'default',
+    sha256: '0'.repeat(64),
+  };
   const result = {
     ok: true,
     revision: 'retirement-revision',
-    output: { profile: 'web-component-source-v1' },
-    preview: { format: 1, entry: 'preview', modules: {}, events: [], styles: [] },
-  } as Extract<BrowserCompileResult, { ok: true }>;
+    requestSha256: '1'.repeat(64),
+    source: provenanceSource,
+    output: {
+      code: '',
+      profile: 'web-component-source-v1',
+      dependencies: [],
+      provenance: { source: provenanceSource, irVersion: 7, backend: 'web-component-source-v1' },
+    },
+    preview: {
+      format: 1,
+      entry: 'preview',
+      modules: {},
+      events: [],
+      styles: [],
+      executionBudget: '100000-checkpoints-per-task-v1',
+    },
+  } satisfies Extract<BrowserCompileResult, { ok: true }>;
   const target: BrowserTargetAssets = {
     format: 1,
     profile: 'web-component-source-v1',
@@ -38,7 +57,10 @@ function preview() {
       })
     );
   };
-  message('preview-ready', { data: { profile: target.profile } });
+  if (listenerReady) {
+    message('preview-listener-ready');
+    message('preview-ready', { data: { profile: target.profile } });
+  }
   return { host, mounted, message, send };
 }
 
@@ -51,6 +73,47 @@ afterEach(() => {
 });
 
 describe('compiled preview retirement acknowledgement', () => {
+  it('retires an unready frame only after its current listener handshake and actual acknowledgement', async () => {
+    const { host, mounted, message, send } = preview(false);
+    const retirement = mounted.dispose();
+    expect(mounted.dispose()).toBe(retirement);
+    expect(send).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(100);
+    message('preview-listener-ready', { source: window });
+    message('preview-listener-ready', { origin: 'https://unrelated.invalid' });
+    message('preview-listener-ready', { data: { token: 'wrong-token' } });
+    message('preview-listener-ready', { data: { revision: 'old-revision' } });
+    expect(send).not.toHaveBeenCalled();
+    message('preview-listener-ready');
+    expect(send).toHaveBeenCalledOnce();
+    message('preview-listener-ready');
+    expect(send).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(149);
+    expect(host.children).toHaveLength(1);
+    message('disposed');
+    await expect(retirement).resolves.toBeUndefined();
+    expect(host.children).toHaveLength(0);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('does not restart the original deadline when an unready frame announces its listener late', async () => {
+    const { host, mounted, message, send } = preview(false);
+    const retirement = mounted.dispose();
+    const rejected = expect(retirement).rejects.toThrow(/cleanup.*acknowledg/i);
+    void rejected.catch(() => {});
+    await vi.advanceTimersByTimeAsync(249);
+    message('preview-listener-ready');
+    expect(send).toHaveBeenCalledOnce();
+    await vi.advanceTimersByTimeAsync(1);
+    await rejected;
+    expect(host.children).toHaveLength(0);
+    message('preview-listener-ready');
+    message('disposed');
+    expect(send).toHaveBeenCalledOnce();
+    await expect(mounted.dispose()).rejects.toThrow(/cleanup.*acknowledg/i);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('rejects a missing acknowledgement while reclaiming the iframe and listeners', async () => {
     const { host, mounted, send, message } = preview();
     const remove = vi.spyOn(window, 'removeEventListener');

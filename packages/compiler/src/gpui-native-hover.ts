@@ -199,6 +199,8 @@ mod native_hover_tests {
         fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
             let mut root=div().size_full().flex().flex_col();
             for (owner,path) in [(&self.label,"hover-label"),(&self.target,"hover-target")] {
+                // Terminal owners deliberately have no projection to paint.
+                if owner.borrow().disposed { continue; }
                 Owner::project(owner);
                 let snapshot=owner.borrow().projection.clone().unwrap();
                 root=root.child(paint_native_root(&snapshot,owner,&self.focus,path.into(),Rc::new(|_,_|{})));
@@ -248,6 +250,12 @@ mod native_hover_tests {
                 assert_eq!(calls.get(),1,"a cancelled hover turn cannot activate on the subsequent native click");
             }
             Owner::dispose(&host.label);Owner::dispose(&host.target);
+        }).unwrap();
+        frames(window,cx);
+        window.update(cx,|host,_,_| {
+            assert!(host.label.borrow().disposed&&host.target.borrow().disposed);
+            assert!(host.label.borrow().projection.is_none()&&host.target.borrow().projection.is_none());
+            assert_eq!(calls.get(),1,"terminal native frames cannot revive retired label activation");
         }).unwrap();
     }
 

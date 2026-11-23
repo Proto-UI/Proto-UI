@@ -313,19 +313,25 @@ try {
       assert.equal(await element.getAttribute('sandbox'), 'allow-scripts');
       const facts = await (await element.elementHandle()).contentFrame().then((child: any) =>
         child.evaluate(() => {
-          const rejected = (read: () => unknown) => {
-            try {
-              read();
-              return false;
-            } catch {
-              return true;
-            }
-          };
-          return {
-            parent: rejected(() => parent.document),
-            storage: rejected(() => localStorage.getItem('probe')),
-            cookie: rejected(() => document.cookie),
-          };
+          let parentBlocked = false;
+          let storageBlocked = false;
+          let cookieBlocked = false;
+          try {
+            void parent.document;
+          } catch {
+            parentBlocked = true;
+          }
+          try {
+            localStorage.getItem('probe');
+          } catch {
+            storageBlocked = true;
+          }
+          try {
+            void document.cookie;
+          } catch {
+            cookieBlocked = true;
+          }
+          return { parent: parentBlocked, storage: storageBlocked, cookie: cookieBlocked };
         })
       );
       assert.deepEqual(facts, { parent: true, storage: true, cookie: true });
