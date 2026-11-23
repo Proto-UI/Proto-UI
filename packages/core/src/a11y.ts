@@ -1,5 +1,6 @@
 import type { State } from './state';
 import type { AnatomyFamily } from './anatomy';
+import type { ProtoEventControl } from '@proto.ui/types';
 
 declare const A11Y_SEMANTIC_OBJECT_REF: unique symbol;
 
@@ -67,6 +68,17 @@ export type A11yStateBinding<V = unknown> = {
 export type A11yActionSpec = {
   event?: string;
 };
+
+/**
+ * Finite numeric request from a host implementing the SetValue action bridge.
+ * This is a host payload schema, not a portable semantic Event or a State write.
+ * The GPUI compiler proves it from a preceding setValue action declaration.
+ */
+export type A11ySetValueEventPayload = Readonly<{
+  type: string;
+  value: number;
+  control: ProtoEventControl;
+}>;
 
 export type A11yRelationTarget =
   | string

@@ -13,6 +13,8 @@ import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
+import { gpuiNativeNotifySource } from './gpui-native-notify';
+import { gpuiNativeHoverSource } from './gpui-native-hover';
 
 export const gpuiNativeOwnerSource =
   String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
@@ -24,6 +26,13 @@ pub type Callback = Rc<dyn Fn(Vec<Value>) -> Value>;
 // Native frame factories capture an authored-render snapshot; they do not store
 // semantic tags or re-run the authored render function during native repaint.
 pub type NativeRenderer = Rc<dyn Fn(Vec<Value>) -> NativeSnapshot>;
+// Checked rendering is an additional use of the original authored callable.
+// Keep its identity and scalar invocation separate from the native conversion;
+// a hook's captured render field remains the same JavaScript function.
+pub struct RendererAdapter { pub callable:Value, pub render:NativeRenderer, public_owner:Option<OwnerWeak> }
+pub fn capture_renderer(callable:Value,render:NativeRenderer)->Value {
+    Value::Renderer(Rc::new(RendererAdapter{callable,render,public_owner:None}))
+}
 // A native helper is an ordinary typed closure with its own runtime identity.
 // Its identity is independent of both its FunctionIR declaration and child snapshots.
 pub struct NativeCallable<F:?Sized> { pub identity:Rc<()>, pub call:Rc<F>, pub ordinary:Option<Value> }
@@ -34,7 +43,7 @@ impl<F:?Sized> NativeCallable<F> {
     pub fn truthy(&self)->bool { true }
     pub fn nullish(&self)->bool { false }
     pub fn equals_native<G:?Sized>(&self,other:&NativeCallable<G>)->bool { Rc::ptr_eq(&self.identity,&other.identity) }
-    pub fn equals_value(&self,other:&Value)->bool { self.ordinary.as_ref().map(|value|strict_equal(value,other)).unwrap_or_else(||matches!(other,Value::NativeFunction{identity,..} if Rc::ptr_eq(&self.identity,identity))) }
+    pub fn equals_value(&self,other:&Value)->bool { self.ordinary.as_ref().map(|value|strict_equal(value,other)).unwrap_or_else(||matches!(other.callable_value(),Value::NativeFunction{identity,..} if Rc::ptr_eq(&self.identity,identity))) }
 }
 pub type NativeFrame = Rc<dyn Fn(&OwnerRef,&FocusHandle,&str,&Drive,&[NativeSnapshot],&mut usize)->Vec<AnyElement>>;
 #[derive(Clone)]
@@ -85,7 +94,7 @@ pub fn assert_native_slot_children(children:&[NativeSnapshot]) {
 #[derive(Clone)]
 pub enum Value {
     Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16), Utf16String(Rc<Vec<u16>>),
-    Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(NativeRenderer), Owner(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
+    Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(Rc<RendererAdapter>), Owner(OwnerWeak), DefinitionOwner(OwnerWeak), RenderOwner(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
     Style(Vec<(String, String)>), Resource(Rc<Cell<bool>>),
     Input(Rc<Input>), ControlLabelRequest(Rc<ControlLabelRequest>),
     StaticCapability(&'static StaticDeclaration), Handle(OwnerWeak, &'static str),
@@ -141,6 +150,7 @@ impl Value {
         Self::Json(Json::Object(value)) => value.get(key).cloned().map(Self::json).unwrap_or(Self::Undefined),
         Self::Record(value) => value.fields.borrow().get(key).cloned().unwrap_or(Self::Undefined),
         Self::Array(value) => if key=="length"{Self::number(value.len()as f64)}else{key.parse::<usize>().ok().and_then(|index|value.get(index).cloned()).unwrap_or(Self::Undefined)},
+        Self::Input(_) if key=="control" => self.clone(),
         Self::Input(value) => value.fields.get(key).cloned().map(Self::Json).unwrap_or(Self::Undefined),
         Self::ControlLabelRequest(request) if key == "source" => Self::string(request.source),
         Self::ContextKey(_) if key=="__brand" => Self::string("ContextKey"),
@@ -173,16 +183,19 @@ impl Value {
     pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>ecma_string_number(v),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>String::from_utf16(&self.string_units()).map(|text|ecma_string_number(&text)).unwrap_or(f64::NAN),Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
     pub fn nullish(&self) -> bool { matches!(self,Self::Undefined|Self::Json(Json::Null)) }
     pub fn call(&self,args:Vec<Self>)->Result<Self,Self>{catch_authored(||self.call_authored(args))}
+    pub fn callable_value(&self)->&Self { match self { Self::Renderer(adapter)=>adapter.callable.callable_value(), _=>self } }
+    pub fn is_callback(&self)->bool { matches!(self.callable_value(),Self::Function(_)) }
     // Compiler-emitted authored composition stays in one exception scope.
     // Native consumers use call(), which returns before any GPUI lease unwinds.
-    pub fn call_authored(&self, args: Vec<Self>) -> Self { match self { Self::Function(f)=>f(args), _=>value_type_error("Value is not callable") } }
+    pub fn call_authored(&self, args: Vec<Self>) -> Self { match self.callable_value() { Self::Function(f)=>f(args), _=>value_type_error("Value is not callable") } }
     pub fn get(&self) -> Self { match self { Self::State(state)|Self::BorrowedState(state)=>{ensure(&state.owner);state.value.borrow().clone()}, Self::Observed(owner, key)=>observed(owner,key), _=>value_type_error("expected State handle") } }
-    pub fn owner(&self) -> OwnerWeak { match self { Self::Owner(owner)|Self::Handle(owner,_)|Self::HostTarget(owner)|Self::Part(owner,_)|Self::ObjectRef(owner)=>owner.clone(), _=>panic!("expected owner capability") } }
+    pub fn owner(&self) -> OwnerWeak { match self { Self::Owner(owner)|Self::DefinitionOwner(owner)|Self::RenderOwner(owner)|Self::Handle(owner,_)|Self::HostTarget(owner)|Self::Part(owner,_)|Self::ObjectRef(owner)=>owner.clone(), _=>panic!("expected owner capability") } }
     pub fn items(&self) -> Vec<Self> { match self {Self::Array(v)=>(**v).clone(),Self::Json(Json::Array(v))=>v.iter().cloned().map(Self::json).collect(),_=>value_type_error("expected array")} }
 }
 pub fn strict_equal(a:&Value,b:&Value)->bool {
+    let a=a.callable_value();let b=b.callable_value();
     if a.is_string()&&b.is_string(){return a.string_units()==b.string_units()}
-    match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::ControlLabelRequest(a),Value::ControlLabelRequest(b))=>Rc::ptr_eq(a,b),(Value::ContextKey(a),Value::ContextKey(b))=>a==b,(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))|(Value::BorrowedState(a),Value::BorrowedState(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.identity()==b.identity(),(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
+    match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::ControlLabelRequest(a),Value::ControlLabelRequest(b))=>Rc::ptr_eq(a,b),(Value::ContextKey(a),Value::ContextKey(b))=>a==b,(Value::Owner(a),Value::Owner(b))|(Value::DefinitionOwner(a),Value::DefinitionOwner(b))|(Value::RenderOwner(a),Value::RenderOwner(b))=>Weak::ptr_eq(a,b),(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))|(Value::BorrowedState(a),Value::BorrowedState(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.identity()==b.identity(),(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
 fn same_value(a:&Value,b:&Value)->bool{
     if matches!(a,Value::Number(_)|Value::Json(Json::Number(_)))&&matches!(b,Value::Number(_)|Value::Json(Json::Number(_))){
         let a=a.num();let b=b.num();a.to_bits()==b.to_bits()||(a.is_nan()&&b.is_nan())
@@ -265,12 +278,16 @@ pub fn arg(args:&[Value],index:usize)->Value{args.get(index).cloned().unwrap_or(
 pub fn ensure(owner:&OwnerWeak)->OwnerRef{let owner=owner.upgrade().unwrap_or_else(||throw_error("OWNER_RELEASED","owner released"));if owner.borrow().disposed{throw_error("OWNER_DISPOSED","terminally disposed owner")}owner}
 pub fn setup(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);if owner.borrow().phase!="setup"{value_error("setup-only capability")}owner}
 pub fn runtime(owner:&OwnerWeak)->OwnerRef{let owner=ensure(owner);if matches!(owner.borrow().phase,"setup"|"render"|"before-dispose"){value_error("callback capability required")}owner}
+// Stable Run identity is shared by this owner's callbacks. Definition and
+// rendering handles remain distinct objects even when they share that owner.
 pub fn capability(owner:&OwnerWeak)->Value{Value::Owner(owner.clone())}
+pub fn definition_capability(owner:&OwnerWeak)->Value{Value::DefinitionOwner(owner.clone())}
+pub fn render_capability(owner:&OwnerWeak)->Value{Value::RenderOwner(owner.clone())}
 pub struct State { pub value:RefCell<Value>, pub kind:&'static str, pub spec:Value, pub owner:OwnerWeak }
 #[derive(Clone)]
 struct Watcher { active:Rc<Cell<bool>>, keys:Option<Vec<String>>, raw:bool, callback:Value }
 #[derive(Clone)]
-struct Listener { active:Rc<Cell<bool>>, kind:String, global:bool, capture:bool, once:bool, consumed_epoch:Rc<Cell<Option<u64>>>,  passive:bool, callback:Value }
+struct Listener { active:Rc<Cell<bool>>, kind:String, global:bool, capture:bool, once:bool, consumed_epoch:Rc<Cell<Option<u64>>>, passive:bool, numeric_value:bool, callback:Value }
 #[derive(Clone)]
 struct Contribution {active:Rc<Cell<bool>>, predicate:Option<Value>, styles:Vec<(String,String)>}
 #[derive(Clone)]
@@ -290,17 +307,17 @@ pub struct Owner {
     public_values:PublicValues,
     failures:Vec<NativeFailure>,
     pub phase:&'static str,pub disposed:bool,pub disposing:bool,pub present:bool,pub mounted:bool,pub epoch:u64,
-    pub dirty:bool,pub native_drive:Option<Drive>,pub window_id:Option<gpui::WindowId>,pub update_requested:bool,pub projection_revision:u64,pub committed_revision:u64,
+    pub dirty:bool,pub pending_native_events:bool,pub native_drive:Option<Drive>,pub window_id:Option<gpui::WindowId>,pub update_requested:bool,pub projection_revision:u64,pub committed_revision:u64,
     pub projection:Option<NativeSnapshot>,pub renderer:Value,pub raw:Json,pub raw_value:Value,pub props_value:Value,pub props:Json,pub schemas:BTreeMap<String,Value>,pub defaults:BTreeMap<String,Value>,
     pub states:BTreeMap<String,Rc<State>>,pub exposes:BTreeMap<String,Value>,pub declared_events:BTreeSet<String>,pub emitted:Vec<(String,Json)>,
     pub lifecycle:BTreeMap<String,Vec<Value>>,watchers:Vec<Watcher>,listeners:Vec<Listener>,contributions:Vec<Contribution>,patch:Vec<(String,String)>,suppressed:BTreeSet<String>,
     pub parent:OwnerWeak,pub providers:BTreeMap<NativeContextKey,Value>,subscriptions:Vec<ContextSubscription>,
     pub context_accepts:fn(&str,&Json)->bool,pub props_accepts:fn(&Json)->bool,pub prop_valid:fn(&str,&Json)->bool,pub previous_valid:BTreeMap<String,Json>,pub default_layers:Vec<BTreeMap<String,Value>>,
     pub focusable:bool,pub focus_disabled:bool,pub focus_requested:bool,pub focus_entry:bool,pub focused:bool,pub suppress_click:bool,
-    pub accessible:bool,pub accessible_role:Value,pub accessible_states:BTreeMap<String,Value>,pub accessible_actions:BTreeSet<String>,pub name_content:bool,
+    pub accessible:bool,pub accessible_role:Value,pub accessible_states:BTreeMap<String,Value>,pub accessible_state_conditions:BTreeMap<String,Value>,pub accessible_actions:BTreeSet<String>,pub name_content:bool,
     pub slot:Vec<NativeSnapshot>,pub bounds:Option<Bounds<Pixels>>,pub native_hitbox:Option<gpui::Hitbox>,pub native_translation:gpui::Point<Pixels>,pub theme:String,pub dark:bool,
     pub style_vocabulary:&'static crate::gpui_native_style::StyleVocabulary,
-    pub modules:Modules,press:NativePress,press_global:bool,window_input_observed:Option<gpui::WeakFocusHandle>,
+    pub modules:Modules,press:NativePress,press_global:bool,window_input_observed:Option<gpui::WeakFocusHandle>,native_hover:NativeHoverState,
 }
 #[cfg(feature="test-support")]
 pub fn native_owner_allocation_count()->usize{OWNERS.with(|owners|owners.borrow().iter().filter(|owner|owner.strong_count()>0).count())}
@@ -321,7 +338,7 @@ pub fn native_resource_counts(owner:&OwnerRef)->Json{
 impl Owner {
     pub fn new(raw:Json,parent:OwnerWeak,context_accepts:fn(&str,&Json)->bool,props_accepts:fn(&Json)->bool,prop_valid:fn(&str,&Json)->bool,style_vocabulary:&'static crate::gpui_native_style::StyleVocabulary)->OwnerRef {
         if !raw.is_object(){value_type_error("raw props must be a record")}
-        let owner=Rc::new(RefCell::new(Self{atoms:NativeHostAtoms::default(),lexical_slots:Vec::new(),authored:AuthoredHooks::default(),public_values:PublicValues::default(),failures:Vec::new(),phase:"setup",disposed:false,disposing:false,present:true,mounted:false,epoch:0,dirty:true,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None}));
+        let owner=Rc::new(RefCell::new(Self{atoms:NativeHostAtoms::default(),lexical_slots:Vec::new(),authored:AuthoredHooks::default(),public_values:PublicValues::default(),failures:Vec::new(),phase:"setup",disposed:false,disposing:false,present:true,mounted:false,epoch:0,dirty:true,pending_native_events:false,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_state_conditions:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None,native_hover:NativeHoverState::default()}));
         OWNERS.with(|all|all.borrow_mut().push(Rc::downgrade(&owner)));owner
     }
     pub fn finish(owner:&OwnerRef,renderer:Value){control_label_finish(owner);finish_public_exposes(owner);owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
@@ -351,7 +368,7 @@ impl Owner {
         let guard=PhaseGuard{owner:Rc::downgrade(owner),previous};
         // C-CORE-SYNTAX-0004-C: void setup projects one anonymous slot.
         let _lexical_owner=enter_lexical_owner(&Rc::downgrade(owner));
-        let result=match renderer{Value::Undefined=>NativeSnapshot::slot(),Value::Renderer(render)=>render(vec![capability(&Rc::downgrade(owner))]),_=>panic!("expected compiled native renderer")};
+        let result=match renderer{Value::Undefined=>NativeSnapshot::slot(),Value::Renderer(adapter)=>(adapter.render)(vec![render_capability(&Rc::downgrade(owner))]),_=>panic!("expected compiled native renderer")};
         result.assert_children();
         {let mut o=owner.borrow_mut();o.projection=Some(result);o.projection_revision+=1;}
         drop(guard);
@@ -360,7 +377,7 @@ impl Owner {
         let(event,epoch)={let mut o=owner.borrow_mut();if o.disposed||!o.present||o.bounds.is_none()||o.projection_revision!=revision||o.committed_revision==revision{return}o.committed_revision=revision;let event=if !o.mounted{o.mounted=true;o.epoch+=1;let epoch=o.epoch;if let Some(projection)=o.modules.focus.entry_projection.as_mut(){projection.binding.epoch=epoch;}"mounted"}else{"updated"};(event,o.epoch)};
         modules_commit(owner);
         {let o=owner.borrow();if o.disposed||!o.present||!o.mounted||o.epoch!=epoch||o.projection_revision!=revision||o.committed_revision!=revision{return}}
-        life(owner,event);
+        life(owner,event);native_hover_mounted(owner,epoch);
     }
     pub fn dispose(owner:&OwnerRef){
         {let mut owner=owner.borrow_mut();if owner.disposed||owner.disposing{return}owner.disposing=true;}
@@ -379,7 +396,7 @@ impl Owner {
     fn retire(owner:&OwnerRef){
         control_label_dispose(owner);
         retire_entry_intent(owner);clear_scope_recipient(owner);
-        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
+        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
     }
     // Failed-created retirement extracts owned values inside one short borrow so
     // one destructor panic cannot abort the remaining terminal release attempts;
@@ -389,7 +406,7 @@ impl Owner {
     fn failed_created_retire(owner:&OwnerRef){
         attempt_failed_created_cleanup(||control_label_dispose(owner));
         retire_entry_intent(owner);clear_scope_recipient(owner);
-            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;
+            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();
             (std::mem::take(&mut o.projection),std::mem::take(&mut o.renderer),std::mem::take(&mut o.watchers),std::mem::take(&mut o.listeners),std::mem::take(&mut o.contributions),std::mem::take(&mut o.subscriptions),std::mem::take(&mut o.providers),std::mem::take(&mut o.exposes),std::mem::take(&mut o.states),std::mem::take(&mut o.lifecycle),std::mem::take(&mut o.slot),std::mem::take(&mut o.modules))};
         let(projection,renderer,watchers,listeners,contributions,subscriptions,providers,exposes,states,lifecycle,slot,modules)=extracted;
         attempt_failed_created_cleanup(||drop(projection));
@@ -425,9 +442,9 @@ fn attempt_native_cleanup<T>(failure:&mut Option<Box<dyn std::any::Any+Send>>,op
 const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);7]=[text_detach,image_detach,positioning_detach,overlay_detach,control_label_detach,atoms_detach,crate::gpui_native_move::move_detach];
 fn begin_native_detach(owner:&OwnerRef)->bool{
     withdraw_entry_view(owner);
-    let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
+    let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
 }
-pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}crate::gpui_native_move::move_blur(owner);withdraw_entry_view(owner);let mut o=owner.borrow_mut();o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.window_id=Some(id);}
+pub fn bind_native_focus_window(owner:&OwnerRef,window:&Window){let id=window.window_handle().window_id();if owner.borrow().window_id==Some(id){return}crate::gpui_native_move::move_blur(owner);withdraw_entry_view(owner);let mut o=owner.borrow_mut();let hover_mounted=o.native_hover.mounted_epoch==Some(o.epoch);o.epoch=o.epoch.wrapping_add(1);o.modules.focus.native=None;o.native_hover=NativeHoverState{mounted_epoch:hover_mounted.then_some(o.epoch),needs_sync:hover_mounted,..NativeHoverState::default()};o.window_id=Some(id);}
 pub fn detach_native_view(owner:&OwnerRef){
     let mounted=begin_native_detach(owner);
     let mut failure=None;
@@ -538,7 +555,45 @@ pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{
 pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,value);Value::Undefined}
 pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);capture_method(&owner_ref,key.clone(),callback.clone());owner_ref.borrow_mut().exposes.insert(key,callback);Value::Undefined}
 pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().declared_events.insert(key);Value::Undefined}
-pub fn emit(owner:&OwnerWeak,key:Value,payload:Value)->Value{let owner=runtime(owner);let key=key.text();assert!(owner.borrow().declared_events.contains(&key),"undeclared Expose event");let payload=if matches!(payload,Value::Undefined){Json::Null}else{payload.data()};owner.borrow_mut().emitted.push((key,payload));Value::Undefined}
+pub fn emit(owner:&OwnerWeak,key:Value,payload:Value)->Value{let owner=runtime(owner);let key=key.text();assert!(owner.borrow().declared_events.contains(&key),"undeclared Expose event");let payload=if matches!(payload,Value::Undefined){Json::Null}else{payload.data()};{let mut o=owner.borrow_mut();o.emitted.push((key,payload));o.pending_native_events=true;o.dirty=true;}Value::Undefined}
+// Event publication wakes the retained native consumer without requesting an
+// authored render. Event-only controls must not wait for unrelated State writes.
+#[cfg(all(test,feature="test-support"))]
+mod event_notification_tests {
+    use super::*;
+    #[test]
+    fn stable_callback_owner_identity_preserves_distinct_handle_kinds() {
+        let first=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        let second=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        let a=Rc::downgrade(&first);let b=Rc::downgrade(&second);
+        assert!(strict_equal(&capability(&a),&capability(&a)));
+        assert!(!strict_equal(&capability(&a),&capability(&b)));
+        assert!(strict_equal(&definition_capability(&a),&definition_capability(&a)));
+        assert!(strict_equal(&render_capability(&a),&render_capability(&a)));
+        assert!(!strict_equal(&capability(&a),&definition_capability(&a)));
+        assert!(!strict_equal(&capability(&a),&render_capability(&a)));
+        assert!(!strict_equal(&definition_capability(&a),&render_capability(&a)));
+        Owner::dispose(&first);Owner::dispose(&second);
+    }
+
+    #[test]
+    fn event_only_publication_notifies_without_reexecuting_the_authored_renderer() {
+        let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        let weak=Rc::downgrade(&owner);
+        expose_event(&weak,Value::string("chosen"));
+        let renders=Rc::new(Cell::new(0));let observed=renders.clone();
+        Owner::finish(&owner,capture_renderer(Value::Function(Rc::new(|_|Value::Json(Json::Null))),Rc::new(move |_|{observed.set(observed.get()+1);NativeSnapshot::empty()})));
+        Owner::project(&owner);let revision=owner.borrow().projection_revision;
+        {let mut o=owner.borrow_mut();o.phase="callback";o.mounted=true;o.dirty=false;}
+        emit(&weak,Value::string("chosen"),Value::number(7.));
+        assert!(owner.borrow().dirty,"event consumers need a native observer notification");
+        assert!(!owner.borrow().update_requested,"publication is not source render intent");
+        assert_eq!(owner.borrow().emitted,vec![("chosen".into(),serde_json::json!(7.))]);
+        Owner::project(&owner);
+        assert_eq!(renders.get(),1);assert_eq!(owner.borrow().projection_revision,revision);
+        Owner::dispose(&owner);
+    }
+}
 pub fn disposer(owner:OwnerRef,active:Rc<Cell<bool>>,setup_only:bool)->Value{let owner=Rc::downgrade(&owner);Value::Function(Rc::new(move |_|{if setup_only{setup(&owner);}else{ensure(&owner);}active.set(false);Value::Undefined}))}
 pub fn style_use(owner:&OwnerWeak,handles:Vec<Value>)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));owner.borrow_mut().contributions.push(Contribution{active:active.clone(),predicate:None,styles:style_items(handles)});disposer(owner,active,true)}
 pub fn rule(owner:&OwnerWeak,predicate:Value,handles:Vec<Value>)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));owner.borrow_mut().contributions.push(Contribution{active:active.clone(),predicate:Some(predicate),styles:style_items(handles)});Value::Resource(active)}
@@ -583,7 +638,7 @@ pub fn context_update(owner:&OwnerWeak,key:Value,next:Value,optional:bool)->Valu
         throw_error("CONTEXT_DISCONNECTED","required Context provider missing")
     };
     let previous=bound.borrow().providers[&key].clone();
-    let value=if matches!(next,Value::Function(_)){next.call_authored(vec![previous.clone()])}else{next};
+    let value=if next.is_callback(){next.call_authored(vec![previous.clone()])}else{next};
     ensure(&Rc::downgrade(&bound));
     let data=value.try_data().unwrap_or_else(||throw_error("CONTEXT_VALUE_INVALID","invalid Context data"));
     if !(owner.borrow().context_accepts)(&key.descriptor,&data) { throw_error("CONTEXT_VALUE_INVALID","invalid Context data"); }
@@ -638,10 +693,12 @@ pub fn focus_configure(owner:&OwnerWeak,config:Value)->Value{let owner=setup(own
 pub fn focus_disabled(owner:&OwnerWeak,disabled:Value)->Value{let owner=runtime(owner);let disabled=disabled.bool();let mut o=owner.borrow_mut();o.focus_disabled=disabled;o.dirty=true;if disabled{o.focus_requested=false;o.modules.focus.request_source=None;o.focused=false;o.modules.focus.visible=false;o.modules.focus.module_active=false;o.modules.focus.blur_requested=true;}Value::Undefined}
 pub fn focus_self(owner:&OwnerWeak)->Value{focus_request(owner,Value::Undefined,false)}
 pub fn accessible_role(owner:&OwnerWeak,role:Value)->Value{setup(owner).borrow_mut().accessible_role=role;Value::Undefined}
-pub fn accessible_state(owner:&OwnerWeak,key:Value,state:Value)->Value{setup(owner).borrow_mut().accessible_states.insert(key.text(),state);Value::Undefined}
+pub fn accessible_state(owner:&OwnerWeak,key:Value,state:Value,options:Value)->Value{let owner=setup(owner);let condition=options.member("when",true);if !condition.nullish(){condition.get().bool();}let mut owner=owner.borrow_mut();let key=key.text();owner.accessible_states.insert(key.clone(),state);owner.accessible_state_conditions.remove(&key);if !condition.nullish(){owner.accessible_state_conditions.insert(key,condition);}Value::Undefined}
 pub fn accessible_action(owner:&OwnerWeak,key:Value)->Value{accessible_action_spec(owner,key,Value::Undefined)}
 pub fn name_content(owner:&OwnerWeak)->Value{let owner=setup(owner);let mut o=owner.borrow_mut();o.name_content=true;o.modules.accessible_text.remove("name");Value::Undefined}
-pub fn listen(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let kind=key.text();if global&&kind.starts_with("press."){owner.borrow_mut().press_global=true;}let capture=options.member("capture",true);let once=options.member("once",true);let passive=options.member("passive",true);owner.borrow_mut().listeners.push(Listener{active:active.clone(),kind,global,capture:!capture.nullish()&&capture.bool(),once:!once.nullish()&&once.bool(),consumed_epoch:Rc::new(Cell::new(None)),passive:!passive.nullish()&&passive.bool(),callback});disposer(owner,active,false)}
+pub fn listen(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{listen_with_schema(owner,key,global,callback,options,false)}
+pub fn listen_numeric_value(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{assert!(!global,"numeric accessibility actions are owner-local");listen_with_schema(owner,key,global,callback,options,true)}
+fn listen_with_schema(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value,numeric_value:bool)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let kind=key.text();if global&&kind.starts_with("press."){owner.borrow_mut().press_global=true;}let capture=options.member("capture",true);let once=options.member("once",true);let passive=options.member("passive",true);owner.borrow_mut().listeners.push(Listener{active:active.clone(),kind,global,capture:!capture.nullish()&&capture.bool(),once:!once.nullish()&&once.bool(),consumed_epoch:Rc::new(Cell::new(None)),passive:!passive.nullish()&&passive.bool(),numeric_value,callback});disposer(owner,active,false)}
 pub fn prevent(input:Value)->Value{match input{Value::Input(input)=>{if !input.live.get(){throw_error("INPUT_CONTROL_EXPIRED","input control expired")}if !input.passive{input.prevented.set(true)}},_=>panic!("input capability required")};Value::Undefined}
 struct InputLifetime<'a>(&'a Input);
 impl Drop for InputLifetime<'_>{fn drop(&mut self){self.0.live.set(false);}}
@@ -654,6 +711,7 @@ fn dispatch_phase(owner:&OwnerRef,kind:&str,global:bool,capture:bool,fields:Map<
     for listener in listeners{
         if owner.borrow().disposed||!owner.borrow().mounted{break}
         if !listener.active.get()||listener.global!=global||listener.capture!=capture||listener.kind!=kind{continue}
+        if listener.numeric_value&&!fields.get("value").and_then(Json::as_f64).is_some_and(f64::is_finite){continue}
         if listener.once{let epoch=owner.borrow().epoch;if listener.consumed_epoch.get()==Some(epoch){continue}listener.consumed_epoch.set(Some(epoch));}
         let input=Rc::new(Input{fields:fields.clone(),prevented:Cell::new(false),passive:listener.passive,live:Cell::new(true)});
         let delivered=native_host_callback(owner,kind,||invoke_scoped(owner,"event",||{
@@ -665,6 +723,23 @@ fn dispatch_phase(owner:&OwnerRef,kind:&str,global:bool,capture:bool,fields:Map<
     prevented
 }
 pub fn event_fields(kind:&str)->Map<String,Json>{let mut fields=Map::new();fields.insert("type".into(),Json::String(kind.into()));fields}
+pub fn default_accessibility_event(action:&str)->String{if action=="setValue"{"host:a11y-set-value".into()}else{format!("a11y:{action}")}}
+/// One bridge shared by the actual GPUI callback and native consumer tests.
+/// A SetValue request carries finite numeric input; policy and State stay authored.
+pub fn dispatch_accessibility_action(owner:&OwnerRef,action:&str,data:Option<&gpui::accesskit::ActionData>)->bool{
+    let kind={let o=owner.borrow();if o.disposed||!o.present||!o.mounted||!o.accessible||!o.accessible_actions.contains(action){return false}o.modules.action_events.get(action).cloned().unwrap_or_else(||default_accessibility_event(action))};
+    // C-A11Y-0001-F: activate.event describes the authored outward event.
+    // Native activation takes the existing semantic input route; the
+    // Prototype owns its disabled/controlled guards, State and final emit.
+    if action=="activate"{return dispatch_root_route(owner,"press.commit",event_fields("press.commit"))}
+    let mut fields=event_fields(&kind);
+    if action=="setValue"{
+        let Some(gpui::accesskit::ActionData::NumericValue(value))=data else{return false};
+        if !value.is_finite(){return false}
+        fields.insert("value".into(),Json::from(*value));
+    }
+    dispatch(owner,&kind,false,fields)
+}
 pub fn text_content(value:&Option<NativeSnapshot>,slot:&[NativeSnapshot])->String{value.as_ref().map(|snapshot|(snapshot.text)(slot)).unwrap_or_default()}
 pub type Drive=Rc<dyn Fn(&mut Window,&mut App)>;
 #[derive(Clone,Copy)]
@@ -708,21 +783,22 @@ pub fn paint_native_root(value:&NativeSnapshot,owner:&OwnerRef,focus:&FocusHandl
 // Authored children are captured native factories, never semantic tag dispatch.
 let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(style,fixed,translation)=native_presentation(owner,&tokens);*element.style()=style;
 if image_supported(owner){element=element.role(gpui::Role::Image);}
-if owner.borrow().modules.hooks.contains("scroll"){let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
-let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let native_action=action_from_name(&action);if let Some(lease)=native_accessible_action_lease(owner,&action){element=element.on_a11y_action(native_action,move |_,window,cx|lease.request(window,cx));}}}
+if owner.borrow().modules.hooks.contains("scroll")&&owner.borrow().modules.scroll.external_engine==0{let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
+let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let native_action=action_from_name(&action);if let Some(lease)=native_accessible_action_lease(owner,&action){element=element.on_a11y_action(native_action,move |data,window,cx|lease.request_data(data,window,cx));}}}
 if control_label_is_label(owner){
     element=element.role(gpui::Role::Label);
     if let Some(lease)=control_label_action_lease(owner){
         element=element.on_a11y_action(gpui::AccessibleAction::Click,move|_,window,cx|lease.request(window,cx));
     }
 }
+let hover_view=Rc::new(Cell::new(None));
 if native_pointer_input_needed(owner){
 let capture_down=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_down(move|event,window,cx|{control_label_pointer_capture(&capture_down);let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_down,"host:mousedown",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_down=owner.clone();let down_drive=drive.clone();element.interactivity().on_any_mouse_down(move|event,window,cx|{let eligible=claim_pointer(&on_down);control_label_down(&on_down,event,eligible,window);if eligible{let mut fields=event_fields("pointer.down");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_down,"pointer.down",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_down,"press.start",press_fields("press.start",&fields));}if prevented{window.prevent_default()}else if !window.default_prevented(){text_pointer_down(&on_down,event,window,cx);}if event.button==gpui::MouseButton::Right&&dispatch_root_route(&on_down,"context.menu",event_fields("context.menu")){window.prevent_default()}}let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch(&on_down,"host:mousedown",false,fields){window.prevent_default()}if window.default_prevented(){control_label_cancel(&on_down);}down_drive(window,cx)});
 let capture_up=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_up(move|event,window,cx|{let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_up,"host:mouseup",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_up=owner.clone();let up_drive=drive.clone();element.interactivity().on_any_mouse_up(move|event,window,cx|{if claim_pointer(&on_up){let mut fields=event_fields("pointer.up");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_up,"pointer.up",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_up,"press.end",press_fields("press.end",&fields));}if prevented{window.prevent_default()}}let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch(&on_up,"host:mouseup",false,fields){window.prevent_default()}up_drive(window,cx)});
-let on_move=owner.clone();let move_drive=drive.clone();element=element.on_mouse_move(move|event,window,cx|{if claim_pointer(&on_move){let mut fields=event_fields("pointer.move");modifiers(&mut fields,event.modifiers);if dispatch_root_route(&on_move,"pointer.move",fields){window.prevent_default()}else if !window.default_prevented(){text_pointer_move(&on_move,event,window,cx);}}let mut fields=event_fields("host:mousemove");modifiers(&mut fields,event.modifiers);if dispatch(&on_move,"host:mousemove",false,fields){window.prevent_default()}move_drive(window,cx)});
-let on_hover=owner.clone();let hover_drive=drive.clone();element=element.on_hover(move|hover,window,cx|{let kind=if *hover{"pointer.enter"}else{"pointer.leave"};if !*hover{control_label_cancel(&on_hover);}let mut prevented=dispatch_root_route(&on_hover,kind,event_fields(kind));if !*hover{prevented|=pointer_intent(&on_hover,"press.cancel",event_fields("press.cancel"));}if prevented{window.prevent_default()}let kind=if *hover{"host:mouseenter"}else{"host:mouseleave"};if dispatch(&on_hover,kind,false,event_fields(kind)){window.prevent_default()}hover_drive(window,cx)});
+let on_move=owner.clone();let move_drive=drive.clone();let hover_motion=hover_view.clone();element=element.on_mouse_move(move|event,window,cx|{if claim_pointer(&on_move){let mut fields=event_fields("pointer.move");modifiers(&mut fields,event.modifiers);if dispatch_root_route(&on_move,"pointer.move",fields){window.prevent_default()}else if !window.default_prevented(){text_pointer_move(&on_move,event,window,cx);}}let mut fields=event_fields("host:mousemove");modifiers(&mut fields,event.modifiers);if dispatch(&on_move,"host:mousemove",false,fields){window.prevent_default()}if native_hover_motion(&on_move,hover_motion.get(),window,cx){window.prevent_default()}move_drive(window,cx)});
+let on_hover=owner.clone();let hover_drive=drive.clone();let hover_input=hover_view.clone();element=element.on_hover(move|hover,window,cx|{if let Some(view)=hover_input.get(){if native_hover_input(&on_hover,view,*hover,window,cx){window.prevent_default()}}hover_drive(window,cx)});
 let on_click=owner.clone();let click_drive=drive.clone();element=element.on_click(move|event,window,cx|{let(suppress,cancelled)={let mut o=on_click.borrow_mut();(std::mem::take(&mut o.suppress_click),std::mem::take(&mut o.press.cancelled))};let eligible=claim_click(&on_click);if !cancelled&&!(suppress&&matches!(event,gpui::ClickEvent::Keyboard(_)))&&eligible&&dispatch_root_route(&on_click,"press.commit",event_fields("press.commit")){window.prevent_default()}if dispatch(&on_click,"host:click",false,event_fields("host:click")){window.prevent_default()}control_label_click(&on_click,event,eligible&&!cancelled,window,cx);global_native_click(event,window,cx);click_drive(window,cx)});
 
 }
@@ -732,7 +808,7 @@ let on_key=owner.clone();element=element.on_key_down(move|event,window,cx|{let m
 let on_key=owner.clone();element=element.on_key_up(move|event,window,cx|{let mut fields=event_fields("host:keyup");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch(&on_key,"host:keyup",false,fields){window.prevent_default()}collect_key(&on_key);global_key_up(event,window,cx);});
 }
 let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();
-element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);},move|_,_,window,cx|{
+element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);hover_view.set(native_hover_view(&measured,window));},move|_,_,window,cx|{
     if native_pointer_input_needed(&committed){register_pointer_input(window,Some(Rc::downgrade(&committed)));}
     if crate::gpui_native_move::move_owner_has_binding(&committed){crate::gpui_native_move::register_move_input(window,Rc::downgrade(&committed));}
     if native_boundary_input_needed(&committed){window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);}
@@ -744,6 +820,7 @@ element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_
             if !current{return}if native_focus_observation_needed(&owner){owner.borrow_mut().modules.focus.native=Some(focus);}
             #[cfg(feature="experimental-focus-tree")]refresh_native_entry(&owner,window);
             Owner::commit(&owner,revision);if owner.borrow().disposed||!owner.borrow().present{return}
+            if native_hover_reconcile(&owner,window,cx){window.prevent_default()}
             poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{drive(window,cx)}
         });
     });
@@ -893,7 +970,7 @@ pub fn role_from_name(name:&str)->Option<gpui::Role>{
         };return Some(role)
     }None
 }
-pub fn action_from_name(name:&str)->gpui::AccessibleAction{match name{"activate"|"click"|"press"=>gpui::AccessibleAction::Click,"focus"=>gpui::AccessibleAction::Focus,"increment"=>gpui::AccessibleAction::Increment,"decrement"=>gpui::AccessibleAction::Decrement,_=>panic!("unsupported native accessibility action: {name}")}}
+pub fn action_from_name(name:&str)->gpui::AccessibleAction{match name{"activate"|"click"|"press"=>gpui::AccessibleAction::Click,"focus"=>gpui::AccessibleAction::Focus,"increment"=>gpui::AccessibleAction::Increment,"decrement"=>gpui::AccessibleAction::Decrement,"setValue"=>gpui::AccessibleAction::SetValue,_=>panic!("unsupported native accessibility action: {name}")}}
 // A native action callback belongs to one declaration and one committed view.
 // It does not keep the owner alive or regain authority after same-key setup
 // replacement, detach/remount, disposal or migration to another Window.
@@ -903,6 +980,9 @@ pub struct NativeAccessibleActionLease {
 }
 impl NativeAccessibleActionLease {
     pub fn request(&self,window:&mut Window,cx:&mut App) {
+        self.request_data(None,window,cx)
+    }
+    pub fn request_data(&self,data:Option<&gpui::accesskit::ActionData>,window:&mut Window,cx:&mut App) {
         let Some(owner)=self.owner.upgrade() else{return};
         let current={let o=owner.borrow();!o.disposed&&!o.disposing&&o.present&&o.mounted&&o.bounds.is_some()
             &&o.accessible&&o.epoch==self.epoch&&o.window_id==Some(self.window)
@@ -910,14 +990,7 @@ impl NativeAccessibleActionLease {
             &&o.modules.action_identities.get(&self.key).is_some_and(|identity|Rc::ptr_eq(identity,&self.identity))
             &&o.modules.action_events.get(&self.key)==Some(&self.event)};
         if !current{return}
-        // C-A11Y-0001-F: activate.event describes the authored outward event.
-        // Native activation takes the existing semantic input route; the
-        // Prototype owns its disabled/controlled guards, State and final emit.
-        let prevented=if self.key=="activate" {
-            dispatch_root_route(&owner,"press.commit",event_fields("press.commit"))
-        }else{
-            dispatch(&owner,&self.event,false,event_fields(&self.event))
-        };
+        let prevented=dispatch_accessibility_action(&owner,&self.key,data);
         if prevented{window.prevent_default()}
         drive_owners(window,cx);
     }
@@ -1035,7 +1108,7 @@ pub fn global_key_down(event:&gpui::KeyDownEvent,window:&mut Window,cx:&mut App)
     }
     if let Some(target)=&target{prevented|=dispatch_root_route(target,"key.down",fields.clone());}
     if prevented||window.default_prevented(){window.prevent_default();cx.stop_propagation();}
-    else if focus_key_navigation(event,window){cx.stop_propagation();}
+    else if !target.as_ref().is_some_and(text_is_composing)&&focus_key_navigation(event,window){cx.stop_propagation();}
     else if let Some(target)=target.filter(ready){
         if text_supported(&target){if text_key_down(&target,event,window,cx){window.prevent_default();cx.stop_propagation();}}
         else if let Some(key)=key.filter(|key|key=="Enter"||key==" ").filter(|_|trigger_child(&target).is_none()){
@@ -1069,4 +1142,6 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
   gpuiNativeImageSource +
   gpuiNativePositioningSource +
   gpuiNativeOverlaySource +
-  gpuiNativeControlLabelSource;
+  gpuiNativeControlLabelSource +
+  gpuiNativeNotifySource +
+  gpuiNativeHoverSource;

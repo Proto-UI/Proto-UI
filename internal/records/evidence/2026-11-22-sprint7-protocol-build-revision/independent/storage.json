@@ -1,0 +1,42 @@
+{
+  "purpose": "Byte-identical durable copies of the unchanged independent review sidecars; original absolute references remain historical.",
+  "reviewSha256": "e20c80a7f1ae1eed82d6c2e614e8226f0bef0a589882f9493b804933b890b1d5",
+  "files": [
+    {
+      "originalPath": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-model-request.stdout.log",
+      "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-model-request.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "originalPath": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-model-request.stderr.log",
+      "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-model-request.stderr.log",
+      "bytes": 1345,
+      "sha256": "a92418f7181f2d09f2e948252290b3979aecd6e6f6dfaaaf4c9e7eb4f265afa0"
+    },
+    {
+      "originalPath": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-consumer-broker.stdout.log",
+      "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-consumer-broker.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "originalPath": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-consumer-broker.stderr.log",
+      "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-consumer-broker.stderr.log",
+      "bytes": 1065,
+      "sha256": "c1e8f09b88657cfa3796b806c6ebbde3ff77c410c054fddd7ded46c79acdd959"
+    },
+    {
+      "originalPath": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-tests.json",
+      "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json",
+      "bytes": 5679,
+      "sha256": "ad9c246af02afc280244aeb4947c2c411895eb14c024759e68fd23da3abbb3a6"
+    },
+    {
+      "originalPath": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-red-readback.json",
+      "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-red-readback.json",
+      "bytes": 1444,
+      "sha256": "ffe3ae37cae8d993bde25e17e12ab3ac210b15a5f18265dce0ec5a5b34ec85a5"
+    }
+  ]
+}
