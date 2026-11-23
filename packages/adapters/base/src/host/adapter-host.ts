@@ -2,7 +2,6 @@
 import type { Prototype } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
 import { createRuntimeSession, type RuntimeHost, type RuntimeSession } from '@proto.ui/runtime';
-import { createTeardown } from '../lifecycle/teardown';
 
 export type AdapterHostHooks<P extends PropsBaseType> = {
   onRuntimeReady?: RuntimeHost<P>['onRuntimeReady'];
@@ -45,7 +44,6 @@ export function createAdapterHost<P extends PropsBaseType>(
   hooks: AdapterHostHooks<P> = {},
   options: AdapterHostOptions = {}
 ): AdapterHostSession<P> {
-  const teardown = createTeardown();
   let disposePromise: Promise<void> | null = null;
   let afterUnmountDone = false;
 
@@ -80,11 +78,21 @@ export function createAdapterHost<P extends PropsBaseType>(
     mount: () => session.mount(),
     unmount: () => session.unmount(),
     dispose() {
-      teardown.run(() => {
+      if (disposePromise) return disposePromise;
+      let resolveDispose!: () => void;
+      let rejectDispose!: (error: unknown) => void;
+      // Publish the sole completion before Runtime or Adapter cleanup can
+      // synchronously reenter. Returning a fresh resolved Promise here would
+      // falsely report success before the original disposal has completed.
+      disposePromise = new Promise<void>((resolve, reject) => {
+        resolveDispose = resolve;
+        rejectDispose = reject;
+      });
+      try {
         const runtimeDispose = Promise.resolve(session.dispose());
 
         // RuntimeSession deliberately completes the terminal transition
-        // synchronously when no async presence transition is pending. Keep
+        // synchronously when no unmount callback pass remains outstanding. Keep
         // adapter resource disposal in that same turn so DOM listeners do not
         // outlive their host/test environment by an extra microtask.
         if (session.instancePhase === 'disposed') {
@@ -96,15 +104,35 @@ export function createAdapterHost<P extends PropsBaseType>(
             afterUnmountFailed = true;
             afterUnmountError = error;
           }
-          disposePromise = runtimeDispose.then(() => {
-            if (afterUnmountFailed) throw afterUnmountError;
-          });
-          return;
+          void runtimeDispose.then(() => {
+            if (afterUnmountFailed) rejectDispose(afterUnmountError);
+            else resolveDispose();
+          }, rejectDispose);
+        } else {
+          void runtimeDispose.then(
+            () => {
+              try {
+                finishAfterUnmount();
+                resolveDispose();
+              } catch (error) {
+                rejectDispose(error);
+              }
+            },
+            (runtimeError) => {
+              try {
+                finishAfterUnmount();
+              } catch {
+                // As in the synchronous terminal path, the initiating Runtime
+                // failure remains primary after adapter cleanup was attempted.
+              }
+              rejectDispose(runtimeError);
+            }
+          );
         }
-
-        disposePromise = runtimeDispose.finally(finishAfterUnmount);
-      });
-      return disposePromise ?? Promise.resolve();
+      } catch (error) {
+        rejectDispose(error);
+      }
+      return disposePromise;
     },
   };
 }
