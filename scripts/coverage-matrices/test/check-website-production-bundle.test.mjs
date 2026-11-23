@@ -1426,23 +1426,28 @@ for (const diagnostic of ['liquid-tint-stage-diagnostic', 'liquid-visible-refrac
   test(`Sprint 6 fixture classification retains static Adapter rejection for ${diagnostic}`, () => {
     const graph = graphFixture();
     const facade = `apps/www/src/pages/en/test/${diagnostic}.astro?astro&type=script&index=0&lang.ts`;
+    const producer = `apps/www/src/content/docs/zh-cn/${diagnostic}.ts`;
+    const program = 'packages/adapters/base/src/material/program.ts';
     graph.chunks.push(
       chunk(`_astro/${diagnostic}.js`, {
         isEntry: true,
         facadeModuleId: facade,
-        moduleIds: [
-          `apps/www/src/pages/en/test/${diagnostic}.astro`,
-          'packages/adapters/base/src/material/program.ts',
-        ],
+        moduleIds: [facade, producer, program],
       })
     );
+    graph.modules = [
+      { id: facade, imports: [producer], dynamicImports: [] },
+      { id: producer, imports: [program], dynamicImports: [] },
+      { id: program, imports: [], dynamicImports: [] },
+    ];
+    // Complete owner provenance makes this a material bypass control, rather
+    // than an incidental rejection of missing module metadata.
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    graph.modules[0].imports.push(program);
     const issues = collectWebsiteProductionBundleIssues({ graph });
-    assert.ok(
-      issues.some(
-        (issue) => issue.includes(facade) && issue.includes('statically reaches forbidden')
-      ),
-      issues.join('\n')
-    );
+    assert.deepEqual(issues, [
+      `material diagnostic entry \`${facade}\` bypasses its exact producer: ${program}`,
+    ]);
   });
 }
 
