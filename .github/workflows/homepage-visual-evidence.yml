@@ -346,7 +346,7 @@ jobs:
     # Additive exact-source evidence for the mobile interaction increment.
     # Keep the older homepage comparison and all existing acceptance budgets.
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       MOBILE_BASELINE_SHA: ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31
     steps:
@@ -364,7 +364,10 @@ jobs:
         with:
           node-version: 24
       - name: Prepare the same official browser and fonts for both revisions
-        timeout-minutes: 5
+        # Two worktrees are installed here. The previous five-minute ceiling
+        # left no room for the font package and both locked installs on a
+        # loaded runner.
+        timeout-minutes: 12
         run: |
           set -euo pipefail
           corepack enable
@@ -445,7 +448,7 @@ jobs:
   visual-density:
     # Consumer-only scale/sidebar/Copy comparison, isolated from the existing gates.
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 40
     env:
       DENSITY_BASELINE_SHA: ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31
       DENSITY_FOLLOWUP_BASELINE_SHA: fbd90df092369e6d2aab73c66848f4236ba83a29
@@ -469,7 +472,11 @@ jobs:
         with:
           node-version: 24
       - name: Prepare locked sources and the same official browser/font environment
-        timeout-minutes: 5
+        # Three worktrees are installed here (baseline, followup baseline and
+        # candidate). The previous five-minute ceiling expired during the
+        # installs, so every later capture ran without node_modules and failed
+        # with ERR_MODULE_NOT_FOUND for tsx.
+        timeout-minutes: 15
         run: |
           set -euo pipefail
           corepack enable
