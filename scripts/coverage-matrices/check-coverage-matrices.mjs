@@ -8921,6 +8921,7 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
@@ -9787,6 +9788,10 @@ const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
 // combines both sprints' module-graph changes on top of the train.
 const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
   'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
+// Sprint 2 adds only the draft Native File Input and Selectable Row sidebar
+// entries to that merged configuration. Retry/Worker imports and owners match.
+const WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256 =
+  '26e4307893b07f9f17e5c22c38842d0992391d68603c1c9db506f07a556c668d';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',
