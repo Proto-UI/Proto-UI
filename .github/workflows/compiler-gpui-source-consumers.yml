@@ -134,6 +134,7 @@ jobs:
           git rev-parse HEAD > "$RUNNER_TEMP/gpui-evidence/source-sha.txt"
           rustc +1.98.1 --version --verbose > "$RUNNER_TEMP/gpui-evidence/rustc.txt"
           node --import tsx packages/compiler/test/fixtures/gpui-ordinary-values/produce.mjs "$RUNNER_TEMP/gpui-evidence/generated" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/producer.log"
+          node --import tsx packages/compiler/test/fixtures/gpui-control-label/produce.mjs "$RUNNER_TEMP/gpui-evidence/official-control-label" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/official-control-label-producer.log"
       - name: Verify the full locked GPUI and shared SDK dependency graph
         run: |
           set -euo pipefail
@@ -144,6 +145,14 @@ jobs:
             --toolchain 1.98.1 \
             --output "$RUNNER_TEMP/gpui-evidence/cargo-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/cargo-graph.log"
+          cargo +1.98.1 metadata --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/official-control-label-metadata.json"
+          node scripts/gpui/check-cargo-graph.mjs \
+            --manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml" \
+            --git https://github.com/zed-industries/zed \
+            --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+            --toolchain 1.98.1 \
+            --output "$RUNNER_TEMP/gpui-evidence/official-control-label-graph.json" \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/official-control-label-graph.log"
       - name: Build the default published native SDK
         run: |
           set -euo pipefail
@@ -156,6 +165,10 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
+      - name: Execute the official Input delegate and physical ControlLabel consumer
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml" --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/official-control-label-consumer.log"
       - name: Verify bounded native text-selection style mapping
         run: |
           set -euo pipefail
@@ -177,18 +190,6 @@ jobs:
             --output "$RUNNER_TEMP/gpui-evidence/numeric-graph.json" \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test a11y_value -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-consumer.log"
-      - name: Execute unchanged compiled Button Toggle and Label consumers
-        run: |
-          set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
-      - name: Verify bounded native text-selection style mapping
-        run: |
-          set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test style_mapping -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/style-mapping-consumer.log"
-      - name: Verify native accessibility activation through authored operations
-        run: |
-          set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test a11y_activation -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/a11y-activation-consumer.log"
       - name: Verify explicit native scroll pause against ordinary requests
         run: |
           set -euo pipefail
