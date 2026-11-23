@@ -74,3 +74,5 @@ exit 0 只表示本次所选执行预算正常完成且没有 compiler defect / 
 小样本之后仅加强了“任何 baseline 行都不得消失”的 ratchet 条件，并重新执行上述三个测试。实际小样本执行器的精确字节按计划中的 SHA 恢复保留，避免给不同脚本版本代填执行。
 
 [完整小样本证据与逐文件哈希](./evidence/2026-11-24-sprint2-library-inventory/validation.json)随本记录保存。完整源码与新定义融合后的全库 sweep 尚未在此记录中执行；必须使用最终确切来源另留结果。
+
+随后还增加了真实工具身份绑定：description 读取 compiler 实际解析的 TypeScript、source-loader 的 TypeScript 和 tsx 的 package / implementation 哈希。直接 `--describe` 已实际观察 TypeScript 5.9.3 与 tsx 4.21.0；正式执行会将各自实际路径、版本和哈希写入 run fingerprint。这是执行元数据增量，没有重标上述小样本的脚本 SHA 或扩大其通过范围。

@@ -23,6 +23,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const script = fileURLToPath(import.meta.url);
@@ -259,6 +260,19 @@ async function describe(modulePath) {
         `Pinned implementation drift: ${input.path}`
       );
   }
+  const packageIdentity = (owner, name) => {
+    const require = createRequire(owner);
+    const manifestPath = require.resolve(`${name}/package.json`);
+    const entryPath = require.resolve(name);
+    return {
+      name,
+      version: json(manifestPath).version,
+      manifestPath,
+      manifestSha256: sha(readFileSync(manifestPath)),
+      entryPath,
+      entrySha256: sha(readFileSync(entryPath)),
+    };
+  };
   return {
     profiles,
     compilerBuild: compiler.compilerBuildIdentity,
@@ -270,6 +284,9 @@ async function describe(modulePath) {
       readFileSync(path.join(root, 'packages/compiler/src/source-loader.ts'))
     ),
     node: process.version,
+    compilerTypeScript: packageIdentity(modulePath ?? script, 'typescript'),
+    sourceLoaderTypeScript: packageIdentity(script, 'typescript'),
+    typescriptLoader: packageIdentity(script, 'tsx'),
   };
 }
 function workerCommand(extra, heapMb, timeoutMs = 180000) {
