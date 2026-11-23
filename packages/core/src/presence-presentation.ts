@@ -5,6 +5,13 @@ import type { State } from './state';
 
 export type PresencePhase = 'closed' | 'preparing' | 'entering' | 'entered' | 'leaving';
 export type AffineLength = Readonly<{ px: number; rootText: number; ownBox: number }>;
+/** Positioning length, deliberately distinct from an own-box translation. */
+export type ContainingBlockLength = Readonly<{
+  px: number;
+  rootText: number;
+  containingBlock: number;
+}>;
+export type PresentationEasing = readonly [number, number, number, number];
 export type Translation = readonly [AffineLength, AffineLength];
 export type FiniteSelection<T> = Readonly<{
   source: Pick<State<string>, 'get'>;
@@ -13,8 +20,9 @@ export type FiniteSelection<T> = Readonly<{
 export type PresenceEndpoint = Readonly<{
   translate?: Translation | FiniteSelection<Translation>;
   opacity?: number;
+  top?: ContainingBlockLength;
 }>;
-export type PresentationChannel = 'translate' | 'opacity';
+export type PresentationChannel = 'translate' | 'opacity' | 'top';
 export type PresentationOutcome =
   | 'finished'
   | 'reduced-motion'
@@ -60,7 +68,9 @@ export type PresencePresentationDeclaration = Readonly<{
   owner: PresentationOwnerRef;
   closed: PresenceEndpoint;
   entered: PresenceEndpoint;
-  easing: readonly [number, number, number, number];
+  easing: PresentationEasing;
+  /** Defaults to easing. All channels still borrow the owner's duration/deadline. */
+  channelEasing?: Readonly<Partial<Record<PresentationChannel, PresentationEasing>>>;
 }>;
 export type PresentationCompletionConfig =
   | 'timer'
@@ -148,6 +158,19 @@ function affine(value: unknown): AffineLength {
     ownBox: finite(field(v, 'ownBox')),
   });
 }
+function containingBlockLength(value: unknown): ContainingBlockLength {
+  const v = shape(value, ['px', 'rootText', 'containingBlock']);
+  return Object.freeze({
+    px: finite(field(v, 'px')),
+    rootText: finite(field(v, 'rootText')),
+    containingBlock: finite(field(v, 'containingBlock')),
+  });
+}
+function curve(value: unknown): PresentationEasing {
+  const easing = dense(value, 4).map(finite);
+  if (easing[0] < 0 || easing[0] > 1 || easing[2] < 0 || easing[2] > 1) return fail();
+  return Object.freeze(easing) as unknown as PresentationEasing;
+}
 function translation(value: unknown): Translation {
   const pair = dense(value, 2);
   return Object.freeze([affine(pair[0]), affine(pair[1])]);
@@ -166,22 +189,31 @@ function selectedTranslation(value: unknown): Translation | FiniteSelection<Tran
   return Object.freeze({ source, cases: Object.freeze(cases) });
 }
 function endpoint(value: unknown): PresenceEndpoint {
-  const v = shape(value, ['translate', 'opacity'], []);
+  const v = shape(value, ['translate', 'opacity', 'top'], []);
   const keys = Reflect.ownKeys(v);
   if (!keys.length) return fail();
-  const result: { translate?: Translation | FiniteSelection<Translation>; opacity?: number } = {};
+  const result: {
+    translate?: Translation | FiniteSelection<Translation>;
+    opacity?: number;
+    top?: ContainingBlockLength;
+  } = {};
   if (keys.includes('translate')) result.translate = selectedTranslation(field(v, 'translate'));
   if (keys.includes('opacity')) {
     const opacity = finite(field(v, 'opacity'));
     if (opacity < 0 || opacity > 1) return fail();
     result.opacity = opacity;
   }
+  if (keys.includes('top')) result.top = containingBlockLength(field(v, 'top'));
   return Object.freeze(result);
 }
 export function snapshotPresencePresentation(
   value: PresencePresentationDeclaration
 ): PresencePresentationDeclaration {
-  const v = shape(value, ['owner', 'closed', 'entered', 'easing']);
+  const v = shape(
+    value,
+    ['owner', 'closed', 'entered', 'easing', 'channelEasing'],
+    ['owner', 'closed', 'entered', 'easing']
+  );
   const owner = object(field(v, 'owner')) as PresentationOwnerRef;
   const closed = endpoint(field(v, 'closed'));
   const entered = endpoint(field(v, 'entered'));
@@ -190,13 +222,21 @@ export function snapshotPresencePresentation(
     Object.keys(closed).length !== Object.keys(entered).length
   )
     return fail();
-  const easing = dense(field(v, 'easing'), 4).map(finite);
-  if (easing[0] < 0 || easing[0] > 1 || easing[2] < 0 || easing[2] > 1) return fail();
+  const easing = curve(field(v, 'easing'));
+  let channelEasing: PresencePresentationDeclaration['channelEasing'];
+  if (Object.hasOwn(v, 'channelEasing')) {
+    const input = shape(field(v, 'channelEasing'), Object.keys(closed), []);
+    const overrides: Partial<Record<PresentationChannel, PresentationEasing>> = {};
+    for (const key of Reflect.ownKeys(input) as PresentationChannel[])
+      overrides[key] = curve(field(input, key));
+    channelEasing = Object.freeze(overrides);
+  }
   return Object.freeze({
     owner,
     closed,
     entered,
-    easing: Object.freeze(easing) as unknown as PresencePresentationDeclaration['easing'],
+    easing,
+    ...(channelEasing ? { channelEasing } : {}),
   });
 }
 export function snapshotPresentationCompletionConfig(

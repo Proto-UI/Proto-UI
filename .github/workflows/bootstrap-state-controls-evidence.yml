@@ -11,7 +11,7 @@ concurrency:
 jobs:
   browser-evidence:
     runs-on: ubuntu-24.04
-    # Sequential state-controls, navbar, Button motion and historical captures.
+    # Sequential state-controls, navbar, Button/Modal/Progress motion and historical captures.
     timeout-minutes: 30
     env:
       PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -53,7 +53,7 @@ jobs:
         run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
       - name: Check fixture boundaries and source token closure
         run: |
-          node --test scripts/test/bootstrap-state-controls-evidence.test.mjs
+          node --test scripts/test/bootstrap-state-controls-evidence.test.mjs scripts/test/check-bootstrap-motion-evidence.test.mjs
           corepack pnpm@10.32.1 check:styles:preset
       - name: Collect real four-runtime evidence
         id: state-controls
@@ -93,6 +93,48 @@ jobs:
             apps/www/src/content/docs/zh-cn/bootstrap-button-motion-evidence.test.ts \
             apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts \
             --maxWorkers=1 --minWorkers=1
+      - name: Bind Bootstrap motion evidence to the exact source
+        if: ${{ !cancelled() }}
+        id: bootstrap-motion-source
+        env:
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-motion-evidence
+        run: node scripts/test/check-bootstrap-motion-evidence.mjs source "$PUI_FINF_FEATURE_EVIDENCE_DIR"
+      - name: Collect Bootstrap Modal and Progress source and native motion evidence
+        if: ${{ !cancelled() && steps.bootstrap-motion-source.outcome == 'success' }}
+        id: bootstrap-motion
+        env:
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-motion-evidence
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/core/test/presence-top-declaration.test.ts \
+            packages/modules/feedback/test/presence-top-projector.test.ts \
+            packages/adapters/base/test/web-presence-top.test.ts \
+            packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts \
+            packages/adapters/web-component/test/portal-conceal.test.ts \
+            packages/modules/feedback/test/resident-width.test.ts \
+            packages/adapters/base/test/web-resident-width.test.ts \
+            packages/adapters/base/test/web-resident-width-adoption.test.ts \
+            packages/runtime/test/contract/resident-width.contract.test.ts \
+            packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts \
+            packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts \
+            --pool=forks --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json \
+            --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json"
+      - name: Require all 129 motion assertions and their native artifacts
+        if: always()
+        id: bootstrap-motion-gate
+        env:
+          EVIDENCE_STEP_STATUS: ${{ steps.bootstrap-motion.outcome }}
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-motion-evidence
+        run: node scripts/test/check-bootstrap-motion-evidence.mjs check "$PUI_FINF_FEATURE_EVIDENCE_DIR"
+      - name: Retain Bootstrap motion JSON, source manifests and PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-motion-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bootstrap-motion-evidence
+          if-no-files-found: error
+          retention-days: 30
       - name: Preserve terminal status even when setup or browser launch fails
         if: always()
         env:
@@ -259,3 +301,313 @@ jobs:
           if test -e "$PROTO_UI_BASELINE_WORKTREE/.git"; then
             git worktree remove --force "$PROTO_UI_BASELINE_WORKTREE"
           fi
+
+  # Add this mapping under jobs in bootstrap-state-controls-evidence.yml.
+  # Existing triggers and the 30-minute browser job remain unchanged.
+  source-validation:
+    name: Source generation, types and spec validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    env:
+      PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Initialize source validation evidence
+        run: |
+          pui_source_evidence="$RUNNER_TEMP/bootstrap-source-validation-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir "$pui_source_evidence"
+          printf 'EVIDENCE_DIR=%s\n' "$pui_source_evidence" >> "$GITHUB_ENV"
+      - name: Check out the exact source
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Bind a clean source before installation
+        id: source_before
+        if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
+        run: |
+          set +e
+          (
+            set -e
+            git rev-parse HEAD | tee "$EVIDENCE_DIR/source-head-before.txt"
+            git rev-parse HEAD^{tree} | tee "$EVIDENCE_DIR/source-tree-before.txt"
+            git status --porcelain=v1 --untracked-files=all | tee "$EVIDENCE_DIR/source-status-before.txt"
+            test "$(cat "$EVIDENCE_DIR/source-head-before.txt")" = "$PROTO_UI_EXPECTED_HEAD_SHA"
+            test ! -s "$EVIDENCE_DIR/source-status-before.txt"
+          ) 2>&1 | tee "$EVIDENCE_DIR/source-before.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/source-before.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/source-before.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Set up Node 24
+        id: node_setup
+        if: ${{ !cancelled() && steps.source_before.outcome == 'success' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the locked workspace
+        id: install
+        if: ${{ !cancelled() && steps.node_setup.outcome == 'success' && steps.source_before.outcome == 'success' }}
+        run: |
+          set +e
+          (
+            set -e
+            node --version
+            node -e 'if (!process.version.startsWith("v24.")) process.exit(1)'
+            corepack enable
+            corepack pnpm@10.32.1 --version
+            corepack pnpm@10.32.1 install --frozen-lockfile
+          ) 2>&1 | tee "$EVIDENCE_DIR/install.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/install.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/install.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Build the actual public CLI
+        id: cli_build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          set +e
+          node scripts/build/public-packages.mjs --package @proto.ui/cli 2>&1 | tee "$EVIDENCE_DIR/cli-build.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/cli-build.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/cli-build.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Generate the website prototype companions
+        id: website_generate
+        if: ${{ !cancelled() && steps.cli_build.outcome == 'success' }}
+        run: |
+          set +e
+          node apps/www/scripts/generate-website-prototype-tokens.mjs 2>&1 | tee "$EVIDENCE_DIR/website-generate.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/website-generate.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/website-generate.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Check public type contracts
+        id: type_contracts
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          set +e
+          node node_modules/typescript/bin/tsc -p internal/contracts/types/tsconfig.json 2>&1 | tee "$EVIDENCE_DIR/type-contracts.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/type-contracts.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/type-contracts.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Check workspace types with generated companions
+        id: workspace_types
+        if: ${{ !cancelled() && steps.website_generate.outcome == 'success' }}
+        run: |
+          set +e
+          node --max-old-space-size=6144 node_modules/typescript/bin/tsc -p tsconfig.workspace.json --noEmit 2>&1 | tee "$EVIDENCE_DIR/workspace-types.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/workspace-types.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/workspace-types.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Execute all 40 selected graph and schema assertions
+        id: spec_graph
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          set +e
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/spec/graph/test \
+            packages/spec/fixtures/test/prototype-inheritance-schema.test.ts \
+            packages/spec/fixtures/test/adapter-profile-schema.test.ts \
+            packages/spec/fixtures/test/feedback-style-authoring.test.ts \
+            packages/spec/fixtures/test/feedback-style-runtime-patch.test.ts \
+            --pool=forks --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json \
+            --outputFile="$EVIDENCE_DIR/spec-graph.json" \
+            2>&1 | tee "$EVIDENCE_DIR/spec-graph.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/spec-graph.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/spec-graph.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Execute all six draft public consumer assertions
+        id: draft_consumer
+        if: ${{ !cancelled() && steps.cli_build.outcome == 'success' }}
+        run: |
+          set +e
+          node --test --test-reporter=tap \
+            scripts/release/test/draft-prototype-packages.test.mjs \
+            scripts/build/test/draft-prototype-consumer.test.mjs \
+            2>&1 | tee "$EVIDENCE_DIR/draft-consumer.log"
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/draft-consumer.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/draft-consumer.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Preserve terminal source and execution receipts
+        id: source_results
+        if: ${{ always() }}
+        env:
+          SOURCE_STEP_OUTCOMES: >-
+            {
+              "checkout": "${{ steps.checkout.outcome }}",
+              "node_setup": "${{ steps.node_setup.outcome }}",
+              "source_before": "${{ steps.source_before.outcome }}",
+              "install": "${{ steps.install.outcome }}",
+              "cli_build": "${{ steps.cli_build.outcome }}",
+              "website_generate": "${{ steps.website_generate.outcome }}",
+              "type_contracts": "${{ steps.type_contracts.outcome }}",
+              "workspace_types": "${{ steps.workspace_types.outcome }}",
+              "spec_graph": "${{ steps.spec_graph.outcome }}",
+              "draft_consumer": "${{ steps.draft_consumer.outcome }}"
+            }
+
+
+        run: |
+          set +e
+          node --input-type=commonjs <<'NODE' 2>&1 | tee "$EVIDENCE_DIR/source-validation.log"
+          const assert = require('node:assert/strict');
+          const { execFileSync } = require('node:child_process');
+          const { mkdirSync, readFileSync, writeFileSync } = require('node:fs');
+          const path = require('node:path');
+          const directory = process.env.EVIDENCE_DIR;
+          mkdirSync(directory, { recursive: true });
+          const failures = [];
+          const check = (label, run) => {
+            try { return run(); } catch (error) {
+              failures.push(label + ': ' + (error instanceof Error ? error.message : String(error)));
+              return null;
+            }
+          };
+          const read = (file) => readFileSync(path.join(directory, file), 'utf8');
+          const save = (file, value) => writeFileSync(path.join(directory, file), JSON.stringify(value, null, 2) + '\n');
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+          const outcomes = check('step outcomes', () => JSON.parse(process.env.SOURCE_STEP_OUTCOMES)) || {};
+          const receipt = {
+            status: 'failed', expectedHead: process.env.PROTO_UI_EXPECTED_HEAD_SHA,
+            eventSha: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT, node: process.version,
+            timestamp: new Date().toISOString(), outcomes, stages: [], failures,
+          };
+          for (const id of ['checkout', 'node_setup'])
+            check(id, () => assert.equal(outcomes[id], 'success'));
+          check('Node 24', () => assert.match(process.version, /^v24\./));
+          for (const id of ['source_before', 'install', 'cli_build', 'website_generate',
+            'type_contracts', 'workspace_types', 'spec_graph', 'draft_consumer']) {
+            const name = id.replaceAll('_', '-');
+            const stage = { id, outcome: outcomes[id], log: name + '.log' };
+            for (const [field, suffix] of [['commandExit', '.exit'], ['logExit', '.log-exit']]) {
+              stage[field] = check(name + suffix, () => {
+                const value = read(name + suffix);
+                assert.match(value, /^(0|[1-9][0-9]*)\n$/);
+                return Number(value.trim());
+              });
+              check(name + ' ' + field, () => assert.equal(stage[field], 0));
+            }
+            check(name + ' log', () => read(stage.log)); // Successful tsc can have empty stdout.
+            check(name + ' outcome', () => assert.equal(stage.outcome, 'success'));
+            receipt.stages.push(stage);
+          }
+          const before = {};
+          const after = {};
+          for (const [key, file, args] of [
+            ['head', 'source-head-before.txt', ['rev-parse', 'HEAD']],
+            ['tree', 'source-tree-before.txt', ['rev-parse', 'HEAD^{tree}']],
+            ['status', 'source-status-before.txt', ['status', '--porcelain=v1', '--untracked-files=all']],
+          ]) {
+            before[key] = check('before ' + key, () => read(file));
+            after[key] = check('after ' + key, () => git(...args));
+          }
+          receipt.source = { before, after };
+          save('source-after.json', after);
+          check('source binding', () => {
+            assert.match(receipt.expectedHead, /^[0-9a-f]{40}$/);
+            for (const snapshot of [before, after]) {
+              assert.equal(snapshot.head.trim(), receipt.expectedHead);
+              assert.match(snapshot.tree.trim(), /^[0-9a-f]{40}$/);
+              assert.equal(snapshot.status, '');
+            }
+            assert.equal(after.tree, before.tree);
+          });
+          check('spec graph execution', () => {
+            const graphFiles = git('ls-files', '-z', '--', 'packages/spec/graph/test')
+              .split('\0').filter((file) => /\.(?:test|spec)\.[cm]?[jt]sx?$/.test(file));
+            assert.ok(graphFiles.length > 0, 'No tracked graph tests');
+            const expectedFiles = [...graphFiles,
+              'packages/spec/fixtures/test/prototype-inheritance-schema.test.ts',
+              'packages/spec/fixtures/test/adapter-profile-schema.test.ts',
+              'packages/spec/fixtures/test/feedback-style-authoring.test.ts',
+              'packages/spec/fixtures/test/feedback-style-runtime-patch.test.ts',
+            ];
+            assert.equal(new Set(expectedFiles).size, expectedFiles.length);
+            const report = JSON.parse(read('spec-graph.json'));
+            assert.equal(report.success, true);
+            for (const field of ['numTotalTests', 'numPassedTests']) assert.equal(report[field], 40, field);
+            for (const field of ['numFailedTests', 'numPendingTests', 'numTodoTests',
+              'numFailedTestSuites', 'numPendingTestSuites']) assert.equal(report[field], 0, field);
+            if (report.numRuntimeErrorTestSuites !== undefined) assert.equal(report.numRuntimeErrorTestSuites, 0);
+            const files = report.testResults;
+            assert.ok(Array.isArray(files));
+            const names = files.map((file) => path.relative(process.cwd(), path.resolve(file.name)).replaceAll('\\', '/'));
+            assert.deepEqual([...names].sort(), [...expectedFiles].sort(), 'Missing, extra or duplicate test file');
+            const assertions = [];
+            for (const file of files) {
+              assert.equal(file.status, 'passed', file.name);
+              assert.ok(Array.isArray(file.assertionResults) && file.assertionResults.length > 0, file.name);
+              const identities = [];
+              for (const test of file.assertionResults) {
+                assert.equal(test.status, 'passed', test.fullName);
+                assert.ok(typeof test.fullName === 'string' && test.fullName.trim());
+                identities.push(test.fullName);
+                assertions.push(test);
+              }
+              assert.equal(new Set(identities).size, identities.length, 'Duplicate assertion identity');
+            }
+            assert.equal(assertions.length, 40);
+            receipt.specGraph = { files: names, assertions: assertions.length, passed: true };
+          });
+          check('draft consumer execution', () => {
+            const tap = read('draft-consumer.log');
+            assert.equal([...tap.matchAll(/^TAP version 13\r?$/gm)].length, 1, 'Missing or duplicate TAP header');
+            assert.ok(!/^\s*(?:not ok\b|Bail out!)/m.test(tap), 'Failed or aborted TAP case');
+            assert.ok(!/^\s*(?:not )?ok\s+\d+.*#\s*(?:SKIP|TODO)\b/im.test(tap), 'Skipped or todo TAP case');
+            const plans = [...tap.matchAll(/^1\.\.(\d+)\r?$/gm)];
+            const cases = [...tap.matchAll(/^ok (\d+) - (.+)\r?$/gm)];
+            assert.equal(plans.length, 1, 'Missing or duplicate terminal TAP plan');
+            assert.equal(cases.length, 6, 'Require six executed consumer cases');
+            assert.equal(Number(plans[0][1]), cases.length);
+            assert.ok(plans[0].index > cases.at(-1).index, 'Incomplete terminal TAP plan');
+            assert.deepEqual(cases.map((entry) => Number(entry[1])), cases.map((_, index) => index + 1));
+            assert.equal(new Set(cases.map((entry) => entry[2].trim())).size, cases.length);
+            for (const [field, expected] of [
+              ['tests', 6], ['pass', 6], ['fail', 0], ['cancelled', 0], ['skipped', 0], ['todo', 0],
+            ]) {
+              const matches = [...tap.matchAll(new RegExp('^# ' + field + ' (\\d+)\\r?$', 'gm'))];
+              assert.equal(matches.length, 1, 'Missing or duplicate TAP ' + field);
+              assert.equal(Number(matches[0][1]), expected, 'TAP ' + field);
+              assert.ok(matches[0].index > plans[0].index, 'Incomplete TAP footer');
+            }
+            assert.match(tap.trimEnd(), /(?:^|\n)# duration_ms [0-9.]+$/);
+            receipt.draftConsumer = { tests: 6, passed: true };
+          });
+          receipt.status = failures.length === 0 ? 'passed' : 'failed';
+          save('manifest.json', receipt);
+          console.log(JSON.stringify(receipt, null, 2));
+          if (failures.length) process.exitCode = 1;
+          NODE
+          pui_status=("${PIPESTATUS[@]}")
+          set -e
+          printf '%s\n' "${pui_status[0]}" > "$EVIDENCE_DIR/source-validation.exit"
+          printf '%s\n' "${pui_status[1]}" > "$EVIDENCE_DIR/source-validation.log-exit"
+          (( pui_status[0] == 0 && pui_status[1] == 0 ))
+      - name: Upload source validation evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-source-validation-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30

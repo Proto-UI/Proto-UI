@@ -53,7 +53,82 @@ cases:
     title: Document and split Shadow measure actual Drawer presentation and public cold entry
     covers: [P-SHADCN-DRAWER-MOTION-EVIDENCE]
     expectation: Exact-source native traces must establish physical movement, fade, retained close and reversal. The intrinsic-height public cold entry must animate independently of its fixed-height diagnostic control; source or DOM-model results cannot substitute for these observations.
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-TOP-BASELINE
+    title: Containing-block top and non-neutral opacity retain distinct semantic baselines
+    covers:
+      [
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-DECLARATION,
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-RETARGET,
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-PROFILE,
+        HC-FEEDBACK-PRESENCE-PRESENTATION-0001-LEASE,
+        HC-FEEDBACK-PRESENCE-PRESENTATION-0001-INPUTS,
+      ]
+    expectation: independent-channel-curves-last-acknowledged-reversal-proved-containing-block-and-owned-final-style-baselines
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-MODAL-SOURCE
+    title: Authored Bootstrap modal parts retain Base attempts and upstream independent timing
+    covers:
+      [
+        P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-BASE,
+        P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-VISUAL,
+        P-BOOTSTRAP-2-3-2-ALERT-DIALOG-BASE,
+        P-BOOTSTRAP-2-3-2-ALERT-DIALOG-VISUAL,
+      ]
+    expectation: source-and-DOM-model-evidence-for-top300ms-ease-out-opacity300ms-linear-mask150ms-linear-controlled-refusal-and-reversal
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-PORTAL-HANDOFF
+    title: Closed Portal handoff retains concealment and releases only its own declarations
+    covers:
+      - C-FEEDBACK-PRESENCE-PRESENTATION-0001-ACKNOWLEDGEMENT
+      - C-FEEDBACK-PRESENCE-PRESENTATION-0001-SETTLEMENT
+      - HC-FEEDBACK-PRESENCE-PRESENTATION-0001-LEASE
+    expectation: synchronous-reentry-transfers-original-baselines-and-independent-cleanup-retries-preserve-foreign-owners
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-MODAL-NATIVE
+    title: Chromium observes actual Bootstrap modal timing, reversal and closed-barrier reopen
+    covers:
+      - P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-VISUAL
+      - P-BOOTSTRAP-2-3-2-ALERT-DIALOG-VISUAL
+      - C-FEEDBACK-PRESENCE-PRESENTATION-0001-ACKNOWLEDGEMENT
+    expectation: six-source-bound-Web-Component-document-cases-with-native-RAF-and-CSS-oracle-and-separate-capture-intervals
 implementations:
+  - id: bootstrap-modal-native-presentation
+    kind: workspace-check
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-MODAL-NATIVE]
+    exercises: [P-BOOTSTRAP-2-3-2-DIALOG-CONTENT, P-BOOTSTRAP-2-3-2-ALERT-DIALOG]
+    notes:
+      - The dedicated Bootstrap motion lane requires all six cases and their source-bound PNGs; document coverage does not establish split Shadow, four-host, physical-refresh, non-Web or Compiler acceptance.
+  - id: portal-conceal-ownership
+    kind: module-test
+    status: passing
+    path: packages/adapters/web-component/test/portal-conceal.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-PORTAL-HANDOFF]
+  - id: presence-top-declarations
+    kind: module-test
+    status: passing
+    path: packages/core/test/presence-top-declaration.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-TOP-BASELINE]
+  - id: presence-top-projector
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/presence-top-projector.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-TOP-BASELINE]
+  - id: presence-web-top-baseline
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-presence-top.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-TOP-BASELINE]
+  - id: bootstrap-modal-authored-presentation
+    kind: module-test
+    status: passing
+    path: packages/prototypes/bootstrap-2-3-2/test/modal-presence-presentation.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-MODAL-SOURCE]
+    exercises: [P-BOOTSTRAP-2-3-2-DIALOG-CONTENT, P-BOOTSTRAP-2-3-2-ALERT-DIALOG]
   - id: drawer-authored-presentation
     kind: module-test
     status: planned
@@ -141,9 +216,16 @@ verifies:
     - HC-FEEDBACK-PRESENCE-PRESENTATION-0001
 exercises:
   prototypes:
+    - id: P-BOOTSTRAP-2-3-2-DIALOG-CONTENT
+      since: 0.3.0-alpha.1
+    - id: P-BOOTSTRAP-2-3-2-ALERT-DIALOG
+      since: 0.3.0-alpha.1
     - id: P-SHADCN-DRAWER-MOTION
       since: 0.3.0-alpha.1
 revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Define independently verifiable declaration, authority and application cases without claiming host pixels.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Add independently addressable containing-block, channel timing, final opacity baseline and authored modal source evidence without claiming physical frames.

@@ -1282,13 +1282,27 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           initialPresent = snapshot.present;
           return;
         }
-        const wasConcealing = this._portalConceal.cancel();
-        // A portaled exit must finish its opacity fade before display:none.
-        // Hiding immediately drops the faded layer and Chromium can repaint
-        // the last opaque frame (the closed-dialog marker flash).
-        const concealOnPortal = !snapshot.present && isWebComponentPortaled(thisEl);
-        if (!snapshot.present && !concealOnPortal) setViewDetached(true);
         const requestVersion = ++latestIntentVersion;
+        const wasConcealing = this._portalConceal.cancel();
+        if (
+          ownerResourcesReleased ||
+          this._terminalDisposing ||
+          requestVersion !== latestIntentVersion
+        )
+          return;
+        if (!snapshot.present) {
+          currentEventGate?.disable();
+          // Hide a closed portal without removing its compositor/layout surface
+          // until the existing rendering barrier can revoke that projection.
+          const concealed = isWebComponentPortaled(thisEl) && this._portalConceal.conceal();
+          if (
+            ownerResourcesReleased ||
+            this._terminalDisposing ||
+            requestVersion !== latestIntentVersion
+          )
+            return;
+          if (!concealed) setViewDetached(true);
+        }
         if (snapshot.present && wasConcealing && owner.hasView) {
           // The retained epoch never unmounted. Reveal it immediately so a
           // newer open/focus request is not queued behind the canceled barrier.

@@ -5,6 +5,7 @@ import {
   type PresentationOwnerFrame,
   type PresentationViewBinding,
   type PresentationOutcome,
+  type PresencePresentationDeclaration,
 } from '@proto.ui/core';
 export type ResolvedPresenceEndpoint = Omit<PresenceEndpoint, 'translate'> & {
   translate?: import('@proto.ui/core').Translation;
@@ -18,6 +19,7 @@ export type PresencePresentationFrame = Readonly<{
   closed: ResolvedPresenceEndpoint;
   entered: ResolvedPresenceEndpoint;
   easing: readonly [number, number, number, number];
+  channelEasing?: PresencePresentationDeclaration['channelEasing'];
   bind(binding: PresentationViewBinding): void;
   complete(binding: PresentationViewBinding, outcome: PresentationOutcome): void;
 }>;

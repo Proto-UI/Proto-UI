@@ -9,8 +9,10 @@ import { createResidentMotionSampler } from './sampler';
 import {
   extractResidentMotionTarget,
   resolveMotionTranslate,
+  resolveMotionWidth,
   type MotionTranslate,
   type MotionColor,
+  type MotionLength,
 } from './targets';
 import { colorToMotionVector, motionVectorToColor, type MotionRgba } from './color';
 export type MotionEnvironment = Readonly<{
@@ -20,6 +22,8 @@ export type MotionEnvironment = Readonly<{
   rootFontPx: number | null;
   width: number | null;
   height: number | null;
+  /** Physical content width of the layout containing block, never the own box. */
+  containingBlockWidth?: number | null;
   palette: Readonly<Record<string, MotionRgba>>;
   paletteRevision: number;
   paletteDiagnostics?: readonly string[];
@@ -30,6 +34,8 @@ export type MotionPresentation = Readonly<{
   backgroundColor?: MotionRgba;
   /** Settled color is carried for non-Web hosts; Web releases its paint lease. */
   backgroundColorState?: 'active' | 'settled';
+  width?: number;
+  widthState?: 'active' | 'settled';
 }>;
 export type ResidentMotionHost = {
   now(): number;
@@ -98,9 +104,15 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
       translate?: readonly number[];
       backgroundColor?: MotionRgba;
       backgroundColorState?: 'active' | 'settled';
+      width?: number;
+      widthState?: 'active' | 'settled';
     } = {};
     const omitted = new Set<string>(),
-      reasons: string[] = [...(env.paletteDiagnostics ?? []), ...(env.projectionDiagnostics ?? [])];
+      reasons: string[] = [
+        ...(env.paletteDiagnostics ?? []),
+        ...(env.projectionDiagnostics ?? []),
+        ...(frame.sourceDiagnostics ?? []),
+      ];
     let active = false;
     const samples = new Map<ResidentMotionProperty, readonly number[]>();
     for (const declaration of frame.declarations)
@@ -115,12 +127,14 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
           declarationKeys.set(property, key);
         }
         const target = env.supportedProperties.includes(property)
-          ? extractResidentMotionTarget(frame.style.tokens, property)
+          ? extractResidentMotionTarget(frame.style.tokens, property, frame.numbers)
           : { supported: false as const, reason: 'host-property-unavailable' };
         let value: readonly number[] | null = null;
         if (!target.supported) reasons.push(`${property}:${target.reason}`);
         else if (property === 'translate')
           value = resolveMotionTranslate(target.value as MotionTranslate, env);
+        else if (property === 'width')
+          value = resolveMotionWidth(target.value as MotionLength, env);
         else {
           const color = target.value as MotionColor;
           const palette = env.palette[color.role];
@@ -144,16 +158,21 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
           reasons.push(`${property}:unresolved-target-settled`);
           continue;
         }
-        const sample = sampler!.target(
+        const rawSample = sampler!.target(
           value,
           now,
           animate && acceptedSamples.has(property),
           fromAnimationFrame ? undefined : acceptedSamples.get(property)
         )!;
+        const sample =
+          property === 'width' ? Object.freeze([Math.max(0, rawSample[0])]) : rawSample;
         samples.set(property, sample);
         if (property === 'translate') {
           presentation.translate = sample;
           if (target.supported) for (const token of target.ownedTokens) omitted.add(token);
+        } else if (property === 'width') {
+          presentation.width = sample[0];
+          presentation.widthState = sampler!.active ? 'active' : 'settled';
         } else {
           presentation.backgroundColor = motionVectorToColor(sample);
           presentation.backgroundColorState = sampler!.active ? 'active' : 'settled';
@@ -230,6 +249,20 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
         ...frame,
         style: createRootStyleEffect(readRootStyleEntries(frame.style, 'setup')),
         declarations: frame.declarations.map(snapshotResidentMotion),
+        numbers: Object.freeze(
+          Object.fromEntries(
+            Object.keys(frame.numbers ?? {}).flatMap((key) => {
+              const descriptor = Object.getOwnPropertyDescriptor(frame.numbers!, key);
+              return descriptor &&
+                'value' in descriptor &&
+                typeof descriptor.value === 'number' &&
+                Number.isFinite(descriptor.value)
+                ? [[key, descriptor.value]]
+                : [];
+            })
+          )
+        ),
+        sourceDiagnostics: Object.freeze([...(frame.sourceDiagnostics ?? [])]),
       });
       if (!off && !subscribing) {
         subscribing = true;

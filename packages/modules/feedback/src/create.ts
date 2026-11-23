@@ -6,6 +6,7 @@ import { PRESENCE_PRESENTATION_SINK_CAP, PRESENCE_RUN_IN_CALLBACK_CAP } from './
 import type { StatePort } from '@proto.ui/module-state';
 import { snapshotResidentMotion, type ResidentMotionDeclaration } from '@proto.ui/core';
 import { RESIDENT_MOTION_SINK_CAP, type ResidentMotionSink } from './motion/sink';
+import { createMotionNumericSources } from './motion/numeric-sources';
 import type { InstancePhase, MountPhase, ProtoPhase, StyleHandle } from '@proto.ui/core';
 import {
   illegalPhase,
@@ -199,6 +200,22 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private motionDeclarations = new Set<ResidentMotionDeclaration>();
         private motionSink: ResidentMotionSink | null = null;
         private motionView = 0;
+        private motionNumbers = createMotionNumericSources({
+          expose: (key) => deps.tryPort<{ get(key: string): unknown }>('expose')?.get(key),
+          state: () => deps.tryPort<StatePort>('state'),
+          invalidate: () => {
+            this.markDirty();
+            if (this.sys?.execPhase() === 'callback' && this.sys.deferAfterCallback)
+              this.sys.deferAfterCallback(() => {
+                if (!this.disposed) this.flushIfPossible();
+              });
+            else this.flushIfPossible();
+          },
+        });
+        registerMotionSource(source: object): void {
+          this.ensureSetup('feedback.motion.registerSource');
+          this.motionNumbers.register(source);
+        }
         declareMotion(declaration: ResidentMotionDeclaration): () => void {
           this.ensureSetup('def.feedback.style.transition');
           if (this.presence.declared)
@@ -581,6 +598,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const revision = ++this.visualRevision;
           const style = snapshotFinalStyle(handle);
           const pending = { ...style, tokens: [...style.tokens] };
+          if (!this.caps.has(RESIDENT_MOTION_SINK_CAP)) this.motionNumbers.snapshot([]);
           try {
             if (this.presence.declared) {
               if (this.sharedSlot || this.material)
@@ -600,6 +618,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
                   revision,
                   style: pending,
                   declarations: Object.freeze([...this.motionDeclarations]),
+                  ...this.motionNumbers.snapshot(
+                    [...this.motionDeclarations].some((declaration) =>
+                      declaration.properties.includes('width')
+                    )
+                      ? pending.tokens
+                      : []
+                  ),
                 })
               );
             } else if (this.caps.has(VISUAL_FEEDBACK_SINK_CAP)) {
@@ -706,7 +731,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           try {
             try {
               try {
-                this.presence.dispose();
+                try {
+                  this.motionNumbers.dispose();
+                } finally {
+                  this.presence.dispose();
+                }
               } finally {
                 this.releaseVisualSink();
               }
@@ -778,6 +807,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
       const facade: FeedbackFacade = {
         presence: impl.presenceFacade(),
+        motion: { registerSource: (source) => impl.registerMotionSource(source) },
         material: {
           declare: (slot) => impl.declareMaterial(slot),
           use: (candidate) => impl.useMaterial(candidate),

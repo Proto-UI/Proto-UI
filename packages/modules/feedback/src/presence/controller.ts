@@ -96,6 +96,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
       channels: Object.freeze([
         ...(recipe?.closed.translate ? ['translate' as const] : []),
         ...(recipe?.closed.opacity !== undefined ? ['opacity' as const] : []),
+        ...(recipe?.closed.top ? ['top' as const] : []),
       ]),
       outcome,
     });
@@ -125,6 +126,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
     return Object.freeze({
       ...(translate ? { translate } : {}),
       ...(endpoint.opacity !== undefined ? { opacity: endpoint.opacity } : {}),
+      ...(endpoint.top ? { top: endpoint.top } : {}),
     });
   };
   const release = (advance = true) => {
@@ -270,7 +272,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
       const closed = resolve(declaration.closed),
         entered = resolve(declaration.entered);
       if (!current()) return true;
-      const targetKey = JSON.stringify([closed, entered, recipe.easing]);
+      const targetKey = JSON.stringify([closed, entered, recipe.easing, recipe.channelEasing]);
       if (targetKey !== owner.targetKey) {
         owner.targetKey = targetKey;
         owner.targetRevision++;
@@ -317,6 +319,7 @@ export function createPresenceController(options: PresenceControllerOptions) {
           closed,
           entered,
           easing: declaration.easing,
+          ...(declaration.channelEasing ? { channelEasing: declaration.channelEasing } : {}),
           bind(binding: PresentationViewBinding) {
             if (
               !disposed &&

@@ -1,23 +1,38 @@
 import type {
   PresentationOutcome,
+  PresentationChannel,
   PresentationViewBinding,
   StyleHandle,
   Translation,
 } from '@proto.ui/core';
-import { createResidentMotionSampler } from '../motion/sampler';
+import { createPresenceMotionSampler } from './sampler';
+import {
+  matchesPresenceTopTarget,
+  matchesPresenceOpacityTarget,
+  resolvePresenceTop,
+} from './top-target';
 import type {
   PresencePresentationFrame,
   PresencePresentationSink,
   ResolvedPresenceEndpoint,
 } from './sink';
-export type PresenceSample = Readonly<{ translate?: readonly [number, number]; opacity?: number }>;
+export type PresenceSample = Readonly<{
+  translate?: readonly [number, number];
+  opacity?: number;
+  /** Non-neutral entered opacity must match final semantic intent. */
+  opacityBaseline?: number;
+  top?: number;
+  /** Typed entered endpoint, used only for host ownership preflight. */
+  topBaseline?: number;
+}>;
 export type PresenceEnvironment = Readonly<{
   preference: 'reduce' | 'no-preference' | 'unknown';
   visible: boolean;
   width: number | null;
   height: number | null;
   rootFontPx: number | null;
-  supported: readonly ('translate' | 'opacity')[];
+  containingBlockHeight?: number | null;
+  supported: readonly PresentationChannel[];
 }>;
 export type PresencePresentationHost = {
   readonly binding: PresentationViewBinding;
@@ -54,8 +69,9 @@ function vector(
   env: PresenceEnvironment
 ): readonly number[] | null {
   const translation = endpoint.translate ? resolveTranslation(endpoint.translate, env) : [0, 0];
-  if (!translation) return null;
-  return Object.freeze([translation[0], translation[1], endpoint.opacity ?? 1]);
+  const top = endpoint.top ? resolvePresenceTop(endpoint.top, env) : 0;
+  if (!translation || top === null) return null;
+  return Object.freeze([translation[0], translation[1], endpoint.opacity ?? 1, top]);
 }
 /** Neutral presentation only. No component state, layout or ViewIntent writer. */
 export function createPresencePresentationProjector(
@@ -71,7 +87,7 @@ export function createPresencePresentationProjector(
   let off: (() => void) | null = null;
   let acknowledged: readonly number[] | null = null;
   let target: readonly number[] | null = null;
-  let sampler: ReturnType<typeof createResidentMotionSampler> | null = null;
+  let sampler: ReturnType<typeof createPresenceMotionSampler> | null = null;
   let samplerConfig = '';
   let cold = true;
   let awaitingInitialFrame = false;
@@ -109,15 +125,28 @@ export function createPresencePresentationProjector(
   const render = (
     candidate: PresencePresentationFrame,
     value: readonly number[],
-    token: number
+    token: number,
+    env: PresenceEnvironment
   ) => {
     if (!current(candidate, token)) return false;
     const sample: PresenceSample = {
       ...(candidate.closed.translate ? { translate: [value[0], value[1]] as const } : {}),
       ...(candidate.closed.opacity !== undefined
-        ? { opacity: Math.max(0, Math.min(1, value[2])) }
+        ? {
+            opacity: Math.max(0, Math.min(1, value[2])),
+            ...(candidate.entered.opacity !== 1
+              ? { opacityBaseline: candidate.entered.opacity }
+              : {}),
+          }
+        : {}),
+      ...(candidate.closed.top
+        ? {
+            top: value[3],
+            topBaseline: resolvePresenceTop(candidate.entered.top!, env) ?? undefined,
+          }
         : {}),
     };
+    if (!current(candidate, token)) return false;
     let accepted = false;
     try {
       accepted = host.project(candidate.style, sample, () => current(candidate, token));
@@ -172,12 +201,24 @@ export function createPresencePresentationProjector(
       candidate.owner.phase === 'leaving' || candidate.owner.phase === 'closed'
         ? candidate.closed
         : candidate.entered;
-    const value = vector(endpoint, env);
+    const value =
+      candidate.closed.top && !env.supported.includes('top') ? null : vector(endpoint, env);
     sampler?.dispose();
     sampler = null;
     samplerConfig = '';
     awaitingInitialFrame = false;
-    const accepted = value !== null && render(candidate, value, token);
+    // Unknown bases cannot yield a typed sample. Keep the accepted semantic
+    // baseline and its bounded settlement outcome instead of guessing geometry.
+    let accepted = false;
+    if (value !== null) {
+      accepted = render(candidate, value, token, env);
+    } else if (candidate.closed.top) {
+      try {
+        accepted = host.project(candidate.style, {}, () => current(candidate, token));
+      } catch {
+        reasons.add('projection-failed');
+      }
+    }
     if (!current(candidate, token)) return false;
     complete(candidate, accepted ? outcome : 'projection-failed', token);
     return accepted;
@@ -210,14 +251,18 @@ export function createPresencePresentationProjector(
     if (preparedFrame !== frame) return;
     const candidate = frame,
       token = generation;
-    // This first host profile only admits neutral entered modulation. General
+    // This host profile only admits neutral entered modulation. General
     // typed declarations remain representable and receive explicit diagnostics.
     const enteredNeutral =
-      (candidate.entered.opacity === undefined || candidate.entered.opacity === 1) &&
+      (candidate.entered.opacity === undefined ||
+        candidate.entered.opacity === 1 ||
+        matchesPresenceOpacityTarget(candidate.style.tokens, candidate.entered.opacity)) &&
       (!candidate.entered.translate ||
         candidate.entered.translate.every(
           (axis) => axis.px === 0 && axis.rootText === 0 && axis.ownBox === 0
-        ));
+        )) &&
+      (!candidate.entered.top ||
+        matchesPresenceTopTarget(candidate.style.tokens, candidate.entered.top));
     if (!enteredNeutral) {
       const op = ++operation;
       cancel();
@@ -259,8 +304,9 @@ export function createPresencePresentationProjector(
     const channels = [
       ...(candidate.closed.translate ? ['translate'] : []),
       ...(candidate.closed.opacity !== undefined ? ['opacity'] : []),
+      ...(candidate.closed.top ? ['top'] : []),
     ];
-    if (channels.some((channel) => !env.supported.includes(channel as 'translate' | 'opacity'))) {
+    if (channels.some((channel) => !env.supported.includes(channel as PresentationChannel))) {
       settle('missing-capability');
       return;
     }
@@ -279,7 +325,7 @@ export function createPresencePresentationProjector(
       !!candidate.owner.attempt &&
       (candidate.owner.phase === 'entering' || candidate.owner.phase === 'leaving');
     if (!animated || completed) {
-      const accepted = render(candidate, next, token);
+      const accepted = render(candidate, next, token, env);
       if (!current(candidate, token)) return;
       if (!accepted) reasons.add('projection-failed');
       target = next;
@@ -299,13 +345,14 @@ export function createPresencePresentationProjector(
       return;
     }
     const now = host.now();
-    const config = JSON.stringify([candidate.owner.durationMs, candidate.easing]);
+    const config = JSON.stringify([
+      candidate.owner.durationMs,
+      candidate.easing,
+      candidate.channelEasing,
+    ]);
     if (!sampler || samplerConfig !== config) {
       sampler?.dispose();
-      sampler = createResidentMotionSampler({
-        durationMs: candidate.owner.durationMs,
-        easing: candidate.easing,
-      });
+      sampler = createPresenceMotionSampler(candidate);
       samplerConfig = config;
       sampler.target(
         acknowledged ?? (candidate.owner.phase === 'entering' ? initial : next),
@@ -315,7 +362,7 @@ export function createPresencePresentationProjector(
     }
     if (cold && candidate.owner.phase === 'entering') {
       if (!awaitingInitialFrame) {
-        if (!render(candidate, initial, token)) {
+        if (!render(candidate, initial, token, env)) {
           if (current(candidate, token)) settle('projection-failed');
           return;
         }
@@ -331,7 +378,7 @@ export function createPresencePresentationProjector(
         return;
       }
       // A delivered presentation frame acknowledges the actual start sample.
-      if (!render(candidate, acknowledged ?? initial, token)) {
+      if (!render(candidate, acknowledged ?? initial, token, env)) {
         if (current(candidate, token)) settle('projection-failed');
         return;
       }
@@ -348,13 +395,13 @@ export function createPresencePresentationProjector(
       target = next;
     }
     const sample = fromFrame ? sampler.sample(now) : acknowledged;
-    if (sample && !render(candidate, sample, token)) {
+    if (sample && !render(candidate, sample, token, env)) {
       if (current(candidate, token)) settle('projection-failed');
       return;
     }
     if (!current(candidate, token)) return;
     if (!sampler.active) {
-      if (!render(candidate, next, token)) {
+      if (!render(candidate, next, token, env)) {
         if (current(candidate, token)) settle('projection-failed');
         return;
       }
