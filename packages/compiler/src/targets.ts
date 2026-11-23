@@ -489,6 +489,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
         'controlLabel.target',
         'controlLabel.sync',
         'controlLabelRequest.isCurrent',
+        'scroll.sync',
         'eventControl.requestDefaultActionPrevention',
       ] as Operation[]
     ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),

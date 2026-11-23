@@ -8,7 +8,8 @@ afterEach(async () => {
   vi.restoreAllMocks();
   document.body.replaceChildren();
 });
-// C-TEXT-CONTROL-SELECTION-0001 binds snapshots to the physical editor.
+// C-TEXT-CONTROL-SELECTION-0001 binds snapshot selection to the physical editor.
+// Reset does not grant a second caret owner or permit inferring offsets from length.
 // Compare the observed host facts, never an inferred end caret.
 function hostSelection(input: HTMLInputElement) {
   return {
