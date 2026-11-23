@@ -8,7 +8,7 @@ import type {
   State,
 } from '@proto.ui/core';
 /** Finite, portable control values. No callback, DOM object, or opaque ref is a Prop. */
-export type FieldValue = string | number | boolean | string[] | null;
+export type FieldValue = string | number | boolean | string[] | number[] | null;
 export type FieldValidationMode = 'onBlur' | 'onChange' | 'manual';
 export type FieldValidationReason = 'blur' | 'change' | 'manual';
 export type FieldValidityFlag = 'valueMissing' | 'tooShort' | 'tooLong' | 'customError';

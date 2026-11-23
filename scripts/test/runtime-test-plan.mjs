@@ -47,6 +47,7 @@ export const READY_ROUTES = Object.freeze([
   '/en/ui-libraries/shadcn/card/',
   '/en/ui-libraries/shadcn/input/',
   '/en/ui-libraries/shadcn/select/',
+  '/en/ui-libraries/shadcn/tabs/',
   '/en/ui-libraries/base/scroll-area/',
   '/en/ui-libraries/base/textarea/',
   '/en/ui-libraries/brutalist/components/badge/',
@@ -79,6 +80,8 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts',
+  'packages/compiler/test/sprint2-native.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
   'packages/compiler/test/control-label-native.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',
@@ -432,17 +435,18 @@ export function validateBrowserCostEvidence(evidence) {
   return evidence;
 }
 
-const costEvidence = validateBrowserCostEvidence(
-  JSON.parse(
-    readFileSync(
-      new URL('./fixtures/browser-suite-costs-44876125495.json', import.meta.url),
-      'utf8'
-    )
-  )
-);
-const observedCosts = Object.fromEntries(
-  costEvidence.observations.map(({ suite, durationMs }) => [suite, Math.ceil(durationMs / 1000)])
-);
+const observedCosts = {};
+for (const file of [
+  './fixtures/browser-suite-costs-44876125495.json',
+  './fixtures/browser-suite-costs-45029016292.json',
+]) {
+  const evidence = validateBrowserCostEvidence(
+    JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  );
+  for (const { suite, durationMs } of evidence.observations) {
+    observedCosts[suite] = Math.max(observedCosts[suite] ?? 0, Math.ceil(durationMs / 1000));
+  }
+}
 // The passive-atoms file was still running when the old shard was killed. Its
 // 600s reserve is explicitly an estimate, not an invented completion sample.
 const interruptedSuiteReserves = {

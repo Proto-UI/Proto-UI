@@ -58,7 +58,7 @@ Each Item projects `role="radio"`, boolean `aria-checked`, effective `aria-disab
 
 This first slice intentionally does **not** include:
 
-- `name`, form owner, submission, reset, validation, `required`, or hidden/native inputs
+- `name`, form owner, submission, validation, `required`, or hidden/native inputs
 - native `<input type="radio">` event and grouping parity
 - public `orientation` or `loop` configuration
 - Toolbar-specific arrow behavior
@@ -73,6 +73,12 @@ Those concerns require separate host or semantic contracts; they are not approxi
 - Source: [packages/prototypes/base/src/radio-group](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/radio-group)
 - Tests: [radio-group.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/radio-group.test.ts)
 
+## Read-only and explicit Form composition
+
+Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. A read-only Radio Group can still move roving focus with its supported navigation keys. Ordinary Root does not automatically register with Field or Form.
+
+Use `fieldRadioGroup` from `@proto.ui/prototypes-base/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+
 ## API
 
 Radio Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
@@ -82,6 +88,7 @@ Radio Group is workspace source. There is no public `proto-ui add` target. Passi
   rows={[
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />

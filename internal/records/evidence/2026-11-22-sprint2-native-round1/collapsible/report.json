@@ -1,0 +1,400 @@
+{
+  "numTotalTestSuites": 7,
+  "numPassedTestSuites": 7,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 41,
+  "numPassedTests": 23,
+  "numFailedTests": 0,
+  "numPendingTests": 18,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795355727596,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["Base Collapsible public browser evidence"],
+          "fullName": "Base Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "wc preserves disclosure ownership through native input and view lifetimes",
+          "duration": 4554.529488,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Base Collapsible public browser evidence"],
+          "fullName": "Base Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "react preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3752.2630659999995,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Base Collapsible public browser evidence"],
+          "fullName": "Base Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "vue preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3623.3586859999923,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Base Collapsible public browser evidence"],
+          "fullName": "Base Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "vue2 preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3435.630502,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["Base Collapsible public browser evidence"],
+          "fullName": "Base Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+          "status": "passed",
+          "title": "renders the Chinese narrow page through the same public disclosure",
+          "duration": 2692.4183179999964,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795355908023,
+      "endTime": 1795355926081.4182,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "wc preserves disclosure ownership through native input and view lifetimes",
+          "duration": 4824.005481,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "react preserves disclosure ownership through native input and view lifetimes",
+          "duration": 4054.102534999991,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "vue preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3712.0188960000087,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "vue2 preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3624.403324999992,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence wc preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "wc preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3031.5820930000045,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence react preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "react preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3491.1593490000087,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence vue preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "vue preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3409.722345000002,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence vue2 preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "vue2 preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3380.3030639999924,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["shadcn Collapsible public browser evidence"],
+          "fullName": "shadcn Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+          "status": "passed",
+          "title": "renders the Chinese narrow page through the same public disclosure",
+          "duration": 2624.0164240000013,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "wc preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3370.011467000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "react preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3635.685378000009,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "vue preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3333.251237000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+          "status": "passed",
+          "title": "vue2 preserves disclosure ownership through native input and view lifetimes",
+          "duration": 3374.525575000007,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence wc preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "wc preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3012.9894540000096,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence react preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "react preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3363.4439920000004,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence vue preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "vue preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3284.630449999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence vue2 preserves padding and wraps long text at 320px and 200% type",
+          "status": "passed",
+          "title": "vue2 preserves padding and wraps long text at 320px and 200% type",
+          "duration": 3215.919446,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["brutalist Collapsible public browser evidence"],
+          "fullName": "brutalist Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+          "status": "passed",
+          "title": "renders the Chinese narrow page through the same public disclosure",
+          "duration": 2358.1031990000047,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "wc preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "react preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "vue preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "vue2 preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence wc preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "wc preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence react preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "react preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence vue preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "vue preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence vue2 preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "vue2 preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bootstrap-2-3-2 Collapsible public browser evidence"],
+          "fullName": "bootstrap-2-3-2 Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+          "status": "skipped",
+          "title": "renders the Chinese narrow page through the same public disclosure",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence wc preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "wc preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence react preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "react preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence vue preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "vue preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence vue2 preserves disclosure ownership through native input and view lifetimes",
+          "status": "skipped",
+          "title": "vue2 preserves disclosure ownership through native input and view lifetimes",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence wc preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "wc preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence react preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "react preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence vue preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "vue preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence vue2 preserves padding and wraps long text at 320px and 200% type",
+          "status": "skipped",
+          "title": "vue2 preserves padding and wraps long text at 320px and 200% type",
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["liquid-glass Collapsible public browser evidence"],
+          "fullName": "liquid-glass Collapsible public browser evidence renders the Chinese narrow page through the same public disclosure",
+          "status": "skipped",
+          "title": "renders the Chinese narrow page through the same public disclosure",
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795355787396,
+      "endTime": 1795355848497.1033,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts"
+    }
+  ]
+}

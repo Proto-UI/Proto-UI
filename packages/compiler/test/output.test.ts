@@ -70,6 +70,19 @@ describe('transactional create-only compiler delivery', () => {
     expect(await readdir(directory)).toEqual(['Component.tsx']);
   });
 
+  it('requires the caller to create the parent directory without creating ancestors', async () => {
+    const { directory, compilation } = await fixture();
+    const nested = path.join(directory, 'consumer', 'generated');
+    const rejected = await writeCompilation(compilation, nested);
+    expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI3003' }] });
+    await expect(stat(directory)).rejects.toMatchObject({ code: 'ENOENT' });
+    await mkdir(path.dirname(nested), { recursive: true });
+    expect(await writeCompilation(compilation, nested)).toMatchObject({ ok: true });
+    expect(await readFile(path.join(nested, 'Component.tsx'), 'utf8')).toContain(
+      compilation.output.code
+    );
+  });
+
   it('does not unlink a file whose exclusive creation failed after directory reservation', async () => {
     const { directory, compilation } = await fixture();
     const result = await writeCompilation(compilation, directory, async (filename) => {

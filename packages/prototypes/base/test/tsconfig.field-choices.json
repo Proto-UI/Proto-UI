@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.workspace.json",
+  "include": ["field-choices.types.ts"],
+  "exclude": []
+}

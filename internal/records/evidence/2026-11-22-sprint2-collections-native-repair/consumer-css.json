@@ -1,0 +1,56 @@
+{
+  "oldPrototypeCssSha256": "dd7c14fd69677a4baadf3bd9dd5a16c2c0e19f67e56fd02657717f1bea54eaec",
+  "oldHasConsumerHeightSelector": false,
+  "oldHasConsumerOverflowSelector": false,
+  "newHasConsumerHeightSelector": true,
+  "newHasConsumerOverflowSelector": true,
+  "hasVisibleRowVariant": true,
+  "collections": {
+    "compiler": "tailwindcss@4.2.2",
+    "stylesheet": "apps/www/src/styles/tailwindcss.css",
+    "stylesheetSha256": "a5f9f7fdc0cbedc7dd78cd87c76860c78a977fa3af610880e93e73ddfaa90488",
+    "consumerSources": {
+      "apps/www/src/content/docs/zh-cn/demo-base-tree.demo.ts": "d794aa1d39446279602b4385ae4dcdba29f85bcc5b3eb4010109057fc2d30bcd",
+      "apps/www/src/content/docs/zh-cn/demo-base-data-table-recipes.demo.ts": "cecf1b50b6ac3cd38bfcc104147b47cf1d86a7d5c52e368b85458cea7907bca5",
+      "apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts": "f3fff0e817ed9b28a5c7e7481ea6cb1962eac0f71564f56646ff6bf0ce2553d4",
+      "apps/www/src/content/docs/zh-cn/demo-shadcn-tree.demo.ts": "6a7c511c8c23751d8d65dd78d3cdd659481f31805393239d1086366df46ba05f",
+      "apps/www/src/content/docs/zh-cn/demo-shadcn-data-table-recipes.demo.ts": "dfaefe55e71d2bb9736633e3288926844e05509e990b4b52d1026de11cbc7874",
+      "apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts": "dc682916e40657032a9f0eaf660e0f2b65669e4829023842333068da0ea260f2",
+      "apps/www/src/content/docs/zh-cn/demo-brutalist-tree.demo.ts": "8c840fd500112fb521f3ca00203b065413c6c6966020c8520458b7f09f430994",
+      "apps/www/src/content/docs/zh-cn/demo-brutalist-data-table-recipes.demo.ts": "5478f179390482824bdfbdc1d9ab4e366d513497b0bf702c75cac722e5785ef3",
+      "apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts": "f5e9bd67eba3140e3fc2cf8040d5fea6cb1c6e08198ad44b30ff14d8415798d8",
+      "apps/www/src/content/docs/zh-cn/data-table-recipes.shared.ts": "13b05141fc1e80a571d66d756cb750ffd3dee58d03c91887ff5ee77d6bd534ce",
+      "apps/www/src/content/docs/shadcn-demo-style.ts": "41c14e604544dab831f4550f110aab62d2ba8464e65c9debb0c99b607fcafc7d"
+    },
+    "candidateCount": 155,
+    "importedStyles": {
+      "node_modules/.pnpm/tailwindcss@4.2.2/node_modules/tailwindcss/index.css": "415a5f01208fe877d36ee8421b2135a766f258374f817a8a0a41c478c4009391"
+    },
+    "fonts": {
+      "apps/www/src/styles/assets/font/dm-sans/DMSans-Variable.ttf": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+      "apps/www/src/styles/assets/font/geist/Geist-Variable.ttf": "73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659"
+    },
+    "cssSha256": "599ae4a10ed2bfc1779476588727d7548dae8ce755180ea69189156f04379cd7"
+  },
+  "form": {
+    "compiler": "tailwindcss@4.2.2",
+    "stylesheet": "apps/www/src/styles/tailwindcss.css",
+    "stylesheetSha256": "a5f9f7fdc0cbedc7dd78cd87c76860c78a977fa3af610880e93e73ddfaa90488",
+    "consumerSources": {
+      "apps/www/src/content/docs/form-validation-demo.shared.ts": "f13bf429b2bafc2d798207fe63a932587707d18873bb60f27c43bfc6d090fde1",
+      "apps/www/src/content/docs/select-input-demo.shared.ts": "af9106bcda695be4d78c5433701bd47dc82914c951f86ab6af111e99a80b7ca3",
+      "apps/www/src/content/docs/field-choices-demo.shared.ts": "8e298d75babf379a4e71d5eff497bf780201522ca1be4ba05e7bc36c9fbaea10",
+      "apps/www/src/content/docs/shadcn-demo-style.ts": "41c14e604544dab831f4550f110aab62d2ba8464e65c9debb0c99b607fcafc7d"
+    },
+    "candidateCount": 365,
+    "importedStyles": {
+      "node_modules/.pnpm/tailwindcss@4.2.2/node_modules/tailwindcss/index.css": "415a5f01208fe877d36ee8421b2135a766f258374f817a8a0a41c478c4009391"
+    },
+    "fonts": {
+      "apps/www/src/styles/assets/font/dm-sans/DMSans-Variable.ttf": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+      "apps/www/src/styles/assets/font/geist/Geist-Variable.ttf": "73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659"
+    },
+    "cssSha256": "9910ec72cbaf5fb95ca665b6e0ebca4489a7eac1b684129f59061db7bd015de9"
+  },
+  "boundary": "Static actual Tailwind stylesheet compilation, not native geometry or browser acceptance"
+}

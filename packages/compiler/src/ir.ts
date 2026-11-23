@@ -6,6 +6,7 @@ import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
 import type { ObservableSemantics } from './observable-semantics';
 import type { GpuiNativeSdkIdentity } from './gpui-native-sdk';
+import type { CompilerBuildIdentity } from './compiler-build';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
 export const IR_VERSION = 7 as const;
@@ -495,6 +496,7 @@ export interface GeneratedModule {
   }[];
   provenance: {
     source: PrototypeIR['source'];
+    compilerBuild?: CompilerBuildIdentity;
     irVersion: typeof IR_VERSION;
     backend: CompilerProfile;
     /** Reconstructable compile-time support selection, checked against emitted file bytes. */

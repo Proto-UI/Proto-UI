@@ -3,6 +3,7 @@ import { createControlLabelRef, definePrototype } from '@proto.ui/core';
 import {
   AdaptToWebComponent,
   setElementProps,
+  getElementProps,
   setElementAssociations,
 } from '@proto.ui/adapter-web-component';
 import {
@@ -42,6 +43,88 @@ const flush = async () => {
 afterEach(async () => {
   document.body.replaceChildren();
   await flush();
+});
+const patch = (element: HTMLElement, props: Record<string, unknown>) =>
+  setElementProps(element, { ...getElementProps(element), ...props });
+
+it('validates a controlled canonical value after a queued owner commit and keeps rejected candidate text out', async () => {
+  const m = mount({ externalValidation: true, validationMode: 'onChange' }, { value: 'initial' });
+  await flush();
+  const requests: any[] = [];
+  let accepts = true;
+  m.field.addEventListener('validationRequest', (event: CustomEvent) =>
+    requests.push(event.detail)
+  );
+  m.control.addEventListener('valueChange', (event: CustomEvent) => {
+    if (accepts) queueMicrotask(() => patch(m.control, { value: event.detail.value }));
+  });
+  const edit = (value: string) => {
+    m.editor().value = value;
+    m.editor().dispatchEvent(
+      new InputEvent('input', { bubbles: true, composed: true, data: value })
+    );
+  };
+  edit('accepted\nline');
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await flush();
+  expect(requests).toHaveLength(1);
+  expect(requests[0].value).toBe('accepted\nline');
+  expectsCurrent();
+  accepts = false;
+  edit('rejected');
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  await flush();
+  expect(requests).toHaveLength(2);
+  expect(requests[1].value).toBe('accepted\nline');
+  expectsCurrent();
+  function expectsCurrent() {
+    expect(m.editor().value).toBe('accepted\nline');
+    expect(m.control.getExposes().__fieldSnapshot().value).toBe('accepted\nline');
+  }
+});
+
+it.each(['reset', 'readOnly', 'composition', 'detach'] as const)(
+  'retires a queued controlled FieldTextarea report at %s',
+  async (boundary) => {
+    const m = mount({ externalValidation: true, validationMode: 'onChange' }, { value: 'initial' });
+    await flush();
+    const requests: any[] = [];
+    m.field.addEventListener('validationRequest', (event: CustomEvent) =>
+      requests.push(event.detail)
+    );
+    m.editor().value = 'candidate';
+    m.editor().dispatchEvent(
+      new InputEvent('input', { bubbles: true, composed: true, data: 'candidate' })
+    );
+    if (boundary === 'reset') m.control.getExposes().resetValue();
+    if (boundary === 'readOnly') patch(m.field, { readOnly: true });
+    if (boundary === 'composition')
+      m.editor().dispatchEvent(
+        new CompositionEvent('compositionstart', { bubbles: true, composed: true })
+      );
+    if (boundary === 'detach') m.control.remove();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await flush();
+    expect(requests).toEqual([]);
+  }
+);
+
+it('restores an uncontrolled multiline creation value during explicit readOnly reset', async () => {
+  const m = mount({}, { defaultValue: 'initial\nline' });
+  await flush();
+  m.editor().value = 'edited';
+  m.editor().dispatchEvent(
+    new InputEvent('input', { bubbles: true, composed: true, data: 'edited' })
+  );
+  await flush();
+  patch(m.control, { defaultValue: 'later default' });
+  patch(m.field, { readOnly: true });
+  await flush();
+  expect(m.control.getExposes().resetValue()).toBe(true);
+  await flush();
+  expect(m.editor().value).toBe('initial\nline');
+  expect(m.editor().readOnly).toBe(true);
+  expect(m.control.getExposes().__fieldSnapshot().value).toBe('initial\nline');
 });
 function mount(props: Record<string, unknown> = {}, controlProps: Record<string, unknown> = {}) {
   const field = document.createElement(fieldRoot.name) as any;

@@ -1,9 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { readFileSync } from 'node:fs';
 import {
   initSiteNativeControls,
   siteSidebarTextRole,
   siteIsReadingToc,
+  siteLinkAppearance,
 } from './site-native-controls';
 vi.mock('./PrototypePreviewer/projection-theme', () => ({
   resolveProjectionThemeSurfaceStyle: (family: string) => ({
@@ -11,6 +13,11 @@ vi.mock('./PrototypePreviewer/projection-theme', () => ({
   }),
 }));
 const releases: Array<() => void> = [];
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 const settle = async () => {
   for (let index = 0; index < 12; index++) await Promise.resolve();
 };
@@ -19,6 +26,64 @@ afterEach(() => {
   document.body.replaceChildren();
   delete document.documentElement.dataset.siteLibraryFamily;
   vi.restoreAllMocks();
+});
+
+it.each(['shadcn', 'brutalist'] as const)(
+  '%s preserves matching group/leaf shape and native disclosure ownership through enhancement',
+  async (family) => {
+    document.documentElement.dataset.siteLibraryFamily = family;
+    document.body.innerHTML = `<aside class="sidebar-pane"><ul class="top-level"><li><details open><summary>Section</summary><ul><li><a href="/article/" aria-current="page">Article</a></li></ul></details></li></ul></aside>`;
+    const summary = document.querySelector('summary')!;
+    const link = document.querySelector('a')!;
+    const details = document.querySelector('details')!;
+    const label = summary.firstChild;
+    const release = initSiteNativeControls();
+    releases.push(release);
+    await settle();
+    const shape = (element: HTMLElement) =>
+      element
+        .querySelector('[data-site-link-content]')!
+        .getAttribute('data-pui-style')!
+        .split(/\s+/)
+        .filter((token) => token.startsWith('rounded-'));
+    for (const event of ['pointerenter', 'pointerleave', 'pointerenter']) {
+      summary.dispatchEvent(new Event(event));
+      link.dispatchEvent(new Event(event));
+      await settle();
+      expect(shape(summary)).toEqual(shape(link));
+      expect(shape(summary)).toEqual([family === 'brutalist' ? 'rounded-base' : 'rounded-md']);
+      expect(link.getAttribute('aria-current')).toBe('page');
+      expect(summary.hasAttribute('role')).toBe(false);
+      expect(details.open).toBe(true);
+    }
+    summary.focus();
+    expect(document.activeElement).toBe(summary);
+    expect(summary.contains(label)).toBe(true);
+    release();
+    expect(summary.firstChild).toBe(label);
+    expect(link.getAttribute('href')).toBe('/article/');
+    expect(document.querySelector('details')).toBe(details);
+  }
+);
+
+it('gives the Hero pill its own presentation while preserving ordinary text links', async () => {
+  document.body.innerHTML = `<div class="homepage-hero__eyebrow"><a data-site-native-link href="/en/whitepaper/0-preface/">Why another Button?</a></div><a data-site-native-link data-site-link-appearance="text" href="/en/docs/">Article</a>`;
+  const pill = document.querySelector('a')!;
+  const prose = document.querySelectorAll('a')[1]!;
+  const label = pill.firstChild;
+  expect(siteLinkAppearance(pill)).toBe('pill');
+  releases.push(initSiteNativeControls());
+  await settle();
+  for (const link of [pill, prose]) link.dispatchEvent(new Event('pointerenter'));
+  await settle();
+  const tokens = (link: Element) =>
+    link.querySelector('[data-site-link-text]')!.getAttribute('data-pui-style')!.split(/\s+/);
+  expect(tokens(pill)).not.toContain('underline');
+  expect(tokens(prose)).toContain('underline');
+  expect(pill.contains(label)).toBe(true);
+  expect(pill.getAttribute('href')).toBe('/en/whitepaper/0-preface/');
+  pill.focus();
+  expect(document.activeElement).toBe(pill);
 });
 
 describe('website native anchor composition', () => {

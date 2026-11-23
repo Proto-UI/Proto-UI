@@ -386,7 +386,7 @@ export function emitWebComponentSource(
   const contextValidation = context
     ? emitNativeContextValidation(ir, keyNames, `${prefix}Accepts`)
     : '';
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix);
+  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix, admitted.value.ruleMetaKeys);
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -404,7 +404,7 @@ export function emitWebComponentSource(
       return formatJavaScriptValueType(type, typeName);
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
-    if (type === 'exception') return 'unknown';
+    if (type === 'exception' || type === 'unknown') return 'unknown';
     if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (isDataValueType(type))
       return interacting && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
@@ -560,9 +560,17 @@ export function emitWebComponentSource(
         span: node.span,
       });
     try {
+      // A render callback may omit its unused parameter (for example a physical
+      // TextControl returning null). Its result still needs native normalization.
       const renderer =
-        !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      const callable = `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+        !options.ssr && node.context === 'render'
+          ? (node.parameters[0]?.name ?? `${prefix}Renderer${nativeSequence++}`)
+          : undefined;
+      const parameters =
+        renderer && node.parameters.length === 0
+          ? `${renderer}: ${prefix}Renderer`
+          : emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName);
+      const callable = `(${parameters})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
       return callBoundaries.authored.has(node)
         ? `${prefix}MarkAuthoredCallable(${callable})`
         : callable;
@@ -707,7 +715,7 @@ export function emitWebComponentSource(
         switch (statement.kind) {
           case 'const':
             nativeScope = nativeScope.bind(statement.name, statement.value);
-            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
           case 'return':
@@ -1238,6 +1246,7 @@ ${
 ${
   styled
     ? `  const ${p}Style = ${p}CreateNativeStyle({ensureSetup, ensureRuntime: runtime, isAlive: () => alive,
+    ${atoms.ruleMeta(ssr ? 'host.document' : 'host.ownerDocument')}
     project(tokens) { ${ssr ? "host.attribute('data-pui-style', tokens.length ? tokens.join(' ') : null);" : "if (tokens.length) host.setAttribute('data-pui-style', tokens.join(' ')); else host.removeAttribute('data-pui-style');"} }});\n`
     : ''
 }
@@ -1379,13 +1388,17 @@ ${styled ? `    ${p}Style.refresh();\n` : ''}
 ${interacting ? `    ${p}Interaction.refresh();\n` : ''}
     if (!hydrated) { hydrated = true; return; }
     const changed = Object.keys(specs).filter((key) => !Object.is(prev[key], resolved[key]));
-    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => own(previousRaw, key) !== own(raw, key) || !Object.is(previousRaw[key], raw[key])) : changed;
+    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : changed;
     const next = resolved, nextRaw = raw;
     const previousWindow = propsWindow; propsWindow = {raw: nextRaw, resolved: next};
-    try { for (const watcher of [...watchers]) {
+    try { for (let group = 0; group < 3; ++group) for (const watcher of [...watchers]) {
+      if ((watcher.raw ? watcher.keys === null ? 0 : 1 : 2) !== group) continue;
       const all = watcher.raw ? rawChanged : changed;
       const matched = watcher.keys === null ? all : all.filter((key) => watcher.keys!.includes(key));
-      if (watcher.active && matched.length) invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      if (watcher.active && matched.length) {
+        if (watcher.raw) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+        invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      }
     } } finally { propsWindow = previousWindow; }
   }
   function drainEmissions(): void {

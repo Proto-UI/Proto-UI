@@ -1,0 +1,27 @@
+{
+  "scope": "Report-only worktree validation, not product acceptance",
+  "sourceBase": "b3e4cd0d2cfdeb4fe48787911cd5dd4cee7a006b",
+  "checks": [
+    {
+      "command": "corepack pnpm@10.32.1 check:agent-doc",
+      "exitCode": 1,
+      "status": "launcher-blocked",
+      "reason": "tsx CLI attempts an unavailable Unix-domain IPC socket; no checker result",
+      "log": "collections-review-agent-doc.log"
+    },
+    {
+      "command": "node --import tsx scripts/spec/generate-agent-project-understanding.mjs --check",
+      "exitCode": 0,
+      "status": "passed",
+      "log": "collections-review-agent-doc-loader.log"
+    },
+    {
+      "command": "corepack pnpm@10.32.1 check:agent-operations",
+      "exitCode": 130,
+      "status": "reviewer-interrupted-incomplete",
+      "reason": "Larger-than-anticipated suite did not reach final terminal receipt; reviewer interrupted owned session to avoid further contention with integrated strict types. Partial printed successes are not a suite pass.",
+      "log": "collections-review-agent-operations.log"
+    }
+  ],
+  "resourceBoundary": "The operations check overlapped the root-reported workspace tsc process killed with exit137; no causal attribution was established. Reviewer has stopped the only outstanding local execution and will not repeat broad checks."
+}

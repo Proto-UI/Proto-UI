@@ -30,6 +30,12 @@ Indicator 是派生的。它从最近的 Base Checkbox 读 `checked` 与 `indete
 
 把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
 
+## 只读与显式 Form 组合
+
+Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。普通 Root 不会自动注册到 Field 或 Form。
+
+在显式 `FormField` 中使用 `@proto.ui/prototypes-shadcn/field` 的 `fieldCheckbox`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+
 ## API
 
 未传入的布尔属性使用下表默认值。传入 `checked` 或 `indeterminate` 会使该事实进入受控模式，另一事实仍可以保持非受控。
@@ -42,6 +48,7 @@ Indicator 是派生的。它从最近的 Base Checkbox 读 `checked` 与 `indete
     { name: 'indeterminate', type: 'boolean | undefined', default: '非受控' },
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
   ]}
 />
 

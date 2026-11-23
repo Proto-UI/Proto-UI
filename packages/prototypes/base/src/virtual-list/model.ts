@@ -10,6 +10,10 @@ export type WindowSnapshot = Readonly<{
   committed: WindowRange | null;
   materializedKeys: readonly string[];
 }>;
+export interface WindowMaterializerLease {
+  isCurrent(): boolean;
+  release(): void;
+}
 export interface WindowedCollection {
   setItems(keys: readonly string[]): void;
   configure(policy: { overscanItems?: number; maxMaterializedItems?: number }): void;
@@ -19,6 +23,8 @@ export interface WindowedCollection {
   invalidate(): void;
   snapshot(): WindowSnapshot;
   subscribe(listener: () => void): () => void;
+  acquireMaterializer(onRetired: () => void): WindowMaterializerLease;
+  retireMaterializer(): void;
 }
 /** Complete logical identity is independent of physical Anatomy membership. No host units enter this model. */
 export function createWindowedCollection(
@@ -34,6 +40,7 @@ export function createWindowedCollection(
     committed: WindowRange | null = null,
     materializedKeys: string[] = [];
   const listeners = new Set<() => void>();
+  let materializer: WindowMaterializerLease | null = null;
   const notify = () => {
     for (const fn of [...listeners]) fn();
   };
@@ -78,6 +85,34 @@ export function createWindowedCollection(
     configure,
     snapshot,
     invalidate,
+    acquireMaterializer(onRetired) {
+      if (materializer) throw new Error('Windowed Collection already has an active materializer');
+      const lease: WindowMaterializerLease = Object.freeze({
+        isCurrent: () => materializer === lease,
+        release() {
+          if (materializer !== lease) return;
+          materializer = null;
+          // Retire before user cleanup, which may synchronously install a new
+          // owner. No old-owner state write may follow that callback.
+          generation++;
+          requested = null;
+          committed = null;
+          materializedKeys = [];
+          status = 'idle';
+          try {
+            onRetired();
+          } finally {
+            notify();
+          }
+        },
+      });
+      materializer = lease;
+      return lease;
+    },
+    retireMaterializer() {
+      if (materializer) materializer.release();
+      else invalidate();
+    },
     subscribe(fn) {
       listeners.add(fn);
       return () => listeners.delete(fn);

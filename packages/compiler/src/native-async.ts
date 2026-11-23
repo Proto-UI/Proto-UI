@@ -1,4 +1,82 @@
 import type { ExpressionIR, GeneratedModule, Operation, ValueType } from './ir';
+import type { RuleMetaKey } from './rule-declarations';
+
+export const nativeMetaSubscriptionArtifact: NonNullable<
+  GeneratedModule['supportingFiles']
+>[number] = {
+  path: '.proto-ui/meta/subscription-v1.ts',
+  kind: 'source',
+  contents: `/** Native invalidation registration; acquire/release always use one captured complete API pair. */
+export function nativeMediaBinding(query: MediaQueryList | undefined, notify: () => void): { attach(): void; release(): void } | undefined {
+  if (!query) return;
+  const add = query.addEventListener, remove = query.removeEventListener;
+  if (typeof add === 'function' && typeof remove === 'function') return {
+    attach: () => add.call(query, 'change', notify), release: () => remove.call(query, 'change', notify),
+  };
+  const legacyAdd = query.addListener, legacyRemove = query.removeListener;
+  if (typeof legacyAdd === 'function' && typeof legacyRemove === 'function') return {
+    attach: () => legacyAdd.call(query, notify), release: () => legacyRemove.call(query, notify),
+  };
+}
+export function releaseNativeMeta(releases: readonly (() => void)[]): void {
+  const failures: unknown[] = [];
+  for (const release of releases) { try { release(); } catch (error) { failures.push(error); } }
+  if (failures.length === 1) throw failures[0];
+  if (failures.length) throw new AggregateError(failures, 'Native Meta cleanup failed.');
+}
+`,
+};
+
+export const nativeRuleColorSchemeArtifact: NonNullable<
+  GeneratedModule['supportingFiles']
+>[number] = {
+  path: '.proto-ui/meta/color-scheme-source-v1.ts',
+  kind: 'source',
+  contents: `import { readNativeWebMeta } from './web-snapshot-v1';
+import { nativeMediaBinding, releaseNativeMeta } from './subscription-v1';
+// C-RULE-COLOR-SCHEME-0001: one document invalidation source, no value bus or author callbacks.
+type Service = { callbacks: Set<() => void>; stop(): void };
+const services = new WeakMap<Document, Service>();
+export function subscribeNativeColorScheme(doc: Document | undefined, notify: () => void): () => void {
+  const view = doc?.defaultView;
+  if (!doc?.documentElement || !view?.MutationObserver) return () => {};
+  let service = services.get(doc);
+  if (!service) {
+    const callbacks = new Set<() => void>();
+    let active = true, queued = false, previous = readNativeWebMeta(doc, 'colorScheme');
+    const invalidate = () => {
+      if (!active || queued) return;
+      queued = true;
+      queueMicrotask(() => {
+        queued = false; if (!active) return;
+        const next = readNativeWebMeta(doc, 'colorScheme');
+        if (next === previous) return; previous = next;
+        for (const callback of [...callbacks]) if (active && callbacks.has(callback)) callback();
+      });
+    };
+    let query: MediaQueryList | undefined;
+    try { query = view.matchMedia?.('(prefers-color-scheme: dark)'); } catch {}
+    const observer = new view.MutationObserver(invalidate), binding = nativeMediaBinding(query, invalidate);
+    const releases: (() => void)[] = [];
+    service = { callbacks, stop() {
+      if (!active) return; active = false;
+      callbacks.clear(); if (services.get(doc) === service) services.delete(doc);
+      releaseNativeMeta(releases);
+    } };
+    services.set(doc, service);
+    try {
+      releases.push(() => observer.disconnect());
+      observer.observe(doc.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+      if (binding) { releases.push(binding.release); binding.attach(); }
+    } catch (error) { releaseNativeMeta([() => { throw error; }, () => service!.stop()]); }
+  }
+  // A registration identity allows the same callback to hold independent leases.
+  const callback = () => notify(); service.callbacks.add(callback);
+  const current = service; let released = false;
+  return () => { if (released) return; released = true; current.callbacks.delete(callback); if (!current.callbacks.size) current.stop(); };
+}
+`,
+};
 
 export const nativeMetaArtifact: NonNullable<GeneratedModule['supportingFiles']>[number] = {
   path: '.proto-ui/meta/web-snapshot-v1.ts',
@@ -37,15 +115,86 @@ export function readNativeWebMeta(doc: Document | undefined, key: string): unkno
 `,
 };
 
-export function nativeHostAtomPlan(operations: readonly Operation[], prefix: string) {
+export const nativeRulePreferenceArtifact: NonNullable<GeneratedModule['supportingFiles']>[number] =
+  {
+    path: '.proto-ui/meta/preference-source-v1.ts',
+    kind: 'source',
+    contents: `import { nativeMediaBinding, releaseNativeMeta } from './subscription-v1';
+// C-RULE-PREFERENCES-0001: only reached fixed-key MQLs, shared per document/key.
+const definitions: Record<string, readonly [string, readonly string[]]> = {
+  'preference.reducedMotion': ['prefers-reduced-motion', ['no-preference', 'reduce']],
+  'preference.reducedTransparency': ['prefers-reduced-transparency', ['no-preference', 'reduce']],
+  'preference.contrast': ['prefers-contrast', ['no-preference', 'less', 'more', 'custom']],
+  'preference.forcedColors': ['forced-colors', ['none', 'active']],
+};
+type Source = { callbacks: Set<() => void>; read(): unknown; stop(): void };
+const documents = new WeakMap<Document, Map<string, Source>>();
+export function readNativeRulePreference(doc: Document | undefined, key: string): unknown {
+  return doc ? documents.get(doc)?.get(key)?.read() ?? 'unknown' : 'unknown';
+}
+export function subscribeNativeRulePreferences(doc: Document | undefined, keys: readonly string[], notify: () => void): () => void {
+  const view = doc?.defaultView;
+  if (!doc || typeof view?.matchMedia !== 'function') return () => {};
+  let active = true, queued = false;
+  const changed = () => { if (!active || queued) return; queued = true; queueMicrotask(() => { queued = false; if (active) notify(); }); };
+  const releases: (() => void)[] = [];
+  let sources = documents.get(doc); if (!sources) { sources = new Map(); documents.set(doc, sources); }
+  try { for (const key of keys) {
+    if (!Object.hasOwn(definitions, key)) throw new Error('Unknown generated Rule preference.');
+    let source = sources.get(key);
+    if (!source) {
+      const [feature, values] = definitions[key], getter = view.matchMedia; let queries: MediaQueryList[];
+      try { queries = values.map(value => view.matchMedia('(' + feature + ': ' + value + ')')); } catch { continue; }
+      const callbacks = new Set<() => void>(); let live = true, ready = false, pending = false;
+      const read = () => {
+        if (!live || !ready || doc.defaultView !== view || view.matchMedia !== getter) return 'unknown';
+        try { const matches = values.filter((_value, index) => queries[index].matches); return matches.length === 1 ? matches[0] : 'unknown'; } catch { return 'unknown'; }
+      };
+      let previous = read();
+      const invalidate = () => { if (!live || pending) return; pending = true; queueMicrotask(() => {
+        pending = false; if (!live) return; const next = read();
+        if (next === previous) return; previous = next;
+        for (const callback of [...callbacks]) if (live && callbacks.has(callback)) callback();
+      }); };
+      let bindings: ReturnType<typeof nativeMediaBinding>[];
+      try { bindings = queries.map(query => typeof query?.matches === 'boolean' ? nativeMediaBinding(query, invalidate) : undefined); } catch { continue; }
+      if (bindings.some(binding => !binding)) continue;
+      const attached: (() => void)[] = [];
+      source = { callbacks, read, stop() { if (!live) return; live = false;
+        callbacks.clear(); if (sources!.get(key) === source) sources!.delete(key);
+        if (!sources!.size && documents.get(doc) === sources) documents.delete(doc);
+        releaseNativeMeta(attached);
+      } }; sources.set(key, source);
+      try { for (const binding of bindings) { attached.push(binding!.release); binding!.attach(); } ready = true; previous = read(); }
+      catch (error) { releaseNativeMeta([() => { throw error; }, () => source!.stop()]); }
+    }
+    source.callbacks.add(changed); const current = source;
+    releases.push(() => { current.callbacks.delete(changed); if (!current.callbacks.size) current.stop(); });
+  } } catch (error) { active = false; releaseNativeMeta([() => { throw error; }, ...releases]); }
+  return () => { if (!active) return; active = false; releaseNativeMeta(releases); };
+}
+`,
+  };
+
+export function nativeHostAtomPlan(
+  operations: readonly Operation[],
+  prefix: string,
+  ruleMetaKeys: readonly RuleMetaKey[] = []
+) {
   const delay = operations.includes('scheduler.delay');
   const presence = operations.some((operation) => operation.startsWith('presence.'));
   const snapshot = presence || operations.includes('presentation.snapshotCompletion');
-  const meta = operations.includes('meta.get');
+  const ruleColorScheme = ruleMetaKeys.includes('colorScheme');
+  const rulePreferences = ruleMetaKeys.filter((key) => key.startsWith('preference.'));
+  const ruleMeta = ruleColorScheme || rulePreferences.length > 0;
+  const meta = operations.includes('meta.get') || ruleMeta;
   const files = [
     ...(delay ? [nativeDelayArtifact] : []),
     ...(snapshot ? [nativePresenceArtifact] : []),
     ...(meta ? [nativeMetaArtifact] : []),
+    ...(ruleMeta ? [nativeMetaSubscriptionArtifact] : []),
+    ...(ruleColorScheme ? [nativeRuleColorSchemeArtifact] : []),
+    ...(rulePreferences.length ? [nativeRulePreferenceArtifact] : []),
   ];
   return {
     delay,
@@ -54,7 +203,25 @@ export function nativeHostAtomPlan(operations: readonly Operation[], prefix: str
     meta,
     files,
     names: { delay: `${prefix}Delay`, presence: `${prefix}Presence`, meta: `${prefix}Meta` },
+    ruleMeta(document: string, typed = true): string {
+      const leases = [
+        ruleColorScheme ? `${prefix}SubscribeColorScheme(${document}, notify)` : '',
+        rulePreferences.length
+          ? `${prefix}SubscribePreferences(${document}, ${JSON.stringify(rulePreferences)}, notify)`
+          : '',
+      ].filter(Boolean);
+      const read = rulePreferences.length
+        ? `key.startsWith('preference.') ? ${prefix}ReadPreference(${document}, key) : ${prefix}ReadMeta(${document}, key)`
+        : `${prefix}ReadMeta(${document}, key)`;
+      const subscribe = leases.map((lease) => `leases.push(${lease});`).join(' ');
+      return ruleMeta
+        ? `getMeta: ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${read}, subscribeMeta: ${typed ? '(notify: () => void)' : '/** @param {() => void} notify */ (notify)'} => { ${typed ? 'const leases: (() => void)[] = [];' : '/** @type {(() => void)[]} */ const leases = [];'} try { ${subscribe} } catch (error) { ${prefix}ReleaseMeta([() => { throw error; }, ...leases]); } return () => ${prefix}ReleaseMeta(leases); },`
+        : '';
+    },
     imports: [
+      ruleMeta
+        ? `import { releaseNativeMeta as ${prefix}ReleaseMeta } from './.proto-ui/meta/subscription-v1';`
+        : '',
       delay
         ? `import { createNativeDelay as ${prefix}CreateDelay, type NativeDelayTask as ${prefix}DelayTask } from './.proto-ui/async/delay-web-v1';`
         : '',
@@ -64,10 +231,19 @@ export function nativeHostAtomPlan(operations: readonly Operation[], prefix: str
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
         : '',
+      ruleColorScheme
+        ? `import { subscribeNativeColorScheme as ${prefix}SubscribeColorScheme } from './.proto-ui/meta/color-scheme-source-v1';`
+        : '',
+      rulePreferences.length
+        ? `import { subscribeNativeRulePreferences as ${prefix}SubscribePreferences, readNativeRulePreference as ${prefix}ReadPreference } from './.proto-ui/meta/preference-source-v1';`
+        : '',
     ]
       .filter(Boolean)
       .join('\n'),
     jsImports: [
+      ruleMeta
+        ? `import { releaseNativeMeta as ${prefix}ReleaseMeta } from './.proto-ui/meta/subscription-v1';`
+        : '',
       delay
         ? `import { createNativeDelay as ${prefix}CreateDelay } from './.proto-ui/async/delay-web-v1';\n/** @typedef {import('./.proto-ui/async/delay-web-v1').NativeDelayTask} ${prefix}DelayTask */`
         : '',
@@ -76,6 +252,12 @@ export function nativeHostAtomPlan(operations: readonly Operation[], prefix: str
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
+        : '',
+      ruleColorScheme
+        ? `import { subscribeNativeColorScheme as ${prefix}SubscribeColorScheme } from './.proto-ui/meta/color-scheme-source-v1';`
+        : '',
+      rulePreferences.length
+        ? `import { subscribeNativeRulePreferences as ${prefix}SubscribePreferences, readNativeRulePreference as ${prefix}ReadPreference } from './.proto-ui/meta/preference-source-v1';`
         : '',
     ]
       .filter(Boolean)

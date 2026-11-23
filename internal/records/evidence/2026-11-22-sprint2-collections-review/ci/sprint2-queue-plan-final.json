@@ -1,0 +1,117 @@
+{
+  "families": ["base", "shadcn", "brutalist"],
+  "runtimes": ["wc", "react", "vue", "vue2"],
+  "suites": [
+    {
+      "id": "input",
+      "script": "scripts/analysis/sprint2-input-browser.mjs",
+      "kinds": ["input-otp", "slider-values"],
+      "expectedCases": 72,
+      "format": "native"
+    },
+    {
+      "id": "collections",
+      "script": "scripts/analysis/collections-recipes-browser.mjs",
+      "kinds": ["tree", "data-table", "virtual-list"],
+      "expectedCases": 36,
+      "format": "native"
+    },
+    {
+      "id": "geometry",
+      "script": "scripts/analysis/component-capabilities-browser.mjs",
+      "kinds": ["resizable", "carousel", "date-picker"],
+      "expectedCases": 36,
+      "format": "native"
+    },
+    {
+      "id": "form-select",
+      "script": "scripts/analysis/form-select-recipes-browser.mjs",
+      "kinds": ["form", "select", "choices"],
+      "expectedCases": 36,
+      "format": "native"
+    },
+    {
+      "id": "ordinary-linked-consumers",
+      "files": ["packages/compiler/test/artifact-linking-consumer.test.ts"],
+      "evidenceKind": "ordinary framework imports in Node/HappyDOM; not native browser evidence",
+      "expectedCases": 12,
+      "expectedIds": [
+        "ordinary consumers of independently compiled and linked libraries fails visibly when an ordinary import evaluates an unlinked external obligation",
+        "ordinary consumers of independently compiled and linked libraries uses React imports through native wrappers and portals, updates repeatedly and disposes subscriptions",
+        "ordinary consumers of independently compiled and linked libraries uses Vue 3 native component slots, nearest providers and disposal",
+        "ordinary consumers of independently compiled and linked libraries uses Vue 2 ordinary options imports and native children without a Proto launcher",
+        "ordinary consumers of independently compiled and linked libraries uses registered Web Components through ordinary DOM wrappers and terminal disconnect",
+        "ordinary consumers of independently compiled and linked libraries shares Anatomy membership and Focus Scope keys between different independently compiled feature closures",
+        "ordinary consumers of independently compiled and linked libraries resolves structured A11y targets across independent feature closures without crossing domains or private families",
+        "ordinary consumers of independently compiled and linked libraries rejects incompatible Focus metadata and declaration kinds before native import",
+        "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in react-dom-source-v1",
+        "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in vue-source-v1",
+        "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in vue2-source-v1",
+        "ordinary consumers of independently compiled and linked libraries preserves actual nominal references for every declaration kind in web-component-source-v1"
+      ],
+      "format": "vitest"
+    },
+    {
+      "id": "compiled-consumers",
+      "files": ["packages/compiler/test/sprint2-native.browser.test.ts"],
+      "evidenceVariable": "PROTO_UI_RUNTIME_EVIDENCE_DIR",
+      "expectedCases": 20,
+      "expectedIds": [
+        "wc/base: native Button activation, preferences and terminal cleanup",
+        "wc/shadcn: native Button activation, preferences and terminal cleanup",
+        "wc/brutalist: native Button activation, preferences and terminal cleanup",
+        "wc/sync: trusted controlled typing preserves caret through candidate refresh",
+        "wc/queued: trusted controlled typing preserves caret through candidate refresh",
+        "react/base: native Button activation, preferences and terminal cleanup",
+        "react/shadcn: native Button activation, preferences and terminal cleanup",
+        "react/brutalist: native Button activation, preferences and terminal cleanup",
+        "react/sync: trusted controlled typing preserves caret through candidate refresh",
+        "react/queued: trusted controlled typing preserves caret through candidate refresh",
+        "vue/base: native Button activation, preferences and terminal cleanup",
+        "vue/shadcn: native Button activation, preferences and terminal cleanup",
+        "vue/brutalist: native Button activation, preferences and terminal cleanup",
+        "vue/sync: trusted controlled typing preserves caret through candidate refresh",
+        "vue/queued: trusted controlled typing preserves caret through candidate refresh",
+        "vue2/base: native Button activation, preferences and terminal cleanup",
+        "vue2/shadcn: native Button activation, preferences and terminal cleanup",
+        "vue2/brutalist: native Button activation, preferences and terminal cleanup",
+        "vue2/sync: trusted controlled typing preserves caret through candidate refresh",
+        "vue2/queued: trusted controlled typing preserves caret through candidate refresh"
+      ],
+      "format": "vitest"
+    },
+    {
+      "id": "site",
+      "files": ["apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts"],
+      "evidenceVariable": "PROTO_UI_SPRINT2_SITE_EVIDENCE_DIR",
+      "expectedCases": 42,
+      "format": "vitest"
+    },
+    {
+      "id": "preferences",
+      "files": ["apps/www/test/preferences.browser.test.ts"],
+      "evidenceVariable": "PROTO_UI_PREFERENCE_EVIDENCE_DIR",
+      "expectedCases": 4,
+      "format": "vitest"
+    },
+    {
+      "id": "collapsible",
+      "files": [
+        "apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts"
+      ],
+      "pattern": "^(?:Base|shadcn|brutalist) Collapsible public browser evidence ",
+      "evidenceVariable": "PROTO_UI_COLLAPSIBLE_SCREENSHOT_DIR",
+      "expectedCases": 23,
+      "format": "vitest"
+    },
+    {
+      "id": "accordion",
+      "files": ["apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts"],
+      "pattern": "^Accordion five families / four native Web consumers (?:base|shadcn|brutalist) ",
+      "evidenceVariable": "PROTO_UI_ACCORDION_SCREENSHOT_DIR",
+      "expectedCases": 23,
+      "format": "vitest"
+    }
+  ]
+}

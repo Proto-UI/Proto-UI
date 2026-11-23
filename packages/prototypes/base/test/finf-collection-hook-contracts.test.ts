@@ -84,6 +84,7 @@ it('inspects real authored hook frames and nested child handles', async () => {
     tr: {
       a11yLabel: 'string',
       collectionCount: 'number',
+      direction: 'string',
       invalid: 'boolean',
       value: 'string',
     } satisfies Domains<ReturnType<typeof tree.asTreeRoot>>,
@@ -101,10 +102,13 @@ it('inspects real authored hook frames and nested child handles', async () => {
       hidden: 'boolean',
       level: 'number',
       position: 'number',
+      relationshipKey: 'string',
       selected: 'boolean',
       setSize: 'number',
     } satisfies Domains<ReturnType<typeof tree.asTreeItem>>,
-    tg: {} satisfies Domains<ReturnType<typeof tree.asTreeGroup>>,
+    tg: { hidden: 'boolean', direction: 'string', relationshipKey: 'string' } satisfies Domains<
+      ReturnType<typeof tree.asTreeGroup>
+    >,
     tt: {} satisfies Domains<ReturnType<typeof tree.asTreeToggle>>,
     mr: {} satisfies Domains<ReturnType<typeof message.asMessageScrollerRoot>>,
     mv: {
@@ -121,9 +125,11 @@ it('inspects real authored hook frames and nested child handles', async () => {
     >,
     vv: {} satisfies Domains<ReturnType<typeof virtual.asVirtualListViewport>>,
     vc: {} satisfies Domains<ReturnType<typeof virtual.asVirtualListContent>>,
-    dr: { collectionCount: 'number', filteredCount: 'number' } satisfies Domains<
-      ReturnType<typeof table.asDataTableRoot>
-    >,
+    dr: {
+      collectionCount: 'number',
+      filteredCount: 'number',
+      pageSelection: 'string',
+    } satisfies Domains<ReturnType<typeof table.asDataTableRoot>>,
     dw: {
       collectionFirst: 'boolean',
       collectionIndex: 'number',
@@ -135,8 +141,12 @@ it('inspects real authored hook frames and nested child handles', async () => {
       rowKey: 'string',
       selected: 'boolean',
     } satisfies Domains<ReturnType<typeof table.asDataTableRow>>,
-    dc: { displayValue: 'string' } satisfies Domains<ReturnType<typeof table.asDataTableCell>>,
-    dh: { sort: 'string' } satisfies Domains<ReturnType<typeof table.asDataTableHeader>>,
+    dc: { displayValue: 'string', hidden: 'boolean' } satisfies Domains<
+      ReturnType<typeof table.asDataTableCell>
+    >,
+    dh: { sort: 'string', hidden: 'boolean' } satisfies Domains<
+      ReturnType<typeof table.asDataTableHeader>
+    >,
     dcap: {} satisfies Domains<ReturnType<typeof table.asDataTableCaption>>,
     dp: {} satisfies Domains<ReturnType<typeof table.asDataTablePrevious>>,
     dn: {} satisfies Domains<ReturnType<typeof table.asDataTableNext>>,
@@ -238,11 +248,14 @@ it('inspects real authored hook frames and nested child handles', async () => {
       getCollectionItems: true,
       getCollectionCount: true,
       filteredCount: true,
+      pageSelection: true,
       getRows: true,
       getRecord: true,
+      getSelectedKeys: true,
       requestSort: true,
       requestPage: true,
       requestSelection: true,
+      requestPageSelection: true,
     } satisfies Record<keyof ProtoAdapterExposes<typeof table.dataTableRoot>, true>,
     dw: {
       collectionIndex: true,

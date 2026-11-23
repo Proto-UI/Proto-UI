@@ -1,0 +1,68 @@
+{
+  "ok": true,
+  "files": [
+    {
+      "file": "LICENSE",
+      "bytes": 1078,
+      "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66",
+      "repeatSha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66",
+      "equal": true
+    },
+    {
+      "file": "README.md",
+      "bytes": 1037,
+      "sha256": "09d6ad5ec832ec4747184b62876c2251d52d23ccfa7f9bb634e7d454209a0157",
+      "repeatSha256": "09d6ad5ec832ec4747184b62876c2251d52d23ccfa7f9bb634e7d454209a0157",
+      "equal": true
+    },
+    {
+      "file": "cli.js",
+      "bytes": 287,
+      "sha256": "f464769067a25b4e8631413042710cc5ad2de7efe904c1eb3abc18bc79e321aa",
+      "repeatSha256": "f464769067a25b4e8631413042710cc5ad2de7efe904c1eb3abc18bc79e321aa",
+      "equal": true
+    },
+    {
+      "file": "compiler-build.json",
+      "bytes": 28146,
+      "sha256": "3447eb0a5cc6b5e27ddaf9eec2eebe97a43be3ac2e8c24cb88bb37c7bfdfd2cd",
+      "repeatSha256": "3447eb0a5cc6b5e27ddaf9eec2eebe97a43be3ac2e8c24cb88bb37c7bfdfd2cd",
+      "equal": true
+    },
+    {
+      "file": "index.js",
+      "bytes": 3024680,
+      "sha256": "7b4ee955958b4e9d47f44bd4b7f96659ce06832c20480cbe0d4b09db75ff2148",
+      "repeatSha256": "7b4ee955958b4e9d47f44bd4b7f96659ce06832c20480cbe0d4b09db75ff2148",
+      "equal": true
+    },
+    {
+      "file": "index.js.map",
+      "bytes": 4477896,
+      "sha256": "2267071be3e3a7e9f7892e2ecafc54356f16f4b9857bb0f92cf75f0bd4efc9a9",
+      "repeatSha256": "2267071be3e3a7e9f7892e2ecafc54356f16f4b9857bb0f92cf75f0bd4efc9a9",
+      "equal": true
+    },
+    {
+      "file": "package-lock.json",
+      "bytes": 926,
+      "sha256": "f3d9d62583abd54303f0abf4bf33e2a88c1cd48f8c60ba5024d32cb30399dbda",
+      "repeatSha256": "f3d9d62583abd54303f0abf4bf33e2a88c1cd48f8c60ba5024d32cb30399dbda",
+      "equal": true
+    },
+    {
+      "file": "package.json",
+      "bytes": 542,
+      "sha256": "156ca7629c3a37b0e29306f02afc6fcab9caa04082276b8815400f06264540b5",
+      "repeatSha256": "156ca7629c3a37b0e29306f02afc6fcab9caa04082276b8815400f06264540b5",
+      "equal": true
+    },
+    {
+      "file": "profiles.json",
+      "bytes": 84952,
+      "sha256": "c50ae94bd3a7aa5f8852ce4b9216c72fc45773774a688659605c908992f7f212",
+      "repeatSha256": "c50ae94bd3a7aa5f8852ce4b9216c72fc45773774a688659605c908992f7f212",
+      "equal": true
+    }
+  ]
+}

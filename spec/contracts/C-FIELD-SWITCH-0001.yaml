@@ -17,12 +17,18 @@ criteria:
   - id: C-FIELD-SWITCH-0001-LIFECYCLE
     text:
       en: Each accepted canonical checked change emits the existing checkedChange synchronously. If the same view remains live after delivery, its canonical Field snapshot is synchronized and one owned zero-delay change notification is scheduled. Consecutive accepted changes are not debounced; each notification reads current canonical truth and existing Field validation leases retain latest-result ownership. A rejected controlled request schedules no validation. Unmount, disposal or synchronous outward-listener retirement cancels pending reports. Focus and blur reporting reuse the existing focus owner. Relationships and policy changes do not replace checked state or copy Switch activation or drag mechanics.
+  - id: C-FIELD-SWITCH-0001-RESET
+    text:
+      en: The explicit FieldSwitch exposes resetValue through the same existing Switch owner. The creation canonical checked value is its reset baseline; later defaults do not replace it. Reset retires active axis preview and queued change reports, restores canonical progress, and may run while readOnly or disabled. Uncontrolled reset restores the value without a checkedChange proposal; controlled reset requests the baseline and never forces acceptance or changes refused canonical value or dirty. Reset sends sync facts but no onChange validation. Callback reset, policy changes, owner changes, unmount, reconnect or disposal retire the older continuation; a newer owner decision wins. Ordinary Switch does not gain an automatic Field or Form entry.
 sources:
   - path: packages/prototypes/base/src/switch/root.proto.ts
   - path: packages/prototypes/base/src/field/switch.proto.ts
 verifies:
   tests: [T-FIELD-SWITCH-0001]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: extended
+    summary: Define explicit FieldSwitch reset after the public Form recipe exposed the missing reset entry; preserve existing change-report ordering and independent checked ownership.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Opts the existing Switch root into Field semantics without a second behavior implementation.

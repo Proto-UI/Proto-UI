@@ -16,7 +16,18 @@ import {
   AS_TRIGGER_GET_PROTO_CAP,
 } from '@proto.ui/module-as-trigger';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
-import { fieldRoot, fieldControl, fieldTextarea, FIELD_CONTEXT } from '../src/field';
+import {
+  fieldRoot,
+  fieldControl,
+  fieldTextarea,
+  fieldCheckbox,
+  fieldSwitch,
+  fieldRadioGroup,
+  FIELD_CONTEXT,
+} from '../src/field';
+import { radioGroupRoot, radioGroupItem, RADIO_GROUP_FAMILY } from '../src/radio-group';
+import { checkboxRoot } from '../src/checkbox';
+import { formRoot, formField } from '../src/form';
 import { toggleGroupRoot, toggleGroupItem } from '../src/toggle-group';
 import { TOGGLE_GROUP_CONTEXT } from '../src/toggle-group/shared';
 import {
@@ -174,6 +185,384 @@ function runtimeHarness() {
   };
 }
 
+it.each(['normal', 'owner', 'owner-round-trip', 'nested-reset', 'dispose'] as const)(
+  'FieldSwitch reset preserves the entry lease during preview teardown: %s',
+  async (boundary) => {
+    const h = runtimeHarness();
+    const control = h.make(fieldSwitch, null, { checked: false });
+    let off = () => {},
+      fired = false,
+      disposed: Promise<void> | undefined;
+    const proposals: boolean[] = [];
+    try {
+      await control.session.mount();
+      h.setActionCallback((name, detail) => {
+        if (name !== 'checkedChange') return;
+        proposals.push(detail.checked);
+        control.session.controller.applyRawProps({ checked: detail.checked });
+      });
+      control.session.invokeInCallbackScope(() =>
+        control.target.dispatchEvent(new Event('pointer.down'))
+      );
+      expect(control.exposes.pressed.get()).toBe(true);
+      off = control.exposes.pressed.subscribe((event: { next: boolean }) => {
+        if (event.next !== false || fired) return;
+        fired = true;
+        if (boundary === 'owner' || boundary === 'owner-round-trip') {
+          control.session.controller.applyRawProps({ checked: true });
+          if (boundary === 'owner-round-trip')
+            control.session.controller.applyRawProps({ checked: false });
+        } else if (boundary === 'nested-reset') control.exposes.resetValue();
+        else if (boundary === 'dispose') disposed = control.session.dispose();
+      });
+      expect(() =>
+        control.session.invokeInCallbackScope(() => control.exposes.resetValue())
+      ).not.toThrow();
+      expect(fired).toBe(true);
+      expect(proposals).toEqual(
+        boundary === 'normal' || boundary === 'nested-reset' ? [false] : []
+      );
+      if (boundary !== 'dispose') expect(control.exposes.checked.get()).toBe(boundary === 'owner');
+      await disposed;
+    } finally {
+      off();
+      await control.session.dispose();
+    }
+  }
+);
+
+it.each(['unmount', 'dispose', 'remount', 'owner', 'owner-round-trip'] as const)(
+  'Radio no-op focus notification retires after focused subscriber %s',
+  async (boundary) => {
+    const h = runtimeHarness();
+    const root = h.make(radioGroupRoot, null, { value: 'a' });
+    // An independently authored legal owned item exposes its portable focus fact;
+    // this exercises Root callback ordering without claiming native host focus.
+    const item = h.make(
+      definePrototype({
+        name: 'test-owned-radio-focus-fact',
+        setup(def) {
+          def.anatomy.claim(RADIO_GROUP_FAMILY, { role: 'item' });
+          const focused = def.state.bool('focused', false);
+          def.expose.state('focused', focused);
+          def.expose.method('markFocused', () => focused.set(true));
+          def.expose.method('__collectionItem', () => ({
+            instanceId: 'owned-focus-item',
+            value: 'a',
+            disabled: false,
+          }));
+        },
+      }),
+      root.target
+    );
+    let off = () => {},
+      fired = false;
+    const pending: Promise<void>[] = [];
+    try {
+      await root.session.mount();
+      await item.session.mount();
+      item.session.invokeInCallbackScope(() => item.exposes.markFocused());
+      off = root.exposes.focused.subscribe((event: { next: boolean }) => {
+        if (!event.next || fired) return;
+        fired = true;
+        if (boundary === 'owner' || boundary === 'owner-round-trip') {
+          root.session.controller.applyRawProps({ value: 'b' });
+          if (boundary === 'owner-round-trip')
+            root.session.controller.applyRawProps({ value: 'a' });
+        } else {
+          pending.push(root.session[boundary === 'dispose' ? 'dispose' : 'unmount']());
+          if (boundary === 'remount') pending.push(root.session.mount());
+        }
+      });
+      expect(() =>
+        root.session.invokeInCallbackScope(() => root.exposes.requestValue('a'))
+      ).not.toThrow();
+      expect(fired).toBe(true);
+      expect(h.actions).not.toContain('valueChange');
+      await Promise.all(pending);
+      if (boundary === 'owner') expect(root.exposes.value.get()).toBe('b');
+      if (boundary === 'owner-round-trip') expect(root.exposes.value.get()).toBe('a');
+    } finally {
+      off();
+      await item.session.dispose();
+      await root.session.dispose();
+    }
+  }
+);
+
+for (const proto of [checkboxRoot, fieldCheckbox])
+  it.each(['confirm-mixed', 'new-checked', 'owner-round-trip'] as const)(
+    `${proto.name} mixed callback respects newer checked ownership: %s`,
+    async (mode) => {
+      const h = runtimeHarness();
+      const control = h.make(proto, null, { checked: false, indeterminate: true });
+      const proposals: boolean[] = [];
+      try {
+        await control.session.mount();
+        h.setActionCallback((name, detail) => {
+          if (name === 'indeterminateChange') {
+            control.session.controller.applyRawProps({
+              checked: mode !== 'confirm-mixed',
+              indeterminate: false,
+            });
+            if (mode === 'owner-round-trip')
+              control.session.controller.applyRawProps({ checked: false, indeterminate: false });
+          }
+          if (name === 'checkedChange') {
+            proposals.push(detail.checked);
+            control.session.controller.applyRawProps({
+              checked: detail.checked,
+              indeterminate: false,
+            });
+          }
+        });
+        control.session.invokeInCallbackScope(() =>
+          control.target.dispatchEvent(new Event('press.commit'))
+        );
+        expect(control.exposes.checked.get()).toBe(mode !== 'owner-round-trip');
+        expect(control.exposes.indeterminate.get()).toBe(false);
+        expect(proposals).toEqual(mode === 'confirm-mixed' ? [true] : []);
+      } finally {
+        await control.session.dispose();
+      }
+    }
+  );
+
+it.each(['reset', 'unmount', 'dispose', 'remount'] as const)(
+  'FieldSwitch reset retires continuation after controlled callback %s',
+  async (boundary) => {
+    const h = runtimeHarness();
+    const field = h.make(fieldRoot, null, { validationMode: 'onChange', externalValidation: true });
+    const control = h.make(fieldSwitch, field.target, { checked: false });
+    const pending: Promise<void>[] = [];
+    let retired = false;
+    try {
+      await field.session.mount();
+      await control.session.mount();
+      control.session.controller.applyRawProps({ checked: true });
+      h.setActionCallback((name) => {
+        if (name !== 'checkedChange' || retired) return;
+        retired = true;
+        if (boundary === 'reset') control.exposes.resetValue();
+        else {
+          pending.push(control.session[boundary === 'dispose' ? 'dispose' : 'unmount']());
+          if (boundary === 'remount') pending.push(control.session.mount());
+        }
+      });
+      expect(() =>
+        control.session.invokeInCallbackScope(() => control.exposes.resetValue())
+      ).not.toThrow();
+      expect(retired).toBe(true);
+      await Promise.all(pending);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(h.actions.filter((name) => name === 'checkedChange')).toHaveLength(
+        boundary === 'reset' ? 2 : 1
+      );
+      expect(h.actions).not.toContain('validationRequest');
+      if (boundary === 'remount' || boundary === 'reset') {
+        expect(control.exposes.checked.get()).toBe(true);
+        expect(control.exposes.__fieldSnapshot()).toMatchObject({ active: true, value: true });
+      }
+    } finally {
+      h.setActionCallback(() => {});
+      await control.session.dispose();
+      await field.session.dispose();
+    }
+  }
+);
+
+it.each([radioGroupRoot, fieldRadioGroup])(
+  '$name reconciles current controlled props on reconnect without replacing its reset baseline',
+  async (proto) => {
+    const h = runtimeHarness();
+    const control = h.make(proto, null, { value: 'a' });
+    const proposals: unknown[] = [];
+    try {
+      await control.session.mount();
+      await control.session.unmount();
+      control.session.controller.applyRawProps({ value: 'b' });
+      await control.session.mount();
+      expect(control.exposes.value.get()).toBe('b');
+      h.setActionCallback((name, payload) => {
+        if (name === 'valueChange') proposals.push(payload.value);
+      });
+      control.session.invokeInCallbackScope(() => control.exposes.resetValue());
+      expect(proposals).toEqual(['a']);
+      expect(control.exposes.value.get()).toBe('b');
+      await control.session.unmount();
+      control.session.controller.applyRawProps({ defaultValue: 'c' });
+      await control.session.mount();
+      expect(control.exposes.value.get()).toBe('b');
+      control.session.invokeInCallbackScope(() => control.exposes.resetValue());
+      expect(control.exposes.value.get()).toBe('a');
+    } finally {
+      await control.session.dispose();
+    }
+  }
+);
+
+for (const kind of ['checkbox', 'radio'] as const)
+  it.each(['reset', 'unmount', 'dispose', 'remount'] as const)(
+    `Field ${kind} retires an old choice proposal after callback %s`,
+    async (boundary) => {
+      const h = runtimeHarness();
+      const root = h.make(fieldRoot, null, {
+        validationMode: 'onChange',
+        externalValidation: true,
+      });
+      const control = h.make(
+        kind === 'checkbox' ? fieldCheckbox : fieldRadioGroup,
+        root.target,
+        kind === 'checkbox' ? { checked: false } : { value: 'a' }
+      );
+      const items =
+        kind === 'radio'
+          ? ['a', 'b'].map((value) => h.make(radioGroupItem, control.target, { value }))
+          : [];
+      const all = [root, control, ...items];
+      let retired = false;
+      const pending: Promise<void>[] = [];
+      const event = kind === 'checkbox' ? 'checkedChange' : 'valueChange';
+      try {
+        for (const item of all) await item.session.mount();
+        h.setActionCallback((name) => {
+          if (name !== event || retired) return;
+          retired = true;
+          if (boundary === 'reset') control.exposes.resetValue();
+          else {
+            pending.push(control.session[boundary === 'dispose' ? 'dispose' : 'unmount']());
+            if (boundary === 'remount') pending.push(control.session.mount());
+          }
+        });
+        const request = () =>
+          kind === 'checkbox'
+            ? control.target.dispatchEvent(new Event('press.commit'))
+            : control.exposes.requestValue('b');
+        expect(() => control.session.invokeInCallbackScope(request)).not.toThrow();
+        expect(retired).toBe(true);
+        await Promise.all(pending);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(h.actions.filter((name) => name === event)).toHaveLength(
+          boundary === 'reset' ? 2 : 1
+        );
+        expect(h.actions).not.toContain('validationRequest');
+        if (boundary === 'remount') {
+          expect(control.exposes.__fieldSnapshot()).toMatchObject({
+            active: true,
+            value: kind === 'checkbox' ? false : 'a',
+          });
+          h.setActionCallback(() => {});
+          expect(() => control.session.invokeInCallbackScope(request)).not.toThrow();
+          expect(h.actions.filter((name) => name === event)).toHaveLength(2);
+        }
+      } finally {
+        h.setActionCallback(() => {});
+        for (const item of all.reverse()) await item.session.dispose();
+      }
+    }
+  );
+
+it('Form reset stops the retired Field continuation after its controlled Checkbox callback disposes it', async () => {
+  const h = runtimeHarness();
+  const form = h.make(formRoot),
+    field = h.make(formField, form.target, { name: 'choice' });
+  const control = h.make(fieldCheckbox, field.target, { checked: false });
+  let retired: Promise<void> | undefined;
+  try {
+    for (const item of [form, field, control]) await item.session.mount();
+    h.setActionCallback((name) => {
+      if (name === 'checkedChange') retired = field.session.dispose();
+    });
+    expect(() =>
+      form.session.invokeInCallbackScope(() => form.exposes.requestReset())
+    ).not.toThrow();
+    expect(retired).toBeDefined();
+    await retired;
+    expect(form.exposes.getValues()).toEqual({});
+  } finally {
+    h.setActionCallback(() => {});
+    for (const item of [control, field, form]) await item.session.dispose();
+  }
+});
+
+it.each([fieldControl, fieldTextarea])(
+  '$name reset stops after its controlled callback synchronously disposes the actual Runtime',
+  async (proto) => {
+    const h = runtimeHarness();
+    const root = h.make(fieldRoot);
+    const control = h.make(proto, root.target, { value: 'owner' });
+    let disposed: Promise<void> | undefined;
+    try {
+      await root.session.mount();
+      await control.session.mount();
+      h.setActionCallback((name) => {
+        if (name === 'valueChange') disposed = control.session.dispose();
+      });
+      expect(() =>
+        control.session.invokeInCallbackScope(() => control.exposes.resetValue())
+      ).not.toThrow();
+      expect(disposed).toBeDefined();
+      await disposed;
+      expect(h.actions).toEqual(['valueChange']);
+    } finally {
+      await control.session.dispose();
+      await root.session.dispose();
+    }
+  }
+);
+
+for (const proto of [fieldControl, fieldTextarea])
+  it.each(['reset-proposal', 'composition-state'] as const)(
+    `${proto.name} reset preserves a newer composition started from %s`,
+    async (boundary) => {
+      const h = runtimeHarness();
+      const root = h.make(fieldRoot, null, {
+        externalValidation: true,
+        validationMode: 'onChange',
+      });
+      const control = h.make(proto, root.target, { value: 'owner' });
+      let started = false;
+      let stop: (() => void) | undefined;
+      const beginNewComposition = () => {
+        if (started) return;
+        started = true;
+        control.composition('compositionstart', 'new candidate');
+      };
+      try {
+        await root.session.mount();
+        await control.session.mount();
+        control.composition('compositionstart', 'old candidate');
+        if (boundary === 'reset-proposal')
+          h.setActionCallback((name) => {
+            if (name === 'valueChange') beginNewComposition();
+          });
+        else
+          stop = control.exposes.composing.subscribe((event: any) => {
+            if (event.type === 'next' && !event.next) beginNewComposition();
+          });
+        h.actions.length = 0;
+        control.session.invokeInCallbackScope(() =>
+          expect(control.exposes.resetValue()).toBe(false)
+        );
+        expect(started).toBe(true);
+        expect(control.exposes.composing.get()).toBe(true);
+        expect(control.exposes.__fieldSnapshot()).toMatchObject({
+          value: 'owner',
+          composing: true,
+          active: true,
+        });
+        root.session.invokeInCallbackScope(() => expect(root.exposes.validate()).toBeNull());
+        expect(h.actions).not.toContain('validationRequest');
+        expect(h.actions).not.toContain('compositionEnd');
+      } finally {
+        stop?.();
+        h.setActionCallback(() => {});
+        await control.session.dispose();
+        await root.session.dispose();
+      }
+    }
+  );
+
 it.each([fieldControl, fieldTextarea])(
   '$name retires the Field composition snapshot and allows validation after rejoining',
   async (proto) => {
@@ -276,7 +665,10 @@ const cases = [
     name: 'Number Field commit',
     proto: numberFieldRoot,
     state: null,
-    prepare: (x: any) => x.requestInput('2', true),
+    // A commit cannot interrupt composition. A controlled, unaccepted draft
+    // leaves the request pending until commit without claiming an active IME.
+    props: { value: 0 },
+    prepare: (x: any) => x.requestInput('2', false),
     request: (x: any) => x.commitValue(),
     event: 'valueCommit',
     callback: 'valueChange',

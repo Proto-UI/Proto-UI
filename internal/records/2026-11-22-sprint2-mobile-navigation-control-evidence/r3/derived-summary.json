@@ -1,0 +1,179 @@
+{
+  "runId": 45043843835,
+  "artifactId": 14763246293,
+  "zipSha256": "472c632d6e232dcbd820a809f249d5462737a94b524820eb5291691265ff9e85",
+  "carrierHead": "ac0793a656cc7d531175c4239aa00cce271a41f7",
+  "productHead": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "fixtureSha256": "e711131db264547dd7193f3ff8d6fa3fab82f6ca153b33a7d82fbe7d81250780",
+  "selected": 61,
+  "passed": 61,
+  "failed": 0,
+  "skipped": 0,
+  "originalScenarios": 42,
+  "targetFreshContexts": 20,
+  "enhancedMobileCaptures": [
+    {
+      "path": "sidebar-mobile-en-brutalist-enhanced-control-0075.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0083.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-shadcn-enhanced-control-0077.json",
+      "inputTop": 722,
+      "eventTop": 690,
+      "afterTop": 690,
+      "expectedTop": 690
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0088.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0096.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-en-shadcn-enhanced-control-0073.json",
+      "inputTop": 722,
+      "eventTop": 690,
+      "afterTop": 690,
+      "expectedTop": 690
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0099.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0097.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0082.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0094.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0087.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0089.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0081.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0098.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0086.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0085.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0090.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0091.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0092.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0093.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0095.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0079.json",
+      "inputTop": 2248,
+      "eventTop": 2248,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    },
+    {
+      "path": "sidebar-mobile-zh-cn-brutalist-enhanced-control-0084.json",
+      "inputTop": 2248,
+      "eventTop": 2216,
+      "afterTop": 2216,
+      "expectedTop": 2216
+    }
+  ],
+  "allFourPointsEachOwner": true,
+  "limit": "Same-product-source controlled fixture result, not clean final-head full304 acceptance."
+}

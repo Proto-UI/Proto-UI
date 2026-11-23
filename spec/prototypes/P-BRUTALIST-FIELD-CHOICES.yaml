@@ -1,0 +1,40 @@
+id: P-BRUTALIST-FIELD-CHOICES
+type: prototype
+title: brutalist explicit Field choice projections
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Draft direct Base projections. Independent review and source-bound native, assistive technology and presentation evidence remain required; source tests are not those guarantees.
+summary: Reuse the Base explicit choice owner and ordinary family presentation without additional value or validation ownership.
+statement:
+  en: The family inherits the explicit Base FieldCheckbox and FieldRadioGroup compositions. Field owns validation and relationships, Form owns submission, and the Base Root owns the canonical value. Presentation consumes those facts.
+criteria:
+  - id: P-BRUTALIST-FIELD-CHOICES-INHERITANCE
+    text:
+      en: Each explicit entry composes its matching Base hook once and preserves the complete public Props, exposes, focus, controlled refusal, reset and lifecycle contract. Ordinary family Checkbox and Radio Group remain independently usable without Form registration.
+  - id: P-BRUTALIST-FIELD-CHOICES-STYLE
+    text:
+      en: Explicit and ordinary controls share the same family paint helper. Checkbox invalid styling consumes Base Field invalid state and retains the independent textual Field Error relationship. Radio Group layout does not create a second selection or focus owner. Native visual and focus-ring acceptance requires actual browser evidence.
+  - id: P-BRUTALIST-FIELD-CHOICES-SWITCH
+    text:
+      en: FieldSwitch composes the existing Base optional-Field Switch owner once, preserving C-FIELD-SWITCH-0001 values, reset, focus, policy and report ordering. It shares the ordinary Brutalist Switch paint and its explicit draggable=false boundary. The new choice change-coalescing rule does not rewrite Switch reporting.
+inherits:
+  prototypes: [P-BASE-FIELD-CHOICES]
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0003
+    - C-FIELD-SWITCH-0001
+verifies:
+  tests: [T-BASE-FIELD-CHOICES-0001]
+sources:
+  - path: packages/prototypes/brutalist/src/field/checkbox.proto.ts
+  - path: packages/prototypes/brutalist/src/field/radio-group.proto.ts
+  - path: packages/prototypes/brutalist/src/checkbox/root-visual.ts
+  - path: packages/prototypes/brutalist/src/radio-group/root-visual.ts
+  - path: packages/prototypes/brutalist/src/field/switch.proto.ts
+  - path: packages/prototypes/brutalist/src/switch/root-visual.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Add explicit Field choice projections with a single Base semantic owner and shared ordinary-control presentation.
+tags: [prototype, brutalist, field, draft]

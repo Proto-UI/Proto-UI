@@ -73,6 +73,17 @@ It does not yet include:
 - Source: [packages/prototypes/base/src/select](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/select)
 - Test: [select.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/select.test.ts)
 
+## Pointer, keyboard and touch ownership
+
+<PrototypePreviewer
+  demoId="demo-base-select-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+This scrollable public recipe separates focus from the committed selection. Known mouse movement without held buttons may navigate; touch, pen and dragging do not borrow that hover path. The controlled-refusal switch leaves proposals visible while the owner keeps the current value. The popup uses the public popper placement; the browser owns touch scrolling and capture.
+
 ## API
 
 Select is workspace source. There is no public `proto-ui add` target. Passing `open` or `value` selects controlled mode for that fact.

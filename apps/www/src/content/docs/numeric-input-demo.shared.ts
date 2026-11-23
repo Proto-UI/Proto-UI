@@ -84,6 +84,17 @@ export function createNumericInputDemo(
           ),
           ref: 'control',
         },
+        ...(component === 'input-otp'
+          ? [
+              {
+                kind: 'box' as const,
+                className: 'text-sm text-muted-foreground',
+                children: [
+                  'Type a code, then move the caret or select a middle range in the real editor; the matching slots follow that selection. · 输入验证码后，在真实编辑器内移动光标或选中中间文本，活动槽随实际选区变化。',
+                ],
+              },
+            ]
+          : []),
         ...(component === 'number-field'
           ? [
               atom(

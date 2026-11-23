@@ -29,6 +29,12 @@ Import Root, Item, and Indicator from the already-public `@proto.ui/prototypes-b
 
 The related catalog entities are `draft`; this page records the current direction rather than a stable Radio Group guarantee.
 
+## Read-only and explicit Form composition
+
+Root accepts `readOnly`. It preserves focus while refusing value proposals; disabled also removes focus participation. A read-only Radio Group can still move roving focus with its supported navigation keys. Ordinary Root does not automatically register with Field or Form.
+
+Use `fieldRadioGroup` from `@proto.ui/prototypes-brutalist/field` inside an explicit `FormField` to connect canonical values, required validation, Label/Description/Error relationships and reset. The [Form choice recipe](../../form/) demonstrates controlled refusal, accepted changes, read-only focus, disabled groups and real owner replacement. `resetValue()` requests the instance creation baseline and never forces a controlled owner to accept it.
+
 ## API
 
 Radio Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
@@ -38,9 +44,9 @@ Radio Group is workspace source. There is no public `proto-ui add` target. Passi
   rows={[
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />
 
 These props belong to Root. Item defaults `value` to `''` and `disabled` to `false`. Indicator has no props.
-

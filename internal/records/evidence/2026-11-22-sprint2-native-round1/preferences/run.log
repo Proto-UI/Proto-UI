@@ -1,0 +1,47 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90m/home/runner/work/Proto-UI/Proto-UI[39m
+
+[2m1:55:19 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  // @vitest-environment node
+2  |  import { createServer, type Server } from 'node:http';
+   |                                               ^
+3  |  import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+4  |  import { tmpdir } from 'node:os';
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/test/preferences.browser.test.ts[39m
+[2m1:55:19 PM[22m [33m[1m[vite][22m[39m [33mwarning: [33mUnrecognized target environment "ES2024"[33m
+1  |  import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
+   |                                                                           ^
+2  |  // Shared server/browser plumbing for documentation browser regressions.
+3  |  // Extracted so a third suite does not need a third inline copy; the two existing
+[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/home/runner/work/Proto-UI/Proto-UI/apps/www/src/content/docs/zh-cn/browser-harness.ts[39m
+[90mstdout[2m | apps/www/test/preferences.browser.test.ts
+[22m[39mPreference evidence: /home/runner/work/_temp/sprint2-consumers/preferences
+
+ [32m✓[39m apps/www/test/preferences.browser.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 6912[2mms[22m[39m
+   [33m[2m✓[22m[39m bounded preferences in real Web hosts[2m > [22mwc repaints live preferences and retains safe unknown fallback [33m2164[2mms[22m[39m
+   [33m[2m✓[22m[39m bounded preferences in real Web hosts[2m > [22mreact repaints live preferences and retains safe unknown fallback [33m1494[2mms[22m[39m
+   [33m[2m✓[22m[39m bounded preferences in real Web hosts[2m > [22mvue repaints live preferences and retains safe unknown fallback [33m1513[2mms[22m[39m
+   [33m[2m✓[22m[39m bounded preferences in real Web hosts[2m > [22mvue2 repaints live preferences and retains safe unknown fallback [33m1431[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 13:55:19
+[2m   Duration [22m 7.46s[2m (transform 68ms, setup 0ms, collect 329ms, tests 6.91s, environment 0ms, prepare 40ms)[22m
+
+JSON report written to /home/runner/work/_temp/sprint2-consumers/preferences/report.json

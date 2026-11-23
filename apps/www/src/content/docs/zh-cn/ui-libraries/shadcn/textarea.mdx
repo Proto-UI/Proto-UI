@@ -32,6 +32,10 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
 
+## 复位与 Field 组合
+
+当前 0.3 源码公开 `resetValue()`：非受控编辑器恢复实例创建时的值，受控编辑器提出该值并等待 owner。显式复位在 readOnly 或 disabled 下仍可用，并退役组合输入。通过 `@proto.ui/prototypes-shadcn/field` 的 `fieldTextarea` 获取同一个多行编辑器的 Field 命名、描述、错误与校验组合；见[版本化 Form 配方](../form/)。
+
 ## API
 
 传入 `value` 进入受控模式。未设置长度限制时，`minLength` 与 `maxLength` 为 `-1`。

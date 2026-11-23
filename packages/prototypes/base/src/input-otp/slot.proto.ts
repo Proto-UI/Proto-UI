@@ -26,9 +26,17 @@ function setup(def: DefHandle<InputOtpSlotProps>) {
       index = run.props.get().index ?? 0;
     character.set(c.value[index] ?? '', 'reason: OTP slot character');
     filled.set(character.get() !== '', 'reason: OTP slot filled');
+    const selection = c.selection;
     active.set(
-      c.focused && index === Math.min(c.value.length, c.length - 1),
-      'reason: OTP insertion hint'
+      c.focused &&
+        !c.disabled &&
+        !c.readOnly &&
+        index < c.length &&
+        selection !== null &&
+        (selection.start === selection.end
+          ? index === Math.min(selection.start, c.length - 1)
+          : index >= selection.start && index < selection.end),
+      'reason: OTP host selection'
     );
     run.update();
   };
