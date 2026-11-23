@@ -3,7 +3,7 @@ import { declaredSetValueEvent } from './a11y-event-types';
 import ts from 'typescript';
 import { unwrapSourceExpression } from './source-syntax';
 import { createHash } from 'node:crypto';
-import { CompilerRejection } from './diagnostics';
+import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { admittedHookOperation } from './hook-admission';
 import { dormantSourceDeclarations } from './parser-source-demand';
 import { moduleBoolean } from './source-module-initialization';
@@ -3672,8 +3672,8 @@ export function parsePrototype(
         {
           code: 'PUI1999',
           category: 'compiler-defect',
-          message: `Unexpected frontend failure: ${error instanceof Error ? error.message : String(error)}`,
-          span: { file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+          message: `Unexpected frontend failure (source location unknown): ${unexpectedFailureEvidence(error)}`,
+          span: unknownDiagnosticSpan(file),
         },
       ],
     };

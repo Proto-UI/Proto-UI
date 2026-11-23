@@ -5,7 +5,7 @@ import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { inferInputPayloadSchemas } from './a11y-event-types';
 import { createHash } from 'node:crypto';
-import { CompilerRejection, reject } from './diagnostics';
+import { CompilerRejection, reject, unknownDiagnosticSpan } from './diagnostics';
 import {
   IR_VERSION,
   MODULE_CAPABILITY_TYPES,
@@ -141,15 +141,7 @@ const RESERVED = new Set(
     ' '
   )
 );
-const FALLBACK: SourceSpan = {
-  file: '<ir>',
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-};
+const FALLBACK: SourceSpan = unknownDiagnosticSpan('<ir>');
 
 export function validIdentifier(value: unknown): value is string {
   return (

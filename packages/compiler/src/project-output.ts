@@ -17,6 +17,7 @@ import { nativeShaderArtifacts } from './native-shader';
 import { nativeInteractionArtifacts } from './native-interaction';
 import { verifyGpuiCompilationSdk } from './gpui-native-sdk-compatibility';
 import type { SuccessfulProjectGeneration } from './project';
+import { unknownDiagnosticSpan } from './diagnostics';
 
 export interface ProjectArtifactOptions {
   /** One flat output filename for every project entry, using the profile's source extension. */
@@ -47,7 +48,7 @@ export function projectCompilationArtifacts(
         code: category === 'output-conflict' ? 'PUI3002' : 'PUI3004',
         category,
         message,
-        span: { file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+        span: unknownDiagnosticSpan(file),
       },
     ],
   });

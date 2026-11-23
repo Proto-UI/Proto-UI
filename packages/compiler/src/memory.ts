@@ -10,6 +10,7 @@ import { emitFlutterSource } from './flutter-source';
 import { resolveTargetProfile, checkTargetOperations, type TargetSelection } from './targets';
 import { attachEmitterMap } from './emitter-map';
 import { compilerBuildIdentity } from './compiler-build';
+import { unexpectedFailureEvidence } from './diagnostics';
 import type { CompileResult, GeneratedModule, ParseOptions, PrototypeIR } from './ir';
 
 export interface Compilation {
@@ -125,7 +126,7 @@ export function compilePrototype(
         {
           code: 'PUI3005',
           category: 'compiler-defect',
-          message: `Emitter source mapping failed: ${error instanceof Error ? error.message : String(error)}`,
+          message: `Emitter source mapping failed (span identifies setup context): ${unexpectedFailureEvidence(error)}`,
           span: parsed.value.setup.span,
         },
       ],

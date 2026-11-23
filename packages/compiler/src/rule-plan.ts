@@ -1,7 +1,7 @@
 import { mergeTwTokensV0 } from '../../core/src/spec/feedback/semantic-merge';
 import { assertTwTokenV0 } from '../../core/src/spec/feedback/tokens';
 import { acceptsValue, type DataType } from './data-types';
-import { CompilerRejection, reject } from './diagnostics';
+import { CompilerRejection, reject, unknownDiagnosticSpan } from './diagnostics';
 import type { CompileResult, Primitive, SourceSpan } from './ir';
 import type {
   RuleCondition,
@@ -39,15 +39,7 @@ export interface RuleEvaluation {
   stylePlan: StylePlan;
 }
 
-const fallbackSpan: SourceSpan = {
-  file: '<rule-plan>',
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-};
+const fallbackSpan: SourceSpan = unknownDiagnosticSpan('<rule-plan>');
 const declarationArrayType: DataType = {
   kind: 'array',
   element: { kind: 'record', fields: [] },

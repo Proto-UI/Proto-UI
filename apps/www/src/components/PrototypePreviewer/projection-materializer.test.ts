@@ -14,6 +14,7 @@ const fakes = vi.hoisted(() => ({
   releaseHostMount: vi.fn(),
   renderDemo: vi.fn(),
   resolveTheme: vi.fn(),
+  scheduleTheme: vi.fn(),
   watchTheme: vi.fn(),
 }));
 
@@ -36,6 +37,7 @@ vi.mock('./projection-theme', () => ({
   resolveProjectionThemeSurfaceStyle: fakes.resolveTheme,
   watchProjectionThemeSurfaceStyle: fakes.watchTheme,
 }));
+vi.mock('./projection-theme-read', () => ({ scheduleProjectionThemeRead: fakes.scheduleTheme }));
 vi.mock('./prototype-modules', () => ({ loadPrototypes: fakes.loadPrototypes }));
 vi.mock('./runtimes/host-mount', () => ({ releaseHostMount: fakes.releaseHostMount }));
 
@@ -90,6 +92,9 @@ describe('Website projection materializer', () => {
     fakes.prepareRuntime.mockReset().mockResolvedValue(undefined);
     fakes.releaseHostMount.mockReset();
     fakes.resolveTheme.mockReset().mockReturnValue({ '--pui-background': '#fff' });
+    // This suite isolates materializer leases. The real per-document scheduler,
+    // cross-owner reads and queued retirement are covered by theme-batch.test.
+    fakes.scheduleTheme.mockReset().mockImplementation(async (_scope, read) => read());
     fakes.watchTheme.mockReset();
   });
 

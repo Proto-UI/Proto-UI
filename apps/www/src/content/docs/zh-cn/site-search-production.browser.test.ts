@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { monitorEventLoopDelay } from 'node:perf_hooks';
@@ -10,6 +10,8 @@ import {
   traceSearchGetter,
   type SearchGetterSample,
   readIndependentPagefindQueries,
+  installSearchRuntimeTrace,
+  stopSearchRuntimeTrace,
 } from './site-search-evidence';
 import {
   capturePlainInputImeBaseline,
@@ -296,7 +298,9 @@ async function expectProductionRuntime(
   poll.verdict = verdict;
   poll.endedAtEpochMs = Date.now();
   const transitions = await withTransportBound(
-    page.evaluate(() => (window as SearchProductionWindow).__searchProductionRuntimeTransitions ?? []),
+    page.evaluate(
+      () => (window as SearchProductionWindow).__searchProductionRuntimeTransitions ?? []
+    ),
     RUNTIME_RECEIPT_TIMEOUT_MS
   );
   // Persist the receipt and the transport samples; a failed write must not
@@ -307,43 +311,72 @@ async function expectProductionRuntime(
       path.join(evidenceDirectory, `${family}-runtime-${runtime}-poll.json`),
       JSON.stringify({ source, poll, transitions: transitions ?? [] }, null, 2)
     );
-  })().catch((error) =>
-    console.warn('[Search production] Runtime observation unavailable', error)
-  );
+  })().catch((error) => console.warn('[Search production] Runtime observation unavailable', error));
   if (!verdict.ok)
     throw new Error(
       `[Search production] ${family} runtime ${runtime} publication rejected (${verdict.reason}): ${verdict.detail}`
     );
 }
 
-/** Opt-in diagnosis only; ordinary acceptance does not start a profiler. */
+/** Two snapshots outside the publication interval; no polling or /proc walk. */
+async function readRuntimeHostDiagnostic() {
+  const cpus = os.cpus();
+  return {
+    atEpochMs: Date.now(),
+    uptimeSeconds: os.uptime(),
+    loadAverage: os.loadavg(),
+    cpuCount: cpus.length,
+    cpuTimeMs: cpus.reduce(
+      (total, cpu) => ({
+        user: total.user + cpu.times.user,
+        nice: total.nice + cpu.times.nice,
+        sys: total.sys + cpu.times.sys,
+        idle: total.idle + cpu.times.idle,
+        irq: total.irq + cpu.times.irq,
+      }),
+      { user: 0, nice: 0, sys: 0, idle: 0, irq: 0 }
+    ),
+    cpuPressure: await readFile('/proc/pressure/cpu', 'utf8').catch((error) => ({
+      unavailable: String(error),
+    })),
+    // This process is the Vitest worker, not Chrome or the outer owner scanner.
+    nodeCpuUsage: process.cpuUsage(),
+    nodeResourceUsage: process.resourceUsage(),
+  };
+}
+
+/** Opt-in diagnosis only; ordinary acceptance does not start a profiler. The
+ * profile changes measurement cost and never replaces the original verdict. */
 async function startRuntimeDiagnostic(page: Page, family: string, runtime: string) {
   const cdp = await page.context().newCDPSession(page);
   const nodeLoop = monitorEventLoopDelay({ resolution: 10 });
   const startedAtEpochMs = Date.now();
-  nodeLoop.enable();
-  await cdp.send('Profiler.enable');
-  await cdp.send('Profiler.start');
-  await cdp.send('Performance.enable');
-  const initialMetrics = await cdp.send('Performance.getMetrics');
-  await page.evaluate(() => {
-    const state = { startedAt: performance.now(), timeOrigin: performance.timeOrigin, tasks: [] as unknown[] };
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries())
-        if (state.tasks.length < 128) state.tasks.push(entry.toJSON());
-    });
-    observer.observe({ type: 'longtask', buffered: false });
-    (window as any).__searchProductionLongTasks = { state, observer };
-  });
+  const initialHost = await readRuntimeHostDiagnostic();
+  let initialMetrics: { metrics: Array<{ name: string; value: number }> };
+  try {
+    nodeLoop.enable();
+    await cdp.send('Profiler.enable');
+    await cdp.send('Profiler.start');
+    await cdp.send('Performance.enable');
+    initialMetrics = await cdp.send('Performance.getMetrics');
+    await page.evaluate(installSearchRuntimeTrace);
+  } catch (error) {
+    nodeLoop.disable();
+    await page.evaluate(stopSearchRuntimeTrace).catch(() => {});
+    await cdp.detach().catch(() => {});
+    throw error;
+  }
   return async () => {
     try {
       const { profile } = await cdp.send('Profiler.stop');
+      await mkdir(evidenceDirectory, { recursive: true });
+      await writeFile(
+        path.join(evidenceDirectory, `${family}-runtime-${runtime}-cpu-profile.json`),
+        JSON.stringify(profile)
+      );
       const finalMetrics = await cdp.send('Performance.getMetrics');
-      const longTasks = await page.evaluate(() => {
-        const diagnostic = (window as any).__searchProductionLongTasks;
-        diagnostic?.observer.disconnect();
-        return diagnostic?.state ?? null;
-      });
+      const pageTimeline = await page.evaluate(stopSearchRuntimeTrace);
+      const finalHost = await readRuntimeHostDiagnostic();
       const nodeEventLoop = {
         minMs: nodeLoop.min / 1e6,
         maxMs: nodeLoop.max / 1e6,
@@ -351,26 +384,29 @@ async function startRuntimeDiagnostic(page: Page, family: string, runtime: strin
         p50Ms: nodeLoop.percentile(50) / 1e6,
         p99Ms: nodeLoop.percentile(99) / 1e6,
       };
-      await mkdir(evidenceDirectory, { recursive: true });
-      await writeFile(
-        path.join(evidenceDirectory, `${family}-runtime-${runtime}-cpu-profile.json`),
-        JSON.stringify(profile)
-      );
       await writeFile(
         path.join(evidenceDirectory, `${family}-runtime-${runtime}-diagnostic.json`),
-        JSON.stringify({
-          source,
-          diagnosticOnly: true,
-          startedAtEpochMs,
-          endedAtEpochMs: Date.now(),
-          nodeEventLoop,
-          initialMetrics,
-          finalMetrics,
-          longTasks,
-        }, null, 2)
+        JSON.stringify(
+          {
+            source,
+            diagnosticOnly: true,
+            wrappedBySprint1Owner: !!process.env.PROTO_UI_SPRINT1_PROCESS_OWNER,
+            startedAtEpochMs,
+            endedAtEpochMs: Date.now(),
+            nodeEventLoop,
+            initialHost,
+            finalHost,
+            initialMetrics,
+            finalMetrics,
+            pageTimeline,
+          },
+          null,
+          2
+        )
       );
     } finally {
       nodeLoop.disable();
+      await page.evaluate(stopSearchRuntimeTrace).catch(() => {});
       await cdp.detach();
     }
   };
@@ -722,8 +758,18 @@ describe.sequential('Required production Search recovery with generated Pagefind
         expect(await current.retry.getAttribute('data-pui-style')).toContain(variantToken);
         const pendingOldInput = await current.input.elementHandle();
         if (!pendingOldInput) throw new Error('Expected committed Search element: pendingOldInput');
-        const vueRequest = await page.evaluate(requestProductionRuntime, 'vue');
-        await expectProductionRuntime(page, family, 'vue', vueRequest);
+        const finishVueDiagnostic =
+          process.env.PROTO_UI_SEARCH_RUNTIME_PROFILE === '1'
+            ? await startRuntimeDiagnostic(page, family, 'vue')
+            : null;
+        try {
+          const vueRequest = await page.evaluate(requestProductionRuntime, 'vue');
+          await expectProductionRuntime(page, family, 'vue', vueRequest);
+        } finally {
+          await finishVueDiagnostic?.().catch((error) =>
+            console.warn('[Search production] Runtime diagnostic unavailable', error)
+          );
+        }
         current = await parts(page);
         await expect.poll(() => current.retry.getAttribute('aria-disabled')).toBe('true');
         expect(await current.retry.getAttribute('data-pui-style')).toContain(variantToken);

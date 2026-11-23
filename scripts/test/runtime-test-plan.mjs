@@ -82,6 +82,9 @@ export const READY_ROUTES = Object.freeze([
 export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts',
   'packages/compiler/test/sprint2-native.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
+  'packages/compiler/test/sprint1-ownership.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
   'packages/compiler/test/control-label-native.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',

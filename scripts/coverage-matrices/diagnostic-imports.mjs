@@ -4,6 +4,7 @@
 // promote Liquid Glass from WIP / Experimental. Changed bytes require review.
 // Ownership and historical failures: internal/records/2026-11-22-regression-source-bindings.md.
 // Hover-only digest renewal: internal/records/2026-11-23-sprint4-source-admission-followup.md.
+// Exact reviewed source: Sprint 4 commit 53194e0c01e6073b9ba3e7852c755ab57cfbe12d.
 export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts': Object.freeze({
     sourceSha256: 'a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6',

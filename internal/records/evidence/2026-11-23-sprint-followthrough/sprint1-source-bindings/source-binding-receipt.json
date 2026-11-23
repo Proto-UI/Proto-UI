@@ -1,0 +1,37 @@
+{
+  "observedAt": "2026-11-22T20:28:18.666735+00:00",
+  "base": "3f62a317dc95ac853c57ae75ea3305fc2a5dfcfa",
+  "comparisonHead": "53194e0c01e6073b9ba3e7852c755ab57cfbe12d",
+  "sourceFiles": [
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "sha256": "b0b35af1ac7dac9f97a2804004a9f7a2c6993314591a49f0cd68181063610dc7"
+    },
+    {
+      "path": "scripts/coverage-matrices/diagnostic-imports.mjs",
+      "sha256": "96a7fbd6d0c1317fba55c7ca6eb2223e789e3c1eb997f806ba54660f53aaa785"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "sha256": "1f95e285a1827ac28f920cf7710148b3d8c6fc83957a82e641805720ce8ec8f6"
+    }
+  ],
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=diagnostic import review rejects owner, body and edge drift",
+    "--test-reporter=spec",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "node": "v24.22.3",
+  "result": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "selected diagnostic-boundary tests only"
+  },
+  "logSha256": "e6f9afbcd4d94e2fcda86d00a9bba58b6f0f712a44cab9f42c57432069d8c91a",
+  "fullSourceGovernance": "pending on this candidate",
+  "sourceReview": "S4 exact immutable input review; S1 preserves its two Search bindings",
+  "githubApproval": false
+}
