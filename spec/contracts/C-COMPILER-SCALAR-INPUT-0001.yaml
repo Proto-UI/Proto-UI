@@ -34,6 +34,11 @@ criteria:
       An outward Expose event may snapshot a finite readonly record whose entire value type recursively proves JSON data. Readonly remains a lexical mutation restriction. The event schema removes only readonly metadata, retaining field types and optionality. Capabilities, callable values, open dictionaries, unknown and nested undefined cannot cross this boundary, including hidden fields in a structurally narrowed source view. A union retains the nesting depth of its alternatives: it preserves the existing root void boundary without admitting undefined inside a record or array. Independently supplied IR must satisfy the same proof as source admission.
 
 
+  - id: C-COMPILER-SCALAR-INPUT-0001-EVENT-TARGETS
+    text: >-
+      A finite dynamic outward event key must name only declared events. Its checked JSON payload must satisfy every possible target event schema; another legal payload emitted only to one target may widen that target without invalidating the shared emission. A payload accepted by only one possible target remains invalid. Each target's boundary and the full source/serialized-IR provenance proof remain mandatory; joining target schemas is not a substitute for checking each target.
+
+
 references:
   contracts: [C-COMPILER-SCALAR-0001, C-COMPILER-OBSERVABLES-0001]
 sources:

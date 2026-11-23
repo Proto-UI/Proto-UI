@@ -1414,6 +1414,122 @@ fn native_rendering_cannot_consume_pending_authored_output_notifications(cx: &mu
     window.update(cx, |host, _, _| assert_eq!(host.observed.borrow().len(), 2, "later renders cannot replay delivered output")).unwrap();
 }
 
+struct CommitOutputHarness {
+    component: Entity<validation::CompiledComponent>,
+    notifications: usize,
+    observed: Vec<(String, Json)>,
+    failures: Vec<proto_ui_gpui_native::gpui_native_owner::NativeFailure>,
+    _observation: gpui::Subscription,
+}
+impl Render for CommitOutputHarness {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        gpui::div().size_full().child(self.component.clone())
+    }
+}
+fn commit_output_window(cx: &mut TestAppContext, phase: &str) -> WindowHandle<CommitOutputHarness> {
+    cx.open_window(size(px(240.), px(80.)), |window, cx| {
+        let component = validation::CompiledComponent::create(
+            json!({"notificationPhase": phase}), None, window, cx,
+        ).unwrap();
+        let observation = cx.observe(&component, |host: &mut CommitOutputHarness, component, cx| {
+            host.notifications += 1;
+            let handle = component.read(cx).handle();
+            host.observed.extend(handle.take_events());
+            host.failures.extend(handle.take_failures());
+        });
+        CommitOutputHarness {
+            component, notifications: 0, observed: Vec::new(), failures: Vec::new(),
+            _observation: observation,
+        }
+    })
+}
+fn commit_output_frame(window: WindowHandle<CommitOutputHarness>, cx: &mut TestAppContext) {
+    // Exactly one physical frame admits the authored lifecycle callback. A
+    // second incidental paint would invoke the ordinary commit drive and mask
+    // the lost notification being tested here.
+    cx.update_window(window.into(), |_, window, cx| {
+        window.refresh();
+        window.draw(cx).clear(cx);
+    }).unwrap();
+    cx.run_until_parked();
+}
+fn assert_commit_output(
+    window: WindowHandle<CommitOutputHarness>, cx: &mut TestAppContext,
+    phase: &str, previous_notifications: usize,
+) {
+    let revision = window.update(cx, |host, _, cx| {
+        assert_eq!(host.notifications, previous_notifications + 1,
+            "the failing commit must itself wake the retained parent without another frame or input");
+        assert_eq!(host.observed, vec![("renderRequest".into(), json!({"phase": phase}))],
+            "the published event is delivered once and later lifecycle callbacks remain stopped");
+        assert_eq!(host.failures.len(), 1);
+        assert_eq!(host.failures[0].phase, "commit");
+        assert!(strict_equal(&host.failures[0].error, &Value::boolean(false)),
+            "notification preserves the exact falsy lifecycle error");
+        let component = host.component.read(cx);
+        let owner = component.owner.borrow();
+        assert!(owner.mounted && owner.present && !owner.disposed);
+        assert!(!owner.pending_native_events && !owner.update_requested);
+        assert_eq!(owner.committed_revision, owner.projection_revision);
+        assert!(owner.emitted.is_empty() && owner.failures.is_empty(),
+            "the real parent observer consumed both published outputs");
+        owner.projection_revision
+    }).unwrap();
+    // Subsequent ordinary frames must neither retry the failed lifecycle list
+    // nor keep notifying from its now-drained event queue.
+    frames(window, cx);
+    window.update(cx, |host, _, cx| {
+        assert_eq!(host.notifications, previous_notifications + 1);
+        assert_eq!(host.observed.len(), 1);
+        assert_eq!(host.failures.len(), 1);
+        let component = host.component.read(cx);
+        let owner = component.owner.borrow();
+        assert_eq!(owner.projection_revision, revision,
+            "event delivery does not request an authored projection");
+        assert!(!owner.pending_native_events && !owner.update_requested);
+        assert!(owner.emitted.is_empty() && owner.failures.is_empty());
+    }).unwrap();
+}
+
+#[gpui::test]
+fn native_mounted_emit_then_throw_false_notifies_parent_without_another_input(cx: &mut TestAppContext) {
+    let window = commit_output_window(cx, "mounted");
+    window.update(cx, |host, _, cx| {
+        assert!(!host.component.read(cx).owner.borrow().mounted);
+        assert_eq!(host.notifications, 0);
+        assert!(host.observed.is_empty() && host.failures.is_empty());
+    }).unwrap();
+    commit_output_frame(window, cx);
+    assert_commit_output(window, cx, "mounted", 0);
+}
+
+#[gpui::test]
+fn native_updated_emit_then_throw_false_notifies_parent_without_another_input(cx: &mut TestAppContext) {
+    let window = commit_output_window(cx, "updated");
+    commit_output_frame(window, cx);
+    window.update(cx, |host, window, cx| {
+        assert!(host.component.read(cx).owner.borrow().mounted);
+        assert!(host.observed.is_empty() && host.failures.is_empty());
+        host.component.update(cx, |component, cx| {
+            component.set_props(
+                json!({"notificationPhase": "updated", "notificationRevision": 1}), window, cx,
+            ).unwrap();
+        });
+    }).unwrap();
+    // Drain the legitimate Props/update notification before the requested
+    // projection commits, so it cannot accidentally deliver the later event.
+    cx.run_until_parked();
+    let before = window.update(cx, |host, _, cx| {
+        assert!(host.observed.is_empty() && host.failures.is_empty());
+        let component = host.component.read(cx);
+        let owner = component.owner.borrow();
+        assert!(owner.update_requested && !owner.pending_native_events);
+        host.notifications
+    }).unwrap();
+    commit_output_frame(window, cx);
+    assert_commit_output(window, cx, "updated", before);
+}
+
 #[gpui::test]
 fn public_callable_results_preserve_alias_scope_and_terminal_lifetime(cx: &mut TestAppContext) {
     let window = open(cx, json!({}));
