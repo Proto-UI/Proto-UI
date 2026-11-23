@@ -1656,12 +1656,14 @@ test('Liquid Card producer requires its exact route facade and stays outside ord
 });
 
 // These are source-edge graph controls, not rendered GPU acceptance evidence.
+const diagnosticSourceTone = 'packages/adapters/base/src/material/style-tint-source.ts';
 const diagnosticMaterialModules = [
   'contact-profile.ts',
   'liquidgl-kernel.generated.ts',
   'program-inputs.ts',
   'program.ts',
   'style-tint-profile.ts',
+  'style-tint-source.ts',
   'style.ts',
 ].map((name) => `packages/adapters/base/src/material/${name}`);
 function materialDiagnosticGraph(kind, dynamic = false) {
@@ -1685,10 +1687,17 @@ function materialDiagnosticGraph(kind, dynamic = false) {
     { id: facade, imports: [producer], dynamicImports: [] },
     {
       id: producer,
-      imports: dynamic ? [] : [...diagnosticMaterialModules],
-      dynamicImports: dynamic ? [...diagnosticMaterialModules] : [],
+      imports: dynamic ? [] : diagnosticMaterialModules.filter((id) => id !== diagnosticSourceTone),
+      dynamicImports: dynamic
+        ? diagnosticMaterialModules.filter((id) => id !== diagnosticSourceTone)
+        : [],
     },
-    ...diagnosticMaterialModules.map((id) => ({ id, imports: [], dynamicImports: [] })),
+    ...diagnosticMaterialModules.map((id) => ({
+      id,
+      imports:
+        id === 'packages/adapters/base/src/material/program.ts' ? [diagnosticSourceTone] : [],
+      dynamicImports: [],
+    })),
   ];
   return { graph, entry, facade, producer };
 }
@@ -1833,6 +1842,36 @@ for (const kind of ['tint-stage', 'visible-refraction']) {
     test(`material diagnostic admits only its exact ${kind} producer with ${dynamic ? 'dynamic' : 'static'} edges`, () => {
       const { graph } = materialDiagnosticGraph(kind, dynamic);
       assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    });
+  }
+  test(`material diagnostic ${kind} rejects emitted source tone without its program edge`, () => {
+    const { graph } = materialDiagnosticGraph(kind);
+    graph.modules.find(
+      (entry) => entry.id === 'packages/adapters/base/src/material/program.ts'
+    ).imports = [];
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+        issue.includes('emits material outside its producer boundary: ' + diagnosticSourceTone)
+      )
+    );
+  });
+  for (const via of ['direct', 'intermediate']) {
+    test(`material diagnostic ${kind} rejects ${via} bypass to the source tone helper`, () => {
+      const { graph } = materialDiagnosticGraph(kind);
+      if (via === 'direct') graph.modules[0].imports.push(diagnosticSourceTone);
+      else {
+        graph.modules[0].dynamicImports.push('unreviewed-source-tone-importer.ts');
+        graph.modules.push({
+          id: 'unreviewed-source-tone-importer.ts',
+          imports: [diagnosticSourceTone],
+          dynamicImports: [],
+        });
+      }
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+          issue.includes('bypasses its exact producer: ' + diagnosticSourceTone)
+        )
+      );
     });
   }
   for (const mutation of [
