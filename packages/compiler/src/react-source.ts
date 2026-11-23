@@ -81,6 +81,7 @@ export function emitReactSource(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value);
   const unsupportedMethods = ir.exposes.filter(
     (value) =>
@@ -408,7 +409,7 @@ export function emitReactSource(
           typeName
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), p);
+        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), p, shaderPlans);
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && value.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({

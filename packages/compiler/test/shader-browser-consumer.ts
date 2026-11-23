@@ -17,7 +17,7 @@ import {
   type ShaderPresentationFrame,
 } from '@proto.ui/module-feedback';
 import { createWebShaderPresentationSink } from '../../adapters/base/src/material/shader-webgl2';
-import prototype from './fixtures/shader-presentation-owner.proto';
+import type shaderPrototype from './fixtures/shader-presentation-owner.proto';
 import {
   createWebShaderDevice,
   createWebShaderPresenter,
@@ -53,7 +53,10 @@ async function settled(target?: Target) {
 }
 
 /** Framework-native mounting; compiled outputs never receive a Proto definition or IR. */
-export function createShaderBrowserFixture(generated: Record<Target, any>) {
+export function createShaderBrowserFixture(
+  generated: Record<Target, any>,
+  prototype: typeof shaderPrototype
+) {
   let sequence = 0;
   let active: {
     host: HTMLElement;

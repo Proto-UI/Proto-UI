@@ -1,8 +1,11 @@
 import type { ExpressionIR, GeneratedModule, Operation, ValueType } from './ir';
 import type { RuleMetaKey } from './rule-declarations';
-import type { ShaderKernel } from '../../core/src/shader-presentation';
+import type {
+  ShaderKernel,
+  ShaderPresentationDeclaration,
+} from '../../core/src/shader-presentation';
 import { nativeShaderArtifacts } from './native-shader';
-import { emitNativeShaderDeclaration } from './shader-plan';
+import { emitNativeShaderDeclaration, shaderPlanKey } from './shader-plan';
 import { nativePresencePresentationArtifact } from './native-presence-presentation';
 
 export const nativeMetaSubscriptionArtifact: NonNullable<
@@ -341,15 +344,22 @@ export type NativeHostAtomPlan = ReturnType<typeof nativeHostAtomPlan>;
 export function emitNativeHostAtom(
   value: ExpressionIR,
   emit: (value: ExpressionIR) => string,
-  prefix: string
+  prefix: string,
+  shaderPlans?: ReadonlyMap<string, ShaderPresentationDeclaration>
 ): string | undefined {
   if (value.kind !== 'operation') return undefined;
   const args = () => value.arguments.map(emit).join(', ');
   let body: string | undefined;
   switch (value.operation) {
-    case 'feedback.material.shader':
-      body = emitNativeShaderDeclaration(value.arguments[0], prefix);
+    case 'feedback.material.shader': {
+      const plan = shaderPlans?.get(shaderPlanKey(value.arguments[0]));
+      // The demand walk can prove the statement unreachable after an abrupt
+      // factory invocation. Such a site must not allocate an unused shader host
+      // or attempt to specialize data that can never be constructed.
+      if (shaderPlans && !plan) return '(void 0)';
+      body = emitNativeShaderDeclaration(value.arguments[0], prefix, plan);
       break;
+    }
     case 'feedback.style.presence':
       body = `${prefix}Presence.declare(${args()})`;
       break;

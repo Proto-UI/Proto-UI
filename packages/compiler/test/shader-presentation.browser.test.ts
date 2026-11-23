@@ -165,20 +165,24 @@ function installShaderProbe() {
 
 let browser: Browser;
 let fixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
+let staticFixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
 beforeAll(async () => {
   fixture = await buildShaderBrowserFixture();
+  staticFixture = await buildShaderBrowserFixture('static-data');
   browser = await chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
     chromiumSandbox: true,
   });
   await writeFile(path.join(fixture.evidenceDir, 'browser-version.txt'), browser.version());
+  await writeFile(path.join(staticFixture.evidenceDir, 'browser-version.txt'), browser.version());
 }, 120_000);
 afterAll(async () => {
   await browser?.close();
 });
 
-async function run(name: string, body: (page: Page) => Promise<void>) {
+async function run(name: string, body: (page: Page) => Promise<void>, selectedFixture = fixture) {
+  const fixture = selectedFixture;
   const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
   page.setDefaultTimeout(5_000);
   const errors: string[] = [],
@@ -266,37 +270,47 @@ function image(actual: number[]) {
   }
 }
 
-const cases = (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
-  (['runtime', 'compiled'] as const).map((execution) => ({ target, execution }))
+const cases = (['inline', 'static-data'] as const).flatMap((variant) =>
+  (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
+    (['runtime', 'compiled'] as const).map((execution) => ({ variant, target, execution }))
+  )
 );
 it.each(cases)(
-  '$target $execution uses real WebGL2, preserves children/input, and retires each view',
+  '$variant $target $execution uses real WebGL2, preserves children/input, and retires each view',
   async (scenario) => {
-    await run(`${scenario.target}-${scenario.execution}`, async (page) => {
-      await page.evaluate(async (value) => {
-        await window.shaderNative.fixture.mount(value.target, value.execution);
-      }, scenario);
-      await ready(page);
-      image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
-      const initial = await page.evaluate(() => window.shaderNative.fixture.read());
-      expect(initial.buttonTexts.some((text) => text.startsWith('ordinary child'))).toBe(true);
-      expect(initial.canvases).toBe(0);
-      await page.getByRole('button', { name: /^ordinary child/ }).click();
-      expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
-        clicks: 1,
-        clickedTag: 'BUTTON',
-      });
-      await page.screenshot({
-        path: path.join(fixture.evidenceDir, `${scenario.target}-${scenario.execution}-paint.png`),
-      });
-      await page.evaluate(() => window.shaderNative.fixture.visible(false));
-      await zero(page);
-      expect(await page.getByRole('button', { name: /^ordinary child/ }).count()).toBe(0);
-      await page.evaluate(() => window.shaderNative.fixture.visible(true));
-      await ready(page);
-      image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
-      expect((await resources(page)).created).toBeGreaterThan(0);
-    });
+    const selectedFixture = scenario.variant === 'inline' ? fixture : staticFixture;
+    await run(
+      `${scenario.target}-${scenario.execution}`,
+      async (page) => {
+        await page.evaluate(async (value) => {
+          await window.shaderNative.fixture.mount(value.target, value.execution);
+        }, scenario);
+        await ready(page);
+        image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
+        const initial = await page.evaluate(() => window.shaderNative.fixture.read());
+        expect(initial.buttonTexts.some((text) => text.startsWith('ordinary child'))).toBe(true);
+        expect(initial.canvases).toBe(0);
+        await page.getByRole('button', { name: /^ordinary child/ }).click();
+        expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
+          clicks: 1,
+          clickedTag: 'BUTTON',
+        });
+        await page.screenshot({
+          path: path.join(
+            selectedFixture.evidenceDir,
+            `${scenario.target}-${scenario.execution}-paint.png`
+          ),
+        });
+        await page.evaluate(() => window.shaderNative.fixture.visible(false));
+        await zero(page);
+        expect(await page.getByRole('button', { name: /^ordinary child/ }).count()).toBe(0);
+        await page.evaluate(() => window.shaderNative.fixture.visible(true));
+        await ready(page);
+        image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
+        expect((await resources(page)).created).toBeGreaterThan(0);
+      },
+      selectedFixture
+    );
   },
   30_000
 );

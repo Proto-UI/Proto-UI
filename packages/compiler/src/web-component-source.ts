@@ -184,6 +184,7 @@ export function emitWebComponentSource(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value, {
     ownership: admitted.value.operations.includes('expose.emit'),
   });
@@ -680,7 +681,7 @@ export function emitWebComponentSource(
           typeName
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(node, (item) => expr(item, depth), prefix);
+        const atom = emitNativeHostAtom(node, (item) => expr(item, depth), prefix, shaderPlans);
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && node.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({

@@ -26,7 +26,7 @@ criteria:
       en: A complete opaque sRGB fallback fill accompanies every declaration. The Web provider preserves authored foreground, geometry and children, uses no input-intercepting canvas, and shows the fallback while preparing or when support, compilation, allocation, decode, ownership, source identity or context is unavailable. Shader pixels cannot replace the fallback until the current complete output is decoded and its binding remains current. Missing sink capability is an explicit unsupported result with ordinary authored style only, not an opaque-fallback paint success claim.
   - id: C-FEEDBACK-SHADER-PRESENTATION-0001-LOWERING
     text:
-      en: Runtime and Compiler consume the same validated data and host publication contract. Compiler admission and serialized IR preserve immutable interfaces and explicit ordered resource dependencies. The current native Web profile admits statically inline own-data records, arrays and finite numeric literals; ordinary aliases, helper-produced declarations and dynamic graphs remain explicit unsupported coverage rather than forbidden public semantics. Admitted output specializes the actual pass sequence into direct allocation and audited pass calls, without a graph evaluator, Prototype protocol copy or Runtime/Adapter import in the generated module. Unimplemented targets diagnose instead of dropping the declaration. Every emitted kernel records the exact first-party source digest; support code is a host resource atom rather than a semantic graph interpreter.
+      en: Runtime and Compiler consume the same validated data and host publication contract. Compiler admission and serialized IR preserve immutable interfaces and explicit ordered resource dependencies. The current native Web profile admits inline own-data graphs and statically proved immutable local or module aliases, including renamed or re-exported pure finite-data factories. The proof follows binding identity, evaluated arguments and defaults, finite own-data construction and selected control flow without executing author JavaScript. Mutation, escaping containers, effectful or recursive construction and unproved inputs remain explicit unsupported coverage rather than forbidden public semantics. Admitted output specializes the actual pass sequence into direct allocation and audited pass calls, without a graph evaluator, Prototype protocol copy or Runtime/Adapter import in the generated module. Unimplemented targets diagnose instead of dropping the declaration. Every emitted kernel records the exact first-party source digest; support code is a host resource atom rather than a semantic graph interpreter.
 openQuestions:
   - id: C-FEEDBACK-SHADER-PRESENTATION-0001-Q-ADMISSION
     question: Which independently reviewed Runtime, native consumer and actual browser receipts establish stable admission of this bounded owned-pixels contract?
@@ -44,6 +44,9 @@ verifies:
   tests:
     - T-FEEDBACK-SHADER-PRESENTATION-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Extend the draft native Web coverage to proved immutable aliases and pure finite-data factories while retaining unknown construction, application sources and native GPU acceptance boundaries.
   - version: 0.3.0-alpha.2
     change: introduced
     summary: Define bounded owned pixels, audited pass interfaces, resource lifetime and independent Runtime/Compiler evidence under the existing effect-graph direction.

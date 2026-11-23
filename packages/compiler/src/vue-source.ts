@@ -79,6 +79,7 @@ export function emitVueSource(
   const profile = ssr ? 'vue-ssr-v1' : 'vue-source-v1';
   const admitted = checkTargetOperations(ir, TARGET_PROFILES['vue-source-v1']);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value);
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
@@ -529,7 +530,12 @@ export function emitVueSource(
           typeName
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(node, (item) => expression(item, depth), prefix);
+        const atom = emitNativeHostAtom(
+          node,
+          (item) => expression(item, depth),
+          prefix,
+          shaderPlans
+        );
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && node.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({

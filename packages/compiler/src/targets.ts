@@ -1,4 +1,5 @@
-import { readNativeShaderPlan } from './shader-plan';
+import { readNativeShaderPlan, shaderPlanKey } from './shader-plan';
+import { shaderStaticData } from './shader-static-data';
 import type { ShaderKernel } from '../../core/src/shader-presentation';
 import { pruneDeadValues } from './demand-pruning';
 import type { RuleMetaKey } from './rule-declarations';
@@ -677,6 +678,7 @@ export interface TargetOperationAnalysis {
   readonly functions: readonly FunctionIR[];
   readonly ruleMetaKeys: readonly RuleMetaKey[];
   readonly shaderKernels: readonly ShaderKernel[];
+  readonly shaderPlans: ReadonlyMap<string, ReturnType<typeof readNativeShaderPlan>>;
 }
 /** Calls, host callbacks and outward callables are invocation roots. Creation alone is inert. */
 export function checkTargetOperations(
@@ -700,6 +702,8 @@ export function checkTargetOperations(
   const operations = new Set<Operation>();
   const ruleMetaKeys = new Set<RuleMetaKey>();
   const shaderKernels = new Set<ShaderKernel>();
+  const shaderPlans = new Map<string, ReturnType<typeof readNativeShaderPlan>>();
+  let readShaderData: ReturnType<typeof shaderStaticData> | undefined;
   const sites: { operation: Operation; span: SourceSpan }[] = [];
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   const reachedHooks = new Set<string>(),
@@ -775,8 +779,10 @@ export function checkTargetOperations(
           allowed.has(value.operation)
         ) {
           try {
-            for (const pass of readNativeShaderPlan(value.arguments[0]).passes)
-              shaderKernels.add(pass.kernel);
+            readShaderData ??= shaderStaticData(ir);
+            const plan = readNativeShaderPlan(value.arguments[0], readShaderData);
+            shaderPlans.set(shaderPlanKey(value.arguments[0]), plan);
+            for (const pass of plan.passes) shaderKernels.add(pass.kernel);
           } catch (error) {
             diagnostic(
               'PUI4009',
@@ -952,6 +958,7 @@ export function checkTargetOperations(
           functions: [...reachedFunctions],
           ruleMetaKeys: [...ruleMetaKeys].sort(),
           shaderKernels: [...shaderKernels],
+          shaderPlans,
         },
       };
 }

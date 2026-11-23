@@ -22,11 +22,21 @@ function data(value: ExpressionIR): unknown {
     'The current native shader profile requires an inline own-data graph; dynamic graphs and aliased resources need separately implemented specialization.'
   );
 }
-export function readNativeShaderPlan(value: ExpressionIR): ShaderPresentationDeclaration {
-  return snapshotShaderPresentation(data(value) as ShaderPresentationDeclaration);
+export function readNativeShaderPlan(
+  value: ExpressionIR,
+  read: (value: ExpressionIR) => unknown = data
+): ShaderPresentationDeclaration {
+  return snapshotShaderPresentation(read(value) as ShaderPresentationDeclaration);
 }
-export function emitNativeShaderDeclaration(value: ExpressionIR, prefix: string): string {
-  const declaration = readNativeShaderPlan(value);
+export const shaderPlanKey = (value: ExpressionIR): string =>
+  createHash('sha256').update(JSON.stringify(value)).digest('hex');
+
+export function emitNativeShaderDeclaration(
+  value: ExpressionIR,
+  prefix: string,
+  plan?: ShaderPresentationDeclaration
+): string {
+  const declaration = plan ?? readNativeShaderPlan(value);
   const key = createHash('sha256').update(JSON.stringify(declaration)).digest('hex');
   const variables = new Map([['$source', '__shaderSource']]);
   const source = {

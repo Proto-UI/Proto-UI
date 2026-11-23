@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 import { expect, it } from 'vitest';
@@ -13,15 +13,22 @@ for (const profile of [
   'vue2-source-v1',
   'web-component-source-v1',
 ] as const)
-  it(`${profile}: strict native consumers preserve copy-only, tint-only and combined interfaces`, async () => {
+  it(`${profile}: strict native consumers preserve copy-only, tint-only, combined and static factory interfaces`, async () => {
     const root = process.cwd(),
       base = path.join(root, 'packages/compiler/test/generated-modules');
     await mkdir(base, { recursive: true });
     const temporary = await mkdtemp(path.join(base, 'shader-types-'));
     try {
       const names: string[] = [];
-      for (const kind of ['copy', 'tint', 'both'] as const) {
-        const compiled = compilePrototype(shaderVariantSource(kind), { profile });
+      for (const kind of ['copy', 'tint', 'both', 'static-data'] as const) {
+        const source =
+          kind === 'static-data'
+            ? await readFile(
+                'packages/compiler/test/fixtures/shader-static-data-owner.proto.ts',
+                'utf8'
+              )
+            : shaderVariantSource(kind);
+        const compiled = compilePrototype(source, { profile });
         if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
         const directory = path.join(temporary, kind),
           written = await writeCompilation(compiled.value, directory);

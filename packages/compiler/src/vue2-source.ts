@@ -94,6 +94,7 @@ export function emitVue2Source(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value);
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
@@ -537,7 +538,12 @@ export function emitVue2Source(
           `${prefix}OptionalReceiver`
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(value, (item) => expression(item, depth), prefix);
+        const atom = emitNativeHostAtom(
+          value,
+          (item) => expression(item, depth),
+          prefix,
+          shaderPlans
+        );
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && value.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({
