@@ -4244,13 +4244,15 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         const held = expression
           ? evaluate(expression, project.module.source, scope)
           : { matched: false, value: UNKNOWN('void projection') };
-        // A member set whose keys could not be observed is not a proven public
-        // member set. Certifying it would claim a complete set of members that
-        // were never seen, so the projection stays unsupported.
-        if (held.value.kind === 'object' && held.value.uncertainKeys) {
-          unprovedCompletion = true;
-          return;
-        }
+        // A member set whose keys could not be fully observed is not a
+        // complete public member set, but the members the projection did
+        // assign are still proven. Discarding the whole projection also
+        // discarded those members, so a projection that republishes another
+        // hook's handles could never prove them. Keep the projection with the
+        // members it assigned: every member it assigned keeps its proven
+        // value, a member it never observed reads as unknown, and the
+        // projection keeps its `uncertainKeys` flag so no consumer may read
+        // it as a complete member set.
         returns.push(held);
       };
       unprovedCompletion = project.fn.parameters.some(
