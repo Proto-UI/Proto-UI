@@ -252,7 +252,7 @@ export function nativeHostAtomPlan(
         .join(' : ');
       const subscribe = leases.map((lease) => `leases.push(${lease});`).join(' ');
       return ruleMeta
-        ? `getMeta: ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${read}, subscribeMeta: ${typed ? '(notify: () => void)' : '/** @param {() => void} notify */ (notify)'} => { ${typed ? 'const leases: (() => void)[] = [];' : '/** @type {(() => void)[]} */ const leases = [];'} try { ${subscribe} } catch (error) { ${prefix}ReleaseMeta([() => { throw error; }, ...leases]); } return () => ${prefix}ReleaseMeta(leases); },`
+        ? `getMeta: ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${read}, subscribeMeta: ${typed ? '(notify: () => void)' : '/** @param {() => void} notify */ (notify)'} => { ${typed ? 'const leases: (() => void)[] = [];' : 'const leases = /** @type {(() => void)[]} */ ([]);'} try { ${subscribe} } catch (error) { ${prefix}ReleaseMeta([() => { throw error; }, ...leases]); } return () => ${prefix}ReleaseMeta(leases); },`
         : '';
     },
     imports: [

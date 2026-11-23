@@ -880,6 +880,12 @@ function ${p}ResolveProps(
   return Object.freeze(next) as ${p}ResolvedProps;
 }
 
+function ${p}CompleteSteps(steps: readonly (() => void)[]): void {
+  let failure: { error: unknown } | undefined;
+  for (const step of steps) { try { step(); } catch (error) { failure ??= { error }; } }
+  if (failure) throw failure.error;
+}
+
 function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${overlayHost ? ', releaseHost: () => void' : ''}${ssr ? ', server = false' : ''}): ${p}Owner {
   let phase: 'setup' | 'callback' | 'render' | 'idle' = 'setup';
   let lifetime: 'alive' | 'disposing' | 'disposed' = 'alive';
@@ -905,6 +911,7 @@ ${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | nu
   let elementSequence = 0;
   let hostProps = initial;
   let root: HTMLElement | null = null;
+  let rootGeneration = 0;
 ${
   decorations
     ? `  const decorationNodes = new WeakMap<object, object>();
@@ -916,8 +923,9 @@ ${
   let decorationSignature: readonly unknown[] | null = null;
   let decorationTemplate: ${p}React.ReactNode = null;
   function releaseDecorations() {
-    decorationStage?.retire(); decorationStage = null; decorationBound = false;
-    decorationPhysical.clear(); ${p}Style.releaseDecorations();
+    const stage = decorationStage; decorationStage = null; decorationBound = false;
+    decorationPhysical.clear();
+    ${p}CompleteSteps([() => stage?.retire(), () => ${p}Style.releaseDecorations()]);
   }
   function bindDecorations() {
     if (!root || !decorationStage || decorationBound) return;
@@ -1054,9 +1062,23 @@ ${ruleMetaKeys.length ? `    meta: ${p}CreateRuleMeta(() => root?.ownerDocument,
 `
     : ''
 }  function dispatch(list: readonly ((run: ${p}Run) => void)[]) {
-    if (list === callbacks.unmounted) { ${atoms.detach} }
-    try { invoke(() => { for (const callback of list) callback(${p}RunHandle); }); }
-    finally { if (list === callbacks.unmounted) { ${atoms.detach} } }
+${
+  atoms.detach
+    ? `    if (list === callbacks.unmounted) {
+      ${p}CompleteSteps([() => { ${atoms.detach} },
+        () => invoke(() => { for (const callback of list) callback(${p}RunHandle); }),
+        () => { ${atoms.detach} }]);
+      return;
+    }
+`
+    : ''
+}    invoke(() => { for (const callback of list) callback(${p}RunHandle); });
+  }
+  function detachView() {
+    const wasMounted = mounted; mounted = false;
+    ${p}CompleteSteps([
+${decorations ? '      () => releaseDecorations(),\n' : ''}${interaction ? `      () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? `      () => ${p}Style.unmount(),\n` : ''}      () => { if (wasMounted) dispatch(callbacks.unmounted);${atoms.detach ? ` else { ${atoms.detach} }` : ''} },
+    ]);
   }
   function schedule() {
 ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !connected || lifetime !== 'alive') return;
@@ -1287,8 +1309,7 @@ ${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' 
     emit: key => ${p}RunHandle.expose.emit(key),
   });
   function disposeInteraction() {
-    try { ${p}Interaction.dispose(); }
-    finally { for (const off of observedStateCleanups.splice(0)) off(); for (const off of authorStateWatchCleanups.splice(0)) off(); }
+    ${p}CompleteSteps([() => ${p}Interaction.dispose(), ...observedStateCleanups.splice(0), ...authorStateWatchCleanups.splice(0)]);
   }
 `
     : ''
@@ -1455,7 +1476,7 @@ ${hookDefinitions}
   try {
     render = (${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${p}Def` : ''}) ?? (() => ${p}Renderer.slot());
     if (typeof render !== 'function') throw new Error('[Prototype] setup must return a render function or void.');
-  } catch (error) { for (const off of authorStateWatchCleanups.splice(0)) off(); ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} throw error; }
+  } catch (error) { try { disposeNow(false, false); } catch {} throw error; }
   phase = 'idle';
   function applyProps(nextHost: GeneratedComponentProps) {
     ensureAlive();
@@ -1505,34 +1526,28 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
     getExposes() { ensureExternal(); return { ...exposes } as GeneratedExposes; },
     invokeInCallbackScope<T>(callback: () => T): T { ensureExternal(); return invoke(callback); },
   });
-${
-  ssr
-    ? `  function disposeNow(exhaustive = false) {
+  function disposeNow(exhaustive = false, authored = true) {
     if (lifetime !== 'alive') return;
-    lifetime = 'disposing'; phase = 'callback';
-    let failure: { error: unknown } | undefined;
-    for (const off of authorStateWatchCleanups.splice(0)) try { off(); } catch (error) { failure ??= { error }; }
-    try {
-      if (exhaustive) {
-        for (const callback of callbacks.beforeDispose) {
-          try { invoke(() => callback(${p}RunHandle)); } catch (error) { failure ??= { error }; }
-        }
-      } else dispatch(callbacks.beforeDispose);
-    } catch (error) { failure ??= { error }; }
-    finally {
-${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= { error }; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= { error }; }` : ''}
-      try { context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} } catch (error) { failure ??= { error }; }
-      lifetime = 'disposed'; phase = 'idle'; connected = false;
-      for (const subscribers of stateSubscribers) subscribers.clear();
-      pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
-      for (const list of Object.values(callbacks)) list.length = 0;
-      for (const key of Object.keys(exposes)) delete exposes[key];
-    }
-    if (failure) throw failure.error;
+    lifetime = 'disposing'; connected = false; ++cleanupVersion; ++rootGeneration; phase = 'callback';
+    ${p}CompleteSteps([
+      ...authorStateWatchCleanups.splice(0),
+      () => detachView(),
+      () => {
+        if (!authored) return;
+        if (exhaustive) ${p}CompleteSteps(callbacks.beforeDispose.map(callback => () => invoke(() => callback(${p}RunHandle))));
+        else dispatch(callbacks.beforeDispose);
+      },
+${interaction ? '      () => disposeInteraction(),\n' : ''}${usesStyle ? "      () => root?.removeAttribute('data-pui-style'),\n" : ''}${decorations ? '      () => releaseDecorations(),\n' : ''}${usesStyle ? `      () => ${p}Style.dispose(),\n` : ''}      () => context.dispose(),
+${atoms.dispose ? `      () => { ${atoms.dispose} },\n` : ''}${hasAuthoredHooks ? `      () => ${p}Authored.dispose(),\n` : ''}${overlayHost ? '      () => releaseHost(),\n' : ''}      () => {
+        root = null; lifetime = 'disposed'; phase = 'idle';
+${decorations ? '        decorationRefs.clear(); decorationSignature = null; decorationTemplate = null;\n' : ''}        for (const subscribers of stateSubscribers) subscribers.clear();
+        pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
+        for (const list of Object.values(callbacks)) list.length = 0;
+        for (const key of Object.keys(exposes)) delete exposes[key];
+      },
+    ]);
   }
-`
-    : ''
-}  return {
+  return {
     handle,
     scope: context,
     getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? ${JSON.stringify(options.rootTag ?? 'div')}` : JSON.stringify(options.rootTag ?? 'div')}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'}${overlayHost ? `, viewPolicy: ${p}Interaction.viewPolicy()` : ''} }; },
@@ -1560,15 +1575,18 @@ ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}   
     : ''
 }
     bindRoot(nextRoot) {
-      if (root === nextRoot) return;
-      ${atoms.physicalPresentation ? atoms.detach : ''}
-${decorations ? `      if (root) releaseDecorations();` : ''}
-${interaction ? `      ${p}Interaction.unmount();\n` : ''}      ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
+      if (root === nextRoot || lifetime !== 'alive') return;
+      const generation = ++rootGeneration;
+      let failure: { error: unknown } | undefined;
+      try { ${p}CompleteSteps([
+${atoms.physicalPresentation ? `        () => { ${atoms.detach} },\n` : ''}${decorations ? '        () => { if (root) releaseDecorations(); },\n' : ''}${interaction ? `        () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? "        () => root?.removeAttribute('data-pui-style'),\n" : ''}      ]); } catch (error) { failure = { error }; }
+      if (generation !== rootGeneration || lifetime !== 'alive') { if (failure) throw failure.error; return; }
       root = nextRoot;
-${usesStyle ? `      if (mounted) projectStyle(${p}Style.tokens());` : ''}
-${decorations ? `      if (mounted && desiredPresent) bindDecorations();` : ''}
-      ${atoms.physicalPresentation ? `if (mounted && desiredPresent && root) { ${atoms.mount} }` : ''}
-${interaction ? `      if (mounted && desiredPresent && viewConnected) ${p}Interaction.mount();\n` : ''}    },
+      const current = () => generation === rootGeneration && lifetime === 'alive';
+      try { ${p}CompleteSteps([
+${usesStyle ? `        () => { if (current() && mounted) projectStyle(${p}Style.tokens()); },\n` : ''}${decorations ? '        () => { if (current() && mounted && desiredPresent) bindDecorations(); },\n' : ''}${atoms.physicalPresentation ? `        () => { if (current() && mounted && desiredPresent && root) { ${atoms.mount} } },\n` : ''}${interaction ? `        () => { if (current() && mounted && desiredPresent && viewConnected) ${p}Interaction.mount(); },\n` : ''}      ]); } catch (error) { failure ??= { error }; }
+      if (failure) throw failure.error;
+    },
     connect() { connected = true; ++cleanupVersion; },
 ${
   interaction
@@ -1605,16 +1623,14 @@ ${
     : ''
 }        schedule();
       }
-      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} lifetime = 'disposed'; connected = false;`} throw error; }
+      catch (error) { try { disposeNow(true); } catch {} throw error; }
     },
     applyProps,
     accept(frame: ${p}Frame) {
       if (!connected || lifetime !== 'alive' || frame.revision <= acceptedRevision || frame !== latest) return false;
       acceptedRevision = frame.revision;
       if (frame.kind === 'detach') {
-${decorations ? `        releaseDecorations();` : ''}
-${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `        ${p}Style.unmount();` : ''}
-        if (mounted) { mounted = false; dispatch(callbacks.unmounted); }
+        try { detachView(); } finally { schedule(); }
       } else if (!desiredPresent) {
         // Physical materialization is not a published mount. Remove the obsolete
         // Root without manufacturing mounted/unmounted for a never-mounted epoch.
@@ -1638,41 +1654,8 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
       const version = ++cleanupVersion;
       queueMicrotask(() => {
         if (connected || cleanupVersion !== version || lifetime !== 'alive') return;
-${overlayHost ? '        let hostDisposalFailure: { error: unknown } | undefined;\n        try {\n' : ''}        lifetime = 'disposing';
-        for (const off of authorStateWatchCleanups.splice(0)) off();
-        phase = 'callback';
-        let failure: { error: unknown } | undefined;
-${
-  interaction
-    ? `        try { ${p}Interaction.unmount(); }
-        catch (error) { failure = { error }; }
-`
-    : ''
-}        try { if (mounted) { mounted = false; ${usesStyle ? `${p}Style.unmount(); ` : ''}dispatch(callbacks.unmounted); } }
-        catch (error) { failure ??= { error }; }
-        try { dispatch(callbacks.beforeDispose); }
-        catch (error) { failure ??= { error }; }
-        finally {
-${
-  interaction
-    ? `          try { disposeInteraction(); } catch (error) { failure ??= { error }; }
-`
-    : ''
-}          ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
-${decorations ? `          releaseDecorations(); decorationRefs.clear(); decorationSignature = null; decorationTemplate = null;` : ''}
-          root = null;
-${usesStyle ? `          ${p}Style.dispose();` : ''}
-          context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''}
-          lifetime = 'disposed'; phase = 'idle';
-          for (const subscribers of stateSubscribers) subscribers.clear();
-          pendingStateEvents.length = 0;
-          watchers.length = 0;
-          rawWatchers.length = 0; rawAllWatchers.length = 0;
-          for (const list of Object.values(callbacks)) list.length = 0;
-          for (const key of Object.keys(exposes)) delete exposes[key];
-        }
-        if (failure) throw failure.error;
-${overlayHost ? '        } catch (error) { hostDisposalFailure = { error }; }\n        try { releaseHost(); } catch (error) { hostDisposalFailure ??= { error }; }\n        if (hostDisposalFailure) throw hostDisposalFailure.error;\n' : ''}      });
+        disposeNow();
+      });
     },
   };
 }
