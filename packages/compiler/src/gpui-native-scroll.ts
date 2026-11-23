@@ -76,7 +76,9 @@ pub fn use_builtin_scroll_surface(owner:&OwnerWeak)->Result<(),&'static str>{
 pub fn scroll_detach(owner:&OwnerRef){
     if owner.borrow().modules.scroll.external.is_some(){scroll_release_external(owner);}
     let mut o=owner.borrow_mut();let s=&mut o.modules.scroll;
-    if s.pending_end.take().is_some(){s.request_status="rejected".into();}
+    // Builtin/compatibility requests retain their epoch-tagged receipt until
+    // the next frame rejects it and consumes that old growth observation.
+    // Retained-target release above has no successor handle to fall back to.
     s.last_input=None;s.reader_input=None;s.observation=None;
 }
 fn scroll_ready(owner:&OwnerRef)->bool{
@@ -148,10 +150,15 @@ pub fn scroll_snapshot(owner:&OwnerWeak)->Value{let owner=ensure(owner);let (axe
 fn scroll_rejected(reason:&str)->Value{record(vec![("kind",Value::string("rejected")),("reason",Value::string(reason))])}
 pub fn scroll_pause_following(owner:&OwnerWeak)->Value{
     let owner=runtime(owner);
+    {
+        let o=owner.borrow();
+        if !o.modules.hooks.contains("scroll"){return scroll_rejected("not-declared")}
+        if !o.mounted{return scroll_rejected("not-mounted")}
+    }
+    // Geometry-free means this command does not move or expose geometry.
+    // It still needs the same current physical lease as other Scroll requests.
+    if !scroll_ready(&owner){return scroll_rejected("unavailable")}
     let mut o=owner.borrow_mut();
-    if !o.modules.hooks.contains("scroll"){return scroll_rejected("not-declared")}
-    if !o.mounted{return scroll_rejected("not-mounted")}
-    if o.disposed||!o.present||o.bounds.is_none(){return scroll_rejected("unavailable")}
     let epoch=o.epoch;
     let s=&mut o.modules.scroll;
     let policy=field(&s.config,"endFollow");

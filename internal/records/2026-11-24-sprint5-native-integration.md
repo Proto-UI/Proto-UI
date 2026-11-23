@@ -65,7 +65,7 @@ candidate receipt.
 | Current ordinary native producer, `producer-candidate` | 37 generated modules | Unchanged authored sources and generated SDK receipts; generated Rust is not patched. |
 | `audit-source-lowering.mjs` | 199 shared operations; 192 profile-listed; 83 reached by these 37 modules; 109 not reached by this producer | A complete static inventory for this producer, not 192 operation runtime passes. |
 | Local `cargo check --offline --locked --lib` against pinned GPUI | Exit 101 before compiling generated Rust | The pinned Zed checkout is absent from the local dependency cache. No native pass or new Rust-source failure is inferred. |
-| Original independent ControlLabel producer | Base Input rejected at `projectHandle` object spread with `PUI2002` | A further shared IR integration failure, retained separately. The original Input journey has not been removed or reclassified as inapplicable. |
+| Original independent ControlLabel producer | Its fourth entry, `input_delegate`, reaches the official `asInputRoot.projectHandle` and is rejected at object spread with `PUI2002` | The default Base Input entry itself generated successfully. This is a further shared IR integration failure in real delegated consumption, retained separately. The original delegate journey has not been removed or reclassified as inapplicable. |
 
 The inventory retains one visible discrepancy: `scroll.bindComposedChrome` is
 profile-listed but has no direct GPUI emitter case or generated consumer. Its
@@ -81,6 +81,41 @@ selection on the final Linux/macOS candidate. The Adapter projection and
 AccessKit-node tests must execute in its own native workspace. OS input and
 assistive-technology delivery have their own evidence; neither source tests
 nor direct framework callback calls establish them.
+
+### Delegated-source and retained-target follow-up
+
+The shared capture-spread correction `ea7e37fc5` rederives the checked captured
+record through the same `checkedSpreadFields` path as the parser. On that
+correction plus this native integration, the **complete original independent
+producer** now generates all four entries (`button`, `label`, `input`,
+`input_delegate`); its receipt explicitly records `generatedRustEdited: false`.
+The successful source receipt is `direct-control-label-candidate/receipt.json`.
+The original failed log remains unchanged. This is producer success; the final
+candidate must still build and execute the four generated crates.
+
+The independent consumer now uses the current typed `InstanceAssociations`,
+`replace_instance_associations`, `ControlLabelActionLease::request`, and retained
+diagnostic API. Its former boolean-returning action helper no longer exists in
+the newer lowering. The consumer retains direct event-count, checked naming,
+no-focus, disabled, cancellation, native-child, same-Entity/two-physical-view,
+replacement and recovery assertions against the actual production bridge.
+Default Base Input is also included in the source regression's unchanged
+official-prototype matrix. The two directly affected source suites pass
+29/29, with zero skipped (`native-delegate-source`).
+
+Independent review identified one additional retained-target integration issue:
+`pauseFollowing()` still tested only handle presence. A target which had not
+been laid out, or which belonged to a foreign native Window, could therefore
+report `projection: unresolved` while pause returned `dispatched`. The current
+enabled-lease requirement of `C-SCROLL-END-FOLLOW-0001-PAUSE` and binding checks
+of `HC-SCROLL-SURFACE-0001-AVAILABILITY` apply even though pause itself does not
+read or mutate geometry. Pause now shares the physical-readiness gate while
+preserving its original not-declared/not-mounted refusal reasons. Two native
+consumer controls use a real mounted owner, an unlaid retained target and a
+separately measured foreign-window viewport. Both retain the explicit builtin
+restoration positive. Their presence is not counted as native execution until
+the final candidate runs them. Builtin/compatibility pending-end receipts keep
+the original epoch retirement path and its stale-growth suppression assertions.
 
 ## #687: reconciliation of its four original first-step conditions
 
@@ -112,3 +147,30 @@ work, and remain part of #1144. They do not become complete platform consumers
 or disappear as “not applicable” because GPUI now has a repaired candidate.
 The original run's Flutter Scroll job succeeded; its result does not establish
 every Flutter operation or any Qt platform behavior.
+
+An additional local selection (`qt-getter-admission`, `flutter-call`, and
+`gpui-capabilities`) passed 54/54 with zero skipped. These are direct-emitter
+and capability-boundary checks. The installed `qmake` command is only a chooser
+without its Qt binary; no Qt platform execution is claimed. No Flutter SDK is
+installed locally. The existing real hosted Flutter Scroll result remains
+separate from these source checks.
+
+### Remaining composed Scroll work is a native implementation condition
+
+`C-SCROLL-COMPOSED-CHROME-0001`,
+`C-SCROLL-COMPOSED-CONTROL-0001`, and `HC-SCROLL-SURFACE-0001` are host-neutral
+definitions; they do not make composed chrome Web-only. The GPUI source emitter
+already refuses this missing host lowering with `PUI_GPUI_HOST_REQUIRED` before
+the operation switch. Its profile-listed inventory row is still a real
+implementation/coverage gap and is not removed from #1056's original scope.
+
+The existing Compiler/Scroll host owners must connect the family-scoped
+Viewport/Scrollbar/descendant-Thumb and orientation resolution to a bounded
+native attachment; project current surface ratios plus actual native track
+geometry into owned Thumb paint; then bind the existing native Move Gesture
+session to that exact Thumb and route normalized `control-drag` to the same
+Scroll engine. The matching consumer must distinguish nested/sibling family
+scopes, ambiguous/replaced parts, unavailable/no-travel targets, final release
+samples, axis changes, detach/rebind and complete style/gesture cleanup. This
+requires real native geometry and input evidence. A profile-list edit or an
+additional rejection check would not fulfill it.
