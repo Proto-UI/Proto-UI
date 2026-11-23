@@ -287,3 +287,117 @@ describe('closed local rule helper invocation', () => {
     });
   }
 });
+
+describe('closed helper producer definition lifetime', () => {
+  it.each([
+    [
+      'a direct projectHandle replacement',
+      `asA.definition.projectHandle = () => ({
+  ready: { get __stateId() { external(); return 'hostile-state'; } }
+});`,
+    ],
+    [
+      'a definition alias write',
+      `const heldDefinition = asA.definition;
+heldDefinition.projectHandle = () => ({
+  ready: { get __stateId() { external(); return 'aliased-hostile-state'; } }
+});`,
+    ],
+    [
+      'an unknown definition mutator',
+      `declare const mutateDefinition: (definition: unknown) => void;
+mutateDefinition(asA.definition);`,
+    ],
+  ])('retains the original subject gap after %s', async (_name, declarations) => {
+    const { scan, tokens } = await observe({
+      declarations,
+      setup: 'paint(def, asA());',
+    });
+    // Core exposes the same mutable definition that the caller reads at
+    // invocation time. Closing the helper's references does not prove its
+    // producer still returns the original State. The metadata getter in the
+    // first two cases is consumed by the real Rule state builder.
+    expect(scan.unresolved).toEqual([{ reason: 'subject', expression: 'facts.ready' }]);
+    expect(scan.usages.map(({ state }) => state)).toEqual(['gamma']);
+    expect(tokens).toContain('data-[gamma]:underline');
+  });
+});
+
+describe('closed helper namespace producer lifetime', () => {
+  it('keeps a source-backed namespace member without namespace escape', async () => {
+    const { scan, tokens } = await observe({
+      declarations: "import * as factsNamespace from './producer';",
+      setup: 'paint(def, factsNamespace.asA());',
+    });
+    expect(scan.unresolved).toEqual([]);
+    expect(scan.usages.map(({ state }) => state)).toEqual(['alpha', 'gamma']);
+    expect(tokens).toContain('data-[alpha]:bg-primary');
+    expect(tokens).toContain('data-[gamma]:underline');
+  });
+
+  it('retains the subject gap when another canonical entry exposes the namespace', async () => {
+    const { scan, tokens } = await observe({
+      declarations: [
+        "import * as factsNamespace from './producer';",
+        'declare const external: (...values: unknown[]) => unknown;',
+        'export const mutatingOwner = definePrototype({',
+        "  name: 'closed-helper-mutating-owner',",
+        '  setup(def) { external(factsNamespace); },',
+        '});',
+      ].join('\n'),
+      setup: 'paint(def, asA());',
+    });
+    expect(scan.unresolved).toEqual([{ reason: 'subject', expression: 'facts.ready' }]);
+    expect(scan.usages.map(({ state }) => state)).toEqual(['gamma']);
+    expect(tokens).toContain('data-[gamma]:underline');
+  });
+});
+
+describe('closed helper namespace member resolution boundaries', () => {
+  it('keeps the subject gap after an unmodeled wrapped member escapes', async () => {
+    const { scan, tokens } = await observe({
+      declarations: [
+        "import * as factsNamespace from './producer';",
+        'declare const external: (...values: unknown[]) => unknown;',
+        'export const mutatingOwner = definePrototype({',
+        "  name: 'wrapped-member-closed-helper-owner',",
+        "  setup(def) { external(factsNamespace[('asA' as const)]); },",
+        '});',
+      ].join('\n'),
+      setup: 'paint(def, asA());',
+    });
+    expect(scan.unresolved).toEqual([{ reason: 'subject', expression: 'facts.ready' }]);
+    expect(scan.usages.map(({ state }) => state)).toEqual(['gamma']);
+    expect(tokens).toContain('data-[gamma]:underline');
+  });
+});
+
+describe('closed helper dynamic namespace producer lifetime', () => {
+  it('keeps a type-only import query inert', async () => {
+    const { scan, tokens } = await observe({
+      declarations: "type FactsNamespace = typeof import('./producer');",
+    });
+    expect(scan.unresolved).toEqual([]);
+    expect(scan.usages.map(({ state }) => state)).toEqual(['alpha', 'gamma']);
+    expect(tokens).toContain('data-[alpha]:bg-primary');
+    expect(tokens).toContain('data-[gamma]:underline');
+  });
+
+  it('keeps the subject gap for an unmodeled dynamic namespace escape', async () => {
+    const { scan, tokens } = await observe({
+      declarations: [
+        'declare const external: (...values: unknown[]) => unknown;',
+        'export const mutatingOwner = definePrototype({',
+        "  name: 'dynamic-namespace-closed-helper-owner',",
+        '  async setup(def) {',
+        "    const namespace = await import('./producer');",
+        '    external(namespace);',
+        '  },',
+        '});',
+      ].join('\n'),
+    });
+    expect(scan.unresolved).toEqual([{ reason: 'subject', expression: 'facts.ready' }]);
+    expect(scan.usages.map(({ state }) => state)).toEqual(['gamma']);
+    expect(tokens).toContain('data-[gamma]:underline');
+  });
+});

@@ -174,7 +174,13 @@ export function closedLocalRuleHelpers(
     ts.forEachChild(node, collect);
   };
   collect(source);
-  if (dynamicScope) return new Set();
+  if (dynamicScope || candidates.length === 0) return new Set();
+
+  // Closed references do not freeze an authored caller's public definition.
+  // Without this exact source graph's lifetime proof, keep every original
+  // declaration scan; argument replay must not erase the independent gap.
+  const lifetime = summary.proveSourceProducerLifetimes(source);
+  if (!lifetime || lifetime.source !== source) return new Set();
 
   const result = new Set<ts.FunctionDeclaration>();
   for (const candidate of candidates) {

@@ -91,6 +91,98 @@ export type RuleStateScan = {
   exposedLocals: ExposedLocalUsage[];
 };
 
+/** One lexical scanner visit, not proof that a runtime owner was instantiated. */
+export type RuleStateSiteVisit = Readonly<{
+  ordinal: number;
+  invocations: readonly Readonly<{
+    ordinal: number;
+    call: ts.CallExpression;
+    helper: ts.FunctionDeclaration;
+  }>[];
+  usages: readonly HookStateUsage[];
+  unresolved: readonly UnresolvedStateRead[];
+  exposedLocals: readonly ExposedLocalUsage[];
+}>;
+
+/**
+ * All syntactic Rule calls retain their original AST identity. A site with no
+ * visits or an empty visit is still present; neither is a coverage verdict.
+ */
+export type RuleStateSiteInventory = Readonly<{
+  source: ts.SourceFile;
+  sites: readonly Readonly<{
+    call: ts.CallExpression;
+    rawVisits: readonly RuleStateSiteVisit[];
+    visits: readonly RuleStateSiteVisit[];
+  }>[];
+  raw: RuleStateScan;
+  scan: RuleStateScan;
+}>;
+
+const isRuleCallSite = (node: ts.Node): node is ts.CallExpression =>
+  ts.isCallExpression(node) &&
+  ((ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'rule') ||
+    (ts.isElementAccessExpression(node.expression) &&
+      !!node.expression.argumentExpression &&
+      ts.isStringLiteralLike(node.expression.argumentExpression) &&
+      node.expression.argumentExpression.text === 'rule'));
+
+/**
+ * Observe independent declaration and production scans over the same AST.
+ * The raw pass does not substitute helper calls for their declarations. It
+ * owns a separate summary and mutable scope/version store. It resolves
+ * dependency files normally and does not clone virtual sources or proofs from
+ * suppliedSummary; that supplied context belongs to the production pass only.
+ * Both passes share this SourceFile, not a claim of identical dependency proof.
+ * Existing production scanning
+ * remains available unchanged through scanRuleStateReads.
+ *
+ * This inventory does not invent prototype entries, discharge unknown call
+ * contexts, or decide that a zero-outcome Rule is covered.
+ */
+export function scanRuleStateReadsWithSites(
+  sourceText: string,
+  fileName = 'source.proto.ts',
+  suppliedSummary?: HookSourceSummaryContext
+): RuleStateSiteInventory {
+  const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  const sites: Array<{
+    call: ts.CallExpression;
+    rawVisits: RuleStateSiteVisit[];
+    visits: RuleStateSiteVisit[];
+  }> = [];
+  const byNode = new Map<ts.CallExpression, (typeof sites)[number]>();
+  const collect = (node: ts.Node): void => {
+    // Match the existing scanner's traversal domain, including computed
+    // members inside type syntax. Inventory is not a runtime-entry claim.
+    if (isRuleCallSite(node)) {
+      const site = { call: node, rawVisits: [], visits: [] };
+      sites.push(site);
+      byNode.set(node, site);
+    }
+    ts.forEachChild(node, collect);
+  };
+  collect(source);
+  const raw = scanRuleStateSource(source, createHookSourceSummaryContext(), false, (call, visit) =>
+    byNode.get(call)!.rawVisits.push(visit)
+  );
+  const scan = scanRuleStateSource(source, suppliedSummary, true, (call, visit) =>
+    byNode.get(call)!.visits.push(visit)
+  );
+  return {
+    source,
+    sites: sites.map((site) =>
+      Object.freeze({
+        call: site.call,
+        rawVisits: Object.freeze(site.rawVisits),
+        visits: Object.freeze(site.visits),
+      })
+    ),
+    raw,
+    scan,
+  };
+}
+
 type LocalStateBinding = {
   kind: 'localState';
   declaredAs: string | null;
@@ -446,11 +538,26 @@ export function scanRuleStateReads(
   suppliedSummary?: HookSourceSummaryContext
 ): RuleStateScan {
   const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  return scanRuleStateSource(source, suppliedSummary);
+}
+
+function scanRuleStateSource(
+  source: ts.SourceFile,
+  suppliedSummary?: HookSourceSummaryContext,
+  replayHelpers = true,
+  observeRule?: (call: ts.CallExpression, visit: RuleStateSiteVisit) => void
+): RuleStateScan {
+  const fileName = source.fileName;
   const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
   sourceSummary.registerSource(source);
-  const closedHelpers = closedLocalRuleHelpers(source, sourceSummary);
+  const closedHelpers = replayHelpers
+    ? closedLocalRuleHelpers(source, sourceSummary)
+    : new Set<ts.FunctionDeclaration>();
   const closedHelperNames = new Set([...closedHelpers].map((helper) => helper.name!.text));
   const helperScopes = new Map<ts.FunctionDeclaration, Scope>();
+  const invocations: Array<RuleStateSiteVisit['invocations'][number]> = [];
+  let invocationOrdinal = 0;
+  let visitOrdinal = 0;
 
   const usages: HookStateUsage[] = [];
   const unresolved: UnresolvedStateRead[] = [];
@@ -4574,15 +4681,8 @@ export function scanRuleStateReads(
       }
     }
 
-    if (
-      ts.isCallExpression(node) &&
-      ((ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === 'rule') ||
-        (ts.isElementAccessExpression(node.expression) &&
-          node.expression.argumentExpression &&
-          ts.isStringLiteralLike(node.expression.argumentExpression) &&
-          node.expression.argumentExpression.text === 'rule')) &&
-      node.arguments.length >= 1
-    ) {
+    if (isRuleCallSite(node) && node.arguments.length >= 1) {
+      const before = observeRule ? [usages.length, unresolved.length, exposedLocals.length] : null;
       const spec = unwrap(node.arguments[0]);
       // The production walk matches a property access only, so `def['rule'](…)`
       // reaches the same runtime API and emits no variant. It is a blind spot
@@ -4593,6 +4693,17 @@ export function scanRuleStateReads(
       // lowered by the runtime and dropped by the extractor, so it is a blind
       // spot rather than something to skip.
       else unresolved.push({ expression: node.getText(source), reason: 'spec' });
+      if (observeRule && before)
+        observeRule(
+          node,
+          Object.freeze({
+            ordinal: ++visitOrdinal,
+            invocations: Object.freeze(invocations.slice()),
+            usages: Object.freeze(usages.slice(before[0])),
+            unresolved: Object.freeze(unresolved.slice(before[1])),
+            exposedLocals: Object.freeze(exposedLocals.slice(before[2])),
+          })
+        );
     }
 
     if (ts.isCallExpression(node)) {
@@ -4691,7 +4802,13 @@ export function scanRuleStateReads(
               sourceAlternatives: currentValues.slice(1),
             });
         }
-        visit(helper.body, helperParameters);
+        if (observeRule)
+          invocations.push(Object.freeze({ ordinal: ++invocationOrdinal, call: node, helper }));
+        try {
+          visit(helper.body, helperParameters);
+        } finally {
+          if (observeRule) invocations.pop();
+        }
       }
       applyCallMutation(node, current, captured, receiver, readsOnly);
       return;
