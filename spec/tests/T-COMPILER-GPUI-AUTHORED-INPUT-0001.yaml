@@ -35,8 +35,9 @@ cases:
         C-COMPILER-SCALAR-INPUT-0001-CONVERSION,
         C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
         C-COMPILER-SCALAR-INPUT-0001-READONLY,
+        C-COMPILER-SCALAR-INPUT-0001-EVENT-TARGETS,
       ]
-    expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries. Structural readonly views, aliases, helper calls and mutable stores cannot hide enumerable undefined or another non-JSON nested value. Local-only narrowed views and explicit fresh data snapshots remain admitted.
+    expectation: Generated methods count UTF-16 units, preserve conversion and rounding semantics, emit readonly JSON events, and reject invalid authority at source and independent IR boundaries. Structural readonly views, aliases, helper calls and mutable stores cannot hide enumerable undefined or another non-JSON nested value. Local-only narrowed views and explicit fresh data snapshots remain admitted. Finite dynamic event emission checks its payload against every target schema, including an additional shape used only by one target; independent IR cannot substitute that target-only payload for the common one.
   - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL
     title: Native Tab default follows completed input dispatch and current focus eligibility
     covers:
@@ -112,6 +113,7 @@ verifies:
           C-COMPILER-SCALAR-INPUT-0001-CONVERSION,
           C-COMPILER-SCALAR-INPUT-0001-ROUNDING,
           C-COMPILER-SCALAR-INPUT-0001-READONLY,
+          C-COMPILER-SCALAR-INPUT-0001-EVENT-TARGETS,
         ]
     - id: C-TEXT-CONTROL-0001
       anchors:

@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { compilePrototype } from '../src/compile';
 
 it('retains one event notification independently from ordinary repaint dirtiness', () => {
@@ -69,4 +70,28 @@ it('schedules an already-published event after failing props and both public met
   )?.contents;
   expect(owner).toContain('fn render_time_watcher_emit_then_throw_keeps_false_and_delivers_once(');
   expect(owner).toContain('fn public_method_emit_then_throw_keeps_zero_and_delivers_once(');
+});
+
+it('keeps already-published lifecycle events observable after a failed native commit', () => {
+  const fixture = new URL('./fixtures/gpui-ordinary-values/validation.proto.ts', import.meta.url);
+  const output = compilePrototype(readFileSync(fixture, 'utf8'), {
+    fileName: 'fixtures/gpui-ordinary-values/validation.proto.ts',
+    profile: 'gpui-source-v1',
+  });
+  expect(output.ok, JSON.stringify(output.ok ? {} : output.diagnostics)).toBe(true);
+  if (!output.ok) return;
+  const owner = output.value.output.supportingFiles?.find((file) =>
+    file.path.endsWith('/gpui-native-owner.rs')
+  )?.contents;
+  expect(owner).toBeDefined();
+  const start = owner!.indexOf('let owner=committed.clone();');
+  expect(start).toBeGreaterThan(0);
+  const commit = owner!.slice(
+    start,
+    owner!.indexOf('if image_supported(owner)', start)
+  );
+  expect(commit).toContain('if native_host_callback(&owner,"commit",||{');
+  expect(commit).toContain('}).is_none(){drive_pending_native_events(&owner,window,cx); }');
+  expect(commit).not.toContain('request_update(');
+  expect(commit).not.toContain('Owner::project(');
 });

@@ -1765,6 +1765,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                     : undefined,
                 ...(phase === 'callback' ? { callbackContext: context as CallbackContext } : {}),
               };
+            let eventPayloadTypes: DataType[] | undefined;
             if (captureReceiver) {
               const owner = hooks.find((hook) => hook.id === captureReceiver.hookId);
               if (!owner?.capture)
@@ -1823,8 +1824,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                     bad('Emit requires a declared outward event.', location);
                   return valueType(exposure.payload, location) as DataType;
                 });
-                if (!types.every((type) => sameType(type, types[0])))
-                  bad('Dynamic events require one shared payload signature.', location);
+                // A shared emission need not give each target the same final
+                // schema: another call may add a legal shape to one target.
+                // Validate this payload against every possible key after its
+                // own expression and provenance have been independently checked.
+                eventPayloadTypes = types;
                 bindings.eventPayloadType = types[0];
               } else {
                 if (first?.kind !== 'literal' || typeof first.value !== 'string')
@@ -1870,11 +1874,13 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                   operationArgumentRule(operation, index)
                 );
             });
-            const argumentIssues = validateOperationArguments(
-              operation,
-              args as never,
-              receiver,
-              bindings
+            const argumentIssues = (eventPayloadTypes?.length ? eventPayloadTypes : [undefined]).flatMap(
+              (eventPayloadType) => validateOperationArguments(
+                operation,
+                args as never,
+                receiver,
+                eventPayloadType === undefined ? bindings : { ...bindings, eventPayloadType }
+              )
             );
             if (argumentIssues.length) bad(argumentIssues[0].message, location);
             if (operation === 'expose.state') {

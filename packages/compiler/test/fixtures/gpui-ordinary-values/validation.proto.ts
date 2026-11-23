@@ -1,12 +1,39 @@
 import { definePrototype, type RunHandle } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
 
-export default definePrototype({
+type Props = { notificationPhase: string; notificationRevision: number };
+
+export default definePrototype<Props>({
   name: 'state-validation-boundary',
   setup(def) {
-    let current: RunHandle | null = null;
+    def.props.define({
+      notificationPhase: { type: 'string', default: 'none' },
+      notificationRevision: { type: 'number', default: 0 },
+    });
+    let current: RunHandle<Props> | null = null;
     def.lifecycle.onCreated((run) => { current = run; });
     def.expose.event('renderRequest', { payload: 'json' });
+    def.props.watch(['notificationRevision'], (run) => { run.update(); });
+    def.lifecycle.onMounted((run) => {
+      if (run.props.get().notificationPhase !== 'mounted') return;
+      run.expose.emit('renderRequest', { phase: 'mounted' });
+      throw false;
+    });
+    def.lifecycle.onMounted((run) => {
+      if (run.props.get().notificationPhase === 'mounted') {
+        run.expose.emit('renderRequest', { phase: 'after-failed-mounted' });
+      }
+    });
+    def.lifecycle.onUpdated((run) => {
+      if (run.props.get().notificationPhase !== 'updated') return;
+      run.expose.emit('renderRequest', { phase: 'updated' });
+      throw false;
+    });
+    def.lifecycle.onUpdated((run) => {
+      if (run.props.get().notificationPhase === 'updated') {
+        run.expose.emit('renderRequest', { phase: 'after-failed-updated' });
+      }
+    });
     def.expose.method('emitOnly', (value: number) => {
       if (current) current.expose.emit('renderRequest', { value });
     });

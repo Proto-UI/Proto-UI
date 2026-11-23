@@ -192,3 +192,55 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
     }
   );
 });
+
+
+describe('finite outward event keys preserve each target schema', () => {
+  const source = `
+    import {definePrototype,type RunHandle} from '@proto.ui/core';
+    export default definePrototype({name:'finite-event-schemas',setup(def){
+      def.expose.event('activate',{payload:'json'});
+      def.expose.event('context',{payload:'json'});
+      const emit=(run:RunHandle,name:'activate'|'context')=>
+        run.expose.emit(name,{selected:true,revision:'r1'});
+      def.event.on('press.commit',run=>{
+        emit(run,'activate');
+        emit(run,'context');
+        run.expose.emit('context',{x:12,y:34,revision:'r1'});
+      });
+      return r=>r.slot();
+    }});`;
+
+  it.each(['gpui-source-v1', 'react-dom-source-v1'] as const)(
+    'admits a shared payload when only one finite target has another legal shape on %s',
+    (profile) => {
+      const result = compilePrototype(source, { profile });
+      expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+      if (!result.ok) return;
+      expect(validateIR(JSON.parse(JSON.stringify(result.value.ir))).ok).toBe(true);
+    }
+  );
+
+  it('independently rejects a dynamic payload accepted by only one possible event', () => {
+    const parsed = parsePrototype(source);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const ir: PrototypeIR = JSON.parse(JSON.stringify(parsed.value));
+    let dynamic: Extract<ExpressionIR, { kind:'operation' }> | undefined;
+    let contextPayload: ExpressionIR | undefined;
+    const visit = (value: unknown): void => {
+      if (!value || typeof value !== 'object') return;
+      if (Array.isArray(value)) { value.forEach(visit); return; }
+      const node = value as ExpressionIR;
+      if (node.kind === 'operation' && node.operation === 'expose.emit') {
+        if (node.arguments[0].kind !== 'literal') dynamic = node;
+        else if (node.arguments[0].value === 'context') contextPayload = node.arguments[1];
+      }
+      Object.values(value).forEach(visit);
+    };
+    visit(ir);
+    if (!dynamic || !contextPayload) throw new Error('dynamic/context event fixture');
+    dynamic.arguments[1] = JSON.parse(JSON.stringify(contextPayload));
+    const result = validateIR(ir);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.diagnostics[0].message).toContain('payload does not match');
+  });
+});
