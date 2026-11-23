@@ -39,7 +39,7 @@ The original job timeout was 60 minutes while ten sequential stages could each u
 ## Inventory and filtering review
 
 | Suite | Admitted cases | Source basis |
-| --- | --: | --- |
+|---|---:|---|
 | Shared input | 72 | Three families × four hosts × two OTP and four Slider scenarios |
 | Collection recipes | 36 | Three families × four hosts × Tree, Data Table and Virtual List |
 | Resizable / Carousel / Date Picker | 36 | Three families × four hosts × three original capability journeys |
@@ -92,6 +92,7 @@ No source defect blocking that exact transport was found. The actual code import
 
 The external carrier still needs an exact uploaded-source readback before dispatch, followed by the real platform permission result and final feature-head readback. An actual permission rejection remains a rejection. No credentials were accessed or GitHub write performed by this reviewer.
 
+
 ### Installation-token permission-model delta
 
 The actual original GitHub transport run `45021743737` completed its read-only verification, but the publisher stopped **before writing**: all 18 objects were verified, `writeAttempts` was zero, and the existing feature head remained unchanged. The retained publisher receipt identifies a self-written guard that incorrectly required a human `viewerPermission` role. This was not a platform rejection of an attempted push.
@@ -100,11 +101,13 @@ GitHub's [Repository GraphQL documentation](https://docs.github.com/en/enterpris
 
 The exact revised script snapshot and SHA-256 are in `reviewed-transport-r1-fixed-publish.mjs` and `transport-r1-installation-token-review.json`. I read the prior real receipt and the revised source; I did not execute an authenticated publication or perform a GitHub write. No blocking source defect was found in this bounded correction. Actual platform acceptance and remote head reconciliation remain the publisher's separately recorded result, and a real platform denial must stay a denial.
 
+
 ## Final public-choice inventory delta
 
 The final reviewed source commit `2430aeaf1c74dc1f4563a543e0021574e7d5c441` includes the public choices recipe in the existing Form/Select suite: 36 rather than 24 cases. The full plan is now **ten suites / 304 cases: 292 browser and 12 ordinary Node/HappyDOM**. It adds no sequential stage, so the 210-minute bound above still applies. I independently executed only `--plan`, asserted those totals, and recorded exact source bytes in `collections-agent-sprint2-ci-review-source-r5.json`; no browser work ran in that check.
 
 The owner's `sprint2-integration-controls-r2.log` contains 26/26 combined Node controls, including the five queue tests; the other 21 are scheduling policy controls. These counts must not be added to their own subset. That same retained log reports Rhea 103/103, catalog helper 7/7, and the 305 bilingual primary-route inventory check. The readback is source/control evidence and not a native matrix acceptance.
+
 
 ## Required workspace-type stage
 

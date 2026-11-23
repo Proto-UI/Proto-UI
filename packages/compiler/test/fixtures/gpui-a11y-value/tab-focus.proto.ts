@@ -23,7 +23,8 @@ export default definePrototype<Props>({
     def.expose.method('focus', () => focus.focus());
     def.expose.method('blur', () => focus.blur());
     def.event.on('key.down', (run, event) => {
-      if (event.key === 'Tab' && run.props.get().blockTab) event.control.requestDefaultActionPrevention();
+      if (event.key === 'Tab' && run.props.get().blockTab)
+        event.control.requestDefaultActionPrevention();
     });
     return (renderer) => renderer.el('button', 'Tab target');
   },

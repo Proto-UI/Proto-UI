@@ -23,7 +23,7 @@ The new retained run is `/tmp/proto-shenko-replay-DG5q4h/summary.json`, using co
 I recomputed the recorded metafile sums and checked the retained source-byte attribution. Both original source-seam and pinned-artifact lanes report the same figures:
 
 | Quantity | Bytes | Scope |
-| --- | --: | --- |
+|---|---:|---|
 | Production JavaScript modules | 1,231,311 | Listed app modules, excluding theme-bootstrap.js; CSS is separate |
 | Sum of gzip module sizes | 351,937 | Each listed module independently compressed |
 | Generated-prototype input source | 112,132 | Source read by the production bundler |
@@ -38,7 +38,7 @@ These values come from the application build, not a synthetic Button-only substi
 I independently checked all eight retained bundle hashes, byte lengths, input-file hashes and metafile attributions. I also recomputed gzip using the declared Node runtime's zlib level 9; `compiler-production-cost-gzip-readback.json` records exact agreement. A separate exploratory Python gzip computation used a different compression engine and produced different compressed lengths, so it is not used as an oracle for the declared Node/zlib measurement.
 
 | Target | Base-only bundle | Three-family bundle | Base-only gzip | Three-family gzip |
-| --- | --: | --: | --: | --: |
+|---|---:|---:|---:|---:|
 | React source | 82,452 | 169,598 | 27,574 | 44,184 |
 | Vue 3 source | 88,633 | 171,517 | 30,803 | 47,469 |
 | Vue 2 source | 68,586 | 162,527 | 23,141 | 40,408 |

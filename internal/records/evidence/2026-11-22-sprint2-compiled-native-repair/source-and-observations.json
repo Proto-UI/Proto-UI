@@ -111,19 +111,25 @@
       "name": "react-base",
       "status": "FAIL",
       "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[data-sprint2-target]')\n",
-      "steps": ["mounted"]
+      "steps": [
+        "mounted"
+      ]
     },
     {
       "name": "react-brutalist",
       "status": "FAIL",
       "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[data-sprint2-target]')\n",
-      "steps": ["mounted"]
+      "steps": [
+        "mounted"
+      ]
     },
     {
       "name": "react-shadcn",
       "status": "FAIL",
       "firstFailure": "locator.click: Timeout 5000ms exceeded.\nCall log:\n  - waiting for locator('[data-sprint2-target]')\n",
-      "steps": ["mounted"]
+      "steps": [
+        "mounted"
+      ]
     },
     {
       "name": "react-text-queued",
@@ -141,19 +147,29 @@
       "name": "vue-base",
       "status": "PASS",
       "firstFailure": null,
-      "steps": ["mounted", "disabled-and-preference-updated", "disposed"]
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
     },
     {
       "name": "vue-brutalist",
       "status": "PASS",
       "firstFailure": null,
-      "steps": ["mounted", "disabled-and-preference-updated", "disposed"]
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
     },
     {
       "name": "vue-shadcn",
       "status": "FAIL",
       "firstFailure": "Matcher did not succeed in 1000ms",
-      "steps": ["mounted"]
+      "steps": [
+        "mounted"
+      ]
     },
     {
       "name": "vue-text-queued",
@@ -181,19 +197,29 @@
       "name": "vue2-base",
       "status": "PASS",
       "firstFailure": null,
-      "steps": ["mounted", "disabled-and-preference-updated", "disposed"]
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
     },
     {
       "name": "vue2-brutalist",
       "status": "PASS",
       "firstFailure": null,
-      "steps": ["mounted", "disabled-and-preference-updated", "disposed"]
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
     },
     {
       "name": "vue2-shadcn",
       "status": "FAIL",
       "firstFailure": "Matcher did not succeed in 1000ms",
-      "steps": ["mounted"]
+      "steps": [
+        "mounted"
+      ]
     },
     {
       "name": "vue2-text-queued",
@@ -221,19 +247,29 @@
       "name": "wc-base",
       "status": "PASS",
       "firstFailure": null,
-      "steps": ["mounted", "disabled-and-preference-updated", "disposed"]
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
     },
     {
       "name": "wc-brutalist",
       "status": "PASS",
       "firstFailure": null,
-      "steps": ["mounted", "disabled-and-preference-updated", "disposed"]
+      "steps": [
+        "mounted",
+        "disabled-and-preference-updated",
+        "disposed"
+      ]
     },
     {
       "name": "wc-shadcn",
       "status": "FAIL",
       "firstFailure": "Matcher did not succeed in 1000ms",
-      "steps": ["mounted"]
+      "steps": [
+        "mounted"
+      ]
     },
     {
       "name": "wc-text-queued",
@@ -1222,11 +1258,21 @@
                 {
                   "lang": "en"
                 },
-                [[33, 2]],
+                [
+                  [
+                    33,
+                    2
+                  ]
+                ],
                 [
                   "BODY",
                   {},
-                  [[35, 5]],
+                  [
+                    [
+                      35,
+                      5
+                    ]
+                  ],
                   [
                     "MAIN",
                     {
@@ -1249,9 +1295,24 @@
                           "data-pui-a11y-actions": "activate",
                           "data-sprint2-target": ""
                         },
-                        [[27, 0]],
-                        [[27, 2]],
-                        [[27, 3]]
+                        [
+                          [
+                            27,
+                            0
+                          ]
+                        ],
+                        [
+                          [
+                            27,
+                            2
+                          ]
+                        ],
+                        [
+                          [
+                            27,
+                            3
+                          ]
+                        ]
                       ]
                     ]
                   ]
@@ -1494,11 +1555,21 @@
                 {
                   "lang": "en"
                 },
-                [[33, 2]],
+                [
+                  [
+                    33,
+                    2
+                  ]
+                ],
                 [
                   "BODY",
                   {},
-                  [[35, 5]],
+                  [
+                    [
+                      35,
+                      5
+                    ]
+                  ],
                   [
                     "MAIN",
                     {
@@ -1519,7 +1590,12 @@
                           "data-pui-style": "select-none inline-flex box-border shrink-0 items-center justify-center border border-input bg-clip-padding py-0 transition-all outline-none text-sm leading-5 font-medium rounded-md bg-input/50 text-foreground shadow-xs h-9 gap-1.5 px-2.5 whitespace-nowrap",
                           "data-sprint2-target": ""
                         },
-                        [[27, 1]]
+                        [
+                          [
+                            27,
+                            1
+                          ]
+                        ]
                       ]
                     ]
                   ]
@@ -1762,13 +1838,23 @@
                 {
                   "lang": "en"
                 },
-                [[33, 2]],
+                [
+                  [
+                    33,
+                    2
+                  ]
+                ],
                 [
                   "BODY",
                   {
                     "__playwright_custom_elements__": "sprint2-generated-shadcn-1"
                   },
-                  [[35, 5]],
+                  [
+                    [
+                      35,
+                      5
+                    ]
+                  ],
                   [
                     "MAIN",
                     {
@@ -1788,7 +1874,12 @@
                           "data-pui-a11y-actions": "activate",
                           "data-sprint2-target": ""
                         },
-                        [[27, 1]]
+                        [
+                          [
+                            27,
+                            1
+                          ]
+                        ]
                       ]
                     ]
                   ]
