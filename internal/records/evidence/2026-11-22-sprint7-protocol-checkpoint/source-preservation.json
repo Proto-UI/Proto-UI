@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "kind": "source-preserving-offline-protocol-checkpoint",
+  "implementationAgent": "ChatGPT Codex /root/sprint5_6",
+  "executionMode": "human-assisted",
+  "currentBase": "38afc8942bfd245e12eaa661298c2feddbc63af8",
+  "original": {
+    "worktree": "/workspace/scratch/b8a4839de6ed/s7-experiments",
+    "head": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "branch": "work/s7-experiments",
+    "statusSha256Before": "28e45495f8e37dd66c92de92e8bc6d611e7cc200854460c466e3528262d6ab02",
+    "statusSha256After": "28e45495f8e37dd66c92de92e8bc6d611e7cc200854460c466e3528262d6ab02",
+    "sourceState": "Four untracked files; no original commit or author identity is fabricated."
+  },
+  "sourceFiles": [
+    {
+      "path": "scripts/analysis/value-experiments/model-request.py",
+      "bytes": 10455,
+      "sha256": "43ddc740d13a52fa68fc15dc5cd135dbaad3af9be73ca56092dc5282bd74e9d9",
+      "gitBlobSha": "06eb591955619e54e9165149c339e7dce698b28c",
+      "originalState": "untracked-uncommitted-file",
+      "originalStatus": "?? scripts/analysis/value-experiments/model-request.py",
+      "matchesOriginalBytes": true,
+      "pythonImports": [
+        "argparse",
+        "hashlib",
+        "json",
+        "os",
+        "pathlib",
+        "time",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "allImportsAreStandardLibrary": true
+    },
+    {
+      "path": "scripts/analysis/value-experiments/test-model-request.py",
+      "bytes": 5258,
+      "sha256": "c8901b2895d2af5050187c17e3bac9d98b754843c0277a32b778254f16eca0c5",
+      "gitBlobSha": "991d830b0173500b02b2a61298b1cf54732f67ff",
+      "originalState": "untracked-uncommitted-file",
+      "originalStatus": "?? scripts/analysis/value-experiments/test-model-request.py",
+      "matchesOriginalBytes": true,
+      "pythonImports": ["importlib.util", "json", "pathlib", "tempfile", "unittest"],
+      "allImportsAreStandardLibrary": true
+    },
+    {
+      "path": "scripts/analysis/value-experiments/consumer-broker.py",
+      "bytes": 15667,
+      "sha256": "f085a69d95bf79c70d4a728583d218ae552ebe8e3abf7cf774ebf0c80dd5b149",
+      "gitBlobSha": "b2448125200033b6cc9733ec1cb646e5be28ca51",
+      "originalState": "untracked-uncommitted-file",
+      "originalStatus": "?? scripts/analysis/value-experiments/consumer-broker.py",
+      "matchesOriginalBytes": true,
+      "pythonImports": [
+        "argparse",
+        "functools",
+        "hashlib",
+        "http.server",
+        "json",
+        "os",
+        "pathlib",
+        "shutil",
+        "signal",
+        "socketserver",
+        "subprocess",
+        "threading",
+        "time",
+        "urllib.error",
+        "urllib.request"
+      ],
+      "allImportsAreStandardLibrary": true
+    },
+    {
+      "path": "scripts/analysis/value-experiments/test-consumer-broker.py",
+      "bytes": 3976,
+      "sha256": "7c343e3953ffda90a65db57633039bbb33077f55103b4e395faaf50b76276445",
+      "gitBlobSha": "d6101cd2aec0cb32ec9bb19749f05d103a65aa80",
+      "originalState": "untracked-uncommitted-file",
+      "originalStatus": "?? scripts/analysis/value-experiments/test-consumer-broker.py",
+      "matchesOriginalBytes": true,
+      "pythonImports": ["importlib.util", "json", "os", "pathlib", "tempfile", "unittest"],
+      "allImportsAreStandardLibrary": true
+    }
+  ],
+  "sourceFileCount": 4,
+  "sourceBytes": 35356,
+  "sourceChanged": false,
+  "testClosure": {
+    "standardLibraryOnly": true,
+    "test-model-request.py": "Loads only model-request.py by literal adjacent file path.",
+    "test-consumer-broker.py": "Loads only consumer-broker.py by literal adjacent file path.",
+    "otherOriginalExperimentScriptsRestored": 0,
+    "independentlyRunnableOfflineTests": 15
+  },
+  "observedVerification": {
+    "commands": "commands.json",
+    "tests": 15,
+    "failures": 0,
+    "modelRuns": 0,
+    "apiRequests": 0,
+    "browserRuns": 0,
+    "packageInstalls": 0,
+    "consumerBuilds": 0,
+    "consumerObservations": 0,
+    "participantJourneys": 0,
+    "interpretation": "Only the two listed offline test invocations ran. Fixture file reads/writes/copies are not consumer execution or artifact admission."
+  },
+  "externalRuntimeInputsNotDeliveredOrExecuted": {
+    "model-request.py": [
+      "Operator-supplied packet JSON and a fresh output directory.",
+      "Explicit inference endpoint and any credential; no live provider or authentication was exercised."
+    ],
+    "consumer-broker.py": [
+      "Separately prepared, independently reviewed frozen stage with protocol.json, participant-system.txt and task.md.",
+      "Stage starter and genuine distribution directories, declared fixed-lock dependencies and PUI_STUDY_NODE.",
+      "Stage build-submission.mjs for the build capability and consumer-check.mjs for browser observation.",
+      "Configured inference transport and provider; the four restored files are not a complete consumer-run stage."
+    ]
+  },
+  "knownExecutionLimitations": [
+    {
+      "id": "PROTOCOL-BUILD-001",
+      "status": "open-before-live-consumer-execution",
+      "path": "scripts/analysis/value-experiments/consumer-broker.py",
+      "condition": "After a successful build, a later failed or timed-out build at the same revision does not clear built_revision. Observation could use stale or partially changed dist.",
+      "nextAction": "Invalidate prior build authority before rebuilding and independently test failed/timeout rejection and successful recovery, or prove transactional output freshness.",
+      "currentCheckpointImpact": "No build or observe action executed; existing six tests do not establish complete artifact freshness."
+    },
+    {
+      "id": "PROTOCOL-FINISH-SEMANTICS",
+      "status": "scope-limitation",
+      "condition": "participant-finished and process exit 0 mean the finish action was received; completed=false can still end the protocol.",
+      "nextAction": "Interpret participant completion, product behavior and experimental acceptance separately from process termination."
+    },
+    {
+      "id": "PROTOCOL-AUTH-UNVERIFIED",
+      "status": "scope-limitation",
+      "condition": "The broker does not add PUI_STUDY_API_KEY as an Authorization header. Provider transport/authentication was not exercised.",
+      "nextAction": "Resolve and validate the chosen provider contract before any live run; do not infer authentication support from offline tests."
+    }
+  ],
+  "remaining": [
+    "Actual model/transport behavior, installation/build/observer paths, artifact admission and uninformed participant outcomes remain unexecuted.",
+    "The other 17 original experiment scripts and knowledge-consumer/Dialog modifications are outside this checkpoint.",
+    "Source preservation and 15 offline controls do not prove a full process/network sandbox, full consumer capability correctness or comparative product advantage.",
+    "The original experiment criterion under #750 remains unaccepted; this checkpoint makes no issue closure, lifecycle or merge claim."
+  ]
+}

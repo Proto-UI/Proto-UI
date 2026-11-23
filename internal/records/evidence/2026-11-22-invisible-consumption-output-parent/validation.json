@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "kind": "operator producer directory repair; no measured consumer or model/browser acceptance",
+  "date": "2026-11-22",
+  "base": "38afc8942bfd245e12eaa661298c2feddbc63af8",
+  "recoveredFrom": {
+    "worktree": "/workspace/scratch/b8a4839de6ed/s7-experiments",
+    "originalLocalHead": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "uncommittedSourceBlob": "f6f562d851f92f9a794eae215fe5aa673ca79c9a",
+    "patchSha256": "11afe3d4f741a364f530198bdf524eb6ca75f9d8fcd3b0bcaed1f0b68b8d6bdb",
+    "note": "Original patch was uncommitted; exact bytes retained without inventing a commit author/history."
+  },
+  "change": "Create distribution parent only; the real Compiler still atomically reserves fresh generated destination. No writer, assertion, protocol or consumer metric changed.",
+  "executedSource": {
+    "producerSha256": "7214ee1a0c9af5a6a277fae43aa9906d910245efb8de2f48727c427cf0ccc336",
+    "baseMainProducerUnchangedByLatestMerge": true,
+    "workingTreeSource": "Three-line recovered producer patch on the recorded main; original per-run producer hash and full compiler/source preimages retained."
+  },
+  "runs": [
+    {
+      "phase": "main39-red",
+      "exitCode": 1,
+      "sourceRevision": "39ca4f7729cde9a3ebb3abfd4fd987d9db57e4de",
+      "producerSha256": "849365f4ccfc9178b8c3a880e06ba7a629545add38875e657d09229501ffca19",
+      "compileOk": true,
+      "writeOk": false,
+      "observedConsumerRuns": 0,
+      "diagnostics": [
+        {
+          "code": "PUI3003",
+          "category": "output-write",
+          "message": "Cannot reserve a fresh output destination: ENOENT: no such file or directory, mkdir '/workspace/scratch/eb30117f7b2a/producer-parent-red-20261122/distribution/generated'; publication failed; no artifact set committed; incomplete artifacts: .proto-ui/context/react-v1.ts, .proto-ui/context/scope-v1.ts, .proto-ui/interaction/control-label-types-v1.ts, .proto-ui/interaction/control-label-v1.ts, .proto-ui/interaction/focus-ownership-v2.ts, .proto-ui/interaction/modules-e6807d4f71af1465-v2.ts, .proto-ui/interaction/native-e6807d4f71af1465-v2.ts, .proto-ui/interaction/ownership-v2.ts, .proto-ui/style/native-v1.ts, Component.tsx, Component.tsx.map, provenance.json",
+          "span": {
+            "file": "/workspace/scratch/eb30117f7b2a/producer-parent-red-20261122/distribution/generated",
+            "start": 0,
+            "end": 0,
+            "line": 1,
+            "column": 1,
+            "endLine": 1,
+            "endColumn": 1
+          }
+        }
+      ]
+    },
+    {
+      "phase": "main39-green",
+      "exitCode": 0,
+      "sourceRevision": "39ca4f7729cde9a3ebb3abfd4fd987d9db57e4de",
+      "producerSha256": "7214ee1a0c9af5a6a277fae43aa9906d910245efb8de2f48727c427cf0ccc336",
+      "compileOk": true,
+      "writeOk": true,
+      "observedConsumerRuns": 0,
+      "status": "awaiting-clean-consumer-and-independent-admission",
+      "outputFiles": 12,
+      "outputInventorySha256": "0cb5533d962381094dda6fa5a3a49e65d4eddad5addcf0685bf0bc87437f36a8",
+      "allOutputsAndConsumerCopiesMatch": true
+    },
+    {
+      "phase": "main38-green",
+      "exitCode": 0,
+      "sourceRevision": "38afc8942bfd245e12eaa661298c2feddbc63af8",
+      "producerSha256": "7214ee1a0c9af5a6a277fae43aa9906d910245efb8de2f48727c427cf0ccc336",
+      "compileOk": true,
+      "writeOk": true,
+      "observedConsumerRuns": 0,
+      "status": "awaiting-clean-consumer-and-independent-admission",
+      "outputFiles": 12,
+      "outputInventorySha256": "0cb5533d962381094dda6fa5a3a49e65d4eddad5addcf0685bf0bc87437f36a8",
+      "allOutputsAndConsumerCopiesMatch": true
+    }
+  ],
+  "archive": {
+    "file": "original-red-green-evidence.tar.gz",
+    "bytes": 2964983,
+    "sha256": "7398685b51fa21e57d4a50e4bec1c6e655e6d400dadf7de7b2b0395443851a4b"
+  },
+  "remaining": [
+    "Clean consumer dependencies/build were not installed or run in this continuation; prepare alone covers the observed output-directory bug.",
+    "Artifact admission, native browser scope evidence, blind participant journey, model behavior and comparative advantage remain unexecuted.",
+    "Issue #750 remains open; observedConsumerRuns is zero in every retained candidate."
+  ]
+}
