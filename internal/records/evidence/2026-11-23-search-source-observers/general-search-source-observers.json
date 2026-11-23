@@ -1,0 +1,27 @@
+{
+  "before": {
+    "head": "84bebc5b13011abf5acf6ee6c558d9baf69da0e6",
+    "status": " M apps/www/src/components/override/Search.test.ts\n",
+    "testSha256": "108bc6efcf3580e76b7ae1d4e927101ee746b54a9f92c263bcf673cf1a3f3393"
+  },
+  "startedAt": 1795432582.4845219,
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "--no-file-parallelism",
+    "apps/www/src/components/override/Search.test.ts",
+    "apps/www/src/components/site-search-composition.test.ts",
+    "apps/www/src/components/site-search-commands.public-mode.test.ts",
+    "apps/www/src/components/site-search-composition-paint-cost.test.ts"
+  ],
+  "exitCode": 0,
+  "completedAt": 1795432633.4561875,
+  "after": {
+    "head": "84bebc5b13011abf5acf6ee6c558d9baf69da0e6",
+    "status": " M apps/www/src/components/override/Search.test.ts\n",
+    "testSha256": "108bc6efcf3580e76b7ae1d4e927101ee746b54a9f92c263bcf673cf1a3f3393"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "packages/adapters/web-component/test/shadow-percentage-translation.test.ts",
+    "--testNamePattern=rebound-target|same-valued mirror|older provider",
+    "--pool=forks",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--no-file-parallelism",
+    "--reporter=json",
+    "--outputFile=/tmp/s67-percentage-lease-control.json"
+  ],
+  "sourcePath": "packages/adapters/web-component/src/shadow-percentage-source.ts",
+  "sourceSha256": "5725b3e50ae0bbcd14b01c244bf7db856f6cd7d6281bbd45b635cdcc086d7dd7",
+  "faultSourceSha256": "854ac87d308afcc4f2263e20e8755c65be153ef26021159ed6d83711b5078694",
+  "fault": "Remove only actual source/target/last-write projection witness; retain owner/handle/map/value/priority checks.",
+  "startedAt": "2026-11-23T12:53:50.437406+00:00",
+  "exitCode": 1,
+  "result": {
+    "numPassedTests": 0,
+    "numFailedTests": 3,
+    "numPendingTests": 29,
+    "numTotalTests": 32
+  },
+  "failures": [
+    {
+      "name": "draft finite percentage translation recipe and current owner proof does not treat an older provider candidate map as an actual projection witness",
+      "messages": [
+        "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1509:21)\n    at Proxy.<anonymous> (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /workspace/scratch/4deb1fac371b/s67-type-boundary/packages/adapters/web-component/test/shadow-percentage-translation.test.ts:241:43\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)"
+      ]
+    },
+    {
+      "name": "draft finite percentage translation recipe and current owner proof rejects a queued effect after rebound-target while preserving the old admitted projection",
+      "messages": [
+        "AssertionError: expected [Function] to throw an error\n    at Proxy.<anonymous> (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1509:21)\n    at Proxy.<anonymous> (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /workspace/scratch/4deb1fac371b/s67-type-boundary/packages/adapters/web-component/test/shadow-percentage-translation.test.ts:349:45\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)"
+      ]
+    },
+    {
+      "name": "draft finite percentage translation recipe and current owner proof rejects mapped collisions and a same-valued mirror as canonical target proof",
+      "messages": [
+        "AssertionError: expected true to be false // Object.is equality\n    at /workspace/scratch/4deb1fac371b/s67-type-boundary/packages/adapters/web-component/test/shadow-percentage-translation.test.ts:377:40\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/scratch/4deb1fac371b/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      ]
+    }
+  ],
+  "sourceRestored": true,
+  "finishedAt": "2026-11-23T12:53:54.010084+00:00"
+}

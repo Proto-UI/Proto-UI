@@ -2,6 +2,21 @@
 import assert from 'node:assert/strict';
 const scope = '[data-shadow-s3]';
 const profiles = ['light', 'split', 'mixed'];
+// Independent expectation from shadcn-ui/ui@3d98900e9b73c45f035f8109e9d41ba6a51685e7,
+// apps/v4/registry/new-york-v4/ui/switch.tsx. At the fixture's 16px root font:
+// w-8 = 32px; h-[1.15rem] = 18.4px; size-4 = 16px; border = 1px;
+// checked translate(100% - 2px) adds 14px to that 1px origin.
+// These are fixed source facts, never read back from the implementation's CSS.
+export const S3_SWITCH_RECIPE = Object.freeze({
+  styleProfile: 'new-york-v4',
+  size: 'default',
+  rootFont: 16,
+  width: 32,
+  height: 18.4,
+  thumbSize: 16,
+  uncheckedThumbX: 1,
+  checkedThumbX: 15,
+});
 const component = (page, profile, key) =>
   page.locator(`${scope} [data-s3-profile="${profile}"] [data-s3-component="${key}"]`);
 const settle = (page) => page.waitForTimeout(240);
@@ -68,6 +83,9 @@ export async function sampleS3(page) {
         slot: get('button').textContent,
         slotOwned: get('button').childNodes[0]?.getRootNode() === document,
         checked: get('switch').getAttribute('aria-checked'),
+        rootFont: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+        switchStyle: get('switch').getExposes().getVisualStyle(),
+        switchSize: get('switch').getExposes().getVisualSize(),
         checkboxChecked: get('checkbox').getAttribute('aria-checked'),
         thumbX: get('thumb').getBoundingClientRect().x - get('switch').getBoundingClientRect().x,
         glyphs: Array.from(
@@ -76,6 +94,100 @@ export async function sampleS3(page) {
       };
     })
   );
+}
+export function assertS3SwitchGeometry(rows, checked = false) {
+  assert.deepEqual(
+    rows.map((row) => row.profile),
+    profiles,
+    'all three S3 profiles observed'
+  );
+  for (const row of rows) {
+    const label = `${row.profile}/Switch`;
+    assert.equal(row.rootFont, S3_SWITCH_RECIPE.rootFont, `${label} source root font`);
+    assert.equal(
+      row.switchStyle,
+      S3_SWITCH_RECIPE.styleProfile,
+      `${label} explicit source profile`
+    );
+    assert.equal(row.switchSize, S3_SWITCH_RECIPE.size, `${label} explicit source size`);
+    for (const field of ['width', 'surfaceWidth'])
+      assert.equal(row.geometry.switch[field], S3_SWITCH_RECIPE.width, `${label} source ${field}`);
+    // Chromium rounds rem lengths to layout units; this only covers that
+    // subpixel representation, not a different authored track size.
+    for (const field of ['height', 'surfaceHeight'])
+      assert.ok(
+        Math.abs(row.geometry.switch[field] - S3_SWITCH_RECIPE.height) < 0.02,
+        `${label} source ${field}: ${row.geometry.switch[field]}`
+      );
+    for (const field of ['width', 'height', 'surfaceWidth', 'surfaceHeight'])
+      assert.equal(
+        row.geometry.thumb[field],
+        S3_SWITCH_RECIPE.thumbSize,
+        `${label} source Thumb ${field}`
+      );
+    assert.equal(
+      row.thumbX,
+      checked ? S3_SWITCH_RECIPE.checkedThumbX : S3_SWITCH_RECIPE.uncheckedThumbX,
+      `${label} source ${checked ? 'checked' : 'unchecked'} Thumb origin`
+    );
+  }
+}
+
+// A matched wrong width must fail even when Light/split/mixed agree. This is
+// test-only fault injection; the public fixture never overrides its geometry.
+export async function runS3SizeControl(page) {
+  await page.waitForSelector(`${scope}[data-ready=true]`);
+  await settle(page);
+  const baseline = await sampleS3(page);
+  assertS3SwitchGeometry(baseline);
+  const switches = page.locator(`${scope} [data-s3-component="switch"]`);
+  const previous = await switches.evaluateAll((roots) =>
+    roots.map((root) => {
+      const surfaces = [
+        ...new Set([root, root.shadowRoot?.querySelector('[part="surface"]')].filter(Boolean)),
+      ];
+      return surfaces.map((surface) => {
+        const saved = {
+          value: surface.style.getPropertyValue('width'),
+          priority: surface.style.getPropertyPriority('width'),
+        };
+        surface.style.setProperty('width', '44px', 'important');
+        return saved;
+      });
+    })
+  );
+  let mutated;
+  try {
+    await settle(page);
+    mutated = await sampleS3(page);
+    assert.ok(
+      mutated.every(
+        (row) => row.geometry.switch.width === 44 && row.geometry.switch.surfaceWidth === 44
+      ),
+      'the negative control must actually change all host and surface widths'
+    );
+    parity(mutated);
+    assert.throws(() => assertS3SwitchGeometry(mutated), /Switch source width/);
+  } finally {
+    await switches.evaluateAll(
+      (roots, previous) =>
+        roots.forEach((root, index) => {
+          const surfaces = [
+            ...new Set([root, root.shadowRoot?.querySelector('[part="surface"]')].filter(Boolean)),
+          ];
+          surfaces.forEach((surface, surfaceIndex) => {
+            const saved = previous[index][surfaceIndex];
+            if (saved.value) surface.style.setProperty('width', saved.value, saved.priority);
+            else surface.style.removeProperty('width');
+          });
+        }),
+      previous
+    );
+  }
+  await settle(page);
+  const restored = await sampleS3(page);
+  assertS3SwitchGeometry(restored);
+  return { expected: S3_SWITCH_RECIPE, baseline, mutated, restored };
 }
 function parity(rows) {
   for (const row of rows)
@@ -122,6 +234,8 @@ async function focused(page, profile, key) {
       outline: host.outlineStyle,
       color: host.outlineColor,
       focusVisible: el.hasAttribute('data-focus-visible'),
+      surfaceOutline: visual.outlineStyle,
+      surfaceOutlineWidth: visual.outlineWidth,
       ring: visual.getPropertyValue('--pui-ring-width').trim(),
       shadow: visual.boxShadow,
     };
@@ -129,6 +243,12 @@ async function focused(page, profile, key) {
   if (paint.split)
     assert.equal(paint.outline, 'none', `${profile}/${key}/no duplicate host outline`);
   else assert.notEqual(paint.outline, 'auto', `${profile}/${key}/authored outline replaces UA`);
+  if (paint.focusVisible && key.startsWith('trigger-')) {
+    assert.equal(paint.surfaceOutline, 'solid', `${profile}/${key}/source focus outline`);
+    assert.equal(paint.surfaceOutlineWidth, '1px', `${profile}/${key}/source focus outline width`);
+    assert.equal(paint.ring, '3px', `${profile}/${key}/source focus ring width`);
+    assert.notEqual(paint.shadow, 'none', `${profile}/${key}/source focus ring paint`);
+  }
   if (paint.focusVisible && ['switch', 'checkbox', 'button'].includes(key)) {
     assert.equal(paint.ring, '3px', `${profile}/${key}/surface focus ring width`);
     assert.notEqual(paint.shadow, 'none', `${profile}/${key}/surface focus ring paint`);
@@ -147,11 +267,11 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
   if (keepMounted) await action(page, 'keepMounted');
   let rows = await sampleS3(page);
   parity(rows);
+  assertS3SwitchGeometry(rows);
   for (const row of rows) {
     assert.equal(row.value, 'a');
     assert.equal(row.geometry.list.height, 36);
     assert.equal(row.geometry['trigger-a'].height, 29);
-    assert.equal(row.geometry.switch.width, 44);
   }
   const cdp = await page.context().newCDPSession(page);
   try {
@@ -243,6 +363,7 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
     }
     await verifyPanels();
     rows = await sampleS3(page);
+    assertS3SwitchGeometry(rows, true);
     for (const row of rows) {
       assert.deepEqual(row.model, {
         checked: true,
@@ -254,7 +375,6 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
       assert.equal(row.changes, 3);
       assert.equal(row.checked, 'true');
       assert.equal(row.checkboxChecked, 'true');
-      assert.equal(row.thumbX, 21);
       assert.deepEqual(row.glyphs, ['m20 6-11 11-5-5']);
     }
     await option(page, 'activationMode', 'manual');
@@ -307,10 +427,10 @@ export async function runS3Journey(page, { keepMounted = false } = {}) {
     await settle(page);
     rows = await sampleS3(page);
     parity(rows);
+    assertS3SwitchGeometry(rows);
     for (const row of rows) {
       assert.equal(row.checked, 'false');
       assert.equal(row.checkboxChecked, 'false');
-      assert.equal(row.thumbX, 3);
       assert.deepEqual(row.glyphs, []);
       assert.equal(row.slotOwned, true);
       assert.equal(

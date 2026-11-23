@@ -1,0 +1,18 @@
+{
+  "command": [
+    "node",
+    "--max-old-space-size=1536",
+    "--import",
+    "tsx",
+    "scripts/spec/check-lifecycle-authoring.mjs",
+    "--base",
+    "a3895208"
+  ],
+  "startedAt": "2026-11-23T12:58:59.550503+00:00",
+  "exitCode": 0,
+  "finishedAt": "2026-11-23T12:59:13.007715+00:00",
+  "sourceHashes": {
+    "spec/decisions/D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001.yaml": "3369965875ac8068b5cfda40cd1fc4c3fcdedb8598f2dc2a353f5286290f52aa",
+    "spec/modules/M-EXPOSE-STATE-WEB-0001.yaml": "d9196e61cd3c8020beffb854495000eb36d5d07e7617c316cf5241e6f8bcb860"
+  }
+}

@@ -3,8 +3,8 @@ type: decision
 title: Root style application roles preserve canonical provenance through internal effects
 status: draft
 lifecycleRationale:
-  zh-CN: 当前仅准入已验证的内部 Root role 与有界 recipe；显式作者 role 语法、通用 placement channel 和未治理组合仍未决，未批准稳定化。
-  en: Only verified internal Root roles and bounded recipes are admitted; explicit author roles, a general placement channel and ungoverned combinations remain unsettled, with no stable admission approved.
+  zh-CN: 既有内部 Root role 与有界 recipe 保留原准入边界；新增有限 percentage translation 是待独立语义审查与真实宿主证据的 draft 候选。显式作者 role 语法、通用 placement channel 和未治理组合仍未决，未批准稳定化。
+  en: Existing internal Root roles and bounded recipes retain their admission boundaries. The finite percentage-translation extension is a draft candidate awaiting independent semantic review and native-host evidence. Explicit author roles, a general placement channel and ungoverned combinations remain unsettled, with no stable admission approved.
 since: 0.3.0-alpha.0
 summary: Root effects carry canonical role provenance before lowering and through merge, Rule updates, runtime patches, and view replay without changing author handles, public token snapshots, or collapsed Adapter output.
 statement:
@@ -17,6 +17,22 @@ statement:
 
 
 criteria:
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-TOKENS
+    text:
+      en: >-
+        Draft candidate: add exactly translate-x-[calc(100%_-_4px)] and the following eight original author tokens as canonical root-geometry, without changing author syntax, merge grouping, lowered-condition provenance or collapsed output: translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)], translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)], translate-x-[calc((100%_-_8px)*var(--pui-percentage)/100)], translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)], translate-x-[calc((4px_-_100%)*var(--pui-percentage)/100)], translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)], translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)] and translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]. This is a finite spelling set, not admission of a translate family, arbitrary calc grammar, other variables, axes, offsets, divisors or added underscoring. The static W-4px expression remains independent of any State channel. For the eight dynamic expressions, p is the current owner's exposed percentage number.range State with min=0 and max=100. W is the complete Root's transform-reference width; the six symmetric formulas are (W-c)*p/100 and (c-W)*p/100 for c=2,4,8px, while the two offset formulas are 1px+(W+1px)*p/100 and -1px-(W+1px)*p/100. Direction is already encoded in the authored expression and must not be applied a second time by the Adapter.
+
+      zh-CN: >-
+        Draft 候选仅新增精确的静态 translate-x-[calc(100%_-_4px)] 与英文列出的八个原始 author token 为 canonical root-geometry，保留作者语法、merge 分组、lowered condition provenance 与 collapsed 输出。它是有限拼写集合，不准入 translate 全族、任意 calc 语法、其它变量、轴、偏移、除数或下划线变体。静态 W-4px 不依赖任何 State channel；八个动态表达式的 p 必须来自当前 owner 的 exposed percentage number.range State，min=0、max=100。W 是完整 Root 的 transform 参照宽度；六个对称式为 (W-c)*p/100 和 (c-W)*p/100，c 为 2、4、8px，两个带起点的式为 1px+(W+1px)*p/100 和 -1px-(W+1px)*p/100。方向已由作者表达式编码，Adapter 不再反转一次。
+
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION
+    text:
+      en: >-
+        Draft candidate: split projection requires a same-source percentage-translation:v1 companion receipt and exact declared operand/transform recipes for all nine tokens. A dynamic entry additionally captures the current view owner's Expose State handle and validates the same current handle, range/semantic metadata, active Expose State Web binding, internal State ID, unique candidate CSS name and actual boundary-owned inline value and priority before publication. Candidate map metadata or inherited/computed same-name CSS alone is insufficient. Acquisition may validate the declaration before the Web binding activates, but neither physical target may publish until the live projection is coherent. A stale owner/view, revoked binding, collision, unsupported spelling or old/wrong recipe rejects the complete pending effect before either target mutates and preserves the previous admitted projection. No new public state, override, observer or prototype-name dispatch is introduced. Whole-Root motion carries the surface and consumer slot exactly once under M, with unchanged native hit geometry, layout allocation and independent nested percentage sources. Native validation must include p=0,25,50,75,100, multiple widths, both encoded directions, static independence, mid-motion reversal, declared transition suppression/restoration, slot identity, host hit testing and view withdrawal/reacquisition. Classification, deterministic port checks or static endpoints alone do not satisfy that validation. Consumer CSS remains the existing native escape hatch; this receipt does not claim general arbitration of indistinguishable foreign same-value writes after publication.
+
+      zh-CN: >-
+        Draft 候选要求九 token 均有同源 percentage-translation:v1 companion receipt 与精确 operand/transform 声明；动态 entry 另捕获当前 view owner 的 Expose State handle，在发布前核同一个当前 handle、range/semantic metadata、active Expose State Web binding、内部 State ID、唯一候选 CSS 名与 boundary 自有 inline 值及 priority。候选 map metadata 或继承/computed 的同名 CSS 值不能单独构成证据。acquisition 可在 Web binding 激活前校验 declaration，但完整 live 投影一致前两个物理 target 均不得发布。旧 owner/view、撤回 binding、名称冲突、未知拼写及旧/错 recipe 必须在任一 target 改变前原子拒绝，保留原已准入投影。不新增公开状态、override、observer 或 prototype 名 dispatch。按 M 完整 Root 仅变换一次，携带 surface 与 consumer slot，保留命中、布局与嵌套实例各自 percentage source；真实宿主必须覆盖 0/25/50/75/100、多宽度、两个编码方向、静态独立性、途中反向、声明的 transition 撤回/恢复、slot identity、host hit 与 view 撤回/重取。分类、确定性 port 控制或静态终点不替代该证据。consumer CSS 仍为既有 native escape hatch；该 receipt 不宣称仲裁发布后不可区分的外部同值写入。
+
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH
     text:
       en: >-
@@ -122,6 +138,16 @@ criteria:
       zh-CN: K1 的普通 Dialog 居中与 fade/zoom 组合必须由同一 token declaration、lowered condition、merge 结果和时序协调。整体几何动画作用于 boundary，surface 只保留视觉绘制，不重复变换；animate/fade/zoom 的 canonical surface 归属不因此改变。首帧、中间帧、途中反向和结束后必须保持中心、slot 随动和命中几何一致；分类或静态终点通过不代表 recipe 完成，也不承诺任意动画组合。
       en: K1's ordinary Dialog centering and fade/zoom combination must coordinate from the same token declarations, lowered conditions, merge results, and timing. Whole-Root geometry animation targets the boundary while surface painting remains on the surface without duplicate transforms; canonical surface ownership of animate/fade/zoom is unchanged. Initial and intermediate frames, reversals, and completion must preserve centering, carried slots, and hit geometry. Classification or static endpoints alone do not establish recipe completion or arbitrary animation support.
 openQuestions:
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q-PERCENTAGE-ADMISSION
+    question:
+      en: Does the bounded percentage-translation candidate satisfy independent semantic review and its complete native geometry, slot, hit and lifecycle matrix?
+      zh-CN: 有限 percentage translation 候选是否通过独立语义审查及完整原生几何、slot、命中和生命周期矩阵？
+    context:
+      en: The candidate addresses the current complete Switch inventory gap without weakening that gate. Draft source, candidate tests and a partial historical S3 replay do not establish acceptance. Keep current full-profile and original browser gates independently blocking until exact-candidate evidence is reviewed.
+      zh-CN: 候选处理当前完整 Switch inventory 缺口，不降低其门槛。draft 源码、候选测试与历史 S3 部分通过不证明准入；在审查精确候选的证据前保留完整 profile 与原浏览器门槛。
+    blocks:
+      - activation:D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+      - criterion:D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001#D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-PROJECTION
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q-PLACEMENT-CHANNEL
     question:
       zh-CN: '`placement` 最终继续作为 Root `feedback.style` 的 application role，还是进入独立 information channel、Module 或 Host Capability？'
@@ -168,7 +194,12 @@ relates:
 verifies:
   tests:
     - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+    - id: T-WEB-COMPONENT-SHADOW-PERCENTAGE-0001
+      since: 0.3.0-alpha.2
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Proposed the finite static and owner-percentage translation draft with exact recipe, current-source and native evidence boundaries; independent admission remains open.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Admitted the exact overflow-y-auto surface role for ordinary split Roots with a validated scrollport recipe.

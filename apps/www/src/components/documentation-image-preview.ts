@@ -104,6 +104,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   let renderAbort = new AbortController();
   let renderOptions = { signal: renderAbort.signal };
   let generation = 0;
+  let openRequest = 0;
   let mediaAbort = new AbortController();
   const zh = doc.documentElement.lang.toLowerCase().startsWith('zh');
   const labels = zh
@@ -508,7 +509,14 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     bindPreviewSurface(content, contentSurface, 'transitionState', renderOptions.signal);
     motion();
     theme();
-    content.addEventListener('beforeLeave', geometry, renderOptions);
+    content.addEventListener(
+      'beforeLeave',
+      () => {
+        openRequest++;
+        geometry();
+      },
+      renderOptions
+    );
     content.addEventListener(
       'afterLeave',
       () => {
@@ -522,13 +530,41 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       renderOptions
     );
   };
-  const open = (item: Enhancement) => {
-    const body = item.media.closest('[data-doc-flow]');
-    if (
-      !body ||
-      !isPreviewCandidate(item.media, body, item.trigger, [item.surface, item.mediaSurface])
-    )
-      return;
+  const open = async (item: Enhancement) => {
+    const request = ++openRequest;
+    const epoch = generation;
+    const isCurrent = () => {
+      const body = item.media.closest('[data-doc-flow]');
+      return (
+        !disposed &&
+        request === openRequest &&
+        epoch === generation &&
+        item.trigger.isConnected &&
+        item.trigger.contains(item.media) &&
+        enhancements.includes(item) &&
+        !!body &&
+        isPreviewCandidate(item.media, body, item.trigger, [item.surface, item.mediaSurface])
+      );
+    };
+    if (!isCurrent()) return;
+    if (item.media instanceof HTMLImageElement && !item.media.currentSrc) {
+      // A lazy <picture> may be activated before the browser selects its source.
+      // Let the image request settle; never substitute the desktop src fallback
+      // for an as-yet unselected responsive candidate or parse srcset ourselves.
+      const declaration = item.media.closest('picture') ?? item.media;
+      const requestedDeclaration = declaration.outerHTML;
+      try {
+        await item.media.decode();
+      } catch {
+        // Failed media still uses the existing img error presentation.
+      }
+      if (
+        (item.media.closest('picture') ?? item.media) !== declaration ||
+        declaration.outerHTML !== requestedDeclaration
+      )
+        return;
+    }
+    if (!isCurrent()) return;
     const source = readPreviewSource(item.media);
     if (!source) return;
     releaseSource();
@@ -660,7 +696,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         trigger.addEventListener(
           'click',
           (event) => {
-            if (event instanceof CustomEvent) open(item);
+            if (event instanceof CustomEvent) void open(item);
           },
           renderOptions
         );

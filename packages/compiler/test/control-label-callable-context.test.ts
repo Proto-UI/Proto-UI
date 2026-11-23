@@ -307,12 +307,16 @@ describe('checked native callable argument escapes', () => {
       parsePrototype(input.replace('false ? configure : () => {}', 'false ? () => {} : configure'))
     ).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' }],
+      diagnostics: [
+        { code: 'PUI1007', message: 'props.setDefaults is not permitted in callback.' },
+      ],
     });
     reverseEffectChoice(ir);
     expect(validateIR(ir)).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI2002', message: 'props.setDefaults is not permitted in callback.' }],
+      diagnostics: [
+        { code: 'PUI2002', message: 'props.setDefaults is not permitted in callback.' },
+      ],
     });
   });
 
@@ -345,7 +349,10 @@ describe('checked native callable argument escapes', () => {
     const ir = parsed(input);
     expect(
       parsePrototype(
-        input.replace('false ? unknownCallable() : () => {}', 'false ? () => {} : unknownCallable()')
+        input.replace(
+          'false ? unknownCallable() : () => {}',
+          'false ? () => {} : unknownCallable()'
+        )
       )
     ).toMatchObject({
       ok: false,
@@ -365,7 +372,9 @@ describe('checked native callable argument escapes', () => {
 
 describe('alias writes and mixed record unions', () => {
   const core = `import {definePrototype} from '@proto.ui/core';`;
-  const aliasSource = (write: string) => `${core}export default definePrototype({name:'alias-write',setup(def){
+  const aliasSource = (
+    write: string
+  ) => `${core}export default definePrototype({name:'alias-write',setup(def){
       def.props.define({enabled:{type:'boolean',default:false}});
       const configure=()=>{def.props.setDefaults({enabled:true});};
       const original={value:0,read:()=>{}};
@@ -374,7 +383,10 @@ describe('alias writes and mixed record unions', () => {
       ${write}
       def.expose.method('apply',(consume:(entry:{read:()=>void})=>void)=>{consume(outward);});
     }});`;
-  const unionSource = (condition: string, payload: string) => `${core}export default definePrototype({name:'mixed-union',setup(def){
+  const unionSource = (
+    condition: string,
+    payload: string
+  ) => `${core}export default definePrototype({name:'mixed-union',setup(def){
       def.props.define({enabled:{type:'boolean',default:false}});
       const unknownCallable=():()=>void=>unknownCallable();
       def.expose.method('apply',(consume:(entry:{read:()=>number;payload:number|(()=>void)})=>void,value:number)=>{
@@ -411,7 +423,8 @@ describe('alias writes and mixed record unions', () => {
   });
 
   it('rejects the setup-only alias write in portable IR', () => {
-    const ir = parsed(aliasSource('writable.value=1;'));
+    // A legal setup call retains the real body for the hostile IR alias write.
+    const ir = parsed(aliasSource('configure();writable.value=1;'));
     replaceAliasWrite(ir, 'configure');
     const portable = validateIR(ir);
     expect(portable.ok).toBe(false);
@@ -423,7 +436,8 @@ describe('alias writes and mixed record unions', () => {
   });
 
   it('retains callable demand for an escaped alias callback', () => {
-    const ir = parsed(aliasSource('writable.value=1;'));
+    // A legal setup call retains the real body for the hostile IR alias write.
+    const ir = parsed(aliasSource('configure();writable.value=1;'));
     replaceAliasWrite(ir, 'configure');
     const declaration = ir.setup.body.find(
       (statement) => statement.kind === 'const' && statement.name === 'configure'

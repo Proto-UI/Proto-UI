@@ -1,0 +1,20 @@
+{
+  "parent": "9402b45992cc3a6fcda79ac043da07d02ab5baf6",
+  "command": "node node_modules/vitest/vitest.mjs run packages/adapters/vue2/test/focus-teardown-readiness.integration.test.ts --pool=forks --no-file-parallelism",
+  "baseline": {
+    "source": "internal/records/evidence/2026-11-23-conceal-fixtures/s67-general-baseline-remaining.json.gz",
+    "passed": 18,
+    "failed": 2
+  },
+  "candidate": {
+    "passed": 20,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceSha256": "5e6472279e53b0e740ce43437e068e8a50fa0e657bada8995a6640a8f804804e",
+  "log": {
+    "path": "shared-factory.log.gz",
+    "uncompressedSha256": "c019b6d31ba42e26c733e95fb26aad173cca76f904cd38c4dfd221e78866e002"
+  },
+  "qualification": "Actual installed Vue 2 lifecycle in Happy DOM; no native or assistive-technology claim."
+}

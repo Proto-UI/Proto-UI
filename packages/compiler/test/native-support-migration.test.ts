@@ -108,7 +108,9 @@ async function historicalSupportArtifacts(): Promise<{
   const exports = object(loaded);
   const native = object(exports.legacyNativeInteractionArtifact);
   const adapter = object(exports.legacyNativeAdapterModulesArtifact);
-  const contextFilename = fileURLToPath(new NodeURL('../src/native-context-legacy.ts', import.meta.url));
+  const contextFilename = fileURLToPath(
+    new NodeURL('../src/native-context-legacy.ts', import.meta.url)
+  );
   const contextExports: unknown = await import(/* @vite-ignore */ contextFilename);
   const context = object(object(contextExports).legacyNativeContextScopeArtifact);
   return {
@@ -608,10 +610,26 @@ async function routing(
     if (!instance) throw new Error('Actual compiled Text owner missing');
     text.value = 'filesystem edit';
     text.dispatchEvent(new Event('input', { bubbles: true }));
-    expect(method(method(instance, 'getExposes'), 'read')).toEqual({
+    const snapshot = method(method(instance, 'getExposes'), 'read');
+    // C-TEXT-CONTROL-SELECTION-0001-OBSERVATION permits old hosts to omit
+    // selection. A current host must report the actual editor observation;
+    // retaining the frozen old bytes must not require removing this new fact.
+    const hasSelection =
+      snapshot !== null && typeof snapshot === 'object' && Object.hasOwn(snapshot, 'selection');
+    expect(snapshot).toEqual({
       value: 'filesystem edit',
       composing: false,
+      ...(hasSelection
+        ? {
+            selection: {
+              start: text.selectionStart,
+              end: text.selectionEnd,
+              direction: text.selectionDirection,
+            },
+          }
+        : {}),
     });
+    trace.textSnapshot = snapshot;
     text.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
     trace.afterTextClick = [...events];
     if (broken) expect(events).toEqual(['outer']);
