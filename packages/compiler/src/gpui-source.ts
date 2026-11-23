@@ -1,3 +1,5 @@
+import { captureEffect, captureReceipt } from './capture-effects';
+import { nativeFieldSources } from './native-capture-provenance';
 import { validateIR, validIdentifier } from './ir-validation';
 import { pruneDeadValues } from './demand-pruning';
 import { rustMathRound } from './rust-scalar-intrinsics';
@@ -1065,30 +1067,22 @@ impl __PuiNativeRecordValue {
     ): { fn: FunctionIR; environment: NativeLexicalScope }[] {
       if (node.kind === 'function') return [{ fn: node.function, environment: scope }];
       if (node.kind === 'narrow') return resolve(node.value, scope);
-      // An authored capture is nominal provenance, not a structural record.
-      // Its render member is the setup result captured by that exact hook.
-      // Preserve scalar/null render callbacks at the native renderer boundary
-      // without converting arbitrary records or guessing a component identity.
-      if (node.kind === 'member' && node.property === 'render') {
-        const captures = valueAlternatives(node.object.type).filter(
-          (type): type is Extract<ExpressionIR['type'], { kind: 'capture' }> =>
-            typeof type !== 'string' && type.kind === 'capture'
-        );
-        if (captures.length) {
-          if (active.has(node)) return [];
-          active.add(node);
-          try {
-            return captures.flatMap((capture) => {
-              const hook = ir.hooks.find((hook) => hook.id === capture.hookId);
-              return hook
-                ? returnedValues(hook.setup).flatMap((result) =>
-                    result.value ? resolve(result.value, result.scope) : []
-                  )
-                : [];
-            });
-          } finally {
-            active.delete(node);
-          }
+      if (node.kind === 'member' || (node.kind === 'element' && node.index.kind === 'literal')) {
+        if (active.has(node)) return [];
+        active.add(node);
+        try {
+          let property: string;
+          if (node.kind === 'member') property = node.property;
+          else if (node.index.kind === 'literal') property = String(node.index.value);
+          else return [];
+          return nativeFieldSources(node.object, property, scope, ir, (callee, declaration) =>
+            resolve(callee, declaration).map((target) => ({
+              fn: target.fn,
+              scope: target.environment,
+            }))
+          ).flatMap((source) => resolve(source.value, source.scope));
+        } finally {
+          active.delete(node);
         }
       }
       if (node.kind === 'conditional')
@@ -1391,7 +1385,8 @@ impl __PuiNativeRecordValue {
     node: ExpressionIR,
     environment: ReadonlySet<string>,
     depth: number,
-    bindReceiver = true
+    bindReceiver = true,
+    captureEffects = true
   ): string {
     if (
       node.kind === 'call' &&
@@ -1426,7 +1421,8 @@ impl __PuiNativeRecordValue {
         },
         environment,
         depth,
-        false
+        false,
+        captureEffects
       );
       return `{ let ${variable} = ${receiverValue}; ${node.optional ? `if ${variable}.nullish() { Value::Undefined } else { ${inner} }` : inner} }`;
     }
@@ -1771,9 +1767,40 @@ impl __PuiNativeRecordValue {
             (handle) =>
               `Value::Style(vec![${handle.tokens.map((token) => `(${string(token)}.into(), ${string(getSemanticGroupKeyV0(token))}.into())`).join(', ')}])`
           );
-        return `rule(&${ownerReference()}, ${predicate}, vec![${handles.join(', ')}])`;
+        const result = `rule(&${ownerReference()}, ${predicate}, vec![${handles.join(', ')}])`;
+        return ir.hooks?.length ? `capture_rule(&${ownerReference()}, ${result})` : result;
       }
       case 'operation': {
+        const effect =
+          captureEffects && ir.hooks?.length ? captureEffect(node.operation) : undefined;
+        if (effect) {
+          const names = node.arguments.map(() => '<capture:' + freshNative() + '>');
+          const aliases: ExpressionIR[] = node.arguments.map((value, index) => ({
+            kind: 'reference',
+            name: names[index],
+            type: value.type,
+            span: value.span,
+          }));
+          const capturedArgument = (index: number) =>
+            index < names.length ? `${local(names[index])}.clone()` : 'Value::Undefined';
+          const result = local(freshNative());
+          const call = expression(
+            { ...node, arguments: aliases },
+            environment,
+            depth,
+            false,
+            false
+          );
+          const receipt = captureReceipt(
+            effect,
+            capturedArgument,
+            `${result}.clone()`,
+            (value) => `Value::string(${string(value)})`,
+            (fields) =>
+              `record(vec![${fields.map(([key, source]) => `(${string(key)}, ${source})`).join(', ')}])`
+          );
+          return `{ ${names.map((name, index) => `let ${local(name)} = ${args[index]};`).join(' ')} let ${result} = ${call}; capture_effect(&${ownerReference()}, ${string(effect.bucket)}, ${receipt}); ${effect.disposer ? `capture_disposer(&${ownerReference()}, ${string(effect.disposer)}, ${result}.clone());` : ''} ${effect.eventKey ? `capture_event_key(&${ownerReference()}, ${capturedArgument(0)});` : ''} ${effect.introducedState !== undefined ? `capture_introduced_state(&${ownerReference()}, ${capturedArgument(effect.introducedState)});` : ''} ${result} }`;
+        }
         const builtin = (installation: string) =>
           `native_builtin_hook(&${ownerReference()}, ${string(node.operation.slice('hook.'.length))}, || ${installation})`;
         switch (node.operation) {

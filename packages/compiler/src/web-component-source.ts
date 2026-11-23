@@ -1,3 +1,4 @@
+import { emitCapturedWebOperation } from './capture-effects';
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
@@ -571,7 +572,20 @@ export function emitWebComponentSource(
     }
   }
 
-  function expr(node: ExpressionIR, depth: number): string {
+  function expr(node: ExpressionIR, depth: number, captureEffects = true): string {
+    if (hasAuthoredHooks && captureEffects) {
+      if (node.kind === 'operation') {
+        const captured = emitCapturedWebOperation({
+          value: node,
+          prefix: prefix,
+          manager: `${prefix}Authored`,
+          interaction: `${prefix}Interaction`,
+          emit: (item, capture = true) => expr(item, depth, capture),
+        });
+        if (captured !== undefined) return captured;
+      }
+      if (node.kind === 'rule') return `${prefix}Authored.rule(${expr(node, depth, false)})`;
+    }
     switch (node.kind) {
       case 'narrow':
       case 'member-write':
@@ -1605,7 +1619,7 @@ ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
     expose: {
       value: expose,
       state(key: string, handle: ${p}State${interacting ? ` | ${p}NativeObservedState<boolean | string | number>` : ''}) { ${interacting ? `const external = observedProjections.get(handle as ${p}NativeObservedState<boolean | string | number>)?.external ?? ('external' in handle ? handle.external : undefined); if (!external) throw new Error('Unknown external state projection'); expose(key, external);` : 'expose(key, handle.external);'} ${hasAuthoredHooks ? `${p}Authored.introduceObserved(handle);` : ''} },
-      method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R) { ${hasAuthoredHooks ? `${p}Authored.method(key, fn);` : ''} expose(key, (...args: unknown[]) => { ensureExternal(); const result = invoke(fn, args, false) as R; return project ? project(result) : result; }); },
+      method<A extends unknown[], R>(key: string, fn: (...args: A) => R, project?: (value: R) => R) {  expose(key, (...args: unknown[]) => { ensureExternal(); const result = invoke(fn, args, false) as R; return project ? project(result) : result; }); },
       event(key: string) { ensureSetup(); if (own(exposes, key) || events.has(key)) throw new Error('Duplicate expose: ' + key); events.add(key); },
     },
     lifecycle: {onCreated(fn) { ensureSetup(); lifecycle.created.push(fn); }, onMounted(fn) { ensureSetup(); lifecycle.mounted.push(fn); }, onUpdated(fn) { ensureSetup(); lifecycle.updated.push(fn); }, onUnmounted(fn) { ensureSetup(); lifecycle.unmounted.push(fn); }, onBeforeDispose(fn) { ensureSetup(); lifecycle.beforeDispose.push(fn); }},

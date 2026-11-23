@@ -14,6 +14,7 @@ export function deriveHookCapture(
   const states = new Map<string, HookCaptureIR['states'][number]>();
   const methods = new Map<string, HookCaptureIR['methods'][number]>();
   const children = new Map<string, HookCaptureIR['children'][number]>();
+  const events = new Set<string>();
   const definiteIntroductions = new Map<ExpressionIR, string>();
   const issue = traceSetupOperations(
     setup,
@@ -26,6 +27,7 @@ export function deriveHookCapture(
         const key = value.arguments[0];
         if (key?.kind !== 'literal' || typeof key.value !== 'string') return;
         const name = key.value;
+        if (value.operation === 'expose.event') events.add(name);
         if (value.operation.startsWith('state.') && stateValue(value.type))
           states.set(name, { name, type: value.type });
         if (value.operation === 'expose.method') {
@@ -49,10 +51,16 @@ export function deriveHookCapture(
     if (statement.kind === 'return' || statement.kind === 'throw') break;
     if (statement.kind === 'if' || statement.kind === 'try') {
       // A reachable return in either branch can bypass later declarations.
-      const returns = (body: readonly StatementIR[]): boolean => body.some((item) =>
-        item.kind === 'return' || (item.kind === 'if' &&
-          (returns(item.then) || returns(item.otherwise))) || (item.kind === 'try' &&
-          (returns(item.body) || returns(item.catch?.body ?? []) || returns(item.finally ?? []))));
+      const returns = (body: readonly StatementIR[]): boolean =>
+        body.some(
+          (item) =>
+            item.kind === 'return' ||
+            (item.kind === 'if' && (returns(item.then) || returns(item.otherwise))) ||
+            (item.kind === 'try' &&
+              (returns(item.body) ||
+                returns(item.catch?.body ?? []) ||
+                returns(item.finally ?? [])))
+        );
       if (returns([statement])) break;
       continue;
     }
@@ -70,6 +78,7 @@ export function deriveHookCapture(
     states: [...states.values()],
     methods: [...methods.values()],
     children: [...children.values()],
+    ...(events.size ? { events: [...events] } : {}),
   };
 }
 
@@ -81,7 +90,9 @@ export function mergeHookCaptures(
   const states = new Map<string, HookCaptureIR['states'][number]>();
   const methods = new Map<string, HookCaptureIR['methods'][number]>();
   const children = new Map<string, HookCaptureIR['children'][number]>();
+  const events = new Set<string>();
   for (const value of values) {
+    for (const name of value.events ?? []) events.add(name);
     for (const state of value.states) {
       const previous = states.get(state.name);
       if (
@@ -117,6 +128,7 @@ export function mergeHookCaptures(
     states: [...states.values()],
     methods: [...methods.values()],
     children: [...children.values()],
+    ...(events.size ? { events: [...events] } : {}),
   };
 }
 
@@ -143,6 +155,7 @@ export function derivePrototypeCaptures(
       };
       const key = value.arguments[0];
       if (key?.kind === 'literal' && typeof key.value === 'string') {
+        if (value.operation === 'expose.event') contribution.events = [key.value];
         if (value.operation.startsWith('state.') && stateValue(value.type))
           contribution.states.push({ name: key.value, type: value.type });
         if (value.operation === 'expose.method') {

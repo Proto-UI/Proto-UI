@@ -1417,6 +1417,7 @@ fn native_rendering_cannot_consume_pending_authored_output_notifications(cx: &mu
 struct CommitOutputHarness {
     component: Entity<validation::CompiledComponent>,
     notifications: usize,
+    raw_notifications: usize,
     observed: Vec<(String, Json)>,
     failures: Vec<proto_ui_gpui_native::gpui_native_owner::NativeFailure>,
     _observation: gpui::Subscription,
@@ -1432,6 +1433,7 @@ fn commit_output_window(cx: &mut TestAppContext, phase: &str) -> WindowHandle<Co
             json!({"notificationPhase": phase}), None, window, cx,
         ).unwrap();
         let observation = cx.observe(&component, |host: &mut CommitOutputHarness, component, cx| {
+            host.raw_notifications += 1;
             let handle = component.read(cx).handle();
             let events = handle.take_events();
             let failures = handle.take_failures();
@@ -1442,7 +1444,7 @@ fn commit_output_window(cx: &mut TestAppContext, phase: &str) -> WindowHandle<Co
             host.failures.extend(failures);
         });
         CommitOutputHarness {
-            component, notifications: 0, observed: Vec::new(), failures: Vec::new(),
+            component, notifications: 0, raw_notifications: 0, observed: Vec::new(), failures: Vec::new(),
             _observation: observation,
         }
     })
@@ -1451,7 +1453,7 @@ fn assert_commit_output(
     window: WindowHandle<CommitOutputHarness>, cx: &mut TestAppContext,
     phase: &str, previous_notifications: usize,
 ) {
-    let revision = window.update(cx, |host, _, cx| {
+    let (revision, raw_notifications) = window.update(cx, |host, _, cx| {
         assert_eq!(host.notifications, previous_notifications + 1,
             "the failing commit must itself wake the retained parent without another frame or input");
         assert_eq!(host.observed, vec![("renderRequest".into(), json!({"phase": phase}))],
@@ -1470,13 +1472,15 @@ fn assert_commit_output(
         drop(owner);
         assert!(component.handle().take_failures().is_empty(),
             "the real parent observer consumed the failure through the public handle");
-        revision
+        (revision, host.raw_notifications)
     }).unwrap();
     // Subsequent ordinary frames must neither retry the failed lifecycle list
     // nor keep notifying from its now-drained event queue.
     frames(window, cx);
     window.update(cx, |host, _, cx| {
         assert_eq!(host.notifications, previous_notifications + 1);
+        assert_eq!(host.raw_notifications, raw_notifications,
+            "later paints cannot keep waking the parent with empty notifications");
         assert_eq!(host.observed.len(), 1);
         assert_eq!(host.failures.len(), 1);
         let component = host.component.read(cx);

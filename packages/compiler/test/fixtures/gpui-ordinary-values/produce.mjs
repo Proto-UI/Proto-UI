@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parsePrototype } from '../../../src/parser.ts';
 import { emitGpuiSource } from '../../../src/gpui-source.ts';
+import { captureFacadeSource, captureRendererSource } from '../capture-facade.ts';
 
 const fixture = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(fixture, '../../../../..');
@@ -83,6 +84,19 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
 }
 emit('transition', transition(false), sourceFiles);
 const dependencies = [];
+dependencies.push(['capture_facade', emit('capture_facade', captureFacadeSource)]);
+for (const [name, result] of [
+  ['capture_null', 'null'],
+  ['capture_text', "'projected text'"],
+  ['capture_number', '42'],
+]) {
+  dependencies.push([name, emit(name, captureRendererSource(result))]);
+}
+receipt.sources.push({
+  path: 'packages/compiler/test/fixtures/capture-facade.ts',
+  sha256: digest(readFileSync(path.join(fixture, '../capture-facade.ts'))),
+});
+
 for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
   dependencies.push([
     name,
@@ -207,6 +221,11 @@ writeFileSync(
 mkdirSync(path.join(output, 'transition/tests'));
 copyFileSync(path.join(fixture, 'consumer.rs'), path.join(output, 'transition/tests/ordinary.rs'));
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
+copyFileSync(
+  path.join(fixture, 'capture_facade.rs'),
+  path.join(output, 'transition/tests/capture_facade.rs')
+);
+receipt.captureFacadeConsumerSha256 = digest(readFileSync(path.join(fixture, 'capture_facade.rs')));
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.
 const scalarInputs = [

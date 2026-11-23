@@ -115,7 +115,13 @@ export const MODULE_CAPABILITY_TYPES = [
 export type ModuleCapabilityType = (typeof MODULE_CAPABILITY_TYPES)[number];
 /** Ordinary lexical values retain structure without becoming public JSON data. */
 export type StructuredValueType =
-  | { kind: 'callable'; parameters: ParameterIR[]; returnType: ValueType }
+  | {
+      kind: 'callable';
+      parameters: ParameterIR[];
+      returnType: ValueType;
+      /** Checked finite-key return signatures on synthesized capture getters. */
+      lookup?: { key: string; type: ValueType }[];
+    }
   | {
       kind: 'object';
       fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[];
@@ -216,8 +222,9 @@ export function isPublicValueType(type: ValueType): boolean {
       );
     if (type.kind === 'callable')
       return (
-        type.parameters.every((parameter) => isPublicValueType(parameter.type)) &&
-        isPublicValueType(type.returnType)
+        type.parameters.every(
+          (parameter) => !hasCaptureLookup(parameter.type) && isPublicValueType(parameter.type)
+        ) && isPublicValueType(type.returnType)
       );
     if (type.kind === 'value-union') return type.members.every(isPublicValueType);
     return false;
@@ -238,6 +245,25 @@ export function isPublicValueType(type: ValueType): boolean {
     'collection-snapshot-list',
     'presentation-owner-ref',
   ].includes(name);
+}
+
+/** Key-dependent getter results require a captured callable, not a host input promise. */
+export function hasCaptureLookup(type: ValueType): boolean {
+  if (typeof type === 'string') return false;
+  if (type.kind === 'callable')
+    return (
+      type.lookup !== undefined ||
+      type.parameters.some((parameter) => hasCaptureLookup(parameter.type)) ||
+      hasCaptureLookup(type.returnType)
+    );
+  if (type.kind === 'object')
+    return (
+      type.fields.some((field) => hasCaptureLookup(field.type)) ||
+      (type.index !== undefined && hasCaptureLookup(type.index))
+    );
+  if (type.kind === 'value-union') return type.members.some(hasCaptureLookup);
+  if (type.kind === 'cell') return hasCaptureLookup(type.value);
+  return false;
 }
 
 export function isCapabilityAssignable(actual: ValueType, expected: ValueType): boolean {
@@ -437,6 +463,7 @@ export interface HookCaptureIR {
   states: { name: string; type: ValueType; valueType?: DataType; definite?: boolean }[];
   methods: { name: string; type: Extract<ValueType, { kind: 'callable' }> }[];
   children: { id: string; name: string }[];
+  events?: string[];
 }
 
 export interface PrototypeIR {

@@ -86,6 +86,15 @@ export function valueTypeEqual(a: ValueType, b: ValueType): boolean {
     );
   if (a.kind === 'callable' && b.kind === 'callable')
     return (
+      (a.lookup === undefined
+        ? b.lookup === undefined
+        : b.lookup !== undefined &&
+          a.lookup.length === b.lookup.length &&
+          a.lookup.every((entry) =>
+            b.lookup!.some(
+              (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
+            )
+          )) &&
       a.parameters.length === b.parameters.length &&
       a.parameters.every(
         (parameter, index) =>
@@ -213,6 +222,18 @@ export function valueAssignable(actual: ValueType, expected: ValueType): boolean
     typeof expected !== 'string' &&
     expected.kind === 'callable'
   ) {
+    // A precise lookup result is authority supplied by the actual capture getter,
+    // never by an arbitrary function with a superficially compatible signature.
+    if (
+      expected.lookup !== undefined &&
+      (actual.lookup === undefined ||
+        !expected.lookup.every((entry) =>
+          actual.lookup!.some(
+            (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
+          )
+        ))
+    )
+      return false;
     if (minimumArgumentCount(actual.parameters) > minimumArgumentCount(expected.parameters))
       return false;
     return (
@@ -339,10 +360,26 @@ export function checkedCall(
     )
       throw new TypeError(`Callable argument ${index + 1} type mismatch.`);
   });
+  const keys = args[0] === undefined ? [] : valueAlternatives(args[0]);
+  const result =
+    fn.lookup &&
+    keys.length &&
+    keys.every(
+      (key) => typeof key !== 'string' && key.kind === 'literal' && typeof key.value === 'string'
+    )
+      ? joinValueTypes(
+          keys.map(
+            (key) =>
+              fn.lookup!.find(
+                (entry) => entry.key === (key as { kind: 'literal'; value: string }).value
+              )?.type ?? 'void'
+          )
+        )
+      : fn.returnType;
   return optional &&
     valueAlternatives(type).some((member) => member === 'null' || member === 'void')
-    ? joinValueTypes([fn.returnType, 'void'])
-    : fn.returnType;
+    ? joinValueTypes([result, 'void'])
+    : result;
 }
 
 /** Every supplies these three values even when the callback declares fewer formals. */

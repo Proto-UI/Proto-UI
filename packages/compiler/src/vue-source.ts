@@ -1,3 +1,4 @@
+import { emitCapturedWebOperation } from './capture-effects';
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
@@ -427,7 +428,20 @@ export function emitVueSource(
       ? `${prefix}MarkAuthoredCallable(${callable})`
       : callable;
   }
-  function expression(node: ExpressionIR, depth: number): string {
+  function expression(node: ExpressionIR, depth: number, captureEffects = true): string {
+    if (hasAuthoredHooks && captureEffects) {
+      if (node.kind === 'operation') {
+        const captured = emitCapturedWebOperation({
+          value: node,
+          prefix: prefix,
+          manager: `${prefix}Authored`,
+          interaction: `${prefix}Interaction`,
+          emit: (item, capture = true) => expression(item, depth, capture),
+        });
+        if (captured !== undefined) return captured;
+      }
+      if (node.kind === 'rule') return `${prefix}Authored.rule(${expression(node, depth, false)})`;
+    }
     switch (node.kind) {
       case 'narrow':
       case 'member-write':
@@ -1187,7 +1201,7 @@ ${usesInteraction ? `        if (!('spec' in handle)) throw new Error('[Vue sour
 ${hasAuthoredHooks ? `      ${n('Authored')}.introduceObserved(handle);` : ''}
     }
     function ${n('ExposeMethod')}<Args extends unknown[], Result>(key: string, callback: (...args: Args) => Result, project?: (value: Result) => Result): void {
-${hasAuthoredHooks ? `      ${n('Authored')}.method(key, callback);` : ''}
+
       const boundary = ${n('MethodChecks')}[key];
       ${n('Declare')}(key, (...args: unknown[]) => {
         ${n('PublicAlive')}();

@@ -94,7 +94,7 @@ jobs:
       - name: Execute generated Rust consumers and resource controls
         run: |
           set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary --test capture_facade -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
       - name: Execute the generated numeric accessibility action bridge
         run: |
           set -euo pipefail
