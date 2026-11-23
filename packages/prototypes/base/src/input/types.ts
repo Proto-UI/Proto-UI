@@ -48,6 +48,7 @@ export type InputRootExposes = {
   composing: ExposeState<boolean>;
   focusSelf: ExposeMethod<(options?: FocusRequestOptions) => void>;
   blurSelf: ExposeMethod<() => void>;
+  resetValue: ExposeMethod<(value?: string) => boolean>;
   valueChange: ExposeEvent<InputValueChangeDetail>;
   change: ExposeEvent<InputChangeDetail>;
   compositionStart: ExposeEvent<InputCompositionDetail>;

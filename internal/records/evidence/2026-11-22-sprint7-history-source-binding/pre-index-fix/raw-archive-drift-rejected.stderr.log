@@ -1,0 +1,9 @@
+file:///workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/scripts/governance/history-source-bindings.mjs:40
+      throw new Error(`native archive capture differs from RAW input: ${name}`);
+            ^
+
+Error: native archive capture differs from RAW input: pr-1.json
+    at assertNativeCaptureIdentity (file:///workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/scripts/governance/history-source-bindings.mjs:40:13)
+    at file:///workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint/scripts/governance/build-history-snapshot.mjs:164:23
+
+Node.js v24.22.1

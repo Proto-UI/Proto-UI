@@ -337,6 +337,7 @@ class NativeAccessible {
   NativeAccessible(this.owner);
   final NativeOwnerBase owner;
   final Map<String, NativeObserved<Object?>> states = {};
+  final Map<String, NativeObserved<bool>> stateConditions = {};
   final Map<String, String> actions = {};
   Object? roleValue;
   bool contentName = false;
@@ -355,11 +356,11 @@ class NativeAccessible {
   void relation(String key, Map<String, Object?> spec) { owner.ensureSetup(); if (spec['mode'] == 'append' && relations.containsKey(key)) { final prior = relations[key]!['target']; final next = spec['target']; relations[key] = {...spec, 'target': [if (prior is List<Object?>) ...prior else prior, if (next is List<Object?>) ...next else next]}; } else relations[key] = Map.unmodifiable(spec); }
   void tree(Map<String, Object?> patch) { owner.ensureSetup(); treeBehavior = {...treeBehavior, ...patch}; }
   void level(Object value) { owner.ensureSetup(); final current = resolve(value); if (current is! num || !current.isFinite || current < 1 || current % 1 != 0) throw ArgumentError('Invalid semantic heading level'); _heading = value; }
-  void state<T>(String name, NativeObserved<T> handle) { owner.ensureSetup(); states[name] = handle; }
+  void state<T>(String name, NativeObserved<T> handle, [Map<String, Object?> options = const {}]) { owner.ensureSetup(); states[name] = handle; stateConditions.remove(name); final when = options['when']; if (when is NativeObserved<bool>) stateConditions[name] = when; }
   void action(String name, [Map<String, Object?> options = const {}]) { owner.ensureSetup(); actions[name] = options['event'] as String? ?? name; }
   void role(Object value) { owner.ensureSetup(); if (value is! String && value is! NativeObserved<String>) throw ArgumentError('Invalid AX role'); roleValue = value; }
   void nameFromContent() { owner.ensureSetup(); contentName = true; }
-  Object? value(String name) => states[name]?.get();
+  Object? value(String name) { final current = states[name]?.get(); return stateConditions.containsKey(name) && stateConditions[name]?.get() != true ? null : current; }
   Widget wrap(Widget child) {
     final role = roleValue is NativeObserved<String> ? (roleValue as NativeObserved<String>).get() : roleValue;
     final controls = relations['controls']?['target'];

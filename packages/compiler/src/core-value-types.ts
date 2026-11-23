@@ -181,6 +181,7 @@ export const CORE_VALUE_TYPES: Readonly<Record<string, ValueType>> = {
   DefHandle: 'def',
   RunHandle: 'run',
   RendererHandle: 'render',
+  A11ySetValueEventPayload: 'a11y-value-event',
   DelayTask: 'delay-task',
   ContextKey: 'context-key',
   PresentationOwnerRef: 'presentation-owner-ref',

@@ -1,0 +1,14 @@
+{
+  "objects": 1697,
+  "manuallyReadIssueDiscussions": 50,
+  "groups": {
+    "merged-with-explicit-evidence-gaps": 385,
+    "historical-terminal-with-evidence-gap": 44,
+    "closed-with-explicit-disposition": 6,
+    "closed-without-merge": 68,
+    "closed-with-explicit-evidence-gap": 183,
+    "merged-with-preserved-native-evidence": 777,
+    "closed-with-native-closing-source": 149,
+    "open-original-conditions-routed": 85
+  }
+}

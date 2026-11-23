@@ -20,7 +20,7 @@ export function createInteraction(options) {
   let scopeConfig=null,rovingConfig=null,entryConfig={strategy:'self',fallback:'self',disabled:false},scopeKey,groupKey;
   let previousFocus=null,rovingSelected=false,rovingActive=false,focus=null,pendingRoving=null;
   const relations=new Map();
-  const registrations = [], states = new Map(), actions = new Map();
+  const registrations = [], states = new Map(), stateConditions = new Map(), actions = new Map();
   let sequence = 0;
   function observed(initial) {
     let value = initial;
@@ -55,7 +55,7 @@ export function createInteraction(options) {
     if(options.controlFacts)Object.assign(facts,options.controlFacts());
     if (role !== undefined) facts.role=read(role);
     if(name!==undefined)facts.name=read(name);if(description!==undefined)facts.description=read(description);if(identity!==undefined)facts.id=read(identity);if(level!==undefined)facts.level=read(level);
-    for (const [key,state] of states) if(accessibleStateKeys.has(key))facts[key]=read(state);
+    for (const [key,state] of states) {const value=read(state);if(accessibleStateKeys.has(key) && (!stateConditions.has(key) || read(stateConditions.get(key)) === true))facts[key]=value;}
     if(options.physicalFacts)Object.assign(facts,options.physicalFacts());
     root.facts=facts;
   }
@@ -160,7 +160,7 @@ export function createInteraction(options) {
     focusFirst() {focusMember('first');},focusLast() {focusMember('last');},focusNext() {focusMember('next');},focusPrev() {focusMember('prev');},focusSelected() {focusMember('selected');},
     activate(request) {options.runtime();const root=options.root();previousFocus=root&&root.nativeWindow?root.nativeWindow.activeFocusItem:null;const index=activeScopes.indexOf(entry);if(index>=0)activeScopes.splice(index,1);activeScopes.push(entry);active.set(true);if(scopeConfig.entry==='container'){if(root)root.requestNativeFocus(request||{});}else if(scopeConfig.entry!=='manual')focusMember(scopeConfig.entry==='selected'?'selected':scopeConfig.entry==='active'?'active':'first',request);},
     deactivate(request) {options.runtime();const index=activeScopes.indexOf(entry);if(index>=0)activeScopes.splice(index,1);active.set(false);if(scopeConfig.restore!=='none'&&previousFocus&&previousFocus.visible)previousFocus.forceActiveFocus();},restoreFocus() {options.runtime();if(previousFocus&&previousFocus.visible)previousFocus.forceActiveFocus();},isActive() {options.alive();return active.handle.get();},getRoving() {options.alive();if(!rovingConfig)rovingConfig={loop:true,navigation:'arrow',orientation:'both',entry:'first'};return roving;}};
-  const accessible={state(key,state) {options.setup();states.set(key,state);refresh();},action(key,spec) {options.setup();actions.set(key,spec||{});},role(value) {options.setup();role=value;refresh();},nameFromContent() {options.setup();contentName=true;refresh();},
+  const accessible={state(key,state,spec) {options.setup();states.set(key,state);stateConditions.delete(key);if(spec && spec.when)stateConditions.set(key,spec.when);refresh();},action(key,spec) {options.setup();actions.set(key,spec||{});},role(value) {options.setup();role=value;refresh();},nameFromContent() {options.setup();contentName=true;refresh();},
     id(value) {options.setup();identity=value;},name(value) {options.setup();name=value;contentName=false;},description(value) {options.setup();description=value;},relation(key,spec) {options.setup();const previous=relations.get(key)||[];relations.set(key,spec.mode==='append'?previous.concat([spec]):[spec]);},tree(patch) {options.setup();Object.assign(tree,patch);},level(value) {options.setup();level=value;}};
   return {event:{on:(type,cb,settings)=>register('root',type,cb,settings),onGlobal:(type,cb,settings)=>register('global',type,cb,settings)},
     asTrigger() {options.setup();trigger=true;},asFocusable() {options.setup();declared=true;focusable.set(!disabled);return focus;},asAccessible() {options.setup();return accessible;},asFocusEntry() {options.setup();return focusEntry;},asFocusScope() {options.setup();if(!scopeConfig)scopeConfig={loop:true,navigation:'tab',orientation:'both',entry:'first',restore:'previous',emptyPolicy:'container'};return scope;},asFocusRoving() {options.setup();if(!rovingConfig)rovingConfig={loop:true,navigation:'arrow',orientation:'both',entry:'first'};return roving;},
@@ -170,7 +170,7 @@ export function createInteraction(options) {
     action(key) {if(!options.ready())return;const spec=actions.get(key);if(spec&&spec.event)options.invoke(()=>options.emit(spec.event),[],false,'event');else if(key==='press')dispatch('press.commit',{accepted:false},'root');},
     mount() {refresh();const root=options.root();if(declared&&!disabled&&(autoFocus||pending)&&root){const request=pending||{};pending=false;root.requestNativeFocus(request);}for(const participant of ownerInteractions.values())participant.fulfill();},
     unmount() {rootPress.pointer=false;rootPress.key=null;globalPress.pointer=false;globalPress.key=null;focused.set(false);focusVisible.set(false);},
-    dispose() {ownerInteractions.delete(options.host);const index=activeScopes.indexOf(entry);if(index>=0)activeScopes.splice(index,1);pendingRoving=null;registrations.length=0;states.clear();actions.clear();relations.clear();let failure;for(const fact of [focused,focusVisible,focusable,active,hasFocused])try{fact.clear();}catch(error){if(failure===undefined)failure=error;}if(failure!==undefined)throw failure;},
+    dispose() {ownerInteractions.delete(options.host);const index=activeScopes.indexOf(entry);if(index>=0)activeScopes.splice(index,1);pendingRoving=null;registrations.length=0;states.clear();stateConditions.clear();actions.clear();relations.clear();let failure;for(const fact of [focused,focusVisible,focusable,active,hasFocused])try{fact.clear();}catch(error){if(failure===undefined)failure=error;}if(failure!==undefined)throw failure;},
     globalTypes() {return registrations.filter((entry)=>entry.kind==='global').map((entry)=>entry.type);},
     isTrigger() {return trigger;}
   };

@@ -120,6 +120,25 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
+      - name: Execute the generated numeric accessibility action bridge
+        run: |
+          set -euo pipefail
+          node --import tsx packages/compiler/test/fixtures/gpui-a11y-value/produce.mjs "$RUNNER_TEMP/gpui-evidence/numeric-action" 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-producer.log"
+          cargo +1.98.1 metadata --offline --all-features --format-version 1 --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" > "$RUNNER_TEMP/gpui-evidence/numeric-metadata.json"
+          node scripts/gpui/check-cargo-graph.mjs \
+            --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
+            --git https://github.com/zed-industries/zed \
+            --rev 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8 \
+            --toolchain 1.98.1 \
+            --output "$RUNNER_TEMP/gpui-evidence/numeric-graph.json" \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-graph.log"
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" --test a11y_value -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/numeric-consumer.log"
+      - name: Execute emitted SDK lifecycle and control regressions
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
+            -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1 --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-sdk-controls.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
