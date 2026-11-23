@@ -3,6 +3,8 @@
   "compilerOptions": {
     "incremental": false
   },
-  "files": ["../../../../packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts"],
+  "files": [
+    "../../../../packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts"
+  ],
   "include": []
 }

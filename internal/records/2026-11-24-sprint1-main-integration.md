@@ -61,3 +61,19 @@ PR #1745's actual review collection was empty at the checkpoint. Local independe
 ## Evidence
 
 The [manifest](evidence/2026-11-24-sprint1-main-integration/manifest.json) records source identities, every command receipt, the complete unresolved inventory and per-file hashes. The [raw archive](evidence/2026-11-24-sprint1-main-integration/executed-validation.tar.gz) has 115 entries, each read back byte for byte, SHA-256 `0eaa9d82fb326c74830c6fb695c53c990122dc8582cb6fbf8527a7ca5fa3668d`. Failed, diagnostic, interrupted and final passing observations are retained separately.
+
+## Commit-hook reconciliation
+
+The normal repository hook formatted fourteen files carried from main while creating commit 61546fc7ca8e0158f913d7f068d700502acf562b. The publisher correctly returned exit 1 because the actual tree b20fadf0585e23e2c6cd5599ca6d23a59ca59e9b differed from its prepared tree 024bb1e92efbf12f152e766944da0ede28349a6f. The commit already existed; that failed acknowledgement was reconciled by reading HEAD, both parents, both complete trees and every changed path. No commit was blindly retried, amended or discarded.
+
+The changes are formatting only: eleven JSON token streams are identical when whitespace outside strings is removed; the Markdown table retains every cell and alignment; the diagnostic transport script has an identical parsed JavaScript structure and literal values; and the YAML decision has identical parsed values. The draft decision, criteria, numerical evidence and all reported failed results remain unchanged. No runtime product source was changed by the hook.
+
+The [complete reconciliation](evidence/2026-11-24-sprint1-main-integration/hook-format-reconciliation.json) lists every original and formatted blob and raw digest. All fourteen original files are also preserved byte for byte in the [original-byte archive](evidence/2026-11-24-sprint1-main-integration/pre-hook-originals.tar.gz), in addition to their immutable main parent. The earlier execution archive remains unchanged. A separate normal commit records this reconciliation before publication; final native results must still bind the final published head.
+
+## Byte-bound payload restoration
+
+A further exact-reference audit distinguished current payload contracts from historical execution source identities. Eight of the formatted files were actual sibling evidence payloads whose existing manifests promise their original bytes: Liquid's strict-project input, the intrinsic CSS and transported driver, four Sidebar observations, and the Train candidate artifact. They are restored byte for byte from the unchanged main parent. Their existing manifests, raw SHA256 values, timestamps and failed outcomes are not rewritten.
+
+The existing formatting policy already protects exact historical evidence paths. This change adds only these eight complete paths to that policy; it does not ignore a directory, maintained script, runtime source or specification. Actual Prettier path controls confirmed all eight are protected and four ordinary/nearby controls are not. Running the normal formatter on the eight payloads preserved every raw digest, byte count and Git blob. An ordinary unprotected TypeScript formatting control still changed normally. The repository hook and exact committed-tree validation remain enabled.
+
+The other six representational changes retain normal formatting and the equivalence evidence above. Historical sourceHashes continue to identify the original executions, and the original-byte archive remains available. The reconciliation report lists the exact restored payloads and distinguishes the intrinsic receipt's driver/css payload hashes from its separate historical sourceHashes.

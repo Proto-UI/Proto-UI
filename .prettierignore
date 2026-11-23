@@ -127,3 +127,14 @@ internal/records/evidence/2026-11-22-sprint7-history-continuation/
 internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
+
+# Exact historical payloads bound by retained byte hashes; keep their original bytes.
+# See internal/records/2026-11-24-sprint1-main-integration.md.
+internal/records/evidence/2026-11-23-liquid-view-operation/strict-project.json
+internal/records/evidence/2026-11-23-s3-intrinsic-full-width/frozen-css.json
+internal/records/evidence/2026-11-23-s3-intrinsic-full-width/transport-driver.mjs
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-enhanced-group-hover.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-failed-scripts-group-hover.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-enhanced.json
+internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-no-js.json
+internal/records/evidence/2026-11-23-train-package-budget/candidate.json

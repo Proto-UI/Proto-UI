@@ -2077,5 +2077,22 @@
   ],
   "nativeAcceptance": "Pending a new published head. No earlier native run is reattributed.",
   "independentPlatformApproval": "Unavailable at this checkpoint; the PR reviews collection was empty.",
-  "previewDeployment": "Vercel bot reported api-deployments-free-per-day >100 on PR1745; no missing-authorization exception is claimed."
+  "previewDeployment": "Vercel bot reported api-deployments-free-per-day >100 on PR1745; no missing-authorization exception is claimed.",
+  "publicationReconciliation": {
+    "report": "hook-format-reconciliation.json",
+    "actualPrecedingCommit": "61546fc7ca8e0158f913d7f068d700502acf562b",
+    "committedTree": "b20fadf0585e23e2c6cd5599ca6d23a59ca59e9b",
+    "formattedIncomingPaths": 14,
+    "originalArchive": {
+      "path": "pre-hook-originals.tar.gz",
+      "entries": 14,
+      "bytes": 334490,
+      "sha256": "86495843ea7817b328d3f7cece6fadb4471eb90db3238b5d0561598e79af700e",
+      "everyEntryReadbackVerified": true
+    },
+    "originalExecutionArchiveUnchanged": true,
+    "restoredByteBoundPayloads": 8,
+    "retainedEquivalentFormatting": 6,
+    "exactIgnorePathsOnly": true
+  }
 }

@@ -2,9 +2,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
-const { documentCss, shadowCss } = JSON.parse(
-  fs.readFileSync(new URL('./intrinsic-css.json', import.meta.url))
-);
+const { documentCss, shadowCss } = JSON.parse(fs.readFileSync(new URL('./intrinsic-css.json', import.meta.url)));
 const baseTokens = [
   'inline-flex',
   'flex-1',
@@ -17,11 +15,13 @@ const baseTokens = [
 ];
 const tokens = [...baseTokens, 'w-full'];
 
+
 const browser = await chromium.launch({
   headless: true,
   args: ['--no-sandbox', '--disable-dev-shm-usage'],
   executablePath:
-    process.env.CHROME_PATH ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    process.env.CHROME_PATH ??
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 });
 try {
   const page = await browser.newPage();
@@ -84,10 +84,7 @@ try {
     },
     { baseTokens, documentCss, shadowCss }
   );
-  fs.writeFileSync(
-    process.argv[2],
-    JSON.stringify({ browser: browser.version(), samples }, null, 2) + '\n'
-  );
+  fs.writeFileSync(process.argv[2], JSON.stringify({browser:browser.version(),samples},null,2)+'\n');
   console.log(JSON.stringify(samples, null, 2));
   for (const sample of samples)
     assert.deepEqual(
