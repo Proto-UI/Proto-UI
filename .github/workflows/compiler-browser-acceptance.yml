@@ -54,13 +54,15 @@ jobs:
           node --test scripts/compiler/browser-assets-production.test.mjs \
             scripts/compiler/browser-production.test.mjs \
             scripts/compiler/browser-delivery-index.test.mjs \
+            scripts/test/sprint3-font-preparation.test.mjs \
             2>&1 | tee "$PUI_EVIDENCE_DIR/production-controls.log"
       - name: Install and record Chinese fonts for the bilingual captures
-        timeout-minutes: 3
+        # Bound cold package acquisition before it consumes browser execution time.
+        timeout-minutes: 5
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          export FONT_EVIDENCE_DIR="$PUI_EVIDENCE_DIR/font-preparation"
+          timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
             > "$PUI_EVIDENCE_DIR/font-environment.txt"
           fc-match 'Noto Sans CJK SC' >> "$PUI_EVIDENCE_DIR/font-environment.txt"

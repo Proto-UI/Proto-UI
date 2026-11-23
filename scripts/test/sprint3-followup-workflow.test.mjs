@@ -141,7 +141,7 @@ test('owned runner paths are distinct, outside checkout and retain the source fo
         GITHUB_ENV: envFile,
         CANDIDATE_SHA: 'a'.repeat(40),
         FOLLOWUP_SUITE: suite,
-        GITHUB_RUN_ID: '10',
+        GITHUB_RUN_ID: '45202101258',
         GITHUB_RUN_ATTEMPT: '2',
       },
     });
@@ -156,6 +156,16 @@ test('owned runner paths are distinct, outside checkout and retain the source fo
     );
     assert.ok(values.TMPDIR.startsWith(runner + path.sep));
     assert.ok(existsSync(values.TMPDIR));
+    const runnerSocket = path.join(
+      '/home/runner/work/_temp',
+      path.relative(runner, values.TMPDIR),
+      'com.google.Chrome.XXXXXX',
+      'SingletonSocket'
+    );
+    assert.ok(
+      Buffer.byteLength(runnerSocket, 'utf8') < 108,
+      'Chromium singleton socket exceeds the Linux pathname budget: ' + runnerSocket
+    );
     all.push(values.SPRINT3_FOLLOWUP_EVIDENCE_DIR);
     if (suite === 'installed')
       assert.equal(
@@ -251,7 +261,10 @@ test('actual video installation and non-fallback CJK font resolution remain requ
     environment,
     /node apps\/www\/node_modules\/playwright-core\/cli\.js install ffmpeg/
   );
-  assert.match(environment, /apt-get install -y --no-install-recommends fonts-noto-cjk fontconfig/);
+  assert.match(
+    environment,
+    /timeout --signal=TERM --kill-after=5s 220s bash apps\/www\/scripts\/prepare-homepage-composition-fonts\.sh/
+  );
   assert.match(environment, /dpkg-query/);
   const match = environment.match(/(for CJK_LANGUAGE in zh-cn ja ko; do[\s\S]*?\n\s*done)/);
   assert.ok(match, 'execute and preserve the actual family-selection loop');
