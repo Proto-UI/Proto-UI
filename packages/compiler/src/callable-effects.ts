@@ -808,7 +808,7 @@ function analyzeCallableFlow(
       if (isDataValueType(type)) return dataFact(type);
       // A non-JSON host aggregate must keep its original structure. A bare
       // UNKNOWN could otherwise acquire a narrower data fact at a later view.
-      const finite = type.kind === 'record' || type.index === undefined;
+      const finite = type.index === undefined;
       if (!carriesCallable(type) && !(checkOutwardData && finite)) return UNKNOWN;
       const record: RecordValue = {
         kind: 'record',

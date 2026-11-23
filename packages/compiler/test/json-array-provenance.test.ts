@@ -49,7 +49,8 @@ function refused(setup: string, body: string, array = false): void {
     if (Array.isArray(value)) return value.forEach(walk);
     const node = value as Record<string, unknown>;
     if (node.kind === 'const' && node.name === 'retained') retained = node.value as ExpressionIR;
-    if (node.kind === 'operation' && node.operation === 'expose.emit') sink = node as typeof sink;
+    if (node.kind === 'operation' && node.operation === 'expose.emit')
+      sink = node as unknown as typeof sink;
     Object.values(node).forEach(walk);
   };
   walk(ir);
@@ -189,9 +190,9 @@ describe('outward JSON array traversal keeps actual values', () => {
       `const values=[1,2];const reduced=values.reduce((acc,item)=>{values.pop();values.pop();return {value:'copy'};},view);`,
       `const result=reduced;`,
     ],
-  ])('preserves %s at source and cold IR', (_name, setup, body) =>
-    admitted(source(hidden + setup, body))
-  );
+  ])('preserves %s at source and cold IR', (_name, setup, body) => {
+    admitted(source(hidden + setup, body));
+  });
 
   it.each([
     'values',
@@ -199,9 +200,9 @@ describe('outward JSON array traversal keeps actual values', () => {
     'values.map(item=>item)',
     'Array.from(values)',
     '[...values]',
-  ])('preserves checked host data through %s', (expression) =>
-    admitted(source(host, `const result=${expression};`))
-  );
+  ])('preserves checked host data through %s', (expression) => {
+    admitted(source(host, `const result=${expression};`));
+  });
 
   const late = `const original={ready:true,value:'bad',hidden:undefined};
     const view:Readonly<{ready:boolean;value:string}>=original;
@@ -307,14 +308,14 @@ describe('outward JSON array traversal keeps actual values', () => {
         array
       )
   );
-  it.each(hostShapes)('retains the checked JSON host %s positive', (_name, type, narrow, value) =>
+  it.each(hostShapes)('retains the checked JSON host %s positive', (_name, type, narrow, value) => {
     admitted(
       source(
         hostShape(type.replaceAll('hidden:undefined', 'hidden:string')),
         `if(!stored)return;const view:${narrow}=stored;const result=${value};`
       )
-    )
-  );
+    );
+  });
   it.each(['{value:string;get hidden():string}', '{child:{value:string;get hidden():string}}'])(
     'keeps the existing source type boundary for host accessor signatures: %s',
     (type) =>

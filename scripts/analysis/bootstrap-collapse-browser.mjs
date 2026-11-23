@@ -9,6 +9,7 @@ import { build } from 'esbuild';
 import { collectProtoStyleTokensFromFiles } from '../../packages/cli/src/services/prototype-style-tokens.ts';
 import { renderProtoStyleTokenCss } from '../../packages/cli/src/services/proto-style-css.ts';
 import { renderThemeCss } from '../../packages/prototypes/bootstrap-2-3-2/src/theme.ts';
+import { installBootstrapCloseEndpointOracle } from './bootstrap-collapse-endpoint-oracle.mjs';
 
 const output = path.resolve(process.env.PUI_EVIDENCE_DIR ?? '.tmp/bootstrap-collapse-browser');
 await mkdir(output, { recursive: true });
@@ -23,6 +24,9 @@ const report = {
     head: git('rev-parse', 'HEAD'),
     dirty: !!git('status', '--porcelain'),
     driverSha256: hash(await readFile(new URL(import.meta.url))),
+    endpointOracleSha256: hash(
+      await readFile(new URL('./bootstrap-collapse-endpoint-oracle.mjs', import.meta.url))
+    ),
   },
   environment: {
     runtimes,
@@ -163,6 +167,7 @@ async function check(runtime, kind, name, action) {
     // A failing reduced-motion assertion must not change any later case's
     // environment. Retire the actual consumer before resetting its preference.
     try {
+      await run(() => globalThis.BootstrapCloseEndpointWitness?.finish());
       await run(() => BootstrapCollapse.dispose());
       await page.emulateMedia({ reducedMotion: 'no-preference' });
     } catch (error) {
@@ -189,16 +194,32 @@ try {
           'Entry must contain several real intermediate heights.'
         );
         await page.screenshot({ path: path.join(output, `${runtime}-${kind}-entered.png`) });
-        row.close = await trace(() => accepted(false));
+        row.closeWitnessStart = await run(installBootstrapCloseEndpointOracle);
+        row.close = await trace(() =>
+          run(async () => {
+            globalThis.BootstrapCloseEndpointWitness.requestStarted();
+            await BootstrapCollapse.accept(false);
+          })
+        );
+        row.closeEndpoint = await run(
+          (samples) => globalThis.BootstrapCloseEndpointWitness.finish(samples),
+          row.close
+        );
         assert(
           hasIntermediate(row.close, entered.height),
           'Close must retain the view through intermediate heights.'
         );
         assert.equal((await snapshot()).height, 0);
         assert.equal((await snapshot()).hidden, true);
+        // The original narrow RAF witness remains part of the raw record. A
+        // delivered frame need not happen to land within a 2px interval; the
+        // contract requires current zero application before view retirement.
+        row.closeHadNearZeroRaf = row.close.some(
+          (sample) => sample.height > 0 && sample.height < 2
+        );
         assert(
-          row.close.some((sample) => sample.height > 0 && sample.height < 2),
-          'Exit must reach the zero edge before detaching.'
+          row.closeEndpoint.accepted,
+          'Current owner must apply zero before hiding or removal.'
         );
         return { entered };
       });
