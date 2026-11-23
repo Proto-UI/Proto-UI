@@ -147,6 +147,10 @@ for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
     emit(name, readFileSync(path.join(fixture, `${name}.proto.ts`), 'utf8')),
   ]);
 dependencies.push([
+  'external_scroll',
+  emit('external_scroll', readFileSync(path.join(fixture, 'external-scroll.proto.ts'), 'utf8')),
+]);
+dependencies.push([
   'scroll_reader',
   emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),
 ]);
