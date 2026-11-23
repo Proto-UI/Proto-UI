@@ -487,5 +487,259 @@
     "No physical OS IME or screen-reader acceptance claim",
     "No S4/S5 Ready conclusion based on this integrated candidate",
     "No threshold or negative-control change"
-  ]
+  ],
+  "publicationRecovery": {
+    "schemaVersion": 1,
+    "publisherAttempt": {
+      "startedAt": "2026-11-23T12:47:42.307203+00:00",
+      "state": "failed",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:publish",
+        "--",
+        "commit",
+        "--message-file",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/reconcile-commit-message.txt",
+        "--branch",
+        "repair/compiler-reconcile-20261123-recovered",
+        "--expected-head",
+        "502693304fc8d7509402fdfb586b283681915231",
+        "--expected-tree",
+        "2643ec88c87b8d994ee5add76f2c208f2ccda9d7",
+        "--repository",
+        "github.com:Proto-UI/Proto-UI",
+        "--mode",
+        "human-assisted",
+        "--mode-source",
+        "current-user",
+        "--authorization",
+        "explicit-current-user"
+      ],
+      "reviewedHead": "502693304fc8d7509402fdfb586b283681915231",
+      "reviewedTree": "2643ec88c87b8d994ee5add76f2c208f2ccda9d7",
+      "reviewedBranch": "repair/compiler-reconcile-20261123-recovered",
+      "stagedFileCount": 386,
+      "pid": 1218610,
+      "exitCode": 1,
+      "logSha256": "f68be35d52d61f51b0fea589a9f73622c54847733b27717f5f584934fa9cc1e8",
+      "error": "RuntimeError('agent publisher exited 1')",
+      "traceback": "Traceback (most recent call last):\n  File \"/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/publish-merge.py\", line 24, in <module>\n    if code!=0:raise RuntimeError('agent publisher exited '+str(code))\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: agent publisher exited 1\n",
+      "finishedAt": "2026-11-23T12:50:07.623646+00:00"
+    },
+    "actualCommit": "13fca7298f80c8a8acd8acdb3e4a35c279875576",
+    "actualParents": [
+      "502693304fc8d7509402fdfb586b283681915231",
+      "b715b8a6d08c2c79417272c8d4ca9254984feadb"
+    ],
+    "actualTree": "ff4c2d3b6562690e06433812360e359589e085a8",
+    "authorizedTree": "2643ec88c87b8d994ee5add76f2c208f2ccda9d7",
+    "changedPaths": [
+      "internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json",
+      "internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md",
+      "internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json",
+      "internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-checkpoint-review.json",
+      "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-manual-decisions.json",
+      "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent-review.json",
+      "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json",
+      "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json",
+      "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md",
+      "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json",
+      "scripts/analysis/invisible-consumption/produce-button.mjs",
+      "scripts/governance/history-audit.mjs"
+    ],
+    "frozenRecordsRestored": [
+      {
+        "path": "internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json",
+        "mainBlob": "46059124a253c3eb7ac8ed0cb1dccaf50ba2bae4",
+        "sha256": "c369ddc80cd2a520c4eabd835c209bd489e5dc3f6b85d1d361edf8ed569b9791",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md",
+        "mainBlob": "f5b7ccda977d504bd2e199d1710d89e3c34d7288",
+        "sha256": "119579a5b7f3a665537250c35c64998ed97ed8928b32ec3d3255f33f27ff98bb",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json",
+        "mainBlob": "8df3cf6e460903e5a978a51e29c17634426ed319",
+        "sha256": "a4b8c066ed376d3e71079d6762e75a8d5ed278978d7eebc059aedb08761cebcd",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-checkpoint-review.json",
+        "mainBlob": "aed34a6601fa51bd86a4b9a1244f9b5e5bab3b81",
+        "sha256": "fefd5587653a9a8dd3c6d3e3ca2e02b237b3cea55ba7cf95cdecaa2ec272fbe6",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-manual-decisions.json",
+        "mainBlob": "667132375df62dd80580ee672607aeea17d18ec6",
+        "sha256": "fab8b955ef2596aa3b1fbcab60865dcaef861d9b369c1329a658eba65b4d59b0",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent-review.json",
+        "mainBlob": "22b6e0c8f0eebede66b7c1723cf90b7410b2995a",
+        "sha256": "e20c80a7f1ae1eed82d6c2e614e8226f0bef0a589882f9493b804933b890b1d5",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json",
+        "mainBlob": "5c178f7cd521b2613d2b69f6761e7b653a9f70c6",
+        "sha256": "ad9c246af02afc280244aeb4947c2c411895eb14c024759e68fd23da3abbb3a6",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json",
+        "mainBlob": "a49127635364a874cfbdc05756f733ec1912190c",
+        "sha256": "a8baf9bdfa3126fd0ace800074d18a5a8ad78a12615c2d79e6d9ecbb149ff846",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md",
+        "mainBlob": "439c953341c824eae677e5f6f8cca8858a09899d",
+        "sha256": "4e8d3ea30b51f84544c6591e479aabef6aca5d39df993edf3ca5db290e1ca09b",
+        "restoredBytesEqualMain": true
+      },
+      {
+        "path": "internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json",
+        "mainBlob": "510771159471257c13dcd463f96b444ff3108a7a",
+        "sha256": "29cfe5378bd0c6257a05d9a1c27d728cc196e84e7e1d81ad4463240f9b21c0d6",
+        "restoredBytesEqualMain": true
+      }
+    ],
+    "retainedFormattedScripts": {
+      "attemptCommit": "13fca7298f80c8a8acd8acdb3e4a35c279875576",
+      "expectedTree": "2643ec88c87b8d994ee5add76f2c208f2ccda9d7",
+      "actualTree": "ff4c2d3b6562690e06433812360e359589e085a8",
+      "scripts": [
+        {
+          "path": "scripts/analysis/invisible-consumption/produce-button.mjs",
+          "beforeSha256": "7214ee1a0c9af5a6a277fae43aa9906d910245efb8de2f48727c427cf0ccc336",
+          "afterSha256": "30e41bc528f9da86b1657b43e56c804c6ad5edc5ef122a0cfbeb0a01ef2b07ad"
+        },
+        {
+          "path": "scripts/governance/history-audit.mjs",
+          "beforeSha256": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
+          "afterSha256": "a8a117d6b3b38890748b5b44b837830a43953d6211eae084b072f0862661cc03"
+        }
+      ],
+      "comparisonExitCode": 1,
+      "comparison": [
+        {
+          "index": 0,
+          "astEqual": false,
+          "beforeAstSha256": "accc2a5f00a7b40d6ccfc2accb02abc39c847d94529a5948ab4ed0438b1251ae",
+          "afterAstSha256": "a063570ce336d6e386b22ed2061e91a58b322b58e455c74dffe6e583d604ad68"
+        },
+        {
+          "index": 1,
+          "astEqual": true,
+          "beforeAstSha256": "b3af9a5a857523ec3ad4ec72dbda60d561aff99272f98866c17fdcdc0d102e79",
+          "afterAstSha256": "b3af9a5a857523ec3ad4ec72dbda60d561aff99272f98866c17fdcdc0d102e79"
+        }
+      ]
+    },
+    "returnExpressionWrapperComparison": [
+      {
+        "index": 0,
+        "astEqual": true,
+        "beforeAstSha256": "accc2a5f00a7b40d6ccfc2accb02abc39c847d94529a5948ab4ed0438b1251ae",
+        "afterAstSha256": "accc2a5f00a7b40d6ccfc2accb02abc39c847d94529a5948ab4ed0438b1251ae"
+      },
+      {
+        "index": 1,
+        "astEqual": true,
+        "beforeAstSha256": "b3af9a5a857523ec3ad4ec72dbda60d561aff99272f98866c17fdcdc0d102e79",
+        "afterAstSha256": "b3af9a5a857523ec3ad4ec72dbda60d561aff99272f98866c17fdcdc0d102e79"
+      }
+    ],
+    "comparisonScope": "Only whole ReturnStatement expression parentheses are normalized; all operator, literal, identifier and child structure is retained. Entire formatter patch was also read.",
+    "compilerInputsUnchangedSinceNativeRun": true,
+    "hooksRetained": true,
+    "archive": {
+      "path": "publication-recovery.tar.gz",
+      "sha256": "58973dd60c1f48567eb496e386dc57cc8d70ad6de27be9d998e153ebcc196e9b",
+      "bytes": 34295,
+      "members": [
+        {
+          "path": "publish-merge-status.json",
+          "sha256": "537ebc9e0115776f251c2788f245834863dcb1efd767140552dd7af289705022",
+          "bytes": 1485
+        },
+        {
+          "path": "publish-merge.log",
+          "sha256": "f68be35d52d61f51b0fea589a9f73622c54847733b27717f5f584934fa9cc1e8",
+          "bytes": 719
+        },
+        {
+          "path": "evidence-stage-status.json",
+          "sha256": "7953979dfa585ff149ed3f2943d86fd933985d771a005d4901839c50079c7342",
+          "bytes": 492
+        },
+        {
+          "path": "0-after.mjs",
+          "sha256": "30e41bc528f9da86b1657b43e56c804c6ad5edc5ef122a0cfbeb0a01ef2b07ad",
+          "bytes": 14963
+        },
+        {
+          "path": "0-before.mjs",
+          "sha256": "7214ee1a0c9af5a6a277fae43aa9906d910245efb8de2f48727c427cf0ccc336",
+          "bytes": 14154
+        },
+        {
+          "path": "1-after.mjs",
+          "sha256": "a8a117d6b3b38890748b5b44b837830a43953d6211eae084b072f0862661cc03",
+          "bytes": 22291
+        },
+        {
+          "path": "1-before.mjs",
+          "sha256": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
+          "bytes": 22253
+        },
+        {
+          "path": "all-hook-changes.patch",
+          "sha256": "93bc7cca096385db307871c09476e68d256ed6f4c2d4618d85e96b391e58bb79",
+          "bytes": 52917
+        },
+        {
+          "path": "ast-comparison.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "ast-comparison.stdout.json",
+          "sha256": "bda2e6627aa2174fab14e512c3420eeb44d6f7c802d6917b698caa41f300d67c",
+          "bytes": 397
+        },
+        {
+          "path": "ast-return-wrapper-comparison.stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        {
+          "path": "ast-return-wrapper-comparison.stdout.json",
+          "sha256": "d91d3296a013e55ffee3a9a534738352d0e0ef0a257c2c9c8ec5d091dafb9791",
+          "bytes": 396
+        },
+        {
+          "path": "recovery.json",
+          "sha256": "29b5d9bd3fe85f28bf43f02f759e5900b4c56684262c2a1e77eb424a7f0c0761",
+          "bytes": 8235
+        },
+        {
+          "path": "review.json",
+          "sha256": "e4a834df330e6b9b8baf1a82fe35178d07f811a2bccfa419c5764bf7a8d06cb8",
+          "bytes": 1246
+        },
+        {
+          "path": "script-format.patch",
+          "sha256": "be7323f54708e6b268f75b56d5d3c2c7a7002824fd9711b45c63300435572232",
+          "bytes": 22469
+        }
+      ]
+    }
+  }
 }

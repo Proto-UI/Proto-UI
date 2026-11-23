@@ -94,6 +94,10 @@
     "consumerObservation": 0,
     "participant": 0
   },
-  "testDoubles": ["Broker.command", "socketserver.TCPServer", "threading.Thread"],
+  "testDoubles": [
+    "Broker.command",
+    "socketserver.TCPServer",
+    "threading.Thread"
+  ],
   "scope": "Offline actual dispatch state transitions; no subprocess, socket, inference, install or real consumer execution."
 }
