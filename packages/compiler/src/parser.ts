@@ -45,7 +45,6 @@ import {
   staticScalarMembership,
   staticCallableSelection,
   staticGetterRecordInitializer,
-  unwrapSourceExpression,
   staticJoin,
   isSourceFunction,
   CORE_FUNCTIONS,
