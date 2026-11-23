@@ -5,13 +5,15 @@ description: 'Proto UI 当前阶段的能力边界、适用范围与预期管理
 
 # 当前状态
 
-Proto UI 仍处于 **v0** 阶段，但 **0.2** release line 已经完成发布。[Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 是当前通过 npm `latest` 提供的稳定生态发行；同一应用内的全部公开 `@proto.ui/*` dependency 必须精确对齐到 `0.2.0`。当前安装说明请使用[快速开始](/zh-cn/start-here/quick-start/)。
+Proto UI 仍处于 **v0** 阶段，但 **0.2** release line 已经完成发布。[Proto UI 0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 是当前通过 npm `latest` 提供的稳定生态发行；沿此稳定版路径使用时，同一应用内的全部公开 `@proto.ui/*` dependency 必须精确对齐到 `0.2.0`。当前安装说明请使用[快速开始](/zh-cn/start-here/quick-start/)。
 
 npm 稳定版可用性与项目成熟度描述的是不同边界。0.2 package release 已稳定发布，但 Proto UI 仍是 v0 协议项目；单项语义保证仍以 spec entity 的 active、draft、deprecated 或 removed 生命周期状态为准。一个 package 随 0.2.0 发布，不会让其中全部 draft prototype 或 capability 自动转为 active。
 
 已评审的发行事实保存在 [0.2.0 发行说明](https://github.com/Proto-UI/Proto-UI/blob/main/internal/releases/0.2.0/release-notes.zh-CN.md)、[tag 中的 package BOM](https://github.com/Proto-UI/Proto-UI/blob/v0.2.0/internal/releases/0.2.0/package-bom.json) 以及 GitHub Release 所附的不可变资产中。
 
-在这个阶段，Proto UI 的重点不是尽快扩张功能表面，而是先把原型、适配器与运行时之间的基础语义收敛清楚，并验证这套体系能否稳定地落地到不同宿主中。
+当前开发遵循 [0.3 交付计划](https://github.com/Proto-UI/Proto-UI/blob/main/internal/governance/release-0.3-plan.md)，承诺范围、目标日期与验收阶段均以该计划为准。计划交付与完成发行验收需要分别判断。
+
+开发工作区版本由 [`VERSION`](https://github.com/Proto-UI/Proto-UI/blob/main/VERSION) 和对应[版本实体](https://github.com/Proto-UI/Proto-UI/tree/main/spec/versions)标识；draft train 不代表已经发布。仓库也已有[私有 Compiler 实现](https://github.com/Proto-UI/Proto-UI/blob/main/packages/compiler/README.md)，各 profile 分别记录支持范围与证据边界。源码存在不代表它是已发布的 Compiler package，也不证明原生宿主已经普遍成熟。
 
 ## 目前正在建设什么？
 

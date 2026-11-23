@@ -1,0 +1,12 @@
+{
+  "sourceRecord": "original-index-race.json",
+  "sourceRecordSha256": "72effd2a92a91a577051172fc1c25c851c27176602f9fed40501a1de594a3db2",
+  "stdoutArtifact": {
+    "path": "original-index-race.stdout.log.gz",
+    "encoding": "gzip",
+    "compressedSha256": "3e65ca66d02fb499ed6fa36821da23cbb97ad2d1da41f64a49eb830a75bacf94",
+    "uncompressedSha256": "09a2dbebb124452073d1c2ea92ac8b7598ee8038bea2fad87c33d0888612290e",
+    "uncompressedBytes": 987,
+    "reason": "Retain the original assertion diagnostic byte-for-byte, including its indented blank lines."
+  }
+}

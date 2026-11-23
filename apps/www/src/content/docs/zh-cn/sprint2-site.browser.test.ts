@@ -433,6 +433,8 @@ for (const locale of locales)
             await leaf.hover();
             const leafHover = await paint(leaf);
             expect(groupHover.radius).toEqual(leafHover.radius);
+            if (family === 'brutalist')
+              expect(groupHover.radius).toEqual(['5px', '5px', '5px', '5px']);
             if (family === 'shadcn') expect(parseFloat(groupHover.radius[0]!)).toBeGreaterThan(0);
             expect(groupHover.height).toBeGreaterThanOrEqual(32);
             expect(leafHover.height).toBeGreaterThanOrEqual(32);
@@ -493,6 +495,8 @@ for (const locale of locales)
           await leaf.hover();
           const leafPaint = await paint(leaf);
           expect(groupPaint.radius).toEqual(leafPaint.radius);
+          if (family === 'brutalist')
+            expect(groupPaint.radius).toEqual(['5px', '5px', '5px', '5px']);
           expect(groupPaint.height).toBeGreaterThanOrEqual(44);
           expect(leafPaint.height).toBeGreaterThanOrEqual(44);
           await capture(page, `sidebar-mobile-${locale}-${family}-${mode}`, {

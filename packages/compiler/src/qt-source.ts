@@ -9,6 +9,7 @@ import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
   unsupportedJavaScriptIntrinsics,
+  unsupportedNumericAccessibility,
   unsupportedPointerFacts,
 } from './pointer-facts-admission';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -47,6 +48,8 @@ export function emitQtSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const numericDiagnostics = unsupportedNumericAccessibility(ir, 'qt-source');
+  if (numericDiagnostics.length) return { ok: false, diagnostics: numericDiagnostics };
   const moduleParts = partitionModuleBindings(ir);
   const sharedModuleNames = new Set(moduleParts.shared.map((binding) => binding.name));
   let emittingModule = false;
@@ -243,7 +246,8 @@ export function emitQtSource(
         const condition = (value: RuleCondition): string => {
           if (value.type === 'true' || value.type === 'false') return value.type;
           if (value.type === 'eq') {
-            if (value.left.type === 'meta') throw new Error('Rule Meta must fail Qt target admission.');
+            if (value.left.type === 'meta')
+              throw new Error('Rule Meta must fail Qt target admission.');
             return `(${value.left.type === 'prop' ? `${p}Owner.getProps()[${JSON.stringify(value.left.key)}]` : `${expression(bound.get(value.left.id)!, depth)}.get()`} === ${JSON.stringify(value.right)})`;
           }
           if (value.type === 'not') return `!(${condition(value.expr)})`;

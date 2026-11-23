@@ -1,0 +1,521 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-independent-source-preservation-checkpoint-review",
+  "observedAt": "2026-11-22T18:49:00.895453+00:00",
+  "reviewer": "/root/sprint5_6",
+  "parallelGeneratorReviewer": "/root/sprint1_3",
+  "implementer": "/root/sprint2_7",
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 1725,
+  "url": "https://github.com/Proto-UI/Proto-UI/pull/1725",
+  "reviewedHead": "d8da090538873fefd555753f60d3fce69f3cbee9",
+  "reviewedBase": "38afc8942bfd245e12eaa661298c2feddbc63af8",
+  "reviewedTree": "03d31841adfcf6a629b13b40d2fdf04a937f9e8d",
+  "liveGitHubReadback": {
+    "state": "open",
+    "draft": true,
+    "head": "d8da090538873fefd555753f60d3fce69f3cbee9",
+    "base": "38afc8942bfd245e12eaa661298c2feddbc63af8",
+    "commitTree": "03d31841adfcf6a629b13b40d2fdf04a937f9e8d",
+    "commitParents": ["38afc8942bfd245e12eaa661298c2feddbc63af8"],
+    "readThrough": "GitHub connector GET pull request and GET Git commit in this review"
+  },
+  "scope": "Byte-identical restoration of 17 historical files and complete original two-commit payload, with a separate continuation record and explicitly unaccepted decisions. No generator execution, regenerated ledger, product acceptance or Issue closure.",
+  "verdict": "adequate for the bounded frozen-source Draft checkpoint; two generator source-binding defects remain open before any regeneration",
+  "blockingFindingsForThisCheckpoint": 0,
+  "findings": [
+    {
+      "id": "HIST-GEN-001",
+      "severity": "medium",
+      "state": "open-follow-up-required-before-regeneration",
+      "blockingForThisFrozenCheckpoint": false,
+      "path": "scripts/governance/reconcile-history-decisions.mjs",
+      "lines": [18, 22, 215, 221],
+      "observed": "Prior manual-reading records are selected by object number and reviewMethod prefix; generated rows then receive current snapshot hashes without validating the prior hashes.",
+      "impact": "Reusing stale manual records after body/discussion changes can incorrectly carry the manual-full-body-and-discussion marker to different sources; the audit then sees refreshed matching hashes.",
+      "requiredRepair": "Before regeneration, reject changed/missing/duplicate manual sources and bind both prior body/discussion hashes to the actual new snapshot; retain actual reviewer/source provenance and meaningful negative controls.",
+      "currentCheckpointEvidence": "All 50 preserved manual records have both hashes independently matched to the original manual file, current frozen decisions and frozen snapshot; original source URLs are retained.",
+      "disclosure": "internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md:13",
+      "owner": "#1147 tooling owner / /root/sprint2_7"
+    },
+    {
+      "id": "HIST-GEN-002",
+      "severity": "medium",
+      "state": "open-follow-up-required-before-regeneration",
+      "blockingForThisFrozenCheckpoint": false,
+      "path": "scripts/governance/build-history-snapshot.mjs",
+      "lines": [113, 127, 153, 165],
+      "observed": "The generator reads native RAW inputs, then replaces their embedded capture values with a separately indexed archive without comparing the complete RAW and decoded archive source sets.",
+      "impact": "A later run can silently substitute a different native capture set while reporting RAW counts.",
+      "requiredRepair": "Before generation, compare exact PR/inline/timeline membership and each original source hash against the decoded archive; reject missing, extra or changed captures.",
+      "currentCheckpointEvidence": "All 1740 decoded capture hashes match the archive indexes and all 1740 actual original RAW files; all 18 Issue pages and 83 comment pages match original parsed values and membership.",
+      "disclosure": "internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md:15",
+      "owner": "#1147 tooling owner / /root/sprint2_7"
+    }
+  ],
+  "candidateFiles": [
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-batch-001.md",
+      "bytes": 20360,
+      "sha256": "14bdb4d08d81faea7cc912730cdad748dfc490a5da02b300824bd8ea8845d027",
+      "gitBlobSha": "2b73416475d7ac73c9a663b5f7c3da37a219baf9"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/README.md",
+      "bytes": 933,
+      "sha256": "4b65268e369d4b5208bca12c6c9464f23f52a804a5b20e3f7317cfabd2b25099",
+      "gitBlobSha": "a02cdf0ed0099dff9c0fe56a7fb2266a99ca8155"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/index.json",
+      "bytes": 161094,
+      "sha256": "c1745dd1f7b3edc74fb818ffd0c94597bad096ea1c905321737c6825cd72907b",
+      "gitBlobSha": "e7093eb51175d62a9397c4c36e97b733a3b2ee45"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-01",
+      "bytes": 4194304,
+      "sha256": "e935e2690093d021fe7ead203f0deaf2007162ed8b45b3d4e459835b3230a5de",
+      "gitBlobSha": "9f703c3619800e203bc8f68e57e8410e78b40f5f"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-02",
+      "bytes": 4194304,
+      "sha256": "660004355e48e57ab1239c6137535db9cc33d4476d9d6bd931920351ad5e482d",
+      "gitBlobSha": "90e54f6d99c43a5817a042aa13b01b291c9802a0"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-03",
+      "bytes": 4194304,
+      "sha256": "64e76658bc95ed30f0aaa31fab2b2c974cf3989238268d59794b10d6786c78b1",
+      "gitBlobSha": "8f9258cabfe074e7430adac1ff21cf95eb65b4e3"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/metadata.json.gz.part-04",
+      "bytes": 3290325,
+      "sha256": "9a38237b9186d62cc43750d2b4e783209903867377778caf9b6ce097369b7557",
+      "gitBlobSha": "ac973bb60dea4025cbe84ff358e9c9f4d7d39d92"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json",
+      "bytes": 61714,
+      "sha256": "c369ddc80cd2a520c4eabd835c209bd489e5dc3f6b85d1d361edf8ed569b9791",
+      "gitBlobSha": "46059124a253c3eb7ac8ed0cb1dccaf50ba2bae4"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history-sources/timeline.json.gz",
+      "bytes": 67362,
+      "sha256": "c0c0521c54bd6aaf7403cbb59e342d9c49227de492146f70c814f5e15ccf7be6",
+      "gitBlobSha": "1421a25377e94111f8ed3eb0741036b3e155f3e5"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history.decisions.json.gz",
+      "bytes": 5908260,
+      "sha256": "b09eaa9cc7e5635af8486f4d2e2f0e85ec1587370c842041cc32dcb52342c532",
+      "gitBlobSha": "3fce0d511e534a1deb202c1df8ac92cc7698c3dc"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint-7-history.snapshot.json.gz",
+      "bytes": 8634307,
+      "sha256": "e27a20141287b63ff39334b44111ee322831d12083f405eac400c3607ba1544d",
+      "gitBlobSha": "bfb217b1211a95e3e1936905f269a83534bcf568"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/56362cea090710530685d12ca516405abec7ceb3.commit.txt",
+      "bytes": 534,
+      "sha256": "40c2b3e9863ad32a37f3bb77c1a9e60f48a58c66952fc12faf08dbbf8c619de4",
+      "gitBlobSha": "9ca15344a8b788f1a4219f1a84742b64eca4ade9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md",
+      "bytes": 6373,
+      "sha256": "25e293e6053347636d56c9916b0e652c268bbc254798be5eb29d4cda51516263",
+      "gitBlobSha": "35a3359fa0148f7cf686aee2c0fb9afb38cb5d4a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-operations.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/agent-operations.stdout.log",
+      "bytes": 22,
+      "sha256": "f49bfafcc2b85c98c728ae44495e063d9d73b93e6bcec2edb96d2fe75738a252",
+      "gitBlobSha": "930ff36502db02c914e02704c4abfd54b53fbfe9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/b42fd96b279787c8c9a6fb39a2a88f30918cec89.commit.txt",
+      "bytes": 682,
+      "sha256": "cd1cac5ffefb498fffde860e52f09e6bed99d25a34acd95e8de5a323a237d8d2",
+      "gitBlobSha": "cb78d86573838e477f7bda79796d6cb1cc97699c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/bundle-parts.json",
+      "bytes": 1473,
+      "sha256": "6b79cbf493ba3eb051043fed95409f88e660b4f71f8aa1a27642de468d34ae13",
+      "gitBlobSha": "353a8514dfe88f22de7453286775999b286ae286"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/bundle-verify.stderr.log",
+      "bytes": 157,
+      "sha256": "ac3dcc17da644e71ec4a45a4c215f5e0a383e11eb930de0bd76fc621eee879fb",
+      "gitBlobSha": "6b9d4648256597c36535bc1b88fbc2e10e5450cd"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/bundle-verify.stdout.log",
+      "bytes": 215,
+      "sha256": "1b6e6c75d9d144ba5dba854030c7c49386fe8d031d90b68fc7a771ae8752da5c",
+      "gitBlobSha": "9c5fcccc2af5164e6b418559433e5a993dc603d9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/check.stdout.log",
+      "bytes": 358,
+      "sha256": "e024fda99a28349a8ff44f11eec2466572fb83ad37b3112206d02efd11a4ff99",
+      "gitBlobSha": "8ca0518a440e3ed50d6a2c07bd491ac1a1b7ff76"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/commands.json",
+      "bytes": 1848,
+      "sha256": "d2eb5aa7ca60cbc018f40be315bcc8f34c7c36b50c469f92e761e97961eef63c",
+      "gitBlobSha": "83ea8a4afc7139e8de53c0ea3633c9dc93955f30"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/contributor-skills.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/contributor-skills.stdout.log",
+      "bytes": 88,
+      "sha256": "ff3fb2dbb064b19df441c8398aa50f74d61416afd6e01aecd4be415f17348dea",
+      "gitBlobSha": "0b9222dc8434bf582f240909d71d97bf9890b9d1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-01",
+      "bytes": 4194304,
+      "sha256": "e38fc8f48b4a1e022183e353a457d8e541491007707529bdf6b4d65ed821432b",
+      "gitBlobSha": "2d64beab020e4fbf657ab95c32369357b62cb16c"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-02",
+      "bytes": 4194304,
+      "sha256": "91678617fd529631dce28b4a04486828b1ec2438cf30e27939e1447972ba744f",
+      "gitBlobSha": "008a70cd0a626f7a8403d2d63315ccc06498e1ac"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-03",
+      "bytes": 4194304,
+      "sha256": "6bda73e601bb38eab6904536066d0070b07691dbaf9441fe10dacdd13b3b2327",
+      "gitBlobSha": "41e744c3670775a5db13dc089e1c99eee6ddf3b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/original-commits.bundle.part-04",
+      "bytes": 3259137,
+      "sha256": "6b46d6438245cce357aba4f2fe114e7ef329c9914aefb921a932e2539021edc3",
+      "gitBlobSha": "86493809ad79b570ef2ecd7c338dd00f010f9f21"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/public-docs.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/public-docs.stdout.log",
+      "bytes": 187,
+      "sha256": "5f314de48806e074ea18f7a0420396ecfa6ac1b0736646acdbc67cc43b20c79f",
+      "gitBlobSha": "4286e1682dfd192631c55bac75cf8cd0e5e65ded"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/ready.stderr.log",
+      "bytes": 117,
+      "sha256": "0debf0490874d2b85b287511ed5e9cc33efbdda3600ec383d35c38be44629821",
+      "gitBlobSha": "843db1e78da72f658c649776d39b1d0736be806d"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/ready.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json",
+      "bytes": 12671,
+      "sha256": "a4b8c066ed376d3e71079d6762e75a8d5ed278978d7eebc059aedb08761cebcd",
+      "gitBlobSha": "8df3cf6e460903e5a978a51e29c17634426ed319"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/tests.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-22-sprint7-history-continuation/tests.stdout.log",
+      "bytes": 1027,
+      "sha256": "6c4aeb780659b1d56b7a44e9ac5d359541051a203396a3fd0f5f3914789755ca",
+      "gitBlobSha": "48f966019096950cc831cacc12d43facdbfc4beb"
+    },
+    {
+      "path": "scripts/governance/build-history-snapshot.mjs",
+      "bytes": 6161,
+      "sha256": "1ecc09f5a2356b13877abf5936893627fe886f31dccf89a3b5792db29fd341b7",
+      "gitBlobSha": "14cd57cc4442dde0a2ea464db2ddc9d89855fcc0"
+    },
+    {
+      "path": "scripts/governance/decode-history-archive.mjs",
+      "bytes": 6072,
+      "sha256": "21c9839438533b3457c70b81ae4b596cb27d55eaa6b5455ec3b68615f931ea7a",
+      "gitBlobSha": "ac72d1facd22fa92c527c283170c1a6bdaf82069"
+    },
+    {
+      "path": "scripts/governance/history-audit.mjs",
+      "bytes": 22253,
+      "sha256": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
+      "gitBlobSha": "ef58ebd2c866fedc0280601c1e5f8c4a45fa520f"
+    },
+    {
+      "path": "scripts/governance/history-audit.test.mjs",
+      "bytes": 9178,
+      "sha256": "4b59bef34093c90ea86dff6708325848f0cfb7f242a322071b460bff40e8366e",
+      "gitBlobSha": "80947332da61816fda4ddcdf4ab23b201dbed06b"
+    },
+    {
+      "path": "scripts/governance/history-files.mjs",
+      "bytes": 2038,
+      "sha256": "5503054586be4e43ccdb00d13ce0b4815c9e99ffa910c28ab887a2000f23cd5a",
+      "gitBlobSha": "7b940e79a17814df56d0eb89f93f4e7196687f0d"
+    },
+    {
+      "path": "scripts/governance/reconcile-history-decisions.mjs",
+      "bytes": 18489,
+      "sha256": "e21682cbc3208a66c058686791d52a3ebd8b05855ca4b7ae09f2bebbe131efac",
+      "gitBlobSha": "fd361b523a5769615ad694d7e218b4e1a66253d7"
+    }
+  ],
+  "candidateFileCount": 41,
+  "candidateFileBytes": 46659259,
+  "candidateFileManifestSha256": "090752a391dfa89d05d3666e48f3a3fb4e43bd563395b1997d9d4a427851e802",
+  "restoration": {
+    "files": 17,
+    "bytes": 30791458,
+    "allMatchOriginalWorktreeBytes": true,
+    "scripts": 6,
+    "nativeArchiveFiles": 8,
+    "snapshotAndDecisionsFiles": 2,
+    "first50ReadingRecord": 1,
+    "originalDecisionJsonBytesRestored": 37819861,
+    "originalDecisionJsonSha256": "898ca78a8dc2e7e7a3366b3d1e48d1166b4d44c632fdf179ece1edb05fca97ea",
+    "twoOriginalSourceLedgersUnchanged": true
+  },
+  "originalCommitRecovery": {
+    "commits": [
+      {
+        "originalCommit": "b42fd96b279787c8c9a6fb39a2a88f30918cec89",
+        "tree": "0bc7f5e98f08708ba5a296aa8ab5f6b50024a24f",
+        "parents": ["dc3b184ba10b0de53e40359c52d012b204b2cd01"],
+        "author": {
+          "name": "Codex",
+          "email": "codex@openai.com"
+        },
+        "committer": {
+          "name": "Codex",
+          "email": "codex@openai.com"
+        },
+        "message": "docs(governance): preserve complete public historical PR sources\n\nFreeze 1230 PR metadata captures and the complete inline-comment population.\nRetain complete source values through verified lossless interning and bounded\narchive volumes; bind every original capture and volume with SHA-256.\nThis is source preservation, not current product acceptance or original body\nedit-history reconstruction. Private DCBot sources are excluded.\n\nRefs: #1147\nSigned-off-by: Codex <codex@openai.com>\n\n",
+        "rawCommitObjectSha256": "cd1cac5ffefb498fffde860e52f09e6bed99d25a34acd95e8de5a323a237d8d2"
+      },
+      {
+        "originalCommit": "56362cea090710530685d12ca516405abec7ceb3",
+        "tree": "2546a612f2540e81ddab6f1a62146dc102cd9a56",
+        "parents": ["b42fd96b279787c8c9a6fb39a2a88f30918cec89"],
+        "author": {
+          "name": "Codex",
+          "email": "codex@openai.com"
+        },
+        "committer": {
+          "name": "Codex",
+          "email": "codex@openai.com"
+        },
+        "message": "docs(governance): bind historical Issue closure and successor sources\n\nPreserve complete selected closing/reopening/cross-reference connections for\nall 467 frozen Issues, including exact closing PR and commit identities.\nThese source events do not assert current technical acceptance.\n\nRefs: #1147\nSigned-off-by: Codex <codex@openai.com>\n\n",
+        "rawCommitObjectSha256": "40c2b3e9863ad32a37f3bb77c1a9e60f48a58c66952fc12faf08dbbf8c619de4"
+      }
+    ],
+    "bundleBytes": 15842049,
+    "bundleSha256": "8baf2861bb8db97d48463590efba647f0abb139d51107fdf628f125355f49d76",
+    "transportParts": [
+      {
+        "path": "original-commits.bundle.part-01",
+        "bytes": 4194304,
+        "sha256": "e38fc8f48b4a1e022183e353a457d8e541491007707529bdf6b4d65ed821432b",
+        "gitBlobSha": "2d64beab020e4fbf657ab95c32369357b62cb16c"
+      },
+      {
+        "path": "original-commits.bundle.part-02",
+        "bytes": 4194304,
+        "sha256": "91678617fd529631dce28b4a04486828b1ec2438cf30e27939e1447972ba744f",
+        "gitBlobSha": "008a70cd0a626f7a8403d2d63315ccc06498e1ac"
+      },
+      {
+        "path": "original-commits.bundle.part-03",
+        "bytes": 4194304,
+        "sha256": "6bda73e601bb38eab6904536066d0070b07691dbaf9441fe10dacdd13b3b2327",
+        "gitBlobSha": "41e744c3670775a5db13dc089e1c99eee6ddf3b8"
+      },
+      {
+        "path": "original-commits.bundle.part-04",
+        "bytes": 3259137,
+        "sha256": "6b46d6438245cce357aba4f2fe114e7ef329c9914aefb921a932e2539021edc3",
+        "gitBlobSha": "86493809ad79b570ef2ecd7c338dd00f010f9f21"
+      }
+    ],
+    "allPartLengthsAndHashesVerified": true,
+    "concatenationMatchesCompleteOriginalBundleBytes": true,
+    "bundleVerifyExitCode": 0,
+    "packChecksumValid": true,
+    "dryRunGitUnpackStrictExitCode": 0,
+    "packedObjects": 18,
+    "requiredPrerequisite": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "selfContainedWithoutPrerequisite": false,
+    "authorCommitterMessagesSignoffsTreesAndRawCommitIdsPreserved": true
+  },
+  "nativeCaptureClosure": {
+    "decodedCaptures": 1740,
+    "pullRequests": 1230,
+    "inlinePages": 43,
+    "issueTimelines": 467,
+    "originalRawCaptureFiles": 1740,
+    "originalRawBytes": 126153709,
+    "everyDecodedCaptureHashMatchesIndex": true,
+    "everyOriginalRawHashMatchesSameIndex": true,
+    "missingOriginals": 0,
+    "mismatchedOriginals": 0,
+    "rawIssuePagesEqual": 18,
+    "rawCommentPagesEqual": 83,
+    "laterInlineCommentsAfterCutoff": 0
+  },
+  "manualReadingBinding": {
+    "originalPath": "/workspace/scratch/b8a4839de6ed/governance-evidence/history/manual-decisions.json",
+    "originalSha256": "fab8b955ef2596aa3b1fbcab60865dcaef861d9b369c1329a658eba65b4d59b0",
+    "originalRecords": 50,
+    "currentManualMarkers": 50,
+    "bodyAndDiscussionHashPairsIndependentlyRecomputedFromActualSnapshot": 50,
+    "oldAndNewHashPairsMatch": 50,
+    "sourceUrlsPreserved": true,
+    "missing": 0,
+    "mismatches": 0,
+    "bindingsSha256FromUnchangedAuditDigestFunction": "c1cbce16fa71216bbcedbe56bc0eb25024a4a924cb835eb8d958a9c96e0864ab"
+  },
+  "verification": {
+    "restoredCandidateCommands": [
+      {
+        "name": "tests",
+        "command": [
+          "/workspace/scratch/eb30117f7b2a/s27-workflow/node-v24.22.1-linux-x64/bin/node",
+          "--test",
+          "scripts/governance/history-audit.test.mjs"
+        ],
+        "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint",
+        "exitCode": 0,
+        "expectedExitCode": 0,
+        "seconds": 0.246,
+        "stdoutSha256": "6c4aeb780659b1d56b7a44e9ac5d359541051a203396a3fd0f5f3914789755ca",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "check",
+        "command": [
+          "/workspace/scratch/eb30117f7b2a/s27-workflow/node-v24.22.1-linux-x64/bin/node",
+          "scripts/governance/history-audit.mjs",
+          "check",
+          "internal/records/2026-11-22-sprint-7-history.snapshot.json.gz",
+          "internal/records/2026-11-22-sprint-7-history.decisions.json.gz"
+        ],
+        "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint",
+        "exitCode": 0,
+        "expectedExitCode": 0,
+        "seconds": 11.687,
+        "stdoutSha256": "e024fda99a28349a8ff44f11eec2466572fb83ad37b3112206d02efd11a4ff99",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "ready",
+        "command": [
+          "/workspace/scratch/eb30117f7b2a/s27-workflow/node-v24.22.1-linux-x64/bin/node",
+          "scripts/governance/history-audit.mjs",
+          "ready",
+          "internal/records/2026-11-22-sprint-7-history.snapshot.json.gz",
+          "internal/records/2026-11-22-sprint-7-history.decisions.json.gz"
+        ],
+        "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-history-checkpoint",
+        "exitCode": 1,
+        "expectedExitCode": 1,
+        "seconds": 10.182,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "0debf0490874d2b85b287511ed5e9cc33efbdda3600ec383d35c38be44629821"
+      }
+    ],
+    "commandsAndLogHashesMatchReviewedGitTree": true,
+    "testsPassed": 9,
+    "testsFailed": 0,
+    "checkExitCode": 0,
+    "counts": {
+      "objects": 1697,
+      "issues": 467,
+      "pullRequests": 1230,
+      "comments": 8106,
+      "excludedLaterObjects": 1,
+      "inlineReviewComments": 4128,
+      "reconciled": 1697,
+      "awaitingReconciliation": 0,
+      "manualFullSourceReadings": 50,
+      "decisionAccepted": 0,
+      "awaitingDecisionAcceptance": 1697,
+      "independentlySampled": 0,
+      "withRemainingConditions": 1697
+    },
+    "readyExitCode": 1,
+    "readyStderr": "1697 reconciled objects still await independent decision acceptance; source reconciliation is not manual code review",
+    "independentReviewerActivities": [
+      "Read all four audit/decoder/test files and inspected both generator findings against source.",
+      "Verified all 17 original file bytes, 41 reviewed-tree blobs, bundle parts, raw commits and original prerequisite mapping.",
+      "Ran readHistoryArchive without an output path and verified all 1740 decoded capture hashes.",
+      "Read and hashed every actual original RAW capture and compared all 101 input page values.",
+      "Recomputed all 50 manual body/discussion pairs with the unchanged audit digest code.",
+      "Checked native Git bundle verification and dry-run strict pack unpack, with no object or source mutation."
+    ],
+    "generatorsExecuted": false,
+    "newModelsOrBrowsersExecuted": false,
+    "fullRepositoryAgentOperationsSuiteClaimedPassed": false
+  },
+  "acceptanceBoundary": {
+    "reconciled": 1697,
+    "manualFullReadings": 50,
+    "independentlyAccepted": 0,
+    "allHistoryCriterion": "open",
+    "readyPromotedToPass": false,
+    "acceptanceInputProvided": false,
+    "historicalNativeReviewCiDcoAndMergeNotCurrentTechnicalAcceptance": true,
+    "sourceHashValidationDoesNotAuthenticateAnAcceptanceReviewer": true
+  },
+  "limitations": [
+    "This local technical receipt is not a GitHub approval or merge authorization.",
+    "The frozen capture cutoff is 2026-11-22T10:22:30Z, not a live or atomic inventory; deleted/inaccessible records and original-at-creation body history remain explicit gaps.",
+    "The first-50 reading record is historical; this review did not manually re-review every one of the 1697 product decisions.",
+    "Both original generators are restored unchanged and must receive the two separately reviewed source-binding repairs before reuse with changed inputs.",
+    "The larger repository agent test invocation is outside this receipt and had no terminal passed result in the frozen checkpoint.",
+    "Remote unpublished-status claims about the old commit endpoints were supplied by the implementer; this review independently verified original object identities and the complete recoverable bundle, and live-read the new PR/commit."
+  ],
+  "repositoryMutationsByReviewer": false,
+  "externalWritesByReviewer": false,
+  "formalGitHubReviewSubmitted": false,
+  "formalReviewPacketClaimed": false
+}

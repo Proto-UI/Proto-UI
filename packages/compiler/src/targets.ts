@@ -3,8 +3,10 @@ import type { RuleMetaKey } from './rule-declarations';
 import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
+import { declaredSetValueEvent } from './a11y-event-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
+import { valueAlternatives } from './value-types';
 import {
   observableSemantics,
   type ObservableSemantics,
@@ -226,6 +228,7 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'textControl.on',
   'textControl.sync',
   'textControl.snapshot',
+  'textControl.resetValue',
   'imageView.on',
   'imageView.sync',
   'imageView.snapshot',
@@ -468,7 +471,10 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
     mode: 'source',
     implemented: true,
-    operations: nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
+    operations: [
+      ...nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
+      'eventControl.requestDefaultActionPrevention',
+    ],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
       { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
@@ -720,22 +726,61 @@ export function checkTargetOperations(
     switch (value.kind) {
       case 'operation':
         operation(value.operation, value.span);
+        if (
+          selected.id === 'gpui-source-v1' &&
+          value.operation === 'accessible.action' &&
+          value.arguments[0]?.kind === 'literal' &&
+          value.arguments[0].value === 'setValue' &&
+          declaredSetValueEvent(value.arguments) === undefined
+        )
+          diagnostic(
+            'PUI_GPUI_A11Y_VALUE',
+            'SetValue requires a literal nonempty host:* event route or its default route.',
+            value.span
+          );
         break;
       case 'style-handle':
         operation('style.tw', value.span);
         break;
       case 'rule':
         operation('rule.declare', value.span);
-        for (const dependency of value.declaration.deps) if (dependency.kind === 'meta') {
-          ruleMetaKeys.add(dependency.key);
-          if (!['react-runtime-v1', 'react-dom-source-v1', 'vue-source-v1', 'vue2-source-v1', 'web-component-source-v1'].includes(selected.id))
-            diagnostic('PUI4003', `Live Rule Meta ${dependency.key} is not implemented by ${selected.id}.`, dependency.span);
-        }
+        for (const dependency of value.declaration.deps)
+          if (dependency.kind === 'meta') {
+            ruleMetaKeys.add(dependency.key);
+            if (
+              ![
+                'react-runtime-v1',
+                'react-dom-source-v1',
+                'vue-source-v1',
+                'vue2-source-v1',
+                'web-component-source-v1',
+              ].includes(selected.id)
+            )
+              diagnostic(
+                'PUI4003',
+                `Live Rule Meta ${dependency.key} is not implemented by ${selected.id}.`,
+                dependency.span
+              );
+          }
         break;
       case 'intrinsic':
         if (
           value.name === 'string' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(
+            selected.framework === 'gpui' &&
+            value.arguments.every((argument) =>
+              valueAlternatives(argument.type).every(
+                (member) =>
+                  member === 'string' ||
+                  member === 'number' ||
+                  member === 'boolean' ||
+                  member === 'null' ||
+                  member === 'void' ||
+                  (typeof member !== 'string' && member.kind === 'literal')
+              )
+            )
+          )
         )
           diagnostic(
             'PUI4003',
@@ -757,6 +802,12 @@ export function checkTargetOperations(
           );
         break;
       case 'member':
+        if (value.object.type === 'a11y-value-event' && selected.id !== 'gpui-source-v1')
+          diagnostic(
+            'PUI4003',
+            `Numeric accessibility action payloads are not implemented by ${selected.id}.`,
+            value.span
+          );
         if (
           value.object.type === 'event' &&
           ['pointerType', 'pointerButtons'].includes(value.property) &&

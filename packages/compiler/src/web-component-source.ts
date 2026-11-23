@@ -1455,7 +1455,7 @@ ${interacting ? '  let interactionAdopted = false;\n' : ''}
     const renderer: ${p}Renderer={nativeFrame,slot(){if(slotUsed)throw new Error('Multiple slots are unsupported');slotUsed=true;return ()=>nativeFrame.slot();},props,read:Object.freeze({props${context ? ', context: contextRead' : ''}})};
     projectHost();
     let fragment:DocumentFragment;
-    if(typeof owner.render==='function')fragment=owner.render(renderer) as DocumentFragment;
+    if(typeof owner.render==='function')fragment=(owner.render(renderer) as DocumentFragment|null|undefined)??nativeFrame.document.createDocumentFragment();
     else {fragment=nativeFrame.document.createDocumentFragment();fragment.appendChild(renderer.slot()());}
     host.commit(nativeFrame.finish(fragment));
   }

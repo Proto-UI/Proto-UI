@@ -4,7 +4,7 @@ This directory freezes the public-development inputs for Issue #748. It is a stu
 
 ## Current study version
 
-`discovery.study.json` records the selected public development cases, prompts, source snapshots, criterion reference IDs, limits, and repeated-run policy at repository revision `0607c6c5c386b8a932ab850e92a8873b2121dc45`. The selected set is:
+[study.json](study.json) records the selected public development cases, prompts, source snapshots, criterion reference IDs, limits, and repeated-run policy at repository revision `0607c6c5c386b8a932ab850e92a8873b2121dc45`. The selected set is:
 
 | Parent public case | Discovery prompt | Frozen Proto reference boundary |
 | --- | --- | --- |
@@ -17,9 +17,11 @@ Parent case IDs are reused only as stable development-case identities. Their fix
 ## Execution protocol
 
 1. Produce a frozen archive:
+
    ```sh
    node scripts/benchmark/discovery-study.mjs freeze --out /tmp/issue748-discovery-freeze
    ```
+
    This writes `study.json`, `sources/**`, `participant/<case>/prompt.txt`, discovery harness snapshots, `inventory.json`, and `seal.json`. It does not launch a participant, browser, server, model, test or evaluator.
 
 2. Register the plan **before** any formal attempt. Record a `plan` document with unique `caseId × setupId × condition × repeat` cells. Round 1 aims for at least three independent blind repeats per `case × model setup`; prefer fewer models to fewer repeats. The model ladder declares `frontier`, `mainstream`, and `lower-cost-fast` as measurement axes, but a run must not be invented when resources are absent.

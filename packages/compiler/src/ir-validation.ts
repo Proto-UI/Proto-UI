@@ -3,6 +3,7 @@ import { RULE_META_TYPES } from './rule-declarations';
 import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
 import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
+import { inferInputPayloadSchemas } from './a11y-event-types';
 import { createHash } from 'node:crypto';
 import { CompilerRejection, reject } from './diagnostics';
 import {
@@ -89,6 +90,7 @@ const CAPABILITIES = new Set([
   'event-control',
   'event-or-control',
   'host-event',
+  'a11y-value-event',
   'props',
   'focus',
   'accessible',
@@ -465,6 +467,7 @@ const EXPRESSION_FIELDS = [
   'elements',
   'entries',
   'operation',
+  'inputPayloadType',
   'receiver',
   'arguments',
   'hookId',
@@ -548,10 +551,10 @@ const EXPRESSION_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   function: ['function'],
   'helper-call': ['name', 'arguments'],
   'authored-hook': ['hookId', 'arguments'],
-  operation: ['operation', 'receiver', 'optional', 'arguments'],
+  operation: ['operation', 'receiver', 'optional', 'inputPayloadType', 'arguments'],
 };
 const STATEMENT_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  const: ['name', 'bindingId', 'value'],
+  const: ['name', 'bindingId', 'value', 'declarationPosition'],
   effect: ['expression'],
   if: ['condition', 'then', 'otherwise'],
   throw: ['value'],
@@ -599,6 +602,9 @@ type Scope = Map<string, Binding>;
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
     assertDataGraph(input);
+    // Schema order follows authored definitions, not this validator's scheduling
+    // of helper/hook typechecks. The derivation never trusts claimed schemas.
+    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR);
     const writtenFields = writtenMemberFields(input);
     let flow = new FlowProof(writtenFields);
 
@@ -731,9 +737,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       copies.set(value, output);
       flow.copyObservation(value, output);
       const changes = replacements.get(value);
-      for (const key of Object.keys(value)) {
-        const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
-        const child = changes && Object.hasOwn(changes, key) ? changes[key] : descriptor.value;
+      for (const key of new Set([...Object.keys(value), ...Object.keys(changes ?? {})])) {
+        const descriptor = Object.getOwnPropertyDescriptor(value, key);
+        const child = changes && Object.hasOwn(changes, key) ? changes[key] : descriptor!.value;
         Object.defineProperty(output, key, {
           value: canonicalCopy(child, copies),
           enumerable: true,
@@ -1313,18 +1319,22 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             }
             for (const dependency of declaration.deps) {
               if (
-                dependency.kind === 'meta' ? !Object.hasOwn(RULE_META_TYPES, dependency.key) : dependency.kind === 'prop'
-                  ? !props.has(dependency.key)
-                  : !stateTypes.has(dependency.id)
+                dependency.kind === 'meta'
+                  ? !Object.hasOwn(RULE_META_TYPES, dependency.key)
+                  : dependency.kind === 'prop'
+                    ? !props.has(dependency.key)
+                    : !stateTypes.has(dependency.id)
               )
                 bad('Rule dependency does not resolve to a declared source.', dependency.span);
             }
             const check = (condition: RuleCondition): void => {
               if (condition.type === 'eq') {
                 const valueType =
-                  condition.left.type === 'meta' ? RULE_META_TYPES[condition.left.key] : condition.left.type === 'prop'
-                    ? props.get(condition.left.key)
-                    : stateTypes.get(condition.left.id);
+                  condition.left.type === 'meta'
+                    ? RULE_META_TYPES[condition.left.key]
+                    : condition.left.type === 'prop'
+                      ? props.get(condition.left.key)
+                      : stateTypes.get(condition.left.id);
                 if (!valueType || !acceptsValue(valueType, condition.right))
                   bad('Rule literal does not match its source type.', condition.span);
               } else if (condition.type === 'not') check(condition.expr);
@@ -1785,7 +1795,26 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (operation === 'event.on' || operation === 'event.onGlobal') {
               if (first?.kind !== 'literal' || typeof first.value !== 'string')
                 bad('Input registrations require static types.', location);
-              bindings.inputPayloadType = first.value.startsWith('host:') ? 'host-event' : 'event';
+              bindings.inputPayloadType = inputPayloadSchemas.get(
+                node as unknown as Extract<ExpressionIR, { kind: 'operation' }>
+              );
+              if (!bindings.inputPayloadType)
+                bad('Input registration is missing its structural declaration proof.', location);
+              const recordedPayload =
+                node.inputPayloadType === undefined
+                  ? replacements.get(node)?.inputPayloadType
+                  : node.inputPayloadType;
+              if (recordedPayload !== undefined && recordedPayload !== bindings.inputPayloadType)
+                bad(
+                  'Input registration schema does not match its preceding checked declaration.',
+                  location
+                );
+              // Older serialized IR omitted this derived field. Canonicalize a copy;
+              // never mutate the caller or infer it later from reachable actions.
+              if (node.inputPayloadType === undefined)
+                replaceField(node, 'inputPayloadType', bindings.inputPayloadType);
+            } else if (node.inputPayloadType !== undefined) {
+              bad('Only input registrations may record an input payload schema.', location);
             }
             if (operation === 'expose.emit' || operation === 'expose.method') {
               if (operation === 'expose.emit') {
@@ -1949,6 +1978,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             'catch',
             'finally',
             'bindingId',
+            'declarationPosition',
           ]),
           location = span(node.span);
         exactKindFields(node, STATEMENT_KIND_FIELDS, ['kind', 'span']);
@@ -2005,9 +2035,17 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               };
               const thenScope = branch(true),
                 elseScope = branch(false);
-              const a = statements(node.then, thenScope, phase, context, reachableReturns),
-                b = statements(node.otherwise, elseScope, phase, context, reachableReturns);
+              const beforeBranch = flow.snapshot();
+              const a = statements(node.then, thenScope, phase, context, reachableReturns);
+              normalizeFlow(thenScope);
+              const afterThen = flow.snapshot();
+              flow.restore(beforeBranch);
+              const b = statements(node.otherwise, elseScope, phase, context, reachableReturns);
+              normalizeFlow(elseScope);
+              const afterElse = flow.snapshot();
               const continuing = a ? elseScope : b ? thenScope : undefined;
+              if (continuing) flow.restore(continuing === thenScope ? afterThen : afterElse);
+              else flow.join(beforeBranch, afterThen, afterElse);
               if (continuing)
                 for (const name of scope.keys()) scope.set(name, continuing.get(name)!);
               else

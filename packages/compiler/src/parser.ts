@@ -1,4 +1,5 @@
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
+import { declaredSetValueEvent } from './a11y-event-types';
 import ts from 'typescript';
 import { unwrapSourceExpression } from './source-syntax';
 import { createHash } from 'node:crypto';
@@ -73,6 +74,7 @@ import {
   checkedCall,
   arrayEveryCallbackParameters,
   intrinsicResult,
+  publishedDataType,
   valueAlternatives,
   canNarrowValue,
   erasesRuntimeAuthority,
@@ -144,6 +146,7 @@ const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
   run: 'RunHandle',
   render: 'RendererHandle',
   event: 'ProtoEventPayload',
+  'a11y-value-event': 'A11ySetValueEventPayload',
   'control-label-request': 'ControlLabelRequest',
 };
 
@@ -189,6 +192,7 @@ class Frontend {
   readonly activeHelpers = new Set<string>();
   readonly eventKinds = new Map<string, 'void' | 'json' | 'any'>();
   readonly eventPayloads = new Map<string, DataType[]>();
+  readonly numericActionEvents = new Set<string>();
   private context: FunctionContext = 'setup';
   private ruleSequence = 0;
   private moduleSequence = 0;
@@ -959,8 +963,14 @@ class Frontend {
     forbidden: ReadonlySet<string>,
     output: StatementIR[]
   ): StatementIR[] {
-    const staticLocals = new Map<string, ts.Expression | undefined>([...scope].map(([name, binding]) => [name, binding.staticData]));
-    for (const [name, value] of staticLocalBindings(nodes, !scope.has('Object') && !module.declarations.has('Object') && !module.imports.has('Object'))) staticLocals.set(name, value);
+    const staticLocals = new Map<string, ts.Expression | undefined>(
+      [...scope].map(([name, binding]) => [name, binding.staticData])
+    );
+    for (const [name, value] of staticLocalBindings(
+      nodes,
+      !scope.has('Object') && !module.declarations.has('Object') && !module.imports.has('Object')
+    ))
+      staticLocals.set(name, value);
     nodes = unrollStaticLoops(module, lowerObjectPatterns(nodes), staticLocals);
     this.predeclare(module, nodes, scope, forbidden);
     for (const node of nodes) {
@@ -1080,6 +1090,7 @@ class Frontend {
           name: binding.emittedName ?? node.name.text,
           bindingId: binding.bindingId,
           value: binding.parsed!,
+          declarationPosition: output.length,
           span,
         });
       } else if (ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node)) continue;
@@ -1094,12 +1105,16 @@ class Frontend {
         const branch = (truth: boolean): Scope => this.refinedScope(scope, condition, truth);
         const thenScope = branch(true),
           elseScope = branch(false);
+        const beforeBranch = this.flow.snapshot();
         const then = this.statements(
           module,
           ts.isBlock(node.thenStatement) ? node.thenStatement.statements : [node.thenStatement],
           thenScope,
           phase
         );
+        this.normalizeFlow(thenScope);
+        const afterThen = this.flow.snapshot();
+        this.flow.restore(beforeBranch);
         const otherwise = node.elseStatement
           ? this.statements(
               module,
@@ -1108,12 +1123,16 @@ class Frontend {
               phase
             )
           : [];
+        this.normalizeFlow(elseScope);
+        const afterElse = this.flow.snapshot();
         output.push({ kind: 'if', condition, then, otherwise, span });
         const continuing = statementsTerminate(then)
           ? elseScope
           : statementsTerminate(otherwise)
             ? thenScope
             : undefined;
+        if (continuing) this.flow.restore(continuing === thenScope ? afterThen : afterElse);
+        else this.flow.join(beforeBranch, afterThen, afterElse);
         if (continuing)
           for (const [name, binding] of scope) {
             const next = continuing.get(name)!;
@@ -2457,23 +2476,24 @@ class Frontend {
     const span = sourceSpan(node);
     if (
       ts.isIdentifier(node.expression) &&
-      node.expression.text === 'String' &&
-      !scope.has('String') &&
-      !module.declarations.has('String') &&
-      !module.imports.has('String')
+      (node.expression.text === 'String' || node.expression.text === 'Number') &&
+      !scope.has(node.expression.text) &&
+      !module.declarations.has(node.expression.text) &&
+      !module.imports.has(node.expression.text)
     ) {
+      const name = node.expression.text === 'Number' ? 'number' : 'string';
       if (node.questionDotToken)
-        rejectNode(node, 'PUI1006', 'String does not admit optional calls.');
+        rejectNode(node, 'PUI1006', `${node.expression.text} does not admit optional calls.`);
       const args = node.arguments.map((argument) =>
         this.expression(module, argument, scope, phase)
       );
       return {
         kind: 'intrinsic',
-        name: 'string',
+        name,
         arguments: args,
         type: this.checkedValue(node, () =>
           intrinsicResult(
-            'string',
+            name,
             args.map((arg) => arg.type)
           )
         ),
@@ -2492,13 +2512,17 @@ class Frontend {
         const name =
           owner.text === 'Number' && property === 'isFinite'
             ? 'number.isFinite'
-            : owner.text === 'Object' && property === 'freeze'
-              ? 'object.freeze'
-              : owner.text === 'Object' && property === 'hasOwn'
-                ? 'object.hasOwn'
-                : owner.text === 'Object' && property === 'assign'
-                  ? 'object.assign'
-                  : undefined;
+            : owner.text === 'Math' && property === 'round'
+              ? 'math.round'
+              : owner.text === 'Math' && property === 'floor'
+                ? 'math.floor'
+                : owner.text === 'Object' && property === 'freeze'
+                  ? 'object.freeze'
+                  : owner.text === 'Object' && property === 'hasOwn'
+                    ? 'object.hasOwn'
+                    : owner.text === 'Object' && property === 'assign'
+                      ? 'object.assign'
+                      : undefined;
         if (name) {
           if (
             name === 'object.assign' &&
@@ -2737,7 +2761,9 @@ class Frontend {
       )
         return {
           kind: 'style-handle',
-          handle: extractRuleStyleHandle(module, node, name => scope.has(name) ? scope.get(name)?.staticData ?? null : undefined),
+          handle: extractRuleStyleHandle(module, node, (name) =>
+            scope.has(name) ? (scope.get(name)?.staticData ?? null) : undefined
+          ),
           type: 'style-handle',
           span,
         };
@@ -2960,7 +2986,9 @@ class Frontend {
         resolveStyle: (expression) =>
           ts.isIdentifier(expression) && scope.get(expression.text)?.style
             ? scope.get(expression.text)!.style
-            : extractRuleStyleHandle(module, expression, name => scope.has(name) ? scope.get(name)?.staticData ?? null : undefined),
+            : extractRuleStyleHandle(module, expression, (name) =>
+                scope.has(name) ? (scope.get(name)?.staticData ?? null) : undefined
+              ),
       });
       const plan = lowerRulePlan([declaration], span);
       if (!plan.ok) throw new CompilerRejection(plan.diagnostics[0]);
@@ -3082,7 +3110,12 @@ class Frontend {
         bindings.contextValueType = this.contextType(args[0]);
         if (operation === 'event.on' || operation === 'event.onGlobal') {
           const type = this.literalString(args[0], argument);
-          bindings.inputPayloadType = type.startsWith('host:') ? 'host-event' : 'event';
+          bindings.inputPayloadType =
+            operation === 'event.on' && this.numericActionEvents.has(type)
+              ? 'a11y-value-event'
+              : type.startsWith('host:')
+                ? 'host-event'
+                : 'event';
         }
         if (operation === 'expose.emit') {
           const names = finiteStringKeys(args[0]);
@@ -3106,9 +3139,9 @@ class Frontend {
     if (operation === 'expose.emit') {
       const names = finiteStringKeys(args[0])!;
       const kind = this.eventKinds.get(names[0])!;
-      const payload = args[1]?.type ?? 'void';
+      const payload = publishedDataType(args[1]?.type ?? 'void');
       if (
-        !isDataValueType(payload) ||
+        payload === undefined ||
         (kind === 'void' && payload !== 'void') ||
         (kind === 'json' && payload === 'void')
       )
@@ -3139,6 +3172,7 @@ class Frontend {
       operation,
       ...(receiver ? { receiver } : {}),
       ...(optionalOperation ? { optional: true } : {}),
+      ...(bindings.inputPayloadType ? { inputPayloadType: bindings.inputPayloadType } : {}),
       arguments: args,
       type,
       span,
@@ -3152,6 +3186,10 @@ class Frontend {
     receiver?: ExpressionIR
   ): void {
     const span = sourceSpan(node);
+    if (operation === 'accessible.action') {
+      const event = declaredSetValueEvent(args);
+      if (event) this.numericActionEvents.add(event);
+    }
     if (operation === 'hook.asTableStructure') {
       const family = tableStructureFamily(span);
       if (!this.staticDeclarations.has(family.id)) this.staticDeclarations.set(family.id, family);
@@ -3611,43 +3649,102 @@ function hasObjectPattern(node: ts.Statement): boolean {
 const unrolledLoops = new WeakMap<ts.Statement, readonly ts.Statement[]>();
 
 /** Flat literal tables are static only while their container never escapes or mutates. */
-function staticLocalBindings(nodes: readonly ts.Statement[], objectUnshadowed: boolean): Map<string, ts.Expression | undefined> {
+function staticLocalBindings(
+  nodes: readonly ts.Statement[],
+  objectUnshadowed: boolean
+): Map<string, ts.Expression | undefined> {
   const bindings = new Map<string, ts.Expression | undefined>();
   const candidates = new Map<string, ts.VariableDeclaration>();
   const shadow = (name: ts.BindingName): void => {
     if (ts.isIdentifier(name)) bindings.set(name.text, undefined);
-    else for (const element of name.elements) if (!ts.isOmittedExpression(element)) shadow(element.name);
+    else
+      for (const element of name.elements)
+        if (!ts.isOmittedExpression(element)) shadow(element.name);
   };
   // Expansion precedes semantic predeclaration, so all lexical names must block
   // builtin/module lookup here, including hoisted functions and binding patterns.
   for (const statement of nodes) {
-    if (ts.isVariableStatement(statement)) for (const declaration of statement.declarationList.declarations) shadow(declaration.name);
-    else if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) shadow(statement.name);
+    if (ts.isVariableStatement(statement))
+      for (const declaration of statement.declarationList.declarations) shadow(declaration.name);
+    else if (
+      (ts.isFunctionDeclaration(statement) ||
+        ts.isClassDeclaration(statement) ||
+        ts.isEnumDeclaration(statement)) &&
+      statement.name
+    )
+      shadow(statement.name);
   }
-  for (const statement of nodes) if (ts.isVariableStatement(statement)) {
-    for (const declaration of statement.declarationList.declarations) if (ts.isIdentifier(declaration.name)) {
-      const name = declaration.name.text; bindings.set(name, undefined);
-      if (!(statement.declarationList.flags & ts.NodeFlags.Const) || !declaration.initializer) continue;
-      const value = unwrapSourceExpression(declaration.initializer);
-      const scalar = (node: ts.Expression) => scalarInitializer(unwrapSourceExpression(node));
-      const flat = ts.isArrayLiteralExpression(value) ? value.elements.every(element => !ts.isSpreadElement(element) && scalar(element))
-        : ts.isObjectLiteralExpression(value) && value.properties.every(property => ts.isPropertyAssignment(property) && !ts.isComputedPropertyName(property.name) && scalar(property.initializer));
-      if (flat) { candidates.set(name, declaration); bindings.set(name, value); }
+  for (const statement of nodes)
+    if (ts.isVariableStatement(statement)) {
+      for (const declaration of statement.declarationList.declarations)
+        if (ts.isIdentifier(declaration.name)) {
+          const name = declaration.name.text;
+          bindings.set(name, undefined);
+          if (!(statement.declarationList.flags & ts.NodeFlags.Const) || !declaration.initializer)
+            continue;
+          const value = unwrapSourceExpression(declaration.initializer);
+          const scalar = (node: ts.Expression) => scalarInitializer(unwrapSourceExpression(node));
+          const flat = ts.isArrayLiteralExpression(value)
+            ? value.elements.every((element) => !ts.isSpreadElement(element) && scalar(element))
+            : ts.isObjectLiteralExpression(value) &&
+              value.properties.every(
+                (property) =>
+                  ts.isPropertyAssignment(property) &&
+                  !ts.isComputedPropertyName(property.name) &&
+                  scalar(property.initializer)
+              );
+          if (flat) {
+            candidates.set(name, declaration);
+            bindings.set(name, value);
+          }
+        }
     }
-  }
   for (const [name, declaration] of candidates) {
     let safe = true;
     const visit = (node: ts.Node): void => {
       if (!safe) return;
       if (ts.isIdentifier(node) && node.text === name && node !== declaration.name) {
         const parent = node.parent;
-        if (ts.isPropertyAssignment(parent) && parent.name === node || ts.isPropertyAccessExpression(parent) && parent.name === node) return;
-        if (objectUnshadowed && !bindings.has('Object') && ts.isCallExpression(parent) && parent.arguments[0] === node && parent.arguments.length === 1 && ts.isPropertyAccessExpression(parent.expression) && ts.isIdentifier(parent.expression.expression) && parent.expression.expression.text === 'Object' && parent.expression.name.text === 'keys') return;
+        if (
+          (ts.isPropertyAssignment(parent) && parent.name === node) ||
+          (ts.isPropertyAccessExpression(parent) && parent.name === node)
+        )
+          return;
+        if (
+          objectUnshadowed &&
+          !bindings.has('Object') &&
+          ts.isCallExpression(parent) &&
+          parent.arguments[0] === node &&
+          parent.arguments.length === 1 &&
+          ts.isPropertyAccessExpression(parent.expression) &&
+          ts.isIdentifier(parent.expression.expression) &&
+          parent.expression.expression.text === 'Object' &&
+          parent.expression.name.text === 'keys'
+        )
+          return;
         let read: ts.Node = node;
-        while ((ts.isPropertyAccessExpression(read.parent) || ts.isElementAccessExpression(read.parent)) && read.parent.expression === read) read = read.parent;
-        if (read === node) { safe = false; return; }
+        while (
+          (ts.isPropertyAccessExpression(read.parent) ||
+            ts.isElementAccessExpression(read.parent)) &&
+          read.parent.expression === read
+        )
+          read = read.parent;
+        if (read === node) {
+          safe = false;
+          return;
+        }
         const use = read.parent;
-        if (ts.isBinaryExpression(use) && use.left === read && use.operatorToken.kind >= ts.SyntaxKind.FirstAssignment && use.operatorToken.kind <= ts.SyntaxKind.LastAssignment || ts.isPrefixUnaryExpression(use) || ts.isPostfixUnaryExpression(use) || ts.isDeleteExpression(use) || ts.isCallExpression(use) && use.expression === read) safe = false;
+        if (
+          (ts.isBinaryExpression(use) &&
+            use.left === read &&
+            use.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+            use.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
+          ts.isPrefixUnaryExpression(use) ||
+          ts.isPostfixUnaryExpression(use) ||
+          ts.isDeleteExpression(use) ||
+          (ts.isCallExpression(use) && use.expression === read)
+        )
+          safe = false;
       }
       ts.forEachChild(node, visit);
     };
@@ -3660,20 +3757,54 @@ function staticLocalBindings(nodes: readonly ts.Statement[], objectUnshadowed: b
 function staticForEach(node: ts.Statement): ts.ForOfStatement | undefined {
   if (!ts.isExpressionStatement(node)) return;
   const call = unwrapSourceExpression(node.expression);
-  if (!ts.isCallExpression(call) || call.questionDotToken || call.arguments.length !== 1 || !ts.isPropertyAccessExpression(call.expression) || call.expression.name.text !== 'forEach') return;
+  if (
+    !ts.isCallExpression(call) ||
+    call.questionDotToken ||
+    call.arguments.length !== 1 ||
+    !ts.isPropertyAccessExpression(call.expression) ||
+    call.expression.name.text !== 'forEach'
+  )
+    return;
   const callback = call.arguments[0];
-  if (!ts.isArrowFunction(callback) || callback.modifiers?.length || callback.parameters.length !== 1 || !ts.isIdentifier(callback.parameters[0].name) || callback.parameters[0].initializer || callback.parameters[0].dotDotDotToken) return;
+  if (
+    !ts.isArrowFunction(callback) ||
+    callback.modifiers?.length ||
+    callback.parameters.length !== 1 ||
+    !ts.isIdentifier(callback.parameters[0].name) ||
+    callback.parameters[0].initializer ||
+    callback.parameters[0].dotDotDotToken
+  )
+    return;
   let abrupt = false;
-  const inspect = (part: ts.Node): void => { if (ts.isFunctionLike(part)) return; if (ts.isReturnStatement(part) || ts.isBreakStatement(part) || ts.isContinueStatement(part)) abrupt = true; ts.forEachChild(part, inspect); };
+  const inspect = (part: ts.Node): void => {
+    if (ts.isFunctionLike(part)) return;
+    if (ts.isReturnStatement(part) || ts.isBreakStatement(part) || ts.isContinueStatement(part))
+      abrupt = true;
+    ts.forEachChild(part, inspect);
+  };
   inspect(callback.body);
   if (abrupt) return;
   const factory = ts.factory;
-  const ranged = <T extends ts.Node>(created: T, from: ts.Node): T => ts.setTextRange(created, from);
-  const variable = ranged(factory.createVariableDeclaration(callback.parameters[0].name), callback.parameters[0]);
-  const list = ranged(factory.createVariableDeclarationList([variable], ts.NodeFlags.Const), callback.parameters[0]);
-  const body = ts.isBlock(callback.body) ? callback.body : ranged(factory.createExpressionStatement(callback.body), callback.body);
-  const loop = ranged(factory.createForOfStatement(undefined, list, call.expression.expression, body), node);
-  (loop as { parent: ts.Node }).parent = node.parent; linkParents(loop); return loop;
+  const ranged = <T extends ts.Node>(created: T, from: ts.Node): T =>
+    ts.setTextRange(created, from);
+  const variable = ranged(
+    factory.createVariableDeclaration(callback.parameters[0].name),
+    callback.parameters[0]
+  );
+  const list = ranged(
+    factory.createVariableDeclarationList([variable], ts.NodeFlags.Const),
+    callback.parameters[0]
+  );
+  const body = ts.isBlock(callback.body)
+    ? callback.body
+    : ranged(factory.createExpressionStatement(callback.body), callback.body);
+  const loop = ranged(
+    factory.createForOfStatement(undefined, list, call.expression.expression, body),
+    node
+  );
+  (loop as { parent: ts.Node }).parent = node.parent;
+  linkParents(loop);
+  return loop;
 }
 
 /**
@@ -3771,7 +3902,8 @@ function staticLoopValues(
       const node = locals.get(identifier.text);
       const identity = `local:${identifier.text}`;
       if (!node || node.pos >= identifier.pos || active.has(identity)) return undefined;
-      active.add(identity); return { module, node };
+      active.add(identity);
+      return { module, node };
     }
     if (!module.declarations.has(identifier.text) && !module.imports.has(identifier.text))
       return undefined;
@@ -3784,14 +3916,24 @@ function staticLoopValues(
   };
   if (ts.isIdentifier(node)) {
     const target = resolved(node);
-    return target && staticLoopValues(target.module, target.node, active, target.module === module ? locals : new Map());
+    return (
+      target &&
+      staticLoopValues(
+        target.module,
+        target.node,
+        active,
+        target.module === module ? locals : new Map()
+      )
+    );
   }
   if (
     ts.isCallExpression(node) &&
     ts.isPropertyAccessExpression(node.expression) &&
     ts.isIdentifier(node.expression.expression) &&
     node.expression.expression.text === 'Object' &&
-    !locals.has('Object') && !module.declarations.has('Object') && !module.imports.has('Object') &&
+    !locals.has('Object') &&
+    !module.declarations.has('Object') &&
+    !module.imports.has('Object') &&
     node.expression.name.text === 'keys' &&
     node.arguments.length === 1 &&
     ts.isIdentifier(node.arguments[0])
@@ -3815,7 +3957,7 @@ function staticLoopValues(
     }
     // Object.keys uses ECMAScript own-key ordering, not source declaration order.
     if (keys.includes('__proto__')) return undefined;
-    return Object.keys(Object.fromEntries(keys.map(key => [key, true])));
+    return Object.keys(Object.fromEntries(keys.map((key) => [key, true])));
   }
   return undefined;
 }
