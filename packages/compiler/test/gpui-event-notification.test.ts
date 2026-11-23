@@ -18,7 +18,16 @@ it('retains one event notification independently from ordinary repaint dirtiness
   const code = output.value.output.code;
   const drive = code.slice(code.indexOf('pub fn drive('), code.indexOf('impl Drop for'));
   expect(drive).toContain('let result = catch_authored');
-  expect(drive).toContain('if !notify_native_events(&self.owner, cx) && dirty { cx.notify(); }');
+  expect(drive).toContain(
+    'if !notify_native_events(&self.owner, cx) && dirty { self.notify_after_turn(cx); }'
+  );
+  const notifyAfterTurn = code.slice(
+    code.indexOf('fn notify_after_turn('),
+    code.indexOf('pub fn drive(')
+  );
+  expect(notifyAfterTurn).toContain('notify_native_change(cx);');
+  expect(notifyAfterTurn).not.toContain('cx.notify()');
+  expect(notifyAfterTurn).not.toContain('request_update(');
   expect(drive.indexOf('notify_native_events')).toBeGreaterThan(
     drive.lastIndexOf('dirty = std::mem::take')
   );
@@ -86,10 +95,7 @@ it('keeps already-published lifecycle events observable after a failed native co
   expect(owner).toBeDefined();
   const start = owner!.indexOf('let owner=committed.clone();');
   expect(start).toBeGreaterThan(0);
-  const commit = owner!.slice(
-    start,
-    owner!.indexOf('if image_supported(owner)', start)
-  );
+  const commit = owner!.slice(start, owner!.indexOf('if image_supported(owner)', start));
   expect(commit).toContain('if native_host_callback(&owner,"commit",||{');
   expect(commit).toContain('}).is_none(){drive_pending_native_events(&owner,window,cx); }');
   expect(commit).not.toContain('request_update(');

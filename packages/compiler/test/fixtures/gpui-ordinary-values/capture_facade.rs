@@ -92,7 +92,7 @@ impl<T: Render + 'static> Render for ProjectionHost<T> {
     }
 }
 macro_rules! projected_renderer_case {
-    ($test:ident, $module:ident, $expected:literal) => {
+    ($test:ident, $module:ident, $expected:literal $(, $identity:literal)*) => {
         #[gpui::test]
         fn $test(cx: &mut TestAppContext) {
             let window = cx.open_window(size(px(180.), px(72.)), |window, cx| ProjectionHost {
@@ -110,6 +110,7 @@ macro_rules! projected_renderer_case {
                         );
                         assert_eq!(owner.committed_revision, owner.projection_revision);
                         assert_eq!(text_content(&owner.projection, &owner.slot), $expected);
+                    $(assert_eq!(owner.exposes[$identity].data(), json!(true), "projected getter identity: {}", $identity);)*
                     }
                     assert!(
                         handle.take_failures().is_empty(),
@@ -136,3 +137,7 @@ projected_renderer_case!(
     capture_number,
     "42"
 );
+
+projected_renderer_case!(projected_child_direct_getter_paints_and_retains_identity, capture_child_direct, "text", "sameGetter");
+projected_renderer_case!(projected_child_copied_getter_paints_and_retains_identity, capture_child_copied, "text", "sameGetter");
+projected_renderer_case!(projected_child_forwarded_getter_paints_and_retains_identity, capture_child_forwarded, "text", "sameGetter");

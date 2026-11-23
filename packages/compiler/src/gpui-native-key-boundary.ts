@@ -99,7 +99,7 @@ mod native_key_boundary_tests {
         }
     }
     fn key(window:WindowHandle<Host>,name:&str,down:bool,cx:&mut TestAppContext) {
-        window.update(cx,|_,window,cx|{
+        cx.update_window(window.into(),|_,window,cx|{
             let mut keystroke=Keystroke::parse(name).unwrap();
             // This physical sample explicitly carries the printable text fact.
             if name=="a"{keystroke.key_char=Some("a".into());}

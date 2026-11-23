@@ -1083,27 +1083,29 @@ function analyzeCallableFlow(
     return result;
   }
 
-  function property(values: Known, name: string): Known {
+  function property(values: Known, name: string, optional = false): Known {
     return values.flatMap((value) =>
-      value.kind === 'record'
-        ? value.array && name === 'length'
-          ? dataFact('number')
-          : (fields(value).get(name) ?? UNDEFINED).flatMap((field) =>
-              field.kind === 'absent' ? UNDEFINED : [field]
-            )
-        : value.kind === 'capture'
-          ? (captureFacade(value).get(name) ?? UNDEFINED).flatMap((field) =>
-              field.kind === 'absent' ? UNDEFINED : [field]
-            )
-          : checkDataBoundaries && value.kind === 'unknown' && value.data !== undefined
-            ? (() => {
-                try {
-                  return hostValue(memberValueType(value.data!, name));
-                } catch {
-                  return UNKNOWN;
-                }
-              })()
-            : UNKNOWN
+      optional && (value.kind === 'undefined' || (value.kind === 'literal' && value.value === null))
+        ? UNDEFINED
+        : value.kind === 'record'
+          ? value.array && name === 'length'
+            ? dataFact('number')
+            : (fields(value).get(name) ?? UNDEFINED).flatMap((field) =>
+                field.kind === 'absent' ? UNDEFINED : [field]
+              )
+          : value.kind === 'capture'
+            ? (captureFacade(value).get(name) ?? UNDEFINED).flatMap((field) =>
+                field.kind === 'absent' ? UNDEFINED : [field]
+              )
+            : checkDataBoundaries && value.kind === 'unknown' && value.data !== undefined
+              ? (() => {
+                  try {
+                    return hostValue(memberValueType(value.data!, name));
+                  } catch {
+                    return UNKNOWN;
+                  }
+                })()
+              : UNKNOWN
     );
   }
 
@@ -1168,7 +1170,11 @@ function analyzeCallableFlow(
           value.arguments
         );
       case 'member': {
-        const result = property(expression(value.object, scope, execution), value.property);
+        const result = property(
+          expression(value.object, scope, execution),
+          value.property,
+          value.optional
+        );
         // A nominal host event/capability has a fixed checked member contract,
         // unlike a source structural record whose hidden fields remain tracked.
         return checkDataBoundaries &&
@@ -1184,7 +1190,7 @@ function analyzeCallableFlow(
         return merge(
           keys.map((key) =>
             key.kind === 'literal'
-              ? property(owner, String(key.value))
+              ? property(owner, String(key.value), value.optional)
               : merge(
                   owner.map((item) =>
                     item.kind === 'record'

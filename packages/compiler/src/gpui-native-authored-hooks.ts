@@ -356,6 +356,7 @@ mod authored_capture_facade_tests {
         assert!(strict_equal(&states.member("text",false),&raw.member("getState",false).call_authored(vec![Value::string("text")])));
         assert!(matches!(states.member("text",false),Value::BorrowedState(_)));
         assert!(strict_equal(&child.member("getState",false),&raw.member("getState",false)));
+        assert!(strict_equal(&child.member("getMethod",false),&raw.member("getMethod",false)),"projectHandle forwards the original captured getter");
         assert!(strict_equal(&child.member("render",false),&render));
         assert_eq!(artifacts.member("eventKeys",false).member("changed",false).text(),"changed");
         assert_eq!(raw.member("getMethod",false).call_authored(vec![Value::string("read")]).call_authored(vec![]).text(),"seed");
@@ -364,9 +365,31 @@ mod authored_capture_facade_tests {
         let public=owner.borrow().exposes["facade"].clone();let public_child=public.member("getAsHook",false).call(vec![Value::string("child")]).unwrap();
         assert!(strict_equal(&public_child,&public.member("asHooks",false).items()[0]),"getter lookup returns the same public child record");
         let projected_public=public_child.member("handle",false);let raw_public=public_child.member("result",false);
-        assert!(strict_equal(&projected_public.member("getMethod",false),&raw_public.member("getMethod",false)));
+        // Public callbacks preserve their original receiver. The raw result and
+        // custom handle are separate receivers, while capture above retains
+        // the original getter identity before this outward guard boundary.
+        let projected_getter=projected_public.member("getMethod",false);
+        let raw_getter=raw_public.member("getMethod",false);
+        let again=public.member("getAsHook",false).call(vec![Value::string("child")]).unwrap();
+        assert!(strict_equal(&projected_public,&again.member("handle",false)));
+        assert!(strict_equal(&raw_public,&again.member("result",false)));
+        assert!(strict_equal(&projected_getter,&again.member("handle",false).member("getMethod",false)),"same projected receiver keeps its public getter");
+        assert!(strict_equal(&raw_getter,&again.member("result",false).member("getMethod",false)),"same raw receiver keeps its public getter");
+        let projected_read=projected_getter.call(vec![Value::string("read")]).unwrap();
+        let raw_read=raw_getter.call(vec![Value::string("read")]).unwrap();
+        assert!(strict_equal(&projected_read,&raw_read),"both getters return the same live public method");
+        assert_eq!(projected_read.call(vec![]).unwrap().text(),"seed");
+        assert_eq!(raw_read.call(vec![]).unwrap().text(),"seed");
         Owner::dispose(&owner);
         assert!(public.member("getAsHook",false).call(vec![Value::string("child")]).is_err());
+        for getter in [projected_getter,raw_getter] {
+            let error=getter.call(vec![Value::string("read")]).unwrap_err();
+            assert_eq!(error.member("code",false).text(),"OWNER_DISPOSED");
+        }
+        for method in [projected_read,raw_read] {
+            let error=method.call(vec![]).unwrap_err();
+            assert_eq!(error.member("code",false).text(),"OWNER_DISPOSED");
+        }
     }
     #[test]
     fn capture_disposers_release_real_registrations_only_during_setup() {

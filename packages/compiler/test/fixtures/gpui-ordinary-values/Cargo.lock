@@ -2466,6 +2466,76 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-ui-gpui-consumer-capture-child-copied"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-capture-child-direct"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-capture-child-forwarded"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-capture-facade"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-capture-null"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-capture-number"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-capture-text"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "proto-ui-gpui-consumer-cold"
 version = "0.1.0"
 dependencies = [
@@ -2740,6 +2810,13 @@ name = "proto-ui-gpui-consumer-transition"
 version = "0.1.0"
 dependencies = [
  "gpui",
+ "proto-ui-gpui-consumer-capture-child-copied",
+ "proto-ui-gpui-consumer-capture-child-direct",
+ "proto-ui-gpui-consumer-capture-child-forwarded",
+ "proto-ui-gpui-consumer-capture-facade",
+ "proto-ui-gpui-consumer-capture-null",
+ "proto-ui-gpui-consumer-capture-number",
+ "proto-ui-gpui-consumer-capture-text",
  "proto-ui-gpui-consumer-cold",
  "proto-ui-gpui-consumer-context-a",
  "proto-ui-gpui-consumer-context-b",

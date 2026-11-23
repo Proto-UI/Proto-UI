@@ -2712,7 +2712,23 @@ impl __PuiNativeRecordValue {
               });
               notify_native_change(cx);
           });
-          vec![on_focus, on_blur]
+          // A native slot descendant can start this root's keyboard press
+          // while the root FocusHandle itself is not focused. Its departure
+          // from the physical subtree is distinct from the root's own blur.
+          let focus_out_owner = Rc::downgrade(&owner_ref);
+          let on_focus_out = cx.on_focus_out(&focus, window, move |view, _, window, cx| {
+              let Some(owner) = focus_out_owner.upgrade() else { return; };
+              native_host_callback(&owner, "focus-out", || {
+              let epoch = owner.borrow().epoch;
+              if !ready(&owner) || owner.borrow().window_id != Some(window.window_handle().window_id()) || view.focus.contains_focused(window, cx) { return; }
+              // This retires only an existing root press lease. Do not forge
+              // host:blur or change the root's own Focus observation here.
+              native_press_blur(&owner);
+              if ready(&owner) && owner.borrow().epoch == epoch { view.drive(window, cx).unwrap_or_else(|error| throw_value(error)); }
+              });
+              notify_native_change(cx);
+          });
+          vec![on_focus, on_blur, on_focus_out]
           } else { Vec::new() };
           let global_key_capture = subscribe_global_key_capture(&owner_ref, cx);
           let window_input = window_input_needed(&owner_ref).then(|| cx.focus_handle().tab_stop(false));
