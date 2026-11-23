@@ -1,0 +1,122 @@
+{
+  "scope": "Two native dir=auto input/textarea Focus Entry regression controls only",
+  "baseCommit": "f6bdadf1bf1791bab8a66d7c9a6c25993fc5c1f4",
+  "baseTree": "d2a1b196393830d6ca746f35c1c1715c44eb88f5",
+  "candidate": "Base commit plus one independently reviewed harness-preparation patch; product source unchanged",
+  "node": "v24.22.3",
+  "pnpm": "10.32.1",
+  "browser": "Google Chrome for Testing 145.0.7632.6",
+  "sandbox": true,
+  "testTimeoutMs": 5000,
+  "nestedPreparationTimeoutMs": 30000,
+  "fixtureBodyUnchangedSha256": "c33da4e89d0505d6843936291264eb5401cbf64016419be2d0abb7aa089be1f6",
+  "inputs": {
+    "pnpm-lock.yaml": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+    "packages/adapters/web-component/src/runtime/modules.ts": "075436cbcf17fdcb7ef8e0983048bd2784f993f65f5579b936a7fb1b24172811",
+    "packages/adapters/web-component/test/shadow-closeout.browser.test.ts": "fc2157d23740281f7f840dcbfb7e42ca1f61cc45f18e66dda2d500e11bf23c9e",
+    "apps/www/src/content/docs/zh-cn/browser-harness.ts": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+  },
+  "patchSha256": "d8f999c35dfcabf50f0e521f52ebc8925efb274d494912915084600972f1c525",
+  "runs": [
+    {
+      "label": "original",
+      "path": "raw/focus-dir-f6bdadf1bf1791bab8a66d7c9a6c25993fc5c1f4",
+      "selected": [
+        {
+          "fullName": "Shadow closeout native boundaries reprojects entry during native dir=auto input input without an attribute change",
+          "status": "failed",
+          "duration": 5003.9234400000005,
+          "failureMessages": [
+            "Error: Test timed out in 5000ms.\nIf this is a long-running test, pass a timeout value as the last argument or configure it globally with \"testTimeout\".\n    at Timeout.<anonymous> (file:///tank/shared/projects/proto-ui-agent/sprint5-f7b2/repo/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:44:18)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+          ]
+        },
+        {
+          "fullName": "Shadow closeout native boundaries reprojects entry during native dir=auto textarea input without an attribute change",
+          "status": "passed",
+          "duration": 1058.070409,
+          "failureMessages": []
+        }
+      ],
+      "unselected": 190,
+      "success": false
+    },
+    {
+      "label": "unchanged-diagnostic",
+      "path": "raw/focus-dir-debug-f6bd",
+      "selected": [
+        {
+          "fullName": "Shadow closeout native boundaries reprojects entry during native dir=auto input input without an attribute change",
+          "status": "failed",
+          "duration": 5006.743862,
+          "failureMessages": [
+            "Error: Test timed out in 5000ms.\nIf this is a long-running test, pass a timeout value as the last argument or configure it globally with \"testTimeout\".\n    at Timeout.<anonymous> (file:///tank/shared/projects/proto-ui-agent/sprint5-f7b2/repo/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:44:18)\n    at listOnTimeout (node:internal/timers:685:17)\n    at processTimers (node:internal/timers:618:7)"
+          ]
+        },
+        {
+          "fullName": "Shadow closeout native boundaries reprojects entry during native dir=auto textarea input without an attribute change",
+          "status": "passed",
+          "duration": 1016.9222410000002,
+          "failureMessages": []
+        }
+      ],
+      "unselected": 190,
+      "success": false
+    },
+    {
+      "label": "prepared",
+      "path": "prepared-raw/focus-dir-prepared-f6bd-v2",
+      "selected": [
+        {
+          "fullName": "Shadow closeout native boundaries native value-driven direction reprojects entry during native dir=auto input input without an attribute change",
+          "status": "passed",
+          "duration": 1425.117914999999,
+          "failureMessages": []
+        },
+        {
+          "fullName": "Shadow closeout native boundaries native value-driven direction reprojects entry during native dir=auto textarea input without an attribute change",
+          "status": "passed",
+          "duration": 168.4513369999986,
+          "failureMessages": []
+        }
+      ],
+      "unselected": 190,
+      "success": true
+    }
+  ],
+  "additionalFailedSetup": {
+    "path": "prepared-raw/focus-dir-prepared-f6bd",
+    "exitCode": 1,
+    "testsExecuted": 0,
+    "reason": "Wrapper cmp compared Git diff index abbreviations (local 10 digits vs remote 9); source and all non-index patch lines matched. Wrapper alone corrected with fixed core.abbrev=10."
+  },
+  "diagnosticObservation": {
+    "firstNewPageToFillMs": 4929,
+    "evidence": "Original unchanged Playwright API log; first input started 4.929 seconds after first case began. The timed-out run remains failed."
+  },
+  "verifiedNativeBehavior": [
+    "Actual trusted fill Latin -> Hebrew -> Latin changed input/textarea computed :dir without changing dir=auto attribute.",
+    "External body:has(...) stylesheet changed button visibility.",
+    "Same native input dispatch observer saw matching host fallback tabindex, visibility and direction.",
+    "No pageerror in either selected successful case."
+  ],
+  "limits": [
+    "190 other Shadow closeout cases were deliberately unselected, not accepted by this run.",
+    "No claim about Compiler production cleanup causality, 250ms distribution, all Focus combinations, physical IME/AT or full visual fidelity.",
+    "The prepared test result is source-bound to f6bd plus the exact one-file patch, not a clean later public head."
+  ],
+  "archives": [
+    {
+      "path": "first-debug.tar.gz",
+      "sha256": "99b2226acb3406abdbec5a8124088e332a29d0ad5d7521ae51717acaa8d96335",
+      "bytes": 72540,
+      "files": 31
+    },
+    {
+      "path": "prepared.tar.gz",
+      "sha256": "4a2a5f1ca897e57bad5b64c48332205d0103f33ed9e6da991dec8f5ed36d063d",
+      "bytes": 164046,
+      "files": 32
+    }
+  ],
+  "result": "Selected native semantic controls passed after bounded harness preparation separation; all original failures retained."
+}

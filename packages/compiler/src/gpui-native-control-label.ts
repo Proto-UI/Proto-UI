@@ -923,6 +923,17 @@ mod control_label_lease_tests {
                     .expect("an enabled live Label preserves its callable bridge");
                 inactive.request(window, cx);
                 assert_eq!(calls.get(), 0, "unresolved {case} bridge is initially inactive");
+                let diagnostic = "missing, duplicate or foreign-scope current ControlLabel pair";
+                assert_eq!(take_control_label_diagnostics(&label), vec![diagnostic],
+                    "the initial current {case} refusal is observable");
+                let refused_again = control_label_action_lease(&label)
+                    .expect("a fresh unresolved Label still preserves its callable bridge");
+                refused_again.request(window, cx);
+                control_label_action_lease(&label).unwrap().request(window, cx);
+                assert_eq!(calls.get(), 0, "fresh unresolved {case} captures remain inactive");
+                assert_eq!(take_control_label_diagnostics(&label), vec![diagnostic],
+                    "fresh same {case} refusal after take is buffered once before the next take");
+                assert!(take_control_label_diagnostics(&label).is_empty());
                 match case {
                     "missing" => target = Some(owner(window, "target", &reference, callback)),
                     "ambiguous" => set_instance_associations(duplicate.as_ref().unwrap(),
@@ -935,11 +946,16 @@ mod control_label_lease_tests {
                 }
                 assert!(control_label_action_available(&label), "the repaired {case} pair really resolves");
                 inactive.request(window, cx);
+                refused_again.request(window, cx);
                 assert_eq!(calls.get(), 0, "restoring {case} cannot upgrade an inactive old bridge");
+                assert!(take_control_label_diagnostics(&label).is_empty(),
+                    "old inactive {case} bridges cannot diagnose a newly valid pair");
                 control_label_action_lease(&label).unwrap().request(window, cx);
                 assert_eq!(calls.get(), 1, "a newly captured {case} bridge may activate");
                 inactive.request(window, cx);
                 assert_eq!(calls.get(), 1, "an inactive bridge never lazily captures authority");
+                assert!(take_control_label_diagnostics(&label).is_empty(),
+                    "current valid capture and retained inactive bridge leave no refusal");
                 Owner::dispose(&label);
                 Owner::dispose(target.as_ref().unwrap());
                 if let Some(duplicate) = duplicate { Owner::dispose(&duplicate); }
