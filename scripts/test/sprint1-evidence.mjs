@@ -14,6 +14,7 @@ export const SPRINT1_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
   'packages/compiler/test/sprint1-ownership.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts',
 ]);
 export const SPRINT1_UNIT_SUITES = Object.freeze([
   'apps/www/src/components/site-search-commands.recovery.test.ts',
@@ -28,6 +29,10 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'apps/www/src/components/site-search-data.test.ts',
   'apps/www/src/components/site-search-session.test.ts',
   'packages/compiler/test/props-update-policy.test.ts',
+  'packages/compiler/test/props-update-analysis.test.ts',
+  'packages/compiler/test/context-key-binding-source.test.ts',
+  'packages/compiler/test/context-key-binding-consumer.test.ts',
+  'apps/www/src/components/site-search-composition-paint-cost.test.ts',
   'packages/prototypes/base/test/select-legacy-slot.test.ts',
   'packages/prototypes/base/test/select.test.ts',
   'packages/prototypes/shadcn/test/select.test.ts',
@@ -54,6 +59,8 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'packages/compiler/src/style-plan.test.ts',
   'packages/prototypes/base/test/number-field-capabilities.test.ts',
   'packages/prototypes/base/test/number-field-format.test.ts',
+  'packages/prototypes/base/test/number-field-supersession.test.ts',
+  'packages/prototypes/base/test/range-owner-supersession.test.ts',
 ]);
 // Additional controls for Anatomy, Shadow CSS, initial portal styles and main integration; keep the
 // original focused-unit selection and its resource budget unchanged.
@@ -71,6 +78,9 @@ export const SPRINT1_INTEGRATION_UNIT_SUITES = Object.freeze([
   'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
   'packages/adapters/web-component/test/shadow-style-artifact.test.ts',
   'packages/adapters/web-component/test/shadow-split-effects.test.ts',
+  'packages/modules/positioning/test/floating-ui-host.test.ts',
+  'packages/modules/positioning/test/available-projection-ownership.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts',
 ]);
 export const SPRINT1_NODE_SUITES = Object.freeze([
   'scripts/analysis/test/number-field-ime-evidence.test.mjs',
@@ -171,7 +181,11 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
     },
     numberField('number-field-0.3', ['base', 'shadcn', 'brutalist'], 150),
     numberField('number-field-experimental', ['bootstrap-2-3-2', 'liquid-glass'], 90),
-    vitest('dialog-observer-native', SPRINT1_BROWSER_SUITES.slice(0, 2), 420),
+    vitest(
+      'dialog-observer-native',
+      [...SPRINT1_BROWSER_SUITES.slice(0, 2), ...SPRINT1_BROWSER_SUITES.slice(3)],
+      420
+    ),
     matrix,
     vitest(
       'search-native',
@@ -183,7 +197,7 @@ export function sprint1Plan(directory, sourceSha, repo = root) {
       // by that suite. This outer resource allowance proves no product speedup.
       1200
     ),
-    vitest('ownership-native', SPRINT1_BROWSER_SUITES.slice(2), 180),
+    vitest('ownership-native', SPRINT1_BROWSER_SUITES.slice(2, 3), 180),
     node(
       'search-props-ab',
       ['--import', 'tsx', 'scripts/test/search-props-ab.mjs', path.join(output, 'search-props-ab')],

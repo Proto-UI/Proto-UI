@@ -523,6 +523,10 @@ export function createSiteSearchComposition(options: {
           // request for this generation's control can be accepted.
           if (event.type !== 'next') return;
           restoreRequestedFocus();
+          // A committed Retry can precede activation of this panel's focus
+          // scope. A refused call is still pending, so presentation retries
+          // through the normal paint and its current publication guards.
+          if (failureFocusOpening && current() && session.read().open) requestPaint();
         });
       };
       const disposers = new Set<() => void>();
@@ -828,11 +832,24 @@ export function createSiteSearchComposition(options: {
             failureFocusOpening === failureFocus &&
             !entryPolicyManual &&
             entryFocusUnchanged &&
+            panelPresented() &&
             currentAction &&
             currentAction !== focusedFailureAction
           ) {
-            focusedFailureAction = currentAction;
             api.call('search-page-action', 'focusSelf');
+            // Public calls may be refused before scope activation, or reenter
+            // close/replacement. Only the current control's focus fact proves
+            // that this opening's handoff actually completed.
+            if (
+              live &&
+              current() &&
+              session.read().open &&
+              epoch === paintEpoch &&
+              failureFocusOpening === failureFocus &&
+              api.getPublicInstance?.('search-page-action') === currentAction &&
+              targetHoldsFocus('search-page-action')
+            )
+              focusedFailureAction = currentAction;
           }
         }
         if (

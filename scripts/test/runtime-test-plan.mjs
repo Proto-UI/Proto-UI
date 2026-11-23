@@ -88,6 +88,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-recovery.browser.test.ts',
   'packages/compiler/test/sprint1-ownership.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-search-disposal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts',
   'packages/compiler/test/sprint2-native.browser.test.ts',
   'apps/www/test/release-docs-reading.browser.test.ts',

@@ -56,13 +56,15 @@ function control() {
     };
   };
   const focusVisible = fact(),
-    disabled = fact();
+    disabled = fact(),
+    focused = fact();
   return {
     focusVisible,
     disabled,
+    focused,
     getExposes: vi.fn(() => {
       if (terminal) throw new Error('read of a terminal public control');
-      return { focusVisible, disabled };
+      return { focusVisible, disabled, focused };
     }),
     disconnect() {
       terminal = true;
@@ -132,7 +134,7 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
   const owners: Record<string, DemoPublicInstance | undefined> = {
     dialog: instance(),
     command: instance(),
-    panel: instance(),
+    panel: { getExposes: () => ({ isPresent: { get: () => true } }) },
     close: instance(),
     'query-shell': family === 'shadcn' ? instance() : undefined,
     query: source,
@@ -145,6 +147,7 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
   );
   const errors: unknown[] = [];
   let notify: DemoPublicInstancesListener = () => {};
+  let focusEpoch = 0;
   let revision = 0,
     live = true,
     disposed = false;
@@ -204,7 +207,7 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
     isCurrent: () => live,
     onFailure: (error) => errors.push(error),
     takeFocusRestore: () => null,
-    focusEpoch: () => 0,
+    focusEpoch: () => focusEpoch,
   });
   const stop = composition.demo.setup!({ api, refs, host: document.createElement('div') });
   const destroy = () => {
@@ -226,6 +229,9 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
     pending,
     hooks,
     source,
+    setFocusEpoch(epoch: number) {
+      focusEpoch = epoch;
+    },
     destroy,
     open() {
       session.setOpen(true);
@@ -517,6 +523,190 @@ describe('Search composition repeated publications', () => {
     f.pending[1].resolve('committed');
     await settled();
     expect(f.refs.status.textContent).toBe('2 documents');
+  });
+
+  it('retries an unaccepted startup Retry focus when the current panel finishes entering', async () => {
+    const f = fixture();
+    const transitions = new Set<(event: { type: string; next: string }) => void>();
+    let entered = false;
+    let actionFocused = false;
+    f.identities({
+      panel: {
+        getExposes: () => ({
+          isPresent: { get: () => true },
+          transitionState: {
+            get: () => (entered ? 'entered' : 'entering'),
+            subscribe(listener: (event: { type: string; next: string }) => void) {
+              transitions.add(listener);
+              return () => transitions.delete(listener);
+            },
+          },
+        }),
+      },
+    });
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    f.source.focused.set(true);
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+      f.owners[ref]!.getExposes = () => ({ focused: { get: () => actionFocused } });
+      if (entered) actionFocused = true;
+    });
+    f.open();
+    f.setFocusEpoch(1); // Only the automatic query entry advanced this opening.
+    await settled();
+    expect(actionFocused).toBe(false);
+    expect(f.api.call).toHaveBeenCalledWith('search-page-action', 'focusSelf');
+    entered = true;
+    for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+    await settled();
+    expect(actionFocused).toBe(true);
+    const acceptedCalls = vi.mocked(f.api.call).mock.calls.length;
+    f.paint();
+    await settled();
+    expect(vi.mocked(f.api.call).mock.calls.length).toBe(acceptedCalls);
+    expect(f.errors).toEqual([]);
+  });
+
+  it('does not certify a refused Retry focus or steal a later focus choice', async () => {
+    const f = fixture();
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    f.source.focused.set(true);
+    f.open();
+    f.setFocusEpoch(1);
+    await settled();
+    const calls = () =>
+      vi
+        .mocked(f.api.call)
+        .mock.calls.filter(
+          ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+        ).length;
+    expect(calls()).toBe(1);
+    // The public control has not confirmed focus; another legitimate paint can retry.
+    f.paint();
+    await settled();
+    expect(calls()).toBe(2);
+    // The user left and then returned to the query. Current focus alone is not intent.
+    f.setFocusEpoch(3);
+    f.paint();
+    await settled();
+    expect(calls()).toBe(2);
+  });
+
+  it('waits for panel presentation before attempting Retry focus and does not spin after acceptance', async () => {
+    const f = fixture();
+    const transitions = new Set<(event: { type: string; next: string }) => void>();
+    let present = false;
+    let actionFocused = false;
+    f.identities({
+      panel: {
+        getExposes: () => ({
+          isPresent: { get: () => present },
+          transitionState: {
+            get: () => (present ? 'entered' : 'entering'),
+            subscribe(listener: (event: { type: string; next: string }) => void) {
+              transitions.add(listener);
+              return () => transitions.delete(listener);
+            },
+          },
+        }),
+      },
+    });
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    f.source.focused.set(true);
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+      actionFocused = true;
+      f.owners[ref]!.getExposes = () => ({ focused: { get: () => actionFocused } });
+    });
+    const focusCalls = () =>
+      vi
+        .mocked(f.api.call)
+        .mock.calls.filter(
+          ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+        );
+    f.open();
+    f.setFocusEpoch(1);
+    await settled();
+    expect(f.owners['search-page-action']).toBeDefined();
+    expect(focusCalls()).toHaveLength(0);
+    for (let i = 0; i < 3; i++) {
+      f.paint();
+      await settled();
+    }
+    expect(focusCalls()).toHaveLength(0);
+    present = true;
+    for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+    await settled();
+    expect(actionFocused).toBe(true);
+    expect(focusCalls()).toHaveLength(1);
+    for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+    f.paint();
+    await settled();
+    expect(focusCalls()).toHaveLength(1);
+    expect(f.errors).toEqual([]);
+  });
+
+  it('does not read or bind a terminal Retry after focusSelf synchronously disposes the composition', async () => {
+    const f = fixture();
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    const terminalRead = vi.fn(() => {
+      throw new Error('terminal Retry control was read');
+    });
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+      f.owners[ref]!.getExposes = terminalRead;
+      f.destroy();
+    });
+    f.open();
+    await settled();
+    expect(terminalRead).not.toHaveBeenCalled();
+    expect(f.props('search-page-action')).toEqual([]);
+    const calls = vi.mocked(f.api.call).mock.calls.length;
+    f.paint();
+    await settled();
+    expect(vi.mocked(f.api.call).mock.calls.length).toBe(calls);
+    expect(f.errors).toEqual([]);
+  });
+
+  it('does not certify an old Retry continuation when focusSelf replaces the action and requests a new paint', async () => {
+    const f = fixture();
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    let replacementFocused = false;
+    const replacement: DemoPublicInstance = {
+      getExposes: () => ({ focused: { get: () => replacementFocused } }),
+    };
+    const focusedOwners: Array<DemoPublicInstance | undefined> = [];
+    const boundOwners: Array<DemoPublicInstance | undefined> = [];
+    const oldRead = vi.fn(() => {
+      throw new Error('replaced Retry control was read');
+    });
+    f.hooks.props = (ref, props) => {
+      if (ref === 'search-page-action' && props.onClick) boundOwners.push(f.owners[ref]);
+    };
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+      const owner = f.owners[ref];
+      focusedOwners.push(owner);
+      if (owner === replacement) {
+        replacementFocused = true;
+        return;
+      }
+      owner!.getExposes = oldRead;
+      f.owners[ref] = replacement;
+      f.paint();
+    });
+    f.open();
+    await settled();
+    expect(focusedOwners).toHaveLength(2);
+    expect(focusedOwners[0]).not.toBe(replacement);
+    expect(focusedOwners[1]).toBe(replacement);
+    expect(replacementFocused).toBe(true);
+    expect(oldRead).not.toHaveBeenCalled();
+    expect(boundOwners).toEqual([replacement]);
+    f.paint();
+    await settled();
+    expect(focusedOwners).toHaveLength(2);
+    expect(f.errors).toEqual([]);
   });
 
   it('does not bind an old action after its focus request synchronously closes the view', async () => {
