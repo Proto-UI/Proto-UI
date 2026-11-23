@@ -66,6 +66,7 @@ let target=resolved(&spec.member("target",false));let Some(ids)=relation_nodes(&
 _=>{},
 }}
 fn positive_integer(value:&Value)->Option<usize>{let number=match value{Value::Number(number)=>*number,Value::Json(serde_json::Value::Number(number))=>number.as_f64()?,_=>return None};if number>=1.&&number<=9007199254740991.&&number.fract()==0.{Some(number as usize)}else{None}}
+fn finite_number(value:&Value)->Option<f64>{let number=match value{Value::Number(number)=>*number,Value::Json(serde_json::Value::Number(number))=>number.as_f64()?,_=>return None};number.is_finite().then_some(number)}
 fn token_is(value:&Value,token:&str)->bool{matches!(value,Value::Json(serde_json::Value::String(value))if value.eq_ignore_ascii_case(token))}
 fn aria_boolean(value:&Value)->Option<bool>{match value{Value::Json(serde_json::Value::Bool(value))=>Some(*value),_ if token_is(value,"true")=>Some(true),_ if token_is(value,"false")=>Some(false),_=>None}}
 struct NativeViewLease{owner:OwnerWeak,hitbox:gpui::HitboxId}
@@ -102,7 +103,11 @@ for(key,spec)in &owner.modules.accessible_relations{project_relation(node,key,sp
 if owner.name_content{node.set_label(text_content(&owner.projection,&owner.slot));}
 for(key,value)in &owner.modules.accessible_text{let value=resolved(value);if value.nullish(){continue}match key.as_str(){"name"=>node.set_label(value.text()),"description"=>node.set_description(value.text()),"id"=>{},_=>panic!("unmapped accessible text field")}}
 if matches!(resolved(&owner.accessible_role),Value::Json(serde_json::Value::String(role))if role=="heading"){if let Some(level)=crate::gpui_native_owner::accessible_level_value(&owner.modules.accessible_level){node.set_level(level);}}
-for(key,state)in &owner.accessible_states{let value=state.get();if value.nullish()||token_is(&value,""){continue}match key.as_str(){
+for(key,state)in &owner.accessible_states{let value=state.get();if owner.accessible_state_conditions.get(key).is_some_and(|condition|!matches!(condition.get(),Value::Json(serde_json::Value::Bool(true)))){continue}if value.nullish()||token_is(&value,""){continue}match key.as_str(){
+"valueNow"=>{if let Some(value)=finite_number(&value){node.set_numeric_value(value)}},
+"valueMin"=>{if let Some(value)=finite_number(&value){node.set_min_numeric_value(value)}},
+"valueMax"=>{if let Some(value)=finite_number(&value){node.set_max_numeric_value(value)}},
+"valueText"=>{if let Value::Json(serde_json::Value::String(value))=value{node.set_value(value)}},
 "selected"=>{if let Some(value)=aria_boolean(&value){node.set_selected(value)}},"expanded"=>{if let Some(value)=aria_boolean(&value){node.set_expanded(value)}},
 "checked"|"pressed"=>{if let Some(value)=aria_boolean(&value){node.set_toggled(if value{gpui::Toggled::True}else{gpui::Toggled::False});}else if token_is(&value,"mixed"){node.set_toggled(gpui::Toggled::Mixed);}},
 "disabled"=>{if let Some(value)=aria_boolean(&value){if value{node.set_disabled()}else if !native_disabled{node.clear_disabled()}}},
@@ -122,5 +127,50 @@ _=>{},
 }}
 let hidden=resolved(&owner.modules.accessible_tree.member("hidden",true));if !hidden.nullish(){if hidden.bool(){node.set_hidden()}else{node.clear_hidden()}}
 }
+}
+
+#[cfg(all(test,feature="test-support"))]
+mod conditional_state_tests {
+    use super::*;
+    use crate::gpui_native_owner::{Owner,OwnerRef,create_state,accessible_state,action_from_name,record};
+    use std::rc::Rc;
+    fn owner()->OwnerRef {Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary())}
+    fn flag(owner:&OwnerRef,name:&str,value:bool)->Value {
+        create_state(&Rc::downgrade(owner),"bool",Value::string(name),Value::boolean(value),Value::Undefined)
+    }
+    fn change(state:&Value,value:Value) {let Value::State(state)=state else{panic!("expected state")};*state.value.borrow_mut()=value;}
+    fn project(owner:&OwnerRef)->gpui::accesskit::Node {
+        let semantics=Semantics{element:gpui::div(),owner:Rc::downgrade(owner),role:Some(gpui::Role::Button)};
+        let mut node=gpui::accesskit::Node::new(gpui::Role::Button);semantics.write_a11y_info(&mut node);node
+    }
+    #[test]
+    fn portable_activation_projects_the_native_click_action() {
+        assert_eq!(action_from_name("activate"),gpui::AccessibleAction::Click);
+        assert_eq!(action_from_name("press"),gpui::AccessibleAction::Click);
+        assert_eq!(action_from_name("click"),gpui::AccessibleAction::Click);
+    }
+
+    #[test]
+    fn native_condition_omits_and_reactivates_current_state() {
+        let owner=owner();let value=flag(&owner,"value",false);let when=flag(&owner,"when",false);
+        accessible_state(&Rc::downgrade(&owner),Value::string("pressed"),value.clone(),record(vec![("when",when.clone())]));
+        owner.borrow_mut().phase="callback";
+        assert_eq!(project(&owner).toggled(),None);
+        change(&value,Value::boolean(true));assert_eq!(project(&owner).toggled(),None);
+        change(&when,Value::boolean(true));assert_eq!(project(&owner).toggled(),Some(gpui::Toggled::True));
+        change(&value,Value::boolean(false));assert_eq!(project(&owner).toggled(),Some(gpui::Toggled::False));
+        change(&when,Value::boolean(false));assert_eq!(project(&owner).toggled(),None);
+        change(&when,Value::Undefined);assert_eq!(project(&owner).toggled(),None);
+        Owner::dispose(&owner);
+    }
+    #[test]
+    fn last_native_state_registration_replaces_its_condition() {
+        let owner=owner();let old=flag(&owner,"old",true);let current=flag(&owner,"current",false);let when=flag(&owner,"when",false);
+        accessible_state(&Rc::downgrade(&owner),Value::string("pressed"),old,record(vec![("when",when)]));
+        accessible_state(&Rc::downgrade(&owner),Value::string("pressed"),current,Value::Undefined);
+        owner.borrow_mut().phase="callback";
+        assert_eq!(project(&owner).toggled(),Some(gpui::Toggled::False));
+        assert!(!owner.borrow().accessible_state_conditions.contains_key("pressed"));Owner::dispose(&owner);
+    }
 }
 `;

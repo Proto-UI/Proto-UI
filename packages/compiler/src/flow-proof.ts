@@ -8,6 +8,12 @@ export interface FlowMark {
   cell: number;
 }
 
+export interface FlowSnapshot {
+  readonly calls: number;
+  readonly heap: number;
+  readonly cells: ReadonlyMap<string, number>;
+}
+
 /** Only executable checked nodes participate; retained source and type views do not. */
 export function writtenMemberFields(value: unknown): ReadonlySet<string> {
   const fields = new Set<string>();
@@ -83,13 +89,34 @@ export function functionCanMutateFlow(
   );
 }
 
-/** Per-function observations. Branch maps share effects; nested function creation does not. */
+/** Per-function observations; mutually exclusive branches have distinct effect histories. */
 export class FlowProof {
   private calls = 0;
   private heap = 0;
   private readonly cells = new Map<string, number>();
   private readonly observations = new WeakMap<object, FlowMark>();
   constructor(private readonly writtenFields: ReadonlySet<string>) {}
+
+  snapshot(): FlowSnapshot {
+    return { calls: this.calls, heap: this.heap, cells: new Map(this.cells) };
+  }
+  restore(snapshot: FlowSnapshot): void {
+    this.calls = snapshot.calls;
+    this.heap = snapshot.heap;
+    this.cells.clear();
+    for (const [key, value] of snapshot.cells) this.cells.set(key, value);
+  }
+  /** Conservatively account for effects on either continuing alternative. */
+  join(base: FlowSnapshot, a: FlowSnapshot, b: FlowSnapshot): void {
+    this.calls = a.calls + b.calls - base.calls;
+    this.heap = a.heap + b.heap - base.heap;
+    this.cells.clear();
+    for (const key of new Set([...base.cells.keys(), ...a.cells.keys(), ...b.cells.keys()]))
+      this.cells.set(
+        key,
+        (a.cells.get(key) ?? 0) + (b.cells.get(key) ?? 0) - (base.cells.get(key) ?? 0)
+      );
+  }
 
   mark(key: string): FlowMark {
     return { calls: this.calls, heap: this.heap, cell: this.cells.get(key) ?? 0 };

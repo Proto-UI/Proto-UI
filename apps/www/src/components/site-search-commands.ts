@@ -492,31 +492,30 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
           prepared.activate();
           activeDialogCandidate = prepared;
           activated = true;
-          composition.activate(
-            replacesOpenDialog
-              ? (panel) => {
-                  const origin = document.activeElement;
-                  const epoch = focusEpoch;
-                  if (
-                    origin &&
-                    origin !== document.body &&
-                    origin !== document.documentElement &&
-                    !panel?.contains(origin)
-                  )
-                    return;
-                  return () => {
-                    const active = document.activeElement;
-                    if (
-                      epoch === focusEpoch &&
-                      (active === origin ||
-                        active === document.body ||
-                        active === document.documentElement)
-                    )
-                      focus('open');
-                  };
-                }
-              : undefined
-          );
+          // The opener-return restore is armed on every activation, not only
+          // on a generation swap. The public Dialog's own restore targets the
+          // pre-activation focus entry; a shortcut open (Ctrl+K) starts from
+          // the document, so without this callback the close would leave
+          // focus on the document instead of the Search opener.
+          composition.activate((panel) => {
+            const origin = document.activeElement;
+            const epoch = focusEpoch;
+            // Restore to the opener only when focus was inside the dialog
+            // content at close. A focus that already fell to the document
+            // (body/html) or moved to a newer external control keeps that
+            // landing rather than being pulled back to the Search opener.
+            if (!origin || !panel?.contains(origin)) return;
+            return () => {
+              const active = document.activeElement;
+              if (
+                epoch === focusEpoch &&
+                (active === origin ||
+                  active === document.body ||
+                  active === document.documentElement)
+              )
+                focus('open');
+            };
+          });
         },
         setLocked(nextLocked: boolean) {
           if (homepage && activated) {
