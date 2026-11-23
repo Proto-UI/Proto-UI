@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "8d4d48d7ef4308b6facbe07a737b438421e26a79",
-  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately.",
+  "revision": "c250f47e877d5dff343da66c065d9f87b2fc8a7d",
+  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -79,7 +79,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae"
+      "sha256": "26e4307893b07f9f17e5c22c38842d0992391d68603c1c9db506f07a556c668d"
     },
     {
       "path": "apps/www/package.json",
