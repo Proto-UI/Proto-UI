@@ -4,7 +4,7 @@
 use gpui::{prelude::*, px, size, App, Context, Entity, IntoElement, Render, TestAppContext, Window, WindowHandle};
 use proto_ui_gpui_native::gpui_native_owner::{
     accessible_action, accessible_action_spec, action_from_name, as_accessible,
-    control_label_action_lease, listen, native_accessible_action_lease, ControlLabelRef,
+    control_label_action_lease, listen, native_accessible_action_lease, register_sequential_focus_owner, ControlLabelRef,
     InstanceAssociations, NativeAccessibleActionLease, NativeSnapshot, Owner, OwnerRef, Value,
 };
 use serde_json::{json, Value as Json};
@@ -176,6 +176,7 @@ fn native_action_routes_keep_declaration_identity_and_reject_unknown_names(cx: &
         let counted = drives.clone();
         owner.borrow_mut().native_drive = Some(Rc::new(move |_, _| counted.set(counted.get() + 1)));
         Owner::finish(&owner, Value::Undefined);
+        register_sequential_focus_owner(&owner, cx);
         Owner::project(&owner);
         owner.borrow_mut().bounds = host.target.owner(cx).borrow().bounds;
         let revision = owner.borrow().projection_revision;
