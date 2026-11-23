@@ -1,0 +1,23 @@
+{
+  "sourceRevision": "a0c112dc4ce805eaa66ff979cf6e8befa5bc9fa4",
+  "scope": "Direct current Core source constructor observation; no packed/runtime/compiler/full-contract acceptance.",
+  "generic": {
+    "hasOwnModules": false,
+    "array": false,
+    "callerDefinitionIsOriginal": true,
+    "definitionNameAfterMutation": "s2-mutated-generic",
+    "definitionSetupIsReplacement": true
+  },
+  "asHookControl": {
+    "hasOwnModules": true,
+    "array": true,
+    "frozen": true,
+    "ids": [
+      "M-S2-STATIC-Z",
+      "M-S2-STATIC-A"
+    ],
+    "preservedDeclarationReferences": true
+  },
+  "genericSetupExecuted": false,
+  "fullKAccepted": false
+}
