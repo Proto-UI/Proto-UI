@@ -1,0 +1,16 @@
+✔ a real body hash binds the first successful representation (1.272611ms)
+✔ the observed Vite 304 shape binds to the earlier body without inventing a new body (0.249576ms)
+✔ a 304 cannot establish the initial body or reuse another 304 as body evidence (1.027371ms)
+✔ revalidation must request the exact previously verified validator (1.267342ms)
+✔ a contradictory response validator remains a failure (0.314655ms)
+✔ cache evidence cannot cross URLs, paths, or changed production bytes (0.643521ms)
+✔ a wrong body or a failed response is never admitted as a cache hit (0.556339ms)
+✔ both body and cached responses remain confined to the selected consumer origin (0.39057ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.923652
