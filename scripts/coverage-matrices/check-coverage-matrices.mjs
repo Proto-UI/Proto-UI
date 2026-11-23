@@ -8871,7 +8871,12 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
       assertPromotionModulePath(rootDir, configPath);
       if (!fs.lstatSync(configPath).isFile()) return false;
       const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
-      if (configSha === WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256) {
+      if (
+        [
+          WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
+        ].includes(configSha)
+      ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
       } else if (
         ![
@@ -9720,6 +9725,11 @@ const PROMOTION_RETRY_PLUGIN_SHA256 =
 // the current configuration to the general package resolver profiles below.
 const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
   'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7';
+// The Sprint 5 compiler adds three lazy QuickJS dependencies and preserves
+// module Worker output. The four Retry import owners, resolver and helpers are
+// unchanged; this exact profile does not admit general package promotion.
+const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'a9eeed0952291e3226c09f1a974dc0742472df8079240210afdbc3701db5dfa3';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

@@ -816,7 +816,7 @@ function writeCurrentRetryConfig(root) {
   );
   assert.equal(
     createHash('sha256').update(config).digest('hex'),
-    'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7'
+    'a9eeed0952291e3226c09f1a974dc0742472df8079240210afdbc3701db5dfa3'
   );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
