@@ -78,3 +78,26 @@ exit 0 只表示本次所选执行预算正常完成且没有 compiler defect / 
 随后还增加了真实工具身份绑定：description 读取 compiler 实际解析的 TypeScript、source-loader 的 TypeScript 和 tsx 的 package / implementation 哈希。直接 `--describe` 已实际观察 TypeScript 5.9.3 与 tsx 4.21.0；正式执行会将各自实际路径、版本和哈希写入 run fingerprint。这是执行元数据增量，没有重标上述小样本的脚本 SHA 或扩大其通过范围。
 
 执行器自审进一步收紧了恢复和失败边界：每个 entry worker 在读取源码前再次核对 checkout、HEAD、干净状态、脚本、compiler 入口、source-loader 及实际 TypeScript / tsx 身份；共享 snapshot 的不可变检查移到每份收据持久化之前。恢复读取会核对 profile 身份和原诊断分类，PASS 必须同时有对应 profile 的输出及匹配的 artifact 哈希。报告保留全部 worker attempt 的退出状态、信号、资源和缺失终态收据，后继 resume 不会抹掉先前 OOM / 中断等执行失败；编译行结果与进程是否正常结束分开记录。可选 ratchet baseline 另绑定实际报告文件字节的 SHA-256，避免只列候选来源却没有绑定所比较的结果内容。
+
+## 六家族十入口实际批次
+
+在完整来源 `047b3cad12c3266eb21440b4403886833b815b32` 上，执行两次 `--max-entries 5`，第二次使用同目录 `--resume`，每次只启动一个 1,024MiB heap entry worker。十个刻意选择的入口覆盖当前六家族，不是随机抽样，源码仍是本工作树较早的 compiler，未混用后续整合树的修复。
+
+| Entry                    | PASS | UNSUPPORTED | compiler-defect | Worker 秒 | RSS 峰值 MiB |
+| ------------------------ | ---: | ----------: | --------------: | --------: | -----------: |
+| Base Accordion Root      |    0 |           6 |               0 |     1.510 |        230.2 |
+| Base Button              |    6 |           0 |               0 |     3.180 |        406.9 |
+| Base ScrollArea Viewport |    0 |           6 |               0 |     1.627 |        223.8 |
+| Base Select Root         |    0 |           6 |               0 |     1.229 |        239.5 |
+| Bootstrap Button         |    0 |           6 |               0 |     1.526 |        252.5 |
+| Brutalist Button         |    5 |           1 |               0 |     3.171 |        387.7 |
+| Liquid Accordion Root    |    0 |           6 |               0 |     1.429 |        241.9 |
+| Liquid Button            |    0 |           6 |               0 |     1.842 |        256.8 |
+| Lucide Icon              |    0 |           6 |               0 |     6.590 |        294.4 |
+| Shadcn Button            |    4 |           1 |               1 |     5.802 |        422.2 |
+
+全部 60 个 implemented profile 调用真实执行，10 个 worker 均正常退出，无 timeout、signal、OOM 或缺失进程终态。已知 Shadcn Vue3 `PUI1999 / Checked Context subscription requires a key declaration` 真实复现；第二批因这一 compiler defect 返回 exit 1，不能因 `selectedComplete: true` 宣称成功。
+
+两批总墙钟为 32.055 秒，worker 共 27.906 秒，中位 entry 为 1.734 秒；这里只用于安排后续 checkpoint 和内存。44 个调用早期拒绝，最终树准入更多能力时运行成本也可能变化，不能由这十个入口估定全库通过率或承诺全量耗时。
+
+最终报告仍包含完整 1,011 × 12 = 12,132 行：15 PASS、1 FAIL、44 UNSUPPORTED、6,066 UNIMPLEMENTED、6,006 UNTESTED，`admissionCoverageComplete: false`。恢复没有重跑先前已落盘的 30 行。所有 row、closure、artifact metadata、plan、request、stdout/stderr、process/resource receipts 与本轮命令完整保存为 [138-member archive](./evidence/2026-11-24-sprint2-library-inventory/pilot10/run.tar.gz)，压缩包 SHA-256 `b7382480b34d59f3b10bbd81cefb5f97f44f950d9698c6d77f9dfc2047df7f3e`；[逐成员读回和批次统计](./evidence/2026-11-24-sprint2-library-inventory/pilot10/validation.json)没有代填未执行结果。
