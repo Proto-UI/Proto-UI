@@ -259,6 +259,7 @@ export function watchProjectionThemeSurfaceStyle(
   };
 
   const observer = new view.MutationObserver((records) => {
+    if (cleaned || queued) return;
     // Identical attribute writes are observable mutations, but introduce no
     // new theme input. Real changes in the same delivery still resolve a new
     // complete theme map; no computed value is cached across deliveries.
