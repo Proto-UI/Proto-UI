@@ -1330,9 +1330,10 @@ ${usesInteraction ? `      ${n('Interaction')}.refresh();` : ''}
       const all = Object.keys(${n('PropSpecs')}).filter((key) => !Object.is(Reflect.get(previous, key), Reflect.get(next, key)));
 ${
   usesRawWatchers
-    ? `      const rawAll = Object.keys({ ...previousRaw, ...raw }).filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(raw, key) || !Object.is(previousRaw[key], raw[key]));
+    ? `      const rawAll = Object.keys({ ...previousRaw, ...raw }).filter(key => !Object.is(previousRaw[key], raw[key]));
       if (rawAll.length) {
-        const nextRaw = Object.freeze({ ...raw }), prevRaw = Object.freeze({ ...previousRaw });
+        const nextRaw = ${n('PropsWindow')}!.raw, prevRaw = Object.freeze({ ...previousRaw });
+        if (${n('RawWatchers')}.some(watcher => watcher.active)) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
         function dispatchRaw(allOnly: boolean): void {
           for (const watcher of ${n('RawWatchers')}) {
             if (!watcher.active || (watcher.keys === null) !== allOnly) continue;

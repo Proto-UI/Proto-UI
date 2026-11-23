@@ -2764,20 +2764,25 @@ impl __PuiNativeRecordValue {
           });
           self._entry_readiness = Some((window_id, subscription));
       }
+      fn notify_after_turn(&self, cx: &mut Context<Self>) {
+          // GPUI suppresses Entity observer effects while a window is drawing,
+          // including its focus/blur phase. Keep authored state synchronous,
+          // then publish the host change after that physical draw lease ends.
+          // A weak target cannot keep a detached component alive for delivery.
+          notify_native_change(cx);
+      }
       pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
-          let mut dirty = false;
           let result = catch_authored(|| {
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); dirty = true; return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); return; }
           modules_drive(&self.owner, &self.focus, window, cx);
-          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); dirty = true; return; }
+          if self.owner.borrow().disposed { self._entry_readiness.take(); self._window_activation.take(); self._focus_subscriptions.clear(); self._focus_lost.take(); self._global_key_capture.take(); return; }
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
           drive_queued_focus(&self.owner, window, cx);
-          dirty = std::mem::take(&mut self.owner.borrow_mut().dirty);
           });
-          // A render-time prop watcher or a terminal callback may publish an
-          // event even after ordinary drawing consumed dirty. Wake observers
-          // once after this native lease; do not request an authored render.
-          if !notify_native_events(&self.owner, cx) && dirty { cx.notify(); }
+          // A callback can publish before failing or retiring its owner. That
+          // output is independent from repaint dirtiness and an unread queue.
+          let dirty = std::mem::take(&mut self.owner.borrow_mut().dirty);
+          if !notify_native_events(&self.owner, cx) && dirty { self.notify_after_turn(cx); }
           result
       }
   }

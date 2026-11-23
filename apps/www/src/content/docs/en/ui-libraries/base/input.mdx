@@ -23,11 +23,29 @@ The Root owns one single-line plain-text editor through its Text Control require
 - `value` selects controlled ownership. Editing produces a normalized proposal; it becomes authoritative only when its owner accepts and supplies `value` again. The second demo Input has an owner that accepts proposals. Ownership is chosen at instance creation, not switched during its lifetime.
 - `valueChange` carries `{ value, composing, data, inputType }` and `change` carries `{ value }`. The IME `compositionStart`, `compositionUpdate` and `compositionEnd` events carry `{ value, data }`; the host editing session maintains the composition candidate.
 
+## Reset the mounted editor
+
+The draft Input contract exposes `resetValue(value?: string): boolean` on the mounted adapter handle. Call it from an application callback when that editor's current editing session should be reset.
+
+| Ownership and argument | Resulting value | Return value |
+| --- | --- | --- |
+| Uncontrolled, with a string | The supplied string, with CR/LF line breaks removed for the single-line editor | `true` while this invocation remains current |
+| Uncontrolled, with no argument | The latest `defaultValue`, normalized in the same way | `true` while this invocation remains current |
+| Controlled | The current owner-supplied `value` is retained | `false` |
+
+For example, `resetValue('New\r\nvalue')` resets an uncontrolled Input to `Newvalue`. Updating `defaultValue` alone preserves an edited value; a later no-argument reset adopts that updated default.
+
+In the demo, **Set latest default** updates the default without replacing the current text. **Reset to default** calls the method without an argument, and **Reset to sample** passes the newline-containing sample. **Try controlled reset** demonstrates the controlled refusal. The status reports the actual method result, public value and editing events observed during that call.
+
+Both ownership modes reset the current editing/composition session and synchronize the public `composing` and `value` states. A controlled `false` result does not mean the composition session was left running; changing the controlled value still belongs to the owner. Reset does not synthesize `valueChange`, `change` or `compositionEnd`. Public state observers may run during the operation.
+
+A missing, uninitialized or detached view, or a supplied non-string value, returns `false`. Terminal disposal retains the existing capability lifetime error. If a synchronous callback resets again, detaches or remounts the editor, the outer invocation becomes stale, returns `false` and cannot publish stale state over the newer session. The complete `asInputRoot` hook inherits this same protocol.
+
 ## One physical target
 
 `disabled`, `readOnly`, `placeholder`, `required`, `name`, `autoComplete`, `minLength`, `maxLength`, `inputMode` and `enterKeyHint` project onto that same Input.
 
-`ariaLabel`, `labelledBy` and `describedBy` name and describe the textbox. Exposes include `focusSelf()`, `blurSelf()` and the `value`, `disabled`, `readOnly`, `focused`, `focusVisible` and `composing` states.
+`ariaLabel`, `labelledBy` and `describedBy` name and describe the textbox. Exposes include `focusSelf()`, `blurSelf()`, `resetValue(value?)` and the `value`, `disabled`, `readOnly`, `focused`, `focusVisible` and `composing` states.
 
 ## Import and boundaries
 
@@ -46,6 +64,7 @@ Input is workspace source. There is no public `proto-ui add` target. Passing `va
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -55,8 +74,16 @@ Input is workspace source. There is no public `proto-ui add` target. Passing `va
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'inputMode', type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'", default: 'undefined' },
-    { name: 'enterKeyHint', type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'", default: 'undefined' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
