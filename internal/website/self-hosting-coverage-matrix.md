@@ -328,7 +328,7 @@ The 2026-11-23 Sprint 1 source-binding reconciliation compares head `3f62a317dc9
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `59be54fc69cf2162d9f6fe75f8ff029905277d01992f6b0ee43ad46436db1efb` |
 | `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16` |
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
-| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `6ea8cf75e2bfcf973c03db08855656f236bab391333f8e2f4a9e95dca99a2f33` |
+| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `690bc430a6d6b99abe7e4e513d8aeb76fa4944ffa0592c925e4e503174b3e67b` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `f90717fb29208d07dcd7635f5a0d1768ddb951e5d6bf1bb459b02c96021fa80e` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f` |
 | `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3` |

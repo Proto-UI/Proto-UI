@@ -753,8 +753,10 @@ for (const width of [2048, 390]) {
             .toBe('entered');
           const maskHandle = await mask.elementHandle();
           if (!maskHandle) throw new Error('Visible DialogMask handle is missing');
+          let maskSettlement: unknown = null;
           const read = async () => ({
             materialProfile,
+            settlement: maskSettlement,
             ...(await maskHandle.evaluate((element) => ({
               prototype: element.getAttribute('data-projection-prototype'),
               coordinates: Object.fromEntries(
@@ -821,12 +823,38 @@ for (const width of [2048, 390]) {
             expect(facts.ownsOutsidePoint).toBe(true);
           };
           const settleMask = async () => {
-            await maskHandle.evaluate(async (element) => {
-              await Promise.all(
-                element.getAnimations().map((animation) => animation.finished.catch(() => {}))
-              );
-            });
+            // Media change delivery and its queued Rule feedback must reach a
+            // frame before enumerating the newly created color transition.
+            // Waiting on the old animation list, then frames, misses that work.
             await frames(page);
+            maskSettlement = await maskHandle.evaluate(async (element) => {
+              const animations = element.getAnimations();
+              const snapshot = () => {
+                const style = getComputedStyle(element);
+                return {
+                  observedAt: performance.now(),
+                  connected: element.isConnected,
+                  tokens: element.getAttribute('data-pui-style'),
+                  background: style.backgroundColor,
+                  transitionProperty: style.transitionProperty,
+                  transitionDuration: style.transitionDuration,
+                  animations: animations.map((animation) => ({
+                    kind: animation.constructor.name,
+                    transitionProperty:
+                      'transitionProperty' in animation ? animation.transitionProperty : null,
+                    currentTime: String(animation.currentTime),
+                    playState: animation.playState,
+                    pending: animation.pending,
+                    targetsMask:
+                      animation.effect instanceof KeyframeEffect &&
+                      animation.effect.target === element,
+                  })),
+                };
+              };
+              const before = snapshot();
+              await Promise.all(animations.map((animation) => animation.finished.catch(() => {})));
+              return { before, after: snapshot() };
+            });
           };
           await settleMask();
           await assertRetainedOwners();

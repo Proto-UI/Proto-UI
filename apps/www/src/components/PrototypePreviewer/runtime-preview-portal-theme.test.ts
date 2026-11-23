@@ -68,14 +68,17 @@ afterEach(() => {
   document.body.removeAttribute('style');
 });
 
-function fixture(setup: (context: DemoSetupContext) => () => void): DemoSpec {
+function fixture(
+  setup: (context: DemoSetupContext) => () => void,
+  initiallyOpen = false
+): DemoSpec {
   return {
     type: 'demo',
     root: {
       kind: 'proto',
       prototypeId: 'portal-theme-root',
       ref: 'root',
-      props: { a11yLabel: 'Theme fixture' },
+      props: { a11yLabel: 'Theme fixture', ...(initiallyOpen ? { defaultOpen: true } : {}) },
       children: [
         { kind: 'proto', prototypeId: 'portal-theme-trigger', ref: 'trigger', children: ['Open'] },
         { kind: 'proto', prototypeId: 'portal-theme-mask', ref: 'mask', previewTheme: 'portal' },
@@ -121,6 +124,165 @@ function actualSurface(boundary: HTMLElement): HTMLElement {
 
 describe('generic preview owned portal theme', () => {
   for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`${runtime}: retains already projected initial inputs without replaying setup updates`, async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      let context!: DemoSetupContext;
+      const theme = { '--pui-background': '#112233', '--pui-font-sans': 'Initial Family' };
+      const surface = createRuntimePreviewSurface(
+        fixture((value) => {
+          context = value;
+          return () => {};
+        }, true),
+        'brutalist',
+        theme,
+        runtime
+      );
+      const setup = surface.demo.setup!;
+      const setupUpdates: string[] = [];
+      const laterUpdates: string[] = [];
+      let initialContent!: HTMLElement;
+      let initialInstance: ReturnType<NonNullable<DemoSetupContext['api']['getPublicInstance']>>;
+      surface.demo.setup = (value) => {
+        initialContent = actualSurface(value.refs.content!);
+        initialInstance = value.api.getPublicInstance!('content');
+        expect(initialInstance).toBeDefined();
+        expect(initialContent.style.getPropertyValue('--pui-background')).toBe('#112233');
+        expect(initialContent.style.padding).toBe('23px');
+        expect(initialContent.style.maxWidth).toBe('410px');
+        const update = value.api.setSurfaceStyle!.bind(value.api);
+        let preparing = true;
+        value.api.setSurfaceStyle = (ref, style) => {
+          (preparing ? setupUpdates : laterUpdates).push(ref);
+          update(ref, style);
+        };
+        try {
+          return setup(value);
+        } finally {
+          preparing = false;
+        }
+      };
+      const rendered = await renderDemo({ runtime, host, demo: surface.demo });
+      try {
+        expect(setupUpdates).toEqual([]);
+        await surface.ready;
+        expect(laterUpdates).toEqual(['mask', 'content']);
+        expect(context.api.getPublicInstance!('content')).toBe(initialInstance);
+        await vi.waitFor(() => {
+          const target = actualSurface(context.refs.content!);
+          expect(target.style.getPropertyValue('--pui-font-sans')).toBe('Initial Family');
+          expect(target.style.getPropertyValue('--pui-radius')).toBe('7px');
+          expect(target.style.padding).toBe('23px');
+          expect(target.style.maxWidth).toBe('410px');
+        });
+        await surface.setAppearance('brutalist', { '--pui-background': '#445566' });
+        await vi.waitFor(() =>
+          expect(
+            actualSurface(context.refs.content!).style.getPropertyValue('--pui-background')
+          ).toBe('#445566')
+        );
+        expect(laterUpdates).toEqual(['mask', 'content', 'mask', 'content']);
+        expect(context.api.getPublicInstance!('content')).toBe(initialInstance);
+      } finally {
+        await rendered.destroy();
+      }
+    });
+    it(`${runtime}: keeps setup replay after an imperative inline edit`, async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      let context!: DemoSetupContext;
+      const surface = createRuntimePreviewSurface(
+        fixture((value) => {
+          context = value;
+          return () => {};
+        }, true),
+        'brutalist',
+        { '--pui-background': '#112233' },
+        runtime
+      );
+      const setup = surface.demo.setup!;
+      const setupUpdates: string[] = [];
+      surface.demo.setup = (value) => {
+        const target = actualSurface(value.refs.content!);
+        target.style.setProperty('--pui-background', '#abcdef', 'important');
+        target.style.paddingLeft = '31px';
+        expect(target.style.getPropertyPriority('--pui-background')).toBe('important');
+        expect(target.style.paddingLeft).toBe('31px');
+        const update = value.api.setSurfaceStyle!.bind(value.api);
+        let preparing = true;
+        value.api.setSurfaceStyle = (ref, style) => {
+          if (preparing) setupUpdates.push(ref);
+          update(ref, style);
+        };
+        try {
+          return setup(value);
+        } finally {
+          preparing = false;
+        }
+      };
+      const rendered = await renderDemo({ runtime, host, demo: surface.demo });
+      try {
+        expect(setupUpdates).toContain('content');
+        await surface.ready;
+        await surface.setAppearance('brutalist', { '--pui-background': '#445566' });
+        await vi.waitFor(() =>
+          expect(
+            actualSurface(context.refs.content!).style.getPropertyValue('--pui-background')
+          ).toBe('#445566')
+        );
+        expect(context.api.getPublicInstance!('content')).toBeDefined();
+      } finally {
+        await rendered.destroy();
+      }
+    });
+    it(`${runtime}: replays a preparation change even when it returns to the initial theme`, async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      let context!: DemoSetupContext;
+      const initial = { '--pui-background': '#112233' };
+      const surface = createRuntimePreviewSurface(
+        fixture((value) => {
+          context = value;
+          return () => {};
+        }, true),
+        'brutalist',
+        initial,
+        runtime
+      );
+      await surface.setAppearance('brutalist', { '--pui-background': '#445566' });
+      const setup = surface.demo.setup!;
+      const setupUpdates: string[] = [];
+      surface.demo.setup = (value) => {
+        expect(actualSurface(value.refs.content!).style.getPropertyValue('--pui-background')).toBe(
+          '#445566'
+        );
+        void surface.setAppearance('brutalist', initial);
+        const update = value.api.setSurfaceStyle!.bind(value.api);
+        let preparing = true;
+        value.api.setSurfaceStyle = (ref, style) => {
+          if (preparing) setupUpdates.push(ref);
+          update(ref, style);
+        };
+        try {
+          return setup(value);
+        } finally {
+          preparing = false;
+        }
+      };
+      const rendered = await renderDemo({ runtime, host, demo: surface.demo });
+      try {
+        expect(setupUpdates).toEqual(['mask', 'content']);
+        await surface.ready;
+        await vi.waitFor(() => {
+          for (const ref of ['mask', 'content'])
+            expect(
+              actualSurface(context.refs[ref]!).style.getPropertyValue('--pui-background')
+            ).toBe('#112233');
+        });
+      } finally {
+        await rendered.destroy();
+      }
+    });
     it(`${runtime}: preserves authored portal classes and inline fonts across physical reparenting`, async () => {
       const host = document.createElement('div');
       document.body.append(host);

@@ -14,7 +14,10 @@ import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prot
 import { DRAWER_PRESENCE_SOURCE_FILES } from './fixtures/drawer-presence-sources';
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
 const output =
-  process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-drawer-presence-evidence');
+  process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ??
+  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'drawer-presence')
+    : path.join(tmpdir(), 'pui-drawer-presence-evidence'));
 beforeAll(async () => {
   tokens = (await collectProtoStyleTokensFromFiles(DRAWER_PRESENCE_SOURCE_FILES)).filter(
     (x): x is string => typeof x === 'string'
@@ -328,6 +331,8 @@ describe('public www Drawer cold-entry diagnostic', () => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(String(error)));
       let result: unknown;
+      let triggerFacts: unknown;
+      let failure: string | undefined;
       try {
         await page.route('**/*', (route) => route.abort());
         await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -340,13 +345,32 @@ describe('public www Drawer cold-entry diagnostic', () => {
             window as any
           ).PublicDrawerEntry.createPublicDrawerEntryFixture(fixed);
         }, fixedControl);
-        // Let initial closed admission finish, exactly as a human clicks a ready demo.
-        await page.locator('wc-shadcn-drawer-trigger').waitFor({ state: 'visible' });
-        await page.evaluate(() => {
+        // The public demo composes a Button directly inside its Drawer Trigger.
+        // C-AS-TRIGGER-0001-D/J makes that inner Button the only interaction
+        // surface and rejects activation on the outer anchor's own host box.
+        const trigger = page.locator('[data-demo-ref="trigger-action"]');
+        expect(await trigger.count()).toBe(1);
+        await trigger.waitFor({ state: 'visible' });
+        await expect.poll(() => trigger.isEnabled()).toBe(true);
+        expect(await page.getByRole('button', { name: 'Open Drawer', exact: true }).count()).toBe(
+          1
+        );
+        const contentId = await trigger.getAttribute('aria-controls');
+        if (!contentId) throw new Error('The actual Drawer Button surface has no Content identity');
+        expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+        triggerFacts = await trigger.evaluate((element) => ({
+          tag: element.localName,
+          ref: element.getAttribute('data-demo-ref'),
+          controls: element.getAttribute('aria-controls'),
+          expanded: element.getAttribute('aria-expanded'),
+          disabled: element.getAttribute('aria-disabled'),
+          rect: element.getBoundingClientRect().toJSON(),
+        }));
+        await trigger.evaluate((element, contentId) => {
           const samples: unknown[] = [];
           (window as any).__entryFrames = samples;
           const sample = () => {
-            const content = document.querySelector('wc-shadcn-drawer-content') as HTMLElement & {
+            const content = document.getElementById(contentId) as HTMLElement & {
               getExposes?: () => any;
             };
             const mask = document.querySelector('wc-shadcn-drawer-mask') as HTMLElement;
@@ -358,26 +382,59 @@ describe('public www Drawer cold-entry diagnostic', () => {
               maskOpacity: mask ? getComputedStyle(mask).opacity : null,
             });
           };
-          (window as any).__entryRequestedAt = performance.now();
-          const end = performance.now() + 750;
           (window as any).__entryDone = new Promise<void>((resolve) => {
-            const frame = () => {
-              sample();
-              if (performance.now() < end) requestAnimationFrame(frame);
-              else resolve();
+            // Observe the native click before the group consumes it. The
+            // unchanged 750ms window begins at input, so Playwright's prior
+            // actionability checks cannot spend the animation observation time.
+            const start = (event: Event) => {
+              if (!(event instanceof MouseEvent)) return;
+              element.removeEventListener('click', start, true);
+              (window as any).__entryRequestedAt = performance.now();
+              (window as any).__entryInput = {
+                trusted: event.isTrusted,
+                timeStamp: event.timeStamp,
+                capturedAt: performance.now(),
+                targetIsSurface: event.target === element,
+                targetInsideSurface:
+                  event.target === element ||
+                  (event.target instanceof Node && element.contains(event.target)),
+                controls: element.getAttribute('aria-controls'),
+              };
+              const end = (window as any).__entryRequestedAt + 750;
+              const frame = () => {
+                sample();
+                if (performance.now() < end) requestAnimationFrame(frame);
+                else resolve();
+              };
+              requestAnimationFrame(frame);
             };
-            requestAnimationFrame(frame);
+            element.addEventListener('click', start, { capture: true, passive: true });
           });
-          (window as any).publicEntry.open();
+        }, contentId);
+        await trigger.click();
+        expect(await page.evaluate(() => (window as any).__entryInput)).toMatchObject({
+          trusted: true,
+          targetInsideSurface: true,
+          controls: contentId,
         });
         await page.evaluate(() => (window as any).__entryDone);
         result = await page.evaluate(() => ({
           requestedAt: (window as any).__entryRequestedAt,
+          input: (window as any).__entryInput,
+          observerAvailable: Array.isArray((window as any).__drawerEntryProbe),
           events: (window as any).__drawerEntryProbe,
           frames: (window as any).__entryFrames,
         }));
         expect(errors).toEqual([]);
+        expect(await page.locator(`[id=${JSON.stringify(contentId)}][role="dialog"]`).count()).toBe(
+          1
+        );
+        expect(await trigger.getAttribute('aria-expanded')).toBe('true');
         const events = (result as any).events as any[];
+        expect(
+          Array.isArray(events),
+          'The real opened Drawer must deliver projector observations'
+        ).toBe(true);
         expect(
           events.some(
             (event) =>
@@ -412,11 +469,17 @@ describe('public www Drawer cold-entry diagnostic', () => {
             `drawer-public-${fixedControl ? 'fixed-control' : 'intrinsic'}-settled.png`
           ),
         });
+      } catch (error) {
+        failure = String(error);
+        throw error;
       } finally {
         // Failure-safe extraction preserves setup and partial first-attempt records.
         if (!result)
           result = await page
             .evaluate(() => ({
+              requestedAt: (window as any).__entryRequestedAt,
+              input: (window as any).__entryInput,
+              observerAvailable: Array.isArray((window as any).__drawerEntryProbe),
               events: (window as any).__drawerEntryProbe,
               frames: (window as any).__entryFrames,
             }))
@@ -432,7 +495,9 @@ describe('public www Drawer cold-entry diagnostic', () => {
               diagnosticOnly: false,
               intrinsicMotionAssertion: true,
               observationMayForceLayout: true,
+              triggerFacts,
               errors,
+              failure,
               result,
             },
             null,

@@ -31,7 +31,9 @@ export async function createPublicDrawerEntryFixture(
   }
   return {
     open() {
-      (host.querySelector('wc-shadcn-drawer-trigger') as HTMLElement).click();
+      // C-AS-TRIGGER-0001-D/J: the directly nested Button is the group's
+      // interaction surface; the outer Drawer Trigger is only its anchor.
+      (host.querySelector('[data-demo-ref="trigger-action"]') as HTMLElement).click();
     },
     async dispose() {
       await rendered.destroy();

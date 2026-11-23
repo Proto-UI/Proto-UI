@@ -1,12 +1,19 @@
 // @vitest-environment node
 
 import type { Browser, Locator } from 'playwright-core';
+import { execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RUNTIMES, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
 import { documentRect } from './browser-geometry';
 
 const ROUTE = '/zh-cn/ui-libraries/shadcn/scroll-area/';
 const EPSILON = 1;
+const evidenceRoot = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+  ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'shadcn-scroll-area')
+  : path.join(tmpdir(), 'pui-shadcn-scroll-area-evidence');
 const requestedRuntime = process.env.PROTO_UI_SHADCN_SCROLL_AREA_BROWSER_RUNTIME;
 const TEST_RUNTIMES = requestedRuntime
   ? RUNTIMES.filter((runtime) => runtime === requestedRuntime)
@@ -22,6 +29,114 @@ async function bounds(locator: Locator, label: string) {
   const box = await locator.boundingBox();
   if (!box) throw new Error(`${label}: expected rendered geometry.`);
   return box;
+}
+
+/** Passive input attribution; no extra waits between native input and the original scroll oracle. */
+async function traceDragStart(
+  thumb: Locator,
+  runtime: string,
+  axis: 'vertical' | 'horizontal',
+  box: { x: number; y: number; width: number; height: number }
+) {
+  await thumb.evaluate(
+    (element, { runtime, axis, point }) => {
+      const win = window as any;
+      win.__shadcnScrollAreaStopTrace?.();
+      const previewer = element.closest('[data-previewer-id]');
+      const viewport = previewer?.querySelector<HTMLElement>('[data-demo-ref="scrollViewport"]');
+      const describe = (node: EventTarget | null | undefined) =>
+        node instanceof Element
+          ? {
+              tag: node.localName,
+              id: node.id,
+              ref: node.getAttribute('data-demo-ref'),
+              demoOwner: node.getAttribute('data-demo-owner'),
+              prototype: node.getAttribute('data-projection-prototype'),
+              coordinates: Object.fromEntries(
+                ['owner', 'family', 'runtime', 'generation'].map((key) => [
+                  key,
+                  node.getAttribute(`data-projection-${key}`),
+                ])
+              ),
+              connected: node.isConnected,
+            }
+          : null;
+      const read = () => {
+        const hit = document.elementFromPoint(point.x, point.y);
+        const style = getComputedStyle(element);
+        return {
+          observedAt: performance.now(),
+          thumb: describe(element),
+          viewport: describe(viewport),
+          missingViewport: !viewport,
+          thumbBox: element.getBoundingClientRect().toJSON(),
+          viewportBox: viewport?.getBoundingClientRect().toJSON() ?? null,
+          currentThumb: previewer?.querySelector(`[data-demo-ref="${axis}Thumb"]`) === element,
+          currentViewport:
+            !!viewport && previewer?.querySelector('[data-demo-ref="scrollViewport"]') === viewport,
+          pointerEvents: style.pointerEvents,
+          visibility: style.visibility,
+          display: style.display,
+          touchAction: style.touchAction,
+          hit: describe(hit),
+          hitInsideThumb: hit === element || (!!hit && element.contains(hit)),
+          scrollTop: viewport?.scrollTop ?? null,
+          scrollLeft: viewport?.scrollLeft ?? null,
+          scrollHeight: viewport?.scrollHeight ?? null,
+          clientHeight: viewport?.clientHeight ?? null,
+          documentScroll: { x: scrollX, y: scrollY },
+        };
+      };
+      const record: any = { runtime, axis, point, before: read(), events: [], droppedEvents: 0 };
+      (win.__shadcnScrollAreaTraces ??= []).push(record);
+      const observe = (event: Event) => {
+        if (record.events.length >= 256) {
+          record.droppedEvents++;
+          return;
+        }
+        try {
+          const pointer = event as PointerEvent;
+          record.events.push({
+            phase: 'capture',
+            type: event.type,
+            timeStamp: event.timeStamp,
+            observedAt: performance.now(),
+            trusted: event.isTrusted,
+            target: describe(event.target),
+            pathContainsThumb: event.composedPath().includes(element),
+            buttons: pointer.buttons,
+            button: pointer.button,
+            pointerId: pointer.pointerId,
+            pointerType: pointer.pointerType,
+            clientX: pointer.clientX,
+            clientY: pointer.clientY,
+            hasPointerCapture: element.hasPointerCapture(pointer.pointerId),
+            thumbConnected: element.isConnected,
+            viewportConnected: viewport?.isConnected ?? false,
+            scrollTop: viewport?.scrollTop ?? null,
+            scrollLeft: viewport?.scrollLeft ?? null,
+          });
+        } catch (error) {
+          record.events.push({ type: event.type, observationError: String(error) });
+        }
+      };
+      const types = [
+        'pointerdown',
+        'pointermove',
+        'pointerup',
+        'pointercancel',
+        'lostpointercapture',
+      ];
+      for (const type of types)
+        window.addEventListener(type, observe, { capture: true, passive: true });
+      win.__shadcnScrollAreaStopTrace = () => {
+        for (const type of types) window.removeEventListener(type, observe, true);
+        record.after = read();
+        win.__shadcnScrollAreaStopTrace = undefined;
+      };
+    },
+    { runtime, axis, point: { x: box.x + box.width / 2, y: box.y + box.height / 2 } }
+  );
 }
 
 async function focusGeometry(locator: Locator, label: string) {
@@ -60,14 +175,17 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
   it('renders exact oriented chrome around one host-owned two-axis surface in every runtime', async () => {
     const context = await browser.newContext({ viewport: { width: 320, height: 844 } });
     const page = await context.newPage();
-    await page.goto(`${baseUrl}${ROUTE}`, {
-      waitUntil: 'domcontentloaded',
-      timeout: 120_000,
-    });
-    const previewer = page.locator('[data-previewer-id]').first();
-    await previewer.waitFor({ state: 'visible', timeout: 120_000 });
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(String(error)));
+    let failure: string | undefined;
 
     try {
+      await page.goto(`${baseUrl}${ROUTE}`, {
+        waitUntil: 'domcontentloaded',
+        timeout: 120_000,
+      });
+      const previewer = page.locator('[data-previewer-id]').first();
+      await previewer.waitFor({ state: 'visible', timeout: 120_000 });
       for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-demo-ref="scrollViewport"]', 1);
         // The runtime Select overlay can remain visible during its close
@@ -287,6 +405,7 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
         }
 
         const verticalStart = await bounds(verticalThumb, `${runtime}/vertical-thumb-start`);
+        await traceDragStart(verticalThumb, runtime, 'vertical', verticalStart);
         await page.mouse.move(
           verticalStart.x + verticalStart.width / 2,
           verticalStart.y + verticalStart.height / 2
@@ -303,6 +422,7 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           .toBeGreaterThan(0);
 
         const horizontalStart = await bounds(horizontalThumb, `${runtime}/horizontal-thumb-start`);
+        await traceDragStart(horizontalThumb, runtime, 'horizontal', horizontalStart);
         await page.mouse.move(
           horizontalStart.x + horizontalStart.width / 2,
           horizontalStart.y + horizontalStart.height / 2
@@ -325,8 +445,45 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           `${runtime}/document-overflow`
         ).toBe(0);
       }
+    } catch (error) {
+      failure = String(error);
+      throw error;
     } finally {
-      await context.close();
+      try {
+        const trace = await page
+          .evaluate(() => {
+            const win = window as any;
+            win.__shadcnScrollAreaStopTrace?.();
+            return {
+              missingTrace: !Array.isArray(win.__shadcnScrollAreaTraces),
+              stages: win.__shadcnScrollAreaTraces ?? null,
+            };
+          })
+          .catch((error) => ({ observationError: String(error) }));
+        await mkdir(evidenceRoot, { recursive: true });
+        await writeFile(
+          path.join(evidenceRoot, 'drag-observations.json'),
+          JSON.stringify(
+            {
+              revision: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+              requestedRuntimes: TEST_RUNTIMES,
+              input: 'unchanged native mouse down, 36px move in 4 steps, up',
+              observationOnly: true,
+              observationMayForceLayout: true,
+              failure,
+              errors,
+              trace,
+            },
+            null,
+            2
+          )
+        );
+      } catch (error) {
+        console.error('Scroll Area failure trace could not be saved:', error);
+        if (!failure) throw error;
+      } finally {
+        await context.close();
+      }
     }
   }, 240_000);
 });

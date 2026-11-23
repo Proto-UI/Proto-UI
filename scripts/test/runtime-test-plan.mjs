@@ -6,7 +6,6 @@ export const READY_ROUTES = Object.freeze([
   '/en/ui-libraries/shadcn/menubar/',
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
-  '/en/test/bootstrap-state-controls/',
   '/en/test/liquid-glass-material/',
   '/en/test/liquid-glass-portal/',
   '/en/ui-libraries/base/image/',
@@ -177,7 +176,6 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts',
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
@@ -187,6 +185,7 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts',
@@ -224,6 +223,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts':
+    '.github/workflows/bootstrap-state-controls-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts':
