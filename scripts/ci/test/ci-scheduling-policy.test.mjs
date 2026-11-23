@@ -576,6 +576,15 @@ function assertNativeScrollConsumerEvidence(workflow) {
   const job = workflow.jobs['native-consumer'];
   assert.equal(job.if, undefined);
   assert.equal(job.needs, undefined);
+  const sdkSteps = job.steps.filter((step) => step.id === 'native_sdk');
+  assert.equal(sdkSteps.length, 1, 'native consumers require the actual SDK build');
+  const [sdk] = sdkSteps;
+  assert.equal(sdk.if, undefined);
+  assert.equal(sdk['continue-on-error'], undefined);
+  assert.deepEqual(sdk.run.trim().split('\n'), [
+    'set -euo pipefail',
+    'cargo +1.98.1 check --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --lib 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/default-check.log"',
+  ]);
   for (const [target, log] of [
     ['scroll_pause', 'scroll-pause-consumer.log'],
     ['scroll_reader', 'scroll-reader-consumer.log'],
@@ -585,7 +594,10 @@ function assertNativeScrollConsumerEvidence(workflow) {
     );
     assert.equal(matches.length, 1, `one complete native ${target} target is mandatory`);
     const [step] = matches;
-    assert.equal(step.if, undefined);
+    // A failure in another consumer must not suppress this mandatory target.
+    // This exact status-function guard only requires the shared SDK prerequisite;
+    // no input flag, branch filter or swallowed failure can make it optional.
+    assert.equal(step.if, "${{ !cancelled() && steps.native_sdk.outcome == 'success' }}");
     assert.equal(step['continue-on-error'], undefined);
     assert.deepEqual(step.run.trim().split('\n'), [
       'set -euo pipefail',
@@ -605,6 +617,24 @@ test('native Scroll evidence rejects missing, duplicate, filtered, optional or s
       step.run?.includes('--test scroll_reader ')
     );
   const mutations = [
+    (workflow) => {
+      delete targetStep(workflow).if;
+    },
+    (workflow) => {
+      targetStep(workflow).if = "${{ success() && steps.native_sdk.outcome == 'success' }}";
+    },
+    (workflow) => {
+      targetStep(workflow).if =
+        "${{ !cancelled() && steps.native_sdk.outcome == 'success' && inputs.scroll }}";
+    },
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps.find((step) => step.id === 'native_sdk')[
+        'continue-on-error'
+      ] = true;
+    },
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps.find((step) => step.id === 'native_sdk').if = 'false';
+    },
     (workflow) => {
       const steps = workflow.jobs['native-consumer'].steps;
       steps.push(structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause '))));
