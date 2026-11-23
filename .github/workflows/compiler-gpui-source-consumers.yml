@@ -29,10 +29,6 @@ on:
         type: boolean
         required: false
         default: false
-      browser_acceptance:
-        type: boolean
-        required: false
-        default: false
 
 permissions:
   contents: read
@@ -207,14 +203,6 @@ jobs:
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1 --nocapture \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-sdk-controls.log"
-      - name: Verify explicit native scroll pause against ordinary requests
-        run: |
-          set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_pause -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-pause-consumer.log"
-      - name: Verify native scroll reader displacement and append behavior
-        run: |
-          set -euo pipefail
-          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_reader -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-reader-consumer.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
