@@ -10,6 +10,7 @@ import {
   sourceMembersOneProducer,
   sourceMembersProven,
   type HookSourceState,
+  type HookSourceRef,
   type HookSourceSummaryContext,
   type HookSourceValue,
   type SourceGraphVersionTracker,
@@ -89,6 +90,171 @@ export type RuleStateScan = {
    */
   exposedLocals: ExposedLocalUsage[];
 };
+
+export type RuleSourceObservation = RuleStateScan & {
+  /** Original inventory entry, retained when a helper owns the Rule body. */
+  entryFile: string;
+  rule: HookSourceRef;
+  function?: HookSourceRef;
+  callPath: HookSourceRef[];
+  declarationOnly: boolean;
+};
+
+type RuleClosureContext = {
+  entryFile: string;
+  observations: RuleSourceObservation[];
+  callPath: HookSourceRef[];
+  activeFunctions: Set<string>;
+  ruleFunctions: Map<string, boolean>;
+  invocation?: { start: number; parameters: Binding[]; versions: SourceGraphVersionTracker };
+};
+
+/** Every source remains in the denominator. A helper declaration is assessed
+ * through each actual caller only when those calls reached the same Rule; an
+ * unknown caller stays unresolved and cannot borrow another caller's proof. */
+export function scanRuleStateReadInventory(
+  files: readonly string[],
+  sourceSummary = createHookSourceSummaryContext()
+): { files: string[]; observations: RuleSourceObservation[]; evaluated: RuleSourceObservation[] } {
+  const observations: RuleSourceObservation[] = [];
+  const ruleFunctions = new Map<string, boolean>();
+  const sources = files.map((file) =>
+    ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
+  );
+  for (const source of sources) {
+    const file = source.fileName;
+    scanRuleStateReads(source.text, file, sourceSummary, {
+      entryFile: file,
+      observations,
+      callPath: [],
+      activeFunctions: new Set(),
+      ruleFunctions,
+    });
+  }
+  const refKey = (ref: HookSourceRef) => `${ref.file}:${ref.start}`;
+  const ruleKey = (row: RuleSourceObservation) => refKey(row.rule);
+  const functionKey = (fn: ts.FunctionLikeDeclaration) =>
+    `${fn.getSourceFile().fileName}:${fn.getStart()}`;
+  const tracked = new Set(
+    [...ruleFunctions].filter(([, hasRules]) => hasRules).map(([key]) => key)
+  );
+  for (const row of observations) if (row.function) tracked.add(refKey(row.function));
+  const functions = new Map<string, ts.FunctionLikeDeclaration>();
+  const unclosed = new Set<string>();
+  const markUnclosed = (
+    source: ts.SourceFile,
+    node: ts.Node,
+    helper: ts.FunctionLikeDeclaration
+  ): void => {
+    unclosed.add(functionKey(helper));
+    observations.push({
+      entryFile: source.fileName,
+      rule: { file: source.fileName, start: node.getStart() },
+      function: { file: helper.getSourceFile().fileName, start: helper.getStart() },
+      callPath: [],
+      declarationOnly: false,
+      usages: [],
+      exposedLocals: [],
+      unresolved: [
+        { expression: `unverified helper value: ${node.getText(source)}`, reason: 'subject' },
+      ],
+    });
+  };
+  const outer = (node: ts.Node): ts.Node => {
+    while (
+      node.parent &&
+      (ts.isParenthesizedExpression(node.parent) ||
+        ts.isAsExpression(node.parent) ||
+        ts.isNonNullExpression(node.parent) ||
+        ts.isTypeAssertionExpression(node.parent) ||
+        ts.isSatisfiesExpression(node.parent))
+    )
+      node = node.parent;
+    return node;
+  };
+  for (const source of sources) {
+    sourceSummary.registerSource(source);
+    const inspect = (node: ts.Node): void => {
+      if (
+        ts.isTypeNode(node) ||
+        ts.isImportDeclaration(node) ||
+        ts.isExportDeclaration(node) ||
+        (ts.isExportAssignment(node) && ts.isIdentifier(node.expression))
+      )
+        return;
+      if (
+        ts.isFunctionLike(node) &&
+        'body' in node &&
+        tracked.has(functionKey(node as ts.FunctionLikeDeclaration))
+      )
+        functions.set(
+          functionKey(node as ts.FunctionLikeDeclaration),
+          node as ts.FunctionLikeDeclaration
+        );
+      const valueReference =
+        (ts.isIdentifier(node) &&
+          (!(node.parent as ts.NamedDeclaration).name ||
+            (node.parent as ts.NamedDeclaration).name !== node ||
+            ts.isShorthandPropertyAssignment(node.parent))) ||
+        ts.isPropertyAccessExpression(node) ||
+        ts.isElementAccessExpression(node);
+      if (valueReference) {
+        const helper = sourceSummary.resolveSourceFunction(node, source);
+        if (helper && tracked.has(functionKey(helper))) {
+          functions.set(functionKey(helper), helper);
+          const value = outer(node);
+          const parent = value.parent;
+          const direct = ts.isCallExpression(parent) && parent.expression === value;
+          const alias =
+            ts.isVariableDeclaration(parent) &&
+            parent.initializer === value &&
+            ts.isIdentifier(parent.name)
+              ? sourceSummary.resolveSourceFunction(parent.name, source)
+              : null;
+          if (!direct && (!alias || functionKey(alias) !== functionKey(helper)))
+            markUnclosed(source, node, helper);
+        }
+      }
+      ts.forEachChild(node, inspect);
+    };
+    inspect(source);
+  }
+  // A namespace or dynamic import can pass a helper without spelling its
+  // function binding. Keep those declarations pending until that value flow is
+  // modeled; one known direct caller must not erase an opaque caller.
+  for (const source of sources) {
+    for (const [key, helper] of functions) {
+      if (sourceSummary.hasDynamicImportOfFunction(source, helper))
+        markUnclosed(source, source, helper);
+      for (const statement of source.statements) {
+        if (
+          !ts.isImportDeclaration(statement) ||
+          statement.importClause?.isTypeOnly ||
+          !ts.isStringLiteralLike(statement.moduleSpecifier) ||
+          !statement.importClause?.namedBindings ||
+          !ts.isNamespaceImport(statement.importClause.namedBindings)
+        )
+          continue;
+        if (
+          sourceSummary.isSourceFunctionExportedBy(source, statement.moduleSpecifier.text, helper)
+        )
+          markUnclosed(source, statement, helper);
+      }
+    }
+  }
+  const reached = new Set(observations.filter((row) => !row.declarationOnly).map(ruleKey));
+  return {
+    files: [...files],
+    observations,
+    evaluated: observations.filter(
+      (row) =>
+        !row.declarationOnly ||
+        !reached.has(ruleKey(row)) ||
+        !row.function ||
+        unclosed.has(refKey(row.function))
+    ),
+  };
+}
 
 type LocalStateBinding = {
   kind: 'localState';
@@ -175,6 +341,8 @@ type Binding =
       from?: string;
       bindingNode?: ts.Node;
     }
+  /** A genuinely omitted helper argument without a default. */
+  | { kind: 'absent'; bindingNode?: ts.Node }
   /** A parameter: it shadows an outer name and its origin is not recoverable. */
   | { kind: 'opaque'; sourceAuthority?: boolean; bindingNode?: ts.Node };
 
@@ -442,7 +610,8 @@ function introducesScope(node: ts.Node): boolean {
 export function scanRuleStateReads(
   sourceText: string,
   fileName = 'source.proto.ts',
-  suppliedSummary?: HookSourceSummaryContext
+  suppliedSummary?: HookSourceSummaryContext,
+  closure?: RuleClosureContext
 ): RuleStateScan {
   const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
   const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
@@ -3105,7 +3274,10 @@ export function scanRuleStateReads(
 
   const sourceConditionOutcome = (node: ts.Node, scope: Scope): boolean | null => {
     const value = unwrap(node);
+    if (ts.isIdentifier(value) && lookup(scope, value.text)?.kind === 'absent') return false;
     if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken) {
+      const operand = unwrap(value.operand);
+      if (ts.isIdentifier(operand) && lookup(scope, operand.text)?.kind === 'absent') return true;
       const presence = sourceMemberPresence(value.operand, scope);
       return presence === null ? null : !presence;
     }
@@ -3962,6 +4134,130 @@ export function scanRuleStateReads(
     invalidateUnknownCallGraphs(unknownCallValues);
   };
 
+  const functionKey = (fn: ts.FunctionLikeDeclaration): string =>
+    `${fn.getSourceFile().fileName}:${fn.getStart()}`;
+
+  const helperHasRules = (fn: ts.FunctionLikeDeclaration, pending = new Set<string>()): boolean => {
+    if (!closure || !fn.body) return false;
+    const key = functionKey(fn);
+    const cached = closure.ruleFunctions.get(key);
+    if (cached !== undefined) return cached;
+    // Inspect the complete reachable declaration graph once. Re-entering a
+    // vertex adds no new Rule; a style-free callback cycle is not a Rule gap.
+    // Only cache a completed root query, since a partial DFS may still reach
+    // a Rule through an ancestor's other edge.
+    if (pending.has(key)) return false;
+    const next = new Set(pending).add(key);
+    let found = false;
+    const walk = (node: ts.Node): void => {
+      if (found || ts.isTypeNode(node)) return;
+      if (node !== fn.body && ts.isFunctionLike(node)) return;
+      if (ts.isCallExpression(node)) {
+        if (memberNameOf(node.expression) === 'rule') found = true;
+        else if (!sourceSummary.isAuthoredProducerCall(node, node.getSourceFile())) {
+          const target = sourceSummary.resolveSourceFunction(node.expression, node.getSourceFile());
+          if (target && helperHasRules(target, next)) found = true;
+        }
+      }
+      if (!found) ts.forEachChild(node, walk);
+    };
+    walk(fn.body);
+    if (pending.size === 0) closure.ruleFunctions.set(key, found);
+    return found;
+  };
+
+  const captureHelperBinding = (argument: ts.Expression, scope: Scope): Binding => {
+    const value = unwrap(argument);
+    if (ts.isIdentifier(value)) {
+      const held = lookup(scope, value.text);
+      if (held?.kind === 'token') {
+        const literal = unwrap(held.initializer);
+        // The initializer's free names belong to the caller. Transporting its
+        // AST into a helper would resolve those names in the wrong activation.
+        // Only literal scalar captures are independent of that scope.
+        if (
+          !held.opaque &&
+          !held.members?.size &&
+          !held.alternates?.length &&
+          (ts.isStringLiteralLike(literal) ||
+            ts.isNumericLiteral(literal) ||
+            literal.kind === ts.SyntaxKind.TrueKeyword ||
+            literal.kind === ts.SyntaxKind.FalseKeyword)
+        )
+          return { ...held };
+        return { kind: 'opaque' };
+      }
+      if (held && held.kind !== 'opaque')
+        return held.kind === 'tokenImport' || held.kind === 'defaultImport'
+          ? { ...held, from: held.from ?? fileName }
+          : { ...held };
+    }
+    const candidates = sourceResolveCandidates(argument, scope);
+    if (candidates.length > 0 && candidates.every((candidate) => candidate.matched)) {
+      const values = candidates.map((candidate) => candidate.value);
+      const hook = sourceHookLabel(argument, scope) ?? '<source-hook>';
+      return {
+        kind: 'handleBag',
+        hook,
+        sourceValue: values[0],
+        sourceAlternatives: values.slice(1),
+        sourceAuthority: true,
+      };
+    }
+    return { kind: 'opaque' };
+  };
+
+  const replayHelper = (
+    call: ts.CallExpression,
+    helper: ts.FunctionLikeDeclaration,
+    parameters: Binding[],
+    scope: Scope
+  ): void => {
+    if (!closure || !helper.body) return;
+    const key = functionKey(helper);
+    const ref = { file: call.getSourceFile().fileName, start: call.getStart() };
+    // Module helpers have their own imports and bindings. A nested closure
+    // needs its defining activation, which this independent scanner does not
+    // currently reconstruct; never substitute the caller's lexical scope.
+    const nested = helper.parent && ts.findAncestor(helper.parent, ts.isFunctionLike);
+    if (
+      nested ||
+      helper.asteriskToken ||
+      helper.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+      closure.activeFunctions.has(key)
+    ) {
+      const miss: UnresolvedStateRead = { expression: call.getText(), reason: 'subject' };
+      unresolved.push(miss);
+      closure.observations.push({
+        entryFile: closure.entryFile,
+        rule: ref,
+        callPath: [...closure.callPath, ref],
+        declarationOnly: false,
+        usages: [],
+        exposedLocals: [],
+        unresolved: [miss],
+      });
+      return;
+    }
+    const current = parameters.map((binding): Binding => {
+      if (!('sourceValue' in binding) || !binding.sourceValue) return binding;
+      const values = [binding.sourceValue, ...(binding.sourceAlternatives ?? [])].flatMap(
+        (value) => (value.kind === 'object' ? scope.versions.versions(value) : [value])
+      );
+      return { ...binding, sourceValue: values[0], sourceAlternatives: values.slice(1) };
+    });
+    const module = helper.getSourceFile();
+    const scanned = scanRuleStateReads(module.text, module.fileName, sourceSummary, {
+      ...closure,
+      callPath: [...closure.callPath, ref],
+      activeFunctions: new Set(closure.activeFunctions).add(key),
+      invocation: { start: helper.getStart(), parameters: current, versions: scope.versions },
+    });
+    usages.push(...scanned.usages);
+    unresolved.push(...scanned.unresolved);
+    exposedLocals.push(...scanned.exposedLocals);
+  };
+
   const visit = (node: ts.Node, scope: Scope): void => {
     const current = introducesScope(node)
       ? {
@@ -4387,6 +4683,7 @@ export function scanRuleStateReads(
           node.expression.argumentExpression.text === 'rule')) &&
       node.arguments.length >= 1
     ) {
+      const before = [usages.length, unresolved.length, exposedLocals.length];
       const spec = unwrap(node.arguments[0]);
       // The production walk matches a property access only, so `def['rule'](…)`
       // reaches the same runtime API and emits no variant. It is a blind spot
@@ -4397,12 +4694,34 @@ export function scanRuleStateReads(
       // lowered by the runtime and dropped by the extractor, so it is a blind
       // spot rather than something to skip.
       else unresolved.push({ expression: node.getText(source), reason: 'spec' });
+      if (closure) {
+        const fn = ts.findAncestor(node, ts.isFunctionLike);
+        closure.observations.push({
+          entryFile: closure.entryFile,
+          rule: { file: fileName, start: node.getStart() },
+          ...(fn ? { function: { file: fileName, start: fn.getStart() } } : {}),
+          callPath: [...closure.callPath],
+          declarationOnly:
+            !!fn &&
+            fn.getStart() !== closure.invocation?.start &&
+            !sourceSummary.isAuthoredSetup(fn, source),
+          usages: usages.slice(before[0]),
+          unresolved: unresolved.slice(before[1]),
+          exposedLocals: exposedLocals.slice(before[2]),
+        });
+      }
     }
 
     if (ts.isCallExpression(node)) {
       // The callee and the arguments are evaluated in order, and the call
       // receives the objects its arguments denoted while they were evaluated.
       visit(node.expression, current);
+      const candidate =
+        closure && !sourceSummary.isAuthoredProducerCall(node, source)
+          ? sourceSummary.resolveSourceFunction(node.expression, source)
+          : null;
+      const helper = candidate && helperHasRules(candidate) ? candidate : null;
+      const parameters: Binding[] = [];
       const mutation = hookSourceCallMutation(node);
       // The receiver is evaluated before the arguments, so the container it
       // denotes is captured before they are visited: a later argument that
@@ -4417,6 +4736,7 @@ export function scanRuleStateReads(
       const readsOnly = provenAccessorCallee(node, current, receiver);
       const captured: CapturedArgument[] = [];
       for (const argument of node.arguments) {
+        if (helper) parameters.push(captureHelperBinding(argument, current));
         captured.push(
           captureArgument(
             argument,
@@ -4426,6 +4746,7 @@ export function scanRuleStateReads(
         );
         visit(argument, current);
       }
+      if (helper) replayHelper(node, helper, parameters, current);
       applyCallMutation(node, current, captured, receiver, readsOnly);
       return;
     }
@@ -4438,10 +4759,71 @@ export function scanRuleStateReads(
     bindings: new Map(),
     node: source,
     sourceSummary,
-    versions: createSourceGraphVersionTracker(),
+    versions: closure?.invocation?.versions ?? createSourceGraphVersionTracker(),
   };
   declareImports(rootScope);
-  visit(source, rootScope);
+  if (closure?.invocation) {
+    let target: ts.FunctionLikeDeclaration | undefined;
+    const locate = (node: ts.Node): void => {
+      if (
+        ts.isFunctionLike(node) &&
+        node.getStart() === closure.invocation!.start &&
+        'body' in node
+      )
+        target = node as ts.FunctionLikeDeclaration;
+      if (!target) ts.forEachChild(node, locate);
+    };
+    locate(source);
+    if (target?.body) {
+      for (const statement of source.statements) {
+        if (ts.isVariableStatement(statement)) {
+          for (const declaration of statement.declarationList.declarations) {
+            shadowBindingPattern(rootScope, declaration.name);
+            const value = declaration.initializer && unwrap(declaration.initializer);
+            if (
+              ts.isIdentifier(declaration.name) &&
+              value &&
+              sourceSummary.resolveStableSourceBinding(declaration.name) &&
+              (ts.isStringLiteralLike(value) ||
+                ts.isNumericLiteral(value) ||
+                value.kind === ts.SyntaxKind.TrueKeyword ||
+                value.kind === ts.SyntaxKind.FalseKeyword)
+            )
+              declare(rootScope, declaration.name.text, {
+                kind: 'token',
+                initializer: declaration.initializer!,
+                bindingNode: declaration,
+              });
+          }
+        }
+      }
+      const scope: Scope = { ...rootScope, parent: rootScope, node: target, bindings: new Map() };
+      for (const [index, parameter] of target.parameters.entries()) {
+        shadowBindingPattern(scope, parameter.name);
+        if (!ts.isIdentifier(parameter.name) || parameter.dotDotDotToken) continue;
+        const binding = closure.invocation.parameters[index];
+        if (binding) declare(scope, parameter.name.text, { ...binding, bindingNode: parameter });
+        else if (!parameter.initializer) declare(scope, parameter.name.text, { kind: 'absent' });
+      }
+      visit(target.body, scope);
+    } else {
+      const ref = closure.callPath.at(-1) ?? { file: fileName, start: closure.invocation.start };
+      const miss: UnresolvedStateRead = {
+        expression: `unresolved helper at ${fileName}:${closure.invocation.start}`,
+        reason: 'subject',
+      };
+      unresolved.push(miss);
+      closure.observations.push({
+        entryFile: closure.entryFile,
+        rule: ref,
+        callPath: [...closure.callPath],
+        declarationOnly: false,
+        usages: [],
+        unresolved: [miss],
+        exposedLocals: [],
+      });
+    }
+  } else visit(source, rootScope);
 
   return { usages, unresolved, exposedLocals };
 }
