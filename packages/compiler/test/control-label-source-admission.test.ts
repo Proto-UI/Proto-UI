@@ -59,26 +59,12 @@ describe.each(targets)('actual Control Label source admission: %s', (target) => 
     'admits actual Toggle Group $entry source with explicit target operation limits',
     async ({ entry }) => {
       // The original source inputs now use ordinary checked collection and
-      // reflection lowering. Vue2 still has its independent watchAll limit.
+      // reflection lowering. Vue2's all-key watchers now have independent
+      // generated-consumer admission in raw-props-consumer.test.ts.
       const result = await compileFile(entry, {
         root: REPOSITORY,
         profile: CONTROL_LABEL_PROFILES[target],
       });
-      if (target === 'vue2') {
-        expect(result.ok).toBe(false);
-        if (result.ok) throw new Error('Vue2 watchAll requires independent target admission.');
-        expect(result.diagnostics).toEqual([
-          expect.objectContaining({
-            code: 'PUI4003',
-            category: 'unsupported-input',
-            message: expect.stringContaining(
-              'Operation props.watchAll is not implemented by vue2-source-v1.'
-            ),
-            span: expect.objectContaining({ file: entry }),
-          }),
-        ]);
-        return;
-      }
       expect(result.ok, result.ok ? undefined : JSON.stringify(result.diagnostics)).toBe(true);
       if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
       expect(result.value.ir.sourceFiles.some((source) => source.file === entry)).toBe(true);

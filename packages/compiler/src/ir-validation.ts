@@ -716,7 +716,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       'requirements',
     ]);
     if (root.schemaVersion !== IR_VERSION)
-      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
+      reject(
+        'PUI2001',
+        `Unsupported private IR schema version. Recompile the original source with schema ${IR_VERSION}; relabeling old IR is not a migration.`,
+        FALLBACK,
+        'invalid-ir'
+      );
     // Schema order follows authored definitions, not this validator's scheduling
     // of helper/hook typechecks. The derivation never trusts claimed schemas.
     const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR, span);
