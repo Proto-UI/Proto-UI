@@ -1067,14 +1067,9 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private sortClaims(claims: ClaimRecord[], comparisons?: OrderComparisons): ClaimRecord[] {
-    return claims
-      .map((claim, index) => ({ claim, index }))
-      .sort((left, right) => {
-        const cmp = this.compareClaims(left.claim, right.claim, comparisons);
-        if (cmp !== 0) return cmp;
-        return left.index - right.index;
-      })
-      .map((entry) => entry.claim);
+    // Supported hosts provide stable Array.sort: equal or unavailable targets
+    // keep registration order without allocating a wrapper for every claim.
+    return claims.slice().sort((left, right) => this.compareClaims(left, right, comparisons));
   }
 
   private compareClaims(a: ClaimRecord, b: ClaimRecord, comparisons?: OrderComparisons): number {

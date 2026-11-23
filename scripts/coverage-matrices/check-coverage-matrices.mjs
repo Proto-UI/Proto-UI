@@ -433,7 +433,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: '7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3',
+    sourceSha256: 'd6abc354e3f292df7b79613fb81d072533ef24bd45697558bacf91ace3086304',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -443,7 +443,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7',
+    sourceSha256: '9450263676765eac08e155b218a464c70020a110286a9910a86df90b97c83c8f',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -735,7 +735,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f',
+    sourceSha256: 'f1176c9c8d131bf6087802c7b4fb2ebd4350318d29270b8dcb2817a427e2bc7c',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
