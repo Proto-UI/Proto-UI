@@ -8,7 +8,7 @@ Provides the base template, shared host wiring, and common runtime bridges for b
 
 React and Vue keep a pending view hidden until its authored style is ready. On reveal the shared guard suppresses incidental CSS transitions. A view with an explicit Overlay Presence binding begins its authored keyframes on the first visible frame.
 
-When terminal Runtime disposal completes synchronously, `createAdapterHost().dispose()` invokes `afterUnmount` once and rejects with its thrown value, including falsy values. An earlier Runtime disposal failure remains the primary rejection on this path; repeated disposal returns the same completion.
+`createAdapterHost().dispose()` publishes one completion before invoking Runtime or Adapter cleanup, so synchronous reentry and later calls receive that same Promise. It invokes `afterUnmount` once and rejects with its thrown value, including falsy values. An earlier Runtime disposal failure remains the primary rejection, including when disposal waits for an in-progress unmount callback. Adapter cleanup still runs in the same turn when Runtime disposal completes synchronously. Cleanup hooks are notifications; their return values do not extend disposal or cause it to await its own completion.
 
 An issued Expose State cancellation keeps its identity when returned again through the same Adapter reader, including inside a public record. A Module-issued cancellation revokes its own subscription without entering the retired owner, so it stays effective after reader invalidation. Every other authored function, including a `subscribe` method and a record carrying the external-handle symbol, stays an owner-bound callable with the callback-scope and terminal guards. New exposed calls still require a live callback scope.
 
