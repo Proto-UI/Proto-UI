@@ -1,14 +1,33 @@
 import type { GeneratedModule } from './ir';
+import { createHash } from 'node:crypto';
 import type { ShaderKernel } from '../../core/src/shader-presentation';
-import { nativeShaderHostSha256 } from './native-shader-host.generated';
+import {
+  nativeShaderHostSha256,
+  nativeShaderSceneHostSource,
+  nativeShaderSceneHostSha256,
+} from './native-shader-host.generated';
 import { specializeNativeShaderHost } from './native-shader-specialization';
 
 export function nativeShaderArtifacts(
-  kernels: readonly ShaderKernel[]
+  kernels: readonly ShaderKernel[],
+  scenes = false
 ): NonNullable<GeneratedModule['supportingFiles']> {
   const specialized = specializeNativeShaderHost(kernels);
+  const sceneSource = nativeShaderSceneHostSource.replace(
+    "from './shader-webgl2-host'",
+    "from './webgl2-host-v1'"
+  );
   return [
     { path: '.proto-ui/shader/webgl2-host-v1.ts', kind: 'source', contents: specialized.source },
+    ...(scenes
+      ? [
+          {
+            path: '.proto-ui/shader/scene-web-v1.ts',
+            kind: 'source' as const,
+            contents: sceneSource,
+          },
+        ]
+      : []),
     {
       path: '.proto-ui/shader/kernel-identities-v1.json',
       kind: 'source',
@@ -21,6 +40,13 @@ export function nativeShaderArtifacts(
             hostSha256: nativeShaderHostSha256,
             emittedHostSha256: specialized.sha256,
             kernels: specialized.kernels,
+            ...(scenes
+              ? {
+                  sceneSource: 'packages/adapters/base/src/material/shader-scene-host.ts',
+                  sceneHostSha256: nativeShaderSceneHostSha256,
+                  emittedSceneHostSha256: createHash('sha256').update(sceneSource).digest('hex'),
+                }
+              : {}),
           },
           null,
           2
@@ -30,27 +56,52 @@ export function nativeShaderArtifacts(
       path: '.proto-ui/shader/owner-web-v1.ts',
       kind: 'source',
       contents: `import {createWebShaderPresenter, type WebShaderProgram} from './webgl2-host-v1';
+${scenes ? "import type {WebShaderScenePresenter, WebShaderSceneProgram, WebShaderHostOptions} from './scene-web-v1';" : ''}
 /** Physical owner lifecycle only. The compiler supplies the finite direct pass program. */
-export function createNativeShader(options: {setup(): void; alive(): boolean; root(): HTMLElement | null; prepare(): void}) {
-  let declaration: {key:string; fallback:readonly [number,number,number,number]; program:WebShaderProgram} | null = null;
-  let view = 0, revision = 0, mounted = false, disposed = false;
+export function createNativeShader(options: {setup(): void; alive(): boolean; root(): HTMLElement | null; prepare(): void${scenes ? '; host?: WebShaderHostOptions' : ''}}) {
+  type Declaration = {kind:'pixels'; key:string; fallback:readonly [number,number,number,number]; program:WebShaderProgram}${scenes ? " | {kind:'scene'; slot:string; resources:number; key:string; fallback:readonly [number,number,number,number]; program:WebShaderSceneProgram}" : ''};
+  let declaration: Declaration | null = null;
+  let view = 0, revision = 0, mounted = false, disposed = false${scenes ? ', turn = 0' : ''};
   const presenter = createWebShaderPresenter({root:options.root, prepare:options.prepare});
+  ${scenes ? 'let scene: WebShaderScenePresenter | undefined;' : ''}
   function refresh() {
     if (disposed || !mounted || !declaration || !options.alive()) return;
-    presenter.commit({view, revision:++revision, key:declaration.key, fallback:declaration.fallback}, declaration.program);
+    ${
+      scenes
+        ? `const selected = declaration, operation = ++turn;
+    if (selected.kind === 'scene') {
+      const frame = {view, revision:++revision, key:selected.key, fallback:selected.fallback};
+      if (!scene) {
+        let acquired: WebShaderScenePresenter | undefined;
+        try { acquired = options.host?.createScenePresenter({root:options.root, prepare:options.prepare}); }
+        catch { if (!disposed && mounted && turn === operation && declaration === selected) presenter.commit(frame, null, undefined, undefined, 'shader-scene-host-failed'); return; }
+        if (disposed || !mounted || turn !== operation || declaration !== selected || !options.alive()) { acquired?.dispose(); return; }
+        scene = acquired;
+      }
+      if (scene) scene.commit({...frame, slot:selected.slot, resources:selected.resources}, selected.program);
+      else presenter.commit(frame, null, undefined, undefined, 'shader-scene-capability-unavailable');
+      return;
+    }`
+        : ''
+    }
+    presenter.commit({view, revision:++revision, key:${scenes ? 'selected' : 'declaration'}.key, fallback:${scenes ? 'selected' : 'declaration'}.fallback}, ${scenes ? 'selected' : 'declaration'}.program);
+  }
+  function register(input: Declaration) {
+    options.setup();
+    if (disposed || declaration) throw new Error('One live shader declaration per material surface');
+    const owned = Object.freeze({...input, fallback:Object.freeze([...input.fallback]) as typeof input.fallback});
+    declaration = owned;
+    return () => {options.setup(); if (declaration !== owned) return; declaration = null; presenter.release(view); ${scenes ? 'scene?.release(view);' : ''}};
   }
   return {
     declare(key:string, fallback:readonly [number,number,number,number], program:WebShaderProgram) {
-      options.setup();
-      if (disposed || declaration) throw new Error('One live shader declaration per material surface');
-      const owned = Object.freeze({key, fallback:Object.freeze([...fallback]) as unknown as typeof fallback, program});
-      declaration = owned;
-      return () => {options.setup(); if (declaration !== owned) return; declaration = null; presenter.release(view);};
+      return register({kind:'pixels', key, fallback, program});
     },
+    ${scenes ? "declareScene(slot:string, resources:number, key:string, fallback:readonly [number,number,number,number], program:WebShaderSceneProgram) { return register({kind:'scene', slot, resources, key, fallback, program}); }," : ''}
     mount() {if (disposed) return; if (!mounted) {mounted=true; view++;} refresh();},
     refresh,
-    detach() {if (!mounted) return; mounted=false; presenter.release(view);},
-    dispose() {if (disposed) return; disposed=true; mounted=false; declaration=null; presenter.dispose();},
+    detach() {if (!mounted) return; mounted=false; ${scenes ? 'turn++;' : ''} presenter.release(view); ${scenes ? 'scene?.release(view);' : ''}},
+    dispose() {if (disposed) return; disposed=true; mounted=false; declaration=null; ${scenes ? 'turn++;' : ''} presenter.dispose(); ${scenes ? 'scene?.dispose();' : ''}},
   };
 }
 `,

@@ -35,6 +35,10 @@ cases:
         HC-FEEDBACK-SHADER-PRESENTATION-0001-FAILURE,
       ]
     expectation: Initial preparation, missing support, compilation failure, context loss and failed decode preserve legal opaque fallback and children. Capability override and reset reacquire a fresh physical binding even within one mounted view; repeated reset does not reacquire, and later remount cannot regress the generation. Stale generations never publish or release their replacement; partial allocations clean up in reverse order; repeated release/disposal never double-delete or overwrite a new paint owner.
+  - id: T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE
+    title: Borrow an explicit scene without stale source or host acquisition
+    covers: [C-FEEDBACK-SHADER-PRESENTATION-0001-SCENE, HC-FEEDBACK-SHADER-PRESENTATION-0001-SCENE]
+    expectation: A finite slot survives snapshot, cold IR and direct native calls. The same application-owned canvas lease supplies four Runtime and four native consumers, with independent sRGB conversion and resource budgets. Current/subscribe/cleanup errors, synchronous acquisition reentry across source kinds, held-decode revocation/replacement, source revision regression, Shadow/Document/scope movement and same-scope recovery preserve fallback and retire old work. Invalid or stale input does not advance the shared acceptance boundary; a valid source-kind change retires both old physical publication and old scene capability before replacement preparation. Unused capabilities read nothing; disposal never disposes the borrowed source. Default exports remain usable without source configuration, and new export-name reservations apply only to reached scene capability.
 implementations:
   - id: shader-data-and-native-admission
     kind: module-test
@@ -64,6 +68,30 @@ implementations:
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
     notes:
       - Finite-data proof is checked through each native Web target, cold serialized IR, renamed/re-exported helpers and independent escape, mutation, effect and unknown-input controls. It adds no application source lease or runtime graph interpreter.
+  - id: shader-scene-data-and-native
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/shader-scene.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE]
+  - id: shader-scene-source-owner
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/shader-scene-host.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE]
+    notes:
+      - Source lifecycle is observed at a controlled physical presenter boundary. These cases do not claim GPU pixels or real browser acceptance.
+  - id: shader-scene-capability-acquisition
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/shader-scene-capability.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
+      ]
   - id: shader-native-consumer-types
     kind: module-test
     status: passing
@@ -71,7 +99,7 @@ implementations:
     required: true
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
     notes:
-      - Strict complete native graphs separately check copy-only, tint-only, combined and pure-factory capability interfaces in every Web profile, including Vue2 checkJs.
+      - Strict complete native graphs separately check copy-only, tint-only, combined, pure-factory and configured-scene capability interfaces in every Web profile, including Vue2 checkJs.
   - id: shader-native-project-closure
     kind: module-test
     status: passing
@@ -79,7 +107,7 @@ implementations:
     required: true
     consumesCases: [T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER]
     notes:
-      - Independent copy/tint entries share only the project's reached kernel union. Each original entry's support bytes must match its canonical closure before union; modified or missing host, owner and kernel identity artifacts reject.
+      - Independent copy/tint/scene entries share only the project's reached kernel union. Each original entry's support bytes must match its canonical closure before union; modified or missing host, owner and kernel identity artifacts reject.
   - id: shader-runtime-owner
     kind: module-test
     status: passing
@@ -99,9 +127,11 @@ implementations:
       [
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-CONSUMER,
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-PIXELS,
+        T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-SCENE,
         T-FEEDBACK-SHADER-PRESENTATION-0001-CASE-RETIREMENT,
       ]
     notes:
+      - The suite retains the original 28 cases and adds eight real canvas-source Runtime/native journeys plus one unconfigured-default case, with three independently source-bound build manifests.
       - The executable suite requires sandboxed Chromium. Its local launch failure is not a passed GPU or consumer result; actual supported-executor receipts remain required.
 verifies:
   contracts: [C-FEEDBACK-SHADER-PRESENTATION-0001]
@@ -113,6 +143,9 @@ openQuestions:
       - activation:T-FEEDBACK-SHADER-PRESENTATION-0001
       - implementation:T-FEEDBACK-SHADER-PRESENTATION-0001#shader-webgl2-browser-consumers
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Bind finite scene data, capability acquisition and source lifetime controls to a 37-case actual-browser candidate without promoting its unexecuted results.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Bind finite static construction controls and the exact factory Runtime/native consumer to the existing draft evidence cases without promoting browser or backend acceptance.

@@ -19,6 +19,7 @@ export function specializeNativeShaderHost(kernels: readonly ShaderKernel[]) {
   const copy = reached.has('copy-rgba8-v1'),
     tint = reached.has('tint-rgba8-v1');
   const omitted = new Set<string>([
+    'createWebShaderDevice',
     ...(!copy ? ['SHADER_COPY_RGBA8_V1'] : []),
     ...(!tint ? ['SHADER_TINT_RGBA8_V1', 'NativeShaderTint'] : []),
   ]);

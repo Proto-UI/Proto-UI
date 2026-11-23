@@ -192,17 +192,20 @@ export async function buildPhysicalPresentationBrowserFixture(configuration: {
   return { evidenceDir, bundle, head, buildSha256: digest(buildManifest) };
 }
 
-export const buildShaderBrowserFixture = (variant: 'inline' | 'static-data' = 'inline') =>
+export const buildShaderBrowserFixture = (variant: 'inline' | 'static-data' | 'scene' = 'inline') =>
   buildPhysicalPresentationBrowserFixture({
     name: `shader-presentation-${variant}`,
-    entry: `packages/compiler/test/fixtures/shader-${variant === 'inline' ? 'presentation' : 'static-data'}-owner.proto.ts`,
+    entry: `packages/compiler/test/fixtures/shader-${variant === 'inline' ? 'presentation' : variant}-owner.proto.ts`,
     consumer: 'packages/compiler/test/shader-browser-consumer.ts',
-    factory: 'createShaderBrowserFixture',
+    factory: variant === 'scene' ? 'createShaderSceneBrowserFixture' : 'createShaderBrowserFixture',
     prototypeArgument: true,
     global: 'shaderNative',
     harness: [
       'packages/compiler/test/shader-presentation.browser.test.ts',
       'packages/compiler/test/shader-oracle.ts',
     ],
-    scope: `Draft owned-pixels copy/tint graph (${variant} construction) through actual Feedback Runtime and four native Web profiles. Real Chromium WebGL2 readback and CSS background publication. This is not application backing-source admission or non-Web GPU acceptance.`,
+    scope:
+      variant === 'scene'
+        ? 'Draft explicitly bound owned-scene canvas source through Runtime and four native factories. Whole normalized opaque sRGB scene; source revision/scope/Document retirement and borrowed subscription cleanup. No in-app-backdrop relabeling or non-Web GPU acceptance.'
+        : `Draft owned-pixels copy/tint graph (${variant} construction) through actual Feedback Runtime and four native Web profiles. Real Chromium WebGL2 readback and CSS background publication. This is not application backing-source admission or non-Web GPU acceptance.`,
   });

@@ -8,6 +8,7 @@ import { buildShaderBrowserFixture } from './shader-browser-fixture';
 import type { createShaderBrowserFixture } from './shader-browser-consumer';
 import {
   expectedShaderImagePixels,
+  expectedShaderSceneImagePixels,
   expectedShaderLinearPixels,
   shaderSourcePixels,
 } from './shader-oracle';
@@ -166,9 +167,11 @@ function installShaderProbe() {
 let browser: Browser;
 let fixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
 let staticFixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
+let sceneFixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
 beforeAll(async () => {
   fixture = await buildShaderBrowserFixture();
   staticFixture = await buildShaderBrowserFixture('static-data');
+  sceneFixture = await buildShaderBrowserFixture('scene');
   browser = await chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
@@ -176,6 +179,7 @@ beforeAll(async () => {
   });
   await writeFile(path.join(fixture.evidenceDir, 'browser-version.txt'), browser.version());
   await writeFile(path.join(staticFixture.evidenceDir, 'browser-version.txt'), browser.version());
+  await writeFile(path.join(sceneFixture.evidenceDir, 'browser-version.txt'), browser.version());
 }, 120_000);
 afterAll(async () => {
   await browser?.close();
@@ -253,8 +257,7 @@ function linear(actual: number[], expected: number[]) {
   for (let i = 0; i < expected.length; i++)
     expect(Math.abs(actual[i] - expected[i]), `linear byte ${i}`).toBeLessThanOrEqual(1);
 }
-function image(actual: number[]) {
-  const expected = expectedShaderImagePixels();
+function image(actual: number[], expected = expectedShaderImagePixels()) {
   expect(actual).toHaveLength(expected.length);
   // Canvas readback unpremultiplies quantized RGBA8. Compare its represented
   // premultiplied color, allowing one rounding unit per channel, and alpha.
@@ -587,4 +590,89 @@ it('late decode and release from an overridden capability cannot affect its reac
       (await page.evaluate(() => window.shaderNative.fixture.capabilityRead())).views.at(-1)
     ).toBe(4);
   });
+});
+
+const sceneCases = (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
+  (['runtime', 'compiled'] as const).map((execution) => ({ target, execution }))
+);
+it.each(sceneCases)(
+  '$target $execution borrows an actual app scene across held decode, revoke, replacement and scope retirement',
+  async (scenario) => {
+    await run(
+      `scene-${scenario.target}-${scenario.execution}`,
+      async (page) => {
+        await page.evaluate(async (value) => {
+          window.shaderProbe.holdDecode = true;
+          await window.shaderNative.fixture.mount(value.target, value.execution);
+        }, scenario);
+        await page.evaluate(() => window.shaderProbe.waitForHeldDecode());
+        expect(await page.evaluate(() => window.shaderNative.fixture.sceneState())).toMatchObject({
+          subscriptions: 1,
+          borrowedDisposals: 0,
+          sourceAvailable: true,
+        });
+        await page.evaluate(() => window.shaderProbe.releaseDecodes());
+        await ready(page);
+        image(
+          await page.evaluate(() => window.shaderNative.fixture.pixels()),
+          expectedShaderSceneImagePixels()
+        );
+        expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
+          canvases: 0,
+          childText: expect.stringContaining('slot child'),
+        });
+        // A second real source frame is held before decode. Revoke must synchronously
+        // retire its GPU work; completing the old image cannot publish it afterwards.
+        await page.evaluate(() => {
+          window.shaderProbe.holdDecode = true;
+          window.shaderNative.fixture.sceneDraw(false);
+        });
+        await page.evaluate(() => window.shaderProbe.waitForHeldDecode());
+        await page.evaluate(() => window.shaderNative.fixture.sceneRevoke());
+        await zero(page);
+        await page.evaluate(() => window.shaderProbe.releaseDecodes());
+        expect(await page.evaluate(() => window.shaderNative.fixture.ready())).toBe(false);
+        expect(await page.evaluate(() => window.shaderNative.fixture.read().background)).toBe(
+          'none'
+        );
+        await page.evaluate(() => window.shaderNative.fixture.sceneDraw(true));
+        await ready(page);
+        image(
+          await page.evaluate(() => window.shaderNative.fixture.pixels()),
+          expectedShaderSceneImagePixels(true)
+        );
+        await page.evaluate(() => window.shaderNative.fixture.sceneMove(true));
+        await zero(page);
+        expect(await page.evaluate(() => window.shaderNative.fixture.ready())).toBe(false);
+        await page.evaluate(() => window.shaderNative.fixture.sceneMove(false));
+        await ready(page);
+        await page.evaluate(() => window.shaderNative.fixture.close());
+        expect(await page.evaluate(() => window.shaderNative.fixture.sceneState())).toMatchObject({
+          subscriptions: 0,
+          borrowedDisposals: 0,
+          sourceAvailable: true,
+        });
+      },
+      sceneFixture
+    );
+  },
+  30_000
+);
+it('the unchanged default scene export retains an opaque fallback without a source capability', async () => {
+  await run(
+    'scene-default-unconfigured',
+    async (page) => {
+      await page.evaluate(() => window.shaderNative.fixture.mount('wc', 'compiled', false));
+      expect(await page.evaluate(() => window.shaderNative.fixture.read().background)).toBe('none');
+      expect(await page.evaluate(() => window.shaderNative.fixture.read().fallback)).toBe(
+        'rgb(38, 51, 64)'
+      );
+      expect(await resources(page)).toMatchObject({ attempts: 0, live: 0 });
+      expect(await page.evaluate(() => window.shaderNative.fixture.sceneState())).toMatchObject({
+        subscriptions: 0,
+        borrowedDisposals: 0,
+      });
+    },
+    sceneFixture
+  );
 });

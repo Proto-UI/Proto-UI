@@ -187,7 +187,8 @@ export function nativeHostAtomPlan(
   operations: readonly Operation[],
   prefix: string,
   ruleMetaKeys: readonly RuleMetaKey[] = [],
-  shaderKernels: readonly ShaderKernel[] = []
+  shaderKernels: readonly ShaderKernel[] = [],
+  shaderScenes = false
 ) {
   const delay = operations.includes('scheduler.delay');
   const presentation = operations.includes('feedback.style.presence');
@@ -203,7 +204,7 @@ export function nativeHostAtomPlan(
   const presenceImport = './' + presenceFile.path.replace(/\.ts$/, '');
   const files = [
     ...(delay ? [nativeDelayArtifact] : []),
-    ...(shader ? nativeShaderArtifacts(shaderKernels) : []),
+    ...(shader ? nativeShaderArtifacts(shaderKernels, shaderScenes) : []),
     ...(snapshot ? [presenceFile] : []),
     ...(meta ? [nativeMetaArtifact] : []),
     ...(ruleMeta ? [nativeMetaSubscriptionArtifact] : []),
@@ -215,6 +216,7 @@ export function nativeHostAtomPlan(
     presence,
     presentation,
     shader,
+    shaderScenes,
     physicalPresentation: presentation || shader,
     snapshot,
     meta,
@@ -236,6 +238,12 @@ export function nativeHostAtomPlan(
         : '';
     },
     imports: [
+      shaderScenes
+        ? `export { createWebShaderHost as createShaderHost } from './.proto-ui/shader/scene-web-v1';`
+        : '',
+      shaderScenes
+        ? `import type { WebShaderHostOptions } from './.proto-ui/shader/scene-web-v1';`
+        : '',
       ruleMeta
         ? `import { releaseNativeMeta as ${prefix}ReleaseMeta } from './.proto-ui/meta/subscription-v1';`
         : '',
@@ -261,6 +269,12 @@ export function nativeHostAtomPlan(
       .filter(Boolean)
       .join('\n'),
     jsImports: [
+      shaderScenes
+        ? `export { createWebShaderHost as createShaderHost } from './.proto-ui/shader/scene-web-v1';`
+        : '',
+      shaderScenes
+        ? `/** @typedef {import('./.proto-ui/shader/scene-web-v1').WebShaderHostOptions} WebShaderHostOptions */`
+        : '',
       ruleMeta
         ? `import { releaseNativeMeta as ${prefix}ReleaseMeta } from './.proto-ui/meta/subscription-v1';`
         : '',
@@ -308,12 +322,13 @@ export function nativeHostAtomPlan(
       run: string;
       root?: string;
       prepare?: string;
+      shaderHost?: string;
       typed?: boolean;
     }): string {
       const typed = options.typed !== false;
       return [
         shader
-          ? `const ${prefix}Shader = ${prefix}CreateShader({setup: () => { ${options.setup}; }, alive: () => ${options.alive}, root: () => ${options.root ?? 'null'}, prepare: () => { ${options.prepare ?? ''} }});`
+          ? `const ${prefix}Shader = ${prefix}CreateShader({setup: () => { ${options.setup}; }, alive: () => ${options.alive}, root: () => ${options.root ?? 'null'}, prepare: () => { ${options.prepare ?? ''} }${shaderScenes ? `, host: ${options.shaderHost ?? 'undefined'}` : ''}});`
           : '',
         delay
           ? `const ${prefix}Delay = ${prefix}CreateDelay({ runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invoke}; }, report: error => console.error('[Delay] callback failed', error) });`

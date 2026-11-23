@@ -677,6 +677,7 @@ export interface TargetOperationAnalysis {
   readonly authoredHooks: readonly string[];
   readonly functions: readonly FunctionIR[];
   readonly ruleMetaKeys: readonly RuleMetaKey[];
+  readonly shaderScenes: boolean;
   readonly shaderKernels: readonly ShaderKernel[];
   readonly shaderPlans: ReadonlyMap<string, ReturnType<typeof readNativeShaderPlan>>;
 }
@@ -957,6 +958,9 @@ export function checkTargetOperations(
           authoredHooks: [...reachedHooks],
           functions: [...reachedFunctions],
           ruleMetaKeys: [...ruleMetaKeys].sort(),
+          shaderScenes: [...shaderPlans.values()].some(
+            (plan) => plan.source.kind === 'owned-scene'
+          ),
           shaderKernels: [...shaderKernels],
           shaderPlans,
         },

@@ -85,6 +85,8 @@ export function emitVueSource(
   const componentName = options.componentName ?? 'CompiledComponent';
   if (
     !validIdentifier(componentName) ||
+    (admitted.value.shaderScenes &&
+      ['createComponent', 'createShaderHost', 'WebShaderHostOptions'].includes(componentName)) ||
     [
       'GeneratedProps',
       'GeneratedResolvedProps',
@@ -126,7 +128,8 @@ export function emitVueSource(
     admitted.value.operations,
     prefix,
     admitted.value.ruleMetaKeys,
-    admitted.value.shaderKernels
+    admitted.value.shaderKernels,
+    admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -896,7 +899,7 @@ const ${n('SlotView')} = ${n('Vue')}.defineComponent({
   setup(props) { return () => props.read!(); },
 });
 
-export const ${componentName} = ${n('Vue')}.defineComponent({
+${atoms.shaderScenes ? 'export function createComponent(shaderHost?: WebShaderHostOptions) {\nreturn' : `export const ${componentName} =`} ${n('Vue')}.defineComponent({
   name: ${JSON.stringify(ir.name)}, inheritAttrs: false,
   props: { instanceAssociations: { type: Object as ${n('Vue')}.PropType<Readonly<{controlLabel?: object | null}>>, default: undefined } },
   emits: ${JSON.stringify(exposes.filter((entry) => entry.kind === 'event').map((entry) => entry.name))},
@@ -1065,7 +1068,7 @@ ${
     const ${n('DefValue')}: ${n('Def')} = Object.freeze({ feedback: Object.freeze({ style: ${n('Style')} }) });`
     : ''
 }
-    ${atoms.owner({ setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
+    ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `    const ${n('Authored')} = ${n('CreateAuthored')}({ setup() { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed'); }, borrow(value) {
@@ -1691,6 +1694,7 @@ ${
     return () => ${n('Present')}.value && !${n('Disposing')} ? ${n('Vue')}.h(${n('View')}, { revision: ${n('Revision')}.value }) : null;
   },
 });
+${atoms.shaderScenes ? `}\nexport const ${componentName} = createComponent();` : ''}
 ${
   ssr
     ? `${ownerInitialDataGuard(n('InitialData'))}

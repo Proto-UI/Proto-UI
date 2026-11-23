@@ -8,6 +8,7 @@ import {
 } from '@proto.ui/module-feedback';
 import prototype from '../../../compiler/test/fixtures/shader-presentation-owner.proto';
 import staticPrototype from '../../../compiler/test/fixtures/shader-static-data-owner.proto';
+import scenePrototype from '../../../compiler/test/fixtures/shader-scene-owner.proto';
 
 function fixture(input = prototype, visible = true) {
   let props = { visible };
@@ -44,7 +45,7 @@ function fixture(input = prototype, visible = true) {
   };
 }
 
-it.each([prototype, staticPrototype])(
+it.each([prototype, staticPrototype, scenePrototype])(
   '$name exact compiler input traverses real Runtime setup and repeatable view lifetimes without DOM',
   async (input) => {
     expect(typeof window).toBe('undefined');
@@ -58,9 +59,15 @@ it.each([prototype, staticPrototype])(
         'copy-rgba8-v1',
         'tint-rgba8-v1',
       ]);
-      expect(declaration.source.pixels).toEqual([
-        255, 0, 0, 255, 0, 128, 0, 128, 0, 0, 64, 64, 64, 128, 192, 255,
-      ]);
+      if (input === scenePrototype)
+        expect(declaration.source).toEqual({ kind: 'owned-scene', slot: 'mainScene' });
+      else {
+        expect(declaration.source.kind).toBe('owned-pixels');
+        if (declaration.source.kind !== 'owned-pixels') throw new Error('Expected owned pixels');
+        expect(declaration.source.pixels).toEqual([
+          255, 0, 0, 255, 0, 128, 0, 128, 0, 0, 64, 64, 64, 128, 192, 255,
+        ]);
+      }
       expect(f.frames.at(-1)!.style.tokens).toEqual(['block', 'p-4']);
       f.setVisible(false);
       expect(f.session.viewIntent.getSnapshot().present).toBe(false);
@@ -83,7 +90,7 @@ it.each([prototype, staticPrototype])(
   }
 );
 
-it.each([prototype, staticPrototype])(
+it.each([prototype, staticPrototype, scenePrototype])(
   '$name created-time absence acquires no physical shader resources before the first visible view',
   async (input) => {
     const f = fixture(input, false);

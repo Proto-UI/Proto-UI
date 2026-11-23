@@ -17,10 +17,16 @@ import {
   type ShaderPresentationFrame,
 } from '@proto.ui/module-feedback';
 import { createWebShaderPresentationSink } from '../../adapters/base/src/material/shader-webgl2';
+import {
+  createWebShaderHost,
+  type WebShaderHostOptions,
+} from '../../adapters/base/src/material/shader-scene-host';
+import { createCanvasBackdropLease } from '../../adapters/base/src/material/source';
 import type shaderPrototype from './fixtures/shader-presentation-owner.proto';
 import {
   createWebShaderDevice,
   createWebShaderPresenter,
+  type WebShaderPaintDevice,
 } from '../../adapters/base/src/material/shader-webgl2-host';
 
 type Target = 'react' | 'vue' | 'vue2' | 'wc';
@@ -41,7 +47,7 @@ const frame = (
   revision: number,
   fallback: readonly [number, number, number, number] = [0.15, 0.2, 0.25, 1]
 ) => ({ view: 1, revision, key: String(revision), fallback });
-const program = (device: ReturnType<typeof createWebShaderDevice>) =>
+const program = (device: WebShaderPaintDevice) =>
   device.tint(device.copy(device.upload({ width: 2, height: 2, pixels })), tint);
 
 async function settled(target?: Target) {
@@ -55,7 +61,8 @@ async function settled(target?: Target) {
 /** Framework-native mounting; compiled outputs never receive a Proto definition or IR. */
 export function createShaderBrowserFixture(
   generated: Record<Target, any>,
-  prototype: typeof shaderPrototype
+  prototype: typeof shaderPrototype,
+  sceneMode = false
 ) {
   let sequence = 0;
   let active: {
@@ -74,23 +81,46 @@ export function createShaderBrowserFixture(
   } | null = null;
   let clicks = 0,
     clickedTag = '';
+  let sourceControl: {
+    scope: HTMLElement;
+    lease: ReturnType<typeof createCanvasBackdropLease>;
+    borrowed: ReturnType<typeof createCanvasBackdropLease>;
+    draw(replacement: boolean): void;
+    state(): {
+      subscriptions: number;
+      releases: number;
+      borrowedDisposals: number;
+      sourceAvailable: boolean;
+    };
+  } | null = null;
+  let retiredSource: ReturnType<NonNullable<typeof sourceControl>['state']> | null = null;
   const components = new Map<string, any>();
-  function component(target: Target, execution: Execution) {
+  function component(target: Target, execution: Execution, configured = true) {
     const key = target + '/' + execution;
-    if (components.has(key)) return components.get(key);
+    if (!sceneMode && components.has(key)) return components.get(key);
+    const shader: WebShaderHostOptions | undefined =
+      sceneMode && configured && sourceControl
+        ? (execution === 'compiled' ? generated[target].createShaderHost : createWebShaderHost)({
+            ownedScenes: { mainScene: sourceControl.borrowed },
+          })
+        : undefined;
     let value: any;
     if (target === 'wc') {
       value = `shader-${execution}-${++sequence}`;
-      if (execution === 'compiled') generated.wc.register(value);
-      else AdaptToWebComponent(prototype as any, { registerAs: value });
+      if (execution === 'compiled') {
+        if (shader) customElements.define(value, generated.wc.createComponent(shader));
+        else generated.wc.register(value);
+      } else AdaptToWebComponent(prototype as any, { registerAs: value, shader });
     } else
       value =
         execution === 'compiled'
-          ? target === 'react'
-            ? generated.react.CompiledComponent
-            : generated[target].default
-          : adapters[target](prototype as any);
-    components.set(key, value);
+          ? shader
+            ? generated[target].createComponent(shader)
+            : target === 'react'
+              ? generated.react.CompiledComponent
+              : generated[target].default
+          : adapters[target](prototype as any, { shader });
+    if (!sceneMode) components.set(key, value);
     return value;
   }
   function surface() {
@@ -121,20 +151,83 @@ export function createShaderBrowserFixture(
       old.host.remove();
     }
     await settled();
+    if (sourceControl) {
+      retiredSource = sourceControl.state();
+      sourceControl.lease.dispose();
+      sourceControl.scope.remove();
+      sourceControl = null;
+    }
   }
   return {
-    async mount(target: Target, execution: Execution) {
+    async mount(target: Target, execution: Execution, configured = true) {
       await close();
       clicks = 0;
       clickedTag = '';
       const host = document.createElement('div');
       host.id = 'consumer';
-      document.body.append(host);
+      if (sceneMode) {
+        const scope = document.createElement('section'),
+          canvas = document.createElement('canvas');
+        canvas.style.cssText = 'width:2px;height:2px;display:block';
+        scope.append(canvas, host);
+        document.body.append(scope);
+        const lease = createCanvasBackdropLease(scope, canvas);
+        let subscriptions = 0,
+          releases = 0,
+          borrowedDisposals = 0;
+        const borrowed = {
+          ...lease,
+          subscribe(notify: () => void) {
+            subscriptions++;
+            const off = lease.subscribe(notify);
+            let live = true;
+            return () => {
+              if (!live) throw new Error('duplicate source unsubscribe');
+              live = false;
+              subscriptions--;
+              releases++;
+              off();
+            };
+          },
+          dispose() {
+            borrowedDisposals++;
+            lease.dispose();
+          },
+        };
+        sourceControl = {
+          scope,
+          lease,
+          borrowed,
+          draw(replacement) {
+            lease.draw((context, width, height) => {
+              const colors = replacement
+                ? ['#00ff00', '#00ff00', '#00ff00', '#00ff00']
+                : ['#ff0000', '#008000', '#000040', '#4080c0'];
+              for (let i = 0; i < 4; i++) {
+                context.fillStyle = colors[i];
+                context.fillRect(
+                  ((i % 2) * width) / 2,
+                  (Math.floor(i / 2) * height) / 2,
+                  width / 2,
+                  height / 2
+                );
+              }
+            });
+          },
+          state: () => ({
+            subscriptions,
+            releases,
+            borrowedDisposals,
+            sourceAvailable: lease.current() !== null,
+          }),
+        };
+        sourceControl.draw(false);
+      } else document.body.append(host);
       host.addEventListener('click', (event) => {
         clicks++;
         clickedTag = (event.composedPath()[0] as Element).tagName;
       });
-      const Component = component(target, execution);
+      const Component = component(target, execution, configured);
       let visible = true;
       let update: () => Promise<void>, unmount: () => void;
       if (target === 'react') {
@@ -202,6 +295,22 @@ export function createShaderBrowserFixture(
         },
       };
       await settled(target);
+    },
+    sceneRevoke() {
+      if (!sourceControl) throw new Error('No scene source');
+      sourceControl.lease.revoke();
+    },
+    sceneDraw(replacement = true) {
+      if (!sourceControl) throw new Error('No scene source');
+      sourceControl.draw(replacement);
+    },
+    async sceneMove(outside: boolean) {
+      if (!sourceControl || !active) throw new Error('No scene consumer');
+      (outside ? document.body : sourceControl.scope).append(active.host);
+      await settled();
+    },
+    sceneState() {
+      return sourceControl?.state() ?? retiredSource;
     },
     async visible(value: boolean) {
       if (!active) throw new Error('No consumer');
@@ -422,4 +531,11 @@ export function createShaderBrowserFixture(
     diagnostics: () => direct?.diagnostics() ?? [],
     close,
   };
+}
+
+export function createShaderSceneBrowserFixture(
+  generated: Record<Target, any>,
+  prototype: typeof shaderPrototype
+) {
+  return createShaderBrowserFixture(generated, prototype, true);
 }

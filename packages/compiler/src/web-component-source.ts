@@ -208,6 +208,8 @@ export function emitWebComponentSource(
   });
   if (
     !validIdentifier(className) ||
+    (admitted.value.shaderScenes &&
+      ['createComponent', 'createShaderHost', 'WebShaderHostOptions'].includes(className)) ||
     [
       'GeneratedProps',
       'GeneratedExposes',
@@ -395,7 +397,8 @@ export function emitWebComponentSource(
     admitted.value.operations,
     prefix,
     admitted.value.ruleMetaKeys,
-    admitted.value.shaderKernels
+    admitted.value.shaderKernels,
+    admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -1041,7 +1044,7 @@ export type GeneratedExposes = {
 ${exposes}
 };
 ${nativeHelpers(prefix, contextValidation, styled, interacting, eventSupport, outwardEvents, true, JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))), staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined', true, atoms, hasAuthoredHooks, publicCalls, controlLabel)}
-export class ${className} extends HTMLElement {
+${atoms.shaderScenes ? 'export function createComponent(shaderHost?: WebShaderHostOptions) {\nclass' : 'export class'} ${className} extends HTMLElement {
   private ${prefix}Owner: ${prefix}Owner | null = null;
   private ${prefix}Port: BrowserPort | null = null;
   private ${prefix}Raw: Record<string, unknown> = {};
@@ -1079,7 +1082,7 @@ ${controlLabel ? `    this.${prefix}Owner?.interaction.refresh();` : ''}
     }
     const port = createNativeBrowserPort(this, ${options.shadow ? 'true' : 'false'}, ${interacting ? `${prefix}CreateNativeInteraction` : 'undefined'}, ${outwardEvents ? `${prefix}MarkNativeExposeEvent` : 'undefined'});
     this.${prefix}Port = port;
-    const owner = ${prefix}CreateOwner(port${controlLabel ? `, () => this.${prefix}Associations` : ''});
+    const owner = ${prefix}CreateOwner(port${controlLabel ? `, () => this.${prefix}Associations` : ''}${atoms.shaderScenes ? ', shaderHost' : ''});
     this.${prefix}Owner = owner;
     const ${prefix}Def = owner.def;
 ${publicCalls ? `    const ${prefix}WrapPublic = owner.wrapPublic;` : ''}
@@ -1135,6 +1138,7 @@ ${options.propsUpdatePolicy === 'host' ? `      if (changed && !this.${prefix}Cl
     try { owner?.dispose(); } finally { this.${prefix}Port?.dispose(); this.${prefix}Port = null; }
   }
 }
+${atoms.shaderScenes ? `return ${className};\n}\nexport const ${className} = createComponent();\nexport type ${className} = InstanceType<typeof ${className}>;` : ''}
 export function register(tagName = ${JSON.stringify(tagName)}, registry: CustomElementRegistry = customElements): typeof ${className} {
   const existing = registry.get(tagName);
   if (existing && existing !== ${className}) throw new Error('Custom element tag already registered: ' + tagName);
@@ -1240,7 +1244,7 @@ ${context ? `  context: ${p}ContextDef;\n` : ''}  props: {define(input: Record<s
   lifecycle: {onCreated(fn: Function): void; onMounted(fn: Function): void; onUpdated(fn: Function): void; onUnmounted(fn: Function): void; onBeforeDispose(fn: Function): void};
 };
 type ${p}Owner = {${atoms.shader ? `shader: ReturnType<typeof ${p}CreateShader>; ` : ''}${publicCalls ? `wrapPublic: ReturnType<typeof ${p}CreatePublicCalls>; ` : ''}${hasAuthoredHooks ? `authored: ReturnType<typeof ${p}CreateAuthored>; ` : ''}${atoms.delay ? `delay: ReturnType<typeof ${p}CreateDelay>; ` : ''}${atoms.presence ? `presence: ReturnType<typeof ${p}CreatePresence<${p}Run>>; ` : ''}${atoms.meta ? 'meta: (key: string) => unknown; ' : ''}identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(${ssr ? 'exhaustive?: boolean' : ''}): void};
-function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}${controlLabel ? ', getAssociations: () => unknown' : ''}): ${p}Owner {
+function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}${controlLabel ? ', getAssociations: () => unknown' : ''}${atoms.shaderScenes ? ', shaderHost?: WebShaderHostOptions' : ''}): ${p}Owner {
   let alive = true, disposing = false, setup = true, callbackDepth = 0;
 ${
   interacting
@@ -1263,7 +1267,7 @@ ${ssr ? '' : '  let detachedDisplay: {value: string; priority: string} | undefin
   const ensureExternal = () => { ensure(); if (disposing) throw new Error('Logical owner is disposing'); };
   const ensureSetup = () => { ensure(); if (!setup) throw new Error('Setup capability is closed'); };
   const runtime = () => { ensure(); if (setup || !callbackDepth) throw new Error('State writes require a live callback scope'); };
-  ${atoms.owner({ setup: 'ensureSetup()', runtime: 'runtime()', alive: 'alive', invoke: 'invoke(callback, [], false)', invokeRun: 'invoke(callback)', document: ssr ? "host.root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)" : 'host.ownerDocument', run: `${p}Run`, root: ssr ? 'host.root' : 'host', prepare: styled ? `${p}Style.refresh();` : '' })}
+  ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: 'ensureSetup()', runtime: 'runtime()', alive: 'alive', invoke: 'invoke(callback, [], false)', invokeRun: 'invoke(callback)', document: ssr ? "host.root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)" : 'host.ownerDocument', run: `${p}Run`, root: ssr ? 'host.root' : 'host', prepare: styled ? `${p}Style.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `  const ${p}AuthoredWatchCleanups: (() => void)[] = [];

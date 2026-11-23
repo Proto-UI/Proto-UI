@@ -130,6 +130,8 @@ export function emitVue2Source(
     admitted.value.operations.some((operation) => stateDeclarations.has(operation));
   if (
     !validIdentifier(componentName) ||
+    (admitted.value.shaderScenes &&
+      ['createComponent', 'createShaderHost', 'WebShaderHostOptions'].includes(componentName)) ||
     ['GeneratedProps', 'GeneratedExposes'].includes(componentName)
   ) {
     return {
@@ -325,7 +327,8 @@ export function emitVue2Source(
     admitted.value.operations,
     prefix,
     admitted.value.ruleMetaKeys,
-    admitted.value.shaderKernels
+    admitted.value.shaderKernels,
+    admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -820,7 +823,7 @@ ${hooks}
 }
 
 /** @typedef {import('vue').default & { readonly ${ownerKey}: ReturnType<typeof ${prefix}CreateOwner>${contextArtifacts ? `; readonly ${JSON.stringify(`${prefix}ParentScope`)}?: ReturnType<typeof ${prefix}CreateContextScope> | null` : ''} }} ${prefix}NativeInstance */
-export const ${componentName} = {
+${atoms.shaderScenes ? '/** @param {WebShaderHostOptions} [shaderHost] */\nexport function createComponent(shaderHost) {\nreturn' : `export const ${componentName} =`} {
   name: ${JSON.stringify(ir.name)},
   inheritAttrs: false,
   props: { instanceAssociations: { type: Object, default: undefined }, ${propDeclarations} },
@@ -833,7 +836,7 @@ export const ${componentName} = {
   }
   /** @this {${prefix}NativeInstance} */
   beforeCreate() {
-    Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.propsUpdatePolicy ? options.propsUpdatePolicy === 'host' : options.autoUpdateOnPropsChange !== false}) });
+    Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.propsUpdatePolicy ? options.propsUpdatePolicy === 'host' : options.autoUpdateOnPropsChange !== false}${atoms.shaderScenes ? ', shaderHost' : ''}) });
     ${
       options.ssr
         ? `const session = ${prefix}FindSession(this);
@@ -864,6 +867,7 @@ export const ${componentName} = {
   /** @this {${prefix}NativeInstance} @param {import('vue').CreateElement} h */
   render(h) { return this[${ownerKey}].render(h); },
 };
+${atoms.shaderScenes ? `}\nexport const ${componentName} = createComponent();` : ''}
 export default ${componentName};
 ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''}
 `;
@@ -1060,8 +1064,8 @@ function PUIRootData(properties, attrs, initial) {
 }`
     : ''
 }
-${ssr ? '' : '/** @param {PUIOwnerInstance} vm @param {(owner: PUIOwner) => PUIRenderFunction | void} setup @param {Record<string, PUIDataType>} types @param {string} rootTag @param {boolean} autoUpdate */'}
-function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
+${ssr ? '' : '/** @param {PUIOwnerInstance} vm @param {(owner: PUIOwner) => PUIRenderFunction | void} setup @param {Record<string, PUIDataType>} types @param {string} rootTag @param {boolean} autoUpdate ' + (atoms.shaderScenes ? '@param {WebShaderHostOptions} [shaderHost] ' : '') + '*/'}
+function PUICreateOwner(vm, setup, types, rootTag, autoUpdate${atoms.shaderScenes ? ', shaderHost' : ''}) {
   ${
     ssr
       ? `let session, initialProjection, requestIndex, sourceIdentity;
@@ -1354,7 +1358,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
       : new AggregateError(failures, '[Vue2 native] presence withdrawal failed.');
   };
 ${context.owner}
-  ${atoms.owner({ setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', root: 'activeRoot && activeRoot.ownerDocument.defaultView && activeRoot instanceof activeRoot.ownerDocument.defaultView.HTMLElement ? activeRoot : null', prepare: styled ? 'style.refresh();' : '', typed: false })}
+  ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: 'setupOnly()', runtime: 'callback()', alive: '!disposed', invoke: 'invoke(callback, false)', invokeRun: 'invoke(() => callback(run), false)', document: "vm.$el?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: 'PUIRun', root: 'activeRoot && activeRoot.ownerDocument.defaultView && activeRoot instanceof activeRoot.ownerDocument.defaultView.HTMLElement ? activeRoot : null', prepare: styled ? 'style.refresh();' : '', typed: false })}
 ${
   hasAuthoredHooks
     ? `  /** @type {(() => void)[]} */ const PUIAuthoredWatchCleanups = [];

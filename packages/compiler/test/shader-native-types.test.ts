@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import ts from 'typescript';
 import { expect, it } from 'vitest';
@@ -13,18 +13,18 @@ for (const profile of [
   'vue2-source-v1',
   'web-component-source-v1',
 ] as const)
-  it(`${profile}: strict native consumers preserve copy-only, tint-only, combined and static factory interfaces`, async () => {
+  it(`${profile}: strict native consumers preserve copy-only, tint-only, combined, static factory and configured scene interfaces`, async () => {
     const root = process.cwd(),
       base = path.join(root, 'packages/compiler/test/generated-modules');
     await mkdir(base, { recursive: true });
     const temporary = await mkdtemp(path.join(base, 'shader-types-'));
     try {
       const names: string[] = [];
-      for (const kind of ['copy', 'tint', 'both', 'static-data'] as const) {
+      for (const kind of ['copy', 'tint', 'both', 'static-data', 'scene'] as const) {
         const source =
-          kind === 'static-data'
+          kind === 'static-data' || kind === 'scene'
             ? await readFile(
-                'packages/compiler/test/fixtures/shader-static-data-owner.proto.ts',
+                `packages/compiler/test/fixtures/shader-${kind === 'scene' ? 'scene' : 'static-data'}-owner.proto.ts`,
                 'utf8'
               )
             : shaderVariantSource(kind);
@@ -33,6 +33,20 @@ for (const profile of [
         const directory = path.join(temporary, kind),
           written = await writeCompilation(compiled.value, directory);
         if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+        if (kind === 'scene') {
+          const consumer = path.join(directory, 'configure-consumer.ts');
+          const entry = './' + generatedSourcePath(profile).replace(/\.[cm]?[jt]sx?$/, '');
+          await writeFile(
+            consumer,
+            `import { createComponent, createShaderHost } from ${JSON.stringify(entry)};
+import { createWebShaderHost } from ${JSON.stringify(path.join(root, 'packages/adapters/base/src/material/shader-scene-host'))};
+const sources = { ownedScenes: { mainScene: { current: () => null, subscribe: (_notify: () => void) => () => {} } } };
+export const native = createComponent(createShaderHost(sources));
+export const shared = createComponent(createWebShaderHost(sources));
+`
+          );
+          names.push(consumer);
+        }
         names.push(
           path.join(directory, generatedSourcePath(profile)),
           ...(compiled.value.output.supportingFiles ?? [])
