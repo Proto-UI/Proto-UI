@@ -806,6 +806,42 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
   return subjects;
 }
 
+function selectorMayDependOnInputState(selector: string): boolean {
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    // An unresolved nesting selector cannot prove that input is unrelated.
+    if (character === '&') return true;
+    if (character !== ':') continue;
+    const pseudoElement = selector[index + 1] === ':';
+    const start = index + (pseudoElement ? 2 : 1);
+    let end = start;
+    while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+    const name = selector.slice(start, end).toLowerCase();
+    // Attribute/tree changes, focus/modality and URL changes already have
+    // their own observers. Native checkedness, validity, range, placeholder,
+    // autofill and unknown pseudo states may change without a DOM mutation.
+    // Keep those conservative across the stylesheet's whole scope, including
+    // form-associated controls, sibling conditions and nested :has branches.
+    const independent = pseudoElement
+      ? /^(?:before|after|first-letter|first-line|marker|backdrop|selection|placeholder|part|slotted)$/.test(
+          name
+        )
+      : /^(?:is|where|not|has|nth(?:-last)?-(?:child|of-type)|(?:first|last|only)-(?:child|of-type)|root|scope|host|host-context|empty|defined|dir|lang|hover|active|focus(?:-within|-visible)?|link|any-link|visited|target(?:-within)?|enabled|disabled|required|optional|read-only|read-write|before|after|first-letter|first-line)$/.test(
+          name
+        );
+    if (!independent || selector[end] === '\\') return true;
+    // Continue through functional pseudo arguments so e.g. :not(:checked)
+    // and :nth-child(2 of :has(input:invalid)) retain their state dependency.
+    index = end - 1;
+  }
+  return false;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -817,6 +853,7 @@ function collectEntryStyleDependencies(
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
+  let inputState = false;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
@@ -845,6 +882,7 @@ function collectEntryStyleDependencies(
     if (rule.type === 3) {
       const imported = (rule as CSSImportRule).styleSheet;
       if (imported) visitSheet(imported);
+      else inputState = true;
     }
     if (rule.type === 1) {
       let selector = (rule as CSSStyleRule).selectorText;
@@ -853,6 +891,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
+      inputState ||= selectorMayDependOnInputState(selector);
       if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
@@ -943,6 +982,7 @@ function collectEntryStyleDependencies(
           // Unknown selector syntax is correctness-sensitive: retain a bounded
           // external-chain fallback rather than silently missing a change.
           relational ||= 1;
+          inputState = true;
         }
       }
     }
@@ -958,6 +998,7 @@ function collectEntryStyleDependencies(
     } catch {
       // Cross-origin sheets remain opaque; their owner media still applies.
       relational ||= 1;
+      inputState = true;
     }
   };
   for (const root of roots)
@@ -970,6 +1011,7 @@ function collectEntryStyleDependencies(
     relationalSubjects,
     positionParents,
     filteredPositionParents,
+    inputState,
   ] as const;
 }
 
@@ -2102,6 +2144,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 relationalSubjects,
                 positionParents,
                 filteredPositionParents,
+                hasInputStateStyleDependency,
               ] = collectEntryStyleDependencies(
                 view!,
                 mediaRoots,
@@ -2206,9 +2249,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   attributes: true,
                 });
               }
-              const stopEntryEnvironmentEvents = listenToEntryEvents(
-                [view!, ...mediaQueries],
-                ['resize', 'change'],
+              const stopEntryResizeEvents = listenToEntryEvents(
+                [view!],
+                ['resize'],
+                projectCurrent
+              );
+              // A form change bubbles through Window too. Only media query
+              // changes are environmental invalidations for every entry.
+              const stopEntryMediaEvents = listenToEntryEvents(
+                mediaQueries,
+                ['change'],
                 projectCurrent
               );
               const onFormReset = (event: Event) => {
@@ -2322,9 +2372,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   (event.type === 'focusin' || event.type === 'focusout')
                 )
                   return;
-                if (event.type.startsWith('transition')) {
+                const transition = event.type.startsWith('transition');
+                if (transition) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (!propertyAffectsEntryEligibility(propertyName)) return;
+                }
+                if (
+                  transition ||
+                  ((event.type === 'input' || event.type === 'change') &&
+                    !hasInputStateStyleDependency)
+                ) {
                   const path = event.composedPath();
                   const origin = path[0];
                   if (
@@ -2393,7 +2450,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   view!.cancelAnimationFrame(eligibilityAnimationFrame);
                 eligibilityAnimationFrame = 0;
                 eligibilityAnimations.clear();
-                stopEntryEnvironmentEvents();
+                stopEntryResizeEvents();
+                stopEntryMediaEvents();
                 stopFormResetEvents();
                 stopSiblingStateEvents();
                 if (keyboardTraversalTimer) view!.clearTimeout(keyboardTraversalTimer);
