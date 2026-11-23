@@ -14,6 +14,7 @@ import {
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { RUNTIME_TEST_INCLUDES } from './runtime-inventory.mjs';
+import { assertGeneralCheckEvidence } from './general-check-plan.mjs';
 import {
   BROWSER_SHARD_COUNT,
   BROWSER_SUITES,
@@ -132,7 +133,7 @@ export function assertRuntimeGate(needs, plan, receipts, sha = checkoutSha()) {
       1,
       `Missing/duplicate receipt: ${selection.phase} ${selection.shard}`
     );
-    const { report, source, ...actual } = matches[0];
+    const { report, source, generalChecks, ...actual } = matches[0];
     assert.deepEqual(
       actual,
       selection,
@@ -140,6 +141,19 @@ export function assertRuntimeGate(needs, plan, receipts, sha = checkoutSha()) {
     );
     assertRuntimeSource(source, selection);
     assertVitestReport(report, selection);
+    if (selection.phase === 'general') {
+      const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+      assertGeneralCheckEvidence(generalChecks, 'general', manifest);
+      assertRuntimeSource(
+        { before: generalChecks.sourceBefore, after: generalChecks.sourceAfter },
+        selection
+      );
+      assert.deepEqual(
+        generalChecks.sourceAfter,
+        source.after,
+        'General preparation and runtime must certify the same source'
+      );
+    } else assert.equal(generalChecks, undefined, 'Browser receipt cannot replace general checks');
   }
 }
 
@@ -166,6 +180,7 @@ export const runtimeSlots = [
     { length: BROWSER_SHARD_COUNT },
     (_, index) => `browser-${index + 1}-of-${BROWSER_SHARD_COUNT}`
   ),
+  'governance',
 ];
 export function artifactName({ runId, attempt, slot }) {
   return `runtime-ci-${runId}-${slot}-attempt-${attempt}`;
@@ -211,19 +226,40 @@ export function latestSlotReceipts(artifacts, context) {
 export function assertCiGate(needs, artifacts, context = ciContext()) {
   // This is also the hard-cancellation guard when a producer cannot upload its
   // final receipt. Never infer success from old artifacts while needs is red.
-  assert.deepEqual(Object.keys(needs).sort(), ['test-browser', 'test-general', 'test-plan']);
+  assert.deepEqual(Object.keys(needs).sort(), [
+    'cycle-plan',
+    'test-browser',
+    'test-general',
+    'test-governance',
+    'test-plan',
+  ]);
   for (const [job, result] of Object.entries(needs))
     assert.equal(result.result, 'success', `Required job ${job} did not succeed`);
   const [plan, ...results] = latestSlotReceipts(artifacts, context);
+  const governance = results.find((receipt) => receipt.slot === 'governance').payload;
+  const specBase = needs['cycle-plan'].outputs?.spec_base;
+  assert.match(specBase ?? '', /^[a-f0-9]{40}$/, 'Missing exact cycle spec base');
+  const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+  assertGeneralCheckEvidence(governance, 'governance', manifest, specBase);
+  assertRuntimeSource(
+    { before: governance.sourceBefore, after: governance.sourceAfter },
+    { checkoutSha: context.checkoutSha }
+  );
   assertRuntimeGate(
-    needs,
+    Object.fromEntries(
+      ['test-browser', 'test-general', 'test-plan'].map((job) => [job, needs[job]])
+    ),
     plan.payload,
-    results.map(({ slot, payload }) => {
-      const expectedSlot =
-        payload.phase === 'general' ? 'general' : `browser-${payload.shard?.replace('/', '-of-')}`;
-      assert.equal(slot, expectedSlot, 'Receipt payload must belong to its logical slot');
-      return payload;
-    }),
+    results
+      .filter(({ slot }) => slot !== 'governance')
+      .map(({ slot, payload }) => {
+        const expectedSlot =
+          payload.phase === 'general'
+            ? 'general'
+            : `browser-${payload.shard?.replace('/', '-of-')}`;
+        assert.equal(slot, expectedSlot, 'Receipt payload must belong to its logical slot');
+        return payload;
+      }),
     context.checkoutSha
   );
 }
@@ -281,7 +317,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     });
     assertCiGate(JSON.parse(process.env.RUNTIME_CI_NEEDS ?? '{}'), artifacts, context);
     console.log(
-      `Runtime gate passed for run ${context.runId} attempt ${context.attempt} event/checkout ${context.checkoutSha}: general plus ${BROWSER_SHARD_COUNT} browser shards`
+      `Runtime gate passed for run ${context.runId} attempt ${context.attempt} event/checkout ${context.checkoutSha}: complete governance, general and ${BROWSER_SHARD_COUNT} browser shards`
     );
   } else {
     throw new Error(
