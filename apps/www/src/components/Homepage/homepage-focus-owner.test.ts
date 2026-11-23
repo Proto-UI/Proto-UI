@@ -31,7 +31,7 @@ const controls = [
     name: 'announcement',
     parent: 'class="homepage-hero__eyebrow"',
     attrs: 'data-home-action-variant="minimal"',
-    appearance: 'text',
+    appearance: 'pill',
   },
 ] as const;
 
@@ -96,14 +96,16 @@ describe('Homepage native focus paint ownership', () => {
     expect(rule).not.toBeNull();
     const selector = rule![1];
     expect(rule![2].trim()).toBe('outline: none;');
-    for (const { appearance } of controls) {
+    for (const appearance of ['brand', 'nav', 'action', 'text', 'pill']) {
       const link = document.createElement('a');
       link.href = '/docs/';
       link.className = 'home-runtime-link';
       link.dataset.siteLinkAppearance = appearance;
       expect(link.matches(selector)).toBe(false);
       link.dataset.siteLinkEnhanced = 'true';
-      expect(link.matches(selector)).toBe(true);
+      // The Hero pill keeps its native outer focus ring; its passive Surface
+      // explicitly opts out of focus paint. Other appearances use Surface.
+      expect(link.matches(selector)).toBe(appearance !== 'pill');
       link.dataset.siteLinkEnhanced = 'false';
       expect(link.matches(selector)).toBe(false);
     }

@@ -9,27 +9,44 @@ import liquidButton from '@proto.ui/prototypes-liquid-glass/button';
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
 import bootstrapButton from '@proto.ui/prototypes-bootstrap-2-3-2/button';
+import * as shadcnSelect from '@proto.ui/prototypes-shadcn/select';
+import * as bootstrapSelect from '@proto.ui/prototypes-bootstrap-2-3-2/select';
+import * as liquidSelect from '@proto.ui/prototypes-liquid-glass/select';
+import * as shadcnSwitch from '@proto.ui/prototypes-shadcn/switch';
+import * as bootstrapSwitch from '@proto.ui/prototypes-bootstrap-2-3-2/switch';
+import * as liquidSwitch from '@proto.ui/prototypes-liquid-glass/switch';
 import { createFieldDemo } from './field-demo.shared';
 import { renderDemo } from '../../components/PrototypePreviewer/demo-renderer';
 
 vi.mock('../../components/PrototypePreviewer/registry', () => ({
   getPrototype(id: string) {
-    if (id === 'base-button') return baseButton;
-    if (id === 'liquid-glass-button') return liquidButton;
-    if (id === 'shadcn-button') return shadcnButton;
-    if (id === 'brutalist-button') return brutalistButton;
-    if (id === 'bootstrap-2-3-2-button') return bootstrapButton;
-    const family = id.startsWith('liquid-glass-')
-      ? liquid
-      : id.startsWith('shadcn-')
-        ? shadcn
-        : id.startsWith('brutalist-')
-          ? brutalist
-          : id.startsWith('bootstrap-2-3-2-')
-            ? bootstrap
-            : base;
-    const role = id.split('-').at(-1)!;
-    return family[`field${role[0].toUpperCase()}${role.slice(1)}` as keyof typeof family];
+    // The actual demo also contains Field Select/Switch compositions. Resolve
+    // the real exported prototype identity, not the last word of its role.
+    const candidates = [
+      baseButton,
+      liquidButton,
+      shadcnButton,
+      brutalistButton,
+      bootstrapButton,
+      ...[
+        base,
+        liquid,
+        shadcn,
+        brutalist,
+        bootstrap,
+        shadcnSelect,
+        bootstrapSelect,
+        liquidSelect,
+        shadcnSwitch,
+        bootstrapSwitch,
+        liquidSwitch,
+      ].flatMap(Object.values),
+    ];
+    const prototype = candidates.find(
+      (value) => value && typeof value === 'object' && 'name' in value && value.name === id
+    );
+    if (!prototype) throw new Error(`Missing real Field demo dependency: ${id}`);
+    return prototype;
   },
 }));
 const cleanups: Array<() => void> = [];
