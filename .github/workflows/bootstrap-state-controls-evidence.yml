@@ -1,7 +1,19 @@
 name: Bootstrap state-controls evidence
 on:
   workflow_dispatch:
+    inputs:
+      validate_public_packages:
+        description: Run the canonical public package build and consumer gates
+        type: boolean
+        required: false
+        default: false
   workflow_call:
+    inputs:
+      validate_public_packages:
+        description: Run the canonical public package build and consumer gates
+        type: boolean
+        required: false
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -595,5 +607,69 @@ jobs:
         with:
           name: bootstrap-source-validation-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+  public-package-validation:
+    name: Public packages (${{ matrix.group }})
+    if: ${{ inputs.validate_public_packages == true }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ matrix.timeout }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { group: build, timeout: 20 }
+          - { group: react, timeout: 20 }
+          - { group: cli, timeout: 15 }
+    defaults:
+      run:
+        shell: bash
+    env:
+      PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      PUI_PUBLIC_VALIDATION_GROUP: ${{ matrix.group }}
+      COREPACK_ENABLE_PROJECT_SPEC: '0'
+    steps:
+      - name: Initialize isolated public package evidence
+        run: |
+          pui_public_evidence="$RUNNER_TEMP/bootstrap-public-packages-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$PUI_PUBLIC_VALIDATION_GROUP"
+          mkdir "$pui_public_evidence"
+          printf 'PUI_PUBLIC_EVIDENCE_DIR=%s\n' "$pui_public_evidence" >> "$GITHUB_ENV"
+      - name: Check out the exact source
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Set up Node 24
+        id: node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute the complete canonical public package group
+        id: execution
+        run: node scripts/test/run-bootstrap-public-validation.mjs run "$PUI_PUBLIC_VALIDATION_GROUP" "$PUI_PUBLIC_EVIDENCE_DIR"
+      - name: Preserve terminal public package status
+        if: ${{ always() }}
+        env:
+          PUI_PUBLIC_CHECKOUT_OUTCOME: ${{ steps.checkout.outcome }}
+          PUI_PUBLIC_NODE_OUTCOME: ${{ steps.node.outcome }}
+          PUI_PUBLIC_EXECUTION_OUTCOME: ${{ steps.execution.outcome }}
+        run: |
+          if [[ ! -f scripts/test/run-bootstrap-public-validation.mjs ]]; then
+            printf '{"schemaVersion":1,"status":"failed","group":"%s","expectedHead":"%s","runId":"%s","runAttempt":"%s","failures":["validation helper unavailable; execution is unverified"]}\n' \
+              "$PUI_PUBLIC_VALIDATION_GROUP" "$PROTO_UI_EXPECTED_HEAD_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" \
+              > "$PUI_PUBLIC_EVIDENCE_DIR/manifest.json"
+            exit 1
+          fi
+          node scripts/test/run-bootstrap-public-validation.mjs finalize "$PUI_PUBLIC_VALIDATION_GROUP" "$PUI_PUBLIC_EVIDENCE_DIR"
+      - name: Upload original public package evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-public-packages-${{ matrix.group }}-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ env.PUI_PUBLIC_EVIDENCE_DIR }}
           if-no-files-found: error
           retention-days: 30
