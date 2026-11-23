@@ -600,6 +600,25 @@ type Scope = Map<string, Binding>;
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
     assertDataGraph(input);
+    // Admit the inert envelope and its version before deriving this version's
+    // input schemas. Unsupported versions retain their own public diagnostic.
+    const root = object(input, [
+      'schemaVersion',
+      'name',
+      'source',
+      'sourceFiles',
+      'setup',
+      'hooks',
+      'contextKeys',
+      'staticDeclarations',
+      'moduleDeclarations',
+      'moduleBindings',
+      'props',
+      'exposes',
+      'requirements',
+    ]);
+    if (root.schemaVersion !== IR_VERSION)
+      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     // Schema order follows authored definitions, not this validator's scheduling
     // of helper/hook typechecks. The derivation never trusts claimed schemas.
     const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR);
@@ -747,23 +766,6 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       return output as T;
     }
-    const root = object(input, [
-      'schemaVersion',
-      'name',
-      'source',
-      'sourceFiles',
-      'setup',
-      'hooks',
-      'contextKeys',
-      'staticDeclarations',
-      'moduleDeclarations',
-      'moduleBindings',
-      'props',
-      'exposes',
-      'requirements',
-    ]);
-    if (root.schemaVersion !== IR_VERSION)
-      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     text(root.name);
     const source = object(root.source, ['file', 'exportName', 'sha256']);
     const entry = safeFile(source.file);

@@ -1,5 +1,5 @@
 import { structuralStatementOrder } from './declaration-order';
-import { reject } from './diagnostics';
+import { reject, unknownDiagnosticSpan } from './diagnostics';
 import type { AuthoredHookIR, ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
 import { ordinaryValueChildren } from './value-children';
 
@@ -58,12 +58,7 @@ export function inferInputPayloadSchemas(
 ): ReadonlyMap<Registration, InputPayloadSchema> {
   const schemas = new Map<Registration, InputPayloadSchema>();
   const malformed = (message: string): never =>
-    reject(
-      'PUI2002',
-      message,
-      { file: '<ir>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
-      'invalid-ir'
-    );
+    reject('PUI2002', message, unknownDiagnosticSpan('<ir>'), 'invalid-ir');
   const record = <T extends object>(value: unknown): T => {
     if (!value || typeof value !== 'object' || Array.isArray(value))
       malformed('Input schema discovery requires IR records.');

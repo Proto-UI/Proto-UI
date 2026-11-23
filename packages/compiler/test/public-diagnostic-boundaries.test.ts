@@ -469,6 +469,20 @@ describe('#1457 diagnostic-only fallback boundaries', () => {
     unknownOrigin(value, '<ir>');
   });
 
+  it('keeps payload-schema shape failures at a truthful unknown location', () => {
+    const compiled = compiler.compilePrototype(source('malformed-hook-container'));
+    if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+    // Preserve a real current-version envelope while invalidating only the
+    // container consumed by the payload-schema pass.
+    const value = failure(validateIR({ ...compiled.value.ir, hooks: null }));
+    expect(value).toMatchObject({
+      code: 'PUI2002',
+      category: 'invalid-ir',
+      message: 'Input schema discovery requires IR arrays.',
+    });
+    unknownOrigin(value, '<ir>');
+  });
+
   it('preserves real IR spans and continues rejecting a diagnostic sentinel as authored IR', () => {
     const result = compiler.compilePrototype(
       `import {definePrototype} from '@proto.ui/core';

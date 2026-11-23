@@ -173,6 +173,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     category: 'unsupported-input',
     meaning: 'Requested props-update policy or capability override is not admitted.',
   },
+  PUI4009: {
+    category: 'unsupported-input',
+    meaning:
+      'Native shader declaration fails graph validation or static lowering, or combines Shader and Presence without an admitted atomic material profile.',
+  },
   PUI4101: {
     category: 'invalid-input',
     meaning: 'Project source/manifest entry is not a valid project.',
@@ -286,6 +291,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   PUI_GPUI_A11Y_VALUE: {
     category: 'unsupported-input',
     meaning: 'GPUI SetValue requires its default route or a literal nonempty host:* event route.',
+  },
+  PUI_GPUI_CONTROL_LABEL_ANATOMY: {
+    category: 'unsupported-input',
+    meaning:
+      'GPUI ControlLabel supports explicit typed InstanceAssociations but has no native lowering for Anatomy pairing.',
   },
   PUI_GPUI_HOST_REQUIRED: {
     category: 'unsupported-input',
