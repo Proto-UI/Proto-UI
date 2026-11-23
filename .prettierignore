@@ -35,6 +35,7 @@ internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
+
 # Historical evidence bytes bound by retained SHA manifests; see
 # internal/records/2026-11-23-integration-archived-evidence-bytes.md
 internal/records/2026-11-22-sprint2-mobile-navigation-control-evidence/

@@ -30,6 +30,8 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 传入 `value` 进入受控模式。`inputMode` 与 `enterKeyHint` 可选，Root 没有默认值。
 
+暴露的 `resetValue(value?: string): boolean` 方法继承自 Base Input。值所有权、composition 会话退役、返回值与生命周期限制详见[重置已挂载的编辑器](../../base/input/#重置已挂载的编辑器)。
+
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
@@ -52,7 +54,4 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-INPUT.yaml', 'P-BASE-INPUT.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-INPUT.yaml', 'P-BASE-INPUT.yaml']} />

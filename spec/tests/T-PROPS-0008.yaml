@@ -71,6 +71,24 @@ cases:
       - C-PROPS-0012-K
     expectation: raw-before-resolved-registration-order
 implementations:
+  - id: compiler-native-dom-raw-watchers
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/raw-props-watch-consumer.test.ts
+    required: true
+    consumesCases:
+      - T-PROPS-0008-CASE-GET-RAW
+      - T-PROPS-0008-CASE-UNDECLARED-KEYS
+      - T-PROPS-0008-CASE-REGISTRATION-SURFACE
+      - T-PROPS-0008-CASE-HYDRATION-SKIP
+      - T-PROPS-0008-CASE-RAW-DIFF
+      - T-PROPS-0008-CASE-WATCH-RAW-ALL
+      - T-PROPS-0008-CASE-WATCH-RAW-KEYS
+      - T-PROPS-0008-CASE-DISPATCH-ORDER
+    notes:
+      - Executes actual generated React, Vue and Web Component owners through ordinary framework imports; covers Object.is diffs, callback snapshot identity, raw-all/keyed/resolved order and the specific escape-hatch diagnostic.
+      - A native Web Component notification synchronously disposes its owner; the remaining raw and resolved callbacks must not run.
+      - GPUI registration admission and Vue2 deferred diagnostics are checked separately; this suite does not establish native GPUI event delivery or cross-target runtime disposer semantics.
   - id: module-props-watch-raw
     kind: module-test
     status: passing
@@ -191,6 +209,9 @@ revisions:
   - version: 0.2.0-rc.3
     change: revised
     summary: Added real React 19 ref stability coverage for adapter-supplied raw snapshot diffing.
+  - version: 0.2.0-rc.3
+    change: revised
+    summary: Added generated native DOM owner evidence for raw snapshot diffs, dispatch order, warning and terminal callback delivery.
 tags:
   - props
   - contract-test

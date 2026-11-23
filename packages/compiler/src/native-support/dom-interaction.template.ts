@@ -38,12 +38,14 @@ export type NativeEventChannel<Run> = {
 };
 export type NativeInteraction<Run = unknown> = {
   event: NativeEventChannel<Run>;
+  /** Internal capture receipt: release only a token registered by this owner. */
+  releaseListener(token: NativeListenerToken): void;
   asTrigger(): void; asFocusable(): NativeFocus; asAccessible(): NativeAccessible; asControlLabel(): NativeControlLabel<Run>;
   projectAttributes(): Readonly<Record<string, string | null>>;
   adoptAttributes(snapshot: Readonly<Record<string, string | null>>, baselines?: Readonly<Record<string, string | null>>): void;
   refresh(): void; mount(): void; unmount(): void; dispose(): void;
 } & Omit<NativeModuleCapabilities<Run>, 'projectAttributes' | 'refresh' | 'mount' | 'unmount' | 'dispose' | 'setFocusDisabled' | 'canFocus' | 'adoptControlState' | 'hasAuthoredControlLabelName' | 'beginControlLabelName' | 'controlLabelAnatomyScope' | 'subscribeControlLabelAnatomy'>;
-type Registration<Run> = { type: string; kind: 'root' | 'global'; callback: (run: Run, event: NativeInput | Event) => void; options?: NativeHostOptions };
+type Registration<Run> = { active: boolean; type: string; kind: 'root' | 'global'; callback: (run: Run, event: NativeInput | Event) => void; options?: NativeHostOptions };
 const semanticEvents: Record<string, true> = ${JSON.stringify(Object.fromEntries(semanticEvents.map((type) => [type, true])))};
 const stateAttributes: Record<string, string> = ${JSON.stringify(stateAttributes)};
 // Canonical logical owners survive view epochs; native targets identify physical input.
@@ -95,7 +97,7 @@ export function createNativeInteraction<Run>(options: {
   let disabled = false, autoFocus = false, navParticipation: 'auto' | 'none' = 'auto', keyboard = false;
   let pendingFocus: NativeFocusOptions | undefined, hasPendingFocus = false, didAutoFocus = false;
   let role: string | NativeState<string> | undefined, contentName = false;
-  const identity = options.identity ?? {}, registrations: Registration<Run>[] = [], removals: (() => void)[] = [], subscriptions: (() => void)[] = [];
+  const identity = options.identity ?? {}, registrations: Registration<Run>[] = [], capturedListeners = new WeakMap<NativeListenerToken, Registration<Run>>(), removals: (() => void)[] = [], subscriptions: (() => void)[] = [];
   const states = new Map<string, NativeState>(), stateConditions = new Map<string, NativeState<boolean>>(), actions = new Map<string, { event?: string }>();
   const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
   let sequence = 0, suppressKeyboardClick = false, pressKey: string | null = null, pointer: number | null = null;
@@ -210,14 +212,16 @@ export function createNativeInteraction<Run>(options: {
     const copied = hostOptions === undefined ? undefined : Object.freeze({ ...hostOptions });
     // Delivery below selects the exact recorded type before selecting raw host or portable data.
     const typedCallback = callback as unknown as (run: Run, event: NativeInput | Event) => void;
-    registrations.push({ kind, type, callback: typedCallback, options: copied });
+    const registration: Registration<Run> = { kind, type, callback: typedCallback, options: copied, active: true };
+    registrations.push(registration);
     const meta = { kind, type, options: copied, label: undefined as string | undefined };
     const token: NativeListenerToken = { id: 'ev_' + ++sequence, meta, desc(text) { options.ensureSetup('event.token.desc'); if (text.trim()) meta.label = text.trim(); return token; } };
+    capturedListeners.set(token, registration);
     return token;
   }
   function emit(kind: 'root' | 'global', type: string, native: Event, epoch: number, target: HTMLElement) {
     for (const registration of registrations) {
-      if (registration.kind !== kind || registration.type !== type || !deliverable(epoch, target)) continue;
+      if (!registration.active || registration.kind !== kind || registration.type !== type || !deliverable(epoch, target)) continue;
       let deadline = true;
       const payload: { type: string; pointerType?: NativeInput['pointerType']; pointerButtons?: NativeInput['pointerButtons']; control: NativeInput['control']; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean } = { type, control: Object.freeze({
         requestDefaultActionPrevention(_request?: { reason?: string; source?: string }) {
@@ -360,12 +364,12 @@ export function createNativeInteraction<Run>(options: {
     const globalEmit = (type: string, native: Event) => emit('global', type, native, epoch, target);
     try {
       for (const registration of registrations) {
-        if (!registration.type.startsWith('host:')) continue;
+        if (!registration.active || !registration.type.startsWith('host:')) continue;
         const hostType = registration.type.slice(5);
         const where = registration.kind === 'root' ? host! : global;
         // Only events delivered by the DOM host reach raw host:* callbacks. Portable
         // payloads and outward CustomEvent Expose signals are never fed to this route.
-        listen(where, hostType, (native: Event) => options.invoke(() => registration.callback(options.getRun(), native)), registration.options);
+        listen(where, hostType, (native: Event) => { if (registration.active) options.invoke(() => registration.callback(options.getRun(), native)); }, registration.options);
       }
       if (!focusDeclared && !registrations.some((entry) => !entry.type.startsWith('host:'))) { refresh(); return; }
       for (const [nativeName, semanticName] of [['pointerdown','pointer.down'],['pointermove','pointer.move'],['pointerup','pointer.up'],['pointercancel','pointer.cancel'],['pointerenter','pointer.enter'],['pointerleave','pointer.leave']] as const) {
@@ -503,6 +507,7 @@ export function createNativeInteraction<Run>(options: {
   }) : null;
   return {
     event: { on: (type, callback, hostOptions) => register('root', type, callback, hostOptions), onGlobal: (type, callback, hostOptions) => register('global', type, callback, hostOptions) },
+    releaseListener(token) { options.ensureSetup('asHook.disposer'); const registration = capturedListeners.get(token); if (!registration) throw new Error('[Event] listener token belongs to a different owner.'); registration.active = false; },
     asTrigger() { options.ensureSetup('hook.asTrigger'); trigger = true; },
     asFocusable() { options.ensureSetup('hook.asFocusable'); if (!focusDeclared) { focusDeclared = true; focusable.set(!disabled); const register = options.registerGenericObservedState ?? options.registerObservedState; register?.(focused.handle); register?.(focusVisible.handle); register?.(focusable.handle); } modules.configureFocusable({}); return focus; },
     asAccessible() { options.ensureSetup('hook.asAccessible'); return accessible; },
