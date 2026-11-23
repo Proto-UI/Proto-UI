@@ -138,3 +138,6 @@ internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brut
 internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-enhanced.json
 internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-no-js.json
 internal/records/evidence/2026-11-23-train-package-budget/candidate.json
+
+# Exact original #1453 analysis reports; the receipt binds their emitted bytes.
+internal/records/2026-11-24-props-update-analysis-evidence/

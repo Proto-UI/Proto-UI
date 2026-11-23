@@ -11,11 +11,14 @@ import { resolveTargetProfile, checkTargetOperations, type TargetSelection } fro
 import { attachEmitterMap } from './emitter-map';
 import { compilerBuildIdentity } from './compiler-build';
 import { unexpectedFailureEvidence } from './diagnostics';
+import { analyzePropsUpdates, type PropsUpdateAnalysis } from './props-update-analysis';
 import type { CompileResult, GeneratedModule, ParseOptions, PrototypeIR } from './ir';
 
 export interface Compilation {
   ir: PrototypeIR;
   output: GeneratedModule;
+  /** Compile-time advice only; it is separate from rejection diagnostics and emitted code. */
+  analysis?: { propsUpdates: PropsUpdateAnalysis };
 }
 export interface CompileOptions extends ParseOptions {
   componentName?: string;
@@ -101,11 +104,31 @@ export function compilePrototype(
       };
   }
   if (!emitted.ok) return emitted;
+  let propsUpdates: PropsUpdateAnalysis;
+  try {
+    propsUpdates = analyzePropsUpdates(
+      parsed.value,
+      profile.value.observableSemantics.props.update
+    );
+  } catch (error) {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI1999',
+          category: 'compiler-defect',
+          message: `Props update analysis failed (span identifies setup context): ${unexpectedFailureEvidence(error)}`,
+          span: parsed.value.setup.span,
+        },
+      ],
+    };
+  }
   try {
     return {
       ok: true,
       value: {
         ir: parsed.value,
+        analysis: { propsUpdates },
         output: attachEmitterMap(
           {
             ...emitted.value,
