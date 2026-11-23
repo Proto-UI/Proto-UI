@@ -87,15 +87,28 @@ describe('compiled GPUI explicit ControlLabel association', () => {
     expect(result.value.output.code).toContain('.member("source", false)');
   });
 
-  it('retains the shared parser boundary for an explicitly supplied undefined descriptor', () => {
-    const result = compilePrototype(
-      `${prefix}export default definePrototype({name:'caption',setup(){asControlLabel().label(undefined);return r=>r.slot();}});`,
-      { profile: 'gpui-source-v1' }
-    );
-    expect(result.ok).toBe(false);
-    if (result.ok) throw new Error('shared unsupported argument unexpectedly admitted');
-    expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(['PUI1006']);
-  });
+  it.each(['label', 'target'])(
+    'treats an explicitly undefined %s descriptor as omitted through public, direct and cold IR paths',
+    (kind) => {
+      const input = (explicit: boolean) =>
+        `${prefix}export default definePrototype({name:'caption',setup(){asControlLabel().${kind}(${kind === 'target' ? '()=>{}' + (explicit ? ',' : '') : ''}${explicit ? 'undefined' : ''});
+return r=>r.slot();}});`;
+      const omitted = compilePrototype(input(false), { profile: 'gpui-source-v1' });
+      if (!omitted.ok) throw new Error(JSON.stringify(omitted.diagnostics));
+      const parsed = parsePrototype(input(true));
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+      const publicResult = compilePrototype(input(true), { profile: 'gpui-source-v1' });
+      if (!publicResult.ok) throw new Error(JSON.stringify(publicResult.diagnostics));
+      expect(publicResult.value.output.code).toBe(omitted.value.output.code);
+      for (const result of [
+        emitGpuiSource(parsed.value),
+        emitGpuiSource(JSON.parse(JSON.stringify(parsed.value))),
+      ]) {
+        if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+        expect(result.value.code).toBe(omitted.value.output.code);
+      }
+    }
+  );
 
   it.each(['label', 'target'])(
     'rejects unsupported native Anatomy %s at public and direct emitter entry points',
@@ -108,6 +121,7 @@ describe('compiled GPUI explicit ControlLabel association', () => {
       if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
       for (const result of [
         emitGpuiSource(parsed.value),
+        emitGpuiSource(JSON.parse(JSON.stringify(parsed.value))),
         compilePrototype(source, { profile: 'gpui-source-v1' }),
       ]) {
         expect(result.ok).toBe(false);

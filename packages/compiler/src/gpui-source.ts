@@ -372,18 +372,6 @@ export function emitGpuiSource(
       });
     if (
       node.kind === 'operation' &&
-      ((node.operation === 'controlLabel.label' && node.arguments.length > 0) ||
-        (node.operation === 'controlLabel.target' && node.arguments.length > 1))
-    )
-      diagnostics.push({
-        code: 'PUI_GPUI_CONTROL_LABEL_ANATOMY',
-        category: 'unsupported-input',
-        message:
-          'GPUI ControlLabel supports direct typed InstanceAssociations; anatomy-pair descriptors require an explicit host lowering.',
-        span: node.span,
-      });
-    if (
-      node.kind === 'operation' &&
       node.operation === 'event.on' &&
       node.arguments[2]?.kind === 'record'
     ) {
