@@ -1,0 +1,491 @@
+{
+  "schemaVersion": 1,
+  "candidate": {
+    "repository": "Proto-UI/Proto-UI",
+    "pullRequest": 1733,
+    "branch": "work/seven-sprints-integration-20261123",
+    "parent": "502693304fc8d7509402fdfb586b283681915231",
+    "mergeParent": "b715b8a6d08c2c79417272c8d4ca9254984feadb",
+    "reviewedSourceTreeBeforeEvidence": "125a76628d12c446af4ed020a0ac91abb4f7f9c9",
+    "localBranch": "repair/compiler-reconcile-20261123-recovered"
+  },
+  "authoringSourceScope": "14 explicitly tracked reconciliation inputs; complete staged path inventory also retained with both parent blob identities",
+  "authoringSourceSha256": {
+    "packages/compiler/src/gpui-native-owner.ts": "399024812561d134591ef10a05cac46d9ca9e97763c30e5d4bb3be0bbbdca805",
+    ".github/workflows/compiler-gpui-source-consumers.yml": "9595ca4695ce415a74134de0c10cdd6723093e9aecbdd008175a278685454168",
+    "packages/compiler/src/gpui-source.ts": "aa35758e4ce2c3a01594835c354bb0edcac841e5bf5529343ecb77da6776ac0c",
+    "packages/compiler/src/targets.ts": "6db296261e37497d6eeafb75c7d7a2e950f800aee1fce6d80f130e4a1b474c6c",
+    "packages/compiler/src/value-types.ts": "61c030d5de9e5c2fb66beb9f0261dd6bb774483c117d67976d2e735769ee0a20",
+    "packages/compiler/test/string-coercion.test.ts": "33f81db3f9dec41fc7d5698f542f4663c8871f48e19d891703d96ac60f3106b6",
+    "packages/compiler/src/gpui-native-scroll.ts": "89bfcf8ebeef81381f5d8a499dbe6bdea66f12c7425246cf2f99bc8a63458247",
+    "packages/compiler/test/fixtures/gpui-ordinary-values/scroll-reader-consumer.rs": "436ff5b882f0e1367895f8f4c30e6cd54ab3fc8d2e9e573ebad5b29c20efb5c5",
+    "packages/compiler/test/text-reset-native.test.ts": "cdf526573fb3c6911c8fa47204bac2589adc39c368ea8ee87c457f8ad0bcfa10",
+    "packages/compiler/src/native-support/dom-modules.template.ts": "f2a112375d7d3765bce795958e41467d95975f425dd03c971eab48a1416152b0",
+    "packages/compiler/src/gpui-native-style.ts": "19176f635b013995d12e634f563bc4aa0677aced23a5128a7c7743dd1ffa7b50",
+    "packages/compiler/src/gpui-native-authored-hooks.ts": "08a92ba993f38defcc9e62d77160d5b7e8ea950e02af3f136dabd079ef245749",
+    "packages/compiler/src/gpui-native-hover.ts": "6297ec4421f5e73ed92aca757a66fb417d559f6d0de2b9015111c2a1d8c2b664",
+    "packages/compiler/test/fixtures/gpui-ordinary-values/Cargo.lock": "6d6e7ad41957cdb5be429b719fa27c18b633ea4ac6c77ac02fc4802ed7019e32"
+  },
+  "generatedRustEdited": false,
+  "generatedRustFileCount": 73,
+  "sourceRuns": [
+    {
+      "name": "general compiler and Input",
+      "files": 18,
+      "passed": 253,
+      "failed": 0,
+      "skipped": 0,
+      "ownerPhase": "before subsequent external observer phase-only repair",
+      "logSha256": "7ae446b3abf51462d8a1a61178b51d3302178beb32b40f0281c8ef144578a54c"
+    },
+    {
+      "name": "Scroll source regressions",
+      "files": 9,
+      "passed": 135,
+      "failed": 0,
+      "skipped": 0,
+      "ownerPhase": "after repair",
+      "logSha256": "96363b97a2fb643758db688385c31cf6a1daead445aa9935e1dece7ede968e3f"
+    }
+  ],
+  "nativeCounts": {
+    "native-sdk": {
+      "passed": 27,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "targetCounts": [27]
+    },
+    "ordinary-consumers": {
+      "passed": 65,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "targetCounts": [4, 14, 39, 3, 4, 1]
+    },
+    "numeric-consumer": {
+      "passed": 9,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "targetCounts": [9]
+    }
+  },
+  "graphControls": {
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0
+  },
+  "nativeSteps": [
+    {
+      "name": "graph-controls",
+      "command": ["node", "--test", "scripts/gpui/test/cargo-graph.test.mjs"],
+      "exitCode": 0,
+      "logSha256": "048a8564bb90b4c6870a40e65551669d8366d6619a1c886ba2b1fda073bcddc4"
+    },
+    {
+      "name": "numeric-lock-prepare",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "metadata",
+        "--offline",
+        "--all-features",
+        "--format-version",
+        "1",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/numeric-v4/Cargo.toml"
+      ],
+      "exitCode": 0,
+      "logSha256": "00933e9d575c65dd1b9ffc6b6ffe71fccf0af10958f44ee2a3ba76077bb2bd8e"
+    },
+    {
+      "name": "ordinary-locked-graph",
+      "command": [
+        "node",
+        "scripts/gpui/check-cargo-graph.mjs",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/generated-v4/transition/Cargo.toml",
+        "--git",
+        "https://github.com/zed-industries/zed",
+        "--rev",
+        "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+        "--toolchain",
+        "1.98.1",
+        "--output",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/ordinary-graph-v4.json"
+      ],
+      "exitCode": 0,
+      "logSha256": "419cd2966ab5c8eb9d98f82891f7241a7312ce04f4802c005ed6c612046e64dd"
+    },
+    {
+      "name": "numeric-locked-graph",
+      "command": [
+        "node",
+        "scripts/gpui/check-cargo-graph.mjs",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/numeric-v4/Cargo.toml",
+        "--git",
+        "https://github.com/zed-industries/zed",
+        "--rev",
+        "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+        "--toolchain",
+        "1.98.1",
+        "--output",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/numeric-graph-v4.json"
+      ],
+      "exitCode": 0,
+      "logSha256": "bb95eea2ee3fcaf45c361e7daf9028c2a4dab4719670b12b77c46895a873c748"
+    },
+    {
+      "name": "native-sdk",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/numeric-v4/Cargo.toml",
+        "-p",
+        "proto-ui-gpui-native",
+        "--features",
+        "test-support,gpui/test-support",
+        "--lib",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "logSha256": "29b409dcfb54f91716b5f42d5ec5baff2fb55c3d257d94c5b9c3f6d8fd79730e"
+    },
+    {
+      "name": "ordinary-consumers",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/generated-v4/transition/Cargo.toml",
+        "--features",
+        "test-support",
+        "--test",
+        "ordinary",
+        "--test",
+        "control_label",
+        "--test",
+        "style_mapping",
+        "--test",
+        "a11y_activation",
+        "--test",
+        "scroll_pause",
+        "--test",
+        "scroll_reader",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "logSha256": "56f723f39df1e6e0554895b26374a05300ad4c85c513d000f9d816936314a770"
+    },
+    {
+      "name": "numeric-consumer",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/numeric-v4/Cargo.toml",
+        "--test",
+        "a11y_value",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "logSha256": "209ba921fbd5b4f298e6cbc5732cca5ad0baa3aad34b6f70856d3feed3a7312f"
+    },
+    {
+      "name": "default-sdk",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "check",
+        "--offline",
+        "--locked",
+        "--manifest-path",
+        "/tank/shared/projects/proto-ui-agent/compiler-reconcile-cc618/generated-v4/transition/Cargo.toml",
+        "--lib"
+      ],
+      "exitCode": 0,
+      "logSha256": "f9f06ddd0c7bbeb36b887f5085b7b1764723671cf39bee106202d35173f20429"
+    }
+  ],
+  "toolchain": {
+    "node": "24.22.3",
+    "rust": "1.98.1",
+    "gpuiGit": "https://github.com/zed-industries/zed",
+    "gpuiRev": "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+    "actualNativeLocked": true,
+    "actualNativeOffline": true
+  },
+  "initialDiagnostic": {
+    "unpublishedSourceHead": "f342328a2417b9cf0a8e1c4337ae2f090ecd5e9f",
+    "ordinaryArchiveSha256": "b2f0a8b0fcfc5c3352669b05a0deef44cf5624df05d9a5df33f2ed7c8c68fa73",
+    "numericArchiveSha256": "05213dde6e96f11c68e0b0d6db34aff2778854afe8cc01205da2d945ee9ad09b",
+    "originalStatusRecords": [
+      "status.json",
+      "sdk-status.json",
+      "sdk-v2-status.json",
+      "consumer-status.json"
+    ],
+    "statusCorrection": "The original sdk-v2 archiveSha256 identifies the ordinary archive. Preserve that original record; numericArchiveSha256 here identifies the actual numeric input. Historical diagnostic runs do not certify the recovered source."
+  },
+  "rawArchive": {
+    "path": "commands-and-output.tar.gz",
+    "sha256": "00f3abc6efcc4151ddcf10c83e9395af55c323f9e827bbd390324970fc376208",
+    "bytes": 577364,
+    "members": [
+      {
+        "path": "current/source-v2-status.json",
+        "sha256": "47711f3d1025f179aac42d47b9015e35d534485a70a6ce7d5536b3e4a4ee36ec",
+        "bytes": 11458
+      },
+      {
+        "path": "current/source-v2-logs/compiler-source-types.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "current/source-v2-logs/diff-check.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "current/source-v2-logs/focused-regression.log",
+        "sha256": "7ae446b3abf51462d8a1a61178b51d3302178beb32b40f0281c8ef144578a54c",
+        "bytes": 494394
+      },
+      {
+        "path": "current/source-v2-logs/format.log",
+        "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+        "bytes": 66
+      },
+      {
+        "path": "current/source-v2-logs/node-version.log",
+        "sha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+        "bytes": 9
+      },
+      {
+        "path": "current/source-v2-logs/rust-source-parse.log",
+        "sha256": "9aebcabf32e9b6435647e5e6d12c5c6c440ed71b327689a248747a6007bfdb93",
+        "bytes": 16416
+      },
+      {
+        "path": "current/source-v2-logs/stage-resolutions.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "current/validation-v1-status.json",
+        "sha256": "c1fcd8f3a4e62844904872919cb2871f8b7e3274ecb0b126ceef6d9fd92c64d2",
+        "bytes": 4138
+      },
+      {
+        "path": "current/validation-v1-logs/format.log",
+        "sha256": "fedff3259cd7bb121ff13f9d0a1a458bc0c460eb32dda0a0d62d94fd1dad10e2",
+        "bytes": 941
+      },
+      {
+        "path": "current/validation-v1-logs/frozen-install.log",
+        "sha256": "2c1e6f830560362dc278b7d7bb483ca4d5f35d4c618a35fcf4ff1ca274a68f9a",
+        "bytes": 1801
+      },
+      {
+        "path": "current/validation-v1-logs/node-version.log",
+        "sha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+        "bytes": 9
+      },
+      {
+        "path": "current/native-v3-status.json",
+        "sha256": "d8c7204e9a555e14b34dba75e865d1989a195e2aa53f84ff13bd7900d0ffaa36",
+        "bytes": 649
+      },
+      {
+        "path": "current/native-v4-status.json",
+        "sha256": "9f7b121c02095b71ebd5fab9d6413d479c11ff30b1ee2cdf3f86423f2b19eec2",
+        "bytes": 9238
+      },
+      {
+        "path": "current/native-v4-logs/diff-check.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "current/native-v4-logs/format.log",
+        "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+        "bytes": 66
+      },
+      {
+        "path": "current/native-v4-logs/graph-controls.log",
+        "sha256": "1727f6fca5b349990228c56ab33bb17f1f829ead85c677c3758ec199039d81ee",
+        "bytes": 23131
+      },
+      {
+        "path": "current/native-v4-logs/numeric-producer.log",
+        "sha256": "4d4e3a1348ee3e800324ecc3d9a13af0eb890b467d365c78a573fcc41540d242",
+        "bytes": 1227
+      },
+      {
+        "path": "current/native-v4-logs/ordinary-producer.log",
+        "sha256": "235d41e2732d609dae67ad6bd7b2edf0017727ac97717854b04e69215ec48c7f",
+        "bytes": 184
+      },
+      {
+        "path": "current/native-v4-logs/scroll-source-regression.log",
+        "sha256": "96363b97a2fb643758db688385c31cf6a1daead445aa9935e1dece7ede968e3f",
+        "bytes": 498292
+      },
+      {
+        "path": "current/native-v4-logs/stage-phase-fix.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "path": "current/native-v5-status.json",
+        "sha256": "6ae94b1152b92f2805247fab6e6dd31732e144702436cd8e9f2c0f9818b6bf35",
+        "bytes": 29769
+      },
+      {
+        "path": "current/native-v5-logs/default-sdk.log",
+        "sha256": "f9f06ddd0c7bbeb36b887f5085b7b1764723671cf39bee106202d35173f20429",
+        "bytes": 99530
+      },
+      {
+        "path": "current/native-v5-logs/graph-controls.log",
+        "sha256": "048a8564bb90b4c6870a40e65551669d8366d6619a1c886ba2b1fda073bcddc4",
+        "bytes": 1576
+      },
+      {
+        "path": "current/native-v5-logs/native-sdk.log",
+        "sha256": "29b409dcfb54f91716b5f42d5ec5baff2fb55c3d257d94c5b9c3f6d8fd79730e",
+        "bytes": 5687
+      },
+      {
+        "path": "current/native-v5-logs/numeric-consumer.log",
+        "sha256": "209ba921fbd5b4f298e6cbc5732cca5ad0baa3aad34b6f70856d3feed3a7312f",
+        "bytes": 22425
+      },
+      {
+        "path": "current/native-v5-logs/numeric-lock-prepare.log",
+        "sha256": "00933e9d575c65dd1b9ffc6b6ffe71fccf0af10958f44ee2a3ba76077bb2bd8e",
+        "bytes": 1985487
+      },
+      {
+        "path": "current/native-v5-logs/numeric-locked-graph.log",
+        "sha256": "bb95eea2ee3fcaf45c361e7daf9028c2a4dab4719670b12b77c46895a873c748",
+        "bytes": 2176
+      },
+      {
+        "path": "current/native-v5-logs/ordinary-consumers.log",
+        "sha256": "56f723f39df1e6e0554895b26374a05300ad4c85c513d000f9d816936314a770",
+        "bytes": 590383
+      },
+      {
+        "path": "current/native-v5-logs/ordinary-locked-graph.log",
+        "sha256": "419cd2966ab5c8eb9d98f82891f7241a7312ce04f4802c005ed6c612046e64dd",
+        "bytes": 1898
+      },
+      {
+        "path": "current/review-index.json",
+        "sha256": "a92927052743f08eca120a6a06d973738b572c76455ebd983440bc7116b99fda",
+        "bytes": 120256
+      },
+      {
+        "path": "current/external-phase.patch",
+        "sha256": "43e82873a14d322ab4a7097a540e1ca377f9a8418f9fff957256c5ebff3b56b8",
+        "bytes": 1914
+      },
+      {
+        "path": "current/compiler-source-tsconfig.json",
+        "sha256": "9c87e1fefd21b0c7322c62be2e3668ad625fc9b688f7023c65d05e18f58b119f",
+        "bytes": 656
+      },
+      {
+        "path": "current/resolution-v1-status.json",
+        "sha256": "a822f42e83778093915b33a0e6d9789b387f4b4e2f2f0b35551ad0d6c575bbcd",
+        "bytes": 3201
+      },
+      {
+        "path": "current/numeric-v4/receipt.json",
+        "sha256": "68904a3e6e418872ba7be9abbea746124f040ca87ab5474ded58115433a389f4",
+        "bytes": 1139
+      },
+      {
+        "path": "current/ordinary-graph-v4.json",
+        "sha256": "419cd2966ab5c8eb9d98f82891f7241a7312ce04f4802c005ed6c612046e64dd",
+        "bytes": 1898
+      },
+      {
+        "path": "current/numeric-graph-v4.json",
+        "sha256": "bb95eea2ee3fcaf45c361e7daf9028c2a4dab4719670b12b77c46895a873c748",
+        "bytes": 2176
+      },
+      {
+        "path": "initial-diagnostic/status.json",
+        "sha256": "c85aa2b1437d3e1d8e4a7bfc613697ae4aafa2e8e00c8bb12af77af64e0cfd4b",
+        "bytes": 901
+      },
+      {
+        "path": "initial-diagnostic/sdk-status.json",
+        "sha256": "3cf07c244788cd6bea7ba0977f57a92336c586bf88509762d90268379b79ee7d",
+        "bytes": 895
+      },
+      {
+        "path": "initial-diagnostic/sdk-v2-status.json",
+        "sha256": "9734103179bd20f2842178a58fd225b4ee53a4b8c64622718a7021f1d6e78c6f",
+        "bytes": 1495
+      },
+      {
+        "path": "initial-diagnostic/consumer-status.json",
+        "sha256": "d161303198566eebc42ee9ead6044c1a07a14e308d67c6faee1db8537a40c9a7",
+        "bytes": 1133
+      },
+      {
+        "path": "initial-diagnostic/logs/0",
+        "sha256": "e8ba25ea0890bf6630709e9f811ccb71944e489015181c521f81c609f9040c2a",
+        "bytes": 65
+      },
+      {
+        "path": "initial-diagnostic/sdk-logs/0",
+        "sha256": "8021410ad909a9b1056faa1a8469cd9a5545be0af919a0b844aec019c5870b57",
+        "bytes": 316
+      },
+      {
+        "path": "initial-diagnostic/sdk-v2-logs/0",
+        "sha256": "76f2f34d1f33723e18b99e7b2239d2a45028cae0fa1cc965120861ba4fd43ed1",
+        "bytes": 1986513
+      },
+      {
+        "path": "initial-diagnostic/sdk-v2-logs/1",
+        "sha256": "f69a6ed2ab3bcac144042fcf394706e4bba72f651d89e45ac7feae816885caae",
+        "bytes": 1162
+      },
+      {
+        "path": "initial-diagnostic/consumer-logs/0",
+        "sha256": "12f9c684ad9ba5b1d7542c07c4e3fdc12b270176c17c9d5fdad975511d5e0e49",
+        "bytes": 672995
+      }
+    ]
+  },
+  "limits": [
+    "No whole-workspace type-check or full umbrella CI claim",
+    "No physical OS IME or screen-reader acceptance claim",
+    "No S4/S5 Ready conclusion based on this integrated candidate",
+    "No threshold or negative-control change"
+  ]
+}

@@ -1,4 +1,10 @@
-import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import {
+  defineAsHook,
+  definePrototype,
+  type AsHookResult,
+  type DefHandle,
+  type RunHandle,
+} from '@proto.ui/core';
 import { asAccessible, asFocusable, asTextControl, asControlLabel } from '@proto.ui/hooks';
 import { declareTextControl } from '@proto.ui/module-text-control';
 import type {
@@ -20,7 +26,7 @@ export type {
   InputValueChangeDetail,
 } from './types';
 
-function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
+function setupInputEditor(def: DefHandle<InputRootProps, InputRootExposes>) {
   const accessible = asAccessible();
   def.props.define({
     value: { type: 'string', empty: 'fallback' },
@@ -87,9 +93,17 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
     if (!disabled.get()) focusable.focusSelf(options);
   });
   def.expose.method('blurSelf', () => focusable.blur());
-  asControlLabel().target((_, request) => {
-    if (!disabled.get() && request.isCurrent())
-      focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+  def.expose.method('resetValue', (next?: string) => {
+    const run = currentView;
+    if (!run) return false;
+    const epoch = ++viewEpoch;
+    const accepted = control.resetValue(next);
+    if (currentView !== run || viewEpoch !== epoch) return false;
+    const snapshot = control.snapshot();
+    composing.set(snapshot?.composing ?? false, 'reason: input reset composition');
+    if (currentView !== run || viewEpoch !== epoch) return false;
+    value.set(snapshot?.value ?? '', 'reason: input reset value');
+    return currentView === run && viewEpoch === epoch && accepted;
   });
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('change', { payload: 'json' });
@@ -211,10 +225,60 @@ function setupInputRoot(def: DefHandle<InputRootProps, InputRootExposes>) {
   return () => null;
 }
 
-export const asInputRoot = defineAsHook<InputRootProps, InputRootExposes, InputRootAsHookContract>({
-  name: 'as-input-root',
+/** Text editing protocol reusable by directly named controls with no independent Label pair. */
+export const asInputEditor = defineAsHook<
+  InputRootProps,
+  InputRootExposes,
+  InputRootAsHookContract
+>({
+  name: 'as-input-editor',
   modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
+  setup: setupInputEditor,
+});
+
+function setupInputRoot(_def: DefHandle<InputRootProps, InputRootExposes>) {
+  const inherited = asInputEditor();
+  const state = inherited.stateHandles;
+  if (!state) throw new Error('[base-input-root] editing state projection is required.');
+  const focusable = asFocusable<InputRootProps>();
+  asControlLabel().target((_, request) => {
+    if (!state.disabled.get() && request.isCurrent())
+      focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+  });
+  return inherited.render;
+}
+
+export const asInputRoot = defineAsHook<
+  InputRootProps,
+  InputRootExposes,
+  InputRootAsHookContract & {
+    asHooks: { 'as-input-editor': AsHookResult<InputRootProps, InputRootAsHookContract> };
+  }
+>({
+  name: 'as-input-root',
+  modules: asInputEditor.modules,
   setup: setupInputRoot,
+  projectHandle(result) {
+    const editor = result.getAsHookHandle?.('as-input-editor');
+    if (!editor) throw new Error('[as-input-root] editing handle projection is required.');
+    // Nested authored capture intentionally keeps ownership in the editor.
+    // Reproject its borrowed handles to preserve the existing InputRoot API.
+    return {
+      ...result,
+      props: editor.props,
+      state: editor.state,
+      stateHandles: editor.stateHandles,
+      getState: editor.getState,
+      methods: editor.methods,
+      getMethod: editor.getMethod,
+      artifacts: {
+        ...result.artifacts,
+        stateHandles: editor.stateHandles,
+        eventKeys: editor.artifacts?.eventKeys,
+        methods: editor.methods,
+      },
+    };
+  },
 });
 
 const inputRoot = definePrototype({

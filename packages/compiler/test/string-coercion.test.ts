@@ -167,6 +167,32 @@ describe('native String conversion', () => {
     ).toBe(false);
   });
 
+  it('admits bounded scalar conversion in GPUI', () => {
+    const text = program(`
+      def.expose.method('convert',(value:string|number|boolean|null)=>String(value));
+      def.expose.method('empty',()=>String());
+      def.expose.method('missing',()=>String(undefined));
+    `);
+    const result = compilePrototype(text, { profile: 'gpui-source-v1' });
+    expect(result.ok, result.ok ? undefined : JSON.stringify(result.diagnostics)).toBe(true);
+  });
+
+  it.each([
+    "def.expose.method('convert',()=>String({value:1}));",
+    "def.expose.method('convert',()=>String([1,2]));",
+    `function convert(value:unknown){return String(value);}
+      def.expose.method('convert',(value:string)=>convert(value));`,
+  ])('keeps structured or opaque GPUI coercion unsupported: %s', (body) => {
+    const result = compilePrototype(program(body), { profile: 'gpui-source-v1' });
+    expect(result.ok).toBe(false);
+    if (!result.ok)
+      expect(
+        result.diagnostics.some(
+          (diagnostic) => diagnostic.code === 'PUI4003' && diagnostic.message.includes('String')
+        )
+      ).toBe(true);
+  });
+
   it('admits only proven scalar GPUI coercion and keeps direct Qt/Flutter unsupported', () => {
     const text = program('const value=String(1);'),
       ir = portable(text);

@@ -136,7 +136,7 @@ function assertNativeGraph(module: GeneratedModule): void {
   expect(owner).not.toContain('append_template_children');
   expect(owner).not.toContain('valid_template_children');
   expect(owner).toMatch(/projection\s*:\s*Option<NativeSnapshot>/);
-  expect(owner).toContain('Value::Renderer(render)=>render(');
+  expect(owner).toContain('Value::Renderer(adapter)=>(adapter.render)(');
 }
 
 // These are Rust source-shape checks, not a Rust parser, compiler or runtime oracle.
@@ -420,7 +420,9 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     (_label, body) => {
       const module = emit(body);
       expect(module.code).toContain('match callable');
-      expect(module.code).toContain('Value::Function(callback) => Value::Renderer');
+      expect(module.code).toContain(
+        'Value::Function(callback) => capture_renderer(Value::Function(callback.clone())'
+      );
       expect(module.code).not.toContain('Value::Template');
     }
   );

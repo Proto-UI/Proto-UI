@@ -309,7 +309,10 @@ export type ExpressionIR = ExpressionBase &
     | {
         kind: 'intrinsic';
         name:
+          | 'number'
           | 'number.isFinite'
+          | 'math.round'
+          | 'math.floor'
           | 'string'
           | 'object.freeze'
           | 'object.assign'

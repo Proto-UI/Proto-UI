@@ -2,7 +2,7 @@
 //! Copy this file into the generated consumer's tests/ without editing generated Rust.
 
 use generated_gpui_component::native::gpui_native_owner::{
-    assert_native_slot_children, request_update, strict_equal, NativeCallable, NativeSnapshot, Owner, OwnerRef,
+    assert_native_slot_children, capture_renderer, request_update, strict_equal, NativeCallable, NativeRenderer, NativeSnapshot, Owner, OwnerRef,
     Value,
 };
 use generated_gpui_component::native::gpui_native_style::StyleVocabulary;
@@ -15,6 +15,10 @@ fn owner() -> OwnerRef {
     )).expect("actual generated style fixture");
     Owner::new(json!({}), Default::default(), |_, _| true, |_| true, |_, _| true,
         Box::leak(Box::new(vocabulary)))
+}
+
+fn renderer(render: NativeRenderer) -> Value {
+    capture_renderer(Value::NativeFunction { identity: Rc::new(()), render: render.clone() }, render)
 }
 
 #[test]
@@ -138,7 +142,7 @@ fn only_explicit_projection_intent_reinvokes_the_authored_renderer() {
     let owner = owner();
     let calls = Rc::new(Cell::new(0));
     let renderer_calls = calls.clone();
-    Owner::finish(&owner, Value::Renderer(Rc::new(move |_| {
+    Owner::finish(&owner, renderer(Rc::new(move |_| {
         renderer_calls.set(renderer_calls.get() + 1);
         NativeSnapshot::text_value(Value::number(renderer_calls.get() as f64))
     })));
@@ -162,7 +166,7 @@ fn failed_projection_preserves_previous_snapshot_and_restores_the_phase() {
     let owner = owner();
     let invalid = Rc::new(Cell::new(false));
     let chosen = invalid.clone();
-    Owner::finish(&owner, Value::Renderer(Rc::new(move |_| {
+    Owner::finish(&owner, renderer(Rc::new(move |_| {
         if chosen.get() {
             NativeSnapshot::sequence(vec![NativeSnapshot::slot(), NativeSnapshot::slot()], None)
         } else {
@@ -186,7 +190,7 @@ fn an_authored_renderer_panic_restores_phase_without_a_partial_projection() {
     let owner = owner();
     let panic_next = Rc::new(Cell::new(false));
     let chosen = panic_next.clone();
-    Owner::finish(&owner, Value::Renderer(Rc::new(move |_| {
+    Owner::finish(&owner, renderer(Rc::new(move |_| {
         assert!(!chosen.get(), "authored renderer failure");
         NativeSnapshot::text_value(Value::string("before failure"))
     })));

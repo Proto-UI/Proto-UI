@@ -1,0 +1,55 @@
+{
+  "state": "First source-binding repair before removing the independent index reread window; historical result only",
+  "base": "d8da090538873fefd555753f60d3fce69f3cbee9",
+  "files": [
+    {
+      "path": "scripts/governance/history-source-bindings.mjs",
+      "sha256": "728af159aa3e0330af68e724c5644f6b8f093bacb681f1301a593a006bd30c94",
+      "bytes": 2393,
+      "archivedPath": "source/scripts/governance/history-source-bindings.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/history-source-bindings.test.mjs",
+      "sha256": "590dbfdfb05a158355ce0a909cd71b3df54787158ff424f4afbef0676cb03d1b",
+      "bytes": 4793,
+      "archivedPath": "source/scripts/governance/history-source-bindings.test.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/build-history-snapshot.mjs",
+      "sha256": "e143acfca1e0e4292d3e1a169fa9f7d78e9487322226eafe80dbc4adf46718fc",
+      "bytes": 6794,
+      "archivedPath": "source/scripts/governance/build-history-snapshot.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/reconcile-history-decisions.mjs",
+      "sha256": "7b11f5874218d46762531855fc71feac8ab5fa63d024c9ceb844cffe346a1074",
+      "bytes": 18473,
+      "archivedPath": "source/scripts/governance/reconcile-history-decisions.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/decode-history-archive.mjs",
+      "sha256": "21c9839438533b3457c70b81ae4b596cb27d55eaa6b5455ec3b68615f931ea7a",
+      "bytes": 6072,
+      "archivedPath": "source/scripts/governance/decode-history-archive.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/history-files.mjs",
+      "sha256": "5503054586be4e43ccdb00d13ce0b4815c9e99ffa910c28ab887a2000f23cd5a",
+      "bytes": 2038,
+      "archivedPath": "source/scripts/governance/history-files.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/history-audit.mjs",
+      "sha256": "e0422a36173ede69db9e723d287cb82de2267cd3d098b23252601b1f80028597",
+      "bytes": 22253,
+      "archivedPath": "source/scripts/governance/history-audit.mjs.txt"
+    },
+    {
+      "path": "scripts/governance/history-audit.test.mjs",
+      "sha256": "4b59bef34093c90ea86dff6708325848f0cfb7f242a322071b460bff40e8366e",
+      "bytes": 9178,
+      "archivedPath": "source/scripts/governance/history-audit.test.mjs.txt"
+    }
+  ],
+  "originalArchiveAndDecisionsChanged": false
+}

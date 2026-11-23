@@ -1,0 +1,73 @@
+{
+  "reviewerAgent": "/root/sprint1_3",
+  "observedAt": "2026-11-22T19:24:20.234511+00:00",
+  "parent": "69bf36be7237d34e8c387c8422b039ea37677003",
+  "python": "Python 3.12.14",
+  "runs": [
+    {
+      "argv": ["python3", "-B", "scripts/analysis/value-experiments/test-model-request.py", "-v"],
+      "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
+      "exitCode": 0,
+      "expectedTestCount": 9,
+      "reportedCountMatches": true,
+      "seconds": 0.127,
+      "stdout": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-model-request.stdout.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-model-request.stderr.log",
+      "stderrSha256": "a92418f7181f2d09f2e948252290b3979aecd6e6f6dfaaaf4c9e7eb4f265afa0",
+      "output": "test_json_mode_does_not_introduce_tools_or_transmit_timeout_settings (__main__.Boundary.test_json_mode_does_not_introduce_tools_or_transmit_timeout_settings) ... ok\ntest_model_tool_requests_have_no_dispatch (__main__.Boundary.test_model_tool_requests_have_no_dispatch) ... ok\ntest_only_explicit_literal_repair_history_is_accepted (__main__.Boundary.test_only_explicit_literal_repair_history_is_accepted) ... ok\ntest_path_and_configuration_injection_is_rejected (__main__.Boundary.test_path_and_configuration_injection_is_rejected) ... ok\ntest_source_is_inert_text_and_only_declared_files_survive (__main__.Boundary.test_source_is_inert_text_and_only_declared_files_survive) ... ok\ntest_tool_retrieval_and_history_channels_cannot_be_added (__main__.Boundary.test_tool_retrieval_and_history_channels_cannot_be_added) ... ok\ntest_truncation_is_failed_instead_of_repaired_or_dropped (__main__.Boundary.test_truncation_is_failed_instead_of_repaired_or_dropped) ... ok\ntest_unreferenced_files_and_environment_never_enter_request (__main__.Boundary.test_unreferenced_files_and_environment_never_enter_request) ... ok\ntest_valid_repair_history_is_exactly_the_supplied_pair (__main__.Boundary.test_valid_repair_history_is_exactly_the_supplied_pair) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.002s\n\nOK\n"
+    },
+    {
+      "argv": ["python3", "-B", "scripts/analysis/value-experiments/test-consumer-broker.py", "-v"],
+      "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
+      "exitCode": 0,
+      "expectedTestCount": 7,
+      "reportedCountMatches": true,
+      "seconds": 0.193,
+      "stdout": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-consumer-broker.stdout.log",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "/workspace/scratch/eb30117f7b2a/s27-workflow/protocol-build-revision-independent-consumer-broker.stderr.log",
+      "stderrSha256": "c1e8f09b88657cfa3796b806c6ebbde3ff77c410c054fddd7ded46c79acdd959",
+      "output": "test_failed_rebuild_revokes_observation_until_full_success (__main__.Capabilities.test_failed_rebuild_revokes_observation_until_full_success) ... ok\ntest_installation_requires_explicit_action_and_copy_retains_real_bytes (__main__.Capabilities.test_installation_requires_explicit_action_and_copy_retains_real_bytes) ... ok\ntest_no_observer_before_current_build (__main__.Capabilities.test_no_observer_before_current_build) ... ok\ntest_oracle_paths_and_unknown_files_never_read (__main__.Capabilities.test_oracle_paths_and_unknown_files_never_read) ... ok\ntest_package_scripts_and_arbitrary_commands_cannot_be_mutated_or_dispatched (__main__.Capabilities.test_package_scripts_and_arbitrary_commands_cannot_be_mutated_or_dispatched) ... ok\ntest_read_and_write_are_actual_bounded_capabilities (__main__.Capabilities.test_read_and_write_are_actual_bounded_capabilities) ... ok\ntest_symlink_escape_is_rejected (__main__.Capabilities.test_symlink_escape_is_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.030s\n\nOK\n"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "scripts/analysis/value-experiments/model-request.py",
+      "bytes": 10455,
+      "sha256": "43ddc740d13a52fa68fc15dc5cd135dbaad3af9be73ca56092dc5282bd74e9d9",
+      "gitBlobSha": "06eb591955619e54e9165149c339e7dce698b28c"
+    },
+    {
+      "path": "scripts/analysis/value-experiments/consumer-broker.py",
+      "bytes": 15801,
+      "sha256": "bf717d3837370ea02d66bba5ba47910fe843c90d69978065da3719a4e5fa285c",
+      "gitBlobSha": "adbaee4a6249798e606d90bc880472f72a0c8349"
+    },
+    {
+      "path": "scripts/analysis/value-experiments/test-model-request.py",
+      "bytes": 5258,
+      "sha256": "c8901b2895d2af5050187c17e3bac9d98b754843c0277a32b778254f16eca0c5",
+      "gitBlobSha": "991d830b0173500b02b2a61298b1cf54732f67ff"
+    },
+    {
+      "path": "scripts/analysis/value-experiments/test-consumer-broker.py",
+      "bytes": 6533,
+      "sha256": "612ed0f742fd8a3acb3f7768fffb305a3246695c2e33507cd0caf3c0e943b9f7",
+      "gitBlobSha": "1e8e46876cb31b289e2eb909c8e584a18d069ced"
+    }
+  ],
+  "beforeAfterSourceIdentical": true,
+  "diffCheckExitCode": 0,
+  "diffCheckOutput": "",
+  "liveRuns": {
+    "model": 0,
+    "api": 0,
+    "browser": 0,
+    "install": 0,
+    "consumerBuild": 0,
+    "consumerObservation": 0,
+    "participant": 0
+  },
+  "executionBoundary": "Existing offline tests plus explicit command/TCPServer/thread doubles; no actual model/API/install/typecheck/bundle/server/browser/observe execution."
+}

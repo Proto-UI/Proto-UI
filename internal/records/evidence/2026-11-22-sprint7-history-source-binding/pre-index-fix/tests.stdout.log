@@ -1,0 +1,26 @@
+✔ frozen current body and original source are both preserved; pending work blocks completion (6.163073ms)
+✔ historical accounting preserves an explicit evidence gap without pretending to reaccept the product (5.194852ms)
+✔ an independent acceptance cannot outlive its source or decision and cannot be self-issued (1.389027ms)
+✔ open, merged and closed-unmerged PRs retain distinct native outcomes (0.224049ms)
+✔ empty terminal page, stable-ID uniqueness and exact comment accounting reject partial capture (0.906018ms)
+✔ a post-cutoff object is excluded, not quietly counted in the review denominator (0.560226ms)
+✔ changing the reviewed source or dropping an original criterion invalidates a decision (2.408345ms)
+✔ three hours with empty assignees never becomes an ownership or takeover inference (1.071398ms)
+✔ Markdown example checkboxes do not manufacture acceptance criteria (1.061181ms)
+✔ an unchanged manual reading keeps its original record without acquiring acceptance (1.872106ms)
+✔ a changed body cannot inherit a manual reading through the same object number (0.454977ms)
+✔ edited or newly added discussion invalidates the previous manual reading (0.289176ms)
+✔ missing original proof cannot be silently replaced with a newly calculated hash (0.303579ms)
+✔ missing source objects and duplicate manual records fail before any inheritance (0.203127ms)
+✔ the same complete native source set is accepted independently of enumeration order (0.590041ms)
+✔ an equal-sized archive for a different capture population is rejected (0.207904ms)
+✔ changed PR, inline or timeline values cannot be substituted by another archive (1.223226ms)
+✔ missing or additional native captures reject the replacement before snapshot output (0.607727ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.448064
