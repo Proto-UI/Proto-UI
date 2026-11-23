@@ -98,7 +98,7 @@ mod native_key_boundary_tests {
             cx.run_until_parked();
         }
     }
-    fn key(window:WindowHandle<Host>,name:&str,down:bool,cx:&mut TestAppContext) {
+    fn key(window:WindowHandle<Host>,name:&'static str,down:bool,cx:&mut TestAppContext) {
         cx.update_window(window.into(),|_,window,cx|{
             let mut keystroke=Keystroke::parse(name).unwrap();
             // This physical sample explicitly carries the printable text fact.
