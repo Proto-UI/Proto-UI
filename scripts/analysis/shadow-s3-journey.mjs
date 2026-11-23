@@ -234,6 +234,8 @@ async function focused(page, profile, key) {
       outline: host.outlineStyle,
       color: host.outlineColor,
       focusVisible: el.hasAttribute('data-focus-visible'),
+      surfaceOutline: visual.outlineStyle,
+      surfaceOutlineWidth: visual.outlineWidth,
       ring: visual.getPropertyValue('--pui-ring-width').trim(),
       shadow: visual.boxShadow,
     };
@@ -241,6 +243,12 @@ async function focused(page, profile, key) {
   if (paint.split)
     assert.equal(paint.outline, 'none', `${profile}/${key}/no duplicate host outline`);
   else assert.notEqual(paint.outline, 'auto', `${profile}/${key}/authored outline replaces UA`);
+  if (paint.focusVisible && key.startsWith('trigger-')) {
+    assert.equal(paint.surfaceOutline, 'solid', `${profile}/${key}/source focus outline`);
+    assert.equal(paint.surfaceOutlineWidth, '1px', `${profile}/${key}/source focus outline width`);
+    assert.equal(paint.ring, '3px', `${profile}/${key}/source focus ring width`);
+    assert.notEqual(paint.shadow, 'none', `${profile}/${key}/source focus ring paint`);
+  }
   if (paint.focusVisible && ['switch', 'checkbox', 'button'].includes(key)) {
     assert.equal(paint.ring, '3px', `${profile}/${key}/surface focus ring width`);
     assert.notEqual(paint.shadow, 'none', `${profile}/${key}/surface focus ring paint`);

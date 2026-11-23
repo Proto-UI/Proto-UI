@@ -1241,11 +1241,18 @@ function sortUtilityOverrides(rules: CssRule[]): void {
   // line-height emitted by composite `text-*` utilities. The incoming token
   // list is alphabetical. Directional colors and corners likewise follow
   // their all-edge shorthands, regardless of token spelling or input order.
+  // Explicit outline longhands follow the transparent outline-none shorthand;
+  // authors can keep its boundary suppression while painting a 1px focus line.
   const overridePriority = (rule: CssRule): number => {
     const utility = splitVariants(rule.token).at(-1) ?? '';
     if (/^(duration|ease|delay)-/.test(utility)) return 1;
     if (/^rounded-[trbl]-/.test(utility)) return 1;
     if (/^border-b-(?:[a-z]|\[#)/.test(utility)) return 1;
+    if (
+      rule.css.some((declaration) => /^outline-(?:style|width|color|offset):/.test(declaration)) &&
+      !rule.css.some((declaration) => declaration.startsWith('outline:'))
+    )
+      return 1;
     if (/^leading-/.test(utility)) return 2;
     return 0;
   };
