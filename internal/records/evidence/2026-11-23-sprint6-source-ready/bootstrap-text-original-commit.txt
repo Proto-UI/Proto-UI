@@ -1,0 +1,6 @@
+tree 53cae5398ba24173bb1d05aa774e57a36ca0cf16
+parent 1286dd05722ad4d51d06f9ea09d14723c36a8a2a
+author Codex <codex@openai.com> 1795431582 +0000
+committer Codex <codex@openai.com> 1795431816 +0000
+
+fix(bootstrap): restore defined scalable Text metrics and family closure

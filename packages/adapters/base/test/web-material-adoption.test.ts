@@ -26,7 +26,12 @@ vi.mock('../src/material/contact-carrier', () => ({
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: gpu.create }));
 vi.mock('../src/material/image-prepare', () => ({
-  prepareOpticalImage: images.prepare,
+  createOpticalImageCache: (document: Document) => ({
+    prepare: (source: string, ready: () => void, failed: () => void) =>
+      images.prepare(document, source, ready, failed),
+    clear() {},
+    dispose() {},
+  }),
   inspectOpticalImageResources: () => ({}),
 }));
 

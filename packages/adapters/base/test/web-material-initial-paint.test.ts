@@ -1,3 +1,7 @@
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import surface from '@proto.ui/prototypes-liquid-glass/surface';
+import { THEME } from '../../../prototypes/liquid-glass/src/theme';
+import { renderInitialPaintPage } from '../../../../experiments/material-initial-paint/render-page.mjs';
 import { initialPaintSceneColors } from '../../../../experiments/material-initial-paint/scene';
 import { colorContrast, resolvePaletteColor } from '../src/material/style';
 import { webcrypto } from 'node:crypto';
@@ -30,12 +34,16 @@ const decode = vi.hoisted(() => ({
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: () => gpu }));
 vi.mock('../src/material/image-prepare', () => ({
-  prepareOpticalImage: (_doc: Document, _source: string, ready: () => void, failed: () => void) => {
-    decode.ready = ready;
-    decode.fail = failed;
-    if (!decode.delayed) ready();
-    return () => {};
-  },
+  createOpticalImageCache: () => ({
+    prepare: (_source: string, ready: () => void, failed: () => void) => {
+      decode.ready = ready;
+      decode.fail = failed;
+      if (!decode.delayed) ready();
+      return () => {};
+    },
+    clear() {},
+    dispose() {},
+  }),
 }));
 // Valid opaque PNGs are synthetic protocol fixtures. Mock GPU tests below prove
 // ownership and refusal, never optical appearance, WebGL parity, or native CSS.
@@ -420,11 +428,6 @@ describe('internal finite rest seed receipt (synthetic bytes, not optical eviden
 
 describe('actual internal family producer boundary', () => {
   it('captures the real Liquid Surface rest candidate and renders already-painted server HTML', async () => {
-    const { AdaptToWebComponent, setElementProps } =
-      await import('@proto.ui/adapter-web-component');
-    const { default: surface } = await import('@proto.ui/prototypes-liquid-glass/surface');
-    const { renderInitialPaintPage } =
-      await import('../../../../experiments/material-initial-paint/render-page.mjs');
     let options: WebMaterialOptions;
     AdaptToWebComponent(surface, {
       registerAs: 'seed-family-control',
@@ -1210,10 +1213,6 @@ describe('trusted server owner and fallible proof rejection matrix', () => {
 
 describe('real WC seed handoff investigation', () => {
   it('records a real Surface first frame before subsequent seeded admission', async () => {
-    const { AdaptToWebComponent, setElementProps } =
-      await import('@proto.ui/adapter-web-component');
-    const { default: surface } = await import('@proto.ui/prototypes-liquid-glass/surface');
-    const { THEME } = await import('../../../prototypes/liquid-glass/src/theme');
     let f: ReturnType<typeof fixture>;
     const frames: VisualFeedbackFrame[] = [];
     AdaptToWebComponent(surface, {
@@ -1256,9 +1255,6 @@ describe('real WC seed handoff investigation', () => {
 
 describe('WC acquisition preserves the registered initial plane (synthetic layout/GPU)', () => {
   it('keeps an admitted seed through the real Surface mount transaction and delayed decode', async () => {
-    const { AdaptToWebComponent, setElementProps } =
-      await import('@proto.ui/adapter-web-component');
-    const { default: surface } = await import('@proto.ui/prototypes-liquid-glass/surface');
     let f: ReturnType<typeof fixture>;
     const Constructor = AdaptToWebComponent(surface, {
       registerAs: 'seed-transaction-control',

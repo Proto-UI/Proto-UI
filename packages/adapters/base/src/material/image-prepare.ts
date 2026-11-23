@@ -15,6 +15,7 @@ const emptyCounters = () => ({
   imageReadyCallbacks: 0,
   imageReadyCallbackMilliseconds: 0,
   imageReadyCallbackFailures: 0,
+  imageReuseHits: 0,
 });
 const counters = new WeakMap<Document, ReturnType<typeof emptyCounters>>();
 export function inspectOpticalImageResources(document: Document) {
@@ -24,6 +25,33 @@ export function prepareOpticalImage(
   document: Document,
   source: string,
   ready: () => void,
+  failed: () => void
+): () => void {
+  return decodeOpticalImage(document, source, () => ready(), failed);
+}
+function publishReady(
+  win: Window,
+  stats: ReturnType<typeof emptyCounters>,
+  ready: () => void,
+  failed: () => void
+) {
+  const started = win.performance.now();
+  stats.imageReadyCallbacks++;
+  let callbackFailed = false;
+  try {
+    ready();
+  } catch {
+    stats.imageReadyCallbackFailures++;
+    callbackFailed = true;
+  } finally {
+    stats.imageReadyCallbackMilliseconds += win.performance.now() - started;
+  }
+  if (callbackFailed) failed();
+}
+function decodeOpticalImage(
+  document: Document,
+  source: string,
+  ready: (image: HTMLImageElement) => void,
   failed: () => void
 ): () => void {
   const win = document.defaultView;
@@ -103,20 +131,9 @@ export function prepareOpticalImage(
         stats.decodedImages++;
         const callback = ready;
         ready = () => {};
-        const callbackStarted = win.performance.now();
-        stats.imageReadyCallbacks++;
-        let callbackFailed = false;
-        try {
-          callback();
-        } catch {
-          stats.imageReadyCallbackFailures++;
-          callbackFailed = true;
-        } finally {
-          // Publication work ends before error recovery starts. The failed
-          // callback may synchronously replace the owner or schedule fallback.
-          stats.imageReadyCallbackMilliseconds += win.performance.now() - callbackStarted;
-        }
-        if (callbackFailed) fail();
+        // Publication work ends before error recovery starts. The failed
+        // callback may synchronously replace the owner or schedule fallback.
+        publishReady(win, stats, () => callback(image), fail);
         clearCallbacks();
       }, fail)
       .catch(fail);
@@ -126,4 +143,138 @@ export function prepareOpticalImage(
     throw error;
   }
   return retire;
+}
+
+/** One material binding may cache at most two idle decoded held-contact outputs,
+ * with a combined 1 MiB decoded-pixel/string budget beyond its active leases.
+ * Every request still renders and validates current pixels before looking up
+ * the exact PNG. Release animation frames do not displace held images. This is
+ * never a source, policy, geometry, contrast, or input-session cache. */
+export function createOpticalImageCache(document: Document) {
+  const win = document.defaultView;
+  if (!win) throw new Error('image-owner-document-unavailable');
+  const stats = counters.get(document) ?? emptyCounters();
+  counters.set(document, stats);
+  const maximumBytes = 1024 * 1024;
+  type Entry = {
+    source: string;
+    bytes: number;
+    decoded: boolean;
+    retired: boolean;
+    retire(): void;
+    cancel(): void;
+  };
+  const idle = new Map<string, Entry>();
+  const owned = new Set<Entry>();
+  let idleBytes = 0;
+  let disposed = false;
+  const removeIdle = (entry: Entry) => {
+    if (idle.get(entry.source) !== entry) return;
+    idle.delete(entry.source);
+    idleBytes -= entry.bytes;
+  };
+  const retire = (entry: Entry) => {
+    if (entry.retired) return;
+    entry.retired = true;
+    removeIdle(entry);
+    owned.delete(entry);
+    entry.cancel();
+    entry.retire();
+    entry.source = '';
+  };
+  const clear = () => {
+    for (const entry of owned) retire(entry);
+  };
+  return {
+    prepare(source: string, ready: () => void, failed: () => void, retain = false) {
+      if (disposed) throw new Error('image-owner-retired');
+      const cached = idle.get(source);
+      const entry: Entry = cached ?? {
+        source,
+        bytes: 0,
+        decoded: false,
+        retired: false,
+        retire() {},
+        cancel() {},
+      };
+      source = '';
+      removeIdle(entry);
+      owned.add(entry);
+      let live = true;
+      const clearCallbacks = () => {
+        ready = () => {};
+        failed = () => {};
+      };
+      entry.cancel = () => {
+        live = false;
+        clearCallbacks();
+      };
+      const release = () => {
+        if (!live) return;
+        live = false;
+        clearCallbacks();
+        if (!retain || !entry.decoded || entry.bytes <= 0 || entry.bytes > maximumBytes) {
+          retire(entry);
+          return;
+        }
+        const previous = idle.get(entry.source);
+        if (previous) retire(previous);
+        idle.set(entry.source, entry);
+        idleBytes += entry.bytes;
+        while (idle.size > 2 || idleBytes > maximumBytes) retire(idle.values().next().value!);
+      };
+      const fail = () => {
+        if (!live) return;
+        const callback = failed;
+        retire(entry);
+        try {
+          callback();
+        } catch {
+          /* Failure cannot revive the retired decoded resource. */
+        }
+      };
+      const publish = () => {
+        if (!live) return;
+        const callback = ready;
+        ready = () => {};
+        callback();
+        failed = () => {};
+      };
+      if (cached) {
+        stats.imageReuseHits++;
+        // Preserve asynchronous readiness and cancellation. The sink rechecks
+        // all fresh ownership/admission facts in its normal ready callback.
+        queueMicrotask(() => {
+          if (live) publishReady(win, stats, publish, fail);
+        });
+      } else {
+        try {
+          entry.retire = decodeOpticalImage(
+            document,
+            entry.source,
+            (image) => {
+              entry.decoded = true;
+              const pixels = image.naturalWidth * image.naturalHeight;
+              entry.bytes =
+                Number.isSafeInteger(pixels) && pixels > 0
+                  ? pixels * 4 + entry.source.length * 2
+                  : 0;
+              publish();
+            },
+            fail
+          );
+          if (entry.retired) entry.retire();
+        } catch (error) {
+          retire(entry);
+          throw error;
+        }
+      }
+      return release;
+    },
+    clear,
+    dispose() {
+      disposed = true;
+      clear();
+    },
+  };
 }

@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-23T13:09:53.953704+00:00",
+  "baseHead": "25dddc948f0a05ac8a02bb486cf833d5e90ffb08",
+  "executionKind": "explicit working-tree validation; later exact-commit browser evidence remains required",
+  "changedSourceFiles": {
+    "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts": "78fa96b67a3a33294fb2d0cde6034fc2f5e692e08c3d0ed763f52450fe9f2434",
+    "packages/adapters/base/src/material/image-prepare.ts": "2a40e09cc44c4c7a286456a0b2ae3ecb376297b7ca0a4e175f970c2446ad2c52",
+    "packages/adapters/base/src/material/sink.ts": "7fcf17ec3ed2b2c307cfe36cd028f22cf0589fcdfcb26a29584cf3085972e97a",
+    "packages/adapters/base/test/web-material-adoption.test.ts": "7bf4f7d3d65208c9073f4f0b08a615b6dce00fcd42fbece1638ed67ec1205d8d",
+    "packages/adapters/base/test/web-material-initial-paint.test.ts": "20504dc7fa4f0c6a17624a914b77e2f52513626f582444acc40384e58da01265",
+    "packages/adapters/base/test/web-material-preferences-sequence.test.ts": "f9b47d56072b83a05be52e38c0da3f5456dedc12f59dccbdaf41bf9bab06180d",
+    "packages/adapters/base/test/web-material-sink.test.ts": "3524381ba3465c53bc8032537eb3b2809736a32a94be292507515ce517742789",
+    "packages/adapters/base/test/web-material-image-cache.test.ts": "b115b6db9186f8faa4cbe7b908b8d11d88ba4a89078e04c8696bc28922230cde",
+    "packages/cli/src/generated/brutalist-style-tokens.ts": "9775d2a0c9dccfc752ea9cfcb13d41d118f170bd43f3c45359a80e2a7f13ffcf",
+    "packages/cli/src/generated/draft-family-style-tokens.ts": "d6c5e6596cbec18389b4fc93a8776065fead6263f714aa7cae9f6ba76f624aa7",
+    "packages/cli/test/text-prototype.test.ts": "3ccfd86d9f74c8f1bd267461a26b03ac88eb06c94e203a1c12d7852386ae0e55",
+    "packages/prototypes/bootstrap-2-3-2/src/text/root.proto.ts": "70edafde5d9680ed5f44b79ee0b7743f6bbbc3e61d835cffd8039ee4d6faadfa"
+  },
+  "passed": {
+    "cacheFocused": {
+      "files": 6,
+      "passed": 306,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0,
+      "defaultCaseTimeoutMs": 5000
+    },
+    "textFocused": {
+      "files": 3,
+      "passed": 176,
+      "failed": 0,
+      "pending": 0,
+      "todo": 0,
+      "journey": 152,
+      "cli": 14,
+      "realDemo": 10
+    },
+    "originalInitialPaintControl": {
+      "selected": 3,
+      "passed": 3
+    },
+    "stylePresetCheck": true,
+    "imagePreparationTypes": true,
+    "cacheReuseNegativeControl": {
+      "expectedFailure": true,
+      "disabledLookup": true,
+      "failed": 1,
+      "originalRestored": true
+    }
+  },
+  "retainedFailures": {
+    "v3Install": "420s setup watchdog expired; no cases executed; later independent frozen install exited0 in253.901s",
+    "v4Text": "original20 selected Text cases failed; first repaired run174/176 with Base proto-export expectation and generated Brutalist token drift",
+    "v5Cache": "305/306; first real Surface case hit unchanged5000ms; original baseline3/3 passed; v6 diagnostic306/306 then stable import-boundary fixture306/306",
+    "nativeTextV1": {
+      "setupHookTimeoutMs": 150000,
+      "selected": 8,
+      "executed": 0,
+      "notSelected": 16
+    },
+    "pairedBrowserV1": {
+      "baseline": "original5000ms git status source snapshot timeout; no samples",
+      "candidate": "same failure; no samples"
+    }
+  },
+  "recoveredRelatedSource": {
+    "sha": "61fe25cabcfd27f98758fcb9575eb6814a88dc08",
+    "author": "Codex <codex@openai.com>",
+    "relationship": "Initially unavailable, independently reconstructed from current draft definition. Recovered local Git object after executor restoration; Text/CLI behavior matches, comments differ. This is not that original commit or an invented original DCO certification.",
+    "archive": {
+      "bundle": "bootstrap-text-61fe25ca.bundle",
+      "provenance": "bootstrap-text-original-provenance.json",
+      "originalCommit": "bootstrap-text-original-commit.txt",
+      "originalSignoffPresent": false,
+      "parentPrerequisite": "1286dd05722ad4d51d06f9ea09d14723c36a8a2a"
+    }
+  },
+  "independentSourceReview": {
+    "reviewer": "separate governance_ready agent",
+    "scope": "actual cache-final-review.diff, full2product files,4mock adaptations,static import boundary,8new cases",
+    "diffSha256": "677fd514c915cf82fea961fa666a70f84b9b4896296bd975f293ce1cd4ba4cd7",
+    "finding": "no blocking source finding",
+    "notClaimed": [
+      "GitHub APPROVE",
+      "native browser execution",
+      "performance improvement",
+      "visual acceptance"
+    ]
+  },
+  "rawFiles": {
+    "native-text-format-preservation.json": {
+      "bytes": 501,
+      "sha256": "ee1cfdd61ed5809ccc4a5fa9c7ae9430b6825b0084761baa05e15f6d77746c8b"
+    },
+    "s6-validation4-complete.json": {
+      "bytes": 2346,
+      "sha256": "c281259941f64e37ed02344b743f3ed71175127ed0557d69176d7b4be3781ce9"
+    },
+    "s6-validation5-complete.json": {
+      "bytes": 5176,
+      "sha256": "013bfca976e9166120793bbed119ef29933bb8872a27f1dc029d19bd40339a82"
+    },
+    "s6-validation6-complete.json": {
+      "bytes": 3804,
+      "sha256": "ddc3b4f0beba07922bc47bf099ec71461949eff7e15cf40289e98889fae7e99e"
+    },
+    "bootstrap-text-original-red-v4.log": {
+      "bytes": 207780,
+      "sha256": "1e463e06a756aab6147ff3cf7d1b3d08176f09dba7319a720a22f5bf4fa5171c"
+    },
+    "bootstrap-text-repaired-v4.log": {
+      "bytes": 262596,
+      "sha256": "f4176ab202590a19eeec62ab4a0b96d0c5ecd45598bfabc77bcdca45f1e2be0e"
+    },
+    "bootstrap-text-repaired-v5.json": {
+      "bytes": 62325,
+      "sha256": "133ee7901fb8141828861d9d415f50f33d710e4dc1fc563144f20dfd81c5633c"
+    },
+    "cache-independent-focused-v5.json": {
+      "bytes": 126101,
+      "sha256": "c01897e068ab4da9be30a0e24a4ef91b7836b5cf76a22d749320309364732f82"
+    },
+    "initial-paint-unmodified-base-control-v5.json": {
+      "bytes": 43593,
+      "sha256": "a8029751634ec26973b2f8bcfeddbbb52feb32c311639e824a3518077114c215"
+    },
+    "cache-import-stages-v6.json": {
+      "bytes": 125619,
+      "sha256": "bffafbe347f9c37399fb05ddc0d53a023fb647848d6ea8c36b2ac9aabe7efe43"
+    },
+    "cache-import-stages-v6.log": {
+      "bytes": 232243,
+      "sha256": "83c1dfcfc41ac2fd9827b2785013ed8cc80cfa8d178b29aa872800c8a6210c8b"
+    },
+    "cache-fixed-focused-v6.json": {
+      "bytes": 125665,
+      "sha256": "2a2f78f4ae5396118f7201eefaa15477de08f24f64a2195eaafbcbdf6e2bbf2a"
+    },
+    "cache-reuse-negative-control-v6.json": {
+      "bytes": 5144,
+      "sha256": "462c0a8faf13eb8bc7d8aa9eb36a2cc94cc8711847f78047af290eaa8902c445"
+    },
+    "cache-reuse-negative-control-v6.log": {
+      "bytes": 3668,
+      "sha256": "ea8da8ae540392c6ac6a9125cdbff636c5ec19fd9b2d7cf61818b44427e95adb"
+    },
+    "cache-image-types-v6.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "style-preset-check-v5.log": {
+      "bytes": 2051,
+      "sha256": "9acd6c27a910dfb94c787254af669c1e3205d0e4d6ba989de8ad6c9c4bf3aae9"
+    },
+    "s6-native-and-pair-v1-complete.json": {
+      "bytes": 3627,
+      "sha256": "24e13a5ca2f89f5b746dbbbb13d55d2dfafc1d2287695ec6858ea88ce987f22f"
+    },
+    "s6-native-and-pair-v1.json": {
+      "bytes": 3164,
+      "sha256": "5c7a26972f6cfd0dd2c833c39042ffeaed1ecae819ac667fb234dc568f1e8389"
+    },
+    "native-text-candidate-v1.json": {
+      "bytes": 10447,
+      "sha256": "1b907b855f3ecd036e19b2c2228b2e505ee9f545783efd81d745bffcb2c2904c"
+    },
+    "native-text-candidate-v1.log": {
+      "bytes": 4090,
+      "sha256": "62cb2d16086b54763f5dfa2fb22c85ff6a2ddd7ff98965f3f99900352d23d33c"
+    },
+    "native-browser-version.txt": {
+      "bytes": 40,
+      "sha256": "d1fb7246bfcaa07e16c871af96164ff464d5c28a1e3e1370f8349d421a4c3eb5"
+    },
+    "native-text-candidate-v1-source.json": {
+      "bytes": 1053,
+      "sha256": "ab392a44648feef5b060668bd495d4eb4091774ac8a74ec2ba291428d9e27cca"
+    },
+    "native-text-candidate-v1-after-source.json": {
+      "bytes": 1059,
+      "sha256": "c84cbe6e23424bdab9bcb5e935017d4b2da85b651440d067bf92bb37352ebfd0"
+    },
+    "cache-pair-baseline-v1.log": {
+      "bytes": 1125,
+      "sha256": "bfd1d73b46344383e9ea4257ab3939ab44ed18ce61b16218a9b98ca3fc4ad761"
+    },
+    "cache-pair-candidate-v1.log": {
+      "bytes": 1125,
+      "sha256": "9ace71d5375ff9dd350f5cbbeea3c5031373ff0a7e457e60a1fe2292ec1d3ba4"
+    },
+    "cache-pair-baseline-v1-source.json": {
+      "bytes": 1051,
+      "sha256": "a6c8abc8188c1a40835eb45aaa83c55a9fe5f6d85d2b5209fd7675662281cd79"
+    },
+    "cache-pair-candidate-v1-source.json": {
+      "bytes": 1052,
+      "sha256": "5a09227c3660ebde475aa8993bce02dafe017aa79b7e5a0dd477773f4792a6cf"
+    }
+  },
+  "archive": {
+    "file": "validation.tar.gz",
+    "bytes": 122477,
+    "sha256": "b25be8cd9f506f8126df8b84763577ffbb488aa2015d1896bc0ee36b4841517c"
+  },
+  "remaining": [
+    "same-runner clean-commit browser comparison with original deadlines",
+    "native Text typography/selection execution",
+    "physical120Hz and input-to-photon",
+    "Apple reference comparison",
+    "original non-Web/application obligations",
+    "exact final-head CI and eligible independent platform review"
+  ],
+  "textIndependentSourceReview": {
+    "reviewer": "separate governance_ready agent",
+    "actualDiffReadBytes": 13031,
+    "reviewedNativeSourceSha256": "6099ec9d459492c7577e6908e701218fe614cb20043d4853ccc2974676850068",
+    "finding": "No blocking source finding. Draft definition/rem ratios and all eight axes remain; native selection/role/tabIndex/control-selection and90s deadline preserved. Entire CLI token, precedence and export assertions retained.",
+    "finalNativeFormatting": {
+      "sourceBeforeSha256": "6099ec9d459492c7577e6908e701218fe614cb20043d4853ccc2974676850068",
+      "sourceAfterSha256": "78fa96b67a3a33294fb2d0cde6034fc2f5e692e08c3d0ed763f52450fe9f2434",
+      "emittedBeforeSha256": "89e6d93648ce000e06bbfba1d7e69c3e8af7e3c80e644c728be0865450de0514",
+      "emittedAfterSha256": "89e6d93648ce000e06bbfba1d7e69c3e8af7e3c80e644c728be0865450de0514",
+      "emissionIdentical": true,
+      "scope": "whole-file formatting only; native semantics are in prior independently reviewed patch"
+    },
+    "executionClaim": false,
+    "formalGitHubApproval": false
+  }
+}
