@@ -1,0 +1,47 @@
+{
+  "source": {
+    "head": "555a69f9e4d3001f403a9c2b6a38e0ce87f56cf7",
+    "tree": "e42a9820555b911e17f3f395fbe9b2b68fd4edd6",
+    "status": ""
+  },
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "--no-file-parallelism",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile=/workspace/scratch/4deb1fac371b/session-evidence/integrated-555-selected-vitest.json",
+    "packages/modules/context/test/ancestor-compiler-boundary.test.ts",
+    "packages/compiler/test/string-coercion.test.ts",
+    "packages/compiler/test/text-reset-native.test.ts",
+    "packages/adapters/web-component/test/owned-decoration.integration.test.ts",
+    "packages/adapters/web-component/test/shadow-split-effects.test.ts",
+    "packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts",
+    "packages/adapters/vue/test/dialog.test.ts",
+    "packages/prototypes/shadcn/test/collection-profiles-r91.test.ts"
+  ],
+  "passed": 187,
+  "failed": 0,
+  "pending": 0,
+  "files": [
+    {
+      "name": "integrated-555-selected-receipt.json.gz",
+      "bytes": 977,
+      "sha256": "355f61632b4ba10b42765175820f9adea7b792ca19f662abc555ae7106d9bc47"
+    },
+    {
+      "name": "integrated-555-selected.log.gz",
+      "bytes": 36178,
+      "sha256": "69ad5265ed6154efabdf82a7fa408ae79a76776d9a93e84d7667b8b7d28d45e4"
+    },
+    {
+      "name": "integrated-555-selected-vitest.json.gz",
+      "bytes": 7434,
+      "sha256": "3cbae230602a3b0d0b35c95568fbbc5abac43255de4971a1fca093bc560f5063"
+    }
+  ],
+  "scope": "Original selected compiler/Context, WC ownership/admission, Vue Dialog and Shadcn collection files on the normal main merge; not full CI or native browser acceptance."
+}
