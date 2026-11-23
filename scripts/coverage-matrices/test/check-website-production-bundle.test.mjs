@@ -836,6 +836,7 @@ const reviewedWcHelpers = [
   'packages/adapters/web-component/src/shadow-color-scheme-environment.ts',
   'packages/adapters/web-component/src/shadow-inner-surface.ts',
   'packages/adapters/web-component/src/shadow-owner-shell.ts',
+  'packages/adapters/web-component/src/shadow-percentage-source.ts',
   'packages/adapters/web-component/src/shadow-profile.ts',
   'packages/adapters/web-component/src/shadow-split-effects.ts',
   'packages/adapters/web-component/src/shadow-split-meta.ts',
@@ -1770,6 +1771,79 @@ function materialDiagnosticWithStaticBridge(kind) {
     { id: wc, imports: [], dynamicImports: [] }
   );
   return { ...result, bridge, api, wc };
+}
+const diagnosticPercentageSource =
+  'packages/adapters/web-component/src/shadow-percentage-source.ts';
+function materialDiagnosticWithPercentageBridge(kind) {
+  const fixture = materialDiagnosticWithStaticBridge(kind);
+  const adapt = 'packages/adapters/web-component/src/adapt.ts';
+  fixture.bridge.moduleIds.push(adapt, diagnosticPercentageSource);
+  fixture.graph.modules.find((record) => record.id === fixture.wc).imports.push(adapt);
+  fixture.graph.modules.push(
+    { id: adapt, imports: [diagnosticPercentageSource], dynamicImports: [] },
+    { id: diagnosticPercentageSource, imports: [], dynamicImports: [] }
+  );
+  return { ...fixture, adapt };
+}
+for (const kind of ['tint-stage', 'visible-refraction']) {
+  test(`material diagnostic ${kind} retains percentage only in the owned static WC bridge`, () => {
+    const { graph } = materialDiagnosticWithPercentageBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  });
+  for (const origin of ['route', 'producer']) {
+    for (const field of ['imports', 'dynamicImports']) {
+      test(`material diagnostic ${kind} rejects ${origin} ${field} to the same percentage helper`, () => {
+        const { graph, facade, producer } = materialDiagnosticWithPercentageBridge(kind);
+        assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+        graph.modules
+          .find((record) => record.id === (origin === 'route' ? facade : producer))
+          [field].push(diagnosticPercentageSource);
+        const expected = [
+          `material diagnostic entry \`${facade}\` reaches a module outside its producer boundary: ${diagnosticPercentageSource}`,
+        ];
+        if (origin === 'route')
+          expected.push(
+            `material diagnostic entry \`${facade}\` bypasses its exact producer: ${diagnosticPercentageSource}`
+          );
+        assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), expected);
+      });
+    }
+  }
+  test(`material diagnostic ${kind} rejects percentage co-location without its actual API import path`, () => {
+    const { graph, facade, adapt } = materialDiagnosticWithPercentageBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    graph.modules.find((record) => record.id === adapt).imports = [];
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), [
+      `material diagnostic entry \`${facade}\` reaches an unreviewed runtime or Adapter module: ${diagnosticPercentageSource}`,
+    ]);
+  });
+  test(`material diagnostic ${kind} rejects the same owned percentage helper emitted outside its bridge`, () => {
+    const { graph, facade, bridge, entry } = materialDiagnosticWithPercentageBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    bridge.moduleIds = bridge.moduleIds.filter((id) => id !== diagnosticPercentageSource);
+    const outside = chunk('_astro/unowned-percentage.js', {
+      moduleIds: [diagnosticPercentageSource],
+    });
+    graph.chunks.push(outside);
+    entry.imports.push(outside.fileName);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), [
+      `material diagnostic entry \`${facade}\` reaches an unreviewed runtime or Adapter module: ${diagnosticPercentageSource}`,
+    ]);
+  });
+  test(`material diagnostic ${kind} rejects percentage through a dynamic-only WC bridge`, () => {
+    const { graph, facade, bridge, entry, wc, adapt } =
+      materialDiagnosticWithPercentageBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    entry.imports = entry.imports.filter((name) => name !== bridge.fileName);
+    entry.dynamicImports.push(bridge.fileName);
+    assert.deepEqual(
+      collectWebsiteProductionBundleIssues({ graph }),
+      [wc, adapt, diagnosticPercentageSource].map(
+        (id) =>
+          `material diagnostic entry \`${facade}\` reaches an unreviewed runtime or Adapter module: ${id}`
+      )
+    );
+  });
 }
 for (const kind of ['tint-stage', 'visible-refraction']) {
   test(
