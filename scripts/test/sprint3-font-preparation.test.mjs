@@ -33,6 +33,20 @@ const lanes = [
     'SPRINT3_FOLLOWUP_EVIDENCE_DIR',
     'Identify sandboxed Chrome and install actual video and CJK dependencies',
   ],
+  [
+    'sprint3-consumer-evidence.yml',
+    'native-consumers',
+    65,
+    'SPRINT3_EVIDENCE_DIR',
+    'Identify Chromium and prepare public CJK font fallback',
+  ],
+  [
+    'sprint3-consumer-evidence.yml',
+    'release-rehearsal',
+    190,
+    'REHEARSAL_EVIDENCE_DIR',
+    'Identify the sandboxed browser and public CJK fonts',
+  ],
 ].map(([file, jobId, deadline, evidence, name]) => {
   const workflow = YAML.parse(
     readFileSync(path.join(repository, '.github/workflows', file), 'utf8')
@@ -40,10 +54,10 @@ const lanes = [
   const job = workflow.jobs[jobId];
   const setup = job.steps.find((step) => step.name === name);
   assert.ok(setup, file + ' font setup');
-  return { file, job, setup, deadline, evidence };
+  return { file, jobId, job, setup, deadline, evidence };
 });
 
-test('all three failed font lanes use the existing verified package owner within a fixed deadline', () => {
+test('all five failed font lanes use the existing verified package owner within a fixed deadline', () => {
   for (const { file, job, setup, deadline } of lanes) {
     assert.ok(setup.run.includes(bounded), file + ' must use the bounded existing font owner');
     assert.equal(setup['timeout-minutes'], 5);
@@ -53,7 +67,7 @@ test('all three failed font lanes use the existing verified package owner within
     assert.doesNotMatch(setup.run, /apt-get|\|\| true/);
     assert.match(setup.run, /FONT_EVIDENCE_DIR=/);
     assert.match(setup.run, /dpkg-query/);
-    assert.match(setup.run, /fc-match/);
+    if (file !== 'sprint3-consumer-evidence.yml') assert.match(setup.run, /fc-match/);
     execFileSync('bash', ['-n', '-c', setup.run]);
   }
 });
@@ -150,6 +164,9 @@ function executeSetup(t, lane, mode) {
       GITHUB_ENV: path.join(directory, 'github-env'),
       PUI_EVIDENCE_DIR: evidence,
       SPRINT3_FOLLOWUP_EVIDENCE_DIR: evidence,
+      SPRINT3_EVIDENCE_DIR: evidence,
+      REHEARSAL_EVIDENCE_DIR: evidence,
+      TMPDIR: runner,
       FONT_TEST_DIRECTORY: directory,
       FONT_TEST_REAL_TIMEOUT: realTimeout,
       FONT_TEST_MODE: mode,
@@ -185,9 +202,12 @@ function executeSetup(t, lane, mode) {
 
 for (const lane of lanes)
   for (const mode of ['passed', 'failed', 'timeout'])
-    test(lane.file + ' actual setup shell preserves ' + mode + ' font owner outcome', (t) => {
-      executeSetup(t, lane, mode);
-    });
+    test(
+      lane.file + ' / ' + lane.jobId + ' setup preserves ' + mode + ' font owner outcome',
+      (t) => {
+        executeSetup(t, lane, mode);
+      }
+    );
 
 test('the reused font owner still rejects bad package identity and missing actual glyph coverage', () => {
   // Reuse its existing controls; this is not package authenticity or native paint evidence.
