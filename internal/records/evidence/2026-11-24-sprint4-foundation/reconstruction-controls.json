@@ -1,0 +1,40 @@
+{
+  "kind": "proto-ui.sprint4-foundation-reconstruction-controls",
+  "format": 1,
+  "base": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "observedAt": "2026-11-23T19:04:16.934194+00:00",
+  "command": [
+    "node",
+    "--test",
+    "scripts/compiler/materialize-frozen-foundation.test.mjs",
+    "scripts/compiler/verify-frozen-foundation.test.mjs"
+  ],
+  "node": "v24.22.3",
+  "exitCode": 0,
+  "sources": [
+    {
+      "path": "scripts/compiler/materialize-frozen-foundation.mjs",
+      "sha256": "e94710b25395053f5bdbb61511baaeefb775aaf67c4a4015a002b24384502ef6"
+    },
+    {
+      "path": "scripts/compiler/materialize-frozen-foundation.test.mjs",
+      "sha256": "88cfca9cd79e9eab670b9d95c2c781622bcf6c7a7efb0193be8a2948df819085"
+    },
+    {
+      "path": "scripts/compiler/verify-frozen-foundation.mjs",
+      "sha256": "dd0eb90503b0ee90a7fa40b00f1a1c4162a3fe52df57f5f481a4791a7f1570cc"
+    },
+    {
+      "path": "scripts/compiler/verify-frozen-foundation.test.mjs",
+      "sha256": "263c5ccb5305ffa199ac050c88c10015578dc10e65e31d671e0b1a0b0eae000c"
+    },
+    {
+      "path": "scripts/compiler/inspect-foundation-definitions.mjs",
+      "sha256": "1b9aa990bda4e7900ceafb8bbeccbf80801399de7ae12dad3e51f105f530f8b2"
+    }
+  ],
+  "logSha256": "7d0c4ad80bee67d834c6a21c9e7751f62a4706fc749aa739467d0fee83c60bc0",
+  "scope": "six independent materialization controls plus eight original integrity controls",
+  "originalPacketExecuted": false,
+  "migrationExecuted": false
+}
