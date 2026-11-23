@@ -72,7 +72,7 @@ report.source.inputs = await Promise.all(
 // only the two Bootstrap directories omitted their hidden-state CSS entirely.
 const styleSources = report.source.inputs
   .map((input) => input.path)
-  .filter((file) => /\.[cm]?tsx?$/.test(file));
+  .filter((file) => file.startsWith('packages/prototypes/') && /\.[cm]?tsx?$/.test(file));
 const tokens = await collectProtoStyleTokensFromFiles(
   styleSources.map((file) => path.resolve(file))
 );
