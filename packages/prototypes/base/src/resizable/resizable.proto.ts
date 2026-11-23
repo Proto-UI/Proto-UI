@@ -146,6 +146,9 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
     intent: (i) => i.feedback.style.use(tw('direction-ltr')),
   });
   let owner: RunHandle<ResizableRootProps> | null = null;
+  // Detached props still synchronize logical state; they cannot reacquire a
+  // retired view command lease. Only the next mounted lifecycle does that.
+  let viewRetired = false;
   let ownerEpoch = 0,
     requestRevision = 0,
     projectionRevision = 0,
@@ -207,7 +210,7 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
     });
   };
   const request = (next: readonly number[], commit: boolean, scalar: boolean) => {
-    if (!owner || !valid) return false;
+    if (!owner || viewRetired || !valid) return false;
     const run = owner,
       epoch = ownerEpoch,
       p = run.props.get();
@@ -239,7 +242,7 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
     return true;
   };
   const requestResize = (index: number, next: number, commit = false) => {
-    if (!owner || !valid) return false;
+    if (!owner || viewRetired || !valid) return false;
     // Legacy normalization retains its two-decimal public ratio behavior.
     if (!vectorMode(owner) && index === 0) {
       const p = owner.props.get();
@@ -258,7 +261,7 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
     return candidate ? request(candidate, commit, true) : false;
   });
   def.expose.method('cancelResize', () => {
-    if (!owner) return false;
+    if (!owner || viewRetired) return false;
     clearProposal();
     return true;
   });
@@ -339,9 +342,13 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
     publish(run, epoch);
   };
   def.lifecycle.onCreated((run) => sync(run, true));
-  def.lifecycle.onMounted((run) => sync(run));
+  def.lifecycle.onMounted((run) => {
+    viewRetired = false;
+    sync(run);
+  });
   def.props.watchAll((run) => sync(run));
   def.lifecycle.onUnmounted(() => {
+    viewRetired = true;
     owner = null;
     ownerEpoch++;
     clearProposal();
