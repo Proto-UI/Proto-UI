@@ -43,5 +43,6 @@
       "sha256": "3cbae230602a3b0d0b35c95568fbbc5abac43255de4971a1fca093bc560f5063"
     }
   ],
-  "scope": "Original selected compiler/Context, WC ownership/admission, Vue Dialog and Shadcn collection files on the normal main merge; not full CI or native browser acceptance."
+  "scope": "Original selected compiler/Context, WC ownership/admission, Vue Dialog and Shadcn collection files on the normal main merge; not full CI or native browser acceptance.",
+  "testFiles": 8
 }
