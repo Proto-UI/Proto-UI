@@ -255,7 +255,9 @@ class ValueTypeParser {
       ts.isStringLiteral(node.indexType.literal)
     ) {
       try {
-        return memberValueType(this.parse(node.objectType), node.indexType.literal.text);
+        const owner = this.parse(node.objectType),
+          property = node.indexType.literal.text;
+        return capabilityMemberType(owner, property) ?? memberValueType(owner, property);
       } catch (error) {
         rejectNode(
           node,

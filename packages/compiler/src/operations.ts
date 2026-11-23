@@ -531,6 +531,16 @@ const contextNext: ArgumentRule = {
   },
 };
 
+const setPresentContract = rule(
+  'run',
+  'lifecycle.setPresent',
+  callbackPhase,
+  'void',
+  [boolean],
+  [effect('write', 'view-intent')],
+  { contexts: aliveContexts }
+);
+
 /** The single admission/emission vocabulary. Paths are exact public handle names. */
 export const OPERATION_RULES = {
   'capture.getState': rule('authored-result', 'getState', readPhase, 'unknown', [key], [], {
@@ -1029,15 +1039,12 @@ export const OPERATION_RULES = {
     ],
     [effect('signal', 'expose')]
   ),
-  'lifecycle.setPresent': rule(
-    'run',
-    'lifecycle.setPresent',
-    callbackPhase,
-    'void',
-    [boolean],
-    [effect('write', 'view-intent')],
-    { contexts: aliveContexts }
-  ),
+  'lifecycle.setPresent': setPresentContract,
+  'lifecycle.setPresentFromModule': {
+    ...setPresentContract,
+    receiver: 'run-lifecycle',
+    path: 'setPresent',
+  } satisfies OperationRule,
   'lifecycle.onCreated': rule(
     'def',
     'lifecycle.onCreated',
@@ -2565,6 +2572,7 @@ export function stateDeclarationData(
   });
 }
 const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueType>>>> = {
+  run: { lifecycle: 'run-lifecycle' },
   'presence-owner': { ref: 'presentation-owner-ref', writer: 'presentation-owner-writer' },
   'context-key': { __brand: { kind: 'literal', value: 'ContextKey' } },
   'control-label-request': {

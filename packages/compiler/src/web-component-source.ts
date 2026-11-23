@@ -452,6 +452,7 @@ export function emitWebComponentSource(
     if (type === 'state-disconnect') return `{type:'disconnect';reason:'unmount'}`;
     if (type === 'def') return `${prefix}Def`;
     if (type === 'run') return `${prefix}Run`;
+    if (type === 'run-lifecycle') return `${prefix}Run['lifecycle']`;
     if (type === 'render') return `${prefix}Renderer`;
     if (!options.ssr && type === 'template') return '(()=>Node)';
     if (type.startsWith('state:')) return `${prefix}State<${type.slice(6)}>`;

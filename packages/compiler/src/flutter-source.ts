@@ -1,4 +1,5 @@
 import { pruneDeadValues } from './demand-pruning';
+import { unsupportedLifecycleModules } from './lifecycle-module-admission';
 import {
   unsupportedCheckedHelperParameters,
   unsupportedControlLabel,
@@ -42,6 +43,8 @@ export function emitFlutterSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const lifecycleDiagnostics = unsupportedLifecycleModules(ir, 'flutter-source');
+  if (lifecycleDiagnostics.length) return { ok: false, diagnostics: lifecycleDiagnostics };
   const validatorDiagnostics = unsupportedPropsValidators(ir, 'flutter-source');
   if (validatorDiagnostics.length) return { ok: false, diagnostics: validatorDiagnostics };
   const numericDiagnostics = unsupportedNumericAccessibility(ir, 'flutter-source');

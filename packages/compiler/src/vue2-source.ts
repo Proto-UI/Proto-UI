@@ -366,6 +366,7 @@ export function emitVue2Source(
     if (type === 'props') return `${prefix}ResolvedProps`;
     if (type === 'def') return `${prefix}Owner['def']`;
     if (type === 'run') return `${prefix}Run`;
+    if (type === 'run-lifecycle') return `${prefix}Run['lifecycle']`;
     if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
     if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
     if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;

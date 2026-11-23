@@ -54,6 +54,7 @@ export interface StaticCapabilityIR {
   span: SourceSpan;
 }
 export const MODULE_CAPABILITY_TYPES = [
+  'run-lifecycle',
   'decoration-target',
   'decoration-style',
   'control-label',

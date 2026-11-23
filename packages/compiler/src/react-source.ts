@@ -384,6 +384,7 @@ export function emitReactSource(
     if (type === 'state-disconnect') return `{type:'disconnect';reason:'unmount'}`;
     if (type === 'def') return `typeof ${p}Def`;
     if (type === 'run') return `${p}Run`;
+    if (type === 'run-lifecycle') return `${p}Run['lifecycle']`;
     if (type === 'render') return `typeof ${p}Renderer`;
     if (type === 'props') return `${p}ResolvedProps`;
     if (type === 'focus') return `${p}NativeFocus`;

@@ -363,6 +363,7 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
 
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
+  'lifecycle.setPresentFromModule',
   'feedback.style.presence',
   'feedback.material.shader',
   'anatomy.descendantsOf',
@@ -789,6 +790,12 @@ export function checkTargetOperations(
     )
       diagnostic('PUI4003', `Record getters are not implemented by ${selected.id}.`, value.span);
     const javascript = ['react', 'vue', 'vue2', 'web-component'].includes(selected.framework);
+    if (!javascript && value.kind === 'member' && value.type === 'run-lifecycle')
+      diagnostic(
+        'PUI4003',
+        `First-class lifecycle modules are not lowered by ${selected.id}.`,
+        value.span
+      );
     const containers = (type: ValueType): boolean => {
       if (typeof type === 'string') return false;
       if (type.kind === 'value-array') return serializableDataType(type) === undefined;

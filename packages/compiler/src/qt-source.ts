@@ -1,4 +1,5 @@
 import { pruneDeadValues } from './demand-pruning';
+import { unsupportedLifecycleModules } from './lifecycle-module-admission';
 import {
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -50,6 +51,8 @@ export function emitQtSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const lifecycleDiagnostics = unsupportedLifecycleModules(ir, 'qt-source');
+  if (lifecycleDiagnostics.length) return { ok: false, diagnostics: lifecycleDiagnostics };
   const validatorDiagnostics = unsupportedPropsValidators(ir, 'qt-source');
   if (validatorDiagnostics.length) return { ok: false, diagnostics: validatorDiagnostics };
   const numericDiagnostics = unsupportedNumericAccessibility(ir, 'qt-source');

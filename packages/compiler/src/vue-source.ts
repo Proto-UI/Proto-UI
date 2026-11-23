@@ -163,6 +163,7 @@ export function emitVueSource(
   let usesStyle = false;
   let usesInteraction = supportPlan.features.length > 0;
   let usesRawWatchers = false;
+  let usesLifecycleModule = false;
   function unsupported(node: ExpressionIR, message: string): void {
     diagnostics.push({ code: 'PUI4003', category: 'unsupported-input', message, span: node.span });
   }
@@ -183,6 +184,7 @@ export function emitVueSource(
         node.targets?.forEach((style) => inspect(style.value));
         break;
       case 'member':
+        if (node.type === 'run-lifecycle') usesLifecycleModule = true;
         inspect(node.object);
         break;
       case 'unary':
@@ -372,6 +374,8 @@ export function emitVueSource(
         return usesStyle ? n('Def') : 'void';
       case 'run':
         return `${n('Run')}`;
+      case 'run-lifecycle':
+        return '{setPresent(present: boolean): void}';
       case 'render':
         return `${n('Frame')}`;
       case 'props':
@@ -888,7 +892,7 @@ ${staticImports}
 ${statements(moduleParts.shared, 0)}
 
 ${usesStyle ? `type ${n('Def')} = Readonly<{ feedback: Readonly<{ style: ${n('NativeStyle')} }> }>;` : ''}
-type ${n('Run')} = Readonly<{ readonly owner: symbol${usesStyle ? `; readonly feedback: ${n('Def')}['feedback']` : ''} }>;
+type ${n('Run')} = Readonly<{ readonly owner: symbol${usesStyle ? `; readonly feedback: ${n('Def')}['feedback']` : ''}${usesLifecycleModule ? '; readonly lifecycle: {setPresent(present: boolean): void}' : ''} }>;
 type ${n('StateEvent')}<T> = { type: 'next'; prev: T; next: T; reason?: unknown } | {type:'disconnect';reason:'unmount'};
 type ${n('Spec')} = Readonly<{ kind: 'bool' | 'enum' | 'string' | 'number.range' | 'number.discrete'; options?: readonly (string | number)[]; min?: number; max?: number; step?: number; clamp?: boolean }>;
 type ${n('PropSpec')} = { type: unknown; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; range?: { min?: number; max?: number }; options?: readonly unknown[]; validator?: (value: never) => boolean };
@@ -1096,7 +1100,7 @@ ${
     : ''
 }
     ${publicCalls ? `const ${n('WrapPublic')} = ${n('CreatePublicCalls')}({alive: ${n('PublicAlive')}, invoke: callback => ${n('Invoke')}('expose-method', callback)});` : ''}
-    const ${n('RunValue')}: ${n('Run')} = Object.freeze({ owner: Symbol(${JSON.stringify(ir.name)})${usesStyle ? `, feedback: ${n('DefValue')}.feedback` : ''} });
+    const ${n('RunValue')}: ${n('Run')} = Object.freeze({ owner: Symbol(${JSON.stringify(ir.name)})${usesStyle ? `, feedback: ${n('DefValue')}.feedback` : ''}${usesLifecycleModule ? `, lifecycle: Object.freeze({setPresent: (present: boolean) => ${n('SetPresent')}(${n('RunValue')}, present)})` : ''} });
 
     function ${n('IsRecord')}(value: unknown): value is Record<string, unknown> {
       if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
