@@ -852,6 +852,15 @@
       },
       "allOtherStagedPathsExitCode": 0,
       "reason": "The original git bundle verify stdout retains its trailing separator byte; do not rewrite frozen evidence."
+    },
+    "frozenFormatterRecovery": {
+      "record": "formatter-recovery.json",
+      "previousHead": "e7e3cdff90e1021ed9386767c621af9138a3a039",
+      "restoredExactPaths": 10,
+      "verifiedProtectedFiles": 134,
+      "allProtectedBlobsMatchMain": true,
+      "normalHooksRetained": true,
+      "originalDecisionAcceptanceRemains0": true
     }
   },
   "artifacts": [
@@ -986,6 +995,66 @@
       "rawBytes": 786,
       "rawSha256": "d08ae56e4fdeeb257393262b163855922a90d8580d2f250227f6fa9d39c12d61",
       "gzipSha256": "6ae5402f4ef80330c12aae9c04aa399db93cd9ec209e5c119c10c91c2db03ad3"
+    },
+    {
+      "path": "original-publisher-readback.json.gz",
+      "rawBytes": 814,
+      "rawSha256": "b23bc6716a9bc2ed8627fe033ad184b5c4b72c7634cc222de4f98d5f1e677457",
+      "gzipSha256": "d5fa77f0f7a3976cded4f6376c64f0a4ee9bfe4713f5028e395970712be6f6ce"
+    },
+    {
+      "path": "commit-publisher.log.gz",
+      "rawBytes": 730,
+      "rawSha256": "b886ea3b270a23b21c7baddad51a4841ff746f5161aa890b5947ffa340a208c2",
+      "gzipSha256": "c9b7b331f2c04663506966e78a4d018fa83d1b67c7e64b7194e7b29ab867236a"
+    },
+    {
+      "path": "frozen-before-repair.json.gz",
+      "rawBytes": 4436,
+      "rawSha256": "2ca1affd6d31b5433adbce378c92a70f449bae6700220e3299c5bee518efda6b",
+      "gzipSha256": "b7e842799255d2eed910550243411a1a15e47669f7687f728bcdd88be24010f6"
+    },
+    {
+      "path": "frozen-main-byte-manifest.json.gz",
+      "rawBytes": 39276,
+      "rawSha256": "72ae1372fab85850732606dd0079159cdf89c23b692d4deb446172b0867654a8",
+      "gzipSha256": "a3d16815901d34038c68084cab94a8277879471a078c95670fcc0f35fba96888"
+    },
+    {
+      "path": "frozen-prettier-info.log.gz",
+      "rawBytes": 1908,
+      "rawSha256": "4be8ba7b4ec2432e8984c0c3582ec764ef17c48e0022f6d7f7010278302298ad",
+      "gzipSha256": "d70c0464b2ae25663ced9932621e62dd7ed8a58a0c2bf7583b8ff4d3d12d3520"
+    },
+    {
+      "path": "frozen-prettier-exact-probe.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "frozen-history-controls.log.gz",
+      "rawBytes": 2170,
+      "rawSha256": "75f7e9704d34a707a8edcb6154a73bbc03b58b159b41ed1c782eff01e2effc88",
+      "gzipSha256": "56b6f8b46bfd3471c425100dd49eee3686f2a241f6e1727887c59f5113a9aca9"
+    },
+    {
+      "path": "frozen-history-check.log.gz",
+      "rawBytes": 358,
+      "rawSha256": "e024fda99a28349a8ff44f11eec2466572fb83ad37b3112206d02efd11a4ff99",
+      "gzipSha256": "27587b47962e879ff7422b31e9588bdeae4caaa22c087dc7035ebfc6819127ec"
+    },
+    {
+      "path": "frozen-history-ready-negative-control.log.gz",
+      "rawBytes": 117,
+      "rawSha256": "0debf0490874d2b85b287511ed5e9cc33efbdda3600ec383d35c38be44629821",
+      "gzipSha256": "00fad4c0b6e06bc8156467c4ffebb13d662a92c550646f506aaa6821a1a4ae6d"
+    },
+    {
+      "path": "frozen-public-docs.log.gz",
+      "rawBytes": 187,
+      "rawSha256": "5fab6239115785df700603692825831ccbf96122b0e23fa8240a48d8f4429bfc",
+      "gzipSha256": "fc59479571b0416cdb31cfd6a6d891405fe2cffe28983c5d4d3bfd86449a50ce"
     }
   ]
 }

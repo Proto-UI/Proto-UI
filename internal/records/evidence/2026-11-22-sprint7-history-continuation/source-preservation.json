@@ -12,7 +12,9 @@
     {
       "originalCommit": "b42fd96b279787c8c9a6fb39a2a88f30918cec89",
       "tree": "0bc7f5e98f08708ba5a296aa8ab5f6b50024a24f",
-      "parents": ["dc3b184ba10b0de53e40359c52d012b204b2cd01"],
+      "parents": [
+        "dc3b184ba10b0de53e40359c52d012b204b2cd01"
+      ],
       "author": {
         "name": "Codex",
         "email": "codex@openai.com"
@@ -27,7 +29,9 @@
     {
       "originalCommit": "56362cea090710530685d12ca516405abec7ceb3",
       "tree": "2546a612f2540e81ddab6f1a62146dc102cd9a56",
-      "parents": ["b42fd96b279787c8c9a6fb39a2a88f30918cec89"],
+      "parents": [
+        "b42fd96b279787c8c9a6fb39a2a88f30918cec89"
+      ],
       "author": {
         "name": "Codex",
         "email": "codex@openai.com"

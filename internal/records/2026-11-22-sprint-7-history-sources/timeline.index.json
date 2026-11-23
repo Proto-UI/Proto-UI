@@ -6,7 +6,11 @@
   "sha256": "c0c0521c54bd6aaf7403cbb59e342d9c49227de492146f70c814f5e15ccf7be6",
   "bytes": 67362,
   "issues": 467,
-  "eventTypes": ["ClosedEvent", "ReopenedEvent", "CrossReferencedEvent"],
+  "eventTypes": [
+    "ClosedEvent",
+    "ReopenedEvent",
+    "CrossReferencedEvent"
+  ],
   "scope": "Complete selected timeline connections; not all GitHub activity event types",
   "sourceFiles": [
     {

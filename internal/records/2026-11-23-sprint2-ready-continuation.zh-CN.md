@@ -43,3 +43,9 @@ TextControl 合并的实际 diff 另由 fresh-context compiler Agent 只读审�
 #1488 的有界 S2 C 功能与 B/C/D visual 子项、#1154 的双语 Hook visual 子项在最终证据完成后回填。完整 Hook 13 项、物理 OS IME、辅助技术、非 Web／真实 Harness／两冻结 App 未覆盖路径、完整历史接受与实验家族仍属于各原 Issue 的具体条件，不因本 PR Ready 自动接受。原失败、原 source pins 和已经获得的历史进度均保留。
 
 本记录不授予合并、发布、部署或规则变更权限。
+
+## 继承的冻结档案格式化修复
+
+首次本地正式 publisher 的回执与提交对象保留；它不证明冻结档案字节未变。此前格式化已改动主干历史记录，所以追加修复恢复上述 10 份档案的 b715b8a6 原 blob，并在 .prettierignore 按现有精确归档规则逐路径排除，正常 hooks 保留。没有重写已有提交或改变历史接受结论。
+
+实际 getFileInfo 确认这 10 个新增路径忽略，两个产品源码控制仍可格式化；再次执行正常 Prettier 后原字节保持。全部受保护历史和 protocol 档案的工作树与索引 blob 已逐一匹配主干；完整清单和 SHA-256 在压缩原始回执。原 21 项 history 控制、1697 对象 audit check 和 public-docs 检查已重新执行；ready 仍按预期以 1 退出，1697 个决定没有被冒充为接受。该修复没有改变先前 78 项源码验证的产品子树；原 304 项消费者及截图仍待最终分支执行。详见 formatter-recovery.json 及原始日志。
