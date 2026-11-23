@@ -68,8 +68,9 @@ function control() {
     }),
     disconnect() {
       terminal = true;
-      for (const listener of [...disabled.listeners])
-        listener({ type: 'disconnect', reason: 'unmount' });
+      for (const field of [disabled, focusVisible, focused])
+        for (const listener of [...field.listeners])
+          listener({ type: 'disconnect', reason: 'unmount' });
     },
   };
 }
@@ -591,6 +592,145 @@ describe('Search composition repeated publications', () => {
     await settled();
     expect(calls()).toBe(2);
   });
+
+  it.each(['shadcn', 'brutalist'] as const)(
+    'retries %s startup failure once when automatic query entry follows the final panel signal',
+    async (family) => {
+      const f = fixture(family);
+      f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+      let actionFocused = false;
+      const attempts: boolean[] = [];
+      vi.mocked(f.api.call).mockImplementation((ref, method) => {
+        if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+        f.owners[ref]!.getExposes = () => ({ focused: { get: () => actionFocused } });
+        const queryReady = f.source.focused.get();
+        attempts.push(queryReady);
+        if (queryReady) {
+          actionFocused = true;
+          f.source.focused.set(false);
+        }
+      });
+      f.open();
+      await settled();
+      expect(attempts).toEqual([false]);
+      expect(actionFocused).toBe(false);
+      // The actual input's public focus fact arrives after presentation and
+      // both committed slots. No later transition/session/identity paint occurs.
+      f.setFocusEpoch(1);
+      f.source.focused.set(true);
+      f.source.focused.set(true);
+      await settled();
+      expect(attempts).toEqual([false, true]);
+      expect(actionFocused).toBe(true);
+      f.source.focused.set(true);
+      await settled();
+      expect(attempts).toEqual([false, true]);
+      expect(f.errors).toEqual([]);
+    }
+  );
+
+  it.each(['newer focus', 'edited query', 'closed'] as const)(
+    'does not hand startup failure focus back after %s before delayed query entry',
+    async (changed) => {
+      const f = fixture('shadcn');
+      f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+      f.open();
+      await settled();
+      if (changed === 'newer focus') f.setFocusEpoch(3);
+      else if (changed === 'edited query') f.update({ query: 'button' });
+      else f.session.setOpen(false);
+      await settled();
+      const before = vi.mocked(f.api.call).mock.calls.length;
+      f.source.focused.set(true);
+      await settled();
+      expect(vi.mocked(f.api.call).mock.calls.length).toBe(before);
+      expect(f.errors).toEqual([]);
+    }
+  );
+
+  it('follows the current query identity and rejects an already-delivering retired focus callback', async () => {
+    const f = fixture('shadcn');
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    f.open();
+    await settled();
+    expect(f.source.focused.listeners.size).toBe(1);
+    const stale = f.source.focused.history[0];
+    const next = control();
+    f.identities({ query: next });
+    await settled();
+    expect(f.source.focused.listeners.size).toBe(0);
+    expect(next.focused.listeners.size).toBe(1);
+    f.source.disconnect();
+    const attempts = vi.fn();
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+      attempts();
+      f.owners[ref]!.getExposes = () => ({ focused: { get: () => true } });
+    });
+    f.setFocusEpoch(1);
+    stale({ type: 'next', prev: false, next: true });
+    await settled();
+    expect(attempts).not.toHaveBeenCalled();
+    next.focused.set(true);
+    await settled();
+    expect(attempts).toHaveBeenCalledOnce();
+    const last = next.focused.history[0];
+    f.destroy();
+    expect(next.focused.listeners.size).toBe(0);
+    next.disconnect();
+    last({ type: 'next', prev: false, next: true });
+    await settled();
+    expect(attempts).toHaveBeenCalledOnce();
+    expect(f.errors).toEqual([]);
+  });
+
+  it('retires a query focus subscription when its registration synchronously replaces the query', async () => {
+    const f = fixture('shadcn');
+    const replaced = control();
+    const replacement = control();
+    const subscribe = replaced.focused.subscribe.getMockImplementation()!;
+    replaced.focused.subscribe.mockImplementation((listener) => {
+      const stop = subscribe(listener);
+      f.identities({ query: replacement });
+      return stop;
+    });
+    f.identities({ query: replaced });
+    expect(replaced.focused.subscribe).toHaveBeenCalledOnce();
+    expect(replaced.focused.listeners.size).toBe(0);
+    expect(replacement.focused.listeners.size).toBe(1);
+    const reads = replacement.focused.subscribe.mock.calls.length;
+    f.identities({ panel: instance() });
+    expect(replacement.focused.subscribe).toHaveBeenCalledTimes(reads);
+    f.destroy();
+    expect(replacement.focused.listeners.size).toBe(0);
+    expect(f.errors).toEqual([]);
+  });
+
+  it.each(['dispose', 'disconnect'] as const)(
+    'releases a query focus subscription that synchronously triggers %s while registering',
+    async (terminal) => {
+      const f = fixture('shadcn');
+      const next = control();
+      const subscribe = next.focused.subscribe.getMockImplementation()!;
+      next.focused.subscribe.mockImplementation((listener) => {
+        const stop = subscribe(listener);
+        if (terminal === 'dispose') f.destroy();
+        else next.disconnect();
+        return stop;
+      });
+      f.identities({ query: next });
+      expect(next.focused.subscribe).toHaveBeenCalledOnce();
+      expect(next.focused.listeners.size).toBe(0);
+      const reads = next.getExposes.mock.calls.length;
+      const calls = vi.mocked(f.api.call).mock.calls.length;
+      expect(() => f.identities({ panel: instance() })).not.toThrow();
+      next.focused.history[0]({ type: 'next', prev: false, next: true });
+      await settled();
+      expect(next.getExposes).toHaveBeenCalledTimes(reads);
+      expect(vi.mocked(f.api.call).mock.calls.length).toBe(calls);
+      expect(f.errors).toEqual([]);
+    }
+  );
 
   it('waits for panel presentation before attempting Retry focus and does not spin after acceptance', async () => {
     const f = fixture();

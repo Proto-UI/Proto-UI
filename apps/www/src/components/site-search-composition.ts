@@ -1,4 +1,5 @@
 import { bindInputShellControl } from '@proto.ui/prototypes-shadcn/input-shell';
+import type { StateSubscribeCallback } from '@proto.ui/core';
 import type {
   DemoSpec,
   DemoNode,
@@ -253,7 +254,7 @@ export function createSiteSearchComposition(options: {
       let seedingQuery = false;
       let seededCommand: DemoPublicInstance | undefined;
       let focusedFailureAction: DemoPublicInstance | undefined;
-      let failureFocusOpening: { epoch: number } | undefined;
+      let failureFocusOpening: { epoch: number; queryEntryRetried?: boolean } | undefined;
       // A generation swap replaces the focused control with an equivalent one in
       // the new generation.  The Dialog content's own automatic entry focus
       // must not win that race, so this generation's content runs with
@@ -273,6 +274,12 @@ export function createSiteSearchComposition(options: {
       let openerReturnArmed = false;
       let offPanelTransition: (() => void) | null = null;
       let panelTransitionOwner: unknown = null;
+      type QueryFocusBinding = {
+        owner: DemoPublicInstance;
+        stop?: () => void;
+        retired: boolean;
+      };
+      let queryFocusBinding: QueryFocusBinding | undefined;
       type HintRequest = { target: HTMLElement; visible: boolean };
       let committedHint: HintRequest | undefined;
       let pendingHint: HintRequest | undefined;
@@ -528,6 +535,63 @@ export function createSiteSearchComposition(options: {
           // through the normal paint and its current publication guards.
           if (failureFocusOpening && current() && session.read().open) requestPaint();
         });
+      };
+      const retireQueryFocus = (binding: QueryFocusBinding | undefined) => {
+        if (!binding) return;
+        binding.retired = true;
+        const stop = binding.stop;
+        binding.stop = undefined;
+        stop?.();
+      };
+      const watchQueryFocus = () => {
+        const owner = api.getPublicInstance?.('query');
+        if (queryFocusBinding?.owner === owner) return;
+        const previous = queryFocusBinding;
+        queryFocusBinding = undefined;
+        retireQueryFocus(previous);
+        // Retiring a public subscription can synchronously replace this pair.
+        if (!live || queryFocusBinding || !owner || api.getPublicInstance?.('query') !== owner)
+          return;
+        const binding: QueryFocusBinding = { owner, retired: false };
+        queryFocusBinding = binding;
+        const isBound = () =>
+          live &&
+          queryFocusBinding === binding &&
+          !binding.retired &&
+          api.getPublicInstance?.('query') === owner;
+        const focused = owner.getExposes()?.focused as
+          | { get(): boolean; subscribe(listener: StateSubscribeCallback<boolean>): () => void }
+          | undefined;
+        if (!isBound() || !focused?.subscribe) return;
+        const stop = focused.subscribe((event) => {
+          if (!isBound()) return;
+          if (event.type === 'disconnect') {
+            // Preserve the terminal owner as a tombstone until a new public
+            // identity arrives; unrelated panel changes cannot revive it.
+            retireQueryFocus(binding);
+            return;
+          }
+          const opening = failureFocusOpening;
+          if (
+            event.type !== 'next' ||
+            !event.next ||
+            !opening ||
+            opening.queryEntryRetried ||
+            focusedFailureAction ||
+            !current() ||
+            !session.read().open ||
+            !focused.get() ||
+            !isBound()
+          )
+            return;
+          // Native query entry may follow the panel's last transition signal.
+          // Use that real fact once per opening; the normal paint still owns
+          // all presentation, epoch, user-intent and author-commit checks.
+          opening.queryEntryRetried = true;
+          requestPaint();
+        });
+        if (isBound()) binding.stop = stop;
+        else stop();
       };
       const disposers = new Set<() => void>();
       const inputValueChange = (detail: { value: string; composing: boolean }) => {
@@ -913,7 +977,7 @@ export function createSiteSearchComposition(options: {
         // generation actually owns.
         family === 'shadcn'
           ? ['command', 'query-shell', 'query', 'panel', 'close']
-          : ['command', 'panel', 'close'],
+          : ['command', 'query', 'panel', 'close'],
         (instances) => {
           const shell = instances['query-shell'];
           const control = instances.query;
@@ -972,6 +1036,7 @@ export function createSiteSearchComposition(options: {
               }
             }
           }
+          watchQueryFocus();
           if (current()) requestPaint();
           // The target may publish after the open transition, so the pending
           // restore is re-checked whenever this generation's instances change.
@@ -1015,6 +1080,11 @@ export function createSiteSearchComposition(options: {
           offInstances,
           () => inputBinding?.binding?.dispose(),
           () => offPanelTransition?.(),
+          () => {
+            const binding = queryFocusBinding;
+            queryFocusBinding = undefined;
+            retireQueryFocus(binding);
+          },
         ]) {
           try {
             stop();
