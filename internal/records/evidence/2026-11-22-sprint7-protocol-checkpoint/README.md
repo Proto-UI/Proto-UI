@@ -12,10 +12,10 @@ The four files under `scripts/analysis/value-experiments/` are `model-request.py
 
 [commands.json](commands.json) binds the exact interpreter, commands, source scope, terminal return codes and stdout/stderr hashes. The existing controls ran from this isolated worktree:
 
-| Existing test file        | Tests | Failures | Exit code |
-| ------------------------- | ----: | -------: | --------: |
-| `test-model-request.py`   |     9 |        0 |         0 |
-| `test-consumer-broker.py` |     6 |        0 |         0 |
+| Existing test file | Tests | Failures | Exit code |
+| --- | ---: | ---: | ---: |
+| `test-model-request.py` | 9 | 0 | 0 |
+| `test-consumer-broker.py` | 6 | 0 | 0 |
 
 To repeat these bounded checks from the repository root:
 

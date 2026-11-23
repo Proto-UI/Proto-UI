@@ -56,7 +56,9 @@
     "rationale": "原需求是 overlay 组件基础。对象关闭且无讨论，无法从本 Issue 恢复关闭原因、实现版本和焦点/清理验收；保留明确的信息缺口，不根据 closed 推断所有 Overlay 语义已验收。",
     "bodySha256": "2a266b1c774324be9f38e4e521eada245bfa4b6a31d857b3056289323e1c6328",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/4"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/4"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -197,7 +199,9 @@
     "rationale": "原需求是独立于 Markdown 的数据驱动丰富 API Table。当前关闭、零评论，关闭原因和消费路径回执未在该对象中保留；维持历史状态并登记缺口。",
     "bodySha256": "a1af24075031fed4bb38e53293e75a1a363d57fd54813bbc296571a4adc8465a",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/26"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/26"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -218,7 +222,9 @@
     "rationale": "原需求是 npx 将组件源码和 JSON 声明的依赖关系写入指定目录。当前关闭、零评论，原安装链证据不可据此恢复；当前 #1458 的可复现消费条件仍独立保留。",
     "bodySha256": "e31973a25ee85856cc1ba635b8815765cfba94385ead71b858bb3d38625d9139",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/27"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/27"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -299,7 +305,9 @@
     "rationale": "原要求包含表单验证/UI/提交以及 ContextProvider 可作 Consumer 的前置重构。关闭且无评论，保留两个责任层的原范围，原实现与验收未被当前状态证明。",
     "bodySha256": "c2943af44b3b201b1421de9f45f2232b460c4c76acab71a140e0cfe46737bf7b",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/43"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/43"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -396,7 +404,9 @@
     "rationale": "原正文为空、无讨论，唯一可恢复的需求范围是 Radio & Checkbox 标题；关闭不提供更详细规格或测试。把缺失源明确记录，禁止编造复合验收。",
     "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/67"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/67"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -417,7 +427,9 @@
     "rationale": "Dialog Component 只有标题、正文为空且无评论；保留原对象与关闭时间。当前 Dialog 焦点、dismiss、嵌套等条件不能被擅自倒填成原需求或历史通过。",
     "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/72"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/72"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -487,7 +499,9 @@
     "rationale": "Switch Component 只有标题、无正文或讨论；记录历史关闭与源缺口，不声称已验证现代 Switch 全部宿主语义。",
     "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/88"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/88"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -549,7 +563,9 @@
     "rationale": "原条件包括全站语言持久化、多文件 tabs、Starlight兼容、响应式及依赖约束。全部 checkbox 仍未勾选且无评论，closed 不能替代逐项证据；完整条件留在账本中。",
     "bodySha256": "9b05dff2b4cc160b92b9f3ad1b86d67bb6aee0362a8a16a76d6e75e20740f8bd",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/123"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/123"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -645,7 +661,9 @@
     "rationale": "原首页 demo 要求 CTA 下交互、原型语法、体现 runtime 技术切换并保留扩展，当前阶段只要求 WC。关闭无评论且原checkbox未勾选，不能改成四宿主或用标题推出已交付。",
     "bodySha256": "ee21456d603381c18fb39179663501c9f80f7f0d9c61617b9a33a6a2aba19c93",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/128"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/128"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -666,7 +684,9 @@
     "rationale": "原新手原型教程要求从零流程、至少2–3代码样例和文档站集成。关闭无评论，保留数量与目录原文；原完成载体需要与历史文档提交关联。",
     "bodySha256": "253d8fe7f4a8c35995127f6657917dab2a2ae7fe7b945d20bc439c09516f1150",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/129"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/129"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -711,7 +731,9 @@
     "rationale": "原要求明确独立 Adapter 行为规范、MUST/SHOULD/MAY、生命周期/Props/事件/a11y/错误/性能、至少两个 Adapter 的 conformance 和 PR CI；关闭零评论、checkbox未勾选。类型存在或当前 source presence 不能代替独立定义及其生命周期证据。",
     "bodySha256": "bd01f3c66b7dbcfc00262f5d15986754c2a0c2c18907d73de1a09aa9602c21f2",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/131"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/131"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -915,7 +937,9 @@
     "rationale": "原要求首发base/shadcn原型清单、每项测试/docs/demo与支持边界。关闭零评论，不能由后来的全库目录倒推当时冻结清单；原计量集合待从v0发布记录关联。",
     "bodySha256": "e963cae64ced0cfff19eec9d551f3978402bd5b4d6e6205189e29468bee3e286",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/189"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/189"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -936,7 +960,9 @@
     "rationale": "原要求对冻结首发包执行release scan、逐blocker清零并回填；关闭零评论。当前scan成功不应替代旧运行回执，保留原截止与冻结包分母。",
     "bodySha256": "6a8118140964f9f3a577919de4929f1fe83b74abddcb12fbf4fec59fb7f979f7",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/190"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/190"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -957,7 +983,9 @@
     "rationale": "原要求逐首发包补README，说明用途、安装、包角色；关闭零评论。源码现存README不构成当时发布包覆盖证明，保留原包集合及文件历史待关联。",
     "bodySha256": "b69696890065a23e3b257f6388893d7804f4498474d302ef7a4045ddf6a7bf32",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/191"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/191"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -978,7 +1006,9 @@
     "rationale": "原要求首发包exports/metadata问题清单、修正及release scan不再阻塞；关闭零评论。保留问题库存和执行结果缺口，不能以当前构建通过替代原发布边界。",
     "bodySha256": "cae210fe250ed40c99642c7fb8cdca2030e48fa29e9a4fbe05de0cb28375209f",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/192"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/192"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -999,7 +1029,9 @@
     "rationale": "原要求至少一次干净staging/dry-run并记录命令、结果及问题。关闭零评论且原checkbox未勾选；脚本存在不能代替该实际彩排。原日志需从相关发布PR/records关联。",
     "bodySha256": "5abaeb3d858c9b98d998c5c2ca1ec7b6e37d9541b88498725ab051dd28fcf7e7",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/193"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/193"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -1020,7 +1052,9 @@
     "rationale": "原英文QuickStart必须移除未可用流程、真实命令目录成立并与README/status/roadmap一致；关闭零评论。保留具体路径和三条条件，当前更新不自动证明v0历史安装验收。",
     "bodySha256": "bfacedd8bd75366e61584f8dc80c29a4ec01fd89299751f724f4a012d4715067",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/194"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/194"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -1041,7 +1075,9 @@
     "rationale": "原中文QuickStart与英文项分开，要求真实路径、命令目录和入口口径一致。关闭零评论，双语条件独立保留，不能用英文验收代理中文。",
     "bodySha256": "cba6cbc6ba141d151e6b6d8375091ffd5b13616929269dc7ebd0f4cda062a5cf",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/195"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/195"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -1062,7 +1098,9 @@
     "rationale": "原要求在干净环境按QuickStart真正运行Button并回填问题修复。关闭零评论；当前源码或孤立unit test不足以恢复原clean-install smoke，保留执行证据缺口。",
     "bodySha256": "8a1faa2acb8c71efe7cd9aea3b36bbec021712d7fba20a65fcf1bf444d436c60",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/196"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/196"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -1083,7 +1121,9 @@
     "rationale": "原要求干净环境跑通复合Dialog并记录caveat，显式用于超出最小happy path的价值证明。关闭零评论；保留实际安装/交互条件，不以Button smoke代理。",
     "bodySha256": "372de80f18f56404183421f771ab6f83d817ab484e71d10e08aefabac85765eb",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/197"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/197"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {
@@ -1104,7 +1144,9 @@
     "rationale": "原要求README、双语status/roadmap、QuickStart、Hero/CTA承诺一致，不暗示超出v0范围。关闭零评论，所有指定入口及原v0范围完整保留；后续0.3的不同范围必须分版本陈述。",
     "bodySha256": "1933ccaed3c64bc1413016693644c6f9af9bce446cc96adc3997b88f7d3677e0",
     "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "sources": ["https://github.com/Proto-UI/Proto-UI/issues/198"],
+    "sources": [
+      "https://github.com/Proto-UI/Proto-UI/issues/198"
+    ],
     "technicalAcceptance": "No new technical acceptance, lifecycle promotion or author certification",
     "remaining": [
       {

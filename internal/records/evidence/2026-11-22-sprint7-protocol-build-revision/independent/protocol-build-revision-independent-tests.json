@@ -5,7 +5,12 @@
   "python": "Python 3.12.14",
   "runs": [
     {
-      "argv": ["python3", "-B", "scripts/analysis/value-experiments/test-model-request.py", "-v"],
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/analysis/value-experiments/test-model-request.py",
+        "-v"
+      ],
       "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
       "exitCode": 0,
       "expectedTestCount": 9,
@@ -18,7 +23,12 @@
       "output": "test_json_mode_does_not_introduce_tools_or_transmit_timeout_settings (__main__.Boundary.test_json_mode_does_not_introduce_tools_or_transmit_timeout_settings) ... ok\ntest_model_tool_requests_have_no_dispatch (__main__.Boundary.test_model_tool_requests_have_no_dispatch) ... ok\ntest_only_explicit_literal_repair_history_is_accepted (__main__.Boundary.test_only_explicit_literal_repair_history_is_accepted) ... ok\ntest_path_and_configuration_injection_is_rejected (__main__.Boundary.test_path_and_configuration_injection_is_rejected) ... ok\ntest_source_is_inert_text_and_only_declared_files_survive (__main__.Boundary.test_source_is_inert_text_and_only_declared_files_survive) ... ok\ntest_tool_retrieval_and_history_channels_cannot_be_added (__main__.Boundary.test_tool_retrieval_and_history_channels_cannot_be_added) ... ok\ntest_truncation_is_failed_instead_of_repaired_or_dropped (__main__.Boundary.test_truncation_is_failed_instead_of_repaired_or_dropped) ... ok\ntest_unreferenced_files_and_environment_never_enter_request (__main__.Boundary.test_unreferenced_files_and_environment_never_enter_request) ... ok\ntest_valid_repair_history_is_exactly_the_supplied_pair (__main__.Boundary.test_valid_repair_history_is_exactly_the_supplied_pair) ... ok\n\n----------------------------------------------------------------------\nRan 9 tests in 0.002s\n\nOK\n"
     },
     {
-      "argv": ["python3", "-B", "scripts/analysis/value-experiments/test-consumer-broker.py", "-v"],
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/analysis/value-experiments/test-consumer-broker.py",
+        "-v"
+      ],
       "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
       "exitCode": 0,
       "expectedTestCount": 7,

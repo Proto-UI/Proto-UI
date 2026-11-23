@@ -64,7 +64,12 @@
     "python": "Python 3.12.14",
     "runs": [
       {
-        "argv": ["python3", "-B", "scripts/analysis/value-experiments/test-model-request.py", "-v"],
+        "argv": [
+          "python3",
+          "-B",
+          "scripts/analysis/value-experiments/test-model-request.py",
+          "-v"
+        ],
         "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
         "exitCode": 0,
         "tests": 9,

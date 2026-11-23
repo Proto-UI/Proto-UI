@@ -17,7 +17,9 @@
     "head": "d8da090538873fefd555753f60d3fce69f3cbee9",
     "base": "38afc8942bfd245e12eaa661298c2feddbc63af8",
     "commitTree": "03d31841adfcf6a629b13b40d2fdf04a937f9e8d",
-    "commitParents": ["38afc8942bfd245e12eaa661298c2feddbc63af8"],
+    "commitParents": [
+      "38afc8942bfd245e12eaa661298c2feddbc63af8"
+    ],
     "readThrough": "GitHub connector GET pull request and GET Git commit in this review"
   },
   "scope": "Byte-identical restoration of 17 historical files and complete original two-commit payload, with a separate continuation record and explicitly unaccepted decisions. No generator execution, regenerated ledger, product acceptance or Issue closure.",
@@ -30,7 +32,12 @@
       "state": "open-follow-up-required-before-regeneration",
       "blockingForThisFrozenCheckpoint": false,
       "path": "scripts/governance/reconcile-history-decisions.mjs",
-      "lines": [18, 22, 215, 221],
+      "lines": [
+        18,
+        22,
+        215,
+        221
+      ],
       "observed": "Prior manual-reading records are selected by object number and reviewMethod prefix; generated rows then receive current snapshot hashes without validating the prior hashes.",
       "impact": "Reusing stale manual records after body/discussion changes can incorrectly carry the manual-full-body-and-discussion marker to different sources; the audit then sees refreshed matching hashes.",
       "requiredRepair": "Before regeneration, reject changed/missing/duplicate manual sources and bind both prior body/discussion hashes to the actual new snapshot; retain actual reviewer/source provenance and meaningful negative controls.",
@@ -44,7 +51,12 @@
       "state": "open-follow-up-required-before-regeneration",
       "blockingForThisFrozenCheckpoint": false,
       "path": "scripts/governance/build-history-snapshot.mjs",
-      "lines": [113, 127, 153, 165],
+      "lines": [
+        113,
+        127,
+        153,
+        165
+      ],
       "observed": "The generator reads native RAW inputs, then replaces their embedded capture values with a separately indexed archive without comparing the complete RAW and decoded archive source sets.",
       "impact": "A later run can silently substitute a different native capture set while reporting RAW counts.",
       "requiredRepair": "Before generation, compare exact PR/inline/timeline membership and each original source hash against the decoded archive; reject missing, extra or changed captures.",
@@ -321,7 +333,9 @@
       {
         "originalCommit": "b42fd96b279787c8c9a6fb39a2a88f30918cec89",
         "tree": "0bc7f5e98f08708ba5a296aa8ab5f6b50024a24f",
-        "parents": ["dc3b184ba10b0de53e40359c52d012b204b2cd01"],
+        "parents": [
+          "dc3b184ba10b0de53e40359c52d012b204b2cd01"
+        ],
         "author": {
           "name": "Codex",
           "email": "codex@openai.com"
@@ -336,7 +350,9 @@
       {
         "originalCommit": "56362cea090710530685d12ca516405abec7ceb3",
         "tree": "2546a612f2540e81ddab6f1a62146dc102cd9a56",
-        "parents": ["b42fd96b279787c8c9a6fb39a2a88f30918cec89"],
+        "parents": [
+          "b42fd96b279787c8c9a6fb39a2a88f30918cec89"
+        ],
         "author": {
           "name": "Codex",
           "email": "codex@openai.com"
