@@ -191,6 +191,9 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/shadow-color-scheme-environment.ts',
   'packages/adapters/web-component/src/shadow-inner-surface.ts',
   'packages/adapters/web-component/src/shadow-owner-shell.ts',
+  // Current-owner receipt imported by the public WC adapt entry; this does
+  // not authorize a diagnostic producer or a sibling chunk to import it.
+  'packages/adapters/web-component/src/shadow-percentage-source.ts',
   'packages/adapters/web-component/src/shadow-profile.ts',
   'packages/adapters/web-component/src/shadow-split-effects.ts',
   'packages/adapters/web-component/src/shadow-split-meta.ts',
