@@ -684,10 +684,12 @@ describe.each(['dialog', 'alert-dialog'] as const)(
             expect(value[part].concealed).toBe(true);
             expect(value[part].inert).toBe(true);
           }
-          for (const value of leaving.samples.filter((value) => value[part].phase === 'closed'))
+          for (const value of leaving.samples.filter((value) => value[part].phase === 'closed')) {
+            expect(value[part].detached).toBe(true);
             expect(value[part].concealed, `${part}: closed must not recover visible paint`).toBe(
               true
             );
+          }
           const retired = leaving.samples.at(-1)![part];
           expect(isPhysicallyRetiredPortal(retired, entered[part])).toBe(true);
           expect(retired.portaled).toBe(false);

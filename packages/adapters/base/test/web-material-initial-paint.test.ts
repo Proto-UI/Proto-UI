@@ -30,12 +30,16 @@ const decode = vi.hoisted(() => ({
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: () => gpu }));
 vi.mock('../src/material/image-prepare', () => ({
-  prepareOpticalImage: (_doc: Document, _source: string, ready: () => void, failed: () => void) => {
-    decode.ready = ready;
-    decode.fail = failed;
-    if (!decode.delayed) ready();
-    return () => {};
-  },
+  createOpticalImageCache: () => ({
+    prepare: (_source: string, ready: () => void, failed: () => void) => {
+      decode.ready = ready;
+      decode.fail = failed;
+      if (!decode.delayed) ready();
+      return () => {};
+    },
+    clear() {},
+    dispose() {},
+  }),
 }));
 // Valid opaque PNGs are synthetic protocol fixtures. Mock GPU tests below prove
 // ownership and refusal, never optical appearance, WebGL parity, or native CSS.
