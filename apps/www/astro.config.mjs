@@ -2202,6 +2202,9 @@ export default defineConfig({
     rehypePlugins: [rehypeEnhancedImage, rehypeScrollableTables],
   },
   vite: {
+    // The browser compiler creates a module Worker with lazy QuickJS imports.
+    // Preserve those split ESM chunks in the production build.
+    worker: { format: 'es' },
     build: {
       rollupOptions: {
         output: {

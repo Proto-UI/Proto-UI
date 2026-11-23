@@ -20,6 +20,11 @@ import {
   observedAstroLocalURL,
 } from '../compiler/browser-service.mjs';
 
+import {
+  prepareProductionBrowserService,
+  type ProductionBrowserService,
+} from '../compiler/browser-production.mjs';
+
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const require = createRequire(path.join(root, 'apps/www/package.json'));
 const { chromium } = require('playwright-core');
@@ -38,14 +43,16 @@ const report: any = {
     'Actual Astro documentation pages, actual WASM module Worker, actual generated four-target iframe controls; Chromium native keyboard/pointer. No physical hardware or assistive-technology acceptance is claimed.',
 };
 let expectedEvidence: BrowserBuildEvidence | undefined;
+let production: ProductionBrowserService | undefined;
 let server: ReturnType<typeof spawn> | undefined;
 let serverLog = '';
 let browser: any;
 let completedCases = false;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 try {
-  const service = localBrowserServiceConfiguration(process.env, root, process.execPath);
-  const base = service.url;
+  const mode = process.env.PUI_BROWSER_MODE ?? 'development';
+  assert.ok(['development', 'production'].includes(mode), 'invalid PUI_BROWSER_MODE');
+  let base: string;
   // Keep the browser's OS sandbox. A host that cannot launch it records an
   // environment failure before spending time preparing the documentation app.
   browser = await chromium.launch({
@@ -54,60 +61,70 @@ try {
     chromiumSandbox: true,
   });
   report.browser = browser.version();
-  execFileSync('corepack', ['pnpm@10.32.1', 'run', 'generate:proto-ui-style'], {
-    cwd: service.cwd,
-    stdio: 'pipe',
-  });
-  expectedEvidence = await captureCurrentBrowserEvidence();
-  Object.assign(report, browserEvidenceRecord(expectedEvidence));
-  await assertLoopbackPortAvailable(service.port);
-  server = spawn(service.executable, service.command.slice(1), {
-    cwd: service.cwd,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  let spawnFailure: Error | undefined;
-  server.on('error', (error) => {
-    spawnFailure = error;
-  });
-  server.stdout?.on('data', (chunk) => {
-    serverLog += chunk.toString();
-  });
-  server.stderr?.on('data', (chunk) => {
-    serverLog += chunk.toString();
-  });
-  const deadline = Date.now() + 90_000;
-  let observedLocalURL: string | undefined;
-  while (!(observedLocalURL = observedAstroLocalURL(serverLog, base))) {
-    if (spawnFailure) throw spawnFailure;
-    if (!childIsAlive(server))
-      throw new Error(`Owned Astro exited before binding its URL: ${serverLog}`);
-    if (Date.now() > deadline)
-      throw new Error(`Astro startup timed out: ${serverLog.slice(-6000)}`);
-    await sleep(100);
-  }
-  assert.ok(childIsAlive(server), 'owned Astro child must still be alive at its ready URL');
-  assert.deepEqual(
-    server.spawnargs,
-    service.command,
-    'actual child command must match the source-bound launch'
-  );
-  report.service = {
-    url: base,
-    mode: 'local-runner-service',
-    owner: {
-      status: 'running',
-      root: service.root,
+  if (mode === 'production') {
+    production = await prepareProductionBrowserService({ root, output, environment: process.env });
+    base = production.url;
+    report.service = production.receipt;
+    expectedEvidence = await captureCurrentBrowserEvidence();
+    Object.assign(report, browserEvidenceRecord(expectedEvidence));
+  } else {
+    const service = localBrowserServiceConfiguration(process.env, root, process.execPath);
+    base = service.url;
+    execFileSync('corepack', ['pnpm@10.32.1', 'run', 'generate:proto-ui-style'], {
       cwd: service.cwd,
-      executable: server.spawnfile,
-      command: server.spawnargs,
-      pid: server.pid,
-      parentPid: process.pid,
-      port: service.port,
-      observedLocalURL,
-      portAvailableBeforeSpawn: true,
-      aliveAtReady: true,
-    },
-  };
+      stdio: 'pipe',
+    });
+    expectedEvidence = await captureCurrentBrowserEvidence();
+    Object.assign(report, browserEvidenceRecord(expectedEvidence));
+    await assertLoopbackPortAvailable(service.port);
+    server = spawn(service.executable, service.command.slice(1), {
+      cwd: service.cwd,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let spawnFailure: Error | undefined;
+    server.on('error', (error) => {
+      spawnFailure = error;
+    });
+    server.stdout?.on('data', (chunk) => {
+      serverLog += chunk.toString();
+    });
+    server.stderr?.on('data', (chunk) => {
+      serverLog += chunk.toString();
+    });
+    const deadline = Date.now() + 90_000;
+    let observedLocalURL: string | undefined;
+    while (!(observedLocalURL = observedAstroLocalURL(serverLog, base))) {
+      if (spawnFailure) throw spawnFailure;
+      if (!childIsAlive(server))
+        throw new Error(`Owned Astro exited before binding its URL: ${serverLog}`);
+      if (Date.now() > deadline)
+        throw new Error(`Astro startup timed out: ${serverLog.slice(-6000)}`);
+      await sleep(100);
+    }
+    assert.ok(childIsAlive(server), 'owned Astro child must still be alive at its ready URL');
+    assert.deepEqual(
+      server.spawnargs,
+      service.command,
+      'actual child command must match the source-bound launch'
+    );
+    report.service = {
+      url: base,
+      mode: 'local-runner-service',
+      owner: {
+        status: 'running',
+        root: service.root,
+        cwd: service.cwd,
+        executable: server.spawnfile,
+        command: server.spawnargs,
+        pid: server.pid,
+        parentPid: process.pid,
+        port: service.port,
+        observedLocalURL,
+        portAvailableBeforeSpawn: true,
+        aliveAtReady: true,
+      },
+    };
+  }
   const serviceManifest = await fetch(`${base}/compiler-assets/input-manifest.json`);
   assert.equal(
     serviceManifest.ok,
@@ -138,6 +155,22 @@ try {
     assetErrors: string[] = [];
   report.loadedAssets = {};
   report.loadedWasm = [];
+  report.loadedProductionAssets = {};
+  report.productionWorkers = [];
+  page.on('worker', (worker: any) => {
+    if (!production) return;
+    const entry = { url: worker.url(), closed: false };
+    report.productionWorkers.push(entry);
+    worker.on('close', () => {
+      entry.closed = true;
+    });
+  });
+  const retiredWorkers = async () => {
+    if (!production) return;
+    const deadline = Date.now() + 5_000;
+    while (page.workers().length && Date.now() < deadline) await sleep(20);
+    assert.equal(page.workers().length, 0, 'the disposed panel must retire its actual Worker');
+  };
   const wasmDigests = new Set(
     Object.entries(expectedEvidence.sourceFiles)
       .filter(([file]) => file.endsWith('.wasm'))
@@ -150,12 +183,35 @@ try {
         ? url.pathname.slice('/compiler-assets/'.length)
         : '';
     const expected = expectedEvidence!.assets[asset];
+    const productionFile =
+      production &&
+      url.origin === new URL(base).origin &&
+      url.pathname.startsWith('/_astro/') &&
+      /\.(?:js|mjs|wasm)$/.test(url.pathname)
+        ? url.pathname.slice(1)
+        : '';
     const wasm = response.headers()['content-type']?.includes('application/wasm');
-    if (!expected && !wasm) return;
+    if (!expected && !wasm && !productionFile) return;
     loadedChecks.push(
       (async () => {
         try {
           const sha256 = digest(await response.body());
+          if (productionFile) {
+            const sealed = production!.files[productionFile];
+            assert.ok(sealed, 'actual resource must belong to the owned production build');
+            assert.equal(response.status(), 200, 'production module/WASM response must succeed');
+            const contentType = response.headers()['content-type'] ?? '';
+            assert.match(
+              contentType,
+              productionFile.endsWith('.wasm') ? /application\/wasm/ : /(?:java|ecma)script/i
+            );
+            assert.equal(sha256, sealed.sha256, 'loaded production asset drift: ' + productionFile);
+            report.loadedProductionAssets[productionFile] = {
+              sha256,
+              status: response.status(),
+              contentType,
+            };
+          }
           if (expected) {
             assert.equal(sha256, expected, `loaded browser asset drift: ${asset}`);
             report.loadedAssets[asset] = sha256;
@@ -230,6 +286,12 @@ try {
       requests.some((request) => request.url.includes('/compiler-assets/compiler.js')),
       false
     );
+    if (production)
+      assert.equal(
+        report.productionWorkers.length,
+        0,
+        'ordinary documentation must not start the compiler Worker'
+      );
     await panel.locator('[data-compiler-panel] > summary').click();
     await terminal();
     assert.equal(
@@ -383,6 +445,7 @@ try {
         'disposed'
     );
     assert.equal(await panel.locator('iframe').count(), 0);
+    await retiredWorkers();
     await panel.locator('[data-compiler-run]').click();
     await terminal();
     const before = await panel.getAttribute('data-compiler-revision');
@@ -392,6 +455,7 @@ try {
         document.querySelector<HTMLElement>('pui-browser-compiler')?.dataset.compilerPhase ===
         'disposed'
     );
+    await retiredWorkers();
     await panel.locator('[data-compiler-panel] > summary').click();
     await terminal();
     assert.notEqual(await panel.getAttribute('data-compiler-revision'), before);
@@ -437,6 +501,7 @@ try {
     await page.screenshot({ path: path.join(output, 'base-button-zh.png'), fullPage: false });
     await page.goto(`${base}/en/`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
     assert.equal(await page.locator('pui-browser-compiler iframe').count(), 0);
+    await retiredWorkers();
   });
   report.consoleErrors = errors;
   report.requests = requests;
@@ -451,11 +516,29 @@ try {
       );
     assert.ok(report.loadedWasm.length > 0, 'the actual Worker loaded the bound QuickJS binary');
   });
+  if (production)
+    await one('production-worker-chunks-and-cleanup', async () => {
+      assert.deepEqual(errors, [], 'production must have no page/console errors');
+      assert.ok(
+        report.productionWorkers.length >= 4,
+        'initial/cancel/reopen/bilingual journeys must create actual Workers'
+      );
+      for (const worker of report.productionWorkers) {
+        const url = new URL(worker.url);
+        assert.equal(url.origin, base);
+        assert.match(url.pathname, /^\/_astro\/[^/]+\.js$/);
+        assert.equal(worker.closed, true, 'every production Worker must retire on navigation');
+        assert.ok(
+          report.loadedProductionAssets[url.pathname.slice(1)],
+          'the actual Worker entry must match the sealed production bytes'
+        );
+      }
+    });
   completedCases = true;
 } catch (error) {
   report.cases.push({ name: 'setup', status: 'failed', error: String(error) });
 } finally {
-  if (report.service?.owner) {
+  if (!production && report.service?.owner) {
     const alive = childIsAlive(server);
     report.service.owner.aliveBeforeShutdown = alive;
     report.service.owner.status = completedCases && alive ? 'passed' : 'failed';
@@ -472,7 +555,21 @@ try {
   } catch (error) {
     report.cases.push({ name: 'browser-cleanup', status: 'failed', error: String(error) });
   } finally {
-    server?.kill('SIGTERM');
+    if (production) {
+      try {
+        await production.close(completedCases);
+        report.cases.push({
+          name: 'runner-owned-local-service',
+          status: report.service.owner.status,
+        });
+      } catch (error) {
+        report.cases.push({
+          name: 'runner-owned-local-service',
+          status: 'failed',
+          error: String(error),
+        });
+      }
+    } else server?.kill('SIGTERM');
   }
   if (expectedEvidence) {
     try {
