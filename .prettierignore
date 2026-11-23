@@ -131,3 +131,10 @@ internal/records/evidence/2026-11-22-sprint7-history-continuation/
 internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
+
+# Exact Sprint 2 regression, distribution and complete-inventory receipts.
+# These byte-bound artifacts are verified against their retained manifests.
+internal/records/evidence/2026-11-23-sprint2-compiler-inventory/
+internal/records/evidence/2026-11-24-sprint2-final-distribution/
+internal/records/evidence/2026-11-24-sprint2-regression-repairs/
+internal/records/evidence/2026-11-24-sprint2-runtime-final/

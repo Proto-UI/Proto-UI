@@ -1,0 +1,30 @@
+{
+  "kind": "s2-runtime-evidence-transfer-complete",
+  "archive": "/tank/shared/projects/proto-ui-agent/s2-completion-20261124-b202/transfer/s2-runtime-462-5cb/raw-evidence.tar.gz",
+  "archiveBytes": 7064463,
+  "archiveSha256": "0a38760cf04e9149d8090735c71124cb5d8a1f5c7be332aca8d80ee3c801ccdb",
+  "verifiedChunks": 216,
+  "verifiedPayloads": 1418,
+  "verifiedTarMembers": 1419,
+  "rawManifestSha256": "212d86e4348d37813a6b0c310943866a36997c5168734ded769c6b0ca2e1201b",
+  "summarySha256": "143130425b6bb2d2b2655e475829bbaf31121222fe8865c9fbd6077792f22533",
+  "sourceCommit": "5cb80eb937f20982dd7dc8cbc93a90e91d665c31",
+  "executedUniqueFiles": 462,
+  "fileStatusCounts": {
+    "passed": 452,
+    "completed-with-unaccepted-pending-or-todo": 1,
+    "failed-or-incomplete": 9
+  },
+  "assertionStatusCounts": {
+    "passed": 5593,
+    "todo": 1,
+    "failed": 11
+  },
+  "sourceStable": true,
+  "rawRunTerminalExits": [
+    130,
+    1
+  ],
+  "testStatus": "failed-with-unexecuted-todo",
+  "transferStatus": "complete-and-verified"
+}
