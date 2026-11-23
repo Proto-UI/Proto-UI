@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "node_modules/prettier/bin/prettier.cjs",
+    "--check",
+    "packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts"
+  ],
+  "startedAt": "2026-11-23T13:33:59.967049+00:00",
+  "sourceSha256": "579fabf93b22536dadbbd8117e5d9e6b42d119b05eb79c0450443ae1b5726477",
+  "exitCode": 0,
+  "finishedAt": "2026-11-23T13:34:00.369007+00:00"
+}

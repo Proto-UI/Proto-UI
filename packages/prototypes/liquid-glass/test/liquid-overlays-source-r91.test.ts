@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Prototype } from '@proto.ui/core';
+import type { Prototype, RunHandle, ViewOperation } from '@proto.ui/core';
 import { createRuntimeSession, type RuntimeSession } from '@proto.ui/runtime';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
@@ -26,10 +26,7 @@ import {
   FOCUS_PARENT_CAP,
   FOCUS_ROOT_TARGET_CAP,
 } from '@proto.ui/module-focus';
-import {
-  VISUAL_FEEDBACK_SINK_CAP,
-  type VisualFeedbackFrame,
-} from '@proto.ui/module-feedback';
+import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import { resolveMaterialStyle, colorContrast } from '../../../adapters/base/src/material/style';
 import { activationTurn } from '../../../modules/native-link/test/no-network';
 import { THEME } from '../src/theme';
@@ -80,6 +77,9 @@ function runtimeHarness() {
     const frames: VisualFeedbackFrame[] = [];
     const released: unknown[] = [];
     const actions: Array<{ name: string; payload: unknown }> = [];
+    let viewAdmitted = false;
+    let viewGeneration = 0;
+    let terminal = false;
     const session = createRuntimeSession(prototype, {
       prototypeName: prototype.name,
       getRawProps: () => props,
@@ -91,6 +91,28 @@ function runtimeHarness() {
         return { cancel: () => clearTimeout(timer) };
       },
       commit: (_children, signal) => signal?.done(),
+      // This non-rendering material host admits a virtual committed view.
+      // Bind its operation identity to actual Runtime epochs and teardown;
+      // detached DOM event targets do not establish native host conformance.
+      viewOperations: {
+        capture() {
+          if (!viewAdmitted || terminal) return null;
+          const generation = viewGeneration;
+          return Object.freeze({
+            isCurrent: () => viewAdmitted && !terminal && generation === viewGeneration,
+          });
+        },
+      },
+      onLifecycleEvent(event) {
+        if (event.type === 'mount.phase') {
+          viewGeneration++;
+          viewAdmitted = event.phase === 'mounted';
+        } else if (event.type === 'instance.dispose.begin') {
+          terminal = true;
+          viewAdmitted = false;
+          viewGeneration++;
+        }
+      },
       onRuntimeReady(wiring) {
         wiring.attach('anatomy', [
           [ANATOMY_INSTANCE_TOKEN_CAP, target],
@@ -189,6 +211,45 @@ function runtimeHarness() {
     },
   };
 }
+
+it('retires the virtual material host operation across unmount, remount and disposal', async () => {
+  const h = runtimeHarness();
+  let run!: RunHandle<Record<string, unknown>>;
+  const unit = h.create({
+    name: 'liquid-material-host-view-operation',
+    setup(def) {
+      def.lifecycle.onCreated((current) => {
+        run = current;
+      });
+    },
+  });
+  const capture = (): ViewOperation | null => {
+    let operation: ViewOperation | null = null;
+    unit.session.invokeInCallbackScope(() => {
+      operation = run.lifecycle.captureViewOperation();
+    });
+    return operation;
+  };
+  try {
+    expect(capture()).toBeNull();
+    await unit.session.mount();
+    const first = capture()!;
+    expect(first.isCurrent()).toBe(true);
+    await unit.session.unmount();
+    expect(first.isCurrent()).toBe(false);
+    expect(capture()).toBeNull();
+    await unit.session.mount();
+    const second = capture()!;
+    expect(second).not.toBe(first);
+    expect(second.isCurrent()).toBe(true);
+    expect(first.isCurrent()).toBe(false);
+    await unit.session.dispose();
+    expect(first.isCurrent()).toBe(false);
+    expect(second.isCurrent()).toBe(false);
+  } finally {
+    await h.dispose();
+  }
+});
 
 const candidate = { intent: 'liquid-glass' };
 const slot = {
@@ -417,20 +478,25 @@ describe.each(menuBars)('Liquid $name distinct popup identity', (parts) => {
       for (const panel of panels) expectOpaqueFallback(panel);
       triggers[1].input('press.commit');
       expect(root.exposes.value.get()).toBe('file');
-      // The controlled owner rejects the committed value: Base records the
-      // refused trigger request — Menubar also records the paired focus-entry
-      // request while NavigationMenu skips content entry — but never an owner
-      // value or an uncontrolled mutation.
-      expect(root.actions.filter((event) => event.name === 'valueChange')).toEqual(
-        parts.name === 'Menubar'
-          ? [
-              { name: 'valueChange', payload: expect.objectContaining({ value: 'edit' }) },
-              { name: 'valueChange', payload: { value: 'edit', reason: 'keyboard' } },
-            ]
-          : [{ name: 'valueChange', payload: expect.objectContaining({ value: 'edit' }) }]
-      );
+      // Base source-entry prepares focus before author callbacks, preserving
+      // the press's single externally visible trigger request. Refusal does
+      // not mutate the owner or manufacture a second keyboard request.
+      const request = { name: 'valueChange', payload: { value: 'edit', reason: 'trigger' } };
+      expect(root.actions.filter((event) => event.name === 'valueChange')).toEqual([request]);
+      expect(panels.map((panel) => panel.material().candidates)).toEqual([[candidate], []]);
+      // A later independent command must still be delivered to the owner.
+      triggers[1].input('press.commit');
+      expect(root.actions.filter((event) => event.name === 'valueChange')).toEqual([
+        request,
+        request,
+      ]);
+      expect(root.exposes.value.get()).toBe('file');
       expect(panels.map((panel) => panel.material().candidates)).toEqual([[candidate], []]);
       root.set({ value: 'edit' });
+      expect(root.actions.filter((event) => event.name === 'valueChange')).toEqual([
+        request,
+        request,
+      ]);
       expect(panels.map((panel) => panel.material().candidates)).toEqual([[], [candidate]]);
       items[1].set({ value: 'edit-action', disabled: true });
       items[1].input('press.commit');
