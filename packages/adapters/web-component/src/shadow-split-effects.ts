@@ -458,6 +458,7 @@ export function createShadowSplitEffectsPort({
   splitPaintOwners.set(surface, {
     containsCurrentTokens() {
       if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) !== applied.root) return false;
+      if (applied && surface.getAttribute(SHADOW_SPLIT_SURFACE_ATTR) !== '') return false;
       const owned = applier.getOwned();
       if (owned.size === 0) return true;
       const live = new Set(surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/));

@@ -1,0 +1,24 @@
+{
+  "baseHead": "d786f6307269e9458f0d2202de7483cc24c7d4ee",
+  "sourceSha256": {
+    "packages/adapters/web-component/src/shadow-split-effects.ts": "63ba0ff2fde394a42ac801898dcfdab63256192987ede87730f4b91b9b0c2351"
+  },
+  "baselineFailure": {
+    "file": "packages/adapters/web-component/test/owned-decoration.integration.test.ts",
+    "test": "rejects invalid split decoration reuse after remove split marker",
+    "inventory": "../2026-11-23-conceal-fixtures/s67-general-baseline-remaining.json.gz"
+  },
+  "candidate": {
+    "command": "node node_modules/vitest/vitest.mjs run packages/adapters/web-component/test/owned-decoration.integration.test.ts packages/adapters/web-component/test/shadow-split-effects.test.ts packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts --pool=forks --no-file-parallelism",
+    "files": 3,
+    "passed": 108,
+    "failed": 0,
+    "skipped": 0
+  },
+  "log": {
+    "bytes": 171720,
+    "sha256": "1516786854de9f95597fe8bda47ddbefdd1ea90718235d26c65a832163504299",
+    "gzipSha256": "6fd8cb1d44459bccab9da16f62891e52d4637f6f275e5ffcf7e7bf743010ed7e"
+  },
+  "scope": "Actual WC implementation in Happy DOM. Native owned-decoration and compositor admission remain separate."
+}
