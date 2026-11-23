@@ -187,14 +187,23 @@ export function mountCompiledPreview(
       if (!readySettled) rejectReady(new DOMException('Preview was retired.', 'AbortError'));
       frame.hidden = true;
       retirePromise = new Promise<void>((resolve, reject) => {
+        let finished = false;
         const finish = () => {
+          if (finished) return;
+          finished = true;
+          finishRetirement = undefined;
           window.clearTimeout(timeout);
           window.removeEventListener('message', listener);
           frame.remove();
           if (cleanupError) reject(cleanupError);
           else resolve();
         };
-        const timeout = window.setTimeout(finish, 250);
+        const timeout = window.setTimeout(() => {
+          cleanupError ??= new Error(
+            'Preview cleanup acknowledgement exceeded its 250-millisecond deadline.'
+          );
+          finish();
+        }, 250);
         finishRetirement = finish;
         frame.contentWindow?.postMessage(
           { type: 'dispose', token, revision: result.revision },
