@@ -393,8 +393,8 @@
     "prototype-library"
   ],
   "files": [
-    "README.md",
     "dist/",
+    "README.md",
     "src/accordion/content.proto.ts",
     "src/accordion/heading.proto.ts",
     "src/accordion/index.ts",
