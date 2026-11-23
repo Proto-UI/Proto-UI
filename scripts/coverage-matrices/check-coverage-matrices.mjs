@@ -424,7 +424,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: 'f691b11c6cd9b25d3be510eb515b6ec3069350a6877caf2597b77857bfc76b18',
+    sourceSha256: '34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',

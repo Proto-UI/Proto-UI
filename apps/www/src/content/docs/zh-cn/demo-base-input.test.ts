@@ -102,10 +102,14 @@ describe('Base Input documentation registration', () => {
     );
     expect(writes).toHaveLength(2);
     controlled.dispatchEvent(
-      new CustomEvent('valueChange', { detail: { value: 'Accepted DOM proposal' }, bubbles: true })
+      new CustomEvent('valueChange', { detail: { value: 'Raw DOM proposal' }, bubbles: true })
     );
+    // This owner accepts the public normalized callback once. Raw host events
+    // are not a second proposal channel, including distinct synthetic values.
+    expect(writes).toHaveLength(2);
+    callback({ value: 'Accepted second callback' });
     expect(writes[2]?.props).toMatchObject({
-      value: 'Accepted DOM proposal',
+      value: 'Accepted second callback',
       ariaLabel: 'Controlled Base Input',
     });
     cleanup();
