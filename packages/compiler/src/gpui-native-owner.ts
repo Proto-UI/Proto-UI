@@ -15,7 +15,6 @@ import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
 import { gpuiNativeNotifySource } from './gpui-native-notify';
 import { gpuiNativeHoverSource } from './gpui-native-hover';
-import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
 import { gpuiNativeSelectionSource } from './gpui-native-selection';
 import { gpuiNativeKeyBoundarySource } from './gpui-native-key-boundary';
 

@@ -1540,13 +1540,14 @@ impl __PuiNativeRecordValue {
     const scalar = nativeScalarKind(node.type);
     return scalar
       ? gpuiBoxScalar(scalar, scalarEmitter(environment, depth, bindReceiver).scalar(node))
-      : ordinaryExpression(node, environment, depth, bindReceiver);
+      : ordinaryExpression(node, environment, depth, bindReceiver, captureEffects);
   }
   function ordinaryExpression(
     node: ExpressionIR,
     environment: ReadonlySet<string>,
     depth: number,
-    bindReceiver = true
+    bindReceiver = true,
+    captureEffects = true
   ): string {
     if (
       node.kind === 'call' &&
