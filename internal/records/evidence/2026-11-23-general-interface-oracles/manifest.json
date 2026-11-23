@@ -1,0 +1,46 @@
+{
+  "originalFailureCount": 40,
+  "candidateFiles": 9,
+  "candidateTests": 256,
+  "candidatePassed": 256,
+  "candidateFailed": 0,
+  "sourceStable": true,
+  "sourceBefore": {
+    "head": "e76d97b8398fa2c4da00955671288c12d5863a03",
+    "patchSha256": "655797e9d4cbaf1bd410bc84c3f2937ecdda299b5e1145abc8bfca9ba9e5fb40",
+    "status": " M packages/cli/test/finf-components.test.ts\n M packages/cli/test/text-prototype.test.ts\n M packages/prototypes/base/test/data-table-header-row.test.ts\n M packages/prototypes/base/test/form-upstream-paint.test.ts\n M packages/prototypes/base/test/textarea.test.ts\n M packages/prototypes/brutalist/test/checkbox.test.ts\n M packages/prototypes/brutalist/test/radio-group.test.ts\n M packages/prototypes/shadcn/test/checkbox.test.ts\n M packages/prototypes/shadcn/test/command-evidence-app.test.ts\n M packages/prototypes/shadcn/test/radio-group.test.ts\n",
+    "files": {
+      "packages/cli/test/finf-components.test.ts": "e68cf260d841cfd084ec86822140043bb8f2db69c78bf7ef71d21ab6b40c90f1",
+      "packages/cli/test/text-prototype.test.ts": "e08f9964c4c1d9271952ff285d6fdd071150881292eaf07a98ef060de5a292d4",
+      "packages/prototypes/base/test/data-table-header-row.test.ts": "59655102bf58833be41ab2edfb6abc7c5636214455767399acbc58190b73d9b5",
+      "packages/prototypes/base/test/form-upstream-paint.test.ts": "4bbad662a492ab07693e9250551c9aff4a177a16e1197793eb45bfc369179b39",
+      "packages/prototypes/base/test/textarea.test.ts": "1816b4d5f134ab33a13a0f4f2a7252bf7fb9282792f5fec5ef7a2c45b800c99e",
+      "packages/prototypes/brutalist/test/checkbox.test.ts": "88f85304bb5aa473f83f09bf801b6ea8ade6772bbed279608afe10f86c7c8e7f",
+      "packages/prototypes/brutalist/test/radio-group.test.ts": "5520194162a37fc63bb181b1fe5dbe5eaac4975407ec88a908d4b83302ea7a24",
+      "packages/prototypes/shadcn/test/checkbox.test.ts": "0cea1536aed79b3b5d7fb07315c1007e6531a6e26af8e60f60f959256db49352",
+      "packages/prototypes/shadcn/test/command-evidence-app.test.ts": "585a257ab1d61d574da516b70a7c8f6848ab531578d433f61ecd55bdf1bef20b",
+      "packages/prototypes/shadcn/test/radio-group.test.ts": "3ac8718f20d8e0d278bed1d5902db50e9ce98c544d19a71b79325ef46e09c3cd"
+    }
+  },
+  "sourceAfter": {
+    "head": "e76d97b8398fa2c4da00955671288c12d5863a03",
+    "patchSha256": "655797e9d4cbaf1bd410bc84c3f2937ecdda299b5e1145abc8bfca9ba9e5fb40",
+    "status": " M packages/cli/test/finf-components.test.ts\n M packages/cli/test/text-prototype.test.ts\n M packages/prototypes/base/test/data-table-header-row.test.ts\n M packages/prototypes/base/test/form-upstream-paint.test.ts\n M packages/prototypes/base/test/textarea.test.ts\n M packages/prototypes/brutalist/test/checkbox.test.ts\n M packages/prototypes/brutalist/test/radio-group.test.ts\n M packages/prototypes/shadcn/test/checkbox.test.ts\n M packages/prototypes/shadcn/test/command-evidence-app.test.ts\n M packages/prototypes/shadcn/test/radio-group.test.ts\n",
+    "files": {
+      "packages/cli/test/finf-components.test.ts": "e68cf260d841cfd084ec86822140043bb8f2db69c78bf7ef71d21ab6b40c90f1",
+      "packages/cli/test/text-prototype.test.ts": "e08f9964c4c1d9271952ff285d6fdd071150881292eaf07a98ef060de5a292d4",
+      "packages/prototypes/base/test/data-table-header-row.test.ts": "59655102bf58833be41ab2edfb6abc7c5636214455767399acbc58190b73d9b5",
+      "packages/prototypes/base/test/form-upstream-paint.test.ts": "4bbad662a492ab07693e9250551c9aff4a177a16e1197793eb45bfc369179b39",
+      "packages/prototypes/base/test/textarea.test.ts": "1816b4d5f134ab33a13a0f4f2a7252bf7fb9282792f5fec5ef7a2c45b800c99e",
+      "packages/prototypes/brutalist/test/checkbox.test.ts": "88f85304bb5aa473f83f09bf801b6ea8ade6772bbed279608afe10f86c7c8e7f",
+      "packages/prototypes/brutalist/test/radio-group.test.ts": "5520194162a37fc63bb181b1fe5dbe5eaac4975407ec88a908d4b83302ea7a24",
+      "packages/prototypes/shadcn/test/checkbox.test.ts": "0cea1536aed79b3b5d7fb07315c1007e6531a6e26af8e60f60f959256db49352",
+      "packages/prototypes/shadcn/test/command-evidence-app.test.ts": "585a257ab1d61d574da516b70a7c8f6848ab531578d433f61ecd55bdf1bef20b",
+      "packages/prototypes/shadcn/test/radio-group.test.ts": "3ac8718f20d8e0d278bed1d5902db50e9ce98c544d19a71b79325ef46e09c3cd"
+    }
+  },
+  "files": {
+    "candidate-validation.tar.gz": "d10b5243461ec0a687e5236dcdc527c3c17ca4dcc3c092cbbf190eebfa4e3543",
+    "original-failures.json": "9f69305faf4fa1b2fd5c0b1d8738cfca52f6baef82cf5f2a490882d9121d5815"
+  }
+}

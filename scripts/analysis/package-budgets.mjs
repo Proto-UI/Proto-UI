@@ -48,6 +48,9 @@ const environment = {
 // Integrated Sprint 3 candidate: selection/origin, scroll and owned cleanup costs;
 // four bounded ceilings with canonical red reports and unchanged strict policy:
 // internal/records/2026-11-23-sprint3-integrated-package-budget.json
+// Sprint 3 integrated input, selection, pause and startup costs, including live Anatomy.
+// Four bounded numeric ceilings only; original red reports and exact closure attribution:
+// internal/records/2026-11-23-sprint3-package-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],

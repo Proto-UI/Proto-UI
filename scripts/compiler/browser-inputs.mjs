@@ -2,14 +2,9 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { findBrowserRepositoryRoot } from './browser-repository-root.mjs';
 
-// Astro relocates these modules into dist/chunks. Bind to the module's own
-// worktree instead of assuming a fixed source-file depth or the caller's cwd.
-export const browserRepositoryRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], {
-  cwd: fileURLToPath(new URL('.', import.meta.url)),
-  encoding: 'utf8',
-}).trim();
+export const browserRepositoryRoot = findBrowserRepositoryRoot(import.meta.url);
 export const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 // This deliberately conservative superset includes the Astro shell, ordinary

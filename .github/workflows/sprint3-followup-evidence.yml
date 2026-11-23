@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           SPRINT3_FOLLOWUP_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-direct-$FOLLOWUP_SUITE-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3.XXXXXX")
+          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3-XXXXXX")
           mkdir -p "$SPRINT3_FOLLOWUP_EVIDENCE_DIR" "$FOLLOWUP_TMP"
           printf '%s\n' "SPRINT3_FOLLOWUP_EVIDENCE_DIR=$SPRINT3_FOLLOWUP_EVIDENCE_DIR" "TMPDIR=$FOLLOWUP_TMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
@@ -129,7 +129,7 @@ jobs:
         run: |
           set -euo pipefail
           FOLLOWUP_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-installed-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
-          FOLLOWUP_TMP="$RUNNER_TEMP/sprint3-installed-tmp-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3-XXXXXX")
           mkdir -p "$FOLLOWUP_EVIDENCE_DIR" "$FOLLOWUP_TMP"
           printf '%s\n' "FOLLOWUP_EVIDENCE_DIR=$FOLLOWUP_EVIDENCE_DIR" \
             "SPRINT3_FOLLOWUP_EVIDENCE_DIR=$FOLLOWUP_EVIDENCE_DIR/public-select-source" \

@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "candidateBefore": "6a2bb11a1e8abf3fffa8921d267db215bb70b10d",
+  "priorRedGreenCandidate": "9cd4d10d1953a3c030e679d8d11061660e202ed9",
+  "workflowFailureCandidate": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+  "workflowRun": 45202101258,
+  "artifacts": [
+    {
+      "name": "image-preview",
+      "id": 14832658779,
+      "sha256": "dd4160bf8bba8ec271b878f97b51cb821a355f77a2c30000933ece4dfc165cfd"
+    },
+    {
+      "name": "scroll",
+      "id": 14833461209,
+      "sha256": "86310bcac973a0a8396d2c26e778e35290e0b4d271bfb45209b2746960782e6b"
+    },
+    {
+      "name": "drawer",
+      "id": 14833446322,
+      "sha256": "a092ec6107932c91cb7b42f5a803b0042a94af04695ea71cc07f07e5c399de7b"
+    }
+  ],
+  "sourceFiles": {
+    ".github/workflows/sprint3-followup-evidence.yml": "7121d5d10ce0ce776f654fdfa957712ddc6a0bc6c78c42f5f501dde40e4ac2a4",
+    ".github/workflows/compiler-browser-acceptance.yml": "fbfb4d09c6c52509d9b9dc27e0154af2243c9e6d2b0a6171eebfca35f5e2dcae",
+    "scripts/test/sprint3-followup-workflow.test.mjs": "c9e20e800b281ccd0b9cc24b627d29b2fc724d6222d6419e74a90bd85ed4ba77",
+    "scripts/release/test/prototype-family-boundary.test.mjs": "a464b2ecbd153c1c6b2269a72d43bcef510fd5fa9d5aa47fc0c90789826a2f8d"
+  },
+  "archive": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-ci-prerequisites/raw.tar.gz",
+    "bytes": 287710,
+    "sha256": "e44ba3e0ca2f713238d89e24a9401c69be0e5fdb002a0146174d46d3623749d3"
+  },
+  "rawFiles": [
+    {
+      "name": "candidate.patch",
+      "bytes": 7023,
+      "sha256": "db00de9cb1b8ad1b70e56617acefb1912649acc1b0dd77a673d452ef50d9c53e"
+    },
+    {
+      "name": "diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "drawer-original.zip",
+      "bytes": 6535,
+      "sha256": "a092ec6107932c91cb7b42f5a803b0042a94af04695ea71cc07f07e5c399de7b"
+    },
+    {
+      "name": "family-controls.log",
+      "bytes": 649,
+      "sha256": "53d881218f10010a9e06a62020677f557edc566d1d85675467c52ef6cf36584e"
+    },
+    {
+      "name": "fetch.log",
+      "bytes": 241,
+      "sha256": "a659d593cc57f85ab0fd168d137bea1631bf9fddd0db7338fc43d2cbe0da1c09"
+    },
+    {
+      "name": "image-preview-original.zip",
+      "bytes": 20881,
+      "sha256": "dd4160bf8bba8ec271b878f97b51cb821a355f77a2c30000933ece4dfc165cfd"
+    },
+    {
+      "name": "install.log",
+      "bytes": 1640,
+      "sha256": "04d9b7de8471f19bc77ac0f8f55241774199273ab71a531e2c0b7086d33ad2fd"
+    },
+    {
+      "name": "manifests.log",
+      "bytes": 28,
+      "sha256": "605a3bd4926173c12f69c5d92026960c89f98f2dd047c26eb5ec189bece5eb9e"
+    },
+    {
+      "name": "original/candidate.patch",
+      "bytes": 7023,
+      "sha256": "3201c99aac0f50ef810615de84f85b596ae5ff523a31d69177dc1ec3c3721fe3"
+    },
+    {
+      "name": "original/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "original/family-baseline.log",
+      "bytes": 2141,
+      "sha256": "a30c5e1ef94fea1c858dd4e48196e4b2112174089470ada741bcb066544086b3"
+    },
+    {
+      "name": "original/family-repaired.log",
+      "bytes": 648,
+      "sha256": "92aa404bb64aedfcc19f41f99c286122a4f0a5bcbb9717b134ecffdc1a5e1078"
+    },
+    {
+      "name": "original/format.log",
+      "bytes": 258,
+      "sha256": "12f1d6b29ee06a961e22ef20745686b97eae2baf2bbf2886ef1535b392a8f4cb"
+    },
+    {
+      "name": "original/manifests.log",
+      "bytes": 28,
+      "sha256": "605a3bd4926173c12f69c5d92026960c89f98f2dd047c26eb5ec189bece5eb9e"
+    },
+    {
+      "name": "original/schedule.log",
+      "bytes": 91,
+      "sha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31"
+    },
+    {
+      "name": "original/status.json",
+      "bytes": 1187,
+      "sha256": "dd87127803e02154e3ee6e00c1d44c9df7af302f0918a7735c04597e25a3fc5e"
+    },
+    {
+      "name": "original/workflow-baseline.log",
+      "bytes": 1988,
+      "sha256": "b3e751ddc337e9cfdd1ccfa2e94b89b853b2fff2b248e25dbf3e92d31668d410"
+    },
+    {
+      "name": "original/workflow-repaired.log",
+      "bytes": 3520,
+      "sha256": "7ef2045be3a8fa6f079b674604c2001a88cde874c3fa53dc8e52903d0fd954c2"
+    },
+    {
+      "name": "patch-apply.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "patch-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "production-controls.log",
+      "bytes": 3474,
+      "sha256": "611578799eb9d25811ead2f57a202f749f8225a96362f765d2ad3b3446f0bcfb"
+    },
+    {
+      "name": "rehearsal-original.zip",
+      "bytes": 243152,
+      "sha256": "7231215500c0cfc463f1e5ec40f9458c2483374dbb006f711b40e4f5b37089d0"
+    },
+    {
+      "name": "schedule.log",
+      "bytes": 91,
+      "sha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31"
+    },
+    {
+      "name": "scroll-original.zip",
+      "bytes": 6386,
+      "sha256": "86310bcac973a0a8396d2c26e778e35290e0b4d271bfb45209b2746960782e6b"
+    },
+    {
+      "name": "status.json",
+      "bytes": 983,
+      "sha256": "7994089122f319be7fe7ac8bfe44f9e8723508c37e3f48283e3a654030431d15"
+    },
+    {
+      "name": "workflow-controls.log",
+      "bytes": 3517,
+      "sha256": "31801f99e3cd80240c56838c5500a17917ceb2e9a9a1d00f0b620ddc28f32b97"
+    },
+    {
+      "name": "worktree.log",
+      "bytes": 4325,
+      "sha256": "7939bc3be765ad4425545dd9402890bbea23c7c0c479d3ad0c5134cb35a3938f"
+    }
+  ],
+  "validation": {
+    "workflowBaseline": {
+      "passed": 8,
+      "failed": 1,
+      "skipped": 0
+    },
+    "workflowAndReceiptCandidate": {
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0
+    },
+    "familyBaseline": {
+      "passed": 5,
+      "failed": 1,
+      "skipped": 0
+    },
+    "familyCandidate": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "productionCandidate": {
+      "passed": 37,
+      "failed": 0,
+      "skipped": 0
+    },
+    "scheduleExit": 0,
+    "manifestExit": 0
+  },
+  "independentReview": {
+    "reviewer": "parent agent /root",
+    "scope": "four-file candidate.patch and exact source hashes",
+    "result": "no blocking issue in the bounded patch",
+    "platformApproval": false
+  },
+  "boundary": "Source/workflow regression evidence; no new-head native, full rehearsal, strict budget or production browser pass is inferred."
+}

@@ -80,9 +80,8 @@ const highlighted = await highlightCode(code, lang);
           data-code-file-title
           data-code-title-scroll={scrollableTitle ? '' : undefined}
           tabindex={scrollableTitle ? 0 : undefined}
-        >
-          {title}
-        </span>
+          set:text={title}
+        />
         <div
           class="site-code-copy-header"
           hidden={collapsible}

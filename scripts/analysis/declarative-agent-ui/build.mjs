@@ -54,6 +54,8 @@ const sources = [
       'package-lock.json',
       'build.mjs',
       'run.mjs',
+      'tsconfig.json',
+      'check-types.mjs',
     ].map((file) => path.relative(repo, path.join(here, file))),
   ]),
 ]

@@ -13,7 +13,10 @@ export function digest(value) {
       hash.update(JSON.stringify(item ?? null));
     } else if (Array.isArray(item)) {
       hash.update('[');
-      item.forEach((child, index) => { if (index) hash.update(','); append(child); });
+      item.forEach((child, index) => {
+        if (index) hash.update(',');
+        append(child);
+      });
       hash.update(']');
     } else {
       hash.update('{');
@@ -21,7 +24,9 @@ export function digest(value) {
       for (const [key, child] of Object.entries(item)) {
         if (child === undefined) continue;
         if (index++) hash.update(',');
-        hash.update(JSON.stringify(key)); hash.update(':'); append(child);
+        hash.update(JSON.stringify(key));
+        hash.update(':');
+        append(child);
       }
       hash.update('}');
     }
