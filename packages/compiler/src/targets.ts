@@ -483,6 +483,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     operations: (
       [
         ...nativeOperations,
+        'scroll.sync',
         'eventControl.requestDefaultActionPrevention',
         'hook.asControlLabel',
         'controlLabel.label',

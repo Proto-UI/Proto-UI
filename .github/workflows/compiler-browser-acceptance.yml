@@ -79,6 +79,7 @@ jobs:
             packages/compiler/test/gpui-capabilities.test.ts \
             packages/compiler/test/gpui-hook-renderer.test.ts \
             packages/compiler/test/gpui-event-notification.test.ts \
+            packages/compiler/test/scroll-axis-sync.test.ts \
             packages/compiler/test/gpui-scalar-lowering.test.ts \
             packages/compiler/test/gpui-style-selection.test.ts \
             packages/compiler/test/gpui-control-label.test.ts \
