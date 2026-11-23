@@ -65,6 +65,7 @@ addEventListener('message',async(event)=>{
     retiring=false;send('disposed');
   }
 });
+send('preview-listener-ready');
 (async()=>{
   const modules={...input.target.modules,...input.preview.modules,'pui:preview-budget':input.budget};
   const imports={};
@@ -126,6 +127,8 @@ export function mountCompiledPreview(
   frame.style.cssText = 'width:100%;height:190px;border:0;display:block;';
   let disposed = false,
     readySettled = false,
+    listenerReady = false,
+    disposeSent = false,
     retirePromise: Promise<void> | undefined;
   let finishRetirement: (() => void) | undefined;
   let cleanupError: Error | undefined;
@@ -141,10 +144,22 @@ export function mountCompiledPreview(
       onFailure(error);
     }
   }, 10_000);
+  const sendRetirement = () => {
+    if (!disposed || !listenerReady || !finishRetirement || disposeSent) return;
+    const current = frame.contentWindow;
+    if (!current) return;
+    disposeSent = true;
+    current.postMessage({ type: 'dispose', token, revision: result.revision }, '*');
+  };
   const listener = (event: MessageEvent) => {
     if (event.source !== frame.contentWindow || event.origin !== 'null') return;
     const message = event.data;
     if (!message || message.token !== token || message.revision !== result.revision) return;
+    if (message.type === 'preview-listener-ready') {
+      listenerReady = true;
+      sendRetirement();
+      return;
+    }
     if (message.type === 'cleanup-error') {
       cleanupError = new Error(String(message.message));
       return;
@@ -205,10 +220,7 @@ export function mountCompiledPreview(
           finish();
         }, 250);
         finishRetirement = finish;
-        frame.contentWindow?.postMessage(
-          { type: 'dispose', token, revision: result.revision },
-          '*'
-        );
+        sendRetirement();
       });
       return retirePromise;
     },
