@@ -25,8 +25,10 @@ const playwright = process.env.PUI_PLAYWRIGHT_MODULE
   : createRequire(new URL('../../apps/www/package.json', import.meta.url))('playwright-core');
 const executablePath = process.env.PUI_CHROME_EXECUTABLE;
 assert.ok(executablePath, 'Set PUI_CHROME_EXECUTABLE to the actual native browser');
-const launchArgs =
-  process.env.PUI_CHROME_NO_SANDBOX === '1' ? ['--no-sandbox', '--disable-dev-shm-usage'] : [];
+// Match the repository's original Shadow S3/S4 native entry points exactly.
+// Browser defaults remain owned by Playwright; this observer adds no flags or
+// environment-controlled fallback. Record the actual process command separately.
+const launchOptions = { executablePath, headless: true };
 await mkdir(output, { recursive: true });
 const report = {
   kind: 'shadow-percentage-native-candidate',
@@ -36,7 +38,8 @@ const report = {
   browserObserverSha256: hash(await readFile(fileURLToPath(import.meta.url))),
   browserExecutableSha256: hash(await readFile(executablePath)),
   executablePath,
-  launchArgs,
+  launchArgs: [],
+  launchOptions,
   originalSprintGatesChanged: false,
   matrix: [],
   animations: [],
@@ -105,13 +108,17 @@ function verifyRows(rows, config, percentage) {
     }
   }
 }
-const browser = await playwright.chromium.launch({
-  executablePath,
-  headless: true,
-  args: launchArgs,
-});
+const browser = await playwright.chromium.launch(launchOptions);
 report.browserVersion = browser.version();
 try {
+  const browserSession = await browser.newBrowserCDPSession();
+  try {
+    report.browserCommandLine = (
+      await browserSession.send('Browser.getBrowserCommandLine')
+    ).arguments;
+  } finally {
+    await browserSession.detach();
+  }
   const page = await browser.newPage({
     viewport: { width: 1000, height: 700 },
     reducedMotion: 'no-preference',
