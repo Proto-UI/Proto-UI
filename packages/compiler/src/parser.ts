@@ -247,6 +247,7 @@ interface Binding {
   constant?: ScalarConstant;
   staticProperties?: StaticProperties;
   staticObjectPresent?: boolean;
+  freshFieldType?: 'boolean' | 'number' | 'string';
 }
 type Scope = Map<string, Binding>;
 const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
@@ -1297,6 +1298,13 @@ class Frontend {
         scope.set(name, {
           type: optional && !fallback ? union([type, 'void'], parameter) : type,
           bindingId: `${module.file.fileName}#${parameter.pos}`,
+          // A closed call may retain a literal input without changing the
+          // author's scalar domain when that value initializes new storage.
+          ...(typeof type !== 'string' &&
+          type.kind === 'literal' &&
+          (declared === 'boolean' || declared === 'number' || declared === 'string')
+            ? { freshFieldType: declared }
+            : {}),
           ...(parameterStateData[index] ? { stateData: parameterStateData[index] } : {}),
           ...(constantInput
             ? {
@@ -1651,6 +1659,7 @@ class Frontend {
                   : alias?.stateId;
             Object.assign(pending, {
               type: value.type,
+              freshFieldType: !expected && !mutable ? alias?.freshFieldType : undefined,
               ...(!mutable ? { value } : {}),
               ...(alias?.helper ? { helper: alias.helper, phase: alias.phase } : {}),
               stateId,
@@ -2715,10 +2724,18 @@ class Frontend {
             } as ExpressionIR,
           };
         }
-        return {
-          key,
-          value: this.expression(module, initializer, scope, phase, field, expected),
-        };
+        let value = this.expression(module, initializer, scope, phase, field, expected);
+        let source = initializer;
+        while (ts.isParenthesizedExpression(source)) source = source.expression;
+        const freshFieldType =
+          !expected && !field && ts.isIdentifier(source)
+            ? scope.get(source.text)?.freshFieldType
+            : undefined;
+        if (freshFieldType && assignable(value.type, freshFieldType))
+          // Keep the exact parameter/capture proof. Only the copied scalar in
+          // this fresh, unannotated field acquires its declared writable domain.
+          value = { kind: 'narrow', value, type: freshFieldType, span: value.span };
+        return { key, value };
       };
       for (const property of node.properties) {
         if (ts.isSpreadAssignment(property)) {

@@ -565,6 +565,11 @@ function analyzeCallableFlow(
       return (
         type === 'function' ||
         type === 'unknown' ||
+        // Checked module configurations retain host callbacks in named fields
+        // (for example CollectionItem.getMeta). Their nominal container type
+        // must not erase the actual closure before the operation's field rules
+        // register its possible host invocation.
+        type === 'module-config' ||
         type === 'authored-result' ||
         type === 'public-expose' ||
         type === 'public-method'
