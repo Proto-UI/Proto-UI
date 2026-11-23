@@ -1,6 +1,6 @@
 // Pinned GPUI Element::write_a11y_info writes the actual AccessKit node.
 export const gpuiNativeA11ySource = String.raw`use gpui::{App, Bounds, Element, ElementId, GlobalElementId, InspectorElementId, LayoutId, Pixels, Window};
-use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view,control_label_commit};
+use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view,control_label_commit,ControlLabelNativeView,control_label_retain_native_view,control_label_release_native_view,control_label_manages_native_view};
 use std::hash::{Hash,Hasher};
 #[cfg(not(feature = "gpui-modern-element-api"))]
 fn node_id(id: &GlobalElementId) -> gpui::accesskit::NodeId {
@@ -69,8 +69,14 @@ fn positive_integer(value:&Value)->Option<usize>{let number=match value{Value::N
 fn finite_number(value:&Value)->Option<f64>{let number=match value{Value::Number(number)=>*number,Value::Json(serde_json::Value::Number(number))=>number.as_f64()?,_=>return None};number.is_finite().then_some(number)}
 fn token_is(value:&Value,token:&str)->bool{matches!(value,Value::Json(serde_json::Value::String(value))if value.eq_ignore_ascii_case(token))}
 fn aria_boolean(value:&Value)->Option<bool>{match value{Value::Json(serde_json::Value::Bool(value))=>Some(*value),_ if token_is(value,"true")=>Some(true),_ if token_is(value,"false")=>Some(false),_=>None}}
-struct NativeViewLease{owner:OwnerWeak,window:gpui::WindowId,hitbox:gpui::HitboxId}
-impl Drop for NativeViewLease{fn drop(&mut self){if let Some(owner)=self.owner.upgrade(){let live={let owner=owner.borrow();owner.window_id==Some(self.window)&&owner.native_hitbox.as_ref().is_some_and(|hitbox|hitbox.id==self.hitbox)};if live{detach_native_view(&owner);}}}}
+struct NativeViewLease{owner:OwnerWeak,window:gpui::WindowId,hitbox:gpui::HitboxId,control_label_managed:bool,control_label:Option<std::rc::Rc<ControlLabelNativeView>>}
+impl Drop for NativeViewLease{fn drop(&mut self){
+if let Some(view)=self.control_label.take(){control_label_release_native_view(&view);return;}
+// A managed state remains managed even if admission later withdraws its receipt.
+// Its late Drop must not fall back to a recycled window/hitbox identity.
+if self.control_label_managed{return;}
+if let Some(owner)=self.owner.upgrade(){let live={let owner=owner.borrow();owner.window_id==Some(self.window)&&owner.native_hitbox.as_ref().is_some_and(|hitbox|hitbox.id==self.hitbox)};if live{detach_native_view(&owner);}}
+}}
 pub struct Semantics<E:Element>{pub element:E,pub owner:OwnerWeak,pub role:Option<gpui::Role>}
 #[cfg(not(feature = "gpui-modern-element-api"))]
 impl<E:Element> gpui::IntoElement for Semantics<E>{type Element=Self;fn into_element(self)->Self{self}}
@@ -83,13 +89,18 @@ fn request_layout(&mut self,id:Option<&GlobalElementId>,inspector:Option<&Inspec
 if let Some(owner)=self.owner.upgrade(){let window_id=window.window_handle().window_id();owner.borrow_mut().window_id=Some(window_id);if self.a11y_role().is_some(){if let Some(id)=id{let frame=layout_frame(window,cx);{let mut owner=owner.borrow_mut();if owner.modules.a11y_frame!=frame{owner.modules.a11y_frame=frame;owner.modules.a11y_bindings=0;}owner.modules.a11y_bindings+=1;owner.modules.a11y_node=Some(node_id(id));}let name=owner.borrow().modules.accessible_text.get("id").map(resolved);if let Some(Value::Json(serde_json::Value::String(name)))=name{if !name.is_empty(){A11Y_LAYOUT_FRAMES.with(|frames|{let mut frames=frames.borrow_mut();let names=&mut frames.get_mut(&window_id).expect("current native layout frame").names;match names.entry(name){std::collections::hash_map::Entry::Vacant(entry)=>{entry.insert(Some(self.owner.clone()));},std::collections::hash_map::Entry::Occupied(mut entry)=>{entry.insert(None);}}});}}}}}self.element.request_layout(id,inspector,window,cx)
 }
 fn prepaint(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorElementId>,bounds:Bounds<Pixels>,layout:&mut Self::RequestLayoutState,window:&mut Window,cx:&mut App)->Self::PrepaintState{
-if let Some(owner)=self.owner.upgrade(){let hitbox=window.insert_hitbox(bounds,gpui::HitboxBehavior::Normal);let hitbox_id=hitbox.id;let window_id=window.window_handle().window_id();{let mut owner=owner.borrow_mut();owner.bounds=Some(bounds);owner.native_hitbox=Some(hitbox);}
+if let Some(owner)=self.owner.upgrade(){let hitbox=window.insert_hitbox(bounds,gpui::HitboxBehavior::Normal);let hitbox_id=hitbox.id;let window_id=window.window_handle().window_id();{let mut owner=owner.borrow_mut();owner.bounds=Some(bounds);owner.native_hitbox=Some(hitbox.clone());}
 // GPUI retains accessed element state through cached frames and drops it when
 // the actual native subtree disappears. No frame polling or owner disposal.
-if let Some(id)=id{window.with_element_state(id,|state:Option<NativeViewLease>,_|{let mut state=state.filter(|state|std::rc::Weak::ptr_eq(&state.owner,&self.owner)).unwrap_or_else(||NativeViewLease{owner:self.owner.clone(),window:window_id,hitbox:hitbox_id});state.window=window_id;state.hitbox=hitbox_id;((),state)});}
+if let Some(id)=id{let a11y_node=self.a11y_role().map(|_|node_id(id));window.with_element_state(id,|state:Option<NativeViewLease>,window|{
+let mut state=state.filter(|state|std::rc::Weak::ptr_eq(&state.owner,&self.owner)).unwrap_or_else(||NativeViewLease{owner:self.owner.clone(),window:window_id,hitbox:hitbox_id,control_label_managed:false,control_label:None});
+state.window=window_id;state.hitbox=hitbox_id;
+state.control_label_managed|=state.control_label.is_some()||control_label_manages_native_view(&owner);
+state.control_label=control_label_retain_native_view(&owner,state.control_label.take(),a11y_node,hitbox.clone(),bounds,window,cx);
+((),state)});}
 // A cached authored projection can acquire a different physical binding without
-// another Owner::commit. All layout occurrences are known before prepaint, so
-// observe its exact view receipt here as well as on first logical mounting.
+// another Owner::commit. Cached native views may enter layout during prepaint;
+// observe each binding here and defer associated redraws until after this draw.
 control_label_commit(&owner);}
 self.element.prepaint(id,inspector,bounds,layout,window,cx)
 }
@@ -104,7 +115,7 @@ crate::gpui_native_owner::image_accessible(&owner_ref,node);
 let native_disabled=node.is_disabled();
 let label=crate::gpui_native_owner::control_label_is_label(&owner_ref);
 let derived_name=crate::gpui_native_owner::control_label_name(&owner_ref);
-if label{if crate::gpui_native_owner::control_label_action_enabled(&owner_ref){node.add_action(gpui::accesskit::Action::Click);}else{node.remove_action(gpui::accesskit::Action::Click);}}
+if label{if crate::gpui_native_owner::control_label_action_available(&owner_ref){node.add_action(gpui::accesskit::Action::Click);}else{node.remove_action(gpui::accesskit::Action::Click);}}
 let owner=owner_ref.borrow();
 for(key,spec)in &owner.modules.accessible_relations{project_relation(node,key,spec,owner.modules.a11y_frame,owner.window_id);}
 if let Some(label_node)=derived_name{node.clear_label();node.set_labelled_by(vec![label_node]);}
@@ -230,8 +241,12 @@ mod native_view_scope_tests {
             // collision is valid across windows and must not identify a lease.
             let id=gpui::HitboxId::placeholder();
             {let mut o=owner.borrow_mut();o.phase="idle";o.mounted=true;o.window_id=Some(second_id);o.bounds=Some(Bounds::default());o.native_hitbox=Some(gpui::Hitbox{id,bounds:Bounds::default(),content_mask:gpui::ContentMask::default(),behavior:gpui::HitboxBehavior::Normal});}
-            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:first_id,hitbox:id});assert!(ready(&owner));
-            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id});assert!(!ready(&owner));Owner::dispose(&owner);
+            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:first_id,hitbox:id,control_label_managed:false,control_label:None});assert!(ready(&owner));
+            // A previously managed state may have withdrawn its receipt while
+            // absent, then be dropped after a newer native epoch reused this id.
+            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id,control_label_managed:true,control_label:None});
+            assert!(ready(&owner), "a withdrawn managed state cannot fall back to legacy hitbox identity");
+            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id,control_label_managed:false,control_label:None});assert!(!ready(&owner));Owner::dispose(&owner);
         }).unwrap();
     }
 }

@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "sourceCommit": "db747e1b81cbbfaf2b37dd8af3de48108f036a04",
+  "createdAt": "2026-11-23T17:41:46.364763+00:00",
+  "originalArtifact": {
+    "id": 14844803475,
+    "bytes": 425066,
+    "sha256": "73994168da9781a6809c7ceb8358148a708c38a091369f54e28752c3b8ad13d6"
+  },
+  "files": [
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/candidate-diff-check.log",
+      "file": "controls-candidate-diff-check.log.raw.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/candidate-format.log",
+      "file": "controls-candidate-format.log.raw.gz",
+      "bytes": 66,
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/candidate-production-replay.log",
+      "file": "controls-candidate-production-replay.log.raw.gz",
+      "bytes": 19,
+      "sha256": "8783ac5790c938aa7ea683df5f7b30e6f1faa364fd145dbe8ab26985d07a6bfc",
+      "gzipBytes": 39,
+      "gzipSha256": "96ce3915833a3fa51a5297b231cb5e2de0785f6cfdc51d852d9a3730b5ff5de7"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/candidate-status.json",
+      "file": "controls-candidate-status.json.raw.gz",
+      "bytes": 4101,
+      "sha256": "72533a4ce492b18fa459b3f5ff31f154ee16ebcd191ba61d0521e163b6c11792",
+      "gzipBytes": 1180,
+      "gzipSha256": "f4f0fc20caf4f8211bfa525e574d3e9f3094b64c24d5f0f73ed467615aac46c7"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/candidate.patch",
+      "file": "controls-candidate.patch.raw.gz",
+      "bytes": 6054,
+      "sha256": "15857a9b86846c973b9c123bc3de5159689d5bf52cccfeaaac376876fdea1168",
+      "gzipBytes": 1402,
+      "gzipSha256": "df91b50f267180c8770b0a14f9ab6824d90714c6def0f4fe3c4d5872d2e1e4f5"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/expanded-controls-candidate.log",
+      "file": "controls-expanded-controls-candidate.log.raw.gz",
+      "bytes": 678278,
+      "sha256": "5c877c5186d4603617e58e69e5f287bb9763910e547a1574c7c02505a756591e",
+      "gzipBytes": 39990,
+      "gzipSha256": "f5516aa35a14408058fb86cb649a35f17b5cb3541afa8d27a10e5fb132d2ad34"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/expanded-controls-original-checker.log",
+      "file": "controls-expanded-controls-original-checker.log.raw.gz",
+      "bytes": 823569,
+      "sha256": "fa07deacd099732059d600cec61513ded56f14c5871a89ec7b3207e984af9f6c",
+      "gzipBytes": 46773,
+      "gzipSha256": "d7fc1c1051b566e8c324492f63fa2ec1fb1d6cb762439055363daffa5ab60c50"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/format-expanded-tests.log",
+      "file": "controls-format-expanded-tests.log.raw.gz",
+      "bytes": 78,
+      "sha256": "93c0bd60727a5c907d1ddca8d155a9bb585459bac76524f5bf198291bf655d26",
+      "gzipBytes": 92,
+      "gzipSha256": "949fd8cb32bc8d3d13b93e7ff50c172f0e1384f9f0512cf7f2b7d867b5785f29"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/original-checker.mjs",
+      "file": "controls-original-checker.mjs.raw.gz",
+      "bytes": 44944,
+      "sha256": "4d9cf1dd97f00afa77d39184c4df2573f4fc985ab3dc53139145e3b1afbc46ff",
+      "gzipBytes": 9342,
+      "gzipSha256": "e5b144511a84acdbeb3fbe4d7263e83d3a3cb0f940983dc1ad76ec641d250786"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/original-production-replay.log",
+      "file": "controls-original-production-replay.log.raw.gz",
+      "bytes": 13727,
+      "sha256": "e775f4b059c2ee5380e6a2865169b63e9a5bf5e29149134a9263138035b2dc8b",
+      "gzipBytes": 786,
+      "gzipSha256": "a8a58bcd16e2e41aa838d36bda60075a41c0577ecab07eabda94d878914c2645"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/shadow-percentage-bridge/original-status.json",
+      "file": "controls-original-status.json.raw.gz",
+      "bytes": 2801,
+      "sha256": "4fbef34441ebcdcf2c6b1ad8f05d17bea1d9e8c18e1ed3b65a6e86d69f223f06",
+      "gzipBytes": 933,
+      "gzipSha256": "00e9f7f1509f5feb9a305dafa70d86307be6407d0408189534d9d3719862e430"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/build-inputs.sha256",
+      "file": "hosted-build-inputs.sha256.raw.gz",
+      "bytes": 173,
+      "sha256": "640ba49ba3716b994a08569ee4a67c5bdb22d16c80509c395fd349aa2f042fd1",
+      "gzipBytes": 152,
+      "gzipSha256": "7b4045cf4a2bf3bc8bf12965685f642b8ac7d3f090a5239b1705998848e98274"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/bundle-gate-controls.log",
+      "file": "hosted-bundle-gate-controls.log.raw.gz",
+      "bytes": 291029,
+      "sha256": "2b3a7129a257461201ff34694f988cc4f2e49d6a23a4b1cdf3723e9e67c6501f",
+      "gzipBytes": 23829,
+      "gzipSha256": "561e1fce89641abe76324ee9c5c941d7a03493d7b8601e4aaea17b8d0024198e"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/node.txt",
+      "file": "hosted-node.txt.raw.gz",
+      "bytes": 9,
+      "sha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "gzipBytes": 29,
+      "gzipSha256": "69cb40fbcedc434b2f29aeb692167e8690a57ee35f2fe68affd46b4f25137494"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/production-build.log",
+      "file": "hosted-production-build.log.raw.gz",
+      "bytes": 777062,
+      "sha256": "a0bf3cbda8494c475921153d07e099b253beb8e759185a87b09c51657c9f59b8",
+      "gzipBytes": 59915,
+      "gzipSha256": "2d845f0f9123513e4b8477b8fea0afeb5c2704ec260f6ee85dfac65e8102782a"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/production-graph.sha256",
+      "file": "hosted-production-graph.sha256.raw.gz",
+      "bytes": 107,
+      "sha256": "68d92e13fa95003b474cd3cd3d40d638017ed0a67fd3ef1502114c3cdd0d3f91",
+      "gzipBytes": 113,
+      "gzipSha256": "56bd3dae621bc8b0cdb5264be4ede7aeef62d06f8bb5996d378843584b6f623a"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/proto-ui-bundle-graph.json",
+      "file": "hosted-proto-ui-bundle-graph.json.raw.gz",
+      "bytes": 5055846,
+      "sha256": "08aa327638f6f19eb6cef4721ede8b4508ce928ff79e334fd262946a59b89881",
+      "gzipBytes": 323588,
+      "gzipSha256": "23e14e002d63a3e717c4032dcf849dcd5f16e8576a299e1faed3c224d464b10d"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/source-sha.txt",
+      "file": "hosted-source-sha.txt.raw.gz",
+      "bytes": 41,
+      "sha256": "23a499e3d5a51dff8308d0d982b35888539ab69020f456f727333ab380f9e93a",
+      "gzipBytes": 59,
+      "gzipSha256": "c0dedd7b660a7a9bf37c7510f34a88637677ac07f9ad88f8304d628794292bf7"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/source-tree.txt",
+      "file": "hosted-source-tree.txt.raw.gz",
+      "bytes": 41,
+      "sha256": "25b90fbb066b3885faa75b28ac1ebc19e43e4d0c6042f6f5cd421e2b5060ce1c",
+      "gzipBytes": 59,
+      "gzipSha256": "c7a091c6091f75eb4e0f9cdd89f08a7bb14dd7a958bc3d752233fa9bdff2dfb4"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/shadow-percentage-ownership.json",
+      "file": "actual-source-and-placement.json.raw.gz",
+      "bytes": 1770,
+      "sha256": "c5fc2c26d165057f83bc128b549c258bb83c2087fd0c31da1e324abe1ab351dd",
+      "gzipBytes": 632,
+      "gzipSha256": "bb211e0c0fd4063d92242d47bef68acfd9bed386e1cfd3c679f77cc03a7df204"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/run-shadow-percentage-original.py",
+      "file": "original-driver.py.raw.gz",
+      "bytes": 3604,
+      "sha256": "5b8b7210e10713b664af092818d438d7aa230764162b3b6eefb53990c00824d7",
+      "gzipBytes": 1724,
+      "gzipSha256": "f4c0caa4df4aa56d0f933746fdbdcf1b0369e3ee1e5225b19a61dc81f635957e"
+    },
+    {
+      "sourcePath": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/run-shadow-percentage-candidate.py",
+      "file": "candidate-driver.py.raw.gz",
+      "bytes": 3679,
+      "sha256": "fc9c0c473d8ddf7a428a85221cad589ff5b79a71e8dbb9783db3e06a2bc032f6",
+      "gzipBytes": 1731,
+      "gzipSha256": "2aa3cfd04b540dfeb62446e05fa56f8cf4c9560c50ddfae2378816025ab5e95f"
+    }
+  ]
+}

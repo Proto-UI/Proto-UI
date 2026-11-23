@@ -12,9 +12,11 @@ import type {
 } from './ir';
 import {
   operationArgumentRule,
+  operationResultType,
   validateOperationPhase,
   privilegedHookCaptures,
   privilegedStateMembers,
+  stateValue,
   type ArgumentRule,
   type CallbackContext,
 } from './operations';
@@ -28,6 +30,20 @@ import {
   valueAlternatives,
 } from './value-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
+import { captureFacadeFields } from './capture-types';
+
+type CaptureGetterOperation =
+  | 'capture.getState'
+  | 'capture.getMethod'
+  | 'capture.getAsHook'
+  | 'capture.getAsHookHandle';
+const CAPTURE_GETTERS = new Map<string, CaptureGetterOperation>([
+  ['getState', 'capture.getState'],
+  ['getMethod', 'capture.getMethod'],
+  ['getAsHook', 'capture.getAsHook'],
+  ['getAsHookHandle', 'capture.getAsHookHandle'],
+]);
+const CAPTURE_LOOKUPS = new Set<string>(CAPTURE_GETTERS.values());
 
 type Known = readonly Atom[];
 type CapturedState = HookCaptureIR['states'][number];
@@ -48,11 +64,15 @@ type Atom =
       opaqueFields?: boolean;
     }
   | { kind: 'getter'; callable: Known }
+  | { kind: 'capture-getter'; capture: Capture; operation: CaptureGetterOperation }
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
+type Presence = 'absent' | 'maybe' | 'present';
 interface CaptureContents {
   render?: Known;
+  states: Presence;
+  events: Presence;
   methods: Map<string, Known>;
   children: Map<string, readonly (Installation | undefined)[]>;
 }
@@ -95,9 +115,10 @@ const copyStore = (state: Store): Store => ({
 
 const UNKNOWN: Known = [{ kind: 'unknown' }];
 const UNDEFINED: Known = [{ kind: 'undefined' }];
-const UNINITIALIZED: Known = [{ kind: 'uninitialized' }];
-// Missing own fields are distinct from present fields containing undefined.
+// Only an own-property map contains ABSENT. Reading it produces undefined;
+// spreading it leaves the preceding property intact, unlike an own undefined.
 const ABSENT: Known = [{ kind: 'absent' }];
+const UNINITIALIZED: Known = [{ kind: 'uninitialized' }];
 /** An untracked value whose checked type cannot carry a callable or owner authority. */
 const dataFact = (type: ValueType): Known => [{ kind: 'unknown', data: type }];
 
@@ -286,12 +307,7 @@ function analyzeCallableFlow(
       const names = new Set(maps.flatMap((map) => [...map.keys()]));
       result.records.set(
         record,
-        new Map(
-          [...names].map((name) => [
-            name,
-            merge(maps.map((map) => map.get(name) ?? (checkDataBoundaries ? ABSENT : UNDEFINED))),
-          ])
-        )
+        new Map([...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? ABSENT))]))
       );
     }
     const unionInstallations = (
@@ -317,10 +333,12 @@ function analyzeCallableFlow(
       const children = new Set(contents.flatMap((value) => [...value.children.keys()]));
       result.captures.set(capture, {
         render: merge(contents.map((value) => value.render ?? UNDEFINED)),
+        states: joinPresence(contents.map((value) => value.states)),
+        events: joinPresence(contents.map((value) => value.events)),
         methods: new Map(
           [...methods].map((name) => [
             name,
-            merge(contents.map((value) => value.methods.get(name) ?? UNDEFINED)),
+            merge(contents.map((value) => value.methods.get(name) ?? ABSENT)),
           ])
         ),
         children: new Map(
@@ -374,10 +392,7 @@ function analyzeCallableFlow(
   }
   function writeField(record: RecordValue, name: string, value: Known, weak = false): void {
     const next = new Map(fields(record));
-    next.set(
-      name,
-      weak ? merge([next.get(name) ?? (checkDataBoundaries ? ABSENT : UNDEFINED), value]) : value
-    );
+    next.set(name, weak ? merge([next.get(name) ?? ABSENT, value]) : value);
     store.records.set(record, next);
   }
   function opaque(span: SourceSpan): void {
@@ -413,7 +428,7 @@ function analyzeCallableFlow(
   function truth(values: Known, nullish = false): boolean | undefined {
     const choices = new Set(
       values.map((value) =>
-        value.kind === 'undefined'
+        value.kind === 'undefined' || value.kind === 'absent'
           ? false
           : value.kind === 'literal'
             ? nullish
@@ -470,8 +485,8 @@ function analyzeCallableFlow(
       switch (value.kind) {
         case 'unknown':
         case 'undefined':
-        case 'uninitialized':
         case 'absent':
+        case 'uninitialized':
           return value.kind === 'unknown' && value.data
             ? ['unknown-data', value.data]
             : [value.kind];
@@ -514,9 +529,18 @@ function analyzeCallableFlow(
           ];
         case 'getter':
           return ['get', value.callable.map((child) => visit(child, depth + 1))];
+        case 'capture-getter':
+          return [
+            'capture-getter',
+            value.operation,
+            location(value.capture),
+            visit(value.capture, depth + 1),
+          ];
         case 'capture':
           return [
             'capture',
+            captureContents(value).states,
+            captureContents(value).events,
             (captureContents(value).render ?? UNDEFINED).map((child) => visit(child, depth + 1)),
             [...captureContents(value).methods].map(([name, method]) => [
               name,
@@ -581,7 +605,7 @@ function analyzeCallableFlow(
       for (const field of type.fields)
         record.fields.set(
           field.name,
-          field.optional ? merge([hostValue(field.type), UNDEFINED]) : hostValue(field.type)
+          field.optional ? merge([hostValue(field.type), UNDEFINED, ABSENT]) : hostValue(field.type)
         );
       return value;
     }
@@ -717,6 +741,198 @@ function analyzeCallableFlow(
     }
   }
 
+  function operationFailure(
+    operation: string,
+    execution: Execution,
+    span: SourceSpan
+  ): Known | undefined {
+    const phaseIssue = validateOperationPhase(
+      operation,
+      execution.phase,
+      execution.phase === 'callback' ? (execution.context as CallbackContext) : undefined
+    ).find((item) => item.code !== 'context' || execution.context !== 'helper');
+    if (phaseIssue && !trace) {
+      if (execution.guarded) {
+        possibleThrow();
+        reachable = false;
+        return [];
+      }
+      if (!demand) {
+        issue = { message: phaseIssue.message, span };
+        return UNKNOWN;
+      }
+    }
+    return undefined;
+  }
+
+  function joinPresence(values: readonly Presence[]): Presence {
+    return values.every((value) => value === values[0]) ? (values[0] ?? 'absent') : 'maybe';
+  }
+
+  function anyPresence(values: readonly Presence[]): Presence {
+    return values.includes('present') ? 'present' : values.includes('maybe') ? 'maybe' : 'absent';
+  }
+
+  function memberPresence(values: Iterable<Known>): Presence {
+    const members = [...values];
+    if (members.some((value) => value.length && value.every((part) => part.kind !== 'absent')))
+      return 'present';
+    return members.some((value) => value.some((part) => part.kind !== 'absent'))
+      ? 'maybe'
+      : 'absent';
+  }
+
+  function childPresence(capture: Capture): Presence {
+    const children = [...captureContents(capture).children.values()];
+    if (children.some((values) => values.length && values.every((value) => value !== undefined)))
+      return 'present';
+    return children.some((values) => values.some((value) => value !== undefined))
+      ? 'maybe'
+      : 'absent';
+  }
+
+  function ownValue(presence: Presence, value: Known): Known {
+    return presence === 'absent' ? ABSENT : presence === 'present' ? value : merge([value, ABSENT]);
+  }
+
+  function readValue(value: Known): Known {
+    return merge(value.map((part) => (part.kind === 'absent' ? UNDEFINED : [part])));
+  }
+
+  function captureRecord(entries: Iterable<readonly [string, Known]>): Known {
+    return [{ kind: 'record', fields: new Map(entries), tracked: false }];
+  }
+
+  function captureFields(capture: Capture) {
+    return captureFacadeFields(
+      ir.hooks.find((hook) => hook.id === capture.hookId),
+      new Map()
+    );
+  }
+
+  /** Presence comes from executed contributions, not serialized capture schemas. */
+  function capturePresence(capture: Capture, name: string): Presence {
+    if (!capture.hookId) return 'maybe';
+    const contents = captureContents(capture);
+    if (name === 'getState' || name === 'stateHandles') return contents.states;
+    if (name === 'getMethod' || name === 'methods')
+      return memberPresence(contents.methods.values());
+    if (name === 'getAsHook' || name === 'getAsHookHandle' || name === 'asHooks')
+      return childPresence(capture);
+    if (name === 'artifacts')
+      return anyPresence([
+        contents.states,
+        contents.events,
+        memberPresence(contents.methods.values()),
+        childPresence(capture),
+      ]);
+    return 'maybe';
+  }
+
+  /** Only a reached capture creates these bound getters; a field's type is not authority. */
+  function captureOwnProperty(capture: Capture, name: string): Known {
+    if (name === 'render')
+      return merge(
+        (captureContents(capture).render ?? UNDEFINED).map((value) =>
+          value.kind === 'undefined' ? ABSENT : [value]
+        )
+      );
+    // Pending and privileged placeholders do not prove a completed public facade.
+    if (!capture.hookId) return merge([UNKNOWN, ABSENT]);
+    const presence = capturePresence(capture, name);
+    if (presence === 'absent') return ABSENT;
+    const operation = CAPTURE_GETTERS.get(name);
+    if (operation) return ownValue(presence, [{ kind: 'capture-getter', capture, operation }]);
+    if (name === 'methods')
+      return ownValue(presence, captureRecord(captureContents(capture).methods));
+    const field = captureFields(capture).find((field) => field.name === name);
+    if (!field) return ABSENT;
+    if (name === 'artifacts') {
+      const contents = captureContents(capture);
+      return ownValue(
+        presence,
+        captureRecord(
+          (objectFields(field.type) ?? []).map((artifact): [string, Known] => [
+            artifact.name,
+            artifact.name === 'methods'
+              ? ownValue(memberPresence(contents.methods.values()), captureRecord(contents.methods))
+              : ownValue(
+                  artifact.name === 'stateHandles'
+                    ? contents.states
+                    : artifact.name === 'eventKeys'
+                      ? contents.events
+                      : childPresence(capture),
+                  carriesCallable(artifact.type) ? UNKNOWN : hostValue(artifact.type)
+                ),
+          ])
+        )
+      );
+    }
+    return ownValue(presence, carriesCallable(field.type) ? UNKNOWN : hostValue(field.type));
+  }
+
+  function captureProperty(capture: Capture, name: string): Known {
+    return readValue(captureOwnProperty(capture, name));
+  }
+
+  /** Direct operations and copied getters resolve the same current capture graph. */
+  function captureLookup(
+    capture: Capture,
+    operation: CaptureGetterOperation,
+    argument: Known
+  ): Known {
+    const contents = captureContents(capture);
+    const hook = ir.hooks.find((hook) => hook.id === capture.hookId);
+    const unresolved = argument.some(
+      (key) => key.kind !== 'literal' || typeof key.value !== 'string'
+    );
+    // Preserve the existing direct-operation exception edge for State reads
+    // and unresolved lookups; sharing provenance must not erase catch paths.
+    if (operation === 'capture.getState' || unresolved) possibleThrow();
+    const keys = new Set(
+      argument.flatMap((key) =>
+        key.kind === 'literal' && typeof key.value === 'string' ? [key.value] : []
+      )
+    );
+    if (unresolved) {
+      const candidates =
+        operation === 'capture.getMethod'
+          ? contents.methods.keys()
+          : operation === 'capture.getState'
+            ? (hook?.capture?.states ?? []).map((state) => state.name)
+            : contents.children.keys();
+      for (const key of candidates) keys.add(key);
+    }
+    const result = [...keys].map((key): Known => {
+      if (operation === 'capture.getMethod') return readValue(contents.methods.get(key) ?? ABSENT);
+      if (operation === 'capture.getState') {
+        // State handles are not authored callables. Keep an incomplete first-pass
+        // capture opaque instead of using serialized lookup metadata as proof.
+        if (!hook?.capture) return UNKNOWN;
+        const type =
+          operationResultType(operation, undefined, { capture: hook.capture, captureKey: key }) ??
+          'unknown';
+        return carriesCallable(type) ? UNKNOWN : hostValue(type);
+      }
+      return merge(
+        (contents.children.get(key) ?? [undefined]).map((child) =>
+          !child
+            ? UNDEFINED
+            : operation === 'capture.getAsHookHandle'
+              ? child.handle
+              : captureRecord([
+                  ['name', [{ kind: 'literal', value: key }]],
+                  ['result', child.result ?? [child.capture]],
+                  ['handle', child.handle],
+                ])
+        )
+      );
+    });
+    if (unresolved)
+      result.push(operation === 'capture.getState' && !hook?.capture ? UNKNOWN : UNDEFINED);
+    return result.length ? merge(result) : UNDEFINED;
+  }
+
   function calls(
     values: Known,
     args: readonly Known[],
@@ -730,6 +946,10 @@ function analyzeCallableFlow(
       return branches(
         values.map((value) => () => {
           if (value.kind === 'closure') return call(value, args, execution);
+          if (value.kind === 'capture-getter') {
+            const failure = operationFailure(value.operation, execution, span);
+            return failure ?? captureLookup(value.capture, value.operation, args[0] ?? UNDEFINED);
+          }
           if (value.kind === 'native') {
             // A host-supplied callable has an explicit signature. Supplied closures
             // may be retained by that external consumer and become outward roots.
@@ -747,6 +967,7 @@ function analyzeCallableFlow(
           }
           if (
             value.kind === 'undefined' ||
+            value.kind === 'absent' ||
             value.kind === 'uninitialized' ||
             (value.kind === 'literal' && value.value === null)
           )
@@ -801,7 +1022,17 @@ function analyzeCallableFlow(
         continue;
       }
       if (value.kind === 'closure') callbacks.push({ closure: value, execution, outward: true });
-      else if (value.kind === 'getter')
+      else if (value.kind === 'capture-getter') {
+        // A public getter can return any member of its actual closed capture.
+        // Those closures keep the caller's execution context and guarded policy.
+        if (value.operation !== 'capture.getState')
+          pending.push(
+            ...captureLookup(value.capture, value.operation, UNKNOWN).map((value) => ({
+              value,
+              type: undefined,
+            }))
+          );
+      } else if (value.kind === 'getter')
         pending.push(...value.callable.map((value) => ({ value, type: undefined })));
       else if (value.kind === 'record')
         for (const [name, field] of fields(value))
@@ -946,14 +1177,11 @@ function analyzeCallableFlow(
               (part) => () =>
                 part.kind === 'getter'
                   ? calls(part.callable, [], execution, span)
-                  : part.kind === 'absent'
-                    ? UNDEFINED
-                    : [part]
+                  : readValue([part])
             )
           );
         }
-        if (value.kind === 'capture' && name === 'render')
-          return captureContents(value).render ?? UNDEFINED;
+        if (value.kind === 'capture') return captureProperty(value, name);
         if (value.kind === 'undefined' || (value.kind === 'literal' && value.value === null))
           return UNDEFINED;
         if (checkDataBoundaries && value.kind === 'unknown' && value.data !== undefined) {
@@ -991,28 +1219,40 @@ function analyzeCallableFlow(
     branches(
       values.map((value) => () => {
         const copy = new Map(previous);
+        const copyField = (name: string, field: Known): void => {
+          const present = field.filter((part) => part.kind !== 'absent');
+          const missing = present.length !== field.length;
+          if (!present.length) return;
+          const next = branches([
+            ...(missing ? [() => copy.get(name) ?? ABSENT] : []),
+            () =>
+              branches(
+                present.map(
+                  (part) => () =>
+                    part.kind === 'getter' ? calls(part.callable, [], execution, span) : [part]
+                )
+              ),
+          ]);
+          copy.set(name, next);
+        };
         if (value.kind === 'record') {
           opaqueFields ||= value.opaqueFields === true;
           for (const name of ownKeys(value)) {
-            const next = checkDataBoundaries
-              ? branches(
-                  fields(value)
-                    .get(name)!
-                    .map(
-                      (part) => () =>
-                        part.kind === 'getter' ? calls(part.callable, [], execution, span) : [part]
-                    )
-                )
-              : property([value], name, execution, span);
-            copy.set(name, checkDataBoundaries ? overlayField(next, previous.get(name)) : next);
+            copyField(name, fields(value).get(name) ?? ABSENT);
+            if (!reachable) return [];
+          }
+        } else if (value.kind === 'capture') {
+          for (const field of captureFields(value)) {
+            copyField(field.name, captureOwnProperty(value, field.name));
             if (!reachable) return [];
           }
         } else if (
-          checkDataBoundaries &&
-          (value.kind === 'undefined' || (value.kind === 'literal' && value.value === null))
+          value.kind === 'undefined' ||
+          (value.kind === 'literal' && value.value === null)
         ) {
-          // Object spread of a known nullish value contributes no own fields.
+          // A nullish source has no own fields in either callable or data flow.
         } else {
+          // A structural view cannot erase the backing host value's full shape.
           const retained = checkDataBoundaries && value.kind === 'unknown' ? value.data : type;
           const declared = retained === undefined ? undefined : objectFields(retained);
           if (
@@ -1026,16 +1266,14 @@ function analyzeCallableFlow(
           for (const field of declared ?? []) {
             if (field.accessor) {
               opaque(span);
-              copy.set(field.name, UNKNOWN);
+              copyField(field.name, ownValue(field.optional ? 'maybe' : 'present', UNKNOWN));
             } else {
-              const next = hostValue(field.type);
-              copy.set(
+              copyField(
                 field.name,
-                field.optional
-                  ? checkDataBoundaries
-                    ? overlayField(merge([next, ABSENT]), previous.get(field.name))
-                    : merge([previous.get(field.name) ?? UNDEFINED, next, UNDEFINED])
-                  : next
+                ownValue(
+                  field.optional ? 'maybe' : 'present',
+                  field.optional ? merge([hostValue(field.type), UNDEFINED]) : hostValue(field.type)
+                )
               );
             }
           }
@@ -1047,10 +1285,7 @@ function analyzeCallableFlow(
     const names = new Set(copies.flatMap((copy) => [...copy.keys()]));
     return {
       fields: new Map(
-        [...names].map((name) => [
-          name,
-          merge(copies.map((copy) => copy.get(name) ?? (checkDataBoundaries ? ABSENT : UNDEFINED))),
-        ])
+        [...names].map((name) => [name, merge(copies.map((copy) => copy.get(name) ?? ABSENT))])
       ),
       opaque: opaqueFields,
     };
@@ -1313,7 +1548,7 @@ function analyzeCallableFlow(
                   writeField(
                     target,
                     name,
-                    checkDataBoundaries ? overlayField(field, fields(target).get(name)) : field,
+                    overlayField(field, fields(target).get(name)),
                     args[0].length > 1
                   );
               }
@@ -1400,11 +1635,6 @@ function analyzeCallableFlow(
         return [array];
       }
       case 'operation': {
-        const phaseIssue = validateOperationPhase(
-          value.operation,
-          execution.phase,
-          execution.phase === 'callback' ? (execution.context as CallbackContext) : undefined
-        ).find((item) => item.code !== 'context' || execution.context !== 'helper');
         const receiver = value.receiver ? expression(value.receiver, scope, execution) : UNKNOWN;
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
         if (
@@ -1419,17 +1649,8 @@ function analyzeCallableFlow(
           };
           return UNKNOWN;
         }
-        if (phaseIssue && !trace) {
-          if (execution.guarded) {
-            possibleThrow();
-            reachable = false;
-            return [];
-          }
-          if (!demand) {
-            issue = { message: phaseIssue.message, span: value.span };
-            return UNKNOWN;
-          }
-        }
+        const failure = operationFailure(value.operation, execution, value.span);
+        if (failure !== undefined) return failure;
         if (!trace && (value.operation === 'expose.method' || value.operation === 'expose.value')) {
           if (
             carriesCallable(value.arguments[1].type) &&
@@ -1456,6 +1677,10 @@ function analyzeCallableFlow(
             trace.operation(value, introduced, target.length === 1 && introduced.length === 1);
           if (frame?.hookId) trace.owned?.operation(frame.hookId, value, introduced);
         }
+        // A throwing operation may leave the capture untouched. Snapshot that
+        // edge before recording successful presence, and retain the existing
+        // post-operation edge below for failures after a partial contribution.
+        if (!CAPTURE_LOOKUPS.has(value.operation)) possibleThrow();
         const stateMembers = trace ? privilegedStateMembers(value.operation) : [];
         const handle: Known | undefined = stateMembers.length
           ? [
@@ -1469,7 +1694,13 @@ function analyzeCallableFlow(
           : undefined;
         for (const child of privilegedHookCaptures(value))
           recordChild(captureFrames.at(-1), child.name, {
-            capture: { kind: 'capture', methods: new Map(), children: new Map() },
+            capture: {
+              kind: 'capture',
+              states: 'absent',
+              events: 'absent',
+              methods: new Map(),
+              children: new Map(),
+            },
             result: handle ?? UNKNOWN,
             handle: handle ?? UNKNOWN,
           });
@@ -1487,42 +1718,27 @@ function analyzeCallableFlow(
         if (value.operation === 'expose.method' && name?.kind === 'literal')
           if (captureFrames.length)
             writeCaptureMethod(captureFrames.at(-1)!, String(name.value), args[1]);
-        if (name?.kind === 'literal') {
-          const key = String(name.value);
-          if (value.operation === 'capture.getMethod')
-            return receiver.flatMap((item) =>
-              item.kind === 'capture'
-                ? (captureContents(item).methods.get(key) ?? UNDEFINED)
-                : UNKNOWN
-            );
-          if (value.operation === 'capture.getAsHook')
-            return receiver.flatMap((item) =>
-              item.kind === 'capture'
-                ? (captureContents(item).children.get(key) ?? [undefined]).flatMap((child) =>
-                    child
-                      ? [
-                          {
-                            kind: 'record' as const,
-                            fields: new Map<string, Known>([
-                              ['name', [{ kind: 'literal', value: key }]],
-                              ['result', child.result ?? [child.capture]],
-                              ['handle', child.handle],
-                            ]),
-                          },
-                        ]
-                      : UNDEFINED
-                  )
-                : UNKNOWN
-            );
-          if (value.operation === 'capture.getAsHookHandle')
-            return receiver.flatMap((item) =>
-              item.kind === 'capture'
-                ? (captureContents(item).children.get(key) ?? [undefined]).flatMap(
-                    (child) => child?.handle ?? UNDEFINED
-                  )
-                : UNKNOWN
-            );
+        if (frame) {
+          if (
+            (value.operation.startsWith('state.') && stateValue(value.type)) ||
+            value.operation === 'expose.state'
+          )
+            store.captures.set(frame, { ...captureContents(frame), states: 'present' });
+          if (value.operation === 'expose.event')
+            store.captures.set(frame, { ...captureContents(frame), events: 'present' });
         }
+        if (CAPTURE_LOOKUPS.has(value.operation))
+          return merge(
+            receiver.map((item) =>
+              item.kind === 'capture'
+                ? captureLookup(
+                    item,
+                    value.operation as CaptureGetterOperation,
+                    args[0] ?? UNDEFINED
+                  )
+                : UNKNOWN
+            )
+          );
         possibleThrow();
         return handle ?? hostValue(value.type);
       }
@@ -1564,6 +1780,8 @@ function analyzeCallableFlow(
               const capture: Capture = {
                 kind: 'capture',
                 hookId: hook.id,
+                states: 'absent',
+                events: 'absent',
                 methods: new Map(),
                 children: new Map(),
               };
@@ -1613,6 +1831,8 @@ function analyzeCallableFlow(
             if (installed.pending) {
               const fallback: Capture = {
                 kind: 'capture',
+                states: 'absent',
+                events: 'absent',
                 methods: new Map(),
                 children: new Map(),
               };

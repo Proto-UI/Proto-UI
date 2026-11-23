@@ -1065,3 +1065,99 @@ impl Element for NativeLabelText {
         Element::a11y_synthetic_children(&mut self.0, prepaint, builder)
     }
 }
+
+#[cfg(test)]
+mod a11y_state_tests {
+    use super::*;
+    use crate::a11y::project;
+    use proto_ui_host_protocol::wire::A11ySnapshotWire;
+    use serde_json::json;
+
+    fn surface(snapshot: serde_json::Value) -> SurfaceNode {
+        let snapshot: A11ySnapshotWire =
+            serde_json::from_value(snapshot).expect("a valid snapshot");
+        let (projection, issues) = project(&snapshot);
+        assert!(issues.is_empty(), "{issues:?}");
+        SurfaceNode {
+            id: "surface".into(),
+            session: "session".into(),
+            style: StyleRefinement::default(),
+            focus: None,
+            a11y: Some(projection.expect("a projection")),
+            children: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn rendered_checkbox_states_reach_the_accesskit_node() {
+        for read_only in [false, true] {
+            for disabled in [false, true] {
+                for (checked, toggled) in [
+                    (json!(false), accesskit::Toggled::False),
+                    (json!(true), accesskit::Toggled::True),
+                    (json!("mixed"), accesskit::Toggled::Mixed),
+                ] {
+                    let surface = surface(json!({
+                        "semanticObjectId": "checkbox",
+                        "role": "checkbox",
+                        "name": { "kind": "text", "value": "Receive updates" },
+                        "states": {
+                            "readOnly": read_only,
+                            "disabled": disabled,
+                            "checked": checked,
+                        },
+                        "actions": { "activate": { "event": "click" } },
+                        "relations": {},
+                    }));
+                    let bridge = Rc::new(RefCell::new(InputBridge::new()));
+                    let mut rendered = render_surface(&surface, &bridge);
+                    let element = rendered
+                        .downcast_mut::<AccessibilityFlags>()
+                        .expect("the production renderer carries declared states");
+                    assert_eq!(Element::a11y_role(element), Some(accesskit::Role::CheckBox));
+                    let mut node = accesskit::Node::new(accesskit::Role::CheckBox);
+                    // A false declaration must clear an existing flag, not
+                    // merely agree with the default on a freshly created node.
+                    if !read_only {
+                        node.set_read_only();
+                    }
+                    Element::write_a11y_info(element, &mut node);
+                    assert_eq!(node.is_read_only(), read_only);
+                    assert_eq!(node.is_disabled(), disabled);
+                    assert_eq!(node.toggled(), Some(toggled));
+                    assert_eq!(node.label(), Some("Receive updates"));
+                    // Read-only is a reported state. The Prototype still owns
+                    // what an activation does, just as it does for disabled.
+                    assert!(node.supports_action(accesskit::Action::Click));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn an_absent_read_only_declaration_preserves_other_node_flags() {
+        let surface = surface(json!({
+            "semanticObjectId": "button",
+            "role": "button",
+            "states": { "disabled": true },
+            "actions": { "activate": { "event": "click" } },
+            "relations": {},
+        }));
+        let bridge = Rc::new(RefCell::new(InputBridge::new()));
+        let mut rendered = render_surface(&surface, &bridge);
+        let element = rendered
+            .downcast_mut::<AccessibilityFlags>()
+            .expect("the existing disabled projection remains wrapped");
+        assert_eq!(Element::a11y_role(element), Some(accesskit::Role::Button));
+        for read_only in [false, true] {
+            let mut node = accesskit::Node::new(accesskit::Role::Button);
+            if read_only {
+                node.set_read_only();
+            }
+            Element::write_a11y_info(element, &mut node);
+            assert_eq!(node.is_read_only(), read_only);
+            assert!(node.is_disabled());
+            assert!(node.supports_action(accesskit::Action::Click));
+        }
+    }
+}

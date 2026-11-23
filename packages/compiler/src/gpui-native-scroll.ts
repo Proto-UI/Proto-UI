@@ -1,7 +1,8 @@
 // GPUI's retained ScrollHandle supplies native viewport geometry and scroll offsets.
 export const gpuiNativeScrollSource = String.raw`
-/// A retained physical target. Native content keeps its original handle;
-/// authored requests and observations use that exact engine, never a mirror.
+/// A retained physical target. Native content keeps using its original handle
+/// (including virtual-list item reveal); Proto observes and requests on it.
+/// This type is a host API and is never exposed to authored prototype code.
 #[derive(Clone)]
 pub struct NativeScrollTarget(Rc<NativeScrollTargetState>);
 struct NativeScrollTargetState{handle:gpui::ScrollHandle,claim:RefCell<Option<(OwnerWeak,u64)>>}
@@ -10,11 +11,12 @@ impl NativeScrollTarget{
     pub fn same_target(&self,other:&Self)->bool{Rc::ptr_eq(&self.0,&other.0)}
 }
 struct NativeScrollBinding{target:NativeScrollTarget,generation:u64,window:gpui::WindowId}
+/// Dropping an old lease cannot detach a replacement or write foreign offsets.
 pub struct NativeScrollLease{owner:OwnerWeak,generation:u64}
 impl NativeScrollLease{
     pub fn is_current(&self)->bool{self.owner.upgrade().is_some_and(|owner|{let o=owner.borrow();!o.disposed&&!o.disposing&&o.modules.scroll.external.as_ref().is_some_and(|binding|binding.generation==self.generation)})}
-    /// Input alone cannot change follow policy. The next native frame must
-    /// observe actual followed-axis displacement with unchanged geometry.
+    /// Native wheels/touch may be consumed inside a virtualized child. This
+    /// reports physical input only; it makes no authored navigation decision.
     pub fn note_input(&self,window:&mut Window)->bool{
         let Some(owner)=self.owner.upgrade()else{return false};
         if !self.is_current()||!scroll_ready(&owner)||owner.borrow().window_id!=Some(window.window_handle().window_id()){return false}
@@ -40,24 +42,28 @@ pub struct ScrollModule{
     pub pending_end:Option<(bool,u64)>,
     pub request_status:String,
     pub previous_max:gpui::Point<Pixels>,
-    explicit_pause_epoch:Option<u64>,
-    observation:Option<NativeScrollObservation>,
-    reader_input:Option<NativeScrollObservation>,
     external:Option<NativeScrollBinding>,
     external_expected:bool,
     binding_generation:u64,
+    explicit_pause_epoch:Option<u64>,
+    observation:Option<NativeScrollObservation>,
+    reader_input:Option<NativeScrollObservation>,
 }
 impl ScrollModule{
     fn current_handle(&self)->Option<&gpui::ScrollHandle>{if self.external_expected{self.external.as_ref().map(|binding|&binding.target.0.handle)}else{self.handle.as_ref()}}
     fn handle(&self)->&gpui::ScrollHandle{self.current_handle().expect("ScrollHandle requires a current scroll target")}
     fn builtin_projection(&self)->bool{!self.external_expected&&self.external_engine==0}
 }
+fn scroll_observation(scroll:&ScrollModule,epoch:u64)->NativeScrollObservation{
+    let handle=scroll.handle();
+    NativeScrollObservation{epoch,offset:handle.offset(),max:handle.max_offset(),viewport:handle.bounds().size}
+}
 fn scroll_release_external(owner:&OwnerRef){
     let binding={let mut o=owner.borrow_mut();let s=&mut o.modules.scroll;if s.pending_end.take().is_some(){s.request_status="rejected".into();}s.last_input=None;s.previous_max=gpui::Point::default();s.reader_input=None;s.observation=None;let binding=s.external.take();o.dirty=true;binding};
     if let Some(binding)=binding{let mut claim=binding.target.0.claim.borrow_mut();if claim.as_ref().is_some_and(|(claimed,generation)|claimed.ptr_eq(&Rc::downgrade(owner))&&*generation==binding.generation){*claim=None;}}
 }
-/// The host retains both the target identity and this lease for the actual
-/// view's lifetime. One physical target cannot belong to two live owners.
+/// Attach an existing native surface instead of creating a second scroll box.
+/// The caller retains the target identity and lease for the physical view life.
 pub fn attach_scroll_surface(owner:&OwnerWeak,target:NativeScrollTarget,window:&Window)->Result<NativeScrollLease,&'static str>{
     let owner=owner.upgrade().ok_or("owner-disposed")?;
     {let o=owner.borrow();if o.disposed||o.disposing{return Err("owner-disposed")}if o.modules.scroll.external_engine!=0{return Err("legacy-engine-attached")}if !o.modules.hooks.contains("scroll"){return Err("not-declared")}}
@@ -68,6 +74,7 @@ pub fn attach_scroll_surface(owner:&OwnerWeak,target:NativeScrollTarget,window:&
     *target.0.claim.borrow_mut()=Some((Rc::downgrade(&owner),generation));
     Ok(NativeScrollLease{owner:Rc::downgrade(&owner),generation})
 }
+/// Explicitly restore the compiler root as the physical scroll surface.
 pub fn use_builtin_scroll_surface(owner:&OwnerWeak)->Result<(),&'static str>{
     let owner=owner.upgrade().ok_or("owner-disposed")?;
     {let o=owner.borrow();if o.disposed||o.disposing{return Err("owner-disposed")}if o.modules.scroll.external_engine!=0{return Err("legacy-engine-attached")}if !o.modules.hooks.contains("scroll"){return Err("not-declared")}}
@@ -85,10 +92,8 @@ fn scroll_ready(owner:&OwnerRef)->bool{
     if !ready(owner){return false}let o=owner.borrow();let s=&o.modules.scroll;
     if s.external_expected{s.external.as_ref().is_some_and(|binding|Some(binding.window)==o.window_id&&binding.target.0.handle.bounds().size.width>gpui::px(0.)&&binding.target.0.handle.bounds().size.height>gpui::px(0.))}else{s.handle.is_some()}
 }
-fn scroll_observation(scroll:&ScrollModule,epoch:u64)->NativeScrollObservation{
-    let handle=scroll.handle();
-    NativeScrollObservation{epoch,offset:handle.offset(),max:handle.max_offset(),viewport:handle.bounds().size}
-}
+/// Compatibility binding retains its explicit fallback contract and cannot
+/// coexist with the retained NativeScrollTarget binding.
 /// The host engine remains attached to its actual viewport (including virtual
 /// lists). This lease gives the declared Proto ScrollSurface that exact engine;
 /// the compiler root must not also track it as a second viewport.
@@ -316,7 +321,7 @@ fn scroll_external_input(owner:&OwnerRef,window:&Window)->bool{
     if o.disposed||!o.mounted||!o.present||o.bounds.is_none()||o.window_id!=Some(window.window_handle().window_id())||!o.modules.hooks.contains("scroll"){return false}
     let epoch=o.epoch;
     let s=&mut o.modules.scroll;
-    if s.current_handle().is_none()||s.builtin_projection(){return false}
+    if s.current_handle().is_none()||(s.external_engine==0&&s.external.is_none())||s.external.as_ref().is_some_and(|binding|binding.window!=window.window_handle().window_id()){return false}
     s.last_input=Some(std::time::Instant::now());
     let follow=field(&s.config,"endFollow");
     if !follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end"&&s.reader_input.is_none(){
@@ -329,7 +334,7 @@ pub fn scroll_input(owner:&OwnerRef,event:&gpui::ScrollWheelEvent,window:&Window
     let mut o=owner.borrow_mut();
     if o.disposed||!o.mounted||!o.present||o.bounds.is_none()||o.epoch!=epoch||o.window_id!=Some(window.window_handle().window_id())||!o.modules.hooks.contains("scroll"){return false}
     let s=&mut o.modules.scroll;
-    if s.handle.is_none(){return false}
+    if !s.builtin_projection()||s.current_handle().is_none(){return false}
     s.last_input=Some(std::time::Instant::now());
     let follow=field(&s.config,"endFollow");
     if !follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end"{
@@ -409,6 +414,25 @@ mod scroll_engine_tests {
         }).unwrap();
     }
 
+    #[gpui::test]
+    fn retired_native_target_cannot_pause_through_the_retained_builtin_fallback(cx:&mut gpui::TestAppContext){
+        use gpui::AppContext;
+        let window=cx.update(|cx|cx.open_window(Default::default(),|_,cx|cx.new(|_|Empty)).unwrap());
+        window.update(cx,|_,window,_|{
+            let owner=owner();let weak=Rc::downgrade(&owner);scroll_setup(&weak);
+            scroll_configure(&weak,record(vec![("endFollow",record(vec![("mode",Value::string("while-at-end")),("axis",Value::string("vertical"))]))]));
+            let lease=attach_scroll_surface(&weak,NativeScrollTarget::new(gpui::ScrollHandle::new()),window).unwrap();
+            // These are owner-lifecycle facts for an unavailable-target refusal,
+            // not an assertion of physical layout or reader movement.
+            {let mut o=owner.borrow_mut();o.phase="callback";o.mounted=true;o.bounds=Some(gpui::Bounds::new(gpui::point(gpui::px(0.),gpui::px(0.)),gpui::size(gpui::px(100.),gpui::px(100.))));o.window_id=Some(window.window_handle().window_id());}
+            drop(lease);
+            let rejected=scroll_pause_following(&weak);
+            assert_eq!(rejected.member("kind",false).text(),"rejected");
+            assert_eq!(rejected.member("reason",false).text(),"unavailable");
+            assert_eq!(scroll_snapshot(&weak).member("projection",false).text(),"unresolved");
+            Owner::dispose(&owner);
+        }).unwrap();
+    }
     #[test]
     fn missing_source_declaration_cannot_gain_scroll_semantics_from_binding(){
         let owner=owner();assert!(attach_scroll_engine(Rc::downgrade(&owner),gpui::ScrollHandle::new()).is_err());Owner::dispose(&owner);

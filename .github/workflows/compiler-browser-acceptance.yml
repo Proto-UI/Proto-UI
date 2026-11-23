@@ -73,6 +73,15 @@ jobs:
             packages/compiler/test/browser-preview-retirement.test.ts \
             packages/compiler/test/browser-panel-retirement.test.ts \
             packages/compiler/test/browser-source-input.test.ts \
+            packages/compiler/test/capture-facade.test.ts \
+            packages/compiler/test/value-ir.test.ts \
+            packages/compiler/test/capture-lookup-integrity.test.ts \
+            packages/compiler/test/authored-hook-language.test.ts \
+            packages/compiler/test/mutable-callable-orders.test.ts \
+            packages/compiler/test/module-helper-capture-boundary.test.ts \
+            packages/compiler/test/privileged-capture-metadata.test.ts \
+            packages/compiler/test/capture-getter-presence.test.ts \
+            packages/compiler/test/capture-host-presence.test.ts \
             packages/compiler/test/request-owner-ssr.test.ts \
             packages/compiler/test/physical-control-ssr.test.ts \
             packages/compiler/test/owner-hydration-retirement.test.ts \
@@ -108,6 +117,14 @@ jobs:
           node scripts/ci/check-ci-schedule.mjs 2>&1 | tee "$EVIDENCE/ci-schedule.log"
           node --test scripts/ci/test/ci-scheduling-policy.test.mjs scripts/ci/test/cycle-job-inventory.test.mjs scripts/ci/test/cycle-report.test.mjs \
             2>&1 | tee "$EVIDENCE/ci-controls.log"
+      - name: Verify specification authoring against the actual main merge base
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/compiler-source-regressions"
+          BASE_SHA=$(git merge-base HEAD origin/main)
+          printf '%s\n' "$BASE_SHA" > "$EVIDENCE/spec-base-sha.txt"
+          corepack pnpm@10.32.1 check:spec-authoring -- --base "$BASE_SHA" \
+            2>&1 | tee "$EVIDENCE/spec-authoring.log"
       - name: Check the complete workspace and documentation types
         run: |
           set -euo pipefail

@@ -230,7 +230,12 @@ mod native_hover_tests {
                 owner.borrow_mut().slot=vec![NativeSnapshot::text_value(Value::string(if target{"Target"}else{"Label"}))];
                 Owner::finish(&owner,Value::Undefined);owner
             };
-            LabelHost{label:make(false),target:make(true),focus:cx.focus_handle()}
+            let label=make(false);let target=make(true);
+            // Match the generated constructor's App-scoped input ownership.
+            // The real native up must reach the same production capture route.
+            register_sequential_focus_owner(&label,cx);
+            register_sequential_focus_owner(&target,cx);
+            LabelHost{label,target,focus:cx.focus_handle()}
         });
         window.update(cx,|_,window,_|window.activate_window()).unwrap();frames(window,cx);
         window.update(cx,|host,window,cx| {
