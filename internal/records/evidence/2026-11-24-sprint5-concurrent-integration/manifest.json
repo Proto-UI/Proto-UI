@@ -1,0 +1,2401 @@
+{
+  "version": 1,
+  "createdAtUtc": "2026-11-23T20:48:42.741969+00:00",
+  "publishedHead": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+  "productHead": "e470d1b0c21fc40e99e71cd7c49a76470444c6e7",
+  "run": {
+    "id": 45259712127,
+    "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45259712127",
+    "head_sha": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+    "event": "workflow_dispatch",
+    "status": "queued",
+    "conclusion": null
+  },
+  "bundleCounts": {
+    "tests": 2150,
+    "pass": 2150,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0
+  },
+  "originalGraphSha256": "08aa327638f6f19eb6cef4721ede8b4508ce928ff79e334fd262946a59b89881",
+  "omittedDuplicateGzip": [
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/external-native-0b7-job-137955391702.log.gz"
+  ],
+  "filesRetainedOnlyInsideOriginalZip": [
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/base-button-en.png",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/base-button-zh.png",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/client.js",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/disposed.png",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/same-checkpoint.png",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/terminal.png",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/unmounted.png",
+    "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/production/preview-requests.jsonl"
+  ],
+  "formalResults": {
+    "phase": "verified-artifacts",
+    "runId": 45259712127,
+    "head": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+    "startedAt": "2026-11-23T20:37:36.870530+00:00",
+    "artifacts": [
+      {
+        "id": 14860895880,
+        "name": "compiler-source-regressions-2df421b1fc55cc0649be6675c0ee46a69ad9316f-45259712127",
+        "bytes": 91180,
+        "sha256": "382630283f003e7932c9fd859bf80906570a60380f37d7275ecd10be2fff8943",
+        "head": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+        "label": "source",
+        "sourceShaReadback": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+        "verifiedSha256": "382630283f003e7932c9fd859bf80906570a60380f37d7275ecd10be2fff8943",
+        "verifiedBytes": 91180
+      },
+      {
+        "id": 14859968084,
+        "name": "compiler-browser-acceptance-2df421b1fc55cc0649be6675c0ee46a69ad9316f-45259712127",
+        "bytes": 2012052,
+        "sha256": "24f0c13f7d841a162eb9173885a3efa851b3be68d3b5a9375f9b6306964fab3e",
+        "head": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+        "label": "browser",
+        "sourceShaReadback": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+        "verifiedSha256": "24f0c13f7d841a162eb9173885a3efa851b3be68d3b5a9375f9b6306964fab3e",
+        "verifiedBytes": 2012052
+      },
+      {
+        "id": 14858984928,
+        "name": "compiler-production-build-2df421b1fc55cc0649be6675c0ee46a69ad9316f-45259712127",
+        "bytes": 425332,
+        "sha256": "7cfd2b5a4094c33a3da7799fb4add37ecbae361be6b568663ae852601a2ee1e4",
+        "head": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+        "label": "production",
+        "sourceShaReadback": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+        "verifiedSha256": "7cfd2b5a4094c33a3da7799fb4add37ecbae361be6b568663ae852601a2ee1e4",
+        "verifiedBytes": 425332
+      }
+    ],
+    "browser": {
+      "caseCount": 20,
+      "passed": 20,
+      "serviceMode": "runner-owned-production-static",
+      "receiptSha256": "a42ca0456c448c32a83397eca601f4c3da61cc4ff3daea5cf96753fa7415ffdc",
+      "verifiedDeliverySha256": "c63b96bffbbd9026d7516b65ffaf1f1c9672b45fdce1eabf83dee87d70f0ee95",
+      "verifiedRows": 8,
+      "caseNames": [
+        "ordinary-documentation-preview-before-compiler-load",
+        "revision-web-component-source-v1",
+        "base-button-web-component-source-v1",
+        "revision-react-dom-source-v1",
+        "base-button-react-dom-source-v1",
+        "revision-vue-source-v1",
+        "base-button-vue-source-v1",
+        "revision-vue2-source-v1",
+        "base-button-vue2-source-v1",
+        "edit-reject-recover-same-revision-source-and-preview",
+        "cancel-running-edit-and-reopen-fresh-owner",
+        "zh-base-button-web-component-source-v1",
+        "zh-base-button-react-dom-source-v1",
+        "zh-base-button-vue-source-v1",
+        "zh-base-button-vue2-source-v1",
+        "chinese-documentation-route-and-navigation-cleanup",
+        "loaded-compiler-target-and-wasm-bindings",
+        "production-worker-chunks-and-cleanup",
+        "runner-owned-local-service",
+        "source-and-asset-stability"
+      ]
+    },
+    "source": {
+      "numTotalTestSuites": 75,
+      "numPassedTestSuites": 75,
+      "numFailedTestSuites": 0,
+      "numTotalTests": 659,
+      "numPassedTests": 659,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "success": true,
+      "specBaseSha": "0fbb52ef832cc27c78e24c28c59a55a16f51d7fe",
+      "typesTail": "ue is never read.\n\n\u001b[7m130\u001b[0m   ownerId: string,\n\u001b[7m   \u001b[0m \u001b[93m  ~~~~~~~\u001b[0m\n\n\u001b[96msrc/components/PrototypePreviewer/tabs-registration.test.ts\u001b[0m:\u001b[93m145\u001b[0m:\u001b[93m20\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6133): \u001b[0m'styleProfile' is declared but its value is never read.\n\n\u001b[7m145\u001b[0m   for (const { id, styleProfile } of SHADCN_PRESET_DEMOS) {\n\u001b[7m   \u001b[0m \u001b[93m                   ~~~~~~~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/code-scroll-chain.browser.test.ts\u001b[0m:\u001b[93m46\u001b[0m:\u001b[93m22\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6133): \u001b[0m'page' is declared but its value is never read.\n\n\u001b[7m46\u001b[0m async function facts(page: Page, pre: Locator) {\n\u001b[7m  \u001b[0m \u001b[93m                     ~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/code-surfaces.browser.test.ts\u001b[0m:\u001b[93m449\u001b[0m:\u001b[93m28\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6387): \u001b[0mThe signature '(x: number, y: number): Range | null' of 'document.caretRangeFromPoint' is deprecated.\n\n\u001b[7m449\u001b[0m     const range = document.caretRangeFromPoint?.(point.x, point.y);\n\u001b[7m   \u001b[0m \u001b[93m                           ~~~~~~~~~~~~~~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts\u001b[0m:\u001b[93m54\u001b[0m:\u001b[93m3\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6133): \u001b[0m'family' is declared but its value is never read.\n\n\u001b[7m54\u001b[0m   family: string,\n\u001b[7m  \u001b[0m \u001b[93m  ~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts\u001b[0m:\u001b[93m1903\u001b[0m:\u001b[93m17\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(80006): \u001b[0mThis may be converted to an async function.\n\n\u001b[7m1903\u001b[0m           const wrapped = function (this: HTMLImageElement) {\n\u001b[7m    \u001b[0m \u001b[93m                ~~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/demo-liquid-glass-prominent-tint.browser.test.ts\u001b[0m:\u001b[93m29\u001b[0m:\u001b[93m8\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6133): \u001b[0m'TintPair' is declared but its value is never read.\n\n\u001b[7m29\u001b[0m   type TintPair,\n\u001b[7m  \u001b[0m \u001b[93m       ~~~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/finf-representative-features.browser.test.ts\u001b[0m:\u001b[93m825\u001b[0m:\u001b[93m3\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6133): \u001b[0m'page' is declared but its value is never read.\n\n\u001b[7m825\u001b[0m   page: Page,\n\u001b[7m   \u001b[0m \u001b[93m  ~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/library-card-font-trace.ts\u001b[0m:\u001b[93m61\u001b[0m:\u001b[93m28\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6385): \u001b[0m'fontStretch' is deprecated.\n\n\u001b[7m61\u001b[0m           fontStretch: css.fontStretch,\n\u001b[7m  \u001b[0m \u001b[93m                           ~~~~~~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/site-native-links.browser.test.ts\u001b[0m:\u001b[93m2741\u001b[0m:\u001b[93m15\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(6133): \u001b[0m'family' is declared but its value is never read.\n\n\u001b[7m2741\u001b[0m   for (const [family, route] of [\n\u001b[7m    \u001b[0m \u001b[93m              ~~~~~~\u001b[0m\n\n\u001b[96msrc/content/docs/zh-cn/site-search-ime-evidence.ts\u001b[0m:\u001b[93m152\u001b[0m:\u001b[93m16\u001b[0m - \u001b[93mwarning\u001b[0m\u001b[90m ts(80007): \u001b[0m'await' has no effect on the type of this expression.\n\n\u001b[7m152\u001b[0m       browser: await browser.version(),\n\u001b[7m   \u001b[0m \u001b[93m               ~~~~~~~~~~~~~~~~~~~~~~~\u001b[0m\n\nResult (1330 files): \n- 0 errors\n- 0 warnings\n- 47 hints\n\n",
+      "specAuthoringTail": "\n> proto-ui@ check:spec-authoring /home/runner/work/Proto-UI/Proto-UI\n> tsx scripts/spec/check-lifecycle-authoring.mjs -- --base 0fbb52ef832cc27c78e24c28c59a55a16f51d7fe\n\n[spec-authoring] 2 changed catalog inputs checked against 0fbb52ef832cc27c78e24c28c59a55a16f51d7fe\n"
+    },
+    "production": {
+      "graphSha256": "8e38e312d02d3ede0ab2dd2dd466f5cdabe1d7f9ad43fe9c56e2b088c64e6163",
+      "graphBytes": 5056274,
+      "buildTail": "ext major version of npm. See `npm help npmrc` for supported config options.\n\nRunning Pagefind v1.4.0 (Extended)\nRunning from: \"/home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@astrojs+starlight@0.35.3_astro@5.18.1_@types+node@25.6.2_jiti@2.6.1_lightningcss@1.32._b0aa86eccf551483ed1b86c82fc51956/node_modules/@astrojs/starlight\"\nSource:       \"../../../../../../apps/www/dist\"\nOutput:       \"../../../../../../apps/www/dist/pagefind\"\n\n[Walking source directory]\nFound 702 files matching **/*.{html}\n\n[Parsing files]\n\u001b[2m20:31:28\u001b[22m \u001b[34m[build]\u001b[39m Waiting for integration \u001b[1m\"@astrojs/starlight\"\u001b[22m, hook \u001b[1m\"astro:build:done\"\u001b[22m...\nFound a data-pagefind-body element on the site.\n\u21b3 Ignoring pages without this tag.\n18 pages found without an <html> element. \nPages without an outer <html> element will not be processed by default. \nIf adding this element is not possible, use the root selector config to target a different root element.\n  * \"/zh-cn/whitepaper/execution-semantics/\" has no <html> element\n  * \"/zh-cn/whitepaper/prototype-boundary/\" has no <html> element\n  * \"/zh-cn/whitepaper/faq/\" has no <html> element\n  * \"/zh-cn/whitepaper/translation-layer/\" has no <html> element\n  * \"/zh-cn/whitepaper/information-flow-model/\" has no <html> element\n  * \"/zh-cn/whitepaper/component-as-protocol/\" has no <html> element\n  * \"/zh-cn/whitepaper/design-constraints/\" has no <html> element\n  * \"/zh-cn/whitepaper/evolution-path/\" has no <html> element\n  * \"/zh-cn/prototypes/shadcn/dialog/\" has no <html> element\n  * \"/en/whitepaper/execution-semantics/\" has no <html> element\n  * \"/en/whitepaper/prototype-boundary/\" has no <html> element\n  * \"/en/whitepaper/faq/\" has no <html> element\n  * \"/en/whitepaper/translation-layer/\" has no <html> element\n  * \"/en/whitepaper/information-flow-model/\" has no <html> element\n  * \"/en/whitepaper/component-as-protocol/\" has no <html> element\n  * \"/en/whitepaper/design-constraints/\" has no <html> element\n  * \"/en/whitepaper/evolution-path/\" has no <html> element\n  * \"/en/prototypes/shadcn/dialog/\" has no <html> element\n\n[Reading languages]\nDiscovered 2 languages: zh-cn, en\n\n[Building search indexes]\nTotal: \n  Indexed 2 languages\n  Indexed 657 pages\n  Indexed 17165 words\n  Indexed 0 filters\n  Indexed 0 sorts\nNote: Pagefind doesn't support stemming for the language zh-cn. \nSearch will still work, but will not match across root words.\nNote: Pagefind doesn't support stemming for the language zh-cn. \nSearch will still work, but will not match across root words.\n\nFinished in 7.282 seconds\n\u001b[2m20:31:32\u001b[22m \u001b[34m[@astrojs/sitemap]\u001b[39m `sitemap-index.xml` created at `dist`\n\u001b[2m20:31:32\u001b[22m \u001b[34m[build]\u001b[39m 684 page(s) built in \u001b[1m83.15s\u001b[22m\n\u001b[2m20:31:32\u001b[22m \u001b[34m[build]\u001b[39m \u001b[1mComplete!\u001b[22m\n[clean-sitemap] removed root redirect URL from sitemap-0.xml\n[website-production-bundle] OK (native/static with source-owned lazy runtime consumers shell; web-component primary demonstration host; 3 isolated demonstration runtimes)\n",
+      "gateCounts": {
+        "tests": 2150,
+        "pass": 2150,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      }
+    },
+    "finishedAt": "2026-11-23T20:37:43.081350+00:00"
+  },
+  "entries": [
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/adapter-ours-remote.log",
+      "path": "raw/external-0b7-integration/adapter-ours-remote.log.gz",
+      "rawBytes": 15061,
+      "rawSha256": "870623015b328349a1dfee4abb0997e36c8b4f69664e881afc38e65d02b93092",
+      "gzipBytes": 3776,
+      "gzipSha256": "6327d22517bc57f5a36cd81a432b7e36264cb3305613ba4ed685a42fbb8c0e55"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/commit-and-native-status.json",
+      "path": "raw/external-0b7-integration/commit-and-native-status.json.gz",
+      "rawBytes": 2993,
+      "rawSha256": "ecb6b40327afc7fcd1bb44dad6f864550346a3e06fa883cb9796e48174c2cee0",
+      "gzipBytes": 833,
+      "gzipSha256": "33d40c0512ba7ba5ac1b8f648c93eaf8e3772de77cae19576cda8f7c641f8129"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/commit-before-head.log",
+      "path": "raw/external-0b7-integration/commit-before-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "444fb9a5b6bcf39ae25f0168404732175bb345f38e7db8b35a1c9502aa9c6ef9",
+      "gzipBytes": 59,
+      "gzipSha256": "79418d73f3538b362a929f2d3372f3665a80b4c779a0caa28bd62803d39a4a91"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/commit-before-merge-head.log",
+      "path": "raw/external-0b7-integration/commit-before-merge-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "a1a5a2c8128e121cb9f6859c2b1721a821b5104b0caa67695aee97374c470470",
+      "gzipBytes": 59,
+      "gzipSha256": "221ad270d2d93ba593ce27512cc8eda48c1f854897ca3f1e5be180593b50a681"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/commit-before-tree.log",
+      "path": "raw/external-0b7-integration/commit-before-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "cc7189f51b7d372b30639386025327ed0adab266f95d987ffe18593e266d21ea",
+      "gzipBytes": 59,
+      "gzipSha256": "64c4779e5701f632d367c725264728d381ab72bda6cae7706976db1b1d475e3a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/commit-before-unstaged.log",
+      "path": "raw/external-0b7-integration/commit-before-unstaged.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/commit-message.txt",
+      "path": "raw/external-0b7-integration/commit-message.txt.gz",
+      "rawBytes": 480,
+      "rawSha256": "1f8f8e7f094a770f1ad6a2c7a336e6ccbfc216b8da5122d0d1ed9bce1f889dc6",
+      "gzipBytes": 323,
+      "gzipSha256": "02c2d6266f5f52337b4ad17ef80cca7060bd2c93d39a35df5458b6b78cbfc3cd"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/committed-head.log",
+      "path": "raw/external-0b7-integration/committed-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "3cef443b0df87dbf37648fb7a03743cb2b2cb7e57e47a90fb11518bdc4c52344",
+      "gzipBytes": 60,
+      "gzipSha256": "17972d273c3286fad0df866cf5f764ce113d9bbac1cfa2f8719289f488ab17a9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/committed-parents.log",
+      "path": "raw/external-0b7-integration/committed-parents.log.gz",
+      "rawBytes": 82,
+      "rawSha256": "f857350b8f1abcfc01fe442df85cdceb1a1ed31d66c108f72ef67640b9a0910a",
+      "gzipBytes": 82,
+      "gzipSha256": "94b08a3a9fb0d46d1eab88cb473c9509fe9d0643f518c9fbdf701edeafbba15e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/committed-tracked-status.log",
+      "path": "raw/external-0b7-integration/committed-tracked-status.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/committed-tree.log",
+      "path": "raw/external-0b7-integration/committed-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "cc7189f51b7d372b30639386025327ed0adab266f95d987ffe18593e266d21ea",
+      "gzipBytes": 59,
+      "gzipSha256": "64c4779e5701f632d367c725264728d381ab72bda6cae7706976db1b1d475e3a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__a11y.rs.stage1",
+      "path": "raw/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__a11y.rs.stage1.gz",
+      "rawBytes": 9149,
+      "rawSha256": "396e5a573d3d73cb89fa0585da0fe70ba6270daf7fc3a550165167991367cd63",
+      "gzipBytes": 2969,
+      "gzipSha256": "f2bb1b9081b4044c119dce4e0ef34158f22189badf72b5be163a529572262824"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__a11y.rs.stage2",
+      "path": "raw/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__a11y.rs.stage2.gz",
+      "rawBytes": 9436,
+      "rawSha256": "6f6e47ade5e910b3e2086e7c5c0b24294398295deafafc023c8ef1c85d4ddbe6",
+      "gzipBytes": 3040,
+      "gzipSha256": "ffc8074b7b7fd733a382218084f777745893e0ed680a826db18dff772ac617a1"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__a11y.rs.stage3",
+      "path": "raw/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__a11y.rs.stage3.gz",
+      "rawBytes": 9455,
+      "rawSha256": "78a9215d8ee8a5c80fd113cde044f6c4e4b82deea0ddb8f325c294cc683b79b7",
+      "gzipBytes": 3062,
+      "gzipSha256": "a3c6db18c974bb95df5f7fc4ecc4c7945038a4a777e93d74db180c702ef258ce"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__host.rs.stage1",
+      "path": "raw/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__host.rs.stage1.gz",
+      "rawBytes": 37363,
+      "rawSha256": "ec2b60aa6b0733e60170d297f206df56fb111e56eb6b0fa94c0d35f58f38bf66",
+      "gzipBytes": 9616,
+      "gzipSha256": "12fe99eaef6d10bd53ed7e6493a2e3067e926ecf30c34ece891003a50dd9cea9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__host.rs.stage2",
+      "path": "raw/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__host.rs.stage2.gz",
+      "rawBytes": 41997,
+      "rawSha256": "fdfa088ec61b5b0da6410ecd12928f668a7acfd3c00917fb6629fd713e607835",
+      "gzipBytes": 10681,
+      "gzipSha256": "f46bc425a4a4274d028ed81f504504011c72555a531b8b4ee01b40dc0b256389"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__host.rs.stage3",
+      "path": "raw/external-0b7-integration/conflict-stages/native__gpui__crates__proto-ui-gpui__src__host.rs.stage3.gz",
+      "rawBytes": 39391,
+      "rawSha256": "3da79da2c08223bb8e8be65879ca7443c7cfedc03d65ace45f15a4285ab2318b",
+      "gzipBytes": 10156,
+      "gzipSha256": "cece8837bf45c990a864352cc69e32ef5be74f646d753d63566f92e99eb69eb3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/scripts__coverage-matrices__check-website-production-bundle.mjs.stage1",
+      "path": "raw/external-0b7-integration/conflict-stages/scripts__coverage-matrices__check-website-production-bundle.mjs.stage1.gz",
+      "rawBytes": 44944,
+      "rawSha256": "4d9cf1dd97f00afa77d39184c4df2573f4fc985ab3dc53139145e3b1afbc46ff",
+      "gzipBytes": 9342,
+      "gzipSha256": "e5b144511a84acdbeb3fbe4d7263e83d3a3cb0f940983dc1ad76ec641d250786"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/scripts__coverage-matrices__check-website-production-bundle.mjs.stage2",
+      "path": "raw/external-0b7-integration/conflict-stages/scripts__coverage-matrices__check-website-production-bundle.mjs.stage2.gz",
+      "rawBytes": 45013,
+      "rawSha256": "5a496e0a985ad486481c3be8ee392af74a725bea19d47d097ee94c56d95fa2b8",
+      "gzipBytes": 9354,
+      "gzipSha256": "b63ff43a109077b009334c83ab9a97cca2e78505ed049570a193ce19e8faa27b"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/scripts__coverage-matrices__check-website-production-bundle.mjs.stage3",
+      "path": "raw/external-0b7-integration/conflict-stages/scripts__coverage-matrices__check-website-production-bundle.mjs.stage3.gz",
+      "rawBytes": 45163,
+      "rawSha256": "5cdd0a6b574685c12051fcbe25dac13dc9925cedd746f8c38fbc0198134bcc1a",
+      "gzipBytes": 9404,
+      "gzipSha256": "2b68abfbd5d6cfa4f538503e5518800790114ccf8720d3b56742e2f83ff43375"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.stage1",
+      "path": "raw/external-0b7-integration/conflict-stages/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.stage1.gz",
+      "rawBytes": 83158,
+      "rawSha256": "1203eb1dfc9756c4b44bcd123acc7180f5e2f3e4a8f4d55e16314e51f0a3146c",
+      "gzipBytes": 13329,
+      "gzipSha256": "7620e17b0281f5cad6cf65545d37609b6c1f81b3e4eeda22bcc9362581023038"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.stage2",
+      "path": "raw/external-0b7-integration/conflict-stages/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.stage2.gz",
+      "rawBytes": 87199,
+      "rawSha256": "12a1bc5b6c29422c38c19900ff90c0cbf8329b6b79e96cc37556a979f1930c32",
+      "gzipBytes": 13774,
+      "gzipSha256": "5244b302a449d4afe5e5d337b841210809441a41bbcfd3b8c1c35f0b439eba18"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/conflict-stages/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.stage3",
+      "path": "raw/external-0b7-integration/conflict-stages/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.stage3.gz",
+      "rawBytes": 85662,
+      "rawSha256": "d093246efe98153cc396f5f6fb21a8e71482413818dc59fdc78112da9e97666b",
+      "gzipBytes": 13634,
+      "gzipSha256": "2f16df7c938a1eabc0084e26bd70545dc44d54046bfd9a68cedef93bcce06bba"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/current-vs-remote-names.log",
+      "path": "raw/external-0b7-integration/current-vs-remote-names.log.gz",
+      "rawBytes": 17896,
+      "rawSha256": "5e6860587021f24976621b53487178eb3ab8e3a05f62f755a0ef406d6b82362b",
+      "gzipBytes": 1933,
+      "gzipSha256": "ae6241623caeacb120a8c757f0ae9d4bf868230cbf2838490383c4ba775d3afa"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/current-vs-remote-stat.log",
+      "path": "raw/external-0b7-integration/current-vs-remote-stat.log.gz",
+      "rawBytes": 12797,
+      "rawSha256": "6d5366788058b382ce8337fd4f01b8c664d0955ac9fe4ee20d9936988972ab1c",
+      "gzipBytes": 2669,
+      "gzipSha256": "47b920a469cf68abd8ddcf587e8387f141f97a9de6539099305e4e969d53057a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/fetch.log",
+      "path": "raw/external-0b7-integration/fetch.log.gz",
+      "rawBytes": 425,
+      "rawSha256": "5c9a2b4c1d19c950d405978d2564f9c7415ec383e8a1280c623340b5065f6fb4",
+      "gzipBytes": 239,
+      "gzipSha256": "d216eb69e5096edb2bdc3a0fab89a8c095f453fdcfc88de36a0807d8a8c42e43"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/gate-format-before.log",
+      "path": "raw/external-0b7-integration/gate-format-before.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/gate-original-graph-replay.log",
+      "path": "raw/external-0b7-integration/gate-original-graph-replay.log.gz",
+      "rawBytes": 227,
+      "rawSha256": "e2ceff292cc26926670a8dc4260546f59fe437792f182b73b10f7c94e3705155",
+      "gzipBytes": 192,
+      "gzipSha256": "030c9e6fa717ab75e89c4db8c6e5959e1cb7ec4b1b613dcb9432369897dd9739"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/gate-original-graph-replay.mjs",
+      "path": "raw/external-0b7-integration/gate-original-graph-replay.mjs.gz",
+      "rawBytes": 644,
+      "rawSha256": "3fc903235ab64e6f621fd8cbf90aa0543a78a95d7a3771e1b32bf5b846a424fd",
+      "gzipBytes": 378,
+      "gzipSha256": "24e266235ea16b370187389884243241a29b3d5c365d3a24c5167a7f636c8b19"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/gate-union-controls.log",
+      "path": "raw/external-0b7-integration/gate-union-controls.log.gz",
+      "rawBytes": 300317,
+      "rawSha256": "1c095796626b9975a55e3714ca708516d55661bda664c1aaeea88c65861c4bbf",
+      "gzipBytes": 25009,
+      "gzipSha256": "4a281a14490801723060caa35057a2c208b1a4e5d5425ba6051b3cb63357f774"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/head.log",
+      "path": "raw/external-0b7-integration/head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "444fb9a5b6bcf39ae25f0168404732175bb345f38e7db8b35a1c9502aa9c6ef9",
+      "gzipBytes": 59,
+      "gzipSha256": "79418d73f3538b362a929f2d3372f3665a80b4c779a0caa28bd62803d39a4a91"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-2-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log",
+      "path": "raw/external-0b7-integration/index-2-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "df6dd2ef5cf0647f0f2e09ec99bcab832b80b8ae17be3fa4a3b4a81a102f67e1",
+      "gzipBytes": 59,
+      "gzipSha256": "71b6084b13afe678eb0517f91866bc4cc30a114e158c1158ef96db6db1c94a6d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-2-native__gpui__crates__proto-ui-gpui__src__host.rs.log",
+      "path": "raw/external-0b7-integration/index-2-native__gpui__crates__proto-ui-gpui__src__host.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "affe4b623c836f6411eaecc3cebda79d2a092945879f608f500a98466e0c81c2",
+      "gzipBytes": 59,
+      "gzipSha256": "a742e9df0f7aa7178fa011153b4ab7948dbef476a309c0a659d748dddca6ca0f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-2-scripts__coverage-matrices__check-website-production-bundle.mjs.log",
+      "path": "raw/external-0b7-integration/index-2-scripts__coverage-matrices__check-website-production-bundle.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "930323329439a8a1a55aea256975f95021db5ec3aca13ecd09c4ea76ef752ace",
+      "gzipBytes": 59,
+      "gzipSha256": "70474ab0d8f29b2524e94d7c64f99c291a434eed7b0ad2f88febf08d1013946f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-2-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log",
+      "path": "raw/external-0b7-integration/index-2-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "e6a1b8da98c57f9ddf0e7e1cf43680528c1e6d013580c10c576c6d91ffd765d8",
+      "gzipBytes": 59,
+      "gzipSha256": "b82027396e66d214a4bd14d5962b71303577bf6a125332da0738944ec00ed1a7"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-3-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log",
+      "path": "raw/external-0b7-integration/index-3-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "332aafea4ac395faf2fa697bfd5070b711595c2d087baec79890fe9df55ebe03",
+      "gzipBytes": 59,
+      "gzipSha256": "50940ec26ca62c70d91af9cbca2ec8eaff79d096b2d6bf3b012dc37ca0b7dfa0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-3-native__gpui__crates__proto-ui-gpui__src__host.rs.log",
+      "path": "raw/external-0b7-integration/index-3-native__gpui__crates__proto-ui-gpui__src__host.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "174ccbfce1eedb9c8eea271eabd1182f5d5164202edd33eed49ed02eae1d50d5",
+      "gzipBytes": 59,
+      "gzipSha256": "ef18ab283d2ce4dea1bbe511804bce1308d2161a9ed3b908a58fd87a3b7ec346"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-3-scripts__coverage-matrices__check-website-production-bundle.mjs.log",
+      "path": "raw/external-0b7-integration/index-3-scripts__coverage-matrices__check-website-production-bundle.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "6443c3ea33a18557845f99f5f44d2c4668b02f56c871100ca3c18e1c52d52834",
+      "gzipBytes": 59,
+      "gzipSha256": "5f7cb8bbcce63aec504056074d9cf8e345245aee24cc6493835c48d9280369c2"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/index-3-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log",
+      "path": "raw/external-0b7-integration/index-3-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "b7a6ced6abeb5cf2ccb5b5534582696329265e4aa873352b2d80a873361dd06c",
+      "gzipBytes": 60,
+      "gzipSha256": "002166a2f9b2fb8ffeb862c45e2e7fc5bb4cc49a7ed092fde5ce70a9ea2b973f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/main-head.log",
+      "path": "raw/external-0b7-integration/main-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "d3c591b1ef3cbb3747a4a06c687e7788c84ff925c386a9bb25f4243e80c5d384",
+      "gzipBytes": 59,
+      "gzipSha256": "73cc2a3356f754a1b92da088e4b5b1d49cc332a15c79e67b01bc0c2c242b7019"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/merge-before-head.log",
+      "path": "raw/external-0b7-integration/merge-before-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "444fb9a5b6bcf39ae25f0168404732175bb345f38e7db8b35a1c9502aa9c6ef9",
+      "gzipBytes": 59,
+      "gzipSha256": "79418d73f3538b362a929f2d3372f3665a80b4c779a0caa28bd62803d39a4a91"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/merge-before-tracked.log",
+      "path": "raw/external-0b7-integration/merge-before-tracked.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/merge-ref.log",
+      "path": "raw/external-0b7-integration/merge-ref.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "a1a5a2c8128e121cb9f6859c2b1721a821b5104b0caa67695aee97374c470470",
+      "gzipBytes": 59,
+      "gzipSha256": "221ad270d2d93ba593ce27512cc8eda48c1f854897ca3f1e5be180593b50a681"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/merge-status.json",
+      "path": "raw/external-0b7-integration/merge-status.json.gz",
+      "rawBytes": 2012,
+      "rawSha256": "58e5a2a63a4f58f06ee56d60b62a5374f5153d0769b69b1be394ee1be519318f",
+      "gzipBytes": 621,
+      "gzipSha256": "daecb6b00d4d2f7d1e35415f8c13d5b33e5cab157877d8b75fe21239e0240544"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/normal-merge-0b7.log",
+      "path": "raw/external-0b7-integration/normal-merge-0b7.log.gz",
+      "rawBytes": 783,
+      "rawSha256": "375534c481562e6905c10e3df9c7e79983378ee0d677df365dd996b4b4a1dd50",
+      "gzipBytes": 265,
+      "gzipSha256": "2e3ebc4a53a69d65cfa4049536953a2d9a976ca2bab18d53b2ddff96bfc672cd"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/normal-merge-cc.log",
+      "path": "raw/external-0b7-integration/normal-merge-cc.log.gz",
+      "rawBytes": 12869,
+      "rawSha256": "02536953672ab33567c3a230b9e74f7530f9396521ddd62e550767b444abdc81",
+      "gzipBytes": 3330,
+      "gzipSha256": "759183ec40c22ce1d05e2344462768a24c4ddb32d86a3dd0ec5d2579db3a48d9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/normal-merge-staged-stat.log",
+      "path": "raw/external-0b7-integration/normal-merge-staged-stat.log.gz",
+      "rawBytes": 2743,
+      "rawSha256": "04590272f55d3a8f1d0a4d092f6a291b4c7d9ef547f3cd1c2c59f6f8af90e19f",
+      "gzipBytes": 904,
+      "gzipSha256": "85b101777135af0514cf7b69bca2a650efed8b53bc471fe3818d6cdb5784f61f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/normal-signedoff-commit.log",
+      "path": "raw/external-0b7-integration/normal-signedoff-commit.log.gz",
+      "rawBytes": 111,
+      "rawSha256": "caa0ffb7a98d5f9c4964f8771a981b19fcef9b23a2ae886478faef1e2668c858",
+      "gzipBytes": 120,
+      "gzipSha256": "9db0dedc9e28c780c539d63dcdd01372e0d6d3ce9d9b99c3fb4e1a6645e6a158"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/protected-record-blobs-before.json",
+      "path": "raw/external-0b7-integration/protected-record-blobs-before.json.gz",
+      "rawBytes": 259373,
+      "rawSha256": "0a4f8c2348b532089d41b439649dc2e4e78ae3fb51fe3da5cca2c31d4e140e87",
+      "gzipBytes": 58097,
+      "gzipSha256": "164042ea9eae2c5f07a9eeb07967f9ba37de29f24d549a0d8be9b21da74106cf"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/protected-record-comparison.json",
+      "path": "raw/external-0b7-integration/protected-record-comparison.json.gz",
+      "rawBytes": 40,
+      "rawSha256": "8a0c32bd53f2e27b752ae5ce8ac295fe4246dbdf3eaab30511d638744b28addc",
+      "gzipBytes": 56,
+      "gzipSha256": "0a41fe3a1502a69610135478ff47eb311b94a87a219b115e047d2c96926f286f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/record-blobs-after.log",
+      "path": "raw/external-0b7-integration/record-blobs-after.log.gz",
+      "rawBytes": 590006,
+      "rawSha256": "cf4f400246e2d4e5e9ad5e2cd9184089226a2b2afa98fce14068dfbe4b47e3d4",
+      "gzipBytes": 145952,
+      "gzipSha256": "f1724d4ca1d0e11583906ae77061d15c0913e25fc76adba84fc756e9153f6ab1"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/record-blobs-before.log",
+      "path": "raw/external-0b7-integration/record-blobs-before.log.gz",
+      "rawBytes": 600916,
+      "rawSha256": "87f0be162318d5f4d540d90ea408f2654a8fec3cd77f7e564e886fd4dd800863",
+      "gzipBytes": 145595,
+      "gzipSha256": "e945034eb41658938e54eb182f92212909264bbd3b0444614179b016423da4c8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/remote-head.log",
+      "path": "raw/external-0b7-integration/remote-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "a1a5a2c8128e121cb9f6859c2b1721a821b5104b0caa67695aee97374c470470",
+      "gzipBytes": 59,
+      "gzipSha256": "221ad270d2d93ba593ce27512cc8eda48c1f854897ca3f1e5be180593b50a681"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolution-status.json",
+      "path": "raw/external-0b7-integration/resolution-status.json.gz",
+      "rawBytes": 9133,
+      "rawSha256": "c7254827cb8b4232c9c69dc806b2c0e830f999bcd81783512758759e4bcdf670",
+      "gzipBytes": 1376,
+      "gzipSha256": "7abd06af68a4db64b08ee2598ebab9a98085c561446bd763e9cbd59d1b274eaf"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolve-conflicts.log",
+      "path": "raw/external-0b7-integration/resolve-conflicts.log.gz",
+      "rawBytes": 224,
+      "rawSha256": "875e948aa3bb97e61c641d6fe737670c2b69afb57e83539fab2be5b572aa7fdf",
+      "gzipBytes": 124,
+      "gzipSha256": "d85f7dc08fe3ed3bc7d4346340b4be7c638848cee6f4dd6b24b1aba362b0f003"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolve-head.log",
+      "path": "raw/external-0b7-integration/resolve-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "444fb9a5b6bcf39ae25f0168404732175bb345f38e7db8b35a1c9502aa9c6ef9",
+      "gzipBytes": 59,
+      "gzipSha256": "79418d73f3538b362a929f2d3372f3665a80b4c779a0caa28bd62803d39a4a91"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolve-merge-head.log",
+      "path": "raw/external-0b7-integration/resolve-merge-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "a1a5a2c8128e121cb9f6859c2b1721a821b5104b0caa67695aee97374c470470",
+      "gzipBytes": 59,
+      "gzipSha256": "221ad270d2d93ba593ce27512cc8eda48c1f854897ca3f1e5be180593b50a681"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolved-add.log",
+      "path": "raw/external-0b7-integration/resolved-add.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolved-diff-check.log",
+      "path": "raw/external-0b7-integration/resolved-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolved-staged-stat.log",
+      "path": "raw/external-0b7-integration/resolved-staged-stat.log.gz",
+      "rawBytes": 2738,
+      "rawSha256": "8e88cd926ec2379efbc57ddf59860b23d8fb0260058a95b254dd916f3eb21d5d",
+      "gzipBytes": 902,
+      "gzipSha256": "f27ef3cc8f7bd9fcb6076030fed5d42811c307076a3640955791a8aeb9c344e7"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolved-tree.log",
+      "path": "raw/external-0b7-integration/resolved-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "cc7189f51b7d372b30639386025327ed0adab266f95d987ffe18593e266d21ea",
+      "gzipBytes": 59,
+      "gzipSha256": "64c4779e5701f632d367c725264728d381ab72bda6cae7706976db1b1d475e3a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/resolved-unmerged.log",
+      "path": "raw/external-0b7-integration/resolved-unmerged.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-2-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log",
+      "path": "raw/external-0b7-integration/stage-2-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "df6dd2ef5cf0647f0f2e09ec99bcab832b80b8ae17be3fa4a3b4a81a102f67e1",
+      "gzipBytes": 59,
+      "gzipSha256": "71b6084b13afe678eb0517f91866bc4cc30a114e158c1158ef96db6db1c94a6d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-2-native__gpui__crates__proto-ui-gpui__src__host.rs.log",
+      "path": "raw/external-0b7-integration/stage-2-native__gpui__crates__proto-ui-gpui__src__host.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "affe4b623c836f6411eaecc3cebda79d2a092945879f608f500a98466e0c81c2",
+      "gzipBytes": 59,
+      "gzipSha256": "a742e9df0f7aa7178fa011153b4ab7948dbef476a309c0a659d748dddca6ca0f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-2-scripts__coverage-matrices__check-website-production-bundle.mjs.log",
+      "path": "raw/external-0b7-integration/stage-2-scripts__coverage-matrices__check-website-production-bundle.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "930323329439a8a1a55aea256975f95021db5ec3aca13ecd09c4ea76ef752ace",
+      "gzipBytes": 59,
+      "gzipSha256": "70474ab0d8f29b2524e94d7c64f99c291a434eed7b0ad2f88febf08d1013946f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-2-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log",
+      "path": "raw/external-0b7-integration/stage-2-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "e6a1b8da98c57f9ddf0e7e1cf43680528c1e6d013580c10c576c6d91ffd765d8",
+      "gzipBytes": 59,
+      "gzipSha256": "b82027396e66d214a4bd14d5962b71303577bf6a125332da0738944ec00ed1a7"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-3-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log",
+      "path": "raw/external-0b7-integration/stage-3-native__gpui__crates__proto-ui-gpui__src__a11y.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "332aafea4ac395faf2fa697bfd5070b711595c2d087baec79890fe9df55ebe03",
+      "gzipBytes": 59,
+      "gzipSha256": "50940ec26ca62c70d91af9cbca2ec8eaff79d096b2d6bf3b012dc37ca0b7dfa0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-3-native__gpui__crates__proto-ui-gpui__src__host.rs.log",
+      "path": "raw/external-0b7-integration/stage-3-native__gpui__crates__proto-ui-gpui__src__host.rs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "174ccbfce1eedb9c8eea271eabd1182f5d5164202edd33eed49ed02eae1d50d5",
+      "gzipBytes": 59,
+      "gzipSha256": "ef18ab283d2ce4dea1bbe511804bce1308d2161a9ed3b908a58fd87a3b7ec346"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-3-scripts__coverage-matrices__check-website-production-bundle.mjs.log",
+      "path": "raw/external-0b7-integration/stage-3-scripts__coverage-matrices__check-website-production-bundle.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "6443c3ea33a18557845f99f5f44d2c4668b02f56c871100ca3c18e1c52d52834",
+      "gzipBytes": 59,
+      "gzipSha256": "5f7cb8bbcce63aec504056074d9cf8e345245aee24cc6493835c48d9280369c2"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/stage-3-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log",
+      "path": "raw/external-0b7-integration/stage-3-scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "b7a6ced6abeb5cf2ccb5b5534582696329265e4aa873352b2d80a873361dd06c",
+      "gzipBytes": 60,
+      "gzipSha256": "002166a2f9b2fb8ffeb862c45e2e7fc5bb4cc49a7ed092fde5ce70a9ea2b973f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/status.json",
+      "path": "raw/external-0b7-integration/status.json.gz",
+      "rawBytes": 2340,
+      "rawSha256": "87bdfaf581023829f1394863c7e3de9d888999570728d5d70a844e59199e729f",
+      "gzipBytes": 628,
+      "gzipSha256": "860b6bb6d9f9dccd32c9e6bb4f1a078b9176e5fed314c688550b2a2370a5341e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/tracked-status.log",
+      "path": "raw/external-0b7-integration/tracked-status.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/unmerged-paths.log",
+      "path": "raw/external-0b7-integration/unmerged-paths.log.gz",
+      "rawBytes": 224,
+      "rawSha256": "875e948aa3bb97e61c641d6fe737670c2b69afb57e83539fab2be5b572aa7fdf",
+      "gzipBytes": 124,
+      "gzipSha256": "d85f7dc08fe3ed3bc7d4346340b4be7c638848cee6f4dd6b24b1aba362b0f003"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-integration/untracked-status.log",
+      "path": "raw/external-0b7-integration/untracked-status.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-control-label.ts.stage1",
+      "path": "raw/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-control-label.ts.stage1.gz",
+      "rawBytes": 20670,
+      "rawSha256": "bfd328b2fac822ea72a03d24a715d16fbcd8817c1802181ff1cb7a8776fc84c1",
+      "gzipBytes": 5070,
+      "gzipSha256": "3f9ed85acd63f53215fa2673a898d1a340a29af5ddb9db99841992fe893558da"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-control-label.ts.stage2",
+      "path": "raw/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-control-label.ts.stage2.gz",
+      "rawBytes": 25259,
+      "rawSha256": "c282ad41df33ed9fd9e816228a1d9029d761acbb1a350cef975e2a6622d18196",
+      "gzipBytes": 6210,
+      "gzipSha256": "e6bb4b8405e880063435f6958e989b03e8ade00e3ecec85ec2b0b804a653c357"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-control-label.ts.stage3",
+      "path": "raw/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-control-label.ts.stage3.gz",
+      "rawBytes": 83434,
+      "rawSha256": "8d6577abb34c9b88447e16b43115f282b15d2157936cc8ff1c7a0221af7294af",
+      "gzipBytes": 16111,
+      "gzipSha256": "0bb6a79b1351920922f3b8918937f7a8c20b40f5983afcde30a16d609907ac3f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-scroll.ts.stage1",
+      "path": "raw/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-scroll.ts.stage1.gz",
+      "rawBytes": 22681,
+      "rawSha256": "cc363cdf04d6dcd65a885cd91ab617c065ddd697bd2c93eda726e684907732dc",
+      "gzipBytes": 5902,
+      "gzipSha256": "d47c9c9aa29c33ad9d9d59c9f1a0d6c727d3eb42a36af70ef0197ceb11197364"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-scroll.ts.stage2",
+      "path": "raw/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-scroll.ts.stage2.gz",
+      "rawBytes": 28327,
+      "rawSha256": "804b91dfb5c8767609f65ec8377dc5862adbd9013141c4128d537944154d6ae1",
+      "gzipBytes": 7007,
+      "gzipSha256": "42ae7d0fd0c05220afafcaef1be89fae2454b5573b9e50c7e5482061d4c94666"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-scroll.ts.stage3",
+      "path": "raw/native52c-integration/conflict-stages/packages__compiler__src__gpui-native-scroll.ts.stage3.gz",
+      "rawBytes": 29745,
+      "rawSha256": "3db96e53174e239a5b980c8bc3ff960417733c4f9abc7e4d0e9c729cef5fdcf8",
+      "gzipBytes": 7211,
+      "gzipSha256": "db0d58ad5ad287c0c3fce279fd50b71eb31e50afa6307c167b37099e16cbebf1"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/external-retention.json",
+      "path": "raw/native52c-integration/external-retention.json.gz",
+      "rawBytes": 4478,
+      "rawSha256": "1d6ec57e3f50d712f8315b9885cadb18da09cba366873c4286bca4f2df9b8c0b",
+      "gzipBytes": 1596,
+      "gzipSha256": "9910e5c66c68fa00a2e64035b0a963981248d31940a99f1cf947897bc3ef76ff"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-committed-head.log",
+      "path": "raw/native52c-integration/native-committed-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "960ea4d44a7beddcf18b49584fb669d5ec1ecbf03caca6f94323e1c00525710b",
+      "gzipBytes": 59,
+      "gzipSha256": "631e7bdff17f4d701580041b61987c71f55edd5a7648d58099093c527a3715fb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-committed-parents.log",
+      "path": "raw/native52c-integration/native-committed-parents.log.gz",
+      "rawBytes": 82,
+      "rawSha256": "ed39c620a517035cf095a0df5f3262ac732a0ebd5ca6eb5b2bade726d09a0315",
+      "gzipBytes": 83,
+      "gzipSha256": "d996a95b8f6adf8cce2adcca17b9f7c82d1642043094b8152b023a6526242b2b"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-committed-tree.log",
+      "path": "raw/native52c-integration/native-committed-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "ba1348442ac90406cc5d309fbfd9afe1a8f6042564110e3fa3f9f7aceeea768a",
+      "gzipBytes": 59,
+      "gzipSha256": "b0d5efab345fd493ac7ecc797dd9c24e1aa5b3c5dc1c4ac849798c198348b27a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-committed-unstaged.log",
+      "path": "raw/native52c-integration/native-committed-unstaged.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-current-conflicts.log",
+      "path": "raw/native52c-integration/native-current-conflicts.log.gz",
+      "rawBytes": 95,
+      "rawSha256": "593ff77c6244bc24a3610275504641f1b71190dc3d3dd336b3230a5742ad88fa",
+      "gzipBytes": 78,
+      "gzipSha256": "5e41c60df984595079a32ea400a3a77e6a58cf9deefcb939ce87a9b017671756"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-diff-check.log",
+      "path": "raw/native52c-integration/native-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-docs-format.log",
+      "path": "raw/native52c-integration/native-docs-format.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-index-2-packages__compiler__src__gpui-native-control-label.ts.log",
+      "path": "raw/native52c-integration/native-index-2-packages__compiler__src__gpui-native-control-label.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "cece1abc56ea85e7102ef3f07b0ffe26f528ace6c2ee8ed84c27a1af110bac65",
+      "gzipBytes": 60,
+      "gzipSha256": "4589c721a82f19aba036d87c8fbdc7deab6850e4c5db3b48464565fc0cb425c9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-index-2-packages__compiler__src__gpui-native-scroll.ts.log",
+      "path": "raw/native52c-integration/native-index-2-packages__compiler__src__gpui-native-scroll.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "7dc7c01d0d2ba3b5bd861f5ec7525b3492c0166e3998aa7f22c1170a6de62310",
+      "gzipBytes": 59,
+      "gzipSha256": "bf23bda1a5da9020f48e2bb1464fa41ed4ca136aa408becd3800674ca4c8d02d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-index-3-packages__compiler__src__gpui-native-control-label.ts.log",
+      "path": "raw/native52c-integration/native-index-3-packages__compiler__src__gpui-native-control-label.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "dc7455935389801ceba19cdce7adc12009b9bcbdaa8effd2d0ffee63861e3402",
+      "gzipBytes": 60,
+      "gzipSha256": "28be575a37a708c25bd4fe1cce4dea286feeaa4aaa5f9ec3b3a9657129515515"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-index-3-packages__compiler__src__gpui-native-scroll.ts.log",
+      "path": "raw/native52c-integration/native-index-3-packages__compiler__src__gpui-native-scroll.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "8f1791e9958094f439157bf859e250a04d454692dd9853b851e99a2a8b2c5730",
+      "gzipBytes": 59,
+      "gzipSha256": "d8cba5b66f9c0f25c19233b2a765881a4cebc18afb56a8df306fed5282deff46"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-merge-cc.log",
+      "path": "raw/native52c-integration/native-merge-cc.log.gz",
+      "rawBytes": 64707,
+      "rawSha256": "6bc119e6c9a7fa8e1a3282a57f846946adcf55998a1eda96d52edc231ed2c583",
+      "gzipBytes": 12513,
+      "gzipSha256": "bd15ef1a9d3932b13689ae8dcc03d93830f57e7442a9460412deaaa16dd40a30"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-merge-message.txt",
+      "path": "raw/native52c-integration/native-merge-message.txt.gz",
+      "rawBytes": 492,
+      "rawSha256": "32845b5db14877fed0fc5770e405468f2ce39ad05498aa695b7a508766b78fa8",
+      "gzipBytes": 315,
+      "gzipSha256": "134db8c5065eb8e7bfd0de5c68966f1574b2a5b88b063c71da77672742e1bb09"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-prepared-tree.log",
+      "path": "raw/native52c-integration/native-prepared-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "ba1348442ac90406cc5d309fbfd9afe1a8f6042564110e3fa3f9f7aceeea768a",
+      "gzipBytes": 59,
+      "gzipSha256": "b0d5efab345fd493ac7ecc797dd9c24e1aa5b3c5dc1c4ac849798c198348b27a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-record-index.log",
+      "path": "raw/native52c-integration/native-record-index.log.gz",
+      "rawBytes": 612503,
+      "rawSha256": "2b3fa3c9130104f5ccd6f03556fb8229ae1dafe3e6eea8f340f2f891a73dd8a1",
+      "gzipBytes": 150464,
+      "gzipSha256": "25d0a1d78699b434b1888265ffe0d6eb9fef2b6d7b6b147b2faf2ff4be20954f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-ref-2-packages__compiler__src__gpui-native-control-label.ts.log",
+      "path": "raw/native52c-integration/native-ref-2-packages__compiler__src__gpui-native-control-label.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "cece1abc56ea85e7102ef3f07b0ffe26f528ace6c2ee8ed84c27a1af110bac65",
+      "gzipBytes": 60,
+      "gzipSha256": "4589c721a82f19aba036d87c8fbdc7deab6850e4c5db3b48464565fc0cb425c9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-ref-2-packages__compiler__src__gpui-native-scroll.ts.log",
+      "path": "raw/native52c-integration/native-ref-2-packages__compiler__src__gpui-native-scroll.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "7dc7c01d0d2ba3b5bd861f5ec7525b3492c0166e3998aa7f22c1170a6de62310",
+      "gzipBytes": 59,
+      "gzipSha256": "bf23bda1a5da9020f48e2bb1464fa41ed4ca136aa408becd3800674ca4c8d02d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-ref-3-packages__compiler__src__gpui-native-control-label.ts.log",
+      "path": "raw/native52c-integration/native-ref-3-packages__compiler__src__gpui-native-control-label.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "dc7455935389801ceba19cdce7adc12009b9bcbdaa8effd2d0ffee63861e3402",
+      "gzipBytes": 60,
+      "gzipSha256": "28be575a37a708c25bd4fe1cce4dea286feeaa4aaa5f9ec3b3a9657129515515"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-ref-3-packages__compiler__src__gpui-native-scroll.ts.log",
+      "path": "raw/native52c-integration/native-ref-3-packages__compiler__src__gpui-native-scroll.ts.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "8f1791e9958094f439157bf859e250a04d454692dd9853b851e99a2a8b2c5730",
+      "gzipBytes": 59,
+      "gzipSha256": "d8cba5b66f9c0f25c19233b2a765881a4cebc18afb56a8df306fed5282deff46"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-remaining-conflicts.log",
+      "path": "raw/native52c-integration/native-remaining-conflicts.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-resolve-head.log",
+      "path": "raw/native52c-integration/native-resolve-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "3cef443b0df87dbf37648fb7a03743cb2b2cb7e57e47a90fb11518bdc4c52344",
+      "gzipBytes": 60,
+      "gzipSha256": "17972d273c3286fad0df866cf5f764ce113d9bbac1cfa2f8719289f488ab17a9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-resolve-merge-head.log",
+      "path": "raw/native52c-integration/native-resolve-merge-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "fb60a4e43a06e7c50975c0f90afa96c3e70159e94524b7324c785a9a9d418593",
+      "gzipBytes": 59,
+      "gzipSha256": "4336154c9f03d89c51806fd14ddd1263c9e245892888def02186d1c46b4da4b1"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-resolved-add.log",
+      "path": "raw/native52c-integration/native-resolved-add.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-signedoff-commit.log",
+      "path": "raw/native52c-integration/native-signedoff-commit.log.gz",
+      "rawBytes": 114,
+      "rawSha256": "787bf129e015366721cf305bfafdd6c1561bc2024ecddf682b562cc25418ba1e",
+      "gzipBytes": 116,
+      "gzipSha256": "1dbc41c266389ca885a84824026af5c0924a342768b6c9a0f1db94471adfc5fe"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-staged-stat.log",
+      "path": "raw/native52c-integration/native-staged-stat.log.gz",
+      "rawBytes": 10785,
+      "rawSha256": "ffbb11d76e4cf1ccb7913656a69b09732717b204bb2506a215cf2130121140ea",
+      "gzipBytes": 1838,
+      "gzipSha256": "e537e79124d17e95f6643f46614ddb8de8b5e4074b12f041fc1fb479d56f1c4b"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/native-unmerged-paths.log",
+      "path": "raw/native52c-integration/native-unmerged-paths.log.gz",
+      "rawBytes": 95,
+      "rawSha256": "593ff77c6244bc24a3610275504641f1b71190dc3d3dd336b3230a5742ad88fa",
+      "gzipBytes": 78,
+      "gzipSha256": "5e41c60df984595079a32ea400a3a77e6a58cf9deefcb939ce87a9b017671756"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/normal-merge-native52c.log",
+      "path": "raw/native52c-integration/normal-merge-native52c.log.gz",
+      "rawBytes": 410,
+      "rawSha256": "e5ad78c8438a8de3117aa94e57b0d5ba9e28c2ed3616892681ee2e0d2a89cb14",
+      "gzipBytes": 188,
+      "gzipSha256": "293a86e4af09ace42a746d135518f8dcf7f1693202b7dcafc368204949bd30a2"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/record-retention.json",
+      "path": "raw/native52c-integration/record-retention.json.gz",
+      "rawBytes": 40,
+      "rawSha256": "40817c7084c8615b6a972589cd95c3eb9573581f62af8a2165407cf5155630e3",
+      "gzipBytes": 56,
+      "gzipSha256": "9e66ce5f11cd3e070cdae7f4fa3986917adb93857f7a377194ba9bfb08d4aa07"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/records-52c87232-internal__records__2026-11-24-gpui-native-composition-recovery.md.log",
+      "path": "raw/native52c-integration/records-52c87232-internal__records__2026-11-24-gpui-native-composition-recovery.md.log.gz",
+      "rawBytes": 117,
+      "rawSha256": "c14ec872820c56cb018932d26fb2446a90fa2edc6103a892a300ce2015d7b0c2",
+      "gzipBytes": 121,
+      "gzipSha256": "97aa435bb3d0cb9a38e223d00d2f2e8dff2d958f23c009ac44a461e9c4cab7e3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/records-52c87232-internal__records__evidence__2026-11-24-gpui-native-composition-recovery.log",
+      "path": "raw/native52c-integration/records-52c87232-internal__records__evidence__2026-11-24-gpui-native-composition-recovery.log.gz",
+      "rawBytes": 22794,
+      "rawSha256": "099a00eab1bc1535d5605cee62d229a13ee0988bf00d3373346aa14a70129b2b",
+      "gzipBytes": 4653,
+      "gzipSha256": "944edaab14549db6c93a549f0e19ec14872220ade9df68c0ac4a145e15ebbfdb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/records-68b81397-internal__records.log",
+      "path": "raw/native52c-integration/records-68b81397-internal__records.log.gz",
+      "rawBytes": 602825,
+      "rawSha256": "896cdbb7f72cd6d78f7f39a4e0a516ff90a8a97098782611cd31c459f7121799",
+      "gzipBytes": 146117,
+      "gzipSha256": "e6205ec144abd69c8d342bcd3bb3012ff70fa1b6a4cf8b7bee79ee2eb1be4fed"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/resolve-commit-main-status.json",
+      "path": "raw/native52c-integration/resolve-commit-main-status.json.gz",
+      "rawBytes": 11919,
+      "rawSha256": "5332d9a0a97d65e977f3da919714496df4d1855097eb36137f474594f653737e",
+      "gzipBytes": 2271,
+      "gzipSha256": "b0838ed53625a2ca682a3d28754095960b92462c16c617cec126e56ba24bd08e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/native52c-integration/status.json",
+      "path": "raw/native52c-integration/status.json.gz",
+      "rawBytes": 2993,
+      "rawSha256": "ecb6b40327afc7fcd1bb44dad6f864550346a3e06fa883cb9796e48174c2cee0",
+      "gzipBytes": 833,
+      "gzipSha256": "33d40c0512ba7ba5ac1b8f648c93eaf8e3772de77cae19576cda8f7c641f8129"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/final-head.log",
+      "path": "raw/main0fbb-integration/final-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "9d61acf6391d1c3ad8f4bb9a85af9b23e0ce7e1cee19c9e36bb1718f6ba24b5f",
+      "gzipBytes": 60,
+      "gzipSha256": "b55f78078d45dae20fc9f21e725a27ab7035ec451d35753251473c407a957c03"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/final-parents.log",
+      "path": "raw/main0fbb-integration/final-parents.log.gz",
+      "rawBytes": 82,
+      "rawSha256": "3a1ff1b326755c2b3144e2c2d4fb2eda18b65a04e6453513a562fd7df163e5df",
+      "gzipBytes": 84,
+      "gzipSha256": "d6ac87f67d15304d0fbf1c4d3bbcb8de697a9e1e9110da7b3ad9246837cadd1f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/final-tracked-status.log",
+      "path": "raw/main0fbb-integration/final-tracked-status.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/final-tree.log",
+      "path": "raw/main0fbb-integration/final-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "ea4d80aff58f2d08c8fdfba0d1276fcd171693f693a63a2031aca78619e98c87",
+      "gzipBytes": 60,
+      "gzipSha256": "8f4a781cadb479b5056db29a9394a554f84c029b5081ed3302585316912370d5"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/main-changed-paths.log",
+      "path": "raw/main0fbb-integration/main-changed-paths.log.gz",
+      "rawBytes": 214,
+      "rawSha256": "1a040a028b761e6b1b66c7ee2a76d39cd85ff88b8a0b1a97b44914741d19972d",
+      "gzipBytes": 125,
+      "gzipSha256": "3a13950dc3eb05f26c5dcac784d87551b7af2b02c1613ba0491faf74e3d6356d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/main-conflicts.log",
+      "path": "raw/main0fbb-integration/main-conflicts.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/main-diff-check.log",
+      "path": "raw/main0fbb-integration/main-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/main-prepared-tree.log",
+      "path": "raw/main0fbb-integration/main-prepared-tree.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "ea4d80aff58f2d08c8fdfba0d1276fcd171693f693a63a2031aca78619e98c87",
+      "gzipBytes": 60,
+      "gzipSha256": "8f4a781cadb479b5056db29a9394a554f84c029b5081ed3302585316912370d5"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/main-ref-check.log",
+      "path": "raw/main0fbb-integration/main-ref-check.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "d3c591b1ef3cbb3747a4a06c687e7788c84ff925c386a9bb25f4243e80c5d384",
+      "gzipBytes": 59,
+      "gzipSha256": "73cc2a3356f754a1b92da088e4b5b1d49cc332a15c79e67b01bc0c2c242b7019"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/main-signedoff-commit.log",
+      "path": "raw/main0fbb-integration/main-signedoff-commit.log.gz",
+      "rawBytes": 101,
+      "rawSha256": "91029d2aa63b6d48ec5987b286ad546ca4d8a2d29b9cc0cb825c6e5c288e0ed7",
+      "gzipBytes": 113,
+      "gzipSha256": "1c9e7d99f1a921ea21548fced94bdcf7fad6d20b2c07aeca0a112e150d1b3b50"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/message.txt",
+      "path": "raw/main0fbb-integration/message.txt.gz",
+      "rawBytes": 239,
+      "rawSha256": "b853f9246c3cb5eb618d7c309d0fa709a26af962873319550c1040e37f1cc697",
+      "gzipBytes": 194,
+      "gzipSha256": "b22820eb9a53e218b1bb918d3e014bf9d5b3d3a2e1ba9806a4a0351295f5255a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/normal-merge-main0fbb.log",
+      "path": "raw/main0fbb-integration/normal-merge-main0fbb.log.gz",
+      "rawBytes": 55,
+      "rawSha256": "b0a553d20817e5980c564f1485d89ea0f776bc5f8ebf0f34a0a4010e2bcb9099",
+      "gzipBytes": 78,
+      "gzipSha256": "34edfea047a1e9874d1b4136dbda7d888275a777c2a444b7a154c99434af1226"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/main0fbb-integration/status.json",
+      "path": "raw/main0fbb-integration/status.json.gz",
+      "rawBytes": 11919,
+      "rawSha256": "5332d9a0a97d65e977f3da919714496df4d1855097eb36137f474594f653737e",
+      "gzipBytes": 2271,
+      "gzipSha256": "b0838ed53625a2ca682a3d28754095960b92462c16c617cec126e56ba24bd08e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/ci-cycle.log",
+      "path": "raw/combined-docs-ci-8768/ci-cycle.log.gz",
+      "rawBytes": 6130,
+      "rawSha256": "c7e53356efb2fd1648e3b4f6d73ac77e1a6be599be6f5dc4d2ceb138714d1640",
+      "gzipBytes": 1538,
+      "gzipSha256": "2cb3602b8196a2df0c3cf9d69781f03b05d8eb84cd5d75d07e44ff8762701b0d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/ci-ledger.log",
+      "path": "raw/combined-docs-ci-8768/ci-ledger.log.gz",
+      "rawBytes": 4918,
+      "rawSha256": "c40b712df56a34371cb634c6bfa7a8ecb331b82ed34ddda96d28dfba00522b69",
+      "gzipBytes": 1237,
+      "gzipSha256": "982003b029af7ab1b48448ebaf61e62ff15d75ad949d7f2370378b80246caa54"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/ci-schedule-check.log",
+      "path": "raw/combined-docs-ci-8768/ci-schedule-check.log.gz",
+      "rawBytes": 91,
+      "rawSha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31",
+      "gzipBytes": 103,
+      "gzipSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/ci-scheduling.log",
+      "path": "raw/combined-docs-ci-8768/ci-scheduling.log.gz",
+      "rawBytes": 6878,
+      "rawSha256": "5ec17e19d6782593969624f57763f0df76b9694e3f9957743615196ac6e0c822",
+      "gzipBytes": 1714,
+      "gzipSha256": "5e6b2cd6a59cd34b33416b0148562f39e330c584694c21a92dd04bcf98b4c41e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/external-log-download.stderr",
+      "path": "raw/combined-docs-ci-8768/external-log-download.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/external-native-0b7-job-137955391702.log",
+      "path": "raw/combined-docs-ci-8768/external-native-0b7-job-137955391702.log.gz",
+      "rawBytes": 1007748,
+      "rawSha256": "3fb66d1ccd4a171e6778f66f12aed8a199490a72958ddd77deeab2aa9e37ceeb",
+      "gzipBytes": 110899,
+      "gzipSha256": "9bb580dedbdd4dbc114abbc7cec70db8dac4f313ff88e31914dabc81f7b16f57"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/relevant-source-blobs-after.log",
+      "path": "raw/combined-docs-ci-8768/relevant-source-blobs-after.log.gz",
+      "rawBytes": 136768,
+      "rawSha256": "c12435eec8144090760e4ff4851ce298b4a5a8303eefd20fddb6befc00e12a65",
+      "gzipBytes": 45484,
+      "gzipSha256": "8aec2c1fdd7f89fc9942f81b62eac20c4aaf42d7ad297e49fe89323e7e929470"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/relevant-source-blobs.log",
+      "path": "raw/combined-docs-ci-8768/relevant-source-blobs.log.gz",
+      "rawBytes": 136768,
+      "rawSha256": "c12435eec8144090760e4ff4851ce298b4a5a8303eefd20fddb6befc00e12a65",
+      "gzipBytes": 45484,
+      "gzipSha256": "8aec2c1fdd7f89fc9942f81b62eac20c4aaf42d7ad297e49fe89323e7e929470"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/relevant-unstaged.log",
+      "path": "raw/combined-docs-ci-8768/relevant-unstaged.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/source-head-after.log",
+      "path": "raw/combined-docs-ci-8768/source-head-after.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "9d61acf6391d1c3ad8f4bb9a85af9b23e0ce7e1cee19c9e36bb1718f6ba24b5f",
+      "gzipBytes": 60,
+      "gzipSha256": "b55f78078d45dae20fc9f21e725a27ab7035ec451d35753251473c407a957c03"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/source-head.log",
+      "path": "raw/combined-docs-ci-8768/source-head.log.gz",
+      "rawBytes": 41,
+      "rawSha256": "9d61acf6391d1c3ad8f4bb9a85af9b23e0ce7e1cee19c9e36bb1718f6ba24b5f",
+      "gzipBytes": 60,
+      "gzipSha256": "b55f78078d45dae20fc9f21e725a27ab7035ec451d35753251473c407a957c03"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/source-tracked-status.log",
+      "path": "raw/combined-docs-ci-8768/source-tracked-status.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/spec-authoring.log",
+      "path": "raw/combined-docs-ci-8768/spec-authoring.log.gz",
+      "rawBytes": 294,
+      "rawSha256": "0a00ea5f969f5d7f53ced963715f1a97702c7ff6d5d7cf786620fe8cf9b9d7c0",
+      "gzipBytes": 205,
+      "gzipSha256": "4cc17c77668727068df2d584108699cca5b1b917a7ddf85f88f2656560226620"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/spec-loader-diagnostic.mjs",
+      "path": "raw/combined-docs-ci-8768/spec-loader-diagnostic.mjs.gz",
+      "rawBytes": 777,
+      "rawSha256": "88c0a886b0aeea4f5f3320bc380e2c50d8b01efb7fb4179d5ab3720d0cc5f76f",
+      "gzipBytes": 414,
+      "gzipSha256": "2cc508d315c1296475861ff1439dcbba73f07f3cae76bf70edf27ef0718e3d4c"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/spec-loader-result.json",
+      "path": "raw/combined-docs-ci-8768/spec-loader-result.json.gz",
+      "rawBytes": 102,
+      "rawSha256": "cb2374f7c71a71bc4980b5358fb2ed121347d12c92d6ebd9f9dbfafb8d54e7f5",
+      "gzipBytes": 114,
+      "gzipSha256": "d2a32ff0332a9ceef4db4958cc0fd0c5394a85e9b06de83793c69fd8de9acb7f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/spec-loader.log",
+      "path": "raw/combined-docs-ci-8768/spec-loader.log.gz",
+      "rawBytes": 89,
+      "rawSha256": "3e031d1b57cd39974c0e22022222013bd33efe3e87f2779383409426400ec939",
+      "gzipBytes": 105,
+      "gzipSha256": "c5b0baa29b034139dd2d90607cb349f112d114a848234a3605df8b89e8b2ca08"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/combined-docs-ci-8768/status.json",
+      "path": "raw/combined-docs-ci-8768/status.json.gz",
+      "rawBytes": 5640,
+      "rawSha256": "b73848507555c361b8786fadc779ef7964109738749a1cc4f254992ec0678b07",
+      "gzipBytes": 1335,
+      "gzipSha256": "aa2c13a9d6ecbdc31674a72cb394746721d17488e5481a8dc827ac0f12136e40"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze/initialize-project-husky.log",
+      "path": "raw/final-source-freeze/initialize-project-husky.log.gz",
+      "rawBytes": 136,
+      "rawSha256": "4783a92f2d92e9c30228a37fc191a7cd7a996beafc7162251148166e67b9f6b5",
+      "gzipBytes": 132,
+      "gzipSha256": "012f0bb7c86304b7823faa52aea2525a329088842b65933f2969d07ae9dd53b6"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze/status.json",
+      "path": "raw/final-source-freeze/status.json.gz",
+      "rawBytes": 1508,
+      "rawSha256": "81b952905452596ad1f1199af6e1e8ef5f1e904668716f4ac9317f6d4891b32b",
+      "gzipBytes": 708,
+      "gzipSha256": "8d57ae0d8c9ebc87daf9b9f047bd4928e2e7ec1ee97fbe476d2df21f469160b8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/automatic-merge-targets.ts",
+      "path": "raw/final-source-freeze-v2/automatic-merge-targets.ts.gz",
+      "rawBytes": 31300,
+      "rawSha256": "32cac013475c33f471733758531dbd96b674e3b667ccd80d4511d311afcbe33d",
+      "gzipBytes": 7187,
+      "gzipSha256": "201c0b13344a4574571b965828d6442f17ed3cc7a80ed36ec747e2584d34e9bb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/capture-merge-diff-check.log",
+      "path": "raw/final-source-freeze-v2/capture-merge-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/commit-capture-provenance.log",
+      "path": "raw/final-source-freeze-v2/commit-capture-provenance.log.gz",
+      "rawBytes": 764,
+      "rawSha256": "eba890a60c4ddf04ea4c70b6ba15f353948e6ac2d7c4a773467bab41a0122c31",
+      "gzipBytes": 350,
+      "gzipSha256": "7bdb9fa31bdc65b78b9bd4c043ffb83a58266cc8aca0ff595e4b862af2810027"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/commit-capture-provenance.message.txt",
+      "path": "raw/final-source-freeze-v2/commit-capture-provenance.message.txt.gz",
+      "rawBytes": 70,
+      "rawSha256": "030c30882bb71d2f2487cf590f6491133546f025166540d359dc20e155c1bcb4",
+      "gzipBytes": 79,
+      "gzipSha256": "381a51cafab715fba492c5e13193e1c80d4c56f1184ab814db8fe14b0b768434"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/commit-capture-provenance.trace.jsonl",
+      "path": "raw/final-source-freeze-v2/commit-capture-provenance.trace.jsonl.gz",
+      "rawBytes": 104348,
+      "rawSha256": "57d924e644993a3c07bc0ab0e4f3c130150f22c98945dc408d82db1723797eac",
+      "gzipBytes": 6924,
+      "gzipSha256": "aca2e642433821f6db23d41ad00d34c9e18a7a7db9e5e29553e913b599b58ae6"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/commit-public-00781.log",
+      "path": "raw/final-source-freeze-v2/commit-public-00781.log.gz",
+      "rawBytes": 164,
+      "rawSha256": "44ab1ca865e2a94ba40961683f547d6777591713659dab200042f67c429703ea",
+      "gzipBytes": 161,
+      "gzipSha256": "8f797e5d661e4031a9dd24d4bd6c9a65c224167d3562f4de6e3d6bf9e7400a14"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/commit-public-00781.message.txt",
+      "path": "raw/final-source-freeze-v2/commit-public-00781.message.txt.gz",
+      "rawBytes": 74,
+      "rawSha256": "f3b011cb5651938db6ba46629699c300fc99f66fde30689b8e717e747194473e",
+      "gzipBytes": 91,
+      "gzipSha256": "99a79cdf169d718c50f1c912557cadda7bc8329f2f9c2da390ce3f063306701e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/commit-public-00781.trace.jsonl",
+      "path": "raw/final-source-freeze-v2/commit-public-00781.trace.jsonl.gz",
+      "rawBytes": 35652,
+      "rawSha256": "abd59c66688d2c84245fba37846e614d454ca33f399b0fe915288debe7187a66",
+      "gzipBytes": 3233,
+      "gzipSha256": "5bc2761d8bbb8d235bd1c061f9690dc8767d73a96c0266d760f7de34988d301a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/fetch-public-00781.log",
+      "path": "raw/final-source-freeze-v2/fetch-public-00781.log.gz",
+      "rawBytes": 278,
+      "rawSha256": "79eb99e1b79f46ecf5322a46f05ec8414940b451048088b758b241414961b77e",
+      "gzipBytes": 180,
+      "gzipSha256": "afd7c8cf1ebc7efe3547906dbf98832625019f23e69784689ec834028f46f1e9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/initialize-project-husky.log",
+      "path": "raw/final-source-freeze-v2/initialize-project-husky.log.gz",
+      "rawBytes": 136,
+      "rawSha256": "4783a92f2d92e9c30228a37fc191a7cd7a996beafc7162251148166e67b9f6b5",
+      "gzipBytes": 132,
+      "gzipSha256": "012f0bb7c86304b7823faa52aea2525a329088842b65933f2969d07ae9dd53b6"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/merge-capture-provenance.log",
+      "path": "raw/final-source-freeze-v2/merge-capture-provenance.log.gz",
+      "rawBytes": 55,
+      "rawSha256": "b0a553d20817e5980c564f1485d89ea0f776bc5f8ebf0f34a0a4010e2bcb9099",
+      "gzipBytes": 78,
+      "gzipSha256": "34edfea047a1e9874d1b4136dbda7d888275a777c2a444b7a154c99434af1226"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/merge-public-00781.log",
+      "path": "raw/final-source-freeze-v2/merge-public-00781.log.gz",
+      "rawBytes": 101,
+      "rawSha256": "6070b5412ee63729e14f51f6348a3ab2adf8800dea5fea77f8a3df6f68ef96bd",
+      "gzipBytes": 117,
+      "gzipSha256": "2a04f311dbd9c98630c00d9d6f2402e570c33ffbe6aac381f16a98e3767209bc"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/remote-diff-check.log",
+      "path": "raw/final-source-freeze-v2/remote-diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/remote-targets.patch",
+      "path": "raw/final-source-freeze-v2/remote-targets.patch.gz",
+      "rawBytes": 316,
+      "rawSha256": "5ed070779344ae8ca4aed717f652a294b11c5b89facddb04af6a71e8f1665a91",
+      "gzipBytes": 203,
+      "gzipSha256": "8a2bc38cb53bf259fb28f9e5f5140c114e825eaad60ac356582109e1fd0ff77d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/stage-unique-scroll.log",
+      "path": "raw/final-source-freeze-v2/stage-unique-scroll.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/final-source-freeze-v2/status.json",
+      "path": "raw/final-source-freeze-v2/status.json.gz",
+      "rawBytes": 15724,
+      "rawSha256": "60ff2d1a4200a36fbd1ab099c47adc62a29dbec30aefe68362491b6110a64654",
+      "gzipBytes": 3398,
+      "gzipSha256": "c9d99ff0a6e814cd5d4309d846a3a48c7215a5bb5cd3dbeb9a9c6df9f0cb65b8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/adapter-vs-ours.patch",
+      "path": "raw/external-0b7-union-candidates/adapter-vs-ours.patch.gz",
+      "rawBytes": 7363,
+      "rawSha256": "fbbbbf5f0af4db2cc8a4ee67063ebb56f05b3590e6289d8719b91d5edfb6d707",
+      "gzipBytes": 2290,
+      "gzipSha256": "9f3018f46db7137d4f721e98844628de951cd8faebdb652f693883ab8479bbbb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/adapter-vs-remote.patch",
+      "path": "raw/external-0b7-union-candidates/adapter-vs-remote.patch.gz",
+      "rawBytes": 8567,
+      "rawSha256": "4802bd96659280d3dcfb24f8d61bf7844d4eeadb679fa1e0341c3ed203ea7cc0",
+      "gzipBytes": 2147,
+      "gzipSha256": "c3b95833be610e4bd64e39ee28038a88e4c3fcaeba96c43e0db33db8d40bce36"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/checker-ours-vs-remote.patch",
+      "path": "raw/external-0b7-union-candidates/checker-ours-vs-remote.patch.gz",
+      "rawBytes": 8220,
+      "rawSha256": "6b18549fd72ec983b7682690b287c037f683ea1eb6c9eb0daafa0ddfa7caeaab",
+      "gzipBytes": 1873,
+      "gzipSha256": "2545de196c981ada1055e0b443753e2494a94e869da37ed917a264ab54e5db21"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/docs-vs-remote.patch",
+      "path": "raw/external-0b7-union-candidates/docs-vs-remote.patch.gz",
+      "rawBytes": 10168,
+      "rawSha256": "3bdef527f761567c91795573cdeb73982f875e07c07ebf7f6d88b3cea5b16ea3",
+      "gzipBytes": 3728,
+      "gzipSha256": "16665e35842788dc673feddb42a90ced87cda48742ea3b9a154c89b689c8e77f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/internal__compiler__gpui-control-label.md.before",
+      "path": "raw/external-0b7-union-candidates/internal__compiler__gpui-control-label.md.before.gz",
+      "rawBytes": 5809,
+      "rawSha256": "0246a5e2ce30214276b266f4f5d9f6d83d30a03aad6d2d014fcaa760912b3bf7",
+      "gzipBytes": 2560,
+      "gzipSha256": "e5fae70bc058f59a997230a9a4f408628b7fed4eb2fdc606f5d31393dbdf74fe"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/internal__compiler__gpui-control-label.md.candidate",
+      "path": "raw/external-0b7-union-candidates/internal__compiler__gpui-control-label.md.candidate.gz",
+      "rawBytes": 8300,
+      "rawSha256": "0622157a41f50704d72d99aff2ba6719051d06f6259fcc882ec09e1ee27d8788",
+      "gzipBytes": 3458,
+      "gzipSha256": "316b23a8dba4c0b4475fef732650e4964519cdd077cd469555895f478f0383ac"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__a11y.rs.before",
+      "path": "raw/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__a11y.rs.before.gz",
+      "rawBytes": 9455,
+      "rawSha256": "78a9215d8ee8a5c80fd113cde044f6c4e4b82deea0ddb8f325c294cc683b79b7",
+      "gzipBytes": 3062,
+      "gzipSha256": "a3c6db18c974bb95df5f7fc4ecc4c7945038a4a777e93d74db180c702ef258ce"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__a11y.rs.candidate",
+      "path": "raw/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__a11y.rs.candidate.gz",
+      "rawBytes": 9453,
+      "rawSha256": "666e35ac0855f1610b503102843eb4eb4b37ef8b2878fbbddd5efb097b49891f",
+      "gzipBytes": 3056,
+      "gzipSha256": "a500be5cbe659c7eb8463e749f946b7d8e52e9618c41306835b1d1c901e89b77"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__host.rs.before",
+      "path": "raw/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__host.rs.before.gz",
+      "rawBytes": 39391,
+      "rawSha256": "3da79da2c08223bb8e8be65879ca7443c7cfedc03d65ace45f15a4285ab2318b",
+      "gzipBytes": 10156,
+      "gzipSha256": "cece8837bf45c990a864352cc69e32ef5be74f646d753d63566f92e99eb69eb3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__host.rs.candidate",
+      "path": "raw/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__src__host.rs.candidate.gz",
+      "rawBytes": 43629,
+      "rawSha256": "d86a9dc2b503af4a78cf9819222c69c493fdf6e47c409d96aa21b7343800481d",
+      "gzipBytes": 10984,
+      "gzipSha256": "cac87c29841712a44a0d8d7171bff2e61a1955d044b91867bbb3a3a6079b185a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__tests__a11y_projection.rs.before",
+      "path": "raw/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__tests__a11y_projection.rs.before.gz",
+      "rawBytes": 12645,
+      "rawSha256": "71d2baf09b172633ee447ff7670f0fdac9b61e024269331c835166bc2f513cb0",
+      "gzipBytes": 2958,
+      "gzipSha256": "5dee921bb6966671037b7d09ac09043a3cc28d428c31dbbe37eb0cff8c4e690c"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__tests__a11y_projection.rs.candidate",
+      "path": "raw/external-0b7-union-candidates/native__gpui__crates__proto-ui-gpui__tests__a11y_projection.rs.candidate.gz",
+      "rawBytes": 15461,
+      "rawSha256": "18a9d9d5e6a2c199593552e46c7b8b0fbbe3788d3351422a0285bb0efeacdcb4",
+      "gzipBytes": 3304,
+      "gzipSha256": "cabed562c0b199282066dfbe76dc9e9679c68be78b6fe82bc6575da5275f51e8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/spec__host-caps__HC-CONTROL-LABEL-0001.yaml.before",
+      "path": "raw/external-0b7-union-candidates/spec__host-caps__HC-CONTROL-LABEL-0001.yaml.before.gz",
+      "rawBytes": 5516,
+      "rawSha256": "c893ca5d8ff4944e3140ad2e1e4171f48effdacde8ea76fa88fd5337f2fa6dad",
+      "gzipBytes": 2293,
+      "gzipSha256": "359165a322e120aaab8ee093173ea35fbad43c9f2506b89d80f0c92c68851b93"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/spec__host-caps__HC-CONTROL-LABEL-0001.yaml.candidate",
+      "path": "raw/external-0b7-union-candidates/spec__host-caps__HC-CONTROL-LABEL-0001.yaml.candidate.gz",
+      "rawBytes": 6028,
+      "rawSha256": "b4fed3cdd9c4692481e36e17121c81a18f7ec3664c6071486368a514511b5caf",
+      "gzipBytes": 2488,
+      "gzipSha256": "c3fc3b01425c904e1e5975185bd633f1ba3ec71514b286237e51c021bd0894ea"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-union-candidates/status.json",
+      "path": "raw/external-0b7-union-candidates/status.json.gz",
+      "rawBytes": 2617,
+      "rawSha256": "c59a1600aaa6d2d95a5bd8f0f737e91c0114d882b58b4d32a4b7519dbbda1dd6",
+      "gzipBytes": 995,
+      "gzipSha256": "41b80edb5728067dd9b9abaae2c36b5523b4fc2747aff042a7867827e1aae89d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-gate-union/candidate-vs-ours.patch",
+      "path": "raw/external-0b7-gate-union/candidate-vs-ours.patch.gz",
+      "rawBytes": 3969,
+      "rawSha256": "ab3544289225c2ae996ba20c984a244100d5b141197f01c962e61474d2fb1ec5",
+      "gzipBytes": 1117,
+      "gzipSha256": "a1f70d1e6bc037efb76e6d8e1c1d26de7840256408af1f66e15c649c70ec0494"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-gate-union/scripts__coverage-matrices__check-website-production-bundle.mjs.candidate",
+      "path": "raw/external-0b7-gate-union/scripts__coverage-matrices__check-website-production-bundle.mjs.candidate.gz",
+      "rawBytes": 45163,
+      "rawSha256": "5cdd0a6b574685c12051fcbe25dac13dc9925cedd746f8c38fbc0198134bcc1a",
+      "gzipBytes": 9404,
+      "gzipSha256": "2b68abfbd5d6cfa4f538503e5518800790114ccf8720d3b56742e2f83ff43375"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-gate-union/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.candidate",
+      "path": "raw/external-0b7-gate-union/scripts__coverage-matrices__test__check-website-production-bundle.test.mjs.candidate.gz",
+      "rawBytes": 89742,
+      "rawSha256": "bce1c95891312598a223bfdeb27aa4e476b5ba8bda1456e75d778fb5e58328f1",
+      "gzipBytes": 13998,
+      "gzipSha256": "ed3524ca814dc9ca82d09216bd49e9611d6d860d4d2f6b284df9f0f58220c4b3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/external-0b7-gate-union/status.json",
+      "path": "raw/external-0b7-gate-union/status.json.gz",
+      "rawBytes": 1111,
+      "rawSha256": "baa40ec380499a19193c1a7f09fdfa94b20bccba53a19b50f6e88e4cf31a21e7",
+      "gzipBytes": 515,
+      "gzipSha256": "3f34841052ffa3f834b8e090443657669a5473a2b866bf642d10bb903380802f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/candidate-workflow.yml",
+      "path": "raw/ci-final-followup/candidate-workflow.yml.gz",
+      "rawBytes": 13987,
+      "rawSha256": "ff661d051d908d64006a711b4bb15492eba4a1861ddf374cd443b8c3b7a563f3",
+      "gzipBytes": 3281,
+      "gzipSha256": "50b11cc4619c48a9de127026b17243b40a6d4e2dcc9bc22961e64415992fa05b"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/candidate.patch",
+      "path": "raw/ci-final-followup/candidate.patch.gz",
+      "rawBytes": 2196,
+      "rawSha256": "fe78b10d2925d7b5d58ab9f2170510498336e6239d93a9a7482753fadf37242c",
+      "gzipBytes": 737,
+      "gzipSha256": "817984c6dff82ecedc1538b9351ceb773eeeeb9911683019a061d4662c4e75b8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/ci-cycle.log",
+      "path": "raw/ci-final-followup/ci-cycle.log.gz",
+      "rawBytes": 6131,
+      "rawSha256": "be3183d4803d3cfe3c9f54a400454a92874c22a6ddad5b4a7f28613d4038a238",
+      "gzipBytes": 1543,
+      "gzipSha256": "1ac6342d57e2d8680f02f737b60bcac1150c1b11b9be5c5fe13e6528e5b263a6"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/ci-policy.log",
+      "path": "raw/ci-final-followup/ci-policy.log.gz",
+      "rawBytes": 6886,
+      "rawSha256": "8b91704085f893bcccd0a6207547026905714dc24a341c8c1a056c0df9969349",
+      "gzipBytes": 1719,
+      "gzipSha256": "fdbaf917c8ae450fe486f3727d5b7547cce99df76701841cdd7a7f559f21344f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/ci-schedule.log",
+      "path": "raw/ci-final-followup/ci-schedule.log.gz",
+      "rawBytes": 91,
+      "rawSha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31",
+      "gzipBytes": 103,
+      "gzipSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/commit-message.txt",
+      "path": "raw/ci-final-followup/commit-message.txt.gz",
+      "rawBytes": 212,
+      "rawSha256": "399530755a5cf9bd0542e370e31e6ad7e9a7e3ec19f7157153220999349f318e",
+      "gzipBytes": 160,
+      "gzipSha256": "5f5ae2b1030e0898b9e43c22321b70183063961b0e4e08f1f4143e02c0ac10c8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/commit.log",
+      "path": "raw/ci-final-followup/commit.log.gz",
+      "rawBytes": 789,
+      "rawSha256": "66235ea18b9fa512f492b73e812645798dbbe39b0b7367b9d4c8ce89c2dd30aa",
+      "gzipBytes": 360,
+      "gzipSha256": "d7c9b4bc695523e35a72a17483b3f33862dda6483d4e4f34b7b887c935d511b9"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/commit.trace.jsonl",
+      "path": "raw/ci-final-followup/commit.trace.jsonl.gz",
+      "rawBytes": 102800,
+      "rawSha256": "7e2f7e9e3797dfa493f029f9bb48e74bdbefb95a70090fc7e97a7806cfb70256",
+      "gzipBytes": 6747,
+      "gzipSha256": "026aaaaf86aff14a704eb6785e3ef72282ddb6e800ab3176f4b7f1f6e548fa93"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/diff-check.log",
+      "path": "raw/ci-final-followup/diff-check.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/format-check.log",
+      "path": "raw/ci-final-followup/format-check.log.gz",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/original-workflow.yml",
+      "path": "raw/ci-final-followup/original-workflow.yml.gz",
+      "rawBytes": 12943,
+      "rawSha256": "1275f1903d8b4259576cdabefbfeb44617f9e9ed3adf940043444f585d87bc72",
+      "gzipBytes": 3083,
+      "gzipSha256": "e62b11727efeefa05ca07c1987474f68fcc4e13a4019d088672471a09203553e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/stage-workflow.log",
+      "path": "raw/ci-final-followup/stage-workflow.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/ci-final-followup/status.json",
+      "path": "raw/ci-final-followup/status.json.gz",
+      "rawBytes": 3677,
+      "rawSha256": "e8ae6daaa053ea94e32ad5452d9dd2425b01bf59bc4642b63934c3d8299fd6c0",
+      "gzipBytes": 1497,
+      "gzipSha256": "6766b655503214ea32c51c19b602ee8d36d466a895dce5d7f3319971848e80b7"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/dispatch.log",
+      "path": "raw/publish-final-candidate/dispatch.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/main-before.log",
+      "path": "raw/publish-final-candidate/main-before.log.gz",
+      "rawBytes": 5234,
+      "rawSha256": "edd7b8fb6d461060088985b25e57bb87af37ad5ca64f29eb065e7155821266ab",
+      "gzipBytes": 1837,
+      "gzipSha256": "1dfd882717038a399acc2fe9e498c1632033b0d1fe1d4213828c03a551d1eeab"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/pr-after.log",
+      "path": "raw/publish-final-candidate/pr-after.log.gz",
+      "rawBytes": 29393,
+      "rawSha256": "d4572c5992859d0c32ec08aacb5586ccf695e254a58935e4fb0b79e284fae464",
+      "gzipBytes": 8625,
+      "gzipSha256": "ef024ffd6d1be7ce645fa4c8825fc7661af4f875a881c73b773b7d13b4ea4ca5"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/pr-before.log",
+      "path": "raw/publish-final-candidate/pr-before.log.gz",
+      "rawBytes": 29394,
+      "rawSha256": "98178dc859699f388bc72954774ad1c22df44f666ed74993af95bfc8a5eaef21",
+      "gzipBytes": 8623,
+      "gzipSha256": "a0e95c11c610b26e15020f32b01ce793002f5bff39845a69a6bf388d77031486"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/pr-body-published.md",
+      "path": "raw/publish-final-candidate/pr-body-published.md.gz",
+      "rawBytes": 19476,
+      "rawSha256": "d7b6c61413a12097020708e6473ea8bfe5f124a4a8bbe5b9d8bb693cafc56ef8",
+      "gzipBytes": 9022,
+      "gzipSha256": "a73a4c52e9a2cf972a2edf36a48b95df98cf8c1dd23c3ec42b3aecb0d1dda227"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/push.log",
+      "path": "raw/publish-final-candidate/push.log.gz",
+      "rawBytes": 124,
+      "rawSha256": "b660a7aed7860905bf90060be80e5bd9a30794261865f59c4ea4116ee1eeb288",
+      "gzipBytes": 133,
+      "gzipSha256": "cb2c5bf248780dee3f73a47bf8c5b16961b379d40ad2b14319a0c7728f990349"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/remote-before.log",
+      "path": "raw/publish-final-candidate/remote-before.log.gz",
+      "rawBytes": 99,
+      "rawSha256": "e2a24c606e6d18698fc7d7000360487946c63d6232fd0f35e45ac019d745426d",
+      "gzipBytes": 106,
+      "gzipSha256": "b4e0b8f375631bf0eb80d4a926a746461592383d62583a69b994d5fc728ace5e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/remote-is-ancestor.log",
+      "path": "raw/publish-final-candidate/remote-is-ancestor.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/runs-before-dispatch.log",
+      "path": "raw/publish-final-candidate/runs-before-dispatch.log.gz",
+      "rawBytes": 40537,
+      "rawSha256": "9e71f3367f4daf9d91e9a2dd5b9cdb94f08c82d919b78ab9d868c757f6c3926a",
+      "gzipBytes": 2674,
+      "gzipSha256": "077f85d6a1dc005144010a2a1b7e4565b1117b91cb1476d7042babc0d6248809"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/runs-readback-0.log",
+      "path": "raw/publish-final-candidate/runs-readback-0.log.gz",
+      "rawBytes": 54181,
+      "rawSha256": "ccdcc81b405bd1d00ea1cd01f9a5d1444d71d7ed60d45d48ebd776ea2190fb13",
+      "gzipBytes": 3067,
+      "gzipSha256": "bb487091911f0d81275fab14f18c6405a14652cee0346029c218c9f68477f162"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate/status.json",
+      "path": "raw/publish-final-candidate/status.json.gz",
+      "rawBytes": 2954,
+      "rawSha256": "1aa5c329445528e1f07d2fc0129b6c46700d53018bc9712ca4079a08110a5e59",
+      "gzipBytes": 798,
+      "gzipSha256": "b0c551dfd89065ec6b2bc827f87fc9ba3736e26a301efa28309c76ac5264eba1"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/browser-download.stderr",
+      "path": "raw/formal-2df-evidence/browser-download.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/browser.zip",
+      "path": "raw/formal-2df-evidence/browser.zip.gz",
+      "rawBytes": 2012052,
+      "rawSha256": "24f0c13f7d841a162eb9173885a3efa851b3be68d3b5a9375f9b6306964fab3e",
+      "gzipBytes": 1994356,
+      "gzipSha256": "d0be3be2e90faa06e7ad6e3f7ccae8b1415c29b8975081cb60632c743ca6a61f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/browser-run.log",
+      "path": "raw/formal-2df-evidence/extracted/browser/browser-run.log.gz",
+      "rawBytes": 767038,
+      "rawSha256": "fc05f66b87839517e736e99cf699cc81f59880a3621f61c5bf2a9c65f8323828",
+      "gzipBytes": 60384,
+      "gzipSha256": "1c5e767292be89134df0a052656c511f5a7dee294ce7e74cbe167784cc271d9e"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/browser.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/browser.txt.gz",
+      "rawBytes": 29,
+      "rawSha256": "04ce1829b69f68a11eb8ef036a6ab18a63411689e39b9b3331c0d884b707983a",
+      "gzipBytes": 49,
+      "gzipSha256": "f851f6fbc0eecfb299e78b99f4c6a1b3ad6990061cc1e47779a5f62b7b92868c"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/dependency-lock.sha256",
+      "path": "raw/formal-2df-evidence/extracted/browser/dependency-lock.sha256.gz",
+      "rawBytes": 81,
+      "rawSha256": "6de4a07b2ef9daea54b548542e13c29ae4ad4a4281bf4cba11d8cf5e91144d90",
+      "gzipBytes": 90,
+      "gzipSha256": "2d14e3e1758a1192eb0dfdd73049356658c238c2f4e34d705db2d3d5319f40c0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/font-environment.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/font-environment.txt.gz",
+      "rawBytes": 119,
+      "rawSha256": "57c85c87f8f59355060dca5faf598232ac0aa539f4b29358fbede5a8a2b72d51",
+      "gzipBytes": 124,
+      "gzipSha256": "114a44a83d89db590013b84235e9a4a92ca5f1ffaee14c7c41f8188b0c66ca77"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/font-preparation/chinese-font-charset.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/font-preparation/chinese-font-charset.txt.gz",
+      "rawBytes": 14350,
+      "rawSha256": "bcd973bc499b188ed6dea0936b9a688fcaae14e5a8988ef3fafe7a261bd7096a",
+      "gzipBytes": 6279,
+      "gzipSha256": "5fc9737c51a4cd271ebe18288386e7a065c1d849389361973165d88977284fc0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/font-preparation/font-environment.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/font-preparation/font-environment.txt.gz",
+      "rawBytes": 390,
+      "rawSha256": "819975c02d1402eaabcf4664f47060ea07f699de772c65d52dae557420d5b96f",
+      "gzipBytes": 292,
+      "gzipSha256": "1060616784c7cbc2ed4d8d3ebc52f10ce7c09888b8ffb09ac87adb562bc0bf74"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/font-preparation/font-preparation.log",
+      "path": "raw/formal-2df-evidence/extracted/browser/font-preparation/font-preparation.log.gz",
+      "rawBytes": 818,
+      "rawSha256": "a70fe319a50b0fb12e5d16abb338f932b538a8108bd5a2ed920b0537acd05c80",
+      "gzipBytes": 540,
+      "gzipSha256": "55a8f8bd3d2967d3859153499a63b7dbc855ff6fd2d4a7c9ff1afd0a03924fa4"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/node.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/node.txt.gz",
+      "rawBytes": 9,
+      "rawSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "gzipBytes": 29,
+      "gzipSha256": "69cb40fbcedc434b2f29aeb692167e8690a57ee35f2fe68affd46b4f25137494"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/disposed.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/owner-hydration-retirement/disposed.json.gz",
+      "rawBytes": 2429,
+      "rawSha256": "388d570b4e8829e762abce953d97163d33633bbf12cf088ae8fa49958fb9f705",
+      "gzipBytes": 1099,
+      "gzipSha256": "14322f7d78c7d3892445929fa881fbf55a70d2a6cbbc163dd7eada20ce9ea072"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/provenance.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/owner-hydration-retirement/provenance.json.gz",
+      "rawBytes": 1972,
+      "rawSha256": "262329c61a2527972d6c7abcd89e2aaf645a4ebccf4834dd53f8d1659198dc31",
+      "gzipBytes": 919,
+      "gzipSha256": "706614eac05688f8302fd1654e21ad4adb771ff6131d81d6b85ce5a118e4ecd2"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/same-checkpoint.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/owner-hydration-retirement/same-checkpoint.json.gz",
+      "rawBytes": 2348,
+      "rawSha256": "3318025b3d4a9a77f4af983139fdba6af99a4097d4e6e964a0b8f26e96fe70ed",
+      "gzipBytes": 1092,
+      "gzipSha256": "05183d850bf1d58091ff6f0add99ed547335c17dfd7f9558eb8ad1e3c9a2e099"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/terminal.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/owner-hydration-retirement/terminal.json.gz",
+      "rawBytes": 2359,
+      "rawSha256": "fd530840adb9a8cf4b414a796de40854d08faf8fd1b5c1ac10b2dd154f95cf50",
+      "gzipBytes": 1094,
+      "gzipSha256": "270ad50c24b15ed2d85f8ed4dbae036137a6f8abba5cf77d9ccbd1c83e4abd81"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-hydration-retirement/unmounted.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/owner-hydration-retirement/unmounted.json.gz",
+      "rawBytes": 2430,
+      "rawSha256": "e8e456c32ae3f6e53eddb2c2a32f8906f46c58dd4387cca16aefd84635a4c65a",
+      "gzipBytes": 1102,
+      "gzipSha256": "1a521f7278fc0bd5b2660a9cdd5b4f6b4d75f154320bed3fdcadab1d1d5fe03b"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/owner-retirement-browser.log",
+      "path": "raw/formal-2df-evidence/extracted/browser/owner-retirement-browser.log.gz",
+      "rawBytes": 83390,
+      "rawSha256": "00bb1822ac40d15abddda6ee687140cbc52b54623b8ef97ee3e9ebdadf1f8f7e",
+      "gzipBytes": 13414,
+      "gzipSha256": "46e31acc9448c142a9559ec2101865093b94e46f4f7c3fa160ec8e126a5ac0ba"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/pnpm.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/pnpm.txt.gz",
+      "rawBytes": 8,
+      "rawSha256": "f71ff3f5176cd06dce75ef9c6a6a4ea9eacefa43f5bd92c6cc9322dd2c8216a3",
+      "gzipBytes": 28,
+      "gzipSha256": "6ec4ab959767a77cf752db440bf7bf921a4226ee5fec44d06e03bfc5c4dbac11"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/production/build.log",
+      "path": "raw/formal-2df-evidence/extracted/browser/production/build.log.gz",
+      "rawBytes": 763572,
+      "rawSha256": "a84c2c9a0cb3356ea255154bf5c6ae253ab4f8b08de5024680e5d0aaf50f0e7b",
+      "gzipBytes": 59271,
+      "gzipSha256": "a550961fa5c5b81b4235c3041a8e6811e7db9d54dac6ef49a7d0374b693c6951"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/production/dist-files.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/production/dist-files.json.gz",
+      "rawBytes": 738529,
+      "rawSha256": "9e20cea684b43f0740e2b26e8592f98085ead3f02b9ca101a541e62e0949ffd4",
+      "gzipBytes": 263209,
+      "gzipSha256": "511aa6444d17f3266fee35b6508dd849db66274758c47623167cd462cf82bdbf"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/production/production.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/production/production.json.gz",
+      "rawBytes": 778671,
+      "rawSha256": "e723aaa5a4322faf78a1a858ecf07c9e93c47eee1df35c47c79eb1724a6f249e",
+      "gzipBytes": 264482,
+      "gzipSha256": "db4f425155af30207e20413331c37af224b00c25cf7a930cb4ef4b81d8fa475f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/production-controls.log",
+      "path": "raw/formal-2df-evidence/extracted/browser/production-controls.log.gz",
+      "rawBytes": 3285,
+      "rawSha256": "b6486a6701581e32927da4b8c86b1f6808f7b84a78a2a3563b1603d31c3570b9",
+      "gzipBytes": 1232,
+      "gzipSha256": "a10fb2d6d0073b8de340ba5329ee59e04e9e76bc7d669e5a3bfa5789c747f67b"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/receipt.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/receipt.json.gz",
+      "rawBytes": 2428676,
+      "rawSha256": "a42ca0456c448c32a83397eca601f4c3da61cc4ff3daea5cf96753fa7415ffdc",
+      "gzipBytes": 793301,
+      "gzipSha256": "ce74cc61691eb1ff62591f2c2f870501b4226652e56c61fb54729b78836ab409"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/server.log",
+      "path": "raw/formal-2df-evidence/extracted/browser/server.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/source-sha.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/source-sha.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "3c94aa2ec507ba0dbf419ec1c9716717a1b28188298b7276024e79da135af20f",
+      "gzipBytes": 59,
+      "gzipSha256": "bba0850b1913e76b6ddd3ce4d72a8c7ff74ce334055130b1de9887a51f8033fb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/source-tree.txt",
+      "path": "raw/formal-2df-evidence/extracted/browser/source-tree.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "d24c07d29c8b902e423e48964f270cec78ff357daf11281af0ceccc8e50e5cdf",
+      "gzipBytes": 59,
+      "gzipSha256": "15718849c359f135bded54f8b55a77599f8ac0e7c221e9f43bd83b5d3c3077d8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/browser/verified-delivery.json",
+      "path": "raw/formal-2df-evidence/extracted/browser/verified-delivery.json.gz",
+      "rawBytes": 1200966,
+      "rawSha256": "c63b96bffbbd9026d7516b65ffaf1f1c9672b45fdce1eabf83dee87d70f0ee95",
+      "gzipBytes": 281462,
+      "gzipSha256": "f3c5f52587c272043f044a40fdf6ca9f428233f502817582d83a669d312360b2"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/build-inputs.sha256",
+      "path": "raw/formal-2df-evidence/extracted/production/build-inputs.sha256.gz",
+      "rawBytes": 173,
+      "rawSha256": "640ba49ba3716b994a08569ee4a67c5bdb22d16c80509c395fd349aa2f042fd1",
+      "gzipBytes": 152,
+      "gzipSha256": "7b4045cf4a2bf3bc8bf12965685f642b8ac7d3f090a5239b1705998848e98274"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/bundle-gate-controls.log",
+      "path": "raw/formal-2df-evidence/extracted/production/bundle-gate-controls.log.gz",
+      "rawBytes": 300295,
+      "rawSha256": "271afb8bebd46949fd37b036a8098d5ac39ad2a7e6f96d67af915de0ba40d783",
+      "gzipBytes": 24458,
+      "gzipSha256": "ff9cebedf1bfd60beee4c6d446ca8f2bea9f87998e593042ebd90805e4dc2eda"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/node.txt",
+      "path": "raw/formal-2df-evidence/extracted/production/node.txt.gz",
+      "rawBytes": 9,
+      "rawSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "gzipBytes": 29,
+      "gzipSha256": "69cb40fbcedc434b2f29aeb692167e8690a57ee35f2fe68affd46b4f25137494"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/production-build.log",
+      "path": "raw/formal-2df-evidence/extracted/production/production-build.log.gz",
+      "rawBytes": 763630,
+      "rawSha256": "2a91d3a93753d3d20ee396729dee7ffc54191cccd154277b0ad6eb4b6d24d71f",
+      "gzipBytes": 59321,
+      "gzipSha256": "b05e3f7769d3fb5a61336db246e4d4fcaf973ad71aff21d84b155c726f79b0b3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/production-graph.sha256",
+      "path": "raw/formal-2df-evidence/extracted/production/production-graph.sha256.gz",
+      "rawBytes": 107,
+      "rawSha256": "5f115a0bbd4205d1ace4945aa068098d640da1bfda1eddc06db56da2994e5c90",
+      "gzipBytes": 113,
+      "gzipSha256": "dbdcd36d7864977c507f0c01a5471a16a06b72b917ebf95d8108ebfdef656a07"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/proto-ui-bundle-graph.json",
+      "path": "raw/formal-2df-evidence/extracted/production/proto-ui-bundle-graph.json.gz",
+      "rawBytes": 5056274,
+      "rawSha256": "8e38e312d02d3ede0ab2dd2dd466f5cdabe1d7f9ad43fe9c56e2b088c64e6163",
+      "gzipBytes": 323720,
+      "gzipSha256": "4b83e404f94b29e326eac1d2192aa56ce14f63272e9b39516762ae22c26ef92a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/source-sha.txt",
+      "path": "raw/formal-2df-evidence/extracted/production/source-sha.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "3c94aa2ec507ba0dbf419ec1c9716717a1b28188298b7276024e79da135af20f",
+      "gzipBytes": 59,
+      "gzipSha256": "bba0850b1913e76b6ddd3ce4d72a8c7ff74ce334055130b1de9887a51f8033fb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/production/source-tree.txt",
+      "path": "raw/formal-2df-evidence/extracted/production/source-tree.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "d24c07d29c8b902e423e48964f270cec78ff357daf11281af0ceccc8e50e5cdf",
+      "gzipBytes": 59,
+      "gzipSha256": "15718849c359f135bded54f8b55a77599f8ac0e7c221e9f43bd83b5d3c3077d8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/browser-inputs.log",
+      "path": "raw/formal-2df-evidence/extracted/source/browser-inputs.log.gz",
+      "rawBytes": 1006,
+      "rawSha256": "ff9340658bd153de4ac7753e9abca73af26490bf7f9e48e14a466f7076891154",
+      "gzipBytes": 584,
+      "gzipSha256": "d210806ee8349d8cb088c51ec119254394656ec65157fa056a0672ebcd49bce4"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/ci-controls.log",
+      "path": "raw/formal-2df-evidence/extracted/source/ci-controls.log.gz",
+      "rawBytes": 5451,
+      "rawSha256": "87619f45c7c0ac7b68df8f004c87484154bcebc04c77c35aa4f498467924c931",
+      "gzipBytes": 2369,
+      "gzipSha256": "70b59dd13ac67e07363b1ee8ece341ea5640b01d21b54356f338d75164881dd3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/ci-schedule.log",
+      "path": "raw/formal-2df-evidence/extracted/source/ci-schedule.log.gz",
+      "rawBytes": 91,
+      "rawSha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31",
+      "gzipBytes": 103,
+      "gzipSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/configuration-controls.log",
+      "path": "raw/formal-2df-evidence/extracted/source/configuration-controls.log.gz",
+      "rawBytes": 4481,
+      "rawSha256": "95e70228f0252bf34a62767e5c81d2afd6462383f9d8b42330efd9c5da8ed63b",
+      "gzipBytes": 887,
+      "gzipSha256": "b8460ec9dd39cd46e1d3593744a17ee95a27f7961fae2c8191319ec741be5d7a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/dependency-lock.sha256",
+      "path": "raw/formal-2df-evidence/extracted/source/dependency-lock.sha256.gz",
+      "rawBytes": 81,
+      "rawSha256": "6de4a07b2ef9daea54b548542e13c29ae4ad4a4281bf4cba11d8cf5e91144d90",
+      "gzipBytes": 90,
+      "gzipSha256": "2d14e3e1758a1192eb0dfdd73049356658c238c2f4e34d705db2d3d5319f40c0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/node.txt",
+      "path": "raw/formal-2df-evidence/extracted/source/node.txt.gz",
+      "rawBytes": 9,
+      "rawSha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14",
+      "gzipBytes": 29,
+      "gzipSha256": "69cb40fbcedc434b2f29aeb692167e8690a57ee35f2fe68affd46b4f25137494"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/source-sha.txt",
+      "path": "raw/formal-2df-evidence/extracted/source/source-sha.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "3c94aa2ec507ba0dbf419ec1c9716717a1b28188298b7276024e79da135af20f",
+      "gzipBytes": 59,
+      "gzipSha256": "bba0850b1913e76b6ddd3ce4d72a8c7ff74ce334055130b1de9887a51f8033fb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/source-tree.txt",
+      "path": "raw/formal-2df-evidence/extracted/source/source-tree.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "d24c07d29c8b902e423e48964f270cec78ff357daf11281af0ceccc8e50e5cdf",
+      "gzipBytes": 59,
+      "gzipSha256": "15718849c359f135bded54f8b55a77599f8ac0e7c221e9f43bd83b5d3c3077d8"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/spec-authoring.log",
+      "path": "raw/formal-2df-evidence/extracted/source/spec-authoring.log.gz",
+      "rawBytes": 270,
+      "rawSha256": "11e7f959eb288bb14b1f29ff7a604cddd3d4c1c22b54b5812645a7a04cdcb205",
+      "gzipBytes": 192,
+      "gzipSha256": "576325b258aacbe4995c89bbf06fa3a35a2129bebd3f9fa1bf7d0bb3382366f0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/spec-base-sha.txt",
+      "path": "raw/formal-2df-evidence/extracted/source/spec-base-sha.txt.gz",
+      "rawBytes": 41,
+      "rawSha256": "d3c591b1ef3cbb3747a4a06c687e7788c84ff925c386a9bb25f4243e80c5d384",
+      "gzipBytes": 59,
+      "gzipSha256": "73cc2a3356f754a1b92da088e4b5b1d49cc332a15c79e67b01bc0c2c242b7019"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/types.log",
+      "path": "raw/formal-2df-evidence/extracted/source/types.log.gz",
+      "rawBytes": 21165,
+      "rawSha256": "28e8e0e397c8be4102000695a1ec6087b19a1dbe934f5a45bb70015bba41cfb4",
+      "gzipBytes": 3371,
+      "gzipSha256": "6a6b84e2a36a614844ee07f0f0c864304115c237795b4cb132d66b42217931dd"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/vitest.json",
+      "path": "raw/formal-2df-evidence/extracted/source/vitest.json.gz",
+      "rawBytes": 248944,
+      "rawSha256": "7092e6fc5f66380e86e98937172e4dc70adcca214af9a9d893fbe3b1f00a8e5d",
+      "gzipBytes": 25237,
+      "gzipSha256": "30aeb7f45120619844bbcf33da6a1be5ab80fcfa686537a054c9265c47f578e0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/extracted/source/vitest.log",
+      "path": "raw/formal-2df-evidence/extracted/source/vitest.log.gz",
+      "rawBytes": 476199,
+      "rawSha256": "b4bcdfb441ba0026e4e22e44ed05f0af484cef336e11b7e69f7cc50de59e7756",
+      "gzipBytes": 55446,
+      "gzipSha256": "bdb7b7edb4d3f9e8521ed4d33f79de89d861c73bf95ae23e0d3c96d9e10bb6bb"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/production-download.stderr",
+      "path": "raw/formal-2df-evidence/production-download.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/production.zip",
+      "path": "raw/formal-2df-evidence/production.zip.gz",
+      "rawBytes": 425332,
+      "rawSha256": "7cfd2b5a4094c33a3da7799fb4add37ecbae361be6b568663ae852601a2ee1e4",
+      "gzipBytes": 422965,
+      "gzipSha256": "a49f1fa72319b2d5202f858ef37bbd9b8940d7cac118a4b5fd05c44c85f951ee"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/source-download.stderr",
+      "path": "raw/formal-2df-evidence/source-download.stderr.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/source.zip",
+      "path": "raw/formal-2df-evidence/source.zip.gz",
+      "rawBytes": 91180,
+      "rawSha256": "382630283f003e7932c9fd859bf80906570a60380f37d7275ecd10be2fff8943",
+      "gzipBytes": 90588,
+      "gzipSha256": "3ff49e2ed7d4045f54594dfdb4468ddb8bbf621852283bcc357241db799ded19"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/formal-2df-evidence/status.json",
+      "path": "raw/formal-2df-evidence/status.json.gz",
+      "rawBytes": 11081,
+      "rawSha256": "8575e8699775d8b2012863b8f2b73f3c812644b830a3aba2a9c639dfb035c291",
+      "gzipBytes": 3277,
+      "gzipSha256": "a6d8d3107845b3a2a7ff20bf5f44d83cd573b045f840e78e146a69690b8ad3c3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/integration-archive-v2/status.json",
+      "path": "raw/integration-archive-v2/status.json.gz",
+      "rawBytes": 626,
+      "rawSha256": "52df83f55b4d26181e8b169709510eca7fefe640db8ec563264bb5df405aa1f3",
+      "gzipBytes": 349,
+      "gzipSha256": "252c7c95cc15ba807580478c1fed301f96f21d7bea74a814699cbb7b441e4f33"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/prepare-external-0b7.py",
+      "path": "helpers/prepare-external-0b7.py.gz",
+      "rawBytes": 2763,
+      "rawSha256": "79437eea3a769de8ffdc310dbcc875ca0ad17e75aa78a7b0d383cc521f6159b4",
+      "gzipBytes": 1228,
+      "gzipSha256": "1c28d11909821db29a8b9a80b4cd697a6c65ae71a69f4d4b8eaf6a946112d1d6"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/merge-external-0b7.py",
+      "path": "helpers/merge-external-0b7.py.gz",
+      "rawBytes": 2998,
+      "rawSha256": "eb7b7f3dfcf89718d52aee3561fc93117c1ac71a97f818e5087b67e404e44ac8",
+      "gzipBytes": 1373,
+      "gzipSha256": "dab798688a862f68a8935f34fdd482eac668ac929311f4f54670918a431f64e3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/resolve-external-0b7.py",
+      "path": "helpers/resolve-external-0b7.py.gz",
+      "rawBytes": 5676,
+      "rawSha256": "d95b7e0f98cbc8ecaeab59f2a783cce132b7957d50f1a6ee2cea83e34711ae30",
+      "gzipBytes": 2233,
+      "gzipSha256": "159928f58dc53f388430cd62026901c2523eb7e5d4817ba80831dfd3cef2a153"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/commit-external-merge-and-prepare-native.py",
+      "path": "helpers/commit-external-merge-and-prepare-native.py.gz",
+      "rawBytes": 4552,
+      "rawSha256": "d3934c26e98d67ea3576ab4a5c19a0d57dc6052eb375614ee360221632e4c07d",
+      "gzipBytes": 1999,
+      "gzipSha256": "bdfb0d646697da53f120762a1ae0de1b0deaab2b27051af4e7ea16aecaf7256c"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/resolve-native-and-merge-main0fbb.py",
+      "path": "helpers/resolve-native-and-merge-main0fbb.py.gz",
+      "rawBytes": 10588,
+      "rawSha256": "4936429eac8bfce0081c3efbe65f40872ca2ed3141c0a60020e39928391f1a80",
+      "gzipBytes": 3838,
+      "gzipSha256": "afa82aeb90dd09d9752d2ad37b4f32982e36d93ca96a17a7b8da95ab185aceab"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/check-combined-docs-ci-8768.py",
+      "path": "helpers/check-combined-docs-ci-8768.py.gz",
+      "rawBytes": 5425,
+      "rawSha256": "2fcf4a1377625785075708b0abf7f98833ed4b392403b9385b8de52f8a480b86",
+      "gzipBytes": 2333,
+      "gzipSha256": "31e375547b6fcd2307bbecaa225d98df64d0f7f7bb61fe14e7614536de8d47fa"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/freeze-final-source.py",
+      "path": "helpers/freeze-final-source.py.gz",
+      "rawBytes": 8350,
+      "rawSha256": "3dfb78ecce71e49b893cce6787c6cce50c9ddf81c94e718e746ef763c296b150",
+      "gzipBytes": 3280,
+      "gzipSha256": "064355b1a3f25bf87c0d3e384c9e539983445ccb777583122e2b28215f269d9f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/freeze-final-source-v2.py",
+      "path": "helpers/freeze-final-source-v2.py.gz",
+      "rawBytes": 8513,
+      "rawSha256": "ee3239db38695f4d7c4eaca28de26edbdef7157b4ff31b65edff986534eb689e",
+      "gzipBytes": 3336,
+      "gzipSha256": "fbf6fbf64f14bf3b15eb16a24ec6c4dc2cbd2cb3d46a795eefad7c9a38804cf6"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/commit-final-ci.py",
+      "path": "helpers/commit-final-ci.py.gz",
+      "rawBytes": 4245,
+      "rawSha256": "619d2af1d72e74f38e35ca0830914443285b4f5585f66175b9ae6d92db5dcbfa",
+      "gzipBytes": 2074,
+      "gzipSha256": "f422c554e1835e881f411062303c437a048cae11b21cbea61d22b8709cff9c43"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/publish-final-candidate.py",
+      "path": "helpers/publish-final-candidate.py.gz",
+      "rawBytes": 3887,
+      "rawSha256": "06bd1a0e2af6d096ebf1173b34d54b01612b73bec6447087b4048c4eb0ee6682",
+      "gzipBytes": 1758,
+      "gzipSha256": "b43ab32925e626e86b495d7b6c15fe65d757ac1a2779107f4c9b374feb13dc71"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/collect-formal-2df-evidence.py",
+      "path": "helpers/collect-formal-2df-evidence.py.gz",
+      "rawBytes": 4465,
+      "rawSha256": "484b9d2ae0b738ef102272c9aed7010ace28b4614fa3660e01ae9760c500275f",
+      "gzipBytes": 1961,
+      "gzipSha256": "2bf169e6266c8903b00d2227d38918fe5877909ffad743c55484b5ce541c8cd2"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/archive-concurrent-integration.py",
+      "path": "helpers/archive-concurrent-integration.py.gz",
+      "rawBytes": 20100,
+      "rawSha256": "cf1416111d2f9fc39ad3b66175f100b8474e99109c3134c9a2742d01ceb553b5",
+      "gzipBytes": 8321,
+      "gzipSha256": "d97de6b3224fea80d2c5f2aa9e974f8c11187d000c4ed4e6eff742a4d1963ed7"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/archive-concurrent-integration-v2.py",
+      "path": "helpers/archive-concurrent-integration-v2.py.gz",
+      "rawBytes": 23540,
+      "rawSha256": "185cf72d8c78ae80de6cc4fbb9e965125342635d0f373277262c6c0125b12cf2",
+      "gzipBytes": 9616,
+      "gzipSha256": "469bb5c951910fbd0d84a336494e00210dd8cf51dcfa534ea36e1f4c47dc07df"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/archive-concurrent-integration-v3.py",
+      "path": "helpers/archive-concurrent-integration-v3.py.gz",
+      "rawBytes": 33049,
+      "rawSha256": "abf5f20538e2a5fd51a5c2dd81ed9ee2653805fc93f91bc29f6e7ead573a4315",
+      "gzipBytes": 10984,
+      "gzipSha256": "58d6ec06e592cdf18c4c8b2ea16bbf0fabd37b0d214749c0b0dfbeb61be15408"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/external-0b7-native-union/candidate.patch",
+      "path": "raw/reviewed-native-union/candidate.patch.gz",
+      "rawBytes": 6243,
+      "rawSha256": "567819c79144ae2f065753ff62c56f59b161e0b1bf18a13cb3b4d59339e6c550",
+      "gzipBytes": 2098,
+      "gzipSha256": "b8e315e151c71fdab20bda64ba7011e988ba125f28adfa63b1999a20d407514a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/external-0b7-native-union/external-control-label-test.rs.txt",
+      "path": "raw/reviewed-native-union/external-control-label-test.rs.txt.gz",
+      "rawBytes": 3563,
+      "rawSha256": "b4a69261e2ef92cc513c121671f641beb3e606d78b3df91ce0b3f97ed0362eed",
+      "gzipBytes": 1238,
+      "gzipSha256": "e8d249c0101493f50a50195bb9ce3163ab670e11de92791f29b6ba6c3074c679"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/external-0b7-native-union/gpui-native-control-label.ts",
+      "path": "raw/reviewed-native-union/gpui-native-control-label.ts.gz",
+      "rawBytes": 86998,
+      "rawSha256": "ee07845235af39b8a1fd723ba9f50ab0004093ea36b485873bc18d1be5bbe77a",
+      "gzipBytes": 16760,
+      "gzipSha256": "f91699a40c8e890f64ee3103400816e580f99022e183339f9ef116a94908b65f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/external-0b7-native-union/gpui-native-scroll.ts",
+      "path": "raw/reviewed-native-union/gpui-native-scroll.ts.gz",
+      "rawBytes": 30289,
+      "rawSha256": "434573ada26b257318da34894c122b9d85241d7a51078cbfc15f89d004b95537",
+      "gzipBytes": 7377,
+      "gzipSha256": "f91407e754199d7136a5080c6ec503c97cc5213478d551e29e7d3fc51d61318a"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/external-0b7-native-union/status.json",
+      "path": "raw/reviewed-native-union/status.json.gz",
+      "rawBytes": 1823,
+      "rawSha256": "a780f97fec337ddb7d64e62c7c3cbcce105518c9aef7e482c0e067f792fd7218",
+      "gzipBytes": 936,
+      "gzipSha256": "267a089887688e8bf0a5458b67ed8d65c2af98f22d01957104644cfa83fb17a0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-db747-hosted-75d5e28a/production/proto-ui-bundle-graph.json",
+      "path": "raw/original-db747-production-graph.json.gz",
+      "rawBytes": 5055846,
+      "rawSha256": "08aa327638f6f19eb6cef4721ede8b4508ce928ff79e334fd262946a59b89881",
+      "gzipBytes": 323588,
+      "gzipSha256": "23e14e002d63a3e717c4032dcf849dcd5f16e8576a299e1faed3c224d464b10d"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/integration-archive-v3/source-map.json",
+      "path": "source-map.json.gz",
+      "rawBytes": 5094,
+      "rawSha256": "56df69b8ab33a1544bfa9d021772cdd293ae949badd81da1f37c6a36f5faf55f",
+      "gzipBytes": 2152,
+      "gzipSha256": "6564c17c3d3e4bd569d5159d47206199f36418a1dcd6b82fd0cfbec92fedc6a3"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint5-input-75d5e28a-ops/integration-archive-v3/final-formal-api-readback.json",
+      "path": "raw/final-formal-api-readback.json.gz",
+      "rawBytes": 9879,
+      "rawSha256": "074e8082983e827e09e1f0d2f69d3646aabed0856bc973df2c47b46cc7de2ae5",
+      "gzipBytes": 1235,
+      "gzipSha256": "bcd18be74489c9785a4e2cbd2088140ac25416b88c80a1d8cae091c2470002d0"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/root-native-compose-75d5e28a-ops/capture-getter-provenance/post-commit-hook-observation-20261123T202650.json",
+      "path": "raw/capture-isolated-hook-observation.json.gz",
+      "rawBytes": 1260,
+      "rawSha256": "7e59b64231a29046aa38ca85abb8c8139a1d597573f527160281621d2d5f3b4e",
+      "gzipBytes": 540,
+      "gzipSha256": "2dfdfa4fdeccbf1e77da86cb05bc65913e94f2374360e459d10fcf94eb5cd60f"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint3-select-75d5e28a-ops/browser-input-source-review-8768.md",
+      "path": "raw/browser-input-source-review-8768.md.gz",
+      "rawBytes": 12523,
+      "rawSha256": "e01a374de70ec5be6d42aab715a429467f89f71a9d1fa6b2ad7ce3615ed90b03",
+      "gzipBytes": 5603,
+      "gzipSha256": "a831ea298a617f6b7e565d25a05e7461707d5f55c244f160dde8cc45d1129c7c"
+    },
+    {
+      "source": "/tank/shared/projects/proto-ui-agent/sprint3-select-75d5e28a-ops/browser-input-source-review-8768-readback.json",
+      "path": "raw/browser-input-source-review-8768-readback.json.gz",
+      "rawBytes": 15228,
+      "rawSha256": "654c944fee63dc9f94e637ddbcc757a5e5c5ef379851a519107a523fac76f3c2",
+      "gzipBytes": 3187,
+      "gzipSha256": "84826d4c9836225ff5e00a7e202c8c6da389665b4943a502c9af6d5ec275e30f"
+    }
+  ]
+}
