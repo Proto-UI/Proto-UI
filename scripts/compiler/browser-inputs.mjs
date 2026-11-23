@@ -2,9 +2,9 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { findBrowserRepositoryRoot } from './browser-repository-root.mjs';
 
-export const browserRepositoryRoot = fileURLToPath(new URL('../../', import.meta.url));
+export const browserRepositoryRoot = findBrowserRepositoryRoot(import.meta.url);
 export const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 // This deliberately conservative superset includes the Astro shell, ordinary

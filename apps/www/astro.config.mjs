@@ -2202,6 +2202,9 @@ export default defineConfig({
     rehypePlugins: [rehypeEnhancedImage, rehypeScrollableTables],
   },
   vite: {
+    // The browser compiler creates a module Worker whose QuickJS closure has
+    // dynamic imports. Preserve that native module graph in production.
+    worker: { format: 'es' },
     build: {
       rollupOptions: {
         output: {

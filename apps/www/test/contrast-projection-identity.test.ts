@@ -25,6 +25,7 @@ import {
 import {
   assertDemoSpec,
   collectPrototypeIds,
+  type DemoSpec,
 } from '../src/components/PrototypePreviewer/demo-types';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
@@ -884,7 +885,7 @@ function installActualProbe() {
   }).code;
   (globalThis as any).puiContrastProbe = new Function(compiled + ';return puiContrastProbe;')();
 }
-const productionDemos = import.meta.glob('../src/content/**/demo-brutalist-*.demo.ts', {
+const productionDemos = import.meta.glob<DemoSpec>('../src/content/**/demo-brutalist-*.demo.ts', {
   eager: true,
   import: 'default',
 });
@@ -2559,6 +2560,7 @@ it('Image rest-only applicability retains the actual passive source and historic
     productionDemos[
       '../src/content/' + authoredSources.image.recipePath.slice('apps/www/src/content/'.length)
     ];
+  assertDemoSpec(recipe);
   const manifest = PROJECTION_FAMILY_MANIFESTS.brutalist.families.image;
   const identities = new Set<string>();
   collectPrototypeIds(recipe.root, identities);
@@ -3022,6 +3024,7 @@ for (const runtime of runtimes) {
       }
       const source =
         productionDemos['../src/content/docs/zh-cn/demo-brutalist-dropdown-menu.demo.ts'];
+      assertDemoSpec(source);
       const items: any[] = [];
       const visit = (node: any) => {
         if (node?.prototypeId === 'brutalist-dropdown-item') items.push(node);
@@ -3067,7 +3070,7 @@ for (const runtime of runtimes) {
         expect(await (await readers.dropdownPointerTarget(popup, row)).count()).toBe(1);
       });
       const target = await readers.dropdownPointerTarget(popup, row);
-      const actual = await target.evaluate((element: HTMLElement) => element);
+      const actual: HTMLElement = await target.evaluate((element: HTMLElement) => element);
       const observe = () => readers.dropdownPointerIdentity(page, popup, target, row);
       expect((await observe()).achieved).toBe(true);
       for (const [attribute, wrong] of [

@@ -1,0 +1,53 @@
+{
+  "kind": "exact-reading-import-binding-revalidation",
+  "observedAt": "2026-11-23T10:26:38.370645+00:00",
+  "base": "96cef14d8b813cefddaa239bc51d89c3d64ac0b0",
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=documentation reading viewport import boundary|documentation media allowances remain bound",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "node": "v24.22.3",
+  "before": {
+    "passed": 6,
+    "failed": 1,
+    "exitCode": 1,
+    "reason": "corrected exact reader source no longer matches reviewed old digest"
+  },
+  "after": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0
+  },
+  "inputs": [
+    {
+      "path": "apps/www/src/components/documentation-image-reading-viewport.proto.ts",
+      "sha256": "38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec"
+    },
+    {
+      "path": "apps/www/src/components/documentation-image-controls.ts",
+      "sha256": "ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07"
+    },
+    {
+      "path": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "sha256": "d080eaeacef1d5d2496977c81bafe8266f07ecd100c1e338d4c0fd917e32dc6d"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "sha256": "f7d0763ff9ba5d58777ed5c933d8419541c7e694570032a62fce4b0be1fb8df6"
+    }
+  ],
+  "logs": [
+    {
+      "path": "internal/records/evidence/2026-11-23-image-reading-import-binding/reading-import-baseline.log.gz",
+      "uncompressedSha256": "2ca599c8ddf73c5ca90660001996c77444b9b433cc2b6996d19209fab9a8e8a1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-image-reading-import-binding/reading-import-candidate.log.gz",
+      "uncompressedSha256": "46d91c9fa516353b0a53202826646bb95992d2f953cec28ae78ea377b430caa2"
+    }
+  ],
+  "boundary": "Only exact source digest renewed; original bridge requirement, source path, three specifiers, blocked owner disposition and all original tests remain."
+}
