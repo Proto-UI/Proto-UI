@@ -2,7 +2,8 @@
  * Ordinary build and execution of the full authored 0.3 Button sources.
  * node --import tsx scripts/compiler/release-family-smoke.mjs
  * NATIVE_CONSUMER_COMPILER may select the supported source-pinned index.js.
- * Exact installed payloads are copied into isolated consumers, never symlinked.
+ * Default: exact installed payload copies without symlinks. Set
+ * NATIVE_CONSUMER_DEPENDENCIES=registry for isolated manifest -> lock -> npm ci.
  * The runtime surface is Happy DOM; browser geometry/trusted input is separate.
  */
 import assert from 'node:assert/strict';
@@ -19,7 +20,11 @@ import {
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { copyInstalledClosure, buildProgram } from './native-consumer-smoke.mjs';
+import {
+  copyInstalledClosure,
+  installRegistryClosure,
+  buildProgram,
+} from './native-consumer-smoke.mjs';
 
 const root = realpathSync(fileURLToPath(new URL('../../', import.meta.url)));
 const compiler = await import(
@@ -37,12 +42,18 @@ const families = ['base', 'shadcn', 'brutalist'];
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const save = (file, value) => writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
 const work = mkdtempSync(path.join(tmpdir(), 'proto-release-families-'));
+const mode = process.env.NATIVE_CONSUMER_DEPENDENCIES ?? 'copy';
+assert.ok(
+  ['copy', 'registry'].includes(mode),
+  'NATIVE_CONSUMER_DEPENDENCIES must be copy or registry'
+);
 const summary = {
   compilerBuild: compiler.compilerBuildIdentity,
   sourceRoot: root,
   surface:
     'Isolated ordinary TypeScript build and real framework mounts in Happy DOM; not native-browser evidence',
   evidence: work,
+  dependencyMode: mode,
   results: [],
 };
 console.log('RELEASE_FAMILY_EVIDENCE', work);
@@ -125,12 +136,15 @@ for (const profile of profiles) {
       dependencies: runtimeDependencies,
       devDependencies,
     });
-    row.dependencies = copyInstalledClosure(
-      consumer,
-      runtimeDependencies,
-      devDependencies,
-      realpathSync(process.env.NATIVE_CONSUMER_PACKAGE_ROOT ?? root)
-    );
+    row.dependencies =
+      mode === 'registry'
+        ? installRegistryClosure(consumer, runtimeDependencies, devDependencies)
+        : copyInstalledClosure(
+            consumer,
+            runtimeDependencies,
+            devDependencies,
+            realpathSync(process.env.NATIVE_CONSUMER_PACKAGE_ROOT ?? root)
+          );
     writeFileSync(path.join(consumer, 'build.mjs'), buildProgram);
     save(path.join(consumer, 'release-families.json'), row.families);
     copyFileSync(
