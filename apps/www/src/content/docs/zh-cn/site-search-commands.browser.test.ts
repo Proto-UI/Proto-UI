@@ -2155,7 +2155,14 @@ for (const width of [320, 390]) {
         const beforePortal = await header.boundingBox();
         await select.click();
         const listboxId = await select.getAttribute('aria-controls');
-        expect(await page.locator(`[id=${JSON.stringify(listboxId)}]`).isVisible()).toBe(true);
+        // Complete item-aligned Select composition stays measurable but hidden
+        // until its current positioning request is applied. Observe that public
+        // presentation boundary within the existing 1000ms polling budget.
+        await expect
+          .poll(() => page.locator(`[id=${JSON.stringify(listboxId)}]`).isVisible(), {
+            timeout: 1000,
+          })
+          .toBe(true);
         expect((await header.boundingBox())!.height).toBe(beforePortal!.height);
         await page.keyboard.press('Escape');
         // The root-font gate covers the actual public modal as well as its trigger.
