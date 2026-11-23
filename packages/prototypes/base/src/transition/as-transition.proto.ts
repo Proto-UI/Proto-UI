@@ -126,6 +126,10 @@ export const asTransition = defineAsHook<
       completion = policy;
     });
     let currentRun: RunHandle<TransitionProps> | null = null;
+    // Last input from the phase owner, not a physical mount or readiness fact.
+    // It stays true while cold materialization is pending and until afterLeave
+    // has returned, even when the perceptual State is already closed.
+    let phaseViewRequested = false;
     const getProps = () => currentRun?.props.get();
 
     const driver: TransitionMachineDriver = {
@@ -172,7 +176,8 @@ export const asTransition = defineAsHook<
         if (!currentRun) {
           throw new Error('[asTransition] runtime lifecycle handle is not available.');
         }
-        currentRun.lifecycle.setPresent(present || closedViewRetained.get());
+        phaseViewRequested = present;
+        currentRun.lifecycle.setPresent(phaseViewRequested || closedViewRetained.get());
       },
       emit(event) {
         currentRun?.expose.emit(event);
@@ -246,7 +251,7 @@ export const asTransition = defineAsHook<
     def.expose.method('retainClosedView', (retained: boolean) => {
       closedViewRetained.set(!!retained, 'reason: transition closed-view retention policy');
       if (!currentRun) return;
-      currentRun.lifecycle.setPresent(isPresent.get() || closedViewRetained.get());
+      currentRun.lifecycle.setPresent(phaseViewRequested || closedViewRetained.get());
     });
 
     def.lifecycle.onCreated((run) => {
