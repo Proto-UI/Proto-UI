@@ -148,7 +148,41 @@ export const Bootstrap232SurfaceRoot = definePrototype<
           w.prop('colorContext').eq('navbar')
         ),
       // Paired with THEME navbar-foreground in both modes; never page foreground.
-      intent: (i) => i.feedback.style.use(tw('bg-transparent text-white')),
+      intent: (i) => i.feedback.style.use(tw('text-white')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
+          w.prop('variant').eq('transparent'),
+          w.prop('colorContext').eq('navbar'),
+          w.prop('hovered').eq(false),
+          w.prop('pressed').eq(false),
+          w.prop('current').eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-transparent shadow-none')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
+          w.prop('variant').eq('transparent'),
+          w.prop('colorContext').eq('navbar'),
+          w.prop('hovered').eq(true),
+          w.prop('pressed').eq(false),
+          w.prop('current').eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-black/10 shadow-none')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
+          w.prop('variant').eq('transparent'),
+          w.prop('colorContext').eq('navbar'),
+          w.any(w.prop('pressed').eq(true), w.prop('current').eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-black/20', bootstrapButtonPressed)),
     });
     def.rule({
       when: (w) =>
@@ -159,9 +193,7 @@ export const Bootstrap232SurfaceRoot = definePrototype<
           w.prop('focusVisible').eq(true)
         ),
       intent: (i) =>
-        i.feedback.style.use(
-          tw('forced-colors-focus-outline ring-2 ring-primary-foreground ring-offset-0')
-        ),
+        i.feedback.style.use(tw('forced-colors-focus-outline ring-2 ring-white ring-offset-0')),
     });
     def.rule({
       when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('outline')),
@@ -264,7 +296,8 @@ export const Bootstrap232SurfaceRoot = definePrototype<
       when: (w) =>
         w.all(
           w.prop('actionProfile').eq('none'),
-          w.all(w.prop('pressed').eq(true), w.not(w.prop('variant').eq('solid')))
+          w.all(w.prop('pressed').eq(true), w.not(w.prop('variant').eq('solid'))),
+          w.not(w.all(w.prop('variant').eq('transparent'), w.prop('colorContext').eq('navbar')))
         ),
       intent: (i) => i.feedback.style.use(tw('translate-y-px shadow-none')),
     });

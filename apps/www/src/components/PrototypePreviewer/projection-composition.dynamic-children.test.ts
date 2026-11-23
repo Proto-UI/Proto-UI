@@ -191,7 +191,7 @@ describe('Website dynamic projection wrapper', () => {
     expect(setChildren).not.toHaveBeenCalled();
   });
 
-  it('pushes a theme update through a nested Proto committed by setChildren', async () => {
+  it('updates the dynamic renderer-owned outer theme while preserving an authored nested token', async () => {
     let ctx!: DemoSetupContext;
     const view = composition(
       child((context) => {
@@ -238,9 +238,14 @@ describe('Website dynamic projection wrapper', () => {
       throw new Error('Expected nested renderer ref');
     mounted.refs[inner.ref] = document.createElement('div');
     view.setThemeSurfaceStyle({ '--pui-background': '#222' });
-    const pushed = setSurfaceStyle.mock.calls.find(([ref]) => ref === inner.ref);
-    expect(pushed).toBeDefined();
-    expect(pushed![1]).toEqual({ '--pui-background': '#222' });
+    // Matching the initial palette does not give the renderer ownership of an
+    // author's value. The nested token remains authored across the snapshot.
+    expect(inner.surfaceStyle).toEqual({ '--pui-background': '#fff', maxWidth: '100%' });
+    expect(setSurfaceStyle.mock.calls.some(([ref]) => ref === inner.ref)).toBe(false);
+    expect(setSurfaceStyle).toHaveBeenCalledWith(
+      projected.ref,
+      expect.objectContaining({ '--pui-background': '#222' })
+    );
   });
 
   it('keeps private renderer handles stable and preserves mixed author styles across current-theme updates', async () => {

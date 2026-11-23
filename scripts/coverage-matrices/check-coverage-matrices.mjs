@@ -305,6 +305,8 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/adapters/base/src/material/program-inputs',
       'packages/adapters/base/src/material/style',
       'packages/adapters/base/src/material/style-tint-profile',
+      // Profile 6 reads bounded source statistics from this pure private helper.
+      'packages/adapters/base/src/material/style-tint-source',
       'packages/adapters/base/src/material/source',
     ]),
   }),
@@ -414,7 +416,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: '9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907',
+    sourceSha256: '3d5d5c21bf52e09aa2cab337d8a64b266a3b8b7e7434cfb40b3ef5b44a0a6602',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
@@ -424,7 +426,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-native-controls.ts': Object.freeze({
-    sourceSha256: '3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80',
+    sourceSha256: '5882e6eca56a9d883d7cd3fac29807a53ee249a2150a9d80a6c18726be17d8e4',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/surface',
@@ -436,7 +438,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: '7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3',
+    sourceSha256: '243c9bee1fa10ef122f223f520c5a069330a19e05d6e01d8193b330061962b51',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -446,7 +448,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7',
+    sourceSha256: '817b4fc4e22a701c6bd15d371b5a7dbfb9a231cedb28f51b743c8a21ba5ce645',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -738,7 +740,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f',
+    sourceSha256: 'b9c2aa8cd3209387b129c8a56f7d5f495645f54977c02f07b0c4a6cbc87f55ea',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',

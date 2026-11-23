@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getElementProps } from '@proto.ui/adapter-web-component';
 import { siteSearchShortcutLabel } from '../site-search-shortcut';
 import { PREFERRED_ADAPTER_EVENT } from '../adapter-preference';
 import { searchCommandParticipant, initDocumentationSearchCommands } from '../site-search-commands';
@@ -36,10 +37,12 @@ type RuntimeScopes = {
     request: ProjectionScopeMaterializeRequest;
   } | null;
 };
-const runtimeScopes = vi.hoisted((): RuntimeScopes => ({
-  roots: new WeakMap<HTMLElement, Set<RuntimeScopeObservation>>(),
-  materializing: null,
-}));
+const runtimeScopes = vi.hoisted(
+  (): RuntimeScopes => ({
+    roots: new WeakMap<HTMLElement, Set<RuntimeScopeObservation>>(),
+    materializing: null,
+  })
+);
 vi.mock('../PrototypePreviewer/projection-scope', async (original) => {
   const actual = await original<typeof ProjectionScopeModule>();
   return {
@@ -187,7 +190,8 @@ vi.mock('../PrototypePreviewer/runtimes/vue2-runtime', async (original) => {
   const require = createRequire(resolve('packages/adapters/vue2/package.json'));
   return { ...actual, loadVue2: async () => require('vue') };
 });
-vi.mock('../PrototypePreviewer/projection-theme', () => ({
+vi.mock('../PrototypePreviewer/projection-theme', async (original) => ({
+  ...(await original<typeof import('../PrototypePreviewer/projection-theme')>()),
   resolveProjectionThemeSurfaceStyle: () => ({
     '--pui-background': '#fff',
     '--pui-foreground': '#111',
@@ -255,11 +259,16 @@ function observeSuccessfulDestroy(owner: { destroy(): Promise<void> }) {
   return () => completed;
 }
 
-async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
+async function mount(
+  family: 'shadcn' | 'brutalist' | 'bootstrap-2-3-2',
+  firstProbeOK = true,
+  inHeader = false
+) {
   const root = document.createElement(`public-search-test-${++serial}`);
   root.dataset.searchComposition = 'command-dialog';
   root.dataset.searchStyle = 'rhea';
   root.dataset.searchInitialFamily = family;
+  if (inHeader) root.dataset.siteHeader = '';
   root.dataset.searchCopy = JSON.stringify(copy);
   root.dataset.pagefindBundle = '/pagefind/';
   root.dataset.openLabel = 'Search';
@@ -496,7 +505,8 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
             committedGeneration: committed.generation,
             requestedAtMs: observed.requestedAtMs,
             completionObservedAtMs,
-            clock: 'Vitest worker performance.now(); completion observation after actual commit/retirement, not a native commit timestamp',
+            clock:
+              'Vitest worker performance.now(); completion observation after actual commit/retirement, not a native commit timestamp',
           });
         })
       );
@@ -792,6 +802,77 @@ describe('public Search intent and resource lifetime', () => {
     expect(f.configure).toHaveBeenCalledTimes(1);
   });
 });
+it('retains the Bootstrap documentation family through opener, lazy Dialog and runtime replacement', async () => {
+  const f = await mount('bootstrap-2-3-2', true, true);
+  expect(f.root.dataset.searchFamily).toBe('bootstrap-2-3-2');
+  expect(f.trigger.dataset.siteControlFamily).toBe('bootstrap-2-3-2');
+  expect(f.trigger.getAttribute('data-pui-style')).toContain('linear-gradient(#fff,#e6e6e6)');
+  f.trigger.focus();
+  click(f.trigger);
+  await vi.waitFor(() => expect(f.open).toBe(true));
+  await vi.waitFor(() => expect(f.input).toBeDefined());
+  for (const runtime of ['react', 'vue', 'vue2', 'wc']) {
+    await f.runtime(runtime);
+    expect(f.root.dataset.searchFamily).toBe('bootstrap-2-3-2');
+    expect(f.trigger.dataset.siteControlFamily).toBe('bootstrap-2-3-2');
+    const scopes = [...(runtimeScopes.roots.get(f.root) ?? [])].filter(
+      (scope) => scope.controller.getSnapshot().phase !== 'destroyed'
+    );
+    expect(scopes.map((scope) => scope.kind).sort()).toEqual(['command', 'dialog']);
+    for (const scope of scopes) {
+      expect(scope.controller.getSnapshot().selection.projectionFamilyId).toBe('bootstrap-2-3-2');
+      expect(
+        scope.materializations.every(
+          (request) => request.selection.projectionFamilyId === 'bootstrap-2-3-2'
+        )
+      ).toBe(true);
+    }
+  }
+  click(f.close);
+  await vi.waitFor(() => expect(f.present).toBe(false));
+  expect(document.activeElement).toBe(f.trigger);
+});
+
+it('uses declared Bootstrap action paint through failed preparation, retry and another result page', async () => {
+  const f = await mount('bootstrap-2-3-2', false, true);
+  click(f.trigger);
+  await vi.waitFor(() => expect(f.retry).toBeDefined());
+  const assertAction = () => {
+    const action = f.retry!;
+    expect(action.localName).toContain('bootstrap-2-3-2');
+    expect(getElementProps(action)?.variant).toBe('default');
+    expect(action.getAttribute('data-pui-style')).toContain('linear-gradient(#fff,#e6e6e6)');
+  };
+  assertAction();
+  f.setProbe(true);
+  const release = f.holdProbe();
+  click(f.retry!);
+  await vi.waitFor(() => expect(f.retry!.getAttribute('aria-disabled')).toBe('true'));
+  expect(getElementProps(f.retry!)?.variant).toBe('default');
+  release();
+  await vi.waitFor(() => expect(f.retry).toBeUndefined());
+  await vi.waitFor(() => expect(f.input).toBeDefined());
+  f.search.mockImplementation(async (query: string) => ({
+    results: Array.from({ length: 23 }, (_, index) => ({
+      id: `${query}-${index}`,
+      data: async () => ({
+        url: `/docs/${query}/${index}`,
+        meta: { title: `Result ${query} ${index}` },
+      }),
+    })),
+  }));
+  type(f.input!, 'Bootstrap');
+  await vi.waitFor(() => expect(f.ref('results')?.textContent).toContain('Result Bootstrap 19'));
+  await vi.waitFor(() => expect(f.retry?.textContent).toBe('More'));
+  assertAction();
+  click(f.retry!);
+  await vi.waitFor(() => expect(f.ref('results')?.textContent).toContain('Result Bootstrap 22'));
+  await vi.waitFor(() => expect(f.retry).toBeUndefined());
+  expect(f.root.dataset.searchFamily).toBe('bootstrap-2-3-2');
+  click(f.close);
+  await vi.waitFor(() => expect(f.present).toBe(false));
+});
+
 for (const family of ['shadcn', 'brutalist'] as const) {
   describe(`actual ${family} public Search gestures`, () => {
     it('opens once from the descendant and ignores a later native echo of the outward callback', async () => {
@@ -881,6 +962,10 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       await settle();
       expect(f.retry!.getAttribute('aria-disabled')).toBe('true');
       await f.runtime('vue');
+      // The parent generation has committed; its real dynamic action subtree
+      // has a separate asynchronous children commit. Await that public ref,
+      // then keep the original disabled/paint and late-recovery assertions.
+      await vi.waitFor(() => expect(f.retry).toBeDefined());
       expect(f.retry!.getAttribute('aria-disabled')).toBe('true');
       expect(f.retry!.getAttribute('data-pui-style')).toContain(variant);
       click(f.close);

@@ -11,6 +11,7 @@ import {
 import { fragment } from '../src/material/liquidgl-kernel.generated';
 import { contactFragment } from '../src/material/contact-profile';
 import { colorContrast, type OpaqueRgba } from '../src/material/style';
+import { styleTintSourceTone, type StyleTintSourceTone } from '../src/material/style-tint-source';
 import {
   createLiquidToggleDetailStimulus,
   evaluateLiquidToggleDetailPair,
@@ -25,7 +26,8 @@ function oracle(
   fill: OpaqueRgba,
   foreground: OpaqueRgba,
   sample: number[],
-  old = false
+  old = false,
+  sourceTone?: StyleTintSourceTone
 ): OpaqueRgba {
   const envelope = styleTintEnvelope(fill, foreground);
   const light = envelope.lightForeground;
@@ -36,7 +38,20 @@ function oracle(
   const hue = base.map((c, i) => 0.75 * c + 0.25 * linear(detail[i]));
   const direction = light ? hue : hue.map((c) => 1 - c);
   const boundCode = srgb(envelope.luminanceBound);
-  const targetCode = light ? boundCode * dot(detail) : boundCode + (1 - boundCode) * dot(detail);
+  let tone = dot(detail);
+  if (sourceTone) {
+    // Independent piecewise interpolation through the three linear segments,
+    // rather than the shader's endpoint-canceling expression.
+    const [low, range, boost] = sourceTone;
+    const outside = 1 - boost * range;
+    tone =
+      tone < low
+        ? outside * tone
+        : tone <= low + range
+          ? outside * low + (outside + boost) * (tone - low)
+          : 1 - outside * (1 - tone);
+  }
+  const targetCode = light ? boundCode * tone : boundCode + (1 - boundCode) * tone;
   // Retain the exact profile-2 map as a same-input historical control.
   const target = old
     ? light
@@ -299,16 +314,22 @@ function evaluate(
     foregroundSrgb8: [foreground[0] * 255, foreground[1] * 255, foreground[2] * 255],
   });
 }
-function outputs(sources: number[][][], fill: OpaqueRgba, foreground: OpaqueRgba, old = false) {
+function outputs(
+  sources: number[][][],
+  fill: OpaqueRgba,
+  foreground: OpaqueRgba,
+  old = false,
+  sourceTone?: StyleTintSourceTone
+) {
   return sources.map((image) =>
-    image.map((sample) => oracle(fill, foreground, sample, old).slice(0, 3))
+    image.map((sample) => oracle(fill, foreground, sample, old, sourceTone).slice(0, 3))
   );
 }
 
-describe('profile 5 retains the profile 4 foreground envelope (arithmetic, not GPU acceptance)', () => {
+describe('profile 6 retains historical profile 4/5 foreground arithmetic (arithmetic, not GPU acceptance)', () => {
   it('uses a distinct identity and rounds every independently frozen endpoint inward to float32', () => {
-    expect(styleTintProfile).toBe('pui-regular-style-tint-5');
-    expect(styleTintContactProfile).toBe('pui-regular-style-tint-contact-5');
+    expect(styleTintProfile).toBe('pui-regular-style-tint-6');
+    expect(styleTintContactProfile).toBe('pui-regular-style-tint-contact-6');
     // Fixed independent 32-step solver results, before uniform conversion.
     const expected = [
       0.15342621431014267, 0.15342621431014267, 0.2626990541705438, 0.07198668649802203,
@@ -534,6 +555,103 @@ function tapSafety(mapped: Vec2, offset: Vec2, aberration: number, size: Vec2) {
   );
 }
 
+describe('profile 6 source gain on all original fixed profile 4/5 inputs (arithmetic only)', () => {
+  it.each(['original30', 'holdout504'] as const)(
+    'preserves every historical pass and foreground bound on %s without changing inputs or metrics',
+    (kind) => {
+      const grids =
+        kind === 'original30'
+          ? frozenGrids
+          : frozenLevels.flatMap((a, i) =>
+              frozenLevels
+                .slice(i + 1)
+                .flatMap((b, j) => frozenLevels.slice(i + j + 2).map((c) => [a, b, c]))
+            );
+      let oldPass = 0,
+        nextPass = 0,
+        lost = 0;
+      for (const [fill, foreground] of frozenPairs)
+        for (const grid of grids) {
+          const first = grid.flatMap((r) =>
+            grid.flatMap((g) => grid.map((b) => [r / 255, g / 255, b / 255]))
+          );
+          const sources = [first, first.map((_, i) => first[(10 * i + 7) % 27])];
+          const bytes = (colors: number[][]) =>
+            Uint8Array.from(
+              colors.flatMap((color) => [...color.map((c) => Math.round(c * 255)), 255])
+            );
+          const budget = styleTintSourceTone(bytes(first));
+          expect(styleTintSourceTone(bytes(sources[1]))).toEqual(budget);
+          const previous = evaluate(sources, outputs(sources, fill, foreground), foreground);
+          const mapped = outputs(sources, fill, foreground, false, budget);
+          const next = evaluate(sources, mapped, foreground);
+          oldPass += Number(previous.passed);
+          nextPass += Number(next.passed);
+          lost += Number(previous.passed && !next.passed);
+          for (const image of mapped)
+            for (const rgb of image) {
+              const quantized: OpaqueRgba = [
+                Math.round(rgb[0] * 255) / 255,
+                Math.round(rgb[1] * 255) / 255,
+                Math.round(rgb[2] * 255) / 255,
+                1,
+              ];
+              expect(
+                colorContrast(quantized, styleTintEnvelope(fill, foreground).worstForeground)
+              ).toBeGreaterThanOrEqual(4.5);
+            }
+        }
+      expect(lost).toBe(0);
+      expect(oldPass).toBe(kind === 'original30' ? 29 : 504);
+      expect(nextPass).toBeGreaterThanOrEqual(oldPass);
+    }
+  );
+
+  it('retains original Toggle inputs and rejects unrelated full-amplitude noise with the same budget', () => {
+    for (const [fill, foreground] of frozenPairs)
+      for (const checker of [true, false]) {
+        const first = Array.from({ length: 192 }, (_, i) => {
+          const x = i % 24,
+            y = Math.floor(i / 24);
+          const high =
+            (checker ? Math.floor(x / 4) + Math.floor(y / 4) : 1 + Math.floor(x / 4)) % 2;
+          return Array(3).fill((high ? 80 : 16) / 255);
+        });
+        const sources = [first, first.map((rgb) => rgb.map((c) => 96 / 255 - c))];
+        const budget = styleTintSourceTone(
+          Uint8Array.from(first.flatMap((rgb) => [...rgb.map((c) => Math.round(c * 255)), 255]))
+        );
+        expect(
+          evaluate(sources, outputs(sources, fill, foreground, false, budget), foreground, 24)
+            .passed
+        ).toBe(true);
+        const noise = [121, 122].map((seed) => {
+          let state = seed;
+          const take = () => {
+            state ^= state << 13;
+            state ^= state >>> 17;
+            state ^= state << 5;
+            return (state >>> 0) / 2 ** 32;
+          };
+          return Array.from({ length: 192 }, () => {
+            const u = take();
+            return u < 1 / 8 ? [0, 0, 0] : u > 7 / 8 ? [1, 1, 1] : [take(), take(), take()];
+          });
+        });
+        const negative = evaluate(
+          sources,
+          outputs(noise, fill, foreground, false, budget),
+          foreground,
+          24
+        );
+        expect(negative.passed).toBe(false);
+        expect(negative.failures.some((failure) => failure.includes('unrelated'))).toBe(true);
+        expect(negative.pair.outputDeltaRms).toBeGreaterThanOrEqual(4);
+        expect(negative.pair.changedCellFraction).toBeGreaterThanOrEqual(0.25);
+      }
+  });
+});
+
 describe('profile 5 frozen source-budgeted shoulder (source/scalar evidence only)', () => {
   it('assembles the exact sixteen-factor proposal before every source tap', () => {
     for (const [profile, neutral] of [
@@ -563,7 +681,7 @@ describe('profile 5 frozen source-budgeted shoulder (source/scalar evidence only
         neutral.match(/\bsampleSource\(/g)!.length
       );
       expect(profile.match(/\btexture2D\(/g)).toHaveLength(neutral.match(/\btexture2D\(/g)!.length);
-      expect(profile.match(/\buniform\b/g)).toHaveLength(neutral.match(/\buniform\b/g)!.length + 2);
+      expect(profile.match(/\buniform\b/g)).toHaveLength(neutral.match(/\buniform\b/g)!.length + 3);
       expect(profile.slice(profile.indexOf(refractedAnchor), profile.indexOf('vec4 final'))).toBe(
         neutral.slice(neutral.indexOf(refractedAnchor), neutral.indexOf('vec4 final'))
       );

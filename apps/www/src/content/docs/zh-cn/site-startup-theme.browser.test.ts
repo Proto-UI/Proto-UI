@@ -9,6 +9,11 @@ import { launchBrowser, runtimeSelectTrigger, startServer, stopServer } from './
 
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const baseline = process.env.PROTO_UI_STARTUP_SUBJECT === 'baseline';
+// The historical 48b80 production subject enhances a native locale link.
+// Current candidates must still expose the public Select combobox.
+const languageControlSelector = baseline
+  ? '#home-language [data-projection-generation-state="active"] a[data-home-locale][href]'
+  : '#home-language [data-projection-generation-state="active"] [role="combobox"]';
 const output = process.env.PROTO_UI_STARTUP_EVIDENCE_DIR;
 const records: unknown[] = [];
 let browser: Browser;
@@ -167,12 +172,10 @@ for (const width of [2048, 390, 430, 320]) {
           );
           await frames(page);
           const readFacts = () =>
-            page.evaluate(() => {
+            page.evaluate((languageSelector) => {
               const header = document.querySelector<HTMLElement>('[data-homepage-runtime]')!;
               const canonical = getComputedStyle(header);
-              const language = document.querySelector<HTMLElement>(
-                '#home-language [data-projection-generation-state="active"] [role="combobox"]'
-              )!;
+              const language = document.querySelector<HTMLElement>(languageSelector)!;
               const surfaces = [
                 ...document.querySelectorAll<HTMLElement>(
                   '#home-language [data-projection-generation-state="active"] [data-projection-scope], #home-social [data-projection-generation-state="active"] [data-projection-scope]'
@@ -196,7 +199,7 @@ for (const width of [2048, 390, 430, 320]) {
                 })),
                 overflow: document.documentElement.scrollWidth > innerWidth,
               };
-            });
+            }, languageControlSelector);
           const immediateFacts = await readFacts();
           await capture(
             page,
@@ -229,14 +232,9 @@ for (const width of [2048, 390, 430, 320]) {
         }
         await page.keyboard.press('Escape');
         await menu(page).click();
-        await page
-          .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
-          .focus();
-        expect(
-          await page
-            .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
-            .evaluate((e) => e === document.activeElement)
-        ).toBe(true);
+        const languageControl = page.locator(languageControlSelector);
+        await languageControl.focus();
+        expect(await languageControl.evaluate((e) => e === document.activeElement)).toBe(true);
         await capture(page, `home-${width}-reopened-keyboard`, {
           input: 'native Escape, click, keyboard focus',
         });

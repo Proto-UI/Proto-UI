@@ -162,6 +162,15 @@ const themeCss = renderThemeCss({
             className: 'fixture-sr-only',
             children: [text],
           });
+          // Compare native editor paint in the same normal-flow context. A
+          // framework editor directly inside the grid is blockified, whereas
+          // WC's editor lives inside its host. This consumer slot equalizes
+          // layout without overriding any Prototype or native editor style.
+          const editor = (child: DemoNode): DemoNode => ({
+            kind: 'box',
+            className: 'fixture-editor-slot',
+            children: [child],
+          });
           const row = (
             title: string,
             children: DemoNode[],
@@ -224,32 +233,40 @@ const themeCss = renderThemeCss({
                 row(
                   'Input · uncontrolled / controlled',
                   [
-                    proto('inputRoot', 'input', {
-                      defaultValue: 'Draft',
-                      ariaLabel: 'Draft title',
-                      autoComplete: 'off',
-                    }),
-                    proto('inputRoot', 'inputControlled', {
-                      value: 'Approved',
-                      ariaLabel: 'Controlled title',
-                      autoComplete: 'off',
-                    }),
+                    editor(
+                      proto('inputRoot', 'input', {
+                        defaultValue: 'Draft',
+                        ariaLabel: 'Draft title',
+                        autoComplete: 'off',
+                      })
+                    ),
+                    editor(
+                      proto('inputRoot', 'inputControlled', {
+                        value: 'Approved',
+                        ariaLabel: 'Controlled title',
+                        autoComplete: 'off',
+                      })
+                    ),
                   ],
                   'fixture-editors'
                 ),
                 row(
                   'Textarea · uncontrolled / controlled',
                   [
-                    proto('textareaRoot', 'textarea', {
-                      defaultValue: 'First line\nSecond line',
-                      ariaLabel: 'Draft notes',
-                      rows: 3,
-                    }),
-                    proto('textareaRoot', 'textareaControlled', {
-                      value: 'Approved notes',
-                      ariaLabel: 'Controlled notes',
-                      rows: 3,
-                    }),
+                    editor(
+                      proto('textareaRoot', 'textarea', {
+                        defaultValue: 'First line\nSecond line',
+                        ariaLabel: 'Draft notes',
+                        rows: 3,
+                      })
+                    ),
+                    editor(
+                      proto('textareaRoot', 'textareaControlled', {
+                        value: 'Approved notes',
+                        ariaLabel: 'Controlled notes',
+                        rows: 3,
+                      })
+                    ),
                   ],
                   'fixture-editors'
                 ),
@@ -362,6 +379,10 @@ const themeCss = renderThemeCss({
         min-width: 0;
       }
       .fixture-field {
+        min-width: 0;
+      }
+      .fixture-editor-slot {
+        display: block;
         min-width: 0;
       }
       .fixture-label {

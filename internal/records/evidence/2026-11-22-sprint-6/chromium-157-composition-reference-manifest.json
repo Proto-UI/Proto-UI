@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "referenceTag": "157.0.8103.78",
+  "retrievedAtUtc": "2026-11-22T12:06:31.657764+00:00",
+  "source": "Official chromium/chromium mirror via authenticated read-only GitHub fetch",
+  "scope": "Read-only source explanation for compositionend isTrusted=false; not a claim of completed bare native editor runtime validation",
+  "files": [
+    {
+      "file": "dom/events/event.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/dom/events/event.cc",
+      "sha256": "cc49063ff86c6244d53883a6f2e8c5e328911d3dff3cf84e37c1b6e842d43c4c",
+      "bytes": 14420
+    },
+    {
+      "file": "dom/events/event_dispatcher.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/dom/events/event_dispatcher.cc",
+      "sha256": "914086254b0c68c5a08beb92cd972f4e6ac4547d0500ac788217be383be6af79",
+      "bytes": 25905
+    },
+    {
+      "file": "dom/events/event_target.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/dom/events/event_target.cc",
+      "sha256": "441837387fa7031af04911b51c4e0f57d8e72baacb3228cb91c446b8293fe0ab",
+      "bytes": 47234
+    },
+    {
+      "file": "dom/events/scoped_event_queue.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/dom/events/scoped_event_queue.cc",
+      "sha256": "85f4e467bd3450223cba20d4c27d32e808ef29c1086cdba392a69336a17471ee",
+      "bytes": 3291
+    },
+    {
+      "file": "editing/ime/input_method_controller.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/editing/ime/input_method_controller.cc",
+      "sha256": "0a34443734dde7ba0544e4b9144150e4064e71fab662a2c497ca7bc764ccb170",
+      "bytes": 79308
+    },
+    {
+      "file": "events/composition_event.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/events/composition_event.cc",
+      "sha256": "cc4ae762fb1e14f5223680b49e189fb46a1f51f56942558b3613c33dbf0be384",
+      "bytes": 3233
+    },
+    {
+      "file": "events/ui_event.cc",
+      "url": "https://github.com/chromium/chromium/blob/157.0.8103.78/third_party/blink/renderer/core/events/ui_event.cc",
+      "sha256": "3582ce3aaf01e79331dce4077566b807014a38812a021a5f4200af238d241dc9",
+      "bytes": 4493
+    }
+  ]
+}

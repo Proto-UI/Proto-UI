@@ -18,6 +18,9 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   // The #808 route renders its actual eight Base-derived parts through the
   // reviewed demo-renderer and keeps React/Vue/Vue2 in dynamic runtime edges.
   'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
+  // Sprint 6 compares the eight Liquid parts through the same route-owned
+  // renderer. This exact entry retains the existing lazy-framework gate.
+  'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-material.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts',
@@ -72,6 +75,7 @@ const OPTIONAL_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/site-typography.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
 ]);
 for (const facade of OPTIONAL_DEMONSTRATION_ENTRY_FACADES)
   APPROVED_DEMONSTRATION_ENTRY_FACADES.add(facade);

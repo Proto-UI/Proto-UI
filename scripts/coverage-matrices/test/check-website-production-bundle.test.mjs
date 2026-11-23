@@ -1379,6 +1379,73 @@ test('Bootstrap state-controls admission is exact and keeps frameworks lazy', ()
   );
 });
 
+function liquidStateControlsGraph() {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/liquid-glass-state-controls.js', {
+      isEntry: true,
+      facadeModuleId:
+        'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
+      imports: ['_astro/wc-host.js'],
+      dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+      moduleIds: ['apps/www/src/pages/en/test/liquid-glass-state-controls.astro'],
+    })
+  );
+  return graph;
+}
+
+test('Sprint 6 Liquid state-controls admits the exact four-runtime demonstration', () => {
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: liquidStateControlsGraph() }), []);
+});
+
+for (const scenario of ['static-react', 'copied-entry', 'ordinary-shell-import']) {
+  test(`Sprint 6 Liquid state-controls still rejects ${scenario}`, () => {
+    const graph = liquidStateControlsGraph();
+    const entry = graph.chunks.find(
+      (candidate) => candidate.fileName === '_astro/liquid-glass-state-controls.js'
+    );
+    if (scenario === 'static-react') entry.imports.push('_astro/react.js');
+    else if (scenario === 'copied-entry')
+      entry.facadeModuleId =
+        'apps/www/src/pages/en/test/copied-liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts';
+    else graph.chunks[0].imports.push(entry.fileName);
+    const issues = collectWebsiteProductionBundleIssues({ graph });
+    assert.ok(
+      issues.some((issue) =>
+        scenario === 'static-react'
+          ? issue.includes('liquid-glass-state-controls.astro') &&
+            issue.includes('statically includes the react Adapter')
+          : issue.includes('Website shell entry') && issue.includes('reaches forbidden')
+      ),
+      issues.join('\n')
+    );
+  });
+}
+
+for (const diagnostic of ['liquid-tint-stage-diagnostic', 'liquid-visible-refraction-diagnostic']) {
+  test(`Sprint 6 fixture classification retains static Adapter rejection for ${diagnostic}`, () => {
+    const graph = graphFixture();
+    const facade = `apps/www/src/pages/en/test/${diagnostic}.astro?astro&type=script&index=0&lang.ts`;
+    graph.chunks.push(
+      chunk(`_astro/${diagnostic}.js`, {
+        isEntry: true,
+        facadeModuleId: facade,
+        moduleIds: [
+          `apps/www/src/pages/en/test/${diagnostic}.astro`,
+          'packages/adapters/base/src/material/program.ts',
+        ],
+      })
+    );
+    const issues = collectWebsiteProductionBundleIssues({ graph });
+    assert.ok(
+      issues.some(
+        (issue) => issue.includes(facade) && issue.includes('statically reaches forbidden')
+      ),
+      issues.join('\n')
+    );
+  });
+}
+
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const configSource = ts.createSourceFile(
   'astro.config.mjs',

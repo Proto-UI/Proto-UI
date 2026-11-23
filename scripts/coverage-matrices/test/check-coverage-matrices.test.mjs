@@ -19098,6 +19098,10 @@ for (const [relative, allowed] of [
     'apps/www/src/pages/en/test/liquid-glass-hover.astro',
     '@proto.ui/prototypes-liquid-glass/button',
   ],
+  [
+    'apps/www/src/pages/en/test/liquid-glass-state-controls.astro',
+    '@proto.ui/prototypes-liquid-glass',
+  ],
 ]) {
   test(`diagnostic import review rejects owner, body and edge drift: ${path.basename(relative)}`, () => {
     const root = createRoot();
@@ -19272,6 +19276,7 @@ for (const source of [
   'packages/adapters/base/src/material/geometry-watch.ts',
   'packages/adapters/base/src/material/initial-paint-experiment.ts',
   'packages/adapters/base/src/material/preferences.ts',
+  'packages/adapters/base/src/material/style-tint-profile.ts',
 ])
   for (const scenario of ['exact', 'wrong-owner', 'changed-bytes', 'adjacent-path']) {
     test(`private Liquid Card interactive source binding: ${path.basename(source)} ${scenario}`, () => {
@@ -19304,6 +19309,11 @@ for (const [relative, allowed] of [
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
   ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
   ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
+  [
+    'packages/adapters/base/src/material/preferences.ts',
+    '@proto.ui/module-feedback/internal/shared-policy',
+  ],
+  ['packages/adapters/base/src/material/style-tint-profile.ts', './contact-profile'],
 ])
   test(`private Liquid Card import stays source-bound: ${relative}`, () => {
     const root = createRoot();
@@ -19347,7 +19357,7 @@ test('merged material helper edges retain exact importers and reject neighboring
   writeValidMatrices(root);
   const material = 'packages/adapters/base/src/material/';
   for (const [name, imports] of [
-    ['program.ts', ['./program-inputs', './prefilter']],
+    ['program.ts', ['./program-inputs', './prefilter', './style-tint-source']],
     ['program-pool.ts', ['./source-refresh-task']],
   ]) {
     const relative = material + name;

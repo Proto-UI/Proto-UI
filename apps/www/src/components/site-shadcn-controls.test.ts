@@ -345,10 +345,22 @@ describe('site family projections', () => {
       outside.dataset.siteButton = '';
       header.append(button, root);
       document.body.append(header, outside);
+      const projectStyle = vi.spyOn(button.style, 'setProperty');
+      const outsideStyle = vi.spyOn(outside.style, 'setProperty');
       initSiteShadcnControls(document);
       await settle();
-      expect(button.style.width).toBe('2.75rem');
-      expect(button.style.height).toBe('2.75rem');
+      // HappyDOM does not retain var() on width/height. Observe the actual CSS
+      // projection call; the native Navbar lane checks resolved 44/40px paint.
+      expect(projectStyle).toHaveBeenCalledWith(
+        'width',
+        'var(--site-header-icon-size, 2.75rem)',
+        ''
+      );
+      expect(projectStyle).toHaveBeenCalledWith(
+        'height',
+        'var(--site-header-icon-size, 2.75rem)',
+        ''
+      );
       expect(button.style.padding).toBe('0px');
       expect(root.style.width).toBe('100%');
       expect(root.style.minWidth).toBe('0');
@@ -368,6 +380,7 @@ describe('site family projections', () => {
       expect(item.textContent).toBe('Web Components');
       expect(trigger.getAttribute('aria-labelledby')).toBe('header-runtime-label');
       expect(outside.style.width).not.toBe('2.75rem');
+      expect(outsideStyle.mock.calls.some(([property]) => property === 'width')).toBe(false);
       setSelectValue(root, 'react');
       setSiteSelectDisabled(root, true);
       await settle();
@@ -444,15 +457,35 @@ it('bounds the existing local adapter field without clipping enlarged value text
 it('maps a legacy ghost alias to the existing public Brutalist surface variant', async () => {
   document.body.innerHTML =
     '<header data-site-header><wc-brutalist-button data-site-button data-variant="ghost" data-size="icon">Menu</wc-brutalist-button></header>';
+  const button = document.querySelector<HTMLElement>('wc-brutalist-button')!;
+  const projectStyle = vi.spyOn(button.style, 'setProperty');
   initSiteShadcnControls(document);
   await settle();
-  const button = document.querySelector<HTMLElement>('wc-brutalist-button')!;
   const tokens = button.getAttribute('data-pui-style')!;
   expect(button.getAttribute('role')).toBe('button');
   expect(tokens).toContain('border-black');
   expect(tokens).toContain('bg-secondary-background');
   expect(tokens).toContain('shadow-[4px_4px_0_0_#000]');
-  expect(button.style.width).toBe('2.75rem');
+  expect(projectStyle).toHaveBeenCalledWith('width', 'var(--site-header-icon-size, 2.75rem)', '');
+});
+
+it('retains the Bootstrap theme command intent when its public size has normalized to default', async () => {
+  document.body.innerHTML =
+    '<header data-site-header><wc-bootstrap-2-3-2-button data-site-button data-theme-toggle data-header-button-size="icon" data-variant="default" data-size="default">Theme</wc-bootstrap-2-3-2-button></header>';
+  initSiteShadcnControls(document);
+  await settle();
+  const button = document.querySelector<HTMLElement>('wc-bootstrap-2-3-2-button')!;
+  const tokens = button.getAttribute('data-pui-style')!.split(' ');
+  expect(button.getAttribute('role')).toBe('button');
+  expect(tokens).toContain('bg-transparent');
+  expect(tokens).toContain('text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)]');
+  expect(tokens.some((token) => token.includes('linear-gradient'))).toBe(false);
+  expect(tokens).toContain('shadow-none');
+  const identity = button;
+  initSiteShadcnControls(document);
+  await settle();
+  expect(document.querySelector('wc-bootstrap-2-3-2-button')).toBe(identity);
+  expect(button.getAttribute('data-pui-style')!.split(' ')).toEqual(tokens);
 });
 
 it.each(['react', 'vue', 'vue2'])(

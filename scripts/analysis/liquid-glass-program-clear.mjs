@@ -8,12 +8,43 @@ import { build } from 'esbuild';
 
 const PROGRAM = 'packages/adapters/base/src/material/program.ts';
 const HELPER = 'packages/adapters/base/src/material/prefilter.ts';
+const KERNEL = 'packages/adapters/base/src/material/liquidgl-kernel.generated.ts';
 const ENTRY_NAME = '__liquid_program_clear_entry__.ts';
 const ENTRY_CONTENTS = `export { createWebOpticalProgram } from './${PROGRAM}';
 export { createWebOpticalPrefilter } from './${HELPER}';
 `;
 const REGRESSION_SHA = '19d175f454468fa27364c8283e084f3bb7a1016b';
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+// This existing neutral regular profile is shared by the exact regression
+// source and the candidate. style-fill selects each revision's tint algorithm;
+// its intentional source-tone change is not a program.clear() regression.
+const CONTROL = {
+  profile: 'fixed-regular-neutral',
+  kernel: {
+    path: KERNEL,
+    sha256: '61fe78127858f4ed3fbcfb48caef815bbcf8c1a8ef36f603deafe7eb3613da44',
+  },
+  shaders: [
+    { kind: 'vertex', sha256: 'c61427a859d0a9e4c8ce0bed53ba989b4c8f2cd33be07400ae163d400ba515d9' },
+    {
+      kind: 'fragment',
+      sha256: 'bfff4f7c27c5dff34bd8f491e544a837b3f600696f9c54da9f87a86b6089c7f1',
+    },
+  ],
+  frame: {
+    sourceWidth: 416,
+    sourceHeight: 161,
+    sourceBytes: 267904,
+    sourcePixelsSha256: '882792770227550d7a446738f645a4507c679ca3d041ce4c209af9db6fa055ed',
+    geometry: { width: 64, height: 32, radius: 16, dpr: 1, bounds: [0, 0, 1, 1] },
+    pressed: false,
+    variant: 'regular',
+    tint: null,
+    contact: null,
+    fill: [0, 0, 0, 1],
+    foreground: [1, 1, 1, 1],
+  },
+};
 
 export function assertProgramClearEvidence(evidence) {
   assert.deepEqual(
@@ -27,6 +58,17 @@ export function assertProgramClearEvidence(evidence) {
     'Lifecycle controls must explicitly select their real GPU paths'
   );
   for (const row of evidence) {
+    assert.equal(row.profile, CONTROL.profile);
+    assert.deepEqual(row.frame, CONTROL.frame, `${row.label}: lifecycle frame/profile drift`);
+    for (const phase of ['first', 'second']) {
+      // initialize() submits the material pair before source preparation's own
+      // shaders. Observe both initial creation and the recreation after clear.
+      assert.deepEqual(
+        row.shaders.filter((entry) => entry.phase === phase).slice(0, 2),
+        CONTROL.shaders.map((shader) => ({ phase, ...shader })),
+        `${row.label}/${phase}: actual neutral material shader drift`
+      );
+    }
     assert.equal(row.experimentalGpuControl, true);
     assert.equal(row.first.success, true, `${row.label}: first render is not a valid control`);
     assert.equal(row.first.gpuPreparations, 1);
@@ -61,9 +103,14 @@ export function assertProgramClearEvidence(evidence) {
  * the byte matrix or the frame-budget timed windows. */
 export async function collectProgramClearRegression(modules) {
   const results = [];
-  const digest = async (text) =>
+  const digest = async (value) =>
     Array.from(
-      new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))),
+      new Uint8Array(
+        await crypto.subtle.digest(
+          'SHA-256',
+          typeof value === 'string' ? new TextEncoder().encode(value) : value
+        )
+      ),
       (byte) => byte.toString(16).padStart(2, '0')
     ).join('');
   for (const { label, moduleUrl, prefilterSelection } of modules) {
@@ -92,6 +139,7 @@ export async function collectProgramClearRegression(modules) {
     if (!gl) throw new Error('Real program WebGL context unavailable');
     const row = {
       label,
+      profile: 'fixed-regular-neutral',
       prefilterSelection,
       experimentalGpuControl: true,
       first: {},
@@ -127,6 +175,31 @@ export async function collectProgramClearRegression(modules) {
       if (code !== gl.NO_ERROR) row.errors.push({ phase, code, afterCall: row.trace.length });
       return code;
     };
+    const shaderKinds = new WeakMap();
+    const shaderInputs = [];
+    const originalCreateShader = gl.createShader.bind(gl);
+    gl.createShader = (kind) => {
+      const shader = originalCreateShader(kind);
+      if (shader) shaderKinds.set(shader, kind);
+      return shader;
+    };
+    const originalShaderSource = gl.shaderSource.bind(gl);
+    gl.shaderSource = (shader, source) => {
+      const kind = shaderKinds.get(shader);
+      shaderInputs.push({
+        phase,
+        kind:
+          kind === gl.VERTEX_SHADER
+            ? 'vertex'
+            : kind === gl.FRAGMENT_SHADER
+              ? 'fragment'
+              : 'unknown',
+        source,
+      });
+      // Forward the original shader unchanged. No added GL query consumes the
+      // old error or changes the selected program, profile, or GPU backend.
+      return originalShaderSource(shader, source);
+    };
     const program = createWebOpticalProgram(
       canvas,
       null,
@@ -144,7 +217,8 @@ export async function collectProgramClearRegression(modules) {
       geometry: { width: 64, height: 32, radius: 16, dpr: 1, bounds: [0, 0, 1, 1] },
       pressed: false,
       variant: 'regular',
-      tint: 'style-fill',
+      // Deliberately omit both tint and contact: both actual source versions
+      // select the unchanged fixed regular neutral shader with this input.
       fill: [0, 0, 0, 1],
       foreground: [1, 1, 1, 1],
     };
@@ -152,8 +226,12 @@ export async function collectProgramClearRegression(modules) {
       sourceWidth: 416,
       sourceHeight: 161,
       sourceBytes: frame.source.pixels.length,
+      sourcePixelsSha256: await digest(frame.source.pixels),
       geometry: frame.geometry,
-      tint: frame.tint,
+      pressed: frame.pressed,
+      variant: frame.variant,
+      tint: frame.tint ?? null,
+      contact: frame.contact ?? null,
       fill: frame.fill,
       foreground: frame.foreground,
     };
@@ -194,6 +272,13 @@ export async function collectProgramClearRegression(modules) {
       row.afterDispose = program.inspect();
       scope.remove();
     }
+    row.shaders = await Promise.all(
+      shaderInputs.map(async ({ phase, kind, source }) => ({
+        phase,
+        kind,
+        sha256: await digest(source),
+      }))
+    );
     const retired = new Set();
     row.reboundRetiredProgram = row.trace.some((entry) => {
       if (entry.call === 'deleteProgram') retired.add(entry.program);
@@ -207,9 +292,10 @@ async function observe(output, regressionRoot) {
   const root = process.cwd();
   await mkdir(output, { recursive: true });
   const report = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     started: new Date().toISOString(),
     probeSha256: sha256(await readFile(fileURLToPath(import.meta.url))),
+    control: CONTROL,
     sources: [],
     environment: { node: process.version, headless: true },
     failures: [],
@@ -217,6 +303,7 @@ async function observe(output, regressionRoot) {
       'Untimed program-lifetime control on one real browser/renderer, not a performance or physical display claim.',
       'Only application getError calls are observed; no extra call consumes the GL error.',
       'Both controls deliberately execute GPU preparation: the old source receives historical auto; the candidate receives its actual prefilter factory. This does not exercise or benchmark the candidate default CPU policy.',
+      'Cross-source image equality is scoped to the frozen shared neutral regular profile, not style-fill algorithms that changed between revisions. The earlier style-fill mismatch remains a separate historical observation.',
     ],
   };
   let browser;
@@ -275,7 +362,15 @@ async function observe(output, regressionRoot) {
           blob: git(sourceRoot, ['rev-parse', `HEAD:${input}`]),
         };
       }
-      assert.ok(source.inputs[PROGRAM] && source.inputs[HELPER], 'Missing real module inputs');
+      assert.ok(
+        source.inputs[PROGRAM] && source.inputs[HELPER] && source.inputs[KERNEL],
+        'Missing real module inputs'
+      );
+      assert.equal(
+        source.inputs[KERNEL].sha256,
+        CONTROL.kernel.sha256,
+        `${label}: the frozen common neutral kernel changed`
+      );
       report.sources.push(source);
       modules.push({
         label,
@@ -335,8 +430,9 @@ async function observe(output, regressionRoot) {
         prefilterSelection,
       })),
       evidence: report.evidence.map(
-        ({ label, prefilterSelection, first, second, errors, reboundRetiredProgram }) => ({
+        ({ label, profile, prefilterSelection, first, second, errors, reboundRetiredProgram }) => ({
           label,
+          profile,
           prefilterSelection,
           first,
           second,
