@@ -16,7 +16,7 @@ function prototypes(node: DemoChild): string[] {
 }
 
 // Tooltip is published for base, shadcn, and brutalist. base and brutalist each
-// declare initialRuntime="wc" plus a three-runtime selector (no vue2); shadcn
+// declare initialRuntime="wc" plus a four-runtime selector; shadcn
 // declares only initialRuntime. base/shadcn use a plain `tooltip.mdx`; brutalist
 // publishes at `components/tooltip.mdx`. base and shadcn have no manifest entry,
 // so both use the non-manifest guard; only brutalist is manifest-bound.
@@ -24,7 +24,7 @@ const TOOLTIP_FAMILIES = [
   {
     family: 'base',
     mdxPath: 'tooltip.mdx',
-    runtimes: "runtimes={['wc', 'react', 'vue']}",
+    runtimes: "runtimes={['wc', 'react', 'vue', 'vue2']}",
     slug: 'ui-libraries/base/tooltip',
     manifestBound: false,
   },
@@ -38,7 +38,7 @@ const TOOLTIP_FAMILIES = [
   {
     family: 'brutalist',
     mdxPath: 'components/tooltip.mdx',
-    runtimes: "runtimes={['wc', 'react', 'vue']}",
+    runtimes: "runtimes={['wc', 'react', 'vue', 'vue2']}",
     slug: 'ui-libraries/brutalist/components/tooltip',
     manifestBound: true,
   },

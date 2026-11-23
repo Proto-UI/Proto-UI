@@ -12,7 +12,10 @@ import {
   readContrastPopupEscapeBefore,
   readContrastPopupEscapeAfter,
 } from '../scripts/contrast-popup-escape.mjs';
-import { discoverContrastSources } from '../scripts/contrast-audit-plan.mjs';
+import {
+  contrastHeldBinaryTargets,
+  discoverContrastSources,
+} from '../scripts/contrast-audit-plan.mjs';
 import { compileContrastAnatomy, compareContrastAnatomy } from '../scripts/contrast-anatomy.mjs';
 import {
   KnownUnsupportedContrastDomain,
@@ -194,6 +197,18 @@ function declaration(name: string): string {
   return node.getText(runnerAst);
 }
 
+function actualPassiveFamilies(): Set<string> {
+  const statement = runnerAst.statements.find(
+    (node) =>
+      ts.isVariableStatement(node) &&
+      node.declarationList.declarations.some(
+        (entry) => ts.isIdentifier(entry.name) && entry.name.text === 'passiveFamilies'
+      )
+  );
+  if (!statement) throw new Error('Missing actual passive-family policy.');
+  return new Function(javascript(statement.getText(runnerAst)) + ';return passiveFamilies;')();
+}
+
 function javascript(source: string): string {
   return ts.transpileModule(source, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
@@ -373,7 +388,7 @@ for (const declaration of declarations)
     });
   }
 
-it('preserves every declared primary recipe and page/runtime/theme case, including explicit Tooltip limits', () => {
+it('preserves every declared primary recipe and page/runtime/theme case, including four Tooltip hosts', () => {
   expect(declarations.map(({ family }) => family)).toEqual(Object.keys(authoredSources));
   for (const declaration of declarations) {
     expect(declaration.recipeId).toBe(
@@ -386,11 +401,12 @@ it('preserves every declared primary recipe and page/runtime/theme case, includi
   }
   expect(
     declarations.reduce((count, declaration) => count + declaration.runtimes.length * 2, 0)
-  ).toBe(declarations.length * 8 - 2);
+  ).toBe(declarations.length * 8);
   expect(declarations.find((declaration) => declaration.family === 'tooltip')?.runtimes).toEqual([
     'wc',
     'react',
     'vue',
+    'vue2',
   ]);
   expect(declarations.find((declaration) => declaration.family === 'dropdown-menu')?.recipeId).toBe(
     'demo-brutalist-dropdown-menu'
@@ -885,8 +901,10 @@ function pipeline(family: string) {
     'owned',
     'projectionObservation',
     'primary',
+    'plannedStates',
     'anatomyObservation',
     'passiveSurfaceObservation',
+    'imagePassiveApplicability',
   ];
   if (
     runnerAst.statements.some(
@@ -894,6 +912,19 @@ function pipeline(family: string) {
     )
   )
     names.unshift('projectionExpectation');
+  for (const name of [
+    'dropdownPointerRows',
+    'dropdownPointerTarget',
+    'dropdownPointerIdentity',
+    'dropdownPointerAX',
+  ]) {
+    if (
+      runnerAst.statements.some(
+        (node) => ts.isFunctionDeclaration(node) && node.name?.text === name
+      )
+    )
+      names.push(name);
+  }
   const source = names
     .map(declaration)
     .join('\n')
@@ -938,12 +969,13 @@ function pipeline(family: string) {
       declarations.map((entry) => [entry.family, { serialized: JSON.stringify(entry.runtimes) }])
     ),
     surfacePrototypeId,
-    passiveFamilies: new Set(['badge', 'card', 'skeleton', 'separator', 'spinner']),
+    passiveFamilies: actualPassiveFamilies(),
     resolveProjectionRecipe,
     assertDemoSpec,
     collectPrototypeIds,
     compileContrastAnatomy,
     compareContrastAnatomy,
+    contrastHeldBinaryTargets,
     anatomyPlans: new Map(),
     caseSubjects: new WeakMap<object, unknown>(),
     __recipe: recipe,
@@ -965,6 +997,7 @@ function pipelinePage(root: HTMLElement, beforeRead?: () => () => void) {
     }
   };
   const locator = (select: () => Element[]): any => ({
+    count: async () => select().length,
     first: () => locator(() => select().slice(0, 1)),
     last: () => locator(() => select().slice(-1)),
     elementHandle: async () => {
@@ -1130,7 +1163,7 @@ for (const declaration of declarations)
         const page = pipelinePage(mounted.root);
         const identity = await readers.projectionObservation(page, item(runtime, family));
         expect(identity.achieved).toBe(true);
-        if (['badge', 'card', 'skeleton', 'separator', 'spinner'].includes(family)) {
+        if (actualPassiveFamilies().has(family)) {
           const result = await readers.passiveSurfaceObservation(page, family, runtime);
           expect(result.ready, JSON.stringify(result)).toBe(true);
           for (const field of [
@@ -1169,7 +1202,7 @@ for (const declaration of declarations)
     });
   }
 
-for (const family of ['button', 'badge']) {
+for (const family of ['button', 'badge', 'image']) {
   describe(`${family}: downstream consumers revalidate every identity field and boundary`, () => {
     let mounted: Preview;
     let restoreGeometry: () => void;
@@ -2313,5 +2346,847 @@ for (const runtime of runtimes) {
       restore();
       await mounted.destroy();
     }
+  });
+}
+
+for (const runtime of runtimes) {
+  it(`radio-group primary/${runtime}: binds the authored selected Tab entry rather than the first radio`, async () => {
+    const mounted = await preview(runtime, 'radio-group');
+    const restore = controlledMeasurementInputs();
+    try {
+      const readers = pipeline('radio-group');
+      const page = pipelinePage(mounted.root);
+      const auditCase = item(runtime, 'radio-group');
+      const target = readers.primary(page.locator('[data-previewer-id]'), 'radio-group');
+      expect(target, 'The original runner omitted the radio-group primary branch.').not.toBeNull();
+      const selected = await target.evaluate((element: HTMLElement) => element);
+      expect(selected).toBe(
+        mounted.retained.querySelector('[data-demo-ref="density-comfortable"]')
+      );
+      expect(selected).not.toBe(mounted.retained.querySelector('[role="radio"]'));
+      expect(selected.getAttribute('role')).toBe('radio');
+      expect(selected.getAttribute('aria-checked')).toBe('true');
+      expect(selected.getAttribute('tabindex')).toBe('0');
+      expect(selected.closest('[role="radiogroup"]')?.getAttribute('aria-label')).toBe(
+        'Density preference'
+      );
+      const identity = await readers.projectionObservation(page, auditCase);
+      expect(identity.achieved).toBe(true);
+      const rest = await readers.anatomyObservation(page, auditCase, 'rest');
+      expect(rest.achieved, JSON.stringify(rest.failures)).toBe(true);
+      expect(rest.owner).toBe(identity.owner);
+      expect(rest.generation).toBe(identity.generation);
+      expect(rest.observed.currentLease).toBe(true);
+      expect(
+        rest.observed.surfaces.find((part: any) => part.uid === rest.observed.primary)?.ref
+      ).toBe('density-comfortable');
+
+      // Synthetic focus checks observer attribution only. Native Tab/Shift+Tab,
+      // hover, focus-visible and paint still belong to all eight audit cases.
+      selected.focus();
+      const focused = await readers.anatomyObservation(page, auditCase, 'keyboard-focus');
+      expect(focused.achieved).toBe(true);
+      expect(
+        focused.observed.surfaces.find((part: any) => part.uid === focused.observed.primary)
+      ).toMatchObject({ ref: 'density-comfortable', focused: true, currentLease: true });
+    } finally {
+      restore();
+      await mounted.destroy();
+    }
+  });
+
+  it(`radio-group primary/${runtime}: rejects missing, ambiguous, wrong-owner and stale selected parts`, async () => {
+    const mounted = await preview(runtime, 'radio-group');
+    const restore = controlledMeasurementInputs();
+    const selected = mounted.retained.querySelector<HTMLElement>(
+      '[data-demo-ref="density-comfortable"]'
+    )!;
+    const duplicate = document.createElement('div');
+    const readers = pipeline('radio-group');
+    const page = pipelinePage(mounted.root);
+    const auditCase = item(runtime, 'radio-group');
+    const observe = () => readers.anatomyObservation(page, auditCase, 'rest');
+    try {
+      expect((await observe()).achieved).toBe(true);
+      for (const [attribute, wrong] of [
+        ['data-demo-ref', 'retired-density-comfortable'],
+        ['data-projection-prototype', 'brutalist-button'],
+        ['role', 'button'],
+        ['aria-checked', 'false'],
+        ['tabindex', '-1'],
+      ]) {
+        const before = selected.getAttribute(attribute);
+        selected.setAttribute(attribute, wrong);
+        try {
+          await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+        } finally {
+          if (before === null) selected.removeAttribute(attribute);
+          else selected.setAttribute(attribute, before);
+        }
+        expect((await observe()).achieved, attribute).toBe(true);
+      }
+      for (const [attribute, wrong] of [
+        ['data-projection-owner', 'another-radio-owner'],
+        ['data-projection-generation', '0'],
+      ]) {
+        const before = selected.getAttribute(attribute);
+        selected.setAttribute(attribute, wrong);
+        try {
+          const invalid = await observe();
+          expect(invalid.achieved, attribute).toBe(false);
+          expect(invalid.observed.currentLease, attribute).toBe(false);
+        } finally {
+          if (before === null) selected.removeAttribute(attribute);
+          else selected.setAttribute(attribute, before);
+        }
+        expect((await observe()).achieved, attribute).toBe(true);
+      }
+      // A plain duplicate physical claim avoids starting another Adapter while
+      // proving that strict target selection cannot silently choose first().
+      for (const attribute of selected.attributes)
+        duplicate.setAttribute(attribute.name, attribute.value);
+      selected.parentElement!.append(duplicate);
+      await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+      duplicate.remove();
+      expect((await observe()).achieved).toBe(true);
+    } finally {
+      duplicate.remove();
+      restore();
+      await mounted.destroy();
+    }
+  });
+}
+
+for (const runtime of runtimes) {
+  it(`transition primary/${runtime}: binds the authored Enter control rather than the passive phase surface`, async () => {
+    const mounted = await preview(runtime, 'transition');
+    const restore = controlledMeasurementInputs();
+    try {
+      const readers = pipeline('transition');
+      const page = pipelinePage(mounted.root);
+      const auditCase = item(runtime, 'transition');
+      const target = readers.primary(page.locator('[data-previewer-id]'), 'transition');
+      expect(target, 'The original runner omitted the transition primary branch.').not.toBeNull();
+      const enter = await target.evaluate((element: HTMLElement) => element);
+      expect(enter).toBe(mounted.retained.querySelector('[data-demo-ref="enterBtn"]'));
+      expect(enter).not.toBe(mounted.retained.querySelector('[data-demo-ref="transition"]'));
+      expect(enter.getAttribute('role')).toBe('button');
+      expect(enter.textContent).toBe('Enter · 进入');
+      const identity = await readers.projectionObservation(page, auditCase);
+      expect(identity.achieved).toBe(true);
+      const rest = await readers.anatomyObservation(page, auditCase, 'rest');
+      expect(rest.achieved, JSON.stringify(rest.failures)).toBe(true);
+      expect(rest.owner).toBe(identity.owner);
+      expect(rest.generation).toBe(identity.generation);
+      expect(rest.observed.currentLease).toBe(true);
+      expect(
+        rest.observed.surfaces.find((part: any) => part.uid === rest.observed.primary)
+      ).toMatchObject({ ref: 'enterBtn', prototypeId: 'brutalist-button' });
+      expect(rest.observed.surfaces.some((part: any) => part.ref === 'transition')).toBe(true);
+
+      // This only checks observer attribution. The actual Enter/Leave/Complete
+      // actions and phase semantics remain separate from this contrast journey.
+      enter.focus();
+      const focused = await readers.anatomyObservation(page, auditCase, 'keyboard-focus');
+      expect(focused.achieved).toBe(true);
+      expect(
+        focused.observed.surfaces.find((part: any) => part.uid === focused.observed.primary)
+      ).toMatchObject({ ref: 'enterBtn', focused: true, currentLease: true });
+    } finally {
+      restore();
+      await mounted.destroy();
+    }
+  });
+
+  it(`transition primary/${runtime}: rejects missing, ambiguous, wrong-owner and stale controls`, async () => {
+    const mounted = await preview(runtime, 'transition');
+    const restore = controlledMeasurementInputs();
+    const enter = mounted.retained.querySelector<HTMLElement>('[data-demo-ref="enterBtn"]')!;
+    const duplicate = document.createElement('div');
+    const readers = pipeline('transition');
+    const page = pipelinePage(mounted.root);
+    const auditCase = item(runtime, 'transition');
+    const observe = () => readers.anatomyObservation(page, auditCase, 'rest');
+    try {
+      expect((await observe()).achieved).toBe(true);
+      for (const [attribute, wrong] of [
+        ['data-demo-ref', 'retired-enterBtn'],
+        ['data-projection-prototype', 'brutalist-transition'],
+        ['role', 'presentation'],
+      ]) {
+        const before = enter.getAttribute(attribute);
+        enter.setAttribute(attribute, wrong);
+        try {
+          await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+        } finally {
+          if (before === null) enter.removeAttribute(attribute);
+          else enter.setAttribute(attribute, before);
+        }
+        expect((await observe()).achieved, attribute).toBe(true);
+      }
+      for (const [attribute, wrong] of [
+        ['data-projection-owner', 'another-transition-owner'],
+        ['data-projection-generation', '0'],
+      ]) {
+        const before = enter.getAttribute(attribute);
+        enter.setAttribute(attribute, wrong);
+        try {
+          const invalid = await observe();
+          expect(invalid.achieved, attribute).toBe(false);
+          expect(invalid.observed.currentLease, attribute).toBe(false);
+        } finally {
+          if (before === null) enter.removeAttribute(attribute);
+          else enter.setAttribute(attribute, before);
+        }
+        expect((await observe()).achieved, attribute).toBe(true);
+      }
+      for (const attribute of enter.attributes)
+        duplicate.setAttribute(attribute.name, attribute.value);
+      enter.parentElement!.append(duplicate);
+      await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+      duplicate.remove();
+      expect((await observe()).achieved).toBe(true);
+    } finally {
+      duplicate.remove();
+      restore();
+      await mounted.destroy();
+    }
+  });
+}
+
+it('Image rest-only applicability retains the actual passive source and historical failed targets', () => {
+  const recipe =
+    productionDemos[
+      '../src/content/' + authoredSources.image.recipePath.slice('apps/www/src/content/'.length)
+    ];
+  const manifest = PROJECTION_FAMILY_MANIFESTS.brutalist.families.image;
+  const identities = new Set<string>();
+  collectPrototypeIds(recipe.root, identities);
+  expect([...identities]).toEqual(['brutalist-image-root']);
+  expect(manifest.recipePrototypeIds).toEqual(['brutalist-image-root']);
+  const instances: string[] = [];
+  const visit = (node: any) => {
+    if (!node || typeof node === 'string') return;
+    if (node.kind === 'proto') instances.push(node.ref);
+    for (const child of node.children ?? []) visit(child);
+  };
+  visit(recipe.root);
+  expect(instances).toEqual(['fit-contain', 'fit-cover', 'fit-fill', 'decorative', 'error']);
+  const readers = pipeline('image');
+  expect(
+    readers.primary(
+      {
+        locator: () => {
+          throw new Error('No authored Image action exists.');
+        },
+      },
+      'image'
+    )
+  ).toBeNull();
+  expect(readers.plannedStates('image')).toEqual(['rest']);
+  expect(readers.imagePassiveApplicability(recipe).applicable).toBe(true);
+  // The old failed journal remains failed with all original targets unachieved.
+  const unresolved = {
+    ...item('wc', 'image'),
+    status: 'failed',
+    plannedStates: ['rest', 'hover', 'keyboard-focus'],
+  };
+  expect(unresolved.achievedTargets).toEqual([]);
+  expect(isUnresolvedContrastCase(unresolved)).toBe(true);
+});
+
+for (const runtime of runtimes) {
+  it(`Image static plan/${runtime}: retains all five authored sources, fits and a11y inputs`, async () => {
+    const mounted = await preview(runtime, 'image');
+    const restore = controlledMeasurementInputs();
+    try {
+      const readers = pipeline('image');
+      const result = await readers.passiveSurfaceObservation(
+        pipelinePage(mounted.root),
+        'image',
+        runtime
+      );
+      expect(result.achieved, JSON.stringify(result)).toBe(true);
+      expect(result.imageApplicability.applicable).toBe(true);
+      expect(result.expectedInstances.map((instance: any) => instance.ref)).toEqual([
+        'fit-contain',
+        'fit-cover',
+        'fit-fill',
+        'decorative',
+        'error',
+      ]);
+      expect(result.surfaces).toHaveLength(5);
+      for (const instance of result.expectedInstances) {
+        const surface = result.surfaces.find((candidate: any) => candidate.ref === instance.ref);
+        expect(surface).toMatchObject({
+          currentLease: true,
+          withinContent: true,
+          ancestorPrototypeIds: [],
+        });
+        expect(instance.props).toMatchObject({
+          source: expect.any(String),
+          fit: expect.any(String),
+        });
+      }
+      expect(result.unexercisedCoverage.join(' ')).toContain('Native image acquisition/decoding');
+      expect(result.scope).toContain('not semantic or cue conformance');
+    } finally {
+      restore();
+      await mounted.destroy();
+    }
+  });
+}
+
+it('Image static applicability fails closed for interactive, dynamic, changed and incomplete variants', () => {
+  const recipe: any =
+    productionDemos[
+      '../src/content/' + authoredSources.image.recipePath.slice('apps/www/src/content/'.length)
+    ];
+  const readers = pipeline('image');
+  const firstImage = (demo: any): any => {
+    const visit = (node: any): any =>
+      node.kind === 'proto' ? node : (node.children ?? []).map(visit).find(Boolean);
+    return visit(demo.root);
+  };
+  const changes: [string, (demo: any) => void][] = [
+    [
+      'setup',
+      (demo) => {
+        demo.setup = () => {};
+      },
+    ],
+    [
+      'native link',
+      (demo) => {
+        demo.root.tag = 'a';
+        demo.root.attrs = { href: '/next' };
+      },
+    ],
+    [
+      'keyboard input',
+      (demo) => {
+        demo.root.attrs = { tabindex: '0' };
+      },
+    ],
+    [
+      'dynamic stage',
+      (demo) => {
+        demo.root.dynamicChildren = { prototypeIds: ['brutalist-image-root'] };
+      },
+    ],
+    [
+      'interactive prototype',
+      (demo) => {
+        firstImage(demo).prototypeId = 'brutalist-button';
+      },
+    ],
+    [
+      'callback prop',
+      (demo) => {
+        firstImage(demo).props.onPress = 'not-admitted';
+      },
+    ],
+    [
+      'changed fit',
+      (demo) => {
+        firstImage(demo).props.fit = 'cover';
+      },
+    ],
+    [
+      'missing authored ref',
+      (demo) => {
+        firstImage(demo).ref = 'unknown';
+      },
+    ],
+    [
+      'missing alt',
+      (demo) => {
+        firstImage(demo).props.alternativeText = '';
+      },
+    ],
+    [
+      'missing presentation',
+      (demo) => {
+        demo.root.children.pop();
+      },
+    ],
+    [
+      'duplicate presentation',
+      (demo) => {
+        demo.root.children.push(structuredClone(firstImage(demo)));
+      },
+    ],
+  ];
+  for (const [name, change] of changes) {
+    const altered = structuredClone(recipe);
+    change(altered);
+    const result = readers.imagePassiveApplicability(altered);
+    expect(result.applicable, name).toBe(false);
+    expect(result.failures.length, name).toBeGreaterThan(0);
+  }
+});
+
+for (const [family, ref, label] of [
+  ['live-region', 'announcePolite', 'Push polite update · 推送 polite 更新'],
+  ['async-region', 'markBusy', 'Set busy: true · 标记忙碌'],
+]) {
+  for (const runtime of runtimes) {
+    it(`auxiliary primary/${family}/${runtime}: binds the authored public control without making its region interactive`, async () => {
+      const mounted = await preview(runtime, family);
+      const restore = controlledMeasurementInputs();
+      try {
+        const readers = pipeline(family),
+          page = pipelinePage(mounted.root),
+          auditCase = item(runtime, family);
+        const target = readers.primary(page.locator('[data-previewer-id]'), family);
+        expect(
+          target,
+          'The original runner omitted this declared auxiliary control.'
+        ).not.toBeNull();
+        const control = await target.evaluate((element: HTMLElement) => element);
+        expect(control).toBe(mounted.retained.querySelector(`[data-demo-ref="${ref}"]`));
+        expect(control.getAttribute('data-projection-prototype')).toBe('brutalist-button');
+        expect(control.getAttribute('role')).toBe('button');
+        expect(control.textContent).toBe(label);
+        const rest = await readers.anatomyObservation(page, auditCase, 'rest');
+        expect(rest.achieved, JSON.stringify(rest.failures)).toBe(true);
+        expect(rest.observed.currentLease).toBe(true);
+        expect(
+          rest.observed.surfaces.find((part: any) => part.uid === rest.observed.primary)
+        ).toMatchObject({
+          ref,
+          prototypeId: 'brutalist-button',
+        });
+        expect(
+          rest.observed.surfaces.some(
+            (part: any) => part.prototypeId === `brutalist-${family}-root`
+          )
+        ).toBe(true);
+        // Observer attribution only: native input, region announcements and
+        // busy changes remain separate from this visual control journey.
+        control.focus();
+        const focused = await readers.anatomyObservation(page, auditCase, 'keyboard-focus');
+        expect(focused.achieved).toBe(true);
+        expect(
+          focused.observed.surfaces.find((part: any) => part.uid === focused.observed.primary)
+        ).toMatchObject({
+          ref,
+          focused: true,
+          currentLease: true,
+        });
+      } finally {
+        restore();
+        await mounted.destroy();
+      }
+    });
+
+    it(`auxiliary primary/${family}/${runtime}: rejects missing, ambiguous, wrong-part and retired controls`, async () => {
+      const mounted = await preview(runtime, family);
+      const restore = controlledMeasurementInputs();
+      const control = mounted.retained.querySelector<HTMLElement>(`[data-demo-ref="${ref}"]`)!;
+      const duplicate = document.createElement('div');
+      const readers = pipeline(family),
+        page = pipelinePage(mounted.root),
+        auditCase = item(runtime, family);
+      const observe = () => readers.anatomyObservation(page, auditCase, 'rest');
+      try {
+        expect((await observe()).achieved).toBe(true);
+        for (const [attribute, wrong] of [
+          ['data-demo-ref', `retired-${ref}`],
+          ['data-projection-prototype', `brutalist-${family}-root`],
+          ['role', 'presentation'],
+        ]) {
+          const before = control.getAttribute(attribute);
+          control.setAttribute(attribute, wrong);
+          try {
+            await expect(observe()).rejects.toThrow(
+              'Actual audit selector is missing or ambiguous'
+            );
+          } finally {
+            if (before === null) control.removeAttribute(attribute);
+            else control.setAttribute(attribute, before);
+          }
+          expect((await observe()).achieved, attribute).toBe(true);
+        }
+        for (const [attribute, wrong] of [
+          ['data-projection-owner', 'another-control-owner'],
+          ['data-projection-generation', '0'],
+        ]) {
+          const before = control.getAttribute(attribute);
+          control.setAttribute(attribute, wrong);
+          try {
+            const invalid = await observe();
+            expect(invalid.achieved, attribute).toBe(false);
+            expect(invalid.observed.currentLease, attribute).toBe(false);
+          } finally {
+            if (before === null) control.removeAttribute(attribute);
+            else control.setAttribute(attribute, before);
+          }
+          expect((await observe()).achieved, attribute).toBe(true);
+        }
+        for (const attribute of control.attributes)
+          duplicate.setAttribute(attribute.name, attribute.value);
+        control.parentElement!.append(duplicate);
+        await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+        duplicate.remove();
+        expect((await observe()).achieved).toBe(true);
+      } finally {
+        duplicate.remove();
+        restore();
+        await mounted.destroy();
+      }
+    });
+  }
+}
+
+for (const runtime of runtimes) {
+  it(`input primary/${runtime}: binds the actual named editor and fingerprints all three authored native controls`, async () => {
+    const mounted = await preview(runtime, 'input');
+    const restore = controlledMeasurementInputs();
+    vi.stubGlobal('visualViewport', null);
+    try {
+      const readers = pipeline('input'),
+        page = pipelinePage(mounted.root),
+        auditCase = item(runtime, 'input');
+      const target = readers.primary(page.locator('[data-previewer-id]'), 'input');
+      expect(target, 'The original runner omitted the Input native primary.').not.toBeNull();
+      const editor = await target.evaluate((element: HTMLInputElement) => element);
+      expect(editor).toBeInstanceOf(HTMLInputElement);
+      expect(editor.getAttribute('aria-label')).toBe('Name');
+      expect(editor.value).toBe('Guang');
+      expect(editor.disabled).toBe(false);
+      expect(editor.readOnly).toBe(false);
+      // Match the real audit entry: select and validate its current subject
+      // before reading a fingerprint. No global subject fallback is permitted.
+      expect((await readers.projectionObservation(page, auditCase)).achieved).toBe(true);
+      const state = JSON.parse(await readers.fingerprint(page));
+      const inputs = state.surfaces.filter((surface: any) =>
+        surface.host.attributes.some(
+          ([key, value]: string[]) =>
+            key === 'data-projection-prototype' && value === 'brutalist-input-root'
+        )
+      );
+      expect(inputs).toHaveLength(3);
+      expect(inputs.every((surface: any) => surface.target[0].tag === 'INPUT')).toBe(true);
+      expect(inputs.map((surface: any) => surface.target[0].value)).toEqual([
+        'Guang',
+        'Unavailable',
+        'Base keeps this focusable.',
+      ]);
+      const rest = await readers.anatomyObservation(page, auditCase, 'rest');
+      expect(rest.achieved, JSON.stringify(rest.failures)).toBe(true);
+      editor.focus();
+      const focused = await readers.anatomyObservation(page, auditCase, 'keyboard-focus');
+      expect(focused.achieved).toBe(true);
+      expect(
+        focused.observed.surfaces.find((part: any) => part.uid === focused.observed.primary)
+      ).toMatchObject({
+        prototypeId: 'brutalist-input-root',
+        focused: true,
+        currentLease: true,
+      });
+    } finally {
+      restore();
+      await mounted.destroy();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it(`input primary/${runtime}: rejects missing, ambiguous, renamed and foreign physical editors`, async () => {
+    const mounted = await preview(runtime, 'input');
+    const restore = controlledMeasurementInputs();
+    const readers = pipeline('input'),
+      page = pipelinePage(mounted.root),
+      auditCase = item(runtime, 'input');
+    const observe = () => readers.anatomyObservation(page, auditCase, 'rest');
+    let duplicate: Element | null = null;
+    try {
+      const target = readers.primary(page.locator('[data-previewer-id]'), 'input');
+      expect(target).not.toBeNull();
+      const editor = await target.evaluate((element: HTMLInputElement) => element);
+      const host = [
+        ...mounted.retained.querySelectorAll<HTMLElement>(
+          '[data-projection-prototype="brutalist-input-root"]'
+        ),
+      ].find(
+        (candidate) =>
+          candidate === editor ||
+          candidate.contains(editor) ||
+          candidate.shadowRoot?.contains(editor)
+      )!;
+      expect(host).toBeDefined();
+      expect((await observe()).achieved).toBe(true);
+      for (const [element, attribute, wrong] of [
+        [editor, 'aria-label', 'another editor'],
+        [host, 'data-projection-prototype', 'brutalist-textarea-root'],
+      ] as const) {
+        const before = element.getAttribute(attribute);
+        element.setAttribute(attribute, wrong);
+        try {
+          await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+        } finally {
+          if (before === null) element.removeAttribute(attribute);
+          else element.setAttribute(attribute, before);
+        }
+      }
+      for (const attribute of ['data-projection-owner', 'data-projection-generation']) {
+        const before = host.getAttribute(attribute);
+        host.setAttribute(attribute, 'foreign');
+        try {
+          const invalid = await observe();
+          expect(invalid.achieved).toBe(false);
+          expect(invalid.observed.currentLease).toBe(false);
+        } finally {
+          if (before === null) host.removeAttribute(attribute);
+          else host.setAttribute(attribute, before);
+        }
+        if (editor !== host) {
+          editor.setAttribute(attribute, 'foreign');
+          try {
+            await expect(observe()).rejects.toThrow(
+              /Input native editor crosses a foreign projection lease/
+            );
+            await expect(readers.fingerprint(page)).rejects.toThrow(
+              /Input native editor crosses a foreign projection lease/
+            );
+          } finally {
+            editor.removeAttribute(attribute);
+          }
+        }
+      }
+      duplicate = editor.cloneNode(true) as Element;
+      editor.parentElement!.append(duplicate);
+      await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+      duplicate.remove();
+      expect((await observe()).achieved).toBe(true);
+      const parent = editor.parentNode!,
+        next = editor.nextSibling;
+      editor.remove();
+      try {
+        await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+      } finally {
+        parent.insertBefore(editor, next);
+      }
+      expect((await observe()).achieved).toBe(true);
+    } finally {
+      duplicate?.remove();
+      restore();
+      await mounted.destroy();
+    }
+  });
+}
+
+for (const runtime of runtimes) {
+  it(`dropdown pointer identity/${runtime}: binds both real authored variants and their own Shortcuts`, async () => {
+    const mounted = await preview(runtime, 'dropdown-menu');
+    const restore = controlledMeasurementInputs();
+    try {
+      const readers = pipeline('dropdown-menu');
+      const page = pipelinePage(mounted.root);
+      await readers.projectionObservation(page, item(runtime, 'dropdown-menu'));
+      const trigger = mounted.retained.querySelector<HTMLElement>(
+        '[data-projection-prototype="brutalist-dropdown-trigger"]'
+      )!;
+      trigger.click();
+      await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('true'));
+      const popup = await readers.owned(page, 'brutalist-dropdown-content');
+      const rows = readers.dropdownPointerRows();
+      // The real runner waits for the owned popup and the Locator's physical
+      // Item resolution. This DOM bridge needs the same producer prerequisite;
+      // the invalid-owner controls below run once against the settled subject.
+      await vi.waitFor(async () => {
+        expect(await popup.count()).toBe(1);
+        for (const row of rows)
+          expect(await (await readers.dropdownPointerTarget(popup, row)).count()).toBe(1);
+      });
+      expect(rows.map((row: any) => [row.ref, row.value, row.pair])).toEqual([
+        ['profileAction', 'profile', 'main'],
+        ['deleteAction', 'delete', 'destructive'],
+      ]);
+      for (const row of rows) {
+        const target = await readers.dropdownPointerTarget(popup, row);
+        const observed = await readers.dropdownPointerIdentity(page, popup, target, row);
+        expect(observed.achieved, JSON.stringify(observed)).toBe(true);
+        expect(observed).toMatchObject({
+          ref: row.ref,
+          authoredValue: row.value,
+          directText: row.name,
+        });
+        expect(observed.shortcuts).toHaveLength(row.shortcut === null ? 0 : 1);
+        if (row.shortcut)
+          expect(observed.shortcuts[0]).toMatchObject({
+            text: row.shortcut,
+            current: true,
+            hidden: null,
+          });
+      }
+      const source =
+        productionDemos['../src/content/docs/zh-cn/demo-brutalist-dropdown-menu.demo.ts'];
+      const items: any[] = [];
+      const visit = (node: any) => {
+        if (node?.prototypeId === 'brutalist-dropdown-item') items.push(node);
+        for (const child of node?.children ?? []) visit(child);
+      };
+      visit(source.root);
+      expect(items.at(-1)).toMatchObject({
+        ref: 'deleteAction',
+        props: { value: 'delete', textValue: 'Delete', variant: 'destructive' },
+        children: ['Delete'],
+      });
+      expect(items.find((node) => node.props.value === 'logout').props.variant).toBeUndefined();
+      expect(items.filter((node) => node.props.variant === 'destructive')).toHaveLength(1);
+      const anatomy = await readers.anatomyObservation(
+        page,
+        item(runtime, 'dropdown-menu'),
+        'open'
+      );
+      expect(anatomy.achieved, JSON.stringify(anatomy.failures)).toBe(true);
+    } finally {
+      restore();
+      await mounted.destroy();
+    }
+  });
+
+  it(`dropdown pointer identity/${runtime}: rejects foreign, stale, ambiguous and misnamed physical Items`, async () => {
+    const mounted = await preview(runtime, 'dropdown-menu');
+    const restore = controlledMeasurementInputs();
+    const duplicate = document.createElement('div');
+    try {
+      const readers = pipeline('dropdown-menu');
+      const page = pipelinePage(mounted.root);
+      await readers.projectionObservation(page, item(runtime, 'dropdown-menu'));
+      const trigger = mounted.retained.querySelector<HTMLElement>(
+        '[data-projection-prototype="brutalist-dropdown-trigger"]'
+      )!;
+      trigger.click();
+      await vi.waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('true'));
+      const popup = await readers.owned(page, 'brutalist-dropdown-content');
+      const row = readers.dropdownPointerRows()[0];
+      await vi.waitFor(async () => {
+        expect(await popup.count()).toBe(1);
+        expect(await (await readers.dropdownPointerTarget(popup, row)).count()).toBe(1);
+      });
+      const target = await readers.dropdownPointerTarget(popup, row);
+      const actual = await target.evaluate((element: HTMLElement) => element);
+      const observe = () => readers.dropdownPointerIdentity(page, popup, target, row);
+      expect((await observe()).achieved).toBe(true);
+      for (const [attribute, wrong] of [
+        ['data-demo-ref', 'retired-profileAction'],
+        ['data-projection-prototype', 'brutalist-dropdown-trigger'],
+        ['role', 'button'],
+        ['data-projection-owner', 'another-menu-owner'],
+        ['data-projection-generation', '0'],
+      ]) {
+        const before = actual.getAttribute(attribute);
+        actual.setAttribute(attribute, wrong);
+        try {
+          await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+        } finally {
+          if (before === null) actual.removeAttribute(attribute);
+          else actual.setAttribute(attribute, before);
+        }
+        expect((await observe()).achieved, attribute).toBe(true);
+      }
+      const shortcut = actual.querySelector<HTMLElement>(
+        '[data-projection-prototype="brutalist-dropdown-shortcut"]'
+      )!;
+      for (const [attribute, wrong] of [
+        ['aria-hidden', 'true'],
+        ['data-projection-owner', 'another-menu-owner'],
+      ]) {
+        const before = shortcut.getAttribute(attribute);
+        shortcut.setAttribute(attribute, wrong);
+        try {
+          expect((await observe()).achieved).toBe(false);
+        } finally {
+          if (before === null) shortcut.removeAttribute(attribute);
+          else shortcut.setAttribute(attribute, before);
+        }
+        expect((await observe()).achieved).toBe(true);
+      }
+      const text = [...actual.childNodes].find((node) => node.nodeType === Node.TEXT_NODE)!;
+      const originalText = text.textContent;
+      text.textContent = 'A different command';
+      try {
+        expect((await observe()).achieved).toBe(false);
+      } finally {
+        text.textContent = originalText;
+      }
+      const originalControls = trigger.getAttribute('aria-controls')!;
+      trigger.setAttribute('aria-controls', 'another-menu');
+      try {
+        expect((await observe()).achieved).toBe(false);
+      } finally {
+        trigger.setAttribute('aria-controls', originalControls);
+      }
+      for (const attribute of actual.attributes)
+        duplicate.setAttribute(attribute.name, attribute.value);
+      actual.parentElement!.append(duplicate);
+      await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+      duplicate.remove();
+      expect((await observe()).achieved).toBe(true);
+    } finally {
+      duplicate.remove();
+      restore();
+      await mounted.destroy();
+    }
+  });
+}
+
+for (const variant of [
+  'correct',
+  'textValue-only',
+  'wrong-role',
+  'ignored',
+  'different-node',
+  'ambiguous',
+] as const) {
+  it(`dropdown AX transport contract: ${variant} retains exact native naming and physical identity checks`, async () => {
+    const readers = pipeline('dropdown-menu');
+    const row = readers.dropdownPointerRows()[0];
+    const calls: string[] = [];
+    const send = async (method: string) => {
+      calls.push(method);
+      if (method === 'Runtime.evaluate') return { result: { objectId: 'physical-profile' } };
+      if (method === 'DOM.describeNode') return { node: { backendNodeId: 17 } };
+      if (method === 'Accessibility.getPartialAXTree') {
+        const native = {
+          backendDOMNodeId: variant === 'different-node' ? 18 : 17,
+          ignored: variant === 'ignored',
+          role: { value: variant === 'wrong-role' ? 'button' : 'menuitem' },
+          name: { value: variant === 'textValue-only' ? 'Profile' : 'Profile ⇧⌘P' },
+        };
+        return { nodes: variant === 'ambiguous' ? [native, native] : [native] };
+      }
+      if (method === 'Runtime.releaseObjectGroup') return {};
+      throw new Error(`Unexpected CDP command: ${method}`);
+    };
+    const page = {
+      context: () => ({
+        newCDPSession: async () => ({
+          send,
+          detach: async () => {
+            calls.push('detach');
+          },
+        }),
+      }),
+    };
+    const observed = await readers.dropdownPointerAX(
+      page,
+      { owner: 'actual-owner', generation: '1', popupId: 'actual-popup' },
+      row
+    );
+    expect(observed.achieved).toBe(variant === 'correct');
+    expect(calls).toEqual([
+      'Runtime.evaluate',
+      'DOM.describeNode',
+      'Accessibility.getPartialAXTree',
+      'Runtime.releaseObjectGroup',
+      'detach',
+    ]);
+    // Supplied CDP replies exercise the transport contract, not browser/OS AT.
+    expect(observed.native?.name?.value ?? null).toBe(
+      variant === 'ambiguous' ? null : variant === 'textValue-only' ? 'Profile' : 'Profile ⇧⌘P'
+    );
   });
 }

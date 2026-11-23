@@ -151,7 +151,7 @@ async function releaseCaseSubject(page: Page): Promise<void> {
   caseSubjects.delete(page);
   await subject?.previewer.dispose();
 }
-const passiveFamilies = new Set(['badge', 'card', 'skeleton', 'separator', 'spinner']);
+const passiveFamilies = new Set(['badge', 'card', 'image', 'skeleton', 'separator', 'spinner']);
 function plannedStates(family: string): string[] {
   if (family === 'label')
     return [
@@ -621,7 +621,11 @@ async function capture(
       { image: png.toString('base64'), family: item.family, subject: caseSubject(page) }
     );
     const { stateFingerprint, ...storedFacts } = facts;
-    frame.facts = { ...storedFacts, stateFingerprintDigest: digest(stateFingerprint) };
+    frame.facts = {
+      ...storedFacts,
+      imageDigest: digest(png),
+      stateFingerprintDigest: digest(stateFingerprint),
+    };
     const factsJSON = JSON.stringify(frame.facts, null, 2) + '\n';
     await writeFile(join(output, `${name}.facts.json`), factsJSON, { flag: 'wx' });
     frame.factsFile = { path: `${name}.facts.json`, digest: digest(factsJSON) };
@@ -714,6 +718,14 @@ async function capture(
 }
 function primary(previewer: Locator, family: string): Locator | null {
   if (family === 'tabs') return previewer.getByRole('tab', { name: 'Details', exact: true });
+  if (family === 'input') {
+    const control = '[data-pui-root][data-projection-prototype="brutalist-input-root"]';
+    // The authored editable Name example is distinct from Disabled/Read-only.
+    // Bind its actual editor in every host, preserving uniqueness and ownership.
+    return previewer.locator(
+      `[data-projection-content] input${control}[aria-label="Name"], [data-projection-content] ${control} > input[part="control"][aria-label="Name"]:not([data-pui-root])`
+    );
+  }
   if (family === 'field') {
     const control =
       '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="requiredControl"]';
@@ -731,6 +743,24 @@ function primary(previewer: Locator, family: string): Locator | null {
         '[data-pui-root][data-projection-prototype="brutalist-collapsible-root"][data-demo-ref="uncontrolled"] [data-pui-root][data-projection-prototype="brutalist-collapsible-trigger"]',
       accordion:
         '[data-pui-root][data-projection-prototype="brutalist-accordion-trigger"][data-demo-ref="single-lifetime-trigger"]',
+      // The authored Density preference group starts at Comfortable. It is the
+      // selected roving Tab entry for this family's rest/hover/keyboard-focus
+      // journey; Default, the disabled Compact and the unselected second group
+      // cannot substitute. Keep strict uniqueness and the shared lease checks.
+      'radio-group':
+        '[data-pui-root][data-projection-prototype="brutalist-radio-group-root"][data-demo-ref="Density preference"] [data-pui-root][data-projection-prototype="brutalist-radio-group-item"][data-demo-ref="density-comfortable"][role="radio"][aria-checked="true"][tabindex="0"]',
+      // The authored Enter button is the first public phase-machine control.
+      // These rest/hover/keyboard-focus frames observe that exact control's
+      // visual states, not the passive presence region or transition motion.
+      transition:
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="enterBtn"][role="button"]',
+      // These recipes expose real auxiliary actions. Their three planned
+      // visual states belong to the controls, not to the semantic-only regions;
+      // this adds no focus behavior to those passive parts.
+      'live-region':
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="announcePolite"][role="button"]',
+      'async-region':
+        '[data-pui-root][data-projection-prototype="brutalist-button"][data-demo-ref="markBusy"][role="button"]',
     } as Record<string, string>
   )[family];
   if (named) return previewer.locator(`[data-projection-content] ${named}`);
@@ -755,6 +785,66 @@ function primary(previewer: Locator, family: string): Locator | null {
   // Native editor identity is singular; keep Playwright strictness instead of
   // choosing one live editor when a wrapper projection accidentally duplicates it.
   return family === 'textarea' ? targets : targets.first();
+}
+// The current Image recipe has no authored input. Keep that rest-only scope
+// tied to its five actual presentations, not to every possible Image consumer.
+function imagePassiveApplicability(demo: DemoSpec) {
+  const failures: { prototypeId: string; reason: string }[] = [];
+  const instances: { ref: string | null; props: Record<string, unknown> }[] = [];
+  const fail = (reason: string) => failures.push({ prototypeId: 'brutalist-image-root', reason });
+  if (demo.setup) fail('Image recipe has setup; the static rest-only plan does not apply.');
+  function visit(node: DemoChild): void {
+    if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.kind === 'box') {
+      if (node.tag === 'a' || node.attrs || node.dynamicChildren || node.materialStage)
+        fail('Image recipe has a host action or dynamic stage outside the static plan.');
+    } else {
+      if (node.prototypeId !== 'brutalist-image-root' || node.associations || node.children?.length)
+        fail('Image recipe contains another protocol or composition outside the static plan.');
+      const props = node.props ?? {};
+      if (
+        Object.keys(props).some(
+          (key) => !['source', 'a11yMode', 'alternativeText', 'fit'].includes(key)
+        ) ||
+        typeof props.source !== 'string' ||
+        !props.source
+      )
+        fail('Image recipe has unsupported props or no authored source.');
+      instances.push({ ref: node.ref ?? null, props });
+    }
+    for (const child of node.children ?? []) visit(child);
+  }
+  visit(demo.root);
+  const expected = [
+    ['fit-contain', 'contain', 'informative'],
+    ['fit-cover', 'cover', 'informative'],
+    ['fit-fill', 'fill', 'informative'],
+    ['decorative', 'contain', 'decorative'],
+    ['error', 'contain', 'informative'],
+  ];
+  if (instances.length !== expected.length)
+    fail('Image static plan requires all five presentations.');
+  for (const [ref, fit, a11yMode] of expected) {
+    const matches = instances.filter((instance) => instance.ref === ref);
+    const props = matches[0]?.props;
+    if (
+      matches.length !== 1 ||
+      props?.fit !== fit ||
+      props.a11yMode !== a11yMode ||
+      (a11yMode === 'informative'
+        ? typeof props.alternativeText !== 'string' || !props.alternativeText.trim()
+        : props.alternativeText !== undefined && props.alternativeText !== '')
+    )
+      fail(`Image static presentation is missing, duplicated or changed: ${ref}.`);
+  }
+  return {
+    applicable: failures.length === 0,
+    criteria: ['P-BRUTALIST-IMAGE-VISUAL-GRAMMAR', 'P-BASE-IMAGE'],
+    scope:
+      'Only the current five static authored Image presentations; no interaction variant exemption.',
+    instances,
+    failures,
+  };
 }
 async function passiveSurfaceObservation(
   page: Page,
@@ -812,6 +902,8 @@ async function passiveSurfaceObservation(
       collect(child, `${path}.children.${index}`, ancestors);
   }
   collect(demo.root, 'root', []);
+  const imageApplicability = family === 'image' ? imagePassiveApplicability(demo) : null;
+  if (imageApplicability) sourceUnsupported.push(...imageApplicability.failures);
   const expected = manifest.recipePrototypeIds.map((prototypeId) => ({
     prototypeId,
     expectedCount: instances.filter((instance) => instance.prototypeId === prototypeId).length,
@@ -837,142 +929,124 @@ async function passiveSurfaceObservation(
         }
       ).puiContrastProbe;
       const boundary = probe.readContrastAuditSubject(input.subject);
-      const { content, retained, shell, owner, generation } = boundary;
+      const { retained, owner, generation } = boundary;
       const ready = boundary.observation.achieved;
-      const surfaces = [...document.querySelectorAll<HTMLElement>('[data-pui-root]')]
-        .filter(
-          (element) =>
-            !(ready && element === shell) &&
-            (content?.contains(element) ||
-              (owner &&
-                generation &&
-                element.dataset.projectionOwner === owner &&
-                element.dataset.projectionGeneration === generation &&
-                !element.closest('[data-projection-control]')))
-        )
-        .map((element) => {
-          const rect = element.getBoundingClientRect();
-          const own = getComputedStyle(element);
-          const paintVisibility = probe.readContrastPaintedVisibility(element);
-          let visible =
-            paintVisibility.visible &&
-            own.visibility === 'visible' &&
-            [...element.getClientRects()].some((box) => box.width > 0 && box.height > 0);
-          let left = 0,
-            top = 0,
-            right = innerWidth,
-            bottom = innerHeight;
-          // Shared calibrated paint-domain limits apply to passive regions too.
-          // Keep this reader's additional conservative region restrictions.
-          const limits: string[] = [...paintVisibility.limits];
-          const ancestorPrototypeIds: string[] = [];
-          for (
-            let current: HTMLElement | null = element;
-            current;
-            current = current.parentElement
-          ) {
-            const style = getComputedStyle(current);
-            if (
-              style.display === 'none' ||
-              style.contentVisibility === 'hidden' ||
-              Number(style.opacity) === 0
-            )
-              visible = false;
-            if (style.clip !== 'auto' || style.clipPath !== 'none' || style.maskImage !== 'none')
-              limits.push('unsupported-clip-or-mask');
-            if (
-              style.filter !== 'none' ||
-              style.backdropFilter !== 'none' ||
-              style.mixBlendMode !== 'normal'
-            )
-              limits.push('unsupported-filter-or-blend');
-            if (
-              style.transform !== 'none' ||
-              style.translate !== 'none' ||
-              style.rotate !== 'none' ||
-              style.scale !== 'none'
-            )
-              limits.push('unsupported-transformed-region');
-            if (style.contain.includes('paint')) limits.push('unsupported-paint-containment');
-            if (current !== element) {
-              const ancestorRect = current.getBoundingClientRect();
-              if (style.overflowX !== 'visible') {
-                left = Math.max(left, ancestorRect.left + current.clientLeft);
-                right = Math.min(
-                  right,
-                  ancestorRect.left + current.clientLeft + current.clientWidth
-                );
-              }
-              if (style.overflowY !== 'visible') {
-                top = Math.max(top, ancestorRect.top + current.clientTop);
-                bottom = Math.min(
-                  bottom,
-                  ancestorRect.top + current.clientTop + current.clientHeight
-                );
-              }
-              // Identity ancestry stops at the borrowed recipe boundary; the
-              // visibility/paint loop still measures every physical ancestor.
-              if (retained?.contains(current) && current.hasAttribute('data-pui-root'))
-                ancestorPrototypeIds.unshift(current.dataset.projectionPrototype ?? '');
-            }
-          }
-          visible =
-            visible &&
-            rect.right > left &&
-            rect.left < right &&
-            rect.bottom > top &&
-            rect.top < bottom;
+      const surfaces = probe.readSubjectContrastRoots(input.subject).map((element) => {
+        const rect = element.getBoundingClientRect();
+        const own = getComputedStyle(element);
+        const paintVisibility = probe.readContrastPaintedVisibility(element);
+        let visible =
+          paintVisibility.visible &&
+          own.visibility === 'visible' &&
+          [...element.getClientRects()].some((box) => box.width > 0 && box.height > 0);
+        let left = 0,
+          top = 0,
+          right = innerWidth,
+          bottom = innerHeight;
+        // Shared calibrated paint-domain limits apply to passive regions too.
+        // Keep this reader's additional conservative region restrictions.
+        const limits: string[] = [...paintVisibility.limits];
+        const ancestorPrototypeIds: string[] = [];
+        for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+          const style = getComputedStyle(current);
           if (
-            visible &&
-            (rect.left < left || rect.right > right || rect.top < top || rect.bottom > bottom)
+            style.display === 'none' ||
+            style.contentVisibility === 'hidden' ||
+            Number(style.opacity) === 0
           )
-            limits.push('partially-clipped-region');
-          return {
-            prototypeId: element.dataset.projectionPrototype ?? null,
-            owner: element.dataset.projectionOwner ?? null,
-            generation: element.dataset.projectionGeneration ?? null,
-            currentLease:
-              !!owner &&
-              !!generation &&
-              element.dataset.projectionOwner === owner &&
-              element.dataset.projectionGeneration === generation,
-            withinContent: !!retained?.contains(element),
-            ancestorPrototypeIds,
-            ref: element.getAttribute('data-demo-ref'),
-            text: element.textContent,
-            display: own.display,
-            ariaHidden: element.getAttribute('aria-hidden'),
-            ...(input.family === 'spinner' &&
-            element.dataset.projectionPrototype === input.rootPrototypeId
-              ? {
-                  staticReducedMotion:
-                    own.animationName === 'none' &&
-                    element.getAnimations({ subtree: true }).length === 0 &&
-                    own.borderTopColor === 'rgba(0, 0, 0, 0)' &&
-                    own.borderRightColor === own.color &&
-                    own.borderBottomColor === own.color &&
-                    own.borderLeftColor === own.color &&
-                    [
-                      own.borderTopWidth,
-                      own.borderRightWidth,
-                      own.borderBottomWidth,
-                      own.borderLeftWidth,
-                    ].every((width) => width === '2px'),
-                  animationName: own.animationName,
-                  borderColors: [
-                    own.borderTopColor,
-                    own.borderRightColor,
-                    own.borderBottomColor,
-                    own.borderLeftColor,
-                  ],
-                }
-              : {}),
-            visible,
-            paintVisibility,
-            bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-            visibilityLimits: [...new Set(limits)],
-          };
-        });
+            visible = false;
+          if (style.clip !== 'auto' || style.clipPath !== 'none' || style.maskImage !== 'none')
+            limits.push('unsupported-clip-or-mask');
+          if (
+            style.filter !== 'none' ||
+            style.backdropFilter !== 'none' ||
+            style.mixBlendMode !== 'normal'
+          )
+            limits.push('unsupported-filter-or-blend');
+          if (
+            style.transform !== 'none' ||
+            style.translate !== 'none' ||
+            style.rotate !== 'none' ||
+            style.scale !== 'none'
+          )
+            limits.push('unsupported-transformed-region');
+          if (style.contain.includes('paint')) limits.push('unsupported-paint-containment');
+          if (current !== element) {
+            const ancestorRect = current.getBoundingClientRect();
+            if (style.overflowX !== 'visible') {
+              left = Math.max(left, ancestorRect.left + current.clientLeft);
+              right = Math.min(right, ancestorRect.left + current.clientLeft + current.clientWidth);
+            }
+            if (style.overflowY !== 'visible') {
+              top = Math.max(top, ancestorRect.top + current.clientTop);
+              bottom = Math.min(
+                bottom,
+                ancestorRect.top + current.clientTop + current.clientHeight
+              );
+            }
+            // Identity ancestry stops at the borrowed recipe boundary; the
+            // visibility/paint loop still measures every physical ancestor.
+            if (retained?.contains(current) && current.hasAttribute('data-pui-root'))
+              ancestorPrototypeIds.unshift(current.dataset.projectionPrototype ?? '');
+          }
+        }
+        visible =
+          visible &&
+          rect.right > left &&
+          rect.left < right &&
+          rect.bottom > top &&
+          rect.top < bottom;
+        if (
+          visible &&
+          (rect.left < left || rect.right > right || rect.top < top || rect.bottom > bottom)
+        )
+          limits.push('partially-clipped-region');
+        return {
+          prototypeId: element.dataset.projectionPrototype ?? null,
+          owner: element.dataset.projectionOwner ?? null,
+          generation: element.dataset.projectionGeneration ?? null,
+          currentLease:
+            !!owner &&
+            !!generation &&
+            element.dataset.projectionOwner === owner &&
+            element.dataset.projectionGeneration === generation,
+          withinContent: !!retained?.contains(element),
+          ancestorPrototypeIds,
+          ref: element.getAttribute('data-demo-ref'),
+          text: element.textContent,
+          display: own.display,
+          ariaHidden: element.getAttribute('aria-hidden'),
+          ...(input.family === 'spinner' &&
+          element.dataset.projectionPrototype === input.rootPrototypeId
+            ? {
+                staticReducedMotion:
+                  own.animationName === 'none' &&
+                  element.getAnimations({ subtree: true }).length === 0 &&
+                  own.borderTopColor === 'rgba(0, 0, 0, 0)' &&
+                  own.borderRightColor === own.color &&
+                  own.borderBottomColor === own.color &&
+                  own.borderLeftColor === own.color &&
+                  [
+                    own.borderTopWidth,
+                    own.borderRightWidth,
+                    own.borderBottomWidth,
+                    own.borderLeftWidth,
+                  ].every((width) => width === '2px'),
+                animationName: own.animationName,
+                borderColors: [
+                  own.borderTopColor,
+                  own.borderRightColor,
+                  own.borderBottomColor,
+                  own.borderLeftColor,
+                ],
+              }
+            : {}),
+          visible,
+          paintVisibility,
+          bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+          visibilityLimits: [...new Set(limits)],
+        };
+      });
       const currentSurfaces = surfaces.filter(
         (surface) => surface.currentLease && surface.withinContent
       );
@@ -1070,6 +1144,7 @@ async function passiveSurfaceObservation(
         extraInstances: unmatched,
         unsupportedCoverage,
         notVisible,
+        ...(input.imageApplicability ? { imageApplicability: input.imageApplicability } : {}),
         ...(input.family === 'spinner'
           ? {
               requestedReducedMotion: 'reduce',
@@ -1082,6 +1157,11 @@ async function passiveSurfaceObservation(
           : {}),
         unexercisedCoverage: [
           'Prop/state transitions, semantic criteria and independent cue/WCAG classification.',
+          ...(input.family === 'image'
+            ? [
+                'Native image acquisition/decoding, fit rendering, loading/error transitions and accessibility semantics remain unverified by this rest-only physical-region observation.',
+              ]
+            : []),
           ...input.expected
             .filter((expectation) => expectation.auxiliary)
             .map(
@@ -1100,6 +1180,7 @@ async function passiveSurfaceObservation(
       expected,
       instances,
       sourceUnsupported,
+      imageApplicability,
     }
   );
 }
@@ -1734,6 +1815,216 @@ async function paintedPopupObservation(popup: Locator): Promise<Observation> {
     };
   });
 }
+function dropdownPointerRows() {
+  return [
+    {
+      name: 'Profile',
+      ref: 'profileAction',
+      value: 'profile',
+      shortcut: '⇧⌘P',
+      identity: 'default',
+      pair: 'main',
+      selected: null,
+    },
+    {
+      name: 'Delete',
+      ref: 'deleteAction',
+      value: 'delete',
+      shortcut: null,
+      identity: 'destructive',
+      pair: 'destructive',
+      selected: null,
+    },
+  ];
+}
+async function dropdownPointerTarget(
+  popup: Locator,
+  row: ReturnType<typeof dropdownPointerRows>[number]
+) {
+  const owner = await popup.getAttribute('data-projection-owner');
+  const generation = await popup.getAttribute('data-projection-generation');
+  if (!owner || !generation) throw new Error('Dropdown pointer target has no current popup lease.');
+  // textValue is the collection's typeahead text, not its accessible name.
+  // Profile's real name also includes the visible Shortcut. Bind an authored
+  // physical Item and read its actual browser AX name independently below.
+  return popup.locator(
+    `[data-pui-root][data-projection-prototype="brutalist-dropdown-item"][role="menuitem"]` +
+      `[data-demo-ref=${JSON.stringify(row.ref)}][data-projection-owner=${JSON.stringify(owner)}]` +
+      `[data-projection-generation=${JSON.stringify(generation)}]`
+  );
+}
+async function dropdownPointerIdentity(
+  page: Page,
+  popup: Locator,
+  target: Locator | ElementHandle,
+  row: ReturnType<typeof dropdownPointerRows>[number]
+): Promise<Observation> {
+  const physicalPopup = await popup.elementHandle();
+  if (!physicalPopup) throw new Error('Dropdown pointer target has no physical popup.');
+  try {
+    return await target.evaluate(
+      (element, input) => {
+        const probe = (
+          globalThis as typeof globalThis & {
+            puiContrastProbe: typeof import('./contrast-probe.browser');
+          }
+        ).puiContrastProbe;
+        const boundary = probe.readContrastAuditSubject(input.subject);
+        const checks = {
+          current(node: Element) {
+            return (
+              node.isConnected &&
+              node.getAttribute('data-projection-owner') === boundary.owner &&
+              node.getAttribute('data-projection-generation') === boundary.generation
+            );
+          },
+        };
+        const triggers = [
+          ...(boundary.retained?.querySelectorAll<HTMLElement>(
+            '[data-pui-root][data-projection-prototype="brutalist-dropdown-trigger"]'
+          ) ?? []),
+        ];
+        const popup = input.popup;
+        const shortcuts = [
+          ...element.querySelectorAll<HTMLElement>(
+            '[data-pui-root][data-projection-prototype="brutalist-dropdown-shortcut"]'
+          ),
+        ].map((shortcut) => ({
+          text: shortcut.textContent?.trim(),
+          current: checks.current(shortcut),
+          hidden: shortcut.getAttribute('aria-hidden'),
+          painted: probe.readContrastTargetObservation(shortcut).achieved,
+        }));
+        const directText = [...element.childNodes]
+          .filter((node) => node.nodeType === Node.TEXT_NODE)
+          .map((node) => node.textContent)
+          .join('')
+          .trim();
+        const matches = popup
+          ? [
+              ...popup.querySelectorAll(
+                '[data-pui-root][data-projection-prototype="brutalist-dropdown-item"]'
+              ),
+            ].filter((node) => node.getAttribute('data-demo-ref') === input.row.ref)
+          : [];
+        const popupIds = popup?.id
+          ? [...document.querySelectorAll('[id]')].filter((node) => node.id === popup.id)
+          : [];
+        const shortcutMatches =
+          input.row.shortcut === null
+            ? shortcuts.length === 0
+            : shortcuts.length === 1 &&
+              shortcuts[0].text === input.row.shortcut &&
+              shortcuts[0].current &&
+              shortcuts[0].painted &&
+              shortcuts[0].hidden !== 'true';
+        return {
+          achieved:
+            boundary.observation.achieved &&
+            !!popup &&
+            checks.current(popup) &&
+            popup.getAttribute('data-projection-prototype') === 'brutalist-dropdown-content' &&
+            popupIds.length === 1 &&
+            popupIds[0] === popup &&
+            triggers.length === 1 &&
+            checks.current(triggers[0]) &&
+            triggers[0].getAttribute('aria-controls') === popup.id &&
+            triggers[0].getAttribute('aria-expanded') === 'true' &&
+            checks.current(element) &&
+            element.getAttribute('role') === 'menuitem' &&
+            element.getAttribute('data-projection-prototype') === 'brutalist-dropdown-item' &&
+            element.closest(
+              '[data-pui-root][data-projection-prototype="brutalist-dropdown-content"]'
+            ) === popup &&
+            matches.length === 1 &&
+            matches[0] === element &&
+            directText === input.row.name &&
+            shortcutMatches,
+          owner: boundary.owner,
+          generation: boundary.generation,
+          popupId: popup?.id ?? null,
+          ref: element.getAttribute('data-demo-ref'),
+          role: element.getAttribute('role'),
+          authoredValue: input.row.value,
+          directText,
+          shortcuts,
+          target: probe.readContrastTargetObservation(element),
+          basis:
+            'Exact authored ref/value, current Item part and trigger-controlled popup; value is source metadata, not an inferred DOM value.',
+        };
+      },
+      { subject: caseSubject(page), popup: physicalPopup, row }
+    );
+  } finally {
+    await physicalPopup.dispose();
+  }
+}
+async function dropdownPointerAX(
+  page: Page,
+  identity: Observation,
+  row: ReturnType<typeof dropdownPointerRows>[number]
+): Promise<Observation> {
+  const session = await page.context().newCDPSession(page);
+  const objectGroup = 'proto-ui-contrast-pointer-item';
+  try {
+    const selector =
+      `[data-pui-root][data-projection-prototype="brutalist-dropdown-item"][role="menuitem"]` +
+      `[data-demo-ref=${JSON.stringify(row.ref)}][data-projection-owner=${JSON.stringify(identity.owner)}]` +
+      `[data-projection-generation=${JSON.stringify(identity.generation)}]`;
+    const { result, exceptionDetails } = await session.send('Runtime.evaluate', {
+      expression: `(() => {
+        const popup = document.getElementById(${JSON.stringify(identity.popupId)});
+        const targets = [...document.querySelectorAll(${JSON.stringify(selector)})];
+        if (!popup?.isConnected || targets.length !== 1 || !popup.contains(targets[0]))
+          throw new Error('Dropdown AX subject is missing, ambiguous or outside its current popup.');
+        return targets[0];
+      })()`,
+      objectGroup,
+    });
+    if (exceptionDetails || !result.objectId)
+      throw new Error(
+        `Dropdown AX target resolution failed: ${JSON.stringify(exceptionDetails ?? result)}`
+      );
+    const { node } = await session.send('DOM.describeNode', { objectId: result.objectId });
+    const { nodes } = await session.send('Accessibility.getPartialAXTree', {
+      objectId: result.objectId,
+      fetchRelatives: false,
+    });
+    const native = nodes.length === 1 ? nodes[0] : null;
+    const name = native?.name?.value;
+    const expectedNames =
+      row.shortcut === null
+        ? [row.name]
+        : [`${row.name} ${row.shortcut}`, `${row.name}${row.shortcut}`];
+    return {
+      achieved:
+        !!native &&
+        !native.ignored &&
+        native.role?.value === 'menuitem' &&
+        native.backendDOMNodeId === node.backendNodeId &&
+        expectedNames.includes(name),
+      nodeCount: nodes.length,
+      backendDOMNodeId: node.backendNodeId,
+      native: native
+        ? {
+            backendDOMNodeId: native.backendDOMNodeId,
+            ignored: native.ignored,
+            role: native.role,
+            name: native.name,
+          }
+        : null,
+      expectedNames,
+      basis:
+        'Chromium Accessibility.getPartialAXTree for the same unique current physical Item; not physical assistive-technology acceptance.',
+    };
+  } finally {
+    try {
+      await session.send('Runtime.releaseObjectGroup', { objectGroup });
+    } finally {
+      await session.detach();
+    }
+  }
+}
 async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator): Promise<void> {
   const family = item.family;
   const isSelect = family === 'select';
@@ -1743,10 +2034,7 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
         { name: 'Paper', identity: 'selected', pair: 'main', selected: 'true' },
         { name: 'Ink', identity: 'unselected', pair: 'main', selected: 'false' },
       ]
-    : [
-        { name: 'Profile', identity: 'default', pair: 'main', selected: null },
-        { name: 'Delete', identity: 'destructive', pair: 'destructive', selected: null },
-      ];
+    : dropdownPointerRows();
   // These exact authored rows come from demo-brutalist-{select,dropdown-menu}.demo.ts.
   // Selection is observed before mouseup; activation is not suppressed or rewritten.
   for (const row of rows) {
@@ -1759,6 +2047,7 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
       .and(page.locator(`[id=${JSON.stringify(previousId)}]`))
       .waitFor({ state: 'hidden' });
     await page.mouse.move(0, 0);
+    phase = `item-pointer-open:${row.identity}`;
     await trigger.click();
     const controlledId = await trigger.getAttribute('aria-controls');
     if (!controlledId) throw new Error('Item pointer journey has no controlled popup identity.');
@@ -1766,23 +2055,27 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
       page.locator(`[id=${JSON.stringify(controlledId)}]`)
     );
     await popup.waitFor({ state: 'visible' });
-    const target = popup.getByRole(isSelect ? 'option' : 'menuitem', {
-      name: row.name,
-      exact: true,
-    });
+    phase = `item-pointer-subject:${row.identity}`;
+    const target = isSelect
+      ? popup.getByRole('option', { name: row.name, exact: true })
+      : await dropdownPointerTarget(popup, row as ReturnType<typeof dropdownPointerRows>[number]);
     // Visibility can precede deferred native entry focus. Start from an
     // observed item in this exact popup before sending End/Home; then require
     // focus on the OTHER authored row, rather than merely hoping the key ran.
     const role = isSelect ? 'option' : 'menuitem';
     const otherRow = rows.find((candidate) => candidate !== row)!;
-    const other = popup.getByRole(role, { name: otherRow.name, exact: true });
+    const other = isSelect
+      ? popup.getByRole(role, { name: otherRow.name, exact: true })
+      : await dropdownPointerTarget(
+          popup,
+          otherRow as ReturnType<typeof dropdownPointerRows>[number]
+        );
     const baselineRecord: Record<string, unknown> = {
       identity: row.identity,
       targetName: row.name,
       expectedOtherName: otherRow.name,
       expectedSelection: row.selected,
       stage: 'popup-visible',
-      beforeEntryWait: await targetObservation(target),
       achieved: false,
     };
     (item.pointerItemBaselines ??= []).push(baselineRecord);
@@ -1791,8 +2084,34 @@ async function popupItemPointerJourneys(page: Page, item: Case, trigger: Locator
       waitForPaint: async () => {
         baselineRecord.stage = 'waiting-authored-entry-paint';
         baselineRecord.settledFingerprint = await stableFingerprint(page);
+        if (!isSelect) {
+          baselineRecord.stage = 'checking-current-dropdown-item';
+          const dropdownRow = row as ReturnType<typeof dropdownPointerRows>[number];
+          const physical = await target.elementHandle();
+          if (!physical) throw new Error('Dropdown pointer row has no current physical target.');
+          try {
+            const before = await dropdownPointerIdentity(page, popup, physical, dropdownRow);
+            baselineRecord.dropdownIdentityBefore = before;
+            if (!before.achieved)
+              throw new Error(`Invalid current Dropdown pointer row: ${row.identity}.`);
+            baselineRecord.stage = 'reading-current-dropdown-ax';
+            phase = `item-pointer-native-name:${row.identity}`;
+            const ax = await dropdownPointerAX(page, before, dropdownRow);
+            baselineRecord.dropdownAX = ax;
+            if (!ax.achieved)
+              throw new Error(`Invalid native Dropdown item name: ${row.identity}.`);
+            const after = await dropdownPointerIdentity(page, popup, physical, dropdownRow);
+            baselineRecord.dropdownIdentityAfter = after;
+            if (!after.achieved)
+              throw new Error(`Dropdown Item retired during AX observation: ${row.identity}.`);
+          } finally {
+            await physical.dispose();
+          }
+        }
       },
       waitForEntry: async () => {
+        phase = `item-pointer-baseline:${row.identity}`;
+        baselineRecord.beforeEntryWait = await targetObservation(target);
         baselineRecord.stage = 'waiting-native-entry';
         const entry = popup.locator(
           `[role="${role}"]:focus:not([aria-disabled="true"]):not([disabled])`

@@ -38,6 +38,22 @@ const profiles = Object.freeze({
     height: 760,
     intrinsic: 'viewBox',
     fonts: 'system',
+    systemFontRoles: Object.freeze([
+      Object.freeze({
+        classes: Object.freeze(['channel-label']),
+        genericFamily: 'monospace',
+        labels: Object.freeze(['event', 'feedback', 'props', 'expose', 'context']),
+      }),
+      Object.freeze({
+        classes: Object.freeze([
+          'actor-label',
+          'component-label',
+          'dimension-label',
+          'dimension-heading',
+        ]),
+        genericFamily: 'sans-serif',
+      }),
+    ]),
     revealDetailsId: 'legacy-information-flow-comparison',
   }),
 });

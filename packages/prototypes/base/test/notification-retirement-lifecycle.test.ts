@@ -664,14 +664,34 @@ const cases = [
   {
     name: 'Number Field commit',
     proto: numberFieldRoot,
+    props: { value: 1 },
     state: null,
-    // A commit cannot interrupt composition. A controlled, unaccepted draft
-    // leaves the request pending until commit without claiming an active IME.
-    props: { value: 0 },
-    prepare: (x: any) => x.requestInput('2', false),
+    prepare: (x: any) => {
+      // A composition still in progress cannot commit. Keep a legal draft
+      // proposal that the controlled owner has not accepted instead.
+      expect(x.requestInput('2', false)).toBe(true);
+      expect(x.getValue()).toBe(1);
+      expect(x.draft.get()).toBe('2');
+    },
     request: (x: any) => x.commitValue(),
     event: 'valueCommit',
     callback: 'valueChange',
+    verifyCallback: (x: any) => expect(x.getValue()).toBe(1),
+  },
+  {
+    name: 'Number Field uncontrolled empty commit',
+    proto: numberFieldRoot,
+    props: { defaultValue: 1, allowEmpty: true },
+    state: null,
+    prepare: (x: any) => {
+      expect(x.requestInput('', false)).toBe(true);
+      expect(x.getValue()).toBe(1);
+      expect(x.draft.get()).toBe('');
+    },
+    request: (x: any) => x.commitValue(),
+    event: 'valueCommit',
+    callback: 'valueChange',
+    verifyCallback: (x: any) => expect(x.getValue()).toBe(null),
   },
   {
     name: 'Data Table sort',
@@ -825,7 +845,10 @@ for (const test of cases)
         });
       if (test.callback)
         setActionCallback((name) => {
-          if (name === test.callback) retire();
+          if (name === test.callback) {
+            test.verifyCallback?.(root.exposes);
+            retire();
+          }
         });
       if (test.prepare) root.session.invokeInCallbackScope(() => test.prepare!(root.exposes));
       actions.length = 0;

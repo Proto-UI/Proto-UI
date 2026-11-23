@@ -18,7 +18,7 @@ This is an unofficial, bounded projection. Upstream arbitrary input types, file 
 
 ## API
 
-Input is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+Input is workspace source. For this workspace version, the CLI target is `brutalist-input`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -32,8 +32,16 @@ Input is workspace source. There is no public `proto-ui add` target. Passing `va
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'inputMode', type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'", default: 'undefined' },
-    { name: 'enterKeyHint', type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'", default: 'undefined' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
@@ -41,4 +49,3 @@ Input is workspace source. There is no public `proto-ui add` target. Passing `va
 />
 
 These props belong to Root.
-

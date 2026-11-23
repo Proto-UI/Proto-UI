@@ -29,7 +29,7 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 ## API
 
-Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+Dialog 是工作区源码。当前工作区 CLI 目标为 `brutalist-dialog`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -42,4 +42,3 @@ Dialog 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open
 />
 
 这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `focusEntry` 默认 `auto`，同样接受 Transition 属性。Trigger、Title、Description 与 Close 没有属性。
-

@@ -10,6 +10,64 @@ import {
 
 export const diagramSha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
+// Shared by the actual SVG probe and receipt readback. A passing outcome label
+// cannot replace the measured font families, authored roles or loaded faces.
+export function verifyDiagramFonts(profile, evidence, locale) {
+  diagramLocale(profile, locale);
+  assert.ok(Array.isArray(evidence.faces), 'Measured font faces are required');
+  if (profile.fonts === 'embedded-handwritten') {
+    assert.ok(
+      evidence.faces.some((face) => face.family.includes('Hand Latin') && face.status === 'loaded')
+    );
+    if (locale === 'zh-cn')
+      assert.ok(
+        evidence.faces.some((face) => face.family.includes('Hand CJK') && face.status === 'loaded')
+      );
+    return;
+  }
+  assert.equal(profile.fonts, 'system');
+  assert.equal(evidence.faces.length, 0, 'System-font diagram must not load embedded faces');
+  assert.ok(
+    Array.isArray(evidence.fontElements) && evidence.fontElements.length > 0,
+    'Inspect actual system-font text'
+  );
+  assert.deepEqual(
+    evidence.families,
+    evidence.fontElements.map((element) => element.family),
+    'Font family measurements must bind every text element'
+  );
+  const roles = profile.systemFontRoles || [{ genericFamily: 'sans-serif' }];
+  const assignments = roles.map(() => []);
+  for (const element of evidence.fontElements) {
+    assert.ok(typeof element.text === 'string' && element.text.trim());
+    assert.ok(
+      Array.isArray(element.classes) &&
+        element.classes.every((name) => typeof name === 'string' && name.length > 0)
+    );
+    assert.ok(typeof element.family === 'string' && element.family.trim());
+    const matches = roles.flatMap((role, index) =>
+      !role.classes || role.classes.some((name) => element.classes.includes(name)) ? [index] : []
+    );
+    assert.equal(matches.length, 1, `Exactly one authored font role is required: ${element.text}`);
+    const index = matches[0];
+    assert.equal(
+      element.family.split(',').at(-1).trim(),
+      roles[index].genericFamily,
+      `Unexpected system font for ${element.text}`
+    );
+    assignments[index].push(element.text.trim());
+  }
+  for (const [index, role] of roles.entries()) {
+    assert.ok(assignments[index].length > 0, 'Every authored font role must be measured');
+    if (role.labels)
+      assert.deepEqual(
+        [...assignments[index]].sort(),
+        [...role.labels].sort(),
+        'Measure each declared information channel exactly once'
+      );
+  }
+}
+
 export function diagramPagePaths(profile, locale) {
   const { route } = diagramLocale(profile, locale);
   return {
@@ -42,13 +100,11 @@ function uniqueIndex(items, key, label) {
 
 // This checks the completeness and byte bindings of a real capture. It does not
 // authenticate a report author, approve a diagram or establish full Issue closure.
-export async function verifyDiagramReport(profile, report, {
-  revision,
-  provenance,
-  build,
-  readSource,
-  readScreenshot,
-}) {
+export async function verifyDiagramReport(
+  profile,
+  report,
+  { revision, provenance, build, readSource, readScreenshot }
+) {
   assert.equal(report.schemaVersion, 1);
   assert.equal(report.kind, 'proto-ui.whitepaper-diagram-capture');
   assert.match(revision, /^[a-f0-9]{40}$/);
@@ -64,7 +120,11 @@ export async function verifyDiagramReport(profile, report, {
   assert.deepEqual(report.failures, [], 'Failed captures are not complete evidence');
   assert.deepEqual(Object.keys(report.pages).sort(), ['en', 'zh-cn']);
   const assets = uniqueIndex(report.assets, (item) => `${item.locale}/${item.name}`, 'asset');
-  const fonts = uniqueIndex(report.fonts, (item) => `${item.locale}/${item.theme}/${item.variant}`, 'font probe');
+  const fonts = uniqueIndex(
+    report.fonts,
+    (item) => `${item.locale}/${item.theme}/${item.variant}`,
+    'font probe'
+  );
   const cases = uniqueIndex(report.cases, (item) => item.id, 'capture case');
   const usedScreenshots = new Set();
   let expectedAssets = 0;
@@ -90,8 +150,16 @@ export async function verifyDiagramReport(profile, report, {
     const paths = diagramPagePaths(profile, locale);
     assert.equal(page.sourcePath, paths.sourcePath);
     assert.equal(page.builtPath, paths.builtPath);
-    assert.equal(page.sourceSha256, diagramSha256(await readSource(paths.sourcePath)), 'Article source changed');
-    assert.equal(page.builtSha256, diagramSha256(await readSource(paths.builtPath)), 'Built article changed');
+    assert.equal(
+      page.sourceSha256,
+      diagramSha256(await readSource(paths.sourcePath)),
+      'Article source changed'
+    );
+    assert.equal(
+      page.builtSha256,
+      diagramSha256(await readSource(paths.builtPath)),
+      'Built article changed'
+    );
     for (const selected of diagramVariants(profile, locale)) {
       expectedAssets++;
       const binding = assets.get(`${locale}/${selected.name}`);
@@ -112,6 +180,7 @@ export async function verifyDiagramReport(profile, report, {
         assert.equal(font.asset, selected.asset);
         assert.equal(font.svgSha256, binding.svgSha256);
         assert.equal(font.sourceSha256, binding.sourceSha256);
+        verifyDiagramFonts(profile, font, locale);
         assert.ok(Array.isArray(font.text) && font.text.length > 0, 'Measured text is required');
         assert.ok(Number.isFinite(font.minimumFontSize) && font.minimumFontSize > 0);
       }
@@ -121,7 +190,15 @@ export async function verifyDiagramReport(profile, report, {
         expectedCases++;
         const selected = selectDiagramVariant(profile, locale, capture.viewport.width);
         const binding = assets.get(`${locale}/${selected.name}`);
-        const id = diagramEvidenceId(profile, locale, theme, capture.viewport.width, revision, binding.svgSha256, capture.scenario);
+        const id = diagramEvidenceId(
+          profile,
+          locale,
+          theme,
+          capture.viewport.width,
+          revision,
+          binding.svgSha256,
+          capture.scenario
+        );
         const entry = cases.get(id);
         assert.ok(entry, `Missing capture case: ${id}`);
         assert.equal(entry.outcome, 'passed');
@@ -138,7 +215,10 @@ export async function verifyDiagramReport(profile, report, {
         assert.equal(entry.fallbackAsset, fallbackAsset);
         assert.equal(entry.svgSha256, binding.svgSha256);
         assert.equal(entry.sourceSha256, binding.sourceSha256);
-        assert.deepEqual(entry.expectedDimensions, { width: selected.width, height: selected.height });
+        assert.deepEqual(entry.expectedDimensions, {
+          width: selected.width,
+          height: selected.height,
+        });
         assert.deepEqual(entry.errors, []);
         for (const measurement of [entry.image, entry.preview, entry.figureCapture?.source]) {
           assert.ok(measurement, 'Article, figure and preview measurements are required');
@@ -156,8 +236,14 @@ export async function verifyDiagramReport(profile, report, {
           assert.ok(measurement.alt?.trim(), 'Actual accessible image text is required');
         }
         assert.equal(entry.preview.alt, entry.image.alt);
-        assert.ok(entry.accessibility?.triggerLabel?.trim(), 'Actual preview control text is required');
-        assert.ok(entry.accessibility.previewDescription?.trim(), 'Actual Dialog description is required');
+        assert.ok(
+          entry.accessibility?.triggerLabel?.trim(),
+          'Actual preview control text is required'
+        );
+        assert.ok(
+          entry.accessibility.previewDescription?.trim(),
+          'Actual Dialog description is required'
+        );
         if (entry.accessibility.caption) {
           assert.ok(entry.accessibility.previewDescription.includes(entry.accessibility.caption));
         }
@@ -172,7 +258,10 @@ export async function verifyDiagramReport(profile, report, {
           height: entry.figureCapture.clip.height,
         });
         const captures = [entry.articleCapture, entry.figureCapture, entry.previewCapture];
-        assert.deepEqual(entry.screenshots, captures.map((item) => item.file));
+        assert.deepEqual(
+          entry.screenshots,
+          captures.map((item) => item.file)
+        );
         for (const view of captures) await verifyScreenshot(view, id);
       }
     }
@@ -180,5 +269,11 @@ export async function verifyDiagramReport(profile, report, {
   assert.equal(assets.size, expectedAssets, 'Unexpected assets');
   assert.equal(fonts.size, expectedFonts, 'Unexpected font probes');
   assert.equal(cases.size, expectedCases, 'Unexpected capture cases');
-  return { figure: profile.figure, revision, cases: expectedCases, fontProbes: expectedFonts, screenshots: usedScreenshots.size };
+  return {
+    figure: profile.figure,
+    revision,
+    cases: expectedCases,
+    fontProbes: expectedFonts,
+    screenshots: usedScreenshots.size,
+  };
 }

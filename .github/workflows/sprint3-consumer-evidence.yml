@@ -1,0 +1,102 @@
+name: Sprint 3 consumer evidence
+
+on:
+  workflow_dispatch:
+
+# Supplementary exact-source acceptance. No PR trigger, publication, secrets,
+# repository mutation, or additional branch-protection gate.
+permissions:
+  contents: read
+
+concurrency:
+  group: sprint3-consumer-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  native-consumers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    env:
+      CANDIDATE_SHA: ${{ github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Prepare owned temporary and artifact directories
+        run: |
+          set -euo pipefail
+          # The runner context is unavailable in job-level env. Publish these
+          # runner-owned paths only after the job starts.
+          SPRINT3_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-consumer-evidence-$GITHUB_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          SPRINT3_TEMP_DIR="$RUNNER_TEMP/sprint3-consumer-tmp"
+          mkdir -p "$SPRINT3_TEMP_DIR" "$SPRINT3_EVIDENCE_DIR"
+          printf '%s\n' "SPRINT3_EVIDENCE_DIR=$SPRINT3_EVIDENCE_DIR" "TMPDIR=$SPRINT3_TEMP_DIR" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the exact candidate and complete planned inventory
+        id: inventory
+        run: |
+          set -euo pipefail
+          mkdir -p "$TMPDIR"
+          node scripts/test/sprint3-consumer-evidence.mjs init
+      - name: Install the declared locked workspace
+        id: dependencies
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/install.log"
+      - name: Verify evidence retention and workflow admission
+        id: runner-checks
+        run: |
+          set -euo pipefail
+          node --test scripts/test/sprint3-consumer-evidence.test.mjs scripts/test/sprint3-consumer-workflow.test.mjs 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/runner-checks.log"
+      - name: Identify Chromium and prepare public CJK font fallback
+        id: environment
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          {
+            git rev-parse HEAD
+            node --version
+            corepack pnpm@10.32.1 --version
+            "$CHROME" --version
+            df -h "$TMPDIR" "$SPRINT3_EVIDENCE_DIR"
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
+          } 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/environment.log"
+      - name: Execute independent native suites serially and one owned production preview
+        id: consumers
+        # The runner has a 45-minute resource ceiling. Leave time for teardown,
+        # final unknown/blocked reconciliation and always-uploaded artifacts.
+        timeout-minutes: 50
+        run: |
+          set -euo pipefail
+          node scripts/test/sprint3-consumer-evidence.mjs run 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/runner.log"
+      - name: Preserve every terminal, blocked and interrupted outcome
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          : "${SPRINT3_EVIDENCE_DIR:?Evidence directory was not initialized}"
+          if [[ -f "$SPRINT3_EVIDENCE_DIR/results.json" ]]; then
+            node scripts/test/sprint3-consumer-evidence.mjs finalize
+          else
+            mkdir -p "$SPRINT3_EVIDENCE_DIR"
+            printf '%s\n' "$WORKFLOW_STEP_OUTCOMES" > "$SPRINT3_EVIDENCE_DIR/bootstrap-failure.json"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sprint3-consumer-evidence-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.SPRINT3_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30

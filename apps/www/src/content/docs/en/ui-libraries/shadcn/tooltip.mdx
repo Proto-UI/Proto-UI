@@ -4,8 +4,9 @@ description: 'Draft shadcn presentation over the Base Tooltip family.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import CodeExample from '@/components/CodeExample.astro';
+import { shadcnTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 This page targets **Shadcn Rhea** and explicitly selects it for profile-aware parts. The headless trigger/action-body gap below remains open; this is not yet a fully unified Rhea demonstration. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
@@ -31,11 +32,28 @@ Import the family from `@proto.ui/prototypes-shadcn/tooltip`, or generate its Re
 
 The related entities are `draft`; this page describes the current cataloged direction, not a stable compatibility guarantee.
 
-## Install
+## Current-source installation and Usage
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-tooltip" manager="npm" />
+These files target the current 0.3 source packages, including the Vue 2.6 Adapter. They do not claim that the workspace version is published to npm. Start with an existing host application and install the CLI, `@proto.ui/prototypes-shadcn` and that host's Adapter from **the same reviewed source revision**. The repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) produces local tarballs; its [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) installs the complete declared `@proto.ui/*` dependency closure from those tarballs. The [stable Quick Start](/en/start-here/quick-start/) remains a separate published-version route.
 
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+Use `@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue` or `@proto.ui/adapter-vue2` for the selected host. React and Vue keep their existing application mount entry. Vue 2 requires Vue `>=2.6.0 <2.7`; replacing the CLI version with `@latest` does not make a source preview reproducible.
+
+After installing the matching packages, run the local CLI in the application directory. Keep the generated CSS: Base presence and positioning also need its structural rules. The small `tooltip-demo.css` below belongs to the application and does not replace those rules.
+
+```sh
+node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
+node node_modules/@proto.ui/cli/bin/proto-ui.js add wc shadcn-tooltip --no-install --no-interactive
+```
+
+Replace `wc` with `react`, `vue` or `vue2` for the matching facade. The generated four-part exports and WC tags are used below; `--no-install` assumes the matching packages were already installed. Trigger and Content explicitly select Rhea. Their passive Trigger paint remains application-owned.
+
+Copy the files for one host. Add the WC HTML to your existing document and load `src/main.ts` once; for React or Vue, keep the app's usual mount entry and use the provided `App` component. Import `proto-ui-style.css` once if the application already loads it. One Group owns two uncontrolled Roots, and each Root has one standalone Trigger and one non-interactive Content.
+
+<CodeExample
+  files={shadcnTooltipFiles}
+  initialHost="wc"
+  label="Shadcn Tooltip complete host Usage"
+/>
 
 ## Tooltip on a Button
 
@@ -58,6 +76,8 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 Button retains its role, name, click signal, disabled state and single focus owner. Tooltip adds hover/focus intent and the owned `aria-describedby` relation. Disabling Tooltip Root suppresses Tooltip while leaving the command available; disabling the command suppresses both. `useTooltipTrigger` takes no options and adds no outward exposes. It requires an existing focusable subject. Standalone `asTooltipTrigger` retains its original focus behavior and exposes.
 
 For an existing styled prototype, use the same setup composition while preserving its render function: call the styled prototype's `setup(def)`, then `useTooltipTrigger()`, and return the captured render function from your `definePrototype`. Keep the styled prototype's static `modules` declaration. This shares one host and preserves the family's Button presentation; it is separate from the passive action-body styling used by the standalone demo below.
+
+For a command inside a real ShadowRoot, use the [same-tree portal scene recipe](/en/ui-libraries/base/tooltip/#shadowroot). The default body destination cannot supply that shadow command's accessible description through an ID string alone.
 
 ## API
 

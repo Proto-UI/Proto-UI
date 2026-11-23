@@ -1,0 +1,66 @@
+{
+  "observedAt": "2026-11-22T17:40:58.110584+00:00",
+  "publicParent": "b58511ca0fc5be3a4a4a73e4ab32a3a746e49771",
+  "integratedMain": "39ca4f7729cde9a3ebb3abfd4fd987d9db57e4de",
+  "onlyConflict": "scripts/docs/README.md",
+  "decision": "Retain the complete prior release inventory and Sprint 3 dispatch guidance, then append the complete accepted-main Repository documentation references section. Neither side was discarded. All other main changes merge automatically.",
+  "readme": {
+    "priorSha256": "d81084ba5c8b8dec2894d927499b2481505fa4eeaf9e7704c1f856fb6cebe012",
+    "mainSha256": "c2f56b7ad7f6a2df9688c8aafdd5353f3467f0725def3c3cfffdd98a49d35bb4",
+    "resolvedSha256": "74985daedb016ee53007a02db2dfac8c7637ed75d2b0c252646fc0ec85560e49",
+    "completePriorRetained": true,
+    "completeMainNewSectionRetained": true
+  },
+  "checks": [
+    {
+      "command": "node scripts/docs/check-public-docs.mjs",
+      "status": "passed",
+      "summary": "305 bilingual primary routes; 4 library inventories; 435 maintained repository documents."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 check:agent-operations",
+      "status": "incomplete",
+      "exitCode": 130,
+      "summary": "Both structural checks passed (41 skills, 39 lazy leaves). Full Node fixture command printed individual passes but did not reach a terminal summary; interrupted after sustained lack of completion. Individual lines are not an aggregate passing result."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 check:agent-doc",
+      "status": "failed-before-generator",
+      "exitCode": 1,
+      "summary": "tsx CLI IPC Unix-domain socket /tmp/tsx-1000/18.pipe rejected with EPERM."
+    },
+    {
+      "command": "node --import tsx scripts/spec/generate-agent-project-understanding.mjs --check",
+      "status": "passed",
+      "exitCode": 0,
+      "summary": "Actual same generator is renderable; ignored local projection absent as expected. This direct entry does not claim the blocked tsx CLI passed."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "s3-main-docs-check.log.gz",
+      "bytes": 175,
+      "sha256": "23914f7a429058bb6ec911e1ef17b5060d6e88ad27aa17ec17e189f42f8dd89a",
+      "originalSha256": "5f314de48806e074ea18f7a0420396ecfa6ac1b0736646acdbc67cc43b20c79f"
+    },
+    {
+      "path": "s3-main-agent-operations.log.gz",
+      "bytes": 13722,
+      "sha256": "12ad00eb9da3928a25d497958ce78d98d107f047e90a4e994c158874b02036d7",
+      "originalSha256": "ce351babbb8af96bf1da4a06e974c90308067a02fbafcf16127005dcf1168036"
+    },
+    {
+      "path": "s3-main-agent-doc.log.gz",
+      "bytes": 527,
+      "sha256": "329121efe94f8770ffcdf6cd451e70baa0c106df2294243849e67a0922caa107",
+      "originalSha256": "9dc609b3386a307e4601fe21230a2a5d5b0d09ea13afb12cfaf9018e402312c8"
+    },
+    {
+      "path": "s3-main-agent-doc-direct.log.gz",
+      "bytes": 132,
+      "sha256": "6c20f3d48644b339059b77445ad0370e95ce04c3a29804225bd37733799f9e3f",
+      "originalSha256": "3d48dbd398d26c23ab6f71684e3cef84fedaecde6bfc4527bca49de3f2c361ee"
+    }
+  ],
+  "acceptance": "Product code and the three independently reviewed Image source blobs are unchanged from the prior public candidate. No native, CI, whole Agent-suite or merge-ready acceptance is inferred from this documentation reconciliation."
+}

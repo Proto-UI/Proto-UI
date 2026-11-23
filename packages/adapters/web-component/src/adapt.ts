@@ -967,6 +967,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                     onChange: () => this._hostDisplay?.sync(),
                   }
                 ));
+          const applyTokens = applier.apply;
+          applier.apply = (tokens) => {
+            applyTokens(tokens);
+            // A live style commit supersedes a transport snapshot, including an
+            // explicit empty frame. Physical disconnect clear() does not.
+            if (this._applier === applier && this._pendingOwnedTokens !== null)
+              this._pendingOwnedTokens = Array.from(applier.getOwned());
+          };
           currentEventGate = eventGate;
           currentRouter = router;
           // Split owns its role-aware styles across synchronous DOM moves.
@@ -1409,7 +1417,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       // Invalidate only unfulfilled source operations. Terminal retirement keeps
       // its existing deferred policy; exact adapter-owned transport is retained.
       if (!isWebComponentOwnedRelocating(this)) this._withdrawViewOperations?.();
-      this._pendingOwnedTokens = this._applier ? Array.from(this._applier.getOwned()) : null;
+      // A queued connect may observe this element disconnected and return
+      // before restoring. A second disconnect must not replace the retained
+      // logical frame with the physically cleared token set.
+      if (this._pendingOwnedTokens === null)
+        this._pendingOwnedTokens = this._applier ? Array.from(this._applier.getOwned()) : null;
       this._applier?.clear();
       this._hostDisplay?.sync();
 
