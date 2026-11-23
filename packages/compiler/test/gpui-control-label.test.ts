@@ -10,6 +10,7 @@ const actual = [
   ['button', 'button/button.proto.ts'],
   ['toggle', 'toggle/toggle.proto.ts'],
   ['label', 'label/root.proto.ts'],
+  ['input', 'input/root.proto.ts'],
 ] as const;
 const prefix = `import {definePrototype} from '@proto.ui/core';
 import {asControlLabel} from '@proto.ui/hooks';`;

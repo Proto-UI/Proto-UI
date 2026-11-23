@@ -34,8 +34,8 @@ pub struct A11yProjection {
     /// [`names_from_descendants`].
     pub name_from_content: bool,
     pub disabled: bool,
-    /// Whether the value is read-only, when the object explicitly says.
-    /// This does not change focus or activation routing.
+    /// Whether the current value is read-only. Absence leaves this fact
+    /// unspecified; false explicitly clears a prior read-only projection.
     pub read_only: Option<bool>,
     /// Whether a toggle button, a switch or a checkbox is on, when the object
     /// is one.

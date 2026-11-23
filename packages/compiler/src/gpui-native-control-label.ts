@@ -30,6 +30,7 @@ pub struct ControlLabelModule {
     naming: bool,
     activation: bool,
     generation: u64,
+    view: Option<ControlLabelView>,
     pointer: Option<ControlLabelPointer>,
     opaque_pointer_origin: bool,
     diagnostics: Vec<&'static str>,
@@ -38,7 +39,7 @@ pub struct ControlLabelModule {
 impl Default for ControlLabelModule {
     fn default() -> Self {
         Self { association: None, kind: None, callback: Value::Undefined, naming: true, activation: false,
-            generation: 0, pointer: None, opaque_pointer_origin: false, diagnostics: Vec::new(), last_diagnostic: None }
+            generation: 0, view: None, pointer: None, opaque_pointer_origin: false, diagnostics: Vec::new(), last_diagnostic: None }
     }
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -138,10 +139,26 @@ pub fn replace_instance_associations(owner: &OwnerRef, associations: InstanceAss
     }
     owner.borrow_mut().dirty = true;
 }
+pub fn control_label_commit(owner: &OwnerRef) {
+    // Layout has counted all physical occurrences before prepaint. A stable
+    // unique or ambiguous view is one receipt, not a new lease every frame.
+    // Replacing a node and restoring an old node must still retire old input.
+    let view = if ready(owner) { control_label_view(owner) } else { None };
+    let reference = {
+        let mut owner = owner.borrow_mut();
+        let state = &mut owner.modules.control_label;
+        if state.view == view { return; }
+        state.view = view;
+        state.pointer = None;
+        state.association.clone()
+    };
+    if let Some(reference) = reference { control_label_changed(&reference); }
+}
 pub fn control_label_detach(owner: &OwnerRef) {
     let reference = {
         let mut owner = owner.borrow_mut();
         owner.modules.control_label.pointer = None;
+        owner.modules.control_label.view = None;
         owner.modules.control_label.association.clone()
     };
     if let Some(reference) = reference { control_label_changed(&reference); }
@@ -215,6 +232,9 @@ fn control_label_pair(reference: &ControlLabelRef) -> Option<(OwnerRef, OwnerRef
     let mut label = None;
     let mut target = None;
     for owner in control_label_members(reference) {
+        // A live ambiguous participant cannot be skipped to elect another
+        // participant as a winner in the same reference domain.
+        if owner.borrow().modules.a11y_bindings > 1 { return None; }
         if control_label_view(&owner).is_none() { continue; }
         let kind = owner.borrow().modules.control_label.kind;
         match kind {
@@ -295,7 +315,7 @@ pub fn control_label_name(target: &OwnerRef) -> Option<gpui::accesskit::NodeId> 
     control_label_view(&label).map(|view| view.node)
 }
 fn control_label_unmodified(modifiers: gpui::Modifiers) -> bool {
-    !modifiers.alt && !modifiers.control && !modifiers.shift && !modifiers.platform
+    !modifiers.alt && !modifiers.control && !modifiers.shift && !modifiers.platform && !modifiers.function
 }
 pub fn control_label_cancel(owner: &OwnerRef) { owner.borrow_mut().modules.control_label.pointer = None; }
 pub fn control_label_pointer_capture(owner: &OwnerRef) {
@@ -385,5 +405,49 @@ impl gpui::Element for ControlLabelNativeChild {
 }
 pub fn control_label_native_child(owner: &OwnerRef, element: AnyElement) -> AnyElement {
     if control_label_is_label(owner) { ControlLabelNativeChild { element, owner: Rc::downgrade(owner) }.into_any_element() } else { element }
+}
+
+#[cfg(all(test,feature="test-support"))]
+mod control_label_view_tests {
+    use super::*;
+    use gpui::{AppContext,Context,Render,TestAppContext};
+    struct Empty;
+    impl Render for Empty { fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement{div()} }
+    fn owner(window:&Window,target:bool,reference:&ControlLabelRef,callback:Value,node:u64)->OwnerRef{
+        let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+        initialize_instance_associations(&owner,InstanceAssociations{control_label:Some(reference.clone())});
+        let weak=Rc::downgrade(&owner);control_label_declare(&weak,target,callback,Value::Undefined);
+        if !target{control_label_sync(&weak,record(vec![("naming",Value::boolean(true)),("activation",Value::boolean(true))]));}
+        Owner::finish(&owner,Value::Undefined);
+        // The framework consumer covers physical layout. This SDK control
+        // isolates exact request retirement from the already-observed facts.
+        {let mut o=owner.borrow_mut();o.window_id=Some(window.window_handle().window_id());o.mounted=true;o.bounds=Some(Bounds::default());o.epoch=1;
+            o.modules.a11y_frame=1;o.modules.a11y_bindings=1;o.modules.a11y_node=Some(gpui::accesskit::NodeId(node));}
+        control_label_commit(&owner);owner
+    }
+    #[gpui::test]
+    fn physical_replacement_and_ambiguity_cannot_revive_borrowed_requests(cx:&mut TestAppContext){
+        let window=cx.update(|cx|cx.open_window(Default::default(),|_,cx|cx.new(|_|Empty)).unwrap());
+        window.update(cx,|_,window,cx|{
+            let reference=ControlLabelRef::new();let label=owner(window,false,&reference,Value::Undefined,1);
+            let retained=Rc::new(RefCell::new(Value::Undefined));let capture=retained.clone();
+            let target=owner(window,true,&reference,Value::Function(Rc::new(move|arguments|{*capture.borrow_mut()=arguments[1].clone();Value::Undefined})),2);
+            control_label_action_lease(&label).unwrap().request(window,cx);let original=retained.borrow().clone();
+            assert!(control_label_request_current(original.clone()).bool());
+            target.borrow_mut().modules.a11y_node=Some(gpui::accesskit::NodeId(3));control_label_commit(&target);
+            assert!(!control_label_request_current(original.clone()).bool());
+            target.borrow_mut().modules.a11y_node=Some(gpui::accesskit::NodeId(2));control_label_commit(&target);
+            assert!(!control_label_request_current(original).bool(),"restoring a physical node cannot restore a retired request");
+            control_label_action_lease(&label).unwrap().request(window,cx);let unique=retained.borrow().clone();
+            target.borrow_mut().modules.a11y_bindings=2;control_label_commit(&target);
+            assert!(!control_label_request_current(unique.clone()).bool());assert!(control_label_request(&label,"accessibility").is_none());
+            let revision=reference.0.revision.get();control_label_commit(&target);
+            assert_eq!(reference.0.revision.get(),revision,"stable ambiguity must not repeatedly schedule work");
+            target.borrow_mut().modules.a11y_bindings=1;control_label_commit(&target);
+            assert!(!control_label_request_current(unique).bool());
+            control_label_action_lease(&label).unwrap().request(window,cx);assert!(control_label_request_current(retained.borrow().clone()).bool());
+            Owner::dispose(&label);Owner::dispose(&target);
+        }).unwrap();
+    }
 }
 `;

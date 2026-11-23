@@ -795,7 +795,7 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
         }
     }));
     let element = match &surface.a11y {
-        Some(a11y) if a11y.disabled || a11y.read_only.is_some() => A11yStates {
+        Some(a11y) if a11y.disabled || a11y.read_only.is_some() => AccessibilityFlags {
             element,
             disabled: a11y.disabled,
             read_only: a11y.read_only,
@@ -809,17 +809,18 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
     }
 }
 
-/// Accessibility states that the pinned GPUI element builders do not expose.
+/// Accessibility state flags not exposed by the pinned GPUI builders.
 ///
-/// The wrapper preserves the surface's layout and input. It only adds the
-/// declared flags to the surface's ordinary AccessKit projection.
-struct A11yStates {
+/// This wrapper projects the current snapshot into the actual AccessKit node.
+/// Layout, input and action policy remain the surface's own. Read-only is not
+/// disabled: the Prototype decides whether an activation changes its value.
+struct AccessibilityFlags {
     element: Stateful<Div>,
     disabled: bool,
     read_only: Option<bool>,
 }
 
-impl IntoElement for A11yStates {
+impl IntoElement for AccessibilityFlags {
     type Element = Self;
 
     fn into_element(self) -> Self::Element {
@@ -827,7 +828,7 @@ impl IntoElement for A11yStates {
     }
 }
 
-impl Element for A11yStates {
+impl Element for AccessibilityFlags {
     type RequestLayoutState = <Stateful<Div> as Element>::RequestLayoutState;
     type PrepaintState = <Stateful<Div> as Element>::PrepaintState;
 
@@ -913,6 +914,40 @@ impl Element for A11yStates {
         builder: &mut gpui::A11ySubtreeBuilder,
     ) {
         Element::a11y_synthetic_children(&mut self.element, prepaint, builder)
+    }
+}
+
+#[cfg(test)]
+mod accessibility_flags_tests {
+    use super::*;
+
+    #[test]
+    fn current_readonly_fact_reaches_the_native_node_without_losing_its_other_semantics() {
+        for read_only in [None, Some(true), Some(false)] {
+            for disabled in [false, true] {
+                let element = AccessibilityFlags {
+                    element: div()
+                        .id("checkbox")
+                        .role(accesskit::Role::CheckBox)
+                        .aria_label("Current caption")
+                        .aria_toggled(gpui::Toggled::Mixed)
+                        .on_a11y_action(AccessibleAction::Click, |_, _, _| {}),
+                    disabled,
+                    read_only,
+                };
+                let mut node = accesskit::Node::new(element.a11y_role().unwrap());
+                // Explicit false must clear an earlier contribution; absence
+                // must not claim authority over another source's fact.
+                node.set_read_only();
+                element.write_a11y_info(&mut node);
+                assert_eq!(node.is_read_only(), read_only != Some(false));
+                assert_eq!(node.is_disabled(), disabled);
+                assert_eq!(node.role(), accesskit::Role::CheckBox);
+                assert_eq!(node.label(), Some("Current caption"));
+                assert_eq!(node.toggled(), Some(gpui::Toggled::Mixed));
+                assert!(node.supports_action(accesskit::Action::Click));
+            }
+        }
     }
 }
 
@@ -1077,7 +1112,7 @@ mod a11y_state_tests {
                     let bridge = Rc::new(RefCell::new(InputBridge::new()));
                     let mut rendered = render_surface(&surface, &bridge);
                     let element = rendered
-                        .downcast_mut::<A11yStates>()
+                        .downcast_mut::<AccessibilityFlags>()
                         .expect("the production renderer carries declared states");
                     assert_eq!(Element::a11y_role(element), Some(accesskit::Role::CheckBox));
                     let mut node = accesskit::Node::new(accesskit::Role::CheckBox);
@@ -1111,7 +1146,7 @@ mod a11y_state_tests {
         let bridge = Rc::new(RefCell::new(InputBridge::new()));
         let mut rendered = render_surface(&surface, &bridge);
         let element = rendered
-            .downcast_mut::<A11yStates>()
+            .downcast_mut::<AccessibilityFlags>()
             .expect("the existing disabled projection remains wrapped");
         assert_eq!(Element::a11y_role(element), Some(accesskit::Role::Button));
         for read_only in [false, true] {

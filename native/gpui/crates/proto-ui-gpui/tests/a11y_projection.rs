@@ -115,11 +115,55 @@ fn the_recorded_checkbox_is_a_checkbox_unchecked_checked_or_mixed() {
     let unchecked = checkbox("root");
     assert_eq!(unchecked.role, Role::CheckBox);
     assert_eq!(unchecked.toggled, Some(Toggled::False));
+    assert_eq!(unchecked.read_only, Some(false));
     // AccessKit names a checkbox from its content itself.
     assert!(unchecked.name_from_content);
     assert!(names_from_descendants(Role::CheckBox));
     assert_eq!(checkbox("checked").toggled, Some(Toggled::True));
     assert_eq!(checkbox("mixed").toggled, Some(Toggled::Mixed));
+}
+
+#[test]
+fn readonly_preserves_boolean_facts_without_changing_actions_or_check_state() {
+    for value in [true, false] {
+        let (projection, issues) = project(&snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": { "readOnly": value, "checked": "mixed", "disabled": false },
+            "actions": { "activate": { "event": "click" } },
+            "relations": {},
+        })));
+        let projection = projection.expect("the checkbox projects");
+        assert!(issues.is_empty(), "{issues:?}");
+        assert_eq!(projection.read_only, Some(value));
+        assert_eq!(projection.toggled, Some(Toggled::Mixed));
+        assert!(!projection.disabled);
+        // The Prototype retains control of whether the action changes state.
+        assert!(projection.activatable);
+    }
+}
+
+#[test]
+fn readonly_absence_and_invalid_values_do_not_invent_a_boolean_fact() {
+    for value in [None, Some(json!("false")), Some(Value::Null), Some(json!(0))] {
+        let mut snapshot = snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": {},
+            "actions": {},
+            "relations": {},
+        }));
+        if let Some(value) = &value {
+            snapshot.states.insert("readOnly".into(), value.clone());
+        }
+        let (projection, issues) = project(&snapshot);
+        assert_eq!(projection.expect("the checkbox still projects").read_only, None);
+        let expected: Vec<_> = value
+            .into_iter()
+            .map(|value| A11yIssue::State { name: "readOnly".into(), value })
+            .collect();
+        assert_eq!(issues, expected);
+    }
 }
 
 #[test]

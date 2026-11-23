@@ -502,6 +502,7 @@ test('accepted Shadow resources stay limited to the exact WC bridge chunk', () =
     'packages/adapters/web-component/src/shadow-profile.ts',
     'packages/adapters/web-component/src/shadow-split-effects.ts',
     'packages/adapters/web-component/src/color-scheme-source.ts',
+    'packages/adapters/web-component/src/shadow-percentage-source.ts',
   ]) {
     const graph = graphFixture();
     const bridge = graph.chunks.find(
@@ -1845,6 +1846,58 @@ for (const kind of ['tint-stage', 'visible-refraction']) {
     );
   });
 }
+const shadowPercentageSource = 'packages/adapters/web-component/src/shadow-percentage-source.ts';
+function materialDiagnosticWithPercentageDependencyBridge(kind) {
+  const fixture = materialDiagnosticWithStaticBridge(kind);
+  const adapt = 'packages/adapters/web-component/src/adapt.ts';
+  const exposeState = 'packages/modules/expose-state/src/index.ts';
+  fixture.graph.modules.find((entry) => entry.id === fixture.wc).imports.push(adapt);
+  fixture.graph.modules.push(
+    { id: adapt, imports: [shadowPercentageSource], dynamicImports: [] },
+    { id: shadowPercentageSource, imports: [exposeState], dynamicImports: [] },
+    { id: exposeState, imports: [], dynamicImports: [] }
+  );
+  fixture.bridge.moduleIds.push(adapt, shadowPercentageSource, exposeState);
+  return fixture;
+}
+
+for (const kind of ['tint-stage', 'visible-refraction']) {
+  test(`shadow percentage source ${kind} remains owned by the existing static WC bridge`, () => {
+    const { graph } = materialDiagnosticWithPercentageDependencyBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  });
+  for (const origin of ['route', 'producer']) {
+    for (const field of ['imports', 'dynamicImports']) {
+      test(`shadow percentage source ${kind} refuses ${origin} ${field} bypass into the bridge`, () => {
+        const { graph, facade, producer } = materialDiagnosticWithPercentageDependencyBridge(kind);
+        assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+        graph.modules
+          .find((entry) => entry.id === (origin === 'route' ? facade : producer))
+          [field].push(shadowPercentageSource);
+        assert.ok(
+          collectWebsiteProductionBundleIssues({ graph }).some(
+            (issue) =>
+              issue.includes('outside its producer boundary') &&
+              issue.includes(shadowPercentageSource)
+          )
+        );
+      });
+    }
+  }
+  test(`shadow percentage source ${kind} cannot borrow bridge identity without its source edge`, () => {
+    const { graph, wc } = materialDiagnosticWithPercentageDependencyBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    graph.modules.find((entry) => entry.id === wc).imports = [];
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) =>
+          issue.includes('unreviewed runtime or Adapter module') &&
+          issue.includes(shadowPercentageSource)
+      )
+    );
+  });
+}
+
 for (const kind of ['tint-stage', 'visible-refraction']) {
   test(
     'material diagnostic ' + kind + ' retains only the existing owned static bridge placement',

@@ -48,6 +48,7 @@ export class ${className} extends HTMLElement {
   private hasRaw = false;
   private carrier: Carrier | null = null;
   private closed = false;
+  private retiring = false;
   private disconnectVersion = 0;
   private recovering = false;
   private initializedCarrier = false;
@@ -71,7 +72,7 @@ ${controlLabel ? '    this.owner?.interaction.refresh();\n' : ''}  }
   }
   connectedCallback(): void {
     ++this.disconnectVersion;
-    if (this.closed) return;
+    if (this.closed || this.retiring) return;
     if (this.owner) { this.owner.reconcile(); return; }
     const definition = pendingProviderDefinition(this);
     if (definition) {
@@ -122,11 +123,25 @@ ${controlLabel ? '    this.owner?.interaction.refresh();\n' : ''}  }
     }
   }
   disconnectedCallback(): void {
-    const version = ++this.disconnectVersion, owner = this.owner;
+    const version = ++this.disconnectVersion, owner = this.owner, port = this.port;
     queueMicrotask(() => {
       if (version !== this.disconnectVersion || this.isConnected || !owner || owner !== this.owner) return;
-      this.owner = null;
-      try { owner.dispose(); } finally { this.port?.dispose(); this.port = null; }
+      // Cleanup can synchronously reconnect the element. Keep that new connection
+      // pending until the old owner and its captured port have both retired.
+      this.owner = null; this.port = null; this.retiring = true;
+      try { owner.dispose(); }
+      finally {
+        try { port?.dispose(); }
+        finally {
+          this.retiring = false;
+          if (!this.closed && this.isConnected) {
+            const reconnectedVersion = this.disconnectVersion;
+            queueMicrotask(() => {
+              if (!this.closed && !this.owner && this.isConnected && reconnectedVersion === this.disconnectVersion) this.connectedCallback();
+            });
+          }
+        }
+      }
     });
   }
   setProps(next: GeneratedProps & Record<string, unknown>): void {
