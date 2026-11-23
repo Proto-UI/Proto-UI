@@ -1,6 +1,8 @@
 // @vitest-environment node
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
+import { emitReact } from '../src/react';
 import { checkTargetOperations, resolveTargetProfile } from '../src/targets';
 import type { TargetProfile } from '../src/targets';
 import type { PrototypeIR } from '../src/ir';
@@ -27,6 +29,26 @@ export default definePrototype({name:'basic',setup(def){
 }});`;
 
 describe('explicit target capability admission', () => {
+  it('pins runtime delivery to the actual public package manifests', () => {
+    const runtime = profile('react-runtime-v1');
+    const emitted = emitReact(parse(basicSource));
+    if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
+    for (const relative of ['core', 'hooks', 'adapters/react']) {
+      const manifest = JSON.parse(
+        readFileSync(new URL(`../../${relative}/package.json`, import.meta.url), 'utf8')
+      );
+      expect(runtime.dependencies.find(({ name }) => name === manifest.name)?.version).toBe(
+        manifest.version
+      );
+      expect(runtime.helpers.find(({ name }) => name === manifest.name)?.version).toBe(
+        manifest.version
+      );
+      expect(emitted.value.dependencies.find(({ name }) => name === manifest.name)?.version).toBe(
+        manifest.version
+      );
+    }
+  });
+
   it('admits the basic native slice without a hidden semantic-runtime dependency', () => {
     const result = checkTargetOperations(parse(basicSource), profile('react-dom-source-v1'));
     expect(result.ok).toBe(true);

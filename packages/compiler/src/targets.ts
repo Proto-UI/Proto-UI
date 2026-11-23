@@ -404,26 +404,26 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     ],
     dependencies: [
       ...reactDependencies,
-      { name: '@proto.ui/core', version: '0.3.0-alpha.1', role: 'semantic-runtime' },
-      { name: '@proto.ui/hooks', version: '0.3.0-alpha.1', role: 'semantic-runtime' },
-      { name: '@proto.ui/adapter-react', version: '0.3.0-alpha.1', role: 'host-bridge' },
+      { name: '@proto.ui/core', version: '0.3.0-alpha.2', role: 'semantic-runtime' },
+      { name: '@proto.ui/hooks', version: '0.3.0-alpha.2', role: 'semantic-runtime' },
+      { name: '@proto.ui/adapter-react', version: '0.3.0-alpha.2', role: 'host-bridge' },
     ],
     helpers: [
       {
         name: '@proto.ui/core',
-        version: '0.3.0-alpha.1',
+        version: '0.3.0-alpha.2',
         classification: 'semantic-runtime',
         delivery: 'dependency',
       },
       {
         name: '@proto.ui/hooks',
-        version: '0.3.0-alpha.1',
+        version: '0.3.0-alpha.2',
         classification: 'semantic-runtime',
         delivery: 'dependency',
       },
       {
         name: '@proto.ui/adapter-react',
-        version: '0.3.0-alpha.1',
+        version: '0.3.0-alpha.2',
         classification: 'host-bridge',
         delivery: 'dependency',
       },

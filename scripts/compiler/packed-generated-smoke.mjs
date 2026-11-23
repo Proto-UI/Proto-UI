@@ -3,15 +3,19 @@
  * Both paths run independent contract checks and a trace comparison. This is synthetic input,
  * not native-browser, retained-owner, layout, or full compiler/Adapter parity evidence.
  * Run with node --import tsx; PACKED_DIR points to the release pack's tarballs/ directory.
+ * NATIVE_CONSUMER_COMPILER selects the installed, source-pinned compiler index.js.
+ * Packages are installed only from this consumer's manifest through npm lock -> npm ci.
  * Command output and closure.json are retained on every run. Failed consumers are retained;
  * KEEP_PACKED_CONSUMER=1 also retains successful installs for independent inspection.
  */
-import { spawnSync } from 'node:child_process';
+import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdtempSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   rmSync,
@@ -19,8 +23,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { compilePrototype } from '../../packages/compiler/src/index.ts';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url));
 const packedDir = path.resolve(
@@ -29,21 +32,48 @@ const packedDir = path.resolve(
 const releaseDir = path.dirname(packedDir);
 const workDir = mkdtempSync(path.join(tmpdir(), 'proto-compiler-packed-generated-'));
 const consumerDir = path.join(workDir, 'consumer');
+const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const save = (file, value) => writeFileSync(file, JSON.stringify(value, null, 2) + '\n');
+const profile = 'react-runtime-v1';
+const summary = {
+  schema: 'proto-ui.packed-generated-consumer.v1',
+  profile,
+  compiler: process.env.NATIVE_CONSUMER_COMPILER ?? 'checkout-source',
+  compilerBuild: null,
+  sourceRoot: repoRoot,
+  dependencyMode: 'declared-tarballs-and-registry-lock-ci',
+  surface: 'Paired real React mounts in Happy DOM; not native-browser/full parity',
+  ok: false,
+};
 let succeeded = false;
 console.log(`PACKED_CONSUMER_EVIDENCE: ${workDir}`);
 
 function run(name, command, args) {
+  const started = performance.now();
+  const env = { ...process.env, NODE_PATH: '', NODE_OPTIONS: '' };
+  delete env.TSX_TSCONFIG_PATH;
   const result = spawnSync(command, args, {
     cwd: consumerDir,
+    env,
     encoding: 'utf8',
     maxBuffer: 16 * 1024 * 1024,
+    timeout: 180000,
   });
   writeFileSync(path.join(workDir, `${name}.stdout.log`), result.stdout ?? '');
   writeFileSync(path.join(workDir, `${name}.stderr.log`), result.stderr ?? '');
   writeFileSync(
     path.join(workDir, `${name}.result.json`),
     JSON.stringify(
-      { command, args, status: result.status, signal: result.signal, error: result.error?.message },
+      {
+        command,
+        args,
+        cwd: consumerDir,
+        wallMs: performance.now() - started,
+        status: result.status,
+        signal: result.signal,
+        error: result.error?.message ?? null,
+        environment: { NODE_PATH: '', NODE_OPTIONS: '', TSX_TSCONFIG_PATH: null },
+      },
       null,
       2
     )
@@ -59,6 +89,41 @@ function run(name, command, args) {
   return result;
 }
 
+function payload(directory) {
+  const digest = createHash('sha256');
+  let files = 0;
+  let bytes = 0;
+  function visit(current) {
+    for (const entry of readdirSync(current, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )) {
+      if (entry.name === 'node_modules') continue;
+      const file = path.join(current, entry.name);
+      const relative = path.relative(realpathSync(consumerDir), realpathSync(file));
+      assert.ok(
+        !relative.startsWith('..') && !path.isAbsolute(relative),
+        `Escaping installed payload: ${file}`
+      );
+      if (entry.isDirectory()) visit(file);
+      else {
+        assert.ok(entry.isFile(), `Non-regular installed payload: ${file}`);
+        const content = readFileSync(file);
+        files += 1;
+        bytes += content.length;
+        digest.update(
+          JSON.stringify([
+            path.relative(directory, file).split(path.sep).join('/'),
+            content.length,
+            hash(content),
+          ])
+        );
+      }
+    }
+  }
+  visit(directory);
+  return { files, bytes, treeSha256: digest.digest('hex') };
+}
+
 function runNpm(name, args) {
   if (process.platform !== 'win32') return run(name, 'npm', args);
   // Windows npm is a .cmd shim, which spawnSync cannot execute without a shell.
@@ -72,31 +137,90 @@ function runNpm(name, args) {
 }
 
 try {
-  const source = readFileSync(
-    path.join(repoRoot, 'packages/prototypes/base/src/button/button.proto.ts'),
-    'utf8'
+  const compiler = await import(
+    process.env.NATIVE_CONSUMER_COMPILER
+      ? pathToFileURL(path.resolve(process.env.NATIVE_CONSUMER_COMPILER)).href
+      : new URL('../../packages/compiler/src/index.ts', import.meta.url).href
   );
-  const compilation = compilePrototype(source, {
-    fileName: 'button.proto.ts',
+  summary.compilerBuild = compiler.compilerBuildIdentity;
+  summary.sourceRevision = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  }).trim();
+  if (process.env.NATIVE_CONSUMER_COMPILER) {
+    assert.equal(
+      compiler.compilerBuildIdentity?.revision,
+      summary.sourceRevision,
+      'Pinned compiler and authored source must use the same final revision'
+    );
+    assert.equal(
+      execFileSync('git', ['status', '--porcelain', '--untracked-files=normal'], {
+        cwd: repoRoot,
+        encoding: 'utf8',
+      }).trim(),
+      '',
+      'Pinned consumer proof requires clean source'
+    );
+  }
+  const entry = 'packages/prototypes/base/src/button/button.proto.ts';
+  const compilation = await compiler.compileFile(entry, {
+    root: repoRoot,
+    profile,
     componentName: 'GeneratedButton',
   });
+  save(path.join(workDir, 'compilation-result.json'), {
+    ok: compilation.ok,
+    diagnostics: compilation.diagnostics ?? [],
+  });
   if (!compilation.ok) throw new Error(JSON.stringify(compilation.diagnostics));
-  mkdirSync(path.join(consumerDir, 'src'), { recursive: true });
-  writeFileSync(
-    path.join(consumerDir, 'src', 'GeneratedButton.tsx'),
-    compilation.value.output.code
-  );
+  assert.equal(compilation.value.output.profile, profile);
+  const artifacts = compiler.compilationArtifacts(compilation.value, {
+    sourcePath: 'GeneratedButton.tsx',
+  });
+  mkdirSync(consumerDir);
+  const written = await compiler.writeArtifactSet(artifacts, path.join(consumerDir, 'src'));
+  if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+  summary.compilation = {
+    entry,
+    sourceGraphSha256: compilation.value.ir.source.sha256,
+    sourceFiles: compilation.value.ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 })),
+    profile: compilation.value.output.profile,
+    dependencies: compilation.value.output.dependencies,
+    artifacts: artifacts.map(({ path, kind, contents }) => ({
+      path,
+      kind,
+      sha256: hash(contents),
+    })),
+  };
 
   // Follow the release consumer convention: collect internal dependency, peer and optional
   // edges from staged manifests; external packages remain registry-resolved dependencies.
   const manifest = JSON.parse(readFileSync(path.join(releaseDir, 'pack-manifest.json'), 'utf8'));
+  summary.pack = {
+    releaseDir,
+    releaseVersion: manifest.releaseVersion,
+    manifestSha256: hash(readFileSync(path.join(releaseDir, 'pack-manifest.json'))),
+  };
   const packageByName = new Map(manifest.packages.map((pkg) => [pkg.name, pkg]));
+  const targetDependencies = Object.fromEntries(
+    compilation.value.output.dependencies.map(({ name, version }) => [name, version])
+  );
+  for (const [name, version] of Object.entries(targetDependencies)) {
+    if (name.startsWith('@proto.ui/')) {
+      assert.equal(
+        packageByName.get(name)?.version,
+        version,
+        `Generated dependency ${name}@${version} does not match the packed version; never silently substitute versions`
+      );
+    }
+  }
   const closure = new Set();
   const queue = [
     '@proto.ui/core',
     '@proto.ui/hooks',
     '@proto.ui/adapter-react',
     '@proto.ui/prototypes-base',
+    ...Object.keys(targetDependencies).filter((name) => name.startsWith('@proto.ui/')),
   ];
   while (queue.length) {
     const name = queue.shift();
@@ -107,6 +231,8 @@ try {
     const staged = JSON.parse(
       readFileSync(path.join(releaseDir, entry.stage, 'package.json'), 'utf8')
     );
+    assert.equal(staged.name, name);
+    assert.equal(staged.version, manifest.releaseVersion);
     for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
       for (const dependency of Object.keys(staged[field] ?? {})) {
         if (dependency.startsWith('@proto.ui/')) queue.push(dependency);
@@ -132,15 +258,51 @@ try {
     name: 'proto-compiler-packed-generated-smoke',
     private: true,
     type: 'module',
-    dependencies: { ...internalDependencies, react: '19.2.6', 'react-dom': '19.2.6' },
+    dependencies: {
+      ...Object.fromEntries(
+        Object.entries(targetDependencies).filter(([name]) => !name.startsWith('@proto.ui/'))
+      ),
+      ...internalDependencies,
+    },
     devDependencies: { '@happy-dom/global-registrator': '20.11.0', tsx: '4.21.0' },
   };
   writeFileSync(
     path.join(consumerDir, 'package.json'),
     JSON.stringify(packageJson, null, 2) + '\n'
   );
-  runNpm('install', ['install', '--no-audit', '--no-fund']);
-  runNpm('installed-tree', ['ls', '--all', '--json']);
+  assert.equal(packageJson.dependencies.react, '19.2.6');
+  assert.equal(packageJson.dependencies['react-dom'], '19.2.6');
+  assert.equal(existsSync(path.join(consumerDir, 'node_modules')), false);
+  const config = path.join(consumerDir, '.npmrc');
+  const registry = 'https://registry.npmjs.org/';
+  writeFileSync(config, `registry=${registry}\naudit=false\nfund=false\n`);
+  const options = [
+    '--ignore-scripts',
+    '--no-audit',
+    '--no-fund',
+    '--global=false',
+    '--workspaces=false',
+    '--registry',
+    registry,
+    '--cache',
+    path.join(consumerDir, '.npm-cache'),
+    '--userconfig',
+    config,
+  ];
+  runNpm('registry-lock', ['install', '--package-lock-only', ...options]);
+  assert.equal(
+    existsSync(path.join(consumerDir, 'node_modules')),
+    false,
+    'Lock generation must not install packages'
+  );
+  runNpm('registry-ci', ['ci', ...options]);
+  runNpm('installed-tree', ['ls', '--all', '--json', '--global=false', '--workspaces=false']);
+  summary.install = {
+    registry,
+    manifestSha256: hash(readFileSync(path.join(consumerDir, 'package.json'))),
+    lockSha256: hash(readFileSync(path.join(consumerDir, 'package-lock.json'))),
+    installScripts: false,
+  };
 
   // Lockfile entries alone may include uninstalled platform-specific optionals. Report only
   // actual on-disk packages; verify real paths and tarball resolution, not merely URL text.
@@ -178,9 +340,23 @@ try {
       location,
       resolved: entry.resolved ?? null,
       integrity: entry.integrity ?? null,
+      ...payload(directory),
     });
   }
   const installedNames = [...new Set(installed.internal.map((entry) => entry.name))].sort();
+  for (const [name, version] of Object.entries({
+    ...targetDependencies,
+    ...packageJson.devDependencies,
+  })) {
+    const actual = [...installed.internal, ...installed.external].find(
+      (pkg) => pkg.location === `node_modules/${name}`
+    );
+    assert.equal(
+      actual?.version,
+      version,
+      `Installed direct dependency ${name} does not match its declared version`
+    );
+  }
   if (JSON.stringify(installedNames) !== JSON.stringify([...closure].sort()))
     throw new Error('installed internal package set differs from declared closure');
   const control = installed.internal[0];
@@ -300,13 +476,17 @@ console.log('PACKED_PAIRED_OK six Button checkpoints; happy-dom synthetic input'
   // React warnings are emitted to stderr; do not treat a zero exit with warnings as success.
   if (result.stderr.trim())
     throw new Error('paired runtime emitted warnings/errors; see paired-runtime.stderr.log');
+  summary.trace = JSON.parse(readFileSync(path.join(workDir, 'paired-traces.json'), 'utf8'));
+  summary.ok = true;
   succeeded = true;
   console.log('PACKED_PAIRED_SMOKE_PASS (bounded React Button; not native-browser/full parity)');
 } catch (error) {
+  summary.error = error.stack ?? String(error);
   writeFileSync(path.join(workDir, 'failure.txt'), error.stack ?? String(error));
   console.error(`PACKED_CONSUMER_FAILED: consumer and exact output retained at ${workDir}`);
   throw error;
 } finally {
+  save(path.join(workDir, 'summary.json'), summary);
   if (succeeded && process.env.KEEP_PACKED_CONSUMER !== '1')
     rmSync(consumerDir, { recursive: true, force: true });
 }
