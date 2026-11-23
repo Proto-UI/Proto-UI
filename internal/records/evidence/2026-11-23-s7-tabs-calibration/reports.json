@@ -10,7 +10,12 @@
     "startedAt": "2026-11-23T09:14:42Z",
     "commands": [
       {
-        "args": ["git", "sparse-checkout", "add", "benchmarks/interaction/knowledge-consumer"],
+        "args": [
+          "git",
+          "sparse-checkout",
+          "add",
+          "benchmarks/interaction/knowledge-consumer"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/continuation-s67-4deb",
         "log": "sparse.log",
         "returncode": 128,
@@ -34,7 +39,12 @@
     "startedAt": "2026-11-23T09:17:23Z",
     "commands": [
       {
-        "args": ["git", "reset", "--hard", "d0392fb31513b12f55b9e99b1fcf26a6338569c9"],
+        "args": [
+          "git",
+          "reset",
+          "--hard",
+          "d0392fb31513b12f55b9e99b1fcf26a6338569c9"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/continuation-s67-4deb",
         "log": "checkout.log",
         "returncode": 128,
@@ -58,14 +68,24 @@
     "startedAt": "2026-11-23T09:19:08Z",
     "commands": [
       {
-        "args": ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+        "args": [
+          "npm",
+          "ci",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-03/original-consumer",
         "log": "original-install.log",
         "returncode": 0,
         "elapsedSeconds": 44.74776339530945
       },
       {
-        "args": ["npm", "run", "build"],
+        "args": [
+          "npm",
+          "run",
+          "build"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-03/original-consumer",
         "log": "original-build.log",
         "returncode": 0,
@@ -112,14 +132,24 @@
         "elapsedSeconds": 5.631671905517578
       },
       {
-        "args": ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+        "args": [
+          "npm",
+          "ci",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-03/candidate-consumer",
         "log": "candidate-install.log",
         "returncode": 0,
         "elapsedSeconds": 8.446181297302246
       },
       {
-        "args": ["npm", "run", "build"],
+        "args": [
+          "npm",
+          "run",
+          "build"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-03/candidate-consumer",
         "log": "candidate-build.log",
         "returncode": 0,
@@ -233,7 +263,9 @@
         "outcome": "failed",
         "passed": 20,
         "planned": 22,
-        "failed": ["runtime-errors"],
+        "failed": [
+          "runtime-errors"
+        ],
         "expectedFailure": null,
         "expectationMet": false
       },
@@ -243,7 +275,9 @@
         "outcome": "failed",
         "passed": 20,
         "planned": 22,
-        "failed": ["runtime-errors"],
+        "failed": [
+          "runtime-errors"
+        ],
         "expectedFailure": null,
         "expectationMet": false
       },
@@ -253,7 +287,9 @@
         "outcome": "failed",
         "passed": 20,
         "planned": 22,
-        "failed": ["runtime-errors"],
+        "failed": [
+          "runtime-errors"
+        ],
         "expectedFailure": null,
         "expectationMet": false
       },
@@ -263,7 +299,9 @@
         "outcome": "failed",
         "passed": 20,
         "planned": 22,
-        "failed": ["runtime-errors"],
+        "failed": [
+          "runtime-errors"
+        ],
         "expectedFailure": null,
         "expectationMet": false
       },
@@ -273,7 +311,9 @@
         "outcome": "failed",
         "passed": 3,
         "planned": 22,
-        "failed": ["right-skips-disabled"],
+        "failed": [
+          "right-skips-disabled"
+        ],
         "expectedFailure": "right-skips-disabled",
         "expectationMet": false
       },
@@ -283,7 +323,9 @@
         "outcome": "failed",
         "passed": 1,
         "planned": 22,
-        "failed": ["initial-selection"],
+        "failed": [
+          "initial-selection"
+        ],
         "expectedFailure": "initial-selection",
         "expectationMet": false
       },
@@ -293,7 +335,9 @@
         "outcome": "failed",
         "passed": 17,
         "planned": 22,
-        "failed": ["removal"],
+        "failed": [
+          "removal"
+        ],
         "expectedFailure": "removal",
         "expectationMet": false
       }
@@ -2290,14 +2334,24 @@
     "startedAt": "2026-11-23T09:22:15Z",
     "commands": [
       {
-        "args": ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+        "args": [
+          "npm",
+          "ci",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-04/original-consumer",
         "log": "original-install.log",
         "returncode": 0,
         "elapsedSeconds": 0.917217493057251
       },
       {
-        "args": ["npm", "run", "build"],
+        "args": [
+          "npm",
+          "run",
+          "build"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-04/original-consumer",
         "log": "original-build.log",
         "returncode": 0,
@@ -2344,14 +2398,24 @@
         "elapsedSeconds": 2.019071340560913
       },
       {
-        "args": ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
+        "args": [
+          "npm",
+          "ci",
+          "--ignore-scripts",
+          "--no-audit",
+          "--no-fund"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-04/candidate-consumer",
         "log": "candidate-install.log",
         "returncode": 0,
         "elapsedSeconds": 1.020481824874878
       },
       {
-        "args": ["npm", "run", "build"],
+        "args": [
+          "npm",
+          "run",
+          "build"
+        ],
         "cwd": "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/s67-734-calibration-4deb-04/candidate-consumer",
         "log": "candidate-build.log",
         "returncode": 0,
@@ -2505,7 +2569,9 @@
         "outcome": "failed",
         "passed": 3,
         "planned": 22,
-        "failed": ["right-skips-disabled"],
+        "failed": [
+          "right-skips-disabled"
+        ],
         "expectedFailure": "right-skips-disabled",
         "expectationMet": true
       },
@@ -2515,7 +2581,9 @@
         "outcome": "failed",
         "passed": 1,
         "planned": 22,
-        "failed": ["initial-selection"],
+        "failed": [
+          "initial-selection"
+        ],
         "expectedFailure": "initial-selection",
         "expectationMet": true
       },
@@ -2525,7 +2593,9 @@
         "outcome": "failed",
         "passed": 17,
         "planned": 22,
-        "failed": ["removal"],
+        "failed": [
+          "removal"
+        ],
         "expectedFailure": "removal",
         "expectationMet": true
       }

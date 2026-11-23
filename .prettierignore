@@ -103,3 +103,7 @@ internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
+
+# Exact original Sprint 7 terminal observations; retained hashes bind these bytes.
+internal/records/evidence/2026-11-23-s7-declarative-types/summary.json
+internal/records/evidence/2026-11-23-s7-tabs-calibration/reports.json

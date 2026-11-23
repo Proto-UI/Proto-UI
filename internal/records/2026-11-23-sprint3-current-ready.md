@@ -22,3 +22,13 @@ The [source equivalence](evidence/2026-11-23-sprint3-current-ready/source-equiva
 ## Review and acceptance boundary
 
 The independent fixture source review found no blocker in the closure/identity repair. Ready-for-review exposes this concrete reconciled implementation and its evidence for review. Original 364-case native consumers, the separate Select eight, the fifteen-stage rehearsal, strict measured budgets, production Compiler and all original application/device/AT obligations retain their exact producer and source requirements. A new workflow submission is recorded separately from a terminal pass. Independent GitHub approval and integration requirements remain in force.
+
+## Additive publication and browser-probe reconciliation
+
+The official publisher created actual two-parent, Codex-authored/signed commit `5f9e9dd5c6967d47ec7299c34669b7081ceac7d0`, then correctly returned `PublicationUnknown`: the normal precommit formatter had changed one ordinary benchmark script and two original Sprint 7 JSON observations. That real commit remains in history. The ordinary script is proven to equal the exact installed formatter output. Both historical JSON files are restored byte for byte and receive exact immutable-path exclusions; their original and rewritten bytes, hashes, drift patch and failed publication receipt are retained.
+
+The actual production browser probe had a second concrete failure shared with Sprint 5: its nested helper becomes an out-of-realm `__name` reference when serialized by the browser driver. Only the identical callback is adapted into three direct try/catch observations; Sprint 3's additional production flow remains intact. A discriminating control transforms and serializes the actual old/new callbacks: the old callback fails with the missing helper and the new callback returns the independently expected observations for all eight allowed/blocked combinations. This is a separate JavaScript-realm control, not native-browser execution.
+
+All original **81/81** production/profile/source controls passed again on this adapted source. The complete compiler package still equals `7a64255`. The [publication/probe manifest](evidence/2026-11-23-sprint3-publication-reconciliation/manifest.json) binds the validated tree, restored original bytes and complete raw reconciliation archive.
+
+Sprint 3's current preview retirement implementation predates Sprint 5's strict acknowledgement propagation. This probe-only adaptation does not import or claim the latter's stronger guarantee. Full original native/production/release acceptance, actual retirement propagation, generated-output type completion and independent integration approval remain separate conditions.

@@ -3,35 +3,61 @@
   "checks": [
     {
       "label": "strict-baseline",
-      "args": ["npm", "run", "check:types", "--prefix", "scripts/analysis/declarative-agent-ui"],
+      "args": [
+        "npm",
+        "run",
+        "check:types",
+        "--prefix",
+        "scripts/analysis/declarative-agent-ui"
+      ],
       "exitCode": 0,
       "elapsedSeconds": 5.365292910995777,
       "log": "strict-baseline.log"
     },
     {
       "label": "reject-app-tsx",
-      "args": ["npm", "run", "check:types", "--prefix", "scripts/analysis/declarative-agent-ui"],
+      "args": [
+        "npm",
+        "run",
+        "check:types",
+        "--prefix",
+        "scripts/analysis/declarative-agent-ui"
+      ],
       "exitCode": 1,
       "elapsedSeconds": 4.417795426998055,
       "log": "reject-app-tsx.log"
     },
     {
       "label": "reject-mapping-mjs",
-      "args": ["npm", "run", "check:types", "--prefix", "scripts/analysis/declarative-agent-ui"],
+      "args": [
+        "npm",
+        "run",
+        "check:types",
+        "--prefix",
+        "scripts/analysis/declarative-agent-ui"
+      ],
       "exitCode": 1,
       "elapsedSeconds": 4.4642854609992355,
       "log": "reject-mapping-mjs.log"
     },
     {
       "label": "schema-tests",
-      "args": ["node", "--test", "scripts/analysis/declarative-agent-ui/schema.test.mjs"],
+      "args": [
+        "node",
+        "--test",
+        "scripts/analysis/declarative-agent-ui/schema.test.mjs"
+      ],
       "exitCode": 0,
       "elapsedSeconds": 0.32827621899195947,
       "log": "schema-tests.log"
     },
     {
       "label": "whitespace",
-      "args": ["git", "diff", "--check"],
+      "args": [
+        "git",
+        "diff",
+        "--check"
+      ],
       "exitCode": 0,
       "elapsedSeconds": 0.015359509008703753,
       "log": "whitespace.log"
