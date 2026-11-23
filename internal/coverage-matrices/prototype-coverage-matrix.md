@@ -27,18 +27,18 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate commit 0c6b47382a5fdc8ee5b443ea1f2487c98652c8bb; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit 4688e0578e8ef8b0eec1da3aa4c6c8115f71f4d8; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Historical main families / identities | Candidate families / identities | Release scope |
 | --- | --- | --- | --- |
-| base | 22 / 55 | 55 / 115 | 0.3 committed scope; acceptance separate |
+| base | 22 / 55 | 57 / 117 | 0.3 committed scope; acceptance separate |
 | shadcn | 17 / 48 | 57 / 127 | 0.3 committed scope; acceptance separate |
 | brutalist | 19 / 51 | 58 / 118 | 0.3 committed scope; acceptance separate |
 | bootstrap-2-3-2 | 2 / 2 | 54 / 116 | WIP / Experimental; 0.4 |
 | liquid-glass | 2 / 2 | 54 / 112 | WIP / Experimental; 0.4 |
 | lucide | 1 / 1 | 1 / 1 | 0.3 committed scope; acceptance separate |
 
-Candidate atomic GPUI obligations: 460; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
+Candidate atomic GPUI obligations: 468; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
 
 Candidate source definitions include regular .proto.ts files and concrete TypeScript entries resolved from catalog citations. A cataloged composition contributes only its actual P identity; its exported helpers do not invent unadmitted atomic parts. All concrete paths and hashes remain in the JSON.
 
@@ -77,6 +77,7 @@ Candidate source definitions include regular .proto.ts files and concrete TypeSc
 | menubar / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | message-scroller / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | meter / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
+| native-file-input / 1 | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities |
 | navigation-menu / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | number-field / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | popover / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
@@ -85,6 +86,7 @@ Candidate source definitions include regular .proto.ts files and concrete TypeSc
 | resizable / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | scroll-area / 4 | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
 | select / 7 | implemented-draft / 8 P identities | implemented-draft / 5 P identities | implemented-draft / 7 P identities | implemented-draft / 7 P identities |
+| selectable-row / 1 | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities | required-full-projection-not-implemented / 0 P identities |
 | separator / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | slider / 4 | implemented-draft / 4 P identities | implemented-draft / 2 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
 | surface / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
@@ -173,6 +175,7 @@ Membership source: [retained manifest](../fixtures/shadcn-style-source/manifest.
 | P-BASE-MENUBAR | P-SHADCN-MENUBAR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-MESSAGE-SCROLLER | P-SHADCN-MESSAGE-SCROLLER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-METER | P-SHADCN-METER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-NATIVE-FILE-INPUT | required missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing |
 | P-BASE-NAVIGATION-MENU | P-SHADCN-NAVIGATION-MENU | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-NUMBER-FIELD | P-SHADCN-NUMBER-FIELD | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-POPOVER | P-SHADCN-POPOVER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
@@ -192,6 +195,7 @@ Membership source: [retained manifest](../fixtures/shadcn-style-source/manifest.
 | P-BASE-SELECT-STRUCTURAL-PARTS | P-SHADCN-SELECT-STRUCTURAL-PARTS | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-SELECTABLE-ROW | required missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing | required-missing |
 | P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-SLIDER | P-SHADCN-SLIDER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-SLIDER-FIELD-THUMB | P-SHADCN-SLIDER-FIELD-THUMB | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
