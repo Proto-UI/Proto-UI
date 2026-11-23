@@ -6,7 +6,7 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { build } from 'esbuild';
-import { collectProtoStyleTokens } from '../../packages/cli/src/services/prototype-style-tokens.ts';
+import { collectProtoStyleTokensFromFiles } from '../../packages/cli/src/services/prototype-style-tokens.ts';
 import { renderProtoStyleTokenCss } from '../../packages/cli/src/services/proto-style-css.ts';
 import { renderThemeCss } from '../../packages/prototypes/bootstrap-2-3-2/src/theme.ts';
 
@@ -68,12 +68,17 @@ report.source.inputs = await Promise.all(
     .sort()
     .map(async (file) => ({ path: file, sha256: hash(await readFile(file)) }))
 );
-const styles = await Promise.all(
-  ['collapsible', 'accordion'].map((part) =>
-    collectProtoStyleTokens(path.resolve(`packages/prototypes/bootstrap-2-3-2/src/${part}`))
-  )
+// Inherited Base rules are part of the consumer's source closure. Collecting
+// only the two Bootstrap directories omitted their hidden-state CSS entirely.
+const styleSources = report.source.inputs
+  .map((input) => input.path)
+  .filter((file) => /\.[cm]?tsx?$/.test(file));
+const tokens = await collectProtoStyleTokensFromFiles(
+  styleSources.map((file) => path.resolve(file))
 );
-const css = renderProtoStyleTokenCss([...new Set(styles.flat())]);
+const css = renderProtoStyleTokenCss(tokens);
+report.source.styleInputs = styleSources;
+report.source.styleTokenCount = tokens.length;
 report.source.cssSha256 = hash(css);
 await writeFile(path.join(output, 'consumer.js'), script);
 await writeFile(path.join(output, 'consumer.css'), css);

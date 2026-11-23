@@ -134,6 +134,8 @@ export function snapshot() {
     naturalContent: find('body')?.getBoundingClientRect().height ?? 0,
     size: content?.style.getPropertyValue('block-size') ?? '',
     overflow: content?.style.overflow ?? '',
+    display: content ? getComputedStyle(content).display : null,
+    styleTokens: content?.getAttribute('data-pui-style') ?? null,
     hidden: read('content', 'hidden.get'),
     open: read('content', 'open.get'),
     phase: read('content', 'transitionState.get'),
