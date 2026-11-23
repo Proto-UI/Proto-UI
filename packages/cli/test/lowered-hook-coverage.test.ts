@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { createExposeStateWebNameMap } from '../../modules/expose-state-web/src/utils';
-import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
+import { pendingHelperRuleReads, scanRuleStateReads } from '../src/services/lowered-hook-coverage';
 import type { RuleStateScan } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
 import type { HookSourceState } from '../src/services/hook-source-summary';
@@ -43,13 +43,41 @@ async function prototypeSourceFiles(): Promise<string[]> {
 }
 
 /**
- * A `rule` call's callee is named `rule`, so a file whose text lacks that word
- * cannot contain one however the call is punctuated — `def.rule?.({})` and
- * `def.rule /* note *\/ ({})` both keep it. Matching the word rather than the
- * call shape keeps the scanned set identical to production while not building a
- * TypeScript AST for every type and index module under `src`.
+ * A file that registers a rule carries a rule condition, and a file that
+ * imports a local module may call a helper that registers one. The gate scans
+ * both, so the replay of every call site is reachable.
  */
-const RULE_CALL = /\brule\b/;
+const RULE_BEARING = /\brule\b/;
+
+/**
+ * The modules that register a rule, by their path without the extension. A
+ * file that imports one of them may call the helper that registers the rule.
+ */
+const ruleModulePaths = async (files: readonly string[]): Promise<Set<string>> => {
+  const modules = new Set<string>();
+  for (const absolute of files) {
+    const text = await readFile(absolute, 'utf8');
+    if (!RULE_BEARING.test(text)) continue;
+    const relative = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
+    modules.add(relative.replace(/\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/, ''));
+  }
+  return modules;
+};
+
+/** Whether a file imports a module that registers a rule. */
+const importsRuleModule = (
+  file: string,
+  text: string,
+  modules: ReadonlySet<string>
+): boolean => {
+  const directory = path.posix.dirname(file);
+  for (const match of text.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
+    const specifier = match[1] ?? '';
+    const base = path.posix.normalize(path.posix.join(directory, specifier));
+    if (modules.has(base) || modules.has(`${base}/index`)) return true;
+  }
+  return false;
+};
 
 /** A real intent: the variant is a prefix on tokens, so a stub yields nothing. */
 const rule = (condition: string) =>
@@ -5460,13 +5488,22 @@ describe('lowered hook coverage', () => {
       [];
 
     const sourceSummary = createHookSourceSummaryContext();
-    for (const absolute of await prototypeSourceFiles()) {
+    const shipped = await prototypeSourceFiles();
+    const ruleModules = await ruleModulePaths(shipped);
+    for (const absolute of shipped) {
       const file = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
       const text = await readFile(absolute, 'utf8');
-      if (!RULE_CALL.test(text)) continue;
+      if (!RULE_BEARING.test(text) && !importsRuleModule(file, text, ruleModules)) continue;
       const scan = scanRuleStateReads(text, absolute, sourceSummary);
       for (const usage of scan.usages)
-        found.push({ file, hook: usage.hook, state: usage.state, provenance: usage.provenance });
+        found.push({
+          file: usage.file
+            ? path.relative(REPO_ROOT, usage.file).split(path.sep).join('/')
+            : file,
+          hook: usage.hook,
+          state: usage.state,
+          provenance: usage.provenance,
+        });
       for (const miss of scan.unresolved) blind.push(`${file}: ${miss.reason} ${miss.expression}`);
       for (const local of scan.exposedLocals) exposed.push({ file, ...local });
     }
@@ -5480,10 +5517,12 @@ describe('lowered hook coverage', () => {
       'exposed states whose attribute cannot be written as a data selector'
     ).toEqual([]);
     // The two-step shape must be reached in the shipped tree, not just fixtures.
+    // The rule lives in the family's visual helper since commit 4c64eff92
+    // moved it out of the prototype root, so the read is owned by that file.
     expect(found).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          file: 'packages/prototypes/brutalist/src/textarea/root.proto.ts',
+          file: 'packages/prototypes/brutalist/src/textarea/visual.ts',
           hook: 'asTextareaRoot',
           state: 'focusVisible',
         }),
@@ -5495,6 +5534,13 @@ describe('lowered hook coverage', () => {
     // its producer supplies bounded declaration metadata.
 
     expect(blind, 'lowerable rule states the scanner could not trace').toEqual([]);
+
+    // A rule whose subject is a parameter only the call site binds waits for
+    // the replay of that call. A read that no call site replays stays here.
+    expect(
+      pendingHelperRuleReads(sourceSummary),
+      'rule states that no call site replays'
+    ).toEqual([]);
 
     const missing = found.filter(({ provenance }) => !provenance);
 
@@ -5526,6 +5572,7 @@ describe('lowered hook coverage', () => {
       'hook states whose declared source name cannot lower to a data selector'
     ).toEqual([]);
     // The whole-tree rule-state scan outgrew 60s once the R91 multi-profile
-    // family sources landed; keep the unfiltered scan.
-  }, 240_000);
+    // family sources landed, and the helper replay scans the call sites of
+    // every rule-registering helper; keep the unfiltered scan.
+  }, 600_000);
 });
