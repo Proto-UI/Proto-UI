@@ -106,19 +106,31 @@ export function emitCapturedWebOperation(options: {
   manager: string;
   interaction: string;
   emit(value: ExpressionIR, capture?: boolean): string;
+  declaration?(
+    value: ExpressionIR,
+    name: string,
+    initializer: string,
+    argumentIndex?: number
+  ): string;
 }): string | undefined {
   const { value, prefix, manager, interaction, emit } = options;
   const effect = captureEffect(value.operation);
   if (!effect || value.optional) return undefined;
   const definitions: string[] = [];
-  const reference = (input: ExpressionIR, name: string): ExpressionIR => {
-    definitions.push('const ' + name + ' = ' + emit(input) + ';');
+  const reference = (input: ExpressionIR, name: string, argumentIndex?: number): ExpressionIR => {
+    const initializer = emit(input);
+    definitions.push(
+      options.declaration?.(input, name, initializer, argumentIndex) ??
+        'const ' + name + ' = ' + initializer + ';'
+    );
     return { kind: 'reference', name, type: input.type, span: input.span };
   };
   const receiver = value.receiver
     ? reference(value.receiver, prefix + 'CaptureReceiver')
     : undefined;
-  const args = value.arguments.map((arg, index) => reference(arg, prefix + 'CaptureArg' + index));
+  const args = value.arguments.map((arg, index) =>
+    reference(arg, prefix + 'CaptureArg' + index, index)
+  );
   const argument = (index: number) =>
     index < args.length ? prefix + 'CaptureArg' + index : 'undefined';
   const result = prefix + 'CaptureResult';
