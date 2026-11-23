@@ -6,11 +6,16 @@ import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
+import { selectFailureDiagnostic } from './select-failure-diagnostic';
 import { BRUTALIST_THEME } from '../../../../../../packages/prototypes/brutalist/src/theme';
 
 let browser: Browser;
 let baseUrl: string;
-const output = process.env.PUI_RUNTIME_MASK_EVIDENCE_DIR;
+const output =
+  process.env.PUI_RUNTIME_MASK_EVIDENCE_DIR ??
+  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'runtime-loading-mask')
+    : undefined);
 const observations: unknown[] = [];
 beforeAll(async () => {
   baseUrl = await startServer('/en/');
@@ -60,10 +65,23 @@ async function choose(page: Page, control: 'runtime' | 'family', value: string) 
   await trigger.click();
   const id = await trigger.getAttribute('aria-controls');
   expect(id).toBeTruthy();
-  await page
-    .locator(`[id=${JSON.stringify(id)}]`)
-    .getByRole('option', { name: value, exact: true })
-    .click();
+  try {
+    await page
+      .locator(`[id=${JSON.stringify(id)}]`)
+      .getByRole('option', { name: value, exact: true })
+      .click();
+  } catch (error) {
+    observations.push({
+      name: `${control}-${value}-selection-failure`,
+      error: String(error),
+      diagnostic: await selectFailureDiagnostic(page, {
+        control,
+        popupId: id,
+        option: value,
+      }),
+    });
+    throw error;
+  }
 }
 async function ready(page: Page, runtime: string, family?: string) {
   await page.waitForFunction(
