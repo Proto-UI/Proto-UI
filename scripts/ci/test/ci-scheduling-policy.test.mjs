@@ -447,20 +447,49 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
 });
 
 function assertReusableCompilerInputBoundary(workflow) {
-  // Adapter and browser lanes have separate default-off reusable inputs.
-  // Package-budget and Website evidence remain manual-only.
+  // Only Adapter is reusable. Browser evidence remains an explicit manual opt-in.
   assert.deepEqual(workflow.on.workflow_call, {
     inputs: {
       adapter_acceptance: { type: 'boolean', required: false, default: false },
-      browser_acceptance: { type: 'boolean', required: false, default: false },
     },
   });
+  const browser = workflow.on.workflow_dispatch?.inputs?.browser_acceptance;
+  assert.ok(browser, 'the manual browser entry must remain available');
+  assert.equal(browser.type, 'boolean');
+  assert.equal(browser.required, false);
+  assert.equal(browser.default, false);
+  const job = workflow.jobs['browser-compiler'];
+  assert.equal(job.if, '${{ inputs.browser_acceptance }}');
+  assert.equal(job.uses, './.github/workflows/compiler-browser-acceptance.yml');
+  assert.deepEqual(job.with, { source_regressions: true, production_build: true });
 }
 
-test('reusable compiler inputs preserve separate default-off Adapter and browser boundaries', () => {
+test('compiler inputs preserve the reusable Adapter and manual-only browser boundaries', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
   const mutations = [
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = 'true';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = '${{ inputs.adapter_acceptance }}';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].uses = './.github/workflows/unreviewed.yml';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.production_build = false;
+    },
     (workflow) => {
       workflow.on.workflow_call = null;
     },
@@ -474,16 +503,16 @@ test('reusable compiler inputs preserve separate default-off Adapter and browser
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
     },
     (workflow) => {
-      delete workflow.on.workflow_call.inputs.browser_acceptance;
+      delete workflow.on.workflow_dispatch.inputs.browser_acceptance;
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.default = true;
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.default = true;
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.required = true;
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.required = true;
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.type = 'string';
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.type = 'string';
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.unreviewed_acceptance = {
