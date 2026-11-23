@@ -235,6 +235,7 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'textControl.on',
   'textControl.sync',
   'textControl.snapshot',
+  'textControl.resetValue',
   'imageView.on',
   'imageView.sync',
   'imageView.snapshot',
