@@ -113,7 +113,7 @@ exports[`diagnostic registry > keeps stable complete allowed categories and mean
   "PUI9002:compiler-defect — CLI surface hit an unexpected internal failure.",
   "PUI_FLUTTER_NAME:invalid-input — Flutter profile requires an uppercase Dart component identifier.",
   "PUI_GPUI_A11Y_VALUE:unsupported-input — GPUI SetValue requires its default route or a literal nonempty host:* event route.",
-  "PUI_GPUI_CONTROL_LABEL_ANATOMY:unsupported-input — GPUI ControlLabel supports explicit typed InstanceAssociations but has no native lowering for Anatomy pairing.",
+  "PUI_GPUI_CONTROL_LABEL_ANATOMY:unsupported-input — GPUI ControlLabel supports direct instance references, not anatomy-derived pairing.",
   "PUI_GPUI_EXCEPTION_PROPERTY:unsupported-input — GPUI rejects an exception/property payload.",
   "PUI_GPUI_HOST_REQUIRED:unsupported-input — GPUI lowering requires an owned host bridge.",
   "PUI_GPUI_INPUT_REQUIRED:unsupported-input — GPUI lowering requires a declared input owner.",
