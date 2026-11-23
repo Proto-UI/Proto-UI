@@ -1,0 +1,60 @@
+id: C-MATERIAL-PAINT-RESERVATION-0001
+type: contract
+title: Draft owned reservation template and exact Anatomy target association
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Reviewable implementation candidate only. The parent footprint Q-SYNTAX and Q-NATIVE remain unresolved; four-Web geometry, optical, accessibility, cost and independent acceptance are not implied by unit tests.'
+  zh-CN: '仅为可独立审查的实现候选。父 footprint 的 Q-SYNTAX、Q-NATIVE 仍未解决；单元测试不代表四 Web 几何、光学、可访问性、成本或独立接受。'
+summary: One setup-owned reservation identity names a unique logical material descendant and is materialized as one neutral dedicated template part.
+statement:
+  en: 'def.feedback.material.reserve({family, targetRole, inlineSizeFrom?, outlineFrom?}) returns an opaque setup-owned identity. r.paintReservation(identity, children) places exactly one dedicated unstyled part. The Module resolves the current unique target through the declared Anatomy domain and logical ancestry. The Web adapter binds the physical part; only the material host publishes profile and geometry-bound footprints. These roles do not transfer input, focus, accessible naming, selection or presence ownership.'
+  zh-CN: 'def.feedback.material.reserve({family, targetRole, inlineSizeFrom?, outlineFrom?}) 返回 setup 自有的不透明身份；r.paintReservation(identity, children) 放置唯一独立无样式 part。Module 通过声明的 Anatomy domain 与逻辑祖先关系解析当前唯一目标；Web adapter 绑定物理 part，只有 material host 发布绑定 profile 与几何版本的 footprint。上述职责不转移输入、焦点、可访问命名、选择或 presence 所有权。'
+criteria:
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-DECLARATION
+    text:
+      en: 'Declaration is setup-only, data-only and names an actual role in one canonical Anatomy family. The declaring owner must be a strict logical ancestor in that same current domain. Missing, retired, duplicate, foreign-domain and detached targets remain unavailable; DOM selectors, element-name dispatch and implicit wrapper discovery are forbidden. Exactly one declared identity appears once in its own captured template; a forged, foreign, omitted or duplicated identity is rejected.'
+      zh-CN: '声明仅在 setup 且仅含数据，指向一个 canonical Anatomy family 的实际 role；声明 owner 必须为同一当前 domain 内严格逻辑祖先。缺失、退休、重复、其他 domain 或 detached 目标保持 unavailable；禁止 DOM selector、元素名分发和隐式 wrapper 发现。每个声明身份恰在自己的 captured template 中出现一次；伪造、其他 owner、遗漏或重复身份均拒绝。'
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-PROJECTION
+    text:
+      en: 'The part is a neutral structural container containing the authored children/slot, never an input surface, decoration leaf, hidden node or accessibility owner. The target itself, its children, input root and focus identity are retained. Runtime Web Component light/shadow slot transport, React, Vue 3 and Vue 2 must bind this exact part or report unsupported. Compiler, GPUI, Qt, Flutter, SSR and other targets have no admission from this draft syntax; no component policy is added to their emitters.'
+      zh-CN: 'part 为包含作者 children/slot 的中性结构容器，不是输入表面、decoration leaf、隐藏节点或可访问 owner；目标本体、其子节点、输入根与焦点身份保留。Runtime WC light/shadow slot、React、Vue 3、Vue 2 必须绑定此精确 part，或明确 unsupported。Compiler、GPUI、Qt、Flutter、SSR 等目标不因此获得准入，不向 emitter 添加组件策略。'
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-LEASE
+    text:
+      en: 'Logical declarations outlive temporary view absence; physical association belongs to one current generation. A prepared but uncommitted ref does not revoke the live part. Later committed refs supersede earlier ones; old attach/detach, same-node target generations, disposal and reentrant cleanup cannot install stale work or erase successors. All associations are invalidated before cleanup and every owned cleanup is attempted while retaining the first error.'
+      zh-CN: '逻辑声明可跨临时 view 缺失保留；物理关联仅属于当前 generation。准备但未提交的 ref 不撤销 live part；后提交 ref 取代前者，旧 attach/detach、同节点新 target generation、dispose 与清理重入不得安装过期工作或删除后继。清理前先失效关联，尝试全部自有清理并保留首个错误。'
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-LAYOUT
+    text:
+      en: 'The bounded Web candidate measures the material target independently, owns only the dedicated part content basis and four reservation edges, and performs one read phase followed by one write phase. It verifies actual post-layout target size and all four part offsets on a later geometry delivery. This candidate proposes target width/height preservation with ordinary in-flow displacement; it does not satisfy literal unchanged full border-box coordinates. Acceptance of this interpretation remains in the parent Q-SYNTAX and this draft Q-REVIEW. Before/after geometry must report dx, dy, dw and dh separately. Consumer padding, unsupported transforms, extra part contents, width constraints and changed owned styles produce unavailable; unknown is not zero. No target style, arbitrary ancestor or borrowed content is changed. Unchanged values do not cause further writes; there is no additional polling loop.'
+      zh-CN: '有界 Web 候选独立测量材质目标，仅拥有独立 part 的内容基准与四边保留范围，一次先读后写，并在后续几何通知核对真实目标尺寸和四边偏移。本候选提出保留目标宽高并允许普通 in-flow 位移；它不满足完整 border-box 坐标不变的字面解释，该解释仍需父 Q-SYNTAX 与本 draft Q-REVIEW 接受；前后几何必须分别记录 dx、dy、dw、dh。消费者 padding、不支持的 transform、part 额外内容、宽度约束或自有样式冲突产生 unavailable；未知不是零。不修改目标样式、任意祖先或借用内容；相同值不重复写入，不新增轮询循环。'
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-INLINE
+    text:
+      en: 'Optional inlineSizeFrom is a data-only {family, role} reference to one current physical ancestor resolved in the exact logical domain. The initial reference content-width minus target border-width inset is retained; only an independently changed reference width permits a new target width and natural wrapped height. Every pending write records the reference width and target size. A reference expanded by that write, or target height changed at the same inline basis, remains unavailable instead of feeding recursive growth. The host writes only its dedicated part. Liquid Accordion Content owns its own width and unchanged padding: the family Root declares an inline-size container and Content uses its width minus the existing two 1px family borders. CSS cqw follows the nearest eligible physical container, so an intervening consumer container or unsupported containment requires separate acceptance; logical identity alone is not proof of cqw resolution.'
+      zh-CN: '可选 inlineSizeFrom 为仅含数据的 {family, role}，通过精确逻辑 domain 解析唯一当前物理祖先；保存初始 reference 内容宽度减 target border-box 宽度的差。仅独立 reference 宽度变化允许新的目标宽度与自然换行高度；每次 pending 写入记录 reference 宽度及目标尺寸。若本次写入撑大 reference，或同一 inline basis 改变目标高度，保持 unavailable，不递归增长。host 仅写独立 part。Liquid Accordion Content 自有宽度及不变 padding：family Root 声明 inline-size container，Content 使用该宽度减原两侧各 1px 边框。CSS cqw 取最近合格物理 container，中间消费者 container 或不支持 containment 必须另行接受；逻辑身份本身不证明 cqw 来源。'
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-OUTLINE
+    text:
+      en: 'Optional outlineFrom is a data-only {family, role} in the target family, resolving one current strict logical ancestor of the declaring owner and a physical ancestor of its dedicated part. It is read-only. The bounded Web candidate accepts only finite pixel ordinary border radii, applies CSS overlapping-radius normalization, and derives nonnegative inner radii after border widths. Unsupported percentage/unknown radius, border image, shadow, outline or transform remains unavailable. For original profile edges E the dedicated part edges are P.left=E.left, P.right=E.right, P.top=E.top+max(innerTopLeftY,innerTopRightY)+1/DPR and P.bottom=E.bottom+max(innerBottomLeftY,innerBottomRightY)+1/DPR when border paint exists; absent border paint adds zero. This structural block clearance does not enlarge or reduce the material ROI E. Post-layout offsets must equal P, and the original E rectangle must be inside the current inner rounded border. Outline/DPR changes revoke previous ready facts; a self-induced outline change in a pending write is unavailable. Source admission independently rejects intersecting ancestor borders, unsupported outline paint and authored ancestor pseudo paint. Actual border pixels at fractional geometry/DPR and each supported runtime still need native acceptance.'
+      zh-CN: '可选 outlineFrom 为目标 family 内仅含数据的 {family, role}，解析声明 owner 的唯一当前严格逻辑祖先及独立 part 的物理祖先，只读该实体。有界 Web 候选仅接受有限像素普通 border 圆角，按 CSS 重叠半径规则归一化后扣除边框并将 inner radius 下限设为零；百分比或未知圆角、border image、shadow、outline、transform 不支持。原 profile 四边为 E；有边框 paint 时专用 part 的 P.left=E.left、P.right=E.right、P.top=E.top+max(innerTopLeftY,innerTopRightY)+1/DPR，P.bottom 对称；无边框 paint 则不增加。此结构 block clearance 不扩大或缩小原材质 ROI E。布局后偏移必须精确等于 P，原 E 矩形必须位于当前 inner rounded border 内。outline 或 DPR 变化撤销旧 ready；pending 写入自身导致轮廓变化则 unavailable。source admission 独立拒绝相交祖先边框、未知 outline paint 和作者祖先 pseudo paint。分数坐标/DPR 的真实 border 像素与每个适用 runtime 仍需 native 接受。'
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-ADMISSION
+    text:
+      en: 'A MaterialSlot with paintReservation: required needs a ready exact-target reservation fact in addition to all existing source, style, preference, geometry, carrier, budget and freshness guards. An image prepared against a former reservation generation cannot be installed. Reservation is never an optical receipt. Expanded Content, adjacent Item borders, source boundaries and clipping require actual native evidence; a layout fixture or a green job cannot waive them.'
+      zh-CN: '声明 paintReservation: required 的 MaterialSlot 除全部现有 source、style、preference、geometry、carrier、预算与时效门外，还需精确目标 ready reservation fact；旧 reservation generation 下准备的图像不得安装。保留空间绝非光学收据。展开 Content、相邻 Item 边框、source 边界与 clipping 需真实 native 证据，布局 fixture 或 green job 不得豁免。'
+dependsOn:
+  contracts: [C-MATERIAL-PAINT-FOOTPRINT-0001, C-FEEDBACK-MATERIAL-0001]
+sources:
+  - path: packages/core/src/material-paint-reservation.ts
+  - path: packages/modules/feedback/src/material/paint-reservation.ts
+  - path: packages/adapters/base/src/material/paint-reservation.ts
+  - path: packages/adapters/base/src/material/border-outline.ts
+openQuestions:
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-Q-REVIEW
+    question: Does independent review accept this syntax, target-size preservation, responsive constraints and all four runtime transports as a solution to the parent Q-SYNTAX?
+    blocks: [activation:C-MATERIAL-PAINT-RESERVATION-0001]
+  - id: C-MATERIAL-PAINT-RESERVATION-0001-Q-NATIVE
+    question: Which exact-source native layout, source-admission, open/reopen, real input, accessibility and resource receipts satisfy the parent Q-NATIVE?
+    blocks: [activation:C-MATERIAL-PAINT-RESERVATION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Proposed exact Anatomy association and an independently owned template part; parent activation questions and native acceptance remain open.
+tags: [material, layout, anatomy, template, lifecycle]

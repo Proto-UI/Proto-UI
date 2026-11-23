@@ -4,6 +4,10 @@ import { observeWebPointerContact } from '../events/pointer-contact';
 import { createContactMotion } from './contact-motion';
 import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
 import { contactProfile, contactPaintOutset } from './contact-profile';
+import {
+  updateWebMaterialPaintReservation,
+  releaseWebMaterialPaintFootprint,
+} from './paint-reservation';
 import { styleTintProfile, styleTintContactProfile } from './style-tint-profile';
 import { createOpticalImageCache } from './image-prepare';
 import { observeMaterialGeometry } from './geometry-watch';
@@ -509,6 +513,25 @@ function createDocumentMaterialSink(
       // One conservative profile footprint preserves the admitted image lease
       // across rest, held contact and its finite release tail.
       const paintOutset = wantsContact ? contactPaintOutset(rect.width, rect.height) : 0;
+      const reservation =
+        frame.material.slot?.paintReservation === 'required'
+          ? updateWebMaterialPaintReservation(
+              host,
+              requestedCandidate
+                ? {
+                    view: frame.view,
+                    revision: frame.revision,
+                    profile: selectedProfile,
+                    edges: {
+                      top: paintOutset,
+                      right: paintOutset,
+                      bottom: paintOutset,
+                      left: paintOutset,
+                    },
+                  }
+                : null
+            )
+          : null;
       const admission = inspectCanvasBackdrop(host, source, paintOutset);
       const carrierConflict =
         carrier && !carrier.valid(paintedImage)
@@ -556,6 +579,7 @@ function createDocumentMaterialSink(
         axisAligned: geometryValid,
       };
       const policy = resolveMaterialPolicy({
+        paintReservation: reservation?.status,
         slot: frame.material.slot,
         candidates: frame.material.candidates,
         finalStyle: resolved,
@@ -590,7 +614,12 @@ function createDocumentMaterialSink(
       if (policy.decision !== 'eligible' || !source || !admission.valid) {
         fallback(
           resolved.fill,
-          !admission.valid ? admission.reason : (policy.diagnostics[0] ?? 'material-unavailable')
+          !admission.valid
+            ? admission.reason
+            : policy.diagnostics[0] === 'paint-reservation-unavailable' &&
+                reservation?.status === 'unavailable'
+              ? reservation.reason
+              : (policy.diagnostics[0] ?? 'material-unavailable')
         );
         return;
       }
@@ -865,6 +894,7 @@ function createDocumentMaterialSink(
             if (
               program.lost ||
               !currentMaterialCompatible() ||
+              (reservation?.status === 'ready' && !reservation.current()) ||
               currentSource !== source ||
               currentPalette.revision !== palette.revision ||
               JSON.stringify(currentPreferences) !== JSON.stringify(prefs) ||
@@ -1065,6 +1095,7 @@ function createDocumentMaterialSink(
     },
     release(view) {
       if (retired || (last && view !== last.view)) return;
+      releaseWebMaterialPaintFootprint(host, view);
       retired = true;
       sourceRefresh.dispose();
       if (scheduled !== null) win!.cancelAnimationFrame(scheduled);

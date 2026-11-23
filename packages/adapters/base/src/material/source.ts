@@ -1,4 +1,5 @@
 import { contactCarrierBounds, hasAuthoredPseudoPaint } from './contact-carrier';
+import { readBorderOutline, rectangleInsideBorder } from './border-outline';
 /** A bounded source is the visible application canvas itself. No DOM capture,
  * screenshot API, external image fetch, or self-output sampling is performed. */
 export type CanvasBackdropFrame = Readonly<{
@@ -230,6 +231,13 @@ export function inspectCanvasBackdrop(
       (!transparent(css.backgroundColor) || (css.backgroundImage && css.backgroundImage !== 'none'))
     )
       return fail('source-painted-ancestor');
+    if (current !== host) {
+      if (hasAuthoredPseudoPaint(current, true)) return fail('source-painted-ancestor-pseudo');
+      const outline = readBorderOutline(current);
+      if (outline.status === 'unsupported') return fail('source-ancestor-outline-unsupported');
+      if (outline.status === 'border' && !rectangleInsideBorder(paint, outline.border))
+        return fail('source-painted-ancestor-border');
+    }
     if (
       paintOutset > 0 &&
       ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||
@@ -247,6 +255,11 @@ export function inspectCanvasBackdrop(
   ) {
     const css = win.getComputedStyle(ancestor);
     if (!neutral(css)) return fail('source-ancestor-compositing-unavailable');
+    if (hasAuthoredPseudoPaint(ancestor, true)) return fail('source-painted-ancestor-pseudo');
+    const outline = readBorderOutline(ancestor);
+    if (outline.status === 'unsupported') return fail('source-ancestor-outline-unsupported');
+    if (outline.status === 'border' && !rectangleInsideBorder(paint, outline.border))
+      return fail('source-painted-ancestor-border');
     if (
       paintOutset > 0 &&
       ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||

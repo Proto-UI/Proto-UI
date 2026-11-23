@@ -39,7 +39,8 @@ export type MotionPresentation = Readonly<{
 }>;
 export type ResidentMotionHost = {
   now(): number;
-  environment(): MotionEnvironment;
+  /** Immutable channel metadata from the current admitted frame, never a rejected commit. */
+  environment(requestedProperties: readonly ResidentMotionProperty[]): MotionEnvironment;
   subscribe(invalidate: () => void): () => void;
   requestFrame(callback: () => void): unknown;
   cancelFrame(ticket: unknown): void;
@@ -53,7 +54,10 @@ export type ResidentMotionHost = {
 };
 /** One cross-platform driver: hosts supply only environment, scheduling and paint. */
 export function createResidentMotionProjector(host: ResidentMotionHost): ResidentMotionSink {
-  let last: ResidentMotionFrame | null = null,
+  type AdmittedFrame = ResidentMotionFrame & {
+    readonly requestedProperties: readonly ResidentMotionProperty[];
+  };
+  let last: AdmittedFrame | null = null,
     view: number | null = null,
     revision = -1,
     retired = false;
@@ -91,12 +95,14 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
     cancel();
     const currentGeneration = generation,
       frame = last;
-    const env = host.environment(),
-      now = host.now(),
-      allowed =
-        env.visible &&
-        !frame.style.tokens.some((t) => t === 'hidden' || t === 'invisible') &&
-        env.preference === 'no-preference';
+    const env = host.environment(frame.requestedProperties);
+    if (retired || last !== frame || generation !== currentGeneration) return;
+    const now = host.now();
+    if (retired || last !== frame || generation !== currentGeneration) return;
+    const allowed =
+      env.visible &&
+      !frame.style.tokens.some((t) => t === 'hidden' || t === 'invisible') &&
+      env.preference === 'no-preference';
     const animate = presented && allowed && wasAllowed && wasVisible;
     wasVisible = env.visible;
     wasAllowed = allowed;
@@ -245,10 +251,14 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
         revision = -1;
       }
       revision = frame.revision;
+      const declarations = Object.freeze(frame.declarations.map(snapshotResidentMotion));
       last = Object.freeze({
         ...frame,
         style: createRootStyleEffect(readRootStyleEntries(frame.style, 'setup')),
-        declarations: frame.declarations.map(snapshotResidentMotion),
+        declarations,
+        requestedProperties: Object.freeze([
+          ...new Set(declarations.flatMap((declaration) => declaration.properties)),
+        ]),
         numbers: Object.freeze(
           Object.fromEntries(
             Object.keys(frame.numbers ?? {}).flatMap((key) => {

@@ -1,3 +1,4 @@
+import { MATERIAL_PAINT_RESERVATION_CAP } from '@proto.ui/module-feedback';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
 import { SHADER_PRESENTATION_SINK_CAP } from '@proto.ui/module-feedback';
@@ -224,7 +225,10 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
   } = args;
 
   return createCapsWiring()
-    .use('feedback', args.ownedDecoration ? [[OWNED_DECORATION_CAP, true]] : [])
+    .use('feedback', [
+      [MATERIAL_PAINT_RESERVATION_CAP, true],
+      ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
+    ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
@@ -433,6 +437,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
+      [MATERIAL_PAINT_RESERVATION_CAP, true],
       ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
       [EFFECTS_CAP, effectsPort],
       [

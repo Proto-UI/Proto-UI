@@ -10,6 +10,67 @@ afterEach(() => {
   vi.restoreAllMocks();
   document.body.replaceChildren();
 });
+
+describe('rejected Web motion frames preserve the current width capability', () => {
+  it('retains a width animation after a stale frame with the same declarations', () => {
+    const h = fixture();
+    h.commit(100);
+    h.measure(h.parent, 400);
+    h.frame(0);
+    h.commit(300);
+    expect(h.el.style.width).toBe('100px');
+    h.sink.commit({
+      view: 1,
+      revision: 1,
+      style: createRootStyleEffect([resolveRootStyleEntry('w-[100px]', 'rule')]),
+      declarations: [{ properties: ['width'], durationMs: 100, easing: [0, 0, 1, 1] }],
+    });
+    h.frame(50);
+    expect(h.el.style.width).toBe('200px');
+    expect(h.frames.size).toBe(1);
+  });
+
+  it('does not let a rejected older view change the current width capability', () => {
+    const h = fixture();
+    h.commit(100);
+    h.measure(h.parent, 400);
+    h.frame(0);
+    h.commit(300);
+    expect(h.el.style.width).toBe('100px');
+    h.sink.commit({
+      view: 0,
+      revision: 1,
+      style: createRootStyleEffect([resolveRootStyleEntry('w-[100px]', 'rule')]),
+      declarations: [{ properties: ['translate'], durationMs: 100, easing: [0, 0, 1, 1] }],
+    });
+    h.frame(50);
+    expect(h.el.style.width).toBe('200px');
+    expect(h.frames.size).toBe(1);
+  });
+
+  it.each([
+    { name: 'older revision', revision: 1 },
+    { name: 'duplicate revision', revision: 2 },
+  ])('ignores different declarations in a rejected $name', ({ revision }) => {
+    const h = fixture();
+    h.commit(100);
+    h.measure(h.parent, 400);
+    h.frame(0);
+    h.commit(300);
+    h.sink.commit({
+      view: 1,
+      revision,
+      style: createRootStyleEffect([resolveRootStyleEntry('w-[100px]', 'rule')]),
+      declarations: [{ properties: ['translate'], durationMs: 100, easing: [0, 0, 1, 1] }],
+    });
+    h.frame(50);
+    expect(h.el.style.width).toBe('200px');
+    expect(h.frames.size).toBe(1);
+    h.frame(100);
+    expect(h.el.style.width).toBe('');
+    expect(h.frames.size).toBe(0);
+  });
+});
 function fixture(scope: 'document' | 'shadow' = 'document') {
   const parent = document.createElement('div');
   parent.style.display = 'block';
