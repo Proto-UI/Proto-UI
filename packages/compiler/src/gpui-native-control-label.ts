@@ -270,9 +270,14 @@ struct ControlLabelPointer {
 fn record_control_label_diagnostic(owner: &OwnerRef, message: &'static str) {
     let mut owner = owner.borrow_mut();
     let state = &mut owner.modules.control_label;
-    if state.last_diagnostic != Some(message) {
-        state.last_diagnostic = Some(message);
+    let changed = state.last_diagnostic != Some(message);
+    // A consumer may drain the queue while the same refusal remains current.
+    // Retain that new observation without repeating the stderr diagnostic.
+    if changed || !state.diagnostics.contains(&message) {
         state.diagnostics.push(message);
+    }
+    if changed {
+        state.last_diagnostic = Some(message);
         eprintln!("[Proto-UI:ControlLabel] {message}");
     }
 }
