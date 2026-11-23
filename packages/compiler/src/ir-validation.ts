@@ -4,7 +4,7 @@ import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { inferInputPayloadSchemas } from './a11y-event-types';
 import { createHash } from 'node:crypto';
-import { CompilerRejection, reject } from './diagnostics';
+import { CompilerRejection, reject, unknownDiagnosticSpan } from './diagnostics';
 import {
   IR_VERSION,
   MODULE_CAPABILITY_TYPES,
@@ -137,15 +137,7 @@ const RESERVED = new Set(
     ' '
   )
 );
-const FALLBACK: SourceSpan = {
-  file: '<ir>',
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-};
+const FALLBACK: SourceSpan = unknownDiagnosticSpan('<ir>');
 
 export function validIdentifier(value: unknown): value is string {
   return (
@@ -601,9 +593,26 @@ type Scope = Map<string, Binding>;
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
     assertDataGraph(input);
+    const root = object(input, [
+      'schemaVersion',
+      'name',
+      'source',
+      'sourceFiles',
+      'setup',
+      'hooks',
+      'contextKeys',
+      'staticDeclarations',
+      'moduleDeclarations',
+      'moduleBindings',
+      'props',
+      'exposes',
+      'requirements',
+    ]);
+    if (root.schemaVersion !== IR_VERSION)
+      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     // Schema order follows authored definitions, not this validator's scheduling
     // of helper/hook typechecks. The derivation never trusts claimed schemas.
-    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR);
+    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR, span);
     const writtenFields = writtenMemberFields(input);
     let flow = new FlowProof(writtenFields);
 
@@ -748,23 +757,6 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       return output as T;
     }
-    const root = object(input, [
-      'schemaVersion',
-      'name',
-      'source',
-      'sourceFiles',
-      'setup',
-      'hooks',
-      'contextKeys',
-      'staticDeclarations',
-      'moduleDeclarations',
-      'moduleBindings',
-      'props',
-      'exposes',
-      'requirements',
-    ]);
-    if (root.schemaVersion !== IR_VERSION)
-      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     text(root.name);
     const source = object(root.source, ['file', 'exportName', 'sha256']);
     const entry = safeFile(source.file);

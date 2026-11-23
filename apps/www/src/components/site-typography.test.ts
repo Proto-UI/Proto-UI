@@ -53,6 +53,7 @@ vi.mock('./PrototypePreviewer/projection-theme', async (original) => {
         : BRUTALIST_THEME.light['font-heading'],
   });
   return {
+    ...actual,
     resolveProjectionThemeSurfaceStyle: theme,
     applyProjectionThemeSurfaceStyle: actual.applyProjectionThemeSurfaceStyle,
     watchProjectionThemeSurfaceStyle: (

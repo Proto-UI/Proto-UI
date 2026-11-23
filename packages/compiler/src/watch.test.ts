@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { compileProject } from './project';
 import { watchProject } from './watch';
 import { deferred } from './deferred';
+import { formatCompilerDiagnostic } from './diagnostic-format';
+import type { CompilerDiagnostic } from './ir';
 import type { ProjectWatch, ProjectWatchReport, ProjectWatchRuntime } from './watch';
 
 interface WatchHandle {
@@ -113,6 +115,26 @@ async function start(
 function compiledName(report: ProjectWatchReport): string {
   if (report.status !== 'success') throw new Error(JSON.stringify(report.diagnostics));
   return report.compilation.entries[0].compilation.ir.name;
+}
+
+function unknownWatchFailure(value: CompilerDiagnostic, error: Error) {
+  expect(value).toMatchObject({
+    category: 'compiler-defect',
+    message: expect.stringContaining(error.stack!),
+    span: {
+      file: '<watch>',
+      start: -1,
+      end: -1,
+      line: 0,
+      column: 0,
+      endLine: 0,
+      endColumn: 0,
+    },
+  });
+  const rendered = formatCompilerDiagnostic(value, { sources: { '<watch>': source('unused') } });
+  expect(rendered).toContain('<watch> (source location unknown)');
+  expect(rendered).not.toContain('<watch>:1:1');
+  expect(rendered).not.toContain('1 |');
 }
 
 afterEach(async () => {
@@ -461,24 +483,75 @@ describe('project-scoped incremental watch', () => {
     });
   });
 
+  it('retains old output after a compiler invocation throws, then recovers without a terminal watch failure', async () => {
+    const data = await fixture();
+    const error = new TypeError('Injected compiler invocation failed');
+    let failNext = false;
+    const controller = await start(data, {
+      watchDirectory: data.host.watchDirectory.bind(data.host),
+      async compileProject(options, previous) {
+        if (failNext) {
+          failNext = false;
+          throw error;
+        }
+        return compileProject(options, previous);
+      },
+    });
+    const initial = await data.reports.next();
+    expect(compiledName(initial)).toBe('initial');
+    if (initial.status !== 'success') throw new Error('Expected the initial generation.');
+    failNext = true;
+    data.host.current(data.root).change('change', 'entry.proto.ts');
+    const failure = await data.reports.next();
+    expect(failure).toMatchObject({
+      status: 'failure',
+      revision: initial.revision + 1,
+      changedFiles: ['entry.proto.ts'],
+      fatal: false,
+      diagnostics: [{ code: 'PUI4003', category: 'compiler-defect' }],
+    });
+    if (failure.status !== 'failure') throw new Error('Expected the compiler invocation failure.');
+    expect(failure.lastSuccessful).toBe(initial.compilation);
+    expect('compilation' in failure).toBe(false);
+    expect(controller.closed).toBe(false);
+    await writeFile(path.join(data.root, 'entry.proto.ts'), source('recovered-after-throw'));
+    data.host.current(data.root).change('change', 'entry.proto.ts');
+    const recovered = await data.reports.next();
+    expect(compiledName(recovered)).toBe('recovered-after-throw');
+    expect(recovered.revision).toBe(failure.revision + 1);
+    expect(recovered.changedFiles).toEqual(['entry.proto.ts']);
+    await controller.stop();
+    expect(data.host.handles.every((handle) => handle.closed)).toBe(true);
+    expect(await controller.finished).toEqual({ ok: true, value: undefined });
+    unknownWatchFailure(failure.diagnostics[0], error);
+  });
+
   it('closes cleanly when a consumer callback throws instead of leaking watchers or rejecting in the background', async () => {
     const data = await fixture();
+    const error = new Error('Consumer callback failed');
     const result = await watchProject(
       {
         root: data.root,
         entries: ['entry.proto.ts'],
-        onReport() {
-          throw new Error('Consumer callback failed');
+        onReport(report) {
+          data.reports.accept(report);
+          throw error;
         },
       },
       data.host
     );
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     controllers.push(result.value);
-    expect(await result.value.finished).toMatchObject({
+    const finished = await result.value.finished;
+    expect(finished).toMatchObject({
       ok: false,
-      diagnostics: [{ code: 'PUI4004' }],
+      diagnostics: [{ code: 'PUI4004', category: 'compiler-defect' }],
     });
+    expect(result.value.closed).toBe(true);
     expect(data.host.handles.every((handle) => handle.closed)).toBe(true);
+    expect(data.reports.received).toHaveLength(1);
+    expect(compiledName(data.reports.received[0])).toBe('initial');
+    if (finished.ok) throw new Error('Expected the consumer callback failure.');
+    unknownWatchFailure(finished.diagnostics[0], error);
   });
 });

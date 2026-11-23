@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { reject } from './diagnostics';
+import { reject, unknownDiagnosticSpan } from './diagnostics';
 import type { ParseOptions, SourceSpan } from './ir';
 import {
   isLocalSourceSpecifier,
@@ -112,15 +112,7 @@ export class SourceGraph {
         sourceName(target),
       ])
     );
-    const span: SourceSpan = {
-      file: '<input>',
-      start: 0,
-      end: 0,
-      line: 1,
-      column: 1,
-      endLine: 1,
-      endColumn: 1,
-    };
+    const span = unknownDiagnosticSpan();
     for (const [file, text] of Object.entries(options.files ?? {})) {
       const identity = sourceName(file);
       if (Object.hasOwn(this.sources, identity) || typeof text !== 'string') {

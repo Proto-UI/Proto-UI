@@ -5,6 +5,7 @@ import { validateNativeInteraction } from './native-interaction';
 import { declaredSetValueEvent } from './a11y-event-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
+import { unknownDiagnosticSpan } from './diagnostics';
 import { valueAlternatives } from './value-types';
 import {
   observableSemantics,
@@ -556,15 +557,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   }),
 });
 
-const selectionSpan: SourceSpan = {
-  file: '<target>',
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-};
+const selectionSpan: SourceSpan = unknownDiagnosticSpan('<target>');
 function unsupported<T>(code: string, message: string, span: SourceSpan): CompileResult<T> {
   return { ok: false, diagnostics: [{ code, category: 'unsupported-input', message, span }] };
 }

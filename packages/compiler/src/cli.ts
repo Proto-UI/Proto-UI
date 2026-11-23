@@ -4,6 +4,7 @@ import path from 'node:path';
 import { compileFile, diffCompilation, writeCompilation } from './compile';
 import { migrateNativeSupport } from './native-support-migration';
 import { diagnosticsJson, formatCompilerDiagnostics } from './diagnostic-format';
+import { unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import type { CompilerDiagnostic } from './ir';
 import { resolveTargetProfile, TARGET_PROFILES } from './targets';
 import {
@@ -288,7 +289,7 @@ function cliDiagnostic(
     code,
     category,
     message,
-    span: { file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+    span: unknownDiagnosticSpan(file),
   };
 }
 
@@ -530,13 +531,7 @@ async function runWatch(
             .then(() => reportResult(report, revision))
             .catch(async (error: unknown) => {
               rejected(
-                [
-                  cliDiagnostic(
-                    'PUI9002',
-                    'compiler-defect',
-                    error instanceof Error ? error.message : String(error)
-                  ),
-                ],
+                [cliDiagnostic('PUI9002', 'compiler-defect', unexpectedFailureEvidence(error))],
                 revision,
                 3,
                 true
@@ -826,15 +821,6 @@ export async function runCompilerCli(
         : error.file;
       return fail([cliDiagnostic('PUI9001', 'invalid-input', error.message, file)], 2);
     }
-    return fail(
-      [
-        cliDiagnostic(
-          'PUI9002',
-          'compiler-defect',
-          error instanceof Error ? error.message : String(error)
-        ),
-      ],
-      3
-    );
+    return fail([cliDiagnostic('PUI9002', 'compiler-defect', unexpectedFailureEvidence(error))], 3);
   }
 }

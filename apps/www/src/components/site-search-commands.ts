@@ -645,7 +645,17 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   // prototype loading and rendering so the open command can activate within
   // the initial-ready budget instead of waiting for the full dialog tree.
   let dialogController: ProjectionScopeController | null = null;
-  let dialogStarted = false;
+  const retire = (previous: ProjectionScopeController) => {
+    const cleanup = previous.destroy();
+    retired.add(cleanup);
+    void cleanup.then(
+      () => retired.delete(cleanup),
+      (error) => {
+        retired.delete(cleanup);
+        console.error('[SiteSearch] retired projection cleanup failed.', error);
+      }
+    );
+  };
   // Bounded focus continuity for the public Dialog across a generation swap.
   // The restore request is armed only while the Dialog is actually open, so a
   // runtime switch made while the Dialog is closed cannot change the next
@@ -683,8 +693,15 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     });
   };
   const ensureDialog = () => {
-    if (!alive || dialogStarted) return;
-    dialogStarted = true;
+    if (!alive) return;
+    if (dialogController) {
+      const snapshot = dialogController.getSnapshot();
+      // A pending or committed Dialog already owns this open intent. An
+      // uncommitted failure returns to idle and needs a fresh projection
+      // attempt, while the independent Search data/session owner stays live.
+      if (snapshot.generation !== 0 || snapshot.phase !== 'idle') return;
+      retire(dialogController);
+    }
     dialogController = createDialog();
     observe(dialogController.start(), dialogController);
   };
@@ -716,31 +733,35 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   };
   let controller = create();
   const observe = (pending: Promise<unknown>, owner = controller) =>
-    pending.catch((error) => {
-      if (!alive) return;
-      const dialogFailure = owner === dialogController;
-      if (!dialogFailure && owner !== controller) return;
-      root.dataset.searchView = dialogFailure
-        ? 'unavailable'
-        : controller.getSnapshot().generation
-          ? 'retained'
-          : 'unavailable';
-      console.error('[SiteSearch] Search command projection failed.', error);
-    });
+    pending.then(
+      (snapshot) => {
+        if (
+          alive &&
+          owner === dialogController &&
+          owner.getSnapshot().phase === 'ready' &&
+          controller.getSnapshot().phase === 'ready'
+        )
+          root.dataset.searchView = 'ready';
+        return snapshot;
+      },
+      (error) => {
+        if (!alive) return;
+        const dialogFailure = owner === dialogController;
+        if (!dialogFailure && owner !== controller) return;
+        root.dataset.searchView = dialogFailure
+          ? 'unavailable'
+          : controller.getSnapshot().generation
+            ? 'retained'
+            : 'unavailable';
+        console.error('[SiteSearch] Search command projection failed.', error);
+      }
+    );
   const refresh = () => {
     if (!alive) return;
     if (controller.getSnapshot().generation === 0 && controller.getSnapshot().phase === 'idle') {
       const previous = controller;
       controller = create();
-      const cleanup = previous.destroy();
-      retired.add(cleanup);
-      void cleanup.then(
-        () => retired.delete(cleanup),
-        (error) => {
-          retired.delete(cleanup);
-          console.error('[SiteSearch] retired projection cleanup failed.', error);
-        }
-      );
+      retire(previous);
       return observe(controller.start());
     }
     return observe(controller.request({ runtimeId: runtime, projectionFamilyId: family }));
@@ -751,6 +772,13 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       runtime = next;
       void refresh();
       if (dialogController) {
+        const snapshot = dialogController.getSnapshot();
+        if (snapshot.generation === 0 && snapshot.phase === 'idle') {
+          // request() is deliberately unavailable after an uncommitted start
+          // failure. Restart with the latest requested runtime coordinates.
+          ensureDialog();
+          return;
+        }
         const doc = root.ownerDocument;
         const view = doc.defaultView;
         const dialogMount = root.querySelector<HTMLElement>('[data-search-dialog-mount]');

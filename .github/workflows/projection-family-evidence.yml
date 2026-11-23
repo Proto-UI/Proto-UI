@@ -36,6 +36,7 @@ jobs:
           PUI_EVIDENCE_DIR: ${{ runner.temp }}/projection-family-evidence/component-capabilities
         run: |
           set -euo pipefail
+          node --test scripts/analysis/test/number-field-ime-evidence.test.mjs
           corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style
           node --import tsx scripts/analysis/component-capabilities-browser.mjs \
             2>&1 | tee "$RUNNER_TEMP/component-capabilities.log"

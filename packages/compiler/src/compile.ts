@@ -19,9 +19,9 @@ import {
   type ExclusiveOutputFile,
   type OutputArtifact,
 } from './artifact-output';
-import { sourceName } from './source-resolution';
+import { diagnosticInputOrigin, sourceName } from './source-resolution';
 import { FileSourceGraph, type FileSourceSnapshot } from './source-loader';
-import { CompilerRejection } from './diagnostics';
+import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { attachEmitterMap, generatedSourcePath } from './emitter-map';
 import type { CompileResult, GeneratedModule, ParseOptions, PrototypeIR, SourceSpan } from './ir';
 
@@ -149,7 +149,7 @@ export function compilePrototype(
         {
           code: 'PUI3005',
           category: 'compiler-defect',
-          message: `Emitter source mapping failed: ${error instanceof Error ? error.message : String(error)}`,
+          message: `Emitter source mapping failed (span identifies setup context): ${unexpectedFailureEvidence(error)}`,
           span: parsed.value.setup.span,
         },
       ],
@@ -162,23 +162,16 @@ export async function compileFile(
   entry: string,
   options: FileCompileOptions = {}
 ): Promise<CompileResult<Compilation>> {
-  const fallback: SourceSpan = {
-    file: '<input>',
-    start: 0,
-    end: 0,
-    line: 1,
-    column: 1,
-    endLine: 1,
-    endColumn: 1,
-  };
+  let origin = unknownDiagnosticSpan();
   let snapshot = options.sourceSnapshot;
   try {
     if (!snapshot) {
+      if (!path.isAbsolute(entry)) origin = diagnosticInputOrigin(entry);
       const root = await realpath(options.root ?? process.cwd());
       const graph = new FileSourceGraph(root);
-      const loaded = await graph.load(
-        await graph.entry(path.isAbsolute(entry) ? entry : path.resolve(root, entry))
-      );
+      const requested = path.isAbsolute(entry) ? entry : path.resolve(root, entry);
+      origin = diagnosticInputOrigin(path.relative(root, requested).split(path.sep).join('/'));
+      const loaded = await graph.load(await graph.entry(requested));
       if (loaded.failures.length) throw loaded.failures[0];
       snapshot = loaded;
     }
@@ -188,17 +181,18 @@ export async function compileFile(
     // keep their stacks instead of being relabeled as bad source.
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
     if (isDeclaredInputError(error))
-      return { ok: false, diagnostics: [inputDiagnostic(error, fallback)] };
-    return { ok: false, diagnostics: [defectDiagnostic(error, fallback)] };
+      return { ok: false, diagnostics: [inputDiagnostic(error, origin)] };
+    return { ok: false, diagnostics: [defectDiagnostic(error, origin)] };
   }
   try {
     const fileName = sourceName(snapshot.entry);
+    origin = unknownDiagnosticSpan(fileName);
     const source = snapshot.files[fileName];
     if (typeof source !== 'string')
       return {
         ok: false,
         diagnostics: [
-          inputDiagnostic(new Error(`Closed source snapshot has no entry ${fileName}.`), fallback),
+          inputDiagnostic(new Error(`Closed source snapshot has no entry ${fileName}.`), origin),
         ],
       };
     const result = compilePrototype(source, {
@@ -220,7 +214,7 @@ export async function compileFile(
     return result;
   } catch (error) {
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
-    return { ok: false, diagnostics: [defectDiagnostic(error, fallback)] };
+    return { ok: false, diagnostics: [defectDiagnostic(error, origin)] };
   }
 }
 
@@ -236,7 +230,7 @@ function inputDiagnostic(error: unknown, span: SourceSpan) {
   return {
     code: 'PUI1003' as const,
     category: 'invalid-input' as const,
-    message: error instanceof Error ? error.message : String(error),
+    message: `${error instanceof Error ? error.message : String(error)} (source location unknown)`,
     span,
   };
 }
@@ -244,13 +238,9 @@ function defectDiagnostic(error: unknown, span: SourceSpan) {
   return {
     code: 'PUI1999' as const,
     category: 'compiler-defect' as const,
-    message: defectMessage(error),
+    message: `Compiler defect: source location unknown.\n${unexpectedFailureEvidence(error)}`,
     span,
   };
-}
-function defectMessage(error: unknown): string {
-  if (error instanceof Error) return `Compiler defect: ${error.stack ?? error.message}`;
-  return `Compiler defect: ${String(error)}`;
 }
 
 export function compilationArtifacts(

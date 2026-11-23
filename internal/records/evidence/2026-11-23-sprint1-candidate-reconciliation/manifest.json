@@ -1,0 +1,224 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-23T12:37:09.002911+00:00",
+  "kind": "local-development-observations",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1711",
+  "archiveCheckoutHead": "937d4f740622ce6a94c519a0b4d9405bca8014ed",
+  "archiveTrackedDirtyPaths": [
+    "internal/website/self-hosting-coverage-matrix.md",
+    "packages/modules/anatomy/src/impl.ts",
+    "packages/modules/anatomy/test/subscriber-fanout.test.ts",
+    "scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "scripts/test/sprint1-evidence.mjs",
+    "scripts/test/sprint1-evidence.test.mjs"
+  ],
+  "sourceBoundary": "These are retained local working-tree outputs. Scoped Git blob hashes identify bytes at archive collection, not a reconstructed source-before/source-after receipt for earlier commands. They do not certify a clean final commit or native-browser acceptance.",
+  "scopedSourceBlobs": {
+    "apps/www/src/components/override/AdapterSelect.astro": "7cb1521d174c4039ffc18bad855b7c4b17503aeb",
+    "apps/www/src/components/site-header-control-recipes.ts": "354c2264cb0bc1e06ab3aef960f377e7b67098a7",
+    "apps/www/src/components/site-shadcn-controls.test.ts": "b278049e1b9d8a6163cad98c13a5d9b8c4a6264f",
+    "apps/www/src/components/site-shadcn-controls.ts": "a6fdad8eeabc89d3ae08d4f3b9aec45e2257dbc8",
+    "apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts": "73a91dd3a9683c86f9f29e78b0f29f86e317d709",
+    "internal/website/self-hosting-coverage-matrix.md": "1690260dd9f95def9d2f86d024503c2df3121c75",
+    "packages/compiler/src/declaration-order.ts": "567e50d47065608cbc87336da419c3a0600edd04",
+    "packages/compiler/src/ir-validation.ts": "76f8a5f26fcae6786599a4f269986b781354fdd3",
+    "packages/compiler/test/diagnostic-registry.test.ts": "1fbfaafc932cb875ed78b85b642b2256ecbb3361",
+    "packages/compiler/test/gpui-a11y-value.test.ts": "ecd09d280a6b89cfb0003e794bdb2bff910c3a6a",
+    "packages/compiler/test/numeric-a11y-emitter-admission.test.ts": "5d588e4fc10bee845c903005b30490147b5829f3",
+    "packages/compiler/test/pointer-facts-admission.test.ts": "5a3076ac0e8065503c4c54a66147e27a0ade1752",
+    "packages/compiler/test/public-diagnostic-boundaries.test.ts": "83b73bb3f539187533eff842e6e16121f689ed85",
+    "packages/compiler/test/targets.test.ts": "44180c427454731ab596429fb52de7bd748a5936",
+    "packages/modules/anatomy/src/impl.ts": "3981f5ba97f2609a8115dba5f3bc6d1ae212ced9",
+    "packages/modules/anatomy/test/contract/anatomy-order.v0.contract.test.ts": "d1b6cdd8b0200def7a9f82706f2dbaf4a985236f",
+    "packages/modules/anatomy/test/subscriber-fanout.test.ts": "938940b680c2fd668ab6b96ed7e7544d12d844b1",
+    "packages/runtime/test/contract/anatomy.catalog-lifecycle.contract.test.ts": "d1192d1153d0e24b1d878989f25bc893ac3e611d",
+    "packages/runtime/test/contract/anatomy.domain-fanout-cost.contract.test.ts": "0cef39cf8f843e8231146874310324a3de631722",
+    "packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts": "6250c1199b5c8e96dbb5eaefcdd7e82e71f6d9fb",
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": "0d6d734dfb90bd2f686bc65a21b64a5f6b4b4306",
+    "scripts/test/sprint1-evidence.mjs": "8f936835b98a71c8a307a46947f772bd760ecfda",
+    "scripts/test/sprint1-evidence.test.mjs": "803abd6f61383faec003c5728514128db9ea465a"
+  },
+  "files": [
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/ir-merge-green.json",
+      "archivePath": "ir-merge-green.json.gz",
+      "rawBytes": 81331,
+      "rawSha256": "85906ea1df15fddbd0c8dab2aba88a63fc8025263b9e0dec41c845488bfeebf9",
+      "compressedBytes": 8275,
+      "compressedSha256": "1ea0adc7e4ea5dfe21d9ada2d3787d2b43b0b5bf78b17c4df1f2cd9b232f69e0"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/ir-merge-green.log",
+      "archivePath": "ir-merge-green.log.gz",
+      "rawBytes": 71647,
+      "rawSha256": "8869e9c5c2de7f188582241226d085244234b2c4a66acc9d522b2d12f6509743",
+      "compressedBytes": 12423,
+      "compressedSha256": "dcc564dcf2377670da2632903f5f5cb092d3440d4fda0895536a36c1798a7301"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/integration-and-header-unit-final.json",
+      "archivePath": "integration-and-header-unit-final.json.gz",
+      "rawBytes": 86507,
+      "rawSha256": "3c5b154f1647fd01302bd8e42e928e4ce3485780cfff195e3d21d79ffac4b917",
+      "compressedBytes": 8964,
+      "compressedSha256": "2b4e4198cb99cc164bf249db89e138c5747f13614d7895fa3a2de78c09ffd3dc"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/integration-and-header-unit-final.log",
+      "archivePath": "integration-and-header-unit-final.log.gz",
+      "rawBytes": 260947,
+      "rawSha256": "5e1938340b7865198c1a8e836eaa2883cc3ac05ce987e5e370feaedc24458949",
+      "compressedBytes": 32573,
+      "compressedSha256": "4b9d4230c01407019f57494b4d06797adf7ec5fd55ec52b5baef5cde38a9f881"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/sprint1-runner-controls-final.log",
+      "archivePath": "sprint1-runner-controls-final.log.gz",
+      "rawBytes": 1522,
+      "rawSha256": "c140ac7ac08b38e0254cb4fc69410e74f91dc1dc457653fc90382ebadb486c19",
+      "compressedBytes": 809,
+      "compressedSha256": "1bf8aaeaeb4ec8b6428621938661e7165919b5236b6de17b1d582b235f73e7e2"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/source-binding-negative-controls-final.log",
+      "archivePath": "source-binding-negative-controls-final.log.gz",
+      "rawBytes": 314,
+      "rawSha256": "8a3ee1dbbb8f5f11851455181b7299831b47f71c3612ecad9d31aaeb62c967d3",
+      "compressedBytes": 226,
+      "compressedSha256": "d04d9e5495c57a5c1e3a7ab4b6c4f066d6cbc4cada8e6f4d59cc47eb8d7b05b4"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/focused-unit-final.log",
+      "archivePath": "focused-unit-final.log.gz",
+      "rawBytes": 504834,
+      "rawSha256": "4a36bcfcd73aeb704ccf3afb2db6c05a6530d49b475c1e5d4fe2f69560632bc1",
+      "compressedBytes": 61208,
+      "compressedSha256": "ac29ff9fdf09ab8bafa69bfe3803a88f0f10dc1a6b5a370d5684d443f0f4bb68"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/source-binding-checker-final.log",
+      "archivePath": "source-binding-checker-final.log.gz",
+      "rawBytes": 1191,
+      "rawSha256": "f87ee133f37f086f87d7b126255017f90e4c0132a3f02e441c2d6a9b60f78143",
+      "compressedBytes": 397,
+      "compressedSha256": "fd670bc50437cf12efeed56ec28120f61b93c4cb3abb42c5341251f84fbf7ef7"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/source-binding-three-negative-controls.log",
+      "archivePath": "source-binding-three-negative-controls.log.gz",
+      "rawBytes": 437,
+      "rawSha256": "ea7730742ea76d18dbf6cbf262df2693f21e842d1a88416c8575554b3b25f16e",
+      "compressedBytes": 242,
+      "compressedSha256": "93f31f37af52b918e0acaf1bc1edb24165bfcc22fc3d87a7e876532ab89da60a"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/types-workspace-candidate.log",
+      "archivePath": "types-workspace-candidate.log.gz",
+      "rawBytes": 809,
+      "rawSha256": "ba12d67e0ab525d49169726e3df2daba43dd9cbcb3691362111a184059f769f0",
+      "compressedBytes": 450,
+      "compressedSha256": "ee0a037057b39fe64b620551ed900a01a033f314c3774fb3a01fc7ceced14d90"
+    },
+    {
+      "sourcePath": "/workspace/scratch/56f6684ca6c0/evidence/types-workspace-candidate-3072.log",
+      "archivePath": "types-workspace-candidate-3072.log.gz",
+      "rawBytes": 7,
+      "rawSha256": "0089bb674406997eb0e6850cf01c46d23d8689610788516cebf2a31b9276d691",
+      "compressedBytes": 27,
+      "compressedSha256": "70858aec68412e3655b05b5c8290c3550bf58095772ecc22ffeeb592cb6b6c67"
+    }
+  ],
+  "outcomes": {
+    "compiler-controls": {
+      "report": "ir-merge-green.json.gz",
+      "files": 6,
+      "passed": 199,
+      "failed": 0
+    },
+    "integration-and-header-unit": {
+      "report": "integration-and-header-unit-final.json.gz",
+      "files": 9,
+      "passed": 210,
+      "failed": 0,
+      "integrationCases": 185,
+      "headerUnitCases": 25
+    },
+    "runner-controls": {
+      "log": "sprint1-runner-controls-final.log.gz",
+      "passed": 13,
+      "failed": 0
+    },
+    "source-binding-negative-controls": {
+      "log": "source-binding-negative-controls-final.log.gz",
+      "passed": 2,
+      "failed": 0
+    },
+    "focused-unit": {
+      "log": "focused-unit-final.log.gz",
+      "filesSelected": 38,
+      "outerTimeoutMs": 120000,
+      "processStatus": null,
+      "signal": "SIGTERM",
+      "error": "ETIMEDOUT",
+      "terminalJsonAvailable": false,
+      "result": "failed-timeout-no-complete-report",
+      "supervisorObservation": "Reported by the parent execution controller; this run overlapped the full coverage checker, so a single causal explanation is not established."
+    },
+    "full-coverage-checker": {
+      "log": "source-binding-checker-final.log.gz",
+      "exitCode": 1,
+      "result": "failed",
+      "failedIssueCount": 6,
+      "reportedIssues": [
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-shadcn/input-shell` in `apps/www/src/components/site-search-composition.ts` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md:278: source fingerprint for `apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts` does not match its reviewed SHA-256",
+        "internal/website/self-hosting-coverage-matrix.md:327: source fingerprint for `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` does not match its reviewed SHA-256",
+        "internal/website/self-hosting-coverage-matrix.md:328: source fingerprint for `apps/www/src/components/PrototypePreviewer/projection-theme.ts` does not match its reviewed SHA-256",
+        "internal/website/self-hosting-coverage-matrix.md: interactive website source `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` is missing a reviewed Source-scan binding and fingerprint",
+        "internal/website/self-hosting-coverage-matrix.md: interactive website source `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` is not bound to a matrix row"
+      ],
+      "diagnosisBoundary": "The InputShell specifier already has a literal allowlist entry. The raw-import diagnostic does not establish that an additional specifier is needed. Exact-source review, bounded source-binding repair and a complete checker rerun remain pending.",
+      "finalNativeAcceptance": "pending"
+    },
+    "source-binding-three-negative-controls": {
+      "log": "source-binding-three-negative-controls.log.gz",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "workspace-types-local": {
+      "command": "corepack pnpm@10.32.1 -s check:types:workspace",
+      "timeoutSeconds": 300,
+      "attempts": [
+        {
+          "nodeMaxOldSpaceMiB": 1536,
+          "exitCode": 134,
+          "log": "types-workspace-candidate.log.gz",
+          "observation": "V8 reports heap exhaustion before a type-check result."
+        },
+        {
+          "nodeMaxOldSpaceMiB": 3072,
+          "exitCode": 137,
+          "log": "types-workspace-candidate-3072.log.gz",
+          "observation": "Process killed; no type-check result or specific TypeScript diagnostic."
+        }
+      ],
+      "result": "incomplete-resource-failure",
+      "candidateTypeSafety": "not-established"
+    }
+  },
+  "finalNativeAcceptance": "pending",
+  "addenda": [
+    {
+      "observedAt": "2026-11-23T12:40:55.140498+00:00",
+      "kind": "completed-full-coverage-checker-result",
+      "archivePath": "source-binding-checker-final.log.gz",
+      "note": "Preserves the actual failed attempt without replacing the earlier scoped source snapshot."
+    },
+    {
+      "observedAt": "2026-11-23T12:44:41.459530+00:00",
+      "kind": "post-review-controls-and-type-acquisition",
+      "note": "Append actual results; do not replace prior failures or archive-time source identity."
+    }
+  ]
+}
