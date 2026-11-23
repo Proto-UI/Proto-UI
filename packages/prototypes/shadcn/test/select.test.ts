@@ -180,12 +180,17 @@ describe('prototypes/shadcn: select', () => {
       await settle();
       expect(content.getExposes().transitionState.get()).toBe('closed');
       expect(styleContains(content, 'animate-out')).toBe(true);
-      // Semantic closure is immediate; the existing portaled host conceal
-      // barrier retires the physical view after two rendering opportunities.
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      // C-HOST-VIEW-ATTACHMENT-0001 conceals immediately. Physical Portal
+      // retirement separately follows two rendering opportunities.
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(root);
+      expect(content.querySelector('shadcn-select-item')).toBe(alpha);
       expect(styleContains(content, 'animate-out')).toBe(false);
       await vi.advanceTimersByTimeAsync(100);
       await flush();

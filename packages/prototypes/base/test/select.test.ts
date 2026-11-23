@@ -611,7 +611,7 @@ describe('prototypes/base: select', () => {
     vi.useFakeTimers();
     const frame = installRenderingOpportunities();
     try {
-      const { trigger, content } = createSelect({
+      const { root, trigger, content, items } = createSelect({
         content: { side: 'top', align: 'end', sideOffset: 12, alignOffset: 3 },
       });
       await settle();
@@ -628,12 +628,17 @@ describe('prototypes/base: select', () => {
       trigger.click();
       await settle();
       expect(content.getExposes().transitionState.get()).toBe('closed');
-      // A portaled view crosses the existing two-frame compositor conceal
-      // barrier after semantic closure, before its physical projection retires.
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      // C-HOST-VIEW-ATTACHMENT-0001 projects not-present immediately. The
+      // existing two-frame barrier separately retires the physical Portal.
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(root);
+      expect([...content.querySelectorAll('base-select-item')]).toEqual(items);
     } finally {
       frame.restore();
     }

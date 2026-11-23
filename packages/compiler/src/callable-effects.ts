@@ -22,6 +22,7 @@ import { isDataValueType, lexicalStoredType } from './ir';
 import {
   arrayEveryCallbackParameters,
   callableValue,
+  dataBoundaryType,
   objectFields,
   valueAlternatives,
   arrayElementType,
@@ -32,17 +33,22 @@ import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 import { captureFacadeFields } from './capture-types';
 
 type Known = readonly Atom[];
+interface ArrayExtent {
+  minimum: number;
+  maximum: number;
+}
+const UNKNOWN_EXTENT: ArrayExtent = { minimum: 0, maximum: Infinity };
 type CapturedState = HookCaptureIR['states'][number];
 type TracedOperation = Extract<ExpressionIR, { kind: 'operation' }>;
 type Atom =
   | { kind: 'unknown'; data?: ValueType }
-  | { kind: 'undefined' | 'uninitialized' | 'public' }
+  | { kind: 'undefined' | 'uninitialized' | 'public' | 'absent' }
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'closure'; fn: FunctionIR; scope: Scope }
   | { kind: 'native'; type: CallableType }
   | { kind: 'named-state'; state: CapturedState }
   | { kind: 'cell'; initial: Known; tracked: boolean }
-  | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean }
+  | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean; array?: ArrayExtent }
   | { kind: 'getter'; callable: Known }
   | { kind: 'capture-lookup'; owner: Capture; property: CaptureLookup }
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
@@ -75,6 +81,7 @@ type RecordValue = Extract<Atom, { kind: 'record' }>;
 interface Store {
   cells: Map<Cell, Known>;
   records: Map<RecordValue, Map<string, Known>>;
+  arrays: Map<RecordValue, ArrayExtent>;
   installations: Map<string, readonly (Installation | undefined)[]>;
   captures: Map<Capture, CaptureContents>;
   /** Named states present on every successful path to this point. */
@@ -85,6 +92,7 @@ interface Store {
 const emptyStore = (): Store => ({
   cells: new Map(),
   records: new Map(),
+  arrays: new Map(),
   installations: new Map(),
   captures: new Map(),
   captureStates: new Set(),
@@ -93,6 +101,7 @@ const emptyStore = (): Store => ({
 const copyStore = (state: Store): Store => ({
   cells: new Map(state.cells),
   records: new Map(state.records),
+  arrays: new Map(state.arrays),
   installations: new Map(state.installations),
   captures: new Map(state.captures),
   captureStates: new Set(state.captureStates),
@@ -101,6 +110,8 @@ const copyStore = (state: Store): Store => ({
 
 const UNKNOWN: Known = [{ kind: 'unknown' }];
 const UNDEFINED: Known = [{ kind: 'undefined' }];
+/** A missing own field is distinct from an own field whose value is undefined. */
+const ABSENT: Known = [{ kind: 'absent' }];
 const UNINITIALIZED: Known = [{ kind: 'uninitialized' }];
 /** An untracked value whose checked type cannot carry a callable or owner authority. */
 const dataFact = (type: ValueType): Known => [{ kind: 'unknown', data: type }];
@@ -122,6 +133,7 @@ class Scope {
 }
 
 export interface CallableEffectIssue {
+  code?: 'PUI1006';
   message: string;
   span: SourceSpan;
 }
@@ -134,7 +146,12 @@ export interface CallableEffectIssue {
  * unresolved source callable edges are diagnosed rather than treated as empty.
  */
 export function callableEffectIssue(ir: PrototypeIR): CallableEffectIssue | undefined {
-  return analyzeCallableFlow(ir);
+  return analyzeCallableFlow(
+    ir,
+    undefined,
+    undefined,
+    ir.exposes.some((item) => item.kind === 'event')
+  );
 }
 
 export interface CallableDemandObserver {
@@ -211,8 +228,10 @@ function analyzeCallableFlow(
     completePropOperations?(operations: ReadonlySet<TracedOperation>): void;
     owned?: HookContributionObserver;
   },
-  demand?: CallableDemandObserver
+  demand?: CallableDemandObserver,
+  checkOutwardData = false
 ): CallableEffectIssue | undefined {
+  const absentField = checkOutwardData ? ABSENT : UNDEFINED;
   let issue: CallableEffectIssue | undefined;
   let setupPropsClosed = true;
   const moduleScope = new Scope();
@@ -238,6 +257,7 @@ function analyzeCallableFlow(
   let fingerprintExceeded = false;
   const analyzedCallbacks = new Set<string>();
   const callbacks: Registration[] = [];
+  const callbackArguments = new WeakMap<Registration, readonly Known[]>();
   const queuedCallbacks = new WeakMap<Closure, Set<string>>();
   function enqueueCallback(registration: Registration): void {
     const { closure, execution, outward } = registration;
@@ -279,6 +299,8 @@ function analyzeCallableFlow(
     cell.tracked ? (store.cells.get(cell) ?? cell.initial) : UNKNOWN;
   const fields = (record: RecordValue): Map<string, Known> =>
     store.records.get(record) ?? record.fields;
+  const extent = (record: RecordValue): ArrayExtent =>
+    store.arrays.get(record) ?? record.array ?? UNKNOWN_EXTENT;
   const snapshot = (): Store => copyStore(store);
   const captureContents = (capture: Capture): CaptureContents =>
     store.captures.get(capture) ?? capture;
@@ -366,6 +388,41 @@ function analyzeCallableFlow(
     }
     return [...result].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
   }
+  function joinExtents(values: readonly ArrayExtent[], widen = false): ArrayExtent {
+    if (!values.length) return { minimum: 0, maximum: 0 };
+    return {
+      minimum: Math.min(...values.map((value) => value.minimum)),
+      maximum:
+        widen && values.some((value) => value.maximum !== values[0].maximum)
+          ? Infinity
+          : Math.max(...values.map((value) => value.maximum)),
+    };
+  }
+  function arrayExtent(values: Known): ArrayExtent {
+    return joinExtents(
+      values.map((value) => (value.kind === 'record' ? extent(value) : UNKNOWN_EXTENT))
+    );
+  }
+  /** Read the value's own proof, never the narrower type of its current view. */
+  function actualElements(values: Known): Known {
+    return merge(
+      values.map((value) => {
+        if (value.kind === 'undefined' || (value.kind === 'literal' && value.value === null)) {
+          possibleThrow();
+          return [];
+        }
+        if (value.kind === 'record')
+          return fields(value).get('*') ?? merge([...fields(value).values()]);
+        const element =
+          value.kind === 'unknown' && value.data ? iterableElementType(value.data) : undefined;
+        return element === undefined ? UNKNOWN : hostValue(element);
+      })
+    );
+  }
+  function writeExtent(record: RecordValue, value: ArrayExtent, weak = false): void {
+    if (!checkOutwardData) return;
+    store.arrays.set(record, weak ? joinExtents([extent(record), value], true) : value);
+  }
   function joinStores(states: readonly Store[]): Store {
     if (states.length === 1) return copyStore(states[0]);
     const cells = new Set(states.flatMap((state) => [...state.cells.keys()]));
@@ -388,10 +445,18 @@ function analyzeCallableFlow(
       result.records.set(
         record,
         new Map(
-          [...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? UNDEFINED))])
+          [...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? absentField))])
         )
       );
     }
+    for (const record of new Set(states.flatMap((state) => [...state.arrays.keys()])))
+      result.arrays.set(
+        record,
+        joinExtents(
+          states.map((state) => state.arrays.get(record) ?? record.array ?? UNKNOWN_EXTENT),
+          true
+        )
+      );
     const unionInstallations = (
       alternatives: readonly (readonly (Installation | undefined)[])[]
     ): readonly (Installation | undefined)[] => {
@@ -456,6 +521,7 @@ function analyzeCallableFlow(
       records: new Map(
         [...after.records].filter(([key, value]) => before.records.get(key) !== value)
       ),
+      arrays: new Map([...after.arrays].filter(([key, value]) => before.arrays.get(key) !== value)),
       installations: new Map(
         [...after.installations].filter(([key, value]) => before.installations.get(key) !== value)
       ),
@@ -475,6 +541,7 @@ function analyzeCallableFlow(
   function applyDelta(target: Store, changes: Store): void {
     for (const [key, value] of changes.cells) target.cells.set(key, value);
     for (const [key, value] of changes.records) target.records.set(key, value);
+    for (const [key, value] of changes.arrays) target.arrays.set(key, value);
     for (const [key, value] of changes.installations) target.installations.set(key, value);
     for (const [key, value] of changes.captures) target.captures.set(key, value);
     for (const name of changes.captureStates) target.captureStates.add(name);
@@ -482,7 +549,7 @@ function analyzeCallableFlow(
   }
   function writeField(record: RecordValue, name: string, value: Known, weak = false): void {
     const next = new Map(fields(record));
-    next.set(name, weak ? merge([next.get(name) ?? UNDEFINED, value]) : value);
+    next.set(name, weak ? merge([next.get(name) ?? absentField, value]) : value);
     store.records.set(record, next);
   }
   function opaque(span: SourceSpan): void {
@@ -518,7 +585,7 @@ function analyzeCallableFlow(
   function truth(values: Known, nullish = false): boolean | undefined {
     const choices = new Set(
       values.map((value) =>
-        value.kind === 'undefined'
+        value.kind === 'undefined' || value.kind === 'absent'
           ? false
           : value.kind === 'literal'
             ? nullish
@@ -575,6 +642,7 @@ function analyzeCallableFlow(
       switch (value.kind) {
         case 'unknown':
         case 'undefined':
+        case 'absent':
         case 'uninitialized':
         case 'public':
           return value.kind === 'unknown' && value.data
@@ -612,6 +680,7 @@ function analyzeCallableFlow(
           return [
             'record',
             value.tracked === false ? null : location(value),
+            value.array ? extent(value) : null,
             [...fields(value)]
               .sort(([a], [b]) => a.localeCompare(b))
               .map(([name, field]) => [name, field.map((child) => visit(child, depth + 1))]),
@@ -669,7 +738,34 @@ function analyzeCallableFlow(
    * same ordinary containers as callables. A checked authority-shaped type
    * requests tracking; it never invents a State name or a privileged origin. */
   function tracksIdentity(type: ValueType): boolean {
-    return carriesCallable(type) || (!!trace && !isDataValueType(type));
+    const aggregate = (type: ValueType): boolean =>
+      typeof type !== 'string' &&
+      (['record', 'object', 'array', 'value-array'].includes(type.kind) ||
+        ((type.kind === 'union' || type.kind === 'value-union') && type.members.some(aggregate)));
+    return (
+      carriesCallable(type) ||
+      (!!trace && !isDataValueType(type)) ||
+      (checkOutwardData && aggregate(type))
+    );
+  }
+
+  /** Publication examines retained values, including fields hidden by a narrower
+   * checked view. It never calls getters or treats a type assertion as a copy. */
+  function outwardData(values: Known, top = true, ancestors = new Set<Atom>()): boolean {
+    return values.every((value) => {
+      if (value.kind === 'absent') return !top;
+      if (value.kind === 'undefined') return top;
+      if (value.kind === 'literal') return true;
+      if (value.kind === 'unknown')
+        return value.data !== undefined && dataBoundaryType(value.data, top) !== undefined;
+      if (value.kind !== 'record' || ancestors.has(value) || ancestors.size > 256) return false;
+      ancestors.add(value);
+      const valid = [...fields(value).values()].every((field) =>
+        outwardData(field, false, ancestors)
+      );
+      ancestors.delete(value);
+      return valid;
+    });
   }
 
   /** A checked data view can refine an untracked host fact without discarding
@@ -699,23 +795,40 @@ function analyzeCallableFlow(
     }
     if (type.kind === 'value-union' || type.kind === 'union')
       return merge(type.members.map(hostValue));
+    // A general data type can still contain nested void. Retain that original
+    // fact too: JSON publication checks it at its actual nesting depth.
+    if (checkOutwardData && (isDataValueType(type) || dataBoundaryType(type) !== undefined))
+      return dataFact(type);
     if (type.kind === 'value-array' || type.kind === 'set') {
-      if (!carriesCallable(type.element)) return UNKNOWN;
+      if (!carriesCallable(type.element) && !(checkOutwardData && type.kind === 'value-array'))
+        return UNKNOWN;
       return [{ kind: 'record', fields: new Map([['*', hostValue(type.element)]]), tracked: true }];
     }
     if (type.kind === 'object' || type.kind === 'record') {
       if (isDataValueType(type)) return dataFact(type);
-      if (!carriesCallable(type)) return UNKNOWN;
+      // A non-JSON host aggregate must keep its original structure. A bare
+      // UNKNOWN could otherwise acquire a narrower data fact at a later view.
+      const finite = type.kind === 'record' || type.index === undefined;
+      if (!carriesCallable(type) && !(checkOutwardData && finite)) return UNKNOWN;
       const record: RecordValue = {
         kind: 'record',
         fields: new Map(),
-        tracked: carriesCallable(type),
+        tracked: carriesCallable(type) || checkOutwardData,
       };
       const value: Known = [record];
       for (const field of type.fields)
         record.fields.set(
           field.name,
-          field.optional ? merge([hostValue(field.type), UNDEFINED]) : hostValue(field.type)
+          'accessor' in field && field.accessor
+            ? [
+                {
+                  kind: 'getter',
+                  callable: hostValue({ kind: 'callable', parameters: [], returnType: field.type }),
+                },
+              ]
+            : field.optional
+              ? merge([hostValue(field.type), UNDEFINED])
+              : hostValue(field.type)
         );
       return value;
     }
@@ -1037,11 +1150,27 @@ function analyzeCallableFlow(
           return branches(
             field.map(
               (part) => () =>
-                part.kind === 'getter' ? calls(part.callable, [], execution, span) : [part]
+                part.kind === 'getter'
+                  ? calls(part.callable, [], execution, span)
+                  : part.kind === 'absent'
+                    ? UNDEFINED
+                    : [part]
             )
           );
         }
         if (value.kind === 'capture') return captureProperty(value, name);
+        if (value.kind === 'unknown' && value.data) {
+          const field = objectFields(value.data)?.find((field) => field.name === name);
+          if (field) {
+            const known = hostValue(field.type);
+            return field.optional ? merge([known, UNDEFINED]) : known;
+          }
+          const element = arrayElementType(value.data);
+          if (element !== undefined) {
+            if (name === 'length') return dataFact('number');
+            if (/^(0|[1-9]\d*)$/.test(name)) return merge([hostValue(element), UNDEFINED]);
+          }
+        }
         return UNKNOWN;
       })
     );
@@ -1071,14 +1200,29 @@ function analyzeCallableFlow(
         const copy = new Map(previous);
         if (value.kind === 'record')
           for (const name of ownKeys(value)) {
-            copy.set(name, property([value], name, execution, span));
+            const field = fields(value).get(name)!;
+            // On an absent-field branch, spread leaves the preceding property
+            // intact. An own undefined value still overwrites it and is rejected.
+            const read = branches(
+              field.map(
+                (part) => () =>
+                  part.kind === 'absent'
+                    ? (previous.get(name) ?? absentField)
+                    : part.kind === 'getter'
+                      ? calls(part.callable, [], execution, span)
+                      : [part]
+              )
+            );
+            copy.set(name, read);
             if (!reachable) return [];
           }
         else if (value.kind === 'capture')
           for (const field of captureFacadeFields(undefined, new Map()))
             copy.set(field.name, captureProperty(value, field.name));
-        else if (type)
-          for (const field of objectFields(type) ?? []) {
+        else if (type || (value.kind === 'unknown' && value.data))
+          for (const field of objectFields(
+            value.kind === 'unknown' && value.data ? value.data : type!
+          ) ?? []) {
             if (field.accessor) {
               opaque(span);
               copy.set(field.name, UNKNOWN);
@@ -1087,7 +1231,11 @@ function analyzeCallableFlow(
               copy.set(
                 field.name,
                 field.optional
-                  ? merge([previous.get(field.name) ?? UNDEFINED, next, UNDEFINED])
+                  ? merge([
+                      previous.get(field.name) ?? absentField,
+                      next,
+                      ...(checkOutwardData ? [] : [UNDEFINED]),
+                    ])
                   : next
               );
             }
@@ -1098,7 +1246,7 @@ function analyzeCallableFlow(
     );
     const names = new Set(copies.flatMap((copy) => [...copy.keys()]));
     return new Map(
-      [...names].map((name) => [name, merge(copies.map((copy) => copy.get(name) ?? UNDEFINED))])
+      [...names].map((name) => [name, merge(copies.map((copy) => copy.get(name) ?? absentField))])
     );
   }
 
@@ -1275,12 +1423,9 @@ function analyzeCallableFlow(
         }
         for (const entry of value.entries) {
           const field = expression(entry.value, scope, execution);
-          writeField(
-            record,
-            entry.key,
-            entry.accessor ? [{ kind: 'getter', callable: field }] : field,
-            repeated
-          );
+          const initial: Known = entry.accessor ? [{ kind: 'getter', callable: field }] : field;
+          if (!repeated) record.fields.set(entry.key, initial);
+          writeField(record, entry.key, initial, repeated);
         }
         return [record];
       }
@@ -1299,7 +1444,7 @@ function analyzeCallableFlow(
             if (!reachable) return [];
           }
         }
-        if (!carriesCallable(value.type))
+        if (!tracksIdentity(value.type))
           return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         let record = recordSites.get(value) as RecordValue | undefined;
         const repeated = !!record;
@@ -1312,7 +1457,10 @@ function analyzeCallableFlow(
           recordSites.set(value, record);
           allocationSerial++;
         }
-        for (const [name, field] of nextFields) writeField(record, name, field, repeated);
+        for (const [name, field] of nextFields) {
+          if (!repeated) record.fields.set(name, field);
+          writeField(record, name, field, repeated);
+        }
         return [record];
       }
       case 'conditional': {
@@ -1352,40 +1500,70 @@ function analyzeCallableFlow(
       case 'intrinsic': {
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
         const array = value.arguments[0]?.type;
-        const elements = (owners: Known): Known =>
-          merge(
-            owners.map((owner) =>
-              owner.kind === 'record'
-                ? (fields(owner).get('*') ?? merge([...fields(owner).values()]))
-                : UNKNOWN
-            )
-          );
-        const list = (values: Known): Known => {
+        const list = (values: Known, bounds = UNKNOWN_EXTENT): Known => {
           if (!tracksIdentity(value.type))
             return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
           let record = recordSites.get(value) as RecordValue | undefined;
+          const repeated = !!record;
           if (!record) {
-            record = { kind: 'record', fields: new Map(), tracked: true };
+            record = {
+              kind: 'record',
+              fields: new Map(),
+              tracked: true,
+              ...(checkOutwardData ? { array: bounds } : {}),
+            };
             recordSites.set(value, record);
             allocationSerial++;
           }
-          writeField(record, '*', values, true);
+          if (!repeated) record.fields.set('*', values);
+          writeField(record, '*', values, repeated);
+          writeExtent(record, bounds, repeated);
           return [record];
         };
-        if (value.name === 'set.create') return list(args.length ? elements(args[0]) : []);
+        if (value.name === 'set.create') return list(args.length ? actualElements(args[0]) : []);
         if (value.name === 'array.push' || value.name === 'set.add') {
           const additions = merge(args.slice(1));
           for (const owner of args[0] ?? []) {
-            if (owner.kind === 'record') writeField(owner, '*', additions, true);
-            else if (value.arguments.slice(1).some((argument) => carriesCallable(argument.type)))
+            if (owner.kind === 'record') {
+              writeField(owner, '*', additions, true);
+              if (value.name === 'array.push') {
+                const prior = extent(owner),
+                  count = args.length - 1;
+                writeExtent(
+                  owner,
+                  { minimum: prior.minimum + count, maximum: prior.maximum + count },
+                  args[0].length > 1
+                );
+              }
+            } else if (value.arguments.slice(1).some((argument) => carriesCallable(argument.type)))
               opaque(value.span);
           }
           return value.name === 'set.add' ? args[0] : dataFact('number');
         }
-        if (value.name === 'array.shift' || value.name === 'array.pop')
-          return merge([elements(args[0]), UNDEFINED]);
-        if (value.name === 'array.slice') return list(elements(args[0]));
-        if (value.name === 'array.from') return list(elements(args[0]));
+        if (value.name === 'array.shift' || value.name === 'array.pop') {
+          const result = merge([actualElements(args[0]), UNDEFINED]);
+          for (const owner of args[0] ?? []) {
+            if (owner.kind !== 'record') continue;
+            const prior = extent(owner);
+            const next = {
+              minimum: Math.max(0, prior.minimum - 1),
+              maximum: Math.max(0, prior.maximum - 1),
+            };
+            writeExtent(owner, next, args[0].length > 1);
+            if (checkOutwardData && next.maximum === 0 && args[0].length === 1)
+              writeField(owner, '*', []);
+          }
+          return result;
+        }
+        if (value.name === 'array.at') return merge([actualElements(args[0]), UNDEFINED]);
+        if (value.name === 'array.slice')
+          return list(
+            actualElements(args[0]),
+            args.length === 1
+              ? arrayExtent(args[0])
+              : { minimum: 0, maximum: arrayExtent(args[0]).maximum }
+          );
+        if (value.name === 'array.from') return list(actualElements(args[0]), arrayExtent(args[0]));
         if (array && arrayElementType(array) !== undefined && value.name === 'array.sort') {
           const element = arrayElementType(array)!;
           const targets = args[1] ?? UNKNOWN;
@@ -1396,10 +1574,13 @@ function analyzeCallableFlow(
             authored: targets.flatMap((target) => (target.kind === 'closure' ? [target.fn] : [])),
             closed: targets.length > 0 && targets.every((target) => target.kind === 'closure'),
           });
-          calls(targets, [hostValue(element), hostValue(element)], execution, value.span, [
-            { type: element },
-            { type: element },
-          ]);
+          calls(
+            targets,
+            [actualElements(args[0]), actualElements(args[0])],
+            execution,
+            value.span,
+            [{ type: element }, { type: element }]
+          );
           return args[0];
         }
         if (array && arrayElementType(array) !== undefined && value.name === 'array.reduce') {
@@ -1413,16 +1594,80 @@ function analyzeCallableFlow(
             authored: targets.flatMap((target) => (target.kind === 'closure' ? [target.fn] : [])),
             closed: targets.length > 0 && targets.every((target) => target.kind === 'closure'),
           });
-          // Only finite-data accumulators are admitted. Their values do not
-          // carry a callback identity from one iteration into the next.
-          calls(
-            targets,
-            [hostValue(accumulator), hostValue(element), dataFact('number'), args[0]],
-            execution,
-            value.span,
-            [accumulator, element, 'number' as const, array].map((type) => ({ type }))
-          );
-          return hostValue(value.type);
+          if (!checkOutwardData) {
+            calls(
+              targets,
+              [hostValue(accumulator), hostValue(element), dataFact('number'), args[0]],
+              execution,
+              value.span,
+              [accumulator, element, 'number' as const, array].map((type) => ({ type }))
+            );
+            return hostValue(value.type);
+          }
+          // A checked accumulator type does not erase retained fields. The
+          // zero-iteration result is the actual seed (or first actual element);
+          // each later invocation receives the preceding actual result.
+          const initial = arrayExtent(args[0]),
+            hasSeed = args.length > 2;
+          if (!hasSeed && initial.minimum === 0) possibleThrow();
+          if (!hasSeed && initial.maximum === 0) {
+            reachable = false;
+            return [];
+          }
+          let accumulated = hasSeed ? args[2] : actualElements(args[0]);
+          const exits: { values: Known; store: Store }[] = [];
+          const finish = () => exits.push({ values: accumulated, store: snapshot() });
+          const previousAllocationContext = allocationContext;
+          // Repeated iterations join only this invocation's allocation sites.
+          // Separate ordinary calls still create distinct result identities.
+          allocationContext = `${allocationContext ?? `reduce:${allocationSerial++}`}:${location(value)}`;
+          const seen = new Map<string, number>();
+          let completed = false;
+          try {
+            for (let iteration = 0, index = hasSeed ? 0 : 1; iteration < 64; iteration++, index++) {
+              const current = arrayExtent(args[0]);
+              if (index >= initial.minimum || index >= current.minimum) finish();
+              if (index >= initial.maximum || index >= current.maximum) {
+                completed = true;
+                break;
+              }
+              const key = fingerprint([
+                ...accumulated,
+                ...store.cells.keys(),
+                ...store.records.keys(),
+                ...store.captures.keys(),
+              ]);
+              const previous = seen.get(key);
+              // A stable state gives the same result for further iterations;
+              // an unknown-length cycle has already contributed every exit.
+              if (
+                previous === iteration - 1 ||
+                (previous !== undefined && initial.maximum === Infinity && index >= initial.minimum)
+              ) {
+                finish();
+                completed = true;
+                break;
+              }
+              seen.set(key, iteration);
+              accumulated = calls(
+                targets,
+                [accumulated, actualElements(args[0]), dataFact('number'), args[0]],
+                execution,
+                value.span,
+                [accumulator, element, 'number' as const, array].map((type) => ({ type }))
+              );
+              if (issue || !reachable) {
+                completed = true;
+                break;
+              }
+            }
+            if (!completed) opaque(value.span);
+          } finally {
+            allocationContext = previousAllocationContext;
+          }
+          reachable = exits.length > 0;
+          if (reachable) store = joinStores(exits.map((exit) => exit.store));
+          return merge(exits.map((exit) => exit.values));
         }
         if (
           array &&
@@ -1439,7 +1684,8 @@ function analyzeCallableFlow(
           ].includes(value.name)
         ) {
           const parameters = arrayEveryCallbackParameters(array);
-          const element = elements(args[0]);
+          const element = actualElements(args[0]);
+          const traversalExtent = arrayExtent(args[0]);
           const targets = args[1] ?? UNKNOWN;
           demand?.traversal?.(value, {
             external: targets.some(
@@ -1455,10 +1701,17 @@ function analyzeCallableFlow(
             value.span,
             parameters
           );
-          if (value.name === 'array.filter') return list(element);
+          if (value.name === 'array.filter')
+            return list(element, { minimum: 0, maximum: traversalExtent.maximum });
           if (value.name === 'array.find') return merge([element, UNDEFINED]);
-          if (value.name === 'array.map') return list(result);
-          if (value.name === 'array.flatMap') return list(elements(result));
+          // map snapshots its input length before calling the mapper. A mapper
+          // may remove later elements, but cannot erase the first normal result.
+          if (value.name === 'array.map')
+            return list(result, {
+              minimum: traversalExtent.minimum > 0 ? 1 : 0,
+              maximum: traversalExtent.maximum,
+            });
+          if (value.name === 'array.flatMap') return list(actualElements(result));
         }
         if (value.name === 'object.assign') {
           for (const [index, source] of args.slice(1).entries()) {
@@ -1474,7 +1727,11 @@ function analyzeCallableFlow(
               if (target.kind === 'record')
                 for (const [name, field] of copied) writeField(target, name, field);
           }
-          return isDataValueType(value.type) ? dataFact(value.type) : args[0];
+          return checkOutwardData
+            ? args[0]
+            : isDataValueType(value.type)
+              ? dataFact(value.type)
+              : args[0];
         }
         return value.name === 'object.freeze'
           ? args[0]
@@ -1530,20 +1787,22 @@ function analyzeCallableFlow(
       }
       case 'array':
       case 'array-spread': {
+        let bounds: ArrayExtent = { minimum: 0, maximum: 0 };
         const elements =
           value.kind === 'array'
-            ? value.elements.map((element) => expression(element, scope, execution))
+            ? value.elements.map((element) => {
+                bounds.minimum++;
+                bounds.maximum++;
+                return expression(element, scope, execution);
+              })
             : value.parts.map((part) => {
                 const result = expression(part.value, scope, execution);
-                return part.spread
-                  ? merge(
-                      result.map((owner) =>
-                        owner.kind === 'record'
-                          ? (fields(owner).get('*') ?? merge([...fields(owner).values()]))
-                          : UNKNOWN
-                      )
-                    )
-                  : result;
+                const size = part.spread ? arrayExtent(result) : { minimum: 1, maximum: 1 };
+                bounds = {
+                  minimum: bounds.minimum + size.minimum,
+                  maximum: bounds.maximum + size.maximum,
+                };
+                return part.spread ? actualElements(result) : result;
               });
         if (
           !tracksIdentity(value.type) &&
@@ -1557,11 +1816,19 @@ function analyzeCallableFlow(
         let record = recordSites.get(value) as RecordValue | undefined;
         const repeated = !!record;
         if (!record) {
-          record = { kind: 'record', fields: new Map(), tracked: true };
+          record = {
+            kind: 'record',
+            fields: new Map(),
+            tracked: true,
+            ...(checkOutwardData ? { array: bounds } : {}),
+          };
           recordSites.set(value, record);
           allocationSerial++;
         }
-        writeField(record, '*', merge(elements), repeated);
+        const contents = merge(elements);
+        if (!repeated) record.fields.set('*', contents);
+        writeField(record, '*', contents, repeated);
+        writeExtent(record, bounds, repeated);
         return [record];
       }
       case 'operation': {
@@ -1572,6 +1839,21 @@ function analyzeCallableFlow(
         ).find((item) => item.code !== 'context' || execution.context !== 'helper');
         const receiver = value.receiver ? expression(value.receiver, scope, execution) : UNKNOWN;
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
+        if (
+          checkOutwardData &&
+          !issue &&
+          reachable &&
+          value.operation === 'expose.emit' &&
+          !outwardData(args[1] ?? UNDEFINED)
+        ) {
+          issue = {
+            code: 'PUI1006',
+            message:
+              'Outward JSON payload retains a value outside the declared data boundary. Copy only plain, defined data fields before publication.',
+            span: value.span,
+          };
+          return UNKNOWN;
+        }
         if (phaseIssue && !trace) {
           if (execution.guarded) {
             possibleThrow();
@@ -1823,12 +2105,29 @@ function analyzeCallableFlow(
           })
         );
       }
-      case 'rule':
+      case 'rule': {
         expression(value.receiver, scope, execution);
+        const phaseIssue = validateOperationPhase(
+          'rule.declare',
+          execution.phase,
+          execution.phase === 'callback' ? (execution.context as CallbackContext) : undefined
+        )[0];
+        if (phaseIssue && !trace) {
+          if (execution.guarded) {
+            possibleThrow();
+            reachable = false;
+            return [];
+          }
+          if (!demand) {
+            issue ??= { message: phaseIssue.message, span: value.span };
+            return UNKNOWN;
+          }
+        }
         value.states.forEach((state) => expression(state.value, scope, execution));
         value.styles?.forEach((style) => expression(style.value, scope, execution));
         value.targets?.forEach((style) => expression(style.value, scope, execution));
         return UNKNOWN;
+      }
       case 'context-key':
       case 'static-capability':
       case 'style-handle':
@@ -2025,7 +2324,8 @@ function analyzeCallableFlow(
     progress = false;
     store = copyStore(quiescent);
     for (const root of outwardRoots.values()) escape(root.values, root.execution, root.type, false);
-    for (const { closure, execution, outward } of callbacks) {
+    for (const registration of callbacks) {
+      const { closure, execution, outward } = registration;
       store = copyStore(quiescent);
       reachable = true;
       const key = `${identity(closure.fn)}:${execution.phase}:${execution.context}:${execution.guarded ? 'guarded' : 'strict'}:${fingerprint([closure])}:${outward ? 'outward' : 'callback'}`;
@@ -2035,15 +2335,20 @@ function analyzeCallableFlow(
       allocationContext = `${identity(closure.fn)}:${fingerprint([closure], true)}`;
       const callbackThrows: Store[] = [];
       exceptionSinks.push(callbackThrows);
-      const returned = call(
-        closure,
-        closure.fn.parameters.map((parameter) =>
+      // A host invocation is an analysis root, not a new concrete allocation
+      // on every fixed-point visit. Keep its parameter locations stable while
+      // stores continue to join all possible writes. Different registrations,
+      // parameters and nested fields retain independent host value identities.
+      let args = callbackArguments.get(registration);
+      if (!args) {
+        args = closure.fn.parameters.map((parameter) =>
           parameter.optional || parameter.default
             ? merge([hostValue(parameter.type), UNDEFINED])
             : hostValue(parameter.type)
-        ),
-        execution
-      );
+        );
+        callbackArguments.set(registration, args);
+      }
+      const returned = call(closure, args, execution);
       exceptionSinks.pop();
       allocationContext = undefined;
       if (outward) escape(returned, execution, closure.fn.returnType);

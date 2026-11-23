@@ -1511,7 +1511,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             break;
           }
           case 'rule': {
-            if (phase !== 'setup' || expression(node.receiver, scope, phase, context) !== 'def')
+            if (
+              (phase !== 'setup' && context !== 'helper') ||
+              expression(node.receiver, scope, phase, context) !== 'def'
+            )
               bad('Rule declarations are setup-only.', location);
             const declaration = node.declaration as RuleDeclarationIR;
             const plan = lowerRulePlan([declaration], location);

@@ -323,9 +323,11 @@ describe('prototypes/shadcn: checkbox', () => {
       'pressed',
       // P-BASE-FIELD-CHOICES-POLICY/RESET also govern the ordinary Root.
       'readOnly',
-      'resetValue',
       'required',
+      'resetValue',
     ]);
+    // P-BASE-CHECKBOX-REQUIRED belongs to the same Root, never the Indicator.
+    expect(root.getExposes().required.get()).toBe(false);
 
     // Writing the derived names on the Indicator changes nothing: only the Root
     // context can move them.

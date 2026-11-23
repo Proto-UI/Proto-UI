@@ -403,6 +403,8 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
     if (value.kind === 'narrow') return targets(value.value, scope);
     if (value.kind === 'conditional')
       return [...targets(value.then, scope), ...targets(value.otherwise, scope)];
+    if (value.kind === 'binary' && ['&&', '||', '??'].includes(value.operator))
+      return [...targets(value.left, scope), ...targets(value.right, scope)];
     if (value.kind === 'member') return recordField(value.object, value.property, scope);
     if (value.kind === 'element' && value.index.kind === 'literal')
       return recordField(value.object, String(value.index.value), scope);

@@ -19,7 +19,11 @@ const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
 const report = {
   kind: 'bootstrap-collapse-four-web-native',
   at: new Date().toISOString(),
-  source: { head: git('rev-parse', 'HEAD'), dirty: !!git('status', '--porcelain') },
+  source: {
+    head: git('rev-parse', 'HEAD'),
+    dirty: !!git('status', '--porcelain'),
+    driverSha256: hash(await readFile(new URL(import.meta.url))),
+  },
   environment: {
     runtimes,
     kinds,
@@ -222,10 +226,22 @@ try {
         await run(() => BootstrapCollapse.startTrace());
         await accepted(false);
         await page.waitForTimeout(120);
-        row.beforeReversal = await snapshot();
+        // Keep the last applied sample and accepted target change in one
+        // browser task. A separate CDP round trip may deliver another native
+        // leave frame before the reversal, which is motion rather than a jump.
+        const reversal = await run(async () => {
+          const before = BootstrapCollapse.snapshot();
+          await BootstrapCollapse.accept(true);
+          return { before, after: BootstrapCollapse.snapshot() };
+        });
+        row.beforeReversal = reversal.before;
+        row.afterReversal = reversal.after;
+        assert.equal(row.beforeReversal.phase, 'leaving');
         assert(row.beforeReversal.height > 0 && row.beforeReversal.height < initial.height);
-        await accepted(true);
-        row.afterReversal = await snapshot();
+        assert.equal(row.afterReversal.phase, 'entering');
+        assert.equal(row.afterReversal.open, true);
+        assert.equal(row.afterReversal.bodySame, true);
+        assert.equal(row.afterReversal.ownerSame, true);
         assert(
           Math.abs(row.afterReversal.height - row.beforeReversal.height) < 2,
           'Reversal cannot jump to an endpoint.'

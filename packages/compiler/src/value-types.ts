@@ -473,7 +473,7 @@ export function dataBoundaryType(type: ValueType, top = true): DataType | undefi
       ? (type as DataType)
       : undefined;
   if (type.kind === 'literal') return type;
-  if (type.kind === 'array') {
+  if (type.kind === 'array' || type.kind === 'value-array') {
     const element = dataBoundaryType(type.element, false);
     return element ? { kind: 'array', element } : undefined;
   }
@@ -489,6 +489,7 @@ export function dataBoundaryType(type: ValueType, top = true): DataType | undefi
   ) {
     const fields: { name: string; type: DataType; optional?: boolean }[] = [];
     for (const field of type.fields) {
+      if ('accessor' in field && field.accessor) return undefined;
       const value = dataBoundaryType(field.type, false);
       if (!value) return undefined;
       fields.push({ name: field.name, type: value, ...(field.optional ? { optional: true } : {}) });

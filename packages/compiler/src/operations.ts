@@ -3571,8 +3571,8 @@ export function validateOperationArguments(
         if (!bindings.eventPayloadType)
           reject('missing-signature', 'Emitted events require a declared payload signature.');
         else if (
-          !serializableDataType(argument.type) ||
-          !assignable(serializableDataType(argument.type)!, bindings.eventPayloadType)
+          !dataBoundaryType(argument.type) ||
+          !assignable(dataBoundaryType(argument.type)!, bindings.eventPayloadType)
         )
           reject('argument-type', 'Event payload does not match the declared signature.');
         break;

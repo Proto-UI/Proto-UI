@@ -337,12 +337,17 @@ describe('prototypes/brutalist: select', () => {
       await vi.advanceTimersByTimeAsync(1);
       await flush();
       expect(content.getExposes().transitionState.get()).toBe('closed');
-      // Keep the 150/100ms semantic clocks above; physical portal retirement
-      // additionally crosses its independently owned two-frame conceal barrier.
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+      // Keep the 150/100ms clocks. C-HOST-VIEW-ATTACHMENT-0001 projects
+      // not-present now; physical Portal retirement owns a separate barrier.
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(document.body);
+      expect(await frame()).toBeGreaterThan(0);
+      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+      expect(content.parentElement).toBe(root);
+      expect([...content.querySelectorAll(selectItem.name)]).toEqual(items);
     } finally {
       frame.restore();
     }

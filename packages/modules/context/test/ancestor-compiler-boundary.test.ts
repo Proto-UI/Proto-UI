@@ -32,6 +32,7 @@ describe('ancestor Context compiler capability boundary', () => {
           .replaceAll('tryReadAncestor', 'tryRead')
       );
       expect(control.ok).toBe(true);
+      expect(parsePrototype(source).ok).toBe(true);
       const result = compilePrototype(source, { profile });
       const supported = [
         'react-runtime-v1',
@@ -42,17 +43,34 @@ describe('ancestor Context compiler capability boundary', () => {
       ].includes(profile);
       expect(result.ok).toBe(supported);
       if (!result.ok) {
-        expect(result.diagnostics[0]).toMatchObject({
-          // The typed member boundary rejects this unavailable Context facade
-          // before syntax lowering. PUI1006 is its registered type diagnostic.
-          code: 'PUI1006',
-          category: 'unsupported-input',
-          message: 'Undeclared object member context.',
-        });
-        expect(result.diagnostics[0].span.line).toBe(5);
-        expect(source.slice(result.diagnostics[0].span.start, result.diagnostics[0].span.end)).toBe(
-          operation.startsWith('def.context') ? 'def.context' : 'run.context'
-        );
+        expect(result.diagnostics).toHaveLength(1);
+        if (profile === 'gpui-source-v1') {
+          // Source admission is shared; the implemented GPUI target rejects
+          // this exact operation without borrowing Web lowering.
+          const method = operation.startsWith('def.context')
+            ? 'trySubscribeAncestor'
+            : 'tryReadAncestor';
+          expect(result.diagnostics[0]).toMatchObject({
+            code: 'PUI4003',
+            category: 'unsupported-input',
+            message: `Operation context.${method} is not implemented by gpui-source-v1. Select an explicit supported profile; native output never falls back to Runtime/Adapter.`,
+          });
+          const { span } = result.diagnostics[0];
+          expect(span.line).toBe(5);
+          expect(source.slice(span.start, span.end)).toBe(
+            `${operation.startsWith('def.context') ? 'def' : 'run'}.context.${method}(KEY)`
+          );
+        } else {
+          // These public profiles are not registered as implemented. Their
+          // target-selection refusal precedes any operation-level judgment.
+          const framework = profile === 'qt-source-v1' ? 'qt' : 'flutter';
+          expect(result.diagnostics[0]).toMatchObject({
+            code: 'PUI4001',
+            category: 'unsupported-input',
+            message: `Target profile ${profile} identifies ${framework}, but no working emitter is implemented. Choose an implemented profile explicitly.`,
+            span: { file: '<target>', start: -1, end: -1, line: 0 },
+          });
+        }
       }
     }
   });

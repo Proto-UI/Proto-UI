@@ -102,6 +102,7 @@ import {
   canNarrowValue,
   erasesRuntimeAuthority,
   serializableDataType,
+  dataBoundaryType,
   contextRuntimeValueType,
   arrayElementType,
   iterableElementType,
@@ -5317,7 +5318,7 @@ class Frontend {
     if (operation === 'expose.emit') {
       const names = finiteStringKeys(args[0])!;
       const kind = this.eventKinds.get(names[0])!;
-      const payload = serializableDataType(args[1]?.type ?? 'void');
+      const payload = dataBoundaryType(args[1]?.type ?? 'void');
       if (
         payload === undefined ||
         (kind === 'void' && payload !== 'void') ||

@@ -144,9 +144,27 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
       `const flag=def.state.bool('flag',false);`,
       `${optionalOverlay("'original'")}run.expose.emit('changed',view);`,
     ],
+    [
+      'a shared data child is not a circular object',
+      `const shared={value:'ok'};`,
+      `run.expose.emit('changed',{left:shared,right:shared});`,
+    ],
   ])('preserves %s', (_, setup, callback) => {
     const result = compilePrototype(prototype(setup, callback), { profile: 'gpui-source-v1' });
     expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+  });
+
+  it('preserves the earlier authority refusal for a type view that hides a getter', () => {
+    const result = parsePrototype(
+      prototype(
+        `const original={value:'ok',get hidden(){return 'secret';}};
+      const view:Readonly<{value:string}>=original;`,
+        `run.expose.emit('changed',view);`
+      )
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok)
+      expect(result.diagnostics[0].message).toContain('A structural type view cannot hide');
   });
 
   it.each([
