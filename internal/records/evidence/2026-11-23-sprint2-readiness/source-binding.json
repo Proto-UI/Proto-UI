@@ -75,6 +75,14 @@
       {
         "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
         "sha256": "7cf8a7a58458fe309a03d0deaa56b0d5f8439ebd2b50cb13d8f6c4725a81bb75"
+      },
+      {
+        "path": "packages/prototypes/base/src/checkbox/root.proto.ts",
+        "sha256": "4167b55452680d76451ef731142c01e8a12561cce01c7481d135421a741f6dd4"
+      },
+      {
+        "path": "packages/prototypes/base/test/notification-retirement-lifecycle.test.ts",
+        "sha256": "412c9661cdfea6ad9d1bf9133c155999a36c3bd8e018bac10d52a37988c45626"
       }
     ],
     "filesBeforeConcurrentMerge": [
@@ -93,6 +101,40 @@
       {
         "path": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
         "sha256": "05457a0499ab1bbb293cb82f42035a799b9464fa8a0e7217859393d13fbc134b"
+      },
+      {
+        "path": "packages/prototypes/base/package.json",
+        "sha256": "f506961e79805a73e24e79a5ad205a41f19c68845482935b62e966b91aebb7c9"
+      },
+      {
+        "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+        "sha256": "232c977a85e10786f289457d874f8a67ee195b99ef2a3b2a81813761af8abe1d"
+      },
+      {
+        "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+        "sha256": "bd8bf4841ff0acb8306bbf1e29bc3eca3962502ba2e64584e13da2c168181237"
+      },
+      {
+        "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+        "sha256": "7cf8a7a58458fe309a03d0deaa56b0d5f8439ebd2b50cb13d8f6c4725a81bb75"
+      }
+    ],
+    "filesBeforeCheckedOwnerMerge": [
+      {
+        "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+        "sha256": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a"
+      },
+      {
+        "path": "packages/compiler/test/text-reset-native.test.ts",
+        "sha256": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+      },
+      {
+        "path": "apps/www/src/styles/site-library-family.css",
+        "sha256": "db68c8000c0d9709635fa7d178848a2cc2ad541e53195926bdcbdd7b2805c181"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+        "sha256": "231d7507da67ecda5bedb0326b18ca7c5d26802f766321143c8264b7ccc91c22"
       },
       {
         "path": "packages/prototypes/base/package.json",
@@ -903,6 +945,13 @@
       "sourceControlsPassed": 86,
       "expectedSuccessfulSitePngs": 100,
       "finalNativeAcceptance": "pending"
+    },
+    "checkedOwnerMerge": {
+      "record": "checked-owner-merge.json",
+      "firstParent": "f78c407efa14659294e795105f0b7af6caa48246",
+      "concurrentParent": "1450ffd549bce8da636f2ccd45044aff5121e6ad",
+      "currentSourceControlsPassed": 244,
+      "finalSameHeadAcceptance": "pending"
     }
   },
   "artifacts": [
@@ -1139,6 +1188,36 @@
       "rawBytes": 2907,
       "rawSha256": "43c44a8f5989d5280d342cb66be41a2c846ceed838b1acf14984f48be6fb6a15",
       "gzipSha256": "093a6350f47c9ae085a3648669f5af6003a0aeb6feb1868fd4c3824b1209dad2"
+    },
+    {
+      "path": "owner-normal-merge.log.gz",
+      "rawBytes": 55,
+      "rawSha256": "b0a553d20817e5980c564f1485d89ea0f776bc5f8ebf0f34a0a4010e2bcb9099",
+      "gzipSha256": "34edfea047a1e9874d1b4136dbda7d888275a777c2a444b7a154c99434af1226"
+    },
+    {
+      "path": "owner-reset-negative-control.json.gz",
+      "rawBytes": 51966,
+      "rawSha256": "501357fdba379247070466002c3b8144b21e594127020deebece71553428563c",
+      "gzipSha256": "cbd8c07c9f9e28c03abf2e9dede7640020184ec66aef7fb48389f3d29f597369"
+    },
+    {
+      "path": "owner-reset-negative-control.log.gz",
+      "rawBytes": 215408,
+      "rawSha256": "a232aa3ebf816e76e44d05e07238b9428b279339efcab515d52ef4df2d934172",
+      "gzipSha256": "cac4dbf3a9795cdd5c024251bb0b615ab9e28bf4c779d26196a8ee7feed4b43d"
+    },
+    {
+      "path": "owner-source-controls.json.gz",
+      "rawBytes": 71453,
+      "rawSha256": "3729709ef99bbcc5cb2088553a454852e116540aa81e5c7914703303e68cbef5",
+      "gzipSha256": "ba463d9c34df429b07fa58f8bbec215b7da7c857594efa15959169abf2fc1a1d"
+    },
+    {
+      "path": "owner-source-controls.log.gz",
+      "rawBytes": 579519,
+      "rawSha256": "6454a3ffff77d37adffd9e15ad4ad2b9017bb5e3bb0a6e57539f8018d36d3bad",
+      "gzipSha256": "cf287b75f78e78e65f7de30168715888abfbba68008ae80371cfaa5bae2f0932"
     }
   ]
 }

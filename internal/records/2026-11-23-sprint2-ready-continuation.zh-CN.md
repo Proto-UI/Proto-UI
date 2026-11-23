@@ -55,3 +55,9 @@ TextControl 合并的实际 diff 另由 fresh-context compiler Agent 只读审�
 推送前核查发现原 PR 已由另一会话推进到 16be2a37。保留本轮 e7e3/d9fb 与该提交的全部历史，正常 merge；3 个冲突逐项源审后保留并行提交的 Text reset/selection 生命周期新控制、网站真实动画完成观察、实际主题/浏览器偏好事实与五状态独立截图。网站仍为原 42 case，成功截图因不再覆盖重复 profile 状态由 84 增至 100。
 
 16be 原 workflow 45175883003 的原 304 项全部通过，整体仍因新增两个 mock 的 options 参数类型错误而失败。完整原始 job/type 日志与已核 ZIP 哈希保留，不能将该失败冒充为当前 head 通过。两个 options 改为宿主 API 的可选参数；TypeScript 前后生成 JavaScript 完全一致，原断言不变。当前源控制实际为 86/86，包含全部原 78 项加 8 个新 reset/selection 控制，工作区类型检查通过；134 份冻结档案仍匹配原主干。原 304 项与 100 张截图待最终 clean head 的完整工作流和独立视觉审查。
+
+## 再次保留原分支的 Checked owner 修复
+
+原分支随后正常推进至 1450ffd5，补充 Checkbox / FieldCheckbox 重置期间受控 checked owner 更替与 ABA 的退役保护。先保全 d9 + 16be 的正常合并，再正常合入该原作者提交；两边相同的 DOM optional options 类型修复逐字一致。新逻辑在 pressed cleanup 前捕获 owner epoch，并在同步发布之后再次核当前租约，保留 ordinary reset 与仅 mixed 确认的正向行为。
+
+以 16be 的原 Checkbox 源、当前新增 12 项实际 Runtime 控制进行负控：8 项应失败确实失败，4 项正控通过；finally 恢复候选源后，6 文件原有与新增共 244 项全部通过，包含之前全部 86 个 case ID，未修改任何测试时限。这里没有将合成事件 Runtime 控制称为原生宿主接受。134 份冻结档案仍与主干原字节一致。最终 clean head 的原 304 项、工作区类型门禁与 100 张独立视觉审查继续由完整原工作流收齐。
