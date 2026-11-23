@@ -28,7 +28,8 @@ beforeAll(() => {
 afterAll(() => recipeSheet.remove());
 
 // These newer profile/drag branches have no admitted split application role.
-// Preserve their exact inventory and reject activation until separately defined.
+// Their atomic rejection controls do not satisfy the complete-prototype inventory
+// gate below, which still requires no unresolved Root token.
 const unresolvedSwitchThumb = [
   'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
   'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
@@ -60,7 +61,7 @@ const cases = [
     proto: switchThumb,
     directory: 'packages/prototypes/shadcn/src/switch',
     file: 'thumb.proto.ts',
-    unresolved: unresolvedSwitchThumb,
+    unresolved: [],
   },
 ] as const;
 let serial = 0;
