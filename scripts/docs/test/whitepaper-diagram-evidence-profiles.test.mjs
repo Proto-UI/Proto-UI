@@ -11,8 +11,15 @@ import {
   selectDiagramVariant,
   diagramEvidenceCases,
   diagramEvidenceId,
+  diagramExpectedMobileCards,
 } from '../../../apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs';
 
+const mobileHeights = {
+  'switch-activation': 1740,
+  'evolution-feedback': 1000,
+  'conditional-consistency': 1920,
+  'component-anatomy': 1740,
+};
 const revision = 'a'.repeat(40);
 const hash = 'b'.repeat(64);
 
@@ -69,11 +76,17 @@ for (const [figure, chapter, height, fonts] of [
   });
 }
 
-test('the four generated profiles bind their ten explicit locale assets', async () => {
+test('the four generated profiles bind their sixteen explicit locale assets', async () => {
   const expected = {
     'switch-activation': {
-      en: ['/diagrams/whitepaper-switch-activation.en.svg'],
-      'zh-cn': ['/diagrams/whitepaper-switch-activation.zh-cn.svg'],
+      en: [
+        '/diagrams/whitepaper-switch-activation.en.svg',
+        '/diagrams/whitepaper-switch-activation.mobile.en.svg',
+      ],
+      'zh-cn': [
+        '/diagrams/whitepaper-switch-activation.zh-cn.svg',
+        '/diagrams/whitepaper-switch-activation.mobile.zh-cn.svg',
+      ],
     },
     'evolution-feedback': {
       en: [
@@ -86,12 +99,24 @@ test('the four generated profiles bind their ten explicit locale assets', async 
       ],
     },
     'conditional-consistency': {
-      en: ['/diagrams/whitepaper-conditional-consistency.en.svg'],
-      'zh-cn': ['/diagrams/whitepaper-conditional-consistency.zh-cn.svg'],
+      en: [
+        '/diagrams/whitepaper-conditional-consistency.en.svg',
+        '/diagrams/whitepaper-conditional-consistency.mobile.en.svg',
+      ],
+      'zh-cn': [
+        '/diagrams/whitepaper-conditional-consistency.zh-cn.svg',
+        '/diagrams/whitepaper-conditional-consistency.mobile.zh-cn.svg',
+      ],
     },
     'component-anatomy': {
-      en: ['/diagrams/whitepaper-component-anatomy.en.svg'],
-      'zh-cn': ['/diagrams/whitepaper-component-anatomy.zh-cn.svg'],
+      en: [
+        '/diagrams/whitepaper-component-anatomy.en.svg',
+        '/diagrams/whitepaper-component-anatomy.mobile.en.svg',
+      ],
+      'zh-cn': [
+        '/diagrams/whitepaper-component-anatomy.zh-cn.svg',
+        '/diagrams/whitepaper-component-anatomy.mobile.zh-cn.svg',
+      ],
     },
   };
   assert.deepEqual(
@@ -113,7 +138,10 @@ test('the four generated profiles bind their ten explicit locale assets', async 
       for (const selected of variants) {
         assert.ok(Object.isFrozen(selected));
         assert.equal(selected.width, selected.name === 'mobile' ? 500 : 960);
-        assert.equal(selected.height, selected.name === 'mobile' ? 1000 : profile.height);
+        assert.equal(
+          selected.height,
+          selected.name === 'mobile' ? mobileHeights[figure] : profile.height
+        );
         const svg = await readFile(
           new URL(`../../../apps/www/public${selected.asset}`, import.meta.url),
           'utf8'
@@ -134,12 +162,17 @@ test('the four generated profiles bind their ten explicit locale assets', async 
           );
           assert.ok(
             article.includes(
-              `<source media="(max-width: 639px)" srcset="${selected.asset}" width="500" height="1000"`
+              `<source media="(max-width: 639px)" srcset="${selected.asset}" width="500" height="${mobileHeights[figure]}"`
             )
           );
           assert.match(article, /<picture>\s*<source[^>]+>\s*<img[^>]+>\s*<\/picture>/);
           assert.match(svg, /data-layout="mobile"/);
-          assert.doesNotMatch(svg, /@font-face/);
+          assert.equal(svg.includes('@font-face'), profile.fonts === 'embedded-handwritten');
+          assert.equal(
+            [...svg.matchAll(/data-node="/g)].length +
+              [...svg.matchAll(/data-diagnosis="/g)].length,
+            diagramExpectedMobileCards(profile)
+          );
         }
       }
       assert.throws(() => diagramVariants({ ...profile }, locale), /allowlisted/);
@@ -192,30 +225,27 @@ test('the retained legacy profile uses canonical chapters and viewBox geometry i
 });
 
 test('responsive selection is width-bound, with an exact 639/640 boundary and no caller asset path', () => {
-  const evolution = selectDiagramProfile('evolution-feedback');
-  const activation = selectDiagramProfile();
-  for (const locale of ['en', 'zh-cn']) {
-    for (const width of [1, 390, 639, 640, 844, 1440]) {
-      const selected = selectDiagramVariant(evolution, locale, width);
-      assert.equal(selected.name, width <= 639 ? 'mobile' : 'desktop');
-      assert.equal(selected, diagramVariants(evolution, locale)[width <= 639 ? 1 : 0]);
-      assert.equal(
-        selectDiagramVariant(activation, locale, width),
-        diagramVariants(activation, locale)[0]
-      );
-    }
-    for (const invalid of [0, -1, 639.5, NaN, Infinity, '390', '/diagrams/other.svg', {}]) {
-      assert.throws(() => selectDiagramVariant(evolution, locale, invalid), /viewport width/);
+  for (const profile of diagramProfiles().filter(
+    (item) => item.figure !== 'information-flow-model'
+  )) {
+    for (const locale of ['en', 'zh-cn']) {
+      for (const width of [1, 390, 639, 640, 844, 1440]) {
+        const selected = selectDiagramVariant(profile, locale, width);
+        assert.equal(selected.name, width <= 639 ? 'mobile' : 'desktop');
+        assert.equal(selected, diagramVariants(profile, locale)[width <= 639 ? 1 : 0]);
+      }
+      for (const invalid of [0, -1, 639.5, NaN, Infinity, '390', '/diagrams/other.svg', {}])
+        assert.throws(() => selectDiagramVariant(profile, locale, invalid), /viewport width/);
     }
   }
 });
 
-test('Switch captures stay unchanged; evolution adds bounded resize, boundary and landscape cases', () => {
+test('all four responsive profiles retain core cases and add bounded resize, boundary and landscape cases', () => {
   const standard = [
     { scenario: 'standard', viewport: { width: 1440, height: 1000 } },
     { scenario: 'standard', viewport: { width: 390, height: 844 } },
   ];
-  assert.deepEqual(diagramEvidenceCases(selectDiagramProfile()), standard);
+  assert.deepEqual(diagramEvidenceCases(selectDiagramProfile('information-flow-model')), standard);
   const cases = diagramEvidenceCases(selectDiagramProfile('evolution-feedback'));
   assert.deepEqual(cases, [
     ...standard,
@@ -233,6 +263,8 @@ test('Switch captures stay unchanged; evolution adds bounded resize, boundary an
     },
     { scenario: 'landscape-390', viewport: { width: 844, height: 390 } },
   ]);
+  for (const figure of Object.keys(mobileHeights))
+    assert.deepEqual(diagramEvidenceCases(selectDiagramProfile(figure)), cases);
   assert.ok(Object.isFrozen(cases));
   for (const item of cases) {
     assert.ok(Object.isFrozen(item) && Object.isFrozen(item.viewport));
@@ -264,7 +296,7 @@ test('evidence identities distinguish figure, locale, theme, width, revision and
   assert.equal(ids.size, 40);
   const profile = selectDiagramProfile();
   const original = diagramEvidenceId(profile, 'en', 'light', 390, revision, hash);
-  assert.equal(original, `switch-activation-en-light-390-${revision}-${hash}`);
+  assert.equal(original, `switch-activation-mobile-en-light-390-standard-${revision}-${hash}`);
   assert.notEqual(original, diagramEvidenceId(profile, 'en', 'light', 390, 'c'.repeat(40), hash));
   assert.notEqual(
     original,
@@ -305,7 +337,15 @@ test('evolution identities bind variant and scenario as well as selected asset h
     diagramEvidenceId(profile, 'en', 'light', 640, revision, hash, 'boundary-639')
   );
   assert.throws(() =>
-    diagramEvidenceId(selectDiagramProfile(), 'en', 'light', 639, revision, hash, 'boundary-639')
+    diagramEvidenceId(
+      selectDiagramProfile('information-flow-model'),
+      'en',
+      'light',
+      639,
+      revision,
+      hash,
+      'boundary-639'
+    )
   );
 });
 
@@ -328,4 +368,31 @@ test('runner rejects an unknown selection before dependency, asset or browser in
   assert.equal(result.status, 1);
   assert.match(result.stderr, /DIAGRAM_EVIDENCE_FIGURE must be/);
   assert.doesNotMatch(result.stderr, /ERR_MODULE_NOT_FOUND|An absolute evidence directory|ENOENT/);
+});
+
+test('the full responsive plan and geometry regions are explicit', () => {
+  assert.equal(
+    diagramProfiles().reduce((sum, profile) => sum + diagramEvidenceCases(profile).length * 4, 0),
+    120
+  );
+  assert.equal(
+    diagramProfiles().reduce((sum, profile) => sum + diagramVariants(profile, 'en').length * 4, 0),
+    36
+  );
+  for (const [figure, count] of [
+    ['switch-activation', 0],
+    ['component-anatomy', 2],
+    ['conditional-consistency', 4],
+    ['evolution-feedback', 8],
+  ]) {
+    assert.equal(diagramExpectedMobileCards(selectDiagramProfile(figure)), count);
+    assert.throws(
+      () => diagramExpectedMobileCards({ ...selectDiagramProfile(figure) }),
+      /allowlisted/
+    );
+  }
+  assert.throws(
+    () => diagramExpectedMobileCards(selectDiagramProfile('information-flow-model')),
+    /mobile geometry contract/
+  );
 });

@@ -19,6 +19,7 @@ import {
   selectDiagramVariant,
   diagramEvidenceCases,
   diagramEvidenceId,
+  diagramExpectedMobileCards,
 } from './whitepaper-diagram-evidence-profiles.mjs';
 
 // Reject unknown selections before filesystem access or browser initialization.
@@ -223,8 +224,8 @@ try {
             );
             assert.equal(
               fontEvidence.cards.length,
-              8,
-              'Measure the three lanes, evidence and four alternatives'
+              diagramExpectedMobileCards(profile),
+              'Measure every declared mobile geometry region'
             );
           }
           fontEntry.outcome = 'passed';
@@ -627,6 +628,7 @@ try {
           // substitute direct SVG navigation for a broken production preview.
           const trigger = page.locator('[data-docs-image-trigger]').filter({ has: image });
           const preview = page.locator('.docs-image-full');
+          entry.readingPreviews = [];
           const openPreview = async () => {
             await trigger.click();
             await preview.waitFor({ state: 'visible' });
@@ -640,6 +642,176 @@ try {
                   .every((animation) => !animation.pending && animation.playState !== 'running')
               );
             });
+            const readingViewport = page.locator('[data-docs-image-viewport]');
+            const zoom = page.locator('[data-docs-image-zoom]');
+            const readViewport = () =>
+              readingViewport.evaluate((node) => {
+                const box = node.getBoundingClientRect();
+                const style = getComputedStyle(node);
+                return {
+                  x: box.x,
+                  y: box.y,
+                  width: box.width,
+                  height: box.height,
+                  clientWidth: node.clientWidth,
+                  clientHeight: node.clientHeight,
+                  scrollWidth: node.scrollWidth,
+                  scrollHeight: node.scrollHeight,
+                  scrollLeft: node.scrollLeft,
+                  scrollTop: node.scrollTop,
+                  mode: node.dataset.docsImageScale,
+                  role: node.getAttribute('role'),
+                  label: node.getAttribute('aria-label'),
+                  tabIndex: node.tabIndex,
+                  overflowX: style.overflowX,
+                  overflowY: style.overflowY,
+                };
+              });
+            const scrollPosition = (state) => ({
+              x: state.scrollLeft,
+              y: state.scrollTop,
+            });
+            assert.equal((await readViewport()).mode, 'reading', 'Every new open starts readable');
+            let readingImage = bindMeasurement(await preview.evaluate(measureImage), selected);
+            let zoomClicks = 0;
+            while (readingImage.minimumRenderedFontSize < 16 && zoomClicks < 2) {
+              const previousWidth = readingImage.width;
+              await page.locator('[data-docs-image-zoom-in]').click();
+              await page.waitForFunction(
+                (width) =>
+                  document.querySelector('.docs-image-full').getBoundingClientRect().width > width,
+                previousWidth
+              );
+              readingImage = bindMeasurement(await preview.evaluate(measureImage), selected);
+              zoomClicks++;
+            }
+            assert.ok(
+              readingImage.minimumRenderedFontSize >= 16,
+              'The actual reading viewport must make every diagram label at least 16 CSS px'
+            );
+            await readingViewport.hover();
+            const extent = await readViewport();
+            // Native wheel returns to the start after any center-preserving zoom.
+            // No direct scroll writes or synthetic wheel events are used as evidence.
+            await page.mouse.wheel(-extent.scrollWidth * 2, -extent.scrollHeight * 2);
+            await page.waitForFunction(() => {
+              const node = document.querySelector('[data-docs-image-viewport]');
+              return node.scrollLeft <= 1 && node.scrollTop <= 1;
+            });
+            const initial = await readViewport();
+            readingImage = bindMeasurement(await preview.evaluate(measureImage), selected);
+            assert.ok(
+              initial.x >= -1 &&
+                initial.y >= -1 &&
+                initial.x + initial.width <= viewport.width + 1 &&
+                initial.y + initial.height <= viewport.height + 1,
+              'The reading viewport, including its scroll range, stays inside the window'
+            );
+            assert.equal(initial.role, 'region');
+            assert.ok(initial.label?.trim());
+            const hasScrollRange =
+              initial.scrollWidth > initial.clientWidth + 1 ||
+              initial.scrollHeight > initial.clientHeight + 1;
+            await page.waitForFunction(
+              (scrollable) =>
+                document.querySelector('[data-docs-image-viewport]').tabIndex ===
+                (scrollable ? 0 : -1),
+              hasScrollRange
+            );
+            initial.tabIndex = (await readViewport()).tabIndex;
+            assert.equal(initial.overflowX, 'auto');
+            assert.equal(initial.overflowY, 'auto');
+            const backgroundBefore = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+            const reading = {
+              image: readingImage,
+              viewport: initial,
+              zoomClicks,
+              wheel: [],
+              keyboard: [],
+              backgroundBefore,
+            };
+            if (entry.readingPreviews.length === 0) {
+              const filename = `${id}-reading.png`;
+              await page.screenshot({ path: path.join(out, filename) });
+              entry.screenshots.push(filename);
+              entry.readingCapture = {
+                kind: 'viewport',
+                file: filename,
+                source: readingImage,
+                ...diagramPngReceipt(await fs.readFile(path.join(out, filename))),
+              };
+            }
+            for (const axis of ['x', 'y']) {
+              const range =
+                axis === 'x'
+                  ? initial.scrollWidth - initial.clientWidth
+                  : initial.scrollHeight - initial.clientHeight;
+              if (range <= 1) continue;
+              const before = await readViewport();
+              await readingViewport.hover();
+              await page.mouse.wheel(axis === 'x' ? range * 2 : 0, axis === 'y' ? range * 2 : 0);
+              await page.waitForFunction(
+                ({ axis, range }) => {
+                  const node = document.querySelector('[data-docs-image-viewport]');
+                  return Math.abs((axis === 'x' ? node.scrollLeft : node.scrollTop) - range) <= 1;
+                },
+                { axis, range }
+              );
+              const after = await readViewport();
+              reading.wheel.push({
+                axis,
+                before: scrollPosition(before),
+                after: scrollPosition(after),
+              });
+            }
+            if (entry.readingPreviews.length === 0 && reading.wheel.length) {
+              const filename = `${id}-reading-end.png`;
+              const endImage = bindMeasurement(await preview.evaluate(measureImage), selected);
+              await page.screenshot({ path: path.join(out, filename) });
+              entry.screenshots.push(filename);
+              entry.readingEndCapture = {
+                kind: 'viewport',
+                file: filename,
+                source: endImage,
+                ...diagramPngReceipt(await fs.readFile(path.join(out, filename))),
+              };
+            }
+            // The native focusable scroll region must also be operable without
+            // pointer panning. Click establishes native focus; keys move it back.
+            if (reading.wheel.length) {
+              await readingViewport.click({ position: { x: 12, y: 12 } });
+              assert.ok(await readingViewport.evaluate((node) => node === document.activeElement));
+            }
+            for (const axis of reading.wheel.map((sample) => sample.axis)) {
+              const before = await readViewport();
+              const key = axis === 'x' ? 'ArrowLeft' : 'ArrowUp';
+              await page.keyboard.press(key);
+              await page.waitForFunction(
+                ({ axis, previous }) => {
+                  const node = document.querySelector('[data-docs-image-viewport]');
+                  return (axis === 'x' ? node.scrollLeft : node.scrollTop) < previous - 1;
+                },
+                { axis, previous: axis === 'x' ? before.scrollLeft : before.scrollTop }
+              );
+              const after = await readViewport();
+              reading.keyboard.push({
+                axis,
+                key,
+                before: scrollPosition(before),
+                after: scrollPosition(after),
+              });
+            }
+            reading.backgroundAfter = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+            assert.deepEqual(
+              reading.backgroundAfter,
+              backgroundBefore,
+              'Panning stays in the modal viewport'
+            );
+            await zoom.click();
+            await page.waitForFunction(
+              () => document.querySelector('[data-docs-image-viewport]').tabIndex === -1
+            );
+            assert.equal((await readViewport()).mode, 'fit');
             const measurement = bindMeasurement(await preview.evaluate(measureImage), selected);
             assert.equal(measurement.alt, entry.image.alt);
             assert.ok(
@@ -647,14 +819,25 @@ try {
                 measurement.y >= -1 &&
                 measurement.x + measurement.width <= viewport.width + 1 &&
                 measurement.y + measurement.height <= viewport.height + 1,
-              'The themed full-size preview must contain the complete diagram'
+              'Fit overview must still contain the complete diagram'
             );
-            if (selected.name === 'mobile' && viewport.width === 390 && viewport.height === 844) {
-              assert.ok(
-                measurement.minimumRenderedFontSize >= 16,
-                '390 px Dialog labels meet the project-specific 16 px target'
-              );
-            }
+            reading.fit = measurement;
+            reading.fitViewport = await readViewport();
+            assert.ok(
+              reading.fitViewport.clientWidth > 0 &&
+                reading.fitViewport.clientHeight > 0 &&
+                reading.fitViewport.scrollWidth <= reading.fitViewport.clientWidth + 1 &&
+                reading.fitViewport.scrollHeight <= reading.fitViewport.clientHeight + 1 &&
+                measurement.x >= reading.fitViewport.x - 1 &&
+                measurement.y >= reading.fitViewport.y - 1 &&
+                measurement.x + measurement.width <=
+                  reading.fitViewport.x + reading.fitViewport.clientWidth + 1 &&
+                measurement.y + measurement.height <=
+                  reading.fitViewport.y + reading.fitViewport.clientHeight + 1,
+              'Fit overview must show the complete image inside its own native scrollport'
+            );
+            reading.outcome = 'passed';
+            entry.readingPreviews.push(reading);
             assert.equal(new URL(page.url()).pathname, route, 'Preview must stay on the article');
             return measurement;
           };
@@ -697,7 +880,7 @@ try {
             ...diagramPngReceipt(await fs.readFile(path.join(out, fullSize))),
           };
           await dismissPreview();
-          if (profile.figure === 'evolution-feedback') {
+          if (diagramVariants(profile, locale).some((item) => item.name === 'mobile')) {
             entry.interactions = [];
             const exerciseAgain = async (phase) => {
               const article = await readArticle(selected, viewport);
@@ -707,7 +890,9 @@ try {
             };
             await exerciseAgain('repeated-open-dismiss');
             const otherRoute = diagramLocale(
-              selectDiagramProfile('switch-activation'),
+              selectDiagramProfile(
+                profile.figure === 'switch-activation' ? 'evolution-feedback' : 'switch-activation'
+              ),
               locale
             ).route;
             // Cross-document history works at mobile widths without relying on a

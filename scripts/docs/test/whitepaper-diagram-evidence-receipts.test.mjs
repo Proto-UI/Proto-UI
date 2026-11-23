@@ -188,6 +188,108 @@ function fixture(figure = 'conditional-consistency') {
             previewDescription: 'Fixture description',
           },
         };
+        const fitWidth = Math.min(
+          capture.viewport.width - 32,
+          ((capture.viewport.height - 80) * selected.width) / selected.height
+        );
+        entry.preview = {
+          ...measurement,
+          x: 16,
+          y: 64,
+          width: fitWidth,
+          height: (fitWidth * selected.height) / selected.width,
+        };
+        const readingWidth = Math.max(640, selected.width);
+        const readingImage = {
+          ...measurement,
+          x: 16,
+          y: 64,
+          width: readingWidth,
+          height: (readingWidth * selected.height) / selected.width,
+          minimumRenderedFontSize: (26 * readingWidth) / selected.width,
+        };
+        const region = {
+          x: 16,
+          y: 64,
+          width: capture.viewport.width - 32,
+          height: capture.viewport.height - 80,
+          clientWidth: capture.viewport.width - 32,
+          clientHeight: capture.viewport.height - 80,
+          scrollWidth: Math.ceil(Math.max(capture.viewport.width - 32, readingImage.width)),
+          scrollHeight: Math.ceil(Math.max(capture.viewport.height - 80, readingImage.height)),
+          scrollLeft: 0,
+          scrollTop: 0,
+          mode: 'reading',
+          role: 'region',
+          label: 'Illustration, scroll horizontally and vertically',
+          tabIndex: 0,
+          overflowX: 'auto',
+          overflowY: 'auto',
+        };
+        const ranges = {
+          x: region.scrollWidth - region.clientWidth,
+          y: region.scrollHeight - region.clientHeight,
+        };
+        const axes = ['x', 'y'].filter((axis) => ranges[axis] > 1);
+        region.tabIndex = axes.length ? 0 : -1;
+        const wheel = [];
+        const keyboard = [];
+        let position = { x: 0, y: 0 };
+        for (const axis of axes) {
+          const before = { ...position };
+          position[axis] = ranges[axis];
+          wheel.push({ axis, before, after: { ...position } });
+        }
+        for (const axis of axes) {
+          const before = { ...position };
+          position[axis] = Math.max(0, position[axis] - 40);
+          keyboard.push({
+            axis,
+            key: axis === 'x' ? 'ArrowLeft' : 'ArrowUp',
+            before,
+            after: { ...position },
+          });
+        }
+        const reading = {
+          outcome: 'passed',
+          image: readingImage,
+          viewport: region,
+          zoomClicks: 0,
+          wheel,
+          keyboard,
+          backgroundBefore: { x: 0, y: 400 },
+          backgroundAfter: { x: 0, y: 400 },
+          fit: entry.preview,
+          fitViewport: {
+            ...region,
+            mode: 'fit',
+            tabIndex: -1,
+            x: entry.preview.x,
+            y: entry.preview.y,
+            width: entry.preview.width,
+            height: entry.preview.height,
+            clientWidth: Math.round(entry.preview.width),
+            clientHeight: Math.round(entry.preview.height),
+            scrollWidth: Math.round(entry.preview.width),
+            scrollHeight: Math.round(entry.preview.height),
+            scrollLeft: 0,
+            scrollTop: 0,
+          },
+        };
+        const responsive = diagramVariants(profile, locale).some(
+          (variant) => variant.name === 'mobile'
+        );
+        const phases = responsive
+          ? ['repeated-open-dismiss', 'after-back', 'after-forward-back']
+          : [];
+        entry.readingPreviews = [reading, ...phases.map(() => structuredClone(reading))];
+        if (responsive)
+          entry.interactions = phases.map((phase, index) => ({
+            phase,
+            article: { ...measurement },
+            preview: entry.readingPreviews[index + 1].fit,
+            dismissed: true,
+          }));
         entry.articleCapture = receipt('article', capture.viewport, entry.image);
         entry.figureCapture = {
           ...receipt('figure', { width: 120, height: 160 }, { ...measurement }),
@@ -195,10 +297,19 @@ function fixture(figure = 'conditional-consistency') {
           outcome: 'passed',
           clip: { x: 0, y: 0, width: 120, height: 160 },
         };
+        entry.readingCapture = receipt('reading', capture.viewport, readingImage);
+        if (axes.length)
+          entry.readingEndCapture = receipt('reading-end', capture.viewport, {
+            ...readingImage,
+            x: readingImage.x - ranges.x,
+            y: readingImage.y - ranges.y,
+          });
         entry.previewCapture = receipt('preview', capture.viewport, entry.preview);
         entry.screenshots = [
           entry.articleCapture.file,
           entry.figureCapture.file,
+          entry.readingCapture.file,
+          ...(entry.readingEndCapture ? [entry.readingEndCapture.file] : []),
           entry.previewCapture.file,
         ];
         report.cases.push(entry);
@@ -232,11 +343,14 @@ test('complete five-profile locale/theme/view matrices retain separate capture a
     const current = fixture(profile.figure);
     const result = await current.verify();
     counts.push(result.cases);
-    assert.equal(result.screenshots, result.cases * 3);
+    assert.equal(
+      result.screenshots,
+      current.report.cases.reduce((total, entry) => total + (entry.readingEndCapture ? 5 : 4), 0)
+    );
     assert.equal(result.fontProbes, diagramVariants(profile, 'en').length * 4);
     assert.equal(Object.hasOwn(result, 'accepted'), false);
   }
-  assert.deepEqual(counts, [8, 28, 8, 8, 8]);
+  assert.deepEqual(counts, [28, 28, 28, 28, 8]);
 });
 
 test('font-role readback rejects wrong families, missing roles, changed channel labels and embedded system faces', async () => {
@@ -396,9 +510,137 @@ test('screenshot references cannot escape the capture directory or borrow anothe
   outside.report.cases[0].screenshots[0] = '../../outside.png';
   await assert.rejects(outside.verify, /basename/);
   const borrowed = fixture();
-  borrowed.report.cases[0].previewCapture = borrowed.report.cases[0].articleCapture;
-  borrowed.report.cases[0].screenshots[2] = borrowed.report.cases[0].articleCapture.file;
+  borrowed.report.cases[0].previewCapture = {
+    ...borrowed.report.cases[0].articleCapture,
+    source: borrowed.report.cases[0].preview,
+  };
+  borrowed.report.cases[0].screenshots[borrowed.report.cases[0].screenshots.length - 1] =
+    borrowed.report.cases[0].articleCapture.file;
   await assert.rejects(borrowed.verify, /own screenshot/);
+});
+
+test('reading acceptance rejects clipped viewports, tiny text, invented movement and missing phases', async () => {
+  const controls = [
+    (entry) => {
+      delete entry.readingPreviews;
+    },
+    (entry) => {
+      entry.readingPreviews[0].viewport.width = entry.viewport.width + 1;
+    },
+    (entry) => {
+      entry.readingPreviews[0].image.minimumRenderedFontSize = 999;
+    },
+    (entry) => {
+      entry.readingPreviews[0].viewport.scrollWidth = 1;
+    },
+    (entry) => {
+      entry.readingPreviews[0].wheel = [];
+    },
+    (entry) => {
+      entry.readingPreviews[0].keyboard = [];
+    },
+    (entry) => {
+      const sample = entry.readingPreviews[0].wheel[0];
+      sample.after = { ...sample.before };
+    },
+    (entry) => {
+      const sample = entry.readingPreviews[0].keyboard[0];
+      sample.after = { ...sample.before };
+    },
+    (entry) => {
+      entry.readingPreviews[0].backgroundAfter.y += 1;
+    },
+    (entry) => {
+      entry.readingPreviews[0].fitViewport.mode = 'reading';
+    },
+    (entry) => {
+      entry.readingPreviews[0].fit.width = entry.viewport.width + 100;
+    },
+    (entry) => {
+      delete entry.readingCapture;
+    },
+    (entry) => {
+      delete entry.readingEndCapture;
+    },
+    (entry) => {
+      entry.readingEndCapture.source.x = 100000;
+    },
+    (entry) => {
+      entry.interactions.pop();
+    },
+    (entry) => {
+      entry.readingPreviews.pop();
+    },
+  ];
+  for (const mutate of controls) {
+    const current = fixture('evolution-feedback');
+    const entry = current.report.cases.find((sample) => sample.viewport.width === 390);
+    mutate(entry);
+    await assert.rejects(current.verify);
+  }
+});
+
+test('reading checks reject actual tiny text, stale focus participation and a clipped Fit scrollport', async () => {
+  const controls = [
+    {
+      name: 'font size derived from a genuinely undersized image',
+      diagnostic: /16 CSS px target/,
+      mutate(entry) {
+        const reading = entry.readingPreviews[0];
+        reading.image.width = (entry.expectedDimensions.width * 15) / 26;
+        reading.image.height = (entry.expectedDimensions.height * 15) / 26;
+        reading.image.minimumRenderedFontSize = 15;
+        const port = reading.viewport;
+        port.scrollWidth = Math.ceil(Math.max(port.clientWidth, reading.image.width));
+        port.scrollHeight = Math.ceil(Math.max(port.clientHeight, reading.image.height));
+        port.tabIndex =
+          port.scrollWidth > port.clientWidth + 1 || port.scrollHeight > port.clientHeight + 1
+            ? 0
+            : -1;
+      },
+    },
+    {
+      name: 'a reading viewport without scroll range remains in sequential focus',
+      diagnostic: /actual scroll range participates/,
+      mutate(entry) {
+        const port = entry.readingPreviews[0].viewport;
+        port.scrollWidth = port.clientWidth;
+        port.scrollHeight = port.clientHeight;
+        port.tabIndex = 0;
+      },
+    },
+    {
+      name: 'Fit image is inside the window but clipped by its own scrollport',
+      diagnostic: /complete inside its own native scrollport/,
+      mutate(entry) {
+        const port = entry.readingPreviews[0].fitViewport;
+        port.clientHeight -= 10;
+        port.scrollHeight = port.clientHeight;
+      },
+    },
+    {
+      name: 'Fit scrollport retains a horizontal scroll range',
+      diagnostic: /complete inside its own native scrollport/,
+      mutate(entry) {
+        const port = entry.readingPreviews[0].fitViewport;
+        port.scrollWidth = port.clientWidth + 10;
+      },
+    },
+    {
+      name: 'Fit scrollport retains a vertical scroll range',
+      diagnostic: /complete inside its own native scrollport/,
+      mutate(entry) {
+        const port = entry.readingPreviews[0].fitViewport;
+        port.scrollHeight = port.clientHeight + 10;
+      },
+    },
+  ];
+  for (const control of controls) {
+    const current = fixture('evolution-feedback');
+    const entry = current.report.cases.find((sample) => sample.viewport.width === 390);
+    control.mutate(entry);
+    await assert.rejects(current.verify, control.diagnostic, control.name);
+  }
 });
 
 test('PNG receipts reject truncation and invalid headers instead of trusting filenames', () => {

@@ -14,14 +14,14 @@ const inventory = collectDiagramInventory(root, revision);
 test('the inventory binds all original assets, responsive additions and real page references', () => {
   assert.equal(inventory.revision, revision);
   assert.deepEqual(inventory.counts, {
-    assets: 17,
+    assets: 23,
     originalInventory: 15,
-    additionalResponsiveVariants: 2,
-    references: 22,
-    canonicalReferences: 20,
+    additionalResponsiveVariants: 8,
+    references: 28,
+    canonicalReferences: 26,
     retainedDraftReferences: 2,
   });
-  assert.equal(inventory.assets.filter((asset) => asset.kind === 'generated').length, 10);
+  assert.equal(inventory.assets.filter((asset) => asset.kind === 'generated').length, 16);
   assert.equal(inventory.assets.filter((asset) => asset.kind === 'authored-export').length, 6);
   for (const asset of inventory.assets) {
     assert.match(asset.blob, /^[a-f0-9]{40}$/);
@@ -85,7 +85,16 @@ test('source, reason and immutable revision failures are rejected rather than om
 test('generated ownership and author-held source limitations remain explicit', () => {
   for (const asset of inventory.assets.filter((asset) => asset.kind === 'generated')) {
     assert.equal(asset.editableSource.path, 'apps/www/scripts/generate-whitepaper-diagrams.mjs');
-    if (asset.asset.includes('.mobile.')) assert.equal(asset.entrypoint, 'evolutionMobile');
+    if (asset.asset.includes('.mobile.'))
+      assert.equal(
+        asset.entrypoint,
+        {
+          'component-anatomy': 'anatomyMobile',
+          'switch-activation': 'activationMobile',
+          'conditional-consistency': 'consistencyMobile',
+          'evolution-feedback': 'evolutionMobile',
+        }[asset.captureProfile]
+      );
   }
   for (const asset of inventory.assets.filter((asset) => asset.kind === 'authored-export')) {
     assert.equal(asset.editableSource.path, asset.asset);

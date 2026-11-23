@@ -12404,7 +12404,8 @@ test('documentation media allowances remain bound to exact reviewed sources and 
     '@proto.ui/prototypes-brutalist/dialog',
     '@proto.ui/prototypes-brutalist/theme',
   ];
-  const bridgeSource = allowed.map((specifier) => `import '${specifier}';`).join('\n');
+  allowed.push('@proto.ui/prototypes-base/scroll-area');
+  const bridgeSource = fs.readFileSync(new URL(`../../../${bridge}`, import.meta.url), 'utf8');
   for (const [relative, source] of [
     [bridge, bridgeSource],
     [presentation, "import '@proto.ui/core'; import '@proto.ui/prototypes-base/dialog';"],
@@ -17729,6 +17730,7 @@ for (const [source, specifiers] of [
     const nativeLinkSource =
       source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
     const sourceBound =
+      source === 'documentation-image-controls.ts' ||
       source === 'site-search-commands.ts' ||
       source === 'install-command-card-client.ts' ||
       nativeLinkSource ||
@@ -19749,5 +19751,58 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner']) {
       )
     );
     assert.equal(rejected, scenario !== 'exact');
+  });
+}
+
+for (const variant of [
+  'exact source and bridge',
+  'changed viewport source',
+  'foreign viewport owner',
+  'changed bridge companion',
+  'missing bridge companion',
+  'changed source with unrelated import',
+]) {
+  test(`documentation reading viewport import boundary: ${variant}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const viewport = 'apps/www/src/components/documentation-image-reading-viewport.proto.ts';
+    const bridge = 'apps/www/src/components/documentation-image-controls.ts';
+    const exactViewport = fs.readFileSync(new URL(`../../../${viewport}`, import.meta.url), 'utf8');
+    const exactBridge = fs.readFileSync(new URL(`../../../${bridge}`, import.meta.url), 'utf8');
+    const relative =
+      variant === 'foreign viewport owner'
+        ? 'apps/www/src/components/copied-reading-viewport.proto.ts'
+        : viewport;
+    const content =
+      variant === 'changed viewport source'
+        ? `${exactViewport}\n// Changed source requires another review.\n`
+        : variant === 'changed source with unrelated import'
+          ? `${exactViewport}\nimport '@proto.ui/runtime';\n`
+          : exactViewport;
+    fs.mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
+    fs.writeFileSync(path.join(root, relative), content);
+    if (variant !== 'missing bridge companion') {
+      fs.writeFileSync(
+        path.join(root, bridge),
+        variant === 'changed bridge companion'
+          ? `${exactBridge}\n// Changed companion requires another review.\n`
+          : exactBridge
+      );
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    for (const specifier of [
+      '@proto.ui/core',
+      '@proto.ui/hooks',
+      '@proto.ui/prototypes-base/scroll-area',
+    ]) {
+      const rejected = message.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``);
+      assert.equal(rejected, variant !== 'exact source and bridge', message);
+    }
+    if (variant === 'changed source with unrelated import') {
+      assert.ok(
+        message.includes(`raw Proto UI import \`@proto.ui/runtime\` in \`${relative}\``),
+        message
+      );
+    }
   });
 }

@@ -764,6 +764,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Accepted documentation-media bridge (#787/#797). These are exact source
   // imports, not a family-wide or active-SVG admission.
   'apps/www/src/components/documentation-image-controls.ts': Object.freeze({
+    sourceSha256: 'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/button',
@@ -773,10 +774,25 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-brutalist/theme',
       '@proto.ui/prototypes-base/button',
       '@proto.ui/prototypes-base/dialog',
+      '@proto.ui/prototypes-base/scroll-area',
       '@proto.ui/prototypes-shadcn/surface',
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+    ]),
+  }),
+  // The reading viewport retains the public ScrollArea lease and the blocked
+  // documentation-media owner; both authored source identities are required.
+  'apps/www/src/components/documentation-image-reading-viewport.proto.ts': Object.freeze({
+    sourceSha256: '5c756216acffabcae06d99c1dd7e75fab539c4943207b8f63a2d6f4b8bde04bc',
+    companionSource: Object.freeze({
+      path: 'apps/www/src/components/documentation-image-controls.ts',
+      sha256: 'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07',
+    }),
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/hooks',
+      '@proto.ui/prototypes-base/scroll-area',
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-material.astro': Object.freeze({

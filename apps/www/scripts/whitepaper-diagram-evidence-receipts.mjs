@@ -98,6 +98,138 @@ function uniqueIndex(items, key, label) {
   return index;
 }
 
+function verifyReadingPreview(reading, viewport, minimumFontSize, selected) {
+  assert.equal(reading.outcome, 'passed');
+  const region = reading.viewport;
+  const image = reading.image;
+  assert.ok(region && image, 'Reading image and viewport measurements are required');
+  for (const key of [
+    'x',
+    'y',
+    'width',
+    'height',
+    'clientWidth',
+    'clientHeight',
+    'scrollWidth',
+    'scrollHeight',
+    'scrollLeft',
+    'scrollTop',
+  ])
+    assert.ok(Number.isFinite(region[key]), `Finite reading viewport ${key}`);
+  assert.ok(
+    region.width > 0 && region.height > 0 && region.clientWidth > 0 && region.clientHeight > 0
+  );
+  assert.ok(
+    region.x >= -1 &&
+      region.y >= -1 &&
+      region.x + region.width <= viewport.width + 1 &&
+      region.y + region.height <= viewport.height + 1,
+    'Reading viewport must remain inside the window'
+  );
+  assert.equal(region.mode, 'reading');
+  assert.equal(region.role, 'region');
+  assert.ok(region.label?.trim());
+  assert.equal(
+    region.tabIndex,
+    region.scrollWidth > region.clientWidth + 1 || region.scrollHeight > region.clientHeight + 1
+      ? 0
+      : -1,
+    'Only a viewport with actual scroll range participates in sequential focus'
+  );
+  assert.equal(region.overflowX, 'auto');
+  assert.equal(region.overflowY, 'auto');
+  assert.ok(Math.abs(region.scrollLeft) <= 1 && Math.abs(region.scrollTop) <= 1);
+  assert.ok(
+    Math.abs(region.scrollWidth - Math.max(region.clientWidth, image.width)) <= 2 &&
+      Math.abs(region.scrollHeight - Math.max(region.clientHeight, image.height)) <= 2,
+    'Reading scroll extents must account for the actual image'
+  );
+  assert.ok(
+    Math.abs(image.width / image.height - selected.width / selected.height) < 0.01,
+    'Reading must preserve the diagram aspect ratio'
+  );
+  assert.ok(
+    Number.isInteger(reading.zoomClicks) && reading.zoomClicks >= 0 && reading.zoomClicks <= 2
+  );
+  const actualFontSize = (minimumFontSize * image.width) / selected.width;
+  assert.ok(
+    Math.abs(image.minimumRenderedFontSize - actualFontSize) < 0.001,
+    'Rendered font size must derive from the actual source font and image scale'
+  );
+  assert.ok(actualFontSize >= 16, 'Reading labels must meet the 16 CSS px target');
+  const ranges = {
+    x: region.scrollWidth - region.clientWidth,
+    y: region.scrollHeight - region.clientHeight,
+  };
+  const axes = ['x', 'y'].filter((axis) => ranges[axis] > 1);
+  assert.deepEqual(
+    reading.wheel?.map((sample) => sample.axis),
+    axes,
+    'Every overflowing axis needs actual native wheel evidence'
+  );
+  assert.deepEqual(
+    reading.keyboard?.map((sample) => sample.axis),
+    axes,
+    'Every overflowing axis needs actual keyboard evidence'
+  );
+  for (const sample of reading.wheel) {
+    assert.ok(sample.before && sample.after);
+    assert.ok(
+      Number.isFinite(sample.before[sample.axis]) && Number.isFinite(sample.after[sample.axis])
+    );
+    assert.ok(
+      sample.after[sample.axis] > sample.before[sample.axis] + 1 &&
+        Math.abs(sample.after[sample.axis] - ranges[sample.axis]) <= 1,
+      'Native wheel must reach the far edge of the image'
+    );
+  }
+  for (const sample of reading.keyboard) {
+    assert.equal(sample.key, sample.axis === 'x' ? 'ArrowLeft' : 'ArrowUp');
+    assert.ok(sample.before && sample.after);
+    assert.ok(
+      Number.isFinite(sample.before[sample.axis]) && Number.isFinite(sample.after[sample.axis])
+    );
+    assert.ok(
+      sample.after[sample.axis] >= 0 && sample.after[sample.axis] < sample.before[sample.axis] - 1,
+      'Native keyboard must move the reading viewport'
+    );
+  }
+  assert.ok(
+    Number.isFinite(reading.backgroundBefore?.x) && Number.isFinite(reading.backgroundBefore?.y)
+  );
+  assert.deepEqual(
+    reading.backgroundAfter,
+    reading.backgroundBefore,
+    'Panning must not move the background'
+  );
+  assert.equal(reading.fitViewport?.mode, 'fit');
+  assert.equal(reading.fitViewport.tabIndex, -1);
+  const fitPort = reading.fitViewport;
+  for (const key of ['x', 'y', 'clientWidth', 'clientHeight', 'scrollWidth', 'scrollHeight'])
+    assert.ok(Number.isFinite(fitPort[key]), `Finite fit viewport ${key}`);
+  assert.ok(
+    fitPort.clientWidth > 0 &&
+      fitPort.clientHeight > 0 &&
+      fitPort.scrollWidth <= fitPort.clientWidth + 1 &&
+      fitPort.scrollHeight <= fitPort.clientHeight + 1 &&
+      reading.fit.x >= fitPort.x - 1 &&
+      reading.fit.y >= fitPort.y - 1 &&
+      reading.fit.x + reading.fit.width <= fitPort.x + fitPort.clientWidth + 1 &&
+      reading.fit.y + reading.fit.height <= fitPort.y + fitPort.clientHeight + 1,
+    'Fit overview must be complete inside its own native scrollport'
+  );
+  assert.ok(
+    Math.abs(reading.fitViewport.scrollLeft) <= 1 && Math.abs(reading.fitViewport.scrollTop) <= 1
+  );
+  assert.ok(
+    reading.fit?.x >= -1 &&
+      reading.fit.y >= -1 &&
+      reading.fit.x + reading.fit.width <= viewport.width + 1 &&
+      reading.fit.y + reading.fit.height <= viewport.height + 1,
+    'Fit overview must contain the complete diagram'
+  );
+}
+
 // This checks the completeness and byte bindings of a real capture. It does not
 // authenticate a report author, approve a diagram or establish full Issue closure.
 export async function verifyDiagramReport(
@@ -220,7 +352,40 @@ export async function verifyDiagramReport(
           height: selected.height,
         });
         assert.deepEqual(entry.errors, []);
-        for (const measurement of [entry.image, entry.preview, entry.figureCapture?.source]) {
+        const responsive = diagramVariants(profile, locale).some(
+          (variant) => variant.name === 'mobile'
+        );
+        const phases = responsive
+          ? ['repeated-open-dismiss', 'after-back', 'after-forward-back']
+          : [];
+        assert.deepEqual(
+          entry.interactions?.map((interaction) => interaction.phase) ?? [],
+          phases,
+          'Required repeated-open and history phases must remain complete'
+        );
+        assert.ok(
+          Array.isArray(entry.readingPreviews),
+          'Actual reading viewport evidence is required'
+        );
+        assert.equal(
+          entry.readingPreviews.length,
+          phases.length + 1,
+          'Every open must exercise reading and fit'
+        );
+        const font = fonts.get(`${locale}/${theme}/${selected.name}`);
+        for (const reading of entry.readingPreviews)
+          verifyReadingPreview(reading, capture.viewport, font.minimumFontSize, selected);
+        assert.deepEqual(entry.preview, entry.readingPreviews[0].fit);
+        for (const [index, interaction] of (entry.interactions ?? []).entries()) {
+          assert.equal(interaction.dismissed, true);
+          assert.deepEqual(interaction.preview, entry.readingPreviews[index + 1].fit);
+        }
+        for (const measurement of [
+          entry.image,
+          entry.preview,
+          entry.figureCapture?.source,
+          ...entry.readingPreviews.flatMap((reading) => [reading.image, reading.fit]),
+        ]) {
           assert.ok(measurement, 'Article, figure and preview measurements are required');
           assert.equal(measurement.asset, selected.asset);
           assert.equal(measurement.variant, selected.name);
@@ -251,13 +416,44 @@ export async function verifyDiagramReport(
         assert.ok(['viewport-region', 'document-region'].includes(entry.figureCapture.kind));
         assert.deepEqual(entry.articleCapture.source, entry.image);
         assert.deepEqual(entry.previewCapture.source, entry.preview);
+        assert.deepEqual(entry.readingCapture?.source, entry.readingPreviews[0].image);
         assert.deepEqual(entry.articleCapture.dimensions, capture.viewport);
         assert.deepEqual(entry.previewCapture.dimensions, capture.viewport);
+        assert.deepEqual(entry.readingCapture.dimensions, capture.viewport);
         assert.deepEqual(entry.figureCapture.dimensions, {
           width: entry.figureCapture.clip.width,
           height: entry.figureCapture.clip.height,
         });
-        const captures = [entry.articleCapture, entry.figureCapture, entry.previewCapture];
+        const panned = entry.readingPreviews[0].wheel.length > 0;
+        assert.equal(
+          Boolean(entry.readingEndCapture),
+          panned,
+          'A scrollable reading viewport needs its own far-edge capture'
+        );
+        if (panned) {
+          assert.deepEqual(entry.readingEndCapture.dimensions, capture.viewport);
+          const end = entry.readingEndCapture.source;
+          const first = entry.readingPreviews[0];
+          assert.equal(end.asset, first.image.asset);
+          assert.equal(end.svgSha256, first.image.svgSha256);
+          assert.equal(end.sourceSha256, first.image.sourceSha256);
+          assert.equal(end.width, first.image.width);
+          assert.equal(end.height, first.image.height);
+          const x = first.wheel.find((sample) => sample.axis === 'x')?.after.x ?? 0;
+          const y = first.wheel.find((sample) => sample.axis === 'y')?.after.y ?? 0;
+          assert.ok(
+            Math.abs(end.x - (first.image.x - x)) <= 1 &&
+              Math.abs(end.y - (first.image.y - y)) <= 1,
+            'The far-edge capture must show the actual panned image'
+          );
+        }
+        const captures = [
+          entry.articleCapture,
+          entry.figureCapture,
+          entry.readingCapture,
+          ...(panned ? [entry.readingEndCapture] : []),
+          entry.previewCapture,
+        ];
         assert.deepEqual(
           entry.screenshots,
           captures.map((item) => item.file)

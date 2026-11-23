@@ -8,8 +8,9 @@ const generator = 'apps/www/scripts/generate-whitepaper-diagrams.mjs';
 const groups = [
   {
     name: 'component-anatomy',
-    variants: ['en', 'zh-cn'],
+    variants: ['en', 'zh-cn', 'mobile.en', 'mobile.zh-cn'],
     kind: 'generated',
+    mobileEntrypoint: 'anatomyMobile',
     entrypoint: 'anatomy',
     captureProfile: 'component-anatomy',
     reason:
@@ -17,8 +18,9 @@ const groups = [
   },
   {
     name: 'switch-activation',
-    variants: ['en', 'zh-cn'],
+    variants: ['en', 'zh-cn', 'mobile.en', 'mobile.zh-cn'],
     kind: 'generated',
+    mobileEntrypoint: 'activationMobile',
     entrypoint: 'activation',
     captureProfile: 'switch-activation',
     reason:
@@ -26,8 +28,9 @@ const groups = [
   },
   {
     name: 'conditional-consistency',
-    variants: ['en', 'zh-cn'],
+    variants: ['en', 'zh-cn', 'mobile.en', 'mobile.zh-cn'],
     kind: 'generated',
+    mobileEntrypoint: 'consistencyMobile',
     entrypoint: 'consistency',
     captureProfile: 'conditional-consistency',
     reason:
@@ -38,6 +41,7 @@ const groups = [
     variants: ['en', 'zh-cn', 'mobile.en', 'mobile.zh-cn'],
     kind: 'generated',
     entrypoint: 'evolution',
+    mobileEntrypoint: 'evolutionMobile',
     captureProfile: 'evolution-feedback',
     reason:
       'Keep the three concurrent work lines, evidence, four alternative diagnoses and explicit revise/test-again loop. The mobile layout preserves the same meaning; its readability requires its own evidence.',
@@ -89,7 +93,11 @@ export const diagramDecisions = Object.freeze(
         originalInventory: !variant?.startsWith('mobile.'),
         editableSource: group.kind === 'generated' ? generator : null,
         ...(group.entrypoint
-          ? { entrypoint: variant?.startsWith('mobile.') ? 'evolutionMobile' : group.entrypoint }
+          ? {
+              entrypoint: variant?.startsWith('mobile.')
+                ? group.mobileEntrypoint
+                : group.entrypoint,
+            }
           : {}),
         captureProfile: group.captureProfile ?? null,
         disposition: 'keep',
@@ -180,7 +188,9 @@ export function collectDiagramInventory(root, revision, decisions = diagramDecis
         ...bind(decision.asset),
         editableSource: bind(decision.editableSource ?? decision.asset),
         ...(decision.kind === 'authored-export'
-          ? { originalDrawing: 'Author-held; no original drawing hash is available.' }
+          ? {
+              originalDrawing: 'Author-held; no original drawing hash is available.',
+            }
           : {}),
         references: refs,
       };
