@@ -190,6 +190,39 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     expect(facts.network.pending).toHaveLength(200);
     expect(facts.network.truncated).toBe(true);
   });
+  it('retains an early CPU chunk when a later renderer stop is unresponsive', async () => {
+    vi.useFakeTimers();
+    const { page, session } = fixture();
+    const originalSend = session.send.getMockImplementation()!;
+    let stops = 0;
+    session.send.mockImplementation(async (method) => {
+      if (method === 'Profiler.stop' && ++stops === 2) return new Promise<never>(() => {});
+      return originalSend(method);
+    });
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
+    await vi.advanceTimersByTimeAsync(42_000);
+    page.emit('request', request('http://127.0.0.1:4321/still-observed.ts'));
+    await handle.finish();
+    const facts = await result();
+    expect(facts).toMatchObject({
+      finished: true,
+      profileState: 'unavailable',
+      profileError: expect.stringContaining('unavailable within 2000ms'),
+      network: { requested: 1 },
+    });
+    expect(facts.chunks.map((chunk: { state: string }) => chunk.state)).toEqual([
+      'captured',
+      'unavailable',
+    ]);
+    expect((await result('profile-0001.json')).profile.nodes).toHaveLength(2);
+    expect(await result('profile.json')).toMatchObject({
+      chunkSequence: 1,
+      profileTiming: { stopReason: 'checkpoint', ownerStoppedCapture: false },
+    });
+    expect(stops).toBe(2);
+    expect(page.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
   it('keeps recording through navigation and the original init wait until the owner finishes', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-11-23T00:00:00.000Z'));
@@ -200,9 +233,14 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
       phase: () => phase,
     });
     await vi.advanceTimersByTimeAsync(25_000);
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      1
+    );
     phase = 'inited-count';
     await vi.advanceTimersByTimeAsync(60_000);
-    expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      4
+    );
     phase = 'case-finally';
     await handle.finish();
     await handle.finish();
@@ -211,7 +249,7 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
       elapsedMs: 85_000,
       requestedProfileWindowMs: 180_000,
       profileTiming: {
-        startAcknowledgedAt: '2026-11-23T00:00:00.000Z',
+        startAcknowledgedAt: '2026-11-23T00:01:20.000Z',
         stopRequestedAt: '2026-11-23T00:01:25.000Z',
         stopAcknowledgedAt: '2026-11-23T00:01:25.000Z',
         stopReason: 'owner-finish',
@@ -222,8 +260,21 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
       },
     });
     expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
-      1
+      5
     );
+    expect(facts.chunks.map((chunk: { stopReason: string }) => chunk.stopReason)).toEqual([
+      'checkpoint',
+      'checkpoint',
+      'checkpoint',
+      'checkpoint',
+      'owner-finish',
+    ]);
+    expect(facts.samplingGaps).toContain('not sampled');
+    expect((await result('profile-0001.json')).profileTiming).toMatchObject({
+      startAcknowledgedAt: '2026-11-23T00:00:00.000Z',
+      stopAcknowledgedAt: '2026-11-23T00:00:20.000Z',
+      ownerStoppedCapture: false,
+    });
     expect(vi.getTimerCount()).toBe(0);
   });
   it('caps stalled diagnostics at the original case limit without an owner-finish receipt', async () => {
@@ -231,14 +282,18 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     const { page, session } = fixture();
     const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
     await vi.advanceTimersByTimeAsync(45_000);
-    expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      2
+    );
     await vi.advanceTimersByTimeAsync(134_999);
-    expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      8
+    );
     await vi.advanceTimersByTimeAsync(1);
     await handle.finish();
     await handle.finish();
     expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
-      1
+      9
     );
     expect(await result()).toMatchObject({
       elapsedMs: 180_000,
@@ -248,6 +303,77 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
         phaseCoverage: 'requires-timestamp-reconciliation',
       },
     });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('finishes an in-flight checkpoint once without restarting a retired owner', async () => {
+    vi.useFakeTimers();
+    const { page, session } = fixture();
+    const originalSend = session.send.getMockImplementation()!;
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    session.send.mockImplementation(async (method) => {
+      if (method === 'Profiler.stop') await held;
+      return originalSend(method);
+    });
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
+    await vi.advanceTimersByTimeAsync(20_000);
+    const finishing = handle.finish();
+    release();
+    await finishing;
+    await handle.finish();
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.start')).toHaveLength(
+      1
+    );
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      1
+    );
+    expect(await result()).toMatchObject({
+      finished: true,
+      finishReason: 'owner-finish',
+      profileState: 'captured',
+      profileTiming: { stopReason: 'checkpoint', ownerStoppedCapture: false },
+    });
+    expect(page.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('bounds a held restart and a late acknowledgement cannot reactivate capture', async () => {
+    vi.useFakeTimers();
+    const { page, session } = fixture();
+    const originalSend = session.send.getMockImplementation()!;
+    let starts = 0;
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    session.send.mockImplementation(async (method) => {
+      if (method === 'Profiler.start' && ++starts === 2) await held;
+      return originalSend(method);
+    });
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
+    await vi.advanceTimersByTimeAsync(22_000);
+    await handle.finish();
+    const before = await readFile(
+      join(directory, 'demo-matrix/startup-profile/status.json'),
+      'utf8'
+    );
+    expect(JSON.parse(before)).toMatchObject({
+      finished: true,
+      profileState: 'unavailable',
+      profileError: expect.stringContaining('Profiler restart unavailable within 2000ms'),
+    });
+    release();
+    await vi.advanceTimersByTimeAsync(40_000);
+    expect(await readFile(join(directory, 'demo-matrix/startup-profile/status.json'), 'utf8')).toBe(
+      before
+    );
+    expect(starts).toBe(2);
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      1
+    );
+    expect(session.detach).toHaveBeenCalled();
+    expect((await result('profile-0001.json')).profile.nodes).toHaveLength(2);
     expect(vi.getTimerCount()).toBe(0);
   });
   it.each([

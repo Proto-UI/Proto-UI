@@ -5,6 +5,9 @@ import type { CDPSession, Page, Request, Response } from 'playwright-core';
 // The original case still owns its 180s deadline. Its existing finally stops
 // capture earlier; this cap must not truncate navigation plus the 60s init wait.
 const PROFILE_WINDOW_MS = 180_000;
+// A blocked renderer can prevent the final stop from returning any profile.
+// Retain earlier bounded chunks without ending the owner's diagnostic window.
+const PROFILE_CHUNK_MS = 20_000;
 const COMMAND_LIMIT_MS = 2_000;
 const ROW_LIMIT = 200;
 const inert = { finish: async () => {} };
@@ -49,13 +52,30 @@ export async function startMatrixStartupDiagnostic(
   let profileStopRequestedAt: number | null = null;
   let profileStoppedAt: number | null = null;
   let profileDurationMs: number | null = null;
-  let stopReason: 'owner-finish' | 'diagnostic-deadline' | null = null;
+  type StopReason = 'checkpoint' | 'owner-finish' | 'diagnostic-deadline';
+  let stopReason: StopReason | null = null;
+  let finishReason: Exclude<StopReason, 'checkpoint'> | null = null;
   let setupRetired = false;
   let profileState = 'starting';
   let profileError: string | null = null;
   let finished = false;
   let finishPromise: Promise<void> | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let chunkTimer: ReturnType<typeof setTimeout> | undefined;
+  let chunkWork: Promise<void> | undefined;
+  let chunkSequence = 0;
+  const chunks: Array<{
+    sequence: number;
+    file: string | null;
+    state: 'captured' | 'unavailable';
+    phase: string;
+    startAcknowledgedAt: string | null;
+    stopRequestedAt: string;
+    stopAcknowledgedAt: string | null;
+    sampledDurationMs: number | null;
+    stopReason: StopReason;
+    error: string | null;
+  }> = [];
   let heartbeat: ReturnType<typeof setInterval> | undefined;
   let writes: Promise<void> = Promise.resolve();
   const tracked = new WeakMap<Request, { path: string; type: string; elapsedMs: number }>();
@@ -67,6 +87,11 @@ export async function startMatrixStartupDiagnostic(
   const header = () => ({
     startedAt: new Date(startedAt).toISOString(),
     requestedProfileWindowMs: PROFILE_WINDOW_MS,
+    requestedChunkIntervalMs: PROFILE_CHUNK_MS,
+    chunkSequence,
+    chunks: [...chunks],
+    finishReason,
+    samplingGaps: 'Profiler stop/restart gaps are not sampled; inspect each chunk clock.',
     profileTiming: {
       startAcknowledgedAt:
         profileStartedAt === null ? null : new Date(profileStartedAt).toISOString(),
@@ -187,48 +212,118 @@ export async function startMatrixStartupDiagnostic(
   });
   setupCompleted = profileState === 'recording';
   snapshot();
+  const capture = async (reason: StopReason) => {
+    if (!profileStarted || !session) return;
+    // A timed-out stop has unknown protocol state. Never issue a duplicate
+    // stop or restart that might attach a late response to a new chunk.
+    profileStarted = false;
+    stopReason = reason;
+    profileStopRequestedAt = Date.now();
+    const sequence = ++chunkSequence;
+    const receipt: (typeof chunks)[number] = {
+      sequence,
+      file: null,
+      state: 'unavailable',
+      phase: options.phase(),
+      startAcknowledgedAt:
+        profileStartedAt === null ? null : new Date(profileStartedAt).toISOString(),
+      stopRequestedAt: new Date(profileStopRequestedAt).toISOString(),
+      stopAcknowledgedAt: null,
+      sampledDurationMs: null,
+      stopReason: reason,
+      error: null,
+    };
+    try {
+      const result = await bounded(session.send('Profiler.stop'), 'Profiler stop');
+      profileStoppedAt = Date.now();
+      const { startTime, endTime } = result.profile;
+      profileDurationMs =
+        Number.isFinite(startTime) && Number.isFinite(endTime) && endTime >= startTime
+          ? (endTime - startTime) / 1000
+          : null;
+      // A fresh test context owns this session. Strip URL query/fragment even
+      // from public script frames; the profile contains no source/body payload.
+      for (const node of result.profile.nodes) {
+        try {
+          const url = new URL(node.callFrame.url);
+          node.callFrame.url = /^https?:$/.test(url.protocol)
+            ? `${url.origin}${url.pathname}`
+            : '[non-http script]';
+        } catch {
+          node.callFrame.url = '[unresolved script]';
+        }
+      }
+      profileState = 'captured';
+      receipt.state = 'captured';
+      receipt.file = 'profile-' + String(sequence).padStart(4, '0') + '.json';
+      receipt.stopAcknowledgedAt = new Date(profileStoppedAt).toISOString();
+      receipt.sampledDurationMs = profileDurationMs;
+      chunks.push(receipt);
+      const captured = { ...header(), profile: result.profile };
+      persist(receipt.file, captured);
+      // Compatibility alias to the latest successful chunk. Its own stop
+      // reason/clock and terminal status prevent it implying a complete window.
+      persist('profile.json', captured);
+    } catch (error) {
+      profileState = 'unavailable';
+      profileError = String(error);
+      receipt.error = profileError;
+      chunks.push(receipt);
+    }
+  };
+  const restart = async () => {
+    const current = session;
+    if (!current || finished || setupRetired) return;
+    await current.send('Profiler.start');
+    if (finished || setupRetired) {
+      await bounded(current.detach(), 'Profiler late restart detach').catch(() => {});
+      return;
+    }
+    profileStarted = true;
+    profileStartedAt = Date.now();
+    profileStopRequestedAt = null;
+    profileStoppedAt = null;
+    profileDurationMs = null;
+    stopReason = null;
+    profileState = 'recording';
+    profileError = null;
+  };
+  const scheduleChunk = () => {
+    if (finished || !profileStarted) return;
+    chunkTimer = setTimeout(() => {
+      if (finished || Date.now() - startedAt >= PROFILE_WINDOW_MS) return;
+      chunkWork = (async () => {
+        await capture('checkpoint');
+        if (!finished && !setupRetired && profileState === 'captured') {
+          await bounded(restart(), 'Profiler restart').catch((error) => {
+            setupRetired = true;
+            profileState = 'unavailable';
+            profileError = String(error);
+          });
+        }
+        snapshot();
+      })().finally(() => {
+        chunkWork = undefined;
+        scheduleChunk();
+      });
+    }, PROFILE_CHUNK_MS);
+  };
   const finish = (reason: 'owner-finish' | 'diagnostic-deadline') =>
     (finishPromise ??= (async () => {
       finished = true;
-      stopReason = reason;
+      finishReason = reason;
       setupRetired = true;
       clearTimeout(timer);
+      clearTimeout(chunkTimer);
       clearInterval(heartbeat);
       page.off('request', request);
       page.off('response', response);
       page.off('requestfinished', requestFinished);
       page.off('requestfailed', requestFailed);
-      if (profileStarted && session) {
-        try {
-          profileStopRequestedAt = Date.now();
-          const result = await bounded(session.send('Profiler.stop'), 'Profiler stop');
-          profileStoppedAt = Date.now();
-          const { startTime, endTime } = result.profile;
-          profileDurationMs =
-            Number.isFinite(startTime) && Number.isFinite(endTime) && endTime >= startTime
-              ? (endTime - startTime) / 1000
-              : null;
-          // A fresh test context owns this session. Strip URL query/fragment even
-          // from public script frames; the profile contains no source/body payload.
-          for (const node of result.profile.nodes) {
-            try {
-              const url = new URL(node.callFrame.url);
-              node.callFrame.url = /^https?:$/.test(url.protocol)
-                ? `${url.origin}${url.pathname}`
-                : '[non-http script]';
-            } catch {
-              // Relative, protocol-relative and malformed sourceURL values are
-              // not verified public resource URLs. Never retain their raw text.
-              node.callFrame.url = '[unresolved script]';
-            }
-          }
-          profileState = 'captured';
-          persist('profile.json', { ...header(), profile: result.profile });
-        } catch (error) {
-          profileState = 'unavailable';
-          profileError = String(error);
-        }
-      }
+      // An in-flight checkpoint already owns its bounded stop/restart. Let it
+      // settle without starting another protocol operation for the same owner.
+      await chunkWork;
+      await capture(reason);
       snapshot();
       await detach();
       // Bound the caller, not the underlying filesystem: an outstanding write
@@ -244,5 +339,6 @@ export async function startMatrixStartupDiagnostic(
     Math.max(0, PROFILE_WINDOW_MS - (Date.now() - startedAt))
   );
   heartbeat = setInterval(snapshot, 5_000);
+  if (setupCompleted) scheduleChunk();
   return { finish: () => finish('owner-finish') };
 }
