@@ -445,6 +445,54 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
   assert.equal(artifact.with['if-no-files-found'], 'error');
 });
 
+function assertReusableCompilerInputBoundary(workflow) {
+  // The separate Adapter lane is a default-off reusable input. Package-budget
+  // and Website evidence remain manual-only and cannot enter workflow_call.
+  assert.deepEqual(workflow.on.workflow_call, {
+    inputs: {
+      adapter_acceptance: { type: 'boolean', required: false, default: false },
+    },
+  });
+}
+
+test('reusable compiler inputs preserve the separate default-off Adapter boundary', () => {
+  const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  assertReusableCompilerInputBoundary(original);
+  const mutations = [
+    (workflow) => {
+      workflow.on.workflow_call = null;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.adapter_acceptance.default = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.adapter_acceptance.required = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.package_budget_evidence = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.website_shader_evidence = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertReusableCompilerInputBoundary(changed));
+  }
+});
+
 test('manual compiler evidence can explicitly request the unchanged strict package gate', () => {
   const workflows = readWorkflows();
   const workflow = workflows['compiler-gpui-source-consumers.yml'];
@@ -454,7 +502,7 @@ test('manual compiler evidence can explicitly request the unchanged strict packa
     required: false,
     default: false,
   });
-  assert.equal(workflow.on.workflow_call, null);
+  assertReusableCompilerInputBoundary(workflow);
   const job = workflow.jobs['package-budgets'];
   assert.equal(
     job.if,
@@ -522,7 +570,7 @@ function assertWebsiteShaderEvidence(workflows) {
     required: false,
     default: false,
   });
-  assert.equal(caller.on.workflow_call, null, 'full-cycle callers do not inherit manual inputs');
+  assertReusableCompilerInputBoundary(caller);
   const calls = Object.entries(workflows).flatMap(([workflow, definition]) =>
     Object.entries(definition.jobs ?? {})
       .filter(([, job]) => job.uses === `./.github/workflows/${websiteShaderWorkflow}`)
