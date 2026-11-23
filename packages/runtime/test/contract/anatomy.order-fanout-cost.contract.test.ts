@@ -198,7 +198,7 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
 
 describe('Runtime Anatomy synchronous order fanout cost', () => {
   for (const source of ['sync', 'notify'] as const) {
-    it(`${source}: a stable shared domain reads current targets at linear cost per recipient`, () => {
+    it(`${source}: a stable shuffled domain reuses comparisons while reacquiring current targets`, () => {
       const subscriberCount = 16;
       const domain = createDomain(subscriberCount, 64, true);
       const order = domain.items.map((_, index) => domain.items[(index * 37) % 64]!);
@@ -211,13 +211,18 @@ describe('Runtime Anatomy synchronous order fanout cost', () => {
 
       expect([...domain.notifications.values()].flat()).toEqual([]);
       const reads = [...domain.targetReads.values()];
-      // Fresh targets are necessary for every recipient, but sorting must not
-      // multiply host reads by the comparison count of this shuffled domain.
+      // Host getters remain live at each comparison. A once-per-claim read
+      // budget would hide comparator replacement during a later host read.
       expect(reads).toHaveLength(domain.items.length + 1);
       expect(Math.min(...reads)).toBeGreaterThanOrEqual(subscriberCount);
-      expect(reads.reduce((sum, count) => sum + count, 0)).toBeLessThanOrEqual(
-        (domain.items.length + 1) * subscriberCount * 2
-      );
+      const single = createDomain(1, 64, true);
+      const singleOrder = single.items.map((_, index) => single.items[(index * 37) % 64]!);
+      for (const owner of singleOrder) single.element.append(single.targets.get(owner)!);
+      single[source]();
+      single.reset();
+      single[source]();
+      expect(single.comparisons()).toBeGreaterThan(0);
+      expect(domain.comparisons()).toBeLessThanOrEqual(single.comparisons() * 2);
       expect(domain.items.slice(0, subscriberCount).map(domain.version)).toEqual(versions);
       expect(domain.query()).toEqual(order.map((owner) => owner.id));
 
