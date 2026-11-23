@@ -1,7 +1,9 @@
 {
   "suite": {
     "id": "compiled-consumers",
-    "files": ["packages/compiler/test/sprint2-native.browser.test.ts"],
+    "files": [
+      "packages/compiler/test/sprint2-native.browser.test.ts"
+    ],
     "evidenceVariable": "PROTO_UI_RUNTIME_EVIDENCE_DIR",
     "expectedCases": 20,
     "format": "vitest"

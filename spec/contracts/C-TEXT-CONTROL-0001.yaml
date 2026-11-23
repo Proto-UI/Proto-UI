@@ -19,8 +19,10 @@ criteria:
       en: >-
         resetValue(value?) is callback-only and operates on the current mounted editing lease. An uncontrolled editor adopts the supplied canonical string, or its latest defaultValue when omitted, and returns true. A controlled editor retains owner truth and returns false; the caller must change owner Props to accept a different value. Both modes retire the previous composition and event lease before resetting editing state, without emitting an input or change proposal. Retained native callbacks and deferred restoration from the old lease cannot edit the reset or remounted target. Missing, uninitialized or detached editors and invalid non-string arguments return false without a reset; terminal disposal retains the existing capability lifetime error. Ordinary sync remains governed separately by editing-session preservation.
 
+
       zh-CN: >-
         resetValue(value?) 仅限 callback，操作当前已挂载的编辑 lease。非受控 editor 采用传入的 canonical string，省略时采用最近 defaultValue，并返回 true。 受控 editor 保留 owner truth 并返回 false；接受不同值须由调用者更新 owner Props。 两种模式均先撤销旧 composition 与 event lease，再重置编辑状态，不发出 input/change proposal。旧原生 callback 与延迟恢复不得写入重置或重挂载后的 target。缺失、未初始化、 未挂载 editor 或非字符串参数返回 false 且不重置；终态销毁保留现有能力生命周期错误。 普通 sync 仍受独立编辑会话保留规则约束。
+
 
   - id: C-TEXT-CONTROL-0001-A
     text:

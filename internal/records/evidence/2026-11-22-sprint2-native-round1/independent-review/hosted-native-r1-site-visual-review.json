@@ -103,7 +103,11 @@
         "theme": "dark",
         "observations": {
           "expectedName": "How many more times must we reinvent the Button?",
-          "decorations": ["none", "none", "none"]
+          "decorations": [
+            "none",
+            "none",
+            "none"
+          ]
         }
       }
     },
@@ -155,7 +159,9 @@
         "theme": "dark",
         "observations": {
           "expectedName": "How many more times must we reinvent the Button?",
-          "decorations": ["none"]
+          "decorations": [
+            "none"
+          ]
         }
       }
     },
@@ -235,7 +241,11 @@
         "theme": "light",
         "observations": {
           "expectedName": "How many more times must we reinvent the Button?",
-          "decorations": ["none", "none", "none"]
+          "decorations": [
+            "none",
+            "none",
+            "none"
+          ]
         }
       }
     },
@@ -315,7 +325,9 @@
         "theme": "light",
         "observations": {
           "expectedName": "How many more times must we reinvent the Button?",
-          "decorations": ["none"]
+          "decorations": [
+            "none"
+          ]
         }
       }
     },
@@ -367,7 +379,11 @@
         "theme": "dark",
         "observations": {
           "expectedName": "我们还要发明多少次 Button？",
-          "decorations": ["none", "none", "none"]
+          "decorations": [
+            "none",
+            "none",
+            "none"
+          ]
         }
       }
     },
@@ -419,7 +435,9 @@
         "theme": "dark",
         "observations": {
           "expectedName": "我们还要发明多少次 Button？",
-          "decorations": ["none"]
+          "decorations": [
+            "none"
+          ]
         }
       }
     },
@@ -471,7 +489,11 @@
         "theme": "light",
         "observations": {
           "expectedName": "我们还要发明多少次 Button？",
-          "decorations": ["none", "none", "none"]
+          "decorations": [
+            "none",
+            "none",
+            "none"
+          ]
         }
       }
     },
@@ -523,7 +545,9 @@
         "theme": "light",
         "observations": {
           "expectedName": "我们还要发明多少次 Button？",
-          "decorations": ["none"]
+          "decorations": [
+            "none"
+          ]
         }
       }
     },
@@ -605,8 +629,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -622,8 +656,18 @@
             "text": "Button",
             "href": "/en/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["2px", "2px", "2px", "2px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "2px",
+              "2px",
+              "2px",
+              "2px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -639,8 +683,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -679,8 +733,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["5px", "5px", "5px", "5px"],
-          "borders": ["0px", "0px", "2px", "0px"],
+          "radius": [
+            "5px",
+            "5px",
+            "5px",
+            "5px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "2px",
+            "0px"
+          ],
           "background": "rgb(64, 64, 64)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -719,8 +783,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -736,8 +810,18 @@
             "text": "Button",
             "href": "/en/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -753,8 +837,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -793,8 +887,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["0px", "0px", "0px", "0px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "rgb(64, 64, 64)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -833,8 +937,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -850,8 +964,18 @@
             "text": "Tabs",
             "href": "/en/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(27.036 0 0)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -867,8 +991,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgba(0, 0, 0, 0)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -907,8 +1041,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(15.204 0 -0.00000596046)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -947,8 +1091,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -964,8 +1118,18 @@
             "text": "Tabs",
             "href": "/en/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(27.036 0 0)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -981,8 +1145,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1021,8 +1195,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(15.204 0 -0.00000596046)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -1061,8 +1245,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1078,8 +1272,18 @@
             "text": "Button",
             "href": "/en/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["2px", "2px", "2px", "2px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "2px",
+              "2px",
+              "2px",
+              "2px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1095,8 +1299,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1135,8 +1349,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["5px", "5px", "5px", "5px"],
-          "borders": ["0px", "0px", "2px", "0px"],
+          "radius": [
+            "5px",
+            "5px",
+            "5px",
+            "5px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "2px",
+            "0px"
+          ],
           "background": "rgb(229, 229, 229)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -1175,8 +1399,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1192,8 +1426,18 @@
             "text": "Button",
             "href": "/en/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1209,8 +1453,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1249,8 +1503,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["0px", "0px", "0px", "0px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "rgb(229, 229, 229)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -1289,8 +1553,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1306,8 +1580,18 @@
             "text": "Tabs",
             "href": "/en/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1323,8 +1607,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgba(0, 0, 0, 0)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1363,8 +1657,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(96.52 -0.0000298023 0.0000119209)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -1403,8 +1707,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1420,8 +1734,18 @@
             "text": "Tabs",
             "href": "/en/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1437,8 +1761,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1477,8 +1811,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(96.52 -0.0000298023 0.0000119209)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -1517,8 +1861,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1534,8 +1888,18 @@
             "text": "Button",
             "href": "/en/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1575,8 +1939,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1592,8 +1966,18 @@
             "text": "Button",
             "href": "/en/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1633,8 +2017,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1650,8 +2044,18 @@
             "text": "Tabs",
             "href": "/en/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1691,8 +2095,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1708,8 +2122,18 @@
             "text": "Tabs",
             "href": "/en/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(27.036 0 0)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1749,8 +2173,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1766,8 +2200,18 @@
             "text": "Button",
             "href": "/zh-cn/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1807,8 +2251,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1824,8 +2278,18 @@
             "text": "Button",
             "href": "/zh-cn/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -1865,8 +2329,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1882,8 +2356,18 @@
             "text": "Tabs",
             "href": "/zh-cn/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1923,8 +2407,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1940,8 +2434,18 @@
             "text": "Tabs",
             "href": "/zh-cn/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(27.036 0 0)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1981,8 +2485,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -1998,8 +2512,18 @@
             "text": "Button",
             "href": "/zh-cn/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["2px", "2px", "2px", "2px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "2px",
+              "2px",
+              "2px",
+              "2px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2015,8 +2539,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2055,8 +2589,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["5px", "5px", "5px", "5px"],
-          "borders": ["0px", "0px", "2px", "0px"],
+          "radius": [
+            "5px",
+            "5px",
+            "5px",
+            "5px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "2px",
+            "0px"
+          ],
           "background": "rgb(64, 64, 64)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2095,8 +2639,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2112,8 +2666,18 @@
             "text": "Button",
             "href": "/zh-cn/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2129,8 +2693,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(64, 64, 64)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2169,8 +2743,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["0px", "0px", "0px", "0px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "rgb(64, 64, 64)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2209,8 +2793,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2226,8 +2820,18 @@
             "text": "Tabs",
             "href": "/zh-cn/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(27.036 0 0)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2243,8 +2847,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgba(0, 0, 0, 0)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2283,8 +2897,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(15.204 0 -0.00000596046)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2323,8 +2947,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2340,8 +2974,18 @@
             "text": "Tabs",
             "href": "/zh-cn/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(27.036 0 0)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2357,8 +3001,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(15.204 0 -0.00000596046)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2397,8 +3051,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(15.204 0 -0.00000596046)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2437,8 +3101,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2454,8 +3128,18 @@
             "text": "Button",
             "href": "/zh-cn/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["2px", "2px", "2px", "2px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "2px",
+              "2px",
+              "2px",
+              "2px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2471,8 +3155,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["5px", "5px", "5px", "5px"],
-            "borders": ["0px", "0px", "2px", "0px"],
+            "radius": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "2px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2511,8 +3205,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["5px", "5px", "5px", "5px"],
-          "borders": ["0px", "0px", "2px", "0px"],
+          "radius": [
+            "5px",
+            "5px",
+            "5px",
+            "5px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "2px",
+            "0px"
+          ],
           "background": "rgb(229, 229, 229)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2551,8 +3255,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2568,8 +3282,18 @@
             "text": "Button",
             "href": "/zh-cn/ui-libraries/brutalist/components/button/",
             "current": "page",
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(82, 148, 255)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2585,8 +3309,18 @@
             "text": "Brutalist",
             "href": null,
             "current": null,
-            "radius": ["0px", "0px", "0px", "0px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgb(229, 229, 229)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2625,8 +3359,18 @@
           "text": "Brutalist",
           "href": null,
           "current": null,
-          "radius": ["0px", "0px", "0px", "0px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "rgb(229, 229, 229)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2665,8 +3409,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2682,8 +3436,18 @@
             "text": "Tabs",
             "href": "/zh-cn/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2699,8 +3463,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "rgba(0, 0, 0, 0)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2739,8 +3513,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(96.52 -0.0000298023 0.0000119209)",
           "outline": "none",
           "outlineWidth": "3px",
@@ -2779,8 +3563,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2796,8 +3590,18 @@
             "text": "Tabs",
             "href": "/zh-cn/ui-libraries/shadcn/tabs/",
             "current": "page",
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "none",
             "outlineWidth": "3px",
@@ -2813,8 +3617,18 @@
             "text": "Shadcn",
             "href": null,
             "current": null,
-            "radius": ["8px", "8px", "8px", "8px"],
-            "borders": ["0px", "0px", "0px", "0px"],
+            "radius": [
+              "8px",
+              "8px",
+              "8px",
+              "8px"
+            ],
+            "borders": [
+              "0px",
+              "0px",
+              "0px",
+              "0px"
+            ],
             "background": "lab(96.52 -0.0000298023 0.0000119209)",
             "outline": "solid",
             "outlineWidth": "2px",
@@ -2853,8 +3667,18 @@
           "text": "Shadcn",
           "href": null,
           "current": null,
-          "radius": ["8px", "8px", "8px", "8px"],
-          "borders": ["0px", "0px", "0px", "0px"],
+          "radius": [
+            "8px",
+            "8px",
+            "8px",
+            "8px"
+          ],
+          "borders": [
+            "0px",
+            "0px",
+            "0px",
+            "0px"
+          ],
           "background": "lab(96.52 -0.0000298023 0.0000119209)",
           "outline": "none",
           "outlineWidth": "3px",

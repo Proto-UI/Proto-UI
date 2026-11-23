@@ -45,8 +45,7 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
     (payload) => {
       const result = parsePrototype(pointerSource(payload));
       expect(result.ok).toBe(false);
-      if (!result.ok)
-        expect(result.diagnostics[0].message).toContain('declared data boundary');
+      if (!result.ok) expect(result.diagnostics[0].message).toContain('declared data boundary');
     }
   );
 
@@ -193,7 +192,6 @@ describe('outward JSON retains actual ordinary-value provenance', () => {
   );
 });
 
-
 describe('finite outward event keys preserve each target schema', () => {
   const source = `
     import {definePrototype,type RunHandle} from '@proto.ui/core';
@@ -224,11 +222,14 @@ describe('finite outward event keys preserve each target schema', () => {
     const parsed = parsePrototype(source);
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     const ir: PrototypeIR = JSON.parse(JSON.stringify(parsed.value));
-    let dynamic: Extract<ExpressionIR, { kind:'operation' }> | undefined;
+    let dynamic: Extract<ExpressionIR, { kind: 'operation' }> | undefined;
     let contextPayload: ExpressionIR | undefined;
     const visit = (value: unknown): void => {
       if (!value || typeof value !== 'object') return;
-      if (Array.isArray(value)) { value.forEach(visit); return; }
+      if (Array.isArray(value)) {
+        value.forEach(visit);
+        return;
+      }
       const node = value as ExpressionIR;
       if (node.kind === 'operation' && node.operation === 'expose.emit') {
         if (node.arguments[0].kind !== 'literal') dynamic = node;

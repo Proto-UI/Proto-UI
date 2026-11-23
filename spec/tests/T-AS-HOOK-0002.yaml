@@ -51,7 +51,13 @@ implementations:
     status: needs-review
     path: packages/compiler/test/capture-facade-runtime.test.ts
     required: true
-    consumesCases: [T-AS-HOOK-0002-CASE-CALLER-EFFECTS, T-AS-HOOK-0002-CASE-RESULT-ARTIFACTS, T-AS-HOOK-0002-CASE-SETUP-DISPOSERS, T-AS-HOOK-0002-CASE-NESTED-RESULT]
+    consumesCases:
+      [
+        T-AS-HOOK-0002-CASE-CALLER-EFFECTS,
+        T-AS-HOOK-0002-CASE-RESULT-ARTIFACTS,
+        T-AS-HOOK-0002-CASE-SETUP-DISPOSERS,
+        T-AS-HOOK-0002-CASE-NESTED-RESULT,
+      ]
     notes:
       - Actual React, Vue 3, Vue 2 and Web Component consumers retain shared public references and execute real event unsubscribe tokens. Internal receipt bucket layout remains opaque.
   - id: generated-native-capture-artifacts

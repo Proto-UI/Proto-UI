@@ -318,9 +318,7 @@ for (const width of [2048, 390, 430, 320]) {
                 };
               },
               {
-                selector: historicalNewYork
-                  ? historicalLocaleSelector
-                  : languageControlSelector,
+                selector: historicalNewYork ? historicalLocaleSelector : languageControlSelector,
                 apiKind: localeApiKind,
               }
             );

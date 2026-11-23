@@ -878,6 +878,123 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     return setups.has(node);
   };
 
+  /**
+   * A named body can be both a configured Core setup and an ordinary callable.
+   * The configuration alone cannot grant Core's parameter capability to those
+   * other calls. Without a call-specific capability frame, retain proof only
+   * when every local reference is a canonical setup configuration.
+   */
+  const hasOnlyAuthoredSetupReferences = (
+    setup: ts.FunctionLikeDeclaration,
+    source: ts.SourceFile
+  ): boolean => {
+    const module = moduleForSource(source);
+    const allowed = new Set<ts.Node>();
+    const collect = (node: ts.Node): void => {
+      if (ts.isTypeNode(node)) return;
+      if (ts.isCallExpression(node) && node.arguments[0]) {
+        const config = unwrap(node.arguments[0]);
+        if (
+          ts.isObjectLiteralExpression(config) &&
+          (moduleContext.isDefineAsHookReference(node.expression, module) ||
+            moduleContext.isDefinePrototypeReference(node.expression, module) ||
+            moduleContext.isDefineHookReference(node.expression, module))
+        ) {
+          const property = configProperty(config, 'setup');
+          const expression = property ? propertyExpression(property) : undefined;
+          if (expression && functionFor(expression, module)?.fn === setup)
+            allowed.add(unwrap(expression));
+        }
+      }
+      ts.forEachChild(node, collect);
+    };
+    collect(source);
+    if (!allowed.size) return false;
+
+    const bindings: Array<{ name: ts.Identifier; declaration: ts.Node }> = [];
+    if ((ts.isFunctionDeclaration(setup) || ts.isFunctionExpression(setup)) && setup.name)
+      bindings.push({ name: setup.name, declaration: setup });
+    if (ts.isArrowFunction(setup) || ts.isFunctionExpression(setup)) {
+      let held: ts.Node = setup;
+      while (held.parent && unwrap(held.parent) === setup) held = held.parent;
+      if (
+        ts.isVariableDeclaration(held.parent) &&
+        held.parent.initializer &&
+        unwrap(held.parent.initializer) === setup &&
+        ts.isIdentifier(held.parent.name)
+      ) {
+        // A named expression has two callable identities. Checking only its
+        // internal self name would miss ordinary calls through this binding.
+        bindings.push({ name: held.parent.name, declaration: held.parent });
+      } else if (!allowed.has(setup)) {
+        // A factory return or ordinary object member needs an invocation
+        // identity which this lexical prefix query does not carry.
+        return false;
+      }
+    } else if (!ts.isFunctionDeclaration(setup) && !allowed.has(setup)) {
+      return false;
+    }
+    if (!bindings.length) return allowed.has(setup);
+    for (const { declaration } of bindings) {
+      const statement = ts.isVariableDeclaration(declaration)
+        ? declaration.parent.parent
+        : declaration;
+      if (
+        ts.canHaveModifiers(statement) &&
+        ts
+          .getModifiers(statement)
+          ?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+      )
+        return false;
+    }
+    const bindingTargets = new Set<ts.Node>();
+    for (const { name } of bindings) {
+      const binding = moduleContext.resolveReference(name, module);
+      if (!binding || binding.module.source !== source) return false;
+      bindingTargets.add(binding.declaration);
+    }
+    const referencesSetupBinding = (node: ts.Node): boolean => {
+      const binding = moduleContext.resolveReference(node, module);
+      return (
+        !!binding && binding.module.source === source && bindingTargets.has(binding.declaration)
+      );
+    };
+    const names = new Set(bindings.map(({ name }) => name.text));
+    const declarations = new Set(bindings.map(({ name }) => name));
+    let exclusive = true;
+    const visit = (node: ts.Node): void => {
+      if (!exclusive || ts.isTypeNode(node)) return;
+      if (
+        ts.isExportDeclaration(node) &&
+        !node.isTypeOnly &&
+        !node.moduleSpecifier &&
+        node.exportClause &&
+        ts.isNamedExports(node.exportClause) &&
+        node.exportClause.elements.some((entry) => {
+          const name = entry.propertyName ?? entry.name;
+          return !entry.isTypeOnly && names.has(name.text) && referencesSetupBinding(name);
+        })
+      ) {
+        exclusive = false;
+        return;
+      }
+      if (ts.isIdentifier(node) && names.has(node.text) && !declarations.has(node)) {
+        const parent = node.parent as ts.NamedDeclaration;
+        if (
+          (parent.name !== node || ts.isShorthandPropertyAssignment(parent)) &&
+          referencesSetupBinding(node) &&
+          !allowed.has(node)
+        ) {
+          exclusive = false;
+          return;
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    return exclusive;
+  };
+
   const isSameSourceBinding = (
     call: ts.CallExpression,
     source: ts.SourceFile,
@@ -2307,8 +2424,33 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       replayHelper: (node: ts.CallExpression, source: ts.SourceFile, certain: boolean) => {
         const module = moduleForSource(source);
         if (canonicalPrivilegedCall(node, module)) return;
-        if (functionFor(node.expression, module))
-          walk(node, module, new Map(), certain, new Map(), false);
+        if (!functionFor(node.expression, module)) return;
+        const environment: Environment = new Map();
+        // This prefix replay starts inside a real authored setup. Carry only
+        // its unchanged first parameter's Core capability into the helper's
+        // actual argument evaluation; the helper's name/definition does not
+        // grant a capability to its own parameters or to a foreign argument.
+        let boundary: ts.Node | undefined = node.parent;
+        while (boundary && !ts.isSourceFile(boundary) && !isFunctionLike(boundary))
+          boundary = boundary.parent;
+        if (
+          boundary &&
+          isFunctionLike(boundary) &&
+          isAuthoredSetup(boundary, source) &&
+          hasOnlyAuthoredSetupReferences(boundary, source)
+        ) {
+          const parameter = boundary.parameters[0];
+          if (
+            parameter &&
+            !parameter.dotDotDotToken &&
+            ts.isIdentifier(parameter.name) &&
+            !hasBindingWrite(parameter.name, module)
+          ) {
+            const key = binding(parameter.name, module);
+            if (key) capabilities(environment).set(key, 'native');
+          }
+        }
+        walk(node, module, environment, certain, new Map(), false);
       },
     };
   };

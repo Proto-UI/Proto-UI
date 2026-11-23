@@ -2,11 +2,7 @@
   "schemaVersion": 1,
   "kind": "bounded numeric package-budget transaction",
   "date": "2026-11-23",
-  "pullRequest": [
-    1736,
-    1737,
-    1733
-  ],
+  "pullRequest": [1736, 1737, 1733],
   "scope": "Only the five package ceilings whose measured gzip size grew past the previous ceiling through the merged 0.3 integration train (sprints 1-7, #1731 and the seven-sprint evidence corpus).",
   "capabilityLifecycle": "draft, unchanged",
   "sourceBefore": {
@@ -56,9 +52,7 @@
     "treeShaking": true,
     "format": "esm",
     "platform": "browser",
-    "target": [
-      "es2020"
-    ],
+    "target": ["es2020"],
     "gzipLevel": 9,
     "external": [
       "prompts",
