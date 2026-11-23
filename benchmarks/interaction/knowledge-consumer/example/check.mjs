@@ -48,6 +48,7 @@ const report = {
   viewport: values.viewport === 'wide' ? { width: 1280, height: 800 } : { width: 390, height: 844 },
   colorScheme: values['color-scheme'],
   injectedControl: values['negative-control'],
+  mutationEvents: [],
   browserVersion: null,
   checks: planned.map((id) => ({ id, status: 'not-run' })),
   source: [],
@@ -153,9 +154,21 @@ try {
   await list.waitFor({ state: 'visible' });
 
   if (values['negative-control'] === 'automatic') {
-    await list.evaluate((element) => element.addEventListener('focusin', (event) => {
-      if (event.target.getAttribute('role') === 'tab') event.target.click();
-    }));
+    await list.evaluate((element) => {
+      window.__knowledgeMutationEvents = [];
+      element.addEventListener('focusin', (event) => {
+        if (event.target.getAttribute('role') !== 'tab') return;
+        // Radix Tabs 1.1.13 selects on Enter/Space or primary mousedown,
+        // not HTMLElement.click(). This deliberately violates manual activation
+        // through an event that the pinned component actually handles.
+        const activation = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+        window.__knowledgeMutationEvents.push({
+          target: event.target.textContent.trim(), event: 'keydown', key: activation.key,
+          isTrusted: activation.isTrusted, selectedBefore: event.target.getAttribute('aria-selected'),
+        });
+        event.target.dispatchEvent(activation);
+      });
+    });
   } else if (values['negative-control'] === 'relationship') {
     await tab('Overview').evaluate((element) => element.removeAttribute('aria-controls'));
   } else if (values['negative-control'] === 'removal') {
@@ -225,6 +238,11 @@ try {
     try { await capture('failure'); } catch (captureError) { report.captureError = errorText(captureError); }
   }
 } finally {
+  if (page) {
+    try {
+      report.mutationEvents = await page.evaluate(() => window.__knowledgeMutationEvents ?? []);
+    } catch (error) { report.cleanupErrors.push(errorText(error)); }
+  }
   if (tracing) {
     try {
       await context.tracing.stop({ path: path.join(out, 'trace.zip') });
