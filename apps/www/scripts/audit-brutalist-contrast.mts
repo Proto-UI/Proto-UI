@@ -1856,7 +1856,7 @@ async function dropdownPointerTarget(
 async function dropdownPointerIdentity(
   page: Page,
   popup: Locator,
-  target: Locator | ElementHandle,
+  target: ElementHandle<HTMLElement | SVGElement>,
   row: ReturnType<typeof dropdownPointerRows>[number]
 ): Promise<Observation> {
   const physicalPopup = await popup.elementHandle();

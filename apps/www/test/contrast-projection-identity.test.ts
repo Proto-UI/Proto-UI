@@ -25,6 +25,7 @@ import {
 import {
   assertDemoSpec,
   collectPrototypeIds,
+  type DemoSpec,
 } from '../src/components/PrototypePreviewer/demo-types';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
@@ -884,7 +885,7 @@ function installActualProbe() {
   }).code;
   (globalThis as any).puiContrastProbe = new Function(compiled + ';return puiContrastProbe;')();
 }
-const productionDemos = import.meta.glob('../src/content/**/demo-brutalist-*.demo.ts', {
+const productionDemos = import.meta.glob<DemoSpec>('../src/content/**/demo-brutalist-*.demo.ts', {
   eager: true,
   import: 'default',
 });
@@ -3067,7 +3068,7 @@ for (const runtime of runtimes) {
         expect(await (await readers.dropdownPointerTarget(popup, row)).count()).toBe(1);
       });
       const target = await readers.dropdownPointerTarget(popup, row);
-      const actual = await target.evaluate((element: HTMLElement) => element);
+      const actual: HTMLElement = await target.evaluate((element: HTMLElement) => element);
       const observe = () => readers.dropdownPointerIdentity(page, popup, target, row);
       expect((await observe()).achieved).toBe(true);
       for (const [attribute, wrong] of [

@@ -25,7 +25,7 @@ export default definePrototype<DocumentationImageReadingViewportProps, ScrollAre
     const inherited = asScrollAreaViewport();
     const state = inherited.stateHandles;
     if (!state) throw new Error('[docs-image-reading-viewport] Missing Base scroll facts.');
-    asScrollSurface().configure({ projection: 'native' });
+    asScrollSurface().configure({ projection: 'system' });
 
     const accessible = asAccessible();
     const label = def.state.string('readingViewportLabel', DEFAULT_LABEL);
