@@ -10,32 +10,32 @@ Actual execution began at 12:30:43.306109 UTC and ended at 12:31:58.490160 UTC, 
 
 The failure path retained 170 raw PNGs without adding disk I/O to the measured close window. An offline pass verified every image against the captured index, then used the original Sharp resize-to-550 and marker predicate (r > 200, g < 80, b > 200; visibility at least four pixels). All 24 recorded traces contain marker disappearance and no later recorded reappearance. This is an observation of the captured samples, not evidence about unrecorded frames and not a substitute for the minimum-frame gate.
 
-| Path             | Actual frames | Original minimum met | Recorded reappearance frames |
-| ---------------- | ------------: | -------------------- | ---------------------------: |
-| light/default/0  |             8 | yes                  |                            0 |
-| light/default/1  |             5 | yes                  |                            0 |
-| light/switch/0   |             7 | yes                  |                            0 |
-| light/switch/1   |             5 | yes                  |                            0 |
-| light/checkbox/0 |             8 | yes                  |                            0 |
-| light/checkbox/1 |             6 | yes                  |                            0 |
-| light/both/0     |             6 | yes                  |                            0 |
-| light/both/1     |             7 | yes                  |                            0 |
-| split/default/0  |             9 | yes                  |                            0 |
-| split/default/1  |             5 | yes                  |                            0 |
-| split/switch/0   |             4 | **no**               |                            0 |
-| split/switch/1   |             7 | yes                  |                            0 |
-| split/checkbox/0 |             7 | yes                  |                            0 |
-| split/checkbox/1 |            10 | yes                  |                            0 |
-| split/both/0     |             6 | yes                  |                            0 |
-| split/both/1     |             8 | yes                  |                            0 |
-| mixed/default/0  |             9 | yes                  |                            0 |
-| mixed/default/1  |             7 | yes                  |                            0 |
-| mixed/switch/0   |             8 | yes                  |                            0 |
-| mixed/switch/1   |             7 | yes                  |                            0 |
-| mixed/checkbox/0 |             5 | yes                  |                            0 |
-| mixed/checkbox/1 |             9 | yes                  |                            0 |
-| mixed/both/0     |             8 | yes                  |                            0 |
-| mixed/both/1     |             9 | yes                  |                            0 |
+| Path | Actual frames | Original minimum met | Recorded reappearance frames |
+| --- | ---: | --- | ---: |
+| light/default/0 | 8 | yes | 0 |
+| light/default/1 | 5 | yes | 0 |
+| light/switch/0 | 7 | yes | 0 |
+| light/switch/1 | 5 | yes | 0 |
+| light/checkbox/0 | 8 | yes | 0 |
+| light/checkbox/1 | 6 | yes | 0 |
+| light/both/0 | 6 | yes | 0 |
+| light/both/1 | 7 | yes | 0 |
+| split/default/0 | 9 | yes | 0 |
+| split/default/1 | 5 | yes | 0 |
+| split/switch/0 | 4 | **no** | 0 |
+| split/switch/1 | 7 | yes | 0 |
+| split/checkbox/0 | 7 | yes | 0 |
+| split/checkbox/1 | 10 | yes | 0 |
+| split/both/0 | 6 | yes | 0 |
+| split/both/1 | 8 | yes | 0 |
+| mixed/default/0 | 9 | yes | 0 |
+| mixed/default/1 | 7 | yes | 0 |
+| mixed/switch/0 | 8 | yes | 0 |
+| mixed/switch/1 | 7 | yes | 0 |
+| mixed/checkbox/0 | 5 | yes | 0 |
+| mixed/checkbox/1 | 9 | yes | 0 |
+| mixed/both/0 | 8 | yes | 0 |
+| mixed/both/1 | 9 | yes | 0 |
 
 For the failing path the four captured frame timestamps relative to the pre-click path start were 560.541, 629.932, 643.632 and 666.316 ms. The view-detach event was at 651 ms. These offsets include the browser input/actionability interval; they are not a measured violation of the subsequent 380 ms close interval and do not establish hardware load as the cause. The first frame has 49 marker pixels; the remaining three have zero.
 

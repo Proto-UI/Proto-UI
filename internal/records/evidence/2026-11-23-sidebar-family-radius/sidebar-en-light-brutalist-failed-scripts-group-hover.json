@@ -18,8 +18,18 @@
     "text": "Brutalist",
     "href": null,
     "current": null,
-    "radius": ["0px", "0px", "0px", "0px"],
-    "borders": ["0px", "0px", "0px", "0px"],
+    "radius": [
+      "0px",
+      "0px",
+      "0px",
+      "0px"
+    ],
+    "borders": [
+      "0px",
+      "0px",
+      "0px",
+      "0px"
+    ],
     "background": "rgb(229, 229, 229)",
     "outline": "none",
     "outlineWidth": "3px",
