@@ -302,6 +302,10 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     meaning:
       'GPUI ControlLabel supports explicit typed InstanceAssociations but has no native lowering for Anatomy pairing.',
   },
+  PUI_GPUI_CONTROL_LABEL_ANATOMY: {
+    category: 'unsupported-input',
+    meaning: 'GPUI ControlLabel supports direct instance references, not anatomy-derived pairing.',
+  },
   PUI_GPUI_HOST_REQUIRED: {
     category: 'unsupported-input',
     meaning: 'GPUI lowering requires an owned host bridge.',

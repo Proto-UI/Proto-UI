@@ -25,21 +25,26 @@ import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 type Known = readonly Atom[];
 type CapturedState = HookCaptureIR['states'][number];
 type TracedOperation = Extract<ExpressionIR, { kind: 'operation' }>;
+type CaptureGetter = 'getState' | 'getMethod' | 'getAsHook' | 'getAsHookHandle';
 type Atom =
   | { kind: 'unknown'; data?: ValueType }
-  | { kind: 'undefined' | 'uninitialized' }
+  | { kind: 'undefined' | 'uninitialized' | 'absent' }
   | { kind: 'literal'; value: string | number | boolean | null }
   | { kind: 'closure'; fn: FunctionIR; scope: Scope }
   | { kind: 'native'; type: Extract<ValueType, { kind: 'callable' }> }
+  | { kind: 'capture-getter'; capture: Capture; member: CaptureGetter }
   | { kind: 'named-state'; state: CapturedState }
   | { kind: 'cell'; initial: Known; tracked: boolean }
   | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean }
   | { kind: 'getter'; callable: Known }
+  | { kind: 'record'; fields: Map<string, Known>; tracked?: boolean; array?: boolean }
   | ({ kind: 'capture'; hookId?: string } & CaptureContents);
 type Closure = Extract<Atom, { kind: 'closure' }>;
 type Capture = Extract<Atom, { kind: 'capture' }>;
 interface CaptureContents {
   render?: Known;
+  states?: Map<string, Known>;
+  events?: Set<string>;
   methods: Map<string, Known>;
   children: Map<string, readonly (Installation | undefined)[]>;
 }
@@ -83,6 +88,8 @@ const copyStore = (state: Store): Store => ({
 const UNKNOWN: Known = [{ kind: 'unknown' }];
 const UNDEFINED: Known = [{ kind: 'undefined' }];
 const UNINITIALIZED: Known = [{ kind: 'uninitialized' }];
+// Absence is not an enumerable property whose value is undefined.
+const ABSENT: Known = [{ kind: 'absent' }];
 /** An untracked value whose checked type cannot carry a callable or owner authority. */
 const dataFact = (type: ValueType): Known => [{ kind: 'unknown', data: type }];
 
@@ -115,7 +122,12 @@ export interface CallableEffectIssue {
  * unresolved source callable edges are diagnosed rather than treated as empty.
  */
 export function callableEffectIssue(ir: PrototypeIR): CallableEffectIssue | undefined {
-  return analyzeCallableFlow(ir);
+  // Only an outward data sink needs the additional ordinary-data store. Keep
+  // the established callable abstraction for graphs with no JSON event output.
+  const dataOutput = ir.exposes.some(
+    (exposure) => exposure.kind === 'event' && exposure.payload !== 'void'
+  );
+  return analyzeCallableFlow(ir, undefined, undefined, dataOutput);
 }
 
 export interface CallableDemandObserver {
@@ -180,7 +192,8 @@ function analyzeCallableFlow(
     hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>): void;
     owned?: HookContributionObserver;
   },
-  demand?: CallableDemandObserver
+  demand?: CallableDemandObserver,
+  checkDataBoundaries = false
 ): CallableEffectIssue | undefined {
   let issue: CallableEffectIssue | undefined;
   const moduleScope = new Scope();
@@ -217,6 +230,8 @@ function analyzeCallableFlow(
   const identities = new Map<FunctionIR, number>();
   const installingHooks = new Set<string>();
   const captureFrames: Capture[] = [];
+  const captureGetters = new WeakMap<Capture, Map<CaptureGetter, Atom>>();
+  const captureFacades = new WeakMap<CaptureContents, Map<string, Known>>();
   const setup: Execution = { phase: 'setup', context: 'setup' };
   const render: Execution = { phase: 'render', context: 'render' };
 
@@ -267,9 +282,7 @@ function analyzeCallableFlow(
       const names = new Set(maps.flatMap((map) => [...map.keys()]));
       result.records.set(
         record,
-        new Map(
-          [...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? UNDEFINED))])
-        )
+        new Map([...names].map((name) => [name, merge(maps.map((map) => map.get(name) ?? ABSENT))]))
       );
     }
     const unionInstallations = (
@@ -293,8 +306,16 @@ function analyzeCallableFlow(
       const contents = states.map((state) => state.captures.get(capture) ?? capture);
       const methods = new Set(contents.flatMap((value) => [...value.methods.keys()]));
       const children = new Set(contents.flatMap((value) => [...value.children.keys()]));
+      const names = new Set(contents.flatMap((value) => [...(value.states?.keys() ?? [])]));
       result.captures.set(capture, {
         render: merge(contents.map((value) => value.render ?? UNDEFINED)),
+        states: new Map(
+          [...names].map((name) => [
+            name,
+            merge(contents.map((value) => value.states?.get(name) ?? UNDEFINED)),
+          ])
+        ),
+        events: new Set(contents.flatMap((value) => [...(value.events ?? [])])),
         methods: new Map(
           [...methods].map((name) => [
             name,
@@ -316,6 +337,13 @@ function analyzeCallableFlow(
     store.captures.set(capture, {
       ...prior,
       methods: new Map(prior.methods).set(name, value),
+    });
+  }
+  function writeCaptureState(capture: Capture, state: CapturedState): void {
+    const prior = captureContents(capture);
+    store.captures.set(capture, {
+      ...prior,
+      states: new Map(prior.states).set(state.name, [{ kind: 'named-state', state }]),
     });
   }
   function recordChild(capture: Capture | undefined, name: string, value: Installation): void {
@@ -352,7 +380,7 @@ function analyzeCallableFlow(
   }
   function writeField(record: RecordValue, name: string, value: Known, weak = false): void {
     const next = new Map(fields(record));
-    next.set(name, weak ? merge([next.get(name) ?? UNDEFINED, value]) : value);
+    next.set(name, weak ? merge([next.get(name) ?? ABSENT, value]) : value);
     store.records.set(record, next);
   }
   function opaque(span: SourceSpan): void {
@@ -446,6 +474,7 @@ function analyzeCallableFlow(
         case 'unknown':
         case 'undefined':
         case 'uninitialized':
+        case 'absent':
           return value.kind === 'unknown' && value.data
             ? ['unknown-data', value.data]
             : [value.kind];
@@ -453,6 +482,8 @@ function analyzeCallableFlow(
           return ['literal', value.value];
         case 'native':
           return ['native', value.type];
+        case 'capture-getter':
+          return ['capture-getter', value.member, visit(value.capture, depth + 1)];
         case 'named-state':
           return ['named-state', value.state.name, value.state.type];
         case 'cell':
@@ -479,7 +510,7 @@ function analyzeCallableFlow(
         case 'record':
           if (locationsOnly && value.tracked !== false) return ['record-location', location(value)];
           return [
-            'record',
+            value.array ? 'array' : 'record',
             value.tracked === false ? null : location(value),
             [...fields(value)]
               .sort(([a], [b]) => a.localeCompare(b))
@@ -490,6 +521,11 @@ function analyzeCallableFlow(
         case 'capture':
           return [
             'capture',
+            [...(captureContents(value).states ?? [])].map(([name, state]) => [
+              name,
+              state.map((child) => visit(child, depth + 1)),
+            ]),
+            [...(captureContents(value).events ?? [])],
             (captureContents(value).render ?? UNDEFINED).map((child) => visit(child, depth + 1)),
             [...captureContents(value).methods].map(([name, method]) => [
               name,
@@ -519,6 +555,11 @@ function analyzeCallableFlow(
     if (type.kind === 'value-union') return type.members.some(carriesCallable);
     return false;
   }
+  function carriesStructuredData(type: ValueType): boolean {
+    return valueAlternatives(type).some(
+      (member) => typeof member !== 'string' && ['object', 'record', 'array'].includes(member.kind)
+    );
+  }
 
   /** Native callback inputs and fixed host results carry an explicit external contract. */
   function hostValue(type: ValueType): Known {
@@ -534,9 +575,12 @@ function analyzeCallableFlow(
     }
     if (type.kind === 'value-union' || type.kind === 'union')
       return merge(type.members.map(hostValue));
+    if (checkDataBoundaries && type.kind === 'array') return dataFact(type);
+    if (checkDataBoundaries && type.kind === 'literal')
+      return [{ kind: 'literal', value: type.value }];
     if (type.kind === 'object' || type.kind === 'record') {
       if (isDataValueType(type)) return dataFact(type);
-      if (!carriesCallable(type)) return UNKNOWN;
+      if (!carriesCallable(type)) return checkDataBoundaries ? dataFact(type) : UNKNOWN;
       const record: RecordValue = {
         kind: 'record',
         fields: new Map(),
@@ -695,6 +739,8 @@ function analyzeCallableFlow(
       return branches(
         values.map((value) => () => {
           if (value.kind === 'closure') return call(value, args, execution);
+          if (value.kind === 'capture-getter')
+            return captureLookup(value.capture, value.member, args[0] ?? UNDEFINED);
           if (value.kind === 'native') {
             // A host-supplied callable has an explicit signature. Supplied closures
             // may be retained by that external consumer and become outward roots.
@@ -768,6 +814,8 @@ function analyzeCallableFlow(
       if (value.kind === 'closure') callbacks.push({ closure: value, execution, outward: true });
       else if (value.kind === 'getter')
         pending.push(...value.callable.map((value) => ({ value, type: undefined })));
+      else if (value.kind === 'capture-getter')
+        pending.push({ value: value.capture, type: undefined });
       else if (value.kind === 'record')
         for (const [name, field] of fields(value))
           pending.push(...field.map((value) => ({ value, type: fieldType(type, name) })));
@@ -940,7 +988,9 @@ function analyzeCallableFlow(
                   );
                   if (!reachable) return [];
                   demand?.call?.(value, {
-                    external: present.some((target) => target.kind === 'native'),
+                    external: present.some(
+                      (target) => target.kind === 'native' || target.kind === 'capture-getter'
+                    ),
                     authored: present.flatMap((target) =>
                       target.kind === 'closure' ? [target.fn] : []
                     ),
@@ -1003,7 +1053,7 @@ function analyzeCallableFlow(
         ]);
       }
       case 'record': {
-        if (!carriesCallable(value.type)) {
+        if (!checkDataBoundaries && !carriesCallable(value.type)) {
           value.entries.forEach((entry) => expression(entry.value, scope, execution));
           return isDataValueType(value.type) ? dataFact(value.type) : UNKNOWN;
         }
@@ -1013,7 +1063,7 @@ function analyzeCallableFlow(
           record = {
             kind: 'record',
             fields: new Map(),
-            tracked: carriesCallable(value.type),
+            tracked: checkDataBoundaries || carriesCallable(value.type),
           };
           recordSites.set(value, record);
           allocationSerial++;
@@ -1052,7 +1102,7 @@ function analyzeCallableFlow(
           record = {
             kind: 'record',
             fields: new Map(),
-            tracked: carriesCallable(value.type),
+            tracked: checkDataBoundaries || carriesCallable(value.type),
           };
           recordSites.set(value, record);
           allocationSerial++;
@@ -1098,7 +1148,19 @@ function analyzeCallableFlow(
           const parameters = arrayEveryCallbackParameters(array);
           calls(
             args[1] ?? UNKNOWN,
-            parameters.map((parameter) => dataFact(parameter.type)),
+            checkDataBoundaries
+              ? [
+                  merge(
+                    (args[0] ?? UNKNOWN).map((value) =>
+                      value.kind === 'record' && value.array
+                        ? merge([...fields(value).values()])
+                        : hostValue(array.element)
+                    )
+                  ),
+                  dataFact('number'),
+                  args[0] ?? UNKNOWN,
+                ]
+              : parameters.map((parameter) => dataFact(parameter.type)),
             execution,
             value.span,
             parameters
@@ -1129,7 +1191,11 @@ function analyzeCallableFlow(
           cell = {
             kind: 'cell',
             initial,
-            tracked: carriesCallable(lexicalStoredType(value.type)!),
+            // Scalars cannot hide enumerable fields. Keep the existing finite
+            // scalar abstraction rather than expanding callback state machines.
+            tracked:
+              carriesCallable(lexicalStoredType(value.type)!) ||
+              (checkDataBoundaries && carriesStructuredData(lexicalStoredType(value.type)!)),
           };
           recordSites.set(value, cell);
           if (cell.tracked) allocationSerial++;
@@ -1139,7 +1205,11 @@ function analyzeCallableFlow(
       case 'lexical-read':
         return merge(
           expression(value.cell, scope, execution).map((cell) =>
-            cell.kind === 'cell' ? cellValue(cell) : UNKNOWN
+            cell.kind === 'cell'
+              ? checkDataBoundaries && !cell.tracked
+                ? hostValue(value.type)
+                : cellValue(cell)
+              : UNKNOWN
           )
         );
       case 'lexical-update': {
@@ -1168,9 +1238,23 @@ function analyzeCallableFlow(
         }
         return result;
       }
-      case 'array':
-        value.elements.forEach((element) => expression(element, scope, execution));
-        return UNKNOWN;
+      case 'array': {
+        if (!checkDataBoundaries) {
+          value.elements.forEach((element) => expression(element, scope, execution));
+          return UNKNOWN;
+        }
+        let array = recordSites.get(value) as RecordValue | undefined;
+        const repeated = !!array;
+        if (!array) {
+          array = { kind: 'record', array: true, fields: new Map(), tracked: true };
+          recordSites.set(value, array);
+          allocationSerial++;
+        }
+        value.elements.forEach((element, index) =>
+          writeField(array!, String(index), expression(element, scope, execution), repeated)
+        );
+        return [array];
+      }
       case 'operation': {
         const phaseIssue = validateOperationPhase(
           value.operation,
@@ -1179,6 +1263,18 @@ function analyzeCallableFlow(
         ).find((item) => item.code !== 'context' || execution.context !== 'helper');
         const receiver = value.receiver ? expression(value.receiver, scope, execution) : UNKNOWN;
         const args = value.arguments.map((argument) => expression(argument, scope, execution));
+        if (
+          checkDataBoundaries &&
+          value.operation === 'expose.emit' &&
+          !outwardData(args[1] ?? UNDEFINED, value.arguments[1]?.type ?? 'void')
+        ) {
+          issue = {
+            message:
+              'Outward JSON payload retains a non-data source field or unresolved data provenance through its structural view.',
+            span: value.arguments[1]?.span ?? value.span,
+          };
+          return UNKNOWN;
+        }
         if (phaseIssue && !trace) {
           if (execution.guarded) {
             possibleThrow();
@@ -1207,6 +1303,27 @@ function analyzeCallableFlow(
           );
         }
         const frame = captureFrames.at(-1);
+        const named = args[0]?.find(
+          (argument) => argument.kind === 'literal' && typeof argument.value === 'string'
+        );
+        if (frame && named?.kind === 'literal') {
+          if (
+            value.operation.startsWith('state.') &&
+            typeof value.type === 'string' &&
+            /^state:(boolean|number|string)$/.test(value.type)
+          )
+            writeCaptureState(frame, { name: String(named.value), type: value.type });
+          if (value.operation === 'expose.event') {
+            const prior = captureContents(frame);
+            store.captures.set(frame, {
+              ...prior,
+              events: new Set(prior.events).add(String(named.value)),
+            });
+          }
+        }
+        if (frame && value.operation === 'expose.state')
+          for (const item of args[1] ?? [])
+            if (item.kind === 'named-state') writeCaptureState(frame, item.state);
         if (trace) {
           const target = value.operation === 'expose.state' ? (args[1] ?? UNKNOWN) : [];
           const introduced = target.flatMap((item) =>
@@ -1216,7 +1333,7 @@ function analyzeCallableFlow(
             trace.operation(value, introduced, target.length === 1 && introduced.length === 1);
           if (frame?.hookId) trace.owned?.operation(frame.hookId, value, introduced);
         }
-        const stateMembers = trace ? privilegedStateMembers(value.operation) : [];
+        const stateMembers = privilegedStateMembers(value.operation);
         const handle: Known | undefined = stateMembers.length
           ? [
               {

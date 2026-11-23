@@ -1,3 +1,4 @@
+import { emitCapturedWebOperation } from './capture-effects';
 import { pruneDeadValues } from './demand-pruning';
 import {
   nativePublicCallsArtifact,
@@ -313,7 +314,31 @@ export function emitReactSource(
     const callable = `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
     return callBoundaries.authored.has(value) ? `${p}MarkAuthoredCallable(${callable})` : callable;
   }
-  function expression(value: ExpressionIR, depth: number): string {
+  function expression(value: ExpressionIR, depth: number, captureEffects = true): string {
+    if (hasAuthoredHooks && captureEffects) {
+      if (value.kind === 'operation') {
+        const captured = emitCapturedWebOperation({
+          value: value,
+          prefix: p,
+          manager: `${p}Authored`,
+          interaction: `${p}Interaction`,
+          emit: (item, capture = true) => expression(item, depth, capture),
+          declaration: (_item, name, initializer, argumentIndex) => {
+            // Preserve the fixed argument's call-site context without applying
+            // Parameters to generic operations such as expose.method.
+            const type =
+              value.operation === 'props.define' && argumentIndex === 0
+                ? `Parameters<typeof ${p}CaptureReceiver.props.define>[0]`
+                : value.operation === 'expose.event' && argumentIndex === 1
+                  ? `Parameters<typeof ${p}CaptureReceiver.expose.event>[1]`
+                  : undefined;
+            return `const ${name}${type ? `: ${type}` : ''} = ${initializer};`;
+          },
+        });
+        if (captured !== undefined) return captured;
+      }
+      if (value.kind === 'rule') return `${p}Authored.rule(${expression(value, depth, false)})`;
+    }
     switch (value.kind) {
       case 'narrow':
       case 'member-write':
@@ -1173,7 +1198,7 @@ ${hasAuthoredHooks ? `        ${p}Authored.introduceObserved(state);` : ''}
         registerExpose(key, Object.freeze({ kind: 'event', payload: eventSchemas[key] }));
       },
       method<A extends unknown[], R>(key: string, callback: (...args: A) => R, project?: (value: R) => R) {
-${hasAuthoredHooks ? `        ${p}Authored.method(key, callback);` : ''}
+
         registerExpose(key, (...args: A): R => {
           ensureExternal();
           return invoke(() => {

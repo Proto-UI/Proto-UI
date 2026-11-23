@@ -4,7 +4,14 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RUNTIMES, applyColorScheme, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
+import {
+  RUNTIMES,
+  applyColorScheme,
+  launchBrowser,
+  selectRuntime,
+  startServer,
+  stopServer,
+} from './browser-harness';
 import { createInputEvidence, type InputEvidenceSession } from './input-visual-evidence';
 
 let browser: Browser;
@@ -39,7 +46,10 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
     it.each(RUNTIMES)(
       locale + '/%s: real Base editors and runtime replacement',
       async (runtime) => {
-        const context = await browser.newContext({ viewport: { width: 960, height: 800 }, colorScheme: 'light' });
+        const context = await browser.newContext({
+          viewport: { width: 960, height: 800 },
+          colorScheme: 'light',
+        });
         // Explicit unavailable-CDN condition, not a mocked framework or editor.
         const blockedFrameworkRequests: string[] = [];
         await context.route('https://esm.sh/**', async (route) => {
@@ -81,21 +91,37 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
                 })
             );
             await evidence.capture(preview, {
-              locale, runtime, scheme: 'light', state: 'readiness-failed', observations: { errors },
+              locale,
+              runtime,
+              scheme: 'light',
+              state: 'readiness-failed',
+              observations: { errors },
             });
             throw error;
           }
           const host = preview.locator('.host');
-          const capture = async (scheme: 'light' | 'dark', state: string) => evidence.capture(preview, {
-            locale, runtime, scheme, state,
-            observations: await host.locator('input').evaluateAll((inputs) => inputs.map((element) => {
-              const input = element as HTMLInputElement;
-              const rect = input.getBoundingClientRect();
-              return { value: input.value, disabled: input.disabled, readOnly: input.readOnly,
-                focused: input === document.activeElement, nativeFocusVisible: input.matches(':focus-visible'),
-                width: rect.width, height: rect.height };
-            })),
-          });
+          const capture = async (scheme: 'light' | 'dark', state: string) =>
+            evidence.capture(preview, {
+              locale,
+              runtime,
+              scheme,
+              state,
+              observations: await host.locator('input').evaluateAll((inputs) =>
+                inputs.map((element) => {
+                  const input = element as HTMLInputElement;
+                  const rect = input.getBoundingClientRect();
+                  return {
+                    value: input.value,
+                    disabled: input.disabled,
+                    readOnly: input.readOnly,
+                    focused: input === document.activeElement,
+                    nativeFocusVisible: input.matches(':focus-visible'),
+                    width: rect.width,
+                    height: rect.height,
+                  };
+                })
+              ),
+            });
           expect(await host.locator('input,textarea,[contenteditable]').count()).toBe(4);
           expect(
             await host
@@ -117,12 +143,36 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
           await editable.fill('Uncontrolled edit');
           expect(await editable.inputValue()).toBe('Uncontrolled edit');
           await capture('light', 'uncontrolled-edit');
+          await host.getByRole('button', { name: 'Set latest default', exact: true }).click();
+          expect(await editable.inputValue()).toBe('Uncontrolled edit');
+          await expect
+            .poll(async () => host.locator('[data-demo-ref="resetStatus"]').textContent())
+            .toBe('Default changed to "Latest default"; current value: "Uncontrolled edit"');
+          await host.getByRole('button', { name: 'Reset to default', exact: true }).click();
+          await expect.poll(async () => editable.inputValue()).toBe('Latest default');
+          await expect
+            .poll(async () => host.locator('[data-demo-ref="resetStatus"]').textContent())
+            .toBe('Reset accepted: true; value: "Latest default"; editing events: 0');
+          await capture('light', 'reset-latest-default');
+          await host.getByRole('button', { name: 'Reset to sample', exact: true }).click();
+          await expect.poll(async () => editable.inputValue()).toBe('Newvalue');
+          await expect
+            .poll(async () => host.locator('[data-demo-ref="resetStatus"]').textContent())
+            .toBe('Reset accepted: true; value: "Newvalue"; editing events: 0');
+          await capture('light', 'reset-canonical-sample');
           await controlled.fill('Controlled accepted');
           await expect.poll(async () => controlled.inputValue()).toBe('Controlled accepted');
           await expect
             .poll(async () => host.locator('[data-demo-ref="status"]').textContent())
             .toBe('Owner accepted: Controlled accepted');
           await capture('light', 'owner-accepted');
+          await host.getByRole('button', { name: 'Try controlled reset', exact: true }).click();
+          expect(await controlled.inputValue()).toBe('Controlled accepted');
+          await expect
+            .poll(async () => host.locator('[data-demo-ref="resetStatus"]').textContent())
+            .toBe('Reset accepted: false; value: "Controlled accepted"; editing events: 0');
+          expect(await host.locator('input,textarea,[contenteditable]').count()).toBe(4);
+          await capture('light', 'controlled-reset');
           await readonly.focus();
           expect(await readonly.evaluate((element) => element === document.activeElement)).toBe(
             true
@@ -166,6 +216,9 @@ describe.sequential('Base Input live documentation RuntimeBox', () => {
               .getByRole('textbox', { name: 'Controlled Base Input', exact: true })
               .inputValue()
           ).toBe('Owner-controlled value');
+          expect(await host.locator('[data-demo-ref="resetStatus"]').textContent()).toBe(
+            'No reset requested.'
+          );
           await capture('dark', 'remounted');
           expect(errors).toEqual([]);
           expect(blockedFrameworkRequests).toEqual([]);

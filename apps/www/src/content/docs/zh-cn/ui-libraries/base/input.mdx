@@ -23,11 +23,29 @@ Root 通过 Text Control requirement 拥有一个 single-line plain-text editor�
 - `value` 选择受控模式。编辑产生归一化提案，owner 接纳并回传 `value` 后才成为权威值；演示第二个 Input 的 owner 会接纳提案。所有权模式在实例创建时确定，不在生命周期中切换。
 - `valueChange` 携带 `{ value, composing, data, inputType }`，`change` 携带 `{ value }`。IME 的 `compositionStart`、`compositionUpdate`、`compositionEnd` 携带 `{ value, data }`；组合候选由宿主编辑会话维护。
 
+## 重置已挂载的编辑器
+
+Input 的 draft 契约在已挂载的 adapter handle 上公开 `resetValue(value?: string): boolean`。应用可在回调中调用它，重置该编辑器当前的编辑会话。
+
+| 所有权与参数       | 重置后的值                              | 返回值                    |
+| ------------------ | --------------------------------------- | ------------------------- |
+| 非受控，传入字符串 | 传入值移除 CR/LF 换行后的单行文本       | 本次调用仍有效时为 `true` |
+| 非受控，不传参数   | 最新的 `defaultValue`，按相同规则归一化 | 本次调用仍有效时为 `true` |
+| 受控               | 保留当前 owner 传入的 `value`           | `false`                   |
+
+例如，`resetValue('New\r\nvalue')` 会把非受控 Input 重置为 `Newvalue`。单独更新 `defaultValue` 会保留用户已编辑的值；之后不传参数调用 reset，才会采用更新后的默认值。
+
+演示中的 **Set latest default** 更新默认值而不替换当前文本；**Reset to default** 不传参数调用该方法，**Reset to sample** 传入包含换行的示例，**Try controlled reset** 展示受控拒绝。状态区显示真实方法返回值、公开 value，以及该次调用期间观察到的编辑事件数量。
+
+两种所有权模式都会重置当前编辑／composition 会话，并同步公开的 `composing` 与 `value` state。受控返回 `false` 不表示 composition 仍在继续；修改受控值仍由 owner 负责。Reset 不合成 `valueChange`、`change` 或 `compositionEnd`，但操作期间可以触发公开 state observer。
+
+显式传入 `undefined` 与省略参数相同。view 缺失、尚未初始化、已 detach，或传入其他非字符串参数时，返回 `false`；终止 dispose 后仍保留既有的 capability lifetime 错误。若同步回调再次 reset、detach 或 remount 编辑器，外层调用会失效并返回 `false`，不能把旧状态发布到新会话。完整的 `asInputRoot` hook 继承同一协议。
+
 ## 同一个物理目标
 
 `disabled`、`readOnly`、`placeholder`、`required`、`name`、`autoComplete`、`minLength`、`maxLength`、`inputMode` 与 `enterKeyHint` 投影到同一个 Input。
 
-`ariaLabel`、`labelledBy`、`describedBy` 为该 textbox 提供命名与描述。Expose 提供 `focusSelf()`、`blurSelf()`，以及 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` state。
+`ariaLabel`、`labelledBy`、`describedBy` 为该 textbox 提供命名与描述。Expose 提供 `focusSelf()`、`blurSelf()`、`resetValue(value?)`，以及 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` state。
 
 ## 导入与边界
 
@@ -46,6 +64,7 @@ Input 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -55,8 +74,16 @@ Input 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'inputMode', type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'", default: 'undefined' },
-    { name: 'enterKeyHint', type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'", default: 'undefined' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },

@@ -95,14 +95,15 @@ function setupInputEditor(def: DefHandle<InputRootProps, InputRootExposes>) {
   def.expose.method('blurSelf', () => focusable.blur());
   def.expose.method('resetValue', (next?: string) => {
     const run = currentView;
-    if (!run) return false;
+    if (!run || (next !== undefined && typeof next !== 'string')) return false;
     const epoch = ++viewEpoch;
     const accepted = control.resetValue(next);
     if (currentView !== run || viewEpoch !== epoch) return false;
-    const snapshot = control.snapshot();
-    composing.set(snapshot?.composing ?? false, 'reason: input reset composition');
+    composing.set(control.snapshot()?.composing ?? false, 'reason: input reset composition');
     if (currentView !== run || viewEpoch !== epoch) return false;
-    value.set(snapshot?.value ?? '', 'reason: input reset value');
+    // A composing observer may update owner Props. Read current Text Control
+    // authority after that callback instead of publishing a stale snapshot.
+    value.set(control.snapshot()?.value ?? '', 'reason: input reset value');
     return currentView === run && viewEpoch === epoch && accepted;
   });
   def.expose.event('valueChange', { payload: 'json' });
@@ -147,6 +148,12 @@ function setupInputEditor(def: DefHandle<InputRootProps, InputRootExposes>) {
   def.lifecycle.onCreated((run) => sync(run.props.get()));
   def.lifecycle.onMounted((run) => {
     currentView = run;
+    const epoch = ++viewEpoch;
+    // Reset may retire its view between logical value adoption and public
+    // state publication. The new editing view publishes current authority.
+    composing.set(control.snapshot()?.composing ?? false, 'reason: input mounted composition');
+    if (currentView !== run || viewEpoch !== epoch) return;
+    value.set(control.snapshot()?.value ?? '', 'reason: input mounted value');
   });
   def.lifecycle.onUnmounted(() => {
     currentView = null;
