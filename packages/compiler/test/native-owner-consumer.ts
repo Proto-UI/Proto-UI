@@ -5,7 +5,12 @@ import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Vue from 'vue';
 import Vue2 from '../../adapters/vue2/node_modules/vue';
-import { compilePrototype, writeCompilation, type CompileOptions } from '../src/compile';
+import {
+  compilePrototype,
+  writeCompilation,
+  type Compilation,
+  type CompileOptions,
+} from '../src/compile';
 import { generatedSourcePath } from '../src/emitter-map';
 
 export const nativeOwnerProfiles = [
@@ -20,15 +25,20 @@ let sequence = 0;
 
 /** The documented producer/writer API and ordinary native-framework imports form the test boundary. */
 export async function mountNativeOwner(
-  source: string,
+  source: string | Compilation,
   profile: NativeOwnerProfile,
   options: {
     props?: Record<string, unknown>;
     compile?: Omit<CompileOptions, 'profile'>;
   } = {}
 ) {
-  const compiled = compilePrototype(source, { ...options.compile, profile });
+  const compiled =
+    typeof source === 'string'
+      ? compilePrototype(source, { ...options.compile, profile })
+      : { ok: true as const, value: source };
   if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+  if (compiled.value.output.profile !== profile)
+    throw new Error('Consumer profile does not match compiled output.');
   const directory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'generated-modules');
   await mkdir(directory, { recursive: true });
   const temporary = await mkdtemp(path.join(directory, 'ordinary-owner-'));

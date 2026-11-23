@@ -4,12 +4,16 @@ type Contact = {
   point: Point;
   horizontal: boolean;
   vertical: boolean;
+  movedHorizontal: boolean;
+  movedVertical: boolean;
 };
 const contact = (kind: string, point: Point): Contact => ({
   kind,
   point,
   horizontal: false,
   vertical: false,
+  movedHorizontal: false,
+  movedVertical: false,
 });
 const move = (entry: Contact | undefined, point: Point) => {
   if (!entry || !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
@@ -17,8 +21,14 @@ const move = (entry: Contact | undefined, point: Point) => {
   const sign = entry.kind === 'touch' || entry.kind === 'pen' ? 1 : -1;
   const dx = point.x - entry.point.x;
   const dy = point.y - entry.point.y;
-  if (dx !== 0) entry.horizontal = dx * sign > 0;
-  if (dy !== 0) entry.vertical = dy * sign > 0;
+  if (dx !== 0) {
+    entry.horizontal = dx * sign > 0;
+    entry.movedHorizontal = true;
+  }
+  if (dy !== 0) {
+    entry.vertical = dy * sign > 0;
+    entry.movedVertical = true;
+  }
   entry.point = point;
 };
 
@@ -43,10 +53,16 @@ export function createReaderContactSession() {
     hasDeparture(axis: 'horizontal' | 'vertical') {
       return [...pointers.values(), ...touches.values()].some((entry) => entry[axis]);
     },
+    hasMovement(axis: 'horizontal' | 'vertical') {
+      const key = axis === 'horizontal' ? 'movedHorizontal' : 'movedVertical';
+      return [...pointers.values(), ...touches.values()].some((entry) => entry[key]);
+    },
     clearMovement() {
       for (const entry of [...pointers.values(), ...touches.values()]) {
         entry.horizontal = false;
         entry.vertical = false;
+        entry.movedHorizontal = false;
+        entry.movedVertical = false;
       }
     },
     startPointer(id: number, kind: string, point: Point = { x: 0, y: 0 }) {

@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import { createSliderValuesDemo } from './slider-values-demo.shared';
 
-export default createSliderValuesDemo('shadcn');
+export default withShadcnRheaDemo(createSliderValuesDemo('shadcn'));

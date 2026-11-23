@@ -244,6 +244,7 @@ export function emitGpuiSource(
     'hitParticipation.unregisterRegion',
     'scroll.configure',
     'scroll.request',
+    'scroll.pauseFollowing',
     'scroll.getSnapshot',
     'collection.configure',
     'collection.getItems',
@@ -1904,6 +1905,8 @@ impl __PuiNativeRecordValue {
         function condition(value: RuleCondition): string {
           if (value.type === 'true' || value.type === 'false') return value.type;
           if (value.type === 'eq') {
+            if (value.left.type === 'meta')
+              throw new Error('Rule Meta must fail GPUI target admission.');
             const signal =
               value.left.type === 'prop'
                 ? `read_props(&${ownerReference()}, false).member(${string(value.left.key)}, false)`
@@ -2219,6 +2222,8 @@ impl __PuiNativeRecordValue {
             return `scroll_configure(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.request':
             return `scroll_request(${receiverOwner()}, ${argument(0)})`;
+          case 'scroll.pauseFollowing':
+            return `scroll_pause_following(${receiverOwner()})`;
           case 'scroll.getSnapshot':
             return `scroll_snapshot(${receiverOwner()})`;
           case 'hook.asTextControl':
@@ -2868,7 +2873,11 @@ impl __PuiNativeRecordValue {
           if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
           outcome?; self.drive(window, cx)
       }
-      pub fn set_instance_associations(&mut self, associations: InstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_instance_associations(&self.owner, associations))?; drive_owners(window, cx); self.drive(window, cx) }
+      pub fn set_instance_associations(&mut self, associations: InstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
+          let outcome = catch_authored(|| replace_instance_associations(&self.owner, associations));
+          if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
+          outcome?; drive_owners(window, cx); self.drive(window, cx)
+      }
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
       fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {

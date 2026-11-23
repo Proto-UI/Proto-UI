@@ -1,4 +1,6 @@
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
+import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
+import { SHADER_PRESENTATION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
   PRESENCE_PRESENTATION_SINK_CAP,
   PRESENCE_RUN_IN_CALLBACK_CAP,
@@ -388,6 +390,10 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('feedback', [
       ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
       [EFFECTS_CAP, effectsPort],
+      [
+        SHADER_PRESENTATION_SINK_CAP,
+        createWebShaderPresentationSink(args.getCurrentElement, effectsPort),
+      ],
       [PRESENCE_PRESENTATION_SINK_CAP, createWebPresencePresentationSink(args.el, effectsPort)],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
       [

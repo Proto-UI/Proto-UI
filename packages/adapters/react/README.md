@@ -30,6 +30,30 @@ The same Text Control patch owns the native form submission `name`. The adapter 
 
 The adapter publishes one public handle object per mounted adapter instance. React re-runs the imperative handle effect whenever a consumer supplies a new `ref` identity, so the current callback still receives the handle. The handle is allocated once and reused: `update`, `getExposes` and `invokeInCallbackScope` keep reading the live view while its identity stays stable across renders and commits.
 
+## Props delivery and view updates
+
+The React Adapter keeps `autoUpdateOnPropsChange: true` as its compatibility default. After a changed host Props snapshot, the Adapter requests an update in addition to invalidating the Props source. That request belongs to the host policy. The active [C-PROPS-0014](../../../spec/contracts/C-PROPS-0014.yaml) still requires the Props channel itself to resolve inputs and dispatch eligible watchers without implicitly committing a render.
+
+With `autoUpdateOnPropsChange: false`, a host notification marks the raw source dirty. The next Runtime synchronization boundary reads the snapshot and delivers watchers. Ordinary callback scopes and rule evaluation can reach that boundary; observing the DOM does not. This lazy source notification differs from the compiled React DOM facade's immediate Props receipt. Compare them after a defined synchronization boundary, rather than requiring the manual Adapter to remain stale until a particular application event. See the active [React Adapter contract](../../../spec/adapters/A-REACT-18-19-0001.yaml) and draft [Props source capability](../../../spec/host-caps/HC-PROPS-SOURCE-0001.yaml).
+
+For an already mounted component whose rendered text reads `label` and whose style Rule reads `tone`, the selected configurations have these outcomes after changed Props are synchronized:
+
+| Configuration | No authored update request | `watch(['label'], run => run.update())` |
+| --- | --- | --- |
+| Default React Adapter | Host policy requests a text update; Rule style refreshes. | Text and Rule style update; eligible requests may coalesce. |
+| React Adapter, `autoUpdateOnPropsChange: false` | Rule style refreshes; text waits for an explicit update. | The watcher requests the text update; Rule style refreshes. |
+| Compiled `react-dom-source-v1`, default `explicit` policy | Rule style refreshes; text waits for an explicit update. | The watcher requests the text update; Rule style refreshes. |
+
+Existing Adapter consumers can retain the default. When migrating a Props-driven template to an explicit policy, retain or author the update intent appropriate to that template:
+
+```ts
+def.props.watch(['label'], (run) => run.update());
+```
+
+This is the lawful fix reported by the Shenko consumer in [#1453](https://github.com/Proto-UI/Proto-UI/issues/1453). Changing the React `key` to force a remount is unnecessary and loses owner/DOM continuity. A watcher is one valid update cause; events, public methods and other admitted callback paths can also request an update. Absence of this particular watcher alone does not prove a defect.
+
+The focused [Props policy consumer](../../compiler/test/props-update-policy.test.ts) executes the same authored source in all six configurations and checks repeated text/style changes, native slot content, stable DOM/public handles, committed lifecycle callbacks and disposal. Its browser counterpart also observes computed CSS. These are public reproduction fixtures, not a complete Shenko or OpenGreendam/verdant application acceptance. [Compiler policy documentation](../../compiler/README.md#observable-policy) describes the other profile defaults and explicit selection. The upstream positive-scheduling owner question `C-PROPS-0014-Q-CORE-UPDATE-OWNER` remains open; this documentation does not change that normative status or install a missing-update diagnostic.
+
 ## Component props and accessible names
 
 React facade inputs follow the prototype's declared API. They do not extend all HTML attributes. `className` / `hostClassName` / `surfaceClassName`, their `style` counterparts, and `dir` have explicit Adapter channels. Generic `aria-*`, `data-*`, `title`, `id`, `role` and `tabIndex` inputs are not implicitly forwarded. Development builds warn once per undeclared key and logical instance; the warning omits prop values. A declared prototype prop with one of those names still belongs to that prototype. A custom `getProps` mapping may consume an input into the prototype's documented props. Prototype-owned roles and ARIA state remain authoritative.

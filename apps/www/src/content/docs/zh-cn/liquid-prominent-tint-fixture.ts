@@ -7,6 +7,9 @@ import type {
 export const PROMINENT_TINT_PARTS = ['button', 'submit'] as const;
 export const PROMINENT_TINT_CONTROLS = ['neutral', 'tinted', 'opaque'] as const;
 export const PROMINENT_TINT_SOURCES = ['pastel', 'gray-boundary', 'chromatic-regions'] as const;
+// Separate source-response sequence. Existing structured optical inputs remain
+// byte-for-byte unchanged; the final field repeats A after three new revisions.
+export const PROMINENT_TINT_CONSTANT_CODES = [32, 96, 160, 224, 32] as const;
 export type TintPart = (typeof PROMINENT_TINT_PARTS)[number];
 export type TintControl = (typeof PROMINENT_TINT_CONTROLS)[number];
 export type TintSource = (typeof PROMINENT_TINT_SOURCES)[number];
@@ -116,6 +119,18 @@ export function paintProminentTintSource(
   }
 }
 
+export function paintProminentTintConstantSource(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  code: number
+) {
+  if (!PROMINENT_TINT_CONSTANT_CODES.some((value) => value === code))
+    throw new Error('Undeclared constant tint source');
+  ctx.fillStyle = `rgb(${code}, ${code}, ${code})`;
+  ctx.fillRect(0, 0, width, height);
+}
+
 /** Complete finite collection plan, available without loading a browser. */
 export function prominentTintPreferenceStages(part: TintPart) {
   return [
@@ -157,7 +172,11 @@ export function createProminentTintPlan(shard?: string) {
   if (shard && !all.includes(shard as (typeof all)[number]))
     throw new Error('Invalid prominent tint runtime shard');
   const runtimes = shard ? all.filter((runtime) => runtime === shard) : [...all];
-  const cases: { id: string; kind: 'journey' | 'preferences'; captures: string[] }[] = [];
+  const cases: {
+    id: string;
+    kind: 'journey' | 'preferences' | 'constant-field';
+    captures: string[];
+  }[] = [];
   for (const runtime of runtimes)
     for (const theme of ['light', 'dark'])
       for (const part of PROMINENT_TINT_PARTS) {
@@ -188,10 +207,52 @@ export function createProminentTintPlan(shard?: string) {
             (stage, index) => `${id}-${index}-${stage}`
           ),
         });
+        if (part === 'button') {
+          const id = `${runtime}-${theme}-button-constant-field`;
+          cases.push({
+            id,
+            kind: 'constant-field',
+            captures: PROMINENT_TINT_CONSTANT_CODES.flatMap((code, step) =>
+              ['tinted', 'opaque'].map((control) => `${id}-${step}-${code}-${control}`)
+            ),
+          });
+        }
       }
   return { runtimes, cases };
 }
 export type TintCheckpointStatus = { status: string; error?: string };
+export function assessProminentTintCompletion(
+  plan: ReturnType<typeof createProminentTintPlan>,
+  cases: Record<string, TintCheckpointStatus>,
+  captures: Record<string, TintCheckpointStatus>,
+  errors: readonly string[] = []
+) {
+  const expectedCases = new Set(plan.cases.map((entry) => entry.id));
+  const expectedCaptures = new Set(plan.cases.flatMap((entry) => entry.captures));
+  const incompleteCases = [...expectedCases].filter(
+    (id) => cases[id]?.status !== 'completed' || cases[id]?.error
+  );
+  const incompleteCaptures = [...expectedCaptures].filter(
+    (id) => captures[id]?.status !== 'passed-observation-checks' || captures[id]?.error
+  );
+  const unexpectedCases = Object.keys(cases).filter((id) => !expectedCases.has(id));
+  const unexpectedCaptures = Object.keys(captures).filter((id) => !expectedCaptures.has(id));
+  return {
+    status:
+      !incompleteCases.length &&
+      !incompleteCaptures.length &&
+      !unexpectedCases.length &&
+      !unexpectedCaptures.length &&
+      !errors.length
+        ? 'completed'
+        : 'incomplete',
+    incompleteCases,
+    incompleteCaptures,
+    unexpectedCases,
+    unexpectedCaptures,
+    errors,
+  };
+}
 /** Executed but unresolved work is interrupted, never labeled unexecuted. */
 export function finalizeProminentTintStatus(record: TintCheckpointStatus) {
   if (record.status === 'not-run') return { ...record, status: 'blocked-at-normal-finalization' };

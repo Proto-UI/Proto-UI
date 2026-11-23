@@ -16,12 +16,14 @@ const source = `import {definePrototype,type RunHandle} from '@proto.ui/core';
 import {asScrollSurface} from '@proto.ui/hooks';
 export default definePrototype({name:'scroll-position-consumer',setup(def){
   const scroll=asScrollSurface();
-  scroll.configure({axes:'vertical',projection:'system'});
+  scroll.configure({axes:'vertical',projection:'system',endFollow:{mode:'while-at-end',axis:'vertical'}});
   let current:RunHandle<{}>|null=null;
   def.lifecycle.onCreated(run=>{current=run;});
   def.expose.method('to',(position:number)=>scroll.request({kind:'to',axis:'vertical',position}));
   def.expose.method('by',(delta:number)=>scroll.request({kind:'by',axis:'vertical',delta}));
   def.expose.method('read',()=>scroll.getSnapshot());
+  def.expose.method('pause',()=>scroll.pauseFollowing());
+  def.expose.method('end',()=>scroll.request({kind:'to-end',axis:'vertical'}));
   def.expose.method('hide',()=>current?.lifecycle.setPresent(false));
   def.expose.method('show',()=>current?.lifecycle.setPresent(true));
   return r=>r.el('section',r.slot());
@@ -61,6 +63,30 @@ function physicalRoot(host: HTMLElement, profile: NativeOwnerProfile): HTMLEleme
 
 for (const profile of nativeOwnerProfiles)
   describe(`C-SCROLL-0001 ordinary ${profile} consumer`, () => {
+    it('consumes pause as a typed exposed operation without moving or stealing focus', async () => {
+      geometry();
+      const owner = await mountNativeOwner(source, profile);
+      cleanup.push(owner.dispose);
+      const surface = physicalRoot(owner.host, profile);
+      const exposed = owner.handle.getExposes();
+      await owner.act(() => exposed.end());
+      const before = surface.scrollTop;
+      surface.tabIndex = 0;
+      surface.focus();
+      expect(await owner.act(() => exposed.pause())).toEqual({ kind: 'dispatched' });
+      expect(surface.scrollTop).toBe(before);
+      expect(document.activeElement).toBe(surface);
+      expect(exposed.read().endFollow.state).toBe('paused');
+      await owner.act(() => exposed.hide());
+      expect(await owner.act(() => exposed.pause())).toEqual({
+        kind: 'rejected',
+        reason: 'not-mounted',
+      });
+      await owner.act(() => exposed.show());
+      expect(await owner.act(() => exposed.end())).toEqual({ kind: 'dispatched' });
+      expect(exposed.read().endFollow.state).toBe('following');
+    });
+
     it('returns a dispatched record for a delivered request and reports observed facts', async () => {
       geometry();
       const owner = await mountNativeOwner(source, profile);

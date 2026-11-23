@@ -1,6 +1,9 @@
 // @vitest-environment node
 
 import type { Browser, Locator } from 'playwright-core';
+import { execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { renderProtoStyleTokenCss } from '../../../../../../packages/cli/src/services/proto-style-css';
 import {
@@ -30,9 +33,53 @@ if (requestedRuntime && TEST_RUNTIMES.length === 0) {
 
 let browser: Browser;
 let baseUrl = '';
+const evidenceDir = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
 
 function roots(previewer: Locator): Locator {
   return previewer.locator(`[data-projection-content] ${SPINNER_SELECTOR}`);
+}
+
+async function sampleMotion(spinners: Locator) {
+  return spinners.evaluateAll(async (elements) => {
+    const frames: Array<
+      Array<{
+        frame: number;
+        frameTime: number;
+        at: number;
+        transform: string;
+        animations: Array<{ name: string; state: string; time: number | null }>;
+      }>
+    > = elements.map(() => []);
+    let startFrameTime: number | null = null;
+    let previousFrameTime: number | null = null;
+    let frame = 0;
+    // Observe actual frame progression. Do not wait for the infinite animation
+    // to become idle, pause it, or substitute a synthetic clock.
+    while (true) {
+      const frameTime = await new Promise<number>((resolve) => requestAnimationFrame(resolve));
+      if (previousFrameTime !== null && frameTime <= previousFrameTime) continue;
+      startFrameTime ??= frameTime;
+      previousFrameTime = frameTime;
+      frame += 1;
+      elements.forEach((element, index) => {
+        frames[index].push({
+          frame,
+          frameTime,
+          at: performance.now(),
+          transform: getComputedStyle(element).transform,
+          animations: element.getAnimations().map((animation) => ({
+            name: animation instanceof CSSAnimation ? animation.animationName : '',
+            state: animation.playState,
+            time: typeof animation.currentTime === 'number' ? animation.currentTime : null,
+          })),
+        });
+      });
+      // A slow first CSSOM read must not consume the observation window before
+      // we have observed another real frame. Keep the nominal window at 120ms.
+      if (frame >= 2 && frameTime - startFrameTime >= 120) break;
+    }
+    return frames;
+  });
 }
 
 async function expectPassiveFocus(locator: Locator, label: string): Promise<void> {
@@ -259,11 +306,16 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
     }
   }, 240_000);
 
-  it('rotates 1000ms linear infinite by default and stays open-edged under reduced motion', async () => {
-    const opened = await openRoute(browser, baseUrl, SPINNER_ROUTE, NARROW_VIEWPORT);
-    try {
-      for (const runtime of TEST_RUNTIMES) {
+  it.each(TEST_RUNTIMES.flatMap((runtime) => COLOR_SCHEMES.map((theme) => ({ runtime, theme }))))(
+    '$runtime/$theme advances real rotation and keeps reduced motion at passive rest',
+    async ({ runtime, theme }) => {
+      const opened = await openRoute(browser, baseUrl, SPINNER_ROUTE, NARROW_VIEWPORT);
+      const observations: Record<string, unknown> = {};
+      let failure: string | null = null;
+      try {
+        await opened.page.emulateMedia({ reducedMotion: 'no-preference' });
         await selectRuntime(opened.page, opened.previewer, runtime, SPINNER_SELECTOR, 5);
+        await applyColorScheme(opened.page, theme);
         const first = roots(opened.previewer).first();
         const motionFacts = await first.evaluate((element) => {
           const style = getComputedStyle(element);
@@ -278,6 +330,31 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
         expect(motionFacts.animationDuration, `${runtime}/duration`).toBe('1s');
         expect(motionFacts.animationTimingFunction, `${runtime}/timing`).toBe('linear');
         expect(motionFacts.animationIterationCount, `${runtime}/iteration`).toBe('infinite');
+
+        observations.normal = await sampleMotion(roots(opened.previewer));
+        for (const [index, frames] of (
+          observations.normal as Awaited<ReturnType<typeof sampleMotion>>
+        ).entries()) {
+          expect(
+            new Set(frames.map((frame) => frame.transform)).size,
+            `${runtime}/${index}/painted-motion`
+          ).toBeGreaterThan(1);
+          const before = frames[0].animations.find((animation) => animation.name === 'pui-spin');
+          const after = frames
+            .at(-1)!
+            .animations.find((animation) => animation.name === 'pui-spin');
+          expect(before?.state, `${runtime}/${index}/running`).toBe('running');
+          expect(typeof before?.time, `${runtime}/${index}/native-time`).toBe('number');
+          expect(after?.time, `${runtime}/${index}/native-time-progress`).toBeGreaterThan(
+            before!.time!
+          );
+        }
+        if (evidenceDir) {
+          await mkdir(evidenceDir, { recursive: true });
+          await opened.previewer.screenshot({
+            path: join(evidenceDir, `spinner-${runtime}-${theme}-normal.png`),
+          });
+        }
 
         await opened.page.emulateMedia({ reducedMotion: 'reduce' });
         const reducedFacts = await first.evaluate((element) => {
@@ -297,10 +374,54 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
           reducedFacts.borderColors.filter((color) => color === 'rgba(0, 0, 0, 0)').length,
           `${runtime}/reduced-open-edge`
         ).toBe(1);
-        await opened.page.emulateMedia({ reducedMotion: null });
+        observations.reduced = await sampleMotion(roots(opened.previewer));
+        for (const [index, frames] of (
+          observations.reduced as Awaited<ReturnType<typeof sampleMotion>>
+        ).entries()) {
+          expect(
+            new Set(frames.map((frame) => frame.transform)).size,
+            `${runtime}/${index}/static-rest`
+          ).toBe(1);
+          expect(
+            frames.every((frame) => frame.animations.length === 0),
+            `${runtime}/${index}/no-running-animation`
+          ).toBe(true);
+        }
+        if (evidenceDir)
+          await opened.previewer.screenshot({
+            path: join(evidenceDir, `spinner-${runtime}-${theme}-reduced.png`),
+          });
+      } catch (error) {
+        failure = error instanceof Error ? (error.stack ?? error.message) : String(error);
+        throw error;
+      } finally {
+        if (evidenceDir) {
+          await mkdir(evidenceDir, { recursive: true });
+          await writeFile(
+            join(evidenceDir, `spinner-${runtime}-${theme}-motion.json`),
+            JSON.stringify(
+              {
+                sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+                browser: browser.version(),
+                runtime,
+                theme,
+                route: SPINNER_ROUTE,
+                baseUrl,
+                viewport: NARROW_VIEWPORT,
+                scope:
+                  'Actual documentation projection and native CSS animation observations; not a contrast verdict or native OS assistive-technology acceptance.',
+                outcome: failure ? 'FAIL' : 'PASS',
+                failure,
+                observations,
+              },
+              null,
+              2
+            ) + '\n'
+          );
+        }
+        await opened.context.close();
       }
-    } finally {
-      await opened.context.close();
-    }
-  }, 120_000);
+    },
+    120_000
+  );
 });

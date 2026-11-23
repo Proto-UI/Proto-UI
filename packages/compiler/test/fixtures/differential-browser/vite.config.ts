@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import sourceConfig from '../../../../../vitest.config';
 import { transformWithEsbuild, type Plugin } from 'vite';
+import { ownershipFixturePlugin } from '../../ownership-fixture-plugin';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repository = path.resolve(root, '../../../../..');
@@ -177,7 +178,7 @@ const emitted: Plugin = {
 
 export default {
   root,
-  plugins: [...(sourceConfig.plugins ?? []), emitted],
+  plugins: [...(sourceConfig.plugins ?? []), emitted, ownershipFixturePlugin()],
   resolve: {
     alias: {
       react: path.join(repository, 'packages/adapters/react/node_modules/react'),

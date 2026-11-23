@@ -35,14 +35,17 @@ describe('Base Select documentation registration', () => {
     expect(getPrototype('base-select-item')).toBe(selectItem);
   });
   it.each(['en', 'zh-cn'])(
-    'registers the select demo on the %s page with the three-runtime scope',
+    'registers the actual select demo on the %s page with all four public runtimes',
     (locale) => {
       const path = docs(locale);
       expect(existsSync(path)).toBe(true);
       const text = readFileSync(path, 'utf8');
-      expect(text).toContain('demo-base-select');
-      expect(text).toContain('initialRuntime="wc"');
-      expect(text).toContain("runtimes={['wc', 'react', 'vue']}");
+      const preview = text
+        .match(/<PrototypePreviewer\b[\s\S]*?\/>/g)
+        ?.find((tag) => tag.includes('demoId="demo-base-select"'));
+      expect(preview).toBeDefined();
+      expect(preview).toContain('initialRuntime="wc"');
+      expect(preview).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
     }
   );
   it('makes Base Select discoverable in the sidebar', () => {

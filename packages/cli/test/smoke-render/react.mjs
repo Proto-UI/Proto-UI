@@ -23,6 +23,7 @@
 // onto the host. Shadcn additionally stamps its feedback.style class tokens,
 // so we assert the pinned New York paint tokens and installed CSS on that host.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
+import assert from 'node:assert/strict';
 import {
   assertStyledButton,
   assertStyledSwitch,
@@ -35,8 +36,16 @@ loadConsumerStyles(document, { evidenceName: 'cli-react' });
 
 const React = await import('react');
 const ReactDOMClient = await import('react-dom/client');
-const { ShadcnButton, ShadcnSwitch, BaseButton, BaseImageRoot } =
-  await import('./proto-ui/components/react/index.ts');
+const {
+  ShadcnButton,
+  ShadcnSwitch,
+  ShadcnTooltipGroup,
+  ShadcnTooltipRoot,
+  ShadcnTooltipTrigger,
+  ShadcnTooltipContent,
+  BaseButton,
+  BaseImageRoot,
+} = await import('./proto-ui/components/react/index.ts');
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -104,6 +113,65 @@ if (switchHost.getAttribute('aria-checked') !== 'false') {
 assertSwitchThumbState(switchHost, false, 'react smoke: after click');
 await React.act(async () => switchRoot.unmount());
 switchContainer.remove();
+
+// Exercise the installed CLI facade itself. A facade built with React alone
+// renders Content inline, so merely finding role=tooltip would miss the
+// renderer-owned Portal contract. This is synthetic DOM evidence, not native
+// layout, paint or accessibility-tree acceptance.
+const tooltipContainer = document.createElement('div');
+document.body.appendChild(tooltipContainer);
+const tooltipRenderer = ReactDOMClient.createRoot(tooltipContainer);
+let tooltipContent;
+try {
+  await React.act(async () => {
+    tooltipRenderer.render(
+      React.createElement(
+        ShadcnTooltipGroup,
+        null,
+        React.createElement(
+          ShadcnTooltipRoot,
+          { defaultOpen: true },
+          React.createElement(
+            ShadcnTooltipTrigger,
+            { className: 'packed-tooltip-trigger' },
+            'Packed tooltip trigger'
+          ),
+          React.createElement(ShadcnTooltipContent, null, 'Packed tooltip description')
+        )
+      )
+    );
+    await flush();
+  });
+  await React.act(flush);
+  tooltipContent = document.querySelector('[role="tooltip"]');
+  const trigger = tooltipContainer.querySelector('.packed-tooltip-trigger');
+  assert.ok(trigger, 'react smoke: packed Tooltip Trigger did not mount');
+  assert.ok(tooltipContent?.isConnected, 'react smoke: packed Tooltip Content did not mount');
+  assert.equal(tooltipContent.textContent, 'Packed tooltip description');
+  assert.equal(
+    tooltipContainer.contains(tooltipContent),
+    false,
+    'react smoke: installed CLI Tooltip must project outside its author container'
+  );
+  assert.ok(
+    document.body.contains(tooltipContent),
+    'react smoke: Tooltip portal left the document'
+  );
+  assert.ok(tooltipContent.id, 'react smoke: packed Tooltip Content requires an ID');
+  assert.ok(
+    (trigger.getAttribute('aria-describedby') ?? '').split(/\s+/).includes(tooltipContent.id),
+    'react smoke: packed Tooltip Trigger lost its description relation'
+  );
+} finally {
+  await React.act(async () => tooltipRenderer.unmount());
+  tooltipContainer.remove();
+}
+assert.equal(
+  tooltipContent.isConnected,
+  false,
+  'react smoke: Tooltip portal survived owner unmount'
+);
+assert.equal(document.querySelector('[role="tooltip"]'), null);
 globalThis.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
 
 const imageContainer = document.createElement('div');
@@ -138,5 +206,5 @@ console.log(
     shadcn.outerHTML.length +
     'B base=' +
     base.outerHTML.length +
-    'B + Base Image'
+    'B + Base Image + Tooltip body portal and owner cleanup'
 );

@@ -1,0 +1,310 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint4-recovery-original-evidence-manifest",
+  "originalRoot": "/tmp/pui-s4-358e9947-ops",
+  "encoding": "gzip; decompression reproduces original bytes exactly; mtime=0",
+  "status": "complete local checkpoint; final published-head validation remains pending",
+  "entries": [
+    {
+      "path": "raw/frozen-compiler.log.gz",
+      "sourceRelativeToOps": "frozen-compiler.log",
+      "rawBytes": 323700,
+      "rawSha256": "800f9e5fc9fbba3fe9b4c9cc22b115220da767bcff5f5d2722b451a0219aecad",
+      "gzipBytes": 43429,
+      "gzipSha256": "08223a8711b2e827a01deb767769e3a39510916a3c7c0e5947278471fc82c0e1"
+    },
+    {
+      "path": "raw/frozen-compiler.json.gz",
+      "sourceRelativeToOps": "frozen-compiler.json",
+      "rawBytes": 140759,
+      "rawSha256": "cea09a2126e2228ac6943501f203a68393d131695e792a12fae73ecab73a06af",
+      "gzipBytes": 14505,
+      "gzipSha256": "ed51b869ffc4c54fe84fdb50c23925dc42e83e99eee00338cfc769912aef60da"
+    },
+    {
+      "path": "raw/numeric-admission-restored.log.gz",
+      "sourceRelativeToOps": "numeric-admission-restored.log",
+      "rawBytes": 79859,
+      "rawSha256": "3a737bbe0c9a8d974e2d2535f6cb32d95a4d1f21ba7f675dfc45d37956f6ee2e",
+      "gzipBytes": 13038,
+      "gzipSha256": "b941d1d6106f113d71b9624e7c3255aa117532e83528eb6ae2b1cb65adcbda4b"
+    },
+    {
+      "path": "raw/numeric-admission-restored.json.gz",
+      "sourceRelativeToOps": "numeric-admission-restored.json",
+      "rawBytes": 17481,
+      "rawSha256": "a4cabcdc09c9410bcfe20a515de18c2a925f0cee0e057a0d12491ed8ba11e322",
+      "gzipBytes": 1525,
+      "gzipSha256": "cd0c8017232e47f13aee5781d01f189a0e8756f151311940525f4cbac6ea2ffa"
+    },
+    {
+      "path": "raw/numeric-admission-restored.metadata.json.gz",
+      "sourceRelativeToOps": "numeric-admission-restored.metadata.json",
+      "rawBytes": 3324,
+      "rawSha256": "3c6902b66a68d8ba3b9faf74da02e441276ffb1386e5c39d4b0556a7a73d36c2",
+      "gzipBytes": 1544,
+      "gzipSha256": "c9ddaf77a19818912bb9c365b9fff9b10c7e9e5c83af404c4b591b8fc4e3e32d"
+    },
+    {
+      "path": "raw/license-snapshot-generation.log.gz",
+      "sourceRelativeToOps": "license-snapshot-generation.log",
+      "rawBytes": 3044,
+      "rawSha256": "f9596289a67679704dab9263687bc82f3163d37ed9c3bb2c2aaeecf57b088048",
+      "gzipBytes": 1031,
+      "gzipSha256": "83447454df9580efd5c04a7083bccff74389c21f71337776afc9bbf5f385aea0"
+    },
+    {
+      "path": "raw/license-snapshot-generation.json.gz",
+      "sourceRelativeToOps": "license-snapshot-generation.json",
+      "rawBytes": 5028,
+      "rawSha256": "ebc45331b5d79fb4d262720efa6e41de3999986898d14c7f9013e5ec39bc78d5",
+      "gzipBytes": 953,
+      "gzipSha256": "e4ee978c5926916138dfaea76362fd8e33cfd33320992816196ca5107d5724c1"
+    },
+    {
+      "path": "raw/diagnostic-registry-generation.log.gz",
+      "sourceRelativeToOps": "diagnostic-registry-generation.log",
+      "rawBytes": 1452,
+      "rawSha256": "3a47cc065e37a3612663fb1afbd472d4bb4ac58498be705250b8166bf77e35a8",
+      "gzipBytes": 586,
+      "gzipSha256": "7740dcdac1eb2490c16f663d08aeb02aa3abf5c1470aba1eb1b590f0b81ac20e"
+    },
+    {
+      "path": "raw/diagnostic-registry-generation.json.gz",
+      "sourceRelativeToOps": "diagnostic-registry-generation.json",
+      "rawBytes": 2009,
+      "rawSha256": "2b4077eaa7f2de18c5a5132f100c9d4a03fb994600ed3db51027a749a82eba50",
+      "gzipBytes": 627,
+      "gzipSha256": "1b28457dcd42fd55014519dad66606097baa411d8f2c91e0eb463e35e4f52fba"
+    },
+    {
+      "path": "raw/shader-unused-style.log.gz",
+      "sourceRelativeToOps": "shader-unused-style.log",
+      "rawBytes": 26518,
+      "rawSha256": "1312cb393c70818ea397303dac736b18975c96bc48aad860a7e618153b2d1667",
+      "gzipBytes": 4076,
+      "gzipSha256": "b3e90935d6c1cef87632d2500d8f6aced189fbbf40731a04c78a2de608600f50"
+    },
+    {
+      "path": "raw/shader-unused-style.json.gz",
+      "sourceRelativeToOps": "shader-unused-style.json",
+      "rawBytes": 993,
+      "rawSha256": "9bddc5c618cd31056b2acf912ce57584cd695dc20249944b8038d064334590b3",
+      "gzipBytes": 457,
+      "gzipSha256": "86f4dd935e506fe6feba079b6ba99cd9b5c6d6aa609a34db9586bf7221d4c098"
+    },
+    {
+      "path": "raw/shader-unused-style-corrected.log.gz",
+      "sourceRelativeToOps": "shader-unused-style-corrected.log",
+      "rawBytes": 26528,
+      "rawSha256": "42f08f34187e5b57a1cdf9a430bede52abc704dc72bfd4ae04685bd6f4cbef50",
+      "gzipBytes": 4074,
+      "gzipSha256": "a1a9300e96bc1008bb605df8be6329a93902655b554f5edab4121b3124de9819"
+    },
+    {
+      "path": "raw/shader-unused-style-corrected.json.gz",
+      "sourceRelativeToOps": "shader-unused-style-corrected.json",
+      "rawBytes": 991,
+      "rawSha256": "354546c75cd6d1eba846a095761c4b1c4f66dc1a3c36a4c1dfd99c02f3c1e8b0",
+      "gzipBytes": 457,
+      "gzipSha256": "083a5c471036896d03938e2013466c8e63e8a98dd41253aaab9c7629a3d7b2b1"
+    },
+    {
+      "path": "raw/frozen-types.log.gz",
+      "sourceRelativeToOps": "frozen-types.log",
+      "rawBytes": 1149,
+      "rawSha256": "e686ddb4f648ef588cf0126e81d6dc405e80eb158eac0b0d3489e51e98b1f7aa",
+      "gzipBytes": 653,
+      "gzipSha256": "a86d791d851b572b4620ae727733dde55d4fe11a5937e8dd32b1509bf98672e0"
+    },
+    {
+      "path": "raw/frozen-types-retry.log.gz",
+      "sourceRelativeToOps": "frozen-types-retry.log",
+      "rawBytes": 552,
+      "rawSha256": "dc9064895367d572e11cc8579d6a80ef9abd36c2f5a2b3e548a1c080353aa910",
+      "gzipBytes": 370,
+      "gzipSha256": "372132d8483617ebced0c2042db47b9389179da3bb76a8f7d2c5c57dba72282c"
+    },
+    {
+      "path": "raw/frozen-types-fixed.log.gz",
+      "sourceRelativeToOps": "frozen-types-fixed.log",
+      "rawBytes": 292,
+      "rawSha256": "44deeedd9f544557db8e93c0e0ac3d6caeaaa1b4ab24eb70f4a73491dc0e5c57",
+      "gzipBytes": 209,
+      "gzipSha256": "7b80ad18991eaa286fc73b0ba5411d73ceec1ffedc68f1511b21db655bc3f379"
+    },
+    {
+      "path": "raw/frozen-types-corrected.log.gz",
+      "sourceRelativeToOps": "frozen-types-corrected.log",
+      "rawBytes": 60,
+      "rawSha256": "3e737f6a9117cec194b02103b357f8668fae9adb86a8a8cd0bf25efab8948548",
+      "gzipBytes": 78,
+      "gzipSha256": "6ce97002f260e1268efc93192cd9a463a9953d71987db775defc89ed5c261125"
+    },
+    {
+      "path": "raw/archive-preservation/runtime-reader.mjs.gz",
+      "sourceRelativeToOps": "archive-preservation/runtime-reader.mjs",
+      "rawBytes": 1719,
+      "rawSha256": "74d6c2ab7a63156b66bf1d3666ffe530215ec73aeec0e921c310f92ca35251f0",
+      "gzipBytes": 681,
+      "gzipSha256": "96d8f45f4c3320a3dad3bc3c54286baf5e1091abac492f2bc3c2038b922e81ea"
+    },
+    {
+      "path": "raw/archive-preservation/red.receipt.json.gz",
+      "sourceRelativeToOps": "archive-preservation/red.receipt.json",
+      "rawBytes": 962,
+      "rawSha256": "1995a7071199872ac22984fffe66aa0a1f1bdf4a41e3bd6d6a41628baa5455db",
+      "gzipBytes": 462,
+      "gzipSha256": "7b7afd211a95608d0866216c69cea589eb32bc63db0fae9b513859d8ce9cc153"
+    },
+    {
+      "path": "raw/archive-preservation/red.stdout.log.gz",
+      "sourceRelativeToOps": "archive-preservation/red.stdout.log",
+      "rawBytes": 685,
+      "rawSha256": "7259b10bc97ad5d41177f66eeca9d6306fb512ea3a4eba3b4402402b9aa072ee",
+      "gzipBytes": 402,
+      "gzipSha256": "84e088649a1136ad6c87e6b31ea9c95349326153e0f4849728d2bf480d9e2104"
+    },
+    {
+      "path": "raw/archive-preservation/red.stderr.log.gz",
+      "sourceRelativeToOps": "archive-preservation/red.stderr.log",
+      "rawBytes": 890,
+      "rawSha256": "5eb6cf4e40ba640d61d04c78283f16f1f5dccf341fce4e28fed62cc044ee85fd",
+      "gzipBytes": 523,
+      "gzipSha256": "5577d416799e42c420224e60c5294cfb6c4a32614324426c1e88597f2c141f2f"
+    },
+    {
+      "path": "raw/archive-preservation/green.receipt.json.gz",
+      "sourceRelativeToOps": "archive-preservation/green.receipt.json",
+      "rawBytes": 967,
+      "rawSha256": "044817c410220abf2b5ddc4748958787f24d904ee44ce67405eddd778049fc41",
+      "gzipBytes": 464,
+      "gzipSha256": "4a047f232fae90ba29c57662d1bf3856f6df43269345aa8e72ca14928c8b70f3"
+    },
+    {
+      "path": "raw/archive-preservation/green.stdout.log.gz",
+      "sourceRelativeToOps": "archive-preservation/green.stdout.log",
+      "rawBytes": 1582,
+      "rawSha256": "f0132795032b25992522c2e3670ffd039998d5a48b0552be71092206a37dbfc7",
+      "gzipBytes": 826,
+      "gzipSha256": "8496fb6591e0c6676c340de0441565ccf4a3512a668a45b15ed28fee48a4de83"
+    },
+    {
+      "path": "raw/archive-preservation/green.stderr.log.gz",
+      "sourceRelativeToOps": "archive-preservation/green.stderr.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "raw/archive-preservation/restoration.json.gz",
+      "sourceRelativeToOps": "archive-preservation/restoration.json",
+      "rawBytes": 8023,
+      "rawSha256": "29540f172119a3eb9f21780979fc2129a4c8efe2745f9f10af79c14804c092ac",
+      "gzipBytes": 2003,
+      "gzipSha256": "d075203ca61da73e47e4ca3fb2bd916e2c5e08b39cdb85dffb6c73f64e0a3ad1"
+    },
+    {
+      "path": "raw/archive-preservation/prettier-ignore.json.gz",
+      "sourceRelativeToOps": "archive-preservation/prettier-ignore.json",
+      "rawBytes": 2086,
+      "rawSha256": "74cfe8096d867f13d6d96b79fdc09691062b3f4c4f8fab49a91210b839480a01",
+      "gzipBytes": 481,
+      "gzipSha256": "1465d41c067a55c6b3bd0c120cbe0f87d0c75b5546a0f6a84fd909dc75ee4850"
+    },
+    {
+      "path": "raw/archive-preservation/prettier-check.receipt.json.gz",
+      "sourceRelativeToOps": "archive-preservation/prettier-check.receipt.json",
+      "rawBytes": 1618,
+      "rawSha256": "cb9800ff080884962ce4b07a2bb0b14dfb3912fb49d842c53ab6d7613fa29aa5",
+      "gzipBytes": 536,
+      "gzipSha256": "3264df3dccda9b0d4278b9c7c850d549439f6a2afc9e54c920bc0bda1c433136"
+    },
+    {
+      "path": "raw/independent-source-review/fresh-source-recovery-review.json.gz",
+      "sourceRelativeToOps": "independent-source-review/fresh-source-recovery-review.json",
+      "rawBytes": 10436,
+      "rawSha256": "4d113c08a510d94f1fd1e50eac9329413d90007f69baf2ff73111423f967234a",
+      "gzipBytes": 3745,
+      "gzipSha256": "fe466e3819b8f76104280f6de7e570fd67d50014e0efd3684fd4e6361e76b4ff"
+    },
+    {
+      "path": "raw/independent-source-review/shader-presence-fresh-identity.json.gz",
+      "sourceRelativeToOps": "independent-source-review/shader-presence-fresh-identity.json",
+      "rawBytes": 9041,
+      "rawSha256": "8d5f00e2bdba58e96dfb0265e23496bacdd53474abcbef4f9303f1c381634036",
+      "gzipBytes": 2623,
+      "gzipSha256": "2c3fdf3631268f676e097f66fcf08f3622cbd9ed34733f1959561b87c303ff63"
+    },
+    {
+      "path": "raw/independent-source-review/archive-preservation-fresh-review.json.gz",
+      "sourceRelativeToOps": "independent-source-review/archive-preservation-fresh-review.json",
+      "rawBytes": 15019,
+      "rawSha256": "df4011bea69386faccd37781b2a8c5bb8cf74de278ce005c943303775b9b4b11",
+      "gzipBytes": 3505,
+      "gzipSha256": "8633c19bb81c958bb3353fa30f1288cc8266485a8c5aa8c9b8b74c824bb2b420"
+    },
+    {
+      "path": "raw/independent-source-review/shader-style-fresh-review.json.gz",
+      "sourceRelativeToOps": "independent-source-review/shader-style-fresh-review.json",
+      "rawBytes": 3678,
+      "rawSha256": "298f3a0f9ec37d968e49563b1a4438dab9769049fd8008ee0c3d58b01e5e3123",
+      "gzipBytes": 1784,
+      "gzipSha256": "097b81775bbc908143b6ce5c095f9663f5085179eb2289475d38f0b5dcb29871"
+    },
+    {
+      "path": "raw/independent-source-review/additional-delta-review.json.gz",
+      "sourceRelativeToOps": "independent-source-review/additional-delta-review.json",
+      "rawBytes": 3168,
+      "rawSha256": "4787498ab742ffccab6558449a9a9c4a6ac5eea2797fdaccc894edece8cb4795",
+      "gzipBytes": 1562,
+      "gzipSha256": "3c4d0b5b28fb111c0d4be0f49043f4ff645ab3020a6bf9e6fd3a72753d948781"
+    },
+    {
+      "path": "raw/independent-source-review/shader-style-resolution.json.gz",
+      "sourceRelativeToOps": "independent-source-review/shader-style-resolution.json",
+      "rawBytes": 2492,
+      "rawSha256": "853b19671a38754f115ba67181deafccc5c5a302c07ebafecb587c642ca7e9ea",
+      "gzipBytes": 1287,
+      "gzipSha256": "340f2790154d2019d17e5c17340157d3a979057041d97249d4574ab059bc0d7f"
+    },
+    {
+      "path": "raw/api-tree-identity.json.gz",
+      "sourceRelativeToOps": "api-tree-identity.json",
+      "rawBytes": 2242,
+      "rawSha256": "ae0815956f340f1356291390e07c6dc5338cedd6980a081d0041f32e37f826a2",
+      "gzipBytes": 774,
+      "gzipSha256": "bef78f9ac83c4d908b22f0ed5fe10ca8bb31369a36c3feebbaff675dee368585"
+    },
+    {
+      "path": "raw/frozen-types-corrected-replay.log.gz",
+      "sourceRelativeToOps": "frozen-types-corrected-replay.log",
+      "rawBytes": 9644,
+      "rawSha256": "cd88fb8c1141edff4843b2cddf27b22127147f7b55e95a4b16ffd42d073f137b",
+      "gzipBytes": 2451,
+      "gzipSha256": "ee0b999d82bd9c668c6c068a5ec793d9db09fb2ae80b143e0892dbcd908954f1"
+    },
+    {
+      "path": "raw/frozen-types-corrected-replay.receipt.json.gz",
+      "sourceRelativeToOps": "frozen-types-corrected-replay.receipt.json",
+      "rawBytes": 367,
+      "rawSha256": "0697faad075420e97e944fbafb4c380fd1e023df43df748f310c9c5a5b765878",
+      "gzipBytes": 275,
+      "gzipSha256": "d391ac0c46bb2497db05b5a3cfdc5be5adea7812d9a9dfd1f8bda6e62da18066"
+    },
+    {
+      "path": "raw/recovery-public-docs.log.gz",
+      "sourceRelativeToOps": "recovery-public-docs.log",
+      "rawBytes": 187,
+      "rawSha256": "c24d1aca1bcbf43c471f6e8ae37cdc63eede3c9d71f44c117548690c60ca1917",
+      "gzipBytes": 175,
+      "gzipSha256": "4ca8c0519c7836e481a378f8c71ef9a4c8688e85bf5e8d78028197e52043c5a4"
+    }
+  ],
+  "omissions": [
+    "Old unavailable transient getter logs are not reconstructed.",
+    "Git object transfer payloads, previously committed source-license archives and duplicate killed-log copy are not duplicated.",
+    "No external repository business source or credentials are included."
+  ]
+}

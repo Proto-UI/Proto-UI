@@ -55,7 +55,11 @@ export const dataTableRow = definePrototype<ShadcnDataTableRowProps, DataTableRo
     const state = behavior.stateHandles;
     if (!state) throw new Error('[shadcn-data-table] Row state unavailable.');
     const hovered = setupCollectionHover(def);
-    def.feedback.style.use(tw('table-row border-b border-border transition-colors'));
+    def.feedback.style.use(tw('border-b border-border transition-colors'));
+    def.rule({
+      when: (w) => w.state(state.hidden).eq(false),
+      intent: (i) => i.feedback.style.use(tw('table-row')),
+    });
     def.rule({
       when: (w) => w.all(w.state(hovered).eq(true), w.state(state.selected).eq(false)),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
@@ -81,7 +85,8 @@ export const dataTableCell = definePrototype<ShadcnDataTableCellProps, DataTable
   modules: asDataTableCell.modules,
   setup(def) {
     const behavior = asDataTableCell();
-    setupDataTableCell(def);
+    if (!behavior.stateHandles) throw new Error('[shadcn-data-table] Cell state unavailable.');
+    setupDataTableCell(def, behavior.stateHandles.hidden);
     return behavior.render;
   },
 });
@@ -92,7 +97,8 @@ export const dataTableHeader = definePrototype<ShadcnDataTableHeaderProps, DataT
   modules: asDataTableHeader.modules,
   setup(def) {
     const behavior = asDataTableHeader();
-    setupDataTableCell(def, true);
+    if (!behavior.stateHandles) throw new Error('[shadcn-data-table] Header state unavailable.');
+    setupDataTableCell(def, behavior.stateHandles.hidden, true);
     def.rule({
       when: (w) => w.prop('sortable').eq(true),
       intent: (i) => i.feedback.style.use(tw('cursor-pointer')),

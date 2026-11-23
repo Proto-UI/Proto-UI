@@ -1,0 +1,991 @@
+{
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 1713,
+  "observedAt": "2026-11-22T17:25:02.754606+00:00",
+  "publicParent": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+  "integratedMain": "63e7d23c6a269794c0a957fb881f9f9e8f49e233",
+  "originalCandidate": "3d8a1aef0648f329587f7b4d70579e8782d6b77f",
+  "originalTree": "adc530910692c5b4b2beb3e21d181c3d8d5f0914",
+  "bundle": {
+    "path": "original-history.bundle",
+    "bytes": 194092,
+    "sha256": "48adc4f9ae6b3596e2b79dda077577666fbe82f2a1af165fa0d1feb702b2d42d",
+    "prerequisites": [
+      "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+      "63e7d23c6a269794c0a957fb881f9f9e8f49e233"
+    ],
+    "verified": true
+  },
+  "commits": [
+    {
+      "sha": "c3f05744f540ed92c5e11d5b78a06a56d8db3337",
+      "tree": "2487950c85888a98f09699fbe4aa6a4c5ee0b7c2",
+      "parents": [
+        "830287f95959a4a1a4fb797df68b0bd6889e0bae"
+      ],
+      "author": "Codex <codex@openai.com> 1795348551 +0000",
+      "committer": "Codex <codex@openai.com> 1795348551 +0000",
+      "message": "fix(release): retain packed consumer artifacts during rehearsals\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "dc3209a14edbb41a57d0df4dde22f73867dc90b8299891e725ca1c4774f698c6",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "520428abf087a53748bf5ef1b3c9da5ca2e105a0",
+      "tree": "fae902bd58b41ee4ec85a12bf66106c0c55fa1c6",
+      "parents": [
+        "c3f05744f540ed92c5e11d5b78a06a56d8db3337"
+      ],
+      "author": "Codex <codex@openai.com> 1795349512 +0000",
+      "committer": "Codex <codex@openai.com> 1795349512 +0000",
+      "message": "fix(cli): supply renderer-owned portals in React facades\n\nInject react-dom.createPortal into the generated React adapter and reject projects that omit the required renderer dependency before mutating their configuration or facade.\n\nExercise the actual packed Tooltip facade for body projection, its description relation and owner teardown. Retain the original CLI and language admission assertions. Focused tests pass 79/79 and the previous source accepts the invalid React-only consumer; native projection acceptance remains separate.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "f955e36d4fb587ea331dddf8354719486022515df9d373cbf73492385289017f",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "c8a5cfdfbd3054f6ea11794c68d316d6c151ccfa",
+      "tree": "433459491224e6ec0f6482289b39a8b82fd4b4a7",
+      "parents": [
+        "520428abf087a53748bf5ef1b3c9da5ca2e105a0"
+      ],
+      "author": "Codex <codex@openai.com> 1795349578 +0000",
+      "committer": "Codex <codex@openai.com> 1795349578 +0000",
+      "message": "fix(docs): provide public four-host Tooltip usage\n\nReplace the private Base code map with complete public Adapter examples,\nincluding Vue 2, and share those files with the bilingual Usage sections.\nUse existing Shadcn CLI facades and preserve Base/Brutalist no-add boundaries.\nInject React DOM createPortal in the two direct Adapter examples and retain\nthe source-package, ShadowRoot, and non-Web acceptance boundaries.\n\nKeep the original Base DemoSpec path and ID. Add discriminating private-import\nand missing-host coverage plus real facade generation and unsupported-add\nchecks. The 16 focused checks pass; packed/browser acceptance remains separate.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "0959c7dc7db33f8f4eb3c3311d8741eb29dd75dd6c3e651b71b0081344bb70ca",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "914c09f4e5bdec494616b39c22a2479ee67bcc27",
+      "tree": "1fb505bf337b99c4bfc7e8496a69a3e6aab8ded4",
+      "parents": [
+        "c8a5cfdfbd3054f6ea11794c68d316d6c151ccfa"
+      ],
+      "author": "Codex <codex@openai.com> 1795350016 +0000",
+      "committer": "Codex <codex@openai.com> 1795350016 +0000",
+      "message": "docs(release): record isolated candidate application consumers\n\nPreserve the actual 830287 Shenko and Verdant pin experiment separately from their unchanged main baselines. Record all nine command outcomes, actual generated artifacts and the independent evidence readback with their acceptance limits.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "6b04da92cc3220923b6e976ec9ac9e814809d0f80f9229f4ef72ebe64972a197",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "2f5b8bf1a6d7b3f60770e0fb6536b2eac1558ba1",
+      "tree": "43a13a81cd3aeb83edfa9855a2caddc5d5a621d5",
+      "parents": [
+        "914c09f4e5bdec494616b39c22a2479ee67bcc27"
+      ],
+      "author": "Codex <codex@openai.com> 1795350585 +0000",
+      "committer": "Codex <codex@openai.com> 1795350585 +0000",
+      "message": "docs(release): bind website readiness to public source and original conditions\n\nRecord every current release route, host and source disposition without\nequating source inventory with installed or native acceptance. Preserve the\n830287 baseline, the two historical source mappings and missing original\nmaterials, and include the shared public Tooltip Usage source in the inputs.\n\nValidation: diagnostic check and seven focused tests passed. Independent\nreview verified all 370 input hashes, historical changed-path mappings,\nsource-count deltas and original open conditions.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "e195cf064aed39635a5cb60b4243c45dfb83d77d32e003cf8940d14323030232",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "89962d605816a278437be76e91aea973e742a8d2",
+      "tree": "17b3c1c946515f05e0ea371669e73c5ce7f3f23b",
+      "parents": [
+        "2f5b8bf1a6d7b3f60770e0fb6536b2eac1558ba1"
+      ],
+      "author": "Codex <codex@openai.com> 1795350632 +0000",
+      "committer": "Codex <codex@openai.com> 1795350632 +0000",
+      "message": "fix(ci): generate diagram style inputs before build provenance\n\nRun the existing real www generation step before taking its generated-CSS\nreceipt on a clean checkout. Preserve the ordinary production build, all\ndiagram profiles, authored diagrams and provenance checks.\n\nValidation: 47 focused provenance tests passed, independently rerun. The\nactual original clean checkout failed with missing CSS; real generation then\nenabled begin-build, and altered CSS was still rejected by finish-build.\nRetain the later generation exit 137 and pending native visual acceptance.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "18468087c7a01a3030a050b75c6a6b409fdb0fe7ff9e1c9a56cb2786d959ff12",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "65714f33d9d68347e270775d7417f30a0a5bcdfa",
+      "tree": "91e4e7e338c9f61c859b1ca3b46af123c61a9e14",
+      "parents": [
+        "89962d605816a278437be76e91aea973e742a8d2"
+      ],
+      "author": "Codex <codex@openai.com> 1795350678 +0000",
+      "committer": "Codex <codex@openai.com> 1795350678 +0000",
+      "message": "fix(audit): observe the authored Radio Group primary\n\nResolve the unique current Density preference / density-comfortable radio\nthrough its authored root, item and accessible state. Keep all existing\nowner, generation, lease, anatomy and rest/hover/focus requirements.\n\nValidation: the eight new four-host observer controls failed against the\noriginal missing branch and passed with the fix. Retain the original eight\nnative failures at 830287; current-source browser capture remains required.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "2d6d2265d39940dc197f39650ea51294e6e84cf736a6d5ab3b5976d620a3dde5",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "4adb6076a6d9e93ddfd6eb02d07ce06c319eb2d2",
+      "tree": "0dd83ed0e93b9ce3fa0cd8e984aade19c503ec38",
+      "parents": [
+        "65714f33d9d68347e270775d7417f30a0a5bcdfa"
+      ],
+      "author": "Codex <codex@openai.com> 1795350809 +0000",
+      "committer": "Codex <codex@openai.com> 1795350809 +0000",
+      "message": "fix(audit): bind Transition frames to the authored Enter control\n\nRestore the missing strict Enter-button primary for the original rest,\nhover and keyboard-focus plan. Keep whole-recipe anatomy and current owner,\ngeneration and lease requirements, with no passive-region substitution.\n\nValidation: all eight actual-producer controls fail on the original branch\nand pass after this repair, including missing/ambiguous/stale owner cases.\nThe eight original native failures and pending new capture remain recorded;\ncontrol-button visual frames do not establish Transition motion semantics.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "db2c273f5dd48fc22119299e6cceb99622dbb88c29834a83b177de5dcbd67d41",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "aa4b712ffe1abc40c96d445ddc3ce23a50bc03ec",
+      "tree": "dbdaf3269c1ad290b7dd12c560a1367511938472",
+      "parents": [
+        "4adb6076a6d9e93ddfd6eb02d07ce06c319eb2d2"
+      ],
+      "author": "Codex <codex@openai.com> 1795352169 +0000",
+      "committer": "Codex <codex@openai.com> 1795352169 +0000",
+      "message": "test(www): reconcile reviewed markup study sources without erasing history\n\nPreserve the old layered reference byte-for-byte and bind the reviewed four\nSprint 3 source changes plus the extracted installation client to one actual\nGit source. Retain the original CI hook failure and all 17 unexecuted cases.\n\nValidation: 36 unchanged discriminator tests passed. Independent review\nverified old-profile preservation, the 28-source historical correspondence\nat 2bc88aa, all 29 current Git blobs, and unchanged browser assertions.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "4dff09165357ecbb3a7ad06b290b26da126d2767899ca56ff50b9a65d5fa2ed5",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "e317a5b6bc6210710c1ac9adfadfc2f8c3581543",
+      "tree": "bf745d52c78faa60ac5a46f2e34a5e6ad12a666c",
+      "parents": [
+        "aa4b712ffe1abc40c96d445ddc3ce23a50bc03ec"
+      ],
+      "author": "Codex <codex@openai.com> 1795352200 +0000",
+      "committer": "Codex <codex@openai.com> 1795352200 +0000",
+      "message": "fix(audit): bind Dropdown pointer states to real public actions\n\nPreserve Profile's real Shortcut naming and add the missing destructive\nDelete recipe without changing Log out. Select strict current physical\nItems, independently read their native AX names and recheck their leases.\nRetain the original four-host, two-theme targets and the old native failures.\n\nValidation: 14 producer/transport controls passed and source review kept the\noriginal assertions, recipe ownership and public Shortcut semantics. Native\ncurrent-candidate re-execution remains required and is not claimed here.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "8e72873536fd1ff150d0fbb0c5e5155ed8035d303758118effa0c7c8fbac5872",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "27e7e8e7f374f600bfb5ad74ae6651e9f4f46577",
+      "tree": "ac3b506bdb956e8ae524a04c07e6965f70642394",
+      "parents": [
+        "e317a5b6bc6210710c1ac9adfadfc2f8c3581543"
+      ],
+      "author": "Codex <codex@openai.com> 1795352649 +0000",
+      "committer": "Codex <codex@openai.com> 1795352649 +0000",
+      "message": "docs: record Sprint 3 packed Tooltip consumer evidence\n\nIntegrate independently reviewed source-bound preparation records from\nac6170a60a867be45d6ec541def1130da4d7d83c. Retain the original failed\naggregates, explicit recovery, two immutable archives and pending native\nacceptance rather than treating installed builds as release approval.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "2ce9e9fb58a1a5c11b2dc908ab418ce14aa040da0e01cd62a835dc082401d4d8",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "27e5d366076280a17b6ffb5e61b9b7abe0461553",
+      "tree": "ec735a30868884eb872ce27a6032b4a36d0371be",
+      "parents": [
+        "27e7e8e7f374f600bfb5ad74ae6651e9f4f46577"
+      ],
+      "author": "Codex <codex@openai.com> 1795352769 +0000",
+      "committer": "Codex <codex@openai.com> 1795352769 +0000",
+      "message": "fix(www): share authored boundary in passive contrast observer\n\nIntegrate independently reviewed 18070c3d9b7a4138ca477cabbc89958ccf5aa2d9.\nUse the existing authored-root filter to exclude the reader shell while\nretaining foreign in-content and extra current-owner roots for rejection.\nPreserve the original 40 native failures and the old 0/4 controls alongside\nthe 26 passing focused controls. Native recapture remains pending.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "66a5939172989bc6c866d88c6ba89d9fc7754f30203d787e04aa5e852f4d46d9",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "5f9371510cac145bd5d40d8a5c6c76853494f4c2",
+      "tree": "a21a8211b88ec7280cf814ac2a6f50e596308d22",
+      "parents": [
+        "27e5d366076280a17b6ffb5e61b9b7abe0461553"
+      ],
+      "author": "Codex <codex@openai.com> 1795352970 +0000",
+      "committer": "Codex <codex@openai.com> 1795352970 +0000",
+      "message": "fix(shadcn): preserve Scroll Area thumb hit dimensions\n\nIntegrate independently reviewed f9d193b2620a851dca71ad3ffcb856ab471756d6.\nKeep scrolling-axis sizing with the host while supplying the passive\nThumb cross-axis dimensions without a zero flex basis. Preserve original\nnative drag assertions and record the pre-existing generated fixture drift.\nThe 35 focused checks passed; native and preset acceptance remain pending.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "d9a92895080cc8295fb72db3ced78f3a5136110ae43597d003166cee42788fa9",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "369a30f2da11b61bfca82688123391e574594fa4",
+      "tree": "aea62c8dd2668aea77afca314f4e60556ab2a0d2",
+      "parents": [
+        "27e5d366076280a17b6ffb5e61b9b7abe0461553"
+      ],
+      "author": "Codex <codex@openai.com> 1795353501 +0000",
+      "committer": "Codex <codex@openai.com> 1795353501 +0000",
+      "message": "fix(www): admit declared Vue 2 tooltip handoff consumers\n\nHonor the actual four-host Tooltip pages while retaining strict runtime\nidentity checks and all native cold/warm assertions. Bind planner coverage\nto the original public recipe and keep the 20 prior CI entry failures.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "2055b2c2a8d9dc57baf8193f17daa9290b24842432e3ca2a3097ecc6dff54c36",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "a49b0f343136f4eee8a2fcc75001703fbc1383e8",
+      "tree": "972786b7ff64167cb6bc7b421d8a7313ced30646",
+      "parents": [
+        "369a30f2da11b61bfca82688123391e574594fa4"
+      ],
+      "author": "Codex <codex@openai.com> 1795354011 +0000",
+      "committer": "Codex <codex@openai.com> 1795354011 +0000",
+      "message": "test(www): observe real Tooltip triggers at runtime entry\n\nClosed React Content has no physical host yet. Keep the shared readiness\npredicate and native journey intact while observing the actual two focus\nsubjects. Preserve the old seven-root counterexample and real-producer\nmissing, extra and inert controls across all four hosts.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "663560625edc29d91820709615dfe0e6ec7340408817f03707194e057536d078",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "dab24d3f7e1faa5386ce2cc75e1657655c4aefad",
+      "tree": "7bdd4f5a27f50853a1384e5f5e66b1016bfb2c6e",
+      "parents": [
+        "5f9371510cac145bd5d40d8a5c6c76853494f4c2"
+      ],
+      "author": "Codex <codex@openai.com> 1795354080 +0000",
+      "committer": "Codex <codex@openai.com> 1795354080 +0000",
+      "message": "fix(www): bind extracted installation consumer sources\n\nMove the exact Adapter import allowance to the reviewed owner client and\nretain the blocked selection row while updating its source custody. Preserve\nthe original coverage failures and reject copied or changed importer bytes.\nRead the same no-JS fallback payload across formatting whitespace without\nchanging CSS assertions. Independent review completed; the bounded import\ncontrol and three no-JS checks pass, while full coverage ended in signal 9.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "c3a99f22c866bbdc4d20c44b00b4e1c552262e299ad378fb041cf308bd8131f7",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "49277adfefcfba758851c7e024ca0f2756c15e7c",
+      "tree": "6291dfe18d0785843c21b924273f71933b883626",
+      "parents": [
+        "dab24d3f7e1faa5386ce2cc75e1657655c4aefad"
+      ],
+      "author": "Codex <codex@openai.com> 1795354111 +0000",
+      "committer": "Codex <codex@openai.com> 1795354111 +0000",
+      "message": "fix(www): retain physical Scroll Area measurement evidence\n\nIntegrate independently reviewed 975286f9c9b4107c0f7bbf114b89c55365c8dfe8.\nSupply actual physical identity and geometry through the existing PNG and\nfingerprint boundary without changing the known-unsupported classifier.\nAll eight old native captures still fail; 214 calibration checks pass and\ndo not substitute for native paint or numeric acceptance.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "e2353f5d4f637cf66f53bef5bcf8b494a07e4efc876212ba7261822154bd8959",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "479b7210c935c1ca477c131ff3306bd10986b2ae",
+      "tree": "47dcc7c762a2faebfc025d780f019cbd3400f4f8",
+      "parents": [
+        "49277adfefcfba758851c7e024ca0f2756c15e7c"
+      ],
+      "author": "Codex <codex@openai.com> 1795354499 +0000",
+      "committer": "Codex <codex@openai.com> 1795354499 +0000",
+      "message": "fix(www): admit the actual fourth Tooltip handoff runtime\n\nIntegrate independently reviewed contribution 369a30f2da11b61bfca82688123391e574594fa4. Preserve the original native failures and timing assertions; both public pages already declare Vue 2.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "e79c88d4f63634a25b18f63f916e4fae3f39b0c5c8149a0d294e6ccb06b94276",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "13632c692d8c8efe4b395aef480018b18a281863",
+      "tree": "9577b59bad95735e202c002a863ec4dd76096a5a",
+      "parents": [
+        "479b7210c935c1ca477c131ff3306bd10986b2ae"
+      ],
+      "author": "Codex <codex@openai.com> 1795354515 +0000",
+      "committer": "Codex <codex@openai.com> 1795354515 +0000",
+      "message": "test(www): observe actual Tooltip focus subjects at entry\n\nIntegrate independently reviewed contribution a49b0f343136f4eee8a2fcc75001703fbc1383e8. Preserve the shared readiness predicate, timing limit, native accessibility journey and the old React node-count counterexample.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "6d125c208ea08c7420a534ea94777e95b3619e9fd8a7c13590f7fba4771a6c84",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "44c682211e13297b3147bb955a1240d1a2b99a61",
+      "tree": "ec05be36aaa8951c3009903ef6a308b01306b5f8",
+      "parents": [
+        "13632c692d8c8efe4b395aef480018b18a281863"
+      ],
+      "author": "Codex <codex@openai.com> 1795354529 +0000",
+      "committer": "Codex <codex@openai.com> 1795354529 +0000",
+      "message": "fix(www): bind region and Input audits to public subjects\n\nIntegrate independently reviewed contribution 14c86172f3b81e3ff8802fcc9dc081d996d6f0ba. Preserve source-bound owner and physical-editor requirements, original failures, and the unresolved Image and Accordion scope.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "e613b6551b4eeff555cab9ab9acd49e2884678848c21616f14c957695c0c3c83",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "69d2cae35e72531f57b79a981be0dc89b669e48c",
+      "tree": "8fbdd4b5f65a3d3e57dc260e781764c71fc1ef87",
+      "parents": [
+        "a49b0f343136f4eee8a2fcc75001703fbc1383e8"
+      ],
+      "author": "Codex <codex@openai.com> 1795354696 +0000",
+      "committer": "Codex <codex@openai.com> 1795354696 +0000",
+      "message": "test(drawer): activate the public cold-entry action\n\nKeep the programmatic click mechanism while targeting the actual nested\nButton. Record physical and public click events separately, retain the\noriginal cold-motion window, and preserve failure artifacts in runtime CI.\nAdd same-owner controls against the real public demo and retain prior reds.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "60cc5bcbc09f9cc48dfbef7ef6ad13a5fdeb02c8964781bfb51c5c0e397aaefb",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "376c3d2d4571f5054db3b33e4942c89d17521f42",
+      "tree": "026c190a3631b9d69a56cbfe40173cef826860d9",
+      "parents": [
+        "44c682211e13297b3147bb955a1240d1a2b99a61"
+      ],
+      "author": "Codex <codex@openai.com> 1795354696 +0000",
+      "committer": "Codex <codex@openai.com> 1795367566 +0000",
+      "message": "test(drawer): activate the public cold-entry action\n\nKeep the programmatic click mechanism while targeting the actual nested\nButton. Record physical and public click events separately, retain the\noriginal cold-motion window, and preserve failure artifacts in runtime CI.\nAdd same-owner controls against the real public demo and retain prior reds.\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "56600193fc18a9eb7885a2f5567bac51cdfb1a6a2ebbe1a7fb597d2edb44a2b4",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "7c7cc20640c362da7a54828801043b5943738d3d",
+      "tree": "3a0c8c88b5784c8231368829f8b5bde56d819e72",
+      "parents": [
+        "376c3d2d4571f5054db3b33e4942c89d17521f42",
+        "63e7d23c6a269794c0a957fb881f9f9e8f49e233"
+      ],
+      "author": "Codex <codex@openai.com> 1795367893 +0000",
+      "committer": "Codex <codex@openai.com> 1795367893 +0000",
+      "message": "chore: reconcile Sprint 3 with current regression controls\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "c8290112a813e4656f86e8b04e33692f4337e63fadda420cdd4e024994483a66",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    },
+    {
+      "sha": "3d8a1aef0648f329587f7b4d70579e8782d6b77f",
+      "tree": "adc530910692c5b4b2beb3e21d181c3d8d5f0914",
+      "parents": [
+        "7c7cc20640c362da7a54828801043b5943738d3d"
+      ],
+      "author": "Codex <codex@openai.com> 1795368261 +0000",
+      "committer": "Codex <codex@openai.com> 1795368261 +0000",
+      "message": "fix(audit): bind static Image observations to authored recipe\n\nSigned-off-by: Codex <codex@openai.com>\n",
+      "rawCommitSha256": "7bfbe249b73c4d5fd17575ac53db4ee3986f408351157a9ceb3ce5ab386b638f",
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
+    }
+  ],
+  "changedFiles": [
+    {
+      "path": ".github/workflows/whitepaper-diagram-evidence.yml",
+      "deleted": false,
+      "bytes": 5202,
+      "gitBlob": "d142d98e22705d855e7acecfe392340b8793570c",
+      "sha256": "1d09f105dee134154592e25c60a013f2f7a0aa15806520bfcb525b87bea891a9"
+    },
+    {
+      "path": "apps/www/scripts/audit-brutalist-contrast.mts",
+      "deleted": false,
+      "bytes": 149789,
+      "gitBlob": "b8591cc3f8188a64e152915f1770361c89bae491",
+      "sha256": "be53c90effccaa1e8ed87687ef95450da79f485f2f621ca4e5a52facfe339e77"
+    },
+    {
+      "path": "apps/www/scripts/contrast-audit-plan.test.mjs",
+      "deleted": false,
+      "bytes": 55205,
+      "gitBlob": "d8ff5e555e2ba0c9e8d509b552dc2057cea9bd87",
+      "sha256": "d0d8822c7b68ab38074c85d025815e77a5d711b0c8815213800a8da0fd8aec57"
+    },
+    {
+      "path": "apps/www/scripts/contrast-probe-serialization.test.mjs",
+      "deleted": false,
+      "bytes": 50892,
+      "gitBlob": "845cd4b81884661148e121bd7aaa2cb3cb8c10e5",
+      "sha256": "2d706149536d4cd23a3eabfb3e9978b67679fa9305dc8ed0ffd64dc57d04056e"
+    },
+    {
+      "path": "apps/www/scripts/contrast-probe.browser.ts",
+      "deleted": false,
+      "bytes": 84059,
+      "gitBlob": "e25fa712efe8c360cf30a484e969cac609dafed7",
+      "sha256": "9f5b0591c3d6bd14d25cc9eca997521760e07383a5f12458f6bf4eb1b1a17890"
+    },
+    {
+      "path": "apps/www/scripts/contrast-scroll-receipt.test.mjs",
+      "deleted": false,
+      "bytes": 13028,
+      "gitBlob": "3596f718ea81c9197c21a80c4e5835caa1dff5fe",
+      "sha256": "dbe003cdbd7dd8abe2f5daa62b0b2472deb71eeba00e33b5c25a116591edcdea"
+    },
+    {
+      "path": "apps/www/scripts/contrast-tooltip-handoff.mjs",
+      "deleted": false,
+      "bytes": 5191,
+      "gitBlob": "fe9fff0a91d6247c93b609647a790a29d51857dc",
+      "sha256": "b0d3f83181254546635b72b4e80f092dfb67cd3c754163648130c6d368b14a0c"
+    },
+    {
+      "path": "apps/www/scripts/contrast-tooltip-handoff.test.mjs",
+      "deleted": false,
+      "bytes": 7571,
+      "gitBlob": "292292b836ba7e04e4892850fdc01995b9ee0835",
+      "sha256": "54ed6a75667e6562f747ee72fed0d035107837fc7a6452b1c0676b4eada48443"
+    },
+    {
+      "path": "apps/www/src/components/code-example-nojs.test.ts",
+      "deleted": false,
+      "bytes": 2510,
+      "gitBlob": "0b5b8931a529193b5e95f4e4bb27415c7becf240",
+      "sha256": "ffebb64f7d21ccc92e5cb6cc289653b35c36d1dc76767d952b305416727bc8b9"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/base-tooltip/baseTooltipCode.ts",
+      "deleted": false,
+      "bytes": 1055,
+      "gitBlob": "58218732375e30914288f3b1c7bb98070c9f1487",
+      "sha256": "0ce0ab2c52e4fe7bcb83036eaaf565e1c428021f32607da55124ff998318b8ad"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo_components/tooltip-usage.ts",
+      "deleted": false,
+      "bytes": 7981,
+      "gitBlob": "508aaf68ddc825063dd4c6ce11ef3e0c9fb468cc",
+      "sha256": "b60ea17d1823dc56df5e798503f4a0a41c5ccaa04c6ecfdf32eb57bfad954540"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/base/tooltip.mdx",
+      "deleted": false,
+      "bytes": 10073,
+      "gitBlob": "b143110a055f8e6059b9cb32c7d30288b4d31f23",
+      "sha256": "0d1d9a355318b5a522c64a28dc55ba7840df990ac98f76c99f6f3315fe630b98"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/dropdown-menu.mdx",
+      "deleted": false,
+      "bytes": 3199,
+      "gitBlob": "982f1dabbd9f7217449104ec69950b66d8e3ddad",
+      "sha256": "981c9e44037a55d5e50d2ddbdf1277a81e65ff584b48aad7457723a63019473b"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/brutalist/components/tooltip.mdx",
+      "deleted": false,
+      "bytes": 6854,
+      "gitBlob": "f88d1af3e70ec151c758b5fc0e4f438b9e807e10",
+      "sha256": "2ca785528cc532654fd951e9722748fd0dfe4bf29e74461c322e7f56e10cde1f"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/ui-libraries/shadcn/tooltip.mdx",
+      "deleted": false,
+      "bytes": 9288,
+      "gitBlob": "b2a445646304ff38ee3e0133fd48c536780bcd61",
+      "sha256": "bc0fea1cacd5b5158a68a9c2b7ae3dd1e9d77e4d057e8730a80feeaed1c03756"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-tooltip-readiness.test.ts",
+      "deleted": false,
+      "bytes": 5426,
+      "gitBlob": "1bc43c51a890e21464042c7fe58b6ae3f9d2540e",
+      "sha256": "70f103689f1db088a41aeb2dffaa06b179a7aec75d3eecd6522cd3d281447244"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts",
+      "deleted": false,
+      "bytes": 7103,
+      "gitBlob": "61915d03bba470749dab8cc3f488ad26f7d46c57",
+      "sha256": "9305d3fdd577ba652a415d0982158c808074f119059a9a97bb95e1c9c1883020"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-dropdown-menu.demo.ts",
+      "deleted": false,
+      "bytes": 5673,
+      "gitBlob": "05d745052864e6a7d514668ee22a843e4f4228d0",
+      "sha256": "186be7e3ec3a17234529f2e6d026b4bc926f50360b092bc3d14c63e2e4a67889"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+      "deleted": false,
+      "bytes": 18467,
+      "gitBlob": "3893a7bd1140a9c4a060c1482689fb7eb68cacde",
+      "sha256": "30df56d49decf97efebebad60ba87b98d12ca665e98565c8a422841cca77a746"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts",
+      "deleted": false,
+      "bytes": 22999,
+      "gitBlob": "4bf6d0b729e37e7205c16f87302102472e7b39a9",
+      "sha256": "5eb996ecd87b2bd166cebe1a127b806cfe6e387f0321ef8bb9189de19165670b"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/tooltip.mdx",
+      "deleted": false,
+      "bytes": 9305,
+      "gitBlob": "d4c0abfdfd663c9fafdd3ca35262e0d86e7af12a",
+      "sha256": "02a901adcf596721b563e25a81068bd9e28eb63436ca8ccbc27f8d06ecf6f4e0"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/dropdown-menu.mdx",
+      "deleted": false,
+      "bytes": 3085,
+      "gitBlob": "c6019e38c19d3ceb8800ad9719f2f5bd058a0a66",
+      "sha256": "629d4606561de217c2a710999c582c4474522ac6dd6124ca17c33705777efb82"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/tooltip.mdx",
+      "deleted": false,
+      "bytes": 6411,
+      "gitBlob": "41b68be009c45937f14f2668b1145351e4a5f44c",
+      "sha256": "7e39bc6d641f7db041f54c5d3a8f8c59bc96a25a56eb24f83c0e67b4a1de2b80"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/tooltip.mdx",
+      "deleted": false,
+      "bytes": 8592,
+      "gitBlob": "28f339d6926a1d83d256300d90c0562a56e8449f",
+      "sha256": "ddc207c0d3c55fa3b91132b3e67be279340268b1b8b924af30fc19f8745b0b10"
+    },
+    {
+      "path": "apps/www/test/contrast-projection-identity.test.ts",
+      "deleted": false,
+      "bytes": 125651,
+      "gitBlob": "9e59eac2a3d4c6440031ae90de5628312170e7c0",
+      "sha256": "5dbfaf3945f0110fe55b2dd1c7c0fe80766d63e66995e3d3c4b2f1c98406c87d"
+    },
+    {
+      "path": "apps/www/test/tooltip-public-usage.test.ts",
+      "deleted": false,
+      "bytes": 4430,
+      "gitBlob": "8dec6faa5494cd63c4d631fbbd77d94617548735",
+      "sha256": "5d7543ae356bc2d7073a91eb25fdddb1123f3de862e7e9d1f3ee99e9d3e6a6f9"
+    },
+    {
+      "path": "internal/governance/release-workflow.md",
+      "deleted": false,
+      "bytes": 18317,
+      "gitBlob": "912bfc282c71b10998f7e92a6ad29c843a08637d",
+      "sha256": "82a38cbf14e664852862f96a297a567ed13a4ac1a257027896e63401f23ba46e"
+    },
+    {
+      "path": "internal/records/2026-11-22-base-tooltip-readiness-reconciliation.md",
+      "deleted": false,
+      "bytes": 5107,
+      "gitBlob": "8067c548bc93ba07dfdbef8b3f0ff5f7f120a462",
+      "sha256": "fb2c8b32bd94a2aa73378f69c86896f9c0f68d489a8c3e1aba690f2d6b8fdbaa"
+    },
+    {
+      "path": "internal/records/2026-11-22-drawer-public-entry-target.md",
+      "deleted": false,
+      "bytes": 5745,
+      "gitBlob": "a583d4677ee058f0cd7849e703157dd54418b766",
+      "sha256": "cb0d7365eb742e2f4d3db5aabe86182866c51dfcabe352c515e9738ba11e3e4f"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-audit-public-primaries.json",
+      "deleted": false,
+      "bytes": 7146,
+      "gitBlob": "a6d9da0005e5d6e877d8b30a66d63121f9d4902f",
+      "sha256": "afa68e8da9df94c5ae35a989d06b6e679d12603e18fa3c39f0ad3ccc81624fd6"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-audit-public-primaries.md",
+      "deleted": false,
+      "bytes": 6228,
+      "gitBlob": "65c24d554a15853827add396f3540503bfb9f939",
+      "sha256": "d73bd455df582b3c493ffcac98af1cd6987628198182cd8aa33521dc83ccb74c"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-candidate-application-consumers.json",
+      "deleted": false,
+      "bytes": 20791,
+      "gitBlob": "b10142b01d2a131c6bfa74937af888593a5987aa",
+      "sha256": "205a30fc65a4170a68960b7ff30cbb82e99ee2e85fea09e8b5c285a76a0db01f"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-candidate-application-consumers.md",
+      "deleted": false,
+      "bytes": 8832,
+      "gitBlob": "7793aff35c047b22756eb14fb5e4d3d69af0c73a",
+      "sha256": "f868de1f62f5ecb9f758c55d3177fa48f1260e39c6827b12ed77927bd4b9a2a4"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-dropdown-audit-items.md",
+      "deleted": false,
+      "bytes": 5386,
+      "gitBlob": "9969e5613fa9bb064582bb86425bedb9a34685b6",
+      "sha256": "2dc95412f2053e2d22f75c5bbcf15dfb38765ab8d696df70d33a6ce656134893"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-install-source-bindings.md",
+      "deleted": false,
+      "bytes": 5841,
+      "gitBlob": "4d967318d1e45a305455850e7d37aa485f73c38e",
+      "sha256": "9f59e7946099ebff257fa48b1205d4fcb4ece7e1691e18101712bec9d00fa38b"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-passive-audit-boundary.md",
+      "deleted": false,
+      "bytes": 3759,
+      "gitBlob": "6fe490c59fa66c7df829fea01658406b9acd8008",
+      "sha256": "1063d4f97eecb45b976db70d2f6534baa681186d2ebce16c4d63aa314996fe30"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-radio-audit-primary.md",
+      "deleted": false,
+      "bytes": 4984,
+      "gitBlob": "85c3f5f366e9fb663b8c825df731c4165c5ff41d",
+      "sha256": "b7aaa7d0412527ce521e353ea7d7a9c2bd0596dea389f2a6825142af5b23012f"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-scroll-observer-original-readback.json",
+      "deleted": false,
+      "bytes": 6656,
+      "gitBlob": "f96717e4f6f8e1180f088479ec73c91aea323f42",
+      "sha256": "679e9b777d5aae04bc58894f2d3f7e1f8cb6ce987d49f2f5c3959f44da652f69"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-scroll-observer-receipt.md",
+      "deleted": false,
+      "bytes": 4237,
+      "gitBlob": "c18d22365298faedbe8f1753e5091988ff402272",
+      "sha256": "1ccba378170948bab40a6b063b839a939432a781b0daf1368f84c9e8f14ddb0c"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-shadcn-scroll-thumb.json",
+      "deleted": false,
+      "bytes": 19477,
+      "gitBlob": "76cf7797d3864561278bbefb419b184e5c950a78",
+      "sha256": "a6615fac90c7b52d7c76975603d58710a12e664c23db24201ea8f8c85188b696"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-shadcn-scroll-thumb.md",
+      "deleted": false,
+      "bytes": 10434,
+      "gitBlob": "f081a15add8c348b0b40e05297944ec8a49332c7",
+      "sha256": "961eb293436ef98aa51c35b56d233121eb52d534b211bad85e8f1321a18f21f9"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-tooltip-public-consumers.json",
+      "deleted": false,
+      "bytes": 40763,
+      "gitBlob": "f6e2f57b98e494e86155e77c1c793f490be864eb",
+      "sha256": "bb723ceeae502b26a2eb81a0e9b7656332a3054d762550420174793e096d3031"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-tooltip-public-consumers.md",
+      "deleted": false,
+      "bytes": 14296,
+      "gitBlob": "76e304d060e714d57f2b096761165285dbf14ace",
+      "sha256": "4609aabb071ac2a6650907c3eb76a73d55f0280c2f113c7dbfc3f84fa08154cf"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-transition-audit-primary.md",
+      "deleted": false,
+      "bytes": 3619,
+      "gitBlob": "52840c2faa5c0e1c45aa8d0347ba7367f85bd7fa",
+      "sha256": "3d4b8f70b28f5022512d4def8aa415d00d1b1d108cf6c889c5448efcbc4f7070"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-website-readiness.json",
+      "deleted": false,
+      "bytes": 36303,
+      "gitBlob": "d34d4f265dacce0661c075ad9170780ca232aa04",
+      "sha256": "86e357ea8c1a89cf4f58d9bdffc89e2c8e627ec0130c777bd8922514455f64aa"
+    },
+    {
+      "path": "internal/records/2026-11-22-sprint3-website-readiness.md",
+      "deleted": false,
+      "bytes": 13628,
+      "gitBlob": "625d65e0496ebe9c4044f5922300936e6f1fa832",
+      "sha256": "09bb8f3f19a840796a451d58d4a92cb7a36876615cb33fe2ab4de29e84278ffd"
+    },
+    {
+      "path": "internal/records/2026-11-22-tooltip-handoff-runtime-admission.md",
+      "deleted": false,
+      "bytes": 3777,
+      "gitBlob": "d9a85a8b0cb0e532078b85055cc267f64299f791",
+      "sha256": "e3b42e833ca904d465c119bc9dfc272ee8c17ac7fd12ef80f02af4b9ee077d4e"
+    },
+    {
+      "path": "internal/records/2026-11-22-website-markup-reference-reconciliation.md",
+      "deleted": false,
+      "bytes": 4593,
+      "gitBlob": "2c16e21efc86f3283631b743eafde79b4a67e17c",
+      "sha256": "3791faec765ecd3e322600e242df2aac6aac6898b5ccddc96920262be06917ab"
+    },
+    {
+      "path": "internal/records/2026-11-22-whitepaper-build-generation-order.md",
+      "deleted": false,
+      "bytes": 4855,
+      "gitBlob": "59c097f82418b9bddbc6cc63cbd3969e90aab221",
+      "sha256": "ff86067523acb454e6e22405b9f37d350507b11006beaae308e57671e11e24f7"
+    },
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "deleted": false,
+      "bytes": 220633,
+      "gitBlob": "ac7bd3a57d25078d095da89d882dff8380eb3c54",
+      "sha256": "3c786fef273a36af76c3982669c7138f188bd9f34afb1e5d1d34005fe0ae2244"
+    },
+    {
+      "path": "packages/cli/src/registry/adapters.ts",
+      "deleted": false,
+      "bytes": 2834,
+      "gitBlob": "245b9084f6506ceea37095a4623078a1248638af",
+      "sha256": "0885202261c2c38a907ce3c77bfc4ee98684dc1f47411a35c7870a0693439e81"
+    },
+    {
+      "path": "packages/cli/test/cli.test.ts",
+      "deleted": false,
+      "bytes": 55655,
+      "gitBlob": "b594bb5068771e7c68bcfb8002423de8eb7a14d2",
+      "sha256": "91ab22ee0641a44c3ed9d9ee6ae826303276886969a541329928146cf6368e1d"
+    },
+    {
+      "path": "packages/cli/test/smoke-render/react.mjs",
+      "deleted": false,
+      "bytes": 7930,
+      "gitBlob": "336b20ebbd5e7e4b021f9e7e43433eee3fdea347",
+      "sha256": "974a51ed76dccd3e1ffe502a92e2316ac739caa89e973ff6b8b61e5f23ad9b66"
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts",
+      "deleted": false,
+      "bytes": 1460,
+      "gitBlob": "aa77610c6e38e1084085ce6a2575058462f90b1a",
+      "sha256": "3c3b5085842b4a51eaae762c19cafc6c3892efd2d95aab074ae3546adc173717"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-presence.browser.test.ts",
+      "deleted": false,
+      "bytes": 24081,
+      "gitBlob": "988414c09180ea01d7911c94bd4e5e707055d425",
+      "sha256": "cd328ac6f60f31e753cd2b1923489a9064629bfb4dc5fef278bab9429be2742e"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/drawer-public-entry.test.ts",
+      "deleted": false,
+      "bytes": 3994,
+      "gitBlob": "dcdf410bde40d4a69116344464d0926a739ac01d",
+      "sha256": "a696e96bbcbe8762acdaaf1fabc02164e65d8edf1eece8099dc468c8093aebc1"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/fixtures/drawer-www-entry.ts",
+      "deleted": false,
+      "bytes": 2148,
+      "gitBlob": "60b295471665f4adc4945829b836c02a2a5790af",
+      "sha256": "992ab038b33f8212551ef2225212eb88afd60fe153b9737cf9f4810fe0b8b3e3"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/layout-profiles-r91.test.ts",
+      "deleted": false,
+      "bytes": 34475,
+      "gitBlob": "6b3c95149f9d2cf23511c3d393b2f0468f0924ff",
+      "sha256": "7cd87b57658efc3acea84cae20e5eab929589fcce4760c7a0df81a40b092cfb0"
+    },
+    {
+      "path": "packages/prototypes/shadcn/test/scroll-area.test.ts",
+      "deleted": false,
+      "bytes": 16351,
+      "gitBlob": "dbe43f45097a8695ff839940d50e0843f1642ae2",
+      "sha256": "bc58d43c096925067b43bb06c01916289bb48c662cec5a5c762588ad3c6b0c50"
+    },
+    {
+      "path": "scripts/coverage-matrices/README.md",
+      "deleted": false,
+      "bytes": 63478,
+      "gitBlob": "43370573ae3543726fa86f8f8dc3b09f3c20e7b0",
+      "sha256": "791d002f5a5f45807d2b502ed64ebc5ddf12eb4e80873aeb2c8938316d850dfa"
+    },
+    {
+      "path": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "deleted": false,
+      "bytes": 534484,
+      "gitBlob": "dfb32df354b4ed11d91fae3b426fbc6dc90a7b65",
+      "sha256": "3372e074d2ca83e1ba6e9167cd7cb80d2fbe097f0811eced591636486da0a850"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "deleted": false,
+      "bytes": 775995,
+      "gitBlob": "b5acb264a8619634cb306b60ac5ac379f8fd4dee",
+      "sha256": "17b4bab74e2d517ef9bb7bb9f25c423cc6f1fea06deb2226ab9431ecefaa26d4"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-4d9a621.json",
+      "deleted": false,
+      "bytes": 5151,
+      "gitBlob": "dca75d21583260fb206b9a9093bd5ee308ac1022",
+      "sha256": "fae6b90ae25b42795ce9bc88379f6625f6da0369677125d887fa7a018b1035b3"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/fixtures/website-markup-provenance-current.json",
+      "deleted": false,
+      "bytes": 5474,
+      "gitBlob": "2654a30dbb56c417381f669d6fc8705b802b69fb",
+      "sha256": "a55dc6e3633952e85aa5083b163e9e6cfe8f5791c5c0e087a8cb31475bddc892"
+    },
+    {
+      "path": "scripts/docs/release-website-readiness.mjs",
+      "deleted": false,
+      "bytes": 28513,
+      "gitBlob": "bd76737ea25d5b006a1a2c2aaaba05ff5adcf424",
+      "sha256": "6bfaf428ce36f48b063a75876307a8d048296d1f531746d1e432191b8d9ee2bf"
+    },
+    {
+      "path": "scripts/docs/test/release-website-readiness.test.mjs",
+      "deleted": false,
+      "bytes": 6189,
+      "gitBlob": "d5c2d3e575ac59ebb6ddb75f359575e87b9c7e68",
+      "sha256": "5d8e4dc4aec1d42b0aa971b167349ff982a75dec6ef5da2da9de1580a65d5a9e"
+    },
+    {
+      "path": "scripts/docs/test/whitepaper-diagram-evidence.test.mjs",
+      "deleted": false,
+      "bytes": 10589,
+      "gitBlob": "48f9d8fc6f55f657c6a44d885ec363dc8f77e44f",
+      "sha256": "32a9a5e2af988f8998d8cf3bfe6e33b0bb324d08d29d4fb526a72a336aa14a85"
+    },
+    {
+      "path": "scripts/release/consumer-artifacts.mjs",
+      "deleted": false,
+      "bytes": 2123,
+      "gitBlob": "8f419511ec72dd6c6352f7404ff602a725261a49",
+      "sha256": "ab296a78d67f0a05ff1c20c37b6ef403f70e35877893909a162f349d05439cd6"
+    },
+    {
+      "path": "scripts/release/consumer-smoke-cli.mjs",
+      "deleted": false,
+      "bytes": 30144,
+      "gitBlob": "5a4543d3c79a54d4013faeaedb6d1f3956e53d1e",
+      "sha256": "869e69b90fe73ed0e22fc0c3fa71e165cdf597a481924d6f73480bcd4cda1e98"
+    },
+    {
+      "path": "scripts/release/consumer-smoke-react.mjs",
+      "deleted": false,
+      "bytes": 8901,
+      "gitBlob": "f66f6ca7d7770940e8b63393c6ce2c30a9e3c02b",
+      "sha256": "1ce3b49a78ff0b32344724f465575df24206dc837f7ef4762229368d6a43b2e3"
+    },
+    {
+      "path": "scripts/release/rehearse.mjs",
+      "deleted": false,
+      "bytes": 3276,
+      "gitBlob": "b81481b63944af1069f37b3c4d4e6da130d2743c",
+      "sha256": "bd17fd88cd2e6a18787ebe5e2b162fe0dc35b9307fd63f7c8494066b3e8877ab"
+    },
+    {
+      "path": "scripts/release/test/consumer-artifacts.test.mjs",
+      "deleted": false,
+      "bytes": 3999,
+      "gitBlob": "c51f7eda7913bcdda0e05f8ca27b26814bec4a4a",
+      "sha256": "de394a6ed7b001d4a10ca82c5220201661dea8ff178b0d43b88759c92f72a8d5"
+    },
+    {
+      "path": "scripts/test/search-intent-ab.mjs",
+      "deleted": false,
+      "bytes": 55934,
+      "gitBlob": "c73126dc28004fea88d23f71da169d11ecb5ac8e",
+      "sha256": "bb6ef978ab26613eea145f9e1bced815e3b079865f4e00fe317c594c0c384e12"
+    },
+    {
+      "path": "scripts/test/search-intent-ab.test.mjs",
+      "deleted": false,
+      "bytes": 21439,
+      "gitBlob": "b58a1b09fcf897961a980e48751c505eb7bf8efa",
+      "sha256": "d52cdd49531fb5a85641b68a60396e54a97da29d8d5ab5529e2ccfbaca0b80cf"
+    },
+    {
+      "path": "spec/prototypes/P-SHADCN-SCROLL-AREA-THUMB.yaml",
+      "deleted": false,
+      "bytes": 6980,
+      "gitBlob": "a1321c0ef1462f929108202d269ba1ab53106f59",
+      "sha256": "806e59f35e73df58ba318a15345c32f5cbdfa80cb5e54ad4880e4aed23a6d746"
+    },
+    {
+      "path": "spec/tests/T-SHADCN-SCROLL-AREA-0001.yaml",
+      "deleted": false,
+      "bytes": 8805,
+      "gitBlob": "7ad7c4b6103caa11990943a12a86488721eaeb65",
+      "sha256": "d11106da418c038373ec1927d5840c51b88f2ad2646db09909331a2d45211988"
+    }
+  ],
+  "currentEvidence": [
+    {
+      "path": "s3-focused-current.log.gz",
+      "bytes": 44251,
+      "sha256": "033276131cf558a836bb64516806afde2ce8a1ad4b1aaff91a97b206829a9910",
+      "originalBytes": 444939,
+      "originalSha256": "da5209e602c4c48d86b3dbdb0e981cabdad04ca4fa084b480bda9127d010d1c2"
+    },
+    {
+      "path": "s3-focused-current.json.gz",
+      "bytes": 17370,
+      "sha256": "26c04594efeffc7e0023e960bb892b0510dfb19c1439980b38b25083f8627487",
+      "originalBytes": 221981,
+      "originalSha256": "ca1559b26591bc22973d6347f8c57861fa9835ab9e376b2571e712948fa62f14"
+    },
+    {
+      "path": "s3-node-focused.log.gz",
+      "bytes": 4493,
+      "sha256": "a6763226f6468b95b3a2bb77eb9471f6c2916e7ea53542fc9798168bced3b8f5",
+      "originalBytes": 16828,
+      "originalSha256": "c4dd0cff333ea6131da989f3f5056417abc5702781d9bee7ceaf1916b1e7e0d6"
+    },
+    {
+      "path": "s3-install-source-controls.log.gz",
+      "bytes": 164,
+      "sha256": "ea1171bd99b0132907dac5b26e2e6ffad73292272d85d7b27fddb93f61ccadc4",
+      "originalBytes": 198,
+      "originalSha256": "c20cc54d58ad6ae171706051815f847eb9cf15e031b3fc49e74e6349f1f20ae4"
+    },
+    {
+      "path": "s3-drawer-current.log.gz",
+      "bytes": 22999,
+      "sha256": "30712b921b1de29c7b50942ea88dec6c28db5c5a457f361dca498867a4787c4c",
+      "originalBytes": 188966,
+      "originalSha256": "633213cdeabb143b516fec54f4a4f59ae776bb1384ee8b032f3c5aaed6ee14bc"
+    },
+    {
+      "path": "s3-drawer-current.json.gz",
+      "bytes": 2027,
+      "sha256": "5cf32e4c343a09bcdb3549af661c2398ce1e8899cf6f07b62c5d67f5467b63e6",
+      "originalBytes": 8325,
+      "originalSha256": "773002917178d3e055ce338caf8074c9fde3313d95cd9d8fedb40f635746d8c1"
+    },
+    {
+      "path": "s3-image-controls.log.gz",
+      "bytes": 29925,
+      "sha256": "e71527b42c008f1cce66c6cc8759a55b42bff4c6e760b6a32fc4d68f98a468e7",
+      "originalBytes": 271925,
+      "originalSha256": "9ad76e43e8d481b361443ba9f735d3e6b79a08c89d12009241c6ea57c4911912"
+    },
+    {
+      "path": "s3-image-controls.json.gz",
+      "bytes": 11370,
+      "sha256": "86b99457e2af0671542fd491562b99ac59d30c29bd6e6dd4bdf3dae4ad5a7968",
+      "originalBytes": 222194,
+      "originalSha256": "cd6dc240f54c8ceb013193a2056ae824b4c8ebc4f55e675a0a5c23b2cad45295"
+    },
+    {
+      "path": "s3-image-plan-final.log.gz",
+      "bytes": 2042,
+      "sha256": "6d78cf00818f1b8d622f15acdb6fd2139b4c1cd6a111716cd12ac1a89f22806a",
+      "originalBytes": 6320,
+      "originalSha256": "27254a5abccf54c181f881b35091b6d764451fdef2fdd44703fccbfef1cf29db"
+    },
+    {
+      "path": "drawer-independent-source-review.json",
+      "bytes": 1789,
+      "sha256": "f951af812a1a5559c3d437e5ef9db5b142c01285dbe90d9a45964ca9d52218e9"
+    },
+    {
+      "path": "s3-image-independent-root-review.json",
+      "bytes": 2803,
+      "sha256": "6c1b9975d35c9fa7f9816824ec9948540ac78f836e3121aa7bfe9c7f6bae774b",
+      "originalBytes": 2803,
+      "originalSha256": "6c1b9975d35c9fa7f9816824ec9948540ac78f836e3121aa7bfe9c7f6bae774b"
+    },
+    {
+      "path": "s3-image-independent-tests-direct.log.gz",
+      "bytes": 29836,
+      "sha256": "69355b21214547ebfe54e55886fc712d83c3943aef4af05c5dc6e362bf9d296d",
+      "originalBytes": 269621,
+      "originalSha256": "db97806c73a658cb622998d23db6721c41951f70ebab4e6f465490dd8d3ee10a"
+    },
+    {
+      "path": "s3-image-independent-tests.json.gz",
+      "bytes": 232,
+      "sha256": "820446963e9434b047b5377915fb16f7922fe1d4a964ff7a1153a8b8fd452023",
+      "originalBytes": 482,
+      "originalSha256": "b9fe2acda84c60feb0af165cc7ea2a65e628d7bfe73b233c4760900c6bd2854a"
+    },
+    {
+      "path": "s3-image-independent-tests.log.gz",
+      "bytes": 217,
+      "sha256": "431ac710c1a77eea216f370b533bc830974056ae5509027bb1ccf909b9acdee9",
+      "originalBytes": 429,
+      "originalSha256": "5259249c0254393c1f11dcc608926c9a1526154ae8a17c43c0e6398773dab58b"
+    }
+  ],
+  "publication": "The additive connector continuation commit retains this candidate source tree plus the archival and evidence records. Its SHA and platform author differ from the preserved original commits. The existing published PR head remains its first parent; integrated main is an additional parent. Original author/committer identities and certifications are retained in the bundle, not recertified or rewritten. Validation of the source candidate does not claim native or current external acceptance."
+}

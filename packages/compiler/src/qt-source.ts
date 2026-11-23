@@ -193,6 +193,21 @@ export function emitQtSource(
     return `function(${emitJavaScriptParameters(node.parameters, (item) => expression(item, depth))}) {\n${statements(node.body, depth + 1)}${'    '.repeat(depth)}}`;
   }
   function expression(node: ExpressionIR, depth: number): string {
+    // Check the pruned source actually emitted, including retained Hook setups
+    // and shared modules. A getter must not become an ordinary function field.
+    if (
+      (node.kind === 'record' && node.entries.some((entry) => entry.accessor === 'get')) ||
+      (node.kind === 'object-spread' &&
+        node.parts.some((part) => part.kind === 'entry' && part.accessor === 'get'))
+    ) {
+      diagnostics.push({
+        code: 'PUI4003',
+        category: 'unsupported-input',
+        message: 'Record getters are not implemented by qt-source.',
+        span: node.span,
+      });
+      return '(void 0)';
+    }
     switch (node.kind) {
       case 'narrow':
       case 'member-write':
@@ -245,8 +260,11 @@ export function emitQtSource(
         const bound = new Map(node.states.map((state) => [state.id, state.value]));
         const condition = (value: RuleCondition): string => {
           if (value.type === 'true' || value.type === 'false') return value.type;
-          if (value.type === 'eq')
+          if (value.type === 'eq') {
+            if (value.left.type === 'meta')
+              throw new Error('Rule Meta must fail Qt target admission.');
             return `(${value.left.type === 'prop' ? `${p}Owner.getProps()[${JSON.stringify(value.left.key)}]` : `${expression(bound.get(value.left.id)!, depth)}.get()`} === ${JSON.stringify(value.right)})`;
+          }
           if (value.type === 'not') return `!(${condition(value.expr)})`;
           return `(${value.exprs.map(condition).join(value.type === 'all' ? ' && ' : ' || ') || (value.type === 'all' ? 'true' : 'false')})`;
         };

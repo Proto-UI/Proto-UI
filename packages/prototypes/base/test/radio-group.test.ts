@@ -571,9 +571,13 @@ describe('prototypes/base: radio group', () => {
       'focusNext',
       'focusPrev',
       'focusSelected',
+      'focusSelf',
+      'focused',
       'getCollectionCount',
       'getCollectionItems',
+      'readOnly',
       'requestValue',
+      'resetValue',
       'value',
     ]);
     expect(Object.keys(item.getExposes()).sort()).toEqual([

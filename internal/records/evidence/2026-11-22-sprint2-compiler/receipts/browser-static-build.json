@@ -1,0 +1,2646 @@
+{
+  "candidate": {
+    "head": "a165c4058188aa802b475d1d50ce46ab0d574320",
+    "tree": "d95e52a263ca71d38234d31a262ffa3aa521841b",
+    "status": " M scripts/compiler/shenko-consumer-smoke.mjs\n?? packages/compiler/test/sprint2-browser-consumer.ts\n?? packages/compiler/test/sprint2-native-browser-fixture.ts\n?? packages/compiler/test/sprint2-native.browser.test.ts\n",
+    "diffSha256": "9cc4bb5cb73625dacd7706cb5fcf0975878893cc3ace59a0798621c8be1c389f"
+  },
+  "node": "v24.22.3",
+  "esbuild": "0.25.12",
+  "lockSha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/artifact-library.ts",
+      "sha256": "71a24d1dfc4ef0765933b42065b3fde0f0858f75f0c12a91953b8e1037e4ff41",
+      "bytes": 27903
+    },
+    {
+      "path": "packages/compiler/src/artifact-linking.test.ts",
+      "sha256": "2839620325d8e2846c09dbdbe4103f977ee4245c46608e1c447def6116a572ea",
+      "bytes": 13476
+    },
+    {
+      "path": "packages/compiler/src/artifact-linking.ts",
+      "sha256": "e59d6054e69554c3a1a672f8e24562d7714601deb4f542e4855831362a4e5700",
+      "bytes": 14004
+    },
+    {
+      "path": "packages/compiler/src/artifact-output.test.ts",
+      "sha256": "bd3b322787e70f8130bf052157960f770daefffa58b1d26375e88bda5d1f70c0",
+      "bytes": 13508
+    },
+    {
+      "path": "packages/compiler/src/artifact-output.ts",
+      "sha256": "593ec6b6c9e4210170766ab34c5ffba013c1c645f418cc34de2a7647969889ed",
+      "bytes": 22073
+    },
+    {
+      "path": "packages/compiler/src/callable-effects.ts",
+      "sha256": "31f1ca339ea4d16046b4afad0dd24898d67e68754ee82f29f67f22e2ba2e8b2f",
+      "bytes": 56562
+    },
+    {
+      "path": "packages/compiler/src/capture-analysis.ts",
+      "sha256": "9cb9953fa34ff71b39b8db4cc3aadfc7c552e1c9b6bd8a0f3388eee4bf878804",
+      "bytes": 8083
+    },
+    {
+      "path": "packages/compiler/src/cli-entry.ts",
+      "sha256": "e7e76b44fe0bb0d8489641056d1783c5eec5ecf17d33414e9d3991d1b23e2564",
+      "bytes": 124
+    },
+    {
+      "path": "packages/compiler/src/cli.ts",
+      "sha256": "33c6a7a18d877fc00e37c353a0bfbd85a005b0d2b77c43ed8a41c96d09255cb6",
+      "bytes": 30223
+    },
+    {
+      "path": "packages/compiler/src/compile.ts",
+      "sha256": "9fff0036ec7bd9c1af3828b4b5aae1be84b645c91a6f5fa1a4247be6dc707811",
+      "bytes": 11240
+    },
+    {
+      "path": "packages/compiler/src/compiler-build.ts",
+      "sha256": "9b696d4da0c00c3212a447b0ad184ff6f54d744676722e45c33f7dc9afdbf3cc",
+      "bytes": 590
+    },
+    {
+      "path": "packages/compiler/src/conformance/button-cases.ts",
+      "sha256": "a6365c7192f66be6b7ae66f7c3234707afae9965f48d3df3e493455f25925344",
+      "bytes": 22034
+    },
+    {
+      "path": "packages/compiler/src/conformance/journey.ts",
+      "sha256": "ef358280d05149b21f2cd38fb5837935a7185a1f2ad1b17a9da6ed54f7b206a8",
+      "bytes": 7955
+    },
+    {
+      "path": "packages/compiler/src/conformance/registry.ts",
+      "sha256": "7511fc8f17d17ed32b986aeaafd5d7a996f3dc3d5d555dfe710211015bf55328",
+      "bytes": 11634
+    },
+    {
+      "path": "packages/compiler/src/conformance/result.ts",
+      "sha256": "c455cca122d8b2ae43a50d97647844f12e98638e7b420a56a995216d06523f86",
+      "bytes": 7200
+    },
+    {
+      "path": "packages/compiler/src/conformance/sequences.ts",
+      "sha256": "05b1e52821ba8d4e77c2afb4ab73e2158e85606196836f517994883c1784b8f4",
+      "bytes": 1727
+    },
+    {
+      "path": "packages/compiler/src/conformance/trace.ts",
+      "sha256": "d8fdc1486aaa5d8e64627ed448330a3106702a642ac01012b3c44efc1b9077fa",
+      "bytes": 8205
+    },
+    {
+      "path": "packages/compiler/src/conformance/update-cases.ts",
+      "sha256": "5d8cc913c8a47c4c0af0df37121df1fde55f74a95bc8b43674525c1e0487f850",
+      "bytes": 1916
+    },
+    {
+      "path": "packages/compiler/src/consumer-closure.test.ts",
+      "sha256": "74fc94ba607ea07b7c9724af599c36639dec020ace37b31dc0009b5d372f8a9f",
+      "bytes": 22685
+    },
+    {
+      "path": "packages/compiler/src/consumer-closure.ts",
+      "sha256": "823dc2d107f4e3c647dc9a27fe5f824839aefee232f08c3d38be27a877616315",
+      "bytes": 36297
+    },
+    {
+      "path": "packages/compiler/src/context-declarations.ts",
+      "sha256": "c53f6ce08cefa2189e854f4dbcc93b3f26a68d3d784c9b7251f39bfa46de4d21",
+      "bytes": 2345
+    },
+    {
+      "path": "packages/compiler/src/core-value-types.ts",
+      "sha256": "202782b44011136b3e99f3b9401029b5a6d1c94a9be879f57c3325af95f019e4",
+      "bytes": 5622
+    },
+    {
+      "path": "packages/compiler/src/data-types.ts",
+      "sha256": "57e974df306ff4c4cb071d68fa4d29b41c9a98138956a61b03efb500aa467ee4",
+      "bytes": 15278
+    },
+    {
+      "path": "packages/compiler/src/deferred.ts",
+      "sha256": "9b334b80b30b460417d2c94080fb60d0e4e78b936041aea1f544b8501a4c162b",
+      "bytes": 338
+    },
+    {
+      "path": "packages/compiler/src/demand-pruning.ts",
+      "sha256": "8108df368151a9fbb53a07ab97eb8af6b37833104a994c48ced73cf6b5425922",
+      "bytes": 10582
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-format.test.ts",
+      "sha256": "142b98fbb124f2886c902aadd344baad13283c883f7956ff19f852bec7314d67",
+      "bytes": 7000
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-format.ts",
+      "sha256": "afd1efdc78dae92e4efb4b232f9cd928b759c46ffe6748eca19bb93231e812e9",
+      "bytes": 9008
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-registry.ts",
+      "sha256": "29a4a386c4ae080123e1ff39301b75502e8785be7aa54613e86586cefcb1be21",
+      "bytes": 11054
+    },
+    {
+      "path": "packages/compiler/src/diagnostics.ts",
+      "sha256": "b879cdbe08a416fb40d2941c678b80fdd1b4cf5cc11afe07c8845f883df5851f",
+      "bytes": 557
+    },
+    {
+      "path": "packages/compiler/src/emitter-map.ts",
+      "sha256": "f7abd459f03889a189fc3a1d3d98d811a416a91fdedd320323c01b5cc8838e5f",
+      "bytes": 2650
+    },
+    {
+      "path": "packages/compiler/src/event-types.ts",
+      "sha256": "22f2fc33a302bb59f36fa35208b973611259a9b1e4222e3d7656bd2972b2b524",
+      "bytes": 1525
+    },
+    {
+      "path": "packages/compiler/src/expression-types.ts",
+      "sha256": "5c8a5ca953d13f62fbbe4bf4b142a1251137858344de6afa07c5cc347e7dedf0",
+      "bytes": 21921
+    },
+    {
+      "path": "packages/compiler/src/flow-proof.ts",
+      "sha256": "25be040b9aa5818f6be4a0aedce6269c129b4029928f4447da255ad87d62386b",
+      "bytes": 5257
+    },
+    {
+      "path": "packages/compiler/src/flutter-native-host.ts",
+      "sha256": "0c04fdd8a74b4d249da6521cc6947fe88dcc2f1c229c7eacdbe726a68a191b41",
+      "bytes": 67331
+    },
+    {
+      "path": "packages/compiler/src/flutter-native-modules.ts",
+      "sha256": "ba589bd9dc86f5ffa6381e43132b029f877b7d85ffaf20eb849d8819a775da39",
+      "bytes": 74847
+    },
+    {
+      "path": "packages/compiler/src/flutter-source.ts",
+      "sha256": "ced8e8f3a9530c50cc957cc67a65f73642123d555feb4492e63f5c65c0f941fe",
+      "bytes": 68617
+    },
+    {
+      "path": "packages/compiler/src/focus-activation-entry.test.ts",
+      "sha256": "b4e6b73d830a9f327715d0f5cd5f47183b557ed13e51d4549a3c00ba235e97ab",
+      "bytes": 30893
+    },
+    {
+      "path": "packages/compiler/src/gpui-capabilities.ts",
+      "sha256": "aaba68b492afd7445313c2f806f08f65c11eface8cd41c27094292c4362224ab",
+      "bytes": 2100
+    },
+    {
+      "path": "packages/compiler/src/gpui-data-methods.ts",
+      "sha256": "2f2c5eb15d2ac814cb1df6d9e4c6ef35c9bfbe0ce584e6c0fd33c6802b461f88",
+      "bytes": 309
+    },
+    {
+      "path": "packages/compiler/src/gpui-lexical-names.ts",
+      "sha256": "82114909c9039a02b015ca6818426ab98e4d3ea5c36ce5e0a3e2cd77fe397517",
+      "bytes": 8315
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-a11y.ts",
+      "sha256": "b4578085e911f7540da3a10a35c873a523feed7754f04c8e0312bee4d13ccd8f",
+      "bytes": 14168
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-async.ts",
+      "sha256": "012844e301a92107e171306110524a2d2ee09be163136aa792d82cec41133392",
+      "bytes": 12237
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-authored-hooks.ts",
+      "sha256": "052c9cb3f6a95f03b46b88aa879183dd46c35eeabcea8a57426ad6cf18048154",
+      "bytes": 15184
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-boundary.ts",
+      "sha256": "2e92ddc2b63d68520e42cbffbfec455cd91c05681b7702ee8123e7727d61e74a",
+      "bytes": 6598
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-host.ts",
+      "sha256": "4bbb55c4faa3f3f3db64ac0232fc7ab7a77e94c8939419f58b8755361c53f761",
+      "bytes": 1844
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-image.ts",
+      "sha256": "8a728abc4fa638c5ff8095d3ec5975de260c56721b16ca6b7c81f991d0095bae",
+      "bytes": 11142
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-key.ts",
+      "sha256": "d2401ca105d8e3b334241a3d0cca1df554ce1f3f4c729f099d578e2a98bcc1d2",
+      "bytes": 7098
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-manifest.ts",
+      "sha256": "06c2cbfe858a288006d60428ea5d4fa4264fbe38115a3cbf62f91c5155fedf0e",
+      "bytes": 1548
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-modules.ts",
+      "sha256": "fad5cffabe0fbb918ea87f7f06bec7be308c6a474dd815de04f3d7b175357034",
+      "bytes": 44656
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-move.ts",
+      "sha256": "41676d9558d32c7dd7df4b8ff719bcb144551da61cd4cbe5501e575c3a8ce43c",
+      "bytes": 24517
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-overlay.ts",
+      "sha256": "998d533b1f86101da32c29033c6c7ec127ad45a08ab2e39be18f5cd75981feb0",
+      "bytes": 17750
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-owner.ts",
+      "sha256": "7dba3e928004736a91f9b5823e59c136fc213b41f1534d7c2c3eff16f7bfb834",
+      "bytes": 105707
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-positioning.ts",
+      "sha256": "2aeb6588d3054d212de61fca1bf07091b53bb6fae2cd3ea3c40f5d03bab0d1d4",
+      "bytes": 14396
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-scroll.ts",
+      "sha256": "72c92137d219936796482a7b86c4ae36b5af18d1e33feb20bf6adc792fa19f30",
+      "bytes": 7623
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-sdk-compatibility.ts",
+      "sha256": "13ca7d6232242921d15fd85cbef1919faf58e25f9e0cf973ed81e6d825dc1526",
+      "bytes": 14024
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-sdk.ts",
+      "sha256": "4bb57bb1d24916e060ff9f1c3278549bd6de74ec50e04b46236011a6c0a1dffa",
+      "bytes": 6020
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-style.ts",
+      "sha256": "22fa1a3c787eb398327397f4604abaf4423cddb97944c4f5d572b49cf4371707",
+      "bytes": 105780
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-table.ts",
+      "sha256": "c07348e43737d3601312f772428d4a683e19ffa44b32f69634a928789df24fbc",
+      "bytes": 12457
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-text.ts",
+      "sha256": "4ee86c2b48474481a15528929a86a7f322e162871cd7608aef8a2175782c5d72",
+      "bytes": 34084
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-topology.ts",
+      "sha256": "88f8b04f5e52a5bf26a478f803d95aa1a7b0b42e011a23d2708d829629550a52",
+      "bytes": 14107
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-values.ts",
+      "sha256": "3647c9b1807d33339a4955de1cac90f47f3e71816fcf9f10aa42201537746187",
+      "bytes": 7189
+    },
+    {
+      "path": "packages/compiler/src/gpui-source.ts",
+      "sha256": "dcebb5e3cce177f4556c887a7a7fb2e7b8560b85a95ffa10d7da2c84309ef2f3",
+      "bytes": 137603
+    },
+    {
+      "path": "packages/compiler/src/hook-admission.ts",
+      "sha256": "6ad383788543ff8d67672eb5731332236ea1167792bb17b11f469501b3b7cf2c",
+      "bytes": 2553
+    },
+    {
+      "path": "packages/compiler/src/index.ts",
+      "sha256": "fb3ddedd6527cba0ae09b8baf61eef64cba81df5db969a60604a25452c83313f",
+      "bytes": 4948
+    },
+    {
+      "path": "packages/compiler/src/interaction-value-shape.ts",
+      "sha256": "2aed743c7bfe340df6e0c794d4a8d9b9728e21ca02f921d3a06be78e6fb3a483",
+      "bytes": 6273
+    },
+    {
+      "path": "packages/compiler/src/ir-validation.ts",
+      "sha256": "7223c7d43e4c4e34cddd5ae8c09a5e17ec65f2415875f72fc7398a6b3c43e624",
+      "bytes": 94811
+    },
+    {
+      "path": "packages/compiler/src/ir.ts",
+      "sha256": "930937ddab08bdb4af5a276583deb71ccbdf14947c78d6da16ca516214b4321a",
+      "bytes": 16116
+    },
+    {
+      "path": "packages/compiler/src/legacy-native-admission.ts",
+      "sha256": "1751aa9e9fc1a9254744f854f9b803414662843a59ead2c0956b94635a6e1fae",
+      "bytes": 4761
+    },
+    {
+      "path": "packages/compiler/src/native-adapter-modules.ts",
+      "sha256": "b731d925efe0cc648bcb29c7b1f3b33232ef272b40b60ae2787129a050c8988c",
+      "bytes": 2450
+    },
+    {
+      "path": "packages/compiler/src/native-async.ts",
+      "sha256": "43d32bb5b112c4d50c5ff6ae3d66ff49d1f6486ba294104dfe4ec1241bc835a1",
+      "bytes": 28314
+    },
+    {
+      "path": "packages/compiler/src/native-authored-hooks.ts",
+      "sha256": "aa417d5a5b73f7b8a260e07bd78356fdb93c8aedb55fa157d438a37d360bb7a2",
+      "bytes": 9719
+    },
+    {
+      "path": "packages/compiler/src/native-context-legacy.ts",
+      "sha256": "9afc1c780ae8f9939f3d147e17ad09a009726782ee9f97c683698cb860404dd4",
+      "bytes": 9301
+    },
+    {
+      "path": "packages/compiler/src/native-context.ts",
+      "sha256": "e1c04e57a199cba6d27ee86dce61720960fdfac18e6e19a14231997e122309e5",
+      "bytes": 11171
+    },
+    {
+      "path": "packages/compiler/src/native-control-label.ts",
+      "sha256": "c5af25dc2a129bcf17c8578053e15226734e571fd44145dad02521eba27151ab",
+      "bytes": 48240
+    },
+    {
+      "path": "packages/compiler/src/native-focus-scope-restore.test.ts",
+      "sha256": "18075135f8b74cc0f4e25e76e18133a05b6832157d06e2bbc3df2c15b1e0732d",
+      "bytes": 24317
+    },
+    {
+      "path": "packages/compiler/src/native-image-view.ts",
+      "sha256": "bf4125a6bbf7086f2d7005905e63c48d2c7816c3c2df914fa119e6e60f2dbd5e",
+      "bytes": 14668
+    },
+    {
+      "path": "packages/compiler/src/native-instance-associations.ts",
+      "sha256": "68e2120609e67d184b405b25f8426c139bbe160f84086bad6e797807d95804e1",
+      "bytes": 841
+    },
+    {
+      "path": "packages/compiler/src/native-interaction.ts",
+      "sha256": "753b463f37b2fdfb7d1c8e21a2eee2aee274c2e8ec49506cb6672db6185ca2e2",
+      "bytes": 15611
+    },
+    {
+      "path": "packages/compiler/src/native-public-values.ts",
+      "sha256": "f09317eb31e6ec8497b1dc7fda018c05db244ce383694935a1fa5c19f8531f07",
+      "bytes": 9392
+    },
+    {
+      "path": "packages/compiler/src/native-scroll-reveal.ts",
+      "sha256": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603",
+      "bytes": 6744
+    },
+    {
+      "path": "packages/compiler/src/native-static-declarations.ts",
+      "sha256": "22b2635ca9593e4aa756c02827e542c8ec67cb5da262be20d90e720b6587cbb5",
+      "bytes": 3782
+    },
+    {
+      "path": "packages/compiler/src/native-style.ts",
+      "sha256": "9387a66aba4d17c36341cb1956a07e4377c5248ea8afdad88cd9dc008028533a",
+      "bytes": 7951
+    },
+    {
+      "path": "packages/compiler/src/native-support-legacy.ts",
+      "sha256": "e99b3a51f2613839c0860749a936490d12413206d742b78f30e8b333cee43873",
+      "bytes": 173256
+    },
+    {
+      "path": "packages/compiler/src/native-support-migration.ts",
+      "sha256": "88a6c956982f7c2f0098c1d0ecf30598e9a1e55dc6c9cb3a527f28100d68038f",
+      "bytes": 28893
+    },
+    {
+      "path": "packages/compiler/src/native-support/artifacts.ts",
+      "sha256": "cbc7c85fa85463616abec9d24fb0ca32c12fa5b01e71505f0e7fbb83e9a87b76",
+      "bytes": 10640
+    },
+    {
+      "path": "packages/compiler/src/native-support/dom-interaction.template.ts",
+      "sha256": "124b49b249d4ada6fadf01cdb339adb91fe0c85528d16af375ea793637d75475",
+      "bytes": 41187
+    },
+    {
+      "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+      "sha256": "c7bdbe9db173d9e55a2fb09f1683a348c47fa721afc71acf3f97dc6bc70dad5d",
+      "bytes": 149781
+    },
+    {
+      "path": "packages/compiler/src/native-support/legacy-text-v1.template.ts",
+      "sha256": "ef6762716678e06b621121ac269f76b234c84fda93377a2480f08159dc3d4009",
+      "bytes": 30569
+    },
+    {
+      "path": "packages/compiler/src/native-support/part-relationships.template.ts",
+      "sha256": "c4e33fbc362ab5ef54774391eeaa51dc20e16a48a47641e63067f468331d9632",
+      "bytes": 12998
+    },
+    {
+      "path": "packages/compiler/src/native-support/plan.ts",
+      "sha256": "ed6c75653150edb1a3e75a4c917568d74755a0dd4aa393a068ea3026fdc93422",
+      "bytes": 9128
+    },
+    {
+      "path": "packages/compiler/src/native-support/specialize.ts",
+      "sha256": "06c7ecfad621fe8f6593e73074b17bccf77b3264e4ed18fd552652e7ff9a7661",
+      "bytes": 12568
+    },
+    {
+      "path": "packages/compiler/src/native-support/template-ast.ts",
+      "sha256": "0ab3759a95708ce010ac0611abf815bb518c707532dddd24e9e7f3b45ab730e3",
+      "bytes": 5732
+    },
+    {
+      "path": "packages/compiler/src/native-value-lowering.ts",
+      "sha256": "363c8ac86e1db8240cfabfcfc31fc29d594271526cfa6fb650a1861c8e305d50",
+      "bytes": 14971
+    },
+    {
+      "path": "packages/compiler/src/native-vue2-associations.ts",
+      "sha256": "7633f8b773a82b9118dc1b9f34e0b631858f978ca9ea5ec035a11e4c4819fbd8",
+      "bytes": 2612
+    },
+    {
+      "path": "packages/compiler/src/notification-plan.ts",
+      "sha256": "174b0cbec7e7743721fbebd7b9fc7df7cf7d5a1456a81d48884a819de893b3f1",
+      "bytes": 1650
+    },
+    {
+      "path": "packages/compiler/src/observable-semantics.ts",
+      "sha256": "2e22b1f5f5e13a25818287b7b54e1cbbeb321e2122e9852bbba2be441041054d",
+      "bytes": 2690
+    },
+    {
+      "path": "packages/compiler/src/operations.ts",
+      "sha256": "aab4c4c93d58df5ec6aa4cea5fd02e19067eb8cca47917ea43bd62190a4a087f",
+      "bytes": 84093
+    },
+    {
+      "path": "packages/compiler/src/parser-module.ts",
+      "sha256": "5dfda1b60c6116551cdc2fc45a403da243cb206700c4bf03dbbf39b6e457fc81",
+      "bytes": 32960
+    },
+    {
+      "path": "packages/compiler/src/parser.ts",
+      "sha256": "8ff0d9521a3e4f94b665fe70bea20358454b5f46e47c103f146c7b17211eda10",
+      "bytes": 155931
+    },
+    {
+      "path": "packages/compiler/src/pointer-facts-admission.ts",
+      "sha256": "e9e0217097971a3a423f2cb6c7de1a465da9fa86d338562bd10bb3aee2e5f2c5",
+      "bytes": 11283
+    },
+    {
+      "path": "packages/compiler/src/portable-data-methods.ts",
+      "sha256": "af75c5e4ab398182a860fca529630c2d9893bc38dd945a0324de92260eccd59a",
+      "bytes": 7436
+    },
+    {
+      "path": "packages/compiler/src/project-output.test.ts",
+      "sha256": "07b5cf140661bf1196701583bd0e4fd6623e7ec5d660ce0e7de76ae2677e67be",
+      "bytes": 9389
+    },
+    {
+      "path": "packages/compiler/src/project-output.ts",
+      "sha256": "a50d91d75d0ace4fe2d149e1da7a376738525892031fe3190290e52e28ba7624",
+      "bytes": 10060
+    },
+    {
+      "path": "packages/compiler/src/project.test.ts",
+      "sha256": "0a5386d40b4c5740388292e96a653ed51b59201d51f85d2567c1f4e83bc6488c",
+      "bytes": 10035
+    },
+    {
+      "path": "packages/compiler/src/project.ts",
+      "sha256": "7d2db0a50e60e7dcb8a885911138a7ea29cfe64cff6090b10d59ca3a17fad576",
+      "bytes": 12013
+    },
+    {
+      "path": "packages/compiler/src/qt-native-context.ts",
+      "sha256": "3c2889a595e1815c917f61bc7beb857de00b82034697c1e59c87008380656fb5",
+      "bytes": 10471
+    },
+    {
+      "path": "packages/compiler/src/qt-native-controls.ts",
+      "sha256": "6e7e3d7eae6c84c19e94fac604bfae68b75fe7105bd0f539cc9c1f12f4bc3920",
+      "bytes": 10217
+    },
+    {
+      "path": "packages/compiler/src/qt-native-host.ts",
+      "sha256": "edb5aa4ca8e13ddddc157ec5b84c66e6090dd403a8a6c1f6cdf9a00bbd239035",
+      "bytes": 26074
+    },
+    {
+      "path": "packages/compiler/src/qt-native-interaction.ts",
+      "sha256": "22d2123c900688fb6218d25c8dd49e24d88dd2838b994a6316bcc62227548f7c",
+      "bytes": 19311
+    },
+    {
+      "path": "packages/compiler/src/qt-native-owner.ts",
+      "sha256": "198a08a043eb7ad7be3f8ff4c8d6786533dc91725eee38f6009e72e07f30c128",
+      "bytes": 23922
+    },
+    {
+      "path": "packages/compiler/src/qt-native-presentation.ts",
+      "sha256": "67d7e0c0612e7e8a0c67d3754771faae0e84c3d56b69d92e02e6ce26d96cbad5",
+      "bytes": 5999
+    },
+    {
+      "path": "packages/compiler/src/qt-native-style.ts",
+      "sha256": "b030490ebb75ef806a58cbaa28e0cfaf42303d137f5f276f70855c2e00f486e0",
+      "bytes": 6973
+    },
+    {
+      "path": "packages/compiler/src/qt-native-table.ts",
+      "sha256": "51f8f50a5270497d5b26738b2a3fc3b7f6fb1e4ad883d386b5cafbc648643888",
+      "bytes": 856
+    },
+    {
+      "path": "packages/compiler/src/qt-native-topology.ts",
+      "sha256": "881aa215cc81bb01cd453cfafe588717854d023fc4dc42325aa2bed45b1e3df3",
+      "bytes": 26504
+    },
+    {
+      "path": "packages/compiler/src/qt-native-view.ts",
+      "sha256": "17e11227c4dd899fc18abfb4ff91bd022bd74972b9f5c62e187db054b2d0b7aa",
+      "bytes": 17783
+    },
+    {
+      "path": "packages/compiler/src/qt-source.ts",
+      "sha256": "b7c632956678f355d982aa36b1fbbaaa9ef1c9a094b9099e098608656c34187d",
+      "bytes": 28705
+    },
+    {
+      "path": "packages/compiler/src/react-source.ts",
+      "sha256": "f3e571d5a6ab8500c45a9535334f27cec06876b2a779846b93149f273124fb70",
+      "bytes": 81023
+    },
+    {
+      "path": "packages/compiler/src/react-ssr-source.ts",
+      "sha256": "8f427544d02340555314ef9ce8fad3c603b8d3b964a9e2ece2ca18ee96adc4d6",
+      "bytes": 14084
+    },
+    {
+      "path": "packages/compiler/src/react.ts",
+      "sha256": "6f3a93e5afeb8ad7dbbaef090bf24bf800a4d5df39c242adfb91af478128d6e7",
+      "bytes": 22212
+    },
+    {
+      "path": "packages/compiler/src/resolved-props.ts",
+      "sha256": "8900eb188c0d3ea536328c8f7679a6a4f303ce10395140e1e769cb504f2af1dc",
+      "bytes": 7723
+    },
+    {
+      "path": "packages/compiler/src/rule-declarations.ts",
+      "sha256": "85ba623274cdacad451e2d761634d4a0a2593992f000ec1c60c82d05793b912b",
+      "bytes": 23822
+    },
+    {
+      "path": "packages/compiler/src/rule-plan.ts",
+      "sha256": "3bd9ef6bb25abdc8d7c4bbc2fc69fab2b502833dd94c29bd7ca04a641b1cc1b7",
+      "bytes": 13635
+    },
+    {
+      "path": "packages/compiler/src/rust-data-source.ts",
+      "sha256": "bdf3e291805431ae9af51c324ef0de30aef7cce317e90963319229d17938fb68",
+      "bytes": 37328
+    },
+    {
+      "path": "packages/compiler/src/rust-data-support.ts",
+      "sha256": "6de04f194690bab39ae490d70afcf3dd5188b97996fe9450fdf02b151c13d077",
+      "bytes": 1649
+    },
+    {
+      "path": "packages/compiler/src/rust-data.ts",
+      "sha256": "9bc122c1589a8afdacdbe0227737361579ac42276edf9c3d215bccf8156e7c3d",
+      "bytes": 6158
+    },
+    {
+      "path": "packages/compiler/src/rust-scalar-semantics.ts",
+      "sha256": "40d088681706d433ce99bdc956aeff686279b2cc8b926fd1f4ba746c599d1ceb",
+      "bytes": 4581
+    },
+    {
+      "path": "packages/compiler/src/source-loader.ts",
+      "sha256": "076257fa2e1231d51befccff537fa31473ed9b6c2412ebdcaa4016ab71771796",
+      "bytes": 17291
+    },
+    {
+      "path": "packages/compiler/src/source-map.ts",
+      "sha256": "ac9ba1039e818771920507eef2ccd170c822ffe42e0f667f8f1e752d5718fbbe",
+      "bytes": 7010
+    },
+    {
+      "path": "packages/compiler/src/source-module-bindings.ts",
+      "sha256": "9728caa9bc2039f2a022051235299f06cc82f41c16cacfc1b504f27799b22007",
+      "bytes": 2202
+    },
+    {
+      "path": "packages/compiler/src/source-resolution.ts",
+      "sha256": "9a4570feb45b6546b5690de357d50d9a52454cc7f263d25958157fece03bcac1",
+      "bytes": 5688
+    },
+    {
+      "path": "packages/compiler/src/source-syntax.ts",
+      "sha256": "bc8b842e7774dbca364a492f90984e3dc6593f37ec5af7bfd470d54b06ba8d25",
+      "bytes": 4924
+    },
+    {
+      "path": "packages/compiler/src/source-type-resolution.ts",
+      "sha256": "294dac34705a8439bcda69f8390c665dd76ff247074f494a505d3470f6bb9d62",
+      "bytes": 12238
+    },
+    {
+      "path": "packages/compiler/src/source-types.ts",
+      "sha256": "ea18c8a15c36b97ece9fdca856f8df288eb1fd4553ff18e1141984a90b03665c",
+      "bytes": 1853
+    },
+    {
+      "path": "packages/compiler/src/source-values.ts",
+      "sha256": "e8e0ca333ec6afdb80823623bf9f1a119783965eae63f541e45c9d7ca8fc7e02",
+      "bytes": 17478
+    },
+    {
+      "path": "packages/compiler/src/static-declarations.ts",
+      "sha256": "e76b738d2a9f27e00cac09679052b176e7611ee7e8e0150f410ab7000ac651f2",
+      "bytes": 8702
+    },
+    {
+      "path": "packages/compiler/src/style-plan.test.ts",
+      "sha256": "35237aaace850a2991f2ff129fb599167d43a82e7274837e266d726600331380",
+      "bytes": 11413
+    },
+    {
+      "path": "packages/compiler/src/style-plan.ts",
+      "sha256": "b53597b1abb3d71f0c50cfeabdcc91f84f30ff83efc5590b3d43e7881afaa3e4",
+      "bytes": 12053
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "sha256": "ec82d22335ade35260cd5a7bdc29f18ae0df806616a04a8438575a74a66e6c8d",
+      "bytes": 27345
+    },
+    {
+      "path": "packages/compiler/src/template-shape.ts",
+      "sha256": "cebe764ff5aea5bfc3169f4b92fb6e11b23c9703bce6f7a0c30cd96919b15430",
+      "bytes": 14757
+    },
+    {
+      "path": "packages/compiler/src/value-children.ts",
+      "sha256": "0db8cf768e65833e6ba038ea6ae2310ebb1e162f2c38b5e602ca51d4f77c5f16",
+      "bytes": 745
+    },
+    {
+      "path": "packages/compiler/src/value-types.ts",
+      "sha256": "2d63737caa8cb3d93e09a9c5c11d69ffff199e3b462c03df6e7dc8ff400251ff",
+      "bytes": 16473
+    },
+    {
+      "path": "packages/compiler/src/vue-source.ts",
+      "sha256": "1a58470d1ce9ee56bd053a2fe8c65d30ebb1f0c8adf87d12a82bbb93205b8082",
+      "bytes": 96883
+    },
+    {
+      "path": "packages/compiler/src/vue-ssr-support.ts",
+      "sha256": "608eb599495aea7c972cd3a4bd646f8764f62fade50def909a3042fe58d9a050",
+      "bytes": 6433
+    },
+    {
+      "path": "packages/compiler/src/vue2-context-source.test.ts",
+      "sha256": "cd0c9608c05967c2422362714f3390c6563c823289ad0ef66571d16f2edda0cf",
+      "bytes": 9302
+    },
+    {
+      "path": "packages/compiler/src/vue2-native-template.ts",
+      "sha256": "32d59f997de38899c19ae4889d8f9dbf16e7e55b8e77022b7c51976aec95e415",
+      "bytes": 37894
+    },
+    {
+      "path": "packages/compiler/src/vue2-portal-source.test.ts",
+      "sha256": "6d25687d5818efb15c016b5204f6172d450b187a4d9644ce06a36120dfa883ac",
+      "bytes": 11695
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.test.ts",
+      "sha256": "7ba0a88e8d6bcdbb5c56702393d8e0aef515b8311e2a245b4274a4888717351e",
+      "bytes": 29727
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "sha256": "765c97e39ed30efa4954100586f88a67ef2b004d64cb0c71038e3b44f2352b81",
+      "bytes": 95182
+    },
+    {
+      "path": "packages/compiler/src/vue2-ssr-entry.ts",
+      "sha256": "2c2d441cf0fd03585d6cf237b107241eaec1b67ef26c799bccf238208e01f648",
+      "bytes": 8995
+    },
+    {
+      "path": "packages/compiler/src/vue2-style-source.test.ts",
+      "sha256": "00eeeade607fb145c042ea7db3d7b28cffc1cc4ffcd6368c5f35b7eabd92b65d",
+      "bytes": 10276
+    },
+    {
+      "path": "packages/compiler/src/watch.test.ts",
+      "sha256": "7a261ccfbc5f03c9069740e92a0ee4beeacc499ea4c6a74bd8f8ae6ab773d140",
+      "bytes": 21052
+    },
+    {
+      "path": "packages/compiler/src/watch.ts",
+      "sha256": "455e89ec4b85f81ca5aa02d9a11f5e07791ef88697375e8cd2a96fe2ed2c1ac1",
+      "bytes": 19585
+    },
+    {
+      "path": "packages/compiler/src/web-component-browser-support.test.ts",
+      "sha256": "0b83ada830a9db3a8d6a8e4513c3bb17a1bb2f4e81b20b0e7abb6ea6d41b84ec",
+      "bytes": 12342
+    },
+    {
+      "path": "packages/compiler/src/web-component-browser-support.ts",
+      "sha256": "a224b0424db459eb488bfbf897e0858e2240da7c52df7260837a9e96078f4507",
+      "bytes": 13266
+    },
+    {
+      "path": "packages/compiler/src/web-component-context.test.ts",
+      "sha256": "df4d8f2d7e09b49e569e23a0080dc0a1511efffc2325a0e0938dab1349e9739f",
+      "bytes": 17983
+    },
+    {
+      "path": "packages/compiler/src/web-component-source.test.ts",
+      "sha256": "0c79844151a1155251af641fc6db942ad5b81b30d758cb0fe00c4df465af7db3",
+      "bytes": 35805
+    },
+    {
+      "path": "packages/compiler/src/web-component-source.ts",
+      "sha256": "d706a73368f2945bb0e07399f7ac7b885c2df221790edb0619db6fc599eae899",
+      "bytes": 91146
+    },
+    {
+      "path": "packages/compiler/src/web-component-ssr-style.test.ts",
+      "sha256": "59c4cc5a91c9278b129f93e10e528abe6e0feac856f78736ab60cae73b1d21f0",
+      "bytes": 14489
+    },
+    {
+      "path": "packages/compiler/src/web-component-ssr-style.ts",
+      "sha256": "b95ca1dd44e4837672087199524c0595116a4e19b4a37d0f5075cee2485fe644",
+      "bytes": 14480
+    },
+    {
+      "path": "packages/compiler/src/web-component-ssr-support.ts",
+      "sha256": "24b39831c60fe1ebcc0fdc9202f0f464a12a9e2ea098895f9f214b9d647b9822",
+      "bytes": 55274
+    },
+    {
+      "path": "packages/compiler/src/web-component-style.test.ts",
+      "sha256": "c49be258f2c0e2206d226961e23e7642731dfa34c952ca1c8509e02ab73ac2be",
+      "bytes": 10715
+    },
+    {
+      "path": "packages/compiler/test/sprint2-browser-consumer.ts",
+      "sha256": "5bd9f0ab3ef0e605fcd7a74732c3d1222fce3493586b21e9afab6f90e540cb10",
+      "bytes": 8982
+    },
+    {
+      "path": "packages/compiler/test/sprint2-native-browser-fixture.ts",
+      "sha256": "ef457dec029dd8d5a93cbb2ac4b890170b19aec2ce5f239eb85c0933332e93b3",
+      "bytes": 8645
+    },
+    {
+      "path": "packages/compiler/test/sprint2-native.browser.test.ts",
+      "sha256": "410a7146dea14db90169c625bde1b4076a18e165007b3070ac1d0372893e7abd",
+      "bytes": 13560
+    }
+  ],
+  "compilations": [
+    {
+      "target": "react",
+      "kind": "base",
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "react-dom-source-v1",
+      "sourceSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "react",
+      "kind": "shadcn",
+      "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "react-dom-source-v1",
+      "sourceSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sha256": "209134c984c54e56b4de343c2349e209a4441ca1ee37a607b9d32525a2ead34e",
+          "bytes": 14921
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/new-york.ts",
+          "sha256": "aae953b100cfe8ac1f536a6cfa4c0255bfa022e40df4953a28936babfb3cc7ee",
+          "bytes": 1443
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/paint.ts",
+          "sha256": "466dfd46c086cfa432423b21d419618e8605a77e894e82df426d2498137cb8c4",
+          "bytes": 1430
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/profiles.ts",
+          "sha256": "b44c4ea2ae124a7f1fadc15e3e12299a4b601284fa70aeacae6a5aeccd5fb689",
+          "bytes": 8939
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "react",
+      "kind": "brutalist",
+      "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "react-dom-source-v1",
+      "sourceSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sha256": "4c33232d7461053b2bbb7d3609c628ff3ce71e59c068eb75c4c93c9925700934",
+          "bytes": 7305
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/style.ts",
+          "sha256": "56f7f68ef2949556ce28decf23cec9dea0b1e97712d0d657433bda32a19ecfa8",
+          "bytes": 1696
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "react",
+      "kind": "text",
+      "entry": "native-candidate-owner.proto.ts",
+      "consumerNature": "independent-shared-contract-fixture",
+      "profile": "react-dom-source-v1",
+      "sourceSha256": "ffbe7c50fd76b01d7e1b6d0122d2e80a8fc6a74d5bc3a6dfdde8d52920c26864",
+      "sourceFiles": [
+        {
+          "file": "native-candidate-owner.proto.ts",
+          "sha256": "8e0ebc178ed1ecd721ba1513419e80a43a51942aef98e226827f72e9ce1b4c04",
+          "bytes": 919
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "react",
+          "version": "19.2.6",
+          "role": "target"
+        },
+        {
+          "name": "react-dom",
+          "version": "19.2.6",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue",
+      "kind": "base",
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "vue-source-v1",
+      "sourceSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "3.5.31",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue",
+      "kind": "shadcn",
+      "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "vue-source-v1",
+      "sourceSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sha256": "209134c984c54e56b4de343c2349e209a4441ca1ee37a607b9d32525a2ead34e",
+          "bytes": 14921
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/new-york.ts",
+          "sha256": "aae953b100cfe8ac1f536a6cfa4c0255bfa022e40df4953a28936babfb3cc7ee",
+          "bytes": 1443
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/paint.ts",
+          "sha256": "466dfd46c086cfa432423b21d419618e8605a77e894e82df426d2498137cb8c4",
+          "bytes": 1430
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/profiles.ts",
+          "sha256": "b44c4ea2ae124a7f1fadc15e3e12299a4b601284fa70aeacae6a5aeccd5fb689",
+          "bytes": 8939
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "3.5.31",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue",
+      "kind": "brutalist",
+      "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "vue-source-v1",
+      "sourceSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sha256": "4c33232d7461053b2bbb7d3609c628ff3ce71e59c068eb75c4c93c9925700934",
+          "bytes": 7305
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/style.ts",
+          "sha256": "56f7f68ef2949556ce28decf23cec9dea0b1e97712d0d657433bda32a19ecfa8",
+          "bytes": 1696
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "3.5.31",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue",
+      "kind": "text",
+      "entry": "native-candidate-owner.proto.ts",
+      "consumerNature": "independent-shared-contract-fixture",
+      "profile": "vue-source-v1",
+      "sourceSha256": "ffbe7c50fd76b01d7e1b6d0122d2e80a8fc6a74d5bc3a6dfdde8d52920c26864",
+      "sourceFiles": [
+        {
+          "file": "native-candidate-owner.proto.ts",
+          "sha256": "8e0ebc178ed1ecd721ba1513419e80a43a51942aef98e226827f72e9ce1b4c04",
+          "bytes": 919
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "3.5.31",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue2",
+      "kind": "base",
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "vue2-source-v1",
+      "sourceSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "2.6.14",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue2",
+      "kind": "shadcn",
+      "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "vue2-source-v1",
+      "sourceSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sha256": "209134c984c54e56b4de343c2349e209a4441ca1ee37a607b9d32525a2ead34e",
+          "bytes": 14921
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/new-york.ts",
+          "sha256": "aae953b100cfe8ac1f536a6cfa4c0255bfa022e40df4953a28936babfb3cc7ee",
+          "bytes": 1443
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/paint.ts",
+          "sha256": "466dfd46c086cfa432423b21d419618e8605a77e894e82df426d2498137cb8c4",
+          "bytes": 1430
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/profiles.ts",
+          "sha256": "b44c4ea2ae124a7f1fadc15e3e12299a4b601284fa70aeacae6a5aeccd5fb689",
+          "bytes": 8939
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "2.6.14",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue2",
+      "kind": "brutalist",
+      "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "vue2-source-v1",
+      "sourceSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sha256": "4c33232d7461053b2bbb7d3609c628ff3ce71e59c068eb75c4c93c9925700934",
+          "bytes": 7305
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/style.ts",
+          "sha256": "56f7f68ef2949556ce28decf23cec9dea0b1e97712d0d657433bda32a19ecfa8",
+          "bytes": 1696
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "2.6.14",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "vue2",
+      "kind": "text",
+      "entry": "native-candidate-owner.proto.ts",
+      "consumerNature": "independent-shared-contract-fixture",
+      "profile": "vue2-source-v1",
+      "sourceSha256": "ffbe7c50fd76b01d7e1b6d0122d2e80a8fc6a74d5bc3a6dfdde8d52920c26864",
+      "sourceFiles": [
+        {
+          "file": "native-candidate-owner.proto.ts",
+          "sha256": "8e0ebc178ed1ecd721ba1513419e80a43a51942aef98e226827f72e9ce1b4c04",
+          "bytes": 919
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "vue",
+          "version": "2.6.14",
+          "role": "target"
+        }
+      ]
+    },
+    {
+      "target": "wc",
+      "kind": "base",
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "web-component-source-v1",
+      "sourceSha256": "c64570ede43b48f720f61e62f0341c50222d20372f3b0b74fe4c7eafc068f1e7",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "target": "wc",
+      "kind": "shadcn",
+      "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "web-component-source-v1",
+      "sourceSha256": "84930a478b4294c89672872bb3fe8bc42783fe0080f864762cd2a4491bce9e72",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/button.proto.ts",
+          "sha256": "209134c984c54e56b4de343c2349e209a4441ca1ee37a607b9d32525a2ead34e",
+          "bytes": 14921
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/new-york.ts",
+          "sha256": "aae953b100cfe8ac1f536a6cfa4c0255bfa022e40df4953a28936babfb3cc7ee",
+          "bytes": 1443
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/paint.ts",
+          "sha256": "466dfd46c086cfa432423b21d419618e8605a77e894e82df426d2498137cb8c4",
+          "bytes": 1430
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/button/profiles.ts",
+          "sha256": "b44c4ea2ae124a7f1fadc15e3e12299a4b601284fa70aeacae6a5aeccd5fb689",
+          "bytes": 8939
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/context.ts",
+          "sha256": "60d5750a5fe453edaa4e051c5d8b26132db1124b5f18e7c5efa2d5ab27743fa0",
+          "bytes": 1080
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/index.ts",
+          "sha256": "52769ca3613ed5f1da65f2c9723d02f29b73e1a571c57c6e654bdc92174c2270",
+          "bytes": 336
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+          "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+          "bytes": 378
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/style-scope/selection.ts",
+          "sha256": "444e2d84c97c3559738be878dd982b34a807d5b2c8f263732c310685761b1a85",
+          "bytes": 3153
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "target": "wc",
+      "kind": "brutalist",
+      "entry": "packages/prototypes/brutalist/src/button/button.proto.ts",
+      "consumerNature": "unchanged-public-family",
+      "profile": "web-component-source-v1",
+      "sourceSha256": "b73c3bc9ba9778927c557752ba5a485793ae406eef1ffc0097945232bc9335d1",
+      "sourceFiles": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+          "bytes": 6686
+        },
+        {
+          "file": "packages/prototypes/base/src/button/index.ts",
+          "sha256": "2d750abaccda51ca6a645d5756ad86598c23fd525b64462d626d96366748ba42",
+          "bytes": 221
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/button/button.proto.ts",
+          "sha256": "4c33232d7461053b2bbb7d3609c628ff3ce71e59c068eb75c4c93c9925700934",
+          "bytes": 7305
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/style.ts",
+          "sha256": "56f7f68ef2949556ce28decf23cec9dea0b1e97712d0d657433bda32a19ecfa8",
+          "bytes": 1696
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "target": "wc",
+      "kind": "text",
+      "entry": "native-candidate-owner.proto.ts",
+      "consumerNature": "independent-shared-contract-fixture",
+      "profile": "web-component-source-v1",
+      "sourceSha256": "ffbe7c50fd76b01d7e1b6d0122d2e80a8fc6a74d5bc3a6dfdde8d52920c26864",
+      "sourceFiles": [
+        {
+          "file": "native-candidate-owner.proto.ts",
+          "sha256": "8e0ebc178ed1ecd721ba1513419e80a43a51942aef98e226827f72e9ce1b4c04",
+          "bytes": 919
+        }
+      ],
+      "dependencies": []
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "generated/react/base/.proto-ui/context/react-v1.ts",
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+      "bytes": 161
+    },
+    {
+      "path": "generated/react/base/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/react/base/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/react/base/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/react/base/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/react/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/react/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/react/base/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/react/base/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/react/base/Component.tsx",
+      "sha256": "6f34a0f642525560c2d8703c9f7d19db9219f9e61f696ba34ecdc0958c69a1c1",
+      "bytes": 57121
+    },
+    {
+      "path": "generated/react/base/Component.tsx.map",
+      "sha256": "18f8391c683ef345be7a6801c79eae2b54c34c8ef4da1fac9c5835ac0aa3a9d1",
+      "bytes": 8257
+    },
+    {
+      "path": "generated/react/base/provenance.json",
+      "sha256": "220d0a95e210ce6761abaf917120287546d7f93d03a8c5afc4776ea0c1608542",
+      "bytes": 4147
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+      "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+      "bytes": 626
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/context/react-v1.ts",
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+      "bytes": 161
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+      "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+      "bytes": 2319
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/react/shadcn/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/react/shadcn/Component.tsx",
+      "sha256": "83047209439a7a7173c3f3b5f79af39589d7a3ea4e5ff85c6e418d1c6be2ae26",
+      "bytes": 123395
+    },
+    {
+      "path": "generated/react/shadcn/Component.tsx.map",
+      "sha256": "8ac658d59001f41bb03a4bc9f67ee95310fb0a5b33dd0451b90eb0a50edc90e6",
+      "bytes": 42716
+    },
+    {
+      "path": "generated/react/shadcn/provenance.json",
+      "sha256": "4335cf04f87a338b8cf6a025ac9730aa4bae210aa73984fff80b27316ce387ad",
+      "bytes": 6809
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/context/react-v1.ts",
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+      "bytes": 161
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/meta/preference-source-v1.ts",
+      "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+      "bytes": 3853
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/react/brutalist/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/react/brutalist/Component.tsx",
+      "sha256": "3872a4db0e957e07295360261b9dee95f54f31aecf52c1c79530ad766f1473bf",
+      "bytes": 71220
+    },
+    {
+      "path": "generated/react/brutalist/Component.tsx.map",
+      "sha256": "0be78c2c693cf5b8ed16da28d8da151b0484d9d9874fe5da00f7c0a27c037397",
+      "bytes": 18084
+    },
+    {
+      "path": "generated/react/brutalist/provenance.json",
+      "sha256": "384e173dd9b06116463b882920ac4bfbdf24c684cc72e7b6bdbc0f98f2289ea1",
+      "bytes": 5585
+    },
+    {
+      "path": "generated/react/text/.proto-ui/context/react-v1.ts",
+      "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+      "bytes": 161
+    },
+    {
+      "path": "generated/react/text/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/react/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+      "sha256": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+      "bytes": 40942
+    },
+    {
+      "path": "generated/react/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+      "sha256": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+      "bytes": 15520
+    },
+    {
+      "path": "generated/react/text/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/react/text/Component.tsx",
+      "sha256": "4fb556c11883f0c0e376413d5c5cc6b6e4936598f130aa3687e1a554883267ed",
+      "bytes": 47762
+    },
+    {
+      "path": "generated/react/text/Component.tsx.map",
+      "sha256": "a0f1d1dd796b83a22d5f63cd3d2292892935c99d2fbc39bc442de8edf686e1a4",
+      "bytes": 1839
+    },
+    {
+      "path": "generated/react/text/provenance.json",
+      "sha256": "ec8bf12f302e1b93bd9f197eacfd5b8b42f475a407e4a30e540dc63615ab0647",
+      "bytes": 2915
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue/base/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/vue/base/Component.ts",
+      "sha256": "b94c20d795c031b8115d0f02dc78bb4d324485ac234614f9bc4515757adb0f52",
+      "bytes": 55327
+    },
+    {
+      "path": "generated/vue/base/Component.ts.map",
+      "sha256": "01bf43267cc5d22aa3bcb0f35cc8a6b3f3998d6f7a66215d787f24fb78cf4d34",
+      "bytes": 8129
+    },
+    {
+      "path": "generated/vue/base/provenance.json",
+      "sha256": "b9d5deabb053bef2d5504a1561ce4c2b890a9bab3b25a2189963677ed8629b1b",
+      "bytes": 3868
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+      "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+      "bytes": 626
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+      "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+      "bytes": 2319
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/vue/shadcn/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/vue/shadcn/Component.ts",
+      "sha256": "286c820f4c9db40e14a78faf314ad73f55e589bfa80c42c4b0d08c71892d4710",
+      "bytes": 125621
+    },
+    {
+      "path": "generated/vue/shadcn/Component.ts.map",
+      "sha256": "f0960d7b8ff6a01b2c228f266ac9f17058c9793af642a26e65dca3c0555e41d5",
+      "bytes": 42611
+    },
+    {
+      "path": "generated/vue/shadcn/provenance.json",
+      "sha256": "f1f17ebd3d376d89907f3a453d9f71c93c8001118fe5a5cf6674a0542976e618",
+      "bytes": 6530
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/meta/preference-source-v1.ts",
+      "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+      "bytes": 3853
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/vue/brutalist/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/vue/brutalist/Component.ts",
+      "sha256": "0b0db188837a84ca228421fd421e71fda6107122bc4ed3116c606d2a87475c14",
+      "bytes": 69517
+    },
+    {
+      "path": "generated/vue/brutalist/Component.ts.map",
+      "sha256": "ef92491aa239a35d9ab0bc0511270e3b2ab0e92bfd49d4fde0765e3cb6c6d7d5",
+      "bytes": 17960
+    },
+    {
+      "path": "generated/vue/brutalist/provenance.json",
+      "sha256": "1b8ab8093810fb8c1ab0ea23b5baa8edcf6742d6a54a15677a0f053fea6b45f0",
+      "bytes": 5306
+    },
+    {
+      "path": "generated/vue/text/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+      "sha256": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+      "bytes": 40942
+    },
+    {
+      "path": "generated/vue/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+      "sha256": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+      "bytes": 15520
+    },
+    {
+      "path": "generated/vue/text/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue/text/Component.ts",
+      "sha256": "f17b9ae59bd7a15addb3988a7492a25693af4303d573bbecdc28a286aec31154",
+      "bytes": 45579
+    },
+    {
+      "path": "generated/vue/text/Component.ts.map",
+      "sha256": "ca0a1162f3c9e22a80cf5b7986b66c098c978c004ad9e43b09b3dd95743169e1",
+      "bytes": 1725
+    },
+    {
+      "path": "generated/vue/text/provenance.json",
+      "sha256": "31a19247b31163a2460ba94dfd0d745c5bc9aa11ed22f4208290140ba202a495",
+      "bytes": 2636
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/interaction/vue2-associations-v1.ts",
+      "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a",
+      "bytes": 2356
+    },
+    {
+      "path": "generated/vue2/base/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/vue2/base/Component.js",
+      "sha256": "76a0e8b52fb9a812906554f21fd6adb6d9ad9010edcd902e4370bf686d43e5b3",
+      "bytes": 59326
+    },
+    {
+      "path": "generated/vue2/base/Component.js.map",
+      "sha256": "891078d67a45e7a45d7816aff80bc7e97bca557d51d6b7723bf45cb20885b797",
+      "bytes": 8373
+    },
+    {
+      "path": "generated/vue2/base/provenance.json",
+      "sha256": "00672c46e8426ac7a06002647e934ebf4c1ba4d8cad45ead3fdfbd0f3298dfdc",
+      "bytes": 4048
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+      "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+      "bytes": 626
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/interaction/vue2-associations-v1.ts",
+      "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a",
+      "bytes": 2356
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+      "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+      "bytes": 2319
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/vue2/shadcn/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/vue2/shadcn/Component.js",
+      "sha256": "26ec5d3e5369e40e1b869e880e3b53453c9462d8f941b775fafd0913110ab891",
+      "bytes": 130937
+    },
+    {
+      "path": "generated/vue2/shadcn/Component.js.map",
+      "sha256": "05360fffe75e1201bbef794b00eccc6106bb161b1e2455b6bba703a3c69499f2",
+      "bytes": 42835
+    },
+    {
+      "path": "generated/vue2/shadcn/provenance.json",
+      "sha256": "8410bd82c4918f398c21e2ab9f35730d183028432cfc446ae702c72bfe55717b",
+      "bytes": 6710
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/interaction/vue2-associations-v1.ts",
+      "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a",
+      "bytes": 2356
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/meta/preference-source-v1.ts",
+      "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+      "bytes": 3853
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/vue2/brutalist/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/vue2/brutalist/Component.js",
+      "sha256": "c02d6bbb93a379915290a0865c9c9496825aded6bdd661e39a04a2a420241096",
+      "bytes": 74252
+    },
+    {
+      "path": "generated/vue2/brutalist/Component.js.map",
+      "sha256": "70e26585b9e57cf61ba96cf6df84a9bd9630af38a89e8dab90ec45cb89cbc3ca",
+      "bytes": 18203
+    },
+    {
+      "path": "generated/vue2/brutalist/provenance.json",
+      "sha256": "4f1625007516eabf9fd53f72269a2ea320edf264376c91942fcc3a6e86fa083e",
+      "bytes": 5486
+    },
+    {
+      "path": "generated/vue2/text/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/vue2/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+      "sha256": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+      "bytes": 40942
+    },
+    {
+      "path": "generated/vue2/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+      "sha256": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+      "bytes": 15520
+    },
+    {
+      "path": "generated/vue2/text/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/vue2/text/Component.js",
+      "sha256": "7eb91a6112d8780c347ee6da65b1fe568b837db0e34b3c47a9d7bf122fa4d6b1",
+      "bytes": 49806
+    },
+    {
+      "path": "generated/vue2/text/Component.js.map",
+      "sha256": "020e445ae6be05c0de5f3a1a4cb792ee81a6f99e15f129e73a0633be340be246",
+      "bytes": 1962
+    },
+    {
+      "path": "generated/vue2/text/provenance.json",
+      "sha256": "9a75eadcbe830e043c16685d0fab9ce3e0a340e576805ca1a9288e9ac778b6b7",
+      "bytes": 2633
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/wc/base/.proto-ui/web-component/browser-v1.ts",
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+      "bytes": 12784
+    },
+    {
+      "path": "generated/wc/base/Component.ts",
+      "sha256": "5c8a3ed6f8c5cec5a8398fc67337f76869c56b59ef4d9dc85127c29822074890",
+      "bytes": 46463
+    },
+    {
+      "path": "generated/wc/base/Component.ts.map",
+      "sha256": "19425e34117952d40aca779a108b4598e45beabfbb731390bf5ccce4357be308",
+      "bytes": 8076
+    },
+    {
+      "path": "generated/wc/base/provenance.json",
+      "sha256": "1357d7bdce576937cb3f1ef7b8d6b7a551998de9a2620c61bbe4e384efe6b3ea",
+      "bytes": 3985
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+      "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+      "bytes": 626
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+      "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+      "bytes": 2319
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/wc/shadcn/.proto-ui/web-component/browser-v1.ts",
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+      "bytes": 12784
+    },
+    {
+      "path": "generated/wc/shadcn/Component.ts",
+      "sha256": "6b96395033296682d39d7d923b7e6676561872caabc926c32fa1e6c538b58ba9",
+      "bytes": 114876
+    },
+    {
+      "path": "generated/wc/shadcn/Component.ts.map",
+      "sha256": "a0d9f73fd5929f0ff1159534f16ea700d88c4bcf394e7b31b21c60c0c1f1a00a",
+      "bytes": 42536
+    },
+    {
+      "path": "generated/wc/shadcn/provenance.json",
+      "sha256": "8b06f497f40f1cda9bd9541de7dbac5831ff95bf25629ab373a3110c904be23f",
+      "bytes": 6647
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+      "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9",
+      "bytes": 1072
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/interaction/control-label-v1.ts",
+      "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+      "bytes": 58048
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+      "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+      "bytes": 798
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+      "sha256": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+      "bytes": 45749
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+      "sha256": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+      "bytes": 52961
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/meta/preference-source-v1.ts",
+      "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+      "bytes": 3853
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/meta/subscription-v1.ts",
+      "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+      "bytes": 1137
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+      "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+      "bytes": 2163
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+      "sha256": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+      "bytes": 6755
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/style/native-v1.ts",
+      "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+      "bytes": 5912
+    },
+    {
+      "path": "generated/wc/brutalist/.proto-ui/web-component/browser-v1.ts",
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+      "bytes": 12784
+    },
+    {
+      "path": "generated/wc/brutalist/Component.ts",
+      "sha256": "15813c9a1e0a05a508c377fc11e5e28c08e86ed75b3d960e96b675c05c50ab04",
+      "bytes": 60484
+    },
+    {
+      "path": "generated/wc/brutalist/Component.ts.map",
+      "sha256": "6afde8285f0d335e2fa19cc07af0e2c529708b089b47a0050e24f62b00cd1cfe",
+      "bytes": 17904
+    },
+    {
+      "path": "generated/wc/brutalist/provenance.json",
+      "sha256": "5392abdaa590a146c7c484e8ffcbaaf80340ca6f605e05849ef03d20886a1097",
+      "bytes": 5423
+    },
+    {
+      "path": "generated/wc/text/.proto-ui/context/scope-v1.ts",
+      "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+      "bytes": 8996
+    },
+    {
+      "path": "generated/wc/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+      "sha256": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+      "bytes": 40942
+    },
+    {
+      "path": "generated/wc/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+      "sha256": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+      "bytes": 15520
+    },
+    {
+      "path": "generated/wc/text/.proto-ui/interaction/ownership-v2.ts",
+      "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+      "bytes": 4849
+    },
+    {
+      "path": "generated/wc/text/.proto-ui/web-component/browser-v1.ts",
+      "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+      "bytes": 12784
+    },
+    {
+      "path": "generated/wc/text/Component.ts",
+      "sha256": "739664451494f6787df2c0e14d70006a5e2a41b601bbf4d09ceb8e1b6f7f46c0",
+      "bytes": 36214
+    },
+    {
+      "path": "generated/wc/text/Component.ts.map",
+      "sha256": "15a1414cd5da7c20e21ff1e477d2c3534098d514746693e465392e421dd79dba",
+      "bytes": 1661
+    },
+    {
+      "path": "generated/wc/text/provenance.json",
+      "sha256": "b0ed8c7cd61780c7ce27168e6ecf8651e2c60b8c3abc624685158b26bca7aec5",
+      "bytes": 2753
+    }
+  ],
+  "inputs": {
+    "node_modules/.pnpm/react@19.2.6/node_modules/react/cjs/react.development.js": "766365d7c26eda5f6db4b4fdc4605305bd63c00725070d33885784d23de2d58d",
+    "node_modules/.pnpm/react@19.2.6/node_modules/react/index.js": "60caffdecbdc5db3bc4ec4e83df9488345ccb271d07533b9210bf5750918d97e",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom.development.js": "55b85961ccd93ab8d62333742f14bcf1e8dc0f90a70304762a8ce9719411e022",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/index.js": "ba1a3e33489f868371561777607e3ee5091df0f7ea3f1a10f789d6b86e4c1505",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/context/react-v1.ts": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/base/Component.tsx": "6f34a0f642525560c2d8703c9f7d19db9219f9e61f696ba34ecdc0958c69a1c1",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/meta/color-scheme-source-v1.ts": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/context/react-v1.ts": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/shadcn/Component.tsx": "83047209439a7a7173c3f3b5f79af39589d7a3ea4e5ff85c6e418d1c6be2ae26",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/meta/preference-source-v1.ts": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/context/react-v1.ts": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/brutalist/Component.tsx": "3872a4db0e957e07295360261b9dee95f54f31aecf52c1c79530ad766f1473bf",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/text/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/text/.proto-ui/context/react-v1.ts": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/text/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+    "../../../../tmp/sprint2-native-kVanLX/generated/react/text/Component.tsx": "4fb556c11883f0c0e376413d5c5cc6b6e4936598f130aa3687e1a554883267ed",
+    "node_modules/.pnpm/@vue+shared@3.5.31/node_modules/@vue/shared/dist/shared.esm-bundler.js": "4abb72e420e88e1d4197cf8d38c642450f47b5925389e71d75b30a268f7b3dad",
+    "node_modules/.pnpm/@vue+compiler-core@3.5.31/node_modules/@vue/compiler-core/dist/compiler-core.esm-bundler.js": "4f7d971526264ad2104ec7d4be34b37f98871b13d428dd8b9630a065165e4083",
+    "node_modules/.pnpm/@vue+compiler-dom@3.5.31/node_modules/@vue/compiler-dom/dist/compiler-dom.esm-bundler.js": "f01ea84b5085ed224f9a58b07776565b1432e1229d5568a34bb58f568480bb29",
+    "node_modules/.pnpm/@vue+reactivity@3.5.31/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js": "24a3c5d0310d3d62c41b94805d2fda1306998738c8975a138b544217d29815fb",
+    "node_modules/.pnpm/@vue+runtime-core@3.5.31/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js": "08a2f6bbdeac5434d88c3487310738af67f038cbf8c7bfa49fb2eb250d3bd4a9",
+    "node_modules/.pnpm/@vue+runtime-dom@3.5.31/node_modules/@vue/runtime-dom/dist/runtime-dom.esm-bundler.js": "8f32bb517aa43b2b13602d177f250165de60fda0ed61d4cdb4b63bba83dd00e7",
+    "node_modules/.pnpm/vue@3.5.31_typescript@5.9.3/node_modules/vue/dist/vue.cjs.js": "f49ffbd5abbc2140afb77b6a7e31fe3747cdf56e3951753c537003fc462a1182",
+    "node_modules/.pnpm/vue@3.5.31_typescript@5.9.3/node_modules/vue/index.js": "a5287f6056bc5c2c569d318063ee043f55a0d323fa7262f64456d58fd574f928",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/base/Component.ts": "b94c20d795c031b8115d0f02dc78bb4d324485ac234614f9bc4515757adb0f52",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/meta/color-scheme-source-v1.ts": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/shadcn/Component.ts": "286c820f4c9db40e14a78faf314ad73f55e589bfa80c42c4b0d08c71892d4710",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/meta/preference-source-v1.ts": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/brutalist/Component.ts": "0b0db188837a84ca228421fd421e71fda6107122bc4ed3116c606d2a87475c14",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/text/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/text/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue/text/Component.ts": "f17b9ae59bd7a15addb3988a7492a25693af4303d573bbecdc28a286aec31154",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/interaction/vue2-associations-v1.ts": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/base/Component.js": "76a0e8b52fb9a812906554f21fd6adb6d9ad9010edcd902e4370bf686d43e5b3",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/meta/color-scheme-source-v1.ts": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/interaction/vue2-associations-v1.ts": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/shadcn/Component.js": "26ec5d3e5369e40e1b869e880e3b53453c9462d8f941b775fafd0913110ab891",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/meta/preference-source-v1.ts": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/interaction/vue2-associations-v1.ts": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/brutalist/Component.js": "c02d6bbb93a379915290a0865c9c9496825aded6bdd661e39a04a2a420241096",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/text/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/text/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/vue2/text/Component.js": "7eb91a6112d8780c347ee6da65b1fe568b837db0e34b3c47a9d7bf122fa4d6b1",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/web-component/browser-v1.ts": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/base/Component.ts": "5c8a3ed6f8c5cec5a8398fc67337f76869c56b59ef4d9dc85127c29822074890",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/meta/color-scheme-source-v1.ts": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/web-component/browser-v1.ts": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/shadcn/Component.ts": "6b96395033296682d39d7d923b7e6676561872caabc926c32fa1e6c538b58ba9",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/meta/subscription-v1.ts": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/meta/web-snapshot-v1.ts": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/meta/preference-source-v1.ts": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/interaction/control-label-v1.ts": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/owner/authored-hooks-v1.ts": "75340bafa4ebee909ce63335c57e455b855fc29bdbfc35e6ca1856383c135486",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/web-component/browser-v1.ts": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/style/native-v1.ts": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/interaction/focus-ownership-v2.ts": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts": "c92df95a55057b58dd6bde5a15dace3d39abf38a139418fac8e53b3c064dbe9b",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts": "e6f185df9728c820915ff604328fb6c252d20efed84f0f35de77f118529b4d1e",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/brutalist/Component.ts": "15813c9a1e0a05a508c377fc11e5e28c08e86ed75b3d960e96b675c05c50ab04",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/text/.proto-ui/context/scope-v1.ts": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/text/.proto-ui/web-component/browser-v1.ts": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/text/.proto-ui/interaction/ownership-v2.ts": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts": "52df3ee243726be808f461861621ddd802fab62883324c3b129bb55dfa853068",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts": "d66df0883c05f38cf0bbd43b0c378642cd03c821f63a850c400ef06bbf91bc76",
+    "../../../../tmp/sprint2-native-kVanLX/generated/wc/text/Component.ts": "739664451494f6787df2c0e14d70006a5e2a41b601bbf4d09ceb8e1b6f7f46c0",
+    "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/cjs/scheduler.development.js": "646eb671c8585382baff16daf92fe16a4cdd10dcf1a363c58b2ae1f6bf3a2b8d",
+    "node_modules/.pnpm/scheduler@0.27.0/node_modules/scheduler/index.js": "145965504d60007bc25486ab930b0367867dcd5d579ccd343c148d69349a7cfb",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/cjs/react-dom-client.development.js": "d27de6648360d44909aca6a3a93b9d306e6cad2d23913caf1b10cc39c896225b",
+    "node_modules/.pnpm/react-dom@19.2.6_react@19.2.6/node_modules/react-dom/client.js": "00e348ab3d6bc2eef908345d0bc4e008c95bcfecec060dfda5c4967953761396",
+    "node_modules/.pnpm/vue@2.6.14/node_modules/vue/dist/vue.runtime.esm.js": "a1a1b5f08be01462f9f201dc0f5ae4c2b1ea40f57d0ce71e769500cc3296a76b",
+    "packages/compiler/test/sprint2-browser-consumer.ts": "5bd9f0ab3ef0e605fcd7a74732c3d1222fce3493586b21e9afab6f90e540cb10"
+  },
+  "entrySha256": "4c6edc2a78404c7f776beefce44ecbd8a3cf974f2faea18eef96b493dd4d2b59",
+  "bundleSha256": "ad9693622d3a1161d47d511db8688fdcc9883ca2bea6836d1adbf1621e9a055b",
+  "scope": "12 unchanged family Buttons and four independent TextControl candidates in ordinary generated framework consumers. Browser outcomes require the separate Chromium run; static assembly is not browser acceptance."
+}

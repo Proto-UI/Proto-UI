@@ -751,11 +751,19 @@
   display: none !important;
 }
 
-/* User-directed accessible blue adaptation of Bootstrap 2.3.2 navbar-static-top.
-   Website Header owns this
-   navigation frame; component surfaces keep their public family projections.
-   Source: twbs/bootstrap v2.3.2 less/navbar.less (Apache-2.0). */
+/* User-directed blue adaptation of Bootstrap 2.3.2 navbar-static-top.
+   Reference: twbs/bootstrap@b4c4072679943773a7582daa63f545ba818fa627
+   less/navbar.less + less/variables.less (Apache-2.0): 40px navbar, 30px
+   controls, 20px/200 brand, 10px 15px links. The blue/dark palettes and mobile
+   44px targets are explicit Proto UI adaptations. The website owns geometry;
+   public family Button, Select, Surface and Text still own their projections. */
 [data-site-library-family='bootstrap-2-3-2'] .site-header {
+  --site-control-height: 30px;
+  --site-select-control-height: 30px;
+  --site-header-icon-size: 40px;
+  --site-header-popup-padding: 10px 12px;
+  --site-header-navigation-gap: 0px;
+  --site-header-brand-navigation-gap: 20px;
   color: var(--site-bootstrap-navbar-foreground);
   background: linear-gradient(
     var(--site-bootstrap-navbar-top),
@@ -763,14 +771,77 @@
   );
   border-bottom: 1px solid var(--site-bootstrap-navbar-border);
   box-shadow: 0 1px 10px rgb(0 0 0 / 10%);
-  --site-header-navigation-gap: 1.25rem;
-  --site-header-brand-navigation-gap: 1.5rem;
 }
-[data-site-library-family='bootstrap-2-3-2'] .site-header-brand {
+[data-site-library-family='bootstrap-2-3-2'] .site-header .site-header-brand a {
+  min-height: var(--site-header-row-height);
+  font-size: 20px;
+  line-height: 20px;
+  font-weight: 200;
+  letter-spacing: normal;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
 }
-:root[data-theme='dark'][data-site-library-family='bootstrap-2-3-2'] .site-header-brand {
+[data-site-library-family='bootstrap-2-3-2'] .site-header [data-site-header-desktop-navigation] a {
+  min-height: var(--site-header-row-height);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
   text-shadow: 0 -1px 0 rgb(0 0 0 / 25%);
+}
+/* The passive family Surface supplies padding after enhancement. The native
+   startup anchor needs the same dimensions without double-padding that owner. */
+[data-site-library-family='bootstrap-2-3-2']
+  .site-header
+  [data-site-header-desktop-navigation]
+  a:not([data-site-link-enhanced]) {
+  box-sizing: border-box;
+  padding: 10px 15px;
+}
+[data-site-library-family='bootstrap-2-3-2']
+  .site-header
+  :is(.site-header-theme, .site-header-menu, [data-site-header-fallback-summary]) {
+  width: var(--site-header-icon-size);
+  height: var(--site-header-icon-size);
+}
+[data-site-library-family='bootstrap-2-3-2']
+  .site-header
+  :is([data-site-header-panel-content], [data-site-header-panel-body]) {
+  gap: 10px;
+}
+/* Accessible names remain on the same owners. Their wide toolbar controls do
+   not introduce a second label baseline into the navbar; the compact settings
+   panel retains its visible group labels. */
+[data-site-library-family='bootstrap-2-3-2']
+  [data-site-header-wide-preferences]
+  .pui-projection-control-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+@media (min-width: 48rem) {
+  [data-site-library-family='bootstrap-2-3-2'] .site-header {
+    --site-header-row-height: 40px;
+  }
+  [data-site-library-family='bootstrap-2-3-2'] .site-header .site-header-context {
+    box-sizing: border-box;
+    height: auto;
+    min-height: 40px;
+    padding-block: 5px;
+    align-items: center;
+    border-top-color: rgb(255 255 255 / 20%);
+  }
+}
+@media (max-width: 47.999rem) {
+  [data-site-library-family='bootstrap-2-3-2'] .site-header {
+    --site-control-height: 44px;
+    --site-select-control-height: 44px;
+    --site-header-icon-size: 44px;
+  }
 }
 /* The complete family name and status stay on one line at ordinary desktop
    scale. Small screens and enlarged text still use the existing reflow. */
@@ -781,7 +852,7 @@
     grid-template-columns: auto auto minmax(0, 1fr) 23.5rem minmax(10rem, 13rem) 2.75rem 2.75rem;
   }
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-header {
-    grid-template-columns: auto auto minmax(0, 1fr) 25rem minmax(10rem, 13rem) 2.75rem 2.75rem;
+    grid-template-columns: auto auto minmax(0, 1fr) 25rem minmax(10rem, 13rem) 40px 40px;
   }
   [data-site-library-family='bootstrap-2-3-2'] .home-runtime-preferences .pui-projection-controls {
     grid-template-columns: minmax(12rem, 1fr) minmax(12rem, 1fr);

@@ -241,7 +241,7 @@ export function createOwner(host, options) {
     getExposes() {external();return exposes;},nativeEvent:(name,event)=>interaction.nativeEvent(name,event,false),globalNativeEvent(name,event){interaction.nativeEvent(name,event,true);topology.nativeEvent(name,event);},
     focusChanged:(next)=>interaction.focusChanged(next),textFocusChanged:(next)=>interaction.textFocusChanged(next),accessibleAction:(key)=>interaction.action(key),
     textEdited(text,preedit) {controls.textEvent('input',text,preedit);interaction.nativeEvent('input',{accepted:false,text,preedit},false);},textCommitted(text) {controls.textEvent('change',text,null);interaction.nativeEvent('change',{accepted:false,text},false);},compositionChanged(preedit,text) {controls.composition(preedit,text);},
-    imageStatus(status,generation) {controls.imageStatus(status,generation);},scrollFacts(snapshot) {controls.scrollFacts(snapshot);},geometryChanged(){if(view)topology.geometryChanged();},topologyChanged(){scope.api.rebind();if(view){topology.refresh();presentation.refresh();}schedule(false);},
+    imageStatus(status,generation) {controls.imageStatus(status,generation);},scrollFacts(snapshot,geometry) {controls.scrollFacts(snapshot,geometry);},geometryChanged(){if(view)topology.geometryChanged();},topologyChanged(){scope.api.rebind();if(view){topology.refresh();presentation.refresh();}schedule(false);},
     dispose() {
       if(!alive||disposing)return;disposing=true;++ticket;queued=false;let failure;
       try{detach();}catch(error){failure=error;}

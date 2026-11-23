@@ -17,7 +17,7 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesPartExpo
     const state = inherited.stateHandles!;
     const style = setupSliderValuesStyle(def);
     const rail = def.feedback.style.declareDecoration();
-    // Structural layout, not the scalar Track's AxisInput/capture owner.
+    // Family rail paint; the inherited Values Track owns the shared AxisInput lease.
     def.feedback.style.use(tw('relative block h-3 w-full select-none'));
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),

@@ -266,6 +266,13 @@ export async function runSearchProductionEvidence(options = {}, dependencies = {
         '--no-file-parallelism',
         '--maxWorkers=1',
         '--minWorkers=1',
+        ...(env.PROTO_UI_SEARCH_PRODUCTION_REPORT
+          ? [
+              '--reporter=default',
+              '--reporter=json',
+              `--outputFile=${env.PROTO_UI_SEARCH_PRODUCTION_REPORT}`,
+            ]
+          : []),
         SEARCH_PRODUCTION_SUITE,
       ],
       {

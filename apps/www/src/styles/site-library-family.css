@@ -107,8 +107,6 @@
   :is(
     a[data-site-primary-nav-link],
     .mobile-primary-links a,
-    .sidebar-pane .top-level a:not([data-site-link-enhanced]),
-    .sidebar-pane .top-level summary,
     .pagination-links a:not([data-site-link-enhanced])
   ) {
   border-radius: 0;

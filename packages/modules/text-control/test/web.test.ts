@@ -2,6 +2,14 @@ import { describe, expect, it, vi } from 'vitest';
 import type { TextControlEvent } from '@proto.ui/core';
 import { createWebTextControlHost, resolveWebTextControlLocalName } from '../src/web';
 
+// Retain exact assertions for the pre-existing value/composition surface while
+// the independently specified selection surface is checked in selection.test.ts.
+function withoutSelection<T extends { selection?: unknown } | null>(value: T) {
+  if (!value) return value;
+  const { selection: _selection, ...prior } = value;
+  return prior;
+}
+
 describe('module-text-control web bridge', () => {
   it('projects the supported textarea properties and live updates', () => {
     const textarea = document.createElement('textarea');
@@ -63,7 +71,7 @@ describe('module-text-control web bridge', () => {
     expect(textarea.minLength).toBe(1);
     expect(textarea.maxLength).toBe(200);
     expect(textarea.wrap).toBe('soft');
-    expect(lease.snapshot()).toEqual({ value: 'updated', composing: false });
+    expect(withoutSelection(lease.snapshot())).toEqual({ value: 'updated', composing: false });
     lease.dispose();
   });
 
@@ -93,7 +101,7 @@ describe('module-text-control web bridge', () => {
     textarea.dispatchEvent(compositionEvent('compositionend', '編集中'));
     textarea.dispatchEvent(new Event('change', { bubbles: true }));
 
-    expect(seen).toEqual([
+    expect(seen.map(withoutSelection)).toEqual([
       {
         type: 'compositionstart',
         value: 'fixed',
@@ -215,7 +223,7 @@ describe('module-text-control web bridge', () => {
     Object.defineProperty(adoptedComposition, 'data', { value: 'adopted' });
     input.dispatchEvent(adoptedComposition);
 
-    expect(seen).toEqual([
+    expect(seen.map(withoutSelection)).toEqual([
       {
         type: 'compositionstart',
         value: '',
@@ -273,7 +281,7 @@ describe('module-text-control web bridge', () => {
       })
     );
 
-    expect(seen).toEqual([
+    expect(seen.map(withoutSelection)).toEqual([
       {
         type: 'input',
         value: 'detached',

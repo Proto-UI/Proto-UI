@@ -1,0 +1,22 @@
+{
+  "kind": "actual-exec-terminal-receipt",
+  "recordedFrom": "Observed exec_command output chunk 9c40aa; this receipt transcribes the observed result, not a captured stdout file.",
+  "command": [
+    "node",
+    "--test",
+    "scripts/test/happy-dom-mutation-keepalive.test.mjs"
+  ],
+  "exitCode": 0,
+  "test": "pinned observer forwarding survives GC only with its lifetime keeper and stops on disconnect",
+  "counts": {
+    "tests": 1,
+    "pass": 1,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "observedDurationMs": 735.611611,
+  "helperSha256": "fd7f95e4471174f4d03f515c893dc71f095afb66b814c79f4e6f31a56665e431",
+  "testSha256": "5edf7e72f073a2f0d11ce6566e13f5092590f859c2d353395405a71dd19188b4",
+  "scope": "Pinned HappyDOM 15.11.7 observer lifetime premise only; no native browser evidence."
+}

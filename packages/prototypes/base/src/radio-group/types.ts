@@ -12,6 +12,7 @@ export interface RadioGroupRootProps {
   value?: string;
   defaultValue?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   a11yLabel?: string;
 }
 
@@ -20,6 +21,10 @@ export type RadioGroupValueChangeDetail = Readonly<{ value: string }>;
 export type RadioGroupRootExposes = {
   value: ExposeState<string>;
   disabled: ExposeState<boolean>;
+  readOnly: ExposeState<boolean>;
+  focused: ExposeState<boolean>;
+  resetValue: ExposeMethod<() => boolean>;
+  focusSelf: ExposeMethod<() => void>;
   count: ExposeState<number>;
   valueChange: ExposeEvent<RadioGroupValueChangeDetail>;
   requestValue: ExposeMethod<(value: string) => boolean>;
@@ -35,6 +40,8 @@ export type RadioGroupRootExposes = {
 export type RadioGroupRootStateHandles = {
   value: State<string>;
   disabled: State<boolean>;
+  readOnly: State<boolean>;
+  focused: State<boolean>;
   count: State<number>;
 };
 

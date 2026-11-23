@@ -145,6 +145,19 @@ function read(image: DetailImage, cells: readonly TintCell[]) {
     };
   });
 }
+
+/** Constant-field brightness response, separate from structured optical gates.
+ * A flat source cannot prove structure/refraction and never passes those gates.
+ * Use the same declared opaque interior cells and actual captured byte plane. */
+export function measureConstantTintField(image: DetailImage, cells: readonly TintCell[]) {
+  if (!cells.length) throw new Error('Empty constant tint cells');
+  const values = read(image, cells);
+  return {
+    cells: values.length,
+    fullyOpaque: values.every((value) => value.opaque),
+    meanLuma: values.reduce((sum, value) => sum + value.luma, 0) / values.length,
+  };
+}
 function gradients(values: readonly number[], cells: readonly TintCell[]) {
   const index = new Map(cells.map((cell, i) => [`${cell.x},${cell.y}`, i]));
   return cells.flatMap((cell, i) =>

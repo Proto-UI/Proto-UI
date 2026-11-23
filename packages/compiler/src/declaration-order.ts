@@ -1,8 +1,11 @@
 import { reject } from './diagnostics';
-import type { StatementIR } from './ir';
+import type { SourceSpan, StatementIR } from './ir';
 
 /** Restore definition order while leaving the ordinary hoisted binding order intact. */
-export function structuralStatementOrder(body: readonly StatementIR[]): readonly StatementIR[] {
+export function structuralStatementOrder(
+  body: readonly StatementIR[],
+  rejectionSpan: (statement: StatementIR) => SourceSpan = (statement) => statement.span
+): readonly StatementIR[] {
   const positions = new Map<number, StatementIR>();
   const ordinary: StatementIR[] = [];
   let lastPosition = body.length;
@@ -28,7 +31,7 @@ export function structuralStatementOrder(body: readonly StatementIR[]): readonly
       reject(
         'PUI2002',
         'Hoisted function declarations require unique structural positions and a reversed leading prefix.',
-        statement.span,
+        rejectionSpan(statement),
         'invalid-ir'
       );
     positions.set(position, statement);

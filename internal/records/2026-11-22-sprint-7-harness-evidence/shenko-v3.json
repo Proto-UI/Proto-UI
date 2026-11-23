@@ -1,0 +1,711 @@
+{
+  "schema_version": 1,
+  "scope": "real Shenko live frontend; fixture HTTP/WS reads",
+  "upstream": {
+    "repository": "https://github.com/Proto-UI/Proto-UI.git",
+    "commit": "3334b45970ca6eaf62b7e307ec545bbf596f3587",
+    "previous_reviewed_commit": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "lock_sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "source_checkout": "/workspace/scratch/b8a4839de6ed/s7-harness",
+    "build_receipt": {
+      "script": "scripts/build/public-packages.mjs",
+      "selected_package_count": 42,
+      "receipt_path": "/tmp/s7-public-build.json",
+      "receipt_sha256": "6674287a384107d66d54758977a23172c4b5b6ce6de81d92c14867f462c47e54"
+    }
+  },
+  "bundle_manifest_sha256": "0afea96d4a7b5a170b6299729d5224337d06bc5165933d066eb42c33e249c030",
+  "fixture": "committed mixed Chinese/English Markdown, stable owner/reply IDs, replay duplicates",
+  "physical_input": false,
+  "model_or_backend_acceptance": false,
+  "runs": [
+    {
+      "tab": "inspect",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [],
+      "checks": [],
+      "errors": [
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')"
+      ],
+      "status": "failed",
+      "failure": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.timeline-viewport') to be visible\u001b[22m\n"
+    },
+    {
+      "tab": "im",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [],
+      "checks": [],
+      "errors": [
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')"
+      ],
+      "status": "failed",
+      "failure": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.im-scroll') to be visible\u001b[22m\n"
+    },
+    {
+      "tab": "inspect",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [],
+      "checks": [],
+      "errors": [
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')"
+      ],
+      "status": "failed",
+      "failure": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.timeline-viewport') to be visible\u001b[22m\n"
+    },
+    {
+      "tab": "im",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [],
+      "checks": [],
+      "errors": [
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')",
+        "Error: [AsHook] no active setup context for shadcn-message-scroller-viewport.",
+        "TypeError: Cannot read properties of undefined (reading 'subscribe')"
+      ],
+      "status": "failed",
+      "failure": "TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.im-scroll') to be visible\u001b[22m\n"
+    }
+  ],
+  "browser": {
+    "engine": "Chromium",
+    "version": "145.0.7632.6",
+    "headless": true
+  },
+  "status": "failed",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    }
+  ]
+}

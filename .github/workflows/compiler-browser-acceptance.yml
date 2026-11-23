@@ -165,10 +165,11 @@ jobs:
           retention-days: 30
   browser-acceptance:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       ASTRO_TELEMETRY_DISABLED: '1'
+      PUI_BROWSER_MODE: production
       NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - uses: actions/checkout@v4
@@ -197,6 +198,13 @@ jobs:
           "$CHROME" --version > "$PUI_EVIDENCE_DIR/browser.txt"
           printf 'PUI_CHROME_EXECUTABLE=%s\n' "$CHROME" >> "$GITHUB_ENV"
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Verify production receipt rejection and cleanup controls
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          node --test scripts/compiler/browser-production.test.mjs \
+            scripts/compiler/browser-delivery-index.test.mjs \
+            2>&1 | tee "$PUI_EVIDENCE_DIR/production-controls.log"
       - name: Install and record Chinese fonts for the bilingual captures
         timeout-minutes: 3
         run: |
@@ -206,7 +214,7 @@ jobs:
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
             > "$PUI_EVIDENCE_DIR/font-environment.txt"
           fc-match 'Noto Sans CJK SC' >> "$PUI_EVIDENCE_DIR/font-environment.txt"
-      - name: Run the cold bilingual four-target browser journey
+      - name: Build once and run the cold bilingual four-target production journey
         run: |
           set -euo pipefail
           node --import tsx scripts/analysis/browser-compiler-browser.mts \
@@ -221,6 +229,7 @@ jobs:
           import { createBrowserDeliveryIndex } from './scripts/compiler/browser-delivery-index.mjs';
           const receipt = JSON.parse(await readFile(path.join(process.env.PUI_EVIDENCE_DIR, 'receipt.json'), 'utf8'));
           assert.equal(receipt.head, process.env.CANDIDATE_SHA);
+          assert.equal(receipt.service.mode, 'runner-owned-production-static');
           assert.ok(receipt.cases.length > 0);
           assert.ok(receipt.cases.every((entry) => entry.status === 'passed'));
           const index = await createBrowserDeliveryIndex({ receipt });

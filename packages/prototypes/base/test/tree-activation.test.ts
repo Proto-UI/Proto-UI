@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
 import type { A11ySemanticObjectSnapshot, Prototype } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
 import {
@@ -17,7 +18,7 @@ import {
   AS_TRIGGER_GET_PROTO_CAP,
 } from '@proto.ui/module-as-trigger';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
-import { treeRoot, treeItem } from '../src/tree';
+import { treeRoot, treeItem, TREE_FAMILY, TREE_CONTEXT } from '../src/tree';
 import * as shadcn from '../../shadcn/src/tree';
 import * as brutalist from '../../brutalist/src/tree';
 import * as bootstrap from '../../bootstrap-2-3-2/src/tree';
@@ -106,6 +107,38 @@ function portableHarness() {
     },
   };
 }
+
+it('does not mistake a Root method claim failure for a detached Tree item', async () => {
+  const h = portableHarness();
+  const failure = Object.assign(new Error('invalid claim in the Root method'), {
+    code: 'ANATOMY_CLAIM_INVALID',
+  });
+  const brokenRoot = definePrototype({
+    name: 'tree-method-failure-root',
+    setup(def) {
+      def.anatomy.claim(TREE_FAMILY, { role: 'root' });
+      def.context.provide(TREE_CONTEXT, {
+        value: '',
+        expandedKeys: [],
+        disabled: false,
+        readOnly: false,
+        direction: 'ltr',
+        active: '',
+        revision: 0,
+      });
+      def.expose.method('getTree', () => {
+        throw failure;
+      });
+    },
+  });
+  try {
+    const root = h.make(brokenRoot);
+    await root.session.mount();
+    expect(() => h.make(treeItem, root.target, { nodeKey: 'a' })).toThrow(failure);
+  } finally {
+    await h.dispose();
+  }
+});
 
 it('declares portable activate while normalized press.commit selects exactly once', async () => {
   const h = portableHarness();

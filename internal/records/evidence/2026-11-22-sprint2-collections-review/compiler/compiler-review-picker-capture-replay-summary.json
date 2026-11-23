@@ -1,0 +1,151 @@
+{
+  "headAtStart": "2419927b6218b75d8e0782285d2748c123411bbe",
+  "sourceStable": true,
+  "results": [
+    {
+      "id": "compiler-review-picker-request-start-capture-green",
+      "exitCode": 0,
+      "result": {
+        "reviewedCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+        "scope": "Independent real Runtime source probe; public exposed State subscription opens a previously closed Picker synchronously before first Calendar request Context publication. No browser or physical-input claim.",
+        "ok": true,
+        "results": [
+          {
+            "mode": "single",
+            "request": true,
+            "before": false,
+            "after": true,
+            "observed": true,
+            "actions": ["openChange", "valueChange"],
+            "expectedOpenAfter": true,
+            "pass": true
+          },
+          {
+            "mode": "range",
+            "request": true,
+            "before": false,
+            "after": true,
+            "observed": true,
+            "actions": ["openChange", "rangeChange"],
+            "expectedOpenAfter": true,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "compiler-review-picker-context-start-capture-green",
+      "exitCode": 0,
+      "result": {
+        "scope": "Independent public asCalendarRoot/asDatePickerRoot composition. A subscriber installed between the hooks opens a closed popup on the first request Context notification. No product source changed.",
+        "ok": true,
+        "results": [
+          {
+            "mode": "single",
+            "before": false,
+            "request": true,
+            "after": true,
+            "observed": true,
+            "actions": ["openChange", "valueChange"],
+            "expectedOpenAfter": true,
+            "pass": true
+          },
+          {
+            "mode": "range",
+            "before": false,
+            "request": true,
+            "after": true,
+            "observed": true,
+            "actions": ["openChange", "rangeChange"],
+            "expectedOpenAfter": true,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "compiler-review-picker-context-nested-capture-green",
+      "exitCode": 0,
+      "result": {
+        "scope": "Independent public Context composition: request 1 opens a closed popup; an earlier Popover subscriber issues request 2 after actual open=true. Request 2 is current, accepted and must complete normally. No product source changed.",
+        "ok": true,
+        "results": [
+          {
+            "mode": "single",
+            "before": false,
+            "request": true,
+            "after": false,
+            "opened": true,
+            "nested": true,
+            "nestedOpen": true,
+            "nestedRequest": true,
+            "finalSelection": "2026-10-16",
+            "actions": ["openChange", "valueChange", "openChange"],
+            "expectedOpenAfter": false,
+            "pass": true
+          },
+          {
+            "mode": "range",
+            "before": false,
+            "request": true,
+            "after": false,
+            "opened": true,
+            "nested": true,
+            "nestedOpen": true,
+            "nestedRequest": true,
+            "finalSelection": {
+              "from": "2026-10-10",
+              "to": "2026-10-16"
+            },
+            "actions": ["openChange", "rangeChange", "openChange"],
+            "expectedOpenAfter": false,
+            "pass": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "compiler-review-picker-context-oldclose-capture-green",
+      "exitCode": 0,
+      "result": {
+        "scope": "Independent public Context composition: an earlier old-close subscriber reopens and starts a new controlled selection while actual open=true. Later owner acceptance must complete that current request despite the stale old-close delivery.",
+        "ok": true,
+        "results": [
+          {
+            "mode": "single",
+            "before": true,
+            "beforeAcceptance": true,
+            "pendingSelection": "2026-10-10",
+            "nestedOpen": true,
+            "nestedRequest": true,
+            "after": false,
+            "observed": true,
+            "finalSelection": "2026-10-16",
+            "actions": ["openChange", "valueChange", "openChange", "openChange"],
+            "expectedOpenAfter": false,
+            "pass": true
+          },
+          {
+            "mode": "range",
+            "before": true,
+            "beforeAcceptance": true,
+            "pendingSelection": {
+              "from": "2026-10-10"
+            },
+            "nestedOpen": true,
+            "nestedRequest": true,
+            "after": false,
+            "observed": true,
+            "finalSelection": {
+              "from": "2026-10-10",
+              "to": "2026-10-16"
+            },
+            "actions": ["openChange", "rangeChange", "openChange", "openChange"],
+            "expectedOpenAfter": false,
+            "pass": true
+          }
+        ]
+      }
+    }
+  ]
+}

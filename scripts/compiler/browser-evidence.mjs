@@ -1,3 +1,4 @@
+import { verifyProductionBrowserEvidence } from './browser-production.mjs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -24,6 +25,8 @@ export function browserEvidenceRecord(manifest) {
 
 export function verifyRecordedBrowserEvidence(receipt, current) {
   verifyOwnedBrowserService(receipt.service);
+  if (receipt.service.mode === 'runner-owned-production-static')
+    verifyProductionBrowserEvidence(receipt);
   const recorded = { ...receipt.buildManifest, sourceFiles: receipt.sourceFiles };
   assertSameBrowserEvidence(recorded, current);
   const sourceSha256 = digest(JSON.stringify(receipt.sourceFiles));

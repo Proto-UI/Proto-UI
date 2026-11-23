@@ -18,6 +18,20 @@ Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 筛选、列显隐、页选择与格式化配方
+
+下面用公开 Input、Button 与原有 DataTable 部件组成可交互配方。名称列筛选与 Root `filter` 共同生效：每个非空 `columnFilters` 条件都匹配后，再排序和分页。`columnVisibility` 隐藏对应 Header、Cell 的物理视图，同时保留作者声明的逻辑坐标；隐藏表头退出排序焦点，Header、Cell 退出辅助技术呈现；原有部件与自定义子节点保留身份，重新显示后恢复。
+
+`requestPageSelection()` 只选择或清空当前筛选后的这一页，并保留其他页的选择；`pageSelection` 输出 `none`、`some` 或 `all`。受控 `selectedKeys` 仍只发请求；`readOnly` 拒绝行选择和整页选择，允许排序与分页。空页请求不产生变更。
+
+Cell 设置 `renderValue={false}` 后保留应用编写的子节点；公开 `displayValue` 仍跟随当前记录，同 ID 的数据替换也会更新。本配方订阅该状态来格式化状态文本，并在卸载时释放订阅。数据视图策略由组件持有，显示格式由应用持有。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-data-table-recipes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
 Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `sortKey`、`sortDirection`、`page` 或 `selectedKeys` 会使对应事实进入受控模式。
@@ -29,6 +43,8 @@ Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `
     { name: 'defaultSortKey', type: 'string', default: "''" },
     { name: 'defaultSortDirection', type: "'none' | 'ascending' | 'descending'", default: 'none' },
     { name: 'filter', type: 'string', default: "''" },
+    { name: 'columnFilters', type: 'Readonly<Record<string, string>>', default: '{}' },
+    { name: 'columnVisibility', type: 'Readonly<Record<string, boolean>>', default: '{}' },
     { name: 'defaultPage', type: 'number', default: '0' },
     { name: 'pageSize', type: 'number', default: '10' },
     { name: 'defaultSelectedKeys', type: 'readonly string[]', default: '[]' },
@@ -37,5 +53,4 @@ Data Table 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `
   ]}
 />
 
-这些属性属于 Root。Row 的 `index` 默认 `0`，`header` 默认 `false`。Cell 的 `columnKey` 默认 `''`。Header 的 `sortable` 默认 `true`。Previous 与 Next 接受 Button 的属性。
-
+这些属性属于 Root。Row 的 `index` 默认 `0`，`header` 默认 `false`。Cell 的 `columnKey` 默认 `''`，`renderValue` 默认 `true`。Header 的 `sortable` 默认 `true`。Previous 与 Next 接受 Button 的属性。

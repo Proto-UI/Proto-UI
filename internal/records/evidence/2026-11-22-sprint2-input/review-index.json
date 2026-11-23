@@ -1,0 +1,50 @@
+{
+  "schema": "proto-ui.sprint2-input-independent-review.v1",
+  "reviewer": "/root/collections",
+  "class": "independent local source review and focused actual Runtime/Adapter replay; not GitHub approval or native acceptance",
+  "report": "review/collections-agent-field-choices-review.md.gz",
+  "findings": [
+    {
+      "id": "FIELD-CHOICE-REVIEW-001",
+      "correction": "ebbfc57",
+      "replaySource": "3693622",
+      "result": "reconciled"
+    },
+    {
+      "id": "FIELD-CHOICE-REVIEW-002",
+      "correction": "ebbfc57",
+      "replaySource": "3693622",
+      "result": "reconciled"
+    },
+    {
+      "id": "FIELD-CHOICE-REVIEW-003",
+      "correction": "ebbfc57",
+      "replaySource": "3693622",
+      "result": "reconciled"
+    },
+    {
+      "id": "FIELD-CHOICE-REVIEW-004",
+      "correction": "3693622",
+      "replaySource": "3693622",
+      "result": "reconciled"
+    },
+    {
+      "id": "FIELD-CHOICE-REVIEW-005",
+      "correction": "42ee3b9",
+      "replaySource": "42ee3b9",
+      "result": "reconciled"
+    }
+  ],
+  "publicSourceReview": {
+    "source": "095ecbdde4902941a13032386765dac59ebd7e6b",
+    "result": "no new finding reported",
+    "sourceOfStatement": "Reviewer-authored report, including its final 095ecbd and actual stylesheet readback update, plus the active-session message",
+    "nativeResult": "not executed"
+  },
+  "reviewerFixtureError": "The first focus-retirement probe lacked a one-shot subscriber guard and recursively remounted until exit 137. It is not a product negative control; the corrected independent probe isolated the actual disposed-owner failure.",
+  "rawProbeOwner": "/root/collections; its separate dated review archive retains original probe sources and raw reports",
+  "independentRecord": "internal/records/2026-11-22-sprint2-collections-review.zh-CN.md",
+  "independentReport": "internal/records/evidence/2026-11-22-sprint2-collections-review/reviews/collections-agent-field-choices-review.md",
+  "independentProbeRoot": "internal/records/evidence/2026-11-22-sprint2-collections-review/field/",
+  "independentArchiveStateWhenRecorded": "Prepared by reviewer, pending its separate commit; this author did not edit those probes or report."
+}

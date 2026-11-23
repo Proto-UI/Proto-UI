@@ -5,6 +5,7 @@ import SiteCopyBootstrap from '../SiteCopyBootstrap.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(siteFamily);
+const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
 import { highlightCode, type CodeLang } from './code-highlight';
 
 export type { CodeLang } from './code-highlight';
@@ -20,6 +21,7 @@ interface Props {
   /** Required instructions stay readable, including before hydration. */
   collapsible?: boolean;
   copyLabel?: string;
+  expandLabel?: string;
   title?: string;
   scrollableTitle?: boolean;
   titleIcon?: 'terminal' | 'folder-tree' | CodeFileIcon;
@@ -37,7 +39,8 @@ const {
   fileIndex,
   framed = true,
   collapsible = true,
-  copyLabel = 'Copy code',
+  copyLabel = isChinese ? '复制代码' : 'Copy code',
+  expandLabel = isChinese ? '展开代码' : 'View code',
   title,
   scrollableTitle = false,
   titleIcon,
@@ -49,6 +52,8 @@ const highlighted = await highlightCode(code, lang);
 ---
 
 <SiteCopyBootstrap />
+<!-- Source is readable before hydration and without JavaScript. The client
+     owns collapsing long examples and revealing their expansion control. -->
 <figure
   id={id}
   class="relative min-w-0 max-w-full"
@@ -61,14 +66,23 @@ const highlighted = await highlightCode(code, lang);
   data-code-presentation={presentation}
   data-code-line-numbers={String(lineNumbers)}
   data-code-collapsible={String(collapsible)}
-  data-code-expanded={collapsible ? undefined : 'true'}
+  data-code-expanded="true"
   data-site-code-surface={framed ? 'frame' : undefined}
 >
   {
     title && (
       <figcaption class="code-panel__title" data-code-file-header>
-        <StaticLucideIcon name={titleIcon ?? codeFileIcon(title)} size={scrollableTitle ? "16px" : "1rem"} />
-        <span data-code-file-title data-code-title-scroll={scrollableTitle ? "" : undefined} tabindex={scrollableTitle ? 0 : undefined}>{title}</span>
+        <StaticLucideIcon
+          name={titleIcon ?? codeFileIcon(title)}
+          size={scrollableTitle ? '16px' : '1rem'}
+        />
+        <span
+          data-code-file-title
+          data-code-title-scroll={scrollableTitle ? '' : undefined}
+          tabindex={scrollableTitle ? 0 : undefined}
+        >
+          {title}
+        </span>
         <div
           class="site-code-copy-header"
           hidden={collapsible}
@@ -79,11 +93,7 @@ const highlighted = await highlightCode(code, lang);
       </figcaption>
     )
   }
-  <div
-    class="group relative min-w-0 max-w-full min-h-12"
-    data-code-inner
-    data-code-expanded={collapsible ? undefined : 'true'}
-  >
+  <div class="group relative min-w-0 max-w-full min-h-12" data-code-inner data-code-expanded="true">
     {
       !title && (
         <div
@@ -107,10 +117,11 @@ const highlighted = await highlightCode(code, lang);
           data-size="sm"
           class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10"
           data-code-toggle
+          hidden
           aria-expanded="false"
-          aria-label="展开代码"
+          aria-label={expandLabel}
         >
-          View code
+          {expandLabel}
         </Button>
       )
     }
@@ -165,9 +176,15 @@ const highlighted = await highlightCode(code, lang);
     min-width: 0;
   }
   [data-code-title-scroll] {
-    flex: 1 1 auto; white-space: nowrap; overflow-x: auto; overflow-y: hidden;
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
-  [data-code-title-scroll]:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+  [data-code-title-scroll]:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
   .site-code-copy-header {
     margin-inline-start: auto;
     flex: none;

@@ -21,7 +21,7 @@ import {
   type ProjectionMaterializerOptions,
 } from './PrototypePreviewer/projection-materializer';
 import { collectPrototypeIds, type DemoSpec } from './PrototypePreviewer/demo-types';
-import type { SiteLibraryFamily } from './site-library-family';
+import { requireSiteLibraryFamily, type SiteLibraryFamily } from './site-library-family';
 import type { SiteSearchFocusRestore } from './site-search-composition';
 
 // These fixed glyphs are required by every Search generation. Keep them in
@@ -170,10 +170,13 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     const isHeaderOpen = command === 'open' && !!root.closest('[data-site-header]');
     const props = isHeaderOpen
       ? headerButtonProps(family, 'default')
-      : {
-          variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
-          size: command === 'open' ? 'default' : 'sm',
-        };
+      : family === 'bootstrap-2-3-2'
+        ? { variant: 'default', size: command === 'open' ? 'default' : 'small' }
+        : {
+            variant:
+              family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
+            size: command === 'open' ? 'default' : 'sm',
+          };
     return {
       type: 'demo',
       root: {
@@ -187,11 +190,11 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                 width: 'var(--site-search-trigger-width, 2.75rem)',
                 minWidth: '0',
                 maxWidth: '100%',
-                height: '2.75rem',
-                minHeight: '2.75rem',
+                height: 'var(--site-control-height, 2.75rem)',
+                minHeight: 'var(--site-control-height, 2.75rem)',
                 paddingInline: 'var(--site-search-trigger-padding, 0)',
                 justifyContent: 'var(--site-search-trigger-justify, center)',
-                ...(isHeaderOpen ? headerResponsiveButtonFeedback() : {}),
+                ...(isHeaderOpen ? headerResponsiveButtonFeedback(family) : {}),
               }
             : { minHeight: '2.75rem' },
         className:
@@ -633,7 +636,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   } catch {
     /* Optional storage. */
   }
-  const family = root.dataset.searchInitialFamily === 'brutalist' ? 'brutalist' : 'shadcn';
+  const family = requireSiteLibraryFamily(root.dataset.searchInitialFamily ?? 'shadcn');
   let alive = true;
   // The same owner supplies the initial theme and later color-mode updates.
   // Each candidate keeps its own lease, including the retained rollback view.
@@ -645,7 +648,17 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   // prototype loading and rendering so the open command can activate within
   // the initial-ready budget instead of waiting for the full dialog tree.
   let dialogController: ProjectionScopeController | null = null;
-  let dialogStarted = false;
+  const retire = (previous: ProjectionScopeController) => {
+    const cleanup = previous.destroy();
+    retired.add(cleanup);
+    void cleanup.then(
+      () => retired.delete(cleanup),
+      (error) => {
+        retired.delete(cleanup);
+        console.error('[SiteSearch] retired projection cleanup failed.', error);
+      }
+    );
+  };
   // Bounded focus continuity for the public Dialog across a generation swap.
   // The restore request is armed only while the Dialog is actually open, so a
   // runtime switch made while the Dialog is closed cannot change the next
@@ -683,8 +696,15 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
     });
   };
   const ensureDialog = () => {
-    if (!alive || dialogStarted) return;
-    dialogStarted = true;
+    if (!alive) return;
+    if (dialogController) {
+      const snapshot = dialogController.getSnapshot();
+      // A pending or committed Dialog already owns this open intent. An
+      // uncommitted failure returns to idle and needs a fresh projection
+      // attempt, while the independent Search data/session owner stays live.
+      if (snapshot.generation !== 0 || snapshot.phase !== 'idle') return;
+      retire(dialogController);
+    }
     dialogController = createDialog();
     observe(dialogController.start(), dialogController);
   };
@@ -716,31 +736,35 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   };
   let controller = create();
   const observe = (pending: Promise<unknown>, owner = controller) =>
-    pending.catch((error) => {
-      if (!alive) return;
-      const dialogFailure = owner === dialogController;
-      if (!dialogFailure && owner !== controller) return;
-      root.dataset.searchView = dialogFailure
-        ? 'unavailable'
-        : controller.getSnapshot().generation
-          ? 'retained'
-          : 'unavailable';
-      console.error('[SiteSearch] Search command projection failed.', error);
-    });
+    pending.then(
+      (snapshot) => {
+        if (
+          alive &&
+          owner === dialogController &&
+          owner.getSnapshot().phase === 'ready' &&
+          controller.getSnapshot().phase === 'ready'
+        )
+          root.dataset.searchView = 'ready';
+        return snapshot;
+      },
+      (error) => {
+        if (!alive) return;
+        const dialogFailure = owner === dialogController;
+        if (!dialogFailure && owner !== controller) return;
+        root.dataset.searchView = dialogFailure
+          ? 'unavailable'
+          : controller.getSnapshot().generation
+            ? 'retained'
+            : 'unavailable';
+        console.error('[SiteSearch] Search command projection failed.', error);
+      }
+    );
   const refresh = () => {
     if (!alive) return;
     if (controller.getSnapshot().generation === 0 && controller.getSnapshot().phase === 'idle') {
       const previous = controller;
       controller = create();
-      const cleanup = previous.destroy();
-      retired.add(cleanup);
-      void cleanup.then(
-        () => retired.delete(cleanup),
-        (error) => {
-          retired.delete(cleanup);
-          console.error('[SiteSearch] retired projection cleanup failed.', error);
-        }
-      );
+      retire(previous);
       return observe(controller.start());
     }
     return observe(controller.request({ runtimeId: runtime, projectionFamilyId: family }));
@@ -751,6 +775,13 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
       runtime = next;
       void refresh();
       if (dialogController) {
+        const snapshot = dialogController.getSnapshot();
+        if (snapshot.generation === 0 && snapshot.phase === 'idle') {
+          // request() is deliberately unavailable after an uncommitted start
+          // failure. Restart with the latest requested runtime coordinates.
+          ensureDialog();
+          return;
+        }
         const doc = root.ownerDocument;
         const view = doc.defaultView;
         const dialogMount = root.querySelector<HTMLElement>('[data-search-dialog-mount]');

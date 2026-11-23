@@ -1,6 +1,13 @@
 import { structuralStatementOrder } from './declaration-order';
-import { reject } from './diagnostics';
-import type { AuthoredHookIR, ExpressionIR, FunctionIR, PrototypeIR, StatementIR } from './ir';
+import { reject, unknownDiagnosticSpan } from './diagnostics';
+import type {
+  AuthoredHookIR,
+  ExpressionIR,
+  FunctionIR,
+  PrototypeIR,
+  SourceSpan,
+  StatementIR,
+} from './ir';
 import { ordinaryValueChildren } from './value-children';
 
 export const DEFAULT_SET_VALUE_EVENT = 'host:a11y-set-value';
@@ -54,16 +61,12 @@ interface SchemaContext {
  * operation contracts afterwards; the shape checks here keep discovery closed.
  */
 export function inferInputPayloadSchemas(
-  input: PrototypeIR
+  input: PrototypeIR,
+  validateSpan: (value: unknown) => SourceSpan
 ): ReadonlyMap<Registration, InputPayloadSchema> {
   const schemas = new Map<Registration, InputPayloadSchema>();
   const malformed = (message: string): never =>
-    reject(
-      'PUI2002',
-      message,
-      { file: '<ir>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
-      'invalid-ir'
-    );
+    reject('PUI2002', message, unknownDiagnosticSpan('<ir>'), 'invalid-ir');
   const record = <T extends object>(value: unknown): T => {
     if (!value || typeof value !== 'object' || Array.isArray(value))
       malformed('Input schema discovery requires IR records.');
@@ -159,7 +162,7 @@ export function inferInputPayloadSchemas(
       record<ExpressionIR>(statement.value);
       scope.set(name(statement.name), { declaration: statement, scope, module: false });
     }
-    for (const statement of structuralStatementOrder(body)) {
+    for (const statement of structuralStatementOrder(body, (item) => validateSpan(item.span))) {
       switch (statement.kind) {
         case 'const': {
           const binding = scope.get(statement.name)!;

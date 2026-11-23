@@ -3,15 +3,35 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { parse } from 'yaml';
 import ts from 'typescript';
-import { BROWSER_SUITES, READY_ROUTES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import {
+  BROWSER_SUITES,
+  PRODUCTION_BROWSER_SUITES,
+  PRODUCTION_BROWSER_OWNERS,
+  READY_ROUTES,
+  createRuntimeTestPlan,
+} from './runtime-test-plan.mjs';
 
 const fixturePath = 'apps/www/src/pages/en/test/bootstrap-state-controls.astro';
 const browserPath = 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts';
 const fixture = readFileSync(fixturePath, 'utf8');
 const browser = readFileSync(browserPath, 'utf8');
+const navbarPath = 'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts';
+const navbar = readFileSync(navbarPath, 'utf8');
+const motionPath = 'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts';
+const motion = readFileSync(motionPath, 'utf8');
 const workflow = parse(
   readFileSync('.github/workflows/bootstrap-state-controls-evidence.yml', 'utf8')
 );
+
+function assertDedicatedOwner(suite) {
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  assert.equal(PRODUCTION_BROWSER_SUITES.filter((entry) => entry === suite).length, 1);
+  assert.equal(
+    PRODUCTION_BROWSER_OWNERS[suite],
+    '.github/workflows/bootstrap-state-controls-evidence.yml'
+  );
+  assert.ok(!createRuntimeTestPlan([])[1].args.includes(suite));
+}
 
 test('fixture uses all eight actual Bootstrap exports and only source-derived component paint', () => {
   const script = fixture.match(/<script>([\s\S]*?)<\/script>/)?.[1];
@@ -78,6 +98,8 @@ test('browser suite is Actions-only and exact-head guarded before starting any s
 test('browser test and fixture script have no TypeScript syntax diagnostics', () => {
   for (const [fileName, source] of [
     [browserPath, browser],
+    [navbarPath, navbar],
+    [motionPath, motion],
     [fixturePath + '.ts', fixture.match(/<script>([\s\S]*?)<\/script>/)?.[1]],
   ]) {
     const result = ts.transpileModule(source, {
@@ -94,8 +116,95 @@ test('browser test and fixture script have no TypeScript syntax diagnostics', ()
   }
 });
 
-test('registered browser suite stays out of the no-server phase', () => {
-  assert.equal(BROWSER_SUITES.filter((suite) => suite === browserPath).length, 1);
+test('navbar evidence is independently guarded, scheduled and terminal after another suite fails', () => {
+  const beforeStart = navbar.slice(0, navbar.indexOf("baseUrl = await startServer('/en/')"));
+  assert.match(beforeStart, /GITHUB_ACTIONS !== 'true'/);
+  assert.match(beforeStart, /sourceSha !== expectedSha/);
+  assert.match(beforeStart, /PROTO_UI_BROWSER_BASE_URL/);
+  assert.match(navbar, /describe\.skipIf\(!enabled\)/);
+  assert.match(navbar, /expectedCases\.every/);
+  assert.match(navbar, /\? 'pending' : 'blocked'/);
+  assert.match(navbar, /expect\(complete,/);
+  assertDedicatedOwner(navbarPath);
+  const phase = createRuntimeTestPlan([])[0];
+  assert.equal(phase.args[phase.args.indexOf(navbarPath) - 1], '--exclude');
+  const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === 'navbar');
+  assert.equal(step.if, '${{ !cancelled() }}');
+  assert.equal(step.env.PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE, '1');
+  assert.ok(step.run.includes(navbarPath));
+  assert.ok(
+    workflow.jobs['browser-evidence'].steps.some(
+      (step) =>
+        step.if === 'always()' && step.with?.path === '${{ runner.temp }}/bootstrap-navbar-evidence'
+    )
+  );
+});
+
+test('historical navbar capture keeps candidate instrumentation outside the pinned measured tree', () => {
+  const script = readFileSync('scripts/analysis/bootstrap-navbar-baseline.mjs', 'utf8');
+  const beforeImports = script
+    .slice(0, script.indexOf('harness = await import('))
+    .replace(/\s+/g, ' ');
+  assert.match(beforeImports, /GITHUB_ACTIONS, 'true'/);
+  assert.match(beforeImports, /measuredSha, BASELINE_SHA/);
+  assert.match(beforeImports, /scriptSourceSha, process\.env\.PROTO_UI_EXPECTED_HEAD_SHA/);
+  assert.match(beforeImports, /measuredRoot, scriptRoot/);
+  assert.match(beforeImports, /status', '--porcelain'/);
+  assert.match(
+    script,
+    /path\.join\(measuredRoot, 'apps\/www\/src\/content\/docs\/zh-cn\/browser-harness\.ts'\)/
+  );
+  assert.match(script, /scriptSha256/);
+  assert.match(script, /status: 'captured'/);
+  assert.doesNotMatch(script, /toBeLessThanOrEqual\(42\)|height.*=== 40|height.*== 40/);
+  const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === 'baseline');
+  assert.equal(step.env.PROTO_UI_BASELINE_SHA, 'dc3b184ba10b0de53e40359c52d012b204b2cd01');
+  assert.match(step.run, /git worktree add --detach/);
+  assert.match(step.run, /cd "\$PROTO_UI_BASELINE_WORKTREE"/);
+  assert.match(
+    step.run,
+    /node --import tsx "\$GITHUB_WORKSPACE\/scripts\/analysis\/bootstrap-navbar-baseline\.mjs"/
+  );
+  assert.doesNotMatch(step.run, /\bcp\b|\bcopy\b|git (?:cherry-pick|apply)/);
+});
+
+test('Button motion uses actual native trajectories in an independently guarded sequential lane', () => {
+  const beforeStart = motion.slice(0, motion.indexOf('baseUrl = await startServer(ROUTE)'));
+  assert.match(beforeStart, /GITHUB_ACTIONS !== 'true'/);
+  assert.match(beforeStart, /sourceSha !== expectedSha/);
+  assert.match(beforeStart, /PROTO_UI_BROWSER_BASE_URL/);
+  assert.match(motion, /describe\.skipIf\(!enabled\)/);
+  assert.match(motion, /requestAnimationFrame/);
+  assert.match(motion, /getAnimations\(\)/);
+  assert.match(motion, /transitioncancel/);
+  assert.match(motion, /bootstrapReduceMotion/);
+  assert.match(motion, /assertBootstrapButtonEntryMotion/);
+  assert.match(motion, /assertBootstrapButtonImmediateExit/);
+  assert.match(motion, /seenCells\.has\(name\)/);
+  assert.match(motion, /!expectedCases\.includes\(name\)/);
+  assert.match(motion, /cleanupErrors\.length === 0/);
+  const final = motion.slice(motion.indexOf('afterAll(async'));
+  assert.ok(final.indexOf("attemptCleanup('source server'") < final.indexOf('await manifest('));
+  assert.doesNotMatch(motion, /dispatchEvent|addStyleTag|clock\.install|clock\.pauseAt/);
+  assertDedicatedOwner(motionPath);
+  const phase = createRuntimeTestPlan([])[0];
+  assert.equal(phase.args[phase.args.indexOf(motionPath) - 1], '--exclude');
+  const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === 'button-motion');
+  assert.equal(step.if, '${{ !cancelled() }}');
+  assert.equal(step.env.PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE, '1');
+  assert.ok(step.run.includes(motionPath));
+  assert.ok(step.run.includes('bootstrap-button-motion-evidence.test.ts'));
+  assert.ok(
+    workflow.jobs['browser-evidence'].steps.some(
+      (step) =>
+        step.if === 'always()' &&
+        step.with?.path === '${{ runner.temp }}/bootstrap-button-motion-evidence'
+    )
+  );
+});
+
+test('registered browser suite stays with its dedicated owner, outside both generic phases', () => {
+  assertDedicatedOwner(browserPath);
   const phases = createRuntimeTestPlan([]);
   const excluded = phases[0].args.indexOf(browserPath);
   assert.ok(excluded > 0);

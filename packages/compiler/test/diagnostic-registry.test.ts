@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DIAGNOSTIC_REGISTRY,
   diagnosticCategory,
+  diagnosticCategories,
   isDiagnosticCode,
 } from '../src/diagnostic-registry';
 
@@ -119,15 +120,20 @@ function* sources(dir: string): Generator<string> {
   }
 }
 
-function observedCategories(): Map<string, Set<string>> {
+function* sourceTexts(): Generator<{ file: string; text: string }> {
+  for (const file of sources(SRC)) yield { file, text: readFileSync(file, 'utf8') };
+}
+
+function observedCategories(
+  inputs: Iterable<{ file: string; text: string }> = sourceTexts()
+): Map<string, Set<string>> {
   const observed = new Map<string, Set<string>>();
   const note = (code: string, category: string) => {
     const set = observed.get(code) ?? new Set<string>();
     set.add(category);
     observed.set(code, set);
   };
-  for (const file of sources(SRC)) {
-    const text = readFileSync(file, 'utf8');
+  for (const { file, text } of inputs) {
     const filename = path.basename(file);
 
     // reject/rejectNode/diagnostic: first PUI literal in the window is the
@@ -156,11 +162,11 @@ function observedCategories(): Map<string, Set<string>> {
 
     // Object literals: `code: 'PUInnnn', category: 'x'` in either order.
     for (const m of text.matchAll(
-      /code\s*:\s*'(?<code>PUI\d{4}|PUI_[A-Z0-9_]+)'\s*,\s*category\s*:\s*'(?<cat>[a-z-]+)'/g
+      /code\s*:\s*'(?<code>PUI\d{4}|PUI_[A-Z0-9_]+)'(?:\s+as\s+const)?\s*,\s*category\s*:\s*'(?<cat>[a-z-]+)'/g
     ))
       note(m.groups!.code, m.groups!.cat);
     for (const m of text.matchAll(
-      /category\s*:\s*'(?<cat>[a-z-]+)'\s*,\s*code\s*:\s*'(?<code>PUI\d{4}|PUI_[A-Z0-9_]+)'/g
+      /category\s*:\s*'(?<cat>[a-z-]+)'(?:\s+as\s+const)?\s*,\s*code\s*:\s*'(?<code>PUI\d{4}|PUI_[A-Z0-9_]+)'/g
     ))
       note(m.groups!.code, m.groups!.cat);
 
@@ -175,6 +181,24 @@ function observedCategories(): Map<string, Set<string>> {
     }
   }
   return observed;
+}
+
+function categoryMismatches(observed: Map<string, Set<string>>): string[] {
+  const mismatches: string[] = [];
+  for (const [code, categories] of observed) {
+    if (NON_DIAGNOSTIC_PUI_LITERALS.has(code)) continue;
+    if (!isDiagnosticCode(code)) {
+      mismatches.push(`${code} observed (${[...categories].join('/')}) but not registered`);
+      continue;
+    }
+    const allowed = diagnosticCategories(code);
+    for (const category of categories)
+      if (!allowed.some((registered) => registered === category))
+        mismatches.push(
+          `${code} observed unregistered category ${category}; allowed ${allowed.join('/')}`
+        );
+  }
+  return mismatches;
 }
 
 function literalCodes(): Set<string> {
@@ -202,21 +226,51 @@ describe('diagnostic registry', () => {
   });
 
   it('agrees with every observed call-site category', () => {
-    const observed = observedCategories();
-    const mismatches: string[] = [];
-    for (const [code, categories] of observed) {
-      if (NON_DIAGNOSTIC_PUI_LITERALS.has(code)) continue;
-      if (!isDiagnosticCode(code)) {
-        mismatches.push(`${code} observed (${[...categories].join('/')}) but not registered`);
-        continue;
-      }
-      const registered = diagnosticCategory(code)!;
-      if (!categories.has(registered))
-        mismatches.push(
-          `${code} registered as ${registered} but observed ${[...categories].join('/')}`
-        );
+    expect(categoryMismatches(observedCategories())).toEqual([]);
+  });
+
+  it('observes the actual public file boundary as-const diagnostics', () => {
+    const file = path.join(SRC, 'compile.ts');
+    const observed = observedCategories([{ file, text: readFileSync(file, 'utf8') }]);
+    expect(observed.get('PUI1003')).toEqual(new Set(['invalid-input']));
+    expect(observed.get('PUI1999')).toEqual(new Set(['compiler-defect']));
+    expect(categoryMismatches(observed)).toEqual([]);
+  });
+
+  it.each(['literal', 'as-const', 'category-first', 'category-first-as-const'])(
+    'rejects an added wrong category beside a correct emission: %s',
+    (shape) => {
+      const suffix = shape.includes('as-const') ? ' as const' : '';
+      const site = (category: string) =>
+        shape.startsWith('category-first')
+          ? `{ category: '${category}'${suffix}, code: 'PUI1999'${suffix} }`
+          : `{ code: 'PUI1999'${suffix}, category: '${category}'${suffix} }`;
+      // Keep the real allowed category present. Merely finding one correct
+      // emission must not hide an additional invalid-input emission.
+      const observed = observedCategories([
+        {
+          file: 'mixed-category-control.ts',
+          text: `${site('compiler-defect')};\n${site('invalid-input')};`,
+        },
+      ]);
+      expect(observed.get('PUI1999')).toEqual(new Set(['compiler-defect', 'invalid-input']));
+      expect(categoryMismatches(observed)).toEqual([expect.stringContaining('invalid-input')]);
     }
-    expect(mismatches).toEqual([]);
+  );
+
+  it('rejects a third wrong category while retaining both legitimate PUI1003 emissions', () => {
+    const observed = observedCategories([
+      {
+        file: 'mixed-boundary-control.ts',
+        text: `reject('PUI1003', 'known file failure', span, 'invalid-input');
+rejectNode(node, 'PUI1003', 'unsupported import');
+reject('PUI1003', 'wrongly classified defect', span, 'compiler-defect');`,
+      },
+    ]);
+    expect(observed.get('PUI1003')).toEqual(
+      new Set(['invalid-input', 'compiler-defect', 'unsupported-input'])
+    );
+    expect(categoryMismatches(observed)).toEqual([expect.stringContaining('compiler-defect')]);
   });
 
   it('keeps a stable registered code set and category table', () => {
@@ -224,6 +278,34 @@ describe('diagnostic registry', () => {
       .sort()
       .map((code) => `${code}:${DIAGNOSTIC_REGISTRY[code].category}`);
     expect(table).toMatchSnapshot();
+  });
+
+  it('keeps stable complete allowed categories and meanings', () => {
+    const table = Object.keys(DIAGNOSTIC_REGISTRY)
+      .sort()
+      .map((code) => {
+        const categories = diagnosticCategories(code);
+        expect(new Set(categories).size, `${code} repeats a category`).toBe(categories.length);
+        expect(categories[0], `${code} changed its primary lookup`).toBe(diagnosticCategory(code));
+        return `${code}:${categories.join('/')} — ${DIAGNOSTIC_REGISTRY[code].meaning}`;
+      });
+    expect(table).toMatchSnapshot();
+  });
+
+  it('accepts each registered meaning-specific category without requiring its primary beside it', () => {
+    for (const code of Object.keys(DIAGNOSTIC_REGISTRY)) {
+      for (const category of diagnosticCategories(code)) {
+        const observed = observedCategories([
+          {
+            file: 'single-meaning-control.ts',
+            text: `{ code: '${code}', category: '${category}' }`,
+          },
+        ]);
+        expect(categoryMismatches(observed), `${code}/${category}`).toEqual([]);
+      }
+    }
+    expect(diagnosticCategories('PUI_UNREGISTERED_CONTROL')).toEqual([]);
+    expect(diagnosticCategories('toString')).toEqual([]);
   });
 
   it('declares a non-empty meaning for every registered code', () => {

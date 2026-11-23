@@ -18,6 +18,9 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   // The #808 route renders its actual eight Base-derived parts through the
   // reviewed demo-renderer and keeps React/Vue/Vue2 in dynamic runtime edges.
   'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
+  // Sprint 6 compares the eight Liquid parts through the same route-owned
+  // renderer. This exact entry retains the existing lazy-framework gate.
+  'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-material.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts',
@@ -93,6 +96,7 @@ const OPTIONAL_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/site-typography.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
 ]);
 for (const facade of OPTIONAL_DEMONSTRATION_ENTRY_FACADES)
   APPROVED_DEMONSTRATION_ENTRY_FACADES.add(facade);
@@ -139,6 +143,10 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/host/view-visibility.ts',
   'packages/adapters/base/src/index.ts',
   'packages/adapters/base/src/lifecycle/teardown.ts',
+  // Sprint 4 source-reviewed default WC shader capability. Only this exact
+  // public-entry closure is admitted; legacy optical/program modules stay lazy.
+  'packages/adapters/base/src/material/shader-webgl2.ts',
+  'packages/adapters/base/src/material/shader-webgl2-host.ts',
   'packages/adapters/base/src/platform/focus-entry.ts',
   'packages/adapters/base/src/platform/focus-order.ts',
   'packages/adapters/base/src/platform/instance-tree.ts',
@@ -162,8 +170,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/platform/instance-tree.ts',
   'packages/adapters/web-component/src/platform/meta.ts',
   'packages/adapters/web-component/src/props.ts',
-  // Accepted WC-owned opaque fallback/visual-node bookkeeping; this does not
-  // admit shader/compiler assets or opt-in installation into ordinary shells.
+  // Accepted WC-owned opaque fallback/visual-node bookkeeping. Its original
+  // allowance does not extend to other shader/compiler or opt-in assets.
   'packages/adapters/web-component/src/material/owned-texture-sink.ts',
   'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
   'packages/adapters/web-component/src/visual-surface.ts',

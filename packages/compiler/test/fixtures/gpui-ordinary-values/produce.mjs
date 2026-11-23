@@ -147,8 +147,16 @@ for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
     emit(name, readFileSync(path.join(fixture, `${name}.proto.ts`), 'utf8')),
   ]);
 dependencies.push([
+  'scroll_reader',
+  emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),
+]);
+dependencies.push([
   'public_mutation',
   emit('public_mutation', readFileSync(path.join(fixture, 'public-mutation.proto.ts'), 'utf8')),
+]);
+dependencies.push([
+  'scroll_reader',
+  emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),
 ]);
 const hookOnceSource = readFileSync(path.join(fixture, 'hook-once.proto.ts'), 'utf8');
 for (const [name, exportName] of [
@@ -272,6 +280,14 @@ copyFileSync(
   path.join(fixture, 'a11y-activation-consumer.rs'),
   path.join(output, 'transition/tests/a11y_activation.rs')
 );
+copyFileSync(
+  path.join(fixture, 'scroll-pause-consumer.rs'),
+  path.join(output, 'transition/tests/scroll_pause.rs')
+);
+copyFileSync(
+  path.join(fixture, 'scroll-reader-consumer.rs'),
+  path.join(output, 'transition/tests/scroll_reader.rs')
+);
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
 receipt.controlLabelConsumerSha256 = digest(
   readFileSync(path.join(fixture, 'control-label-consumer.rs'))
@@ -281,6 +297,12 @@ receipt.styleMappingConsumerSha256 = digest(
 );
 receipt.a11yActivationConsumerSha256 = digest(
   readFileSync(path.join(fixture, 'a11y-activation-consumer.rs'))
+);
+receipt.scrollPauseConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'scroll-pause-consumer.rs'))
+);
+receipt.scrollReaderConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'scroll-reader-consumer.rs'))
 );
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.

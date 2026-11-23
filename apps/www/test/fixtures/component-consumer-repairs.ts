@@ -1,8 +1,13 @@
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import { createPortal, flushSync } from 'react-dom';
+import * as Vue from 'vue';
+import Vue2 from 'vue2-runtime';
 import { createControlLabelRef, definePrototype, type Prototype } from '@proto.ui/core';
 import { createReactAdapter } from '@proto.ui/adapter-react';
+import { createVueAdapter } from '@proto.ui/adapter-vue';
+import { createVue2Adapter, type Vue2Runtime } from '@proto.ui/adapter-vue2';
+import { registerWebPortalDestination } from '../../../../packages/adapters/base/src';
 import {
   AdaptToWebComponent,
   setElementProps,
@@ -42,6 +47,7 @@ const families = {
     label: shadcnLabel,
     ...shadcnGroup,
     tooltipRoot: shadcnTooltip.ShadcnTooltipRoot,
+    tooltipTrigger: shadcnTooltip.ShadcnTooltipTrigger,
     tooltipContent: shadcnTooltip.ShadcnTooltipContent,
     ...shadcnDrawer,
   },
@@ -51,6 +57,7 @@ const families = {
     label: brutalistLabel,
     ...brutalistGroup,
     tooltipRoot: brutalistTooltip.BrutalistTooltipRoot,
+    tooltipTrigger: brutalistTooltip.BrutalistTooltipTrigger,
     tooltipContent: brutalistTooltip.BrutalistTooltipContent,
     ...brutalistDrawer,
   },
@@ -69,11 +76,27 @@ async function settle() {
   for (let i = 0; i < 3; i++) await frame();
 }
 
-/** Real source prototypes and real React/WC adapters; no simulated focus or geometry. */
+export type ConsumerRuntime = 'react' | 'wc' | 'vue' | 'vue2';
+export type ConsumerOptions = {
+  /** A real outer tree boundary, independent of a WC's internal render root. */
+  shadow?: boolean;
+  /** Use the existing host policy to keep an overlay in the same shadow tree. */
+  portalDestination?: 'scene' | 'default';
+  styleText?: string;
+};
+
+/** Real source prototypes and real framework owners; no simulated focus or geometry. */
 export async function mount(
-  scenario: 'labels' | 'tooltip' | 'drawer' | 'tooltip-lifecycle',
+  scenario:
+    | 'labels'
+    | 'tooltip'
+    | 'drawer'
+    | 'tooltip-lifecycle'
+    | 'tooltip-standalone'
+    | 'tooltip-wrapped',
   familyName: keyof typeof families,
-  runtime: 'react' | 'wc'
+  runtime: ConsumerRuntime,
+  options: ConsumerOptions = {}
 ) {
   const family = families[familyName];
   const counts = { click: 0, active: [] as unknown[], value: [] as unknown[] };
@@ -127,7 +150,7 @@ export async function mount(
       },
       { key: 'item-label', proto: family.label, associations: pairs[2], children: ['Bold text'] },
     ];
-  } else if (scenario === 'tooltip') {
+  } else if (scenario.startsWith('tooltip')) {
     const command: Prototype<any, any> = family.button;
     const tooltipButton = definePrototype({
       ...command,
@@ -138,6 +161,28 @@ export async function mount(
         return render;
       },
     });
+    const trigger: Node =
+      scenario === 'tooltip-standalone'
+        ? { key: 'trigger', proto: family.tooltipTrigger, children: ['Save'] }
+        : scenario === 'tooltip-wrapped'
+          ? {
+              key: 'trigger',
+              proto: family.tooltipTrigger,
+              children: [
+                {
+                  key: 'button',
+                  proto: family.button,
+                  events: { click: () => counts.click++ },
+                  children: ['Save'],
+                },
+              ],
+            }
+          : {
+              key: 'button',
+              proto: tooltipButton,
+              events: { click: () => counts.click++ },
+              children: ['Save'],
+            };
     nodes = [
       { key: 'before', tag: 'button', children: ['Before'] },
       {
@@ -145,50 +190,7 @@ export async function mount(
         proto: family.tooltipRoot,
         props: { openDelay: 0, closeDelay: 0 },
         children: [
-          {
-            key: 'button',
-            proto: tooltipButton,
-            events: { click: () => counts.click++ },
-            children: ['Save'],
-          },
-          {
-            key: 'content',
-            proto: family.tooltipContent,
-            props: { enterDuration: 0, leaveDuration: 0 },
-            children: ['Save this document'],
-          },
-        ],
-      },
-      { key: 'after', tag: 'button', children: ['After'] },
-    ];
-  } else if (scenario === 'tooltip-lifecycle') {
-    // Same same-subject recipe as the 'tooltip' scenario, but the mounted host
-    // stays detached until lifecycle.attach() so the no-DOM mount phase is
-    // observable, and the wrapped button can be removed, re-inserted, disabled,
-    // hidden, given a negative tabindex or remounted while the wiring lives.
-    const command: Prototype<any, any> = family.button;
-    const tooltipButton = definePrototype({
-      ...command,
-      name: `consumer-${familyName}-tooltip-lifecycle-button`,
-      setup(def) {
-        const render = command.setup(def);
-        baseTooltip.useTooltipTrigger();
-        return render;
-      },
-    });
-    nodes = [
-      { key: 'before', tag: 'button', children: ['Before'] },
-      {
-        key: 'root',
-        proto: family.tooltipRoot,
-        props: { openDelay: 0, closeDelay: 0 },
-        children: [
-          {
-            key: 'button',
-            proto: tooltipButton,
-            events: { click: () => counts.click++ },
-            children: ['Save'],
-          },
+          trigger,
           {
             key: 'content',
             proto: family.tooltipContent,
@@ -245,42 +247,106 @@ export async function mount(
   const definitions = new Map<string, Node>();
   const hosts = new Map<string, HTMLElement>();
   const refs = new Map<string, React.RefObject<any>>();
-  const adapt = createReactAdapter({ ...React, createPortal });
+  const handles = new Map<string, any>();
   const components = new Map<Prototype<any, any>, any>();
+  const outer = document.createElement('div');
+  outer.dataset.repairFixture = '';
+  const tree = options.shadow ? outer.attachShadow({ mode: 'open' }) : outer;
+  const scene = document.createElement('div');
   const host = document.createElement('div');
-  if (scenario !== 'tooltip-lifecycle') document.body.append(host);
-  const root = runtime === 'react' ? createRoot(host) : null;
+  const overlayMount = document.createElement('div');
+  overlayMount.dataset.repairOverlayMount = '';
+  scene.append(host, overlayMount);
+  tree.append(scene);
+  if (options.styleText) {
+    const style = document.createElement('style');
+    style.textContent = options.styleText;
+    tree.prepend(style);
+  }
+  if (scenario !== 'tooltip-lifecycle') document.body.append(outer);
+  const releaseDestination =
+    options.portalDestination === 'scene'
+      ? registerWebPortalDestination(scene, overlayMount)
+      : () => {};
+  const adapt =
+    runtime === 'react'
+      ? createReactAdapter({ ...React, createPortal })
+      : runtime === 'vue'
+        ? createVueAdapter(Vue)
+        : runtime === 'vue2'
+          ? createVue2Adapter({
+              extend: Vue2.extend.bind(Vue2),
+              nextTick: Vue2.nextTick.bind(Vue2),
+              set: Vue2.set.bind(Vue2),
+              delete: Vue2.delete.bind(Vue2),
+            } as unknown as Vue2Runtime)
+          : null;
+  const componentFor = (node: Node): any => {
+    if (!node.proto) return node.tag;
+    if (!components.has(node.proto)) components.set(node.proto, adapt!(node.proto));
+    return components.get(node.proto);
+  };
+  let redraw = () => {};
+  let disposeOwner = () => {};
+  let vue2App: InstanceType<typeof Vue2> | null = null;
+  const settleOwner = async () => {
+    if (runtime === 'vue') await Vue.nextTick();
+    if (runtime === 'vue2') await Vue2.nextTick();
+    await settle();
+  };
+  const elementFor = (key: string) =>
+    scene.querySelector<HTMLElement>(`[data-demo-ref="${key}"]`) ??
+    document.querySelector<HTMLElement>(`[data-demo-ref="${key}"]`);
   const wireWcEvents = (element: HTMLElement, node: Node) => {
     for (const [event, listener] of Object.entries(node.events ?? {}))
       element.addEventListener(event, (e) => {
         if (e instanceof CustomEvent) listener(e.detail);
       });
   };
-  const renderNode = (node: Node | string): any => {
+  const renderNode = (node: Node | string, h?: any): any => {
     if (typeof node === 'string') return node;
     definitions.set(node.key, node);
-    if (runtime === 'react') {
-      if (scenario === 'tooltip-lifecycle' && node.key === 'button' && !buttonPresent)
-        return null;
+    if (runtime !== 'wc') {
+      if (node.key === 'button' && !buttonPresent) return null;
       const props: Record<string, any> = {
         ...node.props,
-        key:
-          scenario === 'tooltip-lifecycle' && node.key === 'button'
-            ? `button-${buttonMount}`
-            : node.key,
+        key: node.key === 'button' ? `button-${buttonMount}` : node.key,
         'data-demo-ref': node.key,
       };
       if (node.associations) props.instanceAssociations = node.associations;
       for (const [event, listener] of Object.entries(node.events ?? {}))
         props[`on${event[0].toUpperCase()}${event.slice(1)}`] = listener;
-      let component: any = node.tag;
-      if (node.proto) {
-        if (!components.has(node.proto)) components.set(node.proto, adapt(node.proto));
-        component = components.get(node.proto);
-        if (!refs.has(node.key)) refs.set(node.key, React.createRef());
-        props.ref = refs.get(node.key);
+      const component = componentFor(node);
+      if (runtime === 'react') {
+        if (node.proto) {
+          if (!refs.has(node.key)) refs.set(node.key, React.createRef());
+          props.ref = refs.get(node.key);
+        }
+        return React.createElement(
+          component,
+          props,
+          ...(node.children ?? []).map((n) => renderNode(n))
+        );
       }
-      return React.createElement(component, props, ...(node.children ?? []).map(renderNode));
+      if (runtime === 'vue') {
+        if (node.proto)
+          props.ref = (handle: unknown) =>
+            handle ? handles.set(node.key, handle) : handles.delete(node.key);
+        const children = () => (node.children ?? []).map((child) => renderNode(child));
+        return Vue.h(component, props, node.proto ? children : children());
+      }
+      return h(
+        component,
+        {
+          key: props.key,
+          ref: node.proto ? node.key : undefined,
+          attrs: { ...node.props, 'data-demo-ref': node.key },
+          props: { instanceAssociations: node.associations },
+          on: node.events,
+          style: node.props?.style,
+        },
+        (node.children ?? []).map((child) => renderNode(child, h))
+      );
     }
     if (node.proto && !customElements.get(node.proto.name)) AdaptToWebComponent(node.proto);
     const element = document.createElement(node.proto?.name ?? node.tag!);
@@ -293,24 +359,75 @@ export async function mount(
       if (node.associations) setElementAssociations(element, node.associations);
       wireWcEvents(element, node);
     } else if (node.props?.style) Object.assign(element.style, node.props.style);
-    element.append(...(node.children ?? []).map(renderNode));
+    element.append(...(node.children ?? []).map((child) => renderNode(child)));
     return element;
   };
-  if (root) flushSync(() => root.render(nodes.map(renderNode)));
-  else host.append(...nodes.map(renderNode));
-  await settle();
+  if (runtime === 'react') {
+    const root = createRoot(host);
+    redraw = () => flushSync(() => root.render(nodes.map((node) => renderNode(node))));
+    disposeOwner = () => flushSync(() => root.unmount());
+    redraw();
+  } else if (runtime === 'vue') {
+    const revision = Vue.ref(0);
+    const app = Vue.createApp({
+      render() {
+        revision.value;
+        return Vue.h(
+          'div',
+          nodes.map((node) => renderNode(node))
+        );
+      },
+    });
+    redraw = () => {
+      revision.value++;
+    };
+    disposeOwner = () => app.unmount();
+    app.mount(host);
+  } else if (runtime === 'vue2') {
+    vue2App = new Vue2({
+      render: (h: any) =>
+        h(
+          'div',
+          nodes.map((node) => renderNode(node, h))
+        ),
+    });
+    vue2App.$mount();
+    host.append(vue2App.$el);
+    redraw = () => vue2App!.$forceUpdate();
+    disposeOwner = () => vue2App!.$destroy();
+  } else {
+    host.append(...nodes.map((node) => renderNode(node)));
+  }
+  await settleOwner();
   return {
     counts,
+    element: elementFor,
+    boundary() {
+      const trigger = elementFor(scenario === 'tooltip-standalone' ? 'trigger' : 'button');
+      const content = elementFor('content');
+      return {
+        shadow: trigger?.getRootNode() instanceof ShadowRoot,
+        sameTree: trigger?.getRootNode() === content?.getRootNode(),
+        contentInDestination: Boolean(content && overlayMount.contains(content)),
+        outerConnected: outer.isConnected,
+      };
+    },
     async set(key: string, props: Record<string, unknown>) {
       definitions.get(key)!.props = props;
-      if (root) flushSync(() => root.render(nodes.map(renderNode)));
-      else setElementProps(hosts.get(key)!, props);
-      await settle();
+      if (runtime === 'wc') setElementProps(hosts.get(key)!, props);
+      else redraw();
+      await settleOwner();
     },
     exposes(key: string) {
-      return runtime === 'react'
-        ? refs.get(key)!.current.getExposes()
-        : (hosts.get(key) as any).getExposes();
+      const handle =
+        runtime === 'react'
+          ? refs.get(key)!.current
+          : runtime === 'vue'
+            ? handles.get(key)
+            : runtime === 'vue2'
+              ? vue2App!.$refs[key]
+              : hosts.get(key);
+      return (handle as any).getExposes();
     },
     // #1455 lifecycle acceptance: the mounted host stays detached until attach(),
     // and the wrapped control can be removed, re-inserted, remounted (element
@@ -319,63 +436,53 @@ export async function mount(
       scenario === 'tooltip-lifecycle'
         ? {
             async attach() {
-              document.body.append(host);
+              document.body.append(outer);
               // The React adapter re-advertises its focus target only on a
               // committed render, so inserting the detached host needs one
               // re-render for the focusable projection (tabindex) to land.
-              if (root) flushSync(() => root.render(nodes.map(renderNode)));
-              await settle();
+              redraw();
+              await settleOwner();
             },
             async remove() {
-              if (root) {
+              if (runtime !== 'wc') {
                 buttonPresent = false;
-                flushSync(() => root.render(nodes.map(renderNode)));
+                redraw();
               } else {
                 hosts.get('button')?.remove();
               }
-              await settle();
+              await settleOwner();
             },
             async insert() {
-              if (root) {
+              if (runtime !== 'wc') {
                 buttonPresent = true;
-                flushSync(() => root.render(nodes.map(renderNode)));
+                redraw();
               } else {
                 const button = hosts.get('button');
                 const rootElement = hosts.get('root');
-                if (button && rootElement)
-                  rootElement.insertBefore(button, hosts.get('content') ?? null);
+                if (button && rootElement) rootElement.insertBefore(button, rootElement.firstChild);
               }
-              await settle();
+              await settleOwner();
             },
             async remount() {
               buttonMount += 1;
-              if (root) {
-                flushSync(() => root.render(nodes.map(renderNode)));
+              if (runtime !== 'wc') {
+                redraw();
               } else {
                 const buttonNode = definitions.get('button');
                 const previous = hosts.get('button');
                 if (buttonNode?.proto && previous) {
-                  const replacement = document.createElement(buttonNode.proto.name);
-                  replacement.setAttribute('data-demo-ref', 'button');
-                  const { hostStyle, ...props } = buttonNode.props ?? {};
-                  setElementProps(replacement, props);
-                  if (hostStyle) Object.assign(replacement.style, hostStyle);
-                  wireWcEvents(replacement, buttonNode);
+                  const replacement = renderNode(buttonNode);
                   previous.replaceWith(replacement);
-                  hosts.set('button', replacement);
                 }
               }
-              await settle();
+              await settleOwner();
             },
             async setTabindex(value: number) {
-              host.querySelector<HTMLElement>('[data-demo-ref="button"]')?.setAttribute(
-                'tabindex',
-                String(value)
-              );
+              elementFor('button')?.setAttribute('tabindex', String(value));
               await settle();
             },
             async setHidden(hidden: boolean) {
-              const button = host.querySelector<HTMLElement>('[data-demo-ref="button"]');
+              const button = elementFor('button');
               if (!button) return;
               // Author display rules outrank the UA [hidden] rule, so pair the
               // semantic hidden attribute with an inline display to actually
@@ -392,9 +499,10 @@ export async function mount(
           }
         : null,
     async dispose() {
-      if (root) flushSync(() => root.unmount());
-      host.remove();
-      await settle();
+      disposeOwner();
+      outer.remove();
+      await settleOwner();
+      releaseDestination();
     },
   };
 }

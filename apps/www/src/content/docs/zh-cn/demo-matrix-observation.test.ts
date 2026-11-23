@@ -128,12 +128,12 @@ describe('Demo Matrix committed projection observations', () => {
   it('resolves accessible names from associated label elements', () => {
     const candidates = Array.from({ length: 4 }, () => generation(cell('ready').host, 'active'));
     // Replace the aria-label on the textarea with a <label for="..."> association.
-    for (const candidate of candidates) {
+    for (const [index, candidate] of candidates.entries()) {
       const textarea = candidate.querySelector('textarea')!;
       textarea.removeAttribute('aria-label');
-      textarea.id = 'notes';
+      textarea.id = `notes-${index}`;
       const label = document.createElement('label');
-      label.htmlFor = 'notes';
+      label.htmlFor = textarea.id;
       label.textContent = 'Protocol notes';
       candidate.appendChild(label);
     }
@@ -184,6 +184,50 @@ describe('Demo Matrix committed projection observations', () => {
     expect(matrixHostsReady()).toBe(true);
     host.replaceChildren();
     expect(matrixHostsReady()).toBe(false);
+  });
+});
+
+describe('Demo Matrix native role and associated-name observations', () => {
+  it.each([
+    { attributes: 'size="1"', role: 'combobox' },
+    { attributes: 'size="4"', role: 'listbox' },
+    { attributes: 'multiple size="1"', role: 'listbox' },
+    { attributes: 'multiple size="4"', role: 'listbox' },
+  ])(
+    'compares native select $attributes with its explicit $role realization',
+    ({ attributes, role }) => {
+      const native = generation(cell('ready').host, 'active');
+      const explicit = generation(cell('ready').host, 'active');
+      native.innerHTML = `<label for="native-select">Destination</label><select id="native-select" ${attributes}><option>First</option><option>Second</option></select>`;
+      // Happy DOM 15 has no select.size IDL property. Supply only that native
+      // input fact; the separate browser/AX suite uses real HTML without stubs.
+      Object.defineProperty(native.querySelector('select'), 'size', {
+        value: Number(native.querySelector('select')!.getAttribute('size')),
+      });
+      explicit.innerHTML = `<div role="${role}" aria-label="Destination" tabindex="0">First</div>`;
+      expect(collectMatrixInteractiveFacts(['combobox', 'listbox']).textarea).toEqual([
+        [{ role, name: 'Destination' }],
+        [{ role, name: 'Destination' }],
+      ]);
+    }
+  );
+
+  it('combines associated native labels in document order and detects losing the second label', () => {
+    const native = generation(cell('ready').host, 'active');
+    const explicit = generation(cell('ready').host, 'active');
+    native.innerHTML =
+      '<label for="native-name">First</label><label for="native-name">Second</label><input id="native-name"><label for="native-name">Third</label>';
+    explicit.innerHTML =
+      '<span id="explicit-first">First</span><span id="explicit-second">Second</span><span id="explicit-third">Third</span><div role="textbox" aria-labelledby="explicit-first explicit-second explicit-third"></div>';
+    const facts = () => collectMatrixInteractiveFacts(['textbox']).textarea;
+    expect(facts()).toEqual([
+      [{ role: 'textbox', name: 'First Second Third' }],
+      [{ role: 'textbox', name: 'First Second Third' }],
+    ]);
+    native.querySelectorAll('label')[1]!.remove();
+    expect(facts()[0]).toEqual([{ role: 'textbox', name: 'First Third' }]);
+    expect(facts()[1]).toEqual([{ role: 'textbox', name: 'First Second Third' }]);
+    expect(() => expect(facts()[0]).toEqual(facts()[1])).toThrow();
   });
 });
 

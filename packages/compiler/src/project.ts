@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { readFile, realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { compileFile, type Compilation } from './compile';
-import { CompilerRejection } from './diagnostics';
-import { IR_VERSION, type CompileResult, type CompilerDiagnostic, type SourceSpan } from './ir';
+import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
+import { IR_VERSION, type CompileResult, type CompilerDiagnostic } from './ir';
 import { sourceName } from './source-resolution';
 import { FileSourceGraph, type ParsedFileSource } from './source-loader';
 import {
@@ -65,15 +65,6 @@ interface CachedCompilation {
 // Retain at most one result per entry and a bounded LRU of source-edge parses. The
 // active graph and last successful generation necessarily describe the requested project.
 const PROJECT_CACHE_SCHEMA = 2;
-const span = (file: string): SourceSpan => ({
-  file,
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-});
 const hash = (value: string | Uint8Array): string =>
   createHash('sha256').update(value).digest('hex');
 
@@ -83,7 +74,17 @@ function diagnostic(error: unknown, file: string): CompilerDiagnostic {
     code: 'PUI4101',
     category: 'invalid-input',
     message: error instanceof Error ? error.message : String(error),
-    span: span(file),
+    span: unknownDiagnosticSpan(file),
+  };
+}
+
+function unexpectedDiagnostic(error: unknown, file: string): CompilerDiagnostic {
+  if (error instanceof CompilerRejection) return error.diagnostic;
+  return {
+    code: 'PUI1999',
+    category: 'compiler-defect',
+    message: `Compiler defect: source location unknown.\n${unexpectedFailureEvidence(error)}`,
+    span: unknownDiagnosticSpan(file),
   };
 }
 
@@ -244,11 +245,13 @@ export class CompilerProject {
     );
 
     for (const requestedEntry of entries) {
+      let sourceLoaded = false;
       try {
         const location = await sources.entry(requestedEntry);
         const closure = await sources.load(location);
-        const entry = closure.entry;
         if (closure.failures.length) throw closure.failures[0];
+        sourceLoaded = true;
+        const entry = closure.entry;
         if (configurationFailed) continue;
         const identity = hash(JSON.stringify([configIdentity, entry, closure.identity]));
         identities.push([requestedEntry, identity]);
@@ -278,7 +281,20 @@ export class CompilerProject {
         });
         nextCache.set(requestedEntry, { identity, compilation: result.value });
       } catch (error) {
-        diagnostics.push(diagnostic(error, requestedEntry));
+        // Declared loader/file failures remain input errors. After a successful
+        // source load, an unclassified exception is an implementation failure;
+        // checked CompilerRejection diagnostics retain their actual identity/span.
+        const inputFailure =
+          !sourceLoaded &&
+          error instanceof Error &&
+          !(error instanceof TypeError) &&
+          !(error instanceof ReferenceError) &&
+          !(error instanceof RangeError);
+        diagnostics.push(
+          inputFailure
+            ? diagnostic(error, requestedEntry)
+            : unexpectedDiagnostic(error, requestedEntry)
+        );
       }
     }
 

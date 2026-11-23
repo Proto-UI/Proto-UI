@@ -1,6 +1,6 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
 import { bindDrawerCommandDisabled } from './drawer-command-disabled.shared';
-import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoSpec } from '../../components/PrototypePreviewer/demo-types';
 
 export default withShadcnRheaDemo({
   'type': 'demo',

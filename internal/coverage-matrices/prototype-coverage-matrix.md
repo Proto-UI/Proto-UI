@@ -27,18 +27,18 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate commit c042af327e8746f2e8273ce38ba35859b1407580; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit 36da18d50381c1abb889bd0a9e9e9d02ae5ed977; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Historical main families / identities | Candidate families / identities | Release scope |
 | --- | --- | --- | --- |
-| base | 22 / 55 | 55 / 114 | 0.3 committed scope; acceptance separate |
-| shadcn | 17 / 48 | 57 / 126 | 0.3 committed scope; acceptance separate |
-| brutalist | 19 / 51 | 58 / 116 | 0.3 committed scope; acceptance separate |
+| base | 22 / 55 | 55 / 115 | 0.3 committed scope; acceptance separate |
+| shadcn | 17 / 48 | 57 / 127 | 0.3 committed scope; acceptance separate |
+| brutalist | 19 / 51 | 58 / 118 | 0.3 committed scope; acceptance separate |
 | bootstrap-2-3-2 | 2 / 2 | 54 / 116 | WIP / Experimental; 0.4 |
 | liquid-glass | 2 / 2 | 54 / 112 | WIP / Experimental; 0.4 |
 | lucide | 1 / 1 | 1 / 1 | 0.3 committed scope; acceptance separate |
 
-Candidate atomic GPUI obligations: 456; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
+Candidate atomic GPUI obligations: 460; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
 
 Candidate source definitions include regular .proto.ts files and concrete TypeScript entries resolved from catalog citations. A cataloged composition contributes only its actual P identity; its exported helpers do not invent unadmitted atomic parts. All concrete paths and hashes remain in the JSON.
 
@@ -64,7 +64,7 @@ Candidate source definitions include regular .proto.ts files and concrete TypeSc
 | dialog / 7 | implemented-draft / 10 P identities | implemented-draft / 10 P identities | implemented-draft / 10 P identities | implemented-draft / 7 P identities |
 | drawer / 5 | implemented-draft / 4 P identities | implemented-draft / 1 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
 | dropdown / 8 | implemented-draft / 8 P identities | implemented-draft / 8 P identities | implemented-draft / 8 P identities | implemented-draft / 8 P identities |
-| field / 6 | implemented-draft / 6 P identities | implemented-draft / 6 P identities | implemented-draft / 6 P identities | implemented-draft / 6 P identities |
+| field / 7 | implemented-draft / 7 P identities | implemented-draft / 7 P identities | implemented-draft / 6 P identities | implemented-draft / 6 P identities |
 | fieldset / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
 | form / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | hover-card / 3 | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities | implemented-draft / 3 P identities |
@@ -86,7 +86,7 @@ Candidate source definitions include regular .proto.ts files and concrete TypeSc
 | scroll-area / 4 | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
 | select / 7 | implemented-draft / 8 P identities | implemented-draft / 5 P identities | implemented-draft / 7 P identities | implemented-draft / 7 P identities |
 | separator / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
-| slider / 4 | implemented-draft / 4 P identities | implemented-draft / 1 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
+| slider / 4 | implemented-draft / 4 P identities | implemented-draft / 2 P identities | implemented-draft / 4 P identities | implemented-draft / 4 P identities |
 | surface / 1 | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities | implemented-draft / 1 P identities |
 | switch / 2 | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities | implemented-draft / 2 P identities |
 | table / 5 | implemented-draft / 5 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities | implemented-draft / 5 P identities |
@@ -152,6 +152,7 @@ Membership source: [retained manifest](../fixtures/shadcn-style-source/manifest.
 | P-BASE-DROPDOWN-MENU-SHORTCUT | P-SHADCN-DROPDOWN-MENU-SHORTCUT | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-FIELD | P-SHADCN-FIELD | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
+| P-BASE-FIELD-CHOICES | P-SHADCN-FIELD-CHOICES | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-FIELD-CONTROL | P-SHADCN-FIELD-CONTROL | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-FIELD-DESCRIPTION | P-SHADCN-FIELD-DESCRIPTION | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
 | P-BASE-FIELD-ERROR | P-SHADCN-FIELD-ERROR | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed | required-unassessed |
