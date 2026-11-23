@@ -108,8 +108,8 @@
   "files": [
     {
       "path": "projection-f419-index.json",
-      "bytes": 72987,
-      "sha256": "ff417cff625d1e3c2fb184f0afe3b5fe02b2c1e01c3689d9a3efabfe1e1a3a96"
+      "bytes": 72979,
+      "sha256": "555a0a910b73f3b454e850e8d0420fa4be47a11614e7731467576a465208c89e"
     },
     {
       "path": "projection-f419-job.log.gz",
@@ -132,6 +132,34 @@
       "path": "sprint1-0b0b861b-selected.zip",
       "bytes": 5681033,
       "sha256": "96221ecda6398f439d1a99bcdec8e0aa41fee11f49d758a46bebf0f52083daac"
+    },
+    {
+      "path": "original-indexes.zip",
+      "bytes": 81092,
+      "sha256": "69e2808a4640a374b5acd9afaf03ec9877e97478644c04eb08c4ef0955da4cc0"
     }
-  ]
+  ],
+  "indexFormattingReconciliation": {
+    "preHookOriginals": "original-indexes.zip",
+    "reason": "The normal formatting hook reformatted the derived projection full-member index. Both indexes retain identical parsed values, original ZIP/member identities and retained raw carriers. The earlier projection index hash identified pre-hook bytes; that entry now identifies actual committed formatted bytes. The Sprint 1 index bytes were unchanged.",
+    "files": [
+      {
+        "path": "projection-f419-index.json",
+        "beforeBytes": 72987,
+        "beforeSha256": "ff417cff625d1e3c2fb184f0afe3b5fe02b2c1e01c3689d9a3efabfe1e1a3a96",
+        "committedBytes": 72979,
+        "committedSha256": "555a0a910b73f3b454e850e8d0420fa4be47a11614e7731467576a465208c89e",
+        "parsedValueUnchanged": true
+      },
+      {
+        "path": "sprint1-0b0b861b-index.json",
+        "beforeBytes": 350468,
+        "beforeSha256": "bc57a7405e974f5055ccdf47d862e6ae8e045df1064b84e9ec3ef613e3f4ea3b",
+        "committedBytes": 350468,
+        "committedSha256": "bc57a7405e974f5055ccdf47d862e6ae8e045df1064b84e9ec3ef613e3f4ea3b",
+        "parsedValueUnchanged": true
+      }
+    ],
+    "priorPublishedManifest": "bf3bd6a6db9a8a2801ca10ff3e552335ed1635e0:internal/records/evidence/2026-11-24-sprint1-native-followup/manifest.json"
+  }
 }
