@@ -33,11 +33,13 @@
       "default": "./dist/index.js"
     },
     "./button": {
+      "proto": "./src/button/index.ts",
       "types": "./dist/button/index.d.ts",
       "import": "./dist/button/index.js",
       "default": "./dist/button/index.js"
     },
     "./checkbox": {
+      "proto": "./src/checkbox/index.ts",
       "types": "./dist/checkbox/index.d.ts",
       "import": "./dist/checkbox/index.js",
       "default": "./dist/checkbox/index.js"
@@ -48,6 +50,7 @@
       "default": "./dist/component-presets.js"
     },
     "./dialog": {
+      "proto": "./src/dialog/index.ts",
       "types": "./dist/dialog/index.d.ts",
       "import": "./dist/dialog/index.js",
       "default": "./dist/dialog/index.js"
@@ -63,41 +66,49 @@
       "default": "./dist/hover-card/index.js"
     },
     "./input": {
+      "proto": "./src/input/index.ts",
       "types": "./dist/input/index.d.ts",
       "import": "./dist/input/index.js",
       "default": "./dist/input/index.js"
     },
     "./select": {
+      "proto": "./src/select/index.ts",
       "types": "./dist/select/index.d.ts",
       "import": "./dist/select/index.js",
       "default": "./dist/select/index.js"
     },
     "./separator": {
+      "proto": "./src/separator/index.ts",
       "types": "./dist/separator/index.d.ts",
       "import": "./dist/separator/index.js",
       "default": "./dist/separator/index.js"
     },
     "./switch": {
+      "proto": "./src/switch/index.ts",
       "types": "./dist/switch/index.d.ts",
       "import": "./dist/switch/index.js",
       "default": "./dist/switch/index.js"
     },
     "./tabs": {
+      "proto": "./src/tabs/index.ts",
       "types": "./dist/tabs/index.d.ts",
       "import": "./dist/tabs/index.js",
       "default": "./dist/tabs/index.js"
     },
     "./textarea": {
+      "proto": "./src/textarea/index.ts",
       "types": "./dist/textarea/index.d.ts",
       "import": "./dist/textarea/index.js",
       "default": "./dist/textarea/index.js"
     },
     "./toggle": {
+      "proto": "./src/toggle/index.ts",
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",
       "default": "./dist/toggle/index.js"
     },
     "./scroll-area": {
+      "proto": "./src/scroll-area/index.ts",
       "types": "./dist/scroll-area/index.d.ts",
       "import": "./dist/scroll-area/index.js",
       "default": "./dist/scroll-area/index.js"
@@ -123,11 +134,13 @@
       "default": "./dist/surface/index.js"
     },
     "./label": {
+      "proto": "./src/label/index.ts",
       "types": "./dist/label/index.d.ts",
       "import": "./dist/label/index.js",
       "default": "./dist/label/index.js"
     },
     "./collapsible": {
+      "proto": "./src/collapsible/index.ts",
       "types": "./dist/collapsible/index.d.ts",
       "import": "./dist/collapsible/index.js",
       "default": "./dist/collapsible/index.js"
@@ -153,6 +166,7 @@
       "default": "./dist/alert-dialog/index.js"
     },
     "./drawer": {
+      "proto": "./src/drawer/index.ts",
       "types": "./dist/drawer/index.d.ts",
       "import": "./dist/drawer/index.js",
       "default": "./dist/drawer/index.js"
@@ -178,6 +192,7 @@
       "default": "./dist/calendar/index.js"
     },
     "./toggle-group": {
+      "proto": "./src/toggle-group/index.ts",
       "types": "./dist/toggle-group/index.d.ts",
       "import": "./dist/toggle-group/index.js",
       "default": "./dist/toggle-group/index.js"
@@ -243,6 +258,7 @@
       "default": "./dist/slider/index.js"
     },
     "./number-field": {
+      "proto": "./src/number-field/index.ts",
       "types": "./dist/number-field/index.d.ts",
       "import": "./dist/number-field/index.js",
       "default": "./dist/number-field/index.js"
@@ -258,6 +274,7 @@
       "default": "./dist/tree/index.js"
     },
     "./message-scroller": {
+      "proto": "./src/message-scroller/index.ts",
       "types": "./dist/message-scroller/index.d.ts",
       "import": "./dist/message-scroller/index.js",
       "default": "./dist/message-scroller/index.js"
@@ -283,6 +300,7 @@
       "default": "./dist/date-picker/index.js"
     },
     "./data-table": {
+      "proto": "./src/data-table/index.ts",
       "types": "./dist/data-table/index.d.ts",
       "import": "./dist/data-table/index.js",
       "default": "./dist/data-table/index.js"
@@ -349,7 +367,137 @@
   "files": [
     "dist/",
     "README.md",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "src/button/button.proto.ts",
+    "src/button/index.ts",
+    "src/button/new-york.ts",
+    "src/button/paint.ts",
+    "src/button/profiles.ts",
+    "src/button/types.ts",
+    "src/checkbox/composition.ts",
+    "src/checkbox/index.ts",
+    "src/checkbox/indicator.proto.ts",
+    "src/checkbox/preset.ts",
+    "src/checkbox/root.proto.ts",
+    "src/checkbox/types.ts",
+    "src/collapsible/content.proto.ts",
+    "src/collapsible/index.ts",
+    "src/collapsible/root.proto.ts",
+    "src/collapsible/trigger.proto.ts",
+    "src/collapsible/types.ts",
+    "src/component-presets.types.ts",
+    "src/data-table/data-table.proto.ts",
+    "src/data-table/header-row.proto.ts",
+    "src/data-table/index.ts",
+    "src/data-table/visual.ts",
+    "src/dialog/close-icon.proto.ts",
+    "src/dialog/close.proto.ts",
+    "src/dialog/content.proto.ts",
+    "src/dialog/description.proto.ts",
+    "src/dialog/footer.proto.ts",
+    "src/dialog/header.proto.ts",
+    "src/dialog/index.ts",
+    "src/dialog/overlay.proto.ts",
+    "src/dialog/preset.ts",
+    "src/dialog/recipes.ts",
+    "src/dialog/root.proto.ts",
+    "src/dialog/style.ts",
+    "src/dialog/title.proto.ts",
+    "src/dialog/trigger.proto.ts",
+    "src/dialog/types.ts",
+    "src/drawer/close.proto.ts",
+    "src/drawer/command-paint.ts",
+    "src/drawer/content.proto.ts",
+    "src/drawer/description.proto.ts",
+    "src/drawer/footer.proto.ts",
+    "src/drawer/handle.proto.ts",
+    "src/drawer/header.proto.ts",
+    "src/drawer/index.ts",
+    "src/drawer/mask.proto.ts",
+    "src/drawer/recipes.ts",
+    "src/drawer/root.proto.ts",
+    "src/drawer/title.proto.ts",
+    "src/drawer/trigger.proto.ts",
+    "src/drawer/types.ts",
+    "src/field/visual.ts",
+    "src/input/index.ts",
+    "src/input/root.proto.ts",
+    "src/input/types.ts",
+    "src/input/visual.ts",
+    "src/label/index.ts",
+    "src/label/root.proto.ts",
+    "src/message-scroller/index.ts",
+    "src/message-scroller/message-scroller.proto.ts",
+    "src/message-scroller/visual.ts",
+    "src/number-field/control.proto.ts",
+    "src/number-field/decrement.proto.ts",
+    "src/number-field/increment.proto.ts",
+    "src/number-field/index.ts",
+    "src/number-field/input.proto.ts",
+    "src/number-field/label.proto.ts",
+    "src/number-field/root.proto.ts",
+    "src/number-field/step-visual.ts",
+    "src/number-field/types.ts",
+    "src/scroll-area/index.ts",
+    "src/scroll-area/root.proto.ts",
+    "src/scroll-area/scrollbar.proto.ts",
+    "src/scroll-area/thumb.proto.ts",
+    "src/scroll-area/types.ts",
+    "src/scroll-area/viewport.proto.ts",
+    "src/select/content.proto.ts",
+    "src/select/group.proto.ts",
+    "src/select/index.ts",
+    "src/select/item-text.proto.ts",
+    "src/select/item.proto.ts",
+    "src/select/label.proto.ts",
+    "src/select/recipes.ts",
+    "src/select/root.proto.ts",
+    "src/select/separator.proto.ts",
+    "src/select/style.ts",
+    "src/select/surface.proto.ts",
+    "src/select/trigger-visual.ts",
+    "src/select/trigger.proto.ts",
+    "src/select/types.ts",
+    "src/select/value.proto.ts",
+    "src/select/viewport.proto.ts",
+    "src/select/visual.ts",
+    "src/separator/index.ts",
+    "src/separator/root.proto.ts",
+    "src/separator/types.ts",
+    "src/style-scope/context.ts",
+    "src/style-scope/index.ts",
+    "src/style-scope/root.proto.ts",
+    "src/style-scope/selection.ts",
+    "src/switch/hit-lease.ts",
+    "src/switch/index.ts",
+    "src/switch/preset.ts",
+    "src/switch/root-visual.ts",
+    "src/switch/root.proto.ts",
+    "src/switch/thumb.proto.ts",
+    "src/switch/types.ts",
+    "src/switch/visual.ts",
+    "src/tabs/content.proto.ts",
+    "src/tabs/index.ts",
+    "src/tabs/indicator.proto.ts",
+    "src/tabs/list.proto.ts",
+    "src/tabs/root.proto.ts",
+    "src/tabs/trigger.proto.ts",
+    "src/tabs/types.ts",
+    "src/tabs/visual.ts",
+    "src/textarea/index.ts",
+    "src/textarea/root.proto.ts",
+    "src/textarea/types.ts",
+    "src/textarea/visual.ts",
+    "src/toggle-group/index.ts",
+    "src/toggle-group/item.proto.ts",
+    "src/toggle-group/root.proto.ts",
+    "src/toggle-group/types.ts",
+    "src/toggle-group/visual.ts",
+    "src/toggle/index.ts",
+    "src/toggle/profiles.ts",
+    "src/toggle/toggle.proto.ts",
+    "src/toggle/types.ts",
+    "src/toolbar/action-visual.ts"
   ],
   "scripts": {
     "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/prototypes-shadcn",

@@ -16,7 +16,7 @@ criteria:
       en: Detached views suspend projection while retaining logical declarations for repeatable mount. Capability host changes resolve the same self declaration to the current host, and replacing a host bridge withdraws its old claims before new projection. Terminal disposal clears declarations and rejects new self leases; old disposers cannot resurrect them. Physical target replacement does not promise identity of the replaced host or restoration of a retired host's focus.
   - id: C-HIT-SELF-REGION-0001-BOUNDARIES
     text:
-      en: Existing static inset geometry, clipping, positioned non-replaced root, pseudo ownership and native feature restrictions remain unchanged. Style choices and inset distances belong to prototypes, never adapter component dispatch. Compiler source profiles reject the new operation until separately admitted; this runtime carrier is not a compiler or native hit-area acceptance claim.
+      en: Existing static inset geometry, clipping, positioned non-replaced root, pseudo ownership and native feature restrictions remain unchanged. Style choices and inset distances belong to prototypes, never adapter component dispatch. Compiler Web source profiles separately admit owner-relative role, mode and metadata leases with view and terminal cleanup; staticHitInset remains rejected before emission. This bounded mode projection is not a compiler hit-inset or non-Web native acceptance claim.
 dependsOn:
   contracts: [C-HIT-PARTICIPATION-0001]
 verifies:

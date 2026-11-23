@@ -1,6 +1,13 @@
 import { callableEffectIssue } from './callable-effects';
 import { RULE_META_TYPES } from './rule-declarations';
-import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
+import {
+  FlowProof,
+  callSiteKey,
+  deriveReadonlyCallSites,
+  functionCanMutateFlow,
+  writtenMemberFields,
+  type FlowMark,
+} from './flow-proof';
 import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { inferInputPayloadSchemas } from './a11y-event-types';
@@ -43,7 +50,6 @@ import {
   captureStateHandlesType,
   capabilityBinaryType,
   stateValue,
-  stateDeclarationData,
   finiteStringKeys,
   type ArgumentRule,
   type CallbackContext,
@@ -77,11 +83,19 @@ import {
   callableValue,
   checkedCall,
   minimumArgumentCount,
+  parameterArgumentType,
   intrinsicResult,
+  arrayElementType,
+  iterableElementType,
+  ordinaryArrayType,
+  serializableDataType,
+  canCheckPropertyPresence,
+  indexedValueType,
   parameterValueType,
   canNarrowValue,
   valueAlternatives,
 } from './value-types';
+import { inferStateData, deriveModuleStateInputs } from './state-data-provenance';
 import { derivePrototypeCaptures } from './capture-analysis';
 import { captureFacadeFields, checkedSpreadFields, mergeSpreadField } from './capture-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
@@ -117,6 +131,8 @@ const CAPABILITIES = new Set([
   'lexical:number',
   'lexical:string',
   'exception',
+  'regexp',
+  'intl-number-format',
   ...MODULE_CAPABILITY_TYPES,
 ]);
 CAPABILITIES.add('authored-result');
@@ -163,7 +179,8 @@ function object(value: unknown, allowed?: readonly string[]): Record<string, unk
   )
     bad('IR requires plain data records.');
   for (const key of Reflect.ownKeys(value)) {
-    if (typeof key !== 'string' || (allowed && !allowed.includes(key))) bad('Unknown IR field.');
+    if (typeof key !== 'string' || (allowed && !allowed.includes(key)))
+      bad(`Unknown IR field ${String(key)}.`);
     const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
     if (!('value' in descriptor) || !descriptor.enumerable)
       bad('IR accessors/non-data fields are forbidden.');
@@ -343,6 +360,38 @@ function valueType(value: unknown, location = FALLBACK): ValueType {
       object(type, ['kind', 'value']);
       return { kind: 'cell', value: valueType(type.value, location) };
     }
+    if (type.kind === 'map') {
+      object(type, ['kind', 'key', 'value', 'readonly']);
+      if (type.readonly !== undefined && typeof type.readonly !== 'boolean')
+        bad('Invalid map readonly flag.', location);
+      return {
+        kind: 'map',
+        key: valueType(type.key, location),
+        value: valueType(type.value, location),
+        ...(type.readonly ? { readonly: true } : {}),
+      };
+    }
+    if (type.kind === 'value-array' || type.kind === 'set') {
+      object(
+        type,
+        type.kind === 'set'
+          ? ['kind', 'element', 'readonly']
+          : ['kind', 'element', 'readonly', 'minimumLength']
+      );
+      if (type.readonly !== undefined && typeof type.readonly !== 'boolean')
+        bad('Invalid array readonly flag.', location);
+      if (
+        type.minimumLength !== undefined &&
+        (!Number.isSafeInteger(type.minimumLength) || Number(type.minimumLength) < 0)
+      )
+        bad('Invalid array length proof.', location);
+      return {
+        kind: type.kind,
+        element: valueType(type.element, location),
+        ...(type.readonly ? { readonly: true } : {}),
+        ...(type.minimumLength === undefined ? {} : { minimumLength: Number(type.minimumLength) }),
+      } as ValueType;
+    }
     if (type.kind === 'value-union') {
       object(type, ['kind', 'members']);
       return joinValueTypes(array(type.members).map((member) => valueType(member, location)));
@@ -383,17 +432,27 @@ function valueType(value: unknown, location = FALLBACK): ValueType {
       object(type, ['kind', 'parameters', 'returnType', 'lookup']);
       const result: Extract<ValueType, { kind: 'callable' }> = {
         kind: 'callable',
-        parameters: array(type.parameters).map((item) => {
-          const parameter = object(item, ['name', 'type', 'optional']);
+        parameters: array(type.parameters).map((item, index, parameters) => {
+          const parameter = object(item, ['name', 'type', 'optional', 'rest']);
           if (
             !validIdentifier(parameter.name) ||
-            (parameter.optional !== undefined && typeof parameter.optional !== 'boolean')
+            (parameter.optional !== undefined && typeof parameter.optional !== 'boolean') ||
+            (parameter.rest !== undefined && typeof parameter.rest !== 'boolean')
           )
             bad('Invalid callable parameter.', location);
+          const parsed = valueType(parameter.type, location);
+          if (
+            parameter.rest &&
+            (index !== parameters.length - 1 ||
+              parameter.optional ||
+              arrayElementType(parsed) === undefined)
+          )
+            bad('Rest parameters require a final array-valued slot.', location);
           return {
             name: parameter.name,
-            type: valueType(parameter.type, location),
+            type: parsed,
             ...(parameter.optional ? { optional: true } : {}),
+            ...(parameter.rest ? { rest: true } : {}),
           };
         }),
         returnType: valueType(type.returnType, location),
@@ -490,6 +549,7 @@ const EXPRESSION_FIELDS = [
   'inputPayloadType',
   'receiver',
   'arguments',
+  'spread',
   'hookId',
   'keyId',
   'declarationId',
@@ -497,6 +557,8 @@ const EXPRESSION_FIELDS = [
   'handle',
   'declaration',
   'states',
+  'styles',
+  'targets',
   'cell',
   'delta',
   'prefix',
@@ -556,26 +618,29 @@ const EXPRESSION_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   'context-key': ['keyId'],
   'static-capability': ['declarationId'],
   'style-handle': ['handle'],
-  rule: ['declaration', 'receiver', 'states'],
+  rule: ['declaration', 'receiver', 'states', 'styles', 'targets'],
   member: ['object', 'property', 'optional'],
   'member-write': ['object', 'property', 'value'],
   element: ['object', 'index', 'optional'],
   conditional: ['condition', 'then', 'otherwise'],
-  call: ['callee', 'arguments', 'optional'],
-  intrinsic: ['name', 'arguments'],
+  call: ['callee', 'arguments', 'optional', 'spread'],
+  intrinsic: ['name', 'arguments', 'optional'],
+  'array-spread': ['parts'],
   'object-spread': ['parts'],
   unary: ['operator', 'operand'],
   binary: ['operator', 'left', 'right'],
   array: ['elements'],
   record: ['entries'],
   function: ['function'],
-  'helper-call': ['name', 'arguments'],
+  'helper-call': ['name', 'arguments', 'spread'],
   'authored-hook': ['hookId', 'arguments'],
   operation: ['operation', 'receiver', 'optional', 'inputPayloadType', 'arguments'],
 };
 const STATEMENT_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
   const: ['name', 'bindingId', 'value', 'declarationPosition'],
   effect: ['expression'],
+  while: ['condition', 'body'],
+  'for-of': ['name', 'bindingId', 'iterable', 'body'],
   if: ['condition', 'then', 'otherwise'],
   throw: ['value'],
   try: ['body', 'catch', 'finally'],
@@ -595,6 +660,7 @@ interface Parameter {
   name: string;
   type: ValueType;
   optional?: boolean;
+  rest?: boolean;
   bindingId?: string;
   stateData?: DataType;
   default?: ExpressionIR;
@@ -606,6 +672,7 @@ interface Binding {
   uninitializedParameter?: boolean;
   uninitializedLexical?: boolean;
   type: ValueType;
+  value?: ExpressionIR;
   origin: object;
   helper?: FunctionIR;
   helperOrigin?: object;
@@ -618,6 +685,15 @@ interface Binding {
   flowAt?: FlowMark;
 }
 type Scope = Map<string, Binding>;
+
+function stateData(value: ExpressionIR, scope: Scope): DataType | undefined {
+  return inferStateData(value, (reference) => {
+    const binding = [...scope].find(([name, binding]) =>
+      reference.bindingId ? binding.bindingId === reference.bindingId : name === reference.name
+    )?.[1];
+    return binding && { value: binding.value, stateData: binding.stateData };
+  });
+}
 
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
@@ -645,6 +721,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     // of helper/hook typechecks. The derivation never trusts claimed schemas.
     const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR, span);
     const writtenFields = writtenMemberFields(input);
+    // This is derived from executable closure/store provenance, never trusted
+    // serialized purity metadata. Every body/type is still checked below.
+    let readonlyCallSites: ReadonlySet<string> = new Set();
     let flow = new FlowProof(writtenFields);
 
     const replacements = new Map<object, Record<string, unknown>>();
@@ -735,6 +814,53 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           });
       }
     }
+    /** Every branch has already expired observations under its own clock. */
+    function joinFlowScopes(scope: Scope, branches: readonly Scope[]): void {
+      normalizeFlow(scope);
+      for (const [name, binding] of scope) {
+        const stored = lexicalStoredType(binding.type);
+        if (!stored) continue;
+        const types = branches.map((branch) => {
+          const next = branch.get(name);
+          const same =
+            next &&
+            (binding.bindingId !== undefined
+              ? next.bindingId === binding.bindingId
+              : next.origin === binding.origin);
+          return same ? (next.narrowed ?? stored) : (binding.narrowed ?? stored);
+        });
+        scope.set(name, {
+          ...binding,
+          narrowed: joinValueTypes(types),
+          flowAt: flow.mark(binding.bindingId ?? name),
+        });
+      }
+    }
+    function conditionalRight(
+      value: unknown,
+      scope: Scope,
+      phase: Phase,
+      context: FunctionContext,
+      left: ExpressionIR,
+      operator: string
+    ): ValueType {
+      const incoming = flow;
+      const skipped =
+        operator === '&&' || operator === '||'
+          ? refinedScope(scope, canonicalCopy(left), operator === '||')
+          : new Map(scope);
+      normalizeFlow(skipped);
+      flow = incoming.fork();
+      const rightScope =
+        operator === '&&' || operator === '||'
+          ? refinedScope(scope, canonicalCopy(left), operator === '&&')
+          : new Map(scope);
+      const right = expression(value, rightScope, phase, context);
+      normalizeFlow(rightScope);
+      flow = incoming.join([incoming, flow]);
+      joinFlowScopes(scope, [skipped, rightScope]);
+      return right;
+    }
     function invalidateFlow(scope: Scope, cells: boolean, allFields = false): void {
       if (cells) flow.call();
       else flow.writeHeap();
@@ -788,6 +914,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       return output as T;
     }
+    readonlyCallSites = deriveReadonlyCallSites(input as PrototypeIR);
+    const stateInputs = deriveModuleStateInputs(input as PrototypeIR);
     text(root.name);
     const source = object(root.source, ['file', 'exportName', 'sha256']);
     const entry = safeFile(source.file);
@@ -915,6 +1043,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             'Image View requires source/alternativeText strings, informative or decorative a11yMode, and contain/cover/fill fit.',
             location
           );
+      } else if (id === '@proto.ui/native-link/declaration') {
+        if (Object.keys(config).length !== 1 || config.navigation !== 'native')
+          bad('Native Link requires its fixed native navigation declaration.', location);
       } else bad('Unknown Module declaration.', location);
       moduleDeclarations.set(id, declaration as unknown as ModuleDeclarationIR);
     }
@@ -1001,25 +1132,42 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     function parameters(value: unknown, declaration = true): Parameter[] {
       const names = new Set<string>();
       let optionalSeen = false;
-      return array(value).map((item) => {
-        const param = object(item, ['name', 'type', 'optional', 'bindingId', 'default']);
+      return array(value).map((item, index, parameters) => {
+        const param = object(item, ['name', 'type', 'optional', 'rest', 'bindingId', 'default']);
         if (
           !validIdentifier(param.name) ||
           names.has(param.name) ||
-          (param.optional !== undefined && typeof param.optional !== 'boolean')
+          (param.optional !== undefined && typeof param.optional !== 'boolean') ||
+          (param.rest !== undefined && typeof param.rest !== 'boolean')
         )
           bad('Invalid function parameter.');
         // Expose signatures project defaults to optional slots without carrying
         // initializer expressions. Only declarations obey source optional order.
-        if (declaration && optionalSeen && param.optional !== true && param.default === undefined)
+        if (
+          declaration &&
+          optionalSeen &&
+          param.optional !== true &&
+          !param.rest &&
+          param.default === undefined
+        )
           bad('Required parameter follows an optional parameter.');
         optionalSeen ||= param.optional === true && param.default === undefined;
         names.add(param.name);
+        const parsed = valueType(param.type);
+        if (
+          param.rest &&
+          (index !== parameters.length - 1 ||
+            param.optional ||
+            param.default ||
+            arrayElementType(parsed) === undefined)
+        )
+          bad('Rest parameters require a final array-valued slot.');
         return {
           name: param.name,
-          type: valueType(param.type),
+          type: parsed,
           origin: param,
           ...(param.optional === true ? { optional: true } : {}),
+          ...(param.rest === true ? { rest: true } : {}),
           ...(param.bindingId !== undefined ? { bindingId: text(param.bindingId) } : {}),
           ...(param.default !== undefined ? { default: param.default as ExpressionIR } : {}),
         };
@@ -1071,11 +1219,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         ])
       );
       invalidateFlow(scope, false);
-      for (const parameter of params)
+      for (const [index, parameter] of params.entries())
         scope.set(parameter.name, {
           type: parameterValueType(parameter),
           origin: parameter.origin,
           bindingId: parameter.bindingId,
+          stateData: stateInputs.get(func as unknown as FunctionIR)?.[index],
           uninitializedParameter: true,
         });
       const returns: ValueType[] = [],
@@ -1087,7 +1236,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       });
       let terminal: boolean;
       try {
-        for (const parameter of params) {
+        for (const [index, parameter] of params.entries()) {
           if (
             parameter.default !== undefined &&
             !assignable(expression(parameter.default, scope, phase, context, true), parameter.type)
@@ -1096,6 +1245,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           scope.set(parameter.name, {
             type: parameterValueType(parameter),
             origin: parameter.origin,
+            stateData: stateInputs.get(func as unknown as FunctionIR)?.[index],
             ...(parameter.bindingId ? { bindingId: parameter.bindingId } : {}),
           });
         }
@@ -1267,14 +1417,18 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (typeof recorded !== 'string' && recorded.kind === 'cell') {
               if (
                 !assignable(initial, recorded.value) &&
-                !assignable(argumentData(node.value as ExpressionIR) ?? initial, recorded.value)
+                !assignable(argumentValue(node.value as ExpressionIR), recorded.value)
               )
                 bad('Lexical initializer does not satisfy its storage type.', location);
               type = recorded;
             } else {
-              if (initial !== 'boolean' && initial !== 'number' && initial !== 'string')
+              const primitive =
+                typeof initial !== 'string' && initial.kind === 'literal' && initial.value !== null
+                  ? typeof initial.value
+                  : initial;
+              if (primitive !== 'boolean' && primitive !== 'number' && primitive !== 'string')
                 bad('Primitive lexical storage requires a scalar initializer.', location);
-              type = `lexical:${initial}`;
+              type = `lexical:${primitive}`;
             }
             break;
           }
@@ -1295,14 +1449,16 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             );
             const scalar = lexicalStoredType(storage);
             if (!scalar) bad('Lexical access cannot mutate a value or semantic handle.', location);
+            let assigned: ValueType | undefined;
             if (node.kind === 'lexical-write') {
               const value = expression(node.value, scope, phase, context);
               if (!assignable(value, scalar)) bad('Lexical write type mismatch.', location);
+              assigned = value;
               const binding = readBinding(String(target.name), scope)!;
               flow.writeCell(binding.bindingId ?? String(target.name));
               scope.set(String(target.name), {
                 ...binding,
-                narrowed: undefined,
+                narrowed: value,
                 flowAt: flow.mark(binding.bindingId ?? String(target.name)),
               });
             } else if (node.kind === 'lexical-update') {
@@ -1321,7 +1477,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             type =
               node.kind === 'lexical-read'
                 ? (readBinding(String(target.name), scope)?.narrowed ?? scalar)
-                : scalar;
+                : (assigned ?? scalar);
             break;
           }
           case 'static-capability':
@@ -1374,6 +1530,37 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               )
                 bad('Rule dependency does not resolve to a declared source.', dependency.span);
             }
+            const styleIds = new Set<string>();
+            const targetIds = new Set<string>();
+            for (const item of node.targets === undefined ? [] : array(node.targets)) {
+              const target = object(item, ['id', 'value']),
+                id = text(target.id);
+              if (
+                !id ||
+                targetIds.has(id) ||
+                expression(target.value, scope, phase, context) !== 'decoration-target'
+              )
+                bad('Rule decoration target requires one checked owned target binding.', location);
+              targetIds.add(id);
+            }
+            for (const item of node.styles === undefined ? [] : array(node.styles)) {
+              const style = object(item, ['id', 'value']),
+                id = text(style.id);
+              if (
+                !id ||
+                styleIds.has(id) ||
+                expression(style.value, scope, phase, context) !== 'style-handle'
+              )
+                bad('Rule style reference requires one checked style-handle binding.', location);
+              styleIds.add(id);
+            }
+            for (const operation of declaration.intent.ops) {
+              if (operation.target && !targetIds.has(operation.target.id))
+                bad('Rule decoration target has no checked binding.', operation.span);
+              for (const handle of operation.handles)
+                if (handle.kind === 'reference' && !styleIds.has(handle.id))
+                  bad('Rule style operand has no checked binding.', operation.span);
+            }
             const check = (condition: RuleCondition): void => {
               if (condition.type === 'eq') {
                 const valueType =
@@ -1396,11 +1583,27 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const types = array(node.elements).map((item) =>
               expression(item, scope, phase, context)
             );
-            if (types.every(isDataValueType))
+            const recorded = valueType(node.type, location);
+            if (typeof recorded !== 'string' && recorded.kind === 'value-array')
+              type = ordinaryArrayType(joinValueTypes(types));
+            else if (types.every(isDataValueType))
               type = { kind: 'array', element: parseDataType({ kind: 'union', members: types }) };
             else if (types.every((type) => type === 'a11y-ref')) type = 'a11y-ref-list';
             else if (types.every(isTemplateChildType)) type = 'array';
-            else bad('Data arrays cannot contain semantic handles.', location);
+            else type = ordinaryArrayType(joinValueTypes(types));
+            break;
+          }
+          case 'array-spread': {
+            const elements = array(node.parts).map((part) => {
+              const entry = object(part, ['spread', 'value']);
+              if (typeof entry.spread !== 'boolean')
+                bad('Array spread flag must be Boolean.', location);
+              const value = expression(entry.value, scope, phase, context, true);
+              const element = entry.spread ? iterableElementType(value) : value;
+              if (element === undefined) bad('Array spread requires a checked iterable.', location);
+              return element;
+            });
+            type = ordinaryArrayType(joinValueTypes(elements));
             break;
           }
           case 'record': {
@@ -1484,12 +1687,26 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           }
           case 'binary': {
             const left = expression(node.left, scope, phase, context);
-            const rightScope =
-              node.operator === '&&' || node.operator === '||'
-                ? refinedScope(scope, node.left as ExpressionIR, node.operator === '&&')
-                : scope;
-            const right = expression(node.right, rightScope, phase, context);
+            const right = ['&&', '||', '??'].includes(String(node.operator))
+              ? conditionalRight(
+                  node.right,
+                  scope,
+                  phase,
+                  context,
+                  node.left as ExpressionIR,
+                  String(node.operator)
+                )
+              : expression(node.right, scope, phase, context);
             const capabilityType = capabilityBinaryType(String(node.operator), left, right);
+            if (node.operator === 'in') {
+              if (!assignable(left, 'string') || !canCheckPropertyPresence(right))
+                bad(
+                  'Property presence requires a checked string key and object representation.',
+                  location
+                );
+              type = 'boolean';
+              break;
+            }
             if (capabilityType) {
               type = capabilityType;
               break;
@@ -1547,6 +1764,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                     if (capability !== undefined) return capability;
                     if (member === 'props' && props.has(key)) return props.get(key)!;
                     if (member === 'exception') return 'exception';
+                    const event = eventPayloadMemberType(member, key);
+                    if (event !== undefined) return event;
                     return memberValueType(member, key, node.optional as boolean);
                   })
                 )
@@ -1601,31 +1820,34 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (hasAccessorField(owner)) invalidateFlow(scope, true, true);
             if (typeof node.optional !== 'boolean')
               bad('Element access optionality must be explicit.', location);
-            if (typeof owner !== 'string' && owner.kind === 'array' && index === 'number')
-              type = joinValueTypes([owner.element, 'void']);
-            else if (
-              typeof owner !== 'string' &&
-              owner.kind === 'object' &&
-              owner.index !== undefined &&
-              index === 'string'
-            )
-              type = joinValueTypes([owner.index, 'void']);
-            else if (objectFields(owner) && index === 'string')
-              // A finite field list does not close a structural record's runtime key set.
-              type = 'unknown';
-            else bad('Dynamic indexing requires an ordinary array or record.', location);
+            type = valueAction(location, () =>
+              indexedValueType(owner, index, node.optional as boolean)
+            );
             break;
           }
           case 'conditional': {
             expression(node.condition, scope, phase, context);
-            const branch = (truth: boolean): Scope => {
-              const result = new Map(scope);
-              return refinedScope(result, node.condition as ExpressionIR, truth);
-            };
-            type = joinValueTypes([
-              expression(node.then, branch(true), phase, context, true),
-              expression(node.otherwise, branch(false), phase, context, true),
-            ]);
+            const incoming = flow;
+            flow = incoming.fork();
+            const thenScope = refinedScope(
+              scope,
+              canonicalCopy(node.condition) as ExpressionIR,
+              true
+            );
+            const then = expression(node.then, thenScope, phase, context, true);
+            normalizeFlow(thenScope);
+            const thenFlow = flow;
+            flow = incoming.fork();
+            const elseScope = refinedScope(
+              scope,
+              canonicalCopy(node.condition) as ExpressionIR,
+              false
+            );
+            const otherwise = expression(node.otherwise, elseScope, phase, context, true);
+            normalizeFlow(elseScope);
+            flow = incoming.join([thenFlow, flow]);
+            joinFlowScopes(scope, [thenScope, elseScope]);
+            type = joinValueTypes([then, otherwise]);
             break;
           }
           case 'call': {
@@ -1652,7 +1874,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                         // for nested discriminants, never from a stale reference.
                         (argumentData((node.arguments as ExpressionIR[])[index]) ?? type)
                 ),
-                node.optional as boolean
+                node.optional as boolean,
+                node.spread === undefined ? [] : (array(node.spread) as boolean[])
               )
             );
             const calleeNode = object(node.callee, EXPRESSION_FIELDS);
@@ -1662,12 +1885,19 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 : undefined;
             if (helper && context !== 'helper') helperContext(helper, context, phase);
             if (
+              !readonlyCallSites.has(callSiteKey(location)) &&
               functionCanMutateFlow(
                 helper ??
                   (calleeNode.kind === 'function'
                     ? (calleeNode.function as FunctionIR)
                     : undefined),
-                node.arguments as ExpressionIR[]
+                node.arguments as ExpressionIR[],
+                (call) =>
+                  call.kind === 'helper-call'
+                    ? scope.get(call.name)?.helper
+                    : call.kind === 'call' && call.callee.kind === 'reference'
+                      ? scope.get(call.callee.name)?.helper
+                      : undefined
               )
             )
               invalidateFlow(scope, true);
@@ -1678,10 +1908,25 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               expression(argument, scope, phase, context, true)
             );
             type = valueAction(location, () =>
-              intrinsicResult(text(node.name), args, node.arguments as ExpressionIR[])
+              intrinsicResult(
+                text(node.name),
+                args,
+                node.arguments as ExpressionIR[],
+                valueType(node.type, location),
+                node.optional === true
+              )
             );
-            if (node.name === 'array.every') invalidateFlow(scope, true);
-            if (node.name === 'object.assign' || node.name === 'string')
+            if (
+              /^(array\.(every|some|filter|find|findIndex|map|flatMap|forEach|reduce|sort|push|shift|pop)|set\.(add|delete|clear))$/.test(
+                String(node.name)
+              )
+            )
+              invalidateFlow(scope, true);
+            if (
+              node.name === 'object.assign' ||
+              node.name === 'string' ||
+              node.name === 'console.warn'
+            )
               invalidateFlow(scope, true, true);
             break;
           }
@@ -1718,11 +1963,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 part.key === undefined &&
                 part.accessor === undefined
               ) {
-                const source = objectFields(value);
+                const source = checkedSpreadFields(value, captureFields);
                 if (!source) bad('Object spread requires a checked ordinary record.', location);
                 if (hasAccessorField(value)) invalidateFlow(scope, true, true);
                 for (const field of source)
-                  fields.set(field.name, spreadObjectField(fields.get(field.name), field));
+                  mergeSpreadField(fields, spreadObjectField(fields.get(field.name), field));
               } else bad('Invalid object spread part.', location);
             }
             type = objectValueType([...fields.values()]);
@@ -1750,27 +1995,46 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const args = array(node.arguments),
               signature = functionValueType(helper),
               required = minimumArgumentCount(signature.parameters);
-            if (args.length < required || args.length > helper.parameters.length)
+            if (
+              args.length < required ||
+              (!helper.parameters.at(-1)?.rest && args.length > helper.parameters.length)
+            )
               bad('Helper argument count mismatch.', location);
+            const spreads = node.spread === undefined ? [] : (array(node.spread) as boolean[]);
+            const actualArguments: ValueType[] = [];
             args.forEach((argument, index) => {
               // Validate the entire expression and its declared type before
               // using literal contents as evidence for the helper parameter.
               const actual = expression(argument, scope, phase, context);
-              const expected = helper.parameters[index].type;
+              const parameter = helper.parameters[index] ?? helper.parameters.at(-1)!;
+              const expected = parameter.rest
+                ? arrayElementType(parameter.type)!
+                : parameterArgumentType(parameter);
               const supplied: ValueType =
                 actual === 'props'
                   ? { kind: 'record', fields: [...props].map(([name, type]) => ({ name, type })) }
-                  : (argumentData(argument as ExpressionIR) ?? actual);
+                  : argumentValue(argument as ExpressionIR);
+              actualArguments.push(assignable(actual, expected) ? actual : supplied);
               if (
-                !(actual === 'void' && signature.parameters[index].optional) &&
+                !spreads[index] &&
+                !(actual === 'void' && parameter.optional) &&
                 !assignable(actual, expected) &&
                 !assignable(supplied, expected)
               )
                 bad('Helper argument type mismatch.', location);
             });
+            valueAction(location, () => checkedCall(signature, actualArguments, false, spreads));
             if (context !== 'helper') helperContext(helper, context, phase);
             type = helper.returnType;
-            if (functionCanMutateFlow(helper, node.arguments as ExpressionIR[]))
+            if (
+              functionCanMutateFlow(helper, node.arguments as ExpressionIR[], (call) =>
+                call.kind === 'helper-call'
+                  ? scope.get(call.name)?.helper
+                  : call.kind === 'call' && call.callee.kind === 'reference'
+                    ? scope.get(call.callee.name)?.helper
+                    : undefined
+              )
+            )
               invalidateFlow(scope, true);
             break;
           }
@@ -1816,13 +2080,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (node.optional !== undefined && typeof node.optional !== 'boolean')
               bad('Optional operation flag must be boolean.', location);
             const receiverWasNullish = receiver !== undefined && node.optional === true;
-            if (
-              receiverWasNullish &&
-              typeof receiver !== 'string' &&
-              receiver?.kind === 'value-union'
-            )
+            if (receiverWasNullish && receiver !== undefined)
               receiver = joinValueTypes(
-                receiver.members.filter((type) => type !== 'null' && type !== 'void')
+                valueAlternatives(receiver)
+                  .filter((type) => type !== 'null' && type !== 'void')
+                  .map((type) =>
+                    typeof type === 'string' && /^(nullable|optional):/.test(type)
+                      ? (type.slice(type.indexOf(':') + 1) as ValueType)
+                      : type
+                  )
               );
             const captureReceiver =
               receiver && typeof receiver !== 'string' && receiver.kind === 'capture'
@@ -1836,12 +2102,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 ),
                 propNames: new Set(props.keys()),
                 stateValueType: stateValue(receiver),
-                stateDataType:
-                  (node.receiver as ExpressionIR | undefined)?.kind === 'reference'
-                    ? scope.get(
-                        (node.receiver as Extract<ExpressionIR, { kind: 'reference' }>).name
-                      )?.stateData
-                    : undefined,
+                stateDataType: node.receiver
+                  ? stateData(node.receiver as ExpressionIR, scope)
+                  : undefined,
                 ...(phase === 'callback' ? { callbackContext: context as CallbackContext } : {}),
               };
             let eventPayloadTypes: DataType[] | undefined;
@@ -2032,6 +2295,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         if (scope.has(declaration.name)) continue;
         scope.set(declaration.name, {
           type: valueType(initializer.type),
+          value: initializer as unknown as ExpressionIR,
           origin: declaration,
           moduleBinding: scope === moduleScope,
           uninitializedLexical: true,
@@ -2061,6 +2325,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             'finally',
             'bindingId',
             'declarationPosition',
+            'iterable',
           ]),
           location = span(node.span);
         exactKindFields(node, STATEMENT_KIND_FIELDS, ['kind', 'span']);
@@ -2090,10 +2355,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               scope.set(node.name, {
                 ...alias,
                 type,
+                value: val as unknown as ExpressionIR,
                 origin: alias?.origin ?? node,
                 moduleBinding: scope === moduleScope,
                 uninitializedLexical: false,
-                stateData: stateDeclarationData(val as unknown as ExpressionIR) ?? alias?.stateData,
+                ...(val.kind === 'lexical-cell' &&
+                (val.value as { kind?: string })?.kind === 'undefined'
+                  ? { narrowed: 'void' as const }
+                  : {}),
+                stateData: stateData(val as unknown as ExpressionIR, scope) ?? alias?.stateData,
                 predicate:
                   (val.kind === 'binary' || val.kind === 'unary') &&
                   stablePredicate(val as unknown as ExpressionIR)
@@ -2109,39 +2379,87 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             case 'effect':
               expression(node.expression, scope, phase, context);
               break;
+            case 'while': {
+              invalidateFlow(scope, true);
+              expression(node.condition, scope, phase, context);
+              const bodyScope = refinedScope(
+                new Map(scope),
+                canonicalCopy(node.condition) as ExpressionIR,
+                true
+              );
+              statements(node.body, bodyScope, phase, context, reachableReturns);
+              invalidateFlow(scope, true);
+              break;
+            }
+            case 'for-of': {
+              if (!validIdentifier(node.name)) bad('Invalid iteration binding.', location);
+              const type = iterableElementType(expression(node.iterable, scope, phase, context));
+              if (type === undefined) bad('Iteration requires a checked iterable.', location);
+              const bodyScope = new Map(scope);
+              bodyScope.set(node.name, {
+                type,
+                origin: node,
+                ...(node.bindingId === undefined ? {} : { bindingId: text(node.bindingId) }),
+              });
+              statements(node.body, bodyScope, phase, context, reachableReturns);
+              invalidateFlow(scope, true);
+              break;
+            }
             case 'if': {
               expression(node.condition, scope, phase, context);
-              const branch = (truth: boolean): Scope => {
-                const next = new Map(scope);
-                return refinedScope(next, canonicalCopy(node.condition) as ExpressionIR, truth);
-              };
-              const thenScope = branch(true),
-                elseScope = branch(false);
-              const beforeBranch = flow.snapshot();
+              const incoming = flow;
+              flow = incoming.fork();
+              const thenScope = refinedScope(
+                scope,
+                canonicalCopy(node.condition) as ExpressionIR,
+                true
+              );
               const a = statements(node.then, thenScope, phase, context, reachableReturns);
               normalizeFlow(thenScope);
-              const afterThen = flow.snapshot();
-              flow.restore(beforeBranch);
+              const thenFlow = flow;
+              flow = incoming.fork();
+              const elseScope = refinedScope(
+                scope,
+                canonicalCopy(node.condition) as ExpressionIR,
+                false
+              );
               const b = statements(node.otherwise, elseScope, phase, context, reachableReturns);
               normalizeFlow(elseScope);
-              const afterElse = flow.snapshot();
-              const continuing = a ? elseScope : b ? thenScope : undefined;
-              if (continuing) flow.restore(continuing === thenScope ? afterThen : afterElse);
-              else flow.join(beforeBranch, afterThen, afterElse);
-              if (continuing)
-                for (const name of scope.keys()) scope.set(name, continuing.get(name)!);
-              else
+              const elseFlow = flow;
+              const paths = [
+                ...(!a ? [{ scope: thenScope, flow: thenFlow }] : []),
+                ...(!b ? [{ scope: elseScope, flow: elseFlow }] : []),
+              ];
+              if (paths.length === 1) {
+                const continuing = paths[0].scope;
+                flow = paths[0].flow;
                 for (const [name, binding] of scope) {
-                  const stored = lexicalStoredType(binding.type);
-                  if (stored)
+                  const next = continuing.get(name)!;
+                  if (
+                    binding.bindingId !== undefined
+                      ? next.bindingId === binding.bindingId
+                      : next.origin === binding.origin
+                  )
                     scope.set(name, {
-                      ...binding,
-                      narrowed: joinValueTypes([
-                        thenScope.get(name)?.narrowed ?? stored,
-                        elseScope.get(name)?.narrowed ?? stored,
-                      ]),
+                      ...next,
+                      ...(lexicalStoredType(next.type)
+                        ? { flowAt: flow.mark(next.bindingId ?? name) }
+                        : {}),
                     });
                 }
+              } else {
+                const joined = paths.length
+                  ? paths
+                  : [
+                      { scope: thenScope, flow: thenFlow },
+                      { scope: elseScope, flow: elseFlow },
+                    ];
+                flow = incoming.join(joined.map((path) => path.flow));
+                joinFlowScopes(
+                  scope,
+                  joined.map((path) => path.scope)
+                );
+              }
               terminal ||= a && b;
               break;
             }
@@ -2155,7 +2473,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               break;
             case 'throw': {
               const type = expression(node.value, scope, phase, context);
-              if (!isDataValueType(type) && type !== 'exception')
+              if (serializableDataType(type) === undefined && type !== 'exception')
                 bad('Thrown values must be admitted data or a caught exception.', location);
               terminal = true;
               break;
@@ -2164,18 +2482,14 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               if (node.catch === undefined && node.finally === undefined)
                 bad('Try requires catch or finally.', location);
               const branchReturns: ValueType[] = [];
-              const bodyTerminal = statements(
-                node.body,
-                new Map(scope),
-                phase,
-                context,
-                branchReturns
-              );
+              const bodyScope = new Map(scope);
+              const bodyTerminal = statements(node.body, bodyScope, phase, context, branchReturns);
               invalidateFlow(scope, true);
               let catchTerminal = true;
+              let catchScope: Scope | undefined;
               if (node.catch !== undefined) {
                 const caught = object(node.catch, ['name', 'body']);
-                const catchScope = new Map(scope);
+                catchScope = new Map(scope);
                 if (caught.name !== undefined) {
                   if (!validIdentifier(caught.name) || catchScope.has(caught.name))
                     bad('Invalid/rebound catch binding.', location);
@@ -2192,6 +2506,20 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               reachableReturns.push(...finalReturns);
               terminal ||= finalTerminal || (bodyTerminal && catchTerminal);
               invalidateFlow(scope, true);
+              if (node.finally === undefined)
+                for (const [name, binding] of scope) {
+                  const stored = lexicalStoredType(binding.type);
+                  if (!stored) continue;
+                  const continuing: ValueType[] = [];
+                  if (!bodyTerminal) continuing.push(bodyScope.get(name)?.narrowed ?? stored);
+                  if (!catchTerminal) continuing.push(catchScope?.get(name)?.narrowed ?? stored);
+                  if (continuing.length)
+                    scope.set(name, {
+                      ...binding,
+                      narrowed: joinValueTypes(continuing),
+                      flowAt: flow.mark(binding.bindingId ?? name),
+                    });
+                }
               break;
             }
             default:
@@ -2256,7 +2584,6 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         if (initializer.kind !== 'lexical-cell' && callableAlias(binding)) continue;
         if (
           initializer.kind !== 'lexical-cell' &&
-          (scalar.kind === 'array' || scalar.kind === 'record') &&
           (staticDataExpression(scalar, moduleNames) ||
             staticGetterRecordExpression(scalar, moduleNames)) &&
           readonlyModuleData(valueType(initializer.type, span(binding.span)))
@@ -2389,12 +2716,36 @@ function staticDataExpression(
   let node = expression;
   while (node.kind === 'narrow') node = node.value as Record<string, unknown>;
   if (node.kind === 'literal') return true;
+  if (
+    node.kind === 'style-handle' ||
+    node.kind === 'context-key' ||
+    node.kind === 'static-capability'
+  )
+    return true;
+  if (
+    node.kind === 'intrinsic' &&
+    (node.name === 'object.freeze' || node.name === 'set.create') &&
+    Array.isArray(node.arguments) &&
+    node.arguments.length <= 1
+  )
+    return node.arguments.every((argument) =>
+      staticDataExpression(argument as Record<string, unknown>, moduleNames)
+    );
   if (node.kind === 'unary')
     return (
       (node.operator === '+' || node.operator === '-') &&
       (node.operand as { kind?: unknown })?.kind === 'literal'
     );
   if (node.kind === 'reference') return typeof node.name === 'string' && moduleNames.has(node.name);
+  if (node.kind === 'lexical-read') {
+    const cell = node.cell as ExpressionIR;
+    const stored = cell && lexicalStoredType(cell.type);
+    return (
+      cell?.kind === 'reference' &&
+      moduleNames.has(cell.name) &&
+      (stored === 'boolean' || stored === 'number' || stored === 'string')
+    );
+  }
   if (node.kind === 'array')
     return (
       Array.isArray(node.elements) &&
@@ -2434,20 +2785,29 @@ function staticGetterRecordExpression(
   );
 }
 
-/** Shared module data must be a read-only view at every depth. */
+/** Shared finite data retains authored mutability; nominal composites are read-only. */
 function readonlyModuleData(type: ValueType): boolean {
-  if (typeof type === 'string') return isDataValueType(type);
-  if (type.kind === 'literal') return true;
+  if (serializableDataType(type) !== undefined) return true;
+  if (typeof type === 'string')
+    return (
+      isDataValueType(type) ||
+      [
+        'style-handle',
+        'context-key',
+        'anatomy-family',
+        'focus-scope-key',
+        'focus-roving-key',
+        'a11y-ref',
+      ].includes(type)
+    );
+  if (type.kind === 'set') return type.readonly === true && isDataValueType(type.element);
+  if (type.kind === 'value-array')
+    return type.readonly === true && readonlyModuleData(type.element);
   if (type.kind === 'object')
     return (
       type.index === undefined &&
       type.fields.every((field) => field.readonly === true && readonlyModuleData(field.type))
     );
-  if (type.kind === 'array')
-    return valueAlternatives(type.element).every(
-      (member) => typeof member === 'string' || member.kind === 'literal'
-    );
-  if (type.kind === 'union')
-    return type.members.every((member) => typeof member === 'string' || member.kind === 'literal');
+  if (type.kind === 'value-union') return type.members.every(readonlyModuleData);
   return false;
 }

@@ -22,13 +22,16 @@ function length(value: unknown): AvailableLayoutLength | null {
   const unit = record.unit;
   const coefficient = record.value;
   if (
-    !['logical', 'root-text', 'available', 'available-minus-root-text'].includes(unit as string) ||
+    (unit !== 'logical' &&
+      unit !== 'root-text' &&
+      unit !== 'available' &&
+      unit !== 'available-minus-root-text') ||
     !finite(coefficient) ||
     coefficient < 0 ||
     (unit === 'available' && coefficient > 1)
   )
     return null;
-  return { unit: unit as AvailableLayoutLength['unit'], value: coefficient };
+  return { unit, value: coefficient };
 }
 /** Pure draft model; live consumer admission and host geometry are verified separately. */
 export function drawerExtentModel(
@@ -38,9 +41,13 @@ export function drawerExtentModel(
   const { snapPoints: input, side, minExtent, maxExtent, snapPoint, defaultSnapPoint } = raw;
   if (!absent(input) && !Array.isArray(input)) return { status: 'invalid', reason: 'snap-points' };
   const snapshot = Array.isArray(input) ? Array.from(input) : [];
-  if (snapshot.some((point) => !finite(point) || point <= 0 || point > 1))
-    return { status: 'invalid', reason: 'snap-points' };
-  const points = [...new Set(snapshot as number[])].sort((a, b) => a - b);
+  const unique = new Set<number>();
+  for (const point of snapshot) {
+    if (!finite(point) || point <= 0 || point > 1)
+      return { status: 'invalid', reason: 'snap-points' };
+    unique.add(point);
+  }
+  const points = [...unique].sort((a, b) => a - b);
   const horizontal = side === 'left' || side === 'right';
   const mode = horizontal || points.length > 0 ? 'fraction' : 'intrinsic';
   if (horizontal && points.length === 0) points.push(1);

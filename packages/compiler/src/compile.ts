@@ -14,7 +14,7 @@ import {
   type OutputArtifact,
 } from './artifact-output';
 import { diagnosticInputOrigin, sourceName } from './source-resolution';
-import { FileSourceGraph, type FileSourceSnapshot } from './source-loader';
+import { FileSourceGraph, type FileSourceSnapshot, type SourceRootIdentity } from './source-loader';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { generatedSourcePath } from './emitter-map';
 import type { CompileResult, SourceSpan } from './ir';
@@ -22,8 +22,11 @@ import type { CompileResult, SourceSpan } from './ir';
 export type { ExclusiveOutputFile } from './artifact-output';
 export interface FileCompileOptions {
   root?: string;
+  /** Stable logical identities for canonical external source roots; physical paths remain audited. */
+  sourceRootIdentities?: readonly SourceRootIdentity[];
   exportName?: string;
   componentName?: string;
+  rootTag?: string;
   profile?: string | TargetSelection;
   nativeSdkPath?: string;
   gpuiDependency?: 'workspace';
@@ -42,7 +45,7 @@ export async function compileFile(
     if (!snapshot) {
       if (!path.isAbsolute(entry)) origin = diagnosticInputOrigin(entry);
       const root = await realpath(options.root ?? process.cwd());
-      const graph = new FileSourceGraph(root);
+      const graph = new FileSourceGraph(root, undefined, options.sourceRootIdentities);
       const requested = path.isAbsolute(entry) ? entry : path.resolve(root, entry);
       origin = diagnosticInputOrigin(path.relative(root, requested).split(path.sep).join('/'));
       const loaded = await graph.load(await graph.entry(requested));
@@ -75,6 +78,7 @@ export async function compileFile(
       sourceImports: snapshot.sourceImports,
       exportName: options.exportName,
       componentName: options.componentName,
+      rootTag: options.rootTag,
       profile: options.profile,
       nativeSdkPath: options.nativeSdkPath,
       gpuiDependency: options.gpuiDependency,

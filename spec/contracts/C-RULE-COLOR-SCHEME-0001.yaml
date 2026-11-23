@@ -65,6 +65,8 @@ criteria:
     text:
       en: Reconciliation targets the current Feedback/Effects binding rather than retaining a DOM surface. Initial mount, retained-owner remount and supported physical surface replacement must project the current recipe through existing Adapter presentation and reveal barriers without writing the retired view. Framework StrictMode/KeepAlive and WC reconnect use their existing owner/view lifetimes.
       zh-CN: reconciliation 使用当前 Feedback/Effects binding，不保留 DOM surface。首 mount、retained-owner remount 和受支持的物理 surface replacement 须经既有 Adapter presentation/reveal barrier 投射当前配方，不写旧 view。框架 StrictMode/KeepAlive 和 WC reconnect 沿用既有 owner/view 生命周期。
+  - id: C-RULE-COLOR-SCHEME-0001-COMPILER
+    text: The bounded React DOM source profile lowers checked colorScheme Rules to direct predicates over the default-web reader and mounted source. It retains the same-document light-DOM domain, root-marker precedence, effective-change coalescing, one lease per owner, last-lease cleanup and fresh remount. Notifications only refresh the existing generated style projection. No Proto Runtime, serialized Rule evaluator, custom reader, SSR or other source-profile equivalence is introduced.
 dependsOn:
   contracts:
     - C-RULE-RUNTIME-0001
@@ -98,7 +100,11 @@ sources:
   - path: packages/modules/rule-meta/src/create.ts
   - path: packages/adapters/base/src/platform/web-color-scheme-source.ts
   - path: packages/adapters/base/src/platform/web-preferences.ts
+  - path: packages/compiler/src/native-rule-meta.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Adds a direct React DOM source implementation of the bounded default-document lease without lifecycle promotion or broader host equivalence.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged the accepted default document colorScheme invalidation boundary without generic Meta admission.

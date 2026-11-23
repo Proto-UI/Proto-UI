@@ -1555,12 +1555,8 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
       expect(result.ok).toBe(false);
       if (!result.ok)
         expect(
-          result.diagnostics.some((item) =>
-            item.message.includes(
-              kind === 'array'
-                ? 'Data arrays cannot contain semantic handles'
-                : 'IR expression type mismatch.'
-            )
+          result.diagnostics.some(
+            (item) => item.code === 'PUI2002' && item.message === 'IR expression type mismatch.'
           )
         ).toBe(true);
     }
@@ -1622,7 +1618,10 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     visit(source);
     expect(declarations.length).toBe(2);
     for (const declaration of declarations) {
-      const fn = declaration.initializer;
+      let fn = declaration.initializer;
+      // The shared uninvoked-body emitter can parenthesize the same original
+      // function allocation. Parentheses do not add a wrapper or projector.
+      while (fn && ts.isParenthesizedExpression(fn)) fn = fn.expression;
       expect(fn && ts.isArrowFunction(fn)).toBe(true);
       if (!fn || !ts.isArrowFunction(fn)) throw new Error('Expected original arrow creation');
       expect(fn.parameters.map((parameter) => parameter.name.getText(source))).toEqual([
@@ -1828,7 +1827,22 @@ describe('Vue2 compile-time root-data demand', () => {
       : emitted;
     const native = options(module, true);
     const props = Vue2.observable({ value: 'seed', seed: 'seed', hint: 'before', present: true });
-    const app = new Vue2({ render: (h) => h(native, { props: { ...props } }) });
+    const candidates: Array<{ value: string; selection: [number | null, number | null] }> = [];
+    const app = new Vue2({
+      render: (h) =>
+        h(native, {
+          props: { ...props },
+          on: {
+            editCandidate: () => {
+              const target = editor();
+              candidates.push({
+                value: target.value,
+                selection: [target.selectionStart, target.selectionEnd],
+              });
+            },
+          },
+        }),
+    });
     const host = document.createElement('div');
     document.body.append(host);
     cleanup.push(() => {
@@ -1850,7 +1864,7 @@ describe('Vue2 compile-time root-data demand', () => {
         throw new Error('Native editor was not materialized');
       return target;
     };
-    return { props, child, host, editor, settle };
+    return { props, child, host, editor, settle, candidates };
   }
 
   it.each(['single', 'multiline'] as const)(
@@ -1894,9 +1908,13 @@ describe('Vue2 compile-time root-data demand', () => {
       const editor = view.editor();
       expect(editor.value).toBe('seed');
       editor.value = 'proposal';
+      editor.setSelectionRange(8, 8);
       editor.dispatchEvent(
         new InputEvent('input', { bubbles: true, data: 'proposal', inputType: 'insertText' })
       );
+      // A focus update inside this same input callback must not restore the old
+      // owner value before the callback boundary decides whether to accept it.
+      expect(view.candidates).toEqual([{ value: 'proposal', selection: [8, 8] }]);
       await view.settle();
       expect(editor.value).toBe('seed');
       editor.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));

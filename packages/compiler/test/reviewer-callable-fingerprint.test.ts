@@ -85,7 +85,7 @@ for (const profile of nativeOwnerProfiles)
       cleanup.push(owner.dispose);
       expect(owner.handle.getExposes().hasState).toBe(true);
       expect(owner.compiled.ir.hooks[0].capture?.states).toEqual([
-        { name: 'flag', type: 'state:boolean' },
+        { name: 'flag', type: 'state:boolean', definite: true },
       ]);
     });
   });

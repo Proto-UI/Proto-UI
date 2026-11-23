@@ -2,7 +2,9 @@ import { pruneDeadValues } from './demand-pruning';
 import {
   emitJavaScriptValue,
   emitJavaScriptRecord,
+  emitJavaScriptBinary,
   emitJavaScriptParameters,
+  emitJavaScriptSignatureParameters,
   formatJavaScriptValueType,
   emitOptionalOperation,
   createJavaScriptValueReader,
@@ -92,6 +94,14 @@ export function emitReact(
       },
     ])
   );
+  // Core capture lookup keys come from this checked Hook's contract. Native
+  // source hosts have a different capture ABI, so keep this override local to
+  // the runtime target and carry it through nested parameter/value types.
+  function captureTypeName(type: ValueType): string | undefined {
+    if (typeof type !== 'string' && type.kind === 'capture')
+      return `${core}.AsHookResult<GeneratedProps, ${hookContract(ir.hooks.find((hook) => hook.id === type.hookId)!)}>`;
+    return undefined;
+  }
   function typeName(type: ValueType): string {
     if (type === 'delay-task') return `${core}.DelayTask`;
     if (type === 'presence-owner') return `${core}.PresenceOwnerDeclaration<GeneratedProps>`;
@@ -100,11 +110,14 @@ export function emitReact(
     if (type === 'presentation-view-binding') return `${core}.PresentationViewBinding`;
     if (type === 'context-key')
       return "import('@proto.ui/types').ContextKey<import('@proto.ui/types').JsonObject>";
-    if (typeof type !== 'string' && type.kind === 'capture')
-      return `${core}.AsHookResult<GeneratedProps, ${hookContract(ir.hooks.find((hook) => hook.id === type.hookId)!)}>`;
+    const capture = captureTypeName(type);
+    if (capture !== undefined) return capture;
     if (typeof type === 'string' && type.startsWith('lexical:')) return type.slice(8);
-    if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
+    if (typeof type !== 'string')
+      return formatJavaScriptValueType(type, typeName, false, captureTypeName);
     if (type === 'exception') return 'unknown';
+    if (type === 'public-expose') return 'unknown';
+    if (type === 'public-method') return '(...args: unknown[]) => unknown';
     if (isDataValueType(type)) return formatDataType(type);
     if (type === 'def') return `${core}.DefHandle<GeneratedProps, GeneratedExposes>`;
     if (type === 'run') return `${core}.RunHandle<GeneratedProps>`;
@@ -180,7 +193,7 @@ export function emitReact(
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return emitJavaScriptParameters(values, (value) => expression(value, 0), typeName);
+    return emitJavaScriptSignatureParameters(values, typeName, captureTypeName);
   }
   function hookContract(hook: AuthoredHookIR): string {
     const capture = hook.capture;
@@ -202,7 +215,7 @@ export function emitReact(
     return `{ state: { ${states} }; asHooks: { ${children} } }`;
   }
   function fn(value: FunctionIR, depth: number): string {
-    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName, captureTypeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
@@ -213,6 +226,7 @@ export function emitReact(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         return emitJavaScriptValue(value, (item) => expression(item, depth), typeName)!;
       case 'undefined':
         return '(void 0)';
@@ -238,19 +252,20 @@ export function emitReact(
       case 'rule': {
         const declaration = value.declaration;
         const states = new Map(value.states.map((state) => [state.id, state.value]));
+        const styles = new Map((value.styles ?? []).map((style) => [style.id, style.value]));
         const builder = `${p}When`,
           intent = `${p}Intent`;
         const condition = (node: RuleCondition): string => {
           if (node.type === 'true' || node.type === 'false')
             return `${builder}.${node.type === 'true' ? 't' : 'f'}()`;
-          if (node.type === 'eq') {
+          if (node.type === 'eq' || node.type === 'gte') {
             const signal =
-              node.left.type === 'meta'
-                ? `${builder}.meta(${JSON.stringify(node.left.key)})`
-                : node.left.type === 'prop'
-                  ? `${builder}.prop(${JSON.stringify(node.left.key)})`
+              node.left.type === 'prop'
+                ? `${builder}.prop(${JSON.stringify(node.left.key)})`
+                : node.left.type === 'meta'
+                  ? `${builder}.meta(${JSON.stringify(node.left.key)})`
                   : `${builder}.state(${expression(states.get(node.left.id)!, depth)})`;
-            return `${signal}.eq(${JSON.stringify(node.right)})`;
+            return `${signal}.${node.type}(${JSON.stringify(node.right)})`;
           }
           if (node.type === 'not') return `${builder}.not(${condition(node.expr)})`;
           return `${builder}.${node.type}(${node.exprs.map(condition).join(', ')})`;
@@ -258,7 +273,7 @@ export function emitReact(
         const operations = declaration.intent.ops
           .map(
             (operation) =>
-              `${intent}.feedback.style.use(${operation.handles.map((handle) => `${core}.tw(${JSON.stringify(handle.tokens.join(' '))})`).join(', ')});`
+              `${intent}.feedback.style.use(${operation.handles.map((handle) => (handle.kind === 'reference' ? expression(styles.get(handle.id)!, depth) : `${core}.tw(${JSON.stringify(handle.tokens.join(' '))})`)).join(', ')});`
           )
           .join(' ');
         const metadata = `${declaration.label === undefined ? '' : `label: ${JSON.stringify(declaration.label)}, `}${declaration.note === undefined ? '' : `note: ${JSON.stringify(declaration.note)}, `}`;
@@ -275,7 +290,7 @@ export function emitReact(
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
-        return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
+        return emitJavaScriptBinary(value, (item) => expression(item, depth));
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
@@ -283,7 +298,7 @@ export function emitReact(
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
-        return `${value.name}(${value.arguments.map((argument) => expression(argument, depth)).join(', ')})`;
+        return `${value.name}(${value.arguments.map((argument, index) => `${value.spread?.[index] ? '...' : ''}${expression(argument, depth)}`).join(', ')})`;
       case 'authored-hook':
         return `${hooks.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
       case 'static-capability':
@@ -323,7 +338,7 @@ export function emitReact(
         const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
         switch (statement.kind) {
           case 'const':
-            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
+            return `${origin}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name}${['lexical-cell', 'record', 'object-spread', 'array', 'array-spread'].includes(statement.value.kind) ? `: ${typeName(statement.value.type)}` : ''} = ${expression(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(statement.expression, depth)};\n`;
           case 'return':
@@ -332,6 +347,10 @@ export function emitReact(
             return `${origin}${indent}throw ${expression(statement.value, depth)};\n`;
           case 'try':
             return `${origin}${indent}try {\n${statements(statement.body, depth + 1)}${indent}}${statement.catch ? ` catch${statement.catch.name ? ` (${statement.catch.name})` : ''} {\n${statements(statement.catch.body, depth + 1)}${indent}}` : ''}${statement.finally ? ` finally {\n${statements(statement.finally, depth + 1)}${indent}}` : ''}\n`;
+          case 'while':
+            return `${origin}${indent}while (${expression(statement.condition, depth)}) {\n${statements(statement.body, depth + 1)}${indent}}\n`;
+          case 'for-of':
+            return `${origin}${indent}for (const ${statement.name} of ${expression(statement.iterable, depth)}) {\n${statements(statement.body, depth + 1)}${indent}}\n`;
           case 'if':
             return `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${statements(statement.then, depth + 1)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1)}${indent}}` : ''}\n`;
         }

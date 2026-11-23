@@ -1,6 +1,12 @@
 import { dataTypeEqual, type DataType } from './data-types';
-import { isDataValueType, type ExpressionIR, type ValueType } from './ir';
-import { joinValueTypes, valueAlternatives, objectFields, objectValueType } from './value-types';
+import { isDataValueType, stateHandleHasMethod, type ExpressionIR, type ValueType } from './ir';
+import {
+  joinValueTypes,
+  valueAlternatives,
+  objectFields,
+  objectValueType,
+  arrayElementType,
+} from './value-types';
 import { valueAssignable } from './value-types';
 
 export type UnaryOperator = '!' | '-' | '+';
@@ -16,6 +22,7 @@ export type BinaryOperator =
   | '*'
   | '/'
   | '%'
+  | 'in'
   | '&&'
   | '||'
   | '??';
@@ -293,6 +300,114 @@ export function conditionRefinements(
     return true;
   };
   if (!fresh(condition)) return [];
+  if (
+    condition.kind === 'binary' &&
+    condition.operator === 'in' &&
+    condition.left.kind === 'literal' &&
+    typeof condition.left.value === 'string'
+  ) {
+    const target = condition.right;
+    const root =
+      target.kind === 'reference'
+        ? target
+        : target.kind === 'lexical-read' && target.cell.kind === 'reference'
+          ? target.cell
+          : undefined;
+    if (root) {
+      const name = condition.left.value;
+      const members = valueAlternatives(target.type).filter((member) => {
+        const present = stateHandleHasMethod(member, name);
+        return present === undefined || present === truth;
+      });
+      return [[root.name, joinValueTypes(members)]];
+    }
+  }
+  // Immutable array bindings retain a positive length proof only until a
+  // possibly mutating call. This proves guarded element reads without assuming
+  // that an arbitrary source index is present.
+  if (
+    condition.kind === 'binary' &&
+    ['===', '!==', '>', '>=', '<', '<='].includes(condition.operator) &&
+    condition.left.kind === 'member' &&
+    condition.left.property === 'length' &&
+    condition.left.object.kind === 'reference' &&
+    condition.right.kind === 'literal' &&
+    typeof condition.right.value === 'number'
+  ) {
+    const target = condition.left.object,
+      original = target.type;
+    const element = arrayElementType(original);
+    if (element !== undefined) {
+      const value = condition.right.value,
+        operator = condition.operator;
+      const minimum =
+        (operator === '===' && truth) || (operator === '!==' && !truth)
+          ? value
+          : (operator === '>' && truth) || (operator === '<=' && !truth)
+            ? Math.floor(value) + 1
+            : (operator === '>=' && truth) || (operator === '<' && !truth)
+              ? Math.ceil(value)
+              : 0;
+      if (Number.isSafeInteger(minimum) && minimum > 0)
+        return [
+          [
+            target.name,
+            {
+              kind: 'value-array',
+              element,
+              ...(typeof original === 'string' ||
+              original.kind !== 'value-array' ||
+              original.readonly
+                ? { readonly: true }
+                : {}),
+              minimumLength: Math.max(
+                minimum,
+                typeof original !== 'string' && original.kind === 'value-array'
+                  ? (original.minimumLength ?? 0)
+                  : 0
+              ),
+            },
+          ],
+        ];
+    }
+  }
+  if (condition.kind === 'intrinsic' && condition.name === 'array.isArray') {
+    const target = condition.arguments[0];
+    if (target?.kind === 'reference' && fresh(target)) {
+      const members = valueAlternatives(target.type);
+      const arrays = members.filter(
+        (type) =>
+          type === 'array' ||
+          (typeof type !== 'string' && (type.kind === 'array' || type.kind === 'value-array'))
+      );
+      if (truth)
+        return [
+          [
+            target.name,
+            members.includes('unknown')
+              ? { kind: 'value-array', element: 'unknown', readonly: true }
+              : joinValueTypes([
+                  ...arrays,
+                  ...(members.includes('template')
+                    ? [
+                        {
+                          kind: 'value-array' as const,
+                          element: 'template' as const,
+                          readonly: true,
+                        },
+                      ]
+                    : []),
+                ]),
+          ],
+        ];
+      return [
+        [
+          target.name,
+          joinValueTypes(members.filter((type) => !arrays.some((array) => array === type))),
+        ],
+      ];
+    }
+  }
   if (truth && condition.kind === 'intrinsic' && condition.name === 'array.includes') {
     const [array, search] = condition.arguments;
     // Only an immutable binding can carry this proof beyond the comparison.
@@ -460,20 +575,22 @@ function ordinaryRefinement(
   let target = condition,
     equal = truth,
     constant: string | number | boolean | null | undefined,
-    runtimeType: string | undefined;
+    runtimeType: string | undefined,
+    hasConstant = false;
   if (
     condition.kind === 'binary' &&
     (condition.operator === '===' || condition.operator === '!==')
   ) {
     const literal =
-      condition.right.kind === 'literal'
+      condition.right.kind === 'literal' || condition.right.kind === 'undefined'
         ? condition.right
-        : condition.left.kind === 'literal'
+        : condition.left.kind === 'literal' || condition.left.kind === 'undefined'
           ? condition.left
           : undefined;
     if (!literal) return undefined;
     target = literal === condition.right ? condition.left : condition.right;
-    constant = literal.value;
+    constant = literal.kind === 'undefined' ? undefined : literal.value;
+    hasConstant = true;
     equal = condition.operator === '===' ? truth : !truth;
     if (target.kind === 'intrinsic' && target.name === 'typeof' && typeof constant === 'string') {
       runtimeType = constant;
@@ -498,6 +615,10 @@ function ordinaryRefinement(
   )
     return undefined;
   const narrow = (type: ValueType): ValueType => {
+    if (runtimeType === 'function' && equal && valueAlternatives(type).includes('public-expose'))
+      return 'public-method';
+    if (runtimeType === 'object' && equal && valueAlternatives(type).includes('unknown'))
+      return joinValueTypes(['record', 'null']);
     if (
       runtimeType &&
       valueAlternatives(type).some((member) => member === 'unknown' || member === 'exception') &&
@@ -506,45 +627,58 @@ function ordinaryRefinement(
     )
       return runtimeType === 'undefined' ? 'void' : (runtimeType as ValueType);
     return joinValueTypes(
-      valueAlternatives(type).filter((member) => {
-        let value: unknown,
-          hasLiteral = false;
-        if (member === 'null') {
-          value = null;
-          hasLiteral = true;
-        }
-        if (member === 'void') {
-          value = undefined;
-          hasLiteral = true;
-        }
-        if (typeof member !== 'string' && member.kind === 'literal') {
-          value = member.value;
-          hasLiteral = true;
-        }
-        if (runtimeType) {
-          const kind = hasLiteral
-            ? typeof value
-            : typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
-              ? member
-              : typeof member !== 'string' && member.kind === 'callable'
-                ? 'function'
+      valueAlternatives(type)
+        .filter((member) => {
+          let value: unknown,
+            hasLiteral = false;
+          if (member === 'null') {
+            value = null;
+            hasLiteral = true;
+          }
+          if (member === 'void') {
+            value = undefined;
+            hasLiteral = true;
+          }
+          if (typeof member !== 'string' && member.kind === 'literal') {
+            value = member.value;
+            hasLiteral = true;
+          }
+          if (runtimeType) {
+            const kind = hasLiteral
+              ? typeof value
+              : typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
+                ? member
+                : typeof member !== 'string' && member.kind === 'callable'
+                  ? 'function'
+                  : member === 'unknown' || member === 'exception'
+                    ? undefined
+                    : 'object';
+            return kind === undefined || (kind === runtimeType) === equal;
+          }
+          if (hasConstant) {
+            if (hasLiteral) return (value === constant) === equal;
+            const domain =
+              typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
+                ? member
                 : member === 'unknown' || member === 'exception'
                   ? undefined
                   : 'object';
-          return kind === undefined || (kind === runtimeType) === equal;
-        }
-        if (constant !== undefined) {
-          if (hasLiteral) return (value === constant) === equal;
-          const domain =
-            typeof member === 'string' && ['boolean', 'number', 'string'].includes(member)
-              ? member
-              : member === 'unknown' || member === 'exception'
-                ? undefined
-                : 'object';
-          return domain === undefined || domain === typeof constant || !equal;
-        }
-        return !hasLiteral || Boolean(value) === truth;
-      })
+            return domain === undefined || domain === typeof constant || !equal;
+          }
+          return !hasLiteral || Boolean(value) === truth;
+        })
+        .map((member) =>
+          hasConstant &&
+          !runtimeType &&
+          equal &&
+          (member === 'unknown' || member === 'exception' || member === typeof constant)
+            ? constant === undefined
+              ? 'void'
+              : constant === null
+                ? 'null'
+                : { kind: 'literal' as const, value: constant }
+            : member
+        )
     );
   };
   if (target.kind !== 'member') return [[reference.name, narrow(target.type)]];

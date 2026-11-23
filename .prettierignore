@@ -10,6 +10,7 @@ native/gpui/fixtures/
 # Pinned MIT upstream artifacts; checksums bind their unmodified UTF-8 LF bytes.
 scripts/agent-operations/vendor/modeltrace/
 # Coverage views are generated and checked byte-for-byte by prototype-coverage.mjs.
+internal/coverage-matrices/prototype-coverage-matrix.json
 internal/coverage-matrices/prototype-coverage-matrix.md
 internal/coverage-matrices/finf-delivery-checklist.md
 # Exact pre-migration Issue body snapshots retain their original formatting.
@@ -46,6 +47,9 @@ internal/records/evidence/2026-11-22-sprint2-compiler/
 internal/records/evidence/2026-11-22-sprint2-datepicker-review/
 internal/records/evidence/2026-11-22-sprint2-input/
 internal/records/evidence/2026-11-22-sprint2-native-round1/
+# Byte-bound original PR #1732 observations imported by the S2 integration.
+internal/records/evidence/2026-11-23-shenko-native-controls/
+internal/records/evidence/2026-11-23-shenko-native-followup/
 
 # Original Sprint 4 raw observations and execution receipts.
 internal/records/evidence/2026-11-22-sprint4/

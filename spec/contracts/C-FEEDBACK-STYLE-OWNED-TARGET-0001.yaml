@@ -62,6 +62,10 @@ sources:
   - path: packages/core/src/handles.ts
   - path: packages/modules/a11y/src/web.ts
   - path: packages/adapters/web-component/src/commit.ts
+  - path: packages/adapters/base/src/platform/web-owned-decoration-stage.ts
+  - path: packages/compiler/src/native-support/web-decoration.ts
+  - path: packages/compiler/src/native-style.ts
+  - path: packages/compiler/src/react-source.ts
 dependsOn:
   contracts:
     - C-FEEDBACK-STYLE-0001
@@ -73,7 +77,7 @@ dependsOn:
 revisions:
   - version: 0.3.0-alpha.2
     change: revised
-    summary: Admitted owned decoration for ordinary Roots in the explicit open split profile with view-owned binding and physical reuse checks.
+    summary: Admitted owned decoration for ordinary Roots in the explicit open split profile and a bounded live React DOM Compiler candidate, with target-scoped style contributions, canonical physical-stage checks and host commit-owned view generations.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: 'Defined a draft-only generic dependency boundary for #935; no implementation or acceptance claim.'

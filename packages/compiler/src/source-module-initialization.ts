@@ -196,10 +196,15 @@ export function validateStaticModuleInitialization(graph: SourceGraph): void {
         return;
       const target = identity(graph, module, value.text, value, observe);
       if (!target) return;
-      // A const alias is a snapshot read. Its own TDZ was checked above;
-      // validating its initializer when its declaration executes retains order.
-      if (target.module.mutableBindings.has(target.name))
-        rejectNode(value, 'PUI1008', 'Static module initialization cannot read mutable storage.');
+      // A finite container snapshots a scalar let at this initialization point.
+      // Its source TDZ is checked above and the semantic parser separately
+      // checks the scalar storage type; later writes cannot replay this read.
+      if (target.module.mutableBindings.has(target.name) && !scalarInitializer(target.node))
+        rejectNode(
+          value,
+          'PUI1008',
+          'Static module initialization requires scalar mutable storage.'
+        );
       return;
     }
     if (ts.isObjectLiteralExpression(value)) {

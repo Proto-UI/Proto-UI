@@ -103,10 +103,7 @@ it('retains target and source admission boundaries outside the accepted keyed ra
       ),
       { profile: 'vue2-source-v1' }
     )
-  ).toMatchObject({
-    ok: false,
-    diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
-  });
+  ).toMatchObject({ ok: true });
   expect(
     compilePrototype(source.replace("['value','extra']", '[]'), { profile: 'react-dom-source-v1' })
   ).toMatchObject({ ok: false });

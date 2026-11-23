@@ -16,13 +16,15 @@ export const NUMBER_FIELD_FAMILY = createAnatomyFamily('base-number-field', {
 export type NumberFieldContext = {
   value: number | null;
   draft: string;
-  min: number;
-  max: number;
+  min: number | null;
+  max: number | null;
   step: number;
   disabled: boolean;
   controlDisabled: boolean;
   controlReadOnly: boolean;
+  controlRequired: boolean;
   readOnly: boolean;
+  required: boolean;
   label: string;
   name: string;
   formatted: string;

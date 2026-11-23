@@ -37,11 +37,13 @@ Number Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   rows={[
     { name: 'value', type: 'number | null', default: '—' },
     { name: 'defaultValue', type: 'number | null', default: '0' },
-    { name: 'min', type: 'number', default: '0' },
-    { name: 'max', type: 'number', default: '100' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
     { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'name', type: 'string', default: "''" },
     { name: 'allowEmpty', type: 'boolean', default: 'false' },
@@ -54,6 +56,10 @@ Number Field 是工作区源码，没有公开的 `proto-ui add` 目标。传入
 />
 
 这些属性属于 Root。
+
+省略边界保留 0/100；显式 `null` 移除该边界。`snapToStep={false}` 保留有限初值和编辑数值，`step` 仍控制步进。没有对应边界时，Home/End 保留原生编辑器的光标移动。
+
+`required` 与祖先 Field 的必填要求合并。Input 与 Control 暴露最终要求，并同时投影到原生编辑器和辅助功能；它不改变空值所有权，也不提交表单。
 
 ## 参考
 

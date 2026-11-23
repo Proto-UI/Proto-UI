@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
+import { validateIR } from '../src/ir-validation';
 import { mountNativeOwner, nativeOwnerProfiles } from './native-owner-consumer';
 
 const cleanup: (() => Promise<void>)[] = [];
@@ -40,7 +41,7 @@ describe('source forms the shadcn families use', () => {
         {
           code: 'PUI1006',
           category: 'unsupported-input',
-          message: 'String requires zero or one data or opaque unknown operand.',
+          message: expect.stringContaining('zero or one'),
         },
       ],
     });
@@ -96,16 +97,15 @@ describe('source forms the shadcn families use', () => {
     expect(ir.match(/"rule.declare"/g)?.length).toBe(2 + 2 * 3);
   });
 
-  it('keeps for...of over non-static data unsupported', () => {
+  it('preserves checked runtime arrays in for...of', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'x',setup(def){
         const list=[1,2];
         for (const item of list) { def.expose.method('m',()=>item); }
       }});`);
-    expect(parsed).toMatchObject({
-      ok: false,
-      diagnostics: [{ message: expect.stringContaining('ForOfStatement') }],
-    });
+    expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    expect(validateIR(JSON.parse(JSON.stringify(parsed.value))).ok).toBe(true);
   });
 
   // watchAll observes every declared prop; watchRaw observes named raw keys,

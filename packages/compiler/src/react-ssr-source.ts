@@ -127,7 +127,7 @@ function ${p}DecodeTemplate(node: GeneratedTemplateProjection, children: ${p}Rea
   return ${p}React.createElement(element.tag, { ...element.attributes, key: element.key }, ...(Array.isArray(decoded) ? decoded : [decoded]));
 }
 function ${p}RootAttributes(projection: GeneratedRenderProjection): Record<string, unknown> {
-  const attributes: Record<string, unknown> = ${p}RootProperties(projection.properties);
+  const attributes: Record<string, unknown> = ${p}RootProperties(projection.properties, true);
   for (const [key, value] of Object.entries(projection.attributes)) {
     if (value === null) continue;
     attributes[key === 'tabindex' ? 'tabIndex' : key] = key === 'hidden' ? true : value;

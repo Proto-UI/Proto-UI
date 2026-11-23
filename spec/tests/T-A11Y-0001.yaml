@@ -101,6 +101,8 @@ cases:
       - HC-A11Y-0001-A
       - HC-A11Y-0001-B
     expectation: web-a11y-projection
+    notes:
+      - Content-derived naming leaves a host-authored explicit name available; an explicit empty text name remains distinct from content naming.
   - id: T-A11Y-0001-CASE-ADDITIVE-RELATION
     title: Additive Web relation projection preserves host-authored IDREF targets
     covers:
@@ -209,9 +211,11 @@ implementations:
     required: true
     consumesCases:
       - T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION
+      - T-A11Y-0001-CASE-WEB-PROJECTION
     notes:
-      - Direct-ref transport evidence only; this does not claim the pending PR #553 family/domain/key matcher or Tabs migration.
+      - Direct-ref transport remains bounded; this does not claim the pending PR #553 family/domain/key matcher or Tabs migration.
       - Heading-level projection and stale aria-level cleanup are covered by the Web/runtime contract cases.
+      - The existing consumer-name baseline case also checks that content-name projection preserves the explicit host name while mounted and after disposal. This is DOM-harness evidence, not a new assistive-technology acceptance claim.
   - id: base-button-a11y-contract
     kind: module-test
     status: passing

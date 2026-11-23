@@ -10,7 +10,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
 
-Base Checkbox owns the protocol: controlled and uncontrolled `checked` and `indeterminate`, activation from pointer and Space, the effective disabled state, focus, and the `checkbox` role with its `mixed` accessible state. Root and Indicator are the whole anatomy. The Shadcn layer adds presentation only: the box, its fill, the focus ring, and the disabled treatment.
+Base Checkbox owns the protocol: controlled and uncontrolled `checked` and `indeterminate`, activation from pointer and Space, the effective disabled state, the required control fact, focus, and the `checkbox` role with its `mixed` accessible state. Root and Indicator are the whole anatomy. The Shadcn layer adds presentation only: the box, its fill, the focus ring, and the disabled treatment.
 
 The Indicator is derived. It reads `checked` and `indeterminate` from the nearest Base Checkbox, picks the tick or the dash, and owns no value, focus, or event of its own. Mixed reads before checked, so a checkbox that is both never paints a tick.
 
@@ -49,10 +49,13 @@ Omitted boolean props use the defaults below. Passing `checked` or `indeterminat
     { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
   ]}
 />
 
-Root exposes `checked`, `indeterminate`, `disabled`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`. There is no `label` prop; name the checkbox with composed content.
+Root exposes `checked`, `indeterminate`, `disabled`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed`, plus `checkedChange` and `indeterminateChange`. There is no `label` prop; name the checkbox with composed content.
+
+The required state and its accessible projection are inherited from Base. Updating `required` does not toggle the checkbox or prevent unchecking. Field validation, native form constraint validation, and submission need an explicit composition; the Shadcn layer adds no second requirement policy or automatic form binding.
 
 ## References
 

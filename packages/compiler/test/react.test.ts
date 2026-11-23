@@ -12,8 +12,13 @@ const source = readFileSync(
   fileURLToPath(new URL('../../prototypes/base/src/button/button.proto.ts', import.meta.url)),
   'utf8'
 );
+const buttonTypes = readFileSync(
+  fileURLToPath(new URL('../../prototypes/base/src/button/types.ts', import.meta.url)),
+  'utf8'
+);
+const buttonOptions = { fileName: 'button.proto.ts', files: { 'types.ts': buttonTypes } };
 function buttonIR(): PrototypeIR {
-  const parsed = parsePrototype(source, { fileName: 'button.proto.ts' });
+  const parsed = parsePrototype(source, buttonOptions);
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   return parsed.value;
 }
@@ -54,7 +59,7 @@ describe('checked IR to React runtime-backed source', () => {
         "hovered.set(true, 'reason: button pointer.enter => hovered')",
         "hovered.set(false, 'reason: button pointer.enter => hovered')"
       ),
-      { fileName: 'button.proto.ts' }
+      buttonOptions
     );
     if (!before.ok || !parsed.ok) throw new Error('Fixture compilation failed');
     const after = emitReact(parsed.value);
@@ -188,7 +193,7 @@ export const asPart = defineAsHook({name:'as-part',setup(){}});`,
     const caller = `import {definePrototype} from '@proto.ui/core'; import {asButton} from './button.proto'; export default definePrototype({name:'caller',setup(def){asButton();}});`;
     const parsed = parsePrototype(caller, {
       fileName: 'caller.proto.ts',
-      files: { 'button.proto.ts': source },
+      files: { 'button.proto.ts': source, 'types.ts': buttonTypes },
     });
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     const output = emitReact(parsed.value);

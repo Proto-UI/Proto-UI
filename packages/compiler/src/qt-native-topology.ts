@@ -40,7 +40,7 @@ export function createTopology(options) {
   }
   let count=null,index=null,total=null,first=null,last=null;
   const open=observed(false);
-  const record={host:options.host,claims,exposes:options.exposes,hooks:hookNames,alive:options.alive,ready:options.ready,root:options.root,invoke:options.invoke,notify,collectionConfig:()=>collectionConfig,itemConfig:()=>itemConfig,updateItem(snapshot) {itemSnapshot=snapshot;index.set(snapshot.index);total.set(snapshot.total);first.set(snapshot.first);last.set(snapshot.last);}};
+  const record={host:options.host,claims,exposes:options.exposes,hooks:hookNames,alive:options.alive,isAlive:options.isAlive,ready:options.ready,root:options.root,invoke:options.invoke,notify,collectionConfig:()=>collectionConfig,itemConfig:()=>itemConfig,updateItem(snapshot) {itemSnapshot=snapshot;index.set(snapshot.index);total.set(snapshot.total);first.set(snapshot.first);last.set(snapshot.last);}};
   participants.set(options.host,record);
   function scopeRoot(family,host=options.host) {
     for(const ancestor of ancestry(host)){const item=participants.get(ancestor);if(item&&item.claims.get(family)==='root')return item;}
@@ -49,7 +49,7 @@ export function createTopology(options) {
   function part(item,role) {
     let roles=partViews.get(item);if(!roles){roles=new Map();partViews.set(item,roles);}
     if(!roles.has(role))roles.set(role,Object.freeze({role,qtPart:item,
-      hasExpose(key) {options.alive();item.alive();return Object.prototype.hasOwnProperty.call(item.exposes(),key);},getExpose(key) {options.alive();item.alive();const values=item.exposes();return Object.prototype.hasOwnProperty.call(values,key)?values[key]:null;},hasHook(name) {options.alive();item.alive();return item.hooks.has(name);}}));
+      hasExpose(key) {options.alive();if(participants.get(item.host)!==item||!item.isAlive())return false;item.alive();return Object.prototype.hasOwnProperty.call(item.exposes(),key);},getExpose(key) {options.alive();if(participants.get(item.host)!==item||!item.isAlive())return null;item.alive();const values=item.exposes();return Object.prototype.hasOwnProperty.call(values,key)?values[key]:null;},hasHook(name) {options.alive();item.alive();return item.hooks.has(name);}}));
     return roles.get(role);
   }
   function parts(family,role,query) {

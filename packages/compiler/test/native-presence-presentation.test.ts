@@ -7,6 +7,7 @@ import { compilePrototype } from '../src/compile';
 import { validateIR } from '../src/ir-validation';
 import { writeArtifactSet } from '../src/artifact-output';
 import { nativePresencePresentationArtifact } from '../src/native-presence-presentation';
+import { nativePresencePresentationArtifact as canonicalPresenceArtifact } from '../src/native-support/web-presence';
 import { mountNativeOwner, nativeOwnerProfiles } from './native-owner-consumer';
 
 const cleanups: (() => unknown | Promise<unknown>)[] = [];
@@ -156,7 +157,9 @@ describe('Presentation admission and direct native lowering', () => {
       if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
       expect(validateIR(JSON.parse(JSON.stringify(result.value.ir)))).toMatchObject({ ok: true });
       expect(result.value.output.supportingFiles?.map((file) => file.path)).toContain(
-        nativePresencePresentationArtifact.path
+        profile === 'react-dom-source-v1'
+          ? canonicalPresenceArtifact.path
+          : nativePresencePresentationArtifact.path
       );
       expect(result.value.output.code).toContain('Presence.declare(');
       expect(result.value.output.code).not.toMatch(/@proto\.ui\/(runtime|adapter|prototypes)/);

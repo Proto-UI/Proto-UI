@@ -31,13 +31,14 @@ criteria:
               P-BASE-CHECKBOX-CONTROLLED-CHECKED,
               P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED,
               P-BASE-CHECKBOX-ACCESSIBLE-ROLE,
+              P-BASE-CHECKBOX-REQUIRED,
             ]
     dependsOn:
       contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0007]
   - id: P-SHADCN-CHECKBOX-CURRENT-BASE-DEVIATIONS
     text:
-      zh-CN: 当前实现不对 `asCheckboxRoot()` 引入的 checked/indeterminate 所有权、activation、disabled、focus 或 accessibility 施加负向补丁；新增 style rules 仅构成视觉增量。
-      en: The current implementation applies no negative patch to the checked and indeterminate ownership, activation, disabled state, focus, or accessibility introduced by `asCheckboxRoot()`; its added style rules are visual deltas only.
+      zh-CN: 当前实现不对 `asCheckboxRoot()` 引入的 checked/indeterminate 所有权、activation、disabled、required 控件事实、focus 或 accessibility 施加负向补丁；新增 style rules 仅构成视觉增量。
+      en: The current implementation applies no negative patch to the checked and indeterminate ownership, activation, disabled state, required control fact, focus, or accessibility introduced by `asCheckboxRoot()`; its added style rules are visual deltas only.
   - id: P-SHADCN-CHECKBOX-DIRECT-ENTRY
     text:
       zh-CN: 当前 Root protocol 以 `shadcn-checkbox-root` direct prototype 公开；本层不额外提供 authored asHook。
@@ -145,6 +146,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-CHECKBOX-0001] }
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Inherited the Base required Prop/state and accessibility fact without adding a second policy owner or automatic form integration.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Declared content-selection suppression on the control root while retaining the independent Label association boundary.

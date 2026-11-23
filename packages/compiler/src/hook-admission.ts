@@ -28,18 +28,12 @@ export const HOOK_ADMISSION = {
   asCollection: { status: 'admitted', operation: 'hook.asCollection' },
   asCollectionItem: { status: 'admitted', operation: 'hook.asCollectionItem' },
   asControlLabel: { status: 'admitted', operation: 'hook.asControlLabel' },
-  asAxisInput: {
-    status: 'unsupported',
-    reason: 'Axis Input capability lowering is not implemented.',
-  },
+  asAxisInput: { status: 'admitted', operation: 'hook.asAxisInput' },
   asContextMenuInput: {
     status: 'unsupported',
     reason: 'Context Menu Input capability lowering is not implemented.',
   },
-  asNativeLink: {
-    status: 'unsupported',
-    reason: 'Native Link capability lowering is not implemented.',
-  },
+  asNativeLink: { status: 'admitted', operation: 'hook.asNativeLink' },
 } as const satisfies Readonly<Record<string, HookAdmission>>;
 
 export function hookAdmission(name: string): HookAdmission | undefined {

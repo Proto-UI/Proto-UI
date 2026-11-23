@@ -147,6 +147,7 @@ export function collectVue2IdentityOnlyFunctions(
       case 'element':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         for (const operand of ordinaryValueChildren(value)!) expression(operand, scope, 'other');
         return;
       case 'conditional':
@@ -191,6 +192,8 @@ export function collectVue2IdentityOnlyFunctions(
       case 'rule':
         expression(value.receiver, scope, 'other');
         for (const state of value.states) expression(state.value, scope, 'other');
+        for (const style of value.styles ?? []) expression(style.value, scope, 'other');
+        for (const style of value.targets ?? []) expression(style.value, scope, 'other');
         return;
       case 'authored-hook':
         // Every hook root/body is independently visited, including unused hooks.
@@ -234,6 +237,14 @@ export function collectVue2IdentityOnlyFunctions(
           break; // deliberately continue visiting syntactically unreachable uses
         case 'throw':
           expression(statement.value, scope, 'other');
+          break;
+        case 'while':
+          expression(statement.condition, scope, 'other');
+          statements(statement.body, scope);
+          break;
+        case 'for-of':
+          expression(statement.iterable, scope, 'other');
+          statements(statement.body, scope.parameter(statement.name, undefined, scope, null));
           break;
         case 'try': {
           statements(statement.body, scope);
@@ -706,6 +717,15 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       } else if (statement.kind === 'throw') {
         expression(statement.value, scope);
         return true;
+      } else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        expression(statement.kind === 'while' ? statement.condition : statement.iterable, scope);
+        statements(
+          statement.body,
+          statement.kind === 'for-of'
+            ? scope.parameter(statement.name, undefined, scope, null)
+            : scope,
+          setup
+        );
       } else if (statement.kind === 'try') {
         const tried = statements(statement.body, scope, setup);
         const caught = statement.catch

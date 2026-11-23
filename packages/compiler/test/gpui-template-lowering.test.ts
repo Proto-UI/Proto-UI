@@ -295,9 +295,16 @@ function nativeParameterIr(predicate: boolean): PrototypeIR {
       },
     ];
     const branch = render.body.find((statement) => statement.kind === 'if');
-    if (branch?.kind !== 'if' || branch.condition.kind !== 'helper-call')
-      throw new Error('Expected helper branch');
-    branch.condition.arguments = [child];
+    if (branch?.kind !== 'if') throw new Error('Expected helper branch');
+    // The ordinary frontend may inline this pure predicate. This historical
+    // fixture explicitly exercises a checked native formal at a helper call.
+    branch.condition = {
+      kind: 'helper-call',
+      name: 'helper',
+      arguments: [child],
+      type: 'boolean',
+      span: branch.condition.span,
+    };
   } else {
     fn.body = [{ kind: 'return', value: parameter, span: fn.span }];
     const tail = render.body.at(-1);
@@ -386,14 +393,23 @@ describe('GPUI native snapshot emission (v9 reconstruction, source evidence only
     expect(module.code).not.toContain('Value::Template');
   });
 
-  it('does not disguise frontend parameter rejection as a successful native consumer', () => {
+  it('diagnoses the native ABI of a source-admitted opaque parameter', () => {
     const parsed = parsePrototype(
       wrap("return r=>{const id=(child)=>child;return id(r.el('span','x'));};"),
       { fileName: 'unannotated-native-formal.proto.ts' }
     );
-    expect(parsed.ok).toBe(false);
-    if (parsed.ok) throw new Error('Unannotated helper parameter unexpectedly admitted');
-    expect(parsed.diagnostics).toContainEqual(expect.objectContaining({ code: 'PUI1006' }));
+    expect(parsed.ok, JSON.stringify(parsed)).toBe(true);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    expect(validateIR(parsed.value)).toMatchObject({ ok: true });
+    expect(emitRecorded(parsed.value)).toMatchObject({
+      ok: false,
+      diagnostics: [
+        expect.objectContaining({
+          code: 'PUI4003',
+          message: expect.stringContaining('opaque unknown parameter'),
+        }),
+      ],
+    });
   });
 
   it('validates every external native child before replacing retained slot state', () => {

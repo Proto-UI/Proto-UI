@@ -1,7 +1,12 @@
 import { createHash } from 'node:crypto';
 import { isDataValueType, type GeneratedModule, type ValueType } from './ir';
 import type { DataType } from './data-types';
-import { callableValue, joinValueTypes, valueAlternatives } from './value-types';
+import {
+  callableValue,
+  joinValueTypes,
+  serializableDataType,
+  valueAlternatives,
+} from './value-types';
 
 /** Needed only when a checked call site can target both authored and external functions. */
 export const nativeAuthoredCallablesArtifact: NonNullable<
@@ -29,6 +34,7 @@ export function createNativePublicCalls(options: { alive(): void; invoke<T>(call
   type Entry = { callable: Function; results: Map<string, (value: unknown) => unknown> };
   const root = Object.freeze({}), cache = new WeakMap<object, WeakMap<Function, Entry>>();
   const records = new WeakMap<object, object>();
+  const arrays = new WeakMap<readonly unknown[], unknown[]>();
   const projectedCallables = new WeakMap<Function, Entry>();
   function wrap<T extends Function>(callback: T, receiver: object = root, projectResult?: (value: ReturnType<Extract<T, (...args: never[]) => unknown>>) => unknown, projectionKey = ''): T {
     let callbacks = cache.get(receiver);
@@ -65,6 +71,29 @@ export function createNativePublicCalls(options: { alive(): void; invoke<T>(call
     project(target);
     return target;
   };
+  wrap.array = function <T extends readonly unknown[]>(source: T, project: (target: unknown[]) => void): T {
+    let target = arrays.get(source);
+    if (!target) {
+      target = [];
+      arrays.set(source, target);
+      arrays.set(target, target);
+    }
+    if ((target as readonly unknown[]) !== source) {
+      target.length = source.length;
+      for (const key of Reflect.ownKeys(target))
+        if (key !== 'length' && !Object.hasOwn(source, key)) Reflect.deleteProperty(target, key);
+      for (let index = 0; index < source.length; index++) {
+        const item = Object.getOwnPropertyDescriptor(source, index);
+        if (!item) { Reflect.deleteProperty(target, index); continue; }
+        if (!Object.hasOwn(item, 'value')) throw new TypeError('[Expose] array accessors are not public data.');
+        Object.defineProperty(target, index, { value: item.value, enumerable: true, configurable: true, writable: true });
+      }
+    }
+    // Preserve the original public array identity while refreshing its current
+    // elements. The generic return view retains authored readonly permission.
+    project(target);
+    return target as unknown as T;
+  };
   return wrap;
 }
 `,
@@ -74,6 +103,7 @@ export function hasPublicCallable(type: ValueType): boolean {
   if (typeof type === 'string') return false;
   if (type.kind === 'callable') return true;
   if (type.kind === 'object') return type.fields.some((field) => hasPublicCallable(field.type));
+  if (type.kind === 'value-array') return hasPublicCallable(type.element);
   if (type.kind === 'value-union') return type.members.some(hasPublicCallable);
   return false;
 }
@@ -101,6 +131,17 @@ export function emitPublicValueCheck(
     if (type.kind === 'value-union')
       return `(${type.members.map((member) => emitPublicValueCheck(value, member, data)).join(' || ') || 'false'})`;
     if (type.kind === 'callable') return `(typeof ${value} === 'function')`;
+    if (type.kind === 'value-array') {
+      const minimum =
+        type.minimumLength === undefined ? '' : ` && ${value}.length >= ${type.minimumLength}`;
+      const schema = serializableDataType(type);
+      if (schema) return `(Array.isArray(${value}) && ${data(value, schema)}${minimum})`;
+      // Match the existing finite public-data boundary: dense plain arrays,
+      // enumerable own numeric data fields, and no getters or hidden fields.
+      const descriptor = `Object.getOwnPropertyDescriptor(${value}, key)!`;
+      const item = emitPublicValueCheck(`${descriptor}.value`, type.element, data);
+      return `(Array.isArray(${value}) && (Object.getPrototypeOf(${value}) === Array.prototype || Object.getPrototypeOf(${value}) === null)${minimum} && Object.keys(${value}).length === ${value}.length && Reflect.ownKeys(${value}).every(key => key === 'length' || typeof key === 'string' && /^(0|[1-9][0-9]*)$/.test(key) && Number(key) < ${value}.length && ${descriptor}.enumerable && Object.hasOwn(${descriptor}, 'value') && ${item}))`;
+    }
     if (type.kind === 'object') {
       const fields = type.fields.map((field) => {
         const descriptor = `Object.getOwnPropertyDescriptor(${value}, ${JSON.stringify(field.name)})`;
@@ -144,6 +185,13 @@ export function emitPublicValue(options: {
     const callable = variants.some(
       (variant) => typeof variant !== 'string' && variant.kind === 'callable'
     );
+    const arrayElements = variants.flatMap((variant) =>
+      typeof variant !== 'string' &&
+      variant.kind === 'value-array' &&
+      hasPublicCallable(variant.element)
+        ? [variant.element]
+        : []
+    );
     const fields = new Map<string, ValueType[]>();
     for (const variant of variants)
       if (typeof variant !== 'string' && variant.kind === 'object')
@@ -162,6 +210,14 @@ export function emitPublicValue(options: {
         return `if (Object.hasOwn(${name}, ${JSON.stringify(key)})) Object.defineProperty(${target}, ${JSON.stringify(key)}, { value: ${project(cast(read, fieldType), fieldType, name)}, enumerable: true, configurable: true, writable: true });`;
       });
       body = `${name} !== null && typeof ${name} === 'object' ? ${options.wrap}.record(${name}, ${target} => { ${entries.join(' ')} }) : ${name}`;
+    }
+    if (arrayElements.length) {
+      const elementType = joinValueTypes(arrayElements),
+        target = `${name}Array`,
+        index = `${name}Index`;
+      const read = `${name}[${index}]`;
+      const projected = project(cast(read, elementType), elementType, name);
+      body = `Array.isArray(${name}) ? ${options.wrap}.array(${name}, ${target} => { for (let ${index} = 0; ${index} < ${name}.length; ${index}++) { if (Object.hasOwn(${name}, ${index})) Object.defineProperty(${target}, ${index}, { value: ${projected}, enumerable: true, configurable: true, writable: true }); } }) : (${body})`;
     }
     if (callable) {
       const returns = variants.flatMap((variant) =>

@@ -10,6 +10,7 @@ import type {
 } from '@proto.ui/prototypes-base/checkbox';
 import type { ShadcnStyleProps } from '../style-scope';
 
+/** Checked, disabled and required facts are inherited from the Base control. */
 export interface ShadcnCheckboxRootProps extends CheckboxRootProps, ShadcnStyleProps {}
 
 export type ShadcnCheckboxRootExposes = CheckboxRootExposes;

@@ -1,3 +1,4 @@
+import { runAllSteps } from '../host/synchronous-steps';
 import { contactCarrierBounds, hasAuthoredPseudoPaint } from './contact-carrier';
 /** A bounded source is the visible application canvas itself. No DOM capture,
  * screenshot API, external image fetch, or self-output sampling is performed. */
@@ -27,19 +28,7 @@ export function createCanvasBackdropLease(
     frame: CanvasBackdropFrame | null = null;
   const listeners = new Set<() => void>();
   const notify = () => {
-    let failed = false;
-    let failure: unknown;
-    for (const listener of [...listeners]) {
-      try {
-        listener();
-      } catch (error) {
-        if (!failed) {
-          failed = true;
-          failure = error;
-        }
-      }
-    }
-    if (failed) throw failure;
+    runAllSteps([...listeners]);
   };
   return {
     current: () => frame,

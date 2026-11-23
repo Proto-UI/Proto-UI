@@ -324,6 +324,7 @@ describe('prototypes/shadcn: checkbox', () => {
       // P-BASE-FIELD-CHOICES-POLICY/RESET also govern the ordinary Root.
       'readOnly',
       'resetValue',
+      'required',
     ]);
 
     // Writing the derived names on the Indicator changes nothing: only the Root

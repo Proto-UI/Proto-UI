@@ -12,6 +12,8 @@ export * from './collapsible';
 export * from './radio-group';
 export * from './dropdown';
 export * from './select';
+export * from './selectable-row';
+export * from './native-file-input';
 export * from './hover-card';
 export * from './tooltip';
 export * from './dialog';
