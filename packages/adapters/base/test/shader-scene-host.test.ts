@@ -412,6 +412,91 @@ describe('borrowed scene source at the physical presenter boundary', () => {
     expect(f.presenter.diagnostics()).toContain('shader-scene-cleanup-failed');
     f.presenter.dispose();
   });
+  it('does not install source observers after root lookup retires the presenter', () => {
+    const f = fixture();
+    f.presenter.dispose();
+    let retireFromRoot = false;
+    let presenter: ReturnType<typeof createWebShaderScenePresenter>;
+    presenter = createWebShaderScenePresenter({
+      root() {
+        if (retireFromRoot) {
+          retireFromRoot = false;
+          presenter.dispose();
+        }
+        return f.root;
+      },
+      prepare() {},
+      host: { ownedScenes: { scene: f.lease } },
+    });
+    const physical = boundary.sessions.at(-1)!;
+    const currentFrame = f.frame!;
+    f.lease.current.mockImplementationOnce(() => {
+      retireFromRoot = true;
+      return currentFrame;
+    });
+    const observe = vi.spyOn(
+      f.root.ownerDocument.defaultView!.MutationObserver.prototype,
+      'observe'
+    );
+    const add = vi.spyOn(f.root.ownerDocument, 'addEventListener');
+    try {
+      presenter.commit(publication(), program);
+      expect(physical.alive).toBe(false);
+      expect(f.off).toHaveBeenCalledOnce();
+      expect(physical.sources).toHaveLength(0);
+      expect(observe).not.toHaveBeenCalled();
+      expect(add.mock.calls.filter(([type]) => type === 'slotchange')).toHaveLength(0);
+      const reads = f.lease.current.mock.calls.length;
+      f.callbacks[0]();
+      expect(f.lease.current).toHaveBeenCalledTimes(reads);
+    } finally {
+      // A failing old-source run must not leak its observed listeners into later cases.
+      for (const observer of observe.mock.contexts) (observer as MutationObserver).disconnect();
+      for (const [type, listener, options] of add.mock.calls)
+        if (type === 'slotchange')
+          f.root.ownerDocument.removeEventListener(type, listener, options);
+      presenter.dispose();
+    }
+  });
+  it('does not let a root lookup replace the current source publication with retired work', () => {
+    const f = fixture();
+    f.presenter.dispose();
+    let replaceFromRoot = false;
+    let sourceReads = 0;
+    let presenter: ReturnType<typeof createWebShaderScenePresenter>;
+    const replacementProgram = vi.fn(program);
+    presenter = createWebShaderScenePresenter({
+      root() {
+        if (replaceFromRoot) {
+          replaceFromRoot = false;
+          presenter.commit(publication(2), replacementProgram);
+        }
+        return f.root;
+      },
+      prepare() {},
+      host: { ownedScenes: { scene: f.lease } },
+    });
+    const physical = boundary.sessions.at(-1)!;
+    const currentFrame = f.frame!;
+    f.lease.current.mockImplementation(() => {
+      if (++sourceReads === 2) replaceFromRoot = true;
+      return currentFrame;
+    });
+    try {
+      presenter.commit(publication(), program);
+      expect(replacementProgram).toHaveBeenCalledOnce();
+      expect(f.off).toHaveBeenCalledOnce();
+      expect(physical.sources).toHaveLength(1);
+      expect(physical.pending).toHaveLength(1);
+      expect(physical.pending[0].current()).toBe(true);
+      const reads = f.lease.current.mock.calls.length;
+      f.callbacks[0]();
+      expect(f.lease.current).toHaveBeenCalledTimes(reads);
+      expect(physical.pending[0].current()).toBe(true);
+    } finally {
+      presenter.dispose();
+    }
+  });
   it('bounds a source that synchronously invalidates on every read', () => {
     const f = fixture(),
       first = f.frame!;

@@ -152,6 +152,92 @@ for (const kind of ['runtime', 'generated'] as const) {
     expect(gpu).not.toHaveBeenCalled();
     active.dispose();
   });
+  it(`${kind}: recovery from a failed scene factory retires its fallback paint before publication`, () => {
+    let attempts = 0;
+    let active: ReturnType<typeof owner>;
+    active = owner(kind, {
+      createScenePresenter(options) {
+        if (++attempts === 1) throw new Error('temporary scene factory failure');
+        const physical = createWebShaderPresenter(options);
+        const recovered: WebShaderScenePresenter = {
+          commit(frame, _program, prepare) {
+            expect(active.root.style.backgroundImage).toBe(original);
+            physical.commit(frame, null, prepare);
+          },
+          release: (view) => physical.release(view),
+          dispose: () => physical.dispose(),
+          diagnostics: () => physical.diagnostics(),
+        };
+        return recovered;
+      },
+    });
+    active.root.style.backgroundImage = 'linear-gradient(red, blue)';
+    const original = active.root.style.backgroundImage;
+    try {
+      active.start();
+      expect(active.root.style.backgroundImage).toBe('none');
+      active.refresh();
+      expect(attempts).toBe(2);
+      expect(active.root.style.backgroundImage).toBe('none');
+    } finally {
+      active.dispose();
+    }
+    expect(active.root.style.backgroundImage).toBe(original);
+  });
+  it(`${kind}: physical fallback cleanup reentry cannot overwrite the current scene paint`, () => {
+    let attempts = 0;
+    let active: ReturnType<typeof owner>;
+    active = owner(kind, {
+      createScenePresenter(options) {
+        if (++attempts === 1) throw new Error('temporary scene factory failure');
+        const physical = createWebShaderPresenter(options);
+        const recovered: WebShaderScenePresenter = {
+          commit(frame, _program, prepare) {
+            physical.commit(frame, null, prepare);
+          },
+          release: (view) => physical.release(view),
+          dispose: () => physical.dispose(),
+          diagnostics: () => physical.diagnostics(),
+        };
+        return recovered;
+      },
+    });
+    active.root.style.backgroundImage = 'linear-gradient(red, blue)';
+    const original = active.root.style.backgroundImage;
+    const style = active.root.style;
+    const removeProperty = style.removeProperty.bind(style);
+    let armed = false;
+    let reentered = false;
+    let currentPaint: string | undefined;
+    const cleanup = vi.spyOn(style, 'removeProperty').mockImplementation((property) => {
+      const value = removeProperty(property);
+      if (armed && property === 'background-color') {
+        armed = false;
+        reentered = true;
+        active.refresh();
+      }
+      return value;
+    });
+    try {
+      active.start();
+      expect(active.root.style.backgroundImage).toBe('none');
+      armed = true;
+      active.refresh();
+      currentPaint = active.root.style.backgroundImage;
+    } finally {
+      armed = false;
+      try {
+        active.dispose();
+      } finally {
+        cleanup.mockRestore();
+      }
+    }
+    expect({ reentered, currentPaint, restoredPaint: active.root.style.backgroundImage }).toEqual({
+      reentered: true,
+      currentPaint: 'none',
+      restoredPaint: original,
+    });
+  });
   it(`${kind}: an unselected owner never calls the source capability factory`, () => {
     const createScenePresenter = vi.fn((): WebShaderScenePresenter => capability());
     const active = owner(kind, { createScenePresenter });

@@ -81,7 +81,7 @@ export function createShaderBrowserFixture(
   } | null = null;
   let clicks = 0,
     clickedTag = '';
-  let sourceControl: {
+  type SourceControl = {
     scope: HTMLElement;
     lease: ReturnType<typeof createCanvasBackdropLease>;
     borrowed: ReturnType<typeof createCanvasBackdropLease>;
@@ -92,8 +92,9 @@ export function createShaderBrowserFixture(
       borrowedDisposals: number;
       sourceAvailable: boolean;
     };
-  } | null = null;
-  let retiredSource: ReturnType<NonNullable<typeof sourceControl>['state']> | null = null;
+  };
+  let sourceControl: SourceControl | null = null;
+  let retiredSource: ReturnType<SourceControl['state']> | null = null;
   const components = new Map<string, any>();
   function component(target: Target, execution: Execution, configured = true) {
     const key = target + '/' + execution;

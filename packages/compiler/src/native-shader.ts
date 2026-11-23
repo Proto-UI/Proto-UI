@@ -62,10 +62,44 @@ export function createNativeShader(options: {setup(): void; alive(): boolean; ro
   type Declaration = {kind:'pixels'; key:string; fallback:readonly [number,number,number,number]; program:WebShaderProgram}${scenes ? " | {kind:'scene'; slot:string; resources:number; key:string; fallback:readonly [number,number,number,number]; program:WebShaderSceneProgram}" : ''};
   let declaration: Declaration | null = null;
   let view = 0, revision = 0, mounted = false, disposed = false${scenes ? ', turn = 0' : ''};
-  const presenter = createWebShaderPresenter({root:options.root, prepare:options.prepare});
-  ${scenes ? 'let scene: WebShaderScenePresenter | undefined;' : ''}
+  ${scenes ? 'let' : 'const'} presenter = createWebShaderPresenter({root:options.root, prepare:options.prepare});
+  ${
+    scenes
+      ? `let scene: WebShaderScenePresenter | undefined;
+  let cleanupDepth = 0, draining = false, pendingRefresh = false;
+  function duringCleanup(work: () => void) {
+    cleanupDepth++;
+    try { work(); } finally { cleanupDepth--; }
+  }
+  function drain() {
+    if (cleanupDepth || draining) return;
+    draining = true;
+    try {
+      while (pendingRefresh) { pendingRefresh = false; refresh(); }
+    } finally { draining = false; }
+  }
+  function retireScene(previous: WebShaderScenePresenter | undefined) {
+    duringCleanup(() => previous?.dispose());
+  }
+  function retirePublishers(dispose: boolean) {
+    const previousPresenter = presenter, previousScene = scene, currentView = view;
+    try {
+      duringCleanup(() => {
+        if (dispose) { previousPresenter.dispose(); previousScene?.dispose(); }
+        else { previousPresenter.release(currentView); previousScene?.release(currentView); }
+      });
+    } finally { drain(); }
+  }`
+      : ''
+  }
   function refresh() {
-    if (disposed || !mounted || !declaration || !options.alive()) return;
+    if (disposed || !mounted || !declaration || !options.alive()) return;${
+      scenes
+        ? `
+    if (cleanupDepth) { turn++; pendingRefresh = true; return; }
+    try {`
+        : ''
+    }
     ${
       scenes
         ? `const selected = declaration, operation = ++turn;
@@ -75,7 +109,13 @@ export function createNativeShader(options: {setup(): void; alive(): boolean; ro
         let acquired: WebShaderScenePresenter | undefined;
         try { acquired = options.host?.createScenePresenter({root:options.root, prepare:options.prepare}); }
         catch { if (!disposed && mounted && turn === operation && declaration === selected) presenter.commit(frame, null, undefined, undefined, 'shader-scene-host-failed'); return; }
-        if (disposed || !mounted || turn !== operation || declaration !== selected || !options.alive()) { acquired?.dispose(); return; }
+        if (disposed || !mounted || turn !== operation || declaration !== selected || !options.alive()) { retireScene(acquired); return; }
+        if (acquired) {
+          const fallback = presenter;
+          presenter = createWebShaderPresenter({root:options.root, prepare:options.prepare});
+          duringCleanup(() => fallback.dispose());
+          if (disposed || !mounted || turn !== operation || declaration !== selected || !options.alive()) { retireScene(acquired); return; }
+        }
         scene = acquired;
       }
       if (scene) scene.commit({...frame, slot:selected.slot, resources:selected.resources}, selected.program);
@@ -84,14 +124,19 @@ export function createNativeShader(options: {setup(): void; alive(): boolean; ro
     }`
         : ''
     }
-    presenter.commit({view, revision:++revision, key:${scenes ? 'selected' : 'declaration'}.key, fallback:${scenes ? 'selected' : 'declaration'}.fallback}, ${scenes ? 'selected' : 'declaration'}.program);
+    presenter.commit({view, revision:++revision, key:${scenes ? 'selected' : 'declaration'}.key, fallback:${scenes ? 'selected' : 'declaration'}.fallback}, ${scenes ? 'selected' : 'declaration'}.program);${
+      scenes
+        ? `
+    } finally { drain(); }`
+        : ''
+    }
   }
   function register(input: Declaration) {
     options.setup();
     if (disposed || declaration) throw new Error('One live shader declaration per material surface');
     const owned = Object.freeze({...input, fallback:Object.freeze([...input.fallback]) as typeof input.fallback});
     declaration = owned;
-    return () => {options.setup(); if (declaration !== owned) return; declaration = null; presenter.release(view); ${scenes ? 'scene?.release(view);' : ''}};
+    return () => {options.setup(); if (declaration !== owned) return; declaration = null; ${scenes ? 'turn++; pendingRefresh = false; retirePublishers(false);' : 'presenter.release(view); '}};
   }
   return {
     declare(key:string, fallback:readonly [number,number,number,number], program:WebShaderProgram) {
@@ -100,8 +145,8 @@ export function createNativeShader(options: {setup(): void; alive(): boolean; ro
     ${scenes ? "declareScene(slot:string, resources:number, key:string, fallback:readonly [number,number,number,number], program:WebShaderSceneProgram) { return register({kind:'scene', slot, resources, key, fallback, program}); }," : ''}
     mount() {if (disposed) return; if (!mounted) {mounted=true; view++;} refresh();},
     refresh,
-    detach() {if (!mounted) return; mounted=false; ${scenes ? 'turn++;' : ''} presenter.release(view); ${scenes ? 'scene?.release(view);' : ''}},
-    dispose() {if (disposed) return; disposed=true; mounted=false; declaration=null; ${scenes ? 'turn++;' : ''} presenter.dispose(); ${scenes ? 'scene?.dispose();' : ''}},
+    detach() {if (!mounted) return; mounted=false; ${scenes ? 'turn++; pendingRefresh = false; retirePublishers(false);' : ' presenter.release(view); '}},
+    dispose() {if (disposed) return; disposed=true; mounted=false; declaration=null; ${scenes ? 'turn++; pendingRefresh = false; retirePublishers(true);' : ' presenter.dispose(); '}},
   };
 }
 `,

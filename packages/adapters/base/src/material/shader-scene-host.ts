@@ -248,6 +248,7 @@ export function createWebShaderScenePresenter(options: {
             throw new Error('shader-scene-stale-revision');
           seenSources.set(source, { revision, frame });
           const root = options.root();
+          if (!live(binding)) return;
           if (!scoped(root, frame)) throw new Error('shader-scene-scope-unavailable');
           const document = root.ownerDocument;
           const trees = sourceTrees(root, frame.scope, frame.canvas);
@@ -306,6 +307,7 @@ export function createWebShaderScenePresenter(options: {
                 frame!.revision === revision &&
                 live(binding) &&
                 options.root() === root &&
+                live(binding) &&
                 root.ownerDocument === document &&
                 scoped(root, frame!)
               );
