@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "28c1a8e62d0d9f013efe5700ed6b70e4cc5a0329",
+  "revision": "8d4d48d7ef4308b6facbe07a737b438421e26a79",
   "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately.",
   "sourceAdmission": "unverified",
   "sources": [
@@ -31,7 +31,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
-      "sha256": "5abf6359d556daf21777892ed99cec3b57d18c5102cfcaa9569987ab76086151"
+      "sha256": "96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-panel-client.ts",
@@ -127,7 +127,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
-      "sha256": "c16bd248d5b532017ca0ba2400f78ca04344f136c6d2f85723e744660d84db7a"
+      "sha256": "f734e78b8ec62770c3432c8ffdf002c258b1378ce88ea90fbf7bdb746f7f9112"
     }
   ]
 }
