@@ -45,8 +45,15 @@ function websiteManualChunk(id) {
   // Only the lazy React/Vue/Vue2 adapters use this reserved-input helper.
   // Do not pull it into every WC site shell through the broad Base grouping.
   if (modulePath === 'packages/adapters/base/src/host/instance-associations.ts') return;
+  // These two reviewed, idle-until-declared providers belong to the public WC
+  // entry. Keep their exact owner chain in the existing site-control bridge.
+  if (
+    modulePath === 'packages/adapters/base/src/material/shader-webgl2.ts' ||
+    modulePath === 'packages/adapters/base/src/material/shader-webgl2-host.ts'
+  )
+    return 'site-shadcn-controls';
   // Optional material providers already enter through the renderer's lazy scene.
-  // Preserve that boundary instead of folding shader/source code into every shell.
+  // Preserve that boundary for every other material provider and generated program.
   if (modulePath?.startsWith('packages/adapters/base/src/material/')) return;
   if (
     modulePath === 'apps/www/src/components/site-shadcn-controls.ts' ||

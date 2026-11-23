@@ -22,6 +22,7 @@ export interface FeedbackFacade extends ModuleFacade {
     /** Setup-only single owned slot and whole candidate contributions. */
     declare(slot: MaterialSlot): () => void;
     use(candidate: MaterialCandidate): () => void;
+    shader(declaration: import('@proto.ui/core').ShaderPresentationDeclaration): () => void;
   };
   style: {
     declareDecoration(): OwnedDecorationTarget;
@@ -68,6 +69,7 @@ export type FeedbackPort = {
   ) => FeedbackRuntimeStyleDisposer | null;
   exportMaterialFrame?: () => MaterialIntentFrame;
   materialDiagnostics?: () => readonly string[];
+  shaderDiagnostics?: () => readonly string[];
   motionDiagnostics?: () => readonly string[];
   /** Private material integration: keep relevant Rules in the evaluator. */
   shouldRetainStyleRule?: (tokens: readonly string[]) => boolean;

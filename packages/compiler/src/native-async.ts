@@ -1,5 +1,9 @@
 import type { ExpressionIR, GeneratedModule, Operation, ValueType } from './ir';
 import type { RuleMetaKey } from './rule-declarations';
+import type { ShaderKernel } from '../../core/src/shader-presentation';
+import { nativeShaderArtifacts } from './native-shader';
+import { emitNativeShaderDeclaration } from './shader-plan';
+import { nativePresencePresentationArtifact } from './native-presence-presentation';
 
 export const nativeMetaSubscriptionArtifact: NonNullable<
   GeneratedModule['supportingFiles']
@@ -179,18 +183,25 @@ export function subscribeNativeRulePreferences(doc: Document | undefined, keys: 
 export function nativeHostAtomPlan(
   operations: readonly Operation[],
   prefix: string,
-  ruleMetaKeys: readonly RuleMetaKey[] = []
+  ruleMetaKeys: readonly RuleMetaKey[] = [],
+  shaderKernels: readonly ShaderKernel[] = []
 ) {
   const delay = operations.includes('scheduler.delay');
-  const presence = operations.some((operation) => operation.startsWith('presence.'));
+  const presentation = operations.includes('feedback.style.presence');
+  const shader = operations.includes('feedback.material.shader');
+  const presence =
+    presentation || operations.some((operation) => operation.startsWith('presence.'));
   const snapshot = presence || operations.includes('presentation.snapshotCompletion');
   const ruleColorScheme = ruleMetaKeys.includes('colorScheme');
   const rulePreferences = ruleMetaKeys.filter((key) => key.startsWith('preference.'));
   const ruleMeta = ruleColorScheme || rulePreferences.length > 0;
   const meta = operations.includes('meta.get') || ruleMeta;
+  const presenceFile = presentation ? nativePresencePresentationArtifact : nativePresenceArtifact;
+  const presenceImport = './' + presenceFile.path.replace(/\.ts$/, '');
   const files = [
     ...(delay ? [nativeDelayArtifact] : []),
-    ...(snapshot ? [nativePresenceArtifact] : []),
+    ...(shader ? nativeShaderArtifacts(shaderKernels) : []),
+    ...(snapshot ? [presenceFile] : []),
     ...(meta ? [nativeMetaArtifact] : []),
     ...(ruleMeta ? [nativeMetaSubscriptionArtifact] : []),
     ...(ruleColorScheme ? [nativeRuleColorSchemeArtifact] : []),
@@ -199,6 +210,9 @@ export function nativeHostAtomPlan(
   return {
     delay,
     presence,
+    presentation,
+    shader,
+    physicalPresentation: presentation || shader,
     snapshot,
     meta,
     files,
@@ -222,11 +236,14 @@ export function nativeHostAtomPlan(
       ruleMeta
         ? `import { releaseNativeMeta as ${prefix}ReleaseMeta } from './.proto-ui/meta/subscription-v1';`
         : '',
+      shader
+        ? `import {createNativeShader as ${prefix}CreateShader} from './.proto-ui/shader/owner-web-v1';`
+        : '',
       delay
         ? `import { createNativeDelay as ${prefix}CreateDelay, type NativeDelayTask as ${prefix}DelayTask } from './.proto-ui/async/delay-web-v1';`
         : '',
       snapshot
-        ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion, type NativePresenceOwner as ${prefix}PresenceOwner } from './.proto-ui/async/presence-owner-v1';`
+        ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion, type NativePresenceOwner as ${prefix}PresenceOwner } from '${presenceImport}';`
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
@@ -244,11 +261,14 @@ export function nativeHostAtomPlan(
       ruleMeta
         ? `import { releaseNativeMeta as ${prefix}ReleaseMeta } from './.proto-ui/meta/subscription-v1';`
         : '',
+      shader
+        ? `import {createNativeShader as ${prefix}CreateShader} from './.proto-ui/shader/owner-web-v1';`
+        : '',
       delay
         ? `import { createNativeDelay as ${prefix}CreateDelay } from './.proto-ui/async/delay-web-v1';\n/** @typedef {import('./.proto-ui/async/delay-web-v1').NativeDelayTask} ${prefix}DelayTask */`
         : '',
       snapshot
-        ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion } from './.proto-ui/async/presence-owner-v1';\n/** @template Run @typedef {import('./.proto-ui/async/presence-owner-v1').NativePresenceOwner<Run>} ${prefix}PresenceOwner */`
+        ? `import { createNativePresence as ${prefix}CreatePresence, snapshotNativeCompletion as ${prefix}SnapshotCompletion } from '${presenceImport}';\n/** @template Run @typedef {import('${presenceImport}').NativePresenceOwner<Run>} ${prefix}PresenceOwner */`
         : '',
       meta
         ? `import { readNativeWebMeta as ${prefix}ReadMeta } from './.proto-ui/meta/web-snapshot-v1';`
@@ -283,15 +303,20 @@ export function nativeHostAtomPlan(
       invokeRun: string;
       document: string;
       run: string;
+      root?: string;
+      prepare?: string;
       typed?: boolean;
     }): string {
       const typed = options.typed !== false;
       return [
+        shader
+          ? `const ${prefix}Shader = ${prefix}CreateShader({setup: () => { ${options.setup}; }, alive: () => ${options.alive}, root: () => ${options.root ?? 'null'}, prepare: () => { ${options.prepare ?? ''} }});`
+          : '',
         delay
           ? `const ${prefix}Delay = ${prefix}CreateDelay({ runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invoke}; }, report: error => console.error('[Delay] callback failed', error) });`
           : '',
         presence
-          ? `const ${prefix}Presence = ${prefix}CreatePresence${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; } });`
+          ? `const ${prefix}Presence = ${prefix}CreatePresence${typed ? `<${options.run}>` : ''}({ setup: () => { ${options.setup}; }, runtime: () => { ${options.runtime}; }, alive: () => ${options.alive}, invoke: callback => { ${options.invokeRun}; }${presentation ? `, root: () => ${options.root ?? 'null'}, prepare: () => { ${options.prepare ?? ''} }` : ''} });`
           : '',
         meta
           ? `const ${prefix}Meta = ${typed ? '(key: string)' : '/** @param {string} key */ (key)'} => ${prefix}ReadMeta(${options.document}, key);`
@@ -300,8 +325,13 @@ export function nativeHostAtomPlan(
         .filter(Boolean)
         .join('\n');
     },
-    detach: `${delay ? `${prefix}Delay.cancelView();` : ''}${presence ? `${prefix}Presence.detach();` : ''}`,
-    dispose: `${delay ? `${prefix}Delay.dispose();` : ''}${presence ? `${prefix}Presence.dispose();` : ''}`,
+    detach: `${delay ? `${prefix}Delay.cancelView();` : ''}${presence ? `${prefix}Presence.detach();` : ''}${shader ? `${prefix}Shader.detach();` : ''}`,
+    mount: `${presentation ? `${prefix}Presence.mount();` : ''}${shader ? `${prefix}Shader.mount();` : ''}`,
+    refresh: `${presentation ? `${prefix}Presence.refresh();` : ''}${shader ? `${prefix}Shader.refresh();` : ''}`,
+    registerSource(source: string): string {
+      return presentation ? `${prefix}Presence.registerSource(${source});` : '';
+    },
+    dispose: `${delay ? `${prefix}Delay.dispose();` : ''}${presence ? `${prefix}Presence.dispose();` : ''}${shader ? `${prefix}Shader.dispose();` : ''}`,
   };
 }
 
@@ -317,6 +347,12 @@ export function emitNativeHostAtom(
   const args = () => value.arguments.map(emit).join(', ');
   let body: string | undefined;
   switch (value.operation) {
+    case 'feedback.material.shader':
+      body = emitNativeShaderDeclaration(value.arguments[0], prefix);
+      break;
+    case 'feedback.style.presence':
+      body = `${prefix}Presence.declare(${args()})`;
+      break;
     case 'scheduler.delay':
       return `${prefix}Delay.schedule(${args()})`;
     case 'presentation.snapshotCompletion':

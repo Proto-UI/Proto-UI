@@ -1139,7 +1139,9 @@ describe('Vue2 closed identity-only body proof', () => {
   function validated(ir: PrototypeIR, invoked = new Set<FunctionIR>()) {
     let directory: string | undefined;
     if (evidenceRoot) {
-      if (!path.isAbsolute(evidenceRoot) || ++proofCaptures > 20)
+      // Twenty original proof captures plus two dormant controls and one
+      // retained-property control; this bounds evidence files, not behavior.
+      if (!path.isAbsolute(evidenceRoot) || ++proofCaptures > 23)
         throw new Error('Unexpected proof evidence root or capture count');
       mkdirSync(evidenceRoot, { recursive: true });
       directory = mkdtempSync(path.join(evidenceRoot, 'proof-'));
@@ -1387,10 +1389,39 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
   });
 
   it.each([
+    ['nested-unused-body', "const later=()=>alias('nested');return r.el('i','not-called');"],
+    [
+      'captured-alias-unused-body',
+      `const later=(make:string)=>alias('captured');
+      return r.el('i','not-called');`,
+    ],
+  ])('retains dormant source without admitting an uncalled body: %s', (_name, tail) => {
+    const ir = identity(tail);
+    expect(ir.sourceFiles[0].content).toContain(tail);
+    expect(
+      renderFunction(ir).body.some(
+        (statement) => statement.kind === 'const' && statement.name === 'later'
+      )
+    ).toBe(false);
+    const make = helper(ir);
+    const proof = checked(ir);
+    expect(proof.incomplete.size).toBe(0);
+    expect(proof.eligible.has(make)).toBe(true);
+    expect(proof.entries.get(make)?.blocked.has('invoke')).toBe(false);
+  });
+
+  it.each([
     ['direct', "return make('called');"],
     ['alias', "return alias('called');"],
     ['after-return', "return r.el('i','not-called');alias('unreachable');"],
-    ['nested-unused-body', "const later=()=>alias('nested');return r.el('i','not-called');"],
+    [
+      'nested-invoked-body',
+      "const later=()=>alias('nested');later();return r.el('i','not-called');",
+    ],
+    [
+      'nested-retained-property',
+      "const later=()=>alias('nested');const retained={later};return r.el('i','not-called');",
+    ],
     ['dead-branch', "if(false)return alias('dead');return r.el('i','not-called');"],
   ])('does not infer non-invocation from an empty collector set: %s', (_name, tail) => {
     const ir = identity(tail);
@@ -1432,6 +1463,7 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
 
   it('resolves a captured alias separately from a caller parameter with the same name', () => {
     const ir = identity(`const later=(make:string)=>alias('captured');
+      later('local');
       return r.el('i','not-called');`);
     const make = helper(ir);
     const proof = checked(ir);

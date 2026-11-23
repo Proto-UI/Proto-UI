@@ -820,7 +820,12 @@ for (const family of ['react', 'vue', 'vue2', 'wc'])
       else assert.deepEqual(issues, []);
     });
 
+const reviewedShaderProviders = [
+  'packages/adapters/base/src/material/shader-webgl2.ts',
+  'packages/adapters/base/src/material/shader-webgl2-host.ts',
+];
 const reviewedWcHelpers = [
+  ...reviewedShaderProviders,
   'packages/adapters/base/src/events/keyboard-press-owner.ts',
   'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/platform/portal-direction.ts',
@@ -909,6 +914,57 @@ for (const [entry, owner] of siteOwners) {
       .find((item) => item.id === 'apps/www/src/components/site-shadcn-controls.ts')
       .imports.push(target);
     return bridge;
+  }
+  test(`bridge origin: ${entry} admits the exact WC shader provider chain`, () => {
+    const { graph } = siteGraph();
+    const modules = 'packages/adapters/web-component/src/runtime/modules.ts';
+    const [provider, host] = reviewedShaderProviders;
+    const bridge = addReviewedBridgeTarget(graph, modules);
+    bridge.moduleIds.push(provider, host);
+    graph.modules.push(
+      { id: provider, imports: [host], dynamicImports: [] },
+      { id: host, imports: [], dynamicImports: [] }
+    );
+    graph.modules.find((item) => item.id === modules).imports.push(provider);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    // A nearby legacy material program has not acquired this owner allowance.
+    const adjacent = 'packages/adapters/base/src/material/program.ts';
+    bridge.moduleIds.push(adjacent);
+    graph.modules.push({ id: adjacent, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === provider).imports.push(adjacent);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(adjacent)
+      )
+    );
+  });
+  for (const target of reviewedShaderProviders) {
+    const forms =
+      owner === 'library-card-client.ts'
+        ? ['query API lookalike']
+        : ['direct owner', 'query API lookalike'];
+    for (const form of forms) {
+      test(`bridge origin: ${entry} rejects ${form} shader access: ${target}`, () => {
+        const { graph, root } = siteGraph();
+        addReviewedBridgeTarget(graph, target);
+        const importer =
+          form === 'direct owner'
+            ? `apps/www/src/components/${owner}`
+            : 'apps/www/src/components/site-shadcn-controls.ts?foreign';
+        let source = graph.modules.find((item) => item.id === importer);
+        if (!source) {
+          source = { id: importer, imports: [], dynamicImports: [] };
+          graph.modules.push(source);
+          root.moduleIds.push(importer);
+        }
+        source.imports.push(target);
+        const issues = collectWebsiteProductionBundleIssues({ graph });
+        assert.ok(
+          issues.some((issue) => issue.includes('unowned importer edge') && issue.includes(target)),
+          issues.join('\n')
+        );
+      });
+    }
   }
   test(`bridge origin: ${entry} admits router-owned pointer contact transitively`, () => {
     const { graph } = siteGraph();
@@ -1359,7 +1415,7 @@ const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)
 const materialBoundary = chunkFunction.body.statements.find(
   (node) =>
     ts.isIfStatement(node) &&
-    node.getText(configSource).includes('packages/adapters/base/src/material/')
+    node.getText(configSource).includes("startsWith('packages/adapters/base/src/material/')")
 );
 assert.ok(materialBoundary);
 const regroupMaterial = vm.runInNewContext(
@@ -1369,7 +1425,15 @@ const regroupMaterial = vm.runInNewContext(
 const optionalMaterialSources = fs
   .readdirSync(path.join(repositoryRoot, 'packages/adapters/base/src/material'))
   .filter((name) => name.endsWith('.ts'))
-  .map((name) => `packages/adapters/base/src/material/${name}`);
+  .map((name) => `packages/adapters/base/src/material/${name}`)
+  .filter((moduleId) => !reviewedShaderProviders.includes(moduleId));
+for (const moduleId of reviewedShaderProviders) {
+  test(`manual chunk binds the reviewed default shader provider: ${moduleId}`, () => {
+    assert.equal(classifyChunk(moduleId), 'site-shadcn-controls');
+    assert.equal(classifyChunk(`${moduleId}?used`), 'site-shadcn-controls');
+    assert.equal(classifyChunk(moduleId.replace('.ts', '-unreviewed.ts')), undefined);
+  });
+}
 for (const moduleId of optionalMaterialSources) {
   test(`manual chunk preserves existing lazy material boundary: ${moduleId}`, () => {
     assert.equal(classifyChunk(moduleId), undefined);

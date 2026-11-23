@@ -2,6 +2,17 @@ name: Compiler GPUI source consumers
 
 on:
   workflow_dispatch:
+    inputs:
+      package_budget_evidence:
+        description: 'Also run the strict whole-entry package gate for this exact ref'
+        type: boolean
+        required: false
+        default: false
+      website_shader_evidence:
+        description: 'Also collect full Website source and original Docs evidence for this exact ref'
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 
 permissions:
@@ -12,6 +23,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Explicit manual evidence only. Reusable full-cycle calls retain their
+  # existing public_package_build owner and do not inherit this opt-in input.
+  package-budgets:
+    if: github.event_name == 'workflow_dispatch' && inputs.package_budget_evidence == true
+    uses: ./.github/workflows/package-budget-evidence.yml
+    permissions:
+      contents: read
+
+  website-shader-evidence:
+    if: github.event_name == 'workflow_dispatch' && inputs.website_shader_evidence == true
+    uses: ./.github/workflows/website-shader-ownership-evidence.yml
+    permissions:
+      contents: read
+
   native-consumer:
     strategy:
       fail-fast: false

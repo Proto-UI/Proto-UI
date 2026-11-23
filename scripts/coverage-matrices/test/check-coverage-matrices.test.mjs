@@ -816,7 +816,7 @@ function writeCurrentRetryConfig(root) {
   );
   assert.equal(
     createHash('sha256').update(config).digest('hex'),
-    'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7'
+    'e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c'
   );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
@@ -18934,6 +18934,47 @@ for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {
   });
 }
 
+for (const [relative, allowed] of [
+  ['packages/modules/feedback/src/create.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/index.ts', './shader/sink'],
+  ['packages/modules/feedback/src/types.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/shader/sink.ts', '@proto.ui/core'],
+  ['packages/runtime/src/kernel/handles/def.ts', '@proto.ui/core/internal'],
+]) {
+  test(`startup shader closure remains source-bound: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const original = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const importer = path.join(root, 'apps/www/src/components/StartupImportProbe.ts');
+    const importFile = (file) =>
+      fs.writeFileSync(
+        importer,
+        `import '${path.relative(path.dirname(importer), file).replaceAll('\\', '/')}';`
+      );
+    fs.mkdirSync(path.dirname(importer), { recursive: true });
+    importFile(target);
+    fs.writeFileSync(target, original);
+    const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    assert.ok(!validationMessage(root).includes(issue));
+    fs.writeFileSync(target, original + '\n// unreviewed source change\n');
+    assert.ok(validationMessage(root).includes(issue));
+    fs.writeFileSync(target, original + "\nimport '@proto.ui/adapter-react';\n");
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/adapter-react\` in \`${relative}\``
+      )
+    );
+    const foreign = relative.replace('.ts', '-foreign.ts');
+    fs.writeFileSync(path.join(root, foreign), original);
+    importFile(path.join(root, foreign));
+    assert.ok(
+      validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+    );
+  });
+}
+
 for (const source of ['site-startup-paint.ts', 'snapshot-prototype-style.ts']) {
   for (const scenario of ['exact', 'foreign', 'changed', 'adjacent-import', 'dynamic-css']) {
     test(`startup prerender import boundary: ${source} ${scenario}`, () => {
@@ -19052,6 +19093,10 @@ for (const [relative, allowed] of [
     '../../../../../../packages/adapters/base/src/material/program',
   ],
   ['apps/www/src/pages/en/test/liquid-glass-portal.astro', '@proto.ui/adapter-base/web-material'],
+  [
+    'apps/www/src/pages/en/test/liquid-glass-hover.astro',
+    '@proto.ui/prototypes-liquid-glass/button',
+  ],
 ]) {
   test(`diagnostic import review rejects owner, body and edge drift: ${path.basename(relative)}`, () => {
     const root = createRoot();

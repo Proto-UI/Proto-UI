@@ -18,6 +18,7 @@ import {
   createJavaScriptValueReader,
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
+  emitJavaScriptRecord,
   emitJavaScriptValue,
   emitJavaScriptParameters,
   emitUninvokedJavaScriptFunction,
@@ -118,7 +119,12 @@ export function emitVueSource(
   let prefix = '__puiVue';
   while ([...names].some((name) => name.startsWith(prefix))) prefix += '_';
   const n = (name: string): string => `${prefix}${name}`;
-  const atoms = nativeHostAtomPlan(admitted.value.operations, prefix, admitted.value.ruleMetaKeys);
+  const atoms = nativeHostAtomPlan(
+    admitted.value.operations,
+    prefix,
+    admitted.value.ruleMetaKeys,
+    admitted.value.shaderKernels
+  );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -207,7 +213,11 @@ export function emitVueSource(
       case 'operation':
         if (node.operation === 'props.watchRaw' || node.operation === 'props.watchRawAll')
           usesRawWatchers = true;
-        if (node.operation.startsWith('feedback.style.')) usesStyle = true;
+        if (
+          node.operation.startsWith('feedback.style.') ||
+          node.operation === 'feedback.material.shader'
+        )
+          usesStyle = true;
         if (
           [
             'hook.',
@@ -480,7 +490,7 @@ export function emitVueSource(
       case 'array':
         return `[${node.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${node.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expression(entry.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(node, (item) => expression(item, depth), typeName);
       case 'function':
         return fn(node.function, depth);
       case 'helper-call':
@@ -956,9 +966,11 @@ ${
         unsubscribe(off: () => void) { ${n('PublicAlive')}(); off(); },
       });
       ${n('States')}.add(state); ${n('PublicStates')}.set(state, projection);
+      ${atoms.registerSource('state')}
       ${n('InternalSubscriptions')}.set(state, callback => state.subscribe(callback));
       const refresh = state.subscribe((event) => {
 ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
+        ${atoms.refresh}
         ${n('Interaction')}.refresh();
         ${emitRecordedNotification({ queue: n('StateQueue'), draining: n('EmittingState'), subscribers: 'subscribers', deliver: 'subscriber(event)' })}
       });
@@ -1025,12 +1037,14 @@ ${
     const ${n('DefValue')}: ${n('Def')} = Object.freeze({ feedback: Object.freeze({ style: ${n('Style')} }) });`
     : ''
 }
-    ${atoms.owner({ setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run') })}
+    ${atoms.owner({ setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `    const ${n('Authored')} = ${n('CreateAuthored')}({ setup() { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed'); }, borrow(value) {
       const state = value as ${n('State')}<unknown>;
-      return Object.freeze({get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${n('Run')}, event: ${n('StateEvent')}<unknown>) => void) { if (!${n('Setup')}) throw new Error('State watch requires setup'); const off = ${n('SubscribeInternal')}(state, event => ${n('Invoke')}('state-watch', () => callback(${n('RunValue')}, event))); ${n('StateCleanup')}.push(off); return off; }});
+      const borrowed = Object.freeze({get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${n('Run')}, event: ${n('StateEvent')}<unknown>) => void) { if (!${n('Setup')}) throw new Error('State watch requires setup'); const off = ${n('SubscribeInternal')}(state, event => ${n('Invoke')}('state-watch', () => callback(${n('RunValue')}, event))); ${n('StateCleanup')}.push(off); return off; }});
+      ${atoms.registerSource('borrowed')}
+      return borrowed;
     } });`
     : ''
 }
@@ -1157,6 +1171,7 @@ ${hasAuthoredHooks ? `      ${n('Authored')}.claimState(semantic);` : ''}
           const event: ${n('StateEvent')}<boolean | number | string> = { type: 'next', prev: value, next, reason };
           value = next;
 ${usesStyle ? `          ${n('Style')}.refresh();` : ''}
+          ${atoms.refresh}
 ${usesInteraction ? `          ${n('Interaction')}.refresh();` : ''}
           ${emitRecordedNotification({ queue: n('StateQueue'), draining: n('EmittingState'), subscribers: 'subscribers', deliver: 'subscriber(event)' })}
         },
@@ -1164,6 +1179,7 @@ ${usesInteraction ? `          ${n('Interaction')}.refresh();` : ''}
         unsubscribe(off) { ${n('PublicAlive')}(); off(); },
       };
       ${n('States')}.add(handle);
+      ${atoms.registerSource('handle')}
       ${n('InternalSubscriptions')}.set(handle, callback => {
         const registration: typeof callback = event => callback(event); subscribers.add(registration);
         return () => { subscribers.delete(registration); };
@@ -1413,6 +1429,7 @@ ${
 }
         ${n('Props')} = ${n('ResolveProps')}(${n('RawProps')}, true);
 ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
+        ${atoms.refresh}
 ${usesInteraction ? `        ${n('Interaction')}.refresh();` : ''}
         ${n('InvokeLife')}('created');
         return renderer;
@@ -1472,6 +1489,7 @@ ${
           ${n('RootElement')} = root; ${n('RootEpoch')} = root ? epoch : undefined;
           if (epoch.committed) {
 ${usesStyle ? `            ${n('Style')}.mount();` : ''}
+            ${atoms.mount}
 ${usesInteraction ? `            ${n('Interaction')}.mount();` : ''}
           }
         }`
@@ -1508,6 +1526,7 @@ ${
             epoch.committed = true;
             committedRevision = drawnRevision;
 ${usesStyle ? `            ${n('Style')}.mount();` : ''}
+            ${atoms.mount}
 ${ssr && usesInteraction ? `            if (!adoptedAttributes && !${n('Server')} && ${n('Record')}) { ${n('Interaction')}.adoptAttributes(${n('Record')}.attrs); adoptedAttributes = true; }` : ''}
 ${usesInteraction ? `            ${n('Interaction')}.mount();` : ''}
             ${n('InvokeLife')}('mounted');

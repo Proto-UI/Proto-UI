@@ -220,6 +220,71 @@ test('missing and empty build outputs fail; real bytes retain hash/raw/gzip meas
   assert.match(result.minifiedSha256, /^[a-f0-9]{64}$/);
 });
 
+const reusableBudgetPath = './.github/workflows/package-budget-evidence.yml';
+function budgetWorkflowFixture() {
+  return {
+    ci: parseYaml(readFileSync(resolve(root, '.github/workflows/ci.yml'), 'utf8')),
+    reusable: parseYaml(readFileSync(resolve(root, reusableBudgetPath), 'utf8')),
+  };
+}
+
+function assertStrictBudgetWorkflow({ ci, reusable }) {
+  const caller = ci.jobs?.public_package_build;
+  assert.equal(
+    caller?.uses,
+    reusableBudgetPath,
+    'full regression must call the exact local budget workflow'
+  );
+  assert.ok(
+    caller['continue-on-error'] === undefined || caller['continue-on-error'] === false,
+    'caller must not ignore budget failure'
+  );
+  assert.ok(
+    Object.hasOwn(reusable.on ?? {}, 'workflow_call'),
+    'the budget workflow must admit workflow_call'
+  );
+  const job = reusable.jobs?.['whole-entry-budgets'];
+  assert.ok(job, 'the reusable whole-entry budget job must remain present');
+  assert.ok(
+    job['continue-on-error'] === undefined || job['continue-on-error'] === false,
+    'budget job must not ignore failure'
+  );
+  assert.equal(job.if, undefined, 'budget job must not hide the gate behind another condition');
+  const steps = job.steps;
+  assert.ok(Array.isArray(steps), 'the reusable budget job must retain its steps');
+  const budgetStep = steps.find((step) =>
+    step.run?.includes('scripts/analysis/package-budgets.mjs')
+  );
+  assert.ok(budgetStep, 'full regression must measure package budgets');
+  assert.match(budgetStep.run, /node scripts\/analysis\/package-budgets\.mjs --json/);
+  assert.match(
+    budgetStep.run,
+    /--require-clean --expected-sha "\$GITHUB_SHA"/,
+    'strict gate must bind clean current-head source'
+  );
+  assert.doesNotMatch(
+    budgetStep.run,
+    /--(?:finf-development|advisory)\b/,
+    'the canonical gate must not opt into advisory measurement'
+  );
+  assert.equal(budgetStep.if, undefined, 'measurement must run after successful preflight');
+  assert.ok(
+    budgetStep['continue-on-error'] === undefined || budgetStep['continue-on-error'] === false,
+    'measurement step must not ignore budget failure'
+  );
+  const artifactStep = steps.find((step) =>
+    step.with?.path?.includes('package-budgets/report.json')
+  );
+  assert.ok(artifactStep, 'budget report upload must remain present');
+  assert.equal(artifactStep.if, 'always()', 'budget report upload must preserve failed runs');
+  assert.equal(
+    artifactStep.with['if-no-files-found'],
+    'error',
+    'a missing budget report must fail'
+  );
+  return { caller, job, steps, budgetStep, artifactStep };
+}
+
 test('default repository/CI and snapshot entrypoints enforce strict; development opt-in remains explicit', () => {
   const pkg = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
   assert.equal(pkg.scripts['check:package-budgets'], 'node scripts/analysis/package-budgets.mjs');
@@ -231,26 +296,88 @@ test('default repository/CI and snapshot entrypoints enforce strict; development
     pkg.scripts['check:package-budgets:development'],
     'node scripts/analysis/package-budgets.mjs --finf-development'
   );
-  const workflow = parseYaml(readFileSync(resolve(root, '.github/workflows/ci.yml'), 'utf8'));
-  const steps = workflow.jobs.public_package_build.steps;
-  const budgetStep = steps.find((step) =>
-    step.run?.includes('scripts/analysis/package-budgets.mjs')
-  );
-  assert.ok(budgetStep, 'full regression must measure package budgets');
-  assert.match(budgetStep.run, /node scripts\/analysis\/package-budgets\.mjs --json/);
-  assert.match(budgetStep.run, /--require-clean --expected-sha "\$GITHUB_SHA"/);
-  assert.doesNotMatch(budgetStep.run, /--finf-development/);
-  assert.notEqual(budgetStep['continue-on-error'], true);
-  const artifactStep = steps.find((step) =>
-    step.with?.path?.includes('package-budgets/report.json')
-  );
-  assert.equal(artifactStep?.if, 'always()');
-  assert.equal(artifactStep?.with['if-no-files-found'], 'error');
+  assertStrictBudgetWorkflow(budgetWorkflowFixture());
   assert.match(
     readFileSync(resolve(root, 'scripts/analysis/monorepo-snapshot.mjs'), 'utf8'),
     /scripts\/analysis\/package-budgets.mjs', '--json'\]/
   );
 });
+
+for (const [name, mutate, failure] of [
+  [
+    'another reusable target',
+    ({ caller }) => (caller.uses = './.github/workflows/another.yml'),
+    /exact local budget workflow/,
+  ],
+  [
+    'missing workflow_call admission',
+    (_target, fixture) => delete fixture.reusable.on.workflow_call,
+    /must admit workflow_call/,
+  ],
+  [
+    'missing measurement gate',
+    ({ job, steps, budgetStep }) => (job.steps = steps.filter((step) => step !== budgetStep)),
+    /must measure package budgets/,
+  ],
+  [
+    'advisory measurement',
+    ({ budgetStep }) =>
+      (budgetStep.run = budgetStep.run.replace('--json', '--json --finf-development')),
+    /must not opt into advisory measurement/,
+  ],
+  [
+    'ignored caller failure',
+    ({ caller }) => (caller['continue-on-error'] = true),
+    /caller must not ignore budget failure/,
+  ],
+  [
+    'ignored job failure',
+    ({ job }) => (job['continue-on-error'] = true),
+    /budget job must not ignore failure/,
+  ],
+  [
+    'ignored measurement failure',
+    ({ budgetStep }) => (budgetStep['continue-on-error'] = true),
+    /measurement step must not ignore budget failure/,
+  ],
+  [
+    'a conditional failure waiver',
+    ({ budgetStep }) => (budgetStep['continue-on-error'] = '${{ true }}'),
+    /measurement step must not ignore budget failure/,
+  ],
+  [
+    'skipped measurement',
+    ({ budgetStep }) => (budgetStep.if = 'false'),
+    /measurement must run after successful preflight/,
+  ],
+  [
+    'missing clean-source requirement',
+    ({ budgetStep }) => (budgetStep.run = budgetStep.run.replace('--require-clean ', '')),
+    /must bind clean current-head source/,
+  ],
+  [
+    'a stale expected SHA',
+    ({ budgetStep }) => (budgetStep.run = budgetStep.run.replace('$GITHUB_SHA', 'a'.repeat(40))),
+    /must bind clean current-head source/,
+  ],
+  [
+    'uploading successful runs only',
+    ({ artifactStep }) => (artifactStep.if = 'success()'),
+    /upload must preserve failed runs/,
+  ],
+  [
+    'ignored missing report',
+    ({ artifactStep }) => (artifactStep.with['if-no-files-found'] = 'ignore'),
+    /missing budget report must fail/,
+  ],
+]) {
+  test(`the reusable budget gate rejects ${name}`, () => {
+    const fixture = structuredClone(budgetWorkflowFixture());
+    const target = assertStrictBudgetWorkflow(fixture);
+    mutate(target, fixture);
+    assert.throws(() => assertStrictBudgetWorkflow(fixture), failure);
+  });
+}
 
 test('real CLI exits nonzero for strict overflow/build/missing output and reports advisory overflow as false', () => {
   const temp = mkdtempSync(join(tmpdir(), 'pui-budget-cli-'));

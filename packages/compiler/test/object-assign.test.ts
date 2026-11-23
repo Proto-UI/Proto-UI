@@ -162,6 +162,33 @@ describe('fresh-target own-data Object.assign', () => {
     portable(program(`const value=Object.assign(new Error());`));
   });
 
+  it('copies an admitted source getter into an ordinary writable data field', () => {
+    // Preserve the original source-getter sample as a lawful control. Actual
+    // read counts and copy effects are covered by record-getter-consumer.
+    const text = program('Object.assign({},{get value(){return 1;}});');
+    const ir = portable(text);
+    expect(ir.sourceFiles[0].content).toBe(text);
+    const call = assignments(ir)[0];
+    const source = call.arguments[1];
+    if (source.kind !== 'record') throw new Error('Missing source getter record.');
+    expect(source.entries).toHaveLength(1);
+    const entry = source.entries[0];
+    expect(entry).toMatchObject({ key: 'value', accessor: 'get', value: { kind: 'function' } });
+    if (entry.value.kind !== 'function') throw new Error('Missing actual getter function.');
+    expect(entry.value.function.parameters).toEqual([]);
+    expect(entry.value.function.body).toMatchObject([{ kind: 'return' }]);
+    expect(source.type).toEqual({
+      kind: 'object',
+      fields: [
+        { name: 'value', type: entry.value.function.returnType, readonly: true, accessor: 'get' },
+      ],
+    });
+    expect(call.type).toEqual({
+      kind: 'record',
+      fields: [{ name: 'value', type: entry.value.function.returnType }],
+    });
+  });
+
   it.each([
     'Object.assign();',
     'Object.assign(null,{value:1});',
@@ -178,7 +205,7 @@ describe('fresh-target own-data Object.assign', () => {
     'Object.assign({},[1]);',
     'Object.assign({},1);',
     'Object.assign({},{...{value:1}});',
-    'Object.assign({},{get value(){return 1;}});',
+    'Object.assign({get value(){return 1;}},{value:2});',
     "const key='value';Object.assign({},{[key]:1});",
     'Object.assign({},{read:()=>1});',
     "const state=def.state.number('value',0);Object.assign({},{state});",

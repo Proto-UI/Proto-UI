@@ -11,6 +11,8 @@ import {
   illegalPhase,
   snapshotMaterialCandidate,
   snapshotMaterialSlot,
+  snapshotShaderPresentation,
+  type ShaderPresentationDeclaration,
   type MaterialCandidate,
   type MaterialSlot,
   type MaterialIntentFrame,
@@ -29,6 +31,7 @@ import type {
 import { EFFECTS_CAP } from './caps';
 import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackSink } from './material/shared-sink';
 import { OWNED_MATERIAL_ID } from './material/declaration-id';
+import { SHADER_PRESENTATION_SINK_CAP, type ShaderPresentationSink } from './shader/sink';
 import {
   MATERIAL_BINDING_FACTORY_CAP,
   type MaterialBinding,
@@ -192,6 +195,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           return this.presence.facade;
         }
         declarePresence(value: import('@proto.ui/core').PresencePresentationDeclaration) {
+          if (this.shaderDeclaration)
+            throw new Error('[feedback.shader] Combined presence projection unavailable');
           if (this.motionDeclarations.size)
             throw new Error('[feedback.presence] Resident/presence channel ownership overlap');
           return this.presence.declare(value);
@@ -201,6 +206,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private motionView = 0;
         declareMotion(declaration: ResidentMotionDeclaration): () => void {
           this.ensureSetup('def.feedback.style.transition');
+          if (this.shaderDeclaration)
+            throw new Error('[feedback.shader] Combined resident motion projection unavailable');
           if (this.presence.declared)
             throw new Error('[feedback.presence] Resident/presence channel ownership overlap');
           const copy = snapshotResidentMotion(declaration);
@@ -236,10 +243,60 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private materialFactory: MaterialBindingFactory | null = null;
         private sharedSlot: MaterialSlot | null = null;
         private materialContributions = new Map<object, readonly MaterialCandidate[]>();
+        private shaderDeclaration: ShaderPresentationDeclaration | null = null;
+        private shaderSink: ShaderPresentationSink | null = null;
+        // Physical shader bindings also change when a capability is replaced
+        // within one mounted view. Never reuse a released binding generation.
+        private shaderSinkView = 0;
+
+        declareShader(declaration: ShaderPresentationDeclaration): () => void {
+          this.ensureSetup('def.feedback.material.shader');
+          const available = () => {
+            if (
+              this.shaderDeclaration ||
+              this.sharedSlot ||
+              this.material ||
+              init.declarations.some((item) => item.id === OWNED_MATERIAL_ID)
+            )
+              throw new Error('[feedback.shader] One material owner per instance');
+            if (this.presence.declared || this.motionDeclarations.size)
+              throw new Error('[feedback.shader] Combined motion projection unavailable');
+          };
+          available();
+          const owned = snapshotShaderPresentation(declaration);
+          available();
+          this.shaderDeclaration = owned;
+          this.markDirty();
+          return () => {
+            this.ensureSetup('def.feedback.material.shader:dispose');
+            if (this.shaderDeclaration !== owned) return;
+            this.shaderDeclaration = null;
+            this.markDirty();
+          };
+        }
+
+        shaderDiagnostics(): readonly string[] {
+          if (!this.shaderDeclaration) return Object.freeze([]);
+          return Object.freeze(
+            this.caps.has(SHADER_PRESENTATION_SINK_CAP)
+              ? [...(this.shaderSink?.diagnostics?.() ?? [])]
+              : ['shader-host-unavailable']
+          );
+        }
+
+        private releaseShaderSink(): void {
+          const sink = this.shaderSink;
+          this.shaderSink = null;
+          sink?.release(this.shaderSinkView);
+        }
 
         declareMaterial(slot: MaterialSlot): () => void {
           this.ensureSetup('def.feedback.material.declare');
-          if (this.sharedSlot || init.declarations.some((item) => item.id === OWNED_MATERIAL_ID))
+          if (
+            this.shaderDeclaration ||
+            this.sharedSlot ||
+            init.declarations.some((item) => item.id === OWNED_MATERIAL_ID)
+          )
             throw new Error('One material slot per instance; private and shared slots cannot mix');
           const owned = snapshotMaterialSlot(slot);
           this.sharedSlot = owned;
@@ -443,7 +500,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           // Until the optimizer supplies complete final geometry/paint
           // provenance, shared material keeps every style Rule in the
           // evaluator. A token-prefix guess is not complete provenance.
-          if (this.sharedSlot || this.motionDeclarations.size) return true;
+          if (this.sharedSlot || this.shaderDeclaration || this.motionDeclarations.size)
+            return true;
           return (
             this.material !== null &&
             tokens.some((token) => /^(bg-|backdrop-|shadow|rounded|text-)/.test(token))
@@ -496,7 +554,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               try {
                 this.releaseMotionSink();
               } finally {
-                this.presence.release();
+                try {
+                  this.presence.release();
+                } finally {
+                  this.releaseShaderSink();
+                }
               }
             }
           }
@@ -512,6 +574,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         protected override onCapsEpoch(_epoch: number): void {
           if (this.disposed) return;
+          this.markDirty();
+          if (
+            this.shaderSink &&
+            (!this.caps.has(SHADER_PRESENTATION_SINK_CAP) ||
+              this.shaderSink !== this.caps.get(SHADER_PRESENTATION_SINK_CAP))
+          )
+            this.releaseShaderSink();
           this.ensureMaterialBinding();
           if (
             this.motionSink &&
@@ -519,16 +588,22 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               this.motionSink !== this.caps.get(RESIDENT_MOTION_SINK_CAP))
           )
             this.releaseMotionSink();
-          const next = this.caps.has(VISUAL_FEEDBACK_SINK_CAP)
-            ? this.caps.get(VISUAL_FEEDBACK_SINK_CAP)
-            : this.caps.has(FINAL_STYLE_SINK_CAP)
-              ? this.caps.get(FINAL_STYLE_SINK_CAP)
-              : null;
-          const nextKind = this.caps.has(VISUAL_FEEDBACK_SINK_CAP)
-            ? 'visual'
-            : this.caps.has(FINAL_STYLE_SINK_CAP)
-              ? 'final'
-              : null;
+          const shaderSelected =
+            this.shaderDeclaration && this.caps.has(SHADER_PRESENTATION_SINK_CAP);
+          const next = shaderSelected
+            ? null
+            : this.caps.has(VISUAL_FEEDBACK_SINK_CAP)
+              ? this.caps.get(VISUAL_FEEDBACK_SINK_CAP)
+              : this.caps.has(FINAL_STYLE_SINK_CAP)
+                ? this.caps.get(FINAL_STYLE_SINK_CAP)
+                : null;
+          const nextKind = shaderSelected
+            ? null
+            : this.caps.has(VISUAL_FEEDBACK_SINK_CAP)
+              ? 'visual'
+              : this.caps.has(FINAL_STYLE_SINK_CAP)
+                ? 'final'
+                : null;
           this.markDirty();
           if (this.visualSink && (this.visualSink !== next || this.visualSinkKind !== nextKind))
             this.releaseVisualSink();
@@ -539,6 +614,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         private hasOutput(): boolean {
           return (
+            (this.shaderDeclaration !== null && this.caps.has(SHADER_PRESENTATION_SINK_CAP)) ||
             this.caps.has(PRESENCE_PRESENTATION_SINK_CAP) ||
             this.caps.has(RESIDENT_MOTION_SINK_CAP) ||
             this.caps.has(VISUAL_FEEDBACK_SINK_CAP) ||
@@ -559,6 +635,10 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             this.markDirty();
             this.flushIfPossible();
           });
+          if (material && this.shaderDeclaration) {
+            material.dispose();
+            throw new Error('[feedback.shader] One material owner per instance');
+          }
           this.material = material;
           this.materialFactory = factory;
           if (this.canProject()) this.material?.connect();
@@ -582,7 +662,29 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const style = snapshotFinalStyle(handle);
           const pending = { ...style, tokens: [...style.tokens] };
           try {
-            if (this.presence.declared) {
+            if (this.shaderDeclaration && this.caps.has(SHADER_PRESENTATION_SINK_CAP)) {
+              // Retire a style-only fallback before handing its paint to the
+              // shader host. Reentrant capability changes must win this attempt.
+              this.releaseVisualSink();
+              if (this.disposed || revision !== this.visualRevision) return;
+              if (!this.caps.has(SHADER_PRESENTATION_SINK_CAP)) {
+                this.markDirty();
+                return;
+              }
+              const sink = this.caps.get(SHADER_PRESENTATION_SINK_CAP);
+              if (this.shaderSink !== sink) {
+                this.shaderSink = sink;
+                this.shaderSinkView = Math.max(this.shaderSinkView + 1, this.viewEpoch);
+              }
+              sink.commit(
+                Object.freeze({
+                  view: this.shaderSinkView,
+                  revision,
+                  style,
+                  declaration: this.shaderDeclaration,
+                })
+              );
+            } else if (this.presence.declared) {
               if (this.sharedSlot || this.material)
                 throw new Error('[feedback.presence] Combined material projection unavailable');
               this.presence.commit(pending, this.viewEpoch, revision);
@@ -687,7 +789,9 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           if (!this.canProject()) return;
           if (
             this.dirty &&
-            (this.caps.has(VISUAL_FEEDBACK_SINK_CAP) || this.caps.has(FINAL_STYLE_SINK_CAP))
+            ((this.shaderDeclaration !== null && this.caps.has(SHADER_PRESENTATION_SINK_CAP)) ||
+              this.caps.has(VISUAL_FEEDBACK_SINK_CAP) ||
+              this.caps.has(FINAL_STYLE_SINK_CAP))
           ) {
             this.flushIfPossible();
             return;
@@ -711,7 +815,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
                 this.releaseVisualSink();
               }
             } finally {
-              this.releaseMotionSink();
+              try {
+                this.releaseMotionSink();
+              } finally {
+                this.releaseShaderSink();
+              }
             }
           } finally {
             try {
@@ -719,6 +827,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             } finally {
               this.recorder = new FeedbackStyleRecorder();
               this.sharedSlot = null;
+              this.shaderDeclaration = null;
               this.materialContributions.clear();
               this.dirty = false;
               this.pendingProjection = null;
@@ -779,6 +888,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
       const facade: FeedbackFacade = {
         presence: impl.presenceFacade(),
         material: {
+          shader: (declaration) => impl.declareShader(declaration),
           declare: (slot) => impl.declareMaterial(slot),
           use: (candidate) => impl.useMaterial(candidate),
         },
@@ -809,6 +919,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             impl.replaceVisualRuntime(previous, handles, candidates, decorations),
           exportMaterialFrame: () => impl.exportMaterialFrame(),
           materialDiagnostics: () => impl.materialDiagnostics(),
+          shaderDiagnostics: () => impl.shaderDiagnostics(),
           motionDiagnostics: () => impl.motionDiagnostics(),
           shouldRetainStyleRule: (tokens) => impl.shouldRetainStyleRule(tokens),
           applyMergedStyle: (h) => impl.applyMergedStyle(h),

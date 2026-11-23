@@ -17,6 +17,7 @@ import {
   createJavaScriptValueReader,
   planJavaScriptCallBoundaries,
   emitJavaScriptMember,
+  emitJavaScriptRecord,
   emitJavaScriptValue,
   emitJavaScriptParameters,
   emitUninvokedJavaScriptFunction,
@@ -102,7 +103,7 @@ export function emitReactSource(
   const interaction = supportPlan.features.length > 0;
   // Demand is derived from reached operations/expressions, never component identity.
   let usesStyle = admitted.value.operations.some((operation) =>
-    /^(style\.|rule\.|feedback\.style\.)/.test(operation)
+    /^(style\.|rule\.|feedback\.style\.|feedback\.material\.shader$)/.test(operation)
   );
   const unsupportedTemplates: ExpressionIR[] = [];
   function inspectTemplate(value: unknown): void {
@@ -209,7 +210,12 @@ export function emitReactSource(
   collect(ir);
   let p = '__pui';
   while ([...names].some((name) => name.startsWith(p))) p += '_';
-  const atoms = nativeHostAtomPlan(admitted.value.operations, p, admitted.value.ruleMetaKeys);
+  const atoms = nativeHostAtomPlan(
+    admitted.value.operations,
+    p,
+    admitted.value.ruleMetaKeys,
+    admitted.value.shaderKernels
+  );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
     callBoundaries.calls.size > 0 ||
@@ -362,7 +368,7 @@ export function emitReactSource(
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
-        return `{ ${value.entries.map((item) => `${item.key === '__proto__' ? `[${JSON.stringify(item.key)}]` : JSON.stringify(item.key)}: ${expression(item.value, depth)}`).join(', ')} }`;
+        return emitJavaScriptRecord(value, (item) => expression(item, depth), typeName);
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
@@ -778,12 +784,14 @@ ${propSchemas}
     try { return callback(); }
     finally { phase = previous; --callbackDepth; if (!callbackDepth) schedule(); }
   }
-  ${atoms.owner({ setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run` })}
+  ${atoms.owner({ setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run`, root: 'root', prepare: usesStyle ? `${p}Style.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `  const ${p}Authored = ${p}CreateAuthored({setup: () => ensurePhase('setup'), borrow(value) {
     const state = value as ${p}State<unknown>, external = externalStates.get(state) as ${p}ExternalState<unknown>;
-    return Object.freeze({ get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: ${p}StateEvent<unknown>) => void) { ensurePhase('setup'); const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event))); authorStateWatchCleanups.push(off); return off; } });
+    const borrowed = Object.freeze({ get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: ${p}StateEvent<unknown>) => void) { ensurePhase('setup'); const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event))); authorStateWatchCleanups.push(off); return off; } });
+    ${atoms.registerSource('borrowed')}
+    return borrowed;
   } });`
     : ''
 }
@@ -946,6 +954,7 @@ ${hasAuthoredHooks ? `    ${p}Authored.claimState(name);` : `    if (typeof name
         const event: ${p}StateEvent<T> = { type: 'next', prev: value, next, reason };
         value = next;
 ${usesStyle ? `        ${p}Style.refresh();` : ''}
+        ${atoms.refresh}
 ${interaction ? `        ${p}Interaction.refresh();\n` : ''}        ${emitRecordedNotification({ queue: 'pendingStateEvents', draining: 'emittingState', subscribers: 'subscribers', deliver: 'subscriber(event)' })}
       },
     };
@@ -958,6 +967,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}        ${emitRecord
       spec: Object.freeze(spec),
     });
     externalStates.set(state, external);
+    ${atoms.registerSource('state')}
 ${hasAuthoredHooks ? `    ${p}Authored.state(name, state);` : ''}
     return state;
   }
@@ -970,6 +980,7 @@ ${
     stateSubscribers.add(subscribers as Set<(event: ${p}StateEvent<unknown>) => void>);
     observedStateCleanups.push(state.subscribe((event) => {
 ${usesStyle ? `      ${p}Style.refresh();` : ''}
+      ${atoms.refresh}
       ${p}Interaction.refresh();
       ${emitRecordedNotification({ queue: 'pendingStateEvents', draining: 'emittingState', subscribers: 'subscribers', deliver: 'subscriber(event)' })}
     }));
@@ -983,6 +994,7 @@ ${usesStyle ? `      ${p}Style.refresh();` : ''}
       spec: Object.freeze({ kind: kind === 'boolean' ? 'bool' as const : kind === 'number' ? 'number.discrete' as const : 'string' as const }),
     });
     externalStates.set(state, external);
+    ${atoms.registerSource('state')}
   }
   const ${p}Interaction: ${p}NativeInteraction<${p}Run> = ${p}CreateNativeInteraction<${p}Run>({
     ensureSetup: () => ensurePhase('setup'),
@@ -1287,9 +1299,11 @@ ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}   
 }
     bindRoot(nextRoot) {
       if (root === nextRoot) return;
+      ${atoms.physicalPresentation ? atoms.detach : ''}
 ${interaction ? `      ${p}Interaction.unmount();\n` : ''}      ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
       root = nextRoot;
 ${usesStyle ? `      if (mounted) projectStyle(${p}Style.tokens());` : ''}
+      ${atoms.physicalPresentation ? `if (mounted && desiredPresent) { ${atoms.mount} }` : ''}
 ${interaction ? `      if (mounted && desiredPresent && viewConnected) ${p}Interaction.mount();\n` : ''}    },
     connect() { connected = true; ++cleanupVersion; },
 ${
@@ -1346,6 +1360,7 @@ ${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `     
         // after its acknowledgement may that dirty intent enter update flow.
         if (dirty) updateQueued = true;
 ${usesStyle ? `        ${p}Style.mount();` : ''}
+        ${atoms.mount}
 ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callbacks.mounted);
       } else if (mounted && frame.epoch === epoch) dispatch(callbacks.updated);
       schedule();
