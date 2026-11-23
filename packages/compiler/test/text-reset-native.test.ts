@@ -160,14 +160,18 @@ for (const profile of nativeOwnerProfiles) {
     for (const target of [input, input.ownerDocument]) {
       const add = target.addEventListener.bind(target),
         remove = target.removeEventListener.bind(target);
-      vi.spyOn(target, 'addEventListener').mockImplementation((type, listener, options) => {
-        if (listener) live.set(listener, { target, type });
-        add(type, listener, options);
-      });
-      vi.spyOn(target, 'removeEventListener').mockImplementation((type, listener, options) => {
-        if (listener) live.delete(listener);
-        remove(type, listener, options);
-      });
+      vi.spyOn(target, 'addEventListener').mockImplementation(
+        (type, listener, options?: boolean | AddEventListenerOptions) => {
+          if (listener) live.set(listener, { target, type });
+          add(type, listener, options);
+        }
+      );
+      vi.spyOn(target, 'removeEventListener').mockImplementation(
+        (type, listener, options?: boolean | EventListenerOptions) => {
+          if (listener) live.delete(listener);
+          remove(type, listener, options);
+        }
+      );
     }
     const beforeReset = api.selections.get();
     await owner.act(() => {
