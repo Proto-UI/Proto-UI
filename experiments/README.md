@@ -5,6 +5,7 @@ This directory holds executable probes, comparison scenes and their source/prove
 | Experiment | Question or fixture |
 | --- | --- |
 | [`effect-graph/`](effect-graph/README.md) | Static modeling of pinned effect pipelines, resources and bindings. |
+| [`liquid-canvas-transport/`](liquid-canvas-transport/README.md) | Same-render owned Canvas2D pixel/lifetime comparison and stage observations; no production carrier change. |
 | [`liquid-elevation-control/`](liquid-elevation-control/README.md) | Matched Liquid Surface elevation variants using the actual family prototype. |
 | [`liquidgl-baseline/`](liquidgl-baseline/README.md) | Pinned upstream liquidGL comparison with retained license and provenance. |
 | [`material-initial-paint/`](material-initial-paint/README.md) | Initial material paint and source-bound browser evidence. |
