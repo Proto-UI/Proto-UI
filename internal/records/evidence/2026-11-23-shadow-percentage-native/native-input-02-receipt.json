@@ -1,0 +1,50 @@
+{
+  "bytes": 354192,
+  "sha256": "84addc90ab337cc8ddbf06990e0b886d47c592ddb31ce77951d7f7fe0b536bce",
+  "members": {
+    "build/manifest.json": {
+      "bytes": 47980,
+      "sha256": "02696f94808cda42b9cc12a428c5222d576e031a8dae13cefbc1a2f6eb5bf048"
+    },
+    "build/artifact.d.ts": {
+      "bytes": 261,
+      "sha256": "76d772bac1c5de84e6fb455683513c74c6d40b55de2744caaf3dfc4e4ead94b8"
+    },
+    "build/tokens.css": {
+      "bytes": 4608,
+      "sha256": "a59e33e9d7f7e5ff5020d1ee19ffef310e27e9ac0d8ce4fdb5e7030b7895e966"
+    },
+    "build/metafile.json": {
+      "bytes": 204167,
+      "sha256": "c68268aae99b07141befca5cd84d0f3f4c59fc3fd399c228618e55005f66c498"
+    },
+    "build/entry.ts": {
+      "bytes": 385,
+      "sha256": "4ae05994e010e73b6daaac3cad35f514329932fa23fe87013026bee59f0ca89f"
+    },
+    "build/artifact.js": {
+      "bytes": 21251,
+      "sha256": "2247fb5ed5d720abd320617362eca50ea6cabc32efa987318331b618a22debdd"
+    },
+    "build/cli.log": {
+      "bytes": 310,
+      "sha256": "1a881f53255124ab6424016b3e64deb0eea343e9efa1dbc11d97d57c03191b19"
+    },
+    "build/consumer.js": {
+      "bytes": 1610052,
+      "sha256": "28004bb2183243d3eefbc0f75f8ec8f3e12f5b7426bb1547b0a86ebfe4d0b21b"
+    },
+    "shadow-percentage-browser.mjs": {
+      "bytes": 15723,
+      "sha256": "81c38fc6f0aef552bc1d18c05929611ee93e63c8c9ae3a25c399fa9a04b947cf"
+    },
+    "consumer-source.ts": {
+      "bytes": 9192,
+      "sha256": "a348f732b13f7efd3130c725a1e1b9ffeae4bf46c0b76f9e13248f22edb66abc"
+    },
+    "shadow-percentage-build.mjs": {
+      "bytes": 3480,
+      "sha256": "44dbf8ce697a9223f31f6b2a999adae0daf52fca203c8e82612727d7450ffa74"
+    }
+  }
+}

@@ -290,12 +290,19 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
 // later fixed coordinates are then solved against the scrolled anchor and stay
 // outside the viewport. Pin the configured strategy inside the viewport before
 // the first await so focus cannot move the document.
-function pinAnchoredStrategy(floating: HTMLElement, strategy: string) {
-  if (floating.style.position === strategy && floating.style.top !== '' && floating.style.left !== '')
-    return;
-  floating.style.position = strategy;
-  if (floating.style.top === '') floating.style.top = '0px';
-  if (floating.style.left === '') floating.style.left = '0px';
+function pinAnchoredStrategy(
+  floating: HTMLElement,
+  strategy: string,
+  styles: ReturnType<typeof ownStyles>
+) {
+  // Preparation is still an owned geometry write. An equal value held by a
+  // prior lease must transfer ownership so its retirement cannot erase us.
+  if (floating.style.position !== strategy || hasOwnedStyle(floating, 'position'))
+    styles.write('position', strategy);
+  for (const name of ['top', 'left'] as const) {
+    if (floating.style[name] === '' || hasOwnedStyle(floating, name))
+      styles.write(name, floating.style[name] || '0px');
+  }
 }
 
 function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
@@ -308,6 +315,12 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let sizingEpoch = 0;
       let sizing: ReturnType<typeof createEdgeSizeLease> | null = null;
       let sizeObservers: ResizeObserver[] = [];
+      let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
+      const retireStrategyPin = () => {
+        const previous = strategyPin;
+        strategyPin = null;
+        previous?.styles.restore();
+      };
       const retireSizing = () => {
         sizingEpoch++;
         for (const observer of sizeObservers) observer.disconnect();
@@ -331,7 +344,11 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const { anchor, floating, config } = current;
         const version = ++generation;
         const reference = referenceFor(anchor, config);
-        const isCurrent = () => !disposed && version === generation && !!reference?.isLive();
+        const isCurrent = () =>
+          !disposed &&
+          version === generation &&
+          !!reference?.isLive() &&
+          (!strategyPin || strategyPin.styles.isCurrent());
         if (disposed) return;
         if (!reference || !isElement(floating)) {
           if (current.sizeMatch && version === generation) {
@@ -346,7 +363,12 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           }
           return;
         }
-        pinAnchoredStrategy(floating, config.strategy);
+        if (!strategyPin || strategyPin.target !== floating) {
+          retireStrategyPin();
+          strategyPin = { target: floating, styles: ownStyles(floating) };
+        }
+        pinAnchoredStrategy(floating, config.strategy, strategyPin.styles);
+        if (!isCurrent()) return;
         if (sizing) {
           const ownSizing = sizing;
           for (let pass = 0; pass < 4; pass++) {
@@ -378,6 +400,10 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
               if (isCurrent()) current.onSizeMatch?.(verified);
               return;
             }
+            // A completed solve replaces the temporary preparation. Restore
+            // its original fields before publishing coordinates synchronously;
+            // later disposal must not undo an already resolved placement.
+            retireStrategyPin();
             for (const [name, value] of [
               ['position', result.strategy],
               ['left', `${result.x}px`],
@@ -418,6 +444,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           middleware: middlewareFor(config, isCurrent),
         });
         if (!isCurrent()) return;
+        retireStrategyPin();
+        if (!isCurrent()) return;
         Object.assign(floating.style, {
           position: result.strategy,
           left: `${result.x}px`,
@@ -433,6 +461,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         cleanup?.();
         cleanup = null;
         retireSizing();
+        retireStrategyPin();
         if (connection.sizeMatch) {
           const epoch = sizingEpoch;
           sizing = createEdgeSizeLease(connection, () => !disposed && epoch === sizingEpoch);
@@ -475,6 +504,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
+          retireStrategyPin();
           cleanup?.();
           cleanup = null;
         });
@@ -518,6 +548,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           disposed = true;
           generation += 1;
           retireSizing();
+          retireStrategyPin();
           cleanup?.();
           cleanup = null;
         },

@@ -1,0 +1,25 @@
+{
+  "startedAt": "2026-11-23T12:31:24.237457+00:00",
+  "baseHead": "71d5221eba36ae482f49c7a4827a3f67acdd65f3",
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "apps/www/src/components/site-select-connected-reaction.test.ts",
+    "--pool=forks",
+    "--no-file-parallelism",
+    "--reporter=json",
+    "--outputFile=/tmp/s67-site-select-formatted.json"
+  ],
+  "testSourceSha256": "a3b7ca57780bc455a1dcd6502041fd68e26b61fa81c19715143b159048a7ee72",
+  "wcAdapterSha256": "81160f0e947a7b2c34b6178be373314e9e2e484c763de280609539787adb30cd",
+  "finishedAt": "2026-11-23T12:31:30.640577+00:00",
+  "exitCode": 0,
+  "tests": {
+    "numPassedTests": 3,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTests": 3,
+    "success": true
+  }
+}

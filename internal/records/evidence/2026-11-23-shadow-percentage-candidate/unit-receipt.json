@@ -1,0 +1,49 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "packages/core/test/feedback/percentage-root-translation.test.ts",
+    "packages/core/test/feedback/h1-root-domains.test.ts",
+    "packages/adapters/web-component/test/shadow-percentage-translation.test.ts",
+    "packages/adapters/web-component/test/shadow-s2-admission.test.ts",
+    "packages/adapters/web-component/test/shadow-split-effects.test.ts",
+    "packages/adapters/web-component/test/shadow-split-runtime.test.ts",
+    "packages/adapters/web-component/test/shadow-split-mounted-consumer.test.ts",
+    "packages/modules/expose-state-web/test/terminal-ownership.test.ts",
+    "packages/modules/expose-state-web/test/catalog-boundary.test.ts",
+    "packages/cli/test/shadow-split-style.test.ts",
+    "packages/cli/test/shadow-style-delivery.test.ts",
+    "packages/cli/test/shadow-template-style.test.ts",
+    "--pool=forks",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--no-file-parallelism",
+    "--reporter=json",
+    "--outputFile=/tmp/s67-percentage-unit-02.json"
+  ],
+  "startedAt": "2026-11-23T12:49:17.192281+00:00",
+  "finishedAt": "2026-11-23T12:49:40.559357+00:00",
+  "exitCode": 0,
+  "testSourceHashes": {
+    "packages/core/test/feedback/percentage-root-translation.test.ts": "46ca13d147a9bf32a4e4c8c01a95863d4d3de4f919aaacb5641ac23d5d2fc7b4",
+    "packages/core/test/feedback/h1-root-domains.test.ts": "8544053a29f98ed2337080bfdd8edee7d71cdfdda0c37da61e7db5e7c38b100f",
+    "packages/adapters/web-component/test/shadow-percentage-translation.test.ts": "61945a818c8945b20cef19badbe0ebcdc86792ae565ba7b48f762009054fda9f",
+    "packages/adapters/web-component/test/shadow-s2-admission.test.ts": "2b98f69be986807744d09bf04dee55d7e9074f2037fb44ce691576b0d8f211a3",
+    "packages/adapters/web-component/test/shadow-split-effects.test.ts": "971c409f521118b8b6620ce8b72febd645628c48a9858a0dfcf76a8f16528214",
+    "packages/adapters/web-component/test/shadow-split-runtime.test.ts": "823158606b37fbba9d33bee7ef9479685f4d5064eb723b0341344e2b4d792911",
+    "packages/adapters/web-component/test/shadow-split-mounted-consumer.test.ts": "f9b62bb17e8f43467ce13d1c3ba6bebd11bdac6ca0c4c487f750334123806d96",
+    "packages/modules/expose-state-web/test/terminal-ownership.test.ts": "a1df77277452600d707d064acedae77e55d06aa449ac1494cb5b420bcef65a7d",
+    "packages/modules/expose-state-web/test/catalog-boundary.test.ts": "dc76efec2aba3020d9e489797ff4a48528bb459a02c6e6eab513a6779ac25d4d",
+    "packages/cli/test/shadow-split-style.test.ts": "59631dba73bf0e41e1ce8e2f527b4bb53af5cc581a83cfd0874bfd00e109956f",
+    "packages/cli/test/shadow-style-delivery.test.ts": "471e804331e3ede14e0e4290838edc3af2e5f9fd75d6f3c501bb368d0d67b29c",
+    "packages/cli/test/shadow-template-style.test.ts": "bcd032ed46d4e8d1f3cb50e00ccf1ab828985b9cbe6ff598e0f1821bd1046f36"
+  },
+  "result": {
+    "numTotalTests": 305,
+    "numPassedTests": 305,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "success": true
+  }
+}

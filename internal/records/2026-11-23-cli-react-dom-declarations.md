@@ -1,0 +1,9 @@
+# CLI consumer: declare the React DOM types used by its generated facade
+
+The exact-head full CI at `6a9b575fbe744ccb2f54d1e45336ccc195f401f1` failed the CLI consumer job [137781761960](https://github.com/Proto-UI/Proto-UI/actions/runs/45200240438/job/137781761960). Its real generated React facade imports `createPortal` from `react-dom`; the isolated consumer declared the runtime and React declarations but omitted React DOM declarations. Strict TypeScript reported TS7016 at `proto-ui/components/react/index.ts(6,30)`.
+
+The consumer manifest now pins `@types/react-dom@19.2.3`, matching the existing React consumer and compiler native-consumer fixtures. No generated facade, published package dependency, TypeScript flag, assertion or native case was weakened.
+
+The retained reproduction used Node 24.22.3, TypeScript 5.9.3, React/React DOM 19.2.6 and React declarations 19.2.14, installed from exact declarations with npm integrity-bearing locks. With the original compiler options, a scoped real `createPortal` type consumer fails with TS7016 when React DOM declarations are absent; adding the single exact dependency produces zero diagnostics. The original `strict=true`, `skipLibCheck=false`, DOM libraries and Bundler resolution are unchanged. This isolates the declaration-resolution defect. It is not the complete packed CLI smoke, whose packaging, synthetic/native runtime and negative-admission gates must still execute on the integrated source.
+
+Evidence: `evidence/2026-11-23-cli-react-dom-declarations/strict-resolution.tar.gz`, 22153 bytes, SHA-256 `c98b9ff85b40d31cf607fd942127dd1a338db8d0d094f01443d9f1fb95173e80`. It retains the complete original CI job log/metadata, old/new script sources, original compiler options, actual driver, both dependency locks, probe, complete command output, exact installed versions/integrities and source-stability receipt. All 23 payload hashes were independently checked after archive creation.

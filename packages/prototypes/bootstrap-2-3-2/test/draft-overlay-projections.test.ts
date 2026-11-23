@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { afterTwoHostFrames } from '../../test-utils/host-rendering';
 import {
   dialogClose,
   dialogCloseIcon,
@@ -78,6 +79,10 @@ async function completeTransitions(...elements: Host[]): Promise<void> {
     complete.call(controls);
   }
   await flush();
+  if (elements.some((element) => transitionState(element) === 'closed')) {
+    await afterTwoHostFrames();
+    await flush();
+  }
 }
 
 function appendDialog(parent: HTMLElement, props: Record<string, unknown> = {}) {
@@ -293,6 +298,7 @@ describe('prototypes/bootstrap-2-3-2: tooltip projection', () => {
     await advance(0);
     expect(stateValue<boolean>(secondRoot, 'open')).toBe(true);
     expect(stateValue<boolean>(firstRoot, 'open')).toBe(false);
+    await completeTransitions(firstContent);
     expect(firstContent.hasAttribute('data-pui-view-detached')).toBe(true);
 
     // Retiring the active owner restores the cold delay rather than keeping a stale warmth lease.

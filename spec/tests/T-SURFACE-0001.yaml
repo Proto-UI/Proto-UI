@@ -38,7 +38,29 @@ cases:
     title: Passive public action appearance preserves native navigation ownership
     covers: [P-SHADCN-SURFACE-ACTION-APPEARANCE, P-BRUTALIST-SURFACE-ACTION-APPEARANCE]
     expectation: Public composition geometry matches the compiled default wrapped Button and supplies only passive Surface/Text props and layout. Native anchor identity and Space behavior remain native; action-label drag selection is suppressed without suppressing prose or editor selection. Ordinary navigation and Surface defaults are unchanged.
+  - id: T-SURFACE-0001-CASE-SHADCN-PROFILE-TRANSITIONS
+    title: Nine explicit passive profiles retain source paint and the native owner
+    covers:
+      [
+        P-SHADCN-SURFACE-INPUTS,
+        P-SHADCN-SURFACE-PRESSED-PROJECTION,
+        P-SHADCN-SURFACE-ACTION-APPEARANCE,
+        P-SHADCN-SURFACE-ACTION-PROFILES,
+        P-SHADCN-TEXT-PROJECTION,
+      ]
+    expectation: All nine explicit profiles and the New York alias follow independent pinned corner, typography, focus, primary/secondary/minimal hover and dark paint expectations. Modern and legacy contributions withdraw on updates and omission. Native anchor identity, href, focus, slotted content, and passive role/expose boundaries remain unchanged. Ordinary none surfaces do not acquire action motion; DOM/token checks leave native and visual acceptance open.
 implementations:
+  - id: shadcn-passive-profile-transitions
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/command-profile-transitions.test.ts
+    required: true
+    consumesCases: [T-SURFACE-0001-CASE-SHADCN-PROFILE-TRANSITIONS]
+    exercises: [P-SHADCN-SURFACE, P-SHADCN-TEXT]
+    notes:
+      [
+        Original seven cases and two added paint/withdrawal cases passed on the source-bound local candidate; native and visual acceptance remain pending.,
+      ]
   - id: brutalist-surface-action-motion
     kind: module-test
     status: planned
@@ -87,6 +109,7 @@ verifies:
     [
       P-BASE-SURFACE,
       P-SHADCN-SURFACE,
+      P-SHADCN-TEXT,
       P-BRUTALIST-SURFACE,
       P-BOOTSTRAP-2-3-2-SURFACE,
       P-LIQUID-GLASS-SURFACE,
@@ -96,11 +119,15 @@ exercises:
     [
       P-BASE-SURFACE,
       P-SHADCN-SURFACE,
+      P-SHADCN-TEXT,
       P-BRUTALIST-SURFACE,
       P-BOOTSTRAP-2-3-2-SURFACE,
       P-LIQUID-GLASS-SURFACE,
     ]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded explicit Shadcn passive profile transition, source-paint and withdrawal coverage without claiming real-browser acceptance.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added passive Surface real Adapter conformance.

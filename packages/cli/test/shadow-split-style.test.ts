@@ -113,6 +113,44 @@ describe('private generated Shadow split sizing', () => {
   });
   // C-HOST-SURFACE-PROJECTION-0001 C/D: one painted focus surface,
   // even when the focus target remains the boundary.
+  it('keeps explicit outline width and color after the compatibility transparent shorthand', () => {
+    const tokens = ['outline-none', 'outline-1', 'outline-ring', 'outline-border'];
+    for (const ordered of [tokens, [...tokens].reverse()]) {
+      for (const css of [
+        renderProtoStyleTokenCss(ordered),
+        renderProtoShadowStyleArtifact(ordered).cssText,
+        renderProtoShadowSplitStyleArtifact(ordered).cssText,
+      ]) {
+        const shorthand = css.indexOf('outline: 2px solid transparent;');
+        expect(shorthand).toBeGreaterThanOrEqual(0);
+        for (const declaration of [
+          'outline-width: 1px;',
+          'outline-color: var(--pui-ring);',
+          'outline-color: var(--pui-border);',
+        ])
+          expect(css.indexOf(declaration)).toBeGreaterThan(shorthand);
+      }
+    }
+    const conditional = renderProtoShadowSplitStyleArtifact([
+      'data-[focus-visible]:outline-1',
+      'data-[focus-visible]:outline-ring',
+      'outline-none',
+    ]).cssText;
+    const condition =
+      ':host([data-pui-split-root-style~="data-[focus-visible]:outline-1"][data-focus-visible])';
+    expect(conditional).toContain(
+      `${condition} > [data-pui-split-surface][data-pui-style~="data-[focus-visible]:outline-1"]`
+    );
+    expect(conditional.indexOf('outline-width: 1px;')).toBeGreaterThan(
+      conditional.indexOf('outline: 2px solid transparent;')
+    );
+    // A positive surface outline still does not authorize suppressing its
+    // logical boundary. Only the existing explicit outline-none does that.
+    expect(
+      renderProtoShadowSplitStyleArtifact(['outline-1', 'outline-ring']).cssText
+    ).not.toContain('outline: none;');
+  });
+
   it('suppresses the boundary outline only for explicit, condition-matched outline-none', () => {
     const css = renderProtoShadowSplitStyleArtifact([
       'outline-none',

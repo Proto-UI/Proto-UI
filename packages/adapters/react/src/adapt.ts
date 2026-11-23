@@ -403,6 +403,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const hostTokenRevisionRef = runtime.useRef(0);
       const [hostStyleRevision, setHostStyleRevision] = runtime.useState(0);
       const [shouldExist, setShouldExist] = runtime.useState(!supportsOwnerContext);
+      const [ownerInitialized, setOwnerInitialized] = runtime.useState(!supportsOwnerContext);
       const projectionReadyRef = runtime.useRef(false);
       const viewReadyRef = runtime.useRef(false);
       const focusTargetReadyListenersRef = runtime.useRef<Set<() => void>>(new Set());
@@ -727,6 +728,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         invokeInCallbackScopeRef.current = hostSession.invokeInCallbackScope;
         const initialIntent = hostSession.viewIntent.getSnapshot();
         setShouldExist(initialIntent.present);
+        // An initially absent owner keeps the same false intent. Publish its
+        // completed initialization independently so React can reconcile the
+        // retained Overlay shell and authored children without mounting its view.
+        setOwnerInitialized(true);
       }, []);
 
       runtime.useLayoutEffect(() => {
@@ -1215,7 +1220,9 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       // siblings such as Select Value + Chevron need authored keys.
       const renderedChildren = Array.isArray(rendered) ? rendered : [rendered];
 
-      const overlayPort = ownerRef.current?.session?.caps.getPort<OverlayPort>('overlay');
+      const overlayPort = ownerInitialized
+        ? ownerRef.current?.session?.caps.getPort<OverlayPort>('overlay')
+        : undefined;
       const portalEnabled =
         shouldExist &&
         overlayPort?.getConfig().portal === true &&

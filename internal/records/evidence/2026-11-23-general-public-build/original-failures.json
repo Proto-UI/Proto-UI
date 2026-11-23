@@ -1,0 +1,50 @@
+[
+  {
+    "file": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+    "name": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts > wc: the published profile-switch source builds and preserves its live Tabs child",
+    "durationMs": 12.779754000000025,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-web-component/dist/index.js'",
+        "stack": "Error: Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-web-component/dist/index.js'\n    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1611:15)\n    at finalizeEsmResolution (node:internal/modules/cjs/loader:1600:9)\n    at resolveExports (node:internal/modules/cjs/loader:754:14)\n    at Module._findPath (node:internal/modules/cjs/loader:821:31)\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1557:27)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)\n    at Module._load (node:internal/modules/cjs/loader:1341:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+    "name": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts > react: the published profile-switch source builds and preserves its live Tabs child",
+    "durationMs": 16.78321999999997,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-react/dist/index.js'",
+        "stack": "Error: Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-react/dist/index.js'\n    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1611:15)\n    at finalizeEsmResolution (node:internal/modules/cjs/loader:1600:9)\n    at resolveExports (node:internal/modules/cjs/loader:754:14)\n    at Module._findPath (node:internal/modules/cjs/loader:821:31)\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1557:27)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)\n    at Module._load (node:internal/modules/cjs/loader:1341:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+    "name": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts > vue: the published profile-switch source builds and preserves its live Tabs child",
+    "durationMs": 42.40110800000002,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-vue/dist/index.js'",
+        "stack": "Error: Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-vue/dist/index.js'\n    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1611:15)\n    at finalizeEsmResolution (node:internal/modules/cjs/loader:1600:9)\n    at resolveExports (node:internal/modules/cjs/loader:754:14)\n    at Module._findPath (node:internal/modules/cjs/loader:821:31)\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1557:27)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)\n    at Module._load (node:internal/modules/cjs/loader:1341:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)"
+      }
+    ]
+  },
+  {
+    "file": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts",
+    "name": "apps/www/src/components/PrototypePreviewer/tabs-profile-switch-code.test.ts > vue2: the published profile-switch source builds and preserves its live Tabs child",
+    "durationMs": 15.79056300000002,
+    "errors": [
+      {
+        "name": "Error",
+        "message": "Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-vue2/dist/index.js'",
+        "stack": "Error: Cannot find module '/home/runner/work/Proto-UI/Proto-UI/apps/www/node_modules/@proto.ui/adapter-vue2/dist/index.js'\n    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1611:15)\n    at finalizeEsmResolution (node:internal/modules/cjs/loader:1600:9)\n    at resolveExports (node:internal/modules/cjs/loader:754:14)\n    at Module._findPath (node:internal/modules/cjs/loader:821:31)\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1557:27)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1142:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1169:12)\n    at Module._load (node:internal/modules/cjs/loader:1341:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)"
+      }
+    ]
+  }
+]

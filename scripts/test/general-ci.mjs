@@ -29,6 +29,10 @@ export function generalCheckPlan(manifest, specBase) {
   return [
     pnpm('check:spec-authoring', ['--', '--base', specBase]),
     pnpm('check:public-docs'),
+    // The general inventory includes ordinary consumers of the displayed
+    // public-package examples. Their createRequire resolves actual dist
+    // exports, so build that graph in this job before executing the tests.
+    pnpm('build:packages'),
     // test:public-docs is already in the root chain; avoid executing it twice.
     ...scripts.flatMap((script) =>
       script === 'test:runtime'

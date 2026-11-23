@@ -1,0 +1,326 @@
+[
+  {
+    "file": "packages/cli/test/family-style-closure.test.ts",
+    "name": "packages/cli/test/family-style-closure.test.ts > real family preset inherited physical closure > shadcn includes the actual inherited Drawer scrollport CSS",
+    "durationMs": 61376.172368,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ '-mb-4', '-mx-1', '-mx-1.5', …(950) ] to deeply equal [ '-mb-4', '-mx-1', '-mx-1.5', …(951) ]",
+        "stack": "AssertionError: expected [ '-mb-4', '-mx-1', '-mx-1.5', …(950) ] to deeply equal [ '-mb-4', '-mx-1', '-mx-1.5', …(951) ]\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/family-style-closure.test.ts:93:27\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/cli/test/family-style-closure.test.ts",
+    "name": "packages/cli/test/family-style-closure.test.ts > real family preset inherited physical closure > brutalist includes the actual inherited Drawer scrollport CSS",
+    "durationMs": 57981.992252000004,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ '-mx-1', '-translate-x-1/2', …(537) ] to deeply equal [ '-mx-1', '-translate-x-1/2', …(554) ]",
+        "stack": "AssertionError: expected [ '-mx-1', '-translate-x-1/2', …(537) ] to deeply equal [ '-mx-1', '-translate-x-1/2', …(554) ]\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/family-style-closure.test.ts:93:27\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/cli/test/family-style-closure.test.ts",
+    "name": "packages/cli/test/family-style-closure.test.ts > real family preset inherited physical closure > bootstrap-2-3-2 includes the actual inherited Drawer scrollport CSS",
+    "durationMs": 56694.851215999995,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ '-translate-x-1/2', …(663) ] to deeply equal [ '-translate-x-1/2', …(661) ]",
+        "stack": "AssertionError: expected [ '-translate-x-1/2', …(663) ] to deeply equal [ '-translate-x-1/2', …(661) ]\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/family-style-closure.test.ts:93:27\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/cli/test/family-style-closure.test.ts",
+    "name": "packages/cli/test/family-style-closure.test.ts > real family preset inherited physical closure > liquid-glass includes the actual inherited Drawer scrollport CSS",
+    "durationMs": 57254.64705,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ '-translate-x-1/2', …(450) ] to deeply equal [ '-translate-x-1/2', …(448) ]",
+        "stack": "AssertionError: expected [ '-translate-x-1/2', …(450) ] to deeply equal [ '-translate-x-1/2', …(448) ]\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/family-style-closure.test.ts:93:27\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/cli/test/text-prototype.test.ts",
+    "name": "packages/cli/test/text-prototype.test.ts > Text public compiler consumption > closes all bootstrap-2-3-2 Text tokens from actual source and emits owned Web CSS",
+    "durationMs": 72.00000900000003,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'font-bold', 'font-heading', …(34) ] to include 'text-[#999]'",
+        "stack": "AssertionError: expected [ 'font-bold', 'font-heading', …(34) ] to include 'text-[#999]'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/text-prototype.test.ts:97:24\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/cli/test/text-prototype.test.ts",
+    "name": "packages/cli/test/text-prototype.test.ts > Text public compiler consumption > exports base Text and generates all four public Adapter facades",
+    "durationMs": 2.539989999999989,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected { proto: './src/text/index.ts', …(3) } to deeply equal { …(3) }",
+        "stack": "AssertionError: expected { proto: './src/text/index.ts', …(3) } to deeply equal { …(3) }\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/text-prototype.test.ts:137:42\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:633:57\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/cli/test/text-prototype.test.ts",
+    "name": "packages/cli/test/text-prototype.test.ts > Text density token closure > closes the generated shadcn preset over actual family and Base sources",
+    "durationMs": 62639.859827,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ '-mb-4', '-mx-1', '-mx-1.5', …(950) ] to deeply equal [ '-mb-4', '-mx-1', '-mx-1.5', …(951) ]",
+        "stack": "AssertionError: expected [ '-mb-4', '-mx-1', '-mx-1.5', …(950) ] to deeply equal [ '-mb-4', '-mx-1', '-mx-1.5', …(951) ]\n    at /home/runner/work/Proto-UI/Proto-UI/packages/cli/test/text-prototype.test.ts:252:22\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real wc Adapter Text > bootstrap-2-3-2 projection > preserves native h1 ownership and updates one canonical presentation subject",
+    "durationMs": 14.251866999999947,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real wc Adapter Text > bootstrap-2-3-2 projection > preserves native p ownership and updates one canonical presentation subject",
+    "durationMs": 6.936043000000154,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real wc Adapter Text > bootstrap-2-3-2 projection > preserves native label ownership and updates one canonical presentation subject",
+    "durationMs": 8.008558999999877,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real wc Adapter Text > bootstrap-2-3-2 projection > preserves native a ownership and updates one canonical presentation subject",
+    "durationMs": 6.495724000000109,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real wc Adapter Text > bootstrap-2-3-2 projection > preserves native button ownership and updates one canonical presentation subject",
+    "durationMs": 6.669789000000037,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real react Adapter Text > bootstrap-2-3-2 projection > preserves native h1 ownership and updates one canonical presentation subject",
+    "durationMs": 7.8379439999998795,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real react Adapter Text > bootstrap-2-3-2 projection > preserves native p ownership and updates one canonical presentation subject",
+    "durationMs": 6.954649000000245,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real react Adapter Text > bootstrap-2-3-2 projection > preserves native label ownership and updates one canonical presentation subject",
+    "durationMs": 7.034950999999637,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real react Adapter Text > bootstrap-2-3-2 projection > preserves native a ownership and updates one canonical presentation subject",
+    "durationMs": 7.228475999999773,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real react Adapter Text > bootstrap-2-3-2 projection > preserves native button ownership and updates one canonical presentation subject",
+    "durationMs": 7.237575000000106,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue Adapter Text > bootstrap-2-3-2 projection > preserves native h1 ownership and updates one canonical presentation subject",
+    "durationMs": 5.53684499999963,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue Adapter Text > bootstrap-2-3-2 projection > preserves native p ownership and updates one canonical presentation subject",
+    "durationMs": 5.097590999999738,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue Adapter Text > bootstrap-2-3-2 projection > preserves native label ownership and updates one canonical presentation subject",
+    "durationMs": 5.162349000000177,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue Adapter Text > bootstrap-2-3-2 projection > preserves native a ownership and updates one canonical presentation subject",
+    "durationMs": 5.206090000000586,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue Adapter Text > bootstrap-2-3-2 projection > preserves native button ownership and updates one canonical presentation subject",
+    "durationMs": 5.466319000000112,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue2 Adapter Text > bootstrap-2-3-2 projection > preserves native h1 ownership and updates one canonical presentation subject",
+    "durationMs": 6.728019000000131,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue2 Adapter Text > bootstrap-2-3-2 projection > preserves native p ownership and updates one canonical presentation subject",
+    "durationMs": 5.847325000000637,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue2 Adapter Text > bootstrap-2-3-2 projection > preserves native label ownership and updates one canonical presentation subject",
+    "durationMs": 5.095164000000295,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue2 Adapter Text > bootstrap-2-3-2 projection > preserves native a ownership and updates one canonical presentation subject",
+    "durationMs": 4.88411300000007,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  },
+  {
+    "file": "packages/web-conformance/test/text.journey.test.ts",
+    "name": "packages/web-conformance/test/text.journey.test.ts > real vue2 Adapter Text > bootstrap-2-3-2 projection > preserves native button ownership and updates one canonical presentation subject",
+    "durationMs": 4.785571999999775,
+    "errors": [
+      {
+        "name": "AssertionError",
+        "message": "expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'",
+        "stack": "AssertionError: expected [ 'text-[10.5px]', …(8) ] to include 'text-xs'\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1196:17)\n    at Proxy.<anonymous> (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at /home/runner/work/Proto-UI/Proto-UI/packages/web-conformance/test/text.journey.test.ts:183:32\n    at file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///home/runner/work/Proto-UI/Proto-UI/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)"
+      }
+    ]
+  }
+]

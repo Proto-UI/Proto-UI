@@ -14,7 +14,7 @@ criteria:
       en: The projection invokes asTextRoot and preserves its slot, defaults, passive boundary and independent presentation axes without negative patches.
   - id: P-SHADCN-TEXT-PROJECTION
     text:
-      en: Each input selects exactly one token for its axis through def.rule and feedback.style, except leading size, which intentionally contributes no leading token. Size maps to text-xs through text-5xl, tone to text-foreground/text-muted-foreground/text-inherit, weight to font-normal/medium/semibold/bold, font to font-sans/heading/mono, leading tighter to leading-[1.1], tracking tighter to tracking-tighter, other explicit leading and tracking values to their named tokens, emphasis to not-italic/italic and decoration to no-underline/underline/line-through. Explicit leading other than size wins over composite size line-height. With leading size, xs|sm|base|lg|xl|2xl|3xl|4xl|5xl retain respectively 1rem|1.25rem|1.5rem|1.75rem|1.75rem|2rem|2.25rem|2.5rem|1 line-height from their size tokens. Missing size falls back to base. An initially invalid size falls back to base; provided empty or invalid size after a valid value preserves that previous value under the existing Props contract. Default leading normal remains 1.5; tighter is 1.1 and tracking tighter is -0.05em. Removing props restores defaults on the same subject. Shadcn-only actionProfile none|rhea|luma defaults to none; explicit Rhea/Luma action composition selects 1.25rem leading while ordinary leading inputs remain unchanged when the profile is none. It adds no event, role or selection interception.
+      en: Each input selects exactly one token for its axis through def.rule and feedback.style, except leading size, which intentionally contributes no leading token. Size maps to text-xs through text-5xl, tone to text-foreground/text-muted-foreground/text-inherit, weight to font-normal/medium/semibold/bold, font to font-sans/heading/mono, leading tighter to leading-[1.1], tracking tighter to tracking-tighter, other explicit leading and tracking values to their named tokens, emphasis to not-italic/italic and decoration to no-underline/underline/line-through. Explicit leading other than size wins over composite size line-height. With leading size, xs|sm|base|lg|xl|2xl|3xl|4xl|5xl retain respectively 1rem|1.25rem|1.5rem|1.75rem|1.75rem|2rem|2.25rem|2.5rem|1 line-height from their size tokens. Missing size falls back to base. An initially invalid size falls back to base; provided empty or invalid size after a valid value preserves that previous value under the existing Props contract. Default leading normal remains 1.5; tighter is 1.1 and tracking tighter is -0.05em. Removing props restores defaults on the same subject. Shadcn-only actionProfile defaults to none and explicitly admits vega|nova|maia|lyra|mira|luma|sera|rhea|new-york-v4 plus the new-york alias. Explicit action composition uses 1.25rem leading for Vega/Nova/Maia/Luma/Rhea/New York, 1rem for Lyra/Sera, and 1.625 relative leading for Mira; Sera adds uppercase and 0.1em tracking. The helper pairs source-bound sm typography except xs for Lyra/Mira/Sera, and medium weight except Sera semibold. Other size, tone, font and weight inputs remain ordinary Text inputs; the profile's line box and Sera tracking take precedence only while explicitly selected, and omission restores ordinary leading/tracking behavior on the same subject. These recipes follow the fixed sources and scope in P-SHADCN-SURFACE-ACTION-PROFILES. This is explicit passive appearance, with no implicit style-scope subscription, event, role, selection interception or native navigation claim.
   - id: P-SHADCN-TEXT-CONSUMPTION
     text:
       en: Public root and /text exports include textRoot, shadcnTextRoot, ShadcnTextRoot and TextRootProps/TextRootExposes with family aliases. CLI shadcn-text generates WC, React, Vue and Vue2 facades. Real four-Adapter DOM evidence does not imply browser visual acceptance or native parity. Web compiler owns these declarations; unsupported CLI hosts are rejected. GPUI currently reports unmapped inherit color, font-style, letter-spacing and text-decoration-line rather than claiming their realization.
@@ -33,11 +33,15 @@ verifies:
   tests:
     - T-TEXT-0001
     - T-SHADCN-TYPOGRAPHY-THEME-0001
+    - T-SURFACE-0001
 sources:
   - path: packages/prototypes/shadcn/src/text/root.proto.ts
   - path: packages/prototypes/shadcn/src/text/index.ts
   - path: packages/prototypes/shadcn/src/text/typography.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Defined explicit nine-profile passive action typography and its withdrawal, paired with the bounded Surface appearance contract without admitting interaction ownership.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added bounded Text family projection through standard typography feedback.

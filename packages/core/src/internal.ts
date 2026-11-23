@@ -2,6 +2,7 @@ import type { AsHookRuntime } from './prototype';
 import type { DefHandle } from './handles';
 
 export * from './spec/feedback/root-effect';
+export { isPercentageRootTranslationV1 } from './spec/feedback/application-role';
 
 export type RuntimeDelayTask = {
   cancel(): void;

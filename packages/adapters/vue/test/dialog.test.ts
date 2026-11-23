@@ -27,18 +27,31 @@ function dialogContext(open: boolean): DialogContextValue {
   };
 }
 
+// Observe the actual first view epoch. A Teleport destination can commit before
+// its projected view mounts; a fixed number of Promise ticks is not that event.
+function observeFirstViewMount() {
+  let signal!: () => void;
+  const mounted = new Promise<void>((resolve) => {
+    signal = resolve;
+  });
+  return { mounted, observe: () => signal() };
+}
+
 describe('adapter-vue: dialog integration', () => {
   it('renders dialog content when open and hides it when closed', async () => {
+    const firstView = observeFirstViewMount();
     const proto = definePrototype({
       name: 'vue-dialog-content-open-close',
       setup(def) {
         def.context.provide(DIALOG_CONTEXT, dialogContext(true));
         dialogContent.setup(def);
+        def.lifecycle.onMounted(firstView.observe);
         return (r) => [r.el('div', 'hello')];
       },
     });
 
     const mounted = createMountedVueAdapter(proto as any, { appear: false });
+    await firstView.mounted;
     await flushVue();
 
     try {
@@ -58,16 +71,19 @@ describe('adapter-vue: dialog integration', () => {
   });
 
   it('shows transition attributes on host element', async () => {
+    const firstView = observeFirstViewMount();
     const proto = definePrototype({
       name: 'vue-dialog-transition-attrs',
       setup(def) {
         def.context.provide(DIALOG_CONTEXT, dialogContext(true));
         dialogContent.setup(def);
+        def.lifecycle.onMounted(firstView.observe);
         return (r) => [r.el('div')];
       },
     });
 
     const mounted = createMountedVueAdapter(proto as any, { appear: false });
+    await firstView.mounted;
     await flushVue();
 
     try {
@@ -110,16 +126,19 @@ describe('adapter-vue: dialog integration', () => {
   });
 
   it('reattaches a portaled dialog view after transition-driven detach', async () => {
+    const firstView = observeFirstViewMount();
     const proto = definePrototype({
       name: 'vue-dialog-portaled-rematerialization',
       setup(def) {
         def.context.provide(DIALOG_CONTEXT, dialogContext(true));
         dialogContent.setup(def);
+        def.lifecycle.onMounted(firstView.observe);
         return (r) => [r.el('div', 'portaled dialog epoch')];
       },
     });
 
     const mounted = createMountedVueAdapter(proto as any, { appear: false });
+    await firstView.mounted;
     await flushVue();
 
     try {
@@ -154,11 +173,13 @@ describe('adapter-vue: dialog integration', () => {
   });
 
   it('supports adapter overlayLayer base z-index configuration', async () => {
+    const firstView = observeFirstViewMount();
     const proto = definePrototype({
       name: 'vue-dialog-layer-base',
       setup(def) {
         def.context.provide(DIALOG_CONTEXT, dialogContext(true));
         dialogContent.setup(def);
+        def.lifecycle.onMounted(firstView.observe);
         return (r) => [r.el('div', 'hello')];
       },
     });
@@ -170,6 +191,7 @@ describe('adapter-vue: dialog integration', () => {
       },
       {}
     );
+    await firstView.mounted;
     await flushVue();
 
     try {
@@ -185,16 +207,19 @@ describe('adapter-vue: dialog integration', () => {
   });
 
   it('routes global outside pointerdown through the adapter and closes dialog content', async () => {
+    const firstView = observeFirstViewMount();
     const proto = definePrototype({
       name: 'vue-dialog-outside-pointerdown',
       setup(def) {
         def.context.provide(DIALOG_CONTEXT, dialogContext(true));
         dialogContent.setup(def);
+        def.lifecycle.onMounted(firstView.observe);
         return (r) => [r.el('div', 'hello')];
       },
     });
 
     const mounted = createMountedVueAdapter(proto as any, { appear: false });
+    await firstView.mounted;
     await flushVue();
 
     try {
@@ -211,16 +236,19 @@ describe('adapter-vue: dialog integration', () => {
   });
 
   it('projects dialog mask passthrough to host pointer-events without affecting transition state', async () => {
+    const firstView = observeFirstViewMount();
     const proto = definePrototype({
       name: 'vue-dialog-mask-passthrough',
       setup(def) {
         def.context.provide(DIALOG_CONTEXT, dialogContext(true));
         dialogMask.setup(def);
+        def.lifecycle.onMounted(firstView.observe);
         return (r) => [r.el('div')];
       },
     });
 
     const mounted = createMountedVueAdapter(proto as any, { passthrough: true });
+    await firstView.mounted;
     await flushVue();
 
     try {
