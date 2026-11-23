@@ -58,39 +58,15 @@ describe('Text public compiler consumption', () => {
       }
       if (family === 'bootstrap-2-3-2') {
         delete familyRequired['leading-normal'];
-        // The retained 2.3.2 variables/type/hero-unit recipes author pinned
-        // pixel sizes with their own line boxes instead of the named
-        // Tailwind scale, and mute with the historical #999 literal.
-        for (const named of [
-          'text-xs',
-          'text-sm',
-          'text-base',
-          'text-lg',
-          'text-xl',
-          'text-2xl',
-          'text-3xl',
-          'text-4xl',
-          'text-5xl',
-          'text-muted-foreground',
-        ]) {
-          delete familyRequired[named];
-        }
-        familyRequired['text-[10.5px]'] = 'font-size: 10.5px;';
-        familyRequired['text-[11.9px]'] = 'font-size: 11.9px;';
-        familyRequired['text-[14px]'] = 'font-size: 14px;';
-        familyRequired['text-[17.5px]'] = 'font-size: 17.5px;';
-        familyRequired['text-[21px]'] = 'font-size: 21px;';
-        familyRequired['text-[24.5px]'] = 'font-size: 24.5px;';
-        familyRequired['text-[31.5px]'] = 'font-size: 31.5px;';
-        familyRequired['text-[38.5px]'] = 'font-size: 38.5px;';
-        familyRequired['text-[60px]'] = 'font-size: 60px;';
-        familyRequired['leading-[20px]'] = 'line-height: 20px;';
-        familyRequired['leading-[30px]'] = 'line-height: 30px;';
-        familyRequired['leading-[40px]'] = 'line-height: 40px;';
-        familyRequired['leading-none'] = 'line-height: 1;';
+        // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION requires rem scaling, the
+        // archived 24.5px-at-16px-root 2xl size, 20/14 normal leading and
+        // 40px-at-16px-root 2xl relaxed leading. Muted ink is theme-owned.
+        delete familyRequired['text-2xl'];
+        familyRequired['text-[1.53125rem]'] = 'font-size: 1.53125rem;';
+        familyRequired['leading-[2.5rem]'] = 'line-height: 2.5rem;';
         familyRequired['leading-[1.1]'] = 'line-height: 1.1;';
         familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
-        familyRequired['text-[#999]'] = 'color: #999;';
+        familyRequired['text-muted-foreground'] = 'color: var(--pui-muted-foreground);';
         familyRequired['leading-[1.4285714285714286]'] = 'line-height: 1.4285714285714286;';
       }
       for (const [token, declaration] of Object.entries(familyRequired)) {
@@ -111,13 +87,13 @@ describe('Text public compiler consumption', () => {
       expect(
         css.indexOf(
           family === 'bootstrap-2-3-2'
-            ? 'data-pui-style~="leading-[40px]"'
+            ? 'data-pui-style~="leading-[2.5rem]"'
             : 'data-pui-style~="leading-normal"'
         )
       ).toBeGreaterThan(
         css.indexOf(
           family === 'bootstrap-2-3-2'
-            ? 'data-pui-style~="text-[60px]"'
+            ? 'data-pui-style~="text-[1.53125rem]"'
             : 'data-pui-style~="text-5xl"'
         )
       );
@@ -135,6 +111,7 @@ describe('Text public compiler consumption', () => {
         readFileSync(`packages/prototypes/${family}/package.json`, 'utf8')
       );
       expect(manifest.exports['./text']).toEqual({
+        ...(family === 'base' ? { proto: './src/text/index.ts' } : {}),
         types: './dist/text/index.d.ts',
         import: './dist/text/index.js',
         default: './dist/text/index.js',

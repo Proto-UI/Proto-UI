@@ -230,7 +230,10 @@ it.each(['native', 'entry', 'entry-disable'] as const)(
 
 it('cleans old view binding when a pending outer programmatic focus throws during source release', async () => {
   let innerRun: any, focus: any;
-  const Outer = createVue2Adapter(Vue2RuntimeAny)(
+  // A factory owns one logical-parent injection key; compose this trigger group
+  // inside that adapter domain, as the public consumer does.
+  const adapt = createVue2Adapter(Vue2RuntimeAny);
+  const Outer = adapt(
     definePrototype({
       name: 'review-vue2-outer-exception',
       setup(def) {
@@ -241,7 +244,7 @@ it('cleans old view binding when a pending outer programmatic focus throws durin
       },
     })
   );
-  const Inner = createVue2Adapter(Vue2RuntimeAny)(
+  const Inner = adapt(
     definePrototype({
       name: 'review-vue2-inner-exception',
       setup(def) {
@@ -265,6 +268,7 @@ it('cleans old view binding when a pending outer programmatic focus throws durin
   const inner = app.$refs.inner,
     outer = app.$refs.outer,
     old = inner.$el;
+  expect(readiness.getLogicalParent(inner.__pui.instanceToken)).toBe(outer.__pui.instanceToken);
   let throwing = false;
   const spy = vi.spyOn(old, 'focus').mockImplementation(() => {
     if (throwing) throw new Error('review host failure');
@@ -412,7 +416,10 @@ it('ignores stale publication and release after a source is replaced or disposed
 it('Vue2 releases failed remount marker bindings after focus observer throw and later hide', async () => {
   let run: any;
   const errors: any[] = [];
-  const Outer = createVue2Adapter(Vue2RuntimeAny)(
+  // A factory owns one logical-parent injection key; compose this trigger group
+  // inside that adapter domain, as the public consumer does.
+  const adapt = createVue2Adapter(Vue2RuntimeAny);
+  const Outer = adapt(
     definePrototype({
       name: 'review-vue2-marker-outer',
       setup(def) {
@@ -423,7 +430,7 @@ it('Vue2 releases failed remount marker bindings after focus observer throw and 
       },
     })
   );
-  const Inner = createVue2Adapter(Vue2RuntimeAny)(
+  const Inner = adapt(
     definePrototype({
       name: 'review-vue2-marker-inner',
       setup(def) {
@@ -449,6 +456,7 @@ it('Vue2 releases failed remount marker bindings after focus observer throw and 
     old = inner.$el,
     token = readiness.getLogicalEventRouteSurfaceForTarget(old)!,
     outerRoot = outer.$el;
+  expect(readiness.getLogicalParent(inner.__pui.instanceToken)).toBe(outer.__pui.instanceToken);
   inner.getExposes().hide();
   await flushVue2();
   await flushVue2();

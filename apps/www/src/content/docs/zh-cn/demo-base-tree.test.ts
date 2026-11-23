@@ -2,7 +2,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { treeRoot, treeItem, treeToggle } from '@proto.ui/prototypes-base/tree';
+import { treeRoot, treeItem, treeToggle, treeGroup } from '@proto.ui/prototypes-base/tree';
 import {
   loadPrototype,
   prototypeModules,
@@ -15,14 +15,20 @@ const docs = (locale: string) =>
   resolve(process.cwd(), 'apps/www/src/content/docs', locale, 'ui-libraries/base/tree.mdx');
 
 describe('Base Tree documentation registration', () => {
-  it('loads the actual public Base Tree root, item, and toggle prototypes lazily', async () => {
-    for (const protoId of ['base-tree-root', 'base-tree-item', 'base-tree-toggle']) {
+  it('loads the actual public Base Tree root, item, toggle, and group prototypes lazily', async () => {
+    for (const protoId of [
+      'base-tree-root',
+      'base-tree-item',
+      'base-tree-toggle',
+      'base-tree-group',
+    ]) {
       expect(prototypeModules[protoId]).toBeTypeOf('function');
       await loadPrototype(protoId);
     }
     expect(getPrototype('base-tree-root')).toBe(treeRoot);
     expect(getPrototype('base-tree-item')).toBe(treeItem);
     expect(getPrototype('base-tree-toggle')).toBe(treeToggle);
+    expect(getPrototype('base-tree-group')).toBe(treeGroup);
   });
   it.each(['en', 'zh-cn'])(
     'registers the tree demo on the %s page with the four-runtime scope',
@@ -38,7 +44,7 @@ describe('Base Tree documentation registration', () => {
     const config = readFileSync(resolve(process.cwd(), 'apps/www/astro.config.mjs'), 'utf8');
     expect(config).toContain("slug: 'ui-libraries/base/tree'");
   });
-  it('admits a Base-only declarative recipe with one root holding four items and one toggle', () => {
+  it('admits one Base root, four items, and the exact project toggle/group hierarchy', () => {
     const recipe = (recipes['./demo-base-tree.demo.ts'] as { default?: DemoSpec } | undefined)
       ?.default;
     expect(recipe).toBeDefined();
@@ -52,14 +58,33 @@ describe('Base Tree documentation registration', () => {
         const directProtoChildren = (node.children ?? []).filter(
           (child: any) => child && typeof child === 'object' && child.kind === 'proto'
         );
-        const itemCount = directProtoChildren.filter(
+        const topItems = directProtoChildren.filter(
           (child: any) => child.prototypeId === 'base-tree-item'
-        ).length;
-        const toggleCount = directProtoChildren.filter(
+        );
+        const toggles = directProtoChildren.filter(
           (child: any) => child.prototypeId === 'base-tree-toggle'
-        ).length;
-        expect(itemCount).toBe(4);
-        expect(toggleCount).toBe(1);
+        );
+        const groups = directProtoChildren.filter(
+          (child: any) => child.prototypeId === 'base-tree-group'
+        );
+        expect(directProtoChildren).toHaveLength(4);
+        expect(topItems.map((item: any) => item.props.nodeKey)).toEqual(['project', 'archive']);
+        expect(topItems.every((item: any) => item.props.parentKey === undefined)).toBe(true);
+        expect(toggles).toHaveLength(1);
+        expect(toggles[0].props.nodeKey).toBe('project');
+        expect(groups).toHaveLength(1);
+        expect(groups[0].props.nodeKey).toBe('project');
+        expect(
+          groups[0].children.map((child: any) => ({
+            kind: child.kind,
+            prototypeId: child.prototypeId,
+            nodeKey: child.props?.nodeKey,
+            parentKey: child.props?.parentKey,
+          }))
+        ).toEqual([
+          { kind: 'proto', prototypeId: 'base-tree-item', nodeKey: 'readme', parentKey: 'project' },
+          { kind: 'proto', prototypeId: 'base-tree-item', nodeKey: 'src', parentKey: 'project' },
+        ]);
       }
       for (const child of node.children ?? []) collectRoots(child);
     };

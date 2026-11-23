@@ -35,10 +35,11 @@ const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExp
       when: (w) => w.prop('appearance').eq('default'),
       intent: (i) => i.feedback.style.use(TAB_TRIGGER_COMMON),
     });
-    // The existing physical outline-none utility is a transparent shorthand.
-    // Withdraw it during visible focus so it cannot reset the focused 1px width.
+    // Keep the explicit outline-none compatibility intent on the logical
+    // boundary during focus too. The CLI emits focused outline longhands after
+    // its transparent shorthand, preserving the source's 1px surface outline.
     def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.not(w.state(focusVisible).eq(true))),
+      when: (w) => w.prop('appearance').eq('default'),
       intent: (i) => i.feedback.style.use(tw('outline-none')),
     });
     for (const id of TABS_PROJECTED_STYLES) {

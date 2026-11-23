@@ -106,6 +106,12 @@ describe('Base Input documentation registration', () => {
       new CustomEvent('valueChange', { detail: { value: 'Wrong sibling' }, bubbles: true })
     );
     expect(ownerWrites()).toHaveLength(2);
+    controlled.dispatchEvent(
+      new CustomEvent('valueChange', { detail: { value: 'Raw DOM proposal' }, bubbles: true })
+    );
+    // This owner accepts the public normalized callback once. Raw host events
+    // are not a second proposal channel, including distinct synthetic values.
+    expect(ownerWrites()).toHaveLength(2);
     callback({ value: 'Accepted next callback' });
     expect(ownerWrites()[2]?.props).toMatchObject({
       value: 'Accepted next callback',

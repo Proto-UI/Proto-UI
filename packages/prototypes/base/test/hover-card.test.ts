@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
+import { afterTwoHostFrames } from '../../test-utils/host-rendering';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { hoverCardContent, hoverCardRoot, hoverCardTrigger } from '../src/hover-card';
 
@@ -23,6 +24,10 @@ async function completeTransition(element: any): Promise<void> {
   const state = exposes.transitionState.get();
   if (state === 'entering' || state === 'leaving') exposes.controls.complete();
   await flushViewReconciliation();
+  if (exposes.transitionState.get() === 'closed') {
+    await afterTwoHostFrames();
+    await flushViewReconciliation();
+  }
 }
 
 function createHoverCard(props: Record<string, unknown> = {}) {

@@ -1,5 +1,6 @@
 import { beforeAll, afterAll, afterEach, describe, expect, it } from 'vitest';
 import { classifyTwTokenApplicationRoleV0 } from '../../../core/src/spec/feedback/application-role';
+import { createRootStyleEffect, resolveRootStyleEntry } from '@proto.ui/core/internal';
 import {
   collectProtoRootStyleTokenOccurrences,
   collectProtoStyleTokens,
@@ -11,6 +12,8 @@ import {
 import button from '../../../prototypes/shadcn/src/button';
 import { switchRoot, switchThumb } from '../../../prototypes/shadcn/src/switch';
 import { AdaptToWebComponent, setElementProps } from '../src';
+import { createShadowSplitEffectsPort } from '../src/shadow-split-effects';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 // Happy DOM does not project @layer/:host stylesheet geometry; materialize only the
 // declared physical prerequisites here. Real Shadow geometry remains a browser gate.
@@ -25,8 +28,23 @@ beforeAll(() => {
 });
 afterAll(() => recipeSheet.remove());
 
-// Complete public prototype admission after H1. This proves lifecycle/wiring,
-// not rendered geometry: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 L-O needs Chrome.
+// The new draft recipe retains an explicit old-companion rejection boundary.
+// These controls do not replace the unchanged complete-prototype inventory or
+// native whole-Root/owner-source acceptance.
+const percentageSwitchThumb = [
+  'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((100%_-_8px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((4px_-_100%)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(100%_-_4px)]',
+  'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
+] as const;
+
+// Default-state public prototype admission after H1. This proves lifecycle/wiring,
+// not all profile branches or rendered geometry: L-O still needs Chrome.
 const cases = [
   {
     proto: button,
@@ -57,6 +75,42 @@ afterEach(async () => {
 });
 
 describe('S2 current public admission boundary', () => {
+  it.each(percentageSwitchThumb)(
+    'rejects an old companion for Switch token %s atomically',
+    (token) => {
+      const host = document.createElement('s2-unsupported-switch');
+      const surface = document.createElement('div');
+      host.attachShadow({ mode: 'open' }).append(surface);
+      const current = renderProtoShadowSplitStyleArtifact(['block', token]);
+      const port = createShadowSplitEffectsPort({
+        host,
+        surface,
+        artifact: {
+          ...current,
+          cssText: rewriteSplitBaseDeclarations(current.cssText, (declarations) =>
+            declarations.replace('--pui-split-percentage-translation-recipe: v1;', '')
+          ),
+        },
+        prototypeName: 's2-unsupported-switch',
+      });
+      const effect = (tokens: string[]) =>
+        createRootStyleEffect(tokens.map((item) => resolveRootStyleEntry(item, 'runtime')));
+      try {
+        port.queueStyle(effect(['block']));
+        port.flushNow!();
+        const before = [host.outerHTML, surface.outerHTML];
+        expect(() => port.queueStyle(effect(['block', token]))).toThrow(
+          /percentage translation recipe/
+        );
+        port.flushNow!();
+        expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+      } finally {
+        port.dispose();
+      }
+      expect(host.hasAttribute('data-pui-split-root-style')).toBe(false);
+    }
+  );
+
   for (const entry of cases) {
     it(`${entry.proto.name}: inventories all unresolved Root tokens, not just the first failure`, async () => {
       const occurrences = await collectProtoRootStyleTokenOccurrences(entry.directory);
@@ -69,7 +123,10 @@ describe('S2 current public admission boundary', () => {
       ];
       if (entry.proto === switchThumb || entry.proto === switchRoot) {
         expect(tokens).not.toContain('transition-all');
-        expect(tokens).not.toContain('transition-transform');
+        // The current source-bound Thumb animates its translation explicitly;
+        // Root remains color-only. Its unresolved-token inventory stays exact.
+        if (entry.proto === switchThumb) expect(tokens).toContain('transition-transform');
+        else expect(tokens).not.toContain('transition-transform');
       } else expect(tokens).toContain('transition-all');
       expect(
         tokens
@@ -82,7 +139,7 @@ describe('S2 current public admission boundary', () => {
       });
     });
 
-    it(`${entry.proto.name}: activates the complete prototype and releases resources across reconnect`, async () => {
+    it(`${entry.proto.name}: activates the default state and releases resources across reconnect`, async () => {
       const closure = (await collectProtoStyleTokens(entry.directory)) as string[];
       // Shadcn Button also uses the Base Button setup styles.
       if (entry.proto === button)

@@ -182,12 +182,12 @@ const infrastructureStyles = {
   'proto-ui-view-visibility':
     '\n:where([data-pui-view-pending]) { visibility: hidden !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]) { transition: none !important; }\n:where([data-pui-view-pending], [data-pui-view-revealing]:not([data-pui-view-revealing="presence"], [data-pui-view-revealing="portal"])) { animation: none !important; }\n:where([data-pui-view-detached]) { display: none !important; }\n',
   'proto-ui-wc-host-display':
-    '\n:where(.pui-host-root) { display: block; }\n:where([data-pui-view-revealing="portal"] *) { transition: none !important; }\n',
+    '\n:where(.pui-host-root) { display: block; }\n:where([data-pui-view-revealing="portal"] *) { transition: none !important; }\n:where([data-pui-portal-preparing]) { display: none !important; }\n',
 };
 const infrastructureHashes = [
   'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
   'sha256-kUIiVlICzVrFbKV+PHF+dL/cmZ7Q0jCE2Rdj47JEk3Q=',
-  'sha256-Y71yyiCYjEH9X0DVs2lUXg4QJHz/RpOzMOMF7ueu56g=',
+  'sha256-6CnPTFG5Q1cqhoTby6bXuVcJGixrWsD5rKyqFtQEyOI=',
 ];
 assert.deepEqual(
   ['', ...Object.values(infrastructureStyles)].map(

@@ -44,6 +44,8 @@ const ROOT_GEOMETRY_TOKENS = new Set([
   'translate-x-5',
   'translate-x-0.25',
   'translate-x-[calc(100%_-_2px)]',
+  // Draft bounded percentage-translation slice: this operand stays static.
+  'translate-x-[calc(100%_-_4px)]',
   'translate-x-[calc(100%_+_2px)]',
   'translate-x-[calc(100%_-_8px)]',
   'scale-[0.98]',
@@ -52,6 +54,25 @@ const ROOT_GEOMETRY_TOKENS = new Set([
   '-translate-x-1/2',
   '-translate-y-1/2',
 ]);
+
+// D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-PERCENTAGE-TOKENS: exact
+// author spellings only. Classification does not certify the owner source or
+// the physical recipe; split admission checks both independently.
+const PERCENTAGE_ROOT_TRANSLATIONS = new Set([
+  'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((100%_-_8px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((4px_-_100%)*var(--pui-percentage)/100)]',
+  'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
+  'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+]);
+
+/** Internal finite operand classification, not a general CSS expression parser. */
+export function isPercentageRootTranslationV1(token: string): boolean {
+  return PERCENTAGE_ROOT_TRANSLATIONS.has(token);
+}
 
 const UNRESOLVED_EXACT_TOKENS = new Set([
   'collapse',
@@ -233,7 +254,8 @@ export function classifyTwTokenApplicationRoleV0(token: string): TwTokenApplicat
   if (token === 'relative') return resolution(token, 'root-geometry', 'canonical');
   // Check exact author tokens before normalizing negative prefixes; H1 does
   // not automatically admit negative, arbitrary, axis or other family variants.
-  if (ROOT_GEOMETRY_TOKENS.has(token)) return resolution(token, 'root-geometry', 'canonical');
+  if (ROOT_GEOMETRY_TOKENS.has(token) || isPercentageRootTranslationV1(token))
+    return resolution(token, 'root-geometry', 'canonical');
   if (token === 'pointer-events-none') return resolution(token, 'hit-testing', 'canonical');
   if (token === 'field-sizing-content' || token === 'field-sizing-fixed') {
     return resolution(token, 'surface', 'canonical');

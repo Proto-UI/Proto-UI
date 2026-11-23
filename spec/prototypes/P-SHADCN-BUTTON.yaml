@@ -29,11 +29,11 @@ criteria:
   - id: P-SHADCN-BUTTON-NEW-YORK-PAINT
     text:
       en: >-
-        Explicit styleProfile new-york selects the direct Button supported subset at shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b, not the default Rhea or compound paint.ts. Default/sm/lg/icon are 36/32/40/36px at root16, rounded-md; default px4 py2, sm gap1.5 px3, lg px6. Default hover is primary/90; destructive is opaque destructive with white text and hover destructive/90, dark destructive/60 and destructive focus20/40; outline is background plus border/shadow-xs, dark input/30 and hover input/50; secondary hover is secondary/80; link hover underlines. Focus is ring3/ring50. No modern transparent border, muted ghost, tinted destructive or pressed translation may leak into this profile. Base behavior is unchanged. wrap and icon-compact remain explicitly Proto extensions. Passive actions do not claim this profile; full-family selectable legacy style remains separate work.
+        Explicit styleProfile new-york selects the direct Button supported subset at shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b, not the default Rhea or compound paint.ts. Default/sm/lg/icon are 36/32/40/36px at root16, rounded-md; default px4 py2, sm gap1.5 px3, lg px6. Default hover is primary/90; destructive is opaque destructive with white text and hover destructive/90, dark destructive/60 and destructive focus20/40; outline is background plus border/shadow-xs, dark input/30 and hover input/50; secondary hover is secondary/80; link hover underlines. Focus is ring3/ring50. No modern transparent border, muted ghost, tinted destructive or pressed translation may leak into this profile. Base behavior is unchanged. wrap and icon-compact remain explicitly Proto extensions. The separate draft P-SHADCN-SURFACE-ACTION-PROFILES revision admits only passive primary/secondary/minimal appearance of this pinned profile. It does not inherit Button behavior, widen this direct Button API comparison, or establish full-family selectable legacy style.
 
 
       zh-CN: >-
-        显式 styleProfile new-york 选择固定 02cad611 的 direct Button 已支持子集，不冒用 Rhea 默认或 compound paint.ts。default/sm/lg/icon 为36/32/40/36px，rounded-md；primary hover90、destructive opaque/white与dark60、outline dark input30/50、secondary hover80、focus ring3/ring50按固定源。现代边框、muted ghost、tinted destructive及press位移不得泄漏。Base行为不变，wrap与icon-compact仍是Proto扩展；passive不承诺该profile，全族旧风格选择另行实现。
+        显式 styleProfile new-york 选择固定 02cad611 的 direct Button 已支持子集，不冒用 Rhea 默认或 compound paint.ts。default/sm/lg/icon 为36/32/40/36px，rounded-md；primary hover90、destructive opaque/white与dark60、outline dark input30/50、secondary hover80、focus ring3/ring50按固定源。现代边框、muted ghost、tinted destructive及press位移不得泄漏。Base行为不变，wrap与icon-compact仍是Proto扩展；passive 仅由独立 draft P-SHADCN-SURFACE-ACTION-PROFILES 修订接纳固定来源的 primary/secondary/minimal 外观；不继承 Button 行为、不扩大本 direct Button API 比较，也不宣称全族旧风格完成。
 
 
   - id: P-SHADCN-BUTTON-MODERN-PAINT
@@ -181,6 +181,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-BUTTON-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Linked the separately defined draft passive primary/secondary/minimal New York appearance, preserving the direct Button historical API baseline and all unrelated parity boundaries.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced the delta-style Shadcn Button catalog template with reversible Base inheritance, pinned upstream identity, current visual API guarantees, intentional asChild omission, and centralized compatibility differences.

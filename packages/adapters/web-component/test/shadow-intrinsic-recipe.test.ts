@@ -10,6 +10,7 @@ import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 const base = ['inline-flex', 'flex-1', 'whitespace-nowrap'];
 const marker = '--pui-split-intrinsic-nowrap-recipe: v1;';
+const fullWidthMarker = '--pui-split-intrinsic-full-width-recipe: v1;';
 const effect = (tokens: string[]) =>
   createRootStyleEffect(tokens.map((t) => resolveRootStyleEntry(t, 'runtime')));
 const generated = renderProtoShadowSplitStyleArtifact([
@@ -20,52 +21,59 @@ const generated = renderProtoShadowSplitStyleArtifact([
   'min-w-0',
   'max-w-lg',
   'size-4',
+  'data-[ready]:w-full',
   ...base.map((t) => `data-[ready]:${t}`),
 ]);
 
 describe('bounded split intrinsic nowrap recipe', () => {
   it('uses a flex shell without changing the external automatic minimum or zero basis', () => {
     expect(generated.cssText).toContain(marker);
+    expect(generated.cssText).toContain(fullWidthMarker);
     expect(generated.cssText).toContain('--pui-split-inline-display: inline-flex;');
     expect(generated.cssText).toContain('display: var(--pui-split-inline-display, inline-grid);');
     expect(generated.cssText).toContain('flex: 1 1 auto;');
     expect(generated.cssText).not.toContain('min-width: max-content;');
     expect(generated.cssText).toMatch(/root-style~="hidden"\]\) \{\s*display: none;/);
   });
-  it.each(['old', 'conditional', 'w-full', 'min-w-0', 'max-w-lg', 'size-4'])(
-    'rejects %s before either target changes',
-    (kind) => {
-      const host = document.createElement('x-intrinsic'),
-        surface = document.createElement('div');
-      host.attachShadow({ mode: 'open' }).append(surface);
-      const artifact = {
-        ...generated,
-        cssText:
-          kind === 'old'
-            ? rewriteSplitBaseDeclarations(generated.cssText, (declarations) =>
-                declarations.replace(marker, '')
-              )
-            : generated.cssText,
-      };
-      const port = createShadowSplitEffectsPort({
-        host,
-        surface,
-        artifact,
-        prototypeName: 'intrinsic-test',
-      });
-      port.queueStyle(effect(['block']));
-      port.flushNow!();
-      const before = [host.outerHTML, surface.outerHTML];
-      const next =
-        kind === 'conditional'
-          ? lowerRootStyleTokens(base, 'data-[ready]')
-          : effect([...base, ...(kind === 'old' ? [] : [kind])]);
-      expect(() => port.queueStyle(next)).toThrow(/intrinsic/);
-      port.flushNow!();
-      expect([host.outerHTML, surface.outerHTML]).toEqual(before);
-      port.dispose();
-    }
-  );
+  it.each([
+    'old',
+    'conditional',
+    'old-w-full',
+    'data-[ready]:w-full',
+    'min-w-0',
+    'max-w-lg',
+    'size-4',
+  ])('rejects %s before either target changes', (kind) => {
+    const host = document.createElement('x-intrinsic'),
+      surface = document.createElement('div');
+    host.attachShadow({ mode: 'open' }).append(surface);
+    const artifact = {
+      ...generated,
+      cssText:
+        kind === 'old' || kind === 'old-w-full'
+          ? rewriteSplitBaseDeclarations(generated.cssText, (declarations) =>
+              declarations.replace(kind === 'old' ? marker : fullWidthMarker, '')
+            )
+          : generated.cssText,
+    };
+    const port = createShadowSplitEffectsPort({
+      host,
+      surface,
+      artifact,
+      prototypeName: 'intrinsic-test',
+    });
+    port.queueStyle(effect(['block']));
+    port.flushNow!();
+    const before = [host.outerHTML, surface.outerHTML];
+    const next =
+      kind === 'conditional'
+        ? lowerRootStyleTokens(base, 'data-[ready]')
+        : effect([...base, ...(kind === 'old' ? [] : [kind === 'old-w-full' ? 'w-full' : kind])]);
+    expect(() => port.queueStyle(next)).toThrow(/intrinsic/);
+    port.flushNow!();
+    expect([host.outerHTML, surface.outerHTML]).toEqual(before);
+    port.dispose();
+  });
   it('replaces and clears the complete effect while preserving consumer contribution', () => {
     const host = document.createElement('x-intrinsic'),
       surface = document.createElement('div');
@@ -77,7 +85,7 @@ describe('bounded split intrinsic nowrap recipe', () => {
       artifact: generated,
       prototypeName: 'intrinsic-test',
     });
-    for (const tokens of [base, [...base, 'hidden'], ['block'], base]) {
+    for (const tokens of [base, [...base, 'w-full'], [...base, 'hidden'], ['block'], base]) {
       port.queueStyle(effect(tokens));
       port.flushNow!();
       expect(host.getAttribute('data-pui-split-root-style')).toBe(tokens.join(' '));

@@ -22,6 +22,7 @@ import { createExposeStateWebNameMap } from './utils';
 
 type Binding = {
   key: string;
+  source: ExposeStateExternalHandle<unknown>;
   off?: () => void;
   attr?: string;
   cssVar?: string;
@@ -129,6 +130,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
 
       const binding: Binding = {
         key,
+        source: value,
         stateId,
         kind: spec.kind,
         attr: this.allowAttrForKind(spec.kind, mode) ? mapping.dataAttr : undefined,
@@ -368,5 +370,33 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
   readonly port = {
     isActive: () => this.active,
     getExposedStateMap: () => this.exposedByStateId,
+    isCurrentCssVarProjection: (
+      source: ExposeStateExternalHandle<unknown>,
+      target: HTMLElement,
+      name: string
+    ): boolean => {
+      const generation = this.bindingGeneration;
+      if (!this.active || !this.isCurrent(generation)) return false;
+      if (!this.caps.has(HOST_ELEMENT_CAP) || this.caps.get(HOST_ELEMENT_CAP) !== target)
+        return false;
+      const candidates = this.bindings.filter((binding) => binding.cssVar === name);
+      if (candidates.length !== 1 || candidates[0]!.source !== source) return false;
+      const lease = this.projections.get(target)?.get(`style:${name}`);
+      if (!lease) return false;
+      try {
+        const value = source.get();
+        const expected = { value: value == null ? '' : String(value), priority: '' };
+        return (
+          this.sameProjection(lease.last, expected) &&
+          this.sameProjection(this.readProjection(target, 'style', name), expected) &&
+          this.active &&
+          this.isCurrent(generation) &&
+          this.bindings.includes(candidates[0]!) &&
+          this.caps.get(HOST_ELEMENT_CAP) === target
+        );
+      } catch {
+        return false;
+      }
+    },
   };
 }

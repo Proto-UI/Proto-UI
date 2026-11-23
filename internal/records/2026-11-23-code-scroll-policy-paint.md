@@ -13,3 +13,13 @@ The complete scripts, observations and three original PNG captures are in `evide
 Before each causal measurement, the full browser fixture now saves that real screenshot and its SHA. It keeps the same PRE and geometry, original `contain`/restored `auto` stages, fourteen −220 native wheels, passive event observation, 750 ms quiet interval, 2,500 ms quiet deadline and all original scrolling/focus/identity thresholds. The observation introduces no DOM/style/input mutation. All thirteen existing source discriminator tests pass. An independent source review found no changed input, threshold or oracle.
 
 The full six-case native website replay remains required on the next integrated head. The minimal experiment and source controls alone do not close the original issue or the historical reproduction gate.
+
+## Actual integrated replay
+
+The subsequent [official run 45160120563](https://github.com/Proto-UI/Proto-UI/actions/runs/45160120563), job `137643076626`, completed successfully at `502693304fc8d7509402fdfb586b283681915231`. All six original browser cases and thirteen source controls passed, with zero failures or skipped tests. The browser reports **157.0.8103.78**; this is separate from the earlier minimal Chromium 145 experiment.
+
+The real short PRE chains from document scrollY **785 to 0**, while the negative `contain` policy remains **785 to 785**. Both long-code widths retain **80px** internal scrolling, then **220px** document chaining at the lower edge, and **80px** horizontal internal scrolling. The fresh policy pair also retains its independent contained negative control. No original threshold, wheel count, input amount or time limit changed.
+
+The historical `(700,550)` replay still hits a different element in the present layout. Its outcome is explicitly `not-reproduced`, with `acceptance: false`; the successful diagnostic case does not close that original coordinate condition or the full issue. The native evidence therefore closes the bounded product replay only.
+
+The complete original artifact, including every observation, screenshot and full log, is retained at `evidence/2026-11-23-code-scroll-integrated-native/official-artifact.zip`: **7,910,577 bytes**, SHA-256 **`552d36ea9fabd33c690a2ea04a1dca8e5a3d60a816ad105b5b88904b8b6503d0`**, fifteen safe archive entries. Its exact source digests match the integrated files. The artifact and adjacent receipt preserve the source version and remaining historical boundary.

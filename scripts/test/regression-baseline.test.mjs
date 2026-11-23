@@ -84,10 +84,14 @@ test('general planning preserves every root gate and separates controls from run
     .map((command) => command.split(' ').at(-1));
   assert.deepEqual(
     plan
-      .slice(2)
+      .slice(3)
       .map((step) => step.id)
       .filter((id) => !id.startsWith('test:runtime:')),
     rootScripts.filter((id) => id !== 'test:runtime')
+  );
+  assert.deepEqual(
+    plan.slice(0, 3).map((step) => step.id),
+    ['check:spec-authoring', 'check:public-docs', 'build:packages']
   );
   assert.deepEqual(
     plan.slice(-2).map((step) => step.id),

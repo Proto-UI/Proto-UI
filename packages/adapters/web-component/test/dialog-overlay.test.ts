@@ -46,6 +46,14 @@ async function completeTransitions(...elements: any[]): Promise<void> {
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
+  // Closed portaled views retain their current epoch until the compositor
+  // conceal barrier has observed two actual host rendering opportunities.
+  await new Promise<void>((resolve) =>
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()))
+  );
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }
 
 describe('adapter-web-component: dialog overlay', () => {

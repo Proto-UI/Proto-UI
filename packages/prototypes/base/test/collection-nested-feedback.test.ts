@@ -182,6 +182,8 @@ for (const [family, modules] of Object.entries(families)) {
       if (component === 'date-picker' && part === 'day') {
         setElementProps(control, { ...ownProps, disabled: false });
         await flush();
+        expect(exposed.selected.get()).toBe(false);
+        expect(control.hasAttribute('data-selected')).toBe(false);
         root.getExposes().openPopover();
         await flush();
         control.click();
@@ -192,14 +194,26 @@ for (const [family, modules] of Object.entries(families)) {
         if (family === 'bootstrap-2-3-2') {
           // Selected paint is interaction-resolved: the variant carries the
           // shared primary text/border recipe while the fill applies live.
-          expect(tokens().some((token: string) => token.startsWith('data-[selected]:'))).toBe(
-            true
-          );
+          expect(tokens().some((token: string) => token.startsWith('data-[selected]:'))).toBe(true);
           expect(tokens().some((token: string) => token.startsWith('bg-[#006dcc_'))).toBe(true);
         } else {
-          expect(tokens().some((token: string) => token.startsWith('data-[selected]:bg-'))).toBe(
-            true
+          // C-CALENDAR-SELECTION-0001-DAYS distinguishes range middles from
+          // selected endpoints. Both exposed conditions lower to one selector;
+          // the same recipe must match only the currently selected endpoint.
+          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-primary');
+          expect(tokens()).toContain(
+            'data-[selected]:not-[data-range-middle]:text-primary-foreground'
           );
+          expect(control.hasAttribute('data-selected')).toBe(true);
+          expect(exposed.rangeMiddle.get()).toBe(false);
+          expect(control.hasAttribute('data-range-middle')).toBe(false);
+          root.getExposes().requestValue('2026-10-01');
+          await flush();
+          expect(root.getExposes().value.get()).toBe('2026-10-01');
+          expect(control.getExposes().selected).toBe(exposed.selected);
+          expect(exposed.selected.get()).toBe(false);
+          expect(control.hasAttribute('data-selected')).toBe(false);
+          expect(tokens()).toContain('data-[selected]:not-[data-range-middle]:bg-primary');
         }
       }
     });

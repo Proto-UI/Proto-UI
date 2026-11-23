@@ -1182,6 +1182,16 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   const exportPositiveCache = new Map<string, HookSourceSymbol>();
   const objectMemberCache = new Map<string, HookSourceSymbol | null>();
   const coreStarFactoryNames = new WeakMap<HookSourceSymbol, string>();
+  const sourceIdentities = new WeakMap<ts.SourceFile, number>();
+  let nextSourceIdentity = 0;
+  const sourceIdentity = (source: ts.SourceFile): number => {
+    let identity = sourceIdentities.get(source);
+    if (identity === undefined) {
+      identity = nextSourceIdentity++;
+      sourceIdentities.set(source, identity);
+    }
+    return identity;
+  };
 
   // A synchronous public lookup is one filesystem-identity observation. Share
   // duplicate path resolution only inside that lookup, never across calls.
@@ -1396,7 +1406,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     name: string,
     stack: Set<string>
   ) => HookSourceSymbol | null = (module, name, stack) => {
-    const key = `${module.file}\0${name}`;
+    const key = `${sourceIdentity(module.source)}\0${name}`;
     const cached = exportPositiveCache.get(key);
     if (cached) return cached;
     if (stack.has(key)) return null;
@@ -1903,7 +1913,9 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     seen = new Set<string>(),
     origin?: HookSourceModule
   ): HookSourceSymbol | null {
-    const cacheKey = `${declarationKey(symbol)}\0${name}\0${origin?.file ?? ''}`;
+    // Old immutable modules remain queryable after a replacement at the same
+    // path. Both the declaration and the reading source own their cache facts.
+    const cacheKey = `${sourceIdentity(symbol.module.source)}\0${declarationKey(symbol)}\0${name}\0${origin ? sourceIdentity(origin.source) : ''}`;
     const cached = objectMemberCache.get(cacheKey);
     if (cached !== undefined) return cached;
     const key = declarationKey(symbol);

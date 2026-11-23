@@ -6,10 +6,12 @@ import {
 } from '@proto.ui/prototypes-base/surface';
 import {
   SHADCN_ACTION_RADIUS,
+  SHADCN_MODERN_ACTION_STYLES,
   SHADCN_ACTION_FOCUS,
   SHADCN_SECONDARY_HOVER,
 } from '../button/profiles';
 import type { ShadcnActionStyleProfile } from '../button/types';
+import { SHADCN_STYLE_IDS } from '../style-scope';
 
 export interface ShadcnSurfaceRootProps extends SurfaceRootProps {
   /** Passive appearance only. The native owner retains all interaction semantics. */
@@ -20,7 +22,11 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
   setup(def) {
     asSurfaceRoot();
     def.props.define({
-      actionProfile: { type: 'enum', empty: 'fallback', options: ['none', 'rhea', 'luma'] },
+      actionProfile: {
+        type: 'enum',
+        empty: 'fallback',
+        options: ['none', ...SHADCN_STYLE_IDS, 'new-york'],
+      },
     });
     def.props.setDefaults({ actionProfile: 'none' });
     def.rule({
@@ -132,16 +138,6 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
     });
     def.rule({
-      // A pressed fact is not itself an opt-in to Button motion. Ordinary
-      // navigation/content surfaces keep their geometry and authored elevation.
-      when: (w) =>
-        w.all(
-          w.any(w.prop('actionProfile').eq('rhea'), w.prop('actionProfile').eq('luma')),
-          w.prop('pressed').eq(true)
-        ),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
-    });
-    def.rule({
       when: (w) =>
         w.all(
           w.prop('actionProfile').eq('none'),
@@ -150,7 +146,12 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
-    for (const profile of ['rhea', 'luma'] as const) {
+    // Explicit source-bound appearance only. No interaction owner is created.
+    for (const profile of SHADCN_MODERN_ACTION_STYLES) {
+      def.rule({
+        when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('pressed').eq(true)),
+        intent: (i) => i.feedback.style.use(tw('translate-y-px')),
+      });
       def.rule({
         when: (w) => w.prop('actionProfile').eq(profile),
         intent: (i) =>
@@ -202,6 +203,55 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
             w.meta('colorScheme').eq('dark')
           ),
         intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
+      });
+    }
+    // Legacy appearance has its own paint and never inherits modern motion.
+    for (const profile of ['new-york-v4', 'new-york'] as const) {
+      def.rule({
+        when: (w) => w.prop('actionProfile').eq(profile),
+        intent: (i) => i.feedback.style.use(tw('rounded-md transition-all outline-none')),
+      });
+      def.rule({
+        when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('focusVisible').eq(true)),
+        intent: (i) =>
+          i.feedback.style.use(tw('forced-colors-focus-outline', SHADCN_ACTION_FOCUS[profile])),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('solid'),
+            w.prop('hovered').eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-primary/90')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('secondary'),
+            w.prop('hovered').eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-secondary/80')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('transparent'),
+            w.prop('hovered').eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('transparent'),
+            w.prop('hovered').eq(true),
+            w.meta('colorScheme').eq('dark')
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-accent/50')),
       });
     }
     return (renderer) => renderer.r.slot();

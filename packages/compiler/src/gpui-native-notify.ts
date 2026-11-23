@@ -33,7 +33,6 @@ pub fn drive_pending_native_events(owner:&OwnerRef,window:&mut Window,cx:&mut Ap
 #[cfg(all(test,feature="test-support"))]
 mod native_notification_tests {
     use super::notify_native_change;
-    use gpui::prelude::*;
     use gpui::{AppContext,Context,Entity,FocusHandle,InteractiveElement,IntoElement,ParentElement,
         Render,Styled,Subscription,TestAppContext,Window,WindowHandle,div,px,size};
     use std::{cell::RefCell,rc::Rc};

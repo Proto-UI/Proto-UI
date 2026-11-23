@@ -5169,11 +5169,9 @@ describe('lowered hook coverage', () => {
   it('expands a known spread of a proven array in order', async () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = ['left'] as const;" },
-      loopConsumer(
-        ["import { NAMES } from './ids';"],
-        'ALL',
-        ["const ALL = [...NAMES, 'right'] as const;"]
-      ),
+      loopConsumer(["import { NAMES } from './ids';"], 'ALL', [
+        "const ALL = [...NAMES, 'right'] as const;",
+      ]),
       async (scan, tokens) => {
         const extracted = await tokens();
         expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
@@ -5255,9 +5253,15 @@ describe('lowered hook coverage', () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = ['left', 'right'] as const;" },
       loopConsumer(["import { NAMES } from './ids';"], 'NAMES', ['mutate(NAMES);']),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5271,9 +5275,15 @@ describe('lowered hook coverage', () => {
         ].join('\n'),
       },
       loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5282,9 +5292,20 @@ describe('lowered hook coverage', () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = ['left', pick ? 'right' : 'center'] as const;" },
       loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        // The scanner refuses the complete row proof. The independent first
+        // literal still contributes to the collector's token inventory; the
+        // conditional member must not manufacture an exact comparison value.
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([
+          'data-[direction=left]:bg-primary',
+        ]);
       }
     );
   });
@@ -5293,9 +5314,15 @@ describe('lowered hook coverage', () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = [...external(), 'left'] as const;" },
       loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5309,9 +5336,15 @@ describe('lowered hook coverage', () => {
         ].join('\n'),
       },
       loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5320,9 +5353,21 @@ describe('lowered hook coverage', () => {
     await withLoopFixture(
       { 'ids.ts': "export let NAMES = ['left', 'right'] as const;" },
       loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        // This fixture has no write. Its two literal values remain in the
+        // conservative CSS inventory, which does not supply the scanner's
+        // stricter const-only proof of the complete iterable.
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([
+          'data-[direction=left]:bg-primary',
+          'data-[direction=right]:bg-primary',
+        ]);
       }
     );
   });
@@ -5334,9 +5379,15 @@ describe('lowered hook coverage', () => {
         'two.ts': "export { NAMES } from './one';",
       },
       loopConsumer(["import { NAMES } from './one';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5345,9 +5396,15 @@ describe('lowered hook coverage', () => {
     await withLoopFixture(
       {},
       loopConsumer(["import { NAMES } from './absent';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5361,9 +5418,15 @@ describe('lowered hook coverage', () => {
         'bridge.ts': "export * from './ids';",
       },
       loopConsumer(["import { NAMES } from './bridge';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
@@ -5372,9 +5435,15 @@ describe('lowered hook coverage', () => {
     await withLoopFixture(
       { 'ids.ts': "export default ['left', 'right'] as const;" },
       loopConsumer(["import NAMES from './ids';"], 'NAMES'),
-      (scan) => {
-        expect(scan.usages).toEqual([]);
+      async (scan, tokens) => {
+        // The row-dependent comparison remains refused. The independent
+        // Checkbox condition in the same body still has a known subject and
+        // literal comparison, so both analyzers must retain its valid proof.
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+        const extracted = await tokens();
+        expect(extracted).toContain('data-[checked]:underline');
+        expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
       }
     );
   });
