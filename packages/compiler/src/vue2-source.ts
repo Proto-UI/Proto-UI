@@ -1130,6 +1130,13 @@ ${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = 
   const exposed = Object.create(null);
   /** @type {Record<string, unknown>} */
   const eventDeclarations = Object.create(null);
+  /** @param {string} key @param {unknown} value */
+  const declareExpose = (key, value) => {
+    setupOnly();
+    if (typeof key !== 'string' || !key || PUIOwn(exposed, key))
+      throw new Error('[Expose] empty or duplicate declaration: ' + key);
+    exposed[key] = value;
+  };
   /** @type {Record<PUILifecycleKind, Array<PUILifecycleCallback<typeof run>>>} */
   const lifecycle = { ${lifecycleKeys.map((key) => `${JSON.stringify(key)}: []`).join(', ')} };
 ${stateful ? '  /** @type {Array<() => void>} */\n  const notifications = [];\n' : ''}  ${
@@ -1445,10 +1452,9 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
     declarations: ${declarations}, tableFamily: ${tableFamily},
     getExposes: () => terminal ? {} : exposed,
     registerExpose: (key, value) => {
-      setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration: ' + key);
-      if (value !== null && typeof value === 'object' && observedExternals.has(value)) exposed[key] = observedExternals.get(value);
-      else if (typeof value === 'function') exposed[key] = (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => value(...args)); });
-      else exposed[key] = value;
+      if (value !== null && typeof value === 'object' && observedExternals.has(value)) declareExpose(key, observedExternals.get(value));
+      else if (typeof value === 'function') declareExpose(key, (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => value(...args)); }));
+      else declareExpose(key, value);
     },
     createOwnedState: (name, value, spec) => createState(spec?.kind ?? (typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string'), name, value, spec),
     watchState: (state, fn) => { setupOnly(); return externalState(state).subscribe(event => invoke(() => fn(run, event))); },
@@ -1633,13 +1639,13 @@ ${
     : ''
 }    expose: {
       /** @param {string} key @param {unknown} value */
-      value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
+      value: declareExpose,
       /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
-      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
+      state: (key, handle) => { declareExpose(key, ${interactive ? 'externalState(handle)' : 'handle.external'}); ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
       /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn @param {(value: Result) => Result} [project] */
-      method: (key, fn, project) => { setupOnly();  exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
+      method: (key, fn, project) => { declareExpose(key, (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; })); },
       /** @param {string} key @param {unknown} [spec] */
-      event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
+      event: (key, spec) => { declareExpose(key, Object.freeze({kind:'event'})); eventDeclarations[key] = spec; },
     },
     lifecycle: Object.fromEntries(lifecycleKeys.map((key) => {
       /** @type {[string, (fn: PUILifecycleCallback<typeof run>) => void]} */
