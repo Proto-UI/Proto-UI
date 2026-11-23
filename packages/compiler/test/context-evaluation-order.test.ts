@@ -63,6 +63,66 @@ function moveMutationIntoRecord(
 }
 
 describe('Context aggregate evaluation order', () => {
+  const snapshotSource = (read: string) =>
+    `import{definePrototype,createContextKey}from'@proto.ui/core';
+    const KEY=createContextKey<{items:readonly number[];value:number}>('snapshot-order');
+    export default definePrototype({name:'snapshot-order',setup(def){
+      def.props.define({value:{type:'number',empty:'fallback'}});
+      def.props.setDefaults({value:1});
+      const value=def.state.numberDiscrete('value',1);const items=[1];
+      const changed=()=>{items.push(2);return value;};
+      def.context.provide(KEY,{items:[1],value:1});
+      def.lifecycle.onCreated(run=>run.context.update(KEY,{items,value:${read}}));
+    }});`;
+
+  it.each(['value.get()', 'run.props.get().value'])(
+    'retains shared data before the checked snapshot observation %s',
+    (read) => {
+      checked(snapshotSource(read));
+    }
+  );
+
+  it('checks the receiver evaluation before a pure State observation', () => {
+    expect(parsePrototype(snapshotSource('changed().get()'))).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1006', message: expect.stringContaining('retain shared values') }],
+    });
+  });
+
+  it('rechecks a forged effectful receiver independently of the snapshot operation', () => {
+    const ir = checked(
+      snapshotSource('value.get()').replace(
+        'run=>run.context.update(KEY,{items,value:value.get()})',
+        'run=>{run.context.update(KEY,{items,value:value.get()});changed().get();}'
+      )
+    );
+    let callback: Extract<ExpressionIR, { kind: 'function' }> | undefined;
+    JSON.stringify(ir, (_key, value) => {
+      if (value?.kind === 'operation' && value.operation === 'lifecycle.onCreated')
+        callback = value.arguments[0];
+      return value;
+    });
+    const [update, changed] = callback?.function.body ?? [];
+    if (
+      update?.kind !== 'effect' ||
+      update.expression.kind !== 'operation' ||
+      changed?.kind !== 'effect' ||
+      changed.expression.kind !== 'operation'
+    )
+      throw new Error('missing original update and later receiver effect');
+    const aggregate = update.expression.arguments[1];
+    if (aggregate.kind !== 'record') throw new Error('missing Context aggregate');
+    const read = aggregate.entries.find((entry) => entry.key === 'value')?.value;
+    if (read?.kind !== 'operation' || read.operation !== 'state.get')
+      throw new Error('missing snapshot operation');
+    read.receiver = changed.expression.receiver;
+    callback!.function.body = [update];
+    expect(validateIR(JSON.parse(JSON.stringify(ir)))).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI2002', message: expect.stringContaining('retain shared values') }],
+    });
+  });
+
   const scalarSource = (
     body: string
   ) => `import {createContextKey,definePrototype} from '@proto.ui/core';

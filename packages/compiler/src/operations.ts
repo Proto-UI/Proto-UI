@@ -3053,6 +3053,7 @@ function orderedContextLiteral(argument: OperationArgument): boolean {
     condition?: OperationArgument;
     parts?: readonly { kind?: string; spread?: boolean; value: OperationArgument }[];
     name?: string;
+    operation?: string;
     operator?: string;
     callee?: OperationArgument;
     receiver?: OperationArgument;
@@ -3169,12 +3170,26 @@ function orderedContextLiteral(argument: OperationArgument): boolean {
       node.name !== undefined &&
       isEcmaIntrinsic(node.name) &&
       (node.name === 'number' || node.name.startsWith('number.') || node.name.startsWith('math.'));
+    const operation =
+      value.kind === 'operation' && node.operation ? lookup(node.operation) : undefined;
+    // The shared operation contract makes a no-argument State/resolved-Props
+    // observation non-reentrant. Reading its receiver still evaluates the
+    // authored expression above; an effectful helper cannot hide behind get().
+    const snapshotObservation =
+      operation !== undefined &&
+      operation.arguments.length === 0 &&
+      !operation.callback &&
+      operation.effects.length > 0 &&
+      operation.effects.every(
+        (effect) => effect.kind === 'read' && ['state', 'props'].includes(effect.resource)
+      );
     return {
       ordered: eager.ordered,
       shared: structured(value.type),
       effects:
         eager.effects ||
         (!scalarIntrinsic &&
+          !snapshotObservation &&
           ![
             'literal',
             'undefined',
