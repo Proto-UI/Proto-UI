@@ -169,14 +169,19 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./feedback', './owned-template-blueprint', './template']),
   }),
   'packages/core/src/spec/owned-template-blueprint.ts': Object.freeze({
-    sourceSha256: 'bf0308e95a26d83cdc730e2a3b0e29c9557da8eaa658de9a99ac9b27a2cb332b',
+    sourceSha256: '99fc68f49987facedd31c01c0121f92b188d6f2c20769202d47657464a055a75',
     companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['./feedback/style', './template']),
+    specifiers: Object.freeze(['./feedback/style', './svg-tags', './template']),
+  }),
+  'packages/core/src/spec/svg-tags.ts': Object.freeze({
+    sourceSha256: '816196bcb9d6899d9185a4dfd11ebe07398a7717afccdb9b5e56e46f95e30bf0',
+    companionSource: BROWSER_COMPILER_OWNER,
+    specifiers: Object.freeze(['./template']),
   }),
   'packages/core/src/spec/template.ts': Object.freeze({
-    sourceSha256: '4e2e9f13e9a273ad42140591bfa43d4bb0204578bdc40d95b596146bc34de7f4',
+    sourceSha256: 'b1d9800a9bb71907c85e8de6923048839b4144d8f00898362221b2f7483cb522',
     companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['../handles', '../prototype', './feedback/style']),
+    specifiers: Object.freeze(['../handles', '../prototype', './feedback/style', './svg-tags']),
   }),
   'packages/core/src/state.ts': Object.freeze({
     sourceSha256: '234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f',

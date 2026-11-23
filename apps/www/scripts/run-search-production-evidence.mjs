@@ -6,6 +6,7 @@ import {
   mkdir,
   readdir,
   readFile,
+  realpath,
   rm,
   writeFile,
 } from 'node:fs/promises';
@@ -24,6 +25,27 @@ export const SEARCH_PRODUCTION_ROUTES = [
 ];
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 
+// Resolve existing symlink ancestors before creating any capture directory.
+// Missing suffixes are kept lexical; an existing dangling link must fail rather
+// than be mistaken for an ordinary missing directory.
+async function physicalCapturePath(file) {
+  let existing = file;
+  const missing = [];
+  for (;;) {
+    try {
+      await lstat(existing);
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error;
+      const parent = path.dirname(existing);
+      if (parent === existing) throw error;
+      missing.unshift(path.basename(existing));
+      existing = parent;
+      continue;
+    }
+    return path.resolve(await realpath(existing), ...missing);
+  }
+}
+
 /** Post-terminal diagnostic capture of this workspace's build output. These are
  * same-build bytes, not a claim about the browser's actual response bodies. */
 export async function retainSearchProductionBuild(options, dependencies = {}) {
@@ -34,14 +56,22 @@ export async function retainSearchProductionBuild(options, dependencies = {}) {
     throw new Error('Invalid diagnostic runner outcome');
   const dist = path.resolve(root, 'apps/www/dist');
   const target = path.resolve(directory);
-  const relativeTarget = path.relative(dist, target);
-  if (
-    relativeTarget === '' ||
-    (relativeTarget !== '..' &&
-      !relativeTarget.startsWith('..' + path.sep) &&
-      !path.isAbsolute(relativeTarget))
-  )
-    throw new Error('Build capture output must stay outside the measured dist tree');
+  const requireOutside = (source, destination) => {
+    const relativeTarget = path.relative(source, destination);
+    if (
+      relativeTarget === '' ||
+      (relativeTarget !== '..' &&
+        !relativeTarget.startsWith('..' + path.sep) &&
+        !path.isAbsolute(relativeTarget))
+    )
+      throw new Error('Build capture output must stay outside the measured dist tree');
+  };
+  requireOutside(dist, target);
+  const [physicalDist, physicalTarget] = await Promise.all([
+    physicalCapturePath(dist),
+    physicalCapturePath(target),
+  ]);
+  requireOutside(physicalDist, physicalTarget);
   const {
     now = Date.now,
     writeCopy = writeFile,

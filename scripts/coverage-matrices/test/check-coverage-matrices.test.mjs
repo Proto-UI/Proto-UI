@@ -19688,6 +19688,9 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-im
 
 for (const reviewed of [
   'packages/core/src/internal.ts',
+  'packages/core/src/spec/owned-template-blueprint.ts',
+  'packages/core/src/spec/template.ts',
+  'packages/core/src/spec/svg-tags.ts',
   'packages/compiler/src/shader-plan.ts',
   'packages/compiler/src/gpui-source.ts',
   'packages/compiler/src/ir-validation.ts',

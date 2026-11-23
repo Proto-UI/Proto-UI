@@ -7,6 +7,7 @@ import type {
   DemoPublicInstancesListener,
   DemoRuntimeApi,
 } from './PrototypePreviewer/demo-types';
+import { createDemoPublicInstances } from './PrototypePreviewer/demo-public-instances';
 import { createSiteSearchComposition, type SiteSearchCopy } from './site-search-composition';
 import type { SiteSearchRow, SiteSearchSnapshot } from './site-search-data';
 import type { SiteSearchSession } from './site-search-session';
@@ -77,7 +78,7 @@ const instance = (): DemoPublicInstance => ({ getExposes: () => ({}) });
 
 /** Real composition and InputShell binding; deterministic public commit boundaries,
  * not a native renderer cost or timing oracle. Session reads copy rows/navigation. */
-function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
+function fixture(family: 'shadcn' | 'brutalist' = 'brutalist', batchedPublications = false) {
   const listeners = new Set<() => void>();
   const state: {
     open: boolean;
@@ -151,6 +152,17 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
   let revision = 0,
     live = true,
     disposed = false;
+  // The existing synchronous fixture remains unchanged by default. Ordering
+  // controls opt into the same identity publisher used by all built-in hosts.
+  const publications = batchedPublications
+    ? createDemoPublicInstances({
+        read: (ref) => owners[ref],
+        current: () => live,
+        fail(error) {
+          throw error;
+        },
+      })
+    : undefined;
   let actionKey: string | undefined;
   const delayed = new Set<string>();
   type Commit = {
@@ -166,7 +178,8 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
   } = {};
   const api: DemoRuntimeApi = {
     getPublicInstance: (ref) => owners[ref],
-    subscribePublicInstances(_refs, listener) {
+    subscribePublicInstances(names, listener) {
+      if (publications) return publications.subscribe(names, listener);
       notify = listener;
       listener({ ...owners }, revision);
       return () => {
@@ -215,6 +228,7 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
     disposed = true;
     live = false;
     if (typeof stop === 'function') stop();
+    publications?.retire();
     session.dispose();
   };
   cleanups.push(destroy);
@@ -245,7 +259,8 @@ function fixture(family: 'shadcn' | 'brutalist' = 'brutalist') {
     },
     identities(patch: Record<string, DemoPublicInstance | undefined>) {
       Object.assign(owners, patch);
-      notify({ ...owners }, ++revision);
+      if (publications) publications.schedule();
+      else notify({ ...owners }, ++revision);
     },
     writes(ref: string) {
       return vi.mocked(api.setChildren!).mock.calls.filter(([name]) => name === ref);
@@ -566,6 +581,473 @@ describe('Search composition repeated publications', () => {
     expect(vi.mocked(f.api.call).mock.calls.length).toBe(acceptedCalls);
     expect(f.errors).toEqual([]);
   });
+
+  it.each(['shadcn', 'brutalist'] as const)(
+    '%s completes a pending Retry when query focus arrives after the last panel transition',
+    async (family) => {
+      // Real composition; controlled public facts and request acceptance only.
+      // This ordering control is not native portal or browser timing evidence.
+      const f = fixture(family);
+      const transitions = new Set<(event: { type: string; next: string }) => void>();
+      let entered = false;
+      let entryCompleted = false;
+      let actionFocused = false;
+      f.identities({
+        panel: {
+          getExposes: () => ({
+            isPresent: { get: () => true },
+            transitionState: {
+              get: () => (entered ? 'entered' : 'entering'),
+              subscribe(listener: (event: { type: string; next: string }) => void) {
+                transitions.add(listener);
+                return () => transitions.delete(listener);
+              },
+            },
+          }),
+        },
+      });
+      f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+      vi.mocked(f.api.call).mockImplementation((ref, method) => {
+        if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+        f.owners[ref]!.getExposes = () => ({ focused: { get: () => actionFocused } });
+        if (entryCompleted) {
+          actionFocused = true;
+          f.source.focused.set(false);
+          f.setFocusEpoch(2);
+        }
+      });
+      const focusCalls = () =>
+        vi
+          .mocked(f.api.call)
+          .mock.calls.filter(
+            ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+          );
+      f.open();
+      await settled();
+      expect(focusCalls()).toHaveLength(1);
+      expect(actionFocused).toBe(false);
+      entered = true;
+      for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+      await settled();
+      expect(focusCalls()).toHaveLength(2);
+      expect(actionFocused).toBe(false);
+      const action = f.owners['search-page-action'];
+      const query = f.owners.query;
+      const resultWrites = f.writes('results').length;
+      const actionWrites = f.writes('actions').length;
+
+      // The query's existing public fact is the only new publication. Its host
+      // event finishes after the fact notification and advances the focus epoch.
+      // Do not manually paint, replace an identity, or emit another transition.
+      f.source.focused.set(true);
+      f.setFocusEpoch(1);
+      entryCompleted = true;
+      await settled();
+      expect(actionFocused).toBe(true);
+      expect(focusCalls()).toHaveLength(3);
+      expect(f.owners['search-page-action']).toBe(action);
+      expect(f.owners.query).toBe(query);
+      expect(f.writes('results')).toHaveLength(resultWrites);
+      expect(f.writes('actions')).toHaveLength(actionWrites);
+
+      // A later focus choice and duplicate transition cannot repeat a completed handoff.
+      f.setFocusEpoch(3);
+      f.source.focused.set(true);
+      for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+      await settled();
+      expect(focusCalls()).toHaveLength(3);
+      f.destroy();
+      expect(transitions.size).toBe(0);
+      expect(f.source.focused.listeners.size).toBe(0);
+      expect(f.errors).toEqual([]);
+    }
+  );
+
+  it.each([
+    'close',
+    'reopen',
+    'newer-focus',
+    'query-blur',
+    'query-replacement',
+    'action-replacement',
+    'dispose',
+    'query-disconnect',
+  ] as const)('cancels a queued query-entry wake after %s', async (reason) => {
+    const f = fixture();
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref === 'search-page-action' && method === 'focusSelf')
+        f.owners[ref]!.getExposes = () => ({ focused: { get: () => false } });
+    });
+    const focusCalls = () =>
+      vi
+        .mocked(f.api.call)
+        .mock.calls.filter(
+          ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+        );
+    f.open();
+    await settled();
+    expect(focusCalls()).toHaveLength(1);
+    f.source.focused.set(true);
+    f.setFocusEpoch(1);
+    const replacement = control();
+    replacement.focused.set(true);
+    if (reason === 'close') f.session.setOpen(false);
+    if (reason === 'reopen') {
+      f.session.setOpen(false);
+      f.state.snapshot = { ...f.state.snapshot, phase: 'loading' };
+      f.session.setOpen(true);
+    }
+    if (reason === 'newer-focus') f.setFocusEpoch(2);
+    if (reason === 'query-blur') f.source.focused.set(false);
+    // A host owner can be replaced before its coalesced identity notification.
+    // No fresh paint is manufactured to help the old queued request.
+    if (reason === 'query-replacement') f.owners.query = replacement;
+    if (reason === 'action-replacement') f.owners['search-page-action'] = instance();
+    if (reason === 'dispose') f.destroy();
+    if (reason === 'query-disconnect') {
+      for (const listener of [...f.source.focused.listeners])
+        listener({ type: 'disconnect', reason: 'unmount' });
+    }
+    const factReads = f.source.focused.get.mock.calls.length;
+    await settled();
+    expect(focusCalls()).toHaveLength(1);
+    if (!['newer-focus', 'query-blur'].includes(reason))
+      expect(f.source.focused.get).toHaveBeenCalledTimes(factReads);
+    if (reason === 'query-replacement') {
+      f.state.snapshot = { ...f.state.snapshot, phase: 'loading' };
+      f.identities({ query: replacement });
+      await settled();
+      expect(f.source.focused.listeners.size).toBe(0);
+      expect(replacement.focused.listeners.size).toBe(1);
+    }
+    f.destroy();
+    expect(f.source.focused.listeners.size).toBe(0);
+    expect(replacement.focused.listeners.size).toBe(0);
+    expect(f.errors).toEqual([]);
+  });
+
+  it('coalesces duplicate query focus facts into one wake while retaining later real paints', async () => {
+    const f = fixture();
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref === 'search-page-action' && method === 'focusSelf')
+        f.owners[ref]!.getExposes = () => ({ focused: { get: () => false } });
+    });
+    const focusCalls = () =>
+      vi
+        .mocked(f.api.call)
+        .mock.calls.filter(
+          ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+        );
+    f.open();
+    await settled();
+    expect(focusCalls()).toHaveLength(1);
+    for (let i = 0; i < 3; i++) f.source.focused.set(true);
+    f.setFocusEpoch(1);
+    await settled();
+    expect(focusCalls()).toHaveLength(2);
+    for (let i = 0; i < 3; i++) f.source.focused.set(true);
+    await settled();
+    expect(focusCalls()).toHaveLength(2);
+    // Consuming the query-entry wake does not certify a refused focus call.
+    f.paint();
+    await settled();
+    expect(focusCalls()).toHaveLength(3);
+    f.destroy();
+    expect(f.source.focused.listeners.size).toBe(0);
+    expect(f.errors).toEqual([]);
+  });
+
+  it('retains the panel transition path when query entry arrives during preparation', async () => {
+    const f = fixture();
+    const transitions = new Set<(event: { type: string; next: string }) => void>();
+    let present = false;
+    let actionFocused = false;
+    f.identities({
+      panel: {
+        getExposes: () => ({
+          isPresent: { get: () => present },
+          transitionState: {
+            get: () => (present ? 'entered' : 'entering'),
+            subscribe(listener: (event: { type: string; next: string }) => void) {
+              transitions.add(listener);
+              return () => transitions.delete(listener);
+            },
+          },
+        }),
+      },
+    });
+    f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+    vi.mocked(f.api.call).mockImplementation((ref, method) => {
+      if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+      actionFocused = true;
+      f.owners[ref]!.getExposes = () => ({ focused: { get: () => actionFocused } });
+      f.source.focused.set(false);
+      f.setFocusEpoch(2);
+    });
+    const focusCalls = () =>
+      vi
+        .mocked(f.api.call)
+        .mock.calls.filter(
+          ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+        );
+    f.open();
+    await settled();
+    f.source.focused.set(true);
+    f.setFocusEpoch(1);
+    await settled();
+    expect(focusCalls()).toHaveLength(0);
+    present = true;
+    for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+    await settled();
+    expect(actionFocused).toBe(true);
+    expect(focusCalls()).toHaveLength(1);
+    f.destroy();
+    expect(transitions.size).toBe(0);
+    expect(f.source.focused.listeners.size).toBe(0);
+    expect(f.errors).toEqual([]);
+  });
+
+  it('retires a synchronously disconnected query subscription without reviving terminal facts', async () => {
+    const f = fixture();
+    const next = control();
+    const off = vi.fn();
+    let terminal = false;
+    next.getExposes.mockImplementation(() => {
+      if (terminal) throw new Error('terminal query facts were read');
+      return { focused: next.focused, focusVisible: next.focusVisible, disabled: next.disabled };
+    });
+    next.focused.subscribe.mockImplementation((listener) => {
+      next.focused.listeners.add(listener);
+      next.focused.history.push(listener);
+      listener({ type: 'disconnect', reason: 'unmount' });
+      terminal = true;
+      return () => {
+        next.focused.listeners.delete(listener);
+        off();
+        return true;
+      };
+    });
+    f.identities({ query: next });
+    await settled();
+    expect(off).toHaveBeenCalledTimes(1);
+    expect(next.focused.listeners.size).toBe(0);
+    const reads = next.getExposes.mock.calls.length;
+    f.identities({ panel: instance() });
+    for (const listener of next.focused.history)
+      listener({ type: 'next', prev: false, next: true });
+    await settled();
+    expect(next.getExposes).toHaveBeenCalledTimes(reads);
+    f.destroy();
+    expect(off).toHaveBeenCalledTimes(1);
+    expect(f.errors).toEqual([]);
+  });
+
+  it.each(['subscribe', 'unsubscribe'] as const)(
+    'keeps only the newest query binding when %s reenters identity publication',
+    async (boundary) => {
+      const f = fixture();
+      const first = control();
+      const intermediate = control();
+      const newest = control();
+      const originalSubscribe = first.focused.subscribe.getMockImplementation()!;
+      first.focused.subscribe.mockImplementation((listener) => {
+        const off = originalSubscribe(listener);
+        if (boundary === 'subscribe') f.identities({ query: newest });
+        return () => {
+          const removed = off();
+          if (boundary === 'unsubscribe') f.identities({ query: newest });
+          return removed;
+        };
+      });
+      f.identities({ query: first });
+      if (boundary === 'unsubscribe') f.identities({ query: intermediate });
+      await settled();
+      expect(f.owners.query).toBe(newest);
+      expect(first.focused.listeners.size).toBe(0);
+      expect(intermediate.focused.subscribe).not.toHaveBeenCalled();
+      expect(newest.focused.subscribe).toHaveBeenCalledTimes(1);
+      expect(newest.focused.listeners.size).toBe(1);
+      f.destroy();
+      expect(newest.focused.listeners.size).toBe(0);
+      expect(f.errors).toEqual([]);
+    }
+  );
+
+  it.each(['subscribe', 'unsubscribe'] as const)(
+    'preserves the newest Shadcn InputShell facts when query %s reenters',
+    async (boundary) => {
+      const f = fixture('shadcn');
+      const first = control();
+      const intermediate = control();
+      const newest = control();
+      const originalSubscribe = first.focused.subscribe.getMockImplementation()!;
+      first.focused.subscribe.mockImplementation((listener) => {
+        const off = originalSubscribe(listener);
+        if (boundary === 'subscribe') f.identities({ query: newest });
+        return () => {
+          const removed = off();
+          if (boundary === 'unsubscribe') f.identities({ query: newest });
+          return removed;
+        };
+      });
+      f.identities({ query: first });
+      if (boundary === 'unsubscribe') f.identities({ query: intermediate });
+      await settled();
+      expect(f.owners.query).toBe(newest);
+      expect(first.focused.listeners.size).toBe(0);
+      expect(first.focusVisible.listeners.size).toBe(0);
+      expect(first.disabled.listeners.size).toBe(0);
+      expect(intermediate.getExposes).not.toHaveBeenCalled();
+      expect(newest.focused.listeners.size).toBe(1);
+      expect(newest.focusVisible.listeners.size).toBe(1);
+      expect(newest.disabled.listeners.size).toBe(1);
+      newest.focusVisible.set(true);
+      newest.disabled.set(true);
+      expect(f.props('query-shell').at(-1)).toEqual({
+        focusVisible: true,
+        disabled: true,
+      });
+      f.destroy();
+      expect(newest.focused.listeners.size).toBe(0);
+      expect(newest.focusVisible.listeners.size).toBe(0);
+      expect(newest.disabled.listeners.size).toBe(0);
+      expect(f.errors).toEqual([]);
+    }
+  );
+
+  it.each(['shadcn', 'brutalist'] as const)(
+    '%s uses the identity publication paint when its new query is already focused',
+    async (family) => {
+      const f = fixture(family, true);
+      const transitions = new Set<(event: { type: string; next: string }) => void>();
+      let entered = false;
+      let ready = false;
+      let actionFocused = false;
+      f.identities({
+        panel: {
+          getExposes: () => ({
+            isPresent: { get: () => true },
+            transitionState: {
+              get: () => (entered ? 'entered' : 'entering'),
+              subscribe(listener: (event: { type: string; next: string }) => void) {
+                transitions.add(listener);
+                return () => transitions.delete(listener);
+              },
+            },
+          }),
+        },
+      });
+      await settled();
+      f.state.snapshot = { ...f.state.snapshot, query: '', phase: 'error', hasMore: false };
+      vi.mocked(f.api.call).mockImplementation((ref, method) => {
+        if (ref !== 'search-page-action' || method !== 'focusSelf') return;
+        f.owners[ref]!.getExposes = () => ({ focused: { get: () => actionFocused } });
+        if (ready) actionFocused = true;
+      });
+      const focusCalls = () =>
+        vi
+          .mocked(f.api.call)
+          .mock.calls.filter(
+            ([ref, method]) => ref === 'search-page-action' && method === 'focusSelf'
+          );
+      f.open();
+      await settled();
+      expect(focusCalls()).toHaveLength(1);
+      entered = true;
+      for (const listener of [...transitions]) listener({ type: 'next', next: 'entered' });
+      await settled();
+      expect(focusCalls()).toHaveLength(2);
+      expect(actionFocused).toBe(false);
+      const action = f.owners['search-page-action'];
+      const resultWrites = f.writes('results').length;
+      const actionWrites = f.writes('actions').length;
+      const next = control();
+      // This public fact changes before the identity publisher's microtask.
+      // subscribe() does not replay it; there is no later fact or transition.
+      next.focused.set(true);
+      expect(next.focused.history).toHaveLength(0);
+      f.setFocusEpoch(1);
+      ready = true;
+      f.identities({ query: next });
+      expect(actionFocused).toBe(false);
+      await settled();
+      expect(actionFocused).toBe(true);
+      expect(focusCalls()).toHaveLength(3);
+      expect(f.owners['search-page-action']).toBe(action);
+      expect(f.owners.query).toBe(next);
+      expect(f.writes('results')).toHaveLength(resultWrites);
+      expect(f.writes('actions')).toHaveLength(actionWrites);
+      f.destroy();
+      expect(transitions.size).toBe(0);
+      expect(next.focused.listeners.size).toBe(0);
+      expect(next.focusVisible.listeners.size).toBe(0);
+      expect(next.disabled.listeners.size).toBe(0);
+      expect(f.errors).toEqual([]);
+    }
+  );
+
+  it.each(['shadcn', 'brutalist'] as const)(
+    '%s retires a terminal query before binding other facts and accepts a fresh owner',
+    async (family) => {
+      const f = fixture(family);
+      const terminal = control();
+      const off = vi.fn();
+      let disconnected = false;
+      terminal.getExposes.mockImplementation(() => {
+        if (disconnected) throw new Error('terminal query facts were read');
+        return {
+          focused: terminal.focused,
+          focusVisible: terminal.focusVisible,
+          disabled: terminal.disabled,
+        };
+      });
+      terminal.focused.subscribe.mockImplementation((listener) => {
+        terminal.focused.listeners.add(listener);
+        terminal.focused.history.push(listener);
+        listener({ type: 'disconnect', reason: 'unmount' });
+        disconnected = true;
+        return () => {
+          terminal.focused.listeners.delete(listener);
+          off();
+          return true;
+        };
+      });
+      expect(() => f.identities({ query: terminal })).not.toThrow();
+      await settled();
+      expect(off).toHaveBeenCalledTimes(1);
+      expect(terminal.focused.listeners.size).toBe(0);
+      expect(terminal.focusVisible.subscribe).not.toHaveBeenCalled();
+      expect(terminal.disabled.subscribe).not.toHaveBeenCalled();
+      expect(f.source.focused.listeners.size).toBe(0);
+      expect(f.source.focusVisible.listeners.size).toBe(0);
+      expect(f.source.disabled.listeners.size).toBe(0);
+      const reads = terminal.getExposes.mock.calls.length;
+      expect(() => f.identities({ panel: instance() })).not.toThrow();
+      for (const listener of terminal.focused.history)
+        listener({ type: 'next', prev: false, next: true });
+      await settled();
+      expect(terminal.getExposes).toHaveBeenCalledTimes(reads);
+      const fresh = control();
+      f.identities({ query: fresh });
+      await settled();
+      expect(fresh.focused.listeners.size).toBe(1);
+      if (family === 'shadcn') {
+        expect(fresh.focusVisible.listeners.size).toBe(1);
+        expect(fresh.disabled.listeners.size).toBe(1);
+        fresh.focusVisible.set(true);
+        fresh.disabled.set(true);
+        expect(f.props('query-shell').at(-1)).toEqual({ focusVisible: true, disabled: true });
+      }
+      f.destroy();
+      expect(fresh.focused.listeners.size).toBe(0);
+      expect(fresh.focusVisible.listeners.size).toBe(0);
+      expect(fresh.disabled.listeners.size).toBe(0);
+      expect(off).toHaveBeenCalledTimes(1);
+      expect(f.errors).toEqual([]);
+    }
+  );
 
   it('does not certify a refused Retry focus or steal a later focus choice', async () => {
     const f = fixture();

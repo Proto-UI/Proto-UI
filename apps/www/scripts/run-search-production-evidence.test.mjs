@@ -687,3 +687,42 @@ test('runtime diagnostic retains same-build output only after the original runne
   assert.equal(job.steps[uploadIndex].if, 'always()');
   assert.equal(job.steps[uploadIndex].with.path, '${{ runner.temp }}/homepage-evidence');
 });
+
+for (const scenario of ['output-parent', 'missing-output-parents', 'workspace-root-alias']) {
+  test(`capture rejects physical dist overlap through ${scenario}`, async (t) => {
+    const f = await syntheticBuild(t);
+    // An empty partial build reproduces the write boundary without recursively
+    // copying the capture into itself on the unfixed implementation.
+    await rm(f.dist, { recursive: true, force: true });
+    await mkdir(f.dist);
+    const alias = path.join(f.root, 'path-alias');
+    await symlink(scenario === 'workspace-root-alias' ? f.root : f.dist, alias);
+    const overrides =
+      scenario === 'workspace-root-alias'
+        ? { root: alias, directory: path.join(f.dist, 'capture') }
+        : {
+            directory:
+              scenario === 'missing-output-parents'
+                ? path.join(alias, 'not-created', 'nested', 'capture')
+                : path.join(alias, 'capture'),
+          };
+    await assert.rejects(f.capture(overrides), /outside the measured dist tree/);
+    assert.deepEqual(await readdir(f.dist), []);
+  });
+}
+
+test('a physical output parent outside dist may be reached through a symlink', async (t) => {
+  const f = await syntheticBuild(t);
+  const parent = path.join(f.root, 'safe-output');
+  const alias = path.join(f.root, 'output-alias');
+  await mkdir(parent);
+  await symlink(parent, alias);
+  const manifest = await f.capture({ directory: path.join(alias, 'nested', 'capture') });
+  assert.equal(manifest.status, 'captured');
+  assert.equal(manifest.files.length, 7);
+  assert.deepEqual(
+    JSON.parse(await readFile(path.join(parent, 'nested/capture/manifest.json'), 'utf8')),
+    manifest
+  );
+  assert.ok(!(await readdir(f.dist)).includes('nested'));
+});
