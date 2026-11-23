@@ -828,8 +828,10 @@ function selectorMayDependOnInputState(selector: string): boolean {
     // without a DOM mutation.
     // Keep those conservative across the stylesheet's whole scope, including
     // form-associated controls, sibling conditions and nested :has branches.
+    // Known native part names do not themselves test the host's input state.
+    // Continue scanning host/state pseudo-classes and retain unknown names.
     const independent = pseudoElement
-      ? /^(?:before|after|first-letter|first-line|marker|backdrop|selection|placeholder|part|slotted)$/.test(
+      ? /^(?:before|after|first-letter|first-line|marker|backdrop|selection|placeholder|part|slotted|file-selector-button|-webkit-(?:details-marker|search-decoration|date-and-time-value|datetime-edit(?:-(?:fields-wrapper|(?:year|month|day|hour|minute|second|millisecond|meridiem)-field))?|calendar-picker-indicator|(?:inner|outer)-spin-button))$/.test(
           name
         )
       : /^(?:is|where|not|has|nth(?:-last)?-(?:child|of-type)|(?:first|last|only)-(?:child|of-type)|root|scope|host|host-context|empty|defined|lang|hover|active|focus(?:-within|-visible)?|link|any-link|visited|target(?:-within)?|enabled|disabled|required|optional|read-only|read-write|before|after|first-letter|first-line)$/.test(

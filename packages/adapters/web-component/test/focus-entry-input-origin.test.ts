@@ -341,3 +341,73 @@ describe('WC entry native input origin', () => {
     expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
   });
 });
+
+const nativeInputPartRules = [
+  ['[data-site-header-fallback-summary]::-webkit-details-marker', 'display: none;'],
+  ['::file-selector-button', 'box-sizing: border-box; border: 0 solid; margin: 0; padding: 0;'],
+  ['::-webkit-search-decoration', '-webkit-appearance: none;'],
+  ['::-webkit-date-and-time-value', 'min-height: 1lh; text-align: inherit;'],
+  ['::-webkit-datetime-edit', 'display: inline-flex;'],
+  ['::-webkit-datetime-edit-fields-wrapper', 'padding: 0;'],
+  ['::-webkit-datetime-edit-year-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-month-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-day-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-hour-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-minute-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-second-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-millisecond-field', 'padding-block: 0;'],
+  ['::-webkit-datetime-edit-meridiem-field', 'padding-block: 0;'],
+  ['::-webkit-calendar-picker-indicator', 'line-height: 1;'],
+  ['::-webkit-inner-spin-button', 'height: auto;'],
+  ['::-webkit-outer-spin-button', 'height: auto;'],
+] as const;
+
+describe('WC entry native input with native-part stylesheet rules', () => {
+  it.each(
+    nativeInputPartRules.flatMap(([selector, declarations]) =>
+      (['input', 'change'] as const).map((type) => ({ selector, declarations, type }))
+    )
+  )(
+    'does not resample an unrelated entry for $type with $selector',
+    async ({ selector, declarations, type }) => {
+      // These declarations come from the actual production page's loaded CSS.
+      // The host model selects the trusted branch; native timing stays a separate gate.
+      const style = document.createElement('style');
+      style.textContent = `${selector} { ${declarations} }`;
+      const outside = document.createElement('textarea');
+      document.body.append(style, outside);
+      expect((style.sheet!.cssRules[0] as CSSStyleRule).selectorText).toBe(selector);
+      const fixture = entry();
+      await settle();
+      const reads = vi.spyOn(window, 'getComputedStyle');
+
+      inputEvent(outside, type);
+
+      expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(false);
+    }
+  );
+
+  it.each([
+    'input:valid::file-selector-button',
+    'input:invalid::file-selector-button',
+    'input:dir(rtl)::file-selector-button',
+    'input:checked::file-selector-button',
+    'input:placeholder-shown::file-selector-button',
+    '::file-selector-button:future-input-state',
+    '::-webkit-future-input-part',
+    String.raw`::file-selector-button\2d unknown`,
+  ])('keeps input-state or unresolved native-part selector conservative: %s', async (selector) => {
+    const style = document.createElement('style');
+    style.textContent = `${selector} { visibility: hidden; }`;
+    const outside = document.createElement('input');
+    document.body.append(style, outside);
+    expect((style.sheet!.cssRules[0] as CSSStyleRule).selectorText).toBe(selector);
+    const fixture = entry();
+    await settle();
+    const reads = vi.spyOn(window, 'getComputedStyle');
+
+    inputEvent(outside, 'input');
+
+    expect(reads.mock.calls.some(([node]) => node === fixture.target)).toBe(true);
+  });
+});
