@@ -795,7 +795,12 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
         }
     }));
     let element = match &surface.a11y {
-        Some(a11y) if a11y.disabled => Disabled(element).into_any_element(),
+        Some(a11y) if a11y.disabled || a11y.read_only.is_some() => AccessibilityFlags {
+            element,
+            disabled: a11y.disabled,
+            read_only: a11y.read_only,
+        }
+        .into_any_element(),
         _ => element.into_any_element(),
     };
     match bridge.borrow().fixed_centers.get(&surface.id).copied() {
@@ -804,14 +809,18 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
     }
 }
 
-/// A surface reported to accessibility as disabled.
+/// Accessibility state flags not exposed by the pinned GPUI builders.
 ///
-/// GPUI's element builders cannot mark an element disabled for
-/// accessibility, so this wraps the surface and adds the flag to what it
-/// reports. Everything else, layout and input included, is the surface's own.
-struct Disabled(Stateful<Div>);
+/// This wrapper projects the current snapshot into the actual AccessKit node.
+/// Layout, input and action policy remain the surface's own. Read-only is not
+/// disabled: the Prototype decides whether an activation changes its value.
+struct AccessibilityFlags {
+    element: Stateful<Div>,
+    disabled: bool,
+    read_only: Option<bool>,
+}
 
-impl IntoElement for Disabled {
+impl IntoElement for AccessibilityFlags {
     type Element = Self;
 
     fn into_element(self) -> Self::Element {
@@ -819,16 +828,16 @@ impl IntoElement for Disabled {
     }
 }
 
-impl Element for Disabled {
+impl Element for AccessibilityFlags {
     type RequestLayoutState = <Stateful<Div> as Element>::RequestLayoutState;
     type PrepaintState = <Stateful<Div> as Element>::PrepaintState;
 
     fn id(&self) -> Option<ElementId> {
-        Element::id(&self.0)
+        Element::id(&self.element)
     }
 
     fn source_location(&self) -> Option<&'static Location<'static>> {
-        Element::source_location(&self.0)
+        Element::source_location(&self.element)
     }
 
     fn request_layout(
@@ -838,7 +847,7 @@ impl Element for Disabled {
         window: &mut Window,
         cx: &mut App,
     ) -> (LayoutId, Self::RequestLayoutState) {
-        Element::request_layout(&mut self.0, id, inspector_id, window, cx)
+        Element::request_layout(&mut self.element, id, inspector_id, window, cx)
     }
 
     fn prepaint(
@@ -851,7 +860,7 @@ impl Element for Disabled {
         cx: &mut App,
     ) -> Self::PrepaintState {
         Element::prepaint(
-            &mut self.0,
+            &mut self.element,
             id,
             inspector_id,
             bounds,
@@ -872,7 +881,7 @@ impl Element for Disabled {
         cx: &mut App,
     ) {
         Element::paint(
-            &mut self.0,
+            &mut self.element,
             id,
             inspector_id,
             bounds,
@@ -884,12 +893,19 @@ impl Element for Disabled {
     }
 
     fn a11y_role(&self) -> Option<accesskit::Role> {
-        Element::a11y_role(&self.0)
+        Element::a11y_role(&self.element)
     }
 
     fn write_a11y_info(&self, node: &mut accesskit::Node) {
-        Element::write_a11y_info(&self.0, node);
-        node.set_disabled();
+        Element::write_a11y_info(&self.element, node);
+        if self.disabled {
+            node.set_disabled();
+        }
+        match self.read_only {
+            Some(true) => node.set_read_only(),
+            Some(false) => node.clear_read_only(),
+            None => {}
+        }
     }
 
     fn a11y_synthetic_children(
@@ -897,7 +913,41 @@ impl Element for Disabled {
         prepaint: &mut Self::PrepaintState,
         builder: &mut gpui::A11ySubtreeBuilder,
     ) {
-        Element::a11y_synthetic_children(&mut self.0, prepaint, builder)
+        Element::a11y_synthetic_children(&mut self.element, prepaint, builder)
+    }
+}
+
+#[cfg(test)]
+mod accessibility_flags_tests {
+    use super::*;
+
+    #[test]
+    fn current_readonly_fact_reaches_the_native_node_without_losing_its_other_semantics() {
+        for read_only in [None, Some(true), Some(false)] {
+            for disabled in [false, true] {
+                let element = AccessibilityFlags {
+                    element: div()
+                        .id("checkbox")
+                        .role(accesskit::Role::CheckBox)
+                        .aria_label("Current caption")
+                        .aria_toggled(gpui::Toggled::Mixed)
+                        .on_a11y_action(AccessibleAction::Click, |_, _, _| {}),
+                    disabled,
+                    read_only,
+                };
+                let mut node = accesskit::Node::new(element.a11y_role().unwrap());
+                // Explicit false must clear an earlier contribution; absence
+                // must not claim authority over another source's fact.
+                node.set_read_only();
+                element.write_a11y_info(&mut node);
+                assert_eq!(node.is_read_only(), read_only != Some(false));
+                assert_eq!(node.is_disabled(), disabled);
+                assert_eq!(node.role(), accesskit::Role::CheckBox);
+                assert_eq!(node.label(), Some("Current caption"));
+                assert_eq!(node.toggled(), Some(gpui::Toggled::Mixed));
+                assert!(node.supports_action(accesskit::Action::Click));
+            }
+        }
     }
 }
 
