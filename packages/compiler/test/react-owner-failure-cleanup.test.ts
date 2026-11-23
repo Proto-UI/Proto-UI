@@ -340,3 +340,79 @@ it('finishes ordinary terminal cleanup after Meta and authored errors without ru
   expect(() => exposed.count.get()).toThrow(/terminal|dispos/i);
   expect(() => exposed.read()).toThrow(/terminal|dispos/i);
 });
+
+it('reacquires the same-document viewport lease after a failed physical Root rebind', async () => {
+  const generated = await load(
+    liveOwner.replace(
+      "meta('preference.forcedColors').eq('active')",
+      "meta('viewport.width').gte(768)"
+    ),
+    true
+  );
+  const nativeAdd = window.addEventListener,
+    nativeRemove = window.removeEventListener;
+  const listeners = new Set<EventListenerOrEventListenerObject>();
+  let failRelease = false;
+  vi.spyOn(window, 'addEventListener').mockImplementation(function (type, callback, options) {
+    if (type === 'resize' && callback) listeners.add(callback);
+    return nativeAdd.call(window, type, callback, options);
+  });
+  vi.spyOn(window, 'removeEventListener').mockImplementation(function (type, callback, options) {
+    const result = nativeRemove.call(window, type, callback, options);
+    if (type === 'resize' && callback) {
+      listeners.delete(callback);
+      if (failRelease) {
+        failRelease = false;
+        throw 0;
+      }
+    }
+    return result;
+  });
+  const width = vi.spyOn(window, 'innerWidth', 'get').mockReturnValue(900);
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
+  const frames: any[] = [];
+  const owner = generated.observeGeneratedOwner(
+    { present: true },
+    (frame: unknown) => frames.push(frame),
+    () => null,
+    () => {}
+  );
+  cleanup.push(() => {
+    drainTerminal(() => owner.disconnect());
+  });
+  const element = document.createElement('div');
+  document.body.append(element);
+  owner.start();
+  await Promise.resolve();
+  owner.bindRoot(element);
+  owner.accept(frames.at(-1));
+  const state = owner.handle.getExposes().count;
+  expect(element.getAttribute('data-pui-style')).toBe('opacity-50');
+  expect(listeners.size).toBe(1);
+  const stale = [...listeners];
+  // Physical Root replacement keeps this logical owner mounted. The old
+  // document source must retire even when the host's removal reports failure.
+  failRelease = true;
+  expect(capture(() => owner.bindRoot(null))).toEqual({ failed: true, error: 0 });
+  element.remove();
+  expect(listeners.size).toBe(0);
+  const replacement = document.createElement('div');
+  document.body.append(replacement);
+  owner.bindRoot(replacement);
+  expect(owner.handle.getExposes().count).toBe(state);
+  expect(listeners.size).toBe(1);
+  const beforeResize = frames.length;
+  width.mockReturnValue(700);
+  for (const callback of stale) {
+    if (typeof callback === 'function') callback(new Event('resize'));
+    else callback.handleEvent(new Event('resize'));
+  }
+  await Promise.resolve();
+  expect(replacement.getAttribute('data-pui-style')).toBe('opacity-50');
+  window.dispatchEvent(new Event('resize'));
+  await Promise.resolve();
+  expect(replacement.hasAttribute('data-pui-style')).toBe(false);
+  expect(frames.length).toBe(beforeResize);
+  expect(drainTerminal(() => owner.disconnect())).toEqual([]);
+  expect(listeners.size).toBe(0);
+});

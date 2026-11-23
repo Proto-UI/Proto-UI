@@ -1,5 +1,5 @@
 import type { GeneratedModule, PrototypeIR } from './ir';
-import { nativeMetaArtifact } from './native-async';
+import { nativeMetaArtifact, nativeMetaSubscriptionArtifact } from './native-async';
 
 /** Exact default-web inputs with mounted sources or existing sampled semantics.
  * Other keys require a target provider before native lowering.
@@ -42,8 +42,9 @@ export const nativeRuleMetaArtifact: NonNullable<GeneratedModule['supportingFile
   kind: 'source',
   contents: `// Default-web Rule inputs only. No Rule interpreter, authored state or structural update.
 import { readNativeWebMeta } from './web-snapshot-v1';
+import { nativeMediaBinding, releaseNativeMeta } from './subscription-v1';
 
-type Source = { subscribe(notify: () => void): (() => void) | undefined };
+type Source = { read(): unknown; subscribe(notify: () => void): (() => void) | undefined };
 const documents = new WeakMap<Document, Map<string, Source>>();
 const preferences: Record<string, readonly [string, readonly string[]]> = {
   'preference.reducedMotion': ['prefers-reduced-motion', ['no-preference', 'reduce']],
@@ -57,15 +58,28 @@ function sourceFor(doc: Document, key: string): Source | undefined {
   if (key !== 'colorScheme' && key !== 'viewport.width' && !Object.hasOwn(preferences, key)) return undefined;
   if (key === 'colorScheme' && typeof view.MutationObserver !== 'function') return undefined;
   if (Object.hasOwn(preferences, key) && typeof view.matchMedia !== 'function') return undefined;
+  const addResize = key === 'viewport.width' ? view.addEventListener : undefined;
+  const removeResize = key === 'viewport.width' ? view.removeEventListener : undefined;
+  if (key === 'viewport.width' && (typeof addResize !== 'function' || typeof removeResize !== 'function')) return undefined;
   let sources = documents.get(doc);
   if (!sources) { sources = new Map(); documents.set(doc, sources); }
   const existing = sources.get(key);
   if (existing) return existing;
   const listeners = new Set<() => void>();
-  let generation = 0, queued = false, last: unknown;
+  let generation = 0, queued = false, live = true, ready = false, last: unknown;
   let cleanups: (() => void)[] = [];
+  function stop() {
+    if (!live) return;
+    live = false; ready = false; ++generation; queued = false;
+    const releases = cleanups; cleanups = []; listeners.clear();
+    if (sources!.get(key) === source) sources!.delete(key);
+    if (!sources!.size && documents.get(doc) === sources) documents.delete(doc);
+    releaseNativeMeta(releases);
+  }
   const source: Source = {
+    read() { return live && ready && doc.defaultView === view ? readNativeWebMeta(doc, key) : 'unknown'; },
     subscribe(notify) {
+      if (!live) return undefined;
       // Distinct leases even if the same callback is reused by separate owners.
       const listener = () => notify();
       listeners.add(listener);
@@ -77,7 +91,7 @@ function sourceFor(doc: Document, key: string): Source | undefined {
           queueMicrotask(() => {
             if (current !== generation) return;
             queued = false;
-            const next = readNativeWebMeta(doc, key);
+            const next = source.read();
             if (Object.is(next, last)) return;
             last = next;
             for (const callback of [...listeners]) if (listeners.has(callback)) {
@@ -87,39 +101,38 @@ function sourceFor(doc: Document, key: string): Source | undefined {
         };
         const media = (query: string) => {
           const value = view.matchMedia(query);
-          if (typeof value.addEventListener === 'function') {
-            value.addEventListener('change', change);
-            cleanups.push(() => value.removeEventListener('change', change));
-          } else if (typeof value.addListener === 'function') {
-            value.addListener(change);
-            cleanups.push(() => value.removeListener(change));
-          }
+          const binding = nativeMediaBinding(value, change);
+          if (!binding) throw new Error('[Rule meta] missing paired media source');
+          cleanups.push(binding.release);
+          binding.attach();
         };
         try {
           if (key === 'colorScheme') {
             const observer = new view.MutationObserver(change);
-            observer.observe(doc.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
-            cleanups.push(() => observer.disconnect());
+            const observe = observer.observe, disconnect = observer.disconnect;
+            cleanups.push(() => disconnect.call(observer));
+            observe.call(observer, doc.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme'] });
             if (typeof view.matchMedia === 'function') media('(prefers-color-scheme: dark)');
           } else if (key === 'viewport.width') {
-            view.addEventListener('resize', change);
-            cleanups.push(() => view.removeEventListener('resize', change));
+            cleanups.push(() => removeResize!.call(view, 'resize', change));
+            addResize!.call(view, 'resize', change);
           } else if (Object.hasOwn(preferences, key)) {
             const [feature, values] = preferences[key];
             for (const value of values) media('(' + feature + ': ' + value + ')');
           }
           // Subscribe first, then reconcile the same getter paired with this source.
-          last = readNativeWebMeta(doc, key);
-        } catch {
-          listeners.delete(listener); ++generation; queued = false;
-          for (const cleanup of cleanups.splice(0)) cleanup();
+          ready = true; last = source.read();
+        } catch (error) {
+          // Preserve the existing unavailable-source fallback when rollback
+          // succeeds. A secondary release failure cannot replace the initiating
+          // registration failure when the failed boundary must be reported.
+          try { stop(); } catch { throw error; }
           return undefined;
         }
       }
       return () => {
         if (!listeners.delete(listener) || listeners.size) return;
-        ++generation; queued = false;
-        for (const cleanup of cleanups.splice(0)) cleanup();
+        stop();
       };
     },
   };
@@ -128,55 +141,71 @@ function sourceFor(doc: Document, key: string): Source | undefined {
 }
 
 export function createNativeRuleMeta(getDocument: () => Document | undefined, keys: readonly string[]) {
-  let active = false, document: Document | undefined, generation = 0;
-  let invalidate: (() => void) | undefined;
-  let cleanups: (() => void)[] = [];
-  let requestedKeys: readonly string[] = [];
-  const leased = new Set<string>();
-  function release(): void {
-    ++generation;
-    for (const cleanup of cleanups.splice(0)) cleanup();
-    leased.clear();
+  type Mount = { active: boolean; document: Document | undefined; generation: number;
+    invalidate(): void; requested: readonly string[]; cleanups: (() => void)[]; leased: Map<string, Source> };
+  let mounted: Mount | undefined;
+  function release(mount: Mount): void {
+    ++mount.generation;
+    const cleanups = mount.cleanups; mount.cleanups = [];
+    mount.leased.clear(); mount.document = undefined;
+    releaseNativeMeta(cleanups);
   }
-  function reconcile(): void {
-    const next = active ? getDocument() : undefined;
-    if (next === document) return;
-    release(); document = next;
+  function reconcile(mount: Mount): void {
+    if (!mount.active || mounted !== mount) return;
+    const next = getDocument();
+    if (next === mount.document) return;
+    release(mount);
+    if (!mount.active || mounted !== mount) return;
+    mount.document = next;
     if (!next) return;
-    const current = generation;
+    const current = mount.generation;
     try {
-      for (const key of requestedKeys) {
+      for (const key of mount.requested) {
         const source = sourceFor(next, key);
         if (!source) continue;
-        const release = source.subscribe(() => {
-          if (!active || current !== generation) return;
+        const off = source.subscribe(() => {
+          if (!mount.active || mounted !== mount || current !== mount.generation) return;
           // Adoption is reconciled before reading; an old document cannot project facts.
-          if (getDocument() !== document) reconcile();
-          invalidate?.();
+          if (getDocument() !== mount.document) reconcile(mount);
+          if (mount.active && mounted === mount) mount.invalidate();
         });
-        if (!release) continue;
-        cleanups.push(release);
-        leased.add(key);
+        if (!off) continue;
+        if (!mount.active || mounted !== mount || current !== mount.generation) { off(); return; }
+        mount.cleanups.push(off);
+        mount.leased.set(key, source);
       }
-    } catch (error) { release(); document = undefined; throw error; }
+    } catch (error) { try { release(mount); } catch {} throw error; }
   }
   return {
     read(key: string): unknown {
-      if (!active) return 'unknown';
-      reconcile();
+      const mount = mounted;
+      if (!mount?.active) return 'unknown';
+      reconcile(mount);
+      if (!mount.active || mounted !== mount) return 'unknown';
       if (key === 'colorScheme' || key === 'reducedMotion' || key === 'styleSupport.alphaFill' || key === 'styleSupport.backdropBlur4px')
-        return readNativeWebMeta(document, key);
-      return document && leased.has(key) ? readNativeWebMeta(document, key) : 'unknown';
+        return readNativeWebMeta(mount.document, key);
+      return mount.leased.get(key)?.read() ?? 'unknown';
     },
     subscribe(notify: () => void, requested: readonly string[]): () => void {
-      if (active) throw new Error('[Rule meta] one mounted lease per logical owner');
-      requestedKeys = requested.filter(key => keys.includes(key));
-      active = true; invalidate = notify; reconcile();
-      return () => { active = false; invalidate = undefined; release(); document = undefined; requestedKeys = []; };
+      if (mounted) throw new Error('[Rule meta] one mounted lease per logical owner');
+      const mount: Mount = { active: true, document: undefined, generation: 0,
+        invalidate: notify, requested: [...new Set(requested.filter(key => keys.includes(key)))], cleanups: [], leased: new Map() };
+      mounted = mount;
+      try { reconcile(mount); }
+      catch (error) { mount.active = false; if (mounted === mount) mounted = undefined; try { release(mount); } catch {} throw error; }
+      return () => {
+        if (!mount.active) return;
+        mount.active = false; if (mounted === mount) mounted = undefined;
+        release(mount);
+      };
     },
   };
 }
 `,
 };
 
-export const nativeRuleMetaArtifacts = [nativeMetaArtifact, nativeRuleMetaArtifact];
+export const nativeRuleMetaArtifacts = [
+  nativeMetaArtifact,
+  nativeMetaSubscriptionArtifact,
+  nativeRuleMetaArtifact,
+];

@@ -46,11 +46,7 @@ import { checkTargetOperations, resolveTargetProfile } from './targets';
 import { isDataValueType, isPublicValueType } from './ir';
 import { buildNativeContextArtifacts, emitNativeContextValidation } from './native-context';
 import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './native-style';
-import {
-  collectNativeRuleMeta,
-  nativeRuleMetaArtifact,
-  nativeRuleMetaArtifacts,
-} from './native-rule-meta';
+import { collectNativeRuleMeta, nativeRuleMetaArtifacts } from './native-rule-meta';
 import { nativeSupportArtifacts, planNativeSupport } from './native-interaction';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitReactSSRSupport, reactSSRTransportArtifact } from './react-ssr-source';
@@ -1887,11 +1883,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
       profile,
       supportingFiles: uniqueNativeFiles([
         ...atoms.files,
-        ...(ruleMetaKeys.length
-          ? atoms.meta
-            ? [nativeRuleMetaArtifact]
-            : nativeRuleMetaArtifacts
-          : []),
+        ...(ruleMetaKeys.length ? nativeRuleMetaArtifacts : []),
         ...(publicCalls ? [nativePublicCallsArtifact] : []),
         ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
         ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
