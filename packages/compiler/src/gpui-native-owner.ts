@@ -373,7 +373,9 @@ impl Owner {
         let(event,epoch)={let mut o=owner.borrow_mut();if o.disposed||!o.present||o.bounds.is_none()||o.projection_revision!=revision||o.committed_revision==revision{return}o.committed_revision=revision;let event=if !o.mounted{o.mounted=true;o.epoch+=1;let epoch=o.epoch;if let Some(projection)=o.modules.focus.entry_projection.as_mut(){projection.binding.epoch=epoch;}"mounted"}else{"updated"};(event,o.epoch)};
         modules_commit(owner);
         {let o=owner.borrow();if o.disposed||!o.present||!o.mounted||o.epoch!=epoch||o.projection_revision!=revision||o.committed_revision!=revision{return}}
-        life(owner,event);native_hover_mounted(owner,epoch);
+        let outcome=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||life(owner,event)));
+        native_hover_mounted(owner,epoch);
+        if let Err(failure)=outcome{std::panic::resume_unwind(failure);}
     }
     pub fn dispose(owner:&OwnerRef){
         {let mut owner=owner.borrow_mut();if owner.disposed||owner.disposing{return}owner.disposing=true;}
@@ -391,7 +393,7 @@ impl Owner {
     }
     fn retire(owner:&OwnerRef){
         retire_entry_intent(owner);clear_scope_recipient(owner);
-        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
+        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.dirty=true;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
     }
     // Failed-created retirement extracts owned values inside one short borrow so
     // one destructor panic cannot abort the remaining terminal release attempts;
@@ -400,7 +402,7 @@ impl Owner {
     // therefore retire even when a callback capture's destructor panics.
     fn failed_created_retire(owner:&OwnerRef){
         retire_entry_intent(owner);clear_scope_recipient(owner);
-            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();
+            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.dirty=true;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();
             (std::mem::take(&mut o.projection),std::mem::take(&mut o.renderer),std::mem::take(&mut o.watchers),std::mem::take(&mut o.listeners),std::mem::take(&mut o.contributions),std::mem::take(&mut o.subscriptions),std::mem::take(&mut o.providers),std::mem::take(&mut o.exposes),std::mem::take(&mut o.states),std::mem::take(&mut o.lifecycle),std::mem::take(&mut o.slot),std::mem::take(&mut o.modules))};
         let(projection,renderer,watchers,listeners,contributions,subscriptions,providers,exposes,states,lifecycle,slot,modules)=extracted;
         attempt_failed_created_cleanup(||drop(projection));
