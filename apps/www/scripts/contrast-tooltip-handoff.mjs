@@ -18,7 +18,7 @@ const delay = (value, name) => {
 
 /** Derive the finite audit journey from the authored consumer, not another popup. */
 export function compileTooltipWarmHandoffPlan(demo, serializedRuntimes) {
-  const runtimes = parseContrastRuntimeOptions(serializedRuntimes, ['wc', 'react', 'vue']);
+  const runtimes = parseContrastRuntimeOptions(serializedRuntimes, ['wc', 'react', 'vue', 'vue2']);
   const groups = [];
   const visit = (node, path) => {
     if (!node || typeof node === 'string') return;
@@ -27,8 +27,7 @@ export function compileTooltipWarmHandoffPlan(demo, serializedRuntimes) {
     (node.children ?? []).forEach((child, index) => visit(child, `${path}.children.${index}`));
   };
   visit(demo?.root, 'root');
-  if (groups.length !== 1)
-    throw new Error('Tooltip handoff requires one authored shared Group.');
+  if (groups.length !== 1) throw new Error('Tooltip handoff requires one authored shared Group.');
   const { node: group, path } = groups[0];
   const roots = group.children ?? [];
   if (

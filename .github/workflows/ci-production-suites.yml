@@ -79,3 +79,7 @@ jobs:
     needs: select-item-sizing
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/bootstrap-state-controls-evidence.yml
+  compiler-browser:
+    needs: bootstrap-state-controls
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/compiler-browser-acceptance.yml

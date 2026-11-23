@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, it, vi } from 'vitest';
 import { compilePrototype } from '../src/compile';
-import { mountNativeOwner } from './native-owner-consumer';
+import { mountNativeOwner, nativeOwnerProfiles } from './native-owner-consumer';
 
 const source = `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'raw-watch-owner',setup(def){
@@ -34,54 +34,62 @@ afterEach(async () => {
   document.body.replaceChildren();
 });
 
-it('dispatches keyed raw snapshot diffs through a real generated React owner', async () => {
-  const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
-  const owner = await mountNativeOwner(source, 'react-dom-source-v1', { props: { value: 1 } });
-  cleanups.push(owner.dispose);
-  const exposed = owner.handle.getExposes();
-  expect(exposed.calls()).toBe(0);
-  await owner.setProps({ value: 1, other: 1 });
-  await owner.setProps({ value: 1, other: 1, extra: undefined });
-  await owner.setProps({ value: 1, other: 1 });
-  expect(exposed.calls()).toBe(0);
-  await owner.setProps({ value: 1, other: 1, extra: NaN });
-  expect(exposed.calls()).toBe(1);
-  expect(exposed.matched()).toBe('extra');
-  expect(exposed.all()).toBe('extra');
-  expect(exposed.aligned()).toBe(true);
-  expect(exposed.provided()).toBe(true);
-  expect(exposed.resolvedCalls()).toBe(0);
-  expect(warning).toHaveBeenCalled();
-  await owner.setProps({ value: 1, other: 1, extra: NaN });
-  expect(exposed.calls()).toBe(1);
-  await owner.setProps({ value: 1, other: 1, extra: -0 });
-  await owner.setProps({ value: 1, other: 1, extra: 0 });
-  expect(exposed.calls()).toBe(3);
-  await owner.setProps({ value: 2, other: 1, extra: 0 });
-  expect(exposed.calls()).toBe(4);
-  expect(exposed.resolvedCalls()).toBe(1);
-  expect(exposed.order()).toBe('RRRRD');
-  await owner.setProps({ value: 2, other: 1 });
-  expect(exposed.calls()).toBe(5);
-  expect(exposed.provided()).toBe(true);
-  expect(() => exposed.cancel()).toThrow(/phase|setup/i);
-  await owner.setProps({ value: 2, other: 1, extra: 3 });
-  expect(exposed.calls()).toBe(6);
-  await owner.setProps({ other: 1, extra: 3 });
-  expect(exposed.calls()).toBe(7);
-  expect(exposed.provided()).toBe(false);
-  expect(exposed.cancelledCalls()).toBe(0);
-  await owner.dispose();
-  expect(() => exposed.calls()).toThrow(/dispos|alive|terminal/i);
-}, 30_000);
+it.each(nativeOwnerProfiles)(
+  'dispatches keyed raw snapshot diffs through a real generated %s owner',
+  async (profile) => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const owner = await mountNativeOwner(source, profile, { props: { value: 1 } });
+    cleanups.push(owner.dispose);
+    const exposed = owner.handle.getExposes();
+    expect(exposed.calls()).toBe(0);
+    await owner.setProps({ value: 1, other: 1 });
+    await owner.setProps({ value: 1, other: 1, extra: undefined });
+    await owner.setProps({ value: 1, other: 1 });
+    expect(exposed.calls()).toBe(0);
+    await owner.setProps({ value: 1, other: 1, extra: NaN });
+    expect(exposed.calls()).toBe(1);
+    expect(exposed.matched()).toBe('extra');
+    expect(exposed.all()).toBe('extra');
+    expect(exposed.aligned()).toBe(true);
+    expect(exposed.provided()).toBe(true);
+    expect(exposed.resolvedCalls()).toBe(0);
+    expect(warning).toHaveBeenCalled();
+    await owner.setProps({ value: 1, other: 1, extra: NaN });
+    expect(exposed.calls()).toBe(1);
+    await owner.setProps({ value: 1, other: 1, extra: -0 });
+    await owner.setProps({ value: 1, other: 1, extra: 0 });
+    expect(exposed.calls()).toBe(3);
+    await owner.setProps({ value: 2, other: 1, extra: 0 });
+    expect(exposed.calls()).toBe(4);
+    expect(exposed.resolvedCalls()).toBe(1);
+    expect(exposed.order()).toBe('RRRRD');
+    await owner.setProps({ value: 2, other: 1 });
+    expect(exposed.calls()).toBe(5);
+    expect(exposed.provided()).toBe(true);
+    await owner.setProps({ value: 2, other: 1, extra: 3 });
+    expect(exposed.calls()).toBe(6);
+    await owner.setProps({ other: 1, extra: 3 });
+    expect(exposed.calls()).toBe(7);
+    expect(exposed.provided()).toBe(false);
+    expect(exposed.cancelledCalls()).toBe(0);
+    // Props watcher disposers are ordinary void callables, not setup authorities.
+    // Preserve the original runtime call as a stronger cancellation assertion.
+    exposed.cancel();
+    exposed.cancel();
+    await owner.setProps({ value: 3, extra: 4 });
+    expect(exposed.calls()).toBe(7);
+    expect(exposed.resolvedCalls()).toBeGreaterThan(1);
+    await owner.dispose();
+    expect(() => exposed.calls()).toThrow(/dispos|alive|terminal/i);
+  },
+  30_000
+);
 
-it('retains target and source admission boundaries outside keyed React raw watch', () => {
-  for (const profile of [
-    'vue-source-v1',
-    'vue2-source-v1',
-    'web-component-source-v1',
-    'gpui-source-v1',
-  ]) {
+it('retains target and source admission boundaries outside the accepted keyed raw-watch consumers', () => {
+  // This complete fixture still needs String coercion, unsupported by GPUI.
+  // The old Vue/WC negative rows predated their actual keyed-raw admission;
+  // their behavior is now exercised above instead of treating acceptance as failure.
+  for (const profile of ['gpui-source-v1']) {
     expect(compilePrototype(source, { profile })).toMatchObject({
       ok: false,
       diagnostics: expect.arrayContaining([expect.objectContaining({ code: 'PUI4003' })]),
@@ -93,7 +101,7 @@ it('retains target and source admission boundaries outside keyed React raw watch
         "def.props.watchRaw(['value','extra'],()=>{cancelledCalls++;})",
         'def.props.watchRawAll(()=>{cancelledCalls++;})'
       ),
-      { profile: 'react-dom-source-v1' }
+      { profile: 'vue2-source-v1' }
     )
   ).toMatchObject({
     ok: false,

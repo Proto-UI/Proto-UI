@@ -98,7 +98,10 @@ This neither requires every platform to be unconditionally identical nor allows 
 
 <figure class="whitepaper-figure">
   <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="Open full-size diagram" aria-describedby="conditional-consistency-description">
-    <img src="/diagrams/whitepaper-conditional-consistency.en.svg" alt="Prototype and profile obligations define the baseline; shared input, projection and rendering conditions determine finer comparison." aria-describedby="conditional-consistency-description" width="960" height="862" class="whitepaper-diagram" loading="lazy" />
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-conditional-consistency.mobile.en.svg" width="500" height="1920" />
+      <img src="/diagrams/whitepaper-conditional-consistency.en.svg" alt="Prototype and profile obligations define the baseline; shared input, projection and rendering conditions determine finer comparison." aria-describedby="conditional-consistency-description" width="960" height="862" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
   <figcaption id="conditional-consistency-description"><span class="sr-only">Prototype and applicable profile obligations form the shared baseline: identity, information channels, State transitions, Lifecycle order, and required Feedback. Shared, controlled input medium, viewport, units, and fonts permit finer comparison of input behavior and Feedback. The same Web family and applicable profiles sharing governed structure, events, style foundations, and projection policy permit comparison of normalized DOM after necessary declared wrappers and markers are excluded. Further control of device metrics, unit scale, font shaping, color, and rasterization permits pixel comparison. Agree the reasons and scope of tolerances and exclusions in advance. These are condition-to-comparison mappings, not automatic tiers, and do not imply complete evidence across Hosts. </span>Open full-size diagram</figcaption>
 </figure>

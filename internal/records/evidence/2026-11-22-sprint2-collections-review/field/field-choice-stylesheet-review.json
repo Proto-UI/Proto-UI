@@ -1,0 +1,33 @@
+{
+  "sourceCommit": "095ecbdde4902941a13032386765dac59ebd7e6b",
+  "scope": "Independent stylesheet generation only; no browser or visual claim",
+  "ok": true,
+  "cssBytes": 555880,
+  "controls": {
+    "size5": true,
+    "block": true,
+    "inlineFlex": true,
+    "fontBytesEmbedded": true,
+    "noRelativeFontAsset": true
+  },
+  "receipt": {
+    "compiler": "tailwindcss@4.2.2",
+    "stylesheet": "apps/www/src/styles/tailwindcss.css",
+    "stylesheetSha256": "a5f9f7fdc0cbedc7dd78cd87c76860c78a977fa3af610880e93e73ddfaa90488",
+    "consumerSources": {
+      "apps/www/src/content/docs/form-validation-demo.shared.ts": "f13bf429b2bafc2d798207fe63a932587707d18873bb60f27c43bfc6d090fde1",
+      "apps/www/src/content/docs/select-input-demo.shared.ts": "af9106bcda695be4d78c5433701bd47dc82914c951f86ab6af111e99a80b7ca3",
+      "apps/www/src/content/docs/field-choices-demo.shared.ts": "8e298d75babf379a4e71d5eff497bf780201522ca1be4ba05e7bc36c9fbaea10",
+      "apps/www/src/content/docs/shadcn-demo-style.ts": "41c14e604544dab831f4550f110aab62d2ba8464e65c9debb0c99b607fcafc7d"
+    },
+    "candidateCount": 365,
+    "importedStyles": {
+      "node_modules/.pnpm/tailwindcss@4.2.2/node_modules/tailwindcss/index.css": "415a5f01208fe877d36ee8421b2135a766f258374f817a8a0a41c478c4009391"
+    },
+    "fonts": {
+      "apps/www/src/styles/assets/font/dm-sans/DMSans-Variable.ttf": "8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d",
+      "apps/www/src/styles/assets/font/geist/Geist-Variable.ttf": "73894e0448cae90a92b6c2f8732b7bb9acb7b94c418bff559dad4a18e1de9659"
+    },
+    "cssSha256": "9910ec72cbaf5fb95ca665b6e0ebca4489a7eac1b684129f59061db7bd015de9"
+  }
+}

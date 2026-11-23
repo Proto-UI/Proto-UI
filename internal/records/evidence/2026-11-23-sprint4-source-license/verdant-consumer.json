@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "kind": "actual-verdant-data-license-metadata-consumer",
+  "compilerHead": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+  "compilerPatchSha256": "f28640059455f806c85727d664ba6fd1abace4c3e1cc6fb7f6370b97060611f9",
+  "inputRepository": "https://github.com/OpenGreendam/verdant",
+  "inputCommit": "bd8c79364059b48283f6205f1a28cdd38d9758fd",
+  "declaredLicense": "AGPL-3.0-or-later",
+  "declarationPath": "frontend/Cargo.toml",
+  "inputHashes": {
+    "frontend/proto-ui/src/note-gesture-planner.proto.ts": "949e8f82cf31a7269df583049caa5ee27573006901be1605c000292795596ede",
+    "frontend/proto-ui/src/control-gesture-planner.proto.ts": "13a95ceb48374943fe4c5f98e943dbda0bc6b5da40664a5e3cf3cdfb3778b613",
+    "frontend/Cargo.toml": "23aca0ccd4bf16985c81d9087e60eeac0d7da91093dbba52f2ce4ab63f7239a7",
+    "LICENSE": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+    "NOTICE.md": "412f5f569a204cea328ec1bfb14b078f686f913952e9a6ac73b3d4f2a4ebeddf",
+    "frontend/proto-ui/compiler.pin.json": "2c41bace1a30ca63415a1785cffff04e2a7747f5838ea0e736e65ec21d193a0d"
+  },
+  "units": [
+    {
+      "unit": "note-gesture-planner",
+      "source": "frontend/proto-ui/src/note-gesture-planner.proto.ts",
+      "sourceSha256": "949e8f82cf31a7269df583049caa5ee27573006901be1605c000292795596ede",
+      "sourceUrl": "https://github.com/OpenGreendam/verdant/blob/bd8c79364059b48283f6205f1a28cdd38d9758fd/frontend/proto-ui/src/note-gesture-planner.proto.ts",
+      "methods": ["planNoteGesture"],
+      "generatedRustSha256": "c738b2c64d2a32711615a72c08b150b54f6502cf7b72d308d6d546b3b8ace8a2",
+      "generatedRustIdentical": true,
+      "changedArtifacts": ["Cargo.toml", "provenance.json"],
+      "variants": [
+        {
+          "label": "undeclared",
+          "sourceLicense": null,
+          "artifacts": [
+            {
+              "path": "lib.rs",
+              "sha256": "c738b2c64d2a32711615a72c08b150b54f6502cf7b72d308d6d546b3b8ace8a2"
+            },
+            {
+              "path": "Cargo.toml",
+              "sha256": "74b143d99d6c5d0080646137d566011efb21252a18abbb05a709eae83e5ea07c"
+            },
+            {
+              "path": "provenance.json",
+              "sha256": "83ed5c0aeeb3aaae432a96c3eb1e384e351895f0022677ec8922083e996285cf"
+            }
+          ],
+          "commands": [
+            {
+              "command": "cargo",
+              "args": [
+                "generate-lockfile",
+                "--offline",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/note-gesture-planner-undeclared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "note-gesture-planner-undeclared-generate-lockfile.log",
+              "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "metadata",
+                "--offline",
+                "--locked",
+                "--format-version=1",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/note-gesture-planner-undeclared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "note-gesture-planner-undeclared-metadata.log",
+              "logSha256": "c7a1854fe97390a2d33ec29d479f73f2f5b3bef61ded68e190a8354c32ac86a6"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "check",
+                "--offline",
+                "--locked",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/note-gesture-planner-undeclared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "note-gesture-planner-undeclared-check.log",
+              "logSha256": "6aefcfff4fd28ff2fcf7b0a35b28fb950a61b933120e2f60e6d6257a0157dc54"
+            }
+          ]
+        },
+        {
+          "label": "declared",
+          "sourceLicense": "AGPL-3.0-or-later",
+          "artifacts": [
+            {
+              "path": "lib.rs",
+              "sha256": "c738b2c64d2a32711615a72c08b150b54f6502cf7b72d308d6d546b3b8ace8a2"
+            },
+            {
+              "path": "Cargo.toml",
+              "sha256": "5854b20d4b0d3817486996b74162ecf0ef22cd1b649a71ed07ee77bdbbb0f9f8"
+            },
+            {
+              "path": "provenance.json",
+              "sha256": "50cb595913faade75399933e584bb33c67709b04fd90b2f734ee95326417ad72"
+            }
+          ],
+          "commands": [
+            {
+              "command": "cargo",
+              "args": [
+                "generate-lockfile",
+                "--offline",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/note-gesture-planner-declared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "note-gesture-planner-declared-generate-lockfile.log",
+              "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "metadata",
+                "--offline",
+                "--locked",
+                "--format-version=1",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/note-gesture-planner-declared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "note-gesture-planner-declared-metadata.log",
+              "logSha256": "7d9fd5eba278a79148ae111a8123b1402c5ebfd0fdc0ec624d6fb0a7e9d970a9"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "check",
+                "--offline",
+                "--locked",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/note-gesture-planner-declared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "note-gesture-planner-declared-check.log",
+              "logSha256": "b97a409107c933a528abcce2e31afcfb5da2a67456487c89d245a7c487b8ade9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": "control-gesture-planner",
+      "source": "frontend/proto-ui/src/control-gesture-planner.proto.ts",
+      "sourceSha256": "13a95ceb48374943fe4c5f98e943dbda0bc6b5da40664a5e3cf3cdfb3778b613",
+      "sourceUrl": "https://github.com/OpenGreendam/verdant/blob/bd8c79364059b48283f6205f1a28cdd38d9758fd/frontend/proto-ui/src/control-gesture-planner.proto.ts",
+      "methods": ["planControlGesture", "dragNormalized"],
+      "generatedRustSha256": "6deeb7570506d5f0fb5bac51662e444f44e71ebf446b1828e64418ea6f1fae2a",
+      "generatedRustIdentical": true,
+      "changedArtifacts": ["Cargo.toml", "provenance.json"],
+      "variants": [
+        {
+          "label": "undeclared",
+          "sourceLicense": null,
+          "artifacts": [
+            {
+              "path": "lib.rs",
+              "sha256": "6deeb7570506d5f0fb5bac51662e444f44e71ebf446b1828e64418ea6f1fae2a"
+            },
+            {
+              "path": "Cargo.toml",
+              "sha256": "1f9268452749ac532ab22f08d2b04c1eab1a2033b817037236635cc0a0f223b5"
+            },
+            {
+              "path": "provenance.json",
+              "sha256": "4b3d5729c2ea49af9ad397fff0af22f0398674e4d8b294b9fefd4b24f16dcc47"
+            }
+          ],
+          "commands": [
+            {
+              "command": "cargo",
+              "args": [
+                "generate-lockfile",
+                "--offline",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/control-gesture-planner-undeclared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "control-gesture-planner-undeclared-generate-lockfile.log",
+              "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "metadata",
+                "--offline",
+                "--locked",
+                "--format-version=1",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/control-gesture-planner-undeclared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "control-gesture-planner-undeclared-metadata.log",
+              "logSha256": "2b5e2d09b5fc10816a0e3a54c0b2f7955993b398820247049013143618d98358"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "check",
+                "--offline",
+                "--locked",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/control-gesture-planner-undeclared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "control-gesture-planner-undeclared-check.log",
+              "logSha256": "8a43acfa7dcb1220c1f5fe6a8eda6cdaf9f678c4023834544e2dcf609ec47e2a"
+            }
+          ]
+        },
+        {
+          "label": "declared",
+          "sourceLicense": "AGPL-3.0-or-later",
+          "artifacts": [
+            {
+              "path": "lib.rs",
+              "sha256": "6deeb7570506d5f0fb5bac51662e444f44e71ebf446b1828e64418ea6f1fae2a"
+            },
+            {
+              "path": "Cargo.toml",
+              "sha256": "0b417703d86fc2792818a0489ad862423cf64d166119c14cd7fe27321d97132a"
+            },
+            {
+              "path": "provenance.json",
+              "sha256": "8a52f10dad759e575ba50ddab6e460a67b2649a1cd883c9048ec81a3d7a1acea"
+            }
+          ],
+          "commands": [
+            {
+              "command": "cargo",
+              "args": [
+                "generate-lockfile",
+                "--offline",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/control-gesture-planner-declared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "control-gesture-planner-declared-generate-lockfile.log",
+              "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "metadata",
+                "--offline",
+                "--locked",
+                "--format-version=1",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/control-gesture-planner-declared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "control-gesture-planner-declared-metadata.log",
+              "logSha256": "78dc592aac5f599b5622621c19c1a0ea35e066b93773ef00478c99f1a811f0d0"
+            },
+            {
+              "command": "cargo",
+              "args": [
+                "check",
+                "--offline",
+                "--locked",
+                "--manifest-path",
+                "/tank/shared/projects/proto-ui-agent/seven-sprints-20261123-chvf1ono/evidence/continuation-s4-license-4deb-02/verdant-consumer-v2/control-gesture-planner-declared/Cargo.toml"
+              ],
+              "exitCode": 0,
+              "logName": "control-gesture-planner-declared-check.log",
+              "logSha256": "670121832edae93189e05341f31d27cb7ab6acf14bcc28a367655f627501ecdd"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result": "passed",
+  "scope": "Two frozen real authored data units, three public functions, two metadata variants each; actual Cargo metadata parser and locked offline cargo check. No App pin, App main or generated files in the original App changed. No new physical input, audio or full-App acceptance claimed.",
+  "attribution": "Frozen input source and generated decision code retain the original Verdant AGPL-3.0-or-later declaration and notices; compiler templates retain their own attribution. No licensing rights are inferred."
+}

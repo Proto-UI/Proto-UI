@@ -183,15 +183,20 @@
               {
                 "leaseId": "toggle-inactive:lease:9",
                 "scope": "root",
-                "type": "pointer.down"
+                "type": "press.cancel"
               },
               {
                 "leaseId": "toggle-inactive:lease:10",
                 "scope": "root",
-                "type": "pointer.up"
+                "type": "pointer.down"
               },
               {
                 "leaseId": "toggle-inactive:lease:11",
+                "scope": "root",
+                "type": "pointer.up"
+              },
+              {
+                "leaseId": "toggle-inactive:lease:12",
                 "scope": "root",
                 "type": "press.commit"
               }
@@ -423,15 +428,20 @@
               {
                 "leaseId": "toggle-active:lease:9",
                 "scope": "root",
-                "type": "pointer.down"
+                "type": "press.cancel"
               },
               {
                 "leaseId": "toggle-active:lease:10",
                 "scope": "root",
-                "type": "pointer.up"
+                "type": "pointer.down"
               },
               {
                 "leaseId": "toggle-active:lease:11",
+                "scope": "root",
+                "type": "pointer.up"
+              },
+              {
+                "leaseId": "toggle-active:lease:12",
                 "scope": "root",
                 "type": "press.commit"
               }
@@ -663,15 +673,20 @@
               {
                 "leaseId": "toggle-disabled:lease:9",
                 "scope": "root",
-                "type": "pointer.down"
+                "type": "press.cancel"
               },
               {
                 "leaseId": "toggle-disabled:lease:10",
                 "scope": "root",
-                "type": "pointer.up"
+                "type": "pointer.down"
               },
               {
                 "leaseId": "toggle-disabled:lease:11",
+                "scope": "root",
+                "type": "pointer.up"
+              },
+              {
+                "leaseId": "toggle-disabled:lease:12",
                 "scope": "root",
                 "type": "press.commit"
               }

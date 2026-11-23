@@ -6,11 +6,13 @@ permissions:
   contents: read
 concurrency:
   group: bootstrap-state-controls-evidence-${{ github.ref }}
+  # Manual evidence must not cancel an active shared regression cycle.
   cancel-in-progress: false
 jobs:
   browser-evidence:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Sequential state-controls, navbar, Button motion and historical captures.
+    timeout-minutes: 30
     env:
       PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -54,6 +56,7 @@ jobs:
           node --test scripts/test/bootstrap-state-controls-evidence.test.mjs
           corepack pnpm@10.32.1 check:styles:preset
       - name: Collect real four-runtime evidence
+        id: state-controls
         env:
           PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE: '1'
           PROTO_UI_BOOTSTRAP_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-state-controls-evidence
@@ -66,10 +69,37 @@ jobs:
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
             --reporter=default --reporter=json \
             --outputFile="$PROTO_UI_BOOTSTRAP_EVIDENCE_DIR/vitest.json"
+      - name: Collect Bootstrap navbar geometry, input and owner restoration evidence
+        # The two selected suites leave independent terminal records even if
+        # one fails. They run sequentially on this runner, without PR fanout.
+        if: ${{ !cancelled() }}
+        id: navbar
+        env:
+          PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE: '1'
+          PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-navbar-evidence
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/prototypes/bootstrap-2-3-2/test/button.test.ts \
+            packages/prototypes/bootstrap-2-3-2/test/navbar-surface.test.ts \
+            apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
+      - name: Collect native Bootstrap Button entry and cancellation trajectories
+        if: ${{ !cancelled() }}
+        id: button-motion
+        env:
+          PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE: '1'
+          PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-button-motion-evidence
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/cli/test/bootstrap-button-paint.test.ts \
+            apps/www/src/content/docs/zh-cn/bootstrap-button-motion-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
       - name: Preserve terminal status even when setup or browser launch fails
         if: always()
         env:
           EVIDENCE_JOB_STATUS: ${{ job.status }}
+          EVIDENCE_SUITE_STATUS: ${{ steps.state-controls.outcome }}
           PROTO_UI_BOOTSTRAP_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-state-controls-evidence
         run: |
           mkdir -p "$PROTO_UI_BOOTSTRAP_EVIDENCE_DIR"
@@ -82,7 +112,8 @@ jobs:
             ...previous,
             expectedSha: process.env.PROTO_UI_EXPECTED_HEAD_SHA,
             workflowStatus: process.env.EVIDENCE_JOB_STATUS,
-            status: previous.status === 'passed' && process.env.EVIDENCE_JOB_STATUS === 'success' ? 'passed' : 'failed',
+            suiteStatus: process.env.EVIDENCE_SUITE_STATUS,
+            status: previous.status === 'passed' && process.env.EVIDENCE_SUITE_STATUS === 'success' ? 'passed' : 'failed',
           }, null, 2));
           JS
       - name: Require all fifteen original browser journeys and exact-source receipts
@@ -98,3 +129,140 @@ jobs:
           path: ${{ runner.temp }}/bootstrap-state-controls-evidence
           if-no-files-found: error
           retention-days: 30
+      - name: Preserve independent navbar terminal status
+        if: always()
+        env:
+          EVIDENCE_STEP_STATUS: ${{ steps.navbar.outcome }}
+          PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-navbar-evidence
+        run: |
+          mkdir -p "$PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE_DIR"
+          node --input-type=module <<'JS'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import path from 'node:path';
+          const file = path.join(process.env.PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE_DIR, 'manifest.json');
+          const previous = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+          writeFileSync(file, JSON.stringify({
+            ...previous,
+            sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+            expectedSha: process.env.PROTO_UI_EXPECTED_HEAD_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            stepStatus: process.env.EVIDENCE_STEP_STATUS,
+            status: previous.status === 'passed' && process.env.EVIDENCE_STEP_STATUS === 'success' ? 'passed' : 'failed',
+          }, null, 2));
+          JS
+      - name: Retain navbar screenshots and full expected-cell manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-navbar-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/bootstrap-navbar-evidence
+          if-no-files-found: error
+          retention-days: 30
+      - name: Preserve independent Button motion terminal status
+        if: always()
+        env:
+          EVIDENCE_STEP_STATUS: ${{ steps.button-motion.outcome }}
+          PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-button-motion-evidence
+        run: |
+          mkdir -p "$PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR"
+          node --input-type=module <<'JS'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import path from 'node:path';
+          const file = path.join(process.env.PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE_DIR, 'manifest.json');
+          const previous = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+          const expected = ['wc', 'react', 'vue', 'vue2'].flatMap(runtime => ['light', 'dark'].flatMap(theme =>
+            [...['default', 'primary', 'warning', 'danger', 'success', 'info', 'inverse'].map(variant => `entry-${variant}`),
+              'focus', 'disabled', 'navbar', 'reduced', 'dispose'].map(phase => `${runtime}-${theme}-${phase}`)));
+          writeFileSync(file, JSON.stringify({
+            ...previous,
+            sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+            expectedSha: process.env.PROTO_UI_EXPECTED_HEAD_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            stepStatus: process.env.EVIDENCE_STEP_STATUS,
+            cases: (previous.cases ?? expected.map(name => ({ name, status: 'pending' }))).map(cell =>
+              cell.status === 'pending' ? { ...cell, status: 'blocked', error: 'Motion cell did not reach a terminal observation.' } : cell),
+            status: previous.status === 'passed' && process.env.EVIDENCE_STEP_STATUS === 'success' ? 'passed' : 'failed',
+            scope: 'Native Chromium input and CSS transition observations on the public four-Web fixture; no physical-device, non-Web, Compiler or full-family acceptance.',
+          }, null, 2));
+          JS
+      - name: Retain Button motion frames, native events and terminal screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-button-motion-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/bootstrap-button-motion-evidence
+          if-no-files-found: error
+          retention-days: 30
+      - name: Capture the pinned original navbar on the same browser runner
+        if: ${{ !cancelled() }}
+        id: baseline
+        env:
+          PROTO_UI_BOOTSTRAP_BASELINE_CAPTURE: '1'
+          PROTO_UI_BASELINE_SHA: dc3b184ba10b0de53e40359c52d012b204b2cd01
+          PROTO_UI_BASELINE_WORKTREE: ${{ runner.temp }}/bootstrap-navbar-baseline-source
+          PROTO_UI_BOOTSTRAP_BASELINE_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-navbar-before
+        run: |
+          git fetch --no-tags origin "$PROTO_UI_BASELINE_SHA"
+          git worktree add --detach "$PROTO_UI_BASELINE_WORKTREE" "$PROTO_UI_BASELINE_SHA"
+          corepack pnpm@10.32.1 --dir "$PROTO_UI_BASELINE_WORKTREE" install --frozen-lockfile
+          corepack pnpm@10.32.1 --dir "$PROTO_UI_BASELINE_WORKTREE" --filter apps-www exec astro preferences disable devToolbar
+          cd "$PROTO_UI_BASELINE_WORKTREE"
+          node --import tsx "$GITHUB_WORKSPACE/scripts/analysis/bootstrap-navbar-baseline.mjs"
+      - name: Preserve historical capture terminal status without a conformance claim
+        if: always()
+        env:
+          EVIDENCE_STEP_STATUS: ${{ steps.baseline.outcome }}
+          PROTO_UI_BASELINE_SHA: dc3b184ba10b0de53e40359c52d012b204b2cd01
+          PROTO_UI_BASELINE_WORKTREE: ${{ runner.temp }}/bootstrap-navbar-baseline-source
+          PROTO_UI_BOOTSTRAP_BASELINE_EVIDENCE_DIR: ${{ runner.temp }}/bootstrap-navbar-before
+        run: |
+          mkdir -p "$PROTO_UI_BOOTSTRAP_BASELINE_EVIDENCE_DIR"
+          node --input-type=module <<'JS'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import path from 'node:path';
+          const file = path.join(process.env.PROTO_UI_BOOTSTRAP_BASELINE_EVIDENCE_DIR, 'manifest.json');
+          const previous = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+          const script = 'scripts/analysis/bootstrap-navbar-baseline.mjs';
+          const expected = ['home', 'docs'].flatMap(entry => ['light', 'dark'].flatMap(theme =>
+            [1440, 1024, 390].map(width => `${entry}-wc-${theme}-${width}`)));
+          const measured = existsSync(path.join(process.env.PROTO_UI_BASELINE_WORKTREE, '.git'))
+            ? execFileSync('git', ['-C', process.env.PROTO_UI_BASELINE_WORKTREE, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+            : null;
+          writeFileSync(file, JSON.stringify({
+            ...previous,
+            measuredSha: measured,
+            expectedBaselineSha: process.env.PROTO_UI_BASELINE_SHA,
+            expectedScriptSourceSha: process.env.PROTO_UI_EXPECTED_HEAD_SHA,
+            scriptSourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+            scriptSha256: existsSync(script) ? createHash('sha256').update(readFileSync(script)).digest('hex') : null,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            stepStatus: process.env.EVIDENCE_STEP_STATUS,
+            cases: (previous.cases ?? expected.map(name => ({ name, status: 'pending' }))).map(cell =>
+              cell.status === 'pending' ? { ...cell, status: 'blocked', error: 'Capture did not reach a terminal observation.' } : cell),
+            status: previous.status === 'captured' && process.env.EVIDENCE_STEP_STATUS === 'success' ? 'captured' : 'failed',
+            scope: 'Historical WC navbar captures only; captured does not assert the new density contract or physical/full-family/Compiler conformance.',
+          }, null, 2));
+          JS
+      - name: Retain same-viewport original navbar captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bootstrap-navbar-before-dc3b184-${{ github.run_id }}
+          path: ${{ runner.temp }}/bootstrap-navbar-before
+          if-no-files-found: error
+          retention-days: 30
+      - name: Release the disposable original-source worktree
+        if: always()
+        env:
+          PROTO_UI_BASELINE_WORKTREE: ${{ runner.temp }}/bootstrap-navbar-baseline-source
+        run: |
+          if test -e "$PROTO_UI_BASELINE_WORKTREE/.git"; then
+            git worktree remove --force "$PROTO_UI_BASELINE_WORKTREE"
+          fi

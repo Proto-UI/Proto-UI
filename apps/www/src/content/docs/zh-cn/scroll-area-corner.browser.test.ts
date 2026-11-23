@@ -222,7 +222,7 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               };
             });
           await capture('before-corner-assertions', { privateSurfaceCount: await passive.count() });
-          const checkCorner = async () => {
+          const checkCorner = async (expectedThumbVisible = true) => {
             const [v, h, surface] = await Promise.all([
               rect(vertical),
               rect(horizontal),
@@ -253,6 +253,38 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               { vRef: family.vertical, hRef: family.horizontal }
             );
             expect(hit).toEqual({ found: true, inRoot: true, isControl: false });
+            const thumbPaint = await Promise.all(
+              [vThumb, hThumb].map((thumb) =>
+                thumb.evaluate((element) => {
+                  const box = element.getBoundingClientRect();
+                  const style = getComputedStyle(element);
+                  return {
+                    width: box.width,
+                    height: box.height,
+                    display: style.display,
+                    background: style.backgroundColor,
+                  };
+                })
+              )
+            );
+            for (const [index, thumb] of thumbPaint.entries()) {
+              const label = `${runtime}/${index === 0 ? 'vertical' : 'horizontal'} Thumb`;
+              if (!expectedThumbVisible) {
+                // C-SCROLL-COMPOSED-CHROME-0001-D: no overflow means no Thumb paint.
+                expect(thumb.display, label).toBe('none');
+                expect(thumb.width, label).toBe(0);
+                expect(thumb.height, label).toBe(0);
+              } else if (family.name === 'brutalist') {
+                // Corner paint cannot substitute for either live Brutalist Thumb.
+                expect(thumb.display, label).not.toBe('none');
+                expect(thumb.width, label).toBeGreaterThan(0);
+                expect(thumb.height, label).toBeGreaterThan(0);
+                expect(
+                  computedThumbFillAlpha(thumb.background),
+                  `${label}: ${thumb.background}`
+                ).toBeGreaterThan(0);
+              }
+            }
             if (family.name === 'shadcn') {
               expect(await passive.count()).toBe(0);
               const paint = await root.evaluate((el) => {
@@ -309,7 +341,14 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             expect(paint.borderStyle).toBe('solid');
             expect(paint.borderLeft).toBe('2px');
             expect(paint.borderTop).toBe('2px');
-            return { vertical: v, horizontal: h, viewport: surface, hit, passive: paint };
+            return {
+              vertical: v,
+              horizontal: h,
+              viewport: surface,
+              hit,
+              passive: paint,
+              thumbPaint,
+            };
           };
           const initial = await checkCorner();
           await capture('initial', initial);
@@ -431,11 +470,19 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             await capture('end-reduced-motion', await checkCorner());
             for (const colorScheme of ['light', 'dark'] as const) {
               await applyColorScheme(page, colorScheme);
-              await page.emulateMedia({ colorScheme, reducedMotion: 'no-preference', forcedColors: 'active' });
+              await page.emulateMedia({
+                colorScheme,
+                reducedMotion: 'no-preference',
+                forcedColors: 'active',
+              });
               await capture(`end-forced-colors-${colorScheme}`, await checkCorner());
             }
             await applyColorScheme(page, 'light');
-            await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference', forcedColors: 'active' });
+            await page.emulateMedia({
+              colorScheme: 'light',
+              reducedMotion: 'no-preference',
+              forcedColors: 'active',
+            });
             await capture('end-forced-colors-before-assertions', {
               viewport: await rect(viewport),
             });
@@ -542,11 +589,14 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
           await expect
             .poll(() => hThumb.evaluate((el) => getComputedStyle(el).display))
             .toBe('none');
-          await checkCorner();
+          await checkCorner(false);
           await content.evaluate((el) => (el as HTMLElement).style.removeProperty('display'));
           await expect.poll(() => viewport.getAttribute('tabindex')).toBe('0');
           await expect
             .poll(() => vThumb.evaluate((el) => getComputedStyle(el).display))
+            .not.toBe('none');
+          await expect
+            .poll(() => hThumb.evaluate((el) => getComputedStyle(el).display))
             .not.toBe('none');
           await checkCorner();
           if (family.name === 'shadcn') {

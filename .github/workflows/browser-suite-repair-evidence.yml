@@ -3,6 +3,11 @@ name: Browser suite repair evidence
 on:
   workflow_dispatch:
     inputs:
+      sprint3_acceptance:
+        description: Run Sprint 3 acceptance instead of the selected repair scope
+        type: boolean
+        required: false
+        default: false
       scope:
         description: Existing repair controls or complete selected Sprint 1 evidence
         type: choice
@@ -23,7 +28,7 @@ concurrency:
 
 jobs:
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -70,7 +75,7 @@ jobs:
           retention-days: 30
 
   sprint1:
-    if: ${{ inputs.scope == 'sprint1' }}
+    if: ${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -112,3 +117,10 @@ jobs:
           path: ${{ runner.temp }}/sprint1
           if-no-files-found: error
           retention-days: 30
+
+  # Explicit manual opt-in; ordinary repair and reusable cycle calls stay unchanged.
+  sprint3-acceptance:
+    if: github.event_name == 'workflow_dispatch' && inputs.sprint3_acceptance == true
+    uses: ./.github/workflows/sprint3-consumer-evidence.yml
+    permissions:
+      contents: read

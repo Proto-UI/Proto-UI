@@ -382,3 +382,79 @@ describe('checked Rust data artifacts', () => {
     );
   });
 });
+
+function dataWithLicense(sourceLicense?: string): RustDataModule {
+  const result = emitRustDataSource(checked(), {
+    methods: ['scale'],
+    crateName: 'typed-data-consumer',
+    sourceLicense,
+  });
+  if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+  return result.value;
+}
+const dataManifest = (output: RustDataModule) =>
+  output.supportingFiles.find(({ path }) => path === 'Cargo.toml')!.contents;
+
+describe('explicit Rust data source-license metadata', () => {
+  it('does not infer a license when the caller supplies none', () => {
+    const output = dataWithLicense();
+    expect(dataManifest(output)).not.toMatch(/^license(?:[.\s=]|-file)/m);
+    expect(dataManifest(output)).toContain('publish = false');
+    expect(output.provenance).not.toHaveProperty('sourceLicense');
+  });
+
+  it.each(['AGPL-3.0-or-later', 'MIT', 'Apache-2.0 OR MIT'])(
+    'preserves the caller-selected %s metadata without changing translated behavior',
+    (sourceLicense) => {
+      const output = dataWithLicense(sourceLicense);
+      expect(dataManifest(output)).toContain('license = "' + sourceLicense + '"\n');
+      expect(output.provenance.sourceLicense).toBe(sourceLicense);
+      expect(output.code).toBe(dataWithLicense().code);
+      expect(output.methods).toEqual(dataWithLicense().methods);
+      expect(output.dependencies).toEqual(dataWithLicense().dependencies);
+      expect(dataManifest(output)).toContain('publish = false');
+    }
+  );
+
+  it('quotes caller text as one TOML basic string without interpreting it as SPDX', () => {
+    const sourceLicense = 'LicenseRef-"quoted"\\path';
+    const output = dataWithLicense(sourceLicense);
+    const line = dataManifest(output)
+      .split('\n')
+      .filter((line) => line.startsWith('license = '));
+    expect(line).toEqual(['license = "LicenseRef-\\"quoted\\"\\\\path"']);
+    expect(output.provenance.sourceLicense).toBe(sourceLicense);
+    expect(dataWithLicense('LicenseRef-\u{1f9ea}').provenance.sourceLicense).toBe(
+      'LicenseRef-\u{1f9ea}'
+    );
+  });
+
+  it('rejects invalid scalar metadata and line/control injection before emitting artifacts', () => {
+    for (const sourceLicense of [
+      '',
+      ' ',
+      '\t',
+      'MIT\n[dependencies]\ninjected = "1"',
+      'MIT\r\npublish = true',
+      'MIT\0',
+      'MIT\u007f',
+      'MIT\u0085',
+      '\ud800',
+      '\udfff',
+      null,
+      7,
+      {},
+      [],
+    ]) {
+      expect(
+        emitRustDataSource(checked(), {
+          methods: ['scale'],
+          sourceLicense: sourceLicense as string,
+        })
+      ).toMatchObject({
+        ok: false,
+        diagnostics: [{ code: 'PUI_RUST_DATA_LICENSE', category: 'unsupported-input' }],
+      });
+    }
+  });
+});

@@ -18,6 +18,11 @@ const localeApiKind = baseline
     ? 'historical-native-locale-link'
     : 'unreviewed-historical-api'
   : 'current-locale-select';
+// The historical 48b80 production subject enhances a native locale link.
+// Current candidates must still expose the public Select combobox.
+const languageControlSelector = baseline
+  ? '#home-language [data-projection-generation-state="active"] a[data-home-locale][href]'
+  : '#home-language [data-projection-generation-state="active"] [role="combobox"]';
 const output = process.env.PROTO_UI_STARTUP_EVIDENCE_DIR;
 const records: unknown[] = [];
 let browser: Browser;
@@ -315,7 +320,7 @@ for (const width of [2048, 390, 430, 320]) {
               {
                 selector: historicalNewYork
                   ? historicalLocaleSelector
-                  : '#home-language [data-projection-generation-state="active"] [role="combobox"]',
+                  : languageControlSelector,
                 apiKind: localeApiKind,
               }
             );
@@ -402,16 +407,9 @@ for (const width of [2048, 390, 430, 320]) {
             route: new URL(page.url()).pathname,
           });
         } else {
-          await page
-            .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
-            .focus();
-          expect(
-            await page
-              .locator(
-                '#home-language [data-projection-generation-state="active"] [role="combobox"]'
-              )
-              .evaluate((e) => e === document.activeElement)
-          ).toBe(true);
+          const languageControl = page.locator(languageControlSelector);
+          await languageControl.focus();
+          expect(await languageControl.evaluate((e) => e === document.activeElement)).toBe(true);
           await capture(page, `home-${width}-reopened-keyboard`, {
             input: 'native Escape, click, keyboard focus',
           });

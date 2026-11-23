@@ -1,5 +1,6 @@
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
+import { BROWSER_COMPILER_IMPORT_ALLOWLIST } from './browser-compiler-imports.mjs';
 import {
   LIBRARY_CARD_IMPORT_ALLOWLIST,
   LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES,
@@ -170,6 +171,13 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
+  ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
+  // The authored Form demo consumes only the public Field request type.
+  // Its interactive controller remains owned by the existing blocked demo row.
+  'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
+    sourceSha256: 'a1ad9240bff32c3d0c3eace6c2cd7ed170fe9b37f618a14111d2e9c06b936db5',
+    specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
+  }),
   // Import-edge allowances only: an inline entry without a `sourceSha256`
   // certifies the exact specifier or resolved path, never the source body.
   // Post-admission body drift is invisible to this gate and stays source-review
@@ -305,6 +313,8 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       'packages/adapters/base/src/material/program-inputs',
       'packages/adapters/base/src/material/style',
       'packages/adapters/base/src/material/style-tint-profile',
+      // Profile 6 reads bounded source statistics from this pure private helper.
+      'packages/adapters/base/src/material/style-tint-source',
       'packages/adapters/base/src/material/source',
     ]),
   }),
@@ -346,7 +356,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // owner (#420). Core is type-only; the Bootstrap helper supplies passive
   // appearance, while Drawer/Dialog retain input, focus and dismissal ownership.
   'apps/www/src/content/docs/drawer-command-disabled.shared.ts': Object.freeze({
-    sourceSha256: 'bdbf1708e7a961aec3085222c0d1faaea49cc674aa10e06c9921f926ccac59d3',
+    sourceSha256: 'b046d82b1709a4c0411d0ee26aaa7fbba4412fcc7c5b173b7d160cd151fb3dbe',
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'apps/www/src/content/docs/overlay-control-recipes-r94.shared.ts': Object.freeze({
@@ -407,11 +417,14 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/text']),
   }),
-  'apps/www/src/components/InstallCommandCard.astro': Object.freeze({
+  // The reviewed extracted client owns the same manager selection. Its exact
+  // importer bytes remain required; this does not admit sibling helpers.
+  'apps/www/src/components/install-command-card-client.ts': Object.freeze({
+    sourceSha256: 'dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64',
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: '9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907',
+    sourceSha256: 'f691b11c6cd9b25d3be510eb515b6ec3069350a6877caf2597b77857bfc76b18',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
@@ -421,7 +434,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-native-controls.ts': Object.freeze({
-    sourceSha256: '3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80',
+    sourceSha256: 'c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/surface',
@@ -433,7 +446,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/site-search-commands.ts': Object.freeze({
-    sourceSha256: 'd6abc354e3f292df7b79613fb81d072533ef24bd45697558bacf91ace3086304',
+    sourceSha256: 'faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572',
     specifiers: Object.freeze([
       '@proto.ui/module-expose-state',
       '../../../../packages/prototypes/lucide/src/icons/search',
@@ -443,7 +456,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // Public InputShell binding only; neither Search source gains UI acceptance.
   'apps/www/src/components/site-search-composition.ts': Object.freeze({
-    sourceSha256: '9450263676765eac08e155b218a464c70020a110286a9910a86df90b97c83c8f',
+    sourceSha256: '5787970b7cb00c1e66b0574cc4a7550524e3bf1a638c02a900136974b8f1afec',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
   'apps/www/src/components/site-text-recipes.ts': Object.freeze({
@@ -500,7 +513,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Exact lazy Finf registry source under www.demo.prototype-previewer (#1323).
   // Public prototype subpaths plus the Core type import; registrations check identity.
   'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts': Object.freeze({
-    sourceSha256: 'b078e1e9e43782d87e5966b88ec6fe01b31d43ab70357c17e2f1e3baa30b6f06',
+    sourceSha256: 'df133b1ddf6cb538ff4e602f7bcd68c7c24835e6bf19ac8e33339571057cae7a',
     specifiers: Object.freeze([
       '@proto.ui/core',
       '@proto.ui/prototypes-base/alert-dialog',
@@ -515,6 +528,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-base/date-picker',
       '@proto.ui/prototypes-base/drawer',
       '@proto.ui/prototypes-base/dropdown',
+      '@proto.ui/prototypes-base/field',
       '@proto.ui/prototypes-base/fieldset',
       '@proto.ui/prototypes-base/form',
       '@proto.ui/prototypes-base/input-otp',
@@ -587,6 +601,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-brutalist/date-picker',
       '@proto.ui/prototypes-brutalist/drawer',
       '@proto.ui/prototypes-brutalist/dropdown',
+      '@proto.ui/prototypes-brutalist/field',
       '@proto.ui/prototypes-brutalist/fieldset',
       '@proto.ui/prototypes-brutalist/form',
       '@proto.ui/prototypes-brutalist/image',
@@ -735,7 +750,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'f1176c9c8d131bf6087802c7b4fb2ebd4350318d29270b8dcb2817a427e2bc7c',
+    sourceSha256: 'c515576d70dda5728fb3de3dde2792d522776cbaf621aff24ab0d819e0f56f0f',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -749,6 +764,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Accepted documentation-media bridge (#787/#797). These are exact source
   // imports, not a family-wide or active-SVG admission.
   'apps/www/src/components/documentation-image-controls.ts': Object.freeze({
+    sourceSha256: 'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-shadcn/button',
@@ -758,10 +774,25 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
       '@proto.ui/prototypes-brutalist/theme',
       '@proto.ui/prototypes-base/button',
       '@proto.ui/prototypes-base/dialog',
+      '@proto.ui/prototypes-base/scroll-area',
       '@proto.ui/prototypes-shadcn/surface',
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/text',
+    ]),
+  }),
+  // The reading viewport retains the public ScrollArea lease and the blocked
+  // documentation-media owner; both authored source identities are required.
+  'apps/www/src/components/documentation-image-reading-viewport.proto.ts': Object.freeze({
+    sourceSha256: '38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec',
+    companionSource: Object.freeze({
+      path: 'apps/www/src/components/documentation-image-controls.ts',
+      sha256: 'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07',
+    }),
+    specifiers: Object.freeze([
+      '@proto.ui/core',
+      '@proto.ui/hooks',
+      '@proto.ui/prototypes-base/scroll-area',
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-material.astro': Object.freeze({
@@ -4797,13 +4828,17 @@ function scriptModuleSpecifiers(source, fileName, options = {}) {
     : scan();
 }
 function scanScriptModuleSpecifiers(source, fileName, { harnessPreviewBoundary = false } = {}) {
-  const sourceFile = ts.createSourceFile(
-    fileName,
-    source,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TSX
-  );
+  // A generic arrow such as `<T>(value: T) => value` is TypeScript, not
+  // JSX. Use a valid non-JSX TypeScript parse for its declared extensions.
+  // Keep the existing TSX inspection for other inputs and malformed .ts
+  // sources, so executable markup cannot disappear behind a parser error.
+  const typedSource = /\.[cm]?ts$/iu.test(fileName)
+    ? ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+    : null;
+  const sourceFile =
+    typedSource && typedSource.parseDiagnostics.length === 0
+      ? typedSource
+      : ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const specifiers = [];
   const literalBindings = topLevelConstStringBindings(sourceFile);
   const receiverBindings = domReceiverBindings(sourceFile);
@@ -8871,7 +8906,14 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
       assertPromotionModulePath(rootDir, configPath);
       if (!fs.lstatSync(configPath).isFile()) return false;
       const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
-      if (configSha === WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256) {
+      if (
+        [
+          WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
+        ].includes(configSha)
+      ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
       } else if (
         ![
@@ -9715,11 +9757,27 @@ const PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256 =
 const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
 const PROMOTION_RETRY_PLUGIN_SHA256 =
   '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';
-// This configuration admits only the four owners of the public Retry virtual ID.
+// Sprint 4 changes only the exact two-provider site-control grouping. Resolver
+// and Retry helper bytes stay unchanged; this configuration still admits only
+// the four owners of the public Retry virtual ID.
 // Bind its extracted resolver and optional probe as metadata without admitting
 // the current configuration to the general package resolver profiles below.
 const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
-  'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7';
+  'e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c';
+// Exact public S4 + S5 configuration merge: only the two declared shader
+// chunk owners and three lazy compiler dependency exclusions are new. The
+// four Retry import owners and all helper identities remain unchanged.
+const WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99';
+// The Sprint 5 compiler adds three lazy QuickJS dependencies and preserves
+// module Worker output. The four Retry import owners, resolver and helpers are
+// unchanged; this exact profile does not admit general package promotion.
+const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'a9eeed0952291e3226c09f1a974dc0742472df8079240210afdbc3701db5dfa3';
+// Merged S4 + S5 site configuration: the accepted digest for the tree that
+// combines both sprints' module-graph changes on top of the train.
+const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

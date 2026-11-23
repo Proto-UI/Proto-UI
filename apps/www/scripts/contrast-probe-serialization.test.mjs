@@ -242,12 +242,16 @@ test('browser-side Focus diagnostics run without Node transpiler helpers', async
 // function. They do not establish native CSS rendering or hit testing.
 const targetObservationFixture = async () => {
   const source = await readFile(new URL('./contrast-probe.browser.ts', import.meta.url), 'utf8');
-  const compiled = await transform(source, {
-    loader: 'ts',
-    format: 'iife',
-    globalName: 'puiContrastProbe',
-    keepNames: false,
-  });
+  const compiled = await transform(
+    source +
+      '\nexport const readWholeBoxCalibration = (element) => paintedVisibility(element, [...element.getClientRects()]);',
+    {
+      loader: 'ts',
+      format: 'iife',
+      globalName: 'puiContrastProbe',
+      keepNames: false,
+    }
+  );
   const style = {
     visibility: 'visible',
     display: 'block',
@@ -359,8 +363,77 @@ const targetObservationFixture = async () => {
     textNode,
     styleByElement,
     bounds,
+    observeWholeBox: () => sandbox.puiContrastProbe.readWholeBoxCalibration(element),
   };
 };
+
+for (const fault of [
+  'none',
+  'empty',
+  'transparent',
+  'outside-safe-rect',
+  'mixed-boxes',
+  'unknown-radius',
+  'filter',
+  'zoom',
+  'mask',
+  'hidden-ancestor',
+]) {
+  test(`rounded target presence requires an actual safe paint witness (${fault})`, async () => {
+    // CSSOM and text-range rectangles are injected calibration facts. The
+    // production reader must retain unsupported whole-box/perimeter evidence.
+    const fixture = await targetObservationFixture();
+    const { ancestorStyle, style, element, textNode, sandbox, bounds } = fixture;
+    ancestorStyle.overflowX = ancestorStyle.overflowY = 'hidden';
+    ancestorStyle.borderTopLeftRadius = '5px';
+    style.backgroundColor = 'transparent';
+    const center = {
+      x: 20,
+      y: 20,
+      left: 20,
+      top: 20,
+      right: 30,
+      bottom: 30,
+      width: 10,
+      height: 10,
+    };
+    let boxes = [center];
+    sandbox.document.createRange = () => ({
+      selectNodeContents: () => {},
+      getClientRects: () => boxes,
+    });
+    if (fault === 'empty') element.childNodes = [];
+    if (fault === 'transparent') style.webkitTextFillColor = 'transparent';
+    if (fault === 'outside-safe-rect') boxes = [bounds];
+    if (fault === 'mixed-boxes') boxes = [center, bounds];
+    if (fault === 'unknown-radius') ancestorStyle.borderTopLeftRadius = '50%';
+    if (fault === 'filter') ancestorStyle.filter = 'opacity(0)';
+    if (fault === 'zoom') ancestorStyle.zoom = '2';
+    if (fault === 'mask') ancestorStyle.maskImage = 'linear-gradient(transparent,transparent)';
+    if (fault === 'hidden-ancestor') ancestorStyle.opacity = '0';
+    const observed = fixture.observe();
+    assert.equal(observed.achieved, fault === 'none');
+    assert.equal(observed.focused, true);
+    if (fault === 'none') {
+      assert.equal(observed.visibility.paintWitness.kind, 'text');
+      assert.ok(Number.isSafeInteger(observed.visibility.paintWitness.physicalNodeId));
+      assert.deepEqual(JSON.parse(JSON.stringify(observed.visibility.paintWitness.boxes)), [
+        { x: 20, y: 20, width: 10, height: 10 },
+      ]);
+      assert.equal(observed.visibility.boxVisibility.classification, 'unsupported');
+      assert.deepEqual(
+        [...observed.visibility.boxVisibility.limits],
+        ['unsupported-rounded-overflow-clip']
+      );
+      assert.equal(fixture.observeWholeBox().classification, 'unsupported');
+      assert.deepEqual(
+        [...fixture.observeWholeBox().limits],
+        ['unsupported-rounded-overflow-clip']
+      );
+    } else assert.equal(observed.visibility.paintWitness, undefined);
+    assert.equal(textNode.textContent, 'Native-state fixture');
+  });
+}
 
 for (const overflow of ['hidden', 'clip', 'auto', 'scroll']) {
   test(`shared target acceptance withholds rounded ${overflow} clipping without inventing hidden bounds`, async () => {
@@ -670,6 +743,9 @@ for (const family of ['badge', 'card', 'skeleton', 'separator', 'spinner']) {
     sandbox.matchMedia = () => ({ matches: true });
     sandbox.puiContrastProbe = {
       ...sandbox.puiContrastProbe,
+      // This controlled paint-domain fixture supplies its authored root input;
+      // actual producer tests exercise the shared production boundary selector.
+      readSubjectContrastRoots: () => [element],
       readContrastAuditSubject: () => ({
         observation: { achieved: true },
         content,
@@ -846,7 +922,7 @@ for (const placement of ['target', 'ancestor']) {
 
 // Run the complete exported fingerprint against a controlled DOM/CSSOM. These
 // tests establish serialization/identity behavior, not browser paint coverage.
-const stateIdentityFixture = async ({ shadow = false, native = false } = {}) => {
+const stateIdentityFixture = async ({ shadow = false, native = false, kind = 'textarea' } = {}) => {
   const window = new Window();
   window.visualViewport = null;
   const source = await readFile(new URL('./contrast-probe.browser.ts', import.meta.url), 'utf8');
@@ -855,10 +931,11 @@ const stateIdentityFixture = async ({ shadow = false, native = false } = {}) => 
     format: 'iife',
     globalName: 'puiContrastProbe',
   });
-  window.document.body.innerHTML = `<section data-projection-scope="fixture" data-projection-owner="fixture" data-projection-generation="1"><${native ? 'textarea' : 'div'} data-pui-root data-projection-owner="fixture" data-projection-generation="1" data-projection-prototype="brutalist-textarea-root"></${native ? 'textarea' : 'div'}></section>`;
+  const tag = native ? kind : 'div';
+  window.document.body.innerHTML = `<section data-projection-scope="fixture" data-projection-owner="fixture" data-projection-generation="1"><${tag} data-pui-root data-projection-owner="fixture" data-projection-generation="1" data-projection-prototype="brutalist-${kind}-root"></${tag}></section>`;
   const host = window.document.querySelector('[data-pui-root]');
   const container = shadow ? host.attachShadow({ mode: 'open' }) : host;
-  const editor = native ? host : window.document.createElement('textarea');
+  const editor = native ? host : window.document.createElement(kind);
   if (!native) container.append(editor);
   editor.value = 'Current editor';
   window.eval(compiled.code);
@@ -943,6 +1020,57 @@ for (const shadow of [false, true]) {
       }
     });
   }
+}
+
+for (const profile of [{ native: true }, {}, { shadow: true }]) {
+  test(`Input fingerprint binds the actual native editor ${JSON.stringify(profile)}`, async () => {
+    const f = await stateIdentityFixture({ ...profile, kind: 'input' });
+    try {
+      const state = JSON.parse(f.read());
+      assert.equal(state.surfaces.length, 1);
+      assert.equal(state.surfaces[0].target[0].tag, 'INPUT');
+      assert.equal(state.surfaces[0].target[0].value, 'Current editor');
+      assert.equal(f.read(), JSON.stringify(state));
+    } finally {
+      await f.close();
+    }
+  });
+}
+
+for (const shadow of [false, true]) {
+  for (const defect of ['missing', 'duplicate', 'foreign-owner', 'stale-generation']) {
+    test(`Input fingerprint rejects ${defect} in ${shadow ? 'shadow' : 'light'} wrapper`, async () => {
+      const f = await stateIdentityFixture({ shadow, kind: 'input' });
+      try {
+        if (defect === 'missing') f.editor.remove();
+        else if (defect === 'duplicate') f.container.append(f.editor.cloneNode(true));
+        else
+          f.editor.setAttribute(
+            defect === 'foreign-owner' ? 'data-projection-owner' : 'data-projection-generation',
+            'foreign'
+          );
+        assert.throws(f.read, /Input.*native editor/i);
+      } finally {
+        await f.close();
+      }
+    });
+  }
+
+  test(`Input fingerprint distinguishes replacement physical editors in ${shadow ? 'shadow' : 'light'} wrapper`, async () => {
+    const f = await stateIdentityFixture({ shadow, kind: 'input' });
+    try {
+      const before = JSON.parse(f.read()).surfaces[0].target[0];
+      const replacement = f.editor.cloneNode(true);
+      replacement.value = f.editor.value;
+      f.editor.replaceWith(replacement);
+      const after = JSON.parse(f.read()).surfaces[0].target[0];
+      assert.equal(after.tag, 'INPUT');
+      assert.equal(after.value, before.value);
+      assert.notEqual(after.id, before.id);
+    } finally {
+      await f.close();
+    }
+  });
 }
 
 test('Textarea runner retains locator strictness instead of first-match selection', async () => {

@@ -14,11 +14,15 @@ use block2::RcBlock;
 use gpui::AsyncApp;
 use objc2::runtime::AnyObject;
 use objc2::{class, msg_send, sel};
-use objc2_foundation::{NSOperatingSystemVersion, NSRect};
+use objc2_foundation::{NSOperatingSystemVersion, NSPoint, NSRect, NSSize};
 
 #[path = "capture_state.rs"]
 mod capture_state;
 use capture_state::CaptureState;
+
+#[path = "capture_pixels.rs"]
+pub mod capture_pixels;
+use capture_pixels::{Rect, Report};
 
 #[link(name = "ScreenCaptureKit", kind = "framework")]
 extern "C" {}
@@ -27,6 +31,19 @@ extern "C" {}
 extern "C" {
     fn CGImageGetWidth(image: *const c_void) -> usize;
     fn CGImageGetHeight(image: *const c_void) -> usize;
+    fn CGColorSpaceCreateDeviceRGB() -> *mut c_void;
+    fn CGColorSpaceRelease(space: *mut c_void);
+    fn CGBitmapContextCreate(
+        data: *mut c_void,
+        width: usize,
+        height: usize,
+        bits_per_component: usize,
+        bytes_per_row: usize,
+        space: *mut c_void,
+        bitmap_info: u32,
+    ) -> *mut c_void;
+    fn CGContextDrawImage(context: *mut c_void, rect: NSRect, image: *const c_void);
+    fn CGContextRelease(context: *mut c_void);
 }
 
 #[link(name = "CoreFoundation", kind = "framework")]
@@ -80,12 +97,33 @@ impl Drop for ObjcOwned {
     }
 }
 
+struct ColorSpace(*mut c_void);
+impl Drop for ColorSpace {
+    fn drop(&mut self) {
+        if !self.0.is_null() {
+            unsafe { CGColorSpaceRelease(self.0) };
+        }
+    }
+}
+
+struct BitmapContext(*mut c_void);
+impl Drop for BitmapContext {
+    fn drop(&mut self) {
+        if !self.0.is_null() {
+            unsafe { CGContextRelease(self.0) };
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Target {
     pub window_id: u32,
     pub process_id: i32,
     pub width: usize,
     pub height: usize,
+    pub content: Rect,
+    pub scale: f64,
+    pub view_is_flipped: bool,
     point_width: f64,
     point_height: f64,
 }
@@ -117,6 +155,21 @@ impl Target {
         if width == 0 || height == 0 || width > 8192 || height > 8192 {
             return Err("test window dimensions exceed capture bounds".into());
         }
+        let bounds: NSRect = msg_send![view, bounds];
+        let view_is_flipped: bool = msg_send![view, isFlipped];
+        let in_window: NSRect =
+            msg_send![view, convertRect: bounds toView: ptr::null::<AnyObject>()];
+        let content = capture_pixels::content_rect(
+            width,
+            height,
+            scale,
+            [
+                in_window.origin.x,
+                in_window.origin.y,
+                in_window.size.width,
+                in_window.size.height,
+            ],
+        )?;
         Ok(Self {
             window_id,
             process_id: std::process::id()
@@ -124,15 +177,36 @@ impl Target {
                 .map_err(|_| "invalid process ID")?,
             width,
             height,
+            content,
+            scale,
+            view_is_flipped,
             point_width: frame.size.width,
             point_height: frame.size.height,
         })
     }
 }
 
-type Pending = Arc<Mutex<CaptureState<Vec<u8>>>>;
+struct Captured {
+    png: Vec<u8>,
+    pixels: Result<Report, String>,
+}
 
-fn finish(pending: &Pending, result: Result<Vec<u8>, String>) {
+#[derive(Debug)]
+pub struct FrameWitness {
+    pub callbacks: usize,
+    pub visible: bool,
+    pub error: Option<String>,
+}
+
+impl FrameWitness {
+    fn passed(&self) -> bool {
+        self.callbacks >= 2 && self.visible && self.error.is_none()
+    }
+}
+
+type Pending = Arc<Mutex<CaptureState<Captured>>>;
+
+fn finish(pending: &Pending, result: Result<Captured, String>) {
     if let Ok(mut state) = pending.lock() {
         state.complete(result, Instant::now());
     }
@@ -185,6 +259,63 @@ unsafe fn encode_png(image: *const c_void, target: Target) -> Result<Vec<u8>, St
         return Err("invalid PNG signature".into());
     }
     Ok(bytes.to_vec())
+}
+
+/// Normalize the borrowed ScreenCaptureKit CGImage into a tightly packed,
+/// known channel order before examining pixels. The PNG itself is encoded
+/// from the original CGImage; this conversion never substitutes rendered or
+/// synthetic pixels for OS capture evidence.
+unsafe fn rgba_pixels(image: *const c_void, target: Target) -> Result<Vec<u8>, String> {
+    let bytes_per_row = target.width.checked_mul(4).ok_or("RGBA stride overflow")?;
+    let length = bytes_per_row
+        .checked_mul(target.height)
+        .filter(|length| *length <= 128 * 1024 * 1024)
+        .ok_or("RGBA buffer exceeds capture bounds")?;
+    let mut rgba = vec![0u8; length];
+    let color = ColorSpace(CGColorSpaceCreateDeviceRGB());
+    if color.0.is_null() {
+        return Err("RGB color space allocation failed".into());
+    }
+    // kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedLast = RGBA8.
+    let context = BitmapContext(CGBitmapContextCreate(
+        rgba.as_mut_ptr().cast(),
+        target.width,
+        target.height,
+        8,
+        bytes_per_row,
+        color.0,
+        0x4000 | 1,
+    ));
+    if context.0.is_null() {
+        return Err("RGBA bitmap context allocation failed".into());
+    }
+    CGContextDrawImage(
+        context.0,
+        NSRect {
+            origin: NSPoint { x: 0.0, y: 0.0 },
+            size: NSSize {
+                width: target.width as f64,
+                height: target.height as f64,
+            },
+        },
+        image,
+    );
+    drop(context);
+    Ok(rgba)
+}
+
+unsafe fn captured_image(image: *const c_void, target: Target) -> Result<Captured, String> {
+    let png = encode_png(image, target)?;
+    let pixels = rgba_pixels(image, target).and_then(|rgba| {
+        capture_pixels::inspect(
+            target.width,
+            target.height,
+            &rgba,
+            target.content,
+            target.scale,
+        )
+    });
+    Ok(Captured { png, pixels })
 }
 
 /// Starts only the consent-free, current-process content query. The callback
@@ -274,7 +405,7 @@ unsafe fn start(target: Target, pending: Pending) -> Result<(), String> {
                 let result = if error.is_null() {
                     // The CGImage is borrowed for this invocation. Encode and
                     // copy its bytes before ScreenCaptureKit releases it.
-                    encode_png(image, target)
+                    captured_image(image, target)
                 } else {
                     Err("exact-window screenshot failed".into())
                 };
@@ -289,7 +420,12 @@ unsafe fn start(target: Target, pending: Pending) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn capture(target: Target, path: &Path, cx: &AsyncApp) -> Result<(), String> {
+pub async fn capture(
+    target: Target,
+    path: &Path,
+    frames: FrameWitness,
+    cx: &AsyncApp,
+) -> Result<Report, String> {
     let pending = Arc::new(Mutex::new(CaptureState::new(
         Instant::now() + Duration::from_secs(5),
     )));
@@ -298,7 +434,7 @@ pub async fn capture(target: Target, path: &Path, cx: &AsyncApp) -> Result<(), S
     unsafe {
         start(target, Arc::clone(&pending))?;
     }
-    let bytes = loop {
+    let captured = loop {
         let ready = pending
             .lock()
             .map_err(|_| "capture state poisoned")?
@@ -311,17 +447,71 @@ pub async fn capture(target: Target, path: &Path, cx: &AsyncApp) -> Result<(), S
             .timer(Duration::from_millis(20))
             .await;
     };
-    // Only this waiter writes files. A timed-out callback can never create or
-    // replace a PNG. Refuse old artifacts instead of silently reusing them.
+    // Retain original failed pixels and their counts as well as successful
+    // evidence. Only this waiter writes files; late/duplicate callbacks still
+    // cannot create or replace any artifact.
+    write_fresh(path, &captured.png)?;
+    let rectangle = |rect: Rect| {
+        serde_json::json!({
+            "x": rect.x, "y": rect.y, "width": rect.width, "height": rect.height,
+        })
+    };
+    let evidence = match &captured.pixels {
+        Ok(report) => serde_json::json!({
+            "rule": "two-label-content-v1",
+            "passed": report.passed() && frames.passed(),
+            "pixelGatePassed": report.passed(),
+            "platformFrames": { "callbacks": frames.callbacks, "visible": frames.visible, "error": frames.error },
+            "windowId": target.window_id,
+            "processId": target.process_id,
+            "width": target.width,
+            "height": target.height,
+            "scale": target.scale,
+            "viewIsFlipped": target.view_is_flipped,
+            "rgbaFormat": "premultiplied-rgba8",
+            "content": rectangle(report.content),
+            "labels": report.labels.iter().map(|label| serde_json::json!({
+                "label": label.label,
+                "roi": rectangle(label.roi),
+                "backgroundPixels": label.background,
+                "inkPixels": label.ink,
+                "inkColumns": label.ink_columns,
+                "inkRows": label.ink_rows,
+                "segmentedRows": label.segmented_rows,
+                "passed": label.passed,
+            })).collect::<Vec<_>>(),
+        }),
+        Err(error) => serde_json::json!({
+            "rule": "two-label-content-v1", "passed": false, "error": error,
+            "platformFrames": { "callbacks": frames.callbacks, "visible": frames.visible, "error": frames.error },
+            "windowId": target.window_id, "processId": target.process_id,
+        }),
+    };
+    let evidence_bytes = serde_json::to_vec_pretty(&evidence).map_err(|error| error.to_string())?;
+    write_fresh(&path.with_extension("pixels.json"), &evidence_bytes)?;
+    let report = captured.pixels?;
+    if !frames.passed() {
+        return Err(format!(
+            "normal platform frame wait failed: {frames:?}; pixels: {report:?}"
+        ));
+    }
+    if !report.passed() {
+        return Err(format!("two-label content pixel gate failed: {report:?}"));
+    }
+    Ok(report)
+}
+
+fn write_fresh(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    // Refuse old artifacts rather than silently reusing them.
     let mut file = OpenOptions::new()
         .write(true)
         .create_new(true)
         .open(path)
-        .map_err(|error| format!("fresh PNG creation failed: {error}"))?;
-    if let Err(error) = file.write_all(&bytes) {
+        .map_err(|error| format!("fresh capture artifact creation failed: {error}"))?;
+    if let Err(error) = file.write_all(bytes) {
         drop(file);
         let _ = std::fs::remove_file(path);
-        return Err(format!("PNG write failed: {error}"));
+        return Err(format!("capture artifact write failed: {error}"));
     }
     Ok(())
 }

@@ -1,0 +1,68 @@
+id: T-SLIDER-VALUES-INPUT-0001
+type: test
+title: Slider Values physical input and grouped Field conformance
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Three 0.3 family consumers provide bounded source tests; exact-source native input and independent review remain required for stable admission.
+summary: Distinguishes Track seek from Thumb grab, preserves Root ownership and explicitly reports numeric array values through Field.
+cases:
+  - id: T-SLIDER-VALUES-INPUT-0001-CASE-POINTER
+    title: Single capture supports direct seek, no-jump grabs, normalized directions and swap focus
+    covers: [P-BASE-SLIDER-VALUES-TRACK, C-AXIS-INPUT-ORIGIN-0001-CONSUMER]
+    expectation: All three public families seek the nearest editable slot, reject disabled origins without retargeting, quantize displacement, follow swap focus and clear no-op contacts without an event.
+  - id: T-SLIDER-VALUES-INPUT-0001-CASE-LIFETIME
+    title: Controlled refusal, policy changes, reset, cancellation and detach preserve canonical ownership
+    covers: [P-BASE-SLIDER-VALUES-COLLISION-ENTRY, P-BASE-SLIDER-VALUES-TRACK]
+    expectation: Only the latest valid logical session can complete; retired capture and stale release do not publish completion or mutate an owner.
+  - id: T-SLIDER-VALUES-INPUT-0001-CASE-FIELD
+    title: A grouped control reports finite canonical arrays and retains label and Form ownership
+    covers: [P-BASE-SLIDER-VALUES-THUMB, C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS]
+    expectation: Field receives a defensive homogeneous finite number array, dirty and focus facts from the whole group, canonical-only controlled reports and disabled reset. Mixed, sparse and nonfinite arrays are rejected.
+implementations:
+  - id: public-family-input
+    kind: runtime-test
+    status: active
+    path: packages/prototypes/base/test/slider-values-input.test.ts
+    required: true
+    consumesCases:
+      [
+        T-SLIDER-VALUES-INPUT-0001-CASE-POINTER,
+        T-SLIDER-VALUES-INPUT-0001-CASE-LIFETIME,
+        T-SLIDER-VALUES-INPUT-0001-CASE-FIELD,
+      ]
+  - id: slider-values-native-input
+    kind: adapter-test
+    status: planned
+    path: scripts/analysis/sprint2-input-browser.mjs
+    required: true
+    consumesCases:
+      [
+        T-SLIDER-VALUES-INPUT-0001-CASE-POINTER,
+        T-SLIDER-VALUES-INPUT-0001-CASE-LIFETIME,
+        T-SLIDER-VALUES-INPUT-0001-CASE-FIELD,
+      ]
+    notes:
+      - Independently terminal controlled and uncontrolled cases run real browser mouse and keyboard input through the four public Adapters; physical OS IME, assistive technology and Compiler evidence remain separate.
+verifies:
+  contracts:
+    - id: C-AXIS-INPUT-ORIGIN-0001
+      anchors: [C-AXIS-INPUT-ORIGIN-0001-CONSUMER]
+    - id: C-FIELD-0001
+      anchors: [C-FIELD-0001-VALUES, C-FIELD-0001-RELATIONS]
+  prototypes:
+    - id: P-BASE-SLIDER-VALUES
+      anchors:
+        [
+          P-BASE-SLIDER-VALUES-TRACK,
+          P-BASE-SLIDER-VALUES-THUMB,
+          P-BASE-SLIDER-VALUES-COLLISION-ENTRY,
+        ]
+exercises:
+  prototypes: [P-BASE-SLIDER-VALUES, P-SHADCN-SLIDER-VALUES, P-BRUTALIST-SLIDER-VALUES]
+sources:
+  - path: packages/prototypes/base/test/slider-values-input.test.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Added source-level physical input and grouped Field consumers alongside the existing logical-owner oracles.
+tags: [slider, values, field, input, test]

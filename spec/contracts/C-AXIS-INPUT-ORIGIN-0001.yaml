@@ -1,0 +1,33 @@
+id: C-AXIS-INPUT-ORIGIN-0001
+type: contract
+title: Axis Input can identify an authored origin part within one contact lease
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: Bounded shared input extension for independently authored consumers; independent native and compiler evidence is required before stable admission.
+summary: Optional originRole associates a contact with a same-owner Anatomy part without exposing a target, pointer ID or component protocol.
+statement: An Axis Input remains the sole physical input and capture owner. A consumer may declare an originRole in the same Anatomy family and receive a finite originIndex into that role's public order, retained for the accepted contact. The consumer owns choosing a logical item, seeking, grab offsets, value changes, focus and commit policy.
+criteria:
+  - id: C-AXIS-INPUT-ORIGIN-0001-FACT
+    text: Setup-only originRole must name a declared role in the configured family. On an opted-in attachment every start, move and end contains originIndex, either null for an input hit outside those origin parts or a nonnegative integer into the same owner's public Anatomy order for that role. The nearest matching part on the original input path wins. No host object, coordinate, contact ID or mutable origin record is exposed. Without originRole the existing sample shape is unchanged. Missing or invalid opted-in facts fail closed rather than becoming a null hit.
+  - id: C-AXIS-INPUT-ORIGIN-0001-LEASE
+    text: The origin and ordered part set belong to one contact lease. Pointer capture and subsequent move/end targets do not change the original originIndex. Role membership, order, physical target, logical owner, capability replacement, detach or disposal retires the lease and prevents stale origin delivery. All origin targets must be available before attachment. A consumer's logical index can change independently without rewriting physical origin. End or cancel clears capture exactly once; a rejected logical start may close and rearm the same input without allowing that down event to be reacquired by an ancestor.
+  - id: C-AXIS-INPUT-ORIGIN-0001-CONSUMER
+    text: Slider Values uses one Track AxisInput with Thumb originRole. A Thumb start uses that Thumb's explicit or ordered logical slot and retains its start value plus normalized displacement, avoiding a jump from an off-center grab. A direct Track start seeks the nearest editable display slot, choosing the lower ordered slot on equal distance. Invalid, disabled or readOnly origins reject; they never fall through to a different Thumb. Collision, controlled veto, selected-slot focus and completion remain in the prototype. This definition adds no Slider recognition to a host or compiler.
+dependsOn:
+  contracts: [C-MOVE-GESTURE-0001, C-ANATOMY-0001]
+verifies:
+  tests: [T-AXIS-INPUT-ORIGIN-0001]
+sources:
+  - path: packages/core/src/axis-input.ts
+  - path: packages/modules/axis-input/src/create.ts
+  - path: packages/adapters/base/src/gestures/web-axis-input-host.ts
+  - path: packages/adapters/base/src/gestures/web-move-gesture-host.ts
+openQuestions:
+  - id: C-AXIS-INPUT-ORIGIN-0001-Q-ADMISSION
+    question: Which independent native and compiler results admit this bounded shared origin capability?
+    blocks: [activation:C-AXIS-INPUT-ORIGIN-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Defined portable part origin association before implementing Slider Values pointer consumption.
+tags: [axis-input, anatomy, origin, lifecycle]

@@ -57,17 +57,20 @@ const kinds = select('PUI_BROWSER_KINDS', [
 const output = path.resolve(process.env.PUI_EVIDENCE_DIR ?? '.tmp/component-capabilities-browser');
 await mkdir(output, { recursive: true });
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+const gitPaths = (...args) =>
+  execFileSync('git', ['ls-files', '-z', ...args], { encoding: 'utf8' })
+    .split('\0')
+    .filter(Boolean);
 const sourcePaths = [
   ...new Set([
-    ...git('ls-files', 'packages', 'apps/www/src/content/docs', 'scripts/analysis').split('\n'),
-    ...git(
-      'ls-files',
+    ...gitPaths('packages', 'apps/www/src/content/docs', 'scripts/analysis'),
+    ...gitPaths(
       '--others',
       '--exclude-standard',
       'packages',
       'apps/www/src/content/docs',
       'scripts/analysis'
-    ).split('\n'),
+    ),
   ]),
 ]
   .filter(Boolean)
@@ -149,7 +152,8 @@ const { chromium } = createRequire(new URL('../../apps/www/package.json', import
 const browser = await chromium.launch({
   headless: true,
   executablePath: process.env.PUI_CHROME_EXECUTABLE ?? '/usr/bin/chromium',
-  args: ['--no-sandbox'],
+  chromiumSandbox: true,
+  args: ['--disable-dev-shm-usage'],
 });
 report.environment.browser = browser.version();
 const page = await browser.newPage({
@@ -570,6 +574,7 @@ async function numberFieldIme(runtime, family, prefix) {
             .filter((event) => !event.isTrusted)
             .every((event) => event.type === 'compositionend'),
           'trusted native events except the insertText compositionend artifact'
+
         );
         assert.equal(control.status, 'passed', 'independent native IME control passed');
         result.compositionTrace = assertNumberFieldImeTrace(
@@ -854,6 +859,7 @@ async function datePicker(runtime, family, prefix) {
     () => document.querySelector('.cap-value')?.textContent.trim() === '2026-10-10 …'
   );
   const pictures = [await capture(`${prefix}-pending`)];
+  const completeEventStart = (await allEvents()).length;
   await page.locator('.cap-date-2026-10-14').click();
   await until('root', 'open', false);
   assert.deepEqual(await read('root', 'getRange'), { from: '2026-10-10', to: '2026-10-14' });
@@ -873,6 +879,14 @@ async function datePicker(runtime, family, prefix) {
   };
   assert.equal(closedPaint.contentVisible, false, 'closed popup is no longer painted');
   assert.equal(closedPaint.dayVisible, false, 'closed popup descendants are no longer painted');
+  assert.deepEqual(
+    (await allEvents())
+      .slice(completeEventStart)
+      .filter((e) => e.id === 'root')
+      .map((e) => e.type),
+    ['rangeChange', 'openChange'],
+    'uncontrolled completion delivers the proposal before its one close notification'
+  );
   pictures.push(await capture(`${prefix}-complete`));
   // Reopen through the real trigger to inspect the completed range retained
   // in the Date Picker's own styled day projections.
@@ -886,15 +900,77 @@ async function datePicker(runtime, family, prefix) {
   await page.locator('.cap-date-2026-10-14').click();
   assert.equal(await read('root', 'open'), true, 'refused controlled completion keeps popup open');
   assert.equal((await read('root', 'getRange')).to, undefined);
+  const controlledCallbacks = [];
+  for (const reopenOnSelection of [false, true]) {
+    await mount(runtime, family, 'date-picker', {
+      mode: 'range',
+      range: { from: '2026-10-10' },
+      acceptRange: true,
+      observeSelection: true,
+      reopenOnSelection,
+    });
+    await page.locator('.cap-trigger').click();
+    await until('content', 'transitionState', 'entered');
+    const eventStart = (await allEvents()).length;
+    await page.locator('.cap-date-2026-10-14').click();
+    await page.evaluate(() => PuiCapabilities.settle());
+    assert.deepEqual(await read('root', 'getRange'), { from: '2026-10-10', to: '2026-10-14' });
+    // A repeated ordinary owner commit must not revive a retired completion.
+    await update('root', { range: { from: '2026-10-10', to: '2026-10-14' } });
+    const observations = await page.evaluate(() => PuiCapabilities.selectionObservations());
+    assert.deepEqual(
+      observations,
+      [
+        {
+          type: 'rangeChange',
+          beforeOpen: true,
+          afterOwnerOpen: true,
+          afterReopenOpen: true,
+        },
+      ],
+      'owner acceptance cannot close the popup while its proposal callback is running'
+    );
+    const events = (await allEvents()).slice(eventStart).filter((e) => e.id === 'root');
+    assert.deepEqual(
+      events.map((e) => e.type),
+      reopenOnSelection
+        ? ['rangeChange', 'openChange', 'openChange']
+        : ['rangeChange', 'openChange']
+    );
+    assert.deepEqual(
+      events.filter((e) => e.type === 'openChange').map((e) => e.detail.open),
+      reopenOnSelection ? [false, true] : [false]
+    );
+    assert.deepEqual(
+      events.filter((e) => e.type === 'openChange').map((e) => e.detail.reason),
+      reopenOnSelection
+        ? ['consumer-selection-reopen', 'consumer-selection-reopen']
+        : ['date-selection']
+    );
+    assert.equal(
+      await read('root', 'open'),
+      reopenOnSelection,
+      'the retired selection must not close a popup reopened by the owner callback'
+    );
+    await until('content', 'transitionState', reopenOnSelection ? 'entered' : 'closed');
+    assert.equal(await page.locator('.cap-date-2026-10-14').isVisible(), reopenOnSelection);
+    controlledCallbacks.push({ reopenOnSelection, observations, events });
+    pictures.push(
+      await capture(`${prefix}-controlled-${reopenOnSelection ? 'reopened' : 'accepted'}`)
+    );
+  }
   return {
     closedPaint,
     rangePaint,
+    controlledCallbacks,
     pictures,
     checks: [
       'native popup and partial range',
       'accepted completion ends presence and hides popup descendants',
       'retained range reopens with family day paint',
       'controlled refusal remains open',
+      'controlled native range acceptance completes after the outward callback',
+      'callback close and reopen retires the old selection completion',
     ],
   };
 }

@@ -337,5 +337,27 @@ describe('vertical target reveal in one Web scroll surface', () => {
     expect(f.reveal()).toBe(false);
     capture().forEach((callback) => callback(48));
     expect(f.surface.scrollTop).toBe(300);
+
+    // A valid reveal retains an explicit reading pause even when the target
+    // is at the end; only reader arrival or a to-end command resumes it.
+    f.geometry.currentTarget = true;
+    f.lease.update({
+      config: {
+        axes: 'vertical',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => f.snapshots.push(snapshot),
+    });
+    expect(f.lease.pauseFollowing!()).toBe(true);
+    f.surface.scrollTop = 200;
+    f.geometry.start = 380;
+    expect(f.reveal()).toBe(true);
+    expect(f.surface.scrollTop).toBe(300);
+    expect(f.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    f.surface.dispatchEvent(new Event('scroll'));
+    expect(f.snapshots.at(-1)?.endFollow.state).toBe('paused');
+    expect(document.activeElement).toBe(f.editor);
   });
 });

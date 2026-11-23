@@ -1,0 +1,115 @@
+{
+  "sourcePage": "https://developer.apple.com/videos/play/wwdc2025/219/",
+  "sourceVideo": "https://devstreaming-cdn.apple.com/videos/wwdc/2025/219/4/476dabc8-f3bb-4190-8929-4ba7131c939d/downloads/wwdc2025-219_sd.mp4?dl=1",
+  "sourceVideoSha256": "1104a39b374f50e4c856af8a2a0d96171a6911afdab81dd22b74b64902122b62",
+  "sourceVideoMetadata": {
+    "width": 960,
+    "height": 540,
+    "fps": "30000/1001",
+    "durationSeconds": 1172.8717,
+    "bytes": 61515369
+  },
+  "extraction": "ffmpeg -v error -nostdin -ss <seconds> -i wwdc2025-219_sd.mp4 -frames:v 1 <frame>.png",
+  "reviewer": "independent local agent /root/review; not a GitHub approval",
+  "scope": "Read-only official rendered reference inspection. Not a Proto-UI candidate comparison, not evidence for a physical display refresh rate, input-to-photon latency, or Apple equivalence.",
+  "frames": [
+    {
+      "seconds": 110,
+      "path": "apple-219-110s.png",
+      "sha256": "1a3313852f439ad39b323fb12b2e1c3996c341bb4a19615e2d4c00d243bff080",
+      "visuallyInspected": true,
+      "observation": "1:50: official conceptual contact demonstration before visible finger contact; clear foreground symbol, shallow rim and lower lighting."
+    },
+    {
+      "seconds": 140,
+      "path": "apple-219-140s.png",
+      "sha256": "2e1999df4c523c1fa6ffe71ea63da8ed48138faad7eb7270cc87c48cd801469a",
+      "visuallyInspected": true,
+      "observation": "2:20: presenter shot; not material visual evidence."
+    },
+    {
+      "seconds": 190,
+      "path": "apple-219-190s.png",
+      "sha256": "d7626343103ba979ac3338f31dc6609926efc560701fd50ed4190460a97a139a",
+      "visuallyInspected": true,
+      "observation": "3:10: clear play symbol over a glass lens; dune boundaries remain continuous yet displaced within the lens, with a distinct rim and lower light."
+    },
+    {
+      "seconds": 226,
+      "path": "apple-219-226s.png",
+      "sha256": "f0d1552007d2de2f9128c712d30cd0495edbd669853df4fcd882a3751ebdefbd",
+      "visuallyInspected": true,
+      "observation": "3:46: finger held on glass; localized contact luminance and deformation are visible."
+    },
+    {
+      "seconds": 228,
+      "path": "apple-219-228s.png",
+      "sha256": "6ed3b7b8c21c39b7363ed813ed26c8e36b8f5dd7c072f01aa06a60ffac220d9d",
+      "visuallyInspected": true,
+      "observation": "3:48: continued held contact with local illumination; no inferred release claim."
+    },
+    {
+      "seconds": 229,
+      "path": "apple-219-229s.png",
+      "sha256": "bc358d2c14e3e45a5d236fce6aef907cccfbbe0feb7d334be7bd44e44c81f375",
+      "visuallyInspected": true,
+      "observation": "3:49: continued held contact."
+    },
+    {
+      "seconds": 230,
+      "path": "apple-219-230s.png",
+      "sha256": "909760dfdf6fb124391037d4d04b916059462d83e7a061a513bc790a03bd95e1",
+      "visuallyInspected": true,
+      "observation": "3:50: continued held contact; localized white rim/glow and deformation rather than a whole-surface color substitution."
+    },
+    {
+      "seconds": 231,
+      "path": "apple-219-231s.png",
+      "sha256": "2a10370d7b913cb0ef731bb012f4f5205f108372d6a36f5759d04c8acd5b0196",
+      "visuallyInspected": true,
+      "observation": "3:51: continued held contact."
+    },
+    {
+      "seconds": 232,
+      "path": "apple-219-232s.png",
+      "sha256": "16934b972cbdcb486d63fcc7615b4a6693605d7069e864f26b8746c991876cf0",
+      "visuallyInspected": true,
+      "observation": "3:52: top-down contact/morph sequence; symbol is blurred during the animated transition, not a static readability reference."
+    },
+    {
+      "seconds": 234,
+      "path": "apple-219-234s.png",
+      "sha256": "75aae349a1a611d57bda5808060c88519e06b7d2ac77024383853703ecff7d87",
+      "visuallyInspected": true,
+      "observation": "3:54: finger moves away during animated transition; do not infer settled release timing from this still."
+    },
+    {
+      "seconds": 385,
+      "path": "apple-219-385s.png",
+      "sha256": "3d3dbaab0fafb6ed282052624d6e6c988e42ca36b3d98f91b2187babe78a1071",
+      "visuallyInspected": true,
+      "observation": "6:25: conceptual exploded layers show optical/background layer, material layer and foreground symbol separately."
+    },
+    {
+      "seconds": 1028,
+      "path": "apple-219-1028s.png",
+      "sha256": "4e6acf5d1a4d08759a4e48291942d0c0dd1ece4ad377269d7da30bf893fb603b",
+      "visuallyInspected": true,
+      "observation": "17:08: flat magenta teaching comparison; not the target material appearance."
+    },
+    {
+      "seconds": 1036,
+      "path": "apple-219-1036s.png",
+      "sha256": "bb627cfd8a196f0fe3762c2a27943ce6a71241720c3336c09edaf2ed3c6ae8b1",
+      "visuallyInspected": true,
+      "observation": "17:16: orange prominent tinted material retains background tonal structure and edge lighting; high-contrast foreground icon."
+    },
+    {
+      "seconds": 1040,
+      "path": "apple-219-1040s.png",
+      "sha256": "df634c04d2de43c26569132532be61524bfc3c57a61929b23e9410aec69c555f",
+      "visuallyInspected": true,
+      "observation": "17:20: red prominent tinted material retains background tonal structure and edge lighting; high-contrast foreground icon."
+    }
+  ]
+}

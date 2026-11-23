@@ -1,0 +1,12 @@
+[coverage-matrices] Coverage matrix validation failed with 11 issues:
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `../../../../../../packages/prototypes/liquid-glass/src/theme` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/button` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/toggle` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/form` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/accordion` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/collapsible` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/select` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/dropdown` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist
+- internal/website/self-hosting-coverage-matrix.md:214: source fingerprint for `apps/www/src/pages/en/test/liquid-glass-hover.astro` does not match its reviewed SHA-256
+- internal/website/self-hosting-coverage-matrix.md:266: source fingerprint for `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` does not match its reviewed SHA-256
+- internal/website/self-hosting-coverage-matrix.md:323: source fingerprint for `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` does not match its reviewed SHA-256

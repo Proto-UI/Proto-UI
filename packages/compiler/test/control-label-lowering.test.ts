@@ -529,6 +529,43 @@ it.each(profiles)('%s reaches host support used only by a checked per-call defau
 
 describe('resolved prop presence stays separate from non-null defaults', () => {
   it.each([
+    { setup: 'install();', required: true, nonNull: true },
+    {
+      setup: "def.props.define({flag:{type:'boolean',default:false}});install();",
+      required: true,
+      nonNull: true,
+    },
+    {
+      setup: "def.props.define({flag:{type:'boolean',default:null}});install();",
+      required: true,
+      nonNull: false,
+    },
+    {
+      setup: "const active=def.state.bool('active',false);if(active.get())install();",
+      required: false,
+      nonNull: false,
+    },
+    {
+      setup: "const active=def.state.bool('active',false);if(active.get())return;install();",
+      required: false,
+      nonNull: false,
+    },
+    {
+      setup: "const active=def.state.bool('active',false);active.get()&&install();",
+      required: false,
+      nonNull: false,
+    },
+  ])('proves only unconditional authored Hook defaults: $setup', ({ setup, required, nonNull }) => {
+    const parsed = parsePrototype(`import {definePrototype,defineAsHook} from '@proto.ui/core';
+      const install=defineAsHook({name:'generic-defaults',setup(def){def.props.define({flag:{type:'boolean',default:false}});}});
+      export default definePrototype({name:'hook-prop-proof',setup(def){${setup}}});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const facts = resolvedPropFacts(parsed.value);
+    expect(facts.required.has('flag')).toBe(required);
+    expect(facts.nonNull.has('flag')).toBe(nonNull);
+  });
+
+  it.each([
     "def.props.define({flag:{type:'boolean',default:null}});def.props.define({flag:{type:'boolean',default:true}});",
     "const choose=def.state.bool('choose',false);if(choose.get()){def.props.define({flag:{type:'boolean',default:null}});}def.props.define({flag:{type:'boolean',default:true}});",
     "def.props.define({flag:{type:'boolean',default:true}});const choose=def.state.bool('choose',false);if(choose.get()){def.props.define({flag:{type:'boolean',default:null}});}",

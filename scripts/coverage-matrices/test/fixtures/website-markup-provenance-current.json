@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "4d9a621618a63bace047776fbdf9eb7a20685cbc",
-  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners plus the Button example producer. Transitive/runtime and served-source proof remain unobserved.",
+  "revision": "4adb6076a6d9e93ddfd6eb02d07ce06c319eb2d2",
+  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners plus the Button example producer. Transitive/runtime and served-source proof remain unobserved. The extracted InstallCommandCard client is included as a direct owner. The earlier reference and its recorded-revision mismatches are retained separately.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -11,7 +11,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/CodePanel.astro",
-      "sha256": "1f3da9d3b811eaeeef624541cec3523827b2265bb2d30a175e0d1e9a57f70497"
+      "sha256": "f25f1b0ccd7faf348e2b32d8a3230d60c07c773ad981882c158ab8bb590edb30"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/code-highlight.ts",
@@ -39,7 +39,7 @@
     },
     {
       "path": "apps/www/src/components/InstallCommandCard.astro",
-      "sha256": "549885c121d579a41e0a5d28aa3a6bfc9032f73f004fc94d7431648e96f3e23d"
+      "sha256": "05c9324e9bb8a39e6ec6772d205c9823258d86638887c0e8b903f762cd887de7"
     },
     {
       "path": "apps/www/src/components/SiteCopyBootstrap.astro",
@@ -71,11 +71,11 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
-      "sha256": "0974f64b4854fe51bb9b4e8c1c575a995d597d76b4d925a154ee280e685b2364"
+      "sha256": "9ce21e5ae6885a62ffc038fc363a330e8411b7242fbbaf139d402d942a3b06db"
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "5b1ab89970f5a4aed6880f1c8fea6ad853521041058b00fd506c1db18755875a"
+      "sha256": "d22631b1ce4efd6aedaa8ea03de1e8507ff5ce3b76d5e4dc04d8b9337a5ff54f"
     },
     {
       "path": "apps/www/astro.config.mjs",
@@ -116,6 +116,10 @@
     {
       "path": "apps/www/src/content/docs/demo_components/button/button-usage.ts",
       "sha256": "4330b1d2095ef54e848c4521f53a0722baebba56edf59650e3e81602de3a2d40"
+    },
+    {
+      "path": "apps/www/src/components/install-command-card-client.ts",
+      "sha256": "dd644892e2650c8c6978c8b5707692ace5cc68d680acf940ef65d3483aa8fb64"
     }
   ]
 }

@@ -1,0 +1,48 @@
+id: P-BASE-FIELD-CHOICES
+type: prototype
+title: Explicit Field Checkbox and Radio Group compositions
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Draft explicit compositions under independent review. Source regressions do not establish native browser, physical input, assistive technology or non-Web acceptance.
+summary: Canonical choice values, focus-preserving readOnly, controlled reset and lifecycle-safe Field reports through one existing semantic owner.
+statement:
+  en: FieldCheckbox and FieldRadioGroup explicitly compose the existing Base choice owners with asOptionalFieldControl. Ordinary Checkbox and Radio Group do not register with Field or Form by ancestor discovery. Field owns validation; Form owns submission; the choice Root owns its value.
+criteria:
+  - id: P-BASE-FIELD-CHOICES-VALUES
+    text:
+      en: Checkbox reports canonical boolean checked; indeterminate is presentation only. Radio Group reports its canonical string. Existing Field required treats false and empty string as missing. Controlled refusal cannot change the submitted value, dirty, mixed ownership or onChange acceptance.
+  - id: P-BASE-FIELD-CHOICES-POLICY
+    text:
+      en: Local readOnly and effective Field readOnly block pointer, keyboard and Label value proposals while retaining focus. ReadOnly Radio Group arrows can move current roving focus without requesting a value. Local, Field and inherited Fieldset disabled additionally remove focus participation and Form values; C-FIELDSET-0001 remains a disabled-only grouping policy. Ordinary roots admit local readOnly without adding a Field owner.
+  - id: P-BASE-FIELD-CHOICES-RESET
+    text:
+      en: Reset targets the instance creation canonical value and Checkbox mixed state. Controlled values are only proposed; refused reset keeps canonical value and dirty relative to the initial baseline. Reset may run while readonly/disabled, retires queued reports and never forces a controlled owner.
+  - id: P-BASE-FIELD-CHOICES-REPORT
+    text:
+      en: Synchronous Field snapshots always carry canonical values. One bounded change notification after ordinary owner commits coalesces same-turn proposals to their final canonical result; refusal or no net change creates no onChange notification. Manual/blur are separate. This does not revise TextControl candidate-edit notification semantics.
+  - id: P-BASE-FIELD-CHOICES-FOCUS
+    text:
+      en: Field relations target the exact explicit Control and its Field Label/Description/Error. Radio Group aggregates focus of its current owned Items; same-turn internal focus migration is not blur. A genuine departure may mark touched and validate. Ordinary item labels preserve their existing associations.
+  - id: P-BASE-FIELD-CHOICES-LIFETIME
+    text:
+      en: Reset, policy changes, unmount, reconnect, disposal and reentrant newer requests retire old continuations and queued reports/focus samples. No retired callback may publish stale snapshots or emit a trailing proposal. Each family reuses one Base owner and passive presentation.
+dependsOn:
+  contracts:
+    - C-FIELD-0001
+    - C-CONTROL-LABEL-0001
+  prototypes:
+    - P-BASE-CHECKBOX
+    - P-BASE-RADIO-GROUP
+verifies:
+  tests:
+    - T-BASE-FIELD-CHOICES-0001
+sources:
+  - path: internal/contracts/prototype-base/form-input-applicability.v0.md
+  - path: packages/prototypes/base/src/field/checkbox.proto.ts
+  - path: packages/prototypes/base/src/field/radio-group.proto.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define explicit 0.3 choice-control Field compositions without automatically registering ordinary controls.
+tags: [prototype, base, field, draft]

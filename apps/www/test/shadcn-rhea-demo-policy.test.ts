@@ -84,6 +84,13 @@ import demo64 from '../src/content/docs/demo-shadcn-image.demo';
 import demo65 from '../src/content/docs/demo-shadcn-live-region.demo';
 import demo66 from '../src/content/docs/demo-shadcn-table.demo';
 import demo67 from '../src/content/docs/demo-shadcn-transition.demo';
+import calendarSelectionDemo from '../src/content/docs/zh-cn/demo-shadcn-calendar-selection.demo';
+import datePickerSelectionDemo from '../src/content/docs/zh-cn/demo-shadcn-date-picker-selection.demo';
+import sliderValuesDemo from '../src/content/docs/demo-shadcn-slider-values.demo';
+import dataTableRecipesDemo from '../src/content/docs/zh-cn/demo-shadcn-data-table-recipes.demo';
+import formValidationDemo from '../src/content/docs/demo-shadcn-form-validation.demo';
+import selectInputDemo from '../src/content/docs/demo-shadcn-select-input.demo';
+import fieldChoicesDemo from '../src/content/docs/demo-shadcn-field-choices.demo';
 import { codeMap as codeMap0 } from '../src/content/docs/demo_components/button/buttonCode';
 import { getButtonExampleFiles } from '../src/content/docs/demo_components/button/button-usage';
 import inputShellDemo from '../src/content/docs/demo-shadcn-input-shell.demo';
@@ -91,6 +98,7 @@ import navigationPopoverDemo from '../src/content/docs/demo-shadcn-popover-navig
 import novaTabsDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-nova.demo';
 import rheaTabsDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-rhea.demo';
 import newYorkTabsDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-preset-new-york-v4.demo';
+import tabsProfileSwitchDemo from '../src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo';
 import { codeMap as codeMap1 } from '../src/content/docs/demo_components/shadcn-dialog/shadcnDialogCode';
 import { codeMap as codeMap2 } from '../src/content/docs/demo_components/shadcn-hover-card/shadcnHoverCardCode';
 import { codeMap as codeMap3 } from '../src/content/docs/demo_components/tabs/tabsCode';
@@ -164,9 +172,25 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-live-region', demo65],
   ['demo-shadcn-table', demo66],
   ['demo-shadcn-transition', demo67],
+  ['demo-shadcn-calendar-selection', calendarSelectionDemo],
+  ['demo-shadcn-date-picker-selection', datePickerSelectionDemo],
+  ['demo-shadcn-slider-values', sliderValuesDemo],
+  ['demo-shadcn-data-table-recipes', dataTableRecipesDemo],
+  ['demo-shadcn-form-validation', formValidationDemo],
+  ['demo-shadcn-select-input', selectInputDemo],
+  ['demo-shadcn-field-choices', fieldChoicesDemo],
 ];
 
 const profileExamples = [
+  {
+    id: 'demo-shadcn-tabs-profile-switch',
+    page: 'tabs.mdx',
+    demo: tabsProfileSwitchDemo,
+    profiles: [
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-style-scope', 'rhea'],
+    ],
+  },
   {
     id: 'demo-shadcn-input-shell',
     page: 'input-shell.mdx',
@@ -281,7 +305,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(73);
+    expect(expected).toHaveLength(81);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

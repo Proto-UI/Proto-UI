@@ -282,6 +282,18 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             expect(await undo.evaluate((element) => getComputedStyle(element).color)).toBe(
               accent.foreground
             );
+            // The Rhea menubar open paint definitionally runs the 100ms
+            // zoom-in-95 entrance (upstream .cn-menubar-content parity), so the
+            // natural content geometry is only observable once it settles.
+            await expect
+              .poll(() =>
+                editMenu.evaluate((element) =>
+                  element
+                    .getAnimations()
+                    .every((animation) => !animation.pending && animation.playState !== 'running')
+                )
+              )
+              .toBe(true);
             const content = await facts(editMenu);
             expect(content.y).toBeGreaterThanOrEqual(0);
             expect(content.y + content.height).toBeLessThanOrEqual(1000);

@@ -124,7 +124,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
   }),
   // The build-time style snapshot uses this exact Feedback implementation.
   'packages/modules/feedback/src/create.ts': Object.freeze({
-    sourceSha256: '4812506a51f80f2366c336a22b9378242e00fef6c2f7d6fa254e8cfd5c797148',
+    sourceSha256: 'd3b7aa151bb0b354552c5105ab4073836006be2a91a8cdcbea221e5ea390098b',
     specifiers: Object.freeze([
       './caps',
       './material/declaration-id',
@@ -134,6 +134,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
       './motion/sink',
       './presence/controller',
       './presence/sink',
+      './shader/sink',
       './style/owned-decoration-cap',
       './style/owned-decoration-registry',
       './types',
@@ -143,7 +144,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/modules/feedback/src/index.ts': Object.freeze({
-    sourceSha256: '57307c4d4de4fae32758e64e0696c374908de7ab9b3261aa5e7c616518d2f81e',
+    sourceSha256: '1834c32e84d8def9a5f2c111c2c17f06d69ab24e28f55a1cb3624df8e1d14fad',
     specifiers: Object.freeze([
       './caps',
       './create',
@@ -156,6 +157,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
       './motion/targets',
       './presence/projector',
       './presence/sink',
+      './shader/sink',
       './style/owned-decoration-cap',
       './types',
     ]),
@@ -215,6 +217,11 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '00302081dcb0087aa1d56f73c24e5e2dcb1d411d423b7147867a4699965906e5',
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
+  // Token/frame declarations only; the build-time style owner installs no GPU host.
+  'packages/modules/feedback/src/shader/sink.ts': Object.freeze({
+    sourceSha256: '140bd9adb239d3b1da1fb27296d74b2b8d8a7831ddaf724477c15051d40dc4cb',
+    specifiers: Object.freeze(['../material/final-style-sink', '@proto.ui/core']),
+  }),
   'packages/modules/feedback/src/style/owned-decoration-cap.ts': Object.freeze({
     sourceSha256: '08ade8287b973f8e3f4f1456c4c3320aff523751d8fe08fe83b152174403cc93',
     specifiers: Object.freeze(['@proto.ui/core']),
@@ -224,7 +231,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'packages/modules/feedback/src/types.ts': Object.freeze({
-    sourceSha256: '26b604199f2bf9616abf5e327ca74c8344ce473bc8472eb0e8f8aed6ae7397ce',
+    sourceSha256: 'f7df696c2cbc06ad392f4a35b44f527432f381c4c7ee82b6e4261cb11cbeba34',
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'packages/modules/rule-meta/src/caps.ts': Object.freeze({
@@ -291,7 +298,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../host', '../session', './types', '@proto.ui/core']),
   }),
   'packages/runtime/src/instance/host.ts': Object.freeze({
-    sourceSha256: '2247e60b269e0925d8d7d7bba03da532936a2fccb10e05018d354878380ab2b2',
+    sourceSha256: '8fb845a5e76eb7c9b427eca5fc0c241b118b9926ad61fb921bb2194ebd633ca8',
     specifiers: Object.freeze([
       '../kernel/lifecycle-events',
       '../kernel/timeline',
@@ -304,7 +311,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./execute', './host', './instance', './session']),
   }),
   'packages/runtime/src/instance/instance.ts': Object.freeze({
-    sourceSha256: '137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b',
+    sourceSha256: 'b4bf27ac468e1d4f1b2ba906ca29650412dea142810a5fc5eab5ecca82182c70',
     specifiers: Object.freeze([
       '../kernel',
       '../kernel/as-hook',
@@ -349,7 +356,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/runtime/src/instance/session.ts': Object.freeze({
-    sourceSha256: '70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0',
+    sourceSha256: '82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a',
     specifiers: Object.freeze([
       '../kernel',
       '../kernel/event',
@@ -385,7 +392,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'packages/runtime/src/kernel/handles/def.ts': Object.freeze({
-    sourceSha256: 'b9d2c7e28189a34a1ef3c32abe678fc198dfc625f33821a87f9e7b7171f88c4d',
+    sourceSha256: '8ababe703c072d71c6b8529efe4c4249ddd34d952744213fc93df661db12d4c1',
     specifiers: Object.freeze([
       '../../orchestrator/module-orchestrator/types',
       '../event',
@@ -435,7 +442,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/runtime/src/kernel/kernel.ts': Object.freeze({
-    sourceSha256: 'cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026',
+    sourceSha256: '714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122',
     specifiers: Object.freeze([
       '../orchestrator/module-orchestrator/types',
       './as-hook',

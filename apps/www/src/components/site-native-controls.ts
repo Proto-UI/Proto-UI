@@ -12,6 +12,7 @@ import BootstrapText from '@proto.ui/prototypes-bootstrap-2-3-2/text';
 import {
   linkSurfaceProps,
   navbarLinkContext,
+  navbarLinkTextStyle,
   linkSurfaceLayout,
   linkTextProps,
   sidebarTextSurfaceStyle,
@@ -48,13 +49,14 @@ export function siteLinkAppearance(link: HTMLElement): SiteLinkAppearance {
     requested === 'icon' ||
     requested === 'nav' ||
     requested === 'text' ||
+    requested === 'pill' ||
     requested === 'brand' ||
     requested === 'sidebar' ||
     requested === 'toc' ||
     requested === 'pagination'
   )
     return requested;
-  if (link.closest('.homepage-hero__eyebrow')) return 'text';
+  if (link.closest('.homepage-hero__eyebrow')) return 'pill';
   if (link.closest('.sidebar-pane .top-level')) return 'sidebar';
   if (link.closest('.pagination-links')) return 'pagination';
   if (link.closest('sl-toc')) return 'toc';
@@ -301,17 +303,32 @@ export function initSiteNativeControls(
         ),
         surfaceStyle: {
           ...theme,
-          ...linkSurfaceLayout(family, appearance, siteLinkEmphasis(link), facts, readingToc),
+          ...linkSurfaceLayout(
+            family,
+            appearance,
+            siteLinkEmphasis(link),
+            facts,
+            readingToc,
+            navbarLinkContext(link)
+          ),
         },
       };
       const sidebarRole = siteSidebarTextRole(link);
       const textProps = {
-        ...linkTextProps(appearance, facts, family, sidebarRole, readingToc),
+        ...linkTextProps(
+          appearance,
+          facts,
+          family,
+          sidebarRole,
+          readingToc,
+          navbarLinkContext(link)
+        ),
         surfaceStyle: {
           ...theme,
           minWidth: '0',
           ...(sidebarRole ? sidebarTextSurfaceStyle(sidebarRole) : {}),
           ...(readingToc ? readingTocTextSurfaceStyle() : {}),
+          ...navbarLinkTextStyle(family, appearance, navbarLinkContext(link)),
         },
       };
       const owner = surface;

@@ -146,6 +146,113 @@ afterEach(() => {
 });
 
 describe('module-scroll: end-follow host contract', () => {
+  it('pauses a pending follow without changing the reader position or focus', () => {
+    const { frames, target, snapshots, lease } = installTouchFollowFixture();
+    const editor = document.createElement('textarea');
+    document.body.append(editor);
+    editor.focus();
+    target.scrollTop = 72;
+    lease.request({ kind: 'to-end', axis: 'vertical' });
+    const staleFrame = frames.peek();
+    expect(frames.pending()).toBe(1);
+
+    expect(lease.pauseFollowing!()).toBe(true);
+    expect(snapshots.at(-1)?.endFollow).toEqual({ state: 'paused', requestStatus: 'rejected' });
+    expect(frames.pending()).toBe(0);
+    staleFrame?.(performance.now());
+    expect(target.scrollTop).toBe(72);
+    expect(document.activeElement).toBe(editor);
+    lease.dispose();
+  });
+
+  it('keeps an explicit pause through layout changes until reader arrival or resume', () => {
+    const { frames, target, updateMetrics, snapshots, lease } = installTouchFollowFixture();
+    expect(target.scrollTop).toBe(300);
+    expect(lease.pauseFollowing!()).toBe(true);
+    // Editing, selecting or moving the other axis does not establish a
+    // reader arrival at the followed end, even when scroll is reported.
+    for (const event of [
+      new MouseEvent('pointerdown', { bubbles: true }),
+      new MouseEvent('pointerup', { bubbles: true }),
+      new KeyboardEvent('keydown', { bubbles: true, key: 'a' }),
+      new WheelEvent('wheel', { bubbles: true, deltaX: 100 }),
+    ]) {
+      target.dispatchEvent(event);
+      target.dispatchEvent(new Event('scroll'));
+      window.dispatchEvent(new Event('resize'));
+      expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    }
+    window.dispatchEvent(new Event('resize'));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    updateMetrics({ scrollHeight: 500 });
+    window.dispatchEvent(new Event('resize'));
+    frames.runAll();
+    expect(target.scrollTop).toBe(300);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+
+    target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 100 }));
+    target.scrollTop = 400;
+    target.dispatchEvent(new Event('scroll'));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    target.scrollTop = 300;
+    target.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 100 }));
+    expect(lease.pauseFollowing!()).toBe(true);
+    target.scrollTop = 400;
+    target.dispatchEvent(new Event('scroll'));
+    expect(snapshots.at(-1)?.endFollow.state).toBe('paused');
+    // Programmatic position commands do not become reader arrivals merely
+    // because their physical destination happens to be the logical end.
+    for (const request of [
+      { kind: 'by', axis: 'vertical', delta: 100 },
+      { kind: 'to', axis: 'vertical', position: 1 },
+      { kind: 'page', axis: 'vertical', direction: 'after' },
+      { kind: 'control-drag', axis: 'vertical', position: 1 },
+    ] as const) {
+      lease.request({ kind: 'to', axis: 'vertical', position: 0.75 });
+      expect(target.scrollTop).toBe(300);
+      lease.request(request);
+      expect(target.scrollTop).toBe(400);
+      expect(snapshots.at(-1)?.endFollow.state, request.kind).toBe('paused');
+      target.dispatchEvent(new Event('scroll'));
+      window.dispatchEvent(new Event('resize'));
+      expect(snapshots.at(-1)?.endFollow.state, request.kind).toBe('paused');
+    }
+    lease.request({ kind: 'to-end', axis: 'vertical' });
+    frames.runAll();
+    expect(snapshots.at(-1)?.endFollow.state).toBe('following');
+    lease.dispose();
+  });
+
+  it('rejects pause on retired or disabled leases and cannot affect a replacement owner', () => {
+    const { target, snapshots, lease } = installTouchFollowFixture();
+    lease.dispose();
+    const replacement = attachEndFollow(target, snapshots);
+    const before = snapshots.length;
+    expect(lease.pauseFollowing!()).toBe(false);
+    expect(snapshots).toHaveLength(before);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('pending');
+    replacement.update({
+      config: {
+        axes: 'horizontal',
+        projection: 'system',
+        endFollow: { mode: 'while-at-end', axis: 'vertical' },
+      },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    const disabledCount = snapshots.length;
+    expect(replacement.pauseFollowing!()).toBe(false);
+    expect(snapshots).toHaveLength(disabledCount);
+    replacement.update({
+      config: { axes: 'vertical', projection: 'system', endFollow: { mode: 'off' } },
+      projection: 'system',
+      onFacts: (snapshot) => snapshots.push(snapshot),
+    });
+    expect(replacement.pauseFollowing!()).toBe(false);
+    expect(snapshots.at(-1)?.endFollow.state).toBe('off');
+    replacement.dispose();
+  });
+
   it('cancels a pending follow frame when departure input cannot scroll (key)', () => {
     const frames = installFrameHarness();
     const target = document.createElement('div');

@@ -77,7 +77,7 @@ const bundlePath = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
       disabled
       aria-disabled="true"
       data-search-startup-button
-      style={headerResponsiveButtonFeedback()}
+      style={headerResponsiveButtonFeedback(family)}
       data-site-control-family={family}
       data-pui-style={startupTokens.join(' ')}
       aria-label={loadingLabel}

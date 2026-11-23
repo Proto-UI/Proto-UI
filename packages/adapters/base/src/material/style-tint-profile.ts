@@ -5,12 +5,13 @@ import { colorContrast, opaqueRgba, type OpaqueRgba } from './style';
 /** First-party, opt-in regular style-fill profile. No Apple equivalence or
  * author parameters. Refraction and contact still sample the admitted source;
  * all lighting is mapped inside the reserved semantic-foreground contrast bound.
- * Profile 5 adds the frozen source-budgeted shoulder only in the inherited
+ * Profile 5 added the frozen source-budgeted shoulder only in the inherited
  * highp branch; mediump retains the old offset. Its finite budget assumes
  * regular/opaque/frost=0/tilt=0/stack-disabled, radius-3 source prefiltering.
- * The original neutral shaders and profile-4 foreground map stay unchanged. */
-export const styleTintProfile = 'pui-regular-style-tint-5';
-export const styleTintContactProfile = 'pui-regular-style-tint-contact-5';
+ * Profile 6 adds bounded source-owned tone gain before the same foreground map.
+ * Neutral shaders, foreground safety and the shoulder stay unchanged. */
+export const styleTintProfile = 'pui-regular-style-tint-6';
+export const styleTintContactProfile = 'pui-regular-style-tint-contact-6';
 
 const weights = [0.2126, 0.7152, 0.0722] as const;
 const decode = (channel: number) =>
@@ -93,6 +94,7 @@ function lightReserve(bound: number) {
 const helpers = `
         uniform float u_styleTintLightForeground;
         uniform float u_styleTintLuminanceBound;
+        uniform vec4 u_styleTintSourceTone;
         vec3 styleTintLinear(vec3 value) {
           return mix(value / 12.92, pow((value + 0.055) / 1.055, vec3(2.4)),
                      step(vec3(0.04045), value));
@@ -109,6 +111,12 @@ const mapping = `
           vec3 styleTintBase = styleTintLinear(u_tint.rgb);
           vec3 styleTintWeights = vec3(0.2126, 0.7152, 0.0722);
           float styleTintTone = dot(styleTintDetail, styleTintWeights);
+          // The source-derived interval increases local detail with slopes
+          // bounded to 0.5..1.5. Its outside term remains strictly positive:
+          // this never clamps a continuous input interval to constant tone.
+          styleTintTone = clamp(styleTintTone + u_styleTintSourceTone.z *
+            (clamp(styleTintTone - u_styleTintSourceTone.x, 0.0, u_styleTintSourceTone.y) -
+             u_styleTintSourceTone.y * styleTintTone), 0.0, 1.0);
           vec3 styleTintHue = mix(styleTintBase, styleTintLinear(styleTintDetail), 0.25);
           float styleTintBoundCode = styleTintSrgb(vec3(u_styleTintLuminanceBound)).r;
           float styleTintTargetCode = mix(

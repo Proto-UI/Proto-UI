@@ -44,7 +44,7 @@ import type { ExecPhase } from '@proto.ui/module-base';
 import { __RT_EVENT_CALLBACKS } from '../kernel/event';
 
 import { CallbackScope } from './execute/callback-scope';
-import { createKernel, type Kernel } from '../kernel';
+import { createKernel, type Kernel, type KernelSetupOwner } from '../kernel';
 import { createAsHookStateProjector } from '../kernel/as-hook';
 
 export type RuntimeInstance<P extends PropsBaseType> = {
@@ -68,6 +68,7 @@ export function createRuntimeInstance<P extends PropsBaseType>(
   opt?: {
     allowRunUpdate?: boolean;
     onModulesReady?: (hub: ModuleOrchestrator) => void;
+    onSetupCleanupError?: (error: unknown) => void;
   }
 ): RuntimeInstance<P> {
   // stable phase ref for SYS_CAP.execPhase() during module setup/runtime checks
@@ -112,33 +113,80 @@ export function createRuntimeInstance<P extends PropsBaseType>(
     ]
   );
 
-  opt?.onModulesReady?.(moduleHub);
+  // A factory can fail before RuntimeSession receives an instance. The module
+  // allocator owns this rollback boundary; no partial owner is published.
+  let startupRetired = false;
+  const retireStartup = (owner?: KernelSetupOwner<P>) => {
+    if (startupRetired) return;
+    startupRetired = true;
+    const attempt = (action: () => void) => {
+      try {
+        action();
+      } catch (error) {
+        try {
+          opt?.onSetupCleanupError?.(error);
+        } catch {}
+      }
+    };
+    attempt(() => moduleHub.setInstancePhase('disposing'));
+    if (owner) {
+      attempt(owner.viewIntent.lockTerminal);
+      const scope = new CallbackScope<P>(owner.getPhase, owner.setPhase, moduleHub);
+      attempt(() =>
+        scope.run(
+          owner.run,
+          () => {
+            for (const callback of owner.lifecycle.beforeDispose)
+              attempt(() => callback(owner.run));
+          },
+          () => {}
+        )
+      );
+      for (const callbacks of Object.values(owner.lifecycle)) callbacks.length = 0;
+    }
+    const registry = (
+      moduleHub as ModuleOrchestrator & { [__RT_EVENT_CALLBACKS]?: { clear(): void } }
+    )[__RT_EVENT_CALLBACKS];
+    attempt(() => registry?.clear());
+    attempt(() => moduleHub.setProtoPhase('unmounted'));
+    attempt(() => moduleHub.dispose());
+    attempt(() => moduleHub.setInstancePhase('disposed'));
+    if (owner) attempt(() => owner.setPhase('unknown'));
+  };
 
-  const kernel = createKernel<P>(proto, moduleHub, {
-    allowRunUpdate: opt?.allowRunUpdate,
-    onPhaseChange: (p) => {
-      phaseRef = p;
-    },
-    asHook: {
-      projectState: createAsHookStateProjector<P>(moduleHub.getPort('state')),
-      enterSetup: ({ def, rt }) => {
-        enterActiveAsHookContext({
-          def: def as any,
-          rt,
-          facades: moduleHub.getFacades(),
-          ports: moduleHub.getPorts(),
-        });
+  let kernel: Kernel<P>;
+  try {
+    opt?.onModulesReady?.(moduleHub);
+    kernel = createKernel<P>(proto, moduleHub, {
+      onSetupFailure: retireStartup,
+      allowRunUpdate: opt?.allowRunUpdate,
+      onPhaseChange: (p) => {
+        phaseRef = p;
       },
-      exitSetup: () => {
-        exitActiveAsHookContext();
+      asHook: {
+        projectState: createAsHookStateProjector<P>(moduleHub.getPort('state')),
+        enterSetup: ({ def, rt }) => {
+          enterActiveAsHookContext({
+            def: def as any,
+            rt,
+            facades: moduleHub.getFacades(),
+            ports: moduleHub.getPorts(),
+          });
+        },
+        exitSetup: () => {
+          exitActiveAsHookContext();
+        },
       },
-    },
-    eventSink: {
-      setEventCallbacks: (callbacks) => {
-        (moduleHub as any)[__RT_EVENT_CALLBACKS] = callbacks;
+      eventSink: {
+        setEventCallbacks: (callbacks) => {
+          (moduleHub as any)[__RT_EVENT_CALLBACKS] = callbacks;
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    retireStartup();
+    throw error;
+  }
 
   // align once (after setup ends kernel is typically "unknown")
   phaseRef = kernel.getPhase() as any;

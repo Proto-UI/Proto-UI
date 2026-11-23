@@ -212,7 +212,9 @@
               }
             ]
           },
-          "style": [],
+          "style": [
+            "select-none"
+          ],
           "a11y": {
             "semanticObjectId": "button-enabled:a11y:1",
             "role": "button",
@@ -454,7 +456,9 @@
               }
             ]
           },
-          "style": [],
+          "style": [
+            "select-none"
+          ],
           "a11y": {
             "semanticObjectId": "button-disabled:a11y:1",
             "role": "button",

@@ -36,7 +36,13 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
   const a11y = asAccessible(),
     focus = role === 'thumb' ? asFocusable<SliderValuesPartProps>() : null;
   const hovered = focus ? def.state.bool('hovered', false) : null;
+  const dragging = focus ? def.state.bool('dragging', false) : null;
   let run: RunHandle<SliderValuesPartProps> | null = null;
+  let notifyRootFocus: (() => void) | null = null;
+  const bindRootFocus = (parts: readonly { getExpose(key: string): unknown }[]) => {
+    const method = parts[0]?.getExpose('__focus');
+    notifyRootFocus = typeof method === 'function' ? () => method() : null;
+  };
   const alive = () => !!run && !retired.get();
   const active = () => alive() && rootAvailable.get();
   for (const [key, handle] of Object.entries({
@@ -57,6 +63,8 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
   if (focus) {
     focus.configure({ disabled: true });
     def.expose.state('focusVisible', focus.focusVisible);
+    def.expose.state('focused', focus.focused);
+    def.expose.state('dragging', dragging!);
     def.expose.state('hovered', hovered!);
     def.expose.method('focusSelf', () => {
       if (active() && !disabled.get()) focus.focusSelf();
@@ -82,6 +90,12 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
       if (!disabled.get()) hovered!.set(true);
     });
     def.event.on('pointer.leave', () => hovered!.set(false));
+    focus.focused.watch((current, event) => {
+      // Focus can retire after the host has detached from its Anatomy domain.
+      // Use only the method from the last observed provider publication; it
+      // merely resamples the Root's current membership and has its own lease.
+      if (event.type === 'next' && active()) notifyRootFocus?.();
+    });
   } else if (role === 'label') a11y.part(SLIDER_VALUES_FAMILY, { key: 'label' });
   else if (role === 'indicator' || role === 'value') a11y.tree({ hidden: true });
   const nextProjection = () => {
@@ -95,6 +109,8 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
     disabled.set(true);
     if (!current()) return;
     hovered?.set(false);
+    if (!current()) return;
+    dragging?.set(false);
     if (!current()) return;
     focus?.setDisabled(true);
   };
@@ -177,6 +193,8 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
     if (!currentProjection()) return;
     if (off) hovered?.set(false);
     if (!currentProjection()) return;
+    dragging?.set(!off && c.interacting && c.activeIndex === selected);
+    if (!currentProjection()) return;
     if (role === 'value') current.update();
   };
   const safeSync = (current: RunHandle<SliderValuesPartProps>) => {
@@ -193,6 +211,7 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
   });
   def.anatomy.subscribeParts(SLIDER_VALUES_FAMILY, 'root', (current, parts) => {
     run = current;
+    bindRootFocus(parts);
     rootAvailable.set(parts.length > 0);
     if (!rootAvailable.get()) {
       disable();
@@ -212,17 +231,21 @@ export function setupSliderValuesPart(def: DefHandle<SliderValuesPartProps>, rol
   def.lifecycle.onMounted((current) => {
     run = current;
     retired.set(false);
-    rootAvailable.set(current.anatomy.partsOf(SLIDER_VALUES_FAMILY, 'root').length > 0);
+    const roots = current.anatomy.partsOf(SLIDER_VALUES_FAMILY, 'root');
+    bindRootFocus(roots);
+    rootAvailable.set(roots.length > 0);
     sync(current);
     notify(current);
   });
   def.lifecycle.onUnmounted(() => {
+    notifyRootFocus = null;
     retired.set(true);
     rootAvailable.set(false);
     disable(true);
     run = null;
   });
   def.lifecycle.onBeforeDispose(() => {
+    notifyRootFocus = null;
     run = null;
     retired.set(true);
   });

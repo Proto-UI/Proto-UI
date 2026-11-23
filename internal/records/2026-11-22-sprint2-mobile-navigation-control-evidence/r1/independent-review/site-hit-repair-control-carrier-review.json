@@ -1,0 +1,49 @@
+{
+  "kind": "independent-read-only-carrier-static-review",
+  "reviewer": "/root/final_review",
+  "reviewedAt": "2026-11-22T15:43:25.967683+00:00",
+  "purpose": "same-product-source mobile navigation fixture repair control",
+  "head": "4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d",
+  "files": {
+    "prepare.mjs": {
+      "sha256": "f92c2d36f8f7f4d46ffb1383a16155c14d6ced4af8785467934375a1f3c3a977",
+      "bytes": 3975
+    },
+    "manifest.json": {
+      "sha256": "10c41ff297c05b4090cb74b9d786d5966200e0f041af358798ea623e956ebd58",
+      "bytes": 299
+    },
+    "repaired-site-test.ts": {
+      "sha256": "78009efe8cd85289acca6b1a86215943cd441a769f557e3c0fbe82dedefc593c",
+      "bytes": 23848
+    },
+    "workflow.yml": {
+      "sha256": "a174222b1057dbdb59eac94679572259231e98090909e6b31d3d01851e3ccea3",
+      "bytes": 2819
+    }
+  },
+  "disposition": "ACCEPTED_FOR_AUTHORIZED_TEMPORARY_CARRIER_EXECUTION",
+  "findings": [],
+  "observations": [
+    "Workflow explicitly checks out its own carrier SHA and fixed product candidate 4541 in separate directories with persisted checkout credentials disabled.",
+    "The script rejects a dirty candidate or wrong HEAD, validates the exact reviewed fixture SHA, and does not alter product implementation or policy files.",
+    "Only capture filename suffixes and nineteen fresh-context repetitions of the original failing mobile case are added to the repaired fixture.",
+    "The original 42 logical scenarios remain; eight original mobile names gain control 0 labels, and only the target mobile scenario repeats for control 1 through 19.",
+    "The four native hit point formulas and exact owner identity assertion remain unchanged; whole-fixture hash binds their reviewed source.",
+    "Original, repaired and instrumented sources and separate fixture-repair/instrumentation patches are preserved. Capture filenames are unique.",
+    "Only contents:read is declared. No GitHub write command, token substitution or product branch mutation is present.",
+    "Actual locked public-package/style builds precede the single-worker native suite; outcome artifact uploads under always(), including failure.",
+    "Metadata explicitly distinguishes this changed-fixture diagnostic from clean-source acceptance."
+  ],
+  "requiredPostRunAudit": [
+    "API ZIP digest and actual downloaded hash",
+    "61 unique terminal cases including all original 42",
+    "20 target repetitions compared to preserved original 7/20 failures",
+    "actual wheel trusted/path/scroll facts and strict point matches",
+    "actual source and patch byte identity"
+  ],
+  "limitations": [
+    "Static review only; no execution, workflow dispatch or GitHub write by this reviewer.",
+    "This carrier cannot replace final clean-head site42/full304 validation."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "callRendererFunction": {
+    "functionCallId": "study-rpc-1",
+    "callFunction": {
+      "@call": "formatString",
+      "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+      "args": { "value": "Hello" }
+    }
+  }
+}

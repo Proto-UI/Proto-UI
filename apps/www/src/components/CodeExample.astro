@@ -9,7 +9,34 @@ export type { CodeExampleFile, CodeExampleProps, CodeExamplesByHost } from './co
 
 interface Props extends CodeExampleProps {}
 
-const { files, commands = {}, pendingHosts = [], guidance = {}, labels = { install: 'Install', usage: 'Usage', copy: 'Copy', pending: 'WIP', overflow: 'Scroll to see all hosts →' }, initialHost, label = 'Code example', class: className = '' } = Astro.props;
+const isChinese = Astro.url.pathname.startsWith('/zh-cn/');
+const defaultLabels = isChinese
+  ? {
+      install: '安装',
+      usage: '用法',
+      copy: '复制',
+      pending: 'WIP',
+      overflow: '横向滚动查看所有宿主 →',
+      files: '文件',
+    }
+  : {
+      install: 'Install',
+      usage: 'Usage',
+      copy: 'Copy',
+      pending: 'WIP',
+      overflow: 'Scroll to see all hosts →',
+      files: 'Files',
+    };
+const {
+  files,
+  commands = {},
+  pendingHosts = [],
+  guidance = {},
+  labels = defaultLabels,
+  initialHost,
+  label = isChinese ? '代码示例' : 'Code example',
+  class: className = '',
+} = Astro.props;
 
 for (const host of Object.keys(files)) {
   if (!isRuntimeId(host)) throw new Error(`[CodeExample] Unsupported host "${host}".`);
@@ -17,12 +44,26 @@ for (const host of Object.keys(files)) {
 
 const readyHosts = AdapterIds.filter((host) => files[host] !== undefined);
 const pending = new Map(pendingHosts.map((host) => [host.id, host]));
-if (pending.size !== pendingHosts.length || pendingHosts.some((host) =>
-  !host.id.trim() || !host.label.trim() || !host.message.trim() || isRuntimeId(host.id) && files[host.id] !== undefined
-)) throw new Error('[CodeExample] Pending hosts require unique IDs, labels and explanations.');
+if (
+  pending.size !== pendingHosts.length ||
+  pendingHosts.some(
+    (host) =>
+      !host.id.trim() ||
+      !host.label.trim() ||
+      !host.message.trim() ||
+      (isRuntimeId(host.id) && files[host.id] !== undefined)
+  )
+)
+  throw new Error('[CodeExample] Pending hosts require unique IDs, labels and explanations.');
 const hosts = [...readyHosts, ...pending.keys()];
-const hostLabels: Record<string, string> = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
-const hostLabel = (host: (typeof hosts)[number]) => pending.get(host)?.label ?? hostLabels[host] ?? host;
+const hostLabels: Record<string, string> = {
+  wc: 'Web Components',
+  react: 'React',
+  vue: 'Vue',
+  vue2: 'Vue 2',
+};
+const hostLabel = (host: (typeof hosts)[number]) =>
+  pending.get(host)?.label ?? hostLabels[host] ?? host;
 if (hosts.length === 0) throw new Error('[CodeExample] At least one supported host is required.');
 
 for (const host of readyHosts) {
@@ -59,7 +100,7 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
   aria-label={label}
 >
   <div class="code-example__strip" data-code-toolbar>
-    <nav class="code-example__tabs" aria-label="Host" data-code-host-tabs>
+    <nav class="code-example__tabs" aria-label={isChinese ? '宿主' : 'Host'} data-code-host-tabs>
       {
         hosts.map((host, hostIndex) => {
           const selected = host === activeHost;
@@ -74,7 +115,8 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
               aria-controls={`${instanceId}-host-panel-${hostIndex}`}
               data-code-host-selected={selected ? 'true' : undefined}
             >
-              {hostLabel(host)}{pending.has(host) && <span data-code-host-status> · {labels.pending}</span>}
+              {hostLabel(host)}
+              {pending.has(host) && <span data-code-host-status> · {labels.pending}</span>}
             </a>
           );
         })
@@ -86,7 +128,7 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
 
   {
     hosts.map((host, hostIndex) => {
-      const hostFiles = isRuntimeId(host) ? files[host] ?? [] : [];
+      const hostFiles = isRuntimeId(host) ? (files[host] ?? []) : [];
       const pendingHost = pending.get(host);
       const command = isRuntimeId(host) ? commands[host] : undefined;
       const hostSelected = host === activeHost;
@@ -101,22 +143,49 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
           hidden={!hostSelected}
         >
           {command && (
-            <section data-code-example-command data-site-code-surface="frame" aria-label={command.label}>
-              <div class="code-example__command-label" data-code-toolbar data-site-code-surface="toolbar">
+            <section
+              data-code-example-command
+              data-site-code-surface="frame"
+              aria-label={command.label}
+            >
+              <div
+                class="code-example__command-label"
+                data-code-toolbar
+                data-site-code-surface="toolbar"
+              >
                 {labels.install} · {command.label}
               </div>
-              <CodePanel code={command.code} lang="bash" framed={false} collapsible={false} copyLabel={`${labels.copy} ${command.label}`} />
+              <CodePanel
+                code={command.code}
+                lang="bash"
+                framed={false}
+                collapsible={false}
+                copyLabel={`${labels.copy} ${command.label}`}
+              />
             </section>
           )}
           {!pendingHost && <div class="code-example__usage-label">{labels.usage}</div>}
-          {!pendingHost && isRuntimeId(host) && guidance[host] && <p class="code-example__guidance" data-code-example-guidance>{guidance[host]}</p>}
+          {!pendingHost && isRuntimeId(host) && guidance[host] && (
+            <p class="code-example__guidance" data-code-example-guidance>
+              {guidance[host]}
+            </p>
+          )}
           {pendingHost ? (
             <div class="code-example__wip" data-code-example-wip data-site-code-surface="frame">
-              <p><strong>WIP · {pendingHost.label}</strong></p>
+              <p>
+                <strong>WIP · {pendingHost.label}</strong>
+              </p>
               <p>{pendingHost.message}</p>
             </div>
-          ) : <CodeFileBrowser id={`${instanceId}-${hostIndex}`} files={hostFiles} label={labels.usage} filesLabel={labels.files ?? 'Files'} copyLabel={labels.copy} />}
-
+          ) : (
+            <CodeFileBrowser
+              id={`${instanceId}-${hostIndex}`}
+              files={hostFiles}
+              label={labels.usage}
+              filesLabel={labels.files ?? defaultLabels.files}
+              copyLabel={labels.copy}
+            />
+          )}
         </section>
       );
     })
@@ -124,7 +193,9 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
 </section>
 
 <!-- Match Tailwind’s base layer: layered !important hidden beats an unlayered override. -->
-<noscript set:html={'<style>@layer base { [data-code-example] [data-code-host-panel][hidden], [data-code-example] [data-code-file-panel][hidden] { display:block!important; } } [data-code-example] [data-code-host-panel] { margin-block:1.5rem; }</style>'} />
+<noscript
+  set:html={'<style>@layer base { [data-code-example] [data-code-host-panel][hidden], [data-code-example] [data-code-file-panel][hidden] { display:block!important; } } [data-code-example] [data-code-host-panel] { margin-block:1.5rem; }</style>'}
+/>
 
 <script>
   import { initCodeExamples } from './code-example-client';
@@ -159,10 +230,27 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     color: var(--color-muted-foreground);
   }
 
-  .code-example__usage-label { padding: 1rem 1rem 0.25rem; font-size: 0.875rem; font-weight: 600; }
-  .code-example__guidance { margin: 0; padding: 0.5rem 1rem; font-size: 0.8125rem; color: var(--color-muted-foreground); }
-  .code-example__overflow-hint { margin: 0.25rem 0; font-size: 0.75rem; color: var(--color-muted-foreground); }
-  @media (min-width: 60rem) { .code-example:not([data-code-example-init]) .code-example__overflow-hint { display: none; } }
+  .code-example__usage-label {
+    padding: 1rem 1rem 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .code-example__guidance {
+    margin: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+  .code-example__overflow-hint {
+    margin: 0.25rem 0;
+    font-size: 0.75rem;
+    color: var(--color-muted-foreground);
+  }
+  @media (min-width: 60rem) {
+    .code-example:not([data-code-example-init]) .code-example__overflow-hint {
+      display: none;
+    }
+  }
 
   .code-example__wip {
     padding: 1rem;
@@ -209,4 +297,3 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     outline-offset: 1px;
   }
 </style>
-

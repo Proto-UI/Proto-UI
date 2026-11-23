@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-11-22T11:35:28.988631+00:00",
+  "head": "f5de20585de610f777d3542c2176686d970d196d",
+  "scope": "SITE-REVIEW-002 source correction, native rerun pending",
+  "files": {
+    "apps/www/src/components/override/Hero.astro": "acac2f7152cd6aa5ed352418526a76db562c9bdbc1a18bbdb7def035976ad27d",
+    "apps/www/src/components/site-link-recipes.ts": "2e34d775eed132ca3eccf66ffb1976c432129bc76dac7e7ff4ca338a63b5090e",
+    "apps/www/src/components/site-link-recipes.test.ts": "25f5af176dc8f3802c9be6746c9497db12e656044c6bc9400db177e152d346dd",
+    "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts": "1da3edc6f320435bddb7318b0f4dc3160c160688f648025820962c56dc8c3278"
+  }
+}

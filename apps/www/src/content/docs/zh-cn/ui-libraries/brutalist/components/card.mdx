@@ -27,11 +27,8 @@ Card 用于被动视觉分组。Selection、disclosure、navigation 与 activati
 
 ## API
 
-Card 是工作区源码，没有公开的 `proto-ui add` 目标。Root 没有属性。
+Card 是工作区源码。当前工作区 CLI 目标为 `brutalist-card`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。Root 没有属性。
 
-<ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[]}
-/>
+<ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
 
 Header、Content 与 Footer 仅接受 children，不增加属性。

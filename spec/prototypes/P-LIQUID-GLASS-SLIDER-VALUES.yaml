@@ -3,11 +3,10 @@ type: prototype
 title: Liquid Glass Slider Values family projection
 status: draft
 since: 0.3.0-alpha.1
-lifecycleRationale:
-    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
+lifecycleRationale: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
 summary: Six indexed Slider Values parts as a separate multi-value family over the Base additive owner.
 statement:
-  en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots and Track is structural. The scalar family is untouched.
+  en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots and Track inherits the shared-origin input consumer. The scalar family is untouched.
 criteria:
   - id: P-LIQUID-GLASS-SLIDER-VALUES-BASE
     text:
@@ -17,7 +16,7 @@ criteria:
       en: 'Values Thumbs project selected segments and Root orientation/direction without installing pointer semantics; family paint maps real derived facts only. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
   - id: P-LIQUID-GLASS-SLIDER-VALUES-BOUNDARY
     text:
-      en: 'Values Track stays structural: pointer origin/session association, grouped Field control, native input and Compiler translation remain open Base/host prerequisites recorded on P-BASE-SLIDER-VALUES, not closed here. Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.'
+      en: 'Values Track and grouped Field behavior inherit the Base public contract. Native input and Compiler acceptance remain separate prerequisites recorded on P-BASE-SLIDER-VALUES; this experimental family has no new acceptance from shared implementation alone. Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.'
   - id: P-LIQUID-GLASS-SLIDER-VALUES-CLOSURE
     text:
       en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.

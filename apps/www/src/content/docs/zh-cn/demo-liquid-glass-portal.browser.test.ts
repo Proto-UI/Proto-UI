@@ -15,6 +15,7 @@ import {
   waitForPreviewRuntime,
 } from './browser-harness';
 import { publicPortalSnapshot } from './public-portal-diagnostic';
+import { calibratePortalBoundary } from './portal-boundary-calibration';
 const ROUTE = '/en/test/liquid-glass-portal/';
 const evidence = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
 const observations: unknown[] = [];
@@ -481,11 +482,45 @@ describe.sequential(
             },
             { font: control.font, containerRem }
           );
+          let boundaryCalibration: Awaited<ReturnType<typeof calibratePortalBoundary>> | null =
+            null;
           if ('edge' in control)
-            await page.setViewportSize({
-              width: Math.round(boundary + control.edge!),
-              height: 1100,
-            });
+            boundaryCalibration = await calibratePortalBoundary(
+              Math.round(boundary + control.edge!),
+              control.edge!,
+              async (width) => {
+                await page.setViewportSize({ width, height: 1100 });
+                return page.evaluate(
+                  ({ font, containerRem }) => {
+                    const html = document.documentElement;
+                    const shell = document.querySelector<HTMLElement>('.docs-shell')!;
+                    const old = html.getAttribute('style');
+                    try {
+                      html.style.setProperty('font-size', `${font}px`, 'important');
+                      const css = getComputedStyle(shell);
+                      const inset =
+                        css.boxSizing === 'border-box'
+                          ? [
+                              'paddingLeft',
+                              'paddingRight',
+                              'borderLeftWidth',
+                              'borderRightWidth',
+                            ].reduce((sum, key) => sum + parseFloat((css as any)[key]), 0)
+                          : 0;
+                      return {
+                        viewportWidth: innerWidth,
+                        contentWidth: parseFloat(css.width) - inset,
+                        threshold: containerRem * parseFloat(getComputedStyle(html).fontSize),
+                      };
+                    } finally {
+                      if (old === null) html.removeAttribute('style');
+                      else html.setAttribute('style', old);
+                    }
+                  },
+                  { font: control.font, containerRem }
+                );
+              }
+            );
           if ('viewport' in control)
             await page.setViewportSize({ width: control.viewport!, height: 1100 });
           const result = await page.evaluate(
@@ -589,6 +624,7 @@ describe.sequential(
                 mediaEdgeAssumption:
                   '1279/1280/1281px probes Chromium default initial font 16px; actual matchMedia is retained independently of root font',
                 baseline: [],
+                settling: [],
                 handover: [],
               };
               try {
@@ -605,6 +641,30 @@ describe.sequential(
                   throw new Error('Actual docs-canvas CSS rule missing');
                 html.style.setProperty('font-size', `${control.font}px`, 'important');
                 html.style.setProperty('zoom', String(control.zoom), 'important');
+                // Root font/viewport changes publish measured sticky-header
+                // geometry asynchronously. Retain that settling history before
+                // taking the unchanged three-frame baseline; do not mistake an
+                // in-flight header publication for containment oscillation.
+                let stableFrames = 0;
+                let previous: ReturnType<typeof sample> | undefined;
+                for (let index = 0; index < 12 && stableFrames < 3; index++) {
+                  await frame();
+                  const current = sample();
+                  result.settling.push(current);
+                  const stable =
+                    previous &&
+                    current.predicate === previous.predicate &&
+                    Math.abs(current.contentWidth - previous.contentWidth) <= 1 &&
+                    (['shell', 'columns', 'toc', 'main'] as const).every((box) =>
+                      ['left', 'top', 'width', 'height'].every(
+                        (key) => Math.abs(current[box][key] - previous![box][key]) <= 1
+                      )
+                    );
+                  stableFrames = stable ? stableFrames + 1 : 0;
+                  previous = current;
+                }
+                if (stableFrames < 3)
+                  throw new Error('Documentation layout did not settle within 12 frames');
                 for (let index = 0; index < 3; index++) {
                   await frame();
                   result.baseline.push(sample());
@@ -670,6 +730,7 @@ describe.sequential(
             { control, media, containerRem }
           );
           result.requestedViewport = page.viewportSize();
+          result.boundaryCalibration = boundaryCalibration;
           report.cases.push(result);
           await retainContainerDiagnostic('docs-shell-containment-handover', report);
         }
@@ -710,8 +771,11 @@ describe.sequential(
                   `${result.control.name} ${box}.${key}`
                 ).toBeLessThanOrEqual(1);
           }
-          if (result.control.name.startsWith('boundary-'))
+          if (result.control.name.startsWith('boundary-')) {
+            expect(result.boundaryCalibration.calibrated, result.control.name).toBe(true);
             expect(baseline.contentWidth - baseline.threshold).toBeCloseTo(result.control.edge, 0);
+            expect(baseline.predicate, result.control.name).toBe(result.control.edge !== 1);
+          }
         }
       } catch (error) {
         report.error = String(error);
@@ -776,6 +840,7 @@ async function retainContainerDiagnostic(name: string, report: Record<string, un
         }).trim(),
         sourceFiles: [
           'apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts',
+          'apps/www/src/content/docs/zh-cn/portal-boundary-calibration.ts',
           'apps/www/src/pages/en/test/liquid-glass-portal.astro',
           'packages/adapters/base/src/platform/portal-destination.ts',
           'packages/adapters/base/src/platform/portal-inline-size.ts',

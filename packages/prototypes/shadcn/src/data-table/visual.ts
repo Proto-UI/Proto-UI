@@ -1,4 +1,4 @@
-import { tw, type DefHandle } from '@proto.ui/core';
+import { tw, type DefHandle, type ObservedStateHandle } from '@proto.ui/core';
 import { setupShadcnStyleSelection, type ShadcnStyleProps } from '../style-scope';
 
 /** MIT shadcn-ui/ui@3d98900e9b73c45f035f8109e9d41ba6a51685e7:
@@ -25,10 +25,19 @@ export function setupDataTableText<
 
 export function setupDataTableCell<
   Props extends ShadcnStyleProps,
+  StateOwnerProps extends object,
   Exposes = Record<string, unknown>,
->(def: DefHandle<Props, Exposes>, header = false) {
+>(
+  def: DefHandle<Props, Exposes>,
+  hidden: ObservedStateHandle<boolean, StateOwnerProps>,
+  header = false
+) {
   const style = setupDataTableText(def);
-  def.feedback.style.use(tw('table-cell text-left align-middle whitespace-nowrap'));
+  def.feedback.style.use(tw('text-left align-middle whitespace-nowrap'));
+  def.rule({
+    when: (w) => w.state(hidden).eq(false),
+    intent: (i) => i.feedback.style.use(tw('table-cell')),
+  });
   if (header) {
     def.feedback.style.use(tw('font-medium'));
     def.rule({

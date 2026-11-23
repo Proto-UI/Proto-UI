@@ -1,0 +1,26 @@
+{
+  "stage": "original-787-checker-with-new-discriminating-controls",
+  "head": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+  "command": [
+    "node",
+    "--test",
+    "--test-reporter=tap",
+    "--test-concurrency=1",
+    "--test-name-pattern=Sprint 6|diagnostic import review rejects owner, body and edge drift: liquid-glass-state-controls",
+    "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "exitCode": 1,
+  "rawLog": {
+    "path": "/workspace/scratch/cd1b397ad8e7/liquid-work/coverage-7871/red-focused.log",
+    "bytes": 6077,
+    "sha256": "ec89d690bbc19598b8e42b885391dfbcd033ff118195170efd942b178a8b78c9"
+  },
+  "sources": {
+    "scripts/coverage-matrices/check-website-production-bundle.mjs": "8297cd458a26157dada82340486dfc078487ac825d717387f48a0beae762be8c",
+    "scripts/coverage-matrices/check-coverage-matrices.mjs": "edd8c1f79dd3951a4cb91ff4e3ed07d716376761ed9281ff9f06e967966ae78b",
+    "scripts/coverage-matrices/diagnostic-imports.mjs": "e82f5faf20d2dbd2258a6db5d78a03b0c1e986d8fcd3387c80ae331ac403f4cb",
+    "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs": "803c2eff22ba14b3c16f79e61b6ce7cd2f2792d2280f047fdfbb29e3c78ab984",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs": "c19c97c40b10450a33ffb1d9394b2058ec9a53a6424246aae98916818fcddd0a"
+  }
+}

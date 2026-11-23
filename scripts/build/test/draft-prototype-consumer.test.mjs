@@ -1,11 +1,64 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, writeFileSync, lstatSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { buildDraftPackages, DRAFT_FAMILIES } from '../draft-prototype-packages.mjs';
 import { ROOT_DIR } from '../public-packages.mjs';
+import { protoSourceEntries } from '../proto-source.mjs';
+
+function assertInstalledExportSeparation(manifest, installed) {
+  const withoutProtoCondition = (entry) => {
+    if (Array.isArray(entry)) return entry.map(withoutProtoCondition);
+    if (entry && typeof entry === 'object')
+      return Object.fromEntries(
+        Object.entries(entry)
+          .filter(([condition]) => condition !== 'proto')
+          .map(([condition, value]) => [condition, withoutProtoCondition(value)])
+      );
+    return entry;
+  };
+  // Compiler source conditions remain authored files. Every other condition,
+  // including nested runtime and declaration branches, still rejects src/.
+  assert.doesNotMatch(JSON.stringify(withoutProtoCondition(manifest.exports)), /\.\/src\//);
+  return protoSourceEntries({ name: manifest.name, dir: installed, manifest });
+}
+
+test('installed exports separate real compiler sources from runtime and declaration targets', (t) => {
+  const installed = mkdtempSync(join(tmpdir(), 'proto-ui-draft-export-'));
+  t.after(() => rmSync(installed, { recursive: true, force: true }));
+  mkdirSync(join(installed, 'src'));
+  writeFileSync(join(installed, 'src/index.ts'), 'export const value = 1;\n');
+  const manifest = {
+    name: '@example/draft-export',
+    exports: {
+      '.': {
+        proto: './src/index.ts',
+        types: './dist/index.d.ts',
+        import: './dist/index.js',
+        default: './dist/index.js',
+      },
+    },
+  };
+  assert.deepEqual(assertInstalledExportSeparation(manifest, installed), [
+    join(installed, 'src/index.ts'),
+  ]);
+  for (const condition of ['types', 'import', 'default']) {
+    const invalid = structuredClone(manifest);
+    invalid.exports['.'][condition] = './src/index.ts';
+    assert.throws(() => assertInstalledExportSeparation(invalid, installed), /not match/);
+  }
+  const nested = structuredClone(manifest);
+  nested.exports['.'].import = [{ node: { default: './src/index.ts' } }];
+  assert.throws(() => assertInstalledExportSeparation(nested, installed), /not match/);
+  const missing = structuredClone(manifest);
+  missing.exports['.'].proto = './src/missing.ts';
+  assert.throws(() => assertInstalledExportSeparation(missing, installed), /ENOENT/);
+  const malformed = structuredClone(manifest);
+  malformed.exports['.'].proto = { default: './src/index.ts' };
+  assert.throws(() => assertInstalledExportSeparation(malformed, installed), /static TypeScript/);
+});
 
 test(
   'private drafts pack and install their real closure for loader-free ESM and strict NodeNext types',
@@ -110,13 +163,14 @@ test(
       '--pretty',
       'false',
     ]);
+    let compilerSourceExports = 0;
     for (const artifact of report.packages) {
       const installed = join(consumer, 'node_modules', artifact.name);
       assert.equal(lstatSync(installed).isSymbolicLink(), false);
       const manifest = JSON.parse(readFileSync(join(installed, 'package.json'), 'utf8'));
       assert.equal(manifest.private, true);
       assert.equal(manifest.protoUi.distribution.publicAdmission, false);
-      assert.doesNotMatch(JSON.stringify(manifest.exports), /\.\/src\//);
+      compilerSourceExports += assertInstalledExportSeparation(manifest, installed).length;
     }
     for (let index = 0; index < names.length; index++)
       assert.equal(
@@ -133,6 +187,7 @@ test(
         esmEntries: specifiers.length,
         strictNodeNextTypes: true,
         exactTabsIdentities: 8,
+        compilerSourceExports,
         workspaceLinks: false,
       },
       consumer,

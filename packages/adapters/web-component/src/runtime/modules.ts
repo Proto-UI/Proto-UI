@@ -1,5 +1,7 @@
 import { subscribeScrollTarget } from './scroll-target';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
+import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
+import { SHADER_PRESENTATION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
   PRESENCE_PRESENTATION_SINK_CAP,
   PRESENCE_RUN_IN_CALLBACK_CAP,
@@ -1676,6 +1678,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         ? [[OWNED_DECORATION_CAP, true] as const]
         : []),
       [EFFECTS_CAP, effectsPort],
+      [
+        SHADER_PRESENTATION_SINK_CAP,
+        createWebShaderPresentationSink(
+          () => (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget(),
+          effectsPort
+        ),
+      ],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
       [
         PRESENCE_PRESENTATION_SINK_CAP,

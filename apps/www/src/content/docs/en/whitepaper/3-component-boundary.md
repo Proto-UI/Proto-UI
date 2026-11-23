@@ -139,7 +139,10 @@ This Caret is only a design example used to explain the boundary. It does not ad
 
 <figure class="whitepaper-figure">
   <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="Open full-size diagram">
-    <img src="/diagrams/whitepaper-component-anatomy.en.svg" alt="Switch Root and Thumb cooperate through Context; Select parts have independent responsibilities while a fixed Caret may remain inside Trigger." width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-component-anatomy.mobile.en.svg" width="500" height="1740" />
+      <img src="/diagrams/whitepaper-component-anatomy.en.svg" alt="Switch Root and Thumb cooperate through Context; Select parts have independent responsibilities while a fixed Caret may remain inside Trigger." width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
   <figcaption>Open full-size diagram</figcaption>
 </figure>

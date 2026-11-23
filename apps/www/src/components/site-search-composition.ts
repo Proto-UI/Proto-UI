@@ -782,7 +782,12 @@ export function createSiteSearchComposition(options: {
                 node: proto('button', {
                   ref: 'search-page-action',
                   props: {
-                    variant: family === 'shadcn' ? 'secondary' : 'surface',
+                    variant:
+                      family === 'shadcn'
+                        ? 'secondary'
+                        : family === 'brutalist'
+                          ? 'surface'
+                          : 'default',
                     wrap: true,
                     disabled: snapshot.loadingMore || retrying,
                   },

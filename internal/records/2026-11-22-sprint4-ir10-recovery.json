@@ -1,0 +1,1028 @@
+{
+  "kind": "proto-ui.sprint4-original-ir10-recovery",
+  "format": 1,
+  "sessionDate": "2026-11-22",
+  "publicBase": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+  "originalPublicReceipt": "https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6222828809",
+  "originalHead": "7ee28b4732970e9df21c409ac19569d16a73c9c3",
+  "originalPlanningMain": "404a7417ef8dc22c8c7fe6d9ff9f3c8a5d40a17b",
+  "originalHeadIR": 5,
+  "originalWorktreeIR": 10,
+  "currentPublicIR": 7,
+  "custody": "Existing private retained packet; no private paths, source bodies or complete manifests are published by this record.",
+  "provenance": {
+    "readAuthority": "Current user authorized Sprint 4 recovery and implementation; existing user-controlled custody copy was read without escalation.",
+    "sourceIdentityVerified": true,
+    "originalAuthorRightsCertified": false,
+    "originalAuthorDCOCertified": false,
+    "currentUserSignedForOriginalAuthors": false,
+    "sourcePublicationAuthorizedByHash": false
+  },
+  "verification": {
+    "implementation": "scripts/compiler/verify-frozen-foundation.mjs",
+    "implementationSha256": "dd0eb90503b0ee90a7fa40b00f1a1c4162a3fe52df57f5f481a4791a7f1570cc",
+    "environment": "Node v26.13.0; authorized remote Linux device; source supplied on stdin; no remote files written",
+    "commandTemplate": "node scripts/compiler/verify-frozen-foundation.mjs --packet PRIVATE_PACKET --archive PRIVATE_ARCHIVE",
+    "result": {
+      "kind": "proto-ui.frozen-foundation-integrity",
+      "format": 1,
+      "anchor": {
+        "receipt": "https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6222828809",
+        "archiveSha256": "79c5b57a172b2f74efc350c50af0c1eb9bb24791828fc48175bc28411d812bda",
+        "archiveSize": 38379897,
+        "indexSha256": "a8d8350b73c7f9c42e5a87be6078c1e3d3869930b4f967e3a1ef5fba8372617f",
+        "indexSize": 10005,
+        "manifestSha256": "35110c1036f441828f060d8fbf239965a8587a99699ead6b5689268b226adb69",
+        "compilerSha256": "f2bc1ada0554d37fdf2926dc9f7d16f31fec05dd99a60cf758262215ecf00c8e"
+      },
+      "passed": true,
+      "archiveChecked": true,
+      "sourceExecuted": false,
+      "originalCompilerReplay": false,
+      "definitionApproval": false,
+      "originalAuthorRightsCertified": false,
+      "migrationExecuted": false,
+      "MERGE_READY": false,
+      "compilerSha256": "f2bc1ada0554d37fdf2926dc9f7d16f31fec05dd99a60cf758262215ecf00c8e",
+      "sourceBankDigest": "922e931eb694151e7e2072b39561b7b78f4b8601c558c1efda0fa1bc3ca42666",
+      "counts": {
+        "artifacts": 25,
+        "objects": 5225,
+        "objectBytes": 131367939,
+        "repositoryFiles": 2051,
+        "deletedCompilerMembers": 13,
+        "compilerSourceFiles": 140,
+        "installedPackages": 86,
+        "installedFiles": 2982,
+        "virtualFiles": 340,
+        "gitBlobReferences": 3937,
+        "debtEvidenceFiles": 16,
+        "originalDebts": 4,
+        "sourceNodes": 128,
+        "sourceEdges": 366,
+        "condensedNodes": 122,
+        "condensedEdges": 297,
+        "deliveryNodes": 13
+      }
+    },
+    "syntheticControls": {
+      "command": "node --test scripts/compiler/verify-frozen-foundation.test.mjs",
+      "node": "v24.22.3",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "sourceSha256": "263c5ccb5305ffa199ac050c88c10015578dc10e65e31d671e0b1a0b0eae000c",
+      "originalArchiveAcceptance": false
+    }
+  },
+  "definitionBinding": {
+    "originalRevision": "35110c1036f441828f060d8fbf239965a8587a99699ead6b5689268b226adb69",
+    "currentRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "scope": "All 88 literal source references plus seven original shared-boundary groups and the State value-domain supplement. This is a dependency inventory, not proof that every operation obeys every criterion.",
+    "sourceReferenceCount": 88,
+    "canonicalDefinitions": 61,
+    "sameBytes": 46,
+    "changedBytes": 15,
+    "lifecycleChanges": 0,
+    "ownerApproval": false,
+    "definitions": [
+      {
+        "id": "A-REACT-18-19-0001",
+        "governingSource": "spec/adapters/A-REACT-18-19-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "e21ccb0d0d1b9019af5735cdf5a292ce9df86d604e567c6cf2b6c3fe2c7d42f2",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "A-VUE-2-0001",
+        "governingSource": "spec/adapters/A-VUE-2-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "171b316780e5a63867beea64b54ba27629cd809937a702c0c2bdfb1650c556ee",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "A-VUE-3-0001",
+        "governingSource": "spec/adapters/A-VUE-3-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "29c3eeab20d2937292c29bd85027e203b8dc68c1c3a18412e3df96834321efd9",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "A-WEB-COMPONENT-0001",
+        "governingSource": "spec/adapters/A-WEB-COMPONENT-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "862e3994e21bbfe8b1271bd11cba5ead0f62d2fea290a5e0a0640539c49698af",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "C-A11Y-0001",
+        "governingSource": "spec/contracts/C-A11Y-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "7cb4c4587b446a2ec13ec14f9b3f00fbcd63b80f0800b308e89c6c197a8cab58",
+        "sourceReferences": ["C-A11Y-0001", "C-A11Y-0001-G", "C-A11Y-0001-H", "C-A11Y-0001-N"],
+        "boundaryGroups": ["NATIVE_ACTION_AND_VIEW_RESOURCE_REALIZATION"]
+      },
+      {
+        "id": "C-A11Y-PART-RELATIONSHIP-0001",
+        "governingSource": "spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "a51076a191d6609a3e974d297d5eefb8f79105ef1b6a908f405b8281f6cfffe3",
+        "sourceReferences": ["C-A11Y-PART-RELATIONSHIP-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-ANATOMY-0002",
+        "governingSource": "spec/contracts/C-ANATOMY-0002.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "afcb2f6f96ff3e7bcdb857df762ba81bb136b7f53a3843ce348971c7992314ee",
+        "sourceReferences": [
+          "C-ANATOMY-0002",
+          "C-ANATOMY-0002-A",
+          "C-ANATOMY-0002-B",
+          "C-ANATOMY-0002-E"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-AS-FOCUS-ENTRY-0001",
+        "governingSource": "spec/contracts/C-AS-FOCUS-ENTRY-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "40b1da8cce8dc87e99d3ff46041b13215237f6dd17a4a67ea789db27c9d76062",
+        "sourceReferences": [],
+        "boundaryGroups": ["NATIVE_ACTION_AND_VIEW_RESOURCE_REALIZATION"]
+      },
+      {
+        "id": "C-AS-HOOK-0001",
+        "governingSource": "spec/contracts/C-AS-HOOK-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "73a8d7b8a37ccab8ed5ef6c4e5f664be91ae64265e416c722c40e37f5c70b15a",
+        "sourceReferences": ["C-AS-HOOK-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-AS-HOOK-0002",
+        "governingSource": "spec/contracts/C-AS-HOOK-0002.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "2e8d6b22580ff8b23ba66f22430220f72f95ac3def4002c01ce94c139309554e",
+        "sourceReferences": ["C-AS-HOOK-0002"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-AS-HOOK-0003",
+        "governingSource": "spec/contracts/C-AS-HOOK-0003.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "d9eaf96f6ea887bc1056ede19fc364031baf8e714ef16a1dad87681d11326e14",
+        "sourceReferences": [
+          "C-AS-HOOK-0003-A",
+          "C-AS-HOOK-0003-B",
+          "C-AS-HOOK-0003-C",
+          "C-AS-HOOK-0003-D"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-AS-HOOK-0007",
+        "governingSource": "spec/contracts/C-AS-HOOK-0007.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "f0de1904739cb5ca08931a8a038414d873f59c12d5db3f676ae07d78d8759dd4",
+        "sourceReferences": ["C-AS-HOOK-0007"],
+        "boundaryGroups": [
+          "CORE_INTERNAL_PRIVILEGED_ATOM",
+          "PUBLIC_DECLARATION_TYPE_DIFFS",
+          "OFFICIAL_AUTHORED_SOURCE_AND_PACKAGE_ENTRIES"
+        ]
+      },
+      {
+        "id": "C-AS-HOOK-PRIVILEGED-0001",
+        "governingSource": "spec/contracts/C-AS-HOOK-PRIVILEGED-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "9efbe3f153f842f1808174beba4a8a7753061e6615d3d2f7337b506efa2b68d4",
+        "sourceReferences": ["C-AS-HOOK-PRIVILEGED-0001-A3", "C-AS-HOOK-PRIVILEGED-0001-C"],
+        "boundaryGroups": [
+          "CORE_INTERNAL_PRIVILEGED_ATOM",
+          "OFFICIAL_AUTHORED_SOURCE_AND_PACKAGE_ENTRIES"
+        ]
+      },
+      {
+        "id": "C-AS-OVERLAY-0001",
+        "governingSource": "spec/contracts/C-AS-OVERLAY-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "12cead910ad793009826ef5066c3a9f28bf86922decda9be180ff9ff32b4eed1",
+        "sourceReferences": ["C-AS-OVERLAY-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-BOUNDARY-0001",
+        "governingSource": "spec/contracts/C-BOUNDARY-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "1123c8e84e6df6ad9c3f79390d9d7ea2888de0dd1bb0ee02d00351b535bcfe40",
+        "sourceReferences": ["C-BOUNDARY-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-CONTEXT-0003",
+        "governingSource": "spec/contracts/C-CONTEXT-0003.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "3536a6cf283a114dfa67bb4a5182a783fe576164c5763d565c20f9a40ddd7ab1",
+        "sourceReferences": [
+          "C-CONTEXT-0003",
+          "C-CONTEXT-0003-A",
+          "C-CONTEXT-0003-B",
+          "C-CONTEXT-0003-C",
+          "C-CONTEXT-0003-D"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-CONTROL-LABEL-0001",
+        "governingSource": "spec/contracts/C-CONTROL-LABEL-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "57790e380b02e98ec73df6745bc86f57a3f5eb07d7377dc9ed84164e80b6fa1d",
+        "sourceReferences": [
+          "C-CONTROL-LABEL",
+          "C-CONTROL-LABEL-0001-IDENTITY",
+          "C-CONTROL-LABEL-0001-LOWERING"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-CORE-SYNTAX-0003",
+        "governingSource": "spec/contracts/C-CORE-SYNTAX-0003.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "fddfedec7950dd194ec30665231445996b50ea4291b9d937ec1196d059454dc0",
+        "sourceReferences": [
+          "C-CORE-SYNTAX-0003-A",
+          "C-CORE-SYNTAX-0003-B",
+          "C-CORE-SYNTAX-0003-C",
+          "C-CORE-SYNTAX-0003-D"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-CORE-SYNTAX-0007",
+        "governingSource": "spec/contracts/C-CORE-SYNTAX-0007.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "a9c1280b301f7cea647320528585c8d8f78bf1cef45e1a9c0cf29f1ab3331d96",
+        "sourceReferences": [],
+        "boundaryGroups": ["CORE_INTERNAL_PRIVILEGED_ATOM", "EXISTING_PRIMITIVE_BOUNDARIES"]
+      },
+      {
+        "id": "C-DELAY-0001",
+        "governingSource": "spec/contracts/C-DELAY-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "d00a77db43137e3cf930a4b0a3b0b9fa3fc12dbae27bd52364477f1d3c6064f9",
+        "sourceReferences": ["C-DELAY-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-EVENT-0001",
+        "governingSource": "spec/contracts/C-EVENT-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "a8fe585bad1bc71e489c4d09c3e63e9d5cf09982bbccca797203e2ea07df4fca",
+        "sourceReferences": ["C-EVENT-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-EVENT-TYPE-0002",
+        "governingSource": "spec/contracts/C-EVENT-TYPE-0002.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "633740dfe7997480dca0a1a3e93e1f2b5a777cda93829bd62235ca5c93f6df82",
+        "sourceReferences": ["C-EVENT-TYPE-0002"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-EXPOSE-STATE-0001",
+        "governingSource": "spec/contracts/C-EXPOSE-STATE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "b0daa6ed23ad80307b7471eeda8b07dc209fb5a7c2a162c80ff581dcdac5b353",
+        "sourceReferences": ["C-EXPOSE-STATE-0001", "C-EXPOSE-STATE-0001-I"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-FEEDBACK-MATERIAL-0001",
+        "governingSource": "spec/contracts/C-FEEDBACK-MATERIAL-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "a234caedb2f87cd00ea17641b806cf955392831bf89747329f35db9a7092e601",
+        "sourceReferences": [
+          "C-FEEDBACK-MATERIAL-0001",
+          "C-FEEDBACK-MATERIAL-0001-GRAMMAR",
+          "C-FEEDBACK-MATERIAL-0001-SLOT"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-FEEDBACK-RESIDENT-MOTION-0001",
+        "governingSource": "spec/contracts/C-FEEDBACK-RESIDENT-MOTION-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "83b3ad6b60d77a8f2f04414484bd5d5dc1c9f3d467886188a320ef5f1fffb322",
+        "sourceReferences": ["C-FEEDBACK-RESIDENT-MOTION"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-FEEDBACK-STYLE-0003",
+        "governingSource": "spec/contracts/C-FEEDBACK-STYLE-0003.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "ba0a21b4e99f631e1c0b7614baa55ad965e0f607b6ffec9869cf3cf9b5b8b7a2",
+        "sourceReferences": [
+          "C-FEEDBACK-STYLE-0003",
+          "C-FEEDBACK-STYLE-0003-A",
+          "C-FEEDBACK-STYLE-0003-B",
+          "C-FEEDBACK-STYLE-0003-C"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-FEEDBACK-STYLE-0004",
+        "governingSource": "spec/contracts/C-FEEDBACK-STYLE-0004.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "be841740fd8227aac4015b098ed344974af802ec071f171ef39576b77cf607b3",
+        "sourceReferences": ["C-FEEDBACK-STYLE-0004"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-FOCUS-0002",
+        "governingSource": "spec/contracts/C-FOCUS-0002.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "b8c237d020c44cf16e5ec4328687e932292b3cce5a2ded7dea3c8d9f5f813332",
+        "sourceReferences": ["C-FOCUS-0002-C"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-IMAGE-VIEW-0001",
+        "governingSource": "spec/contracts/C-IMAGE-VIEW-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "5d5eb95de5c8a5304da7467f0897cf1286e4506db79d87d568f906808f031a31",
+        "sourceReferences": ["C-IMAGE-VIEW-0001-A", "C-IMAGE-VIEW-0001-C", "C-IMAGE-VIEW-0001-E"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-LIFECYCLE-0002",
+        "governingSource": "spec/contracts/C-LIFECYCLE-0002.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+        "sourceReferences": ["C-LIFECYCLE-0002-F", "C-LIFECYCLE-0002-G", "C-LIFECYCLE-0002-H"],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "C-LIFECYCLE-0003",
+        "governingSource": "spec/contracts/C-LIFECYCLE-0003.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "0700391b3b22f46d956a4e97b7dc97c71e6c18148970a55ffa4c642d0d28e93f",
+        "sourceReferences": [
+          "C-LIFECYCLE-0003-A",
+          "C-LIFECYCLE-0003-C",
+          "C-LIFECYCLE-0003-D",
+          "C-LIFECYCLE-0003-F",
+          "C-LIFECYCLE-0003-I"
+        ],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-LIFECYCLE-0008",
+        "governingSource": "spec/contracts/C-LIFECYCLE-0008.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "021ce74e0439481bda5a316982573e06dfd16ea77b0f6c11b36e6077b20549e7",
+        "sourceReferences": [
+          "C-LIFECYCLE-0008-C",
+          "C-LIFECYCLE-0008-D",
+          "C-LIFECYCLE-0008-E",
+          "C-LIFECYCLE-0008-F",
+          "C-LIFECYCLE-0008-H",
+          "C-LIFECYCLE-0008-I"
+        ],
+        "boundaryGroups": [
+          "NATIVE_ACTION_AND_VIEW_RESOURCE_REALIZATION",
+          "SSR_REQUEST_AND_BROWSER_ADOPTION"
+        ]
+      },
+      {
+        "id": "C-MODULE-DECLARATION-0001",
+        "governingSource": "spec/contracts/C-MODULE-DECLARATION-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "7d583321104793f4383476f4f283357213a1133bc5c8e1c1f140ad6cdc2b1a8e",
+        "sourceReferences": [
+          "C-MODULE-DECLARATION-0001",
+          "C-MODULE-DECLARATION-0001-A",
+          "C-MODULE-DECLARATION-0001-B",
+          "C-MODULE-DECLARATION-0001-C",
+          "C-MODULE-DECLARATION-0001-D",
+          "C-MODULE-DECLARATION-0001-F"
+        ],
+        "boundaryGroups": [
+          "OFFICIAL_AUTHORED_SOURCE_AND_PACKAGE_ENTRIES",
+          "EXISTING_PRIMITIVE_BOUNDARIES"
+        ]
+      },
+      {
+        "id": "C-MOVE-GESTURE-0001",
+        "governingSource": "spec/contracts/C-MOVE-GESTURE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "1c693c17367252bb85da70b0dbd0f3538d64e0febddb48c4e56feadf34a4ef2c",
+        "sourceReferences": ["C-MOVE-GESTURE"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-NATIVE-LINK-0001",
+        "governingSource": "spec/contracts/C-NATIVE-LINK-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "642896cc0adcc53a6caa00ecf3f0a4f4a2f2b1580258be75eef830cdd1aa549b",
+        "sourceReferences": ["C-NATIVE-LINK"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-PROPS-0001",
+        "governingSource": "spec/contracts/C-PROPS-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "cffc9edd78756abf778a67d85e055dac827e4449cbbc815fc375a985f766251d",
+        "sourceReferences": [],
+        "boundaryGroups": ["EXISTING_PRIMITIVE_BOUNDARIES"]
+      },
+      {
+        "id": "C-PROPS-0002",
+        "governingSource": "spec/contracts/C-PROPS-0002.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "8dac89bf0078a2a5c234a7b28dabf850d55a1f6120c08e7410e29cbd6b49c855",
+        "sourceReferences": ["C-PROPS-0002"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-PROPS-0011",
+        "governingSource": "spec/contracts/C-PROPS-0011.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "027770be3b9fb73bfa31ca52861ffbe4e6c8c433d492d437ff8c0a835309edcd",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "C-PROPS-0012",
+        "governingSource": "spec/contracts/C-PROPS-0012.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "0b8945701d74c6d7f8ee667adb7fce0133ced9adeff1409bb75c1fcc1563f02b",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "C-PROPS-0013",
+        "governingSource": "spec/contracts/C-PROPS-0013.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "e560a2586cc1e8786b606715ba79bc05b230510effeb1907a0177156993bcc6c",
+        "sourceReferences": [],
+        "boundaryGroups": ["EXISTING_PRIMITIVE_BOUNDARIES"]
+      },
+      {
+        "id": "C-RULE-INTENT-FEEDBACK-MATERIAL-0001",
+        "governingSource": "spec/contracts/C-RULE-INTENT-FEEDBACK-MATERIAL-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "156e1466da76106b31c7e8ea511a9430f88a0b01b323fbc753fdf6692482bdeb",
+        "sourceReferences": ["C-RULE-INTENT-FEEDBACK-MATERIAL-0001-WHOLE"],
+        "boundaryGroups": ["NATIVE_ACTION_AND_VIEW_RESOURCE_REALIZATION"]
+      },
+      {
+        "id": "C-RULE-WHEN-0001",
+        "governingSource": "spec/contracts/C-RULE-WHEN-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "0cac436d696d48a9b0c73ebee38604c514ad0629994bd6fa37f62fed1fa93776",
+        "sourceReferences": [],
+        "boundaryGroups": ["PUBLIC_DECLARATION_TYPE_DIFFS"]
+      },
+      {
+        "id": "C-SCROLL-0001",
+        "governingSource": "spec/contracts/C-SCROLL-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "ad21e573887a496f4d70fb65468bb47f4d257034602292f4d25ee2dc6763e901",
+        "sourceReferences": ["C-SCROLL-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-STATE-0002",
+        "governingSource": "spec/contracts/C-STATE-0002.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "4d0296381eb5187299d354194b1a6ec767cd20073cc4637d0b9044ad6efa100f",
+        "sourceReferences": ["C-STATE-0002"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-STATE-0006",
+        "governingSource": "spec/contracts/C-STATE-0006.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "a3017b6857e1d369780e9dbb65908fa3be34df3e8fc72cb2a5cf1f36c87bb923",
+        "sourceReferences": ["C-STATE-0006-Q-VALIDATION"],
+        "boundaryGroups": ["STATE_VALUE_DOMAIN_OPEN_QUESTION"]
+      },
+      {
+        "id": "C-STATE-0012",
+        "governingSource": "spec/contracts/C-STATE-0012.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "cee5db1a6aff4b0fba31a0ba424ae3b345de36723100aa2aa1f4b989a1942480",
+        "sourceReferences": [],
+        "boundaryGroups": ["PUBLIC_DECLARATION_TYPE_DIFFS", "EXISTING_PRIMITIVE_BOUNDARIES"]
+      },
+      {
+        "id": "C-TABLE-STRUCTURE-0001",
+        "governingSource": "spec/contracts/C-TABLE-STRUCTURE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "2f0428ea143cb951ba8ded9f793b4ee9c7d4939e855b99dc2db8181aa27a50d8",
+        "sourceReferences": ["C-TABLE-STRUCTURE-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "C-TEMPLATE-0001",
+        "governingSource": "spec/contracts/C-TEMPLATE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "049a3effc8b8d4e9f9fab6f4c043990402cd246c7c487f9768c15078e4f3e8aa",
+        "sourceReferences": ["C-TEMPLATE-0001"],
+        "boundaryGroups": ["EXISTING_PRIMITIVE_BOUNDARIES", "SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "C-TEMPLATE-0004",
+        "governingSource": "spec/contracts/C-TEMPLATE-0004.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "027bd0c3a2ae82dd4b1939896d20c1be070983b6ae278cc9061bcb9ac4c90c6c",
+        "sourceReferences": [],
+        "boundaryGroups": ["EXISTING_PRIMITIVE_BOUNDARIES", "SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "C-TEXT-CONTROL-0001",
+        "governingSource": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "bc8bb4ab39e20c919414b3be54b1e38fae731916c70ee3c45dc822197ae8bc8f",
+        "sourceReferences": ["C-TEXT-CONTROL-0001-A", "C-TEXT-CONTROL-0001-B"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "D-ADAPTER-PROFILE-0001",
+        "governingSource": "spec/decisions/D-ADAPTER-PROFILE-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "b10592679f75e07261c8c70c16146a5161ee95a86257624d06b50f31a8d97ded",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "D-AS-HOOK-PRIVILEGED-DEFINE-0001",
+        "governingSource": "spec/decisions/D-AS-HOOK-PRIVILEGED-DEFINE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "3b0ad43189bb0e6eec0bab8f9776721c5185fa4ad518bb986860f5782131366e",
+        "sourceReferences": ["D-AS-HOOK-PRIVILEGED-DEFINE-0001"],
+        "boundaryGroups": ["CORE_INTERNAL_PRIVILEGED_ATOM"]
+      },
+      {
+        "id": "D-SCROLL-PROJECTION-0001",
+        "governingSource": "spec/decisions/D-SCROLL-PROJECTION-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "1897167264a0103d3eb833248bcb78240957b3016fcde8085ced99b4ae5657b5",
+        "sourceReferences": ["D-SCROLL-PROJECTION-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "HC-HIT-PARTICIPATION-0001",
+        "governingSource": "spec/host-caps/HC-HIT-PARTICIPATION-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "ccc2ca0aaa53a3825fd23a63acb6b68a1c28bc88354c82706fb8fa0325c891f5",
+        "sourceReferences": ["HC-HIT-STATIC-OWNERSHIP"],
+        "boundaryGroups": ["STATIC_DATA_PUBLICATION_SCHEMA"]
+      },
+      {
+        "id": "M-COLLECTION-0001",
+        "governingSource": "spec/modules/M-COLLECTION-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "2e1232cc743a8d37d7c0963ce968ba16873169b9c0e862fc99e338efa97c14f6",
+        "sourceReferences": ["M-COLLECTION-0001-B"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "M-EXPOSE-STATE-WEB-0001",
+        "governingSource": "spec/modules/M-EXPOSE-STATE-WEB-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "23b77c0514d4452c4598f53a91cdd4f90b473a95003ad59f72e50a572923d182",
+        "sourceReferences": ["M-EXPOSE-STATE-WEB-0001"],
+        "boundaryGroups": ["STATIC_DATA_PUBLICATION_SCHEMA"]
+      },
+      {
+        "id": "M-OVERLAY-0001",
+        "governingSource": "spec/modules/M-OVERLAY-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "4030c70ae0649f5e72c98ba54962195e19abda9fce356bcfdca7d71afc44c5c8",
+        "sourceReferences": ["M-OVERLAY-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "M-PROPS-0001",
+        "governingSource": "spec/modules/M-PROPS-0001.yaml",
+        "originalLifecycle": "active",
+        "currentLifecycle": "active",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "b295795a64c3705a2bab98f8f69497c09cee1fa75cadc4a18a1f300812cc80a8",
+        "sourceReferences": [],
+        "boundaryGroups": ["SSR_REQUEST_AND_BROWSER_ADOPTION"]
+      },
+      {
+        "id": "M-RULE-0001",
+        "governingSource": "spec/modules/M-RULE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "27ad74c247018f84afb919e694a98d2dc840d5e0ac5cfaaccf4cff0b3d580c8b",
+        "sourceReferences": [],
+        "boundaryGroups": ["NATIVE_ACTION_AND_VIEW_RESOURCE_REALIZATION"]
+      },
+      {
+        "id": "M-RULE-META-0001",
+        "governingSource": "spec/modules/M-RULE-META-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": true,
+        "currentSha256": "4e10012f4a357b79df3862c3b946e02436a9112e43cddda3f0f5ec942ecdc125",
+        "sourceReferences": ["M-RULE-META-0001"],
+        "boundaryGroups": []
+      },
+      {
+        "id": "M-TABLE-STRUCTURE-0001",
+        "governingSource": "spec/modules/M-TABLE-STRUCTURE-0001.yaml",
+        "originalLifecycle": "draft",
+        "currentLifecycle": "draft",
+        "sameBytesAtPublicBase": false,
+        "currentSha256": "2f08c788d428eb13e083d28db28e17af37c1d03f7a2dcc399fc473ebf4feb755",
+        "sourceReferences": [],
+        "boundaryGroups": ["STATIC_DATA_PUBLICATION_SCHEMA"]
+      }
+    ]
+  },
+  "boundaryGroups": [
+    {
+      "id": "CORE_INTERNAL_PRIVILEGED_ATOM",
+      "owner": "Core/Main; official Hook callers remain Hooks owner",
+      "historicalState": "HARD_SHARED_PREREQUISITE_UNRESOLVED",
+      "definitions": [
+        "C-AS-HOOK-PRIVILEGED-0001",
+        "D-AS-HOOK-PRIVILEGED-DEFINE-0001",
+        "C-AS-HOOK-0007",
+        "C-CORE-SYNTAX-0007"
+      ],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    },
+    {
+      "id": "PUBLIC_DECLARATION_TYPE_DIFFS",
+      "owner": "Core/State/Rule definition owners via Main",
+      "historicalState": "EXACT_DECLARATION_INPUT_DIFF_NOT_GENERAL_PERMISSION",
+      "definitions": ["C-AS-HOOK-0007", "C-RULE-WHEN-0001", "C-STATE-0012"],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    },
+    {
+      "id": "STATIC_DATA_PUBLICATION_SCHEMA",
+      "owner": "Spec schema and Hit/ExposeStateWeb/Table definition owners via Main",
+      "historicalState": "HARD_BANK_PRODUCTION_PREREQUISITE_UNRESOLVED",
+      "definitions": [
+        "HC-HIT-PARTICIPATION-0001",
+        "M-EXPOSE-STATE-WEB-0001",
+        "M-TABLE-STRUCTURE-0001"
+      ],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    },
+    {
+      "id": "OFFICIAL_AUTHORED_SOURCE_AND_PACKAGE_ENTRIES",
+      "owner": "Main/Hooks own authored source and package publication; Compiler owns checked transport",
+      "historicalState": "EXACT_BYTES_FROZEN_NOT_OWNER_SEMANTIC_APPROVAL",
+      "definitions": ["C-AS-HOOK-PRIVILEGED-0001", "C-AS-HOOK-0007", "C-MODULE-DECLARATION-0001"],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    },
+    {
+      "id": "EXISTING_PRIMITIVE_BOUNDARIES",
+      "owner": "Shared Core/Module/Host definition owners; independent Compiler realization",
+      "historicalState": "LIFECYCLES_PRESERVED",
+      "definitions": [
+        "C-PROPS-0001",
+        "C-PROPS-0013",
+        "C-TEMPLATE-0001",
+        "C-TEMPLATE-0004",
+        "C-STATE-0012",
+        "C-CORE-SYNTAX-0007",
+        "C-MODULE-DECLARATION-0001"
+      ],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    },
+    {
+      "id": "NATIVE_ACTION_AND_VIEW_RESOURCE_REALIZATION",
+      "owner": "Compiler realization with shared Input/Focus/A11y/Rule/Host owners",
+      "historicalState": "SOURCE_REPAIRS_NOT_NATIVE_ACCEPTANCE",
+      "definitions": [
+        "C-A11Y-0001",
+        "C-AS-FOCUS-ENTRY-0001",
+        "M-RULE-0001",
+        "C-RULE-INTENT-FEEDBACK-MATERIAL-0001",
+        "C-LIFECYCLE-0008"
+      ],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    },
+    {
+      "id": "SSR_REQUEST_AND_BROWSER_ADOPTION",
+      "owner": "Main/shared-definition owners; separate definition Issue required",
+      "historicalState": "UNDEFINED_REQUEST_AND_HANDOFF_BOUNDARY",
+      "definitions": [
+        "C-LIFECYCLE-0002",
+        "C-LIFECYCLE-0008",
+        "M-PROPS-0001",
+        "C-PROPS-0011",
+        "C-PROPS-0012",
+        "C-TEMPLATE-0001",
+        "C-TEMPLATE-0004",
+        "D-ADAPTER-PROFILE-0001",
+        "A-REACT-18-19-0001",
+        "A-VUE-3-0001",
+        "A-VUE-2-0001",
+        "A-WEB-COMPONENT-0001"
+      ],
+      "currentAcceptance": "Exact candidate dependency and governing revision not accepted by this recovery."
+    }
+  ],
+  "additionalOpenQuestion": {
+    "id": "C-STATE-0006-Q-VALIDATION",
+    "owner": "Shared State definition owner",
+    "status": "Retained open; finite-range metadata checks do not decide blanket legacy scalar validation."
+  },
+  "deliveryDependencies": [
+    {
+      "id": "SHARED_CORE_ABI",
+      "owner": "Main/Core/Hooks",
+      "requires": [],
+      "historicalStatus": "owner-definition-and-ABI-freeze-required",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "SHARED_SCHEMA_AND_DATA",
+      "owner": "Main/spec/Host/Module owners",
+      "requires": [],
+      "historicalStatus": "schema-plus-three-draft-publications-freeze-required",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "OFFICIAL_AUTHORED_AND_MAPPINGS",
+      "owner": "Main/Hooks/package owners",
+      "requires": ["SHARED_CORE_ABI"],
+      "historicalStatus": "exact-22-authored-input-and-entry-cutover-required",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "EXISTING_STYLE_PRODUCER",
+      "owner": "CLI style owner; Compiler consumes existing producer",
+      "requires": [],
+      "historicalStatus": "actual-source-import-pinned-not-reimplemented",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "PINNED_INSTALLED_TOOLCHAIN",
+      "owner": "Compiler build closure",
+      "requires": [],
+      "historicalStatus": "installed-inputs-v2.json; no acquisition or runtime acceptance",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "SOURCE_BANK_PRODUCER",
+      "owner": "Compiler",
+      "requires": [
+        "SHARED_CORE_ABI",
+        "SHARED_SCHEMA_AND_DATA",
+        "OFFICIAL_AUTHORED_AND_MAPPINGS",
+        "PINNED_INSTALLED_TOOLCHAIN"
+      ],
+      "historicalStatus": "current-format2-generator-check-passed-not-shared-owner-approval",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "FRONTEND_IR10_REBIND_BOUNDARY",
+      "owner": "Compiler",
+      "requires": ["SOURCE_BANK_PRODUCER"],
+      "historicalStatus": "coupled-checked-frontend-IR-complete-validator-source-boundary",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "GENERIC_TARGET_REALIZATIONS",
+      "owner": "Compiler/host realization",
+      "requires": ["FRONTEND_IR10_REBIND_BOUNDARY", "EXISTING_STYLE_PRODUCER"],
+      "historicalStatus": "host-specific-evidence-and-profile-gates-stay-separate",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "ACTUAL_RUNTIME_REACT_TRANSPORT",
+      "owner": "Compiler consumes actual Core/Adapter",
+      "requires": ["FRONTEND_IR10_REBIND_BOUNDARY", "SHARED_CORE_ABI"],
+      "historicalStatus": "not-equivalent-to-independent-native-realization",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "PUBLIC_SOURCE_FILE_PROJECT_CLI_ARTIFACT_API",
+      "owner": "Compiler",
+      "requires": ["GENERIC_TARGET_REALIZATIONS", "ACTUAL_RUNTIME_REACT_TRANSPORT"],
+      "historicalStatus": "clean-IR10-caller-and-artifact-migration-scope",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "BROWSER_BUNDLE_WASM_WORKER",
+      "owner": "Compiler/browser caller",
+      "requires": ["PUBLIC_SOURCE_FILE_PROJECT_CLI_ARTIFACT_API", "PINNED_INSTALLED_TOOLCHAIN"],
+      "historicalStatus": "actual-entry/bundle/QuickJS/Worker-source-and-binary-pins; no retired actor replay",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "SSR_REQUEST_AND_ADOPTION_DEFINITIONS",
+      "owner": "Main/shared definition owners",
+      "requires": [],
+      "historicalStatus": "undefined-separate-definition-Issue-required",
+      "publicBaseHeadPair": null
+    },
+    {
+      "id": "SSR_CANONICAL_PROFILE_ADMISSION",
+      "owner": "Compiler only after shared definitions",
+      "requires": ["GENERIC_TARGET_REALIZATIONS", "SSR_REQUEST_AND_ADOPTION_DEFINITIONS"],
+      "historicalStatus": "PUI4001-unadmitted-no-bypass",
+      "publicBaseHeadPair": null
+    }
+  ],
+  "migration": {
+    "originalScopeRecovered": true,
+    "executed": false,
+    "strategyStatus": "Historical proposal: source recompilation and strict IR10 admission; exact shared revision acceptance and executed migration remain outstanding.",
+    "boundaries": [
+      "source producers and public source options",
+      "IR validators and target emitters",
+      "file/project/CLI/cache/artifact callers",
+      "browser bundle/WASM/Worker callers",
+      "source-bank producer, conformance tooling and compiler documentation"
+    ],
+    "noPayloadVersionRelabel": true,
+    "preservePUI4001": true
+  },
+  "realConsumerInventory": {
+    "source": "Parent agent read-only inventory for the current user; scope inputs, not migration results.",
+    "shenko": {
+      "main": "f3fa6f4d",
+      "compilerPin": "f29738eb",
+      "role": "real Harness consumer"
+    },
+    "OpenGreendam/verdant": {
+      "main": "91a77554",
+      "compilerPin": "e56b2d1a",
+      "gpuiWorkspace": "e5f2f9db"
+    },
+    "appsModified": false,
+    "migrationExecuted": false
+  },
+  "originalFailures": [
+    {
+      "issue": 892,
+      "id": "FINFV2-890-COMPILER-DORMANT-BODY",
+      "entry": "frozen source-graph.test.ts: admits inert uncalled function declarations but checks their bodies when reached",
+      "retainedOutcome": "42/43 original source-graph tests; eager PUI1005/globalThis admission failure",
+      "replayedByThisRecord": false
+    },
+    {
+      "issue": 894,
+      "id": "FINFV2-890-COMPILER-OPTIONAL-CALLABLE-METADATA",
+      "entry": "v2-6-optional-default-callable-retains-real-helper-effect (three original files)",
+      "retainedOutcome": "TypeScript clean and cold rebind pass, but answer=42 exposure metadata absent",
+      "replayedByThisRecord": false
+    },
+    {
+      "issue": 891,
+      "id": "FINFV2-890-COMPILER-ORIGINAL-REST-TS2322",
+      "entry": "object-rest-complete-owner (two original files)",
+      "retainedOutcome": "TypeScript 5.9.3 TS2322, literal 13 not assignable to literal 3",
+      "replayedByThisRecord": false
+    },
+    {
+      "issue": 893,
+      "id": "FINFV2-890-COMPILER-THROW-ONLY-GETTER-PUI1006",
+      "entry": "abrupt-return.proto.ts plus original rest observer getter",
+      "retainedOutcome": "TypeScript-clean abrupt-return control rejected PUI1006",
+      "replayedByThisRecord": false
+    }
+  ],
+  "acceptance": {
+    "sourceIntegrity": "passed",
+    "sourceFreezeInventory": "recovered and independently reverified",
+    "realDependencyGraph": "recovered; graph shape verified",
+    "definitionDecisions": "not completed",
+    "consumerMigration": "not executed",
+    "nativeBrowserWorkerReplay": "not executed",
+    "publicExactCandidateStack": "not created",
+    "originalAuthorRightsDCO": "not certified",
+    "originalCandidateMERGE_READY": false
+  }
+}

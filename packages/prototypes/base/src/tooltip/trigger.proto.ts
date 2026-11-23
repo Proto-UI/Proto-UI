@@ -7,7 +7,6 @@ import {
 } from '@proto.ui/core';
 import { asAccessible, asFocusable } from '@proto.ui/hooks';
 import {
-  createTooltipContentId,
   TOOLTIP_CONTEXT,
   TOOLTIP_FAMILY,
   updateTooltipInteraction,
@@ -30,21 +29,24 @@ function setupTooltipIntent(
 
   const disabled = def.state.bool('disabled', false);
   const hovered = def.state.bool('hovered', false);
-  const describedBy = def.state.string('tooltipContentId', '');
+  const descriptionKey = def.state.string('tooltipContentRelationshipKey', '');
   const focusable = asFocusable<TooltipTriggerProps>();
   if (ownsFocus) focusable.configure({ disabled: false });
   const focused = focusable.focused;
   const focusVisible = focusable.focusVisible;
 
-  accessible.relation('describedBy', { target: describedBy, mode: 'append' });
+  accessible.relation('describedBy', {
+    target: { kind: 'part', family: TOOLTIP_FAMILY, role: 'content', key: descriptionKey },
+    mode: 'append',
+  });
 
   const syncContext = (run: RunHandle<TooltipTriggerProps>, ctx: TooltipContextValue) => {
     const nextDisabled = !!run.props.get().disabled || ctx.disabled;
     disabled.set(nextDisabled, 'reason: tooltip trigger disabled sync');
     if (ownsFocus) focusable.setDisabled(nextDisabled);
     const contentPresent = run.anatomy.partsOf(TOOLTIP_FAMILY, 'content').length > 0;
-    describedBy.set(
-      ctx.open && contentPresent ? createTooltipContentId(ctx.rootId) : '',
+    descriptionKey.set(
+      ctx.open && contentPresent ? 'content' : '',
       'reason: tooltip trigger describedBy sync'
     );
     if (!nextDisabled) return;

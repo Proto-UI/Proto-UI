@@ -35,6 +35,7 @@ export * from './native-link';
 export * from './resident-motion';
 
 export * from './presence-presentation';
+export * from './shader-presentation';
 
 // Experimental declarations; no production MaterialContact provider is registered.
 export type {
