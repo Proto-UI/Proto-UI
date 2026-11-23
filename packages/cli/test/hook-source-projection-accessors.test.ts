@@ -341,13 +341,19 @@ def.rule({ when: w => w.state(bag.alpha).eq(true),
       const resolved = summary.resolveCall(calls[0]!, source);
       expect(resolved.matched).toBe(true);
       const retained = resolved.value;
-      if (retained.kind !== 'object')
-        throw new Error(`expected a retained projection, received ${retained.kind}`);
-      // The projection is kept instead of discarded, and the member set it
-      // publishes was not fully observed, so it is not claimed complete.
-      expect(retained.uncertainKeys).toBe(true);
-      // A member the projection did not prove is never presented as proven.
-      for (const member of retained.members.values()) expect(member.kind).toBe('unknown');
+      if (label === 'spread') {
+        // Object spread invokes this getter during projection. Its body has
+        // not been proved effect-free, so completion itself remains unknown.
+        // Merely publishing an accessor below does not invoke that accessor.
+        expect(retained.kind).toBe('unknown');
+      } else {
+        if (retained.kind !== 'object')
+          throw new Error(`expected a retained projection, received ${retained.kind}`);
+        // Retain a deferred member set without claiming it was fully observed.
+        expect(retained.uncertainKeys).toBe(true);
+        // A member the projection did not prove is never presented as proven.
+        for (const member of retained.members.values()) expect(member.kind).toBe('unknown');
+      }
 
       const scan = scanRuleStateReads(text, file, createHookSourceSummaryContext());
       expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual([
