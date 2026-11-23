@@ -1380,10 +1380,11 @@ ${styled ? `        ${p}Style.refresh();\n` : ''}${atoms.refresh}
     : ''
 }
   ${publicCalls ? `const ${p}WrapPublic = ${p}CreatePublicCalls({alive: ensureExternal, invoke: <T>(callback: () => T): T => invoke(callback, [], false) as T});` : ''}
-  function invoke(fn: Function, args: unknown[] = [], withRun = true): unknown {
-    ensure();
+  let ownerRun: ${p}Run | undefined;
+  function getRunHandle(): ${p}Run {
+    if (ownerRun) return ownerRun;
     const check = () => runtime();
-    const run: ${p}Run = {
+    return ownerRun = {
       host: { get() { check(); return view && !disposing ? ${ssr ? 'host.root' : 'host'} : null; } },
 ${styled ? `      feedback: {style: ${p}Style},\n` : ''}
 ${
@@ -1398,9 +1399,13 @@ ${
     : ''
 }      update() { check(); if (!disposing) schedule(true); },
       props: Object.freeze({get() { check(); return (propsWindow?.resolved ?? resolved) as ${p}PropsSnapshot; }, getRaw() { check(); return propsWindow?.raw ?? raw; }, isProvided(key: string) { check(); return own(propsWindow?.raw ?? raw, key); }}),
-      lifecycle: {setPresent(next: boolean) { check(); if (disposing) return; intent = next; schedule(false); }},
+      lifecycle: {setPresent(next: boolean) { check(); if (disposing) throw new Error('Terminal presence is locked'); if (typeof next !== 'boolean') throw new TypeError('View presence must be boolean'); intent = next; schedule(false); }},
       expose: {emit(key: string, payload?: unknown, options?: CustomEventInit) { check(); if (!events.has(key)) throw new Error('Undeclared exposed event: ' + key); ${ssr ? 'host.emit(key, payload, options);' : `host.dispatchEvent(${outwardEvents ? `${p}MarkNativeExposeEvent(` : ''}new CustomEvent(key, {detail: payload, bubbles: true, cancelable: true, ...options})${outwardEvents ? ')' : ''});`} }},
     };
+  }
+  function invoke(fn: Function, args: unknown[] = [], withRun = true): unknown {
+    ensure();
+    const run = getRunHandle();
 ${interacting ? `    const previousRun = currentRun; currentRun = run;\n` : ''}
     ++callbackDepth;
     try { return fn(...(withRun ? [run, ...args] : args)); }

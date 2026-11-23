@@ -1374,6 +1374,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
   const setPresent = (next) => {
     callback();
     if (terminal) throw new Error('[Vue2 native] presence is locked for terminal disposal.');
+    if (typeof next !== 'boolean') throw new TypeError('[Vue2 native] presence must be boolean.');
     if (present === next) return;
     present = next; ++epoch; pending = null; renderedCommit = null; queued = false;
     const requestedEpoch = epoch, failures = [];

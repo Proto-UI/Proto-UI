@@ -66,6 +66,54 @@ describe('checked first-class lifecycle modules', () => {
     expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
   });
 
+  it.each([
+    'owner:Lifecycle',
+    'owner:{module:Lifecycle}',
+    'owner:readonly Lifecycle[]',
+    'owner:()=>Lifecycle',
+    'owner?:Lifecycle',
+  ])('rejects public lifecycle-module ingress: %s', (parameter) => {
+    const result = parsePrototype(`import{definePrototype,type RunHandle}from'@proto.ui/core';
+      type Lifecycle=RunHandle<{}>['lifecycle'];
+      export default definePrototype({name:'public-module-refusal',setup(def){
+        def.expose.method('accept',(${parameter})=>{});
+      }});`);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.diagnostics[0].message).toContain('Public method parameters');
+  });
+
+  it('independently rejects a cold-IR public parameter claim', () => {
+    const parsed = parsePrototype(`import{definePrototype}from'@proto.ui/core';
+      export default definePrototype({name:'cold-public-module',setup(def){
+        def.expose.method('accept',()=>{});
+      }});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const ir = JSON.parse(JSON.stringify(parsed.value));
+    const parameters = [{ name: 'owner', type: 'run-lifecycle' }];
+    ir.exposes.find((exposure: { name: string }) => exposure.name === 'accept').parameters =
+      parameters;
+    let changed = 0;
+    JSON.stringify(ir, (_key, value) => {
+      if (value?.kind === 'operation' && value.operation === 'expose.method') {
+        value.arguments[1].function.parameters = parameters;
+        value.arguments[1].type.parameters = parameters;
+        changed++;
+      }
+      return value;
+    });
+    expect(changed).toBe(1);
+    expect(validateIR(ir)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2002' }] });
+  });
+
+  it('does not confuse an ordinary data literal with the internal module type', () => {
+    expect(
+      parsePrototype(`import{definePrototype}from'@proto.ui/core';
+      export default definePrototype({name:'public-module-string',setup(def){
+        def.expose.method('echo',(value:'run-lifecycle')=>value);
+      }});`)
+    ).toMatchObject({ ok: true });
+  });
+
   it.each(['gpui-source-v1'])(
     'keeps a reached module view explicitly unsupported in %s',
     (profile) => {
@@ -122,10 +170,16 @@ describe('checked first-class lifecycle modules', () => {
       expect(api.counts()).toEqual({ created: 1, mounted: 0, unmounted: 0 });
       await owner.act(() => api.present(true));
       expect(api.counts()).toEqual({ created: 1, mounted: 1, unmounted: 0 });
+      expect(api.acrossCallbacks()).toBe(true);
+      await owner.setProps({ revision: 1 });
+      expect(api.acrossCallbacks()).toBe(true);
+      expect(() => api.present(1)).toThrow(/boolean|invalid method arguments/i);
+      expect(api.counts()).toEqual({ created: 1, mounted: 1, unmounted: 0 });
       await owner.act(() => api.present(false));
       expect(api.counts()).toEqual({ created: 1, mounted: 1, unmounted: 1 });
       await owner.act(() => api.present(true));
       expect(api.counts()).toEqual({ created: 1, mounted: 2, unmounted: 1 });
+      expect(api.acrossCallbacks()).toBe(true);
       const retained = api.present;
       await owner.dispose();
       const replacement = await mountNativeOwner(source, profile);

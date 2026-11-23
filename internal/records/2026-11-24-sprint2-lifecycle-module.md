@@ -6,7 +6,7 @@ The unchanged Base Tabs Content passes `run.lifecycle` to a helper. Its source p
 
 The portable graph now has an internal `run-lifecycle` receiver derived only from the actual Run member. The module call shares the existing `setPresent` argument, phase, callback-origin and effect rules. Core indexed type resolution can name the checked member. An ordinary object or type assertion cannot manufacture the nominal receiver.
 
-React, Vue 2 and Web Component output retain their existing module object. Vue 3 creates one module object bound to its real logical Run owner only when that source member is reached. Repeated reads do not allocate wrappers. GPUI, Qt and Flutter explicitly refuse reached first-class module use until they implement it. The unrelated `captureViewOperation` member remains unsupported.
+React and Vue 2 output retain their existing module object. Vue 3 creates one module object bound to its real logical Run owner only when that source member is reached. The initial WC implementation retained the module inside a callback but its owner recreated Run on the next callback; independent follow-up review caught that missing identity condition. The [WC owner follow-up](2026-11-24-sprint2-wc-run-identity.md) repairs and independently verifies one Run/module per logical owner. GPUI, Qt and Flutter explicitly refuse reached first-class module use until they implement it. The unrelated `captureViewOperation` member remains unsupported.
 
 ## Evidence and limits
 
@@ -24,4 +24,4 @@ NODE_OPTIONS=--max-old-space-size=3072 corepack pnpm@10.32.1 exec vitest run pac
 
 The strict generated tests include each artifact's supporting TypeScript/JavaScript modules under `strict` and `checkJs`, including the actual Vue 2 dependency types. A separate bounded source/test TypeScript program checks 14 changed frontend/emitter/test roots and their complete imported graph. It initially caught a missing required observer method in the new direct gate; after implementing that method, the final program completed with **zero diagnostics**. The 17-case source/runtime file was rerun after that correction.
 
-The unchanged Tabs source advances from an undeclared module member to a separate local-closure parameter-compatibility boundary. Its local helper currently declares a structural subset of the module. That remaining frontend proof is tracked separately; this bounded implementation does not claim full Tabs, all targets, AT or the original library/profile denominator has passed.
+At this initial slice, the unchanged Tabs source advanced from an undeclared module member to a separate local-closure parameter-compatibility boundary: its local helper declares a structural subset of the module. The [later closed-local-helper proof](2026-11-24-sprint2-local-nominal-helpers.md) addresses that bounded frontend input. Neither slice claims full Tabs, all targets, AT or the original library/profile denominator has passed.

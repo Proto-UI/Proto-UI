@@ -2878,6 +2878,32 @@ export function validateOperationPhase(
   return [];
 }
 
+/** This new module value is transported only by an existing owner. Public
+ * callers cannot supply it, including through containers or callbacks. Keep
+ * older profile-specific parameter admissions separate from this boundary. */
+function hasLifecycleModule(type: ValueType): boolean {
+  if (typeof type === 'string')
+    return type.replace(/^(nullable|optional):/, '') === 'run-lifecycle';
+  if (type.kind === 'callable')
+    return (
+      type.parameters.some((parameter) => hasLifecycleModule(parameter.type)) ||
+      hasLifecycleModule(type.returnType)
+    );
+  if (type.kind === 'object')
+    return (
+      type.fields.some((field) => hasLifecycleModule(field.type)) ||
+      (type.index !== undefined && hasLifecycleModule(type.index))
+    );
+  if (type.kind === 'record') return type.fields.some((field) => hasLifecycleModule(field.type));
+  if (type.kind === 'value-union' || type.kind === 'union')
+    return type.members.some(hasLifecycleModule);
+  if (type.kind === 'value-array' || type.kind === 'array' || type.kind === 'set')
+    return hasLifecycleModule(type.element);
+  if (type.kind === 'map') return hasLifecycleModule(type.key) || hasLifecycleModule(type.value);
+  if (type.kind === 'cell') return hasLifecycleModule(type.value);
+  return false;
+}
+
 /** Check callback capability types exactly: annotating a run/event/data parameter as another
  * capability must not grant authority. Callbacks may omit unused trailing parameters. */
 export function validateOperationCallback(
@@ -2902,6 +2928,11 @@ export function validateOperationCallback(
     parameters = bindings.methodParameters;
     result = bindings.methodReturnType;
     max = parameters.length;
+    if (parameters.some((parameter) => hasLifecycleModule(parameter.type)))
+      issues.push({
+        code: 'callback-type',
+        message: 'Public method parameters cannot receive an internal runtime lifecycle module.',
+      });
   } else if (signature.parameterPolicy === 'input-payload') {
     if (!bindings.inputPayloadType)
       return [
