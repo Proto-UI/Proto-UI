@@ -20,9 +20,10 @@ it('delivers native root attributes, events and refs without duplicating prototy
   document.body.append(host);
   const root = createRoot(host);
   const source = `import {definePrototype} from '@proto.ui/core';
-    import {asTrigger} from '@proto.ui/hooks';
+    import {asAccessible,asTrigger} from '@proto.ui/hooks';
     export default definePrototype({name:'native-host-boundary',setup(def){
       asTrigger();
+      asAccessible().nameFromContent();
       def.expose.event('click',{payload:'void'});
       def.event.on('press.commit',run=>run.expose.emit('click'));
       return r=>r.slot();
@@ -84,6 +85,7 @@ it('delivers native root attributes, events and refs without duplicating prototy
     expect(second.current).toBe(button);
     expect(host.querySelector('button')).toBe(button);
     expect(button.className).toBe('after');
+    expect(button.getAttribute('aria-label')).toBe('Choose files');
     expect(result.value.output.code).not.toMatch(/from\s*['"]@proto\.ui\//);
     await React.act(async () => {
       root.unmount();

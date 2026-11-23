@@ -18,6 +18,8 @@ const files = {
   sink: 'packages/modules/feedback/src/presence/sink.ts',
   sampler: 'packages/modules/feedback/src/motion/sampler.ts',
   web: 'packages/adapters/base/src/motion/web-presence-presentation.ts',
+  styleOwnership: 'packages/adapters/base/src/motion/web-motion-style-ownership.ts',
+  steps: 'packages/adapters/base/src/host/synchronous-steps.ts',
   preference: 'packages/adapters/base/src/platform/web-preference-source.ts',
 } as const;
 const sources = new Map<string, { file: string; sha256: string; contents: string }>(
@@ -47,6 +49,8 @@ const paths = new Map([
   ['@proto.ui/module-feedback', './projector-v1'],
   ['@proto.ui/module-positioning', '../host-web/translation-composition-v1'],
   ['../platform/web-preference-source', './preferences-v1'],
+  ['./web-motion-style-ownership', './motion-style-ownership-v1'],
+  ['../host/synchronous-steps', './synchronous-steps-v1'],
 ]);
 function retarget(contents: string) {
   const parsed = parseSupportTemplate(mapSupportImports(contents, paths));
@@ -159,6 +163,8 @@ export function webPresenceArtifacts() {
     projector,
     canonical('sampler', files.sampler),
     canonical('web', files.web),
+    canonical('motion-style-ownership', files.styleOwnership),
+    canonical('synchronous-steps', files.steps),
     canonical('preferences', files.preference),
   ];
 }

@@ -24,6 +24,7 @@ const members: Readonly<Record<string, NativeSupportFeature>> = {
   asBoundary: 'boundary',
   asHitParticipation: 'hit',
   asOverlay: 'overlay',
+  viewPolicy: 'overlay',
   registerTargetAlignment: 'target-alignment',
   asScrollSurface: 'scroll',
   asTextControl: 'text',

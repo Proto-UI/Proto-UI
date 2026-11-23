@@ -1,3 +1,5 @@
+import { runAllSteps } from '../host/synchronous-steps';
+import { createWebMotionStyleOwnership, webMotionAncestors } from './web-motion-style-ownership';
 import { acquireWebTranslation } from '@proto.ui/module-positioning';
 import type { EffectsPort, PresentationViewBinding } from '@proto.ui/core';
 import {
@@ -165,12 +167,16 @@ function createDocumentPresenceSink(
   const doc = el.ownerDocument,
     win = doc.defaultView;
   let translation: ReturnType<typeof acquireWebTranslation> | null = null;
-  const baseline = new Map<string, { value: string; priority: string }>();
-  const writes = new Map<string, { value: string; priority: string }>();
-  const lost = new Set<string>();
-  const owned = (name: string, value: { value: string; priority: string }) =>
-    el.style.getPropertyValue(name) === value.value &&
-    el.style.getPropertyPriority(name) === value.priority;
+  const {
+    writes,
+    lost,
+    owned,
+    detectLoss,
+    clear: clearOwnedStyles,
+    write: writeOwnedStyle,
+  } = createWebMotionStyleOwnership(el, (name) => {
+    if (name === 'opacity') clearZeroOpacityOwner();
+  });
   const ownsZeroOpacity = () => {
     const opacity = writes.get('opacity');
     return (
@@ -180,41 +186,14 @@ function createDocumentPresenceSink(
   const clearZeroOpacityOwner = () => {
     if (zeroOpacityOwners.get(el) === ownsZeroOpacity) zeroOpacityOwners.delete(el);
   };
-  const detectLoss = () => {
-    for (const [name, value] of writes)
-      if (!owned(name, value)) {
-        lost.add(name);
-        writes.delete(name);
-        baseline.delete(name);
-        if (name === 'opacity') clearZeroOpacityOwner();
-      }
-  };
   const clear = () => {
     clearZeroOpacityOwner();
     translation?.release();
     translation = null;
-    for (const [name, value] of writes)
-      if (owned(name, value)) {
-        const before = baseline.get(name)!;
-        if (before.value) el.style.setProperty(name, before.value, before.priority);
-        else el.style.removeProperty(name);
-      }
-    writes.clear();
-    baseline.clear();
+    clearOwnedStyles();
   };
   const write = (name: string, value: string) => {
-    detectLoss();
-    if (lost.has(name)) return false;
-    if (!baseline.has(name))
-      baseline.set(name, {
-        value: el.style.getPropertyValue(name),
-        priority: el.style.getPropertyPriority(name),
-      });
-    el.style.setProperty(name, value);
-    writes.set(name, {
-      value: el.style.getPropertyValue(name),
-      priority: el.style.getPropertyPriority(name),
-    });
+    if (!writeOwnedStyle(name, value)) return false;
     if (name === 'opacity') {
       if (Number.parseFloat(value) === 0 && ownsZeroOpacity())
         zeroOpacityOwners.set(el, ownsZeroOpacity);
@@ -224,17 +203,6 @@ function createDocumentPresenceSink(
   };
   const px = (value: string | undefined) =>
     value && /^-?(?:\d+\.?\d*|\.\d+)px$/.test(value) ? Number.parseFloat(value) : null;
-  const ancestors = () => {
-    const result: HTMLElement[] = [];
-    let node: HTMLElement | null = el;
-    while (node) {
-      result.push(node);
-      const root: Node = node.getRootNode();
-      node =
-        node.parentElement ?? ('host' in root ? ((root as ShadowRoot).host as HTMLElement) : null);
-    }
-    return result;
-  };
   return createPresencePresentationProjector({
     binding,
     now: () => win?.performance.now() ?? performance.now(),
@@ -264,7 +232,7 @@ function createDocumentPresenceSink(
         visible:
           el.isConnected &&
           doc.visibilityState !== 'hidden' &&
-          !ancestors().some((node) =>
+          !webMotionAncestors(el).some((node) =>
             node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
           ),
         width: dimension('width'),
@@ -288,31 +256,19 @@ function createDocumentPresenceSink(
       const resize = win?.ResizeObserver ? new win.ResizeObserver(callback) : null;
       resize?.observe(el);
       const mutation = win?.MutationObserver ? new win.MutationObserver(callback) : null;
-      for (const node of ancestors())
+      for (const node of webMotionAncestors(el))
         mutation?.observe(node, {
           attributes: true,
           attributeFilter: ['hidden', 'data-pui-view-pending', 'data-pui-view-detached'],
         });
       doc.addEventListener('visibilitychange', callback);
       return () => {
-        let failed = false;
-        let firstError: unknown;
-        for (const cleanup of [
+        runAllSteps([
           () => off?.(),
           () => resize?.disconnect(),
           () => mutation?.disconnect(),
           () => doc.removeEventListener('visibilitychange', callback),
-        ]) {
-          try {
-            cleanup();
-          } catch (error) {
-            if (!failed) {
-              failed = true;
-              firstError = error;
-            }
-          }
-        }
-        if (failed) throw firstError;
+        ]);
       };
     },
     requestFrame: (callback) =>

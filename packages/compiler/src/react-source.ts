@@ -9,6 +9,10 @@ import {
 } from './native-public-values';
 import { nativeHostAtomPlan, emitNativeHostAtom } from './native-async';
 import { webPresenceSourceInputs } from './native-support/web-presence';
+import {
+  webViewVisibilityArtifact,
+  webViewVisibilitySourceInputs,
+} from './native-support/web-host-primitives';
 import { webDecorationArtifacts, webDecorationSourceInputs } from './native-support/web-decoration';
 import { reactSvgFactories } from './svg-templates';
 import {
@@ -161,6 +165,7 @@ export function emitReactSource(
   const reachedFunctions = new Set(admitted.value.functions);
   const reachedHooks = new Set(admitted.value.authoredHooks);
   const interaction = supportPlan.features.length > 0;
+  const overlayHost = !ssr && supportPlan.features.includes('overlay');
   const decorations = admitted.value.operations.includes('feedback.style.declareDecoration');
   const svg = admitted.value.operations.some((operation) => operation.startsWith('render.svg.'));
   if (ssr && (decorations || admitted.value.operations.includes('feedback.style.presence')))
@@ -632,6 +637,7 @@ ${publicCalls ? `import { createNativePublicCalls as ${p}CreatePublicCalls } fro
 ${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${p}MarkAuthoredCallable, isNativeAuthoredCallable as ${p}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${p}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${interaction ? `import { createPortal as ${p}CreatePortal } from 'react-dom';` : ''}
+${overlayHost ? `import { installViewVisibilityRule as ${p}InstallViewVisibility, PUI_VIEW_DETACHED_ATTR as ${p}DetachedAttribute } from './.proto-ui/host-web/view-visibility-v1';` : ''}
 ${
   ssr
     ? `import { renderToString as ${p}RenderToString } from 'react-dom/server';
@@ -709,7 +715,7 @@ type ${p}Frame = { revision: number; epoch: number; kind: 'mount' | 'update' | '
 type ${p}Owner = {
   handle: GeneratedHandle;
   scope: ${p}ContextScope;
-  getHostProjection(): { tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; portalTarget: HTMLElement | null };
+  getHostProjection(): { tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; portalTarget: HTMLElement | null${overlayHost ? '; viewPolicy: Readonly<{ retainWhenDetached: boolean; portal: boolean }>' : ''} };
   bindRoot(root: HTMLElement | null): void;
   connect(): void;
 ${interaction ? '  connectView(): void;\n  disconnectView(): void;\n  commitHost(): void;\n' : ''}  start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}): void;
@@ -840,7 +846,7 @@ function ${p}ResolveProps(
   return Object.freeze(next) as ${p}ResolvedProps;
 }
 
-function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${ssr ? ', server = false' : ''}): ${p}Owner {
+function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${overlayHost ? ', releaseHost: () => void' : ''}${ssr ? ', server = false' : ''}): ${p}Owner {
   let phase: 'setup' | 'callback' | 'render' | 'idle' = 'setup';
   let lifetime: 'alive' | 'disposing' | 'disposed' = 'alive';
   let connected = true;
@@ -1019,14 +1025,14 @@ ${ruleMetaKeys.length ? `    meta: ${p}CreateRuleMeta(() => root?.ownerDocument,
   }
   function schedule() {
 ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !connected || lifetime !== 'alive') return;
-    if (!updateQueued && desiredPresent === mounted && !(!desiredPresent && root) && !(latest && latest.revision > acceptedRevision)) return;
+    if (!updateQueued && desiredPresent === mounted && !(!desiredPresent && root${overlayHost ? ` && (!${p}Interaction.viewPolicy().retainWhenDetached || latest && latest.kind !== 'detach')` : ''}) && !(latest && latest.revision > acceptedRevision)) return;
     scheduled = true;
     queueMicrotask(() => {
       scheduled = false;
       if (!connected || lifetime !== 'alive') return;
       if (latest && latest.revision > acceptedRevision) return;
       if (!desiredPresent) {
-        if (mounted || root) deliver('detach');
+        if (mounted || root${overlayHost ? ` && (!${p}Interaction.viewPolicy().retainWhenDetached || latest && latest.kind !== 'detach')` : ''}) deliver('detach');
         else { dirty = dirty || updateQueued; updateQueued = false; }
       } else if (!mounted) deliver('mount');
       else if (updateQueued) deliver('update');
@@ -1486,7 +1492,7 @@ ${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??=
 }  return {
     handle,
     scope: context,
-    getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? ${JSON.stringify(options.rootTag ?? 'div')}` : JSON.stringify(options.rootTag ?? 'div')}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'} }; },
+    getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? ${JSON.stringify(options.rootTag ?? 'div')}` : JSON.stringify(options.rootTag ?? 'div')}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'}${overlayHost ? `, viewPolicy: ${p}Interaction.viewPolicy()` : ''} }; },
 ${
   ssr
     ? `    disposeNow,
@@ -1589,7 +1595,7 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
       const version = ++cleanupVersion;
       queueMicrotask(() => {
         if (connected || cleanupVersion !== version || lifetime !== 'alive') return;
-        lifetime = 'disposing';
+${overlayHost ? '        let hostDisposalFailure: { error: unknown } | undefined;\n        try {\n' : ''}        lifetime = 'disposing';
         for (const off of authorStateWatchCleanups.splice(0)) off();
         phase = 'callback';
         let failure: { error: unknown } | undefined;
@@ -1623,7 +1629,7 @@ ${usesStyle ? `          ${p}Style.dispose();` : ''}
           for (const key of Object.keys(exposes)) delete exposes[key];
         }
         if (failure) throw failure.error;
-      });
+${overlayHost ? '        } catch (error) { hostDisposalFailure = { error }; }\n        try { releaseHost(); } catch (error) { hostDisposalFailure ??= { error }; }\n        if (hostDisposalFailure) throw hostDisposalFailure.error;\n' : ''}      });
     },
   };
 }
@@ -1636,6 +1642,22 @@ export const ${componentName} = ${p}React.forwardRef<GeneratedHandle, GeneratedC
   const [frame, setFrame] = ${p}React.useState<${p}Frame | null>(null);
   const [, publishHost] = ${p}React.useReducer((version: number) => version + 1, 0);
   const rootRef = ${p}React.useRef<HTMLElement | null>(null);
+${
+  overlayHost
+    ? `  const portalOriginRef = ${p}React.useRef<HTMLSpanElement | null>(null);
+  const portalMountRef = ${p}React.useRef<HTMLDivElement | null>(null);
+  const [portalMount, setPortalMount] = ${p}React.useState<HTMLDivElement | null>(null);
+  const retainedFrameRef = ${p}React.useRef<${p}Frame | null>(null);
+  // Terminal owner disposal owns this host container. Layout disconnection and
+  // same-turn StrictMode replay leave its identity intact.
+  const releaseHost = ${p}React.useCallback(() => {
+    const mount = portalMountRef.current;
+    portalMountRef.current = null;
+    mount?.remove();
+  }, []);
+`
+    : ''
+}
   const pendingHostRef = ${p}React.useRef(props.hostRef);
   pendingHostRef.current = props.hostRef;
   const boundHostRef = ${p}React.useRef<${p}React.Ref<HTMLElement> | undefined>(undefined);
@@ -1643,7 +1665,7 @@ export const ${componentName} = ${p}React.forwardRef<GeneratedHandle, GeneratedC
     if (boundHostRef.current !== pendingHostRef.current) ${p}AssignHostRef(boundHostRef.current, null);
     boundHostRef.current = pendingHostRef.current;
     rootRef.current = root;
-    ownerRef.current?.bindRoot(root);
+${overlayHost ? `    if (root) ${p}InstallViewVisibility(root.ownerDocument);\n` : ''}    ownerRef.current?.bindRoot(root);
     ${p}AssignHostRef(boundHostRef.current, root);
   }, []);
   ${p}React.useLayoutEffect(() => {
@@ -1698,10 +1720,11 @@ ${
         setFrame(next);
       }, () => parentRef.current, publishHost);
 `
-    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost);
+    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost${overlayHost ? ', releaseHost' : ''});
 `
 }      ownerRef.current = owner;
       owner.start(${ssr ? 'projection' : ''});
+${overlayHost ? '      // Closed bound Overlays have no render frame, but their logical child\n      // owners must receive the newly committed scope and retained host policy.\n      publishHost();\n' : ''}
 ${
   ssr
     ? `      owner.bindRoot(rootRef.current);
@@ -1727,7 +1750,44 @@ ${
     return () => { owner.disconnect(); };
   }, [${ssr ? 'parentReady' : ''}]);
   ${p}React.useLayoutEffect(() => { ${ssr ? 'if (projection && (!started || projection.present && !frame)) return; ' : ''}const owner = ownerRef.current; ${options.propsUpdatePolicy === 'host' ? 'if (owner?.applyProps(props)) owner.handle.update();' : 'owner?.applyProps(props);'} }, [props${ssr ? ', parentReady, started, !!frame' : ''}]);
-  ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);
+${
+  overlayHost
+    ? `  ${p}React.useLayoutEffect(() => {
+    const host = ownerRef.current?.getHostProjection(), origin = portalOriginRef.current;
+    if (!host?.viewPolicy.portal) {
+      if (portalMountRef.current) { releaseHost(); setPortalMount(null); }
+      return;
+    }
+    if (!origin) return;
+    const document = origin.ownerDocument;
+    let mount = portalMountRef.current;
+    if (!mount || mount.ownerDocument !== document) {
+      mount?.remove();
+      mount = document.createElement('div');
+      mount.setAttribute('data-pui-portal-mount', '');
+      mount.style.display = 'contents';
+      portalMountRef.current = mount;
+    }
+    ${p}InstallViewVisibility(document);
+    if (frame && frame.kind !== 'detach') {
+      const destination = document.body ?? document.documentElement;
+      if (mount.parentNode !== destination) destination.appendChild(mount);
+    } else if (origin.parentNode && origin.nextSibling !== mount) {
+      // Detach revokes global projection without replacing retained children.
+      // React owns the Root; only this host-owned container is relocated.
+      origin.parentNode.insertBefore(mount, origin.nextSibling);
+    }
+    if (portalMount !== mount) setPortalMount(mount);
+  });
+  ${p}React.useLayoutEffect(() => {
+    // A portal origin can commit before its container. A frame is acknowledged
+    // only after its physical Root exists, including initially-open Overlays.
+    if (!frame || frame.kind !== 'detach' && !rootRef.current) return;
+    if (ownerRef.current!.accept(frame) && frame.kind !== 'detach') retainedFrameRef.current = frame;
+  }, [frame, portalMount]);
+`
+    : `  ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);`
+}
 ${interaction ? `  ${p}React.useLayoutEffect(() => { ownerRef.current?.commitHost(); });\n` : ''}
   ${p}React.useImperativeHandle(ref, () => ${
     ssr
@@ -1739,7 +1799,17 @@ ${interaction ? `  ${p}React.useLayoutEffect(() => { ownerRef.current?.commitHos
   })`
       : 'ownerRef.current!.handle'
   }, []);
-  const template = ${p}React.useMemo(() => ${p}BindSlots(frame?.node, props.children), [frame?.node, props.children]);
+${
+  overlayHost
+    ? `  const retainedFrame = frame && frame.kind !== 'detach' ? frame : retainedFrameRef.current;
+  const template = ${p}React.useMemo(() => retainedFrame
+    ? ${p}BindSlots(retainedFrame.node, props.children)
+    // The default authored slot has key zero. Keep that same reconciliation
+    // layer before the first published render, without invoking author render.
+    : ${p}React.createElement(${p}React.Fragment, { key: 0 }, props.children),
+    [retainedFrame?.node, !!retainedFrame, props.children]);`
+    : `  const template = ${p}React.useMemo(() => ${p}BindSlots(frame?.node, props.children), [frame?.node, props.children]);`
+}
 ${
   ssr
     ? `  if (serverRequest) {
@@ -1754,14 +1824,24 @@ ${
 `
     : ''
 }  const host = ownerRef.current?.getHostProjection();
-  const rootView = frame && frame.kind !== 'detach'
-    ? ${p}RenderRoot(host!.tag, { ...${p}HostProperties(props), ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ref: bindRoot }, template)${
+${overlayHost ? "  const detached = !frame || frame.kind === 'detach';\n" : ''}  const rootView = ${overlayHost ? 'host && (!detached || host.viewPolicy.retainWhenDetached)' : "frame && frame.kind !== 'detach'"}
+    ? ${p}RenderRoot(host!.tag, { ...${p}HostProperties(props), ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ${overlayHost ? `[${p}DetachedAttribute]: detached ? '' : undefined, ` : ''}ref: bindRoot }, template)${
       ssr
         ? ` : !frame && projection?.present
       ? ${p}RenderRoot(projection.rootTag, { ...${p}RootAttributes(projection), ref: bindRoot }, ${p}DecodeTemplate(projection.template, props.children))`
         : ''
     } : null;
-  const view = ${interaction ? `rootView && host?.portalTarget ? ${p}CreatePortal(rootView, host.portalTarget) : rootView` : 'rootView'};
+  const view = ${
+    overlayHost
+      ? `host?.viewPolicy.portal
+    ? ${p}React.createElement(${p}React.Fragment, null,
+      ${p}React.createElement('span', { key: 'pui-portal-origin', ref: portalOriginRef, hidden: true, 'aria-hidden': true, 'data-pui-portal-origin': '' }),
+      portalMount && rootView ? ${p}CreatePortal(rootView, portalMount, 'pui-portal-content') : null)
+    : rootView`
+      : interaction
+        ? `rootView && host?.portalTarget ? ${p}CreatePortal(rootView, host.portalTarget) : rootView`
+        : 'rootView'
+  };
 ${
   ssr
     ? `  return ${p}React.createElement(${p}OwnerReady.Provider, { value: started },
@@ -1792,6 +1872,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
         ...staticArtifacts.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
         ...(decorations ? webDecorationArtifacts() : []),
+        ...(overlayHost ? [webViewVisibilityArtifact()] : []),
         ...(interaction ? nativeSupportArtifacts(supportPlan) : []),
         ...(ssr ? [reactSSRTransportArtifact] : []),
         {
@@ -1817,7 +1898,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
                 version: 2 as const,
                 id: supportPlan.id,
                 features: [...supportPlan.features],
-                ...(supportPlan.inputs.length || atoms.presentation || decorations
+                ...(supportPlan.inputs.length || atoms.presentation || decorations || overlayHost
                   ? {
                       inputs: [
                         ...new Map(
@@ -1825,6 +1906,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
                             ...supportPlan.inputs,
                             ...(atoms.presentation ? webPresenceSourceInputs() : []),
                             ...(decorations ? webDecorationSourceInputs() : []),
+                            ...(overlayHost ? webViewVisibilitySourceInputs() : []),
                           ].map((input) => [input.file, input])
                         ).values(),
                       ].sort((a, b) => a.file.localeCompare(b.file)),

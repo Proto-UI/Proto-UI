@@ -61,7 +61,7 @@ export type NativeTableCell = Readonly<{ ref: object; kind: 'column-header' | 'r
 export type NativeTableRow = Readonly<{ ref: object; index: number; cells: readonly NativeTableCell[] }>;
 export type NativeTableDiagnostic = Readonly<{ code: string; ref?: object; row?: number; headerKey?: string }>;
 export type NativeTableSnapshot = Readonly<{ root: object; caption: object | undefined; rowCount: number; columnCount: number; rows: readonly NativeTableRow[]; valid: boolean; diagnostics: readonly NativeTableDiagnostic[] }>;
-export interface NativeAccessibleExtension { readonly objectRef: object; part(family: NativeAnatomyFamily, declaration: { key: string | { get(): unknown } }): void; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
+export interface NativeAccessibleExtension { readonly objectRef: object; part(family: NativeAnatomyFamily, declaration: { key: string | { get(): unknown } }): void; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; nameFromContent(): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
 export type NativeControlLabelAnatomyPair = Readonly<{ family: NativeAnatomyFamily; labelRole: string; targetRole: string }>;
 export type NativeControlLabelRequest = Readonly<{ source: 'pointer' | 'accessibility'; isCurrent(): boolean }>;
 export type NativeControlLabelHandle = Readonly<{ sync(options: Readonly<{ naming: boolean; activation: boolean }>): void }>;
@@ -86,6 +86,8 @@ export interface NativeModuleCapabilities<Run = unknown> {
   asAxisInput(): NativeAxisInput<Run>;
   configureFocusable(config: NativeConfig): void; setFocusDisabled(value: boolean): void; setNavParticipation(value: string): void; setRovingStatus(status: NativeConfig): void; canFocus(): boolean; focus(options?: NativeFocusRequest): void; blur(): void;
   rootTag(): string | null; rootProperties(): Readonly<Record<string, string | number | boolean | null>>; projectAttributes(): Readonly<Record<string, string | null>>; portalTarget(): HTMLElement | null;
+  /** Host rendering policy; independent of physical attachment and without author authority. */
+  viewPolicy(): Readonly<{ retainWhenDetached: boolean; portal: boolean }>;
   adoptControlState(): void; commitHost(): void; mount(): void; unmount(): void; refresh(): void; dispose(): void;
 }
 export interface NativeAdapterModuleOptions<Run> {
@@ -368,7 +370,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function focusCandidates(roving: boolean, logical = false): Owner[] {
     const found: Owner[] = [];
     for (const candidate of owners.values()) {
-      if (candidate === owner || !candidate.alive() || !candidate.focusDeclared || candidate.focusConfig.disabled || (!(logical && roving) && candidate.focusConfig.navParticipation === 'none')) continue;
+      // Sequential Tab participation does not exclude a member from its roving group.
+      if (candidate === owner || !candidate.alive() || !candidate.focusDeclared || candidate.focusConfig.disabled || (!roving && candidate.focusConfig.navParticipation === 'none')) continue;
       const target = candidate.target();
       if (!logical && (!target?.isConnected || target.closest('[hidden],[inert],[data-pui-view-detached]'))) continue;
       if (roving) {
@@ -1016,6 +1019,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     },
     id(value) { setup('accessible.id'); explicitId = value; watchAccessible('id', value); const current = readValue(value); if (typeof current === 'string' && current) hostIds.set(options.identity, current); },
     name(value) { setup('accessible.name'); accessibleName = value; watchAccessible('name', value); },
+    nameFromContent() { setup('accessible.nameFromContent'); accessibleName = undefined; watchAccessible('name', undefined); },
     description(value) { setup('accessible.description'); accessibleDescription = value; watchAccessible('description', value); },
     relation(kind, spec) {
       setup('accessible.relation');
@@ -1191,7 +1195,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (start !== null && end !== null) target.setSelectionRange(Math.min(start, textValue.length), Math.min(end, textValue.length), direction ?? 'none');
     target.scrollTop = top; target.scrollLeft = left;
   }
-  function applyText(initialize = false) {
+  function applyText(initialize = false, projectValue = true) {
     if (!ready() || !textDeclared) return;
     if (root!.localName !== 'input' && root!.localName !== 'textarea') throw new Error('[TextControl] renderer did not bind the required physical Root.');
     const target = root as HTMLInputElement | HTMLTextAreaElement;
@@ -1203,8 +1207,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if ((key === 'minLength' || key === 'maxLength') && typeof value === 'number' && Number.isFinite(value)) { if (value < 0) target.removeAttribute(key.toLowerCase()); else Reflect.set(target, key, Math.trunc(value)); continue; }
       if (['placeholder','name','autoComplete','inputMode','enterKeyHint','wrap'].includes(key) && typeof value === 'string') { if (value === '') target.removeAttribute(key.toLowerCase()); else target.setAttribute(key.toLowerCase(), value); }
     }
-    if (typeof textPatch.defaultValue === 'string') target.defaultValue = canonicalText(textPatch.defaultValue);
-    restoreTextValue(target, initialize);
+    if (projectValue) {
+      if (typeof textPatch.defaultValue === 'string') target.defaultValue = canonicalText(textPatch.defaultValue);
+      restoreTextValue(target, initialize);
+    }
   }
   const textControl: NativeTextControl<Run> = {
     on(type, callback) {
@@ -1849,8 +1855,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const current = () => epoch === availableEpoch && viewEpoch === generation && ready() && availableLease === lease && availableBinding === binding;
     try {
       for (const state of availableLayoutStates(binding)) {
-        if (!options.watchState) throw new Error('[Positioning] layout State observation unavailable.');
-        const off = options.watchState(state, () => { if (!current()) return; const frame = readAvailableLayout(binding); if (current()) lease.updateLayout?.(frame); });
+        if (!options.subscribeState) throw new Error('[Positioning] layout State observation unavailable.');
+        const off = options.subscribeState(state, () => { if (!current()) return; const frame = readAvailableLayout(binding); if (current()) lease.updateLayout?.(frame); });
         if (!current()) { off(); return; }
         availableWatches.push(off);
       }
@@ -2103,7 +2109,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     projectModuleAttributes();
     if (__nativeFeature('part-relationships')) partRelationships?.refresh(root);
     if (__nativeFeature('hit')) projectHit();
-    if (__nativeFeature('text')) applyText();
+    // Other modules can refresh during a text callback, before its owner accepts
+    // the edit. Only TextControl synchronization and its host/event boundaries
+    // may project values; an unrelated refresh must not rewind the native caret.
+    if (__nativeFeature('text')) applyText(false, false);
     if (__nativeFeature('image')) applyImage();
     if (__nativeFeature('overlay')) reconcileOverlay();
     if (__nativeFeature('scope') && owner.scopeDeclared) { const focused = root!.ownerDocument.activeElement; hasFocused.set(!!focused && contains(root!, focused)); scopeActive.set(owner.scopeActive); }
@@ -2112,6 +2121,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if ((__nativeFeature('scope') || __nativeFeature('roving')) && pendingNavigation) { const request = pendingNavigation; pendingNavigation = null; navigate(request.operation, request.options); }
     if (__nativeFeature('scope') && ownedEntry) fulfillOwnedEntry();
     requestPresentation();
+  }
+  function viewPolicy(): Readonly<{ retainWhenDetached: boolean; portal: boolean }> {
+    const declared = __nativeFeature('overlay') && hooks.has('asOverlay');
+    return { retainWhenDetached: declared && overlayPresence !== null, portal: declared && overlayConfig.portal === true };
   }
   function portalTarget(): HTMLElement | null { return __nativeFeature('overlay') && ready() && hooks.has('asOverlay') && overlayConfig.portal && overlayViewActive() ? root!.ownerDocument.body : null; }
   function unmount() {
@@ -2250,7 +2263,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     canFocus,
     focus(request) { runtime('focus.focus'); requestFocus(request); },
     blur() { runtime('focus.blur'); ++scopeActivation; cancelOwnedEntry(); pendingFocus = null; if (ready()) root!.blur(); },
-    rootTag, rootProperties, projectAttributes, portalTarget, adoptControlState,
+    rootTag, rootProperties, projectAttributes, portalTarget, viewPolicy, adoptControlState,
     commitHost() { if (__nativeFeature('text')) applyText(); },
     refresh, mount, unmount,
     dispose() {

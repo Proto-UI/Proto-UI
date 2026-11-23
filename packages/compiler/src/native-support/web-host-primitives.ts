@@ -177,3 +177,13 @@ export function webHostPrimitiveArtifacts(features: Iterable<WebHostPrimitive>) 
   files.unshift(artifact('types', types));
   return files;
 }
+
+const viewVisibilityInput = 'packages/adapters/base/src/host/view-visibility.ts';
+/** Shared paint/AX/tab suppression for a retained physical view. */
+export function webViewVisibilitySourceInputs(): WebHostSourceInput[] {
+  const { file, sha256 } = input(viewVisibilityInput);
+  return [{ file, sha256 }];
+}
+export function webViewVisibilityArtifact() {
+  return sourceArtifact('view-visibility', viewVisibilityInput);
+}

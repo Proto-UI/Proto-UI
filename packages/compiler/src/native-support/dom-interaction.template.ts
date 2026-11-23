@@ -30,7 +30,6 @@ export type NativeAccessible = {
   state(key: string, state: NativeState): void;
   action(key: string, spec?: { event?: string }): void;
   role(role: string | NativeState<string>): void;
-  nameFromContent(): void;
 } & NativeAccessibleExtension;
 export type NativeListenerToken = { readonly id: string; readonly meta: { kind: 'root' | 'global'; type: string; options?: NativeHostOptions; label?: string }; desc(text: string): NativeListenerToken };
 export type NativeEventChannel<Run> = {
@@ -95,7 +94,7 @@ export function createNativeInteraction<Run>(options: {
   let disposed = false, root: HTMLElement | null = null, host: HTMLElement | null = null, generation = 0, trigger = false, focusDeclared = false;
   let disabled = false, autoFocus = false, navParticipation: 'auto' | 'none' = 'auto', keyboard = false;
   let pendingFocus: NativeFocusOptions | undefined, hasPendingFocus = false, didAutoFocus = false;
-  let role: string | NativeState<string> | undefined, contentName = false;
+  let role: string | NativeState<string> | undefined;
   const identity = options.identity ?? {}, registrations: Registration<Run>[] = [], removals: (() => void)[] = [], subscriptions: (() => void)[] = [];
   const states = new Map<string, NativeState>(), actions = new Map<string, { event?: string }>();
   const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
@@ -158,7 +157,6 @@ export function createNativeInteraction<Run>(options: {
     if (__nativeFeature('focus') && focusDeclared) write('tabindex', disabled || navParticipation === 'none' ? '-1' : '0');
     if (__nativeFeature('a11y')) {
     if (role !== undefined) write('role', read(role) || null);
-    if (contentName) write('aria-label', null);
     for (const [key, state] of states) {
       if (!Object.hasOwn(stateAttributes, key)) continue;
       const value = state.get();
@@ -270,7 +268,6 @@ export function createNativeInteraction<Run>(options: {
     state(key, state) { options.ensureSetup('accessible.state'); states.set(key, state); watch(state); refresh(); },
     action(key, spec = {}) { options.ensureSetup('accessible.action'); actions.set(key, { ...spec }); refresh(); },
     role(value) { options.ensureSetup('accessible.role'); role = value; if (typeof value !== 'string') watch(value); refresh(); },
-    nameFromContent() { options.ensureSetup('accessible.nameFromContent'); contentName = true; modules.accessible.name(''); refresh(); },
   };
   function unmount() {
     // Invalidate first: even a retained callback or a failing physical removal is inert.
@@ -543,6 +540,7 @@ export function createNativeInteraction<Run>(options: {
     setRovingStatus: (status) => modules.setRovingStatus(status),
     focus: (request) => modules.focus(request), blur: () => modules.blur(),
     rootTag: () => modules.rootTag(), rootProperties: () => modules.rootProperties(), portalTarget: () => modules.portalTarget(),
+    viewPolicy: () => modules.viewPolicy(),
     commitHost: () => modules.commitHost(),
     projectAttributes: combinedProjectAttributes, adoptAttributes,
     refresh() { modules.refresh(); refresh(); if (__nativeFeature('control-label')) controlLabel?.refresh(); if (__nativeFeature('focus') && hasPendingFocus && deliverable() && root!.isConnected && !disabled) { const request = pendingFocus; hasPendingFocus = false; options.invoke(() => focus.focusSelf(request)); } },

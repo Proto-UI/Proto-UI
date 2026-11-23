@@ -38,6 +38,9 @@ const sources = [
   'packages/modules/feedback/src/presence/sink.ts',
   'packages/modules/feedback/src/motion/sampler.ts',
   'packages/adapters/base/src/motion/web-presence-presentation.ts',
+  'packages/adapters/base/src/motion/web-motion-style-ownership.ts',
+  'packages/adapters/base/src/host/synchronous-steps.ts',
+  'packages/adapters/base/src/host/view-visibility.ts',
   'packages/adapters/base/src/platform/web-preference-source.ts',
   'packages/adapters/base/src/platform/web-owned-decoration-stage.ts',
 ];

@@ -1170,12 +1170,10 @@ function projectedScalarAttributes(
   if (snapshot.id !== undefined) attrs.set('id', snapshot.id || undefined);
   if (snapshot.role !== undefined) attrs.set('role', snapshot.role || undefined);
   if (hasProjectedHeadingLevel(snapshot)) attrs.set('aria-level', String(snapshot.level));
-  if (snapshot.name) {
-    attrs.set(
-      'aria-label',
-      snapshot.name.kind === 'text' ? readTextTarget(snapshot.name.value) || undefined : undefined
-    );
-  }
+  // Content naming leaves the host's explicit name available. Omitting this
+  // scalar also releases this owner's previous text-name contribution.
+  if (snapshot.name?.kind === 'text')
+    attrs.set('aria-label', readTextTarget(snapshot.name.value) || undefined);
   if (snapshot.description) {
     attrs.set(
       'aria-description',
@@ -1223,7 +1221,7 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
   if (typeof snapshot.id !== 'undefined') el.removeAttribute('id');
   if (typeof snapshot.role !== 'undefined') el.removeAttribute('role');
   if (hasProjectedHeadingLevel(snapshot)) el.removeAttribute('aria-level');
-  if (snapshot.name) el.removeAttribute('aria-label');
+  if (snapshot.name?.kind === 'text') el.removeAttribute('aria-label');
   if (snapshot.description) el.removeAttribute('aria-description');
 
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {

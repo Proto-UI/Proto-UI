@@ -1795,7 +1795,22 @@ describe('Vue2 compile-time root-data demand', () => {
       : emitted;
     const native = options(module, true);
     const props = Vue2.observable({ value: 'seed', seed: 'seed', hint: 'before', present: true });
-    const app = new Vue2({ render: (h) => h(native, { props: { ...props } }) });
+    const candidates: Array<{ value: string; selection: [number | null, number | null] }> = [];
+    const app = new Vue2({
+      render: (h) =>
+        h(native, {
+          props: { ...props },
+          on: {
+            editCandidate: () => {
+              const target = editor();
+              candidates.push({
+                value: target.value,
+                selection: [target.selectionStart, target.selectionEnd],
+              });
+            },
+          },
+        }),
+    });
     const host = document.createElement('div');
     document.body.append(host);
     cleanup.push(() => {
@@ -1817,7 +1832,7 @@ describe('Vue2 compile-time root-data demand', () => {
         throw new Error('Native editor was not materialized');
       return target;
     };
-    return { props, child, host, editor, settle };
+    return { props, child, host, editor, settle, candidates };
   }
 
   it.each(['single', 'multiline'] as const)(
@@ -1861,9 +1876,13 @@ describe('Vue2 compile-time root-data demand', () => {
       const editor = view.editor();
       expect(editor.value).toBe('seed');
       editor.value = 'proposal';
+      editor.setSelectionRange(8, 8);
       editor.dispatchEvent(
         new InputEvent('input', { bubbles: true, data: 'proposal', inputType: 'insertText' })
       );
+      // A focus update inside this same input callback must not restore the old
+      // owner value before the callback boundary decides whether to accept it.
+      expect(view.candidates).toEqual([{ value: 'proposal', selection: [8, 8] }]);
       await view.settle();
       expect(editor.value).toBe('seed');
       editor.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
