@@ -465,6 +465,14 @@ class ValueTypeParser {
       if (ts.isIdentifier(node.typeName)) {
         const name = node.typeName.text,
           args = node.typeArguments ?? [];
+        if (name === 'NonNullable' && args.length === 1) {
+          const alternatives = valueAlternatives(this.parse(args[0]));
+          if (alternatives.includes('unknown'))
+            rejectNode(node, 'PUI1020', 'NonNullable requires a checked value domain.');
+          return joinValueTypes(
+            alternatives.filter((member) => member !== 'null' && member !== 'void')
+          );
+        }
         if (name === 'ReturnType' && args.length === 1) {
           if (ts.isTypeQueryNode(args[0])) {
             const path = (name: ts.EntityName): string =>

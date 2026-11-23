@@ -16,6 +16,33 @@ function parse(source: string, files: Record<string, string> = {}) {
 }
 
 describe('ordinary source value types', () => {
+  it('removes only null and undefined alternatives from a checked NonNullable domain', () => {
+    expect(parse(`type Result=NonNullable<null|undefined|false|0|''>;`)).toEqual(
+      parse(`type Result=false|0|'';`)
+    );
+    expect(parse(`type Result=NonNullable<null|undefined>;`)).toEqual(parse(`type Result=never;`));
+    expect(
+      parse(`type Result=NonNullable<Readonly<{value:string|null;optional?:boolean}>|null>;`)
+    ).toEqual(parse(`type Result=Readonly<{value:string|null;optional?:boolean}>;`));
+    expect(
+      parse(`import type {BorrowedStateHandle} from '@proto.ui/core';
+        type Result=NonNullable<BorrowedStateHandle<boolean>|null|undefined>;`)
+    ).toBe('borrowed:boolean');
+  });
+  it('resolves authored aliases and renamed type exports before the NonNullable utility', () => {
+    expect(parse(`type NonNullable<T>={original:T};type Result=NonNullable<null>;`)).toEqual(
+      parse(`type Result={original:null};`)
+    );
+    expect(
+      parse(`import type {Present as Local} from './bridge'; type Result=Local;`, {
+        'bridge.ts': `export type {Present} from './types';`,
+        'types.ts': `export type Present=NonNullable<{active:boolean}|null|undefined>;`,
+      })
+    ).toEqual(parse(`type Result={active:boolean};`));
+  });
+  it.each(['unknown', 'any'])('does not invent a nonnull proof for %s', (domain) => {
+    expect(() => parse(`type Result=NonNullable<${domain}>;`)).toThrow();
+  });
   it('extracts exact literal alternatives from an immutable tuple without widening', () => {
     expect(
       parse(`const IDs=['vega','nova','vega',7,true,null] as const;
