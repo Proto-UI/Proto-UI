@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint4-recovered-candidate-continuation",
+  "status": "local executions recorded; whole check:types failed; published-head validation pending",
+  "observedAt": "2026-11-23T12:54:48.591954+00:00",
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 1714,
+  "source": {
+    "baseMain": "b715b8a6d08c2c79417272c8d4ca9254984feadb",
+    "priorPrHead": "53194e0c01e6073b9ba3e7852c755ab57cfbe12d",
+    "affectedCompilerExecutionHead": "458f8ba776b4210f61079048ae65f05d02a739bf",
+    "affectedCompilerTree": "b130be2e8c27d6f82e23230d5e6b5741e2c45830",
+    "localCandidate": "c7ac9579ce15e838841c16814a43f5451c1fddc9",
+    "localCandidateTree": "263a12d0dd5ca5b36d1cb2fe41a42a8f8c17931d",
+    "apiTransportObject": "2df19de17113c6c122442598aa281f6eb65b6272",
+    "apiTransportReceipt": "raw/api-tree-identity.json.gz",
+    "qualification": "Tree equality and mapped parent DAG establish source transport identity, not new execution, published branch state, independent acceptance or approval."
+  },
+  "executions": [
+    {
+      "id": "affected-compiler",
+      "cwd": "/tmp/proto-ui-sprint4-358e9947",
+      "argv": [
+        "node",
+        "--max-old-space-size=1536",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/compiler/test/terminating-flow-branch.test.ts",
+        "packages/compiler/test/record-getters.test.ts",
+        "packages/compiler/test/record-getter-runtime.test.ts",
+        "packages/compiler/test/record-getter-consumer.test.ts",
+        "packages/compiler/test/module-callable-selection.test.ts",
+        "packages/compiler/test/module-callable-selection-consumer.test.ts",
+        "packages/compiler/test/dormant-source-admission.test.ts",
+        "packages/compiler/test/scalar-conversions.test.ts",
+        "packages/compiler/test/scalar-round.test.ts",
+        "packages/compiler/test/string-coercion.test.ts",
+        "packages/compiler/test/gpui-a11y-value.test.ts",
+        "packages/compiler/test/numeric-a11y-emitter-admission.test.ts",
+        "packages/compiler/test/conditional-accessible-state.test.ts",
+        "packages/compiler/test/readonly-text-boundary.test.ts",
+        "packages/compiler/test/shader-native.test.ts",
+        "packages/compiler/test/shader-native-project.test.ts",
+        "packages/compiler/test/getter-publication-admission.test.ts",
+        "packages/compiler/test/qt-getter-admission.test.ts",
+        "packages/compiler/test/rust-data-source.test.ts",
+        "packages/compiler/test/rust-data-artifacts.test.ts",
+        "packages/compiler/test/diagnostic-registry.test.ts",
+        "--pool=threads",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/tmp/pui-s4-358e9947-ops/frozen-compiler.json"
+      ],
+      "environment": {
+        "PATH_prepend": "/workspace/scratch/e7fad9584b95/rust-toolchain/rustup/toolchains/1.98.1-x86_64-unknown-linux-gnu/bin",
+        "CARGO_HOME": "/workspace/scratch/e7fad9584b95/rust-toolchain/cargo",
+        "CARGO_NET_OFFLINE": "true",
+        "CARGO_BUILD_JOBS": "1",
+        "CARGO_PROFILE_DEV_DEBUG": "0",
+        "CARGO_PROFILE_TEST_DEBUG": "0",
+        "PROTO_UI_REQUIRE_RUST_DATA_TESTS": "1",
+        "PROTO_UI_RUST_DATA_CARGO": "/workspace/scratch/e7fad9584b95/rust-toolchain/rustup/toolchains/1.98.1-x86_64-unknown-linux-gnu/bin/cargo"
+      },
+      "node": "v24.22.3",
+      "rust": "1.98.1",
+      "exitCode": 0,
+      "durationSeconds": 79.27,
+      "result": {
+        "success": true,
+        "tests": 376,
+        "passed": 376,
+        "failed": 0,
+        "pending": 0,
+        "files": 21
+      },
+      "evidence": ["raw/frozen-compiler.log.gz", "raw/frozen-compiler.json.gz"],
+      "observationProvenance": "Counts and duration are from preserved runner JSON/log. The exact argv, environment and exit code were reported by root from its actual prior tool execution; this summary is not a contemporaneous execution receipt."
+    },
+    {
+      "id": "numeric-restoration",
+      "result": {
+        "success": true,
+        "tests": 36,
+        "passed": 36,
+        "failed": 0,
+        "pending": 0,
+        "files": 1
+      },
+      "evidence": [
+        "raw/numeric-admission-restored.log.gz",
+        "raw/numeric-admission-restored.json.gz",
+        "raw/numeric-admission-restored.metadata.json.gz"
+      ],
+      "qualification": "Separate preceding run on the restored working tree. The same 36 assertions are included in the later 376 and are not added to that coverage total."
+    },
+    {
+      "id": "registry-initial-generation",
+      "result": {
+        "success": false,
+        "tests": 5,
+        "passed": 3,
+        "failed": 2,
+        "pending": 0,
+        "files": 1
+      },
+      "snapshotsUpdated": 1,
+      "evidence": [
+        "raw/license-snapshot-generation.log.gz",
+        "raw/license-snapshot-generation.json.gz"
+      ],
+      "qualification": "Original failed update-mode observation; two actual failures retained."
+    },
+    {
+      "id": "registry-corrected-generation",
+      "result": {
+        "success": true,
+        "tests": 5,
+        "passed": 5,
+        "failed": 0,
+        "pending": 0,
+        "files": 1
+      },
+      "snapshotsUpdated": 1,
+      "evidence": [
+        "raw/diagnostic-registry-generation.log.gz",
+        "raw/diagnostic-registry-generation.json.gz"
+      ],
+      "qualification": "Snapshot update-mode pass. Ordinary non-update verification of all five cases is included in affected-compiler."
+    },
+    {
+      "id": "shader-intermediate-runtime",
+      "result": {
+        "success": true,
+        "tests": 1,
+        "passed": 1,
+        "failed": 0,
+        "pending": 0,
+        "files": 1
+      },
+      "evidence": ["raw/shader-unused-style.log.gz", "raw/shader-unused-style.json.gz"],
+      "qualification": "tw() intermediate source passed runtime coverage but still lacked the required public-factory argument; not final type evidence."
+    },
+    {
+      "id": "shader-corrected-runtime",
+      "result": {
+        "success": true,
+        "tests": 1,
+        "passed": 1,
+        "failed": 0,
+        "pending": 0,
+        "files": 1
+      },
+      "sourceSha256": "f3efbc446732156e32a408f742633ed810155901dbd637d71559008d54f91a8a",
+      "sourcePath": "packages/adapters/base/test/shader-unused-capability.test.ts",
+      "integratedIn": "c7ac9579ce15e838841c16814a43f5451c1fddc9",
+      "evidence": [
+        "raw/shader-unused-style-corrected.log.gz",
+        "raw/shader-unused-style-corrected.json.gz"
+      ],
+      "qualification": "Actual corrected tw('') working-tree run, followed by source integration; not claimed as rerun after API transport."
+    },
+    {
+      "id": "archive-reader-red-green",
+      "productionEntry": "scripts/governance/history-files.mjs:readHistorySnapshot",
+      "actualInput": "internal/records/2026-11-22-sprint-7-history.snapshot.json.gz",
+      "redExitCode": 1,
+      "redMessage": "native source index changed: timeline.index.json",
+      "greenExitCode": 0,
+      "counts": {
+        "pullRequests": 1230,
+        "issueTimelines": 467,
+        "inlinePages": 43
+      },
+      "restoredFilesExactlyMatchMain": 10,
+      "prettierExcludedExactDirectories": 5,
+      "evidence": [
+        "raw/archive-preservation/runtime-reader.mjs.gz",
+        "raw/archive-preservation/red.receipt.json.gz",
+        "raw/archive-preservation/red.stdout.log.gz",
+        "raw/archive-preservation/red.stderr.log.gz",
+        "raw/archive-preservation/green.receipt.json.gz",
+        "raw/archive-preservation/green.stdout.log.gz",
+        "raw/archive-preservation/green.stderr.log.gz",
+        "raw/archive-preservation/restoration.json.gz",
+        "raw/archive-preservation/prettier-ignore.json.gz",
+        "raw/archive-preservation/prettier-check.receipt.json.gz"
+      ],
+      "qualification": "Reader and frozen snapshot bytes are unchanged. Restoring original archive index bytes resolves actual production-reader rejection; this is not history decision acceptance."
+    },
+    {
+      "id": "local-public-docs",
+      "script": "check:public-docs",
+      "exitCode": 0,
+      "reportedSession": 70744,
+      "scopeCounts": {
+        "bilingualPrimaryRoutes": 305,
+        "libraryInventories": 4,
+        "maintainedDocuments": 436
+      },
+      "evidence": ["raw/recovery-public-docs.log.gz"],
+      "observationProvenance": "Original log plus root actual completed tool session 70744, exit 0. This is the existing local run, not a rerun or an exact published-head workflow."
+    }
+  ],
+  "failedTypeAttempts": [
+    {
+      "log": "raw/frozen-types.log.gz",
+      "observedMessage": "JavaScript heap out of memory; Aborted",
+      "reportedExitCode": 134
+    },
+    {
+      "log": "raw/frozen-types-retry.log.gz",
+      "observedMessage": "TS2741: original style object lacks required kind",
+      "reportedExitCode": 2
+    },
+    {
+      "log": "raw/frozen-types-fixed.log.gz",
+      "observedMessage": "Killed",
+      "reportedExitCode": 137
+    },
+    {
+      "log": "raw/frozen-types-corrected.log.gz",
+      "observedMessage": "/usr/bin/time: No such file or directory",
+      "reportedExitCode": 127,
+      "typecheckStarted": false
+    }
+  ],
+  "failedTypeExitCodeProvenance": "Root actual tool completion observations. Raw logs independently preserve the messages, but do not themselves print all numeric exit statuses. No contemporaneous receipt is invented.",
+  "correctedFullTypes": {
+    "status": "failed",
+    "wholeCommandPassed": false,
+    "sourceCandidate": "c7ac9579ce15e838841c16814a43f5451c1fddc9",
+    "argv": ["corepack", "pnpm@10.32.1", "-s", "check:types"],
+    "nodeOptions": "--max-old-space-size=3072",
+    "exitCode": 137,
+    "elapsedSeconds": 278.93398147101107,
+    "maxRssKiB": 2870140,
+    "phaseObservation": "Root observed the workspace tsc stage complete; subsequent Docs/Astro stage emitted warnings and was Killed. This is not a successful full check:types result.",
+    "phaseObservationProvenance": "Root actual execution observation plus sequential command/log progression; not a separate per-stage receipt.",
+    "evidence": [
+      "raw/frozen-types-corrected-replay.log.gz",
+      "raw/frozen-types-corrected-replay.receipt.json.gz"
+    ],
+    "nextAction": "Run the complete unchanged check:types command on the final published candidate in the isolated remote executor; retain new evidence separately."
+  },
+  "independentReview": {
+    "reports": [
+      "raw/independent-source-review/fresh-source-recovery-review.json.gz",
+      "raw/independent-source-review/shader-presence-fresh-identity.json.gz",
+      "raw/independent-source-review/archive-preservation-fresh-review.json.gz",
+      "raw/independent-source-review/shader-style-fresh-review.json.gz",
+      "raw/independent-source-review/additional-delta-review.json.gz",
+      "raw/independent-source-review/shader-style-resolution.json.gz"
+    ],
+    "resolvedFinding": "S4-SHADER-STYLE-ARITY",
+    "qualification": "Fresh local source reviews and finding resolution; no fabricated GitHub APPROVE, final canonical pui-review packet or new reviewer execution."
+  },
+  "pendingAtThisCheckpoint": [
+    "Complete check:types still unpassed locally after exit 137; full replay on the final published candidate remains pending.",
+    "Final branch publication and readback",
+    "Applicable workflows on exact published candidate",
+    "Formal canonical review input, pui-review and approval",
+    "IR10 contribution-rights, definition-owner, compatibility and consumer-migration criteria remain separately owned"
+  ],
+  "evidencePolicy": {
+    "rawCopies": "Gzip decompression must reproduce each original selected file exactly; raw and compressed SHA-256 values are in manifest.json.",
+    "noReconstructedOldLogs": true,
+    "noExternalBusinessSource": true,
+    "noCredentials": true,
+    "noUnavailableChecksRelabeledPassed": true
+  }
+}
