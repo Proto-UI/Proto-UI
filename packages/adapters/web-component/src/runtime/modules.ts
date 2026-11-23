@@ -853,6 +853,14 @@ function collectEntryStyleDependencies(
   observesResize: boolean,
   observedRoots: ReadonlySet<Node>
 ) {
+  const ScopeRule = (
+    view as unknown as {
+      CSSScopeRule?: new () => CSSGroupingRule & {
+        readonly start: string | null;
+        readonly end: string | null;
+      };
+    }
+  ).CSSScopeRule;
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
@@ -880,6 +888,13 @@ function collectEntryStyleDependencies(
     if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
+    // A scope's start/end selectors can change entry eligibility without an
+    // attribute mutation. Read their native IDL, not a whole grouping cssText
+    // whose media features and nested declarations are not selector preludes.
+    if (!inputState && ScopeRule && rule instanceof ScopeRule)
+      inputState =
+        selectorMayDependOnInputState(rule.start ?? '') ||
+        selectorMayDependOnInputState(rule.end ?? '');
     if (rule.type === 3 || rule.type === 4)
       collectMedia((rule as CSSImportRule | CSSMediaRule).media);
     if (rule.type === 3) {

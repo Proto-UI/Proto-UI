@@ -3469,6 +3469,132 @@ describe('Shadow closeout native boundaries', () => {
     );
   });
 
+  describe('native input-dependent scope boundaries', () => {
+    const fixtures = new Map<
+      'start' | 'end',
+      { page: Awaited<ReturnType<typeof browser.newPage>>; errors: string[] }
+    >();
+
+    beforeAll(async () => {
+      // Preparation retains the existing browser setup bound. Each scope case
+      // has a fresh page and the original five-second interaction test bound.
+      for (const boundary of ['start', 'end'] as const) {
+        const page = await browser.newPage();
+        const errors: string[] = [];
+        fixtures.set(boundary, { page, errors });
+        page.on('pageerror', (error) => errors.push(error.message));
+        await page.addScriptTag({ content: script });
+        const style = await page.addStyleTag({
+          content:
+            boundary === 'start'
+              ? '@scope (body:has(#entry-scope-toggle:checked)) { #native-scope-entry button { visibility: hidden; } }'
+              : '@scope (body) to (#entry-scope-toggle:checked + #entry-scope-limit) { #native-scope-entry button { visibility: hidden; } }',
+        });
+        await style.evaluate((node) => {
+          node.id = 'entry-scope-fixture';
+        });
+        await style.dispose();
+      }
+    }, 30_000);
+
+    afterAll(async () => {
+      await Promise.all([...fixtures.values()].map(({ page }) => page.close()));
+    });
+
+    it.each(['start', 'end'] as const)(
+      'reprojects entry during native input in an @scope %s selector',
+      async (boundary) => {
+        const { page, errors } = fixtures.get(boundary)!;
+        const initial = await page.evaluate(async () => {
+          const p = (window as any).Closeout;
+          const C = p.adapt(
+            p.define({
+              name: 'closeout-input-scope-entry',
+              setup() {
+                p.asFocusEntry().configure({ strategy: 'descendant-first', fallback: 'self' });
+                return (r: any) => r.slot();
+              },
+            })
+          );
+          const editor = document.createElement('input');
+          editor.type = 'checkbox';
+          editor.id = 'entry-scope-toggle';
+          const limit = document.createElement('div');
+          limit.id = 'entry-scope-limit';
+          const host = new C();
+          host.id = 'native-scope-entry';
+          const button = document.createElement('button');
+          button.textContent = 'Scope-dependent entry target';
+          host.append(button);
+          limit.append(host);
+          document.body.append(editor, limit);
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+          const rule = (document.getElementById('entry-scope-fixture') as HTMLStyleElement).sheet!
+            .cssRules[0];
+          const ScopeRule = (window as any).CSSScopeRule;
+          const scope = rule as CSSRule & { start: string | null; end: string | null };
+          const snapshot = () => ({
+            checked: editor.checked,
+            checkedAttribute: editor.getAttribute('checked'),
+            fallback: host.getAttribute('tabindex'),
+            visibility: getComputedStyle(button).visibility,
+          });
+          (window as any).entryScopeObservations = [];
+          document.addEventListener('input', (event) => {
+            if (event.target !== editor) return;
+            // Observe this native dispatch after Adapter capture and before
+            // a later observer or rendering checkpoint can repair projection.
+            (window as any).entryScopeObservations.push({
+              trusted: event.isTrusted,
+              ...snapshot(),
+            });
+          });
+          return {
+            nativeScope: typeof ScopeRule === 'function' && rule instanceof ScopeRule,
+            start: scope.start,
+            end: scope.end,
+            related: host.contains(editor) || editor.contains(host),
+            snapshot: snapshot(),
+          };
+        });
+        const initiallyVisible = boundary === 'start';
+        expect(initial).toEqual({
+          nativeScope: true,
+          start: initiallyVisible ? 'body:has(#entry-scope-toggle:checked)' : 'body',
+          end: initiallyVisible ? null : '#entry-scope-toggle:checked + #entry-scope-limit',
+          related: false,
+          snapshot: {
+            checked: false,
+            checkedAttribute: null,
+            fallback: initiallyVisible ? null : '0',
+            visibility: initiallyVisible ? 'visible' : 'hidden',
+          },
+        });
+
+        await page.locator('#entry-scope-toggle').check();
+        await page.locator('#entry-scope-toggle').uncheck();
+        expect(await page.evaluate(() => (window as any).entryScopeObservations)).toEqual([
+          {
+            trusted: true,
+            checked: true,
+            checkedAttribute: null,
+            fallback: initiallyVisible ? '0' : null,
+            visibility: initiallyVisible ? 'hidden' : 'visible',
+          },
+          {
+            trusted: true,
+            checked: false,
+            checkedAttribute: null,
+            fallback: initiallyVisible ? null : '0',
+            visibility: initiallyVisible ? 'visible' : 'hidden',
+          },
+        ]);
+        expect(errors).toEqual([]);
+      }
+    );
+  });
+
   it('reprojects descendant entry at a native visibility transition endpoint', async () => {
     const page = await browser.newPage();
     const errors: string[] = [];
