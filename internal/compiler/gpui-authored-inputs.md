@@ -14,51 +14,27 @@ The existing public `textControl.resetValue(value?)` is lowered to a bounded edi
 
 Native `text_select_utf16(owner, start, end, window, app)` is a host API, not a new portable author hook. A prototype can publish its selected range policy and the host applies it to the exact current editor. It clamps and snaps codepoint boundaries without splitting surrogate pairs, reveals the caret, permits readonly selection, and rejects disabled, composing, detached or foreign-window targets. Consumers must also retain their authored request/view epoch for asynchronous requests; this synchronous host API does not authenticate a stale app task.
 
+The native AccessKit projection publishes the editor's current canonical text as `TextRun` children of its semantic root. Each hard LF line keeps its line break, and an empty editor or trailing empty line still has a run. `character_lengths` describe selectable Unicode scalar boundaries in UTF-8 bytes; source/native UTF-16 ranges convert to run-relative AccessKit positions, preserving anchor and focus for reversed selections. Placeholder text stays a placeholder and never becomes editable content.
+
+`SetTextSelection` enters the same native selection executor through a weak owner and the exact published view receipt. Its run IDs, text value, owner/editing epochs, window, frame and hitbox must remain current. Reset, detach, replacement, an unpublished text change, an unknown run or an out-of-range position rejects the request. Readonly text remains selectable; disabled and composing editors reject selection changes. This bridge belongs to the declared host editor and does not introduce a component-specific action or a new author API.
+
+These runs publish text and selection, not synthetic character geometry. They do not assign the whole input rectangle to each character. Glyph bounds, character positions/widths and visual soft-wrap runs remain absent until supplied by verified native layout; this slice does not establish AT-SPI character extents, magnifier positioning or OS IME acceptance. The AccessKit consumer regression and actual platform Text-interface observation are separate evidence.
+
 The pinned GPUI `62e5991` profile exposes the current selection through its native input handler and redraws the editor, but has no `Window::notify_text_selection_changed` API. The SDK's optional `gpui-text-selection-notification` Cargo feature calls that extension for a separately verified host that provides it. It is disabled by default in both dependency modes: choosing a workspace dependency or the modern Element ABI does not prove that independent platform-notification capability. Consumers using the extension must enable the feature on their production SDK dependency. This does not claim OS text-service notification support for the pinned profile.
 
 While composition is active, ordinary native editing commands cannot navigate, delete, paste, undo or confirm provisional text. The native IME replacement path continues to own that session. Focus traversal also avoids moving away through an unhandled Tab during composition. These tests use GPUI's input handler and are not a claim that a particular OS input method has been exercised.
 
 ## Sequential native focus
 
-GPUI records a committed native tab order but does not itself perform the Tab
-default action. The generated host supplies that action after authored and native
-key handlers have completed. An App-local weak owner registry captures one
-ordinary Tab or Shift+Tab request before authored global handlers run, then the
-settled keystroke observer performs focus movement synchronously. A later native
-ancestor can still prevent the default or stop propagation; an action-resolved
-key cannot also acquire the fallback. The deferred cleanup only retires a stopped
-request and never performs delayed navigation.
+GPUI records a committed native tab order but does not itself perform the Tab default action. The generated host supplies that action after authored and native key handlers have completed. An App-local weak owner registry captures one ordinary Tab or Shift+Tab request before authored global handlers run, then the settled keystroke observer performs focus movement synchronously. A later native ancestor can still prevent the default or stop propagation; an action-resolved key cannot also acquire the fallback. The deferred cleanup only retires a stopped request and never performs delayed navigation.
 
-Window and focus identifiers are local to an App. Native input fan-out, boundary
-input and queued host driving therefore select owners from that App's weak
-registry before applying the existing window and mounted-view checks. A matching
-WindowId in another App cannot authorize an event or Entity update there. The
-separate-App native regression exercises this through real physical key dispatch;
-it does not claim a broader rewrite of every portable logical registry.
+Window and focus identifiers are local to an App. Native input fan-out, boundary input and queued host driving therefore select owners from that App's weak registry before applying the existing window and mounted-view checks. A matching WindowId in another App cannot authorize an event or Entity update there. The separate-App native regression exercises this through real physical key dispatch; it does not claim a broader rewrite of every portable logical registry.
 
-Registering an unchanged physical binding is idempotent. Ordinary Props updates
-and queued host driving reuse the owner's epoch, window and weak native handle
-receipt, without scanning or notifying the App registry again. A replaced or
-reattached binding registers its new receipt; current disabled, navigation and
-composition eligibility still comes from the live owner at dispatch. The native
-regression observes actual registry notifications across repeated component
-updates and detach/reattach, rather than imposing an elapsed-time threshold.
+Registering an unchanged physical binding is idempotent. Ordinary Props updates and queued host driving reuse the owner's epoch, window and weak native handle receipt, without scanning or notifying the App registry again. A replaced or reattached binding registers its new receipt; current disabled, navigation and composition eligibility still comes from the live owner at dispatch. The native regression observes actual registry notifications across repeated component updates and detach/reattach, rather than imposing an elapsed-time threshold.
 
-An active trapped FocusScope retains its in-scope navigation policy. Otherwise
-the host uses GPUI's current native tab map, including ordinary native siblings,
-disabled targets and authored `navParticipation`. This does not make a
-programmatically focusable target a tab stop or implement application collection
-navigation in the host. Modified shortcuts, inactive windows and current compiled
-TextControl composition do not enter this fallback. A replaced, detached or disposed
-owner, changed native focus, or newer authored focus intent invalidates the
-captured request. Facts still come from the actual focus observations.
+An active trapped FocusScope retains its in-scope navigation policy. Otherwise the host uses GPUI's current native tab map, including ordinary native siblings, disabled targets and authored `navParticipation`. This does not make a programmatically focusable target a tab stop or implement application collection navigation in the host. Modified shortcuts, inactive windows and current compiled TextControl composition do not enter this fallback. A replaced, detached or disposed owner, changed native focus, or newer authored focus intent invalidates the captured request. Facts still come from the actual focus observations.
 
-The public GPUI API does not expose a focus-change generation for an arbitrary
-native handler that moves focus away and back to the identical handle within one
-keystroke without consuming it. The current witness can compare the resulting
-native handle and authored intent, but does not claim to detect that intermediate
-native-only round trip. This bounded host limitation is separate from source
-focus requests and ordinary prevention/propagation behavior.
+The public GPUI API does not expose a focus-change generation for an arbitrary native handler that moves focus away and back to the identical handle within one keystroke without consuming it. The current witness can compare the resulting native handle and authored intent, but does not claim to detect that intermediate native-only round trip. This bounded host limitation is separate from source focus requests and ordinary prevention/propagation behavior.
 
 ## Source prerequisites
 
@@ -66,28 +42,13 @@ The shared source and independent IR checks admit UTF-16 string length, checked 
 
 An authored capture's `render` member retains the callable returned by that exact hook setup. The native lowering follows that nominal provenance to admit scalar or empty render callbacks as well as native renderer callbacks. An absent optional captured renderer keeps the normal default-slot behavior. This does not make arbitrary record members into renderers or add a template interpreter.
 
-For spread and admitted Object.assign, an absent source field preserves the
-previous target property on that branch. It cannot erase an earlier enumerable
-undefined merely because another branch supplies a safe value.
+For spread and admitted Object.assign, an absent source field preserves the previous target property on that branch. It cannot erase an earlier enumerable undefined merely because another branch supplies a safe value.
 
 ## Callback delivery and terminal cleanup
 
 A valid Expose emission wakes the native component's observers even when the callback does not modify State or call `run.update()`. The event remains queued until its consumer takes it; observing it does not manufacture a new authored input or duplicate the payload. Invalid emissions cannot schedule a wakeup.
 
-Native focus and blur callbacks run in GPUI's drawing turn, where immediate
-`Context::notify` does not dispatch entity-observer effects. Generated component
-drivers keep their authored state changes synchronous and defer the entity
-notification through a weak view until the current host turn ends. Consumers
-therefore receive focus-triggered cancellations and exposed output without
-polling or implementing a second blur policy. The real generated focus fixture
-checks both the source fact and the external entity observer after focus gain
-and loss; the weak notification cannot retain a removed component.
-Rendering the generated view does not consume that pending observer signal.
-The native parent may call an exposed method while constructing its layout;
-the child's subsequent render must preserve event-only output until the queued
-driver notifies its consumer. A separate native fixture verifies exactly-once
-delivery over repeated native-parent renders without adding authored State or
-calling `run.update()`.
+Native focus and blur callbacks run in GPUI's drawing turn, where immediate `Context::notify` does not dispatch entity-observer effects. Generated component drivers keep their authored state changes synchronous and defer the entity notification through a weak view until the current host turn ends. Consumers therefore receive focus-triggered cancellations and exposed output without polling or implementing a second blur policy. The real generated focus fixture checks both the source fact and the external entity observer after focus gain and loss; the weak notification cannot retain a removed component. Rendering the generated view does not consume that pending observer signal. The native parent may call an exposed method while constructing its layout; the child's subsequent render must preserve event-only output until the queued driver notifies its consumer. A separate native fixture verifies exactly-once delivery over repeated native-parent renders without adding authored State or calling `run.update()`.
 
 Retained callback handles preserve reference identity within their instance, including when a callback compares a saved handle with its own local copy. Handles from different instances remain distinct; the same instance's definition, callback and renderer handles also have separate identities. Equality only observes the reference; it neither grants callback scope nor revives a disposed owner.
 
