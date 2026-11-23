@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { admittedHookOperation, hookAdmission } from './hook-admission';
 import { dormantSourceDeclarations } from './parser-source-demand';
+import { checkDeferredSourceTypes } from './deferred-source-types';
 import { moduleBoolean } from './source-module-initialization';
 import { hasAccessorField, moduleAccessorStorageIssue } from './record-accessors';
 
@@ -823,13 +824,15 @@ class Frontend {
         ...(parameter.questionToken || parameter.initializer ? { optional: true } : {}),
       };
     });
-    return {
+    const signature: ValueType = {
       kind: 'callable',
       parameters,
       returnType: node.type
         ? parseSourceValueType(module, node.type, this.substitutions)
         : 'unknown',
     };
+    checkDeferredSourceTypes(node, parameters);
+    return signature;
   }
 
   private resolvePending(binding: Binding): void {

@@ -125,6 +125,32 @@ export const unselected=definePrototype({name:'invalid',setup:123});`;
   });
 
   it.each([
+    `const apply=(current:(...values:boolean[])=>boolean)=>current([true]);`,
+    `const renamed=(read:(value:number)=>number)=>{globalThis.document;return read('wrong');};`,
+  ])('retains a closed type contradiction in a dormant body: %s', (body) => {
+    expect(parsePrototype(owner(body))).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1006', message: 'Callable argument 1 type mismatch.' }],
+    });
+  });
+
+  it.each([
+    `const apply=(current:(...values:boolean[])=>boolean)=>current(true);`,
+    `const apply=(current:(...values:boolean[])=>boolean)=>current(...[true,false]);`,
+    `const apply=(current:(...values:boolean[])=>boolean)=>{globalThis.document;return current(true);};`,
+    `const apply=(current:(...values:boolean[])=>boolean)=>{const inner=(current:(values:boolean[])=>boolean)=>current([true]);};`,
+    `const apply=(current:(...values:boolean[])=>boolean)=>{{const current=(values:boolean[])=>true;current([true]);}};`,
+  ])('keeps valid literal calls and shadowed or host bodies deferred: %s', (body) => {
+    const source = owner(body);
+    const parsed = parsePrototype(source);
+    expect(parsed.ok, parsed.ok ? undefined : JSON.stringify(parsed.diagnostics)).toBe(true);
+    if (parsed.ok) {
+      expect(parsed.value.sourceFiles[0].content).toBe(source);
+      expect(validateIR(JSON.parse(JSON.stringify(parsed.value))).ok).toBe(true);
+    }
+  });
+
+  it.each([
     'react-runtime-v1',
     'react-dom-source-v1',
     'vue-source-v1',
