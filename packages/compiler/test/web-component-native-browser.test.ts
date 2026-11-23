@@ -14,7 +14,7 @@ const floatingUi = createRequire(
 interface NativeElement extends HTMLElement {
   logicalOwner: symbol | null;
   update(): void;
-  getExposes(): { bump?: (next: number) => void };
+  getExposes(): { bump?: (next: number) => void; read?: () => string | number | null };
   dispose(): void;
 }
 let nextTag = 0;

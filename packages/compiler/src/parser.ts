@@ -65,6 +65,7 @@ import { parseSourceDataType } from './source-types';
 import { sourceTypeIdentity } from './source-type-resolution';
 import { parseSourceValueType, type TypeSubstitutions } from './source-values';
 import { deriveHookCapture, derivePrototypeCaptures, mergeHookCaptures } from './capture-analysis';
+import { captureFacadeFields, checkedSpreadFields, mergeSpreadField } from './capture-types';
 import { callableEffectIssue } from './callable-effects';
 import { FlowProof, functionCanMutateFlow, writtenMemberFields, type FlowMark } from './flow-proof';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
@@ -81,10 +82,10 @@ import {
   checkedCall,
   arrayEveryCallbackParameters,
   intrinsicResult,
-  publishedDataType,
   valueAlternatives,
   canNarrowValue,
   erasesRuntimeAuthority,
+  dataBoundaryType,
 } from './value-types';
 import {
   STATIC_CORE_VALUES,
@@ -99,6 +100,7 @@ import {
   IR_VERSION,
   isDataValueType,
   isPublicValueType,
+  hasCaptureLookup,
   isCapabilityAssignable,
   lexicalValueType,
   lexicalStoredType,
@@ -704,12 +706,12 @@ class Frontend {
           if (optional) return 'void';
           throw new TypeError(`Cannot read ${property} on a nullish value.`);
         }
-        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'stateHandles')
-          return captureStateHandlesType(
-            this.captureTypes.get(owner.hookId) ?? this.hooks.get(owner.hookId)?.capture
+        if (typeof owner !== 'string' && owner.kind === 'capture')
+          return memberValueType(
+            { kind: 'object', fields: this.captureFields(owner.hookId) },
+            property,
+            optional
           );
-        if (typeof owner !== 'string' && owner.kind === 'capture' && property === 'render')
-          return joinValueTypes([this.hooks.get(owner.hookId)?.setup.returnType ?? 'void', 'void']);
         const capability = capabilityMemberType(owner, property, optional);
         if (capability !== undefined) return capability;
         if (owner === 'props') {
@@ -722,6 +724,19 @@ class Frontend {
         if (event !== undefined) return event;
         return memberValueType(owner, property, optional);
       })
+    );
+  }
+
+  private captureFields(id: string) {
+    return captureFacadeFields(
+      this.hooks.get(id),
+      new Map(
+        [...this.hooks].map(([id, hook]) => [
+          id,
+          hook.projectHandle?.returnType ?? { kind: 'capture', hookId: id },
+        ])
+      ),
+      this.captureTypes.get(id) ?? this.hooks.get(id)?.capture
     );
   }
 
@@ -1845,7 +1860,7 @@ class Frontend {
       for (const property of node.properties) {
         if (ts.isSpreadAssignment(property)) {
           const value = this.expression(module, property.expression, scope, phase);
-          const spread = objectFields(value.type);
+          const spread = checkedSpreadFields(value.type, (id) => this.captureFields(id));
           if (!spread)
             rejectNode(property, 'PUI1006', 'Object spread requires a checked ordinary record.');
           parts.push({ kind: 'spread', value });
@@ -3332,7 +3347,7 @@ class Frontend {
     if (operation === 'expose.emit') {
       const names = finiteStringKeys(args[0])!;
       const kind = this.eventKinds.get(names[0])!;
-      const payload = publishedDataType(args[1]?.type ?? 'void');
+      const payload = dataBoundaryType(args[1]?.type ?? 'void');
       if (
         payload === undefined ||
         (kind === 'void' && payload !== 'void') ||
@@ -3507,6 +3522,12 @@ class Frontend {
         exposure = { name, kind: 'value', type: args[1].type, span };
       } else {
         const method = args[1].kind === 'function' ? args[1].function : callableValue(args[1].type);
+        if (method.parameters.some((parameter) => hasCaptureLookup(parameter.type)))
+          rejectNode(
+            node,
+            'PUI1006',
+            'Public method parameters cannot claim capture getter lookup signatures.'
+          );
         if (!isPublicValueType(method.returnType))
           rejectNode(
             node,
