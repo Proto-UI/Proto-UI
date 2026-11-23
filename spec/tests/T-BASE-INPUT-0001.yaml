@@ -5,6 +5,21 @@ status: draft
 since: 0.3.0-alpha.0
 summary: Verifies the Base Input authoring entries, physical input target, hints, normalized state, and boundary.
 cases:
+  - id: T-BASE-INPUT-0001-CASE-EDITOR-HOOK
+    title: A directly named standalone editor retains editing without claiming an independent Label pair
+    covers:
+      [
+        P-BASE-INPUT-EDITOR-HOOK,
+        P-BASE-INPUT-PHYSICAL-TARGET,
+        P-BASE-INPUT-VALUE-OWNERSHIP,
+        P-BASE-INPUT-EDITING-RESET,
+        P-BASE-INPUT-A11Y-AND-FOCUS,
+      ]
+    expectation: An actual asInputEditor consumer publishes value and composition handles and external focus/reset methods, materializes one editor, preserves direct naming and controlled ownership, and rejects independent Label association. An asInputRoot control in the same test retains the real paired Label protocol.
+  - id: T-BASE-INPUT-0001-CASE-RESET
+    title: Explicit reset replaces the editing lease without synthesizing user input
+    covers: [P-BASE-INPUT-EDITING-RESET, P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME]
+    expectation: Uncontrolled reset canonicalizes supplied or default text; controlled reset retires composition while retaining owner value and returning false. No editing event is synthesized, retired editors and detached calls cannot write, and synchronous reset reentry keeps the newer state.
   - id: T-BASE-INPUT-0001-CASE-SURFACE
     title: Root materializes one contentless native input with the accepted property surface
     covers:
@@ -23,6 +38,24 @@ cases:
     covers: [P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME, C-TEXT-CONTROL-0001-F]
     expectation: A real RuntimeSession detach clears the exposed composing fact while preserving controlled owner values or dirty uncontrolled values. Rejoining accepts fresh input without synthesizing compositionEnd. Synchronous value/composing observers or compositionStart/valueChange handlers may detach and rejoin; the retired callback cannot resume state writes or emit an undelivered tail into the new view.
 implementations:
+  - id: prototypes-base-input-editor
+    kind: runtime-test
+    status: needs-review
+    path: packages/prototypes/base/test/input-editor.test.ts
+    required: true
+    consumesCases: [T-BASE-INPUT-0001-CASE-EDITOR-HOOK]
+    exercises: [P-BASE-INPUT]
+    notes:
+      - An actual standalone authored hook and ordinary Web Component Adapter consumer exercise the shared editor and the separate full InputRoot Label target; this is not native GPUI, platform IME or OS accessibility evidence.
+  - id: prototypes-base-input-reset
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/input-reset.test.ts
+    required: true
+    consumesCases: [T-BASE-INPUT-0001-CASE-RESET]
+    exercises: [P-BASE-INPUT]
+    notes:
+      - Actual Input prototype and Web TextControl host Runtime tests; this is separate from native GPUI and OS IME evidence.
   - id: prototypes-base-input-composition-lifetime
     kind: runtime-test
     status: passing
@@ -47,7 +80,12 @@ exercises:
   modules: [M-TEXT-CONTROL-0001]
 sources:
   - path: packages/prototypes/base/test/input.test.ts
+  - path: packages/prototypes/base/test/input-editor.test.ts
+  - path: packages/prototypes/base/test/input-reset.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added explicit reset and directly named standalone editor cases while keeping paired ControlLabel participation on the full InputRoot entry.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Added source-bound editing-view retirement and synchronous reentry coverage across Base, Shadcn and Brutalist Input.

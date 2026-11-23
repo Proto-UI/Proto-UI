@@ -29,8 +29,8 @@ If a decision later stabilizes, the relevant parts should be promoted into one o
 - `spec/contracts/*`
 - `spec/prototypes/*`, `spec/modules/*`, or `spec/host-caps/*`
 - `spec/tests/*` and executable coverage
-- `apps/www/src/content/docs/*/specs`
-- `apps/www/src/content/docs/*/engineering`
+- `apps/www/src/content/docs/*/specifications`
+- `apps/www/src/content/docs/*/build`
 - readable contract documents where additional explanation remains useful
 
 Recommended structure:

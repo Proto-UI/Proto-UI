@@ -492,19 +492,19 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
           prepared.activate();
           activeDialogCandidate = prepared;
           activated = true;
-          // Shortcut opening need not focus the opener first, so the Dialog
-          // scope may have no previous opener to restore. Search owns this
-          // explicit handback for every opening, including the initial one.
+          // The opener-return restore is armed on every activation, not only
+          // on a generation swap. The public Dialog's own restore targets the
+          // pre-activation focus entry; a shortcut open (Ctrl+K) starts from
+          // the document, so without this callback the close would leave
+          // focus on the document instead of the Search opener.
           composition.activate((panel) => {
             const origin = document.activeElement;
             const epoch = focusEpoch;
-            if (
-              origin &&
-              origin !== document.body &&
-              origin !== document.documentElement &&
-              !panel?.contains(origin)
-            )
-              return;
+            // Restore to the opener only when focus was inside the dialog
+            // content at close. A focus that already fell to the document
+            // (body/html) or moved to a newer external control keeps that
+            // landing rather than being pulled back to the Search opener.
+            if (!origin || !panel?.contains(origin)) return;
             return () => {
               const active = document.activeElement;
               if (

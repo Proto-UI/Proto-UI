@@ -1,0 +1,133 @@
+id: T-COMPILER-SCALAR-0001
+type: test
+title: Checked scalar admission and independent generated consumers
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  These source and generated Rust regressions exercise a bounded private compiler extension. They do not establish complete GPUI native or OS behavior, and the dedicated mounted-native scalar boundary case remains accountable evidence debt.
+
+
+cases:
+  - id: T-COMPILER-SCALAR-0001-CASE-ADMISSION
+    title: Checked scalar forms lower in each declared source profile
+    covers:
+      [
+        C-COMPILER-SCALAR-0001-BINDING,
+        C-COMPILER-SCALAR-0001-NUMBER,
+        C-COMPILER-SCALAR-0001-STRING,
+        C-COMPILER-SCALAR-0001-ROUNDING,
+        C-COMPILER-SCALAR-0001-UTF16,
+        C-COMPILER-SCALAR-0001-TARGET-EVIDENCE,
+      ]
+    expectation: React, Vue, Vue2, Web Component and GPUI source compilation accept the bounded forms; compilation success alone is not described as target execution.
+  - id: T-COMPILER-SCALAR-0001-CASE-NEGATIVE
+    title: Source and serialized IR cannot fabricate scalar or nominal authority
+    covers:
+      [
+        C-COMPILER-SCALAR-0001-BINDING,
+        C-COMPILER-SCALAR-0001-NUMBER,
+        C-COMPILER-SCALAR-0001-STRING,
+        C-COMPILER-SCALAR-0001-EVALUATION,
+      ]
+    expectation: Wrong arity, nonnumeric rounding, shadowed language bindings, opaque or structured native conversions and forged IR operands reject; broader browser String behavior remains intact.
+  - id: T-COMPILER-SCALAR-0001-CASE-RUST
+    title: Generated headless Rust executes source-language scalar edge values
+    covers:
+      [
+        C-COMPILER-SCALAR-0001-NUMBER,
+        C-COMPILER-SCALAR-0001-STRING,
+        C-COMPILER-SCALAR-0001-ROUNDING,
+        C-COMPILER-SCALAR-0001-UTF16,
+        C-COMPILER-SCALAR-0001-EVALUATION,
+        C-COMPILER-SCALAR-0001-TARGET-EVIDENCE,
+      ]
+    expectation: Cargo executes the unchanged generated crate against ECMAScript-derived numeric bits and text, including negative ties, signed zero, precision edges, invalid numeric strings, astral text and the finite public-data boundary. A skipped Cargo case is not a pass.
+  - id: T-COMPILER-SCALAR-0001-CASE-WEB-STRING
+    title: Actual browser source consumers retain their wider native String semantics
+    covers:
+      [
+        C-COMPILER-SCALAR-0001-STRING,
+        C-COMPILER-SCALAR-0001-EVALUATION,
+        C-COMPILER-SCALAR-0001-TARGET-EVIDENCE,
+      ]
+    expectation: Existing generated consumers preserve missing versus undefined input, scalar spellings, opaque conversion, single evaluation and abrupt completion without claiming native structured coercion.
+  - id: T-COMPILER-SCALAR-0001-CASE-GPUI
+    title: A mounted generated GPUI consumer observes the bounded scalar operations
+    covers:
+      [
+        C-COMPILER-SCALAR-0001-NUMBER,
+        C-COMPILER-SCALAR-0001-STRING,
+        C-COMPILER-SCALAR-0001-ROUNDING,
+        C-COMPILER-SCALAR-0001-UTF16,
+        C-COMPILER-SCALAR-0001-TARGET-EVIDENCE,
+      ]
+    expectation: A source-bound generated component executes these boundaries through its live owner and ordinary exposed methods. Source compilation and a headless Rust helper are insufficient substitutes.
+implementations:
+  - id: scalar-conversions
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/scalar-conversions.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-SCALAR-0001-CASE-ADMISSION,
+        T-COMPILER-SCALAR-0001-CASE-NEGATIVE,
+        T-COMPILER-SCALAR-0001-CASE-RUST,
+      ]
+    notes:
+      - Thirteen cases passed locally, including actual generated Rust execution with Cargo; this is not a GPUI Window execution.
+      - The language-support dependency is resolved into a lockfile before testing with --locked; prepared offline runners may set CARGO_NET_OFFLINE.
+  - id: scalar-rounding
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/scalar-round.test.ts
+    required: true
+    consumesCases:
+      [
+        T-COMPILER-SCALAR-0001-CASE-ADMISSION,
+        T-COMPILER-SCALAR-0001-CASE-NEGATIVE,
+        T-COMPILER-SCALAR-0001-CASE-RUST,
+      ]
+    notes:
+      - The recorded fourteen-case run includes emitted Rust bit comparisons for ties, signed zero and precision boundaries; full native component admission remains separate.
+  - id: string-coercion
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/string-coercion.test.ts
+    required: true
+    consumesCases: [T-COMPILER-SCALAR-0001-CASE-NEGATIVE, T-COMPILER-SCALAR-0001-CASE-WEB-STRING]
+    notes:
+      - Twenty-five cases passed after replacing the stale blanket GPUI rejection with bounded scalar success and explicit opaque/structured negatives; direct Qt/Flutter String rejection remains covered.
+  - id: mounted-gpui-scalar-boundaries
+    kind: runtime-test
+    status: missing
+    required: true
+    consumesCases: [T-COMPILER-SCALAR-0001-CASE-GPUI]
+    notes:
+      - A dedicated upstream mounted-native scalar boundary consumer has not been recorded. The downstream combined native build was pending when this mapping was authored.
+verifies:
+  contracts:
+    - id: C-COMPILER-SCALAR-0001
+      anchors:
+        - C-COMPILER-SCALAR-0001-BINDING
+        - C-COMPILER-SCALAR-0001-NUMBER
+        - C-COMPILER-SCALAR-0001-STRING
+        - C-COMPILER-SCALAR-0001-ROUNDING
+        - C-COMPILER-SCALAR-0001-UTF16
+        - C-COMPILER-SCALAR-0001-EVALUATION
+        - C-COMPILER-SCALAR-0001-TARGET-EVIDENCE
+sources:
+  - path: internal/records/2026-11-22-compiler-control-consumer-boundaries.md
+openQuestions:
+  - id: T-COMPILER-SCALAR-0001-Q-NATIVE
+    question: Which reviewed upstream generated GPUI consumer completes the mounted scalar boundary case, independently of pure Rust helper execution?
+    blocks:
+      [
+        implementation:T-COMPILER-SCALAR-0001#mounted-gpui-scalar-boundaries,
+        activation:T-COMPILER-SCALAR-0001,
+      ]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Map source admission, negative boundaries, browser String and actual generated Rust separately from pending mounted GPUI evidence.
+tags: [compiler, scalar, rust, gpui, conformance]

@@ -78,7 +78,7 @@ pub fn authored_hook(owner:&OwnerWeak,name:&str,mode:&'static str,input:Value,in
     {let mut owner=owner_ref.borrow_mut();if mode!="multiple"{owner.authored.entries.insert(name.into(),entry.clone());}
      owner.authored.frames.push(AuthoredFrame{id:order,names:BTreeSet::new(),states:BTreeMap::new(),methods:BTreeMap::new(),children:Vec::new()});}
     let mut guard=CaptureGuard{owner:owner.clone(),open:true};
-    let render=install.call_authored(vec![capability(owner),input.clone(),api.clone()]);
+    let render=install.call_authored(vec![definition_capability(owner),input.clone(),api.clone()]);
     let frame=owner_ref.borrow_mut().authored.frames.pop().expect("capture frame");guard.open=false;
     let result=finish_capture(frame,render);
     // Capture succeeded even if projection subsequently throws. Preserve that
@@ -105,13 +105,23 @@ struct PublicValues {
     projected_functions:BTreeMap<usize,WeakPublicCallback>,
 }
 fn needs_public_projection(value:&Value,seen:&mut BTreeSet<usize>)->bool{match value{
-    Value::Function(_)=>true,
+    Value::Function(_)|Value::Renderer(_)=>true,
     Value::Record(record)=>seen.insert(Rc::as_ptr(record)as usize)&&record.fields.borrow().values().any(|value|needs_public_projection(value,seen)),
     Value::Array(items)=>seen.insert(Rc::as_ptr(items)as usize)&&items.iter().any(|value|needs_public_projection(value,seen)),
     _=>false,
 }}
 fn outward_value(owner:&OwnerWeak,value:Value)->Value {
     fn project(owner:&OwnerWeak,value:Value,receiver:u64,projecting:&mut BTreeSet<usize>)->Value {match value{
+        Value::Renderer(adapter)=>{
+            // Re-exposing a public renderer through its owner is an identity
+            // operation. Other owners retain both sets of lifetime guards.
+            ensure(owner);
+            if adapter.public_owner.as_ref().is_some_and(|known|Weak::ptr_eq(known,owner)){return Value::Renderer(adapter)}
+            let callable=project(owner,adapter.callable.clone(),receiver,projecting);
+            let weak=owner.clone();let render=adapter.render.clone();
+            let render:NativeRenderer=Rc::new(move|args|{let owner=ensure(&weak);invoke_scoped(&owner,"render",||render(args))});
+            Value::Renderer(Rc::new(RendererAdapter{callable,render,public_owner:Some(owner.clone())}))
+        },
         Value::Function(callback)=>{
             let id=Rc::as_ptr(&callback)as *const ()as usize;let owner_ref=ensure(owner);
             // Echoing an already public value through the same owner is an
@@ -176,5 +186,77 @@ fn outward_value(owner:&OwnerWeak,value:Value)->Value {
 fn finish_public_exposes(owner:&OwnerRef){
     let raw=std::mem::take(&mut owner.borrow_mut().exposes);let weak=Rc::downgrade(owner);
     let wrapped=raw.into_iter().map(|(key,value)|(key,outward_value(&weak,value))).collect();owner.borrow_mut().exposes=wrapped;
+}
+
+#[cfg(all(test,feature="test-support"))]
+mod authored_renderer_identity_tests {
+    use super::*;
+    fn owner()->OwnerRef {
+        Owner::new(serde_json::json!({}),Default::default(),|_,_|true,|_|true,|_,_|true,crate::gpui_native_style::vocabulary())
+    }
+    fn text_renderer(callback:Value)->Value {
+        let original=callback.clone();
+        capture_renderer(callback,Rc::new(move|arguments|NativeSnapshot::text_value(original.call_authored(arguments))))
+    }
+    fn capture(owner:&OwnerRef,callback:Value)->Value {
+        let install=Value::Function(Rc::new(move|_|text_renderer(callback.clone())));
+        authored_hook(&Rc::downgrade(owner),"identity-content","once",Value::Undefined,install,Value::Undefined,Value::Undefined)
+    }
+
+    #[test]
+    fn captured_scalar_renderer_keeps_identity_and_direct_invocation() {
+        let owner=owner();let calls=Rc::new(Cell::new(0));let observed=calls.clone();
+        let original=Value::Function(Rc::new(move|_|{observed.set(observed.get()+1);Value::string("captured text")}));
+        let captured=capture(&owner,original.clone());let render=captured.member("render",false);
+        assert!(strict_equal(&render,&original));assert!(strict_equal(&original,&render));
+        assert!(strict_equal(&render,&captured.member("render",false)));
+        assert!(!strict_equal(&render,&Value::Function(Rc::new(|_|Value::string("captured text")))));
+        assert_eq!(render.call(vec![]).unwrap().text(),"captured text");
+        assert_eq!(typeof_value(&render).text(),"function");assert!(render.is_callback());
+        assert!(render.truthy());assert!(!render.nullish());assert!(render.try_data().is_none());
+        assert_eq!(calls.get(),1,"capture does not eagerly execute the callable");
+        Owner::finish(&owner,render);Owner::project(&owner);
+        assert_eq!((owner.borrow().projection.as_ref().unwrap().text)(&[]),"captured text");
+        assert_eq!(calls.get(),2);Owner::project(&owner);assert_eq!(calls.get(),2);
+        Owner::dispose(&owner);
+    }
+
+    #[test]
+    fn public_renderer_aliases_keep_guards_and_scalar_call_behavior() {
+        let owner=owner();let weak=Rc::downgrade(&owner);let observed=weak.clone();
+        let original=Value::Function(Rc::new(move|_|Value::string(observed.upgrade().unwrap().borrow().phase)));
+        let captured=capture(&owner,original.clone());let render=captured.member("render",false);
+        expose_value(&weak,Value::string("api"),record(vec![("render",render.clone()),("original",original)]));
+        Owner::finish(&owner,render);
+        let api=owner.borrow().exposes["api"].clone();let public=api.member("render",false);
+        assert!(strict_equal(&public,&api.member("original",false)),"same receiver aliases share one public callback");
+        assert_eq!(public.call(vec![]).unwrap().text(),"expose-method");
+        assert_eq!(owner.borrow().phase,"idle");
+        let echoed=outward_value(&weak,api.clone());assert!(strict_equal(&api,&echoed));
+        assert!(strict_equal(&public,&echoed.member("render",false)));
+        let Value::Renderer(adapter)=&public else{panic!("public renderer loses checked rendering")};
+        for _ in 0..4 {
+            let Value::Renderer(echoed)=outward_value(&weak,public.clone()) else{panic!("public renderer changed kind")};
+            assert!(Rc::ptr_eq(adapter,&echoed),"public echo must not accumulate guard closures");
+        }
+        assert_eq!(((adapter.render)(vec![]).text)(&[]),"render");
+        assert_eq!(owner.borrow().phase,"idle");
+        Owner::dispose(&owner);
+        let error=public.call(vec![]).unwrap_err();assert_eq!(error.member("code",false).text(),"OWNER_DISPOSED");
+        let error=catch_authored(||(adapter.render)(vec![])).err().expect("retired public render must reject");
+        assert_eq!(error.member("code",false).text(),"OWNER_DISPOSED");
+    }
+
+    #[test]
+    fn captured_native_renderer_retains_its_original_callable_identity() {
+        let native:NativeCallable<dyn Fn()->NativeSnapshot>=NativeCallable{identity:Rc::new(()),call:Rc::new(NativeSnapshot::empty)};
+        let render:NativeRenderer=Rc::new(|_|NativeSnapshot::empty());
+        let original=Value::NativeFunction{identity:native.identity.clone(),render:render.clone()};
+        let captured=capture_renderer(original.clone(),render);
+        assert!(strict_equal(&original,&captured));assert!(strict_equal(&captured,&captured));
+        assert!(native.equals_value(&captured));assert_eq!(typeof_value(&captured).text(),"function");
+        let other=Value::NativeFunction{identity:Rc::new(()),render:Rc::new(|_|NativeSnapshot::empty())};
+        assert!(!strict_equal(&captured,&other));
+    }
 }
 `;

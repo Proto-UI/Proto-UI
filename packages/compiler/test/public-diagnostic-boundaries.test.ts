@@ -469,6 +469,47 @@ describe('#1457 diagnostic-only fallback boundaries', () => {
     unknownOrigin(value, '<ir>');
   });
 
+  it('reports malformed current-version input schema at an unknown location', () => {
+    const result = compiler.compilePrototype(source('invalid-input-schema'), {
+      fileName: 'schema.proto.ts',
+    });
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    const value = failure(validateIR({ ...result.value.ir, hooks: null }));
+    expect(value).toMatchObject({ code: 'PUI2002', category: 'invalid-ir' });
+    unknownOrigin(value, '<ir>');
+  });
+
+  it.each(['missing', 'malformed', 'sentinel'] as const)(
+    'keeps early declaration-order rejection formattable with a %s span',
+    (spanKind) => {
+      const result = compiler.compilePrototype(source('invalid-declaration-order'), {
+        fileName: 'order.proto.ts',
+      });
+      if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+      const statement = result.value.ir.setup.body[0] as unknown as Record<string, unknown>;
+      statement.declarationPosition = 0;
+      if (spanKind === 'missing') delete statement.span;
+      else if (spanKind === 'malformed') statement.span = { file: 'order.proto.ts' };
+      else statement.span = unknownDiagnosticSpan('order.proto.ts');
+      const value = failure(validateIR(result.value.ir));
+      expect(value).toMatchObject({ code: 'PUI2002', category: 'invalid-ir' });
+      unknownOrigin(value, '<ir>');
+    }
+  );
+
+  it('retains a valid authored span on an early declaration-order rejection', () => {
+    const result = compiler.compilePrototype(source('located-declaration-order'), {
+      fileName: 'order.proto.ts',
+    });
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    const statement = result.value.ir.setup.body[0];
+    Object.assign(statement, { declarationPosition: 0 });
+    const value = failure(validateIR(result.value.ir));
+    expect(value).toMatchObject({ code: 'PUI2002', category: 'invalid-ir' });
+    expect(value.span).toBe(statement.span);
+    expect(formatCompilerDiagnostic(value)).toContain('order.proto.ts:3:9');
+  });
+
   it('preserves real IR spans and continues rejecting a diagnostic sentinel as authored IR', () => {
     const result = compiler.compilePrototype(
       `import {definePrototype} from '@proto.ui/core';

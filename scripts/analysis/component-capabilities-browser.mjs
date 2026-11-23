@@ -557,6 +557,20 @@ async function numberFieldIme(runtime, family, prefix) {
           await capture(`${prefix}-ime-${controlled ? 'controlled' : 'uncontrolled'}-committed`)
         );
         result.stage = 'native-provenance';
+        const native = await page.evaluate(() => window.__puiNumberFieldIme.events);
+        assert.ok(native.length > 0, 'native composition events observed');
+        // Chromium dispatches the compositionend that terminates a CDP
+        // Input.imeSetComposition composition via Input.insertText as
+        // untrusted; a plain <input> fixture with the identical CDP sequence
+        // reproduces it without product code. Every other event in the
+        // simulated composition is native, and this harness does not claim
+        // the physical-IME boundary.
+        assert.ok(
+          native
+            .filter((event) => !event.isTrusted)
+            .every((event) => event.type === 'compositionend'),
+          'trusted native events except the insertText compositionend artifact'
+        );
         assert.equal(control.status, 'passed', 'independent native IME control passed');
         result.compositionTrace = assertNumberFieldImeTrace(
           result.compositionEvents,
