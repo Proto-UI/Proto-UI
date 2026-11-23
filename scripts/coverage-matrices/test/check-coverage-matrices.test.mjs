@@ -96,6 +96,53 @@ for (const mode of ['file', 'directory', 'ancestor-directory']) {
   });
 }
 
+for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
+  test(`compiler browser source binding: ${scenario}`, () => {
+    const root = createRoot();
+    const panel = 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts';
+    const client = 'packages/compiler/src/browser/client.ts';
+    const engine = 'packages/compiler/src/browser/engine.ts';
+    fs.mkdirSync(path.dirname(path.join(root, panel)), { recursive: true });
+    fs.mkdirSync(path.dirname(path.join(root, client)), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, panel),
+      `import { createBrowserCompilerClient } from '../../../../../packages/compiler/src/browser/client';\nexport const panel = createBrowserCompilerClient;\n`
+    );
+    fs.writeFileSync(
+      path.join(root, client),
+      "export function createBrowserCompilerClient() {\n  addEventListener('message', () => {});\n  return { compile: () => Promise.resolve(null) };\n}\n"
+    );
+    let boundSource = client;
+    let boundOwners = ['www.demo.raw-adapter-runtimes'];
+    if (scenario === 'foreign-owner') boundOwners = ['www.shell.primary-nav'];
+    if (scenario === 'unlisted-compiler-source') {
+      fs.writeFileSync(
+        path.join(root, engine),
+        "export function createBrowserCompilerEngine() {\n  addEventListener('message', () => {});\n  return { compile: () => null };\n}\n"
+      );
+      boundSource = engine;
+    }
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[boundSource, boundOwners]] });
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'exact') {
+      assert.doesNotMatch(message, /source binding must name exactly one/);
+      assert.doesNotMatch(message, /is missing a reviewed Source-scan binding/);
+      assert.doesNotMatch(message, /is not bound to a matrix row/);
+      assert.doesNotMatch(
+        message,
+        /compiler browser source .* must name exactly the matrix Path owner/
+      );
+    } else if (scenario === 'foreign-owner') {
+      assert.match(
+        message,
+        /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/
+      );
+    } else {
+      assert.match(message, /source binding must name exactly one/);
+    }
+  });
+}
+
 test('resource closure review: regular nested assets preserve unchanged and changed controls', () => {
   const root = createRoot();
   const implementationPath = 'apps/www/src/components/override/Search.astro';
