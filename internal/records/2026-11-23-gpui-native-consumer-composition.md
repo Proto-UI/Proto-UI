@@ -18,53 +18,16 @@ A follow-up negative source check also admitted comparison between definition an
 
 At `8eccebec7`, actual native input consumers passed 14/14 and SDK tests passed 17/17. The official ControlLabel/Input consumer passed 7/8: the repaired Input reset succeeded, but a real pointer down survived an ambiguous frame and activated after the unique view was restored. The exact-node receipt was only observed through logical projection commit. GPUI could reuse an already committed authored projection while laying it out through another native parent, so the physical transition never advanced that receipt. The native prepaint boundary now also observes it after layout has collected all occurrences. The original failing native assertion is retained; the tuple still excludes frame serials, so stable layouts do not produce repeated invalidations.
 
-The subsequent `e2ee4ca20` native ControlLabel run passed 8/8, including that
-unchanged previously failing physical-reuse assertion.
+The subsequent `e2ee4ca20` native ControlLabel run passed 8/8, including that unchanged previously failing physical-reuse assertion.
 
 ## Independent review and actual consumer follow-up
 
-Independent review found three additional bounded gaps. A structurally narrowed
-readonly view could hide enumerable undefined from the outward JSON type check.
-The shared source and independent IR callable-provenance walk now retains actual
-ordinary records, arrays, aliases, helper arguments/results and relevant mutable
-stores at JSON event sinks. It distinguishes absent fields from own undefined
-properties and leaves local-only views and explicit fresh data copies legal.
-Scalar stores retain their finite abstraction, and graphs with no JSON event
-output do not acquire the extra ordinary-data analysis.
+Independent review found three additional bounded gaps. A structurally narrowed readonly view could hide enumerable undefined from the outward JSON type check. The shared source and independent IR callable-provenance walk now retains actual ordinary records, arrays, aliases, helper arguments/results and relevant mutable stores at JSON event sinks. It distinguishes absent fields from own undefined properties and leaves local-only views and explicit fresh data copies legal. Scalar stores retain their finite abstraction, and graphs with no JSON event output do not acquire the extra ordinary-data analysis.
 
-An actionable Base Label did not request window activation observation because
-it intentionally has no focus/press ownership. Its window observation demand is
-now separate from focus and Tab participation. A real native inactive/active
-pointer regression retains the old request across a window switch and requires
-it to be refused. Scroll axis sync also now gates automatic end-follow on the
-currently allowed axis, consumes disabled-interval growth, and preserves the
-authored policy. A physical nonzero-overflow regression checks rejection,
-suspension, re-enabling without replay, and subsequent fresh growth.
+An actionable Base Label did not request window activation observation because it intentionally has no focus/press ownership. Its window observation demand is now separate from focus and Tab participation. A real native inactive/active pointer regression retains the old request across a window switch and requires it to be refused. Scroll axis sync also now gates automatic end-follow on the currently allowed axis, consumes disabled-interval growth, and preserves the authored policy. A physical nonzero-overflow regression checks rejection, suspension, re-enabling without replay, and subsequent fresh growth.
 
-Actual application execution established that focus/blur source state had
-already changed while its consumer observer had not been notified. GPUI omits
-entity-observer effects during its drawing phase. Generated drivers now publish
-their notification through a weak deferred view, and rendering cannot consume
-the driver's pending dirty signal. Real native focus and parent-Render event-only
-fixtures cover both paths. An attached native MoveGesture also requests pointer
-ownership without requiring the authored control to declare Trigger; the nested
-native fixture checks that its accepted gesture does not activate the parent.
+Actual application execution established that focus/blur source state had already changed while its consumer observer had not been notified. GPUI omits entity-observer effects during its drawing phase. Generated drivers now publish their notification through a weak deferred view, and rendering cannot consume the driver's pending dirty signal. Real native focus and parent-Render event-only fixtures cover both paths. An attached native MoveGesture also requests pointer ownership without requiring the authored control to declare Trigger; the nested native fixture checks that its accepted gesture does not activate the parent.
 
-At this local follow-up checkpoint, 199 focused compiler tests passed, the
-bounded compiler TypeScript check passed, and the three edited spec entities
-validated against the schema. All 14 Verdant source units compiled successfully.
-Fresh ordinary-value (30 modules), official ControlLabel and accessibility
-consumer producers succeeded without editing generated Rust. The new native
-fixtures, whole compiler suite and final consumer regeneration remain pending
-on the separate native build machine; these generation receipts do not assert
-their execution or stable platform accessibility acceptance.
+At this local follow-up checkpoint, 199 focused compiler tests passed, the bounded compiler TypeScript check passed, and the three edited spec entities validated against the schema. All 14 Verdant source units compiled successfully. Fresh ordinary-value (30 modules), official ControlLabel and accessibility consumer producers succeeded without editing generated Rust. The new native fixtures, whole compiler suite and final consumer regeneration remain pending on the separate native build machine; these generation receipts do not assert their execution or stable platform accessibility acceptance.
 
-The exact-head review of `d2f132213` found one remaining provenance error:
-spreading a possibly absent optional field over an existing undefined field
-incorrectly discarded the previous property on the absent branch. The shared
-spread/assignment overlay now substitutes the previous property for each absent
-alternative, retaining actual own undefined values. Source and independently
-serialized IR negatives preserve the reproducer, with a safe-existing-field
-positive. The focused provenance/Object.assign/flow suite passed 101 tests
-(including 22 provenance cases), and bounded compiler types passed. This
-follow-up changes proof and tests only; native SDK content is unchanged.
+The exact-head review of `d2f132213` found one remaining provenance error: spreading a possibly absent optional field over an existing undefined field incorrectly discarded the previous property on the absent branch. The shared spread/assignment overlay now substitutes the previous property for each absent alternative, retaining actual own undefined values. Source and independently serialized IR negatives preserve the reproducer, with a safe-existing-field positive. The focused provenance/Object.assign/flow suite passed 101 tests (including 22 provenance cases), and bounded compiler types passed. This follow-up changes proof and tests only; native SDK content is unchanged.

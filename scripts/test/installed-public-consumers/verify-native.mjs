@@ -492,6 +492,16 @@ async function tooltipCase(page, row, group, screenshot) {
   });
 }
 
+export async function assertSelectCommit(root, value) {
+  await until(() => root.getAttribute('data-value'), 'vue', 'native Enter commits Vue');
+  assert.equal(await root.getAttribute('data-text-value'), 'Vue');
+  // Root attributes may commit before the framework's rendered child text.
+  // Observe the same public value through the existing bounded polling owner.
+  await until(() => value.textContent(), 'Vue', 'native committed value is displayed');
+  assert.equal(await root.getAttribute('data-value'), 'vue');
+  assert.equal(await root.getAttribute('data-text-value'), 'Vue');
+}
+
 async function selectCase(page, row, screenshot) {
   const trigger = page.getByRole('combobox', { name: 'Framework selector', exact: true });
   await until(() => trigger.count(), 1, 'one actual accessible public Select trigger');
@@ -535,9 +545,7 @@ async function selectCase(page, row, screenshot) {
   assert.equal(await root.getAttribute('data-value'), '', 'focus movement does not commit');
   await screenshot('open');
   await page.keyboard.press('Enter');
-  await until(() => root.getAttribute('data-value'), 'vue', 'native Enter commits Vue');
-  assert.equal(await root.getAttribute('data-text-value'), 'Vue');
-  assert.equal(await value.textContent(), 'Vue');
+  await assertSelectCommit(root, value);
   await until(() => trigger.getAttribute('aria-expanded'), 'false', 'commit closes Select');
   await until(
     () => trigger.evaluate((element) => document.activeElement === element),

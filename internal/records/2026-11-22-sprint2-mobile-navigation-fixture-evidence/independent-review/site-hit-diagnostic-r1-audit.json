@@ -394,7 +394,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",
@@ -607,7 +610,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",
@@ -820,7 +826,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",
@@ -1033,7 +1042,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",
@@ -1246,7 +1258,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",
@@ -1459,7 +1474,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",
@@ -1672,7 +1690,10 @@
           "closest": null
         }
       ],
-      "windowScroll": [0, 0],
+      "windowScroll": [
+        0,
+        0
+      ],
       "ancestors": [
         {
           "tag": "details",

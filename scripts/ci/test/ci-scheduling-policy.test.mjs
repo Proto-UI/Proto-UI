@@ -447,19 +447,49 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
 });
 
 function assertReusableCompilerInputBoundary(workflow) {
-  // The separate Adapter lane is a default-off reusable input. Package-budget
-  // and Website evidence remain manual-only and cannot enter workflow_call.
+  // Only Adapter is reusable. Browser evidence remains an explicit manual opt-in.
   assert.deepEqual(workflow.on.workflow_call, {
     inputs: {
       adapter_acceptance: { type: 'boolean', required: false, default: false },
     },
   });
+  const browser = workflow.on.workflow_dispatch?.inputs?.browser_acceptance;
+  assert.ok(browser, 'the manual browser entry must remain available');
+  assert.equal(browser.type, 'boolean');
+  assert.equal(browser.required, false);
+  assert.equal(browser.default, false);
+  const job = workflow.jobs['browser-compiler'];
+  assert.equal(job.if, '${{ inputs.browser_acceptance }}');
+  assert.equal(job.uses, './.github/workflows/compiler-browser-acceptance.yml');
+  assert.deepEqual(job.with, { source_regressions: true, production_build: true });
 }
 
-test('reusable compiler inputs preserve the separate default-off Adapter boundary', () => {
+test('compiler inputs preserve the reusable Adapter and manual-only browser boundaries', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
   const mutations = [
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = 'true';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = '${{ inputs.adapter_acceptance }}';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].uses = './.github/workflows/unreviewed.yml';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.production_build = false;
+    },
     (workflow) => {
       workflow.on.workflow_call = null;
     },
@@ -471,6 +501,25 @@ test('reusable compiler inputs preserve the separate default-off Adapter boundar
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
+    },
+    (workflow) => {
+      delete workflow.on.workflow_dispatch.inputs.browser_acceptance;
+    },
+    (workflow) => {
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.default = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.required = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.unreviewed_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.package_budget_evidence = {
@@ -549,13 +598,20 @@ test('native Scroll evidence executes both complete locked targets in the existi
   assertNativeScrollConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
 });
 
-test('native Scroll evidence rejects missing, filtered, optional or swallowed native execution', () => {
+test('native Scroll evidence rejects missing, duplicate, filtered, optional or swallowed native execution', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   const targetStep = (workflow) =>
     workflow.jobs['native-consumer'].steps.find((step) =>
       step.run?.includes('--test scroll_reader ')
     );
   const mutations = [
+    (workflow) => {
+      const steps = workflow.jobs['native-consumer'].steps;
+      steps.push(structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause '))));
+    },
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps.push(structuredClone(targetStep(workflow)));
+    },
     (workflow) => {
       workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
         (step) => !step.run?.includes('--test scroll_pause ')

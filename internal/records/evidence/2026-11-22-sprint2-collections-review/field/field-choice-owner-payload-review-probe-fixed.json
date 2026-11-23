@@ -36,7 +36,9 @@
     {
       "name": "ordinary-checkbox",
       "scenario": "new-canonical-owner-in-mixed-callback",
-      "actions": ["indeterminateChange"],
+      "actions": [
+        "indeterminateChange"
+      ],
       "signals": [
         {
           "event": "indeterminateChange",
@@ -53,7 +55,9 @@
     {
       "name": "field-checkbox",
       "scenario": "new-canonical-owner-in-mixed-callback",
-      "actions": ["indeterminateChange"],
+      "actions": [
+        "indeterminateChange"
+      ],
       "signals": [
         {
           "event": "indeterminateChange",
