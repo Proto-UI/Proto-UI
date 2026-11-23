@@ -451,21 +451,7 @@ jobs:
         id: source_results
         if: ${{ always() }}
         env:
-          SOURCE_STEP_OUTCOMES: >-
-            {
-              "checkout": "${{ steps.checkout.outcome }}",
-              "node_setup": "${{ steps.node_setup.outcome }}",
-              "source_before": "${{ steps.source_before.outcome }}",
-              "install": "${{ steps.install.outcome }}",
-              "cli_build": "${{ steps.cli_build.outcome }}",
-              "website_generate": "${{ steps.website_generate.outcome }}",
-              "type_contracts": "${{ steps.type_contracts.outcome }}",
-              "workspace_types": "${{ steps.workspace_types.outcome }}",
-              "spec_graph": "${{ steps.spec_graph.outcome }}",
-              "draft_consumer": "${{ steps.draft_consumer.outcome }}"
-            }
-
-
+          SOURCE_STEP_OUTCOMES: '{"checkout":"${{ steps.checkout.outcome }}","node_setup":"${{ steps.node_setup.outcome }}","source_before":"${{ steps.source_before.outcome }}","install":"${{ steps.install.outcome }}","cli_build":"${{ steps.cli_build.outcome }}","website_generate":"${{ steps.website_generate.outcome }}","type_contracts":"${{ steps.type_contracts.outcome }}","workspace_types":"${{ steps.workspace_types.outcome }}","spec_graph":"${{ steps.spec_graph.outcome }}","draft_consumer":"${{ steps.draft_consumer.outcome }}"}'
         run: |
           set +e
           node --input-type=commonjs <<'NODE' 2>&1 | tee "$EVIDENCE_DIR/source-validation.log"
