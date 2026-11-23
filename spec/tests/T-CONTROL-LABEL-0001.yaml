@@ -7,6 +7,18 @@ lifecycleRationale:
   en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
 summary: Executable evidence is separated into portable ownership, synthetic host integration, compiler and real browser admission.
 cases:
+  - id: T-CONTROL-LABEL-0001-CASE-GPUI-COMPILED
+    title: Unchanged native Button, Toggle and Label share nominal references and current pair leases
+    covers:
+      - C-CONTROL-LABEL-0001-GPUI-IDENTITY
+      - C-CONTROL-LABEL-0001-GPUI-LEASE
+      - M-CONTROL-LABEL-0001-GPUI
+      - HC-CONTROL-LABEL-0001-GPUI
+      - HC-CONTROL-LABEL-0001-GPUI-OPAQUE-CHILD
+      - C-CONTROL-LABEL-0001-NAME
+      - C-CONTROL-LABEL-0001-ACTIVATION
+      - C-CONTROL-LABEL-0001-FOCUS
+    expectation: The complete unchanged Base Button, Toggle and Label sources pass compileFile and are consumed as separate crates sharing one native SDK. Actual native framework consumers cover typed identity and undeclared recipients, current rendered Label naming, exactly-once target activation, disabled and controlled ownership, author name preservation, duplicate arbitration in both orders, foreign scopes, replacement, detach/remount, disposal and invalidated callback work. Final pointer samples, cancellation and nested opaque input retain negative controls. Anatomy and nonportable transport stay explicit unsupported states. Source-bound platform receipts distinguish this compiled execution from Adapter PNGs and physical OS or assistive-technology acceptance.
   - id: T-CONTROL-LABEL-0001-CASE-PRIVATE-SSR
     title: Private client-only hydration preserves dormant server declarations and real client pairs
     covers:
@@ -156,6 +168,24 @@ cases:
 
 
 implementations:
+  - id: control-label-gpui-native-consumer
+    kind: runtime-test
+    status: active
+    path: packages/compiler/test/fixtures/gpui-ordinary-values/control-label-consumer.rs
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-GPUI-COMPILED
+    notes:
+      - The separate control_label integration target is wired into the existing Linux and macOS locked native-consumer workflow. Candidate-bound Rust execution is required; source emission or the older Adapter PNG receipt is not a native pass.
+  - id: control-label-gpui-source-admission
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/gpui-control-label.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-GPUI-COMPILED
+    notes:
+      - Thirteen executed source cases compile the three complete unchanged Base entries, check shared typed native identity, generic defaults and setup/callback sync admission, and retain explicit Anatomy and other-target diagnostics. This source evidence does not claim native execution.
   - id: control-label-private-client-hydration
     kind: runtime-test
     status: passing

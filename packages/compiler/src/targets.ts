@@ -472,7 +472,16 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
     mode: 'source',
     implemented: true,
-    operations: nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
+    operations: (
+      [
+        ...nativeOperations,
+        'hook.asControlLabel',
+        'controlLabel.label',
+        'controlLabel.target',
+        'controlLabel.sync',
+        'controlLabelRequest.isCurrent',
+      ] as Operation[]
+    ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
       { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },

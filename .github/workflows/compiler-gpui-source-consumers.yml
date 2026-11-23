@@ -113,6 +113,18 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
+      - name: Execute unchanged compiled Button Toggle and Label consumers
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
+      - name: Verify bounded native text-selection style mapping
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test style_mapping -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/style-mapping-consumer.log"
+      - name: Verify native accessibility activation through authored operations
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test a11y_activation -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/a11y-activation-consumer.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -43,17 +43,20 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
     ...(options.componentName ? { componentName: options.componentName } : {}),
   });
   if (!module.ok) throw new Error(`${name} emitter: ${JSON.stringify(module.diagnostics)}`);
+  return retainModule(name, source, parsed.value, module.value);
+}
+function retainModule(name, source, ir, module) {
   const directory = path.join(output, name);
   const artifacts = [
-    { path: 'Component.rs', contents: module.value.code },
-    ...(module.value.supportingFiles ?? []),
+    { path: 'Component.rs', contents: module.code },
+    ...(module.supportingFiles ?? []),
   ];
   for (const file of artifacts) {
     const target = path.join(directory, file.path);
     mkdirSync(path.dirname(target), { recursive: true });
     writeFileSync(target, file.contents);
   }
-  writeFileSync(path.join(directory, 'checked-ir.json'), JSON.stringify(parsed.value, null, 2));
+  writeFileSync(path.join(directory, 'checked-ir.json'), JSON.stringify(ir, null, 2));
   writeFileSync(path.join(directory, 'authored.proto.ts'), source);
   const manifest = readFileSync(path.join(directory, 'Cargo.toml'), 'utf8');
   const generatedPackageName = /^\s*name\s*=\s*"([^"]+)"/m.exec(manifest)?.[1];
@@ -75,7 +78,8 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
     packageName,
     generatedPackageName,
     sourceSha256: digest(source),
-    contextIds: parsed.value.contextKeys.map((key) => key.id),
+    contextIds: ir.contextKeys.map((key) => key.id),
+    inputs: ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 })),
     files: artifacts.map((file) => ({
       path: file.path,
       sha256: digest(file.contents),
@@ -86,6 +90,57 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
 }
 emit('transition', transition(false), sourceFiles);
 const dependencies = [];
+receipt.actualControlLabelConsumers = [];
+for (const [name, file] of [
+  ['base_button', 'button/button.proto.ts'],
+  ['base_toggle', 'toggle/toggle.proto.ts'],
+  ['base_label', 'label/root.proto.ts'],
+]) {
+  const entry = `packages/prototypes/base/src/${file}`;
+  const source = readFileSync(path.join(repository, entry), 'utf8');
+  const result = await compileFile(path.join(repository, entry), {
+    root: repository,
+    profile: 'gpui-source-v1',
+    nativeSdkPath: '../transition/.proto-ui/gpui-native',
+  });
+  if (!result.ok) throw new Error(`${name}: ${JSON.stringify(result.diagnostics)}`);
+  dependencies.push([name, retainModule(name, source, result.value.ir, result.value.output)]);
+  receipt.actualControlLabelConsumers.push({ name, entry, sha256: digest(source) });
+}
+const namedButtonEntry = path.join(fixture, 'control-label-name.proto.ts');
+const namedButton = await compileFile(namedButtonEntry, {
+  root: repository,
+  profile: 'gpui-source-v1',
+  nativeSdkPath: '../transition/.proto-ui/gpui-native',
+});
+if (!namedButton.ok) throw new Error(`named_button: ${JSON.stringify(namedButton.diagnostics)}`);
+dependencies.push([
+  'named_button',
+  retainModule(
+    'named_button',
+    readFileSync(namedButtonEntry, 'utf8'),
+    namedButton.value.ir,
+    namedButton.value.output
+  ),
+]);
+const genericEntry = path.join(fixture, 'control-label-generic.proto.ts');
+for (const [name, exportName] of [
+  ['generic_label', 'default'],
+  ['generic_setup_label', 'SetupLabel'],
+  ['generic_label_target', 'Target'],
+]) {
+  const result = await compileFile(genericEntry, {
+    root: repository,
+    profile: 'gpui-source-v1',
+    nativeSdkPath: '../transition/.proto-ui/gpui-native',
+    exportName,
+  });
+  if (!result.ok) throw new Error(`${name}: ${JSON.stringify(result.diagnostics)}`);
+  dependencies.push([
+    name,
+    retainModule(name, readFileSync(genericEntry, 'utf8'), result.value.ir, result.value.output),
+  ]);
+}
 for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
   dependencies.push([
     name,
@@ -205,7 +260,28 @@ writeFileSync(
 );
 mkdirSync(path.join(output, 'transition/tests'));
 copyFileSync(path.join(fixture, 'consumer.rs'), path.join(output, 'transition/tests/ordinary.rs'));
+copyFileSync(
+  path.join(fixture, 'control-label-consumer.rs'),
+  path.join(output, 'transition/tests/control_label.rs')
+);
+copyFileSync(
+  path.join(fixture, 'style-mapping-consumer.rs'),
+  path.join(output, 'transition/tests/style_mapping.rs')
+);
+copyFileSync(
+  path.join(fixture, 'a11y-activation-consumer.rs'),
+  path.join(output, 'transition/tests/a11y_activation.rs')
+);
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
+receipt.controlLabelConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'control-label-consumer.rs'))
+);
+receipt.styleMappingConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'style-mapping-consumer.rs'))
+);
+receipt.a11yActivationConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'a11y-activation-consumer.rs'))
+);
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.
 const scalarInputs = [
@@ -392,27 +468,26 @@ if (existsSync(lockfile)) {
   receipt.lockSha256 = digest(readFileSync(lockfile));
 }
 receipt.consumerManifestSha256 = digest(readFileSync(rootManifest));
-// Preserve the real current Base Button as a negative consumer. Its authored
-// ControlLabel participation is not yet admitted by the non-Web profile; do not
-// delete that behavior or certify a historical Button source as current support.
-const buttonPath = 'packages/prototypes/base/src/button/button.proto.ts';
-const buttonResult = await compileFile(path.join(repository, buttonPath), {
+// The real Button above is now a positive, unchanged source consumer. Keep the
+// explicit native Anatomy limitation as a discriminating negative declaration.
+const unsupportedPath =
+  'packages/compiler/test/fixtures/gpui-ordinary-values/control-label-anatomy.proto.ts';
+const unsupportedResult = await compileFile(path.join(repository, unsupportedPath), {
+  root: repository,
   profile: 'gpui-source-v1',
 });
 if (
-  buttonResult.ok ||
-  !buttonResult.diagnostics.some(
-    (entry) => entry.code === 'PUI4003' && entry.message.includes('controlLabel')
-  )
+  unsupportedResult.ok ||
+  !unsupportedResult.diagnostics.some((entry) => entry.code === 'PUI_GPUI_CONTROL_LABEL_ANATOMY')
 )
   throw new Error(
-    'Current Base Button admission changed; update its native acceptance matrix explicitly.'
+    'Native ControlLabel Anatomy admission changed; update its acceptance matrix explicitly.'
   );
 receipt.unsupportedConsumers = [
   {
-    source: buttonPath,
-    sha256: digest(readFileSync(path.join(repository, buttonPath))),
-    diagnostics: buttonResult.diagnostics,
+    source: unsupportedPath,
+    sha256: digest(readFileSync(path.join(repository, unsupportedPath))),
+    diagnostics: unsupportedResult.diagnostics,
   },
 ];
 writeFileSync(path.join(output, 'source-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');

@@ -152,6 +152,11 @@ export function emitGpuiSource(
     'hook.asTrigger',
     'hook.asFocusable',
     'hook.asAccessible',
+    'hook.asControlLabel',
+    'controlLabel.label',
+    'controlLabel.target',
+    'controlLabel.sync',
+    'controlLabelRequest.isCurrent',
     'event.on',
     'event.onGlobal',
     'event.requestDefaultActionPrevention',
@@ -332,6 +337,22 @@ export function emitGpuiSource(
         code: 'PUI_GPUI_SDK_CAPABILITY',
         category: 'unsupported-input',
         message: `${node.operation} is unavailable in the default GPUI profile. ${GPUI_MISSING_FOCUS_TREE}`,
+        span: node.span,
+      });
+    else if (
+      node.kind === 'operation' &&
+      ((node.operation === 'controlLabel.label' &&
+        node.arguments[0] &&
+        node.arguments[0].kind !== 'undefined') ||
+        (node.operation === 'controlLabel.target' &&
+          node.arguments[1] &&
+          node.arguments[1].kind !== 'undefined'))
+    )
+      diagnostics.push({
+        code: 'PUI_GPUI_CONTROL_LABEL_ANATOMY',
+        category: 'unsupported-input',
+        message:
+          'GPUI ControlLabel admits explicit typed InstanceAssociations; Anatomy pairing has no admitted native domain lowering.',
         span: node.span,
       });
     else if (node.kind === 'operation' && !supported.has(node.operation))
@@ -2024,6 +2045,16 @@ impl __PuiNativeRecordValue {
             return builtin(`as_focusable(&${ownerReference()})`);
           case 'hook.asAccessible':
             return builtin(`as_accessible(&${ownerReference()})`);
+          case 'hook.asControlLabel':
+            return builtin(`module_handle(&${ownerReference()}, "control-label")`);
+          case 'controlLabel.label':
+            return `control_label_declare(${receiverOwner()}, false, Value::Undefined, ${argument(0)})`;
+          case 'controlLabel.target':
+            return `control_label_declare(${receiverOwner()}, true, ${argument(0)}, ${argument(1)})`;
+          case 'controlLabel.sync':
+            return `control_label_sync(${receiverOwner()}, ${argument(0)})`;
+          case 'controlLabelRequest.isCurrent':
+            return `control_label_request_current(${receiver()})`;
           case 'focus.configure':
             return `focus_setup_config(${receiverOwner()}, "focus", ${argument(0)})`;
           case 'focus.setDisabled':
@@ -2636,6 +2667,7 @@ impl __PuiNativeRecordValue {
   const code = `// Direct checked-source GPUI component. Supporting files are ordinary editable Rust.
   ${emitsExceptions ? '#[cfg(panic = "abort")] compile_error!("Authored exception lowering requires panic=unwind");' : ''}
   pub use proto_ui_gpui_native as native;
+  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};
   use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};
   use std::rc::Rc;
   use serde_json::Value as Json;
@@ -2708,8 +2740,11 @@ impl __PuiNativeRecordValue {
   impl ${componentName} {
       pub fn create_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> { Self::create(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
       pub fn create(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> {
+          Self::create_with_associations(raw_props, parent, InstanceAssociations::default(), window, cx)
+      }
+      pub fn create_with_associations(raw_props: Json, parent: Option<OwnerWeak>, associations: InstanceAssociations, window: &mut Window, cx: &mut App) -> Result<gpui::Entity<Self>, Value> {
           let mut failure = None;
-          let entity = cx.new(|cx| Self::new(raw_props, parent, window, cx).unwrap_or_else(|error| {
+          let entity = cx.new(|cx| Self::new_with_associations(raw_props, parent, associations, window, cx).unwrap_or_else(|error| {
               failure = Some(error);
               // A failed construction still returns normally through GPUI's
               // entity insertion. This inert temporary is dropped immediately
@@ -2722,8 +2757,12 @@ impl __PuiNativeRecordValue {
       }
       pub fn new_props(props: GeneratedProps, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> { Self::new(serde_json::to_value(props).expect("portable Props"), parent, window, cx) }
       pub fn new(raw_props: Json, parent: Option<OwnerWeak>, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> {
+          Self::new_with_associations(raw_props, parent, InstanceAssociations::default(), window, cx)
+      }
+      pub fn new_with_associations(raw_props: Json, parent: Option<OwnerWeak>, associations: InstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<Self, Value> {
           catch_authored(|| {
           let owner_ref = Owner::new(raw_props, parent.unwrap_or_default(), accepts_context, accepts_props, prop_valid, style_vocabulary());
+          initialize_instance_associations(&owner_ref, associations);
           let owner = Rc::downgrade(&owner_ref);
           let focus = cx.focus_handle();
           let view = cx.entity().downgrade();
@@ -2798,10 +2837,11 @@ impl __PuiNativeRecordValue {
       pub fn native_resource_counts(&self) -> Json { let mut counts=native::gpui_native_owner::native_resource_counts(&self.owner); counts["nativeSubscriptions"] = Json::from(self._focus_subscriptions.len() + usize::from(self._window_activation.is_some()) + usize::from(self._focus_lost.is_some()) + usize::from(self._global_key_capture.is_some()) + usize::from(self._entry_readiness.is_some())); counts }
       pub fn handle(&self) -> ${componentName}Handle { ${componentName}Handle { owner: self.owner.clone() } }
       pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_props(&self.owner, raw))?; self.drive(window, cx) }
+      pub fn set_instance_associations(&mut self, associations: InstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_instance_associations(&self.owner, associations))?; drive_owners(window, cx); self.drive(window, cx) }
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
       fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-          if !native_focus_observation_needed(&self.owner) && !native::gpui_native_move::move_owner_has_binding(&self.owner) { self._window_activation.take(); return; }
+          if !native_focus_observation_needed(&self.owner) && !native::gpui_native_move::move_owner_has_binding(&self.owner) && !control_label_is_label(&self.owner) { self._window_activation.take(); return; }
           let id = window.window_handle().window_id();
           if self._window_activation.as_ref().is_some_and(|(bound, _)| *bound == id) { return; }
           self._window_activation.take();
