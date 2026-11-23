@@ -55,7 +55,7 @@ describe('Button SSR generated server artifact', () => {
     expect(getterReads).toBe(0);
     const cycle: Record<string, unknown> = {};
     cycle.self = cycle;
-    expect(() => server.renderToString(cycle)).toThrow(/portable/);
+    expect(() => server.renderToString(cycle)).toThrow('[Owner initialization] cyclic data');
   });
 
   it('changes compatibility binding when generated helper bytes change without changing Button source', async () => {

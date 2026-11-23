@@ -5,8 +5,8 @@ import ts from 'typescript';
 import { describe, expect, it, vi } from 'vitest';
 import { createHookSourceModuleContext } from '../src/services/hook-source-module';
 
-function source(text: string) {
-  return ts.createSourceFile(path.resolve('lexical-index-fixture.ts'), text, ts.ScriptTarget.Latest, true);
+function source(text: string, file = path.resolve('lexical-index-fixture.ts')) {
+  return ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 }
 function nodes<T extends ts.Node>(root: ts.Node, guard: (node: ts.Node) => node is T): T[] {
   const output: T[] = [];
@@ -299,20 +299,31 @@ describe('immutable AST lexical query identities', () => {
 });
 
 describe('indexed import bindings', () => {
-  it('resolves default, named, namespace and renamed imports to their own declarations', () => {
-    const file = source(`import main from './a';
-      import * as ns from './b';
-      import { value, other as alias } from './c';
-      read(main); read(ns); read(value); read(alias);`);
-    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
-    const clauses = nodes(file, ts.isImportClause);
-    const namespace = nodes(file, ts.isNamespaceImport)[0];
-    const specifiers = nodes(file, ts.isImportSpecifier);
-    expect(reads(file).map(n => context.resolveReference(n, module)?.declaration))
-      .toEqual([clauses[0], namespace, specifiers[0], specifiers[1]]);
-    // Repeat queries must be stable, not re-scan or drift.
-    expect(reads(file).map(n => context.resolveReference(n, module)?.declaration))
-      .toEqual([clauses[0], namespace, specifiers[0], specifiers[1]]);
+  it('resolves default, named and renamed imports to reached values and retains namespace identity', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'pui-lexical-imports-'));
+    try {
+      writeFileSync(path.join(directory, 'a.ts'), "const main = 'default'; export default main;");
+      writeFileSync(path.join(directory, 'b.ts'), 'export const member = 1;');
+      writeFileSync(path.join(directory, 'c.ts'), 'export const value = 2; export const other = 3;');
+      const file = source(`import main from './a';
+        import * as ns from './b';
+        import { value, other as alias } from './c';
+        read(main); read(ns); read(value); read(alias);`, path.join(directory, 'consumer.ts'));
+      const context = createHookSourceModuleContext(), module = context.moduleForSource(file);
+      const a = context.resolveModule(file.fileName, './a')!;
+      const c = context.resolveModule(file.fileName, './c')!;
+      const expected = [
+        nodes(a.source, ts.isVariableDeclaration)[0],
+        nodes(file, ts.isNamespaceImport)[0],
+        ...nodes(c.source, ts.isVariableDeclaration),
+      ];
+      // Public resolution follows value imports to their real declarations;
+      // import syntax alone cannot certify an unreadable value module.
+      for (let index = 0; index < 3; index++) {
+        expect(reads(file).map(n => context.resolveReference(n, module)?.declaration))
+          .toEqual(expected);
+      }
+    } finally { rmSync(directory, { recursive: true, force: true }); }
   });
 
   it('rejects an ambiguous duplicate local import name', () => {
@@ -331,7 +342,7 @@ describe('indexed import bindings', () => {
 
   it('does not carry import bindings into a replacement source', () => {
     const context = createHookSourceModuleContext();
-    const before = source(`import { value } from './a'; read(value);`);
+    const before = source(`import { definePrototype as value } from '@proto.ui/core'; read(value);`);
     const first = context.moduleForSource(before);
     const imported = nodes(before, ts.isImportSpecifier)[0];
     expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(imported);
@@ -378,7 +389,22 @@ describe('indexed export declarations', () => {
     expect(context.resolveExport(module, 'erased')).toBeNull();
     expect(context.resolveExport(module, 'gone')).toBeNull();
     expect(context.resolveExport(module, 'kept')?.declaration)
-      .toBe(nodes(file, ts.isVariableDeclaration)[0]);
+      .toBe(nodes(file, ts.isVariableDeclaration).find(node => node.name.getText() === 'kept'));
+  });
+
+  it('keeps old and replacement export identities independent after either cache is populated', () => {
+    const context = createHookSourceModuleContext();
+    const before = source('export const value = 1;');
+    const first = context.moduleForSource(before);
+    const oldDeclaration = nodes(before, ts.isVariableDeclaration)[0];
+    expect(context.resolveExport(first, 'value')?.declaration).toBe(oldDeclaration);
+    const after = source('export const value = 2;');
+    const second = context.moduleForSource(after);
+    const newDeclaration = nodes(after, ts.isVariableDeclaration)[0];
+    for (let index = 0; index < 3; index++) {
+      expect(context.resolveExport(second, 'value')?.declaration).toBe(newDeclaration);
+      expect(context.resolveExport(first, 'value')?.declaration).toBe(oldDeclaration);
+    }
   });
 
   it('keeps conflicting same-name exports ambiguous and stable across repeats', () => {

@@ -31,12 +31,18 @@ describe('source forms the shadcn families use', () => {
       ]);
     });
 
-  it('rejects String() with other than one argument', () => {
+  it('rejects String() with more than one argument', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'x',setup(def){def.expose.method('t',()=>String(1,2));}});`);
     expect(parsed).toMatchObject({
       ok: false,
-      diagnostics: [{ message: expect.stringContaining('exactly one argument') }],
+      diagnostics: [
+        {
+          code: 'PUI1006',
+          category: 'unsupported-input',
+          message: 'String requires zero or one data or opaque unknown operand.',
+        },
+      ],
     });
   });
 

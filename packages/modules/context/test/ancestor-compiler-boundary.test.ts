@@ -36,10 +36,15 @@ describe('ancestor Context compiler capability boundary', () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.diagnostics[0]).toMatchObject({
-          code: 'PUI1004',
+          code: 'PUI1006',
           category: 'unsupported-input',
         });
-        expect(result.diagnostics[0].message).toMatch(/Unsupported member context on (def|run)/);
+        // An unregistered member cannot acquire the Context capability. The
+        // shared structural member checker retains its typed rejection code.
+        expect(result.diagnostics[0].message).toBe('Undeclared object member context.');
+        expect(source.slice(result.diagnostics[0].span.start, result.diagnostics[0].span.end)).toBe(
+          operation.startsWith('def.context') ? 'def.context' : 'run.context'
+        );
         expect(result.diagnostics[0].span.line).toBe(5);
       }
     }
