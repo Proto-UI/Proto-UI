@@ -76,6 +76,12 @@ documentation-image-preview,
   clip-path: inset(50%);
   white-space: nowrap;
 }
+/* Keep the clipped control inside the canvas instead of placing its bordered
+ * box after the full-height reading grid and creating an outer scroll range. */
+.docs-image-keyboard-close:not([data-focus-visible]) {
+  top: 0;
+  left: 0;
+}
 .docs-image-keyboard-close[data-focus-visible] {
   position: absolute;
   top: 0.5rem;

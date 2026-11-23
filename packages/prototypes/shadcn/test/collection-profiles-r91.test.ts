@@ -435,11 +435,17 @@ describe('source-bound collection consumers', () => {
     day.click();
     await flush();
     expect(values).toEqual([{ value: '2026-10-10' }]);
-    expect(opens).toEqual([expect.objectContaining({ open: false, reason: 'date-selection' })]);
+    // C-CALENDAR-SELECTION-0001-PICKER: a pending/refused date proposal
+    // cannot close the popup. Completion follows accepted selection.
+    expect(opens).toEqual([]);
     expect(dateOwner.get()).toBe('2026-10-09');
     expect(openOwner.get()).toBe(true);
+    expect(day.getExposes().selected.get()).toBe(false);
+    expect(value.textContent).toBe('2026-10-09');
     setElementProps(root, { value: '2026-10-10', open: true, styleProfile: 'rhea' });
     await flush();
+    expect(opens).toEqual([expect.objectContaining({ open: false, reason: 'date-selection' })]);
+    expect(openOwner.get()).toBe(true);
     expect(root.getExposes().value).toBe(dateOwner);
     expect(root.getExposes().open).toBe(openOwner);
     expect(day.getExposes().selected.get()).toBe(true);

@@ -93,7 +93,20 @@ describe('Search public ownership and startup contract', () => {
     ).toBe(true);
     expect(calls(composition, 'proto').some((call) => textArg(call) === 'dialog-root')).toBe(true);
     expect(
-      calls(composition, 'proto').some((call) => textArg(call) === 'command-dialog-content')
+      calls(composition, 'proto').some((call) => {
+        const name = call.arguments[0];
+        // The Bootstrap family has a real Dialog content part; the two
+        // Command-Dialog families retain their original specialized part.
+        return (
+          name &&
+          ts.isConditionalExpression(name) &&
+          name.condition.getText() === "family === 'bootstrap-2-3-2'" &&
+          ts.isStringLiteralLike(name.whenTrue) &&
+          name.whenTrue.text === 'dialog-content' &&
+          ts.isStringLiteralLike(name.whenFalse) &&
+          name.whenFalse.text === 'command-dialog-content'
+        );
+      })
     ).toBe(true);
     expect(calls(composition, 'proto').some((call) => textArg(call) === 'command-root')).toBe(true);
   });
@@ -125,9 +138,19 @@ describe('Search public ownership and startup contract', () => {
     ).toBe(false);
     expect(calls(composition, 'subscribePublicInstances')).toHaveLength(1);
     expect(calls(composition, 'bindInputShellControl')).toHaveLength(1);
-    expect(calls(composition, 'setChildren').some((call) => textArg(call) === 'results')).toBe(
+    // The bounded publication owner now forwards the authored slot to the
+    // same public method, retaining its acknowledgement and stale-owner guards.
+    expect(calls(composition, 'publishChildren').some((call) => textArg(call) === 'results')).toBe(
       true
     );
+    expect(
+      calls(composition, 'setChildren').some(
+        (call) =>
+          call.expression.getText() === 'api.setChildren!' &&
+          call.arguments[0]?.getText() === 'slot' &&
+          call.arguments[1]?.getText() === 'children'
+      )
+    ).toBe(true);
     expect(
       calls(composition, 'call').some(
         (call) => textArg(call) === 'query' && textArg(call, 1) === 'focusSelf'

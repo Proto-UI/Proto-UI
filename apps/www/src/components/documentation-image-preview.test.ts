@@ -108,6 +108,118 @@ describe('documentation image viewer PUI integration', () => {
     );
     expect(source).toHaveBeenCalledOnce();
   });
+  it('waits for the browser-selected source before opening an unselected image', async () => {
+    const { trigger, root } = await fixture();
+    const media = trigger.querySelector('img')!;
+    let selected = '';
+    let ready!: () => void;
+    const decoded = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    vi.spyOn(media, 'currentSrc', 'get').mockImplementation(() => selected);
+    Object.defineProperty(media, 'decode', { configurable: true, value: () => decoded });
+
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle();
+    expect(root.getExposes?.().open.get()).toBe(false);
+    selected = 'https://example.com/mobile-diagram.svg';
+    ready();
+    await settle();
+    expect(root.getExposes?.().open.get()).toBe(true);
+    expect(document.querySelector<HTMLImageElement>('.docs-image-full')?.dataset.sourceUrl).toBe(
+      selected
+    );
+  });
+
+  it.each(['source replacement', 'disposal'] as const)(
+    'does not open a retired pending image after %s',
+    async (retirement) => {
+      const { trigger, root } = await fixture();
+      const media = trigger.querySelector('img')!;
+      let ready!: () => void;
+      const decoded = new Promise<void>((resolve) => {
+        ready = resolve;
+      });
+      vi.spyOn(media, 'currentSrc', 'get').mockReturnValue('');
+      Object.defineProperty(media, 'decode', { configurable: true, value: () => decoded });
+
+      trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await settle();
+      expect(root.getExposes?.().open.get()).toBe(false);
+      if (retirement === 'disposal') dispose?.();
+      else media.src = 'https://example.com/replacement.svg';
+      ready();
+      await settle();
+      expect(
+        document.querySelector('[data-docs-image-content][data-transition-state="entering"]')
+      ).toBeNull();
+      if (retirement === 'disposal') expect(root.isConnected).toBe(false);
+      else expect(root.getExposes?.().open.get()).toBe(false);
+    }
+  );
+
+  it('a newer activation owns the preview when an earlier image decode finishes late', async () => {
+    const { trigger, root } = await fixture();
+    const media = trigger.querySelector('img')!;
+    let selected = '';
+    let ready!: () => void;
+    const decoded = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    vi.spyOn(media, 'currentSrc', 'get').mockImplementation(() => selected);
+    Object.defineProperty(media, 'decode', { configurable: true, value: () => decoded });
+
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle();
+    selected = 'https://example.com/current-diagram.svg';
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle();
+    const currentImage = document.querySelector<HTMLImageElement>('.docs-image-full')!;
+    expect(root.getExposes?.().open.get()).toBe(true);
+    expect(currentImage.dataset.sourceUrl).toBe(selected);
+    ready();
+    await settle();
+    expect(document.querySelector('.docs-image-full')).toBe(currentImage);
+    expect(currentImage.dataset.sourceUrl).toBe(selected);
+  });
+
+  it('retires a pending request when the picture node changes but its old markup is preserved', async () => {
+    const { trigger, root } = await fixture();
+    const idleImage = document.querySelector<HTMLImageElement>('.docs-image-full')!;
+    expect(idleImage).not.toBeNull();
+    const idleMarkup = idleImage.outerHTML;
+    const media = trigger.querySelector('img')!;
+    const declaration = document.createElement('picture');
+    media.replaceWith(declaration);
+    declaration.append(media);
+    await settle();
+    let ready!: () => void;
+    const decoded = new Promise<void>((resolve) => {
+      ready = resolve;
+    });
+    vi.spyOn(media, 'currentSrc', 'get').mockReturnValue('');
+    Object.defineProperty(media, 'decode', { configurable: true, value: () => decoded });
+
+    trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle();
+    expect(root.getExposes?.().open.get()).toBe(false);
+    const requestedMarkup = declaration.outerHTML;
+    const preservedMedia = media.cloneNode(true);
+    const replacement = document.createElement('picture');
+    declaration.replaceWith(replacement);
+    replacement.append(media);
+    declaration.append(preservedMedia);
+    expect(declaration.outerHTML).toBe(requestedMarkup);
+    expect(trigger.contains(media)).toBe(true);
+    expect(media.closest('picture')).toBe(replacement);
+
+    ready();
+    await settle();
+    expect(root.getExposes?.().open.get()).toBe(false);
+    expect(document.querySelector('.docs-image-full')).toBe(idleImage);
+    expect(idleImage.outerHTML).toBe(idleMarkup);
+  });
+
   it('keeps HTML style changes out of the media inventory scan', async () => {
     const { trigger } = await fixture();
     await (

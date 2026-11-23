@@ -1,0 +1,11 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {},
+    "types": [],
+    "incremental": false,
+    "skipLibCheck": false
+  },
+  "files": ["../../../../apps/www/test-fixtures/shadow-percentage/consumer.ts"],
+  "include": []
+}

@@ -36,11 +36,16 @@ describe('ancestor Context compiler capability boundary', () => {
       expect(result.ok).toBe(false);
       if (!result.ok) {
         expect(result.diagnostics[0]).toMatchObject({
-          code: 'PUI1004',
+          // The typed member boundary rejects this unavailable Context facade
+          // before syntax lowering. PUI1006 is its registered type diagnostic.
+          code: 'PUI1006',
           category: 'unsupported-input',
+          message: 'Undeclared object member context.',
         });
-        expect(result.diagnostics[0].message).toMatch(/Unsupported member context on (def|run)/);
         expect(result.diagnostics[0].span.line).toBe(5);
+        expect(source.slice(result.diagnostics[0].span.start, result.diagnostics[0].span.end)).toBe(
+          operation.startsWith('def.context') ? 'def.context' : 'run.context'
+        );
       }
     }
   });

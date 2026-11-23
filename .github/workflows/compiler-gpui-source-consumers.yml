@@ -29,10 +29,6 @@ on:
         type: boolean
         required: false
         default: false
-      browser_acceptance:
-        type: boolean
-        required: false
-        default: false
 
 permissions:
   contents: read

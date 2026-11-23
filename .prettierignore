@@ -104,7 +104,8 @@ scripts/analysis/declarative-agent-ui/upstream/common_types.json
 scripts/analysis/declarative-agent-ui/upstream/agent_to_renderer.json
 scripts/analysis/declarative-agent-ui/upstream/LICENSE
 
-# Frozen Sprint 7 source and review records retain their exact accepted bytes.
+# Frozen Sprint 7 source and review records imported from main b715b8a6 retain
+# their exact accepted bytes. Maintained scripts remain subject to formatting.
 internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json
 internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md
 internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json

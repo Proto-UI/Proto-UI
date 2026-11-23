@@ -125,6 +125,9 @@ export function linkSurfaceProps(
       styleProfile: 'rhea',
       emphasis: 'minimal',
       ...facts,
+      // Ordinary navigation retains its native text-selection and stationary
+      // press policy; the shared Rhea recipe still owns hover/current/focus.
+      pressed: false,
       hovered: facts.hovered || facts.current,
     }).surface;
   if (appearance === 'action') return linkActionAppearance(family, emphasis, facts).surface;
@@ -269,12 +272,18 @@ export function linkSurfaceLayout(
       marginBottom: '0',
       padding: appearance === 'brand' ? '10px 0' : '10px 15px',
     };
-  if (family === 'shadcn' && appearance === 'nav')
+  if (family === 'shadcn' && appearance === 'nav') {
+    const {
+      userSelect: _userSelect,
+      WebkitUserSelect: _WebkitUserSelect,
+      ...layout
+    } = shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout;
     return {
-      ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout,
+      ...layout,
       minHeight: 'var(--site-control-height, 2.75rem)',
       pointerEvents: 'none',
     };
+  }
   if (appearance === 'action') {
     return { ...linkActionAppearance(family, emphasis, facts).layout, pointerEvents: 'none' };
   }

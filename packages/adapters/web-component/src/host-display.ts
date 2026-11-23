@@ -7,6 +7,7 @@ import {
 const HOST_DISPLAY_STYLE_ID = 'proto-ui-wc-host-display';
 const HOST_DISPLAY_CLASS = 'pui-host-root';
 const PUI_STYLE_ATTR = 'data-pui-style';
+export const PUI_PORTAL_PREPARING_ATTR = 'data-pui-portal-preparing';
 
 export { PUI_VIEW_DETACHED_ATTR };
 
@@ -78,7 +79,7 @@ function ensureDefaultHostDisplayRule(doc: Document) {
   const styleEl = getOrCreateStyleElement(doc);
   // A newly projected portal publishes its whole light-DOM subtree together.
   // Root animation remains governed by the shared Presence reveal rule.
-  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where(.${HOST_DISPLAY_CLASS}) { display: block; }\n:where([${PUI_VIEW_REVEALING_ATTR}="portal"] *) { transition: none !important; }\n`;
+  styleEl.textContent = `${styleEl.textContent ?? ''}\n:where(.${HOST_DISPLAY_CLASS}) { display: block; }\n:where([${PUI_VIEW_REVEALING_ATTR}="portal"] *) { transition: none !important; }\n:where([${PUI_PORTAL_PREPARING_ATTR}]) { display: none !important; }\n`;
   RULES_BY_DOCUMENT.set(doc, true);
 }
 

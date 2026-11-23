@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "percentage-normal-launch-evidence",
+  "archive": {
+    "path": "commands-and-output.tar.gz",
+    "bytes": 395867,
+    "sha256": "074131db0b0d349a74b0a3adf2d16d6fd9db6e7850a4ee51ee05e65a1bbaa352",
+    "payloadFilesVerified": 18,
+    "internalManifestSha256": "fdf1b1d0d73b8ee5ca5ba8453f7b2c4d22dcf26f01854fd0b099c61f5cebadd1"
+  },
+  "decodedReportSha256": "407c9f6038e81325571d99746f3fa822c6cb108783be2a9d7f3485636ca8d77c",
+  "observerSha256": "14614457e7d8c0e8ce7a1ff68ef66dde9bfbd34979d62f9a64beee1f6484e9ab",
+  "producerManifestSha256": "48f1edfa77a7c6ce6a2097f7e02fa4c8b525b22d172b088b340fdaf7b72f9b72",
+  "producerSourceHead": "07f87c536ebdb04ca61818ef95883f1c92cda4d0",
+  "status": "failed",
+  "nativeAcceptance": "missing",
+  "counts": {
+    "matrix": {
+      "passed": 54,
+      "total": 54
+    },
+    "animations": {
+      "passed": 15,
+      "total": 16
+    },
+    "lifecycle": {
+      "passed": 9,
+      "total": 9
+    }
+  },
+  "pageErrors": 0,
+  "boundaries": [
+    "Attempt 03 preserves the original launch options and every original assertion.",
+    "Earlier attempts 01/02 using the added environment override are diagnostic only.",
+    "This archive is exact-producer evidence, not a current integration-head native rerun."
+  ]
+}

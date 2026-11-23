@@ -270,7 +270,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitS5.astro` | `www.demo.authored-controllers` | `f4669032b8f41a5e52e1be753f0ce36484560e2d567282bf93bf1b752a8e7306` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts` | `www.demo.authored-controllers` | `6ec435217573ac35458cd1ea79b27a9cc95f5137e942cf72b7118a825978cb7a` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s2.ts` | `www.demo.authored-controllers` | `6ef1cb15c224e47045993911e1e6b7c14ad0f93f65df5014c86282118a3a83be` |
-| `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108` |
+| `apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts` | `www.demo.authored-controllers` | `85b7c3c518e6f1ef1e72f20b975d6ac4ce317c1a046a3cc0562602c899dffc46` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts` | `www.demo.authored-controllers` | `4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts` | `www.demo.authored-controllers` | `fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf` |
 | `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `e92b1f802f1b53ca66177fc11f36eb2698ab78ee4c51c602dd7e2c0a75c25ec8` |
@@ -364,7 +364,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/code-example-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs` | `4d78d40daf862af7f343e838d5ab16d08e92b856c8145964dcb2276c1e26e5b9` |
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07` |
 | `apps/www/src/components/documentation-image-reading-viewport.proto.ts` | `www.docs.whitepaper-diagram-viewer` | `38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec` |
-| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `e2abfa0874a8f921827c94cc2c473369d55c5a462c4e07c1d38c0da73aae824c` |
+| `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `20cd7b233e7d585eb905f2cff2f73b5acb3c0191938b983efabd602ba6d60969` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `d1de936074817b50b3c1cd15fb5256a29809a0dd2952d8d0cbc774f832e5c80d` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `d15e4c6708ace3cb09f5bfe78c513eb572820bd76aaad7641967a89f8d25c41c` |
 | `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `9f14efcd4e059a441b798c3f9ff074f7546c5f3e85f95ec13abeba6e73c120cf` |
@@ -386,7 +386,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
 | `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `4fb52b5b1708fb65a2e329205a9ba74bfcb528989e7b203eeef5fbb26ee72017` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a` |
-| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `f691b11c6cd9b25d3be510eb515b6ec3069350a6877caf2597b77857bfc76b18` |
+| `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
 | `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572` |

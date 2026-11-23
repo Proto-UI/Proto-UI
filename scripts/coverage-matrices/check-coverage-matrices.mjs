@@ -262,7 +262,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts': Object.freeze({
-    sourceSha256: '3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108',
+    sourceSha256: '85b7c3c518e6f1ef1e72f20b975d6ac4ce317c1a046a3cc0562602c899dffc46',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-brutalist/badge',
@@ -427,7 +427,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/site-link-recipes.ts': Object.freeze({
-    sourceSha256: 'f691b11c6cd9b25d3be510eb515b6ec3069350a6877caf2597b77857bfc76b18',
+    sourceSha256: '34d8b45ee47007e73ce6008ae58c1b9a06691bb26e856b91051c2ebb72458adc',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',

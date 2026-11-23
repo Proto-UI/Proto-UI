@@ -62,6 +62,17 @@ function fixture(
   const originalStyle = window.getComputedStyle.bind(window);
   vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
     const actual = originalStyle(element, pseudo);
+    // The intrinsic contact basis reads the untransformed used CSS height.
+    // Happy DOM leaves it as "auto"; supply the same 200px layout fact as the
+    // fixture's rect without changing the authored inline height assertion.
+    if (element.localName.endsWith('-drawer-content') && actual.height === 'auto')
+      return new Proxy(actual, {
+        get(target, key) {
+          if (key === 'height') return '200px';
+          const value = Reflect.get(target, key, target);
+          return typeof value === 'function' ? value.bind(target) : value;
+        },
+      });
     return element.hasAttribute('data-pui-available-space-probe')
       ? new Proxy(actual, {
           get(target, key) {

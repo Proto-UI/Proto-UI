@@ -1,0 +1,44 @@
+{
+  "baseHead": "a223be14a81bde0a819a96326ca25c59694193e9",
+  "sourceSha256": {
+    "packages/adapters/react/src/adapt.ts": "62b517a175aac8c271ffd7b8768955f011eb17e63fef63f3e218e069fd55840e"
+  },
+  "baseline": {
+    "testNamePattern": "retained owner scope|subscription follows actual closed Dialog",
+    "files": 2,
+    "passed": 3,
+    "failed": 2,
+    "notSelected": 53
+  },
+  "focusedCandidate": {
+    "files": 2,
+    "passed": 5,
+    "failed": 0,
+    "notSelected": 53
+  },
+  "regression": {
+    "command": "node node_modules/vitest/vitest.mjs run packages/adapters/react/test/context.integration.test.ts packages/adapters/web-component/test/context.integration.test.ts packages/adapters/vue/test/context.integration.test.ts packages/adapters/vue2/test/context.integration.test.ts apps/www/src/components/PrototypePreviewer/demo-renderer.public-instance.test.ts packages/adapters/react/test/lifecycle-view-intent.test.ts packages/adapters/react/test/view-reveal-style.integration.test.ts packages/adapters/react/test/overlay-portal-ownership.test.ts packages/adapters/react/test/view-operation-withdrawal.test.ts --pool=forks --no-file-parallelism",
+    "files": 9,
+    "passed": 70,
+    "failed": 0,
+    "skipped": 0
+  },
+  "logs": {
+    "s67-react-retained-baseline.log": {
+      "bytes": 213527,
+      "sha256": "ec66e5953fe43c4a43e4cb43ce4b0d347de04fc9741fd7f6ffe81ac7a96e70f1",
+      "gzipSha256": "5e173a3e612ec39a0f7c668d904341ecdc8d19743023b32810c2b4a5aa454475"
+    },
+    "s67-react-retained-candidate.log": {
+      "bytes": 212209,
+      "sha256": "4d374c997e571d9082cfcfb567b7933b8e1f024096bdf5b7b3c0de1b617dc1a3",
+      "gzipSha256": "58fa8855ada164cdb21a8430651ebf796deb908942542abb83161fa3e3537d43"
+    },
+    "s67-react-retained-regression.log": {
+      "bytes": 221503,
+      "sha256": "9e04ec7e4aed2268b69d1963e30e4e8e7cb79a82cec3196b07a2ba4c814f9059",
+      "gzipSha256": "2396ced33b66c310003df5cbbaab607db8f03fdbfae4c8405554dd3c2da04248"
+    }
+  },
+  "scope": "Installed framework runtimes in Happy DOM. No assertion or test changed; no native browser, performance or Apple/AT acceptance claim."
+}

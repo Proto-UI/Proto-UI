@@ -91,7 +91,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
-    sourceSha256: '32cac013475c33f471733758531dbd96b674e3b667ccd80d4511d311afcbe33d',
+    sourceSha256: '2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -114,9 +114,14 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/core/src/internal.ts': Object.freeze({
-    sourceSha256: '96c57e2fc6a68a197118b0f5143de1415423bd5fb8c86ab42994bc8a7d4b1855',
+    sourceSha256: '2b16d692f539b0addc652c8fb9cc03b51064d3eba8424fbf836161b289a9eda7',
     companionSource: BROWSER_COMPILER_OWNER,
-    specifiers: Object.freeze(['./handles', './prototype', './spec/feedback/root-effect']),
+    specifiers: Object.freeze([
+      './handles',
+      './prototype',
+      './spec/feedback/application-role',
+      './spec/feedback/root-effect',
+    ]),
   }),
   'packages/core/src/presence-presentation.ts': Object.freeze({
     sourceSha256: '8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398',
@@ -129,7 +134,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./handles', './internal', './spec', './state']),
   }),
   'packages/core/src/spec/feedback/application-role.ts': Object.freeze({
-    sourceSha256: '4dcbb148476982d560f1957bb5cc49f4e53fc9cdb0027b2b14681d647711abe1',
+    sourceSha256: '2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./placeholder']),
   }),

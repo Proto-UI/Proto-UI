@@ -4,10 +4,12 @@ import {
   mergeRootStyleEntries,
   readRootStyleEntries,
   resolveRootStyleEntry,
+  isPercentageRootTranslationV1,
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
 import { createOwnedTwTokenApplier, PUI_STYLE_ATTR } from './feedback-style';
 import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-style-artifact';
+import type { ShadowPercentageSource } from './shadow-percentage-source';
 
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
@@ -29,7 +31,12 @@ const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
-type Projection = { root: string; surface: string[]; borderWidths: string };
+type Projection = {
+  root: string;
+  surface: string[];
+  borderWidths: string;
+  percentage?: { source: ShadowPercentageSource; entry: RootStyleEntry };
+};
 type CompiledStyleRule = Readonly<{
   selector: string;
   branches: readonly string[];
@@ -85,6 +92,23 @@ function declarationsBeforeReceipt(rule: CompiledStyleRule): string | null {
 // Canonical recipes affecting boundary sizing or scrolling are Adapter trust
 // anchors. A new generated spelling requires an Adapter update and parity evidence.
 function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
+  if (needsPercentageTranslationRecipe(entry.authorToken)) {
+    const host = compiledReceiptSelector(entry.token);
+    const selector = rule.selector.replace(/\s/g, '');
+    const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+    const surface = `${host}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`;
+    if (selector !== host && selector !== surface) return false;
+    const operand = entry.authorToken.slice('translate-x-['.length, -1).replaceAll('_', '');
+    const transform =
+      'translate(var(--pui-translate-x,0),var(--pui-translate-y,0))scale(var(--pui-scale-x,1),var(--pui-scale-y,1))';
+    const expected = `--pui-translate-x:${operand};transform:${transform};`;
+    // The generated surface rule has no active token for a Root geometry
+    // entry. The actual host rule must carry the whole-Root rest transform.
+    return (
+      declarationsBeforeReceipt(rule) ===
+      (selector === host ? `${expected}--pui-split-rest-transform:${transform};` : expected)
+    );
+  }
   const expected =
     entry.authorToken === 'w-full'
       ? 'width:100%;'
@@ -95,6 +119,10 @@ function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleE
           : null;
   if (!expected) return true;
   return declarationsBeforeReceipt(rule) === expected;
+}
+
+function needsPercentageTranslationRecipe(token: string): boolean {
+  return token === 'translate-x-[calc(100%_-_4px)]' || isPercentageRootTranslationV1(token);
 }
 
 function nextCssBoundary(
@@ -384,6 +412,8 @@ function hasExactCompiledReceipt(
   return (
     matching.length === candidates.length &&
     matching.length > 0 &&
+    (!needsPercentageTranslationRecipe(entry.authorToken) ||
+      matching.some((rule) => rule.selector.replace(/\s/g, '') === receipt)) &&
     ((!selection && !placeholder && entry.roleSource === 'fallback') ||
       matching.every(
         (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalProjectionRecipe(rule, entry)
@@ -421,11 +451,13 @@ export function createShadowSplitEffectsPort({
   surface,
   artifact,
   prototypeName,
+  capturePercentageSource,
 }: {
   host: HTMLElement;
   surface: HTMLElement;
   artifact: ShadowStyleArtifactV1;
   prototypeName: string;
+  capturePercentageSource?: () => ShadowPercentageSource | null;
 }): EffectsPort & { dispose(): void } {
   const invalid = (reason: string) => new Error(`[${prototypeName}]${reason}`);
   const nativeText = surface.localName === 'input' || surface.localName === 'textarea';
@@ -507,6 +539,7 @@ export function createShadowSplitEffectsPort({
   splitPaintOwners.set(surface, {
     containsCurrentTokens() {
       if (applied && host.getAttribute(SHADOW_SPLIT_ROOT_STYLE_ATTR) !== applied.root) return false;
+      if (applied && surface.getAttribute(SHADOW_SPLIT_SURFACE_ATTR) !== '') return false;
       const owned = applier.getOwned();
       if (owned.size === 0) return true;
       const live = new Set(surface.getAttribute(PUI_STYLE_ATTR)?.split(/\s+/));
@@ -624,6 +657,7 @@ export function createShadowSplitEffectsPort({
       throw invalid('root-provenance');
     }
     const entries = mergeRootStyleEntries(readRootStyleEntries(handle, 'setup'));
+    let percentage: Projection['percentage'];
     if (
       entries.some((entry) =>
         ['animate-in', 'animate-out', '-translate-x-1/2', '-translate-y-1/2'].includes(
@@ -638,13 +672,25 @@ export function createShadowSplitEffectsPort({
     if (intrinsicTokens.every((token) => entries.some((entry) => entry.authorToken === token))) {
       const flex = entries.find((entry) => entry.authorToken === 'flex-1')!;
       if (!hasRecipe('intrinsic-nowrap', 'v1')) fail(flex, 'intrinsic recipe');
+      const dimensions = entries.filter((entry) =>
+        /^(?:w-|min-w-|max-w-|size-)/.test(entry.authorToken)
+      );
+      const fullWidth =
+        dimensions.length === 1 &&
+        dimensions[0].authorToken === 'w-full' &&
+        dimensions[0].token === 'w-full';
       if (
         intrinsicTokens.some((token) =>
           entries.some((entry) => entry.authorToken === token && entry.token !== token)
         ) ||
-        entries.some((entry) => /^(?:w-|min-w-|max-w-|size-)/.test(entry.authorToken))
+        (dimensions.length > 0 && !fullWidth)
       )
         fail(flex, 'intrinsic operands');
+      // The vertical Tabs source uses this exact unconditional width. Its
+      // separately certified recipe does not admit other sizing combinations
+      // or let an older nowrap-only companion claim the additional closure.
+      if (fullWidth && !hasRecipe('intrinsic-full-width', 'v1'))
+        fail(flex, 'intrinsic full-width recipe');
     }
     for (const entry of entries) {
       if (nativeText && entry.authorToken === 'overflow-y-auto') fail(entry, 'native scrollport');
@@ -671,6 +717,15 @@ export function createShadowSplitEffectsPort({
         fail(entry, 'canonical-origin');
       }
       if (entry.role === 'unresolved') fail(entry, 'unresolved-role');
+      if (needsPercentageTranslationRecipe(entry.authorToken)) {
+        if (!hasRecipe('percentage-translation', 'v1'))
+          fail(entry, 'percentage translation recipe');
+        if (isPercentageRootTranslationV1(entry.authorToken) && !percentage) {
+          const source = capturePercentageSource?.();
+          if (!source) return fail(entry, 'percentage owner source');
+          percentage = { source, entry };
+        }
+      }
       const needsK1 = [
         '-translate-x-1/2',
         '-translate-y-1/2',
@@ -718,6 +773,7 @@ export function createShadowSplitEffectsPort({
     }
     return {
       borderWidths,
+      percentage,
       root: entries.map((e) => e.token).join(' '),
       surface: entries
         .filter(
@@ -739,9 +795,15 @@ export function createShadowSplitEffectsPort({
       flushRequested = true;
       return;
     }
-    flushing = true;
     const previous = applied;
     const next = latest;
+    if (next.percentage && !next.percentage.source.isCurrent()) {
+      // The source may have been revoked between queue and publish. Reject
+      // before either target or its initial-transition style is touched.
+      latest = previous;
+      fail(next.percentage.entry, 'percentage source not current');
+    }
+    flushing = true;
     const suppressInitialTransition = !previous;
     try {
       // The surface is already connected, so the first opacity publication

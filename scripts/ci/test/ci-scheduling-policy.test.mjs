@@ -447,13 +447,18 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
 });
 
 function assertReusableCompilerInputBoundary(workflow) {
-  // Adapter and browser acceptance are separate default-off reusable inputs.
-  // Package-budget and Website evidence remain manual-only.
+  // Adapter acceptance is the sole default-off reusable input. Browser,
+  // package-budget and Website evidence retain their separate manual entries.
   assert.deepEqual(workflow.on.workflow_call, {
     inputs: {
       adapter_acceptance: { type: 'boolean', required: false, default: false },
-      browser_acceptance: { type: 'boolean', required: false, default: false },
     },
+  });
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.browser_acceptance, {
+    description: 'Run the separate browser compiler and source regression lanes',
+    type: 'boolean',
+    required: false,
+    default: false,
   });
   const browser = workflow.jobs['browser-compiler'];
   assert.equal(browser.if, '${{ inputs.browser_acceptance }}');
@@ -461,9 +466,20 @@ function assertReusableCompilerInputBoundary(workflow) {
   assert.deepEqual(browser.with, { source_regressions: true, production_build: true });
 }
 
-test('reusable compiler inputs preserve separate default-off Adapter and browser boundaries', () => {
-  const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
+function assertReusableCompilerCallers(workflows) {
+  for (const workflow of Object.values(workflows)) {
+    for (const job of Object.values(workflow.jobs ?? {})) {
+      if (job.uses === './.github/workflows/compiler-gpui-source-consumers.yml')
+        assert.equal(Object.hasOwn(job.with ?? {}, 'browser_acceptance'), false);
+    }
+  }
+}
+
+test('reusable compiler inputs preserve Adapter and manual browser acceptance boundaries', () => {
+  const workflows = readWorkflows();
+  const original = workflows['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
+  assertReusableCompilerCallers(workflows);
   const mutations = [
     (workflow) => {
       workflow.on.workflow_call = null;
@@ -478,13 +494,23 @@ test('reusable compiler inputs preserve separate default-off Adapter and browser
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.default = true;
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.required = true;
+      delete workflow.on.workflow_dispatch.inputs.browser_acceptance;
     },
     (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance.type = 'string';
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.default = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.required = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_dispatch.inputs.browser_acceptance.type = 'string';
     },
     (workflow) => {
       workflow.jobs['browser-compiler'].if = 'true';
@@ -517,6 +543,13 @@ test('reusable compiler inputs preserve separate default-off Adapter and browser
     const changed = structuredClone(original);
     mutate(changed);
     assert.throws(() => assertReusableCompilerInputBoundary(changed));
+  }
+  for (const browserAcceptance of [true, false]) {
+    const changed = structuredClone(workflows);
+    changed['ci.yml'].jobs['compiler-gpui-consumers'].with = {
+      browser_acceptance: browserAcceptance,
+    };
+    assert.throws(() => assertReusableCompilerCallers(changed));
   }
 });
 

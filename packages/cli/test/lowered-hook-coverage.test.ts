@@ -5413,6 +5413,210 @@ describe('lowered hook coverage', () => {
     );
   });
 
+  // Retain main's paired collector checks as mixed-rule controls alongside
+  // the row-only refusal controls above: an unknown row cannot erase an
+  // independent rule whose State and literal comparison remain proven.
+  describe('independent hook reads beside unresolved imported rows', () => {
+    it('withholds the rows when the reading file hands the array to a caller', async () => {
+      await withLoopFixture(
+        { 'ids.ts': "export const NAMES = ['left', 'right'] as const;" },
+        loopConsumer(["import { NAMES } from './ids';"], 'NAMES', ['mutate(NAMES);']),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows when the declaring module writes the array', async () => {
+      await withLoopFixture(
+        {
+          'ids.ts': [
+            "export const NAMES = ['left', 'right'] as const;",
+            "NAMES.push('center');",
+          ].join('\n'),
+        },
+        loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows for a conditional member of an imported array', async () => {
+      await withLoopFixture(
+        { 'ids.ts': "export const NAMES = ['left', pick ? 'right' : 'center'] as const;" },
+        loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          // The scanner refuses the complete row proof. The independent first
+          // literal still contributes to the collector's token inventory; the
+          // conditional member must not manufacture an exact comparison value.
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([
+            'data-[direction=left]:bg-primary',
+          ]);
+        }
+      );
+    });
+
+    it('withholds the rows for an unknown spread of an imported array', async () => {
+      await withLoopFixture(
+        { 'ids.ts': "export const NAMES = [...external(), 'left'] as const;" },
+        loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows when the declaring module has unmodeled effects', async () => {
+      await withLoopFixture(
+        {
+          'ids.ts': [
+            "export const NAMES = ['left', 'right'] as const;",
+            'export const key = createKey();',
+          ].join('\n'),
+        },
+        loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows for a mutable module binding', async () => {
+      await withLoopFixture(
+        { 'ids.ts': "export let NAMES = ['left', 'right'] as const;" },
+        loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          // This fixture has no write. Its two literal values remain in the
+          // conservative CSS inventory, which does not supply the scanner's
+          // stricter const-only proof of the complete iterable.
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([
+            'data-[direction=left]:bg-primary',
+            'data-[direction=right]:bg-primary',
+          ]);
+        }
+      );
+    });
+
+    it('withholds the rows for a cyclic re-export', async () => {
+      await withLoopFixture(
+        {
+          'one.ts': "export { NAMES } from './two';",
+          'two.ts': "export { NAMES } from './one';",
+        },
+        loopConsumer(["import { NAMES } from './one';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows for an import the scanner cannot read', async () => {
+      await withLoopFixture(
+        {},
+        loopConsumer(["import { NAMES } from './absent';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows for a wildcard re-export', async () => {
+      // `export *` does not name what it carries, and the extractor's constants
+      // loader skips wildcard re-exports, so the rows have no proven provenance.
+      await withLoopFixture(
+        {
+          'ids.ts': "export const NAMES = ['left', 'right'] as const;",
+          'bridge.ts': "export * from './ids';",
+        },
+        loopConsumer(["import { NAMES } from './bridge';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+
+    it('withholds the rows for a default-exported array', async () => {
+      await withLoopFixture(
+        { 'ids.ts': "export default ['left', 'right'] as const;" },
+        loopConsumer(["import NAMES from './ids';"], 'NAMES'),
+        async (scan, tokens) => {
+          // The row-dependent comparison remains refused. The independent
+          // Checkbox condition in the same body still has a known subject and
+          // literal comparison, so both analyzers must retain its valid proof.
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+          const extracted = await tokens();
+          expect(extracted).toContain('data-[checked]:underline');
+          expect(extracted.filter((token) => token.startsWith('data-[direction='))).toEqual([]);
+        }
+      );
+    });
+  });
+
   it('resolves every hook state a shipped rule condition reads', async () => {
     const found: Array<{
       file: string;

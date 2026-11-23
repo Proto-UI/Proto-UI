@@ -1,0 +1,30 @@
+{
+  "sha256": "ee7b3d6c75ffeec6809a8c053d8f80cd5df333028a12d9822bf39787773843e4",
+  "bytes": 47397,
+  "members": [
+    {
+      "file": "general-shadcn-datepicker-baseline/report.json",
+      "sha256": "a00ca7991960bdeff32daddfd3fdcdfef774f0a47980231f541105d50b4b5a32"
+    },
+    {
+      "file": "general-shadcn-datepicker-baseline/status.json",
+      "sha256": "2a6e74c0e707bc773102740cd1200c5a48fd9c56ac2829edd505f17fa55d48b9"
+    },
+    {
+      "file": "general-shadcn-datepicker-baseline/stdout.log",
+      "sha256": "cddae2a5f26775b15731bd2cc70b989ea7d6755a9a63b079e03173546e945065"
+    },
+    {
+      "file": "general-shadcn-datepicker-candidate/report.json",
+      "sha256": "34f603f766be7d1bdd3934cffa9461d5d816950311509bc4b91b561be836cc75"
+    },
+    {
+      "file": "general-shadcn-datepicker-candidate/status.json",
+      "sha256": "5900fb48fd6e1f8bf863bb7d0c1eb921e57c3bcd1ff2eaab79ac5ddbb712c060"
+    },
+    {
+      "file": "general-shadcn-datepicker-candidate/stdout.log",
+      "sha256": "d1b0017e9dc3944861e2a61a0bd019fb274ed03c9a04578471f674db2b5755bb"
+    }
+  ]
+}

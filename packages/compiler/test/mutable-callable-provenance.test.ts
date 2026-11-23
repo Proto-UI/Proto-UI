@@ -27,7 +27,9 @@ it.each(['box.invoke = illegal;', 'alias.invoke = illegal;'])(
 );
 
 it('rejects portable IR with a known illegal callable assigned through a record field', () => {
-  const parsed = parsePrototype(effectSource('box.invoke = () => {};'));
+  // Keep the real callable reachable in legal setup before moving its reference
+  // into a callback path in untrusted portable IR. Unused closures are pruned.
+  const parsed = parsePrototype(effectSource('illegal(); box.invoke = () => {};'));
   expect(parsed.ok, JSON.stringify(parsed.ok ? {} : parsed.diagnostics)).toBe(true);
   if (!parsed.ok) throw new Error('expected the inert field assignment control');
   const ir = JSON.parse(JSON.stringify(parsed.value));

@@ -5,13 +5,8 @@ import ts from 'typescript';
 import { describe, expect, it, vi } from 'vitest';
 import { createHookSourceModuleContext } from '../src/services/hook-source-module';
 
-function source(text: string) {
-  return ts.createSourceFile(
-    path.resolve('lexical-index-fixture.ts'),
-    text,
-    ts.ScriptTarget.Latest,
-    true
-  );
+function source(text: string, file = path.resolve('lexical-index-fixture.ts')) {
+  return ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 }
 function nodes<T extends ts.Node>(root: ts.Node, guard: (node: ts.Node) => node is T): T[] {
   const output: T[] = [];
@@ -399,35 +394,41 @@ describe('immutable AST lexical query identities', () => {
 });
 
 describe('indexed import bindings', () => {
-  it('resolves default, named, namespace and renamed imports through their actual modules', () => {
-    withModuleFiles(
-      {
-        'a.ts': 'const main = 1; export default main;',
-        'b.ts': 'export const member = 2;',
-        'c.ts': 'export const value = 3; export const other = 4;',
-      },
-      (makeSource) => {
-        const file = makeSource(`import main from './a';
+  it('resolves default, named and renamed imports to reached values and retains namespace identity', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'pui-lexical-imports-'));
+    try {
+      writeFileSync(path.join(directory, 'a.ts'), "const main = 'default'; export default main;");
+      writeFileSync(path.join(directory, 'b.ts'), 'export const member = 1;');
+      writeFileSync(
+        path.join(directory, 'c.ts'),
+        'export const value = 2; export const other = 3;'
+      );
+      const file = source(
+        `import main from './a';
         import * as ns from './b';
         import { value, other as alias } from './c';
-        read(main); read(ns); read(value); read(alias);`);
-        const context = createHookSourceModuleContext();
-        const module = context.moduleForSource(file);
-        const defaultModule = context.resolveModule(file.fileName, './a')!;
-        const namedModule = context.resolveModule(file.fileName, './c')!;
-        const namespace = nodes(file, ts.isNamespaceImport)[0];
-        const expected = [
-          nodes(defaultModule.source, ts.isVariableDeclaration)[0],
-          namespace,
-          ...nodes(namedModule.source, ts.isVariableDeclaration),
-        ];
-        for (let i = 0; i < 3; i++) {
-          expect(reads(file).map((n) => context.resolveReference(n, module)?.declaration)).toEqual(
-            expected
-          );
-        }
+        read(main); read(ns); read(value); read(alias);`,
+        path.join(directory, 'consumer.ts')
+      );
+      const context = createHookSourceModuleContext(),
+        module = context.moduleForSource(file);
+      const a = context.resolveModule(file.fileName, './a')!;
+      const c = context.resolveModule(file.fileName, './c')!;
+      const expected = [
+        nodes(a.source, ts.isVariableDeclaration)[0],
+        nodes(file, ts.isNamespaceImport)[0],
+        ...nodes(c.source, ts.isVariableDeclaration),
+      ];
+      // Public resolution follows value imports to their real declarations;
+      // import syntax alone cannot certify an unreadable value module.
+      for (let index = 0; index < 3; index++) {
+        expect(reads(file).map((n) => context.resolveReference(n, module)?.declaration)).toEqual(
+          expected
+        );
       }
-    );
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 
   it('rejects an ambiguous duplicate local import name', () => {
@@ -465,6 +466,23 @@ describe('indexed import bindings', () => {
       // The old immutable source retains its import and resolves the real export.
       expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(exported);
     });
+  });
+
+  it('does not carry Core import bindings into a replacement source', () => {
+    const context = createHookSourceModuleContext();
+    const before = source(
+      `import { definePrototype as value } from '@proto.ui/core'; read(value);`
+    );
+    const first = context.moduleForSource(before);
+    const imported = nodes(before, ts.isImportSpecifier)[0];
+    expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(imported);
+    const after = source(`const value = 'local'; read(value);`);
+    const second = context.moduleForSource(after);
+    expect(context.resolveReference(reads(after)[0], second)?.declaration).toBe(
+      nodes(after, ts.isVariableDeclaration)[0]
+    );
+    // The old immutable source still resolves through its own import index.
+    expect(context.resolveReference(reads(before)[0], first)?.declaration).toBe(imported);
   });
 });
 
@@ -515,18 +533,18 @@ describe('indexed export declarations', () => {
     expect(context.resolveExport(module, 'kept')?.declaration).toBe(kept);
   });
 
-  it('keeps export symbols per immutable source on same-path replacement', () => {
+  it('keeps old and replacement export identities independent after either cache is populated', () => {
     const context = createHookSourceModuleContext();
     const before = source('export const value = 1;');
     const first = context.moduleForSource(before);
-    const original = nodes(before, ts.isVariableDeclaration)[0];
-    expect(context.resolveExport(first, 'value')?.declaration).toBe(original);
+    const oldDeclaration = nodes(before, ts.isVariableDeclaration)[0];
+    expect(context.resolveExport(first, 'value')?.declaration).toBe(oldDeclaration);
     const after = source('export const value = 2;');
     const second = context.moduleForSource(after);
-    const replacement = nodes(after, ts.isVariableDeclaration)[0];
-    for (let i = 0; i < 3; i++) {
-      expect(context.resolveExport(second, 'value')?.declaration).toBe(replacement);
-      expect(context.resolveExport(first, 'value')?.declaration).toBe(original);
+    const newDeclaration = nodes(after, ts.isVariableDeclaration)[0];
+    for (let index = 0; index < 3; index++) {
+      expect(context.resolveExport(second, 'value')?.declaration).toBe(newDeclaration);
+      expect(context.resolveExport(first, 'value')?.declaration).toBe(oldDeclaration);
     }
   });
 

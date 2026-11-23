@@ -14,7 +14,7 @@ criteria:
       en: Surface introduces no role, tabindex, focus request, event listener, activation, semantic state, native property forwarding or exposed method. Authored content remains in its original semantic ownership. Observed presentation inputs are not an event simulation or an independent interaction truth.
   - id: P-SHADCN-SURFACE-INPUTS
     text:
-      en: Inputs are variant transparent|outline|secondary|muted|accent|solid|scrim, radius default|none|sm|md|lg|xl|full, border all|bottom|none, elevation none|raised, boolean hovered/focusVisible/pressed/current/fade, and observed transitionState closed|entering|entered|leaving. Defaults are outline/default/all/none, transitionState entered, and all booleans false. Absent inputs restore defaults. Family is not a Surface prop. Shadcn actionProfile none|rhea|luma is an explicit passive visual profile; none preserves these ordinary defaults.
+      en: Inputs are variant transparent|outline|secondary|muted|accent|solid|scrim, radius default|none|sm|md|lg|xl|full, border all|bottom|none, elevation none|raised, boolean hovered/focusVisible/pressed/current/fade, and observed transitionState closed|entering|entered|leaving. Defaults are outline/default/all/none, transitionState entered, and all booleans false. Absent inputs restore defaults. Family is not a Surface prop. Shadcn actionProfile none|vega|nova|maia|lyra|mira|luma|sera|rhea|new-york-v4, with new-york as an explicit alias of new-york-v4, is an explicit passive visual profile; none preserves these ordinary defaults. It does not implicitly consume style-scope or choose a profile for the native owner.
   - id: P-SHADCN-SURFACE-PROJECTION
     text:
       en: The family inherits asSurfaceRoot and owns its finite fill, border, radius, depth and observed-feedback recipes through rule/feedback.style. Surface does not choose font, text size or content. Pointer hit ownership stays with the semantic host. Fade projects only the existing Transition owner phase; it does not create a clock, lifecycle, inertness or interaction state. Web surface-fade consumes --pui-surface-transition-duration, default 0ms, supplied only from finite nonnegative duration milliseconds by its composition owner. Reduced-motion uses 0ms. Scrim lowers to black at 80 percent opacity. Unsupported native lowering, including unresolved CSS duration variables and starting-style selectors, remains diagnostic, never an inferred support claim.
@@ -23,14 +23,22 @@ criteria:
       en: The public package root and /surface subpath expose Surface, with CLI registration for adapter facade consumption. Partial-family Surface defaults to neutral opaque outline presentation (transparent and scrim are ordinary fills, not material effects) and does not expand material or unrelated component compatibility guarantees.
   - id: P-SHADCN-SURFACE-PRESSED-PROJECTION
     text:
-      en: An observed pressed fact on an ordinary actionProfile none surface does not imply Button motion or remove authored elevation. Explicit rhea and luma action appearances project their one-pixel pressed translation only; they do not apply scale or pressed shadow removal. Native navigation and activation ownership remains unchanged. This does not assign Button feedback to Sidebar, table-of-contents, or other non-action consumers.
+      en: An observed pressed fact on an ordinary actionProfile none surface does not imply Button motion or remove authored elevation. Each explicit modern action appearance (vega, nova, maia, lyra, mira, luma, sera or rhea) projects its one-pixel pressed translation only; none and new-york-v4/new-york project no pressed translation. No action profile applies scale or pressed shadow removal. Native navigation and activation ownership remains unchanged. This does not assign Button feedback to Sidebar, table-of-contents, or other non-action consumers.
   - id: P-SHADCN-SURFACE-ACTION-APPEARANCE
     text:
-      en: The separate shadcnActionAppearance Web composition helper returns the public family Surface and Text props plus family-owned wrapping layout for an action label. The Shadcn-only actionProfile enum none|rhea|luma defaults to none; opt-in recipes use the named Button profile corner, border and focus/hover paint without changing ordinary Surface defaults. Its default minimum height matches the family default wrapped Button, while the native owner retains href, focus, Enter, modifiers, middle click, context menu and Space behavior. The label's nonselectable affordance does not suppress document or editor selection, intercept events or introduce Button semantics. This is a passive appearance composition, not admission of a Base Link prototype or a cross-host navigation API.
+      en: The separate shadcnActionAppearance Web composition helper returns the public family Surface and Text props plus family-owned wrapping layout for an action label. The Shadcn-only actionProfile vocabulary is the explicit finite list in INPUTS, defaulting to none; opt-in recipes use the named source-bound default Button profile corner, border and focus/hover paint without changing ordinary Surface defaults. The helper defaults to rhea and maps only primary, secondary and minimal emphasis to solid, secondary and transparent Surface fills; it does not admit Button variants, interaction state, scope inheritance or automatic ARIA handling on a passive subject. Its default minimum height matches the family default wrapped Button, while the native owner retains href, focus, Enter, modifiers, middle click, context menu and Space behavior. The label's nonselectable affordance does not suppress document or editor selection, intercept events or introduce Button semantics. This is a passive appearance composition, not admission of a Base Link prototype or a cross-host navigation API.
+  - id: P-SHADCN-SURFACE-ACTION-PROFILES
+    text:
+      en: >-
+        The eight modern appearance recipes are pinned to shadcn-ui/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7 apps/v4/registry/styles/style-{id}.css cn-button and default/secondary/ghost clauses, retaining the already adopted Rhea/Luma recipe. Their shared base is a one-pixel transparent border, background clipping and outline suppression; focus uses border-ring with ring width/opacity 3px/50% for Vega, Nova and Maia, 1px/50% for Lyra, 2px/30% for Mira and Sera, and 3px/30% for Luma and Rhea. Corners are respectively md, lg, theme-4xl, none, md, theme-4xl, none and theme-2xl. Primary hover uses primary/80; secondary hover mixes secondary with five percent foreground; minimal hover uses muted/foreground and dark muted/50. Separate new-york-v4 (alias new-york) uses the default/secondary/ghost subset of 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/button.tsx: md corners, ring3/ring50, primary/90 and secondary/80 hover, and minimal accent/accent-foreground with dark accent/50. It acquires no modern transparent border, background clipping or pressed translation. Existing forced-colors focus treatment remains a Proto extension for every profile. Only supplied hovered, focusVisible and pressed facts select these recipes; current does not simulate hover on an action profile. Profile or fact changes withdraw inactive contributions on the same passive subjects; omission restores ordinary Surface/Text defaults. Upstream invalid, expanded, nested SVG, extra size, disabled and activation selectors are outside this passive slice and confer no new semantics. Token and DOM tests do not establish native navigation, pixels, motion, assistive-technology or non-Web conformance.
+
+
 sources:
   - path: packages/prototypes/shadcn/src/surface/action-appearance.ts
   - path: packages/prototypes/shadcn/src/surface/root.proto.ts
   - path: packages/prototypes/shadcn/src/surface/index.ts
+  - path: internal/fixtures/shadcn-style-source/manifest.json
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx
 dependsOn:
   contracts: [C-CORE-SYNTAX-0003, C-PROPS-0001, C-FEEDBACK-STYLE-0002]
 inherits:
@@ -39,6 +47,9 @@ inherits:
 verifies:
   tests: [T-SURFACE-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Explicitly admitted the bounded nine-profile passive action appearance, retaining native interaction ownership and separate modern and legacy source recipes; draft review and native evidence remain required.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added reusable passive Surface atom, without page semantics or new navigation ownership.

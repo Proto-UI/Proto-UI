@@ -1923,6 +1923,8 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     seen = new Set<string>(),
     origin?: HookSourceModule
   ): HookSourceSymbol | null {
+    // Old immutable modules remain queryable after a replacement at the same
+    // path. Both the declaration and the reading source own their cache facts.
     const cacheKey = `${declarationKey(symbol)}\0${name}\0${origin ? sourceKey(origin) : ''}`;
     const cached = objectMemberCache.get(cacheKey);
     if (cached !== undefined) return cached;

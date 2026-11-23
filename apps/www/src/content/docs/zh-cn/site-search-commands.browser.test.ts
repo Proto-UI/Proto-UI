@@ -2442,6 +2442,104 @@ for (const width of [320, 390]) {
         await capture(page, id, 'menu-and-heading');
         expect(errors).toEqual([]);
       } catch (error) {
+        let snapshotTimer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          const selects = await Promise.race([
+            page.evaluate(() =>
+              Array.from(document.querySelectorAll<HTMLElement>('*'))
+                .filter((node) =>
+                  /-select-(root|content|surface|viewport|trigger|value|item|item-text)$/.test(
+                    node.localName
+                  )
+                )
+                .slice(0, 100)
+                .map((node) => {
+                  const exposed =
+                    (
+                      node as HTMLElement & { getExposes?: () => Record<string, unknown> }
+                    ).getExposes?.() ?? {};
+                  const states: Record<string, unknown> = {};
+                  for (const key of [
+                    'open',
+                    'transitionState',
+                    'alignmentDiagnostic',
+                    'value',
+                    'displayValue',
+                    'selected',
+                  ]) {
+                    const handle = exposed[key] as { get?: () => unknown } | undefined;
+                    if (typeof handle?.get === 'function') {
+                      try {
+                        states[key] = handle.get();
+                      } catch (failure) {
+                        states[key] = String(failure);
+                      }
+                    }
+                  }
+                  const computed = getComputedStyle(node);
+                  return {
+                    tag: node.localName,
+                    id: node.id,
+                    connected: node.isConnected,
+                    attributes: Object.fromEntries(
+                      Array.from(node.attributes, (attribute) => [attribute.name, attribute.value])
+                    ),
+                    states,
+                    box: node.getBoundingClientRect().toJSON(),
+                    offsetWidth: node.offsetWidth,
+                    offsetHeight: node.offsetHeight,
+                    clientWidth: node.clientWidth,
+                    clientHeight: node.clientHeight,
+                    scrollWidth: node.scrollWidth,
+                    scrollHeight: node.scrollHeight,
+                    offsetParent: node.offsetParent?.localName ?? null,
+                    parent: node.parentElement?.localName ?? null,
+                    computed: Object.fromEntries(
+                      [
+                        'display',
+                        'visibility',
+                        'position',
+                        'width',
+                        'height',
+                        'min-width',
+                        'max-width',
+                        'min-height',
+                        'max-height',
+                        'overflow-x',
+                        'overflow-y',
+                        'top',
+                        'left',
+                        'transform',
+                        'direction',
+                      ].map((property) => [property, computed.getPropertyValue(property)])
+                    ),
+                  };
+                })
+            ),
+            new Promise<null>((resolve) => {
+              snapshotTimer = setTimeout(() => resolve(null), 1000);
+            }),
+          ]);
+          await mkdir(evidenceDirectory, { recursive: true });
+          await writeFile(
+            path.join(evidenceDirectory, `${id}-select-failure.json`),
+            JSON.stringify(
+              {
+                source,
+                family,
+                width,
+                selects,
+                unavailable: selects === null ? 'Select failure snapshot exceeded 1000ms' : null,
+              },
+              null,
+              2
+            )
+          );
+        } catch {
+          // This read-only post-failure snapshot cannot replace the verdict.
+        } finally {
+          if (snapshotTimer !== undefined) clearTimeout(snapshotTimer);
+        }
         await captureFailure(page, error);
         throw error;
       } finally {

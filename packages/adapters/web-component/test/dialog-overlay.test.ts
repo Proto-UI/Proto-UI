@@ -37,12 +37,41 @@ function styleContains(el: Element, token: string): boolean {
   return (el.getAttribute('data-pui-style') ?? '').split(/\s+/).includes(token);
 }
 
+async function requireDialogPresentation(
+  content: HTMLElement & { getExposes(): Record<string, unknown> }
+): Promise<void> {
+  const doc = content.ownerDocument;
+  const view = doc.defaultView!;
+  const transitionState = content.getExposes().transitionState;
+  expect(transitionState).toBeDefined();
+  // First portal publication remains concealed until its host rendering
+  // opportunity. Exercise keyboard input only after that same view is presented.
+  await new Promise<void>((resolve) =>
+    view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve()))
+  );
+  expect(content.ownerDocument).toBe(doc);
+  expect(content.isConnected).toBe(true);
+  expect(content.parentElement).toBe(doc.body);
+  expect(content.getExposes().transitionState).toBe(transitionState);
+  expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+  expect(content.hasAttribute('data-pui-portal-preparing')).toBe(false);
+  expect(view.getComputedStyle(content).display).not.toBe('none');
+}
+
 async function completeTransitions(...elements: any[]): Promise<void> {
   for (const element of elements) {
     const exposes = element?.getExposes?.();
     const state = exposes?.transitionState?.get?.();
     if (state === 'entering' || state === 'leaving') exposes.controls.complete();
   }
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+  // Closed portaled views retain their current epoch until the compositor
+  // conceal barrier has observed two actual host rendering opportunities.
+  await new Promise<void>((resolve) =>
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()))
+  );
   await Promise.resolve();
   await Promise.resolve();
   await Promise.resolve();
@@ -352,6 +381,8 @@ describe('adapter-web-component: dialog overlay', () => {
     await Promise.resolve();
     await Promise.resolve();
 
+    await requireDialogPresentation(content);
+
     expect(document.activeElement).toBe(cancel);
 
     cancel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -441,6 +472,8 @@ describe('adapter-web-component: dialog overlay', () => {
     await Promise.resolve();
     await Promise.resolve();
     await Promise.resolve();
+
+    await requireDialogPresentation(content);
 
     expect(cancel.tabIndex).toBe(-1);
     expect(cancel.hasAttribute('role')).toBe(false);

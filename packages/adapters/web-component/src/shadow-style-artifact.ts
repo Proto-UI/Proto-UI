@@ -22,12 +22,14 @@ export type ShadowStyleArtifactOwner = {
 
 const artifactOwners = new WeakMap<ShadowRoot, ShadowStyleArtifactOwner>();
 
-// Successful pure-text checks for this module's v1/host-color-scheme-v1 ABI.
-// Artifact shape and accessors are still validated on every public call.
-const SELECTOR_ABI_CACHE_ENTRIES = 32;
-const SELECTOR_ABI_CACHE_CHARACTERS = 1024 * 1024;
-const validatedSelectorCss = new Set<string>();
-let validatedSelectorCharacters = 0;
+// Selector validation depends only on the exact immutable CSS string and the
+// fixed v1 ABI. Repeated owners may share that result, never the input artifact
+// or its accessor values. Bound both the entry count and retained UTF-16 units;
+// an oversized stylesheet is still validated without retaining it here.
+const VALIDATED_SELECTOR_LIMIT = 32;
+const VALIDATED_SELECTOR_CODE_UNITS = 1_048_576;
+const validatedSelectors = new Set<string>();
+let validatedSelectorCodeUnits = 0;
 
 /**
  * Validates the semantic artifact before any physical stylesheet mutation and
@@ -61,7 +63,7 @@ export function validateShadowStyleArtifact(artifact: unknown): ShadowStyleArtif
     throw invalidArtifact('environment');
   }
 
-  validateShadowSelectorAbi(cssText);
+  validateSharedShadowSelectorAbi(cssText);
 
   return Object.freeze({
     kind: SHADOW_STYLE_ARTIFACT_KIND,
@@ -112,8 +114,29 @@ export function createShadowStyleArtifactOwner(
   return owner;
 }
 
+function validateSharedShadowSelectorAbi(cssText: string): void {
+  if (validatedSelectors.has(cssText)) {
+    validatedSelectors.delete(cssText);
+    validatedSelectors.add(cssText);
+    return;
+  }
+
+  validateShadowSelectorAbi(cssText);
+  if (cssText.length > VALIDATED_SELECTOR_CODE_UNITS) return;
+
+  while (
+    validatedSelectors.size >= VALIDATED_SELECTOR_LIMIT ||
+    validatedSelectorCodeUnits + cssText.length > VALIDATED_SELECTOR_CODE_UNITS
+  ) {
+    const oldest = validatedSelectors.values().next().value!;
+    validatedSelectors.delete(oldest);
+    validatedSelectorCodeUnits -= oldest.length;
+  }
+  validatedSelectors.add(cssText);
+  validatedSelectorCodeUnits += cssText.length;
+}
+
 function validateShadowSelectorAbi(cssText: string): void {
-  if (validatedSelectorCss.has(cssText)) return;
   const selectors = stripShadowCssComments(cssText);
   const structuralCss = selectors.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
   const documentRule = structuralCss.match(
@@ -156,19 +179,6 @@ function validateShadowSelectorAbi(cssText: string): void {
   if (hasUnscopedDarkToken) {
     throw invalidArtifact('dark');
   }
-
-  // Oversized inputs receive the same validation without being retained.
-  if (cssText.length > SELECTOR_ABI_CACHE_CHARACTERS) return;
-  while (
-    validatedSelectorCss.size >= SELECTOR_ABI_CACHE_ENTRIES ||
-    validatedSelectorCharacters + cssText.length > SELECTOR_ABI_CACHE_CHARACTERS
-  ) {
-    const oldest = validatedSelectorCss.values().next().value!;
-    validatedSelectorCss.delete(oldest);
-    validatedSelectorCharacters -= oldest.length;
-  }
-  validatedSelectorCss.add(cssText);
-  validatedSelectorCharacters += cssText.length;
 }
 
 // Inspect only the leading host compound, including functional suffixes. A

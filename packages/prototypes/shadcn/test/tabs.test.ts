@@ -134,6 +134,7 @@ describe('prototypes/shadcn: tabs', () => {
     expect(styleContains(trigger, 'border-ring')).toBe(true);
     expect(styleContains(trigger, 'outline-1')).toBe(true);
     expect(styleContains(trigger, 'outline-ring')).toBe(true);
+    expect(styleContains(trigger, 'outline-none')).toBe(true);
     expect(styleContains(trigger, 'ring-offset-2')).toBe(false);
     expect(styleContains(trigger, 'shadow-xs')).toBe(false);
 
