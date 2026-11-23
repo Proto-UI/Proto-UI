@@ -1,0 +1,15 @@
+tree 0bc7f5e98f08708ba5a296aa8ab5f6b50024a24f
+parent dc3b184ba10b0de53e40359c52d012b204b2cd01
+author Codex <codex@openai.com> 1795345692 +0800
+committer Codex <codex@openai.com> 1795345813 +0000
+
+docs(governance): preserve complete public historical PR sources
+
+Freeze 1230 PR metadata captures and the complete inline-comment population.
+Retain complete source values through verified lossless interning and bounded
+archive volumes; bind every original capture and volume with SHA-256.
+This is source preservation, not current product acceptance or original body
+edit-history reconstruction. Private DCBot sources are excluded.
+
+Refs: #1147
+Signed-off-by: Codex <codex@openai.com>

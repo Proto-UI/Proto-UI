@@ -272,6 +272,27 @@ export function spreadObjectField(
   return field;
 }
 
+/** JSON publication copies data; readonly source fields do not carry authority. */
+export function publishedDataType(type: ValueType): DataType | undefined {
+  if (isDataValueType(type)) return type;
+  if (typeof type === 'string') return undefined;
+  if (type.kind === 'object' && type.index === undefined) {
+    const fields: { name: string; type: DataType; optional?: boolean }[] = [];
+    for (const field of type.fields) {
+      const data = publishedDataType(field.type);
+      if (!data) return undefined;
+      fields.push({ name: field.name, type: data, ...(field.optional ? { optional: true } : {}) });
+    }
+    return { kind: 'record', fields };
+  }
+  if (type.kind === 'value-union') {
+    const members = type.members.map(publishedDataType);
+    if (members.every((member): member is DataType => member !== undefined))
+      return parseDataType({ kind: 'union', members });
+  }
+  return undefined;
+}
+
 export function memberValueType(owner: ValueType, key: string, optional = false): ValueType {
   const types = valueAlternatives(owner).map((type) => {
     if (type === 'null' || type === 'void') {
@@ -396,6 +417,24 @@ export function intrinsicResult(
   )
     return 'boolean';
   if (name === 'typeof' && args.length === 1) return 'string';
+  if (name === 'number') {
+    if (
+      args.length <= 1 &&
+      args.every((type) =>
+        valueAlternatives(type).every(
+          (member) =>
+            member === 'number' ||
+            member === 'string' ||
+            member === 'boolean' ||
+            member === 'null' ||
+            member === 'void' ||
+            (typeof member !== 'string' && member.kind === 'literal')
+        )
+      )
+    )
+      return 'number';
+    throw new TypeError('Number requires zero or one scalar data operand.');
+  }
   if (name === 'string') {
     if (
       args.length <= 1 &&
@@ -409,6 +448,12 @@ export function intrinsicResult(
   if (name === 'error' && args.length <= 1 && (args.length === 0 || args[0] === 'string'))
     return 'exception';
   if (name === 'number.isFinite' && args.length === 1 && isDataValueType(args[0])) return 'boolean';
+  if (
+    (name === 'math.round' || name === 'math.floor') &&
+    args.length === 1 &&
+    valueAssignable(args[0], 'number')
+  )
+    return 'number';
   if (name === 'string' && args.length === 1 && (isDataValueType(args[0]) || args[0] === 'unknown'))
     return 'string';
   if (name === 'object.freeze' && args.length === 1 && objectFields(args[0])) return args[0];
