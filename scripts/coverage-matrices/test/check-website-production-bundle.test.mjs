@@ -1692,6 +1692,68 @@ function materialDiagnosticGraph(kind, dynamic = false) {
   ];
   return { graph, entry, facade, producer };
 }
+const diagnosticTintSourceModule = 'packages/adapters/base/src/material/style-tint-source.ts';
+function materialDiagnosticTintSourceGraph(kind, dynamic = false) {
+  const fixture = materialDiagnosticGraph(kind, dynamic);
+  const program = 'packages/adapters/base/src/material/program.ts';
+  const tintSourceChunk = '_astro/material-diagnostic-tint-source.js';
+  fixture.graph.modules
+    .find((record) => record.id === program)
+    .imports.push(diagnosticTintSourceModule);
+  fixture.graph.modules.push({ id: diagnosticTintSourceModule, imports: [], dynamicImports: [] });
+  fixture.graph.chunks
+    .find((record) => record.fileName === '_astro/material-diagnostic-program.js')
+    .imports.push(tintSourceChunk);
+  fixture.graph.chunks.push(chunk(tintSourceChunk, { moduleIds: [diagnosticTintSourceModule] }));
+  return { ...fixture, program, tintSourceChunk };
+}
+for (const kind of ['tint-stage', 'visible-refraction']) {
+  for (const dynamic of [false, true]) {
+    test(`material diagnostic ${kind} admits its program-owned tint source through ${dynamic ? 'dynamic' : 'static'} edges`, () => {
+      const { graph } = materialDiagnosticTintSourceGraph(kind, dynamic);
+      assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    });
+  }
+  for (const field of ['imports', 'dynamicImports']) {
+    for (const via of ['direct', 'intermediate']) {
+      test(`material diagnostic ${kind} rejects ${field} ${via} bypass to its same tint source`, () => {
+        const { graph, facade } = materialDiagnosticTintSourceGraph(kind);
+        assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+        const root = graph.modules.find((record) => record.id === facade);
+        if (via === 'direct') root[field].push(diagnosticTintSourceModule);
+        else {
+          const importer = 'unreviewed-tint-source-importer.ts';
+          root[field].push(importer);
+          graph.modules.push({
+            id: importer,
+            imports: [diagnosticTintSourceModule],
+            dynamicImports: [],
+          });
+        }
+        assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), [
+          `material diagnostic entry \`${facade}\` bypasses its exact producer: ${diagnosticTintSourceModule}`,
+        ]);
+      });
+    }
+    test(`material diagnostic ${kind} does not authorize ordinary shell ${field} to its tint source`, () => {
+      const { graph, tintSourceChunk } = materialDiagnosticTintSourceGraph(kind);
+      assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+      const shell = graph.chunks[0];
+      shell[field].push(tintSourceChunk);
+      assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), [
+        `Website shell entry \`${shell.facadeModuleId}\` ${field === 'imports' ? 'statically' : 'dynamically'} reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): ${diagnosticTintSourceModule}`,
+      ]);
+    });
+  }
+  test(`material diagnostic ${kind} rejects tint source chunk presence without program ownership`, () => {
+    const { graph, program, facade } = materialDiagnosticTintSourceGraph(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    graph.modules.find((record) => record.id === program).imports = [];
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), [
+      `material diagnostic entry ${facade} emits material outside its producer boundary: ${diagnosticTintSourceModule}`,
+    ]);
+  });
+}
 // A shared static bridge retains its finite shell permission. Co-location never
 // authorizes source imports by the material diagnostic itself.
 function materialDiagnosticWithStaticBridge(kind) {

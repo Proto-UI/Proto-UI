@@ -60,6 +60,7 @@ const REVIEWED_MATERIAL_DIAGNOSTIC_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/material/program-inputs.ts',
   'packages/adapters/base/src/material/program.ts',
   'packages/adapters/base/src/material/style-tint-profile.ts',
+  'packages/adapters/base/src/material/style-tint-source.ts',
   'packages/adapters/base/src/material/style.ts',
 ]);
 // Sitewide runtime consumers are admitted as exact entry/owner pairs, never
