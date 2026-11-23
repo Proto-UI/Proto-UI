@@ -123,6 +123,7 @@ import {
   abandonWebComponentPortalProjection,
   adoptWebComponentPortalProjections,
   isWebComponentPortaled,
+  beginWebComponentPortalViewAcquisition,
 } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
 import { createRebindableWebKeyedMetaSources } from './keyed-meta-sources';
@@ -676,6 +677,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       // Admit split effects before forwarding the mounted phase to observers.
       let admitViewProjection: (() => void) | null = null;
+      type PortalAcquisition = { epoch: number; release: () => void };
+      let portalAcquisition: PortalAcquisition | null = null;
+      let completedMountAcquisition: PortalAcquisition | null = null;
       let focusIngressReady = false;
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
@@ -764,7 +768,21 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           host: thisEl,
           root: nativeLinkTarget ?? thisRoot,
           shadowViewTarget: splitResources?.surface,
-          schedule,
+          schedule: (task) => {
+            const acquisition = completedMountAcquisition;
+            completedMountAcquisition = null;
+            schedule(() => {
+              try {
+                task();
+              } finally {
+                // The original mounted callback and its synchronous callback
+                // flush may acquire the first portal projection. Do not delay
+                // or reorder that task; retire only its own acquisition token.
+                acquisition?.release();
+                if (portalAcquisition === acquisition) portalAcquisition = null;
+              }
+            });
+          },
           rawPropsSource,
           getInstanceAssociations: () => getElementAssociations(thisEl),
           viewOperations: { capture: () => owner.captureViewOperation() },
@@ -793,11 +811,38 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           },
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: (event) => {
-            if (event.type === 'mount.phase' && event.phase === 'mounted') admitViewProjection?.();
-            opt.diagnostics?.onLifecycleEvent?.(event);
+            const finishingAcquisition =
+              event.type === 'mount.phase' &&
+              event.phase === 'mounted' &&
+              portalAcquisition?.epoch === event.epoch
+                ? portalAcquisition
+                : null;
             if (event.type === 'mount.phase') {
-              focusIngressReady = event.phase === 'mounted';
-              if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
+              if (event.phase === 'mounting') {
+                portalAcquisition?.release();
+                portalAcquisition = {
+                  epoch: event.epoch,
+                  release: beginWebComponentPortalViewAcquisition(thisEl),
+                };
+              } else if (event.phase !== 'mounted' && portalAcquisition?.epoch === event.epoch) {
+                portalAcquisition.release();
+                portalAcquisition = null;
+              }
+            }
+            try {
+              if (event.type === 'mount.phase' && event.phase === 'mounted')
+                admitViewProjection?.();
+              opt.diagnostics?.onLifecycleEvent?.(event);
+              if (event.type === 'mount.phase') {
+                focusIngressReady = event.phase === 'mounted';
+                if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
+              }
+            } finally {
+              // Runtime schedules this epoch after the complete notification
+              // returns. Publish its captured acquisition after any diagnostic
+              // or readiness reentry has finished scheduling a nested epoch.
+              if (event.type === 'mount.phase' && event.phase === 'mounted')
+                completedMountAcquisition = finishingAcquisition;
             }
           },
           getSlotProjector: () => this._slotProjector,
@@ -1309,11 +1354,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
         const wasConcealing = this._portalConceal.cancel();
-        // A portaled exit must finish its opacity fade before display:none.
-        // Hiding immediately drops the faded layer and Chromium can repaint
-        // the last opaque frame (the closed-dialog marker flash).
-        const concealOnPortal = !snapshot.present && isWebComponentPortaled(thisEl);
-        if (!snapshot.present && !concealOnPortal) setViewDetached(true);
+        // The shared marker projects not-present intent immediately. The
+        // existing conceal barrier retains the portal projection through a
+        // rendering opportunity before releasing or reparenting its nodes.
+        if (!snapshot.present) setViewDetached(true);
         const requestVersion = ++latestIntentVersion;
         if (snapshot.present && wasConcealing && owner.hasView) {
           // The retained epoch never unmounted. Reveal it immediately so a
