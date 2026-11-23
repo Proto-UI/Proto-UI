@@ -503,8 +503,17 @@ export function emitJavaScriptValue(
           return `Math.round(${args[0]})`;
         case 'math.floor':
           return `Math.floor(${args[0]})`;
-        case 'object.freeze':
-          return `Object.freeze(${args.join(', ')})`;
+        case 'object.freeze': {
+          const frozen = `Object.freeze(${args.join(', ')})`;
+          // The intrinsic's checked result retains literal elements and field
+          // permissions. TS's generic array overload otherwise widens those
+          // elements before the surrounding declaration can provide context.
+          return !typeName
+            ? frozen
+            : typed
+              ? `(${frozen} as ${typeName(value.type)})`
+              : `(/** @type {${typeName(value.type)}} */ (${frozen}))`;
+        }
         case 'object.assign':
           return `Object.assign(${args.join(', ')})`;
         case 'object.hasOwn':

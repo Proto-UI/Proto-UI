@@ -367,6 +367,7 @@ export function emitVue2Source(
     if (type === 'def') return `${prefix}Owner['def']`;
     if (type === 'run') return `${prefix}Run`;
     if (type === 'run-lifecycle') return `${prefix}Run['lifecycle']`;
+    if (type === 'style-handle') return `${prefix}NativeStyleHandle`;
     if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
     if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
     if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;
@@ -387,7 +388,7 @@ export function emitVue2Source(
       type === 'control-label' ||
       type === 'control-label-handle' ||
       type === 'control-label-request' ||
-      (usesInteraction && (type === 'anatomy-family' || type === 'anatomy-part'))
+      (usesInteraction && ['anatomy-family', 'anatomy-part', 'focus-entry'].includes(type))
     )
       return `import(${JSON.stringify('./' + supportPlan.modulesPath.slice(0, -3))}).NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
     return 'unknown';
@@ -499,8 +500,10 @@ export function emitVue2Source(
       }
       case 'context-key':
         return contextNames.get(value.keyId)!;
-      case 'style-handle':
-        return emitNativeStyleHandle(value.handle, false);
+      case 'style-handle': {
+        const handle = emitNativeStyleHandle(value.handle, false);
+        return usesStyle ? `(/** @type {${prefix}NativeStyleHandle} */ (${handle}))` : handle;
+      }
       case 'rule':
         return emitNativeRule(
           value,
@@ -577,6 +580,14 @@ export function emitVue2Source(
           return nativeTemplate.element(value, depth);
         if (nativeTemplate && value.operation === 'render.slot')
           return nativeTemplate.slot(value, depth);
+        if (
+          (value.operation === 'context.subscribe' || value.operation === 'context.trySubscribe') &&
+          value.arguments[1]
+        )
+          // Source and cold IR bind the callback to this key's value schema.
+          // Only the host transport is unknown-typed. Keep the original
+          // callback expression, identity and evaluation position.
+          return `${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}(${expression(value.arguments[0], depth)}, /** @type {(run: ${prefix}Run, next: unknown, previous: unknown) => void} */ (${expression(value.arguments[1], depth)}))`;
         const argumentsCode = value.arguments.map((item) => expression(item, depth)).join(', ');
         if (value.operation === 'state.get')
           return `/** @type {${typeName(value.type)}} */ (${expression(value.receiver!, depth)}.get())`;
@@ -725,9 +736,9 @@ ${
   const contextCode = contextArtifacts
     ? `
   /** @type {Map<object, (value: unknown) => boolean>} */
-  const contextChecks = new Map([
+  const contextChecks = new Map(/** @type {Array<[object, (value: unknown) => boolean]>} */ ([
 ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {unknown} value */ (value) => ${prefix}AcceptsContextValue(${JSON.stringify(key.type)}, value))],`).join('\n')}
-  ]);
+  ]));
   const contextScope = ${prefix}CreateContextScope({
     getParent: () => vm[${JSON.stringify(`${prefix}ParentScope`)}] || null,
     isAlive: () => !disposed,
