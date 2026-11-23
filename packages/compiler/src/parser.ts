@@ -293,17 +293,77 @@ function assignable(actual: ValueType, expected: ValueType): boolean {
 /** Retain the caller's complete shape while checking the declared read interface. */
 function canRetainParameterType(actual: ValueType, expected: ValueType): boolean {
   if (assignable(actual, expected)) return true;
+  const alternatives = valueAlternatives(actual);
+  if (alternatives.length > 1)
+    return alternatives.every((member) => canRetainParameterType(member, expected));
   const fields = objectFields(actual),
     required = objectFields(expected);
-  if (!fields || !required) return false;
+  if (!required) return false;
+  if (
+    !fields &&
+    (typeof actual !== 'string' ||
+      isDataValueType(actual) ||
+      !Object.values(OPERATION_RULES).some((rule) =>
+        sameType(rule.receiver, operationReceiverType(actual))
+      ))
+  )
+    return false;
   return required.every((field) => {
-    const source = fields.find((candidate) => candidate.name === field.name);
+    const source =
+      fields?.find((candidate) => candidate.name === field.name) ??
+      nominalInterfaceField(actual, field.name);
     return (
       source !== undefined &&
       (!source.optional || !!field.optional) &&
       canRetainParameterType(source.type, field.type)
     );
   });
+}
+
+/** A closed helper may describe a subset of an existing nominal handle. Keep
+ * the handle type in its body; the operation table still controls every call,
+ * phase and ownership permission. This does not create a structural capability. */
+function nominalInterfaceField(
+  owner: ValueType,
+  name: string
+): { name: string; type: ValueType; optional?: boolean } | undefined {
+  if (typeof owner !== 'string') return undefined;
+  const member = capabilityMemberType(owner, name);
+  if (member !== undefined) return { name, type: member };
+  const operation = Object.entries(OPERATION_RULES).find(
+    ([, rule]) => sameType(rule.receiver, operationReceiverType(owner)) && rule.path === name
+  );
+  if (!operation) return undefined;
+  const [id, rule] = operation;
+  if (validateOperationArguments(id, [], owner).some((issue) => issue.code === 'receiver'))
+    return undefined;
+  const parameters: ParameterIR[] = [];
+  for (const [index, argument] of rule.arguments.entries()) {
+    // Callback origins and argument-dependent schemas require their own proof.
+    if (argument.callback || argument.fields) return undefined;
+    const type =
+      argument.role === 'receiver-value'
+        ? stateValue(owner)
+        : argument.role === 'value'
+          ? (argument.valueSchema ??
+            argument.schema ??
+            (argument.types ? joinValueTypes(argument.types) : 'unknown'))
+          : undefined;
+    if (type === undefined) return undefined;
+    parameters.push({
+      name: `argument${index}`,
+      type,
+      ...(argument.optional ? { optional: true } : {}),
+    });
+  }
+  if (rule.max !== parameters.length) return undefined;
+  const returnType = operationResultType(id, owner);
+  return returnType === undefined
+    ? undefined
+    : {
+        name,
+        type: { kind: 'callable', parameters, returnType },
+      };
 }
 function union(types: readonly ValueType[], node: ts.Node): ValueType {
   if (!types.length) return 'void';
@@ -3943,6 +4003,7 @@ class Frontend {
       valueAlternatives(type).some(
         (member) =>
           objectFields(member) !== undefined ||
+          (typeof member === 'string' && !isDataValueType(member)) ||
           (typeof member !== 'string' && ['array', 'value-array'].includes(member.kind))
       )
         ? type
