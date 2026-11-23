@@ -30,7 +30,21 @@ const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
 type Projection = { root: string; surface: string[]; borderWidths: string };
-type CompiledStyleRule = { selector: string; declarations: string };
+type CompiledStyleRule = Readonly<{
+  selector: string;
+  branches: readonly string[];
+  declarations: string;
+}>;
+
+// Cache only this module's pure v1 rule analysis, never a recipe verdict or an
+// owner/DOM result. Count source and derived strings in UTF-16 code units.
+const COMPILED_RULE_CACHE_ENTRIES = 32;
+const COMPILED_RULE_CACHE_CHARACTERS = 4 * 1024 * 1024;
+const compiledRuleCache = new Map<
+  string,
+  { rules: readonly CompiledStyleRule[]; characters: number }
+>();
+let compiledRuleCharacters = 0;
 
 function splitCompiledReceipt(selector: string, declarations: string): string {
   const input = `${selector.replace(/\s/g, '')}{${declarations.replace(/\s/g, '')}}`;
@@ -177,10 +191,46 @@ function collectUnconditionallyAvailableRules(cssText: string): CompiledStyleRul
     if (/^@layer(?:\s+[-_a-zA-Z][-_a-zA-Z0-9]*(?:\.[-_a-zA-Z][-_a-zA-Z0-9]*)*)?$/i.test(prelude)) {
       rules.push(...collectUnconditionallyAvailableRules(body));
     } else if (prelude && !prelude.startsWith('@')) {
-      rules.push({ selector: prelude, declarations: directCssDeclarations(body) });
+      const selector = prelude.replace(/\s/g, '');
+      rules.push(
+        Object.freeze({
+          selector,
+          branches: Object.freeze(splitSelectorBranches(selector)),
+          declarations: directCssDeclarations(body),
+        })
+      );
     }
     cursor = close + 1;
   }
+  return rules;
+}
+
+function compiledRules(cssText: string): readonly CompiledStyleRule[] {
+  const cacheable = typeof cssText === 'string';
+  const cached = cacheable ? compiledRuleCache.get(cssText) : undefined;
+  if (cached) return cached.rules;
+  const uncommented = stripShadowCssComments(cssText);
+  const rules = Object.freeze(collectUnconditionallyAvailableRules(uncommented));
+  if (!cacheable) return rules;
+  const characters = rules.reduce(
+    (total, rule) =>
+      total +
+      rule.selector.length +
+      rule.declarations.length +
+      rule.branches.reduce((length, branch) => length + branch.length, 0),
+    cssText.length + uncommented.length
+  );
+  if (characters > COMPILED_RULE_CACHE_CHARACTERS) return rules;
+  while (
+    compiledRuleCache.size >= COMPILED_RULE_CACHE_ENTRIES ||
+    compiledRuleCharacters + characters > COMPILED_RULE_CACHE_CHARACTERS
+  ) {
+    const oldest = compiledRuleCache.keys().next().value!;
+    compiledRuleCharacters -= compiledRuleCache.get(oldest)!.characters;
+    compiledRuleCache.delete(oldest);
+  }
+  compiledRuleCache.set(cssText, { rules, characters });
+  compiledRuleCharacters += characters;
   return rules;
 }
 
@@ -188,7 +238,7 @@ function verifiedShadowSplitBaseRule(
   rules: readonly CompiledStyleRule[]
 ): CompiledStyleRule | null {
   const baseSelector = `:host([${SHADOW_SPLIT_ROOT_STYLE_ATTR}])`;
-  const baseRule = rules.find(({ selector }) => selector.replace(/\s/g, '') === baseSelector);
+  const baseRule = rules.find(({ selector }) => selector === baseSelector);
   return baseRule && hasValidDeclarationReceipt(baseRule) ? baseRule : null;
 }
 
@@ -198,7 +248,7 @@ export function hasVerifiedShadowSplitBaseRecipe(
   recipe: string,
   version: string
 ): boolean {
-  const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
+  const rules = compiledRules(artifact.cssText);
   const baseRule = verifiedShadowSplitBaseRule(rules);
   return (
     !!baseRule &&
@@ -327,11 +377,10 @@ function hasExactCompiledReceipt(
               surface,
             ]
   );
-  const candidates = rules.filter(({ selector }) => selector.replace(/\s/g, '').includes(receipt));
-  const matching = candidates.filter(({ selector }) => {
-    const branches = splitSelectorBranches(selector.replace(/\s/g, ''));
-    return branches.length === 1 && allowed.has(branches[0]!);
-  });
+  const candidates = rules.filter(({ selector }) => selector.includes(receipt));
+  const matching = candidates.filter(
+    ({ branches }) => branches.length === 1 && allowed.has(branches[0]!)
+  );
   return (
     matching.length === candidates.length &&
     matching.length > 0 &&
@@ -391,7 +440,7 @@ export function createShadowSplitEffectsPort({
   ) {
     throw invalid('projection-owned');
   }
-  const rules = collectUnconditionallyAvailableRules(stripShadowCssComments(artifact.cssText));
+  const rules = compiledRules(artifact.cssText);
   const baseRule = verifiedShadowSplitBaseRule(rules);
   if (!baseRule) {
     throw invalid('sizing-recipe');

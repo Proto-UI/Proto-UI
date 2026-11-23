@@ -190,11 +190,49 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     expect(facts.network.pending).toHaveLength(200);
     expect(facts.network.truncated).toBe(true);
   });
-  it('stops once at the diagnostic deadline even if readiness never settles', async () => {
+  it('keeps recording through navigation and the original init wait until the owner finishes', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-11-23T00:00:00.000Z'));
+    let phase = 'route-open';
+    const { page, session } = fixture();
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, {
+      ...options(),
+      phase: () => phase,
+    });
+    await vi.advanceTimersByTimeAsync(25_000);
+    phase = 'inited-count';
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
+    phase = 'case-finally';
+    await handle.finish();
+    await handle.finish();
+    const facts = await result();
+    expect(facts).toMatchObject({
+      elapsedMs: 85_000,
+      requestedProfileWindowMs: 180_000,
+      profileTiming: {
+        startAcknowledgedAt: '2026-11-23T00:00:00.000Z',
+        stopRequestedAt: '2026-11-23T00:01:25.000Z',
+        stopAcknowledgedAt: '2026-11-23T00:01:25.000Z',
+        stopReason: 'owner-finish',
+        ownerStoppedCapture: true,
+        phaseCoverage: 'requires-timestamp-reconciliation',
+        // Fixture CDP timestamps are separate from the fake owner clock.
+        sampledDurationMs: 0.01,
+      },
+    });
+    expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
+      1
+    );
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it('caps stalled diagnostics at the original case limit without an owner-finish receipt', async () => {
     vi.useFakeTimers();
     const { page, session } = fixture();
     const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
-    await vi.advanceTimersByTimeAsync(44_999);
+    await vi.advanceTimersByTimeAsync(45_000);
+    expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
+    await vi.advanceTimersByTimeAsync(134_999);
     expect(session.send).not.toHaveBeenCalledWith('Profiler.stop');
     await vi.advanceTimersByTimeAsync(1);
     await handle.finish();
@@ -202,8 +240,40 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     expect(session.send.mock.calls.filter(([method]) => method === 'Profiler.stop')).toHaveLength(
       1
     );
-    expect((await result()).elapsedMs).toBe(45_000);
+    expect(await result()).toMatchObject({
+      elapsedMs: 180_000,
+      profileTiming: {
+        stopReason: 'diagnostic-deadline',
+        ownerStoppedCapture: false,
+        phaseCoverage: 'requires-timestamp-reconciliation',
+      },
+    });
     expect(vi.getTimerCount()).toBe(0);
+  });
+  it.each([
+    { name: 'missing', clock: { startTime: 10, endTime: undefined } },
+    { name: 'non-finite', clock: { startTime: Number.NaN, endTime: 20 } },
+    { name: 'reversed', clock: { startTime: 20, endTime: 10 } },
+  ])('never infers phase coverage from a $name CDP sampling clock', async ({ clock }) => {
+    const { page, session } = fixture();
+    const originalSend = session.send.getMockImplementation()!;
+    session.send.mockImplementation(async (method) => {
+      const response = await originalSend(method);
+      if (method === 'Profiler.stop') Object.assign(response.profile, clock);
+      return response;
+    });
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
+    await handle.finish();
+    const facts = await result();
+    expect(facts).toMatchObject({
+      profileState: 'captured',
+      profileTiming: {
+        sampledDurationMs: null,
+        ownerStoppedCapture: true,
+        phaseCoverage: 'requires-timestamp-reconciliation',
+      },
+    });
+    expect(facts.profileTiming).not.toHaveProperty('ownerWindowCovered');
   });
   it.each(['Profiler.enable', 'Profiler.start', 'Profiler.stop'])(
     'does not replace the original failure when %s rejects',

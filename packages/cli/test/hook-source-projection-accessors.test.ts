@@ -7,8 +7,232 @@ import { describe, expect, it } from 'vitest';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
 import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
 import { collectProtoStyleTokensFromFiles } from '../src/services/prototype-style-tokens';
+import { renderProtoStyleTokenCss } from '../src/services/proto-style-css';
+
+async function projectedTokens(
+  projection: string,
+  options: { name?: string; setup?: string; child?: string; parameters?: string } = {}
+) {
+  const dir = await mkdtemp(path.join(tmpdir(), 'hook-source-result-spread-'));
+  try {
+    const name = options.name ?? 'asFacts';
+    await writeFile(
+      path.join(dir, 'producer.ts'),
+      `import { defineAsHook } from '@proto.ui/core';
+${options.child ?? ''}
+export const ${name} = defineAsHook({ name: 'facts',
+  setup(d) { ${options.setup ?? "d.state.bool('alpha', false); d.state.bool('beta', false);"} },
+  projectHandle(${options.parameters ?? 'r'}) { ${projection} }
+});`
+    );
+    const file = path.join(dir, 'consumer.proto.ts');
+    await writeFile(
+      file,
+      `import { ${name} } from './producer';
+const facts = ${name}();
+def.rule({ when: w => w.state(facts.stateHandles.alpha).eq(true),
+  intent: i => i.feedback.style.use(tw('ring-black')) });`
+    );
+    return await collectProtoStyleTokensFromFiles([file]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}
 
 describe('hook source projection accessors', () => {
+  it.each(['asFacts', 'asRenamedSource'])(
+    'retains captured states through a %s result spread',
+    async (name) => {
+      expect(await projectedTokens('return { ...r };', { name })).toEqual([
+        'data-[alpha]:ring-black',
+        'ring-black',
+      ]);
+    }
+  );
+
+  it.each([
+    [
+      'later explicit state bag',
+      'return { ...r, stateHandles: { alpha: r.stateHandles.beta } };',
+      'beta',
+    ],
+    [
+      'later captured state bag',
+      'return { stateHandles: { alpha: r.stateHandles.beta }, ...r };',
+      'alpha',
+    ],
+    [
+      'captured accessor alias',
+      'return { ...r, stateHandles: { alpha: r.getState("beta") } };',
+      'beta',
+    ],
+  ])('preserves %s overwrite order', async (_label, projection, state) => {
+    expect(await projectedTokens(projection)).toEqual([`data-[${state}]:ring-black`, 'ring-black']);
+  });
+
+  it('re-exports a proven child state after spreading the parent capture', async () => {
+    expect(
+      await projectedTokens(
+        `const child = r.getAsHookHandle('child');
+if (!child) throw new Error('missing child');
+return { ...r, stateHandles: child.stateHandles };`,
+        {
+          child: `const asChild = defineAsHook({ name: 'child',
+  setup(d) { d.state.bool('alpha', false); } });`,
+          setup: "d.state.bool('outer', false); asChild();",
+        }
+      )
+    ).toEqual(['data-[alpha]:ring-black', 'ring-black']);
+  });
+
+  it('does not invent absent parent states that overwrite a selected child bag', async () => {
+    expect(
+      await projectedTokens(
+        "return { stateHandles: r.getAsHookHandle('child').stateHandles, ...r };",
+        {
+          child: `const asChild = defineAsHook({ name: 'child',
+  setup(d) { d.state.bool('alpha', false); } });`,
+          setup: 'asChild();',
+        }
+      )
+    ).toEqual(['data-[alpha]:ring-black', 'ring-black']);
+  });
+
+  it.each([
+    ['unknown spread first', 'return { ...unknownValue, ...r };'],
+    ['unknown spread last', 'return { ...r, ...unknownValue };'],
+    ['unknown computed key', 'return { ...r, [unknownKey]: r.stateHandles };'],
+    ['unknown later state bag', 'return { ...r, stateHandles: unknownValue };'],
+    ['prototype setter', 'return { ...r, __proto__: unknownValue };'],
+    ['accessor', 'return { ...r, get other() { return r.stateHandles.alpha; } };'],
+  ])('withholds Result spread proof for %s', async (_label, projection) => {
+    expect(await projectedTokens(projection)).toEqual(['ring-black']);
+  });
+
+  it('does not replace an unproved child public projection with its raw states', async () => {
+    expect(
+      await projectedTokens(
+        "return { ...r, stateHandles: r.getAsHookHandle('child').stateHandles };",
+        {
+          child: `const asChild = defineAsHook({ name: 'child',
+  setup(d) { d.state.bool('alpha', false); },
+  projectHandle(r) { return { get stateHandles() { return r.stateHandles; } }; } });`,
+          setup: 'asChild();',
+        }
+      )
+    ).toEqual(['ring-black']);
+  });
+
+  it.each([
+    ['Result spread', 'side.read', '{ ...r }'],
+    ['explicit state bag', 'side.read', '{ stateHandles: r.stateHandles }'],
+    ['Result spread', '{ ...side }', '{ ...r }'],
+    ['explicit state bag', '{ ...side }', '{ stateHandles: r.stateHandles }'],
+  ])(
+    'withholds %s after evaluating %s with an unproved getter',
+    async (_label, read, projection) => {
+      expect(
+        await projectedTokens(`const side = {
+  get read() { r.stateHandles = { alpha: r.stateHandles.beta }; return 0; }
+};
+const ignored = ${read};
+return ${projection};`)
+      ).toEqual(['ring-black']);
+    }
+  );
+
+  it.each([
+    ['numeric conversion', '+side'],
+    ['relational conversion', 'side < 1'],
+    ['loose equality', 'side == 0'],
+    ['template conversion', '`${side}`'],
+    ['computed data key', '{ [side]: 1 }'],
+    ['computed method key', '{ [side]() {} }'],
+    ['element access key', 'r.stateHandles[side]'],
+    ['indexed accessor key', 'r.getState(side)'],
+  ])('withholds Result spread after an unproved %s', async (_label, expression) => {
+    expect(
+      await projectedTokens(`const side = {
+  valueOf() { r.stateHandles = { alpha: r.stateHandles.beta }; return 0; },
+  toString() { r.stateHandles = { alpha: r.stateHandles.beta }; return 'key'; }
+};
+const ignored = ${expression};
+return { ...r };`)
+    ).toEqual(['ring-black']);
+  });
+
+  it('withholds Result spread after coercing a detached accessor key', async () => {
+    expect(
+      await projectedTokens(`const key = {
+  toString() { r.stateHandles = { alpha: r.stateHandles.beta }; return 'alpha'; }
+};
+const get = r.getState;
+const ignored = get(key);
+return { ...r };`)
+    ).toEqual(['ring-black']);
+  });
+
+  it('withholds Result spread after an unproved tagged template invocation', async () => {
+    expect(
+      await projectedTokens(
+        'const side = () => { r.stateHandles = { alpha: r.stateHandles.beta }; };' +
+          'const ignored = side``; return { ...r };'
+      )
+    ).toEqual(['ring-black']);
+  });
+
+  it('withholds Result spread after an unproved iterator invocation', async () => {
+    expect(await projectedTokens('const ignored = [...unknownIterable]; return { ...r };')).toEqual(
+      ['ring-black']
+    );
+  });
+
+  it('retains pure primitive operations and deferred computed methods', async () => {
+    expect(
+      await projectedTokens(
+        'const numeric = 1 + 2; const text = `value:${1}`;' +
+          "const deferred = { ['later']() { unknownEffect(); } }; return { ...r };"
+      )
+    ).toEqual(['data-[alpha]:ring-black', 'ring-black']);
+  });
+
+  it.each([
+    ['named read', '{ ignored }', 'ignored'],
+    ['rest copy', '{ ...ignored }', 'flip'],
+  ])('withholds Result spread after an unproved parameter %s', async (_label, binding, key) => {
+    expect(
+      await projectedTokens('return { ...r };', {
+        parameters: `r, ${binding} = {
+  get ${key}() { r.stateHandles = { alpha: r.stateHandles.beta }; return 0; }
+}`,
+      })
+    ).toEqual(['ring-black']);
+  });
+
+  it('retains a proven first-parameter capture field binding', async () => {
+    expect(
+      await projectedTokens('return { stateHandles };', { parameters: '{ stateHandles }' })
+    ).toEqual(['data-[alpha]:ring-black', 'ring-black']);
+  });
+
+  it('closes the actual Brutalist Input focus ring through its authored Input handle', async () => {
+    const input = path.resolve('packages/prototypes/brutalist/src/input/root.proto.ts');
+    const tokens = await collectProtoStyleTokensFromFiles([input]);
+    expect(tokens).toEqual(
+      expect.arrayContaining([
+        'data-[focus-visible]:outline-none',
+        'data-[focus-visible]:ring-2',
+        'data-[focus-visible]:ring-black',
+        'data-[focus-visible]:ring-offset-2',
+        'data-[disabled]:cursor-not-allowed',
+        'data-[disabled]:opacity-50',
+      ])
+    );
+    const css = renderProtoStyleTokenCss(['data-[focus-visible]:ring-black']);
+    expect(css).toContain('[data-pui-style~="data-[focus-visible]:ring-black"]');
+    expect(css).toContain('--pui-ring-color: #000000;');
+  });
+
   it('does not substitute built-in states for a rejected authored projection', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'hook-source-rejected-name-'));
     try {

@@ -1,5 +1,14 @@
-import { spawn as nodeSpawn } from 'node:child_process';
-import { access as fileAccess, rm } from 'node:fs/promises';
+import { execFileSync, spawn as nodeSpawn } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import {
+  access as fileAccess,
+  lstat,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { mkdtempSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -14,6 +23,156 @@ export const SEARCH_PRODUCTION_ROUTES = [
   '/pagefind/pagefind.js',
 ];
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+
+/** Post-terminal diagnostic capture of this workspace's build output. These are
+ * same-build bytes, not a claim about the browser's actual response bodies. */
+export async function retainSearchProductionBuild(options, dependencies = {}) {
+  const { root = defaultRoot, directory, expectedSha, runnerOutcome = 'unknown' } = options;
+  if (!directory || !/^[a-f0-9]{40}$/.test(expectedSha))
+    throw new Error('Build capture requires an output directory and exact expected source');
+  if (!['success', 'failure', 'cancelled', 'skipped', 'unknown'].includes(runnerOutcome))
+    throw new Error('Invalid diagnostic runner outcome');
+  const dist = path.resolve(root, 'apps/www/dist');
+  const target = path.resolve(directory);
+  const relativeTarget = path.relative(dist, target);
+  if (
+    relativeTarget === '' ||
+    (relativeTarget !== '..' &&
+      !relativeTarget.startsWith('..' + path.sep) &&
+      !path.isAbsolute(relativeTarget))
+  )
+    throw new Error('Build capture output must stay outside the measured dist tree');
+  const {
+    now = Date.now,
+    writeCopy = writeFile,
+    readSource = () => {
+      const git = (...args) =>
+        execFileSync('git', args, {
+          cwd: root,
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'pipe'],
+        }).trim();
+      return {
+        sha: git('rev-parse', 'HEAD'),
+        tree: git('rev-parse', 'HEAD^{tree}'),
+        dirty: git('status', '--porcelain').length > 0,
+      };
+    },
+  } = dependencies;
+  const required = [
+    'proto-ui-bundle-graph.json',
+    ...SEARCH_PRODUCTION_ROUTES.filter((route) => route.endsWith('/')).map(
+      (route) => route.slice(1) + 'index.html'
+    ),
+  ];
+  const manifest = {
+    version: 1,
+    diagnosticOnly: true,
+    byteProvenance: 'same-build-output',
+    actualServedBytes: false,
+    rebuildPerformed: false,
+    sourceMaps: 'retain-only-if-already-emitted',
+    establishesPerformanceAcceptance: false,
+    runnerOutcome,
+    expectedSourceSha: expectedSha,
+    sourceBefore: null,
+    sourceAfter: null,
+    startedAt: new Date(now()).toISOString(),
+    finishedAt: null,
+    status: 'incomplete',
+    files: [],
+    errors: [],
+  };
+  await mkdir(path.dirname(target), { recursive: true });
+  // A repeated capture must not overwrite the first attempt's retained bytes.
+  await mkdir(target);
+  if (!['success', 'failure'].includes(runnerOutcome))
+    manifest.errors.push('No terminal production runner attempt was observed');
+  const identify = (label) => {
+    try {
+      const source = readSource();
+      manifest[label] = source;
+      if (
+        source.sha !== expectedSha ||
+        !/^[a-f0-9]{40}$/.test(source.tree) ||
+        source.dirty !== false
+      )
+        manifest.errors.push(label + ': checkout differs from the clean expected source');
+    } catch (error) {
+      manifest.errors.push(label + ': ' + String(error));
+    }
+  };
+  identify('sourceBefore');
+  const visit = async (relative = '') => {
+    const entries = await readdir(path.join(dist, relative), { withFileTypes: true });
+    entries.sort((left, right) => left.name.localeCompare(right.name));
+    for (const entry of entries) {
+      const file = relative ? relative + '/' + entry.name : entry.name;
+      if (entry.isSymbolicLink()) {
+        manifest.errors.push('Build capture did not follow symlink: ' + file);
+        continue;
+      }
+      if (entry.isDirectory()) {
+        try {
+          await visit(file);
+        } catch (error) {
+          manifest.errors.push(file + ': ' + String(error));
+        }
+        continue;
+      }
+      const kind = /\.(?:js|mjs)$/.test(file)
+        ? 'script'
+        : /\.map$/.test(file)
+          ? 'source-map'
+          : file === required[0]
+            ? 'bundle-graph'
+            : required.includes(file)
+              ? 'route-html'
+              : null;
+      if (!kind || !entry.isFile()) continue;
+      try {
+        const bytes = await readFile(path.join(dist, file));
+        const copy = path.join(target, 'files', file);
+        await mkdir(path.dirname(copy), { recursive: true });
+        await writeCopy(copy, bytes);
+        const retained = await readFile(copy);
+        const sha256 = createHash('sha256').update(bytes).digest('hex');
+        const retainedSha256 = createHash('sha256').update(retained).digest('hex');
+        if (retained.length !== bytes.length || retainedSha256 !== sha256)
+          throw new Error('Retained bytes differ from the measured build output');
+        manifest.files.push({
+          path: file,
+          kind,
+          bytes: bytes.length,
+          sha256,
+          copyVerified: true,
+        });
+      } catch (error) {
+        manifest.errors.push(file + ': ' + String(error));
+      }
+    }
+  };
+  try {
+    const entry = await lstat(dist);
+    if (!entry.isDirectory() || entry.isSymbolicLink())
+      throw new Error('Build output must be a real directory, not a symlink root');
+    await visit();
+  } catch (error) {
+    manifest.errors.push('Build output: ' + String(error));
+  }
+  for (const file of required)
+    if (!manifest.files.some((entry) => entry.path === file))
+      manifest.errors.push('Missing required build output: ' + file);
+  if (!manifest.files.some((entry) => entry.kind === 'script'))
+    manifest.errors.push('No emitted JavaScript was available');
+  identify('sourceAfter');
+  if (manifest.sourceBefore?.tree !== manifest.sourceAfter?.tree)
+    manifest.errors.push('Checkout tree changed during capture');
+  manifest.finishedAt = new Date(now()).toISOString();
+  manifest.status = manifest.errors.length ? 'incomplete' : 'captured';
+  await writeFile(path.join(target, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+  return manifest;
+}
 
 /** One bounded owner for build, the single named preview and exactly one
  * production suite. Dependencies are injectable for no-socket unit tests. */
@@ -344,7 +503,27 @@ export async function runSearchProductionEvidence(options = {}, dependencies = {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  if (process.platform !== 'linux') {
+  if (process.argv[2] === 'retain-build') {
+    try {
+      const manifest = await retainSearchProductionBuild({
+        directory: process.argv[3],
+        expectedSha: process.env.CANDIDATE_SHA,
+        runnerOutcome: process.env.PROTO_UI_SEARCH_DIAGNOSTIC_RUNNER_OUTCOME ?? 'unknown',
+      });
+      console.log(
+        '[search-production-build-capture] ' +
+          JSON.stringify({
+            status: manifest.status,
+            files: manifest.files.length,
+            errors: manifest.errors,
+          })
+      );
+      if (manifest.status !== 'captured') process.exitCode = 1;
+    } catch (error) {
+      console.error(error);
+      process.exitCode = 1;
+    }
+  } else if (process.platform !== 'linux') {
     console.error(
       'Search production evidence runner supports the managed Linux Actions runner only'
     );

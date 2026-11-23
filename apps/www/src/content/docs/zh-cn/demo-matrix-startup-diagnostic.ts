@@ -2,7 +2,9 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { CDPSession, Page, Request, Response } from 'playwright-core';
 
-const PROFILE_WINDOW_MS = 45_000;
+// The original case still owns its 180s deadline. Its existing finally stops
+// capture earlier; this cap must not truncate navigation plus the 60s init wait.
+const PROFILE_WINDOW_MS = 180_000;
 const COMMAND_LIMIT_MS = 2_000;
 const ROW_LIMIT = 200;
 const inert = { finish: async () => {} };
@@ -42,6 +44,12 @@ export async function startMatrixStartupDiagnostic(
   const file = join(options.directory, 'demo-matrix', 'startup-profile');
   let session: CDPSession | undefined;
   let profileStarted = false;
+  let setupCompleted = false;
+  let profileStartedAt: number | null = null;
+  let profileStopRequestedAt: number | null = null;
+  let profileStoppedAt: number | null = null;
+  let profileDurationMs: number | null = null;
+  let stopReason: 'owner-finish' | 'diagnostic-deadline' | null = null;
   let setupRetired = false;
   let profileState = 'starting';
   let profileError: string | null = null;
@@ -59,6 +67,19 @@ export async function startMatrixStartupDiagnostic(
   const header = () => ({
     startedAt: new Date(startedAt).toISOString(),
     requestedProfileWindowMs: PROFILE_WINDOW_MS,
+    profileTiming: {
+      startAcknowledgedAt:
+        profileStartedAt === null ? null : new Date(profileStartedAt).toISOString(),
+      stopRequestedAt:
+        profileStopRequestedAt === null ? null : new Date(profileStopRequestedAt).toISOString(),
+      stopAcknowledgedAt:
+        profileStoppedAt === null ? null : new Date(profileStoppedAt).toISOString(),
+      sampledDurationMs: profileDurationMs,
+      stopReason,
+      ownerStoppedCapture:
+        setupCompleted && profileState === 'captured' && stopReason === 'owner-finish',
+      phaseCoverage: 'requires-timestamp-reconciliation',
+    },
     sourceSha: options.sourceSha,
     caseName: options.caseName,
     diagnosticOnly: true,
@@ -154,6 +175,7 @@ export async function startMatrixStartupDiagnostic(
     if (setupRetired) return detach();
     await session.send('Profiler.start');
     profileStarted = true;
+    profileStartedAt = Date.now();
     if (setupRetired) return detach();
     profileState = 'recording';
   };
@@ -163,10 +185,12 @@ export async function startMatrixStartupDiagnostic(
     profileError = String(error);
     void detach();
   });
+  setupCompleted = profileState === 'recording';
   snapshot();
-  const finish = () =>
+  const finish = (reason: 'owner-finish' | 'diagnostic-deadline') =>
     (finishPromise ??= (async () => {
       finished = true;
+      stopReason = reason;
       setupRetired = true;
       clearTimeout(timer);
       clearInterval(heartbeat);
@@ -176,7 +200,14 @@ export async function startMatrixStartupDiagnostic(
       page.off('requestfailed', requestFailed);
       if (profileStarted && session) {
         try {
+          profileStopRequestedAt = Date.now();
           const result = await bounded(session.send('Profiler.stop'), 'Profiler stop');
+          profileStoppedAt = Date.now();
+          const { startTime, endTime } = result.profile;
+          profileDurationMs =
+            Number.isFinite(startTime) && Number.isFinite(endTime) && endTime >= startTime
+              ? (endTime - startTime) / 1000
+              : null;
           // A fresh test context owns this session. Strip URL query/fragment even
           // from public script frames; the profile contains no source/body payload.
           for (const node of result.profile.nodes) {
@@ -206,9 +237,12 @@ export async function startMatrixStartupDiagnostic(
         console.error('[demo-matrix-startup-diagnostic-write]', String(error))
       );
     })().catch((error) => console.error('[demo-matrix-startup-diagnostic]', String(error))));
-  timer = setTimeout(() => {
-    void finish();
-  }, PROFILE_WINDOW_MS);
+  timer = setTimeout(
+    () => {
+      void finish('diagnostic-deadline');
+    },
+    Math.max(0, PROFILE_WINDOW_MS - (Date.now() - startedAt))
+  );
   heartbeat = setInterval(snapshot, 5_000);
-  return { finish };
+  return { finish: () => finish('owner-finish') };
 }

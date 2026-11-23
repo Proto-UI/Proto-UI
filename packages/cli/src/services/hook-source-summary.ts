@@ -2660,7 +2660,37 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         if (ts.isSpreadAssignment(property)) {
           const held = evaluate(property.expression, source, environment);
           matched ||= held.matched;
-          if (held.value.kind !== 'object') invalidateMembers();
+          if (held.value.kind === 'result') {
+            // endCapture synthesizes a plain Result with this finite own-field
+            // domain (runtime/src/kernel/as-hook.ts). It is not an authored
+            // public projection or an arbitrary object with a familiar name.
+            // Keep unmodeled/optional fields unknown: copying the capture must
+            // not certify its other capabilities or an earlier value at a key
+            // that the capture can overwrite.
+            for (const key of [
+              'props',
+              'state',
+              'methods',
+              'getMethod',
+              'asHooks',
+              'getAsHook',
+              'getAsHookHandle',
+              'artifacts',
+              'disposers',
+              'context',
+              'event',
+              'feedback',
+              'render',
+            ]) {
+              members.set(key, UNKNOWN(`unmodeled captured result member ${key}`));
+            }
+            // A closed capture with no directly introduced states has neither
+            // property. Spreading it cannot erase a selected child's bag.
+            if (held.value.stateHandles.size > 0 || !held.value.stateHandlesClosed) {
+              for (const key of ['stateHandles', 'getState'])
+                members.set(key, memberValue(held.value, key).value);
+            }
+          } else if (held.value.kind !== 'object') invalidateMembers();
           else {
             if (held.value.uncertainKeys) invalidateMembers();
             for (const [key, member] of held.value.members) members.set(key, member);
@@ -2675,7 +2705,10 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             : propertyName(property.name);
           const held = evaluate(property.initializer, source, environment);
           matched ||= held.matched;
-          if (key === null) {
+          // A literal __proto__ assignment changes the prototype instead of
+          // declaring an own member. Do not certify that object as a plain
+          // projection. A computed ['__proto__'] remains an ordinary data key.
+          if (key === null || (key === '__proto__' && !ts.isComputedPropertyName(property.name))) {
             invalidateMembers();
             continue;
           }
@@ -3983,12 +4016,13 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         name: ts.BindingName,
         value: HookSourceValue,
         scope: Map<string, HookSourceValue>
-      ): void => {
+      ): boolean => {
         if (ts.isIdentifier(name)) {
           scope.set(name.text, value);
-          return;
+          return true;
         }
         if (ts.isObjectBindingPattern(name)) {
+          let plain = value.kind === 'result' || (value.kind === 'object' && !value.uncertainKeys);
           for (const element of name.elements) {
             const key = element.propertyName
               ? ts.isComputedPropertyName(element.propertyName)
@@ -4003,11 +4037,13 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
                 : key === null
                   ? UNKNOWN('unresolved projector parameter key')
                   : memberValue(value, key).value;
-            bindPattern(element.name, selected, scope);
+            plain = bindPattern(element.name, selected, scope) && plain;
           }
-          return;
+          return plain;
         }
         if (ts.isArrayBindingPattern(name)) {
+          let plain =
+            value.kind === 'object' && !value.uncertainKeys && value.arrayLength !== undefined;
           let index = 0;
           for (const element of name.elements) {
             if (ts.isOmittedExpression(element)) {
@@ -4022,29 +4058,61 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
               value.arrayLength === undefined
                 ? UNKNOWN('unproved projector array binding')
                 : memberValue(value, String(current)).value;
-            bindPattern(element.name, selected, scope);
+            plain = bindPattern(element.name, selected, scope) && plain;
           }
+          return plain;
         }
+        return false;
       };
+      let bindingsPlain = true;
       for (let index = 0; index < project.fn.parameters.length; index++) {
         const parameter = project.fn.parameters[index];
         const value =
           index === 0 && !parameter.dotDotDotToken
             ? result
             : UNKNOWN('unproved projector argument');
-        bindPattern(parameter.name, value, environment);
+        bindingsPlain = bindPattern(parameter.name, value, environment) && bindingsPlain;
       }
       const returns: HookSourceResolution[] = [];
       let unprovedCompletion = false;
       const hasEffect = (node: ts.Node, scope: Map<string, HookSourceValue>): boolean => {
+        const hasPlainMembers = (expression: ts.Node): boolean => {
+          const value = evaluate(expression, project.module.source, scope).value;
+          if (value.kind === 'result' || (value.kind === 'object' && !value.uncertainKeys))
+            return true;
+          // endCapture also constructs artifacts as a plain, frozen object.
+          // Its unmodeled values gain no provenance from this effect check.
+          const owner = memberOwner(expression);
+          return (
+            memberName(expression) === 'artifacts' &&
+            owner !== null &&
+            evaluate(owner, project.module.source, scope).value.kind === 'result'
+          );
+        };
+        const isPrimitive = (expression: ts.Node): boolean => {
+          const value = unwrap(expression);
+          return (
+            ts.isStringLiteralLike(value) ||
+            ts.isNumericLiteral(value) ||
+            ts.isBigIntLiteral(value) ||
+            value.kind === ts.SyntaxKind.TrueKeyword ||
+            value.kind === ts.SyntaxKind.FalseKeyword ||
+            value.kind === ts.SyntaxKind.NullKeyword ||
+            ts.isTypeOfExpression(value) ||
+            ts.isVoidExpression(value) ||
+            (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken)
+          );
+        };
         // A function-valued initializer creates a deferred callable; its body
         // runs only when the callable is invoked, not while projecting the
-        // handle. An invocation remains a CallExpression root and is still
-        // classified below.
-        if (isFunctionLike(node)) return false;
+        // handle. A computed method/accessor name is evaluated immediately.
         let effect = false;
         const visit = (current: ts.Node): void => {
-          if (effect || (current !== node && isFunctionLike(current))) return;
+          if (effect) return;
+          if (isFunctionLike(current)) {
+            if (current.name && ts.isComputedPropertyName(current.name)) visit(current.name);
+            return;
+          }
           if (ts.isConditionalExpression(current)) {
             visit(current.condition);
             const condition = unwrap(current.condition);
@@ -4052,7 +4120,55 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             if (condition.kind !== ts.SyntaxKind.TrueKeyword) visit(current.whenFalse);
             return;
           }
-          if (ts.isCallExpression(current)) {
+          if (ts.isPropertyAccessExpression(current) || ts.isElementAccessExpression(current)) {
+            // Reading an unproved receiver can invoke a getter, even when the
+            // read's value is discarded. That getter may mutate the capture
+            // before a later return, invalidating its original member proof.
+            if (!hasPlainMembers(current.expression)) effect = true;
+            if (
+              ts.isElementAccessExpression(current) &&
+              !isPrimitive(current.argumentExpression) &&
+              literalString(current.argumentExpression, project.module, new Map()) === null
+            )
+              effect = true;
+          } else if (ts.isSpreadAssignment(current)) {
+            if (!hasPlainMembers(current.expression)) effect = true;
+          } else if (ts.isComputedPropertyName(current)) {
+            if (
+              !isPrimitive(current.expression) &&
+              literalString(current.expression, project.module, new Map()) === null
+            )
+              effect = true;
+          } else if (ts.isTemplateExpression(current)) {
+            if (current.templateSpans.some((span) => !isPrimitive(span.expression))) effect = true;
+          } else if (
+            ts.isPrefixUnaryExpression(current) &&
+            (current.operator === ts.SyntaxKind.PlusToken ||
+              current.operator === ts.SyntaxKind.MinusToken ||
+              current.operator === ts.SyntaxKind.TildeToken)
+          ) {
+            if (!isPrimitive(current.operand)) effect = true;
+          } else if (ts.isBinaryExpression(current)) {
+            const operator = current.operatorToken.kind;
+            // Strict equality, short-circuiting and comma do not coerce an
+            // object. Other operators may invoke user valueOf/toString hooks.
+            if (
+              (operator >= ts.SyntaxKind.FirstAssignment &&
+                operator <= ts.SyntaxKind.LastAssignment) ||
+              operator === ts.SyntaxKind.InKeyword ||
+              operator === ts.SyntaxKind.InstanceOfKeyword ||
+              (![
+                ts.SyntaxKind.EqualsEqualsEqualsToken,
+                ts.SyntaxKind.ExclamationEqualsEqualsToken,
+                ts.SyntaxKind.AmpersandAmpersandToken,
+                ts.SyntaxKind.BarBarToken,
+                ts.SyntaxKind.QuestionQuestionToken,
+                ts.SyntaxKind.CommaToken,
+              ].includes(operator) &&
+                (!isPrimitive(current.left) || !isPrimitive(current.right)))
+            )
+              effect = true;
+          } else if (ts.isCallExpression(current)) {
             // Projector reads of its own result accessors do not change what
             // the projection returns, so they are not effects.
             const name = memberName(current.expression);
@@ -4064,26 +4180,40 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
                 name === 'getAsHookHandle') &&
               owner !== null &&
               evaluate(owner, project.module.source, scope).value.kind === 'result';
+            let indexed = pure && (name === 'getState' || name === 'getMethod');
             if (!pure) {
               // Detached accessors retain their captured result identity.
               // A similarly named ordinary function is not a callable proof.
-              pure =
-                evaluate(current.expression, project.module.source, scope).value.kind ===
-                'callable';
+              const callable = evaluate(current.expression, project.module.source, scope).value;
+              pure = callable.kind === 'callable';
+              indexed = callable.kind === 'callable' && callable.operation === 'getState';
             }
+            // These native capture accessors index a plain bag. The key may
+            // still invoke toString/valueOf before the otherwise pure lookup.
+            const key = current.arguments[0];
+            if (
+              indexed &&
+              key !== undefined &&
+              !isPrimitive(key) &&
+              literalString(key, project.module, new Map()) === null
+            )
+              pure = false;
             if (!pure) effect = true;
           } else if (
             ts.isNewExpression(current) ||
+            ts.isTaggedTemplateExpression(current) ||
+            ts.isSpreadElement(current) ||
+            ts.isClassExpression(current) ||
+            ts.isJsxElement(current) ||
+            ts.isJsxSelfClosingElement(current) ||
+            ts.isJsxFragment(current) ||
             ts.isAwaitExpression(current) ||
             ts.isYieldExpression(current) ||
             ts.isDeleteExpression(current) ||
             (ts.isPrefixUnaryExpression(current) &&
               (current.operator === ts.SyntaxKind.PlusPlusToken ||
                 current.operator === ts.SyntaxKind.MinusMinusToken)) ||
-            ts.isPostfixUnaryExpression(current) ||
-            (ts.isBinaryExpression(current) &&
-              current.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
-              current.operatorToken.kind <= ts.SyntaxKind.LastAssignment)
+            ts.isPostfixUnaryExpression(current)
           )
             effect = true;
           ts.forEachChild(current, visit);
@@ -4111,13 +4241,15 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         }
         returns.push(held);
       };
-      unprovedCompletion = project.fn.parameters.some(
-        (parameter, index) =>
-          hasEffect(parameter.name, environment) ||
-          (index > 0 &&
-            parameter.initializer !== undefined &&
-            hasEffect(parameter.initializer, environment))
-      );
+      unprovedCompletion =
+        !bindingsPlain ||
+        project.fn.parameters.some(
+          (parameter, index) =>
+            hasEffect(parameter.name, environment) ||
+            (index > 0 &&
+              parameter.initializer !== undefined &&
+              hasEffect(parameter.initializer, environment))
+        );
       const collectReturns = (node: ts.Node, scope: ProjectorScope): boolean => {
         if (ts.isBlock(node)) {
           // A block scopes the `let`, `const` and function declarations it

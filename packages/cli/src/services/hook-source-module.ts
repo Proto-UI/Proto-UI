@@ -303,7 +303,7 @@ function isRuntimeSource(file: string): boolean {
   return SCRIPT_EXTENSIONS.has(path.extname(file).toLowerCase());
 }
 
-function declarationKey(symbol: HookSourceSymbol): string {
+function declarationCoordinates(symbol: HookSourceSymbol): string {
   const source = symbol.module.source;
   let start = -1;
   try {
@@ -311,11 +311,16 @@ function declarationKey(symbol: HookSourceSymbol): string {
   } catch {
     start = symbol.declaration.pos;
   }
-  return `${symbol.module.file}\0${start}\0${symbol.declaration.kind}`;
+  return `${start}\0${symbol.declaration.kind}`;
 }
 
 function sameSymbol(left: HookSourceSymbol, right: HookSourceSymbol): boolean {
-  if (declarationKey(left) === declarationKey(right)) return true;
+  if (
+    left.module.file === right.module.file &&
+    left.module.source === right.module.source &&
+    declarationCoordinates(left) === declarationCoordinates(right)
+  )
+    return true;
   const coreName = (symbol: HookSourceSymbol): string | null =>
     coreImportedName(symbol.declaration) ??
     coreExportedName(symbol.declaration) ??
@@ -1176,6 +1181,21 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     references: new WeakMap(),
     syntax: new WeakMap(),
   };
+  // One operation may retain multiple immutable ASTs for the same physical
+  // path. Their declaration, export and caller-conflict facts must not share
+  // a key merely because their text starts at the same source coordinates.
+  const sourceIds = new WeakMap<ts.SourceFile, number>();
+  let nextSourceId = 0;
+  const sourceKey = (module: HookSourceModule): string => {
+    let id = sourceIds.get(module.source);
+    if (id === undefined) {
+      id = nextSourceId++;
+      sourceIds.set(module.source, id);
+    }
+    return `${module.file}\0${id}`;
+  };
+  const declarationKey = (symbol: HookSourceSymbol): string =>
+    `${sourceKey(symbol.module)}\0${declarationCoordinates(symbol)}`;
   const modules = new Map<string, HookSourceModule>();
   const moduleFailures = new Set<string>();
   const configCache = new Map<string, ConfigRecord>();
@@ -1396,7 +1416,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     name: string,
     stack: Set<string>
   ) => HookSourceSymbol | null = (module, name, stack) => {
-    const key = `${module.file}\0${name}`;
+    const key = `${sourceKey(module)}\0${name}`;
     const cached = exportPositiveCache.get(key);
     if (cached) return cached;
     if (stack.has(key)) return null;
@@ -1494,8 +1514,8 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     const names = new Set<string>();
     const visited = new Set<string>();
     function collect(target: HookSourceModule) {
-      if (visited.has(target.file)) return;
-      visited.add(target.file);
+      if (visited.has(sourceKey(target))) return;
+      visited.add(sourceKey(target));
       const { exports, stars } = syntaxFor(lexicalIndex, target.source);
       for (const name of exports.keys()) {
         if (name !== 'default' || target.file === module.file) names.add(name);
@@ -1903,7 +1923,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     seen = new Set<string>(),
     origin?: HookSourceModule
   ): HookSourceSymbol | null {
-    const cacheKey = `${declarationKey(symbol)}\0${name}\0${origin?.file ?? ''}`;
+    const cacheKey = `${declarationKey(symbol)}\0${name}\0${origin ? sourceKey(origin) : ''}`;
     const cached = objectMemberCache.get(cacheKey);
     if (cached !== undefined) return cached;
     const key = declarationKey(symbol);
@@ -1923,7 +1943,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
       }
       if (
         origin &&
-        origin.file !== symbol.module.file &&
+        (origin.file !== symbol.module.file || origin.source !== symbol.module.source) &&
         hasExternalMemberWrite(symbol, name, origin)
       ) {
         objectMemberCache.set(cacheKey, null);

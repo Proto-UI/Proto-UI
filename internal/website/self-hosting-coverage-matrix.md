@@ -293,8 +293,8 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/demo-associations.ts` | `www.demo.prototype-previewer` | `ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365` |
 | `apps/www/src/components/CodeExample.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface` | `991f8c3bd93c21eaee831b98876389b77d58331b5dd68cd8bf186857958c4851` |
 | `apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a` |
-| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers`, `www.demo.raw-adapter-runtimes` | `c16bd248d5b532017ca0ba2400f78ca04344f136c6d2f85723e744660d84db7a` |
-| `apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts` | `www.demo.raw-adapter-runtimes` | `73527fed2be1f4e9655afef01053ae615f85385c1c0a4f1020dd79a233ead592` |
+| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `f734e78b8ec62770c3432c8ffdf002c258b1378ce88ea90fbf7bdb746f7f9112` |
+| `apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts` | `www.demo.raw-adapter-runtimes` | `f159da1722e8c7b7e9e3ebf4772c077c841e60275cde2a8e1f482e5379df153e` |
 | `packages/compiler/src/browser/client.ts` | `www.demo.raw-adapter-runtimes` | `f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7` |
 | `packages/compiler/src/browser/worker.ts` | `www.demo.raw-adapter-runtimes` | `d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5` |
@@ -323,7 +323,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PageTitle.astro` | `www.shell.page-title` | `6eb3ef6cf85cc84b4aadff283589a910616cccd31fdcf7286c1df9583c102774` |
 | `apps/www/src/components/PrototypeLoader.astro` | `www.demo.prototype-previewer` | `dc066166d19e7ed7c666f244622b73bba397c89bb33afa659ebfc736b1a71c32` |
 | `apps/www/src/components/PrototypePreviewer/AdapterPanelScript.astro` | `www.demo.runtime-select` | `0c8f333bc2eb5ba182eec693c0b902b881d763bfc770e53cc9015015ec0aa848` |
-| `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `4b69ff8ca48e9d55ef0988207857a862dfc9be207ebb8f4f563c50979ff28462` |
+| `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `38afd6e5c7fd509682bbb4211fc4c0f637b49d7d6f7134afb04ff6dc1e518403` |
 | `apps/www/src/components/StaticCodeBlock.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface` | `755a863bb83b647e62dd8e12931eb2eb221ea179311b98aaa1b1a032230dec5b` |
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
@@ -412,8 +412,8 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/content/docs/en/whitepaper/6-consistency-boundary.md` | `www.docs.whitepaper-diagram-viewer` | `643c4d4b8d76473fba3dfb70bd276aa8e5c0f870ff2a76ae26b5fea8a998af84` |
 | `apps/www/src/content/docs/en/whitepaper/7-evolving-within-boundaries.md` | `www.docs.whitepaper-diagram-viewer` | `72cb0fbcf72ede21fa055a1a260fce754c6477c9278624dacdf503c0b6eeb64c` |
 | `apps/www/src/content/docs/zh-cn/demo-base-image.demo.ts` | `www.demo.base-image-controls` | `9a8a33af3ada563c51b62c76a7b238d26a3266c13b6203513614abf1f0c8e77c` |
-| `apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts` | `www.demo.authored-controllers` | `1459a7aee6b4d9ce43002e634542695e66e7ed12707ec36c7607b670e3a0bd23` |
-| `apps/www/src/content/docs/zh-cn/demo-base-select.demo.ts` | `www.demo.authored-controllers` | `43f779dabd304a813e070cbe746c45f91918f5f49c2004a3e1ab42aef4b37959` |
+| `apps/www/src/content/docs/zh-cn/demo-base-input.demo.ts` | `www.demo.authored-controllers` | `0a303cb62d1c19189aee4f0c28d30e97b4461f71d491ed466a026a6fe5777721` |
+| `apps/www/src/content/docs/zh-cn/demo-base-select.demo.ts` | `www.demo.authored-controllers` | `321eadf19028d377565dc963c7341144ba19d4828bc45d9981a332dd62659733` |
 | `apps/www/src/content/docs/zh-cn/demo-base-textarea.demo.ts` | `www.demo.authored-controllers` | `5086c8bb63dddf28ba06726eda54ab354479b6f1ff2c703619b9ddbe8c49b7a4` |
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-command.demo.ts` | `www.demo.authored-controllers` | `357374c075b3cfc5066e534528f23ecbfb5ab9458088143eca10349a58334580` |
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts` | `www.demo.authored-controllers` | `2dd09fc318f19b1fa34d46f0bec17cab0375da92b939113e6b1baf7760025b9d` |

@@ -55,7 +55,7 @@ export const SPRINT1_UNIT_SUITES = Object.freeze([
   'packages/prototypes/base/test/number-field-capabilities.test.ts',
   'packages/prototypes/base/test/number-field-format.test.ts',
 ]);
-// Additional controls for Anatomy, initial portal styles and main integration; keep the
+// Additional controls for Anatomy, Shadow CSS, initial portal styles and main integration; keep the
 // original focused-unit selection and its resource budget unchanged.
 export const SPRINT1_INTEGRATION_UNIT_SUITES = Object.freeze([
   'packages/modules/anatomy/test/subscriber-fanout.test.ts',
@@ -69,6 +69,8 @@ export const SPRINT1_INTEGRATION_UNIT_SUITES = Object.freeze([
   'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts',
   'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts',
   'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
+  'packages/adapters/web-component/test/shadow-style-artifact.test.ts',
+  'packages/adapters/web-component/test/shadow-split-effects.test.ts',
 ]);
 export const SPRINT1_NODE_SUITES = Object.freeze([
   'scripts/analysis/test/number-field-ime-evidence.test.mjs',

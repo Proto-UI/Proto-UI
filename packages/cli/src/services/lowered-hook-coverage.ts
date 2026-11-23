@@ -3261,6 +3261,185 @@ export function scanRuleStateReads(
     return null;
   };
 
+  type LiteralTokenData = string | Map<string, LiteralTokenData>;
+
+  /** Plain own data only: getters, spreads and prototype setters are not values. */
+  const literalTokenData = (expression: ts.Expression): LiteralTokenData | null => {
+    const value = unwrapWritten(expression);
+    if (ts.isStringLiteralLike(value) || ts.isNoSubstitutionTemplateLiteral(value))
+      return value.text;
+    if (!ts.isObjectLiteralExpression(value)) return null;
+    const members = new Map<string, LiteralTokenData>();
+    for (const property of value.properties) {
+      if (!ts.isPropertyAssignment(property)) return null;
+      const key = propertyName(property.name);
+      if (key === null || key === '__proto__') return null;
+      const member = literalTokenData(property.initializer);
+      if (member === null) return null;
+      members.set(key, member);
+    }
+    return members;
+  };
+
+  /**
+   * A private map read hands only a proven string to its consumer. Bare
+   * references, exports, aliases, writes and unknown paths withhold this proof.
+   * The entire source is checked, including deferred writes and later escapes.
+   */
+  const literalTokenMapIsReadOnly = (
+    module: ts.SourceFile,
+    declarationName: ts.Identifier,
+    initial: Map<string, LiteralTokenData>
+  ): boolean => {
+    let safe = true;
+    const visitReference = (node: ts.Node): void => {
+      if (!safe) return;
+      // Dynamic lexical execution can write the owner without a syntax reference.
+      if (
+        ts.isWithStatement(node) ||
+        (ts.isCallExpression(node) &&
+          ts.isIdentifier(unwrapWritten(node.expression)) &&
+          (unwrapWritten(node.expression) as ts.Identifier).text === 'eval')
+      ) {
+        safe = false;
+        return;
+      }
+      if (ts.isIdentifier(node) && node.text === declarationName.text && node !== declarationName) {
+        const parent = node.parent;
+        if (
+          (ts.isPropertyAccessExpression(parent) && parent.name === node) ||
+          (ts.isPropertyAssignment(parent) && parent.name === node) ||
+          (ts.isImportSpecifier(parent) && parent.propertyName === node)
+        )
+          return;
+        for (let owner: ts.Node | undefined = parent; owner; owner = owner.parent) {
+          if (ts.isTypeNode(owner)) return;
+          if (ts.isStatement(owner) || ts.isFunctionLike(owner)) break;
+        }
+
+        let current: ts.Node = node;
+        let data: LiteralTokenData = initial;
+        for (;;) {
+          const next = current.parent;
+          if (
+            next &&
+            (ts.isParenthesizedExpression(next) ||
+              ts.isAsExpression(next) ||
+              ts.isTypeAssertionExpression(next) ||
+              ts.isNonNullExpression(next) ||
+              ts.isSatisfiesExpression(next)) &&
+            next.expression === current
+          ) {
+            current = next;
+            continue;
+          }
+          if (
+            !next ||
+            (!ts.isPropertyAccessExpression(next) && !ts.isElementAccessExpression(next)) ||
+            next.expression !== current
+          )
+            break;
+          const index = ts.isElementAccessExpression(next)
+            ? next.argumentExpression && unwrapWritten(next.argumentExpression)
+            : null;
+          const key = ts.isPropertyAccessExpression(next)
+            ? next.name.text
+            : index && ts.isStringLiteralLike(index)
+              ? index.text
+              : null;
+          if (!(data instanceof Map) || key === null || !data.has(key)) {
+            safe = false;
+            return;
+          }
+          data = data.get(key)!;
+          current = next;
+        }
+        if (typeof data !== 'string') {
+          safe = false;
+          return;
+        }
+        for (let target = current; target.parent; target = target.parent) {
+          const owner = target.parent;
+          if (
+            (ts.isBinaryExpression(owner) &&
+              owner.left === target &&
+              owner.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+              owner.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
+            ((ts.isPrefixUnaryExpression(owner) || ts.isPostfixUnaryExpression(owner)) &&
+              owner.operand === target &&
+              (owner.operator === ts.SyntaxKind.PlusPlusToken ||
+                owner.operator === ts.SyntaxKind.MinusMinusToken)) ||
+            (ts.isDeleteExpression(owner) && owner.expression === target) ||
+            ((ts.isForInStatement(owner) || ts.isForOfStatement(owner)) &&
+              owner.initializer === target)
+          ) {
+            safe = false;
+            return;
+          }
+          if (ts.isStatement(owner) || ts.isFunctionLike(owner)) break;
+        }
+        return;
+      }
+      ts.forEachChild(node, visitReference);
+    };
+    visitReference(module);
+    return safe;
+  };
+
+  /** Match the collector's own string member without inventing a state proof. */
+  const literalTokenMember = (expression: ts.Expression, scope: Scope): string | null => {
+    const read = (node: ts.Expression): LiteralTokenData | null => {
+      const value = unwrapWritten(node);
+      if (ts.isPropertyAccessExpression(value) || ts.isElementAccessExpression(value)) {
+        const owner = read(value.expression);
+        const index = ts.isElementAccessExpression(value)
+          ? value.argumentExpression && unwrapWritten(value.argumentExpression)
+          : null;
+        const key = ts.isPropertyAccessExpression(value)
+          ? value.name.text
+          : index && ts.isStringLiteralLike(index)
+            ? index.text
+            : null;
+        return owner instanceof Map && key !== null ? (owner.get(key) ?? null) : null;
+      }
+      if (!ts.isIdentifier(value)) return literalTokenData(value as ts.Expression);
+      const binding = lookup(scope, value.text);
+      // Imported const objects remain mutable through other modules. This
+      // proof admits only a private owner whose complete source is visible.
+      if (
+        binding?.kind !== 'token' ||
+        binding.opaque ||
+        binding.members?.size ||
+        binding.alternates?.length
+      )
+        return null;
+      const declaration = binding.bindingNode ?? binding.initializer.parent;
+      if (
+        !declaration ||
+        !ts.isVariableDeclaration(declaration) ||
+        declaration.initializer !== binding.initializer ||
+        !declaration.initializer ||
+        !ts.isIdentifier(declaration.name) ||
+        !ts.isVariableDeclarationList(declaration.parent) ||
+        (declaration.parent.flags & ts.NodeFlags.Const) === 0
+      )
+        return null;
+      const statement = declaration.parent.parent;
+      if (
+        ts.isVariableStatement(statement) &&
+        statement.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)
+      )
+        return null;
+      const data = literalTokenData(declaration.initializer);
+      if (!(data instanceof Map)) return null;
+      if (!literalTokenMapIsReadOnly(declaration.getSourceFile(), declaration.name, data))
+        return null;
+      return data;
+    };
+    const value = read(expression);
+    return typeof value === 'string' ? value : null;
+  };
+
   /**
    * Argument shapes `resolveExpression` turns into tokens. A `tw(...)` argument
    * the extractor cannot resolve — an arbitrary call, or a name whose value it
@@ -3347,13 +3526,12 @@ export function scanRuleStateReads(
       return false;
     }
     if (ts.isElementAccessExpression(inner)) {
-      // A member is only reachable if its owner is. Element access is the form
-      // `resolveExpression` reads a token map through.
+      // Retain the existing element-access owner proof.
       return resolvableTokenArgument(inner.expression, scope, seen);
     }
-    // Dot access resolves through `semanticMap` only, which holds hook state
-    // handles rather than tokens. An ordinary token object is a `map`, so
-    // `tw(TOKENS.active)` yields nothing while the runtime lowers the real one.
+    // evaluateTokenGraph/tokenMember also reads ordinary dot members. Admit a
+    // finite own string leaf, not an opaque receiver's partial token inventory.
+    if (ts.isPropertyAccessExpression(inner)) return literalTokenMember(inner, scope) !== null;
     return false;
   };
 
@@ -3362,6 +3540,7 @@ export function scanRuleStateReads(
     const inner = unwrap(node) as ts.Expression;
     if (ts.isStringLiteralLike(inner) || ts.isNoSubstitutionTemplateLiteral(inner)) return true;
     if (ts.isTemplateExpression(inner)) return true;
+    if (ts.isPropertyAccessExpression(inner)) return literalTokenMember(inner, scope) !== null;
     if (ts.isIdentifier(inner)) {
       const binding = lookup(scope, inner.text);
       if (binding?.kind === 'token') return singleValuedTokenArgument(binding.initializer, scope);

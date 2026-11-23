@@ -4735,14 +4735,14 @@ describe('lowered hook coverage', () => {
     const map = "const TOKENS = { active: 'bg-primary' };";
     const usage = { hook: 'asCheckboxRoot', state: 'checked' };
 
-    // `resolveExpression` reads a token object through element access; dot
-    // access resolves through `semanticMap`, which holds state handles.
+    // The collector's token graph reads both forms. The paired token-map
+    // suite checks actual prefixed tokens and keeps opaque members unresolved.
     const element = `${map}\n${handles}\ndef.rule({ when: ${when}, intent: (i) => i.feedback.style.use(tw(TOKENS['active'])) });`;
     expect(scanRuleStateReads(element).usages).toEqual([usage]);
 
     const dotted = `${map}\n${handles}\ndef.rule({ when: ${when}, intent: (i) => i.feedback.style.use(tw(TOKENS.active)) });`;
-    expect(scanRuleStateReads(dotted).usages).toEqual([]);
-    expect(scanRuleStateReads(dotted).unresolved.map((miss) => miss.reason)).toEqual(['intent']);
+    expect(scanRuleStateReads(dotted).usages).toEqual([usage]);
+    expect(scanRuleStateReads(dotted).unresolved).toEqual([]);
   });
 
   it('reports a condition whose operator picks one operand', () => {
@@ -5088,19 +5088,31 @@ describe('lowered hook coverage', () => {
     }
   };
 
-  /** One comparison rule per row plus one hook read per row, for both proofs. */
-  const loopConsumer = (imports: string[], rows: string, before: string[] = []): string =>
+  /** Row comparisons, with an independent hook read by default for expansion controls. */
+  const loopConsumer = (
+    imports: string[],
+    rows: string,
+    before: string[] = [],
+    includeIndependentHookRead = true
+  ): string =>
     [
       ...imports,
       "const direction = def.state.string('direction', 'center');",
-      'const { checked } = asCheckboxRoot().stateHandles;',
+      ...(includeIndependentHookRead ? ['const { checked } = asCheckboxRoot().stateHandles;'] : []),
       "def.expose.state('direction', direction);",
       ...before,
       `for (const row of ${rows}) {`,
       "  def.rule({ when: (w) => w.state(direction).eq(row), intent: (i) => i.feedback.style.use(tw('bg-primary')) });",
-      "  def.rule({ when: (w) => w.state(checked).eq(true), intent: (i) => i.feedback.style.use(tw('underline')) });",
+      ...(includeIndependentHookRead
+        ? [
+            "  def.rule({ when: (w) => w.state(checked).eq(true), intent: (i) => i.feedback.style.use(tw('underline')) });",
+          ]
+        : []),
       '}',
     ].join('\n');
+
+  const rowOnlyLoopConsumer = (imports: string[], rows: string, before: string[] = []): string =>
+    loopConsumer(imports, rows, before, false);
 
   const rowUsages = [
     { hook: 'asCheckboxRoot', state: 'checked' },
@@ -5169,11 +5181,9 @@ describe('lowered hook coverage', () => {
   it('expands a known spread of a proven array in order', async () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = ['left'] as const;" },
-      loopConsumer(
-        ["import { NAMES } from './ids';"],
-        'ALL',
-        ["const ALL = [...NAMES, 'right'] as const;"]
-      ),
+      loopConsumer(["import { NAMES } from './ids';"], 'ALL', [
+        "const ALL = [...NAMES, 'right'] as const;",
+      ]),
       async (scan, tokens) => {
         const extracted = await tokens();
         expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(rowUsages);
@@ -5254,9 +5264,10 @@ describe('lowered hook coverage', () => {
   it('withholds the rows when the reading file hands the array to a caller', async () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = ['left', 'right'] as const;" },
-      loopConsumer(["import { NAMES } from './ids';"], 'NAMES', ['mutate(NAMES);']),
+      rowOnlyLoopConsumer(["import { NAMES } from './ids';"], 'NAMES', ['mutate(NAMES);']),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5270,9 +5281,10 @@ describe('lowered hook coverage', () => {
           "NAMES.push('center');",
         ].join('\n'),
       },
-      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5281,9 +5293,10 @@ describe('lowered hook coverage', () => {
   it('withholds the rows for a conditional member of an imported array', async () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = ['left', pick ? 'right' : 'center'] as const;" },
-      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5292,9 +5305,10 @@ describe('lowered hook coverage', () => {
   it('withholds the rows for an unknown spread of an imported array', async () => {
     await withLoopFixture(
       { 'ids.ts': "export const NAMES = [...external(), 'left'] as const;" },
-      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5308,9 +5322,10 @@ describe('lowered hook coverage', () => {
           'export const key = createKey();',
         ].join('\n'),
       },
-      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5319,9 +5334,10 @@ describe('lowered hook coverage', () => {
   it('withholds the rows for a mutable module binding', async () => {
     await withLoopFixture(
       { 'ids.ts': "export let NAMES = ['left', 'right'] as const;" },
-      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5333,9 +5349,10 @@ describe('lowered hook coverage', () => {
         'one.ts': "export { NAMES } from './two';",
         'two.ts': "export { NAMES } from './one';",
       },
-      loopConsumer(["import { NAMES } from './one';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './one';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5344,9 +5361,10 @@ describe('lowered hook coverage', () => {
   it('withholds the rows for an import the scanner cannot read', async () => {
     await withLoopFixture(
       {},
-      loopConsumer(["import { NAMES } from './absent';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './absent';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5360,9 +5378,10 @@ describe('lowered hook coverage', () => {
         'ids.ts': "export const NAMES = ['left', 'right'] as const;",
         'bridge.ts': "export * from './ids';",
       },
-      loopConsumer(["import { NAMES } from './bridge';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import { NAMES } from './bridge';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
       }
     );
@@ -5371,10 +5390,25 @@ describe('lowered hook coverage', () => {
   it('withholds the rows for a default-exported array', async () => {
     await withLoopFixture(
       { 'ids.ts': "export default ['left', 'right'] as const;" },
-      loopConsumer(["import NAMES from './ids';"], 'NAMES'),
+      rowOnlyLoopConsumer(["import NAMES from './ids';"], 'NAMES'),
       (scan) => {
         expect(scan.usages).toEqual([]);
+        expect(scan.exposedLocals).toEqual([]);
         expect(scan.unresolved.map((miss) => miss.reason)).toEqual(['comparison']);
+      }
+    );
+  });
+
+  it('keeps an independent hook read when imported rows stay unresolved', async () => {
+    await withLoopFixture(
+      { 'ids.ts': "export const NAMES = [...external(), 'left'] as const;" },
+      loopConsumer(["import { NAMES } from './ids';"], 'NAMES'),
+      (scan) => {
+        expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+        expect(scan.exposedLocals).toEqual([]);
+        expect(scan.unresolved).toEqual([
+          { expression: 'w.state(direction).eq(row)', reason: 'comparison' },
+        ]);
       }
     );
   });
@@ -5411,11 +5445,13 @@ describe('lowered hook coverage', () => {
       'exposed states whose attribute cannot be written as a data selector'
     ).toEqual([]);
     // The two-step shape must be reached in the shipped tree, not just fixtures.
+    // Textarea now delegates its rules to a visual helper; Checkbox Group Item
+    // still reads the captured Result's stateHandles in its own authored rule.
     expect(found).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          file: 'packages/prototypes/brutalist/src/textarea/root.proto.ts',
-          hook: 'asTextareaRoot',
+          file: 'packages/prototypes/brutalist/src/checkbox-group/item.proto.ts',
+          hook: 'asCheckboxGroupItem',
           state: 'focusVisible',
         }),
       ])

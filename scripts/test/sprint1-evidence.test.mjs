@@ -196,11 +196,13 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts',
     'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts',
     'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
+    'packages/adapters/web-component/test/shadow-style-artifact.test.ts',
+    'packages/adapters/web-component/test/shadow-split-effects.test.ts',
   ]);
   const integration = steps.find((step) => step.id === 'integration-unit');
   assert.equal(integration.timeoutMs, 90_000);
   assert.deepEqual(integration.suites, SPRINT1_INTEGRATION_UNIT_SUITES);
-  assert.deepEqual(integration.args.slice(-11), SPRINT1_INTEGRATION_UNIT_SUITES);
+  assert.deepEqual(integration.args.slice(-13), SPRINT1_INTEGRATION_UNIT_SUITES);
   assert.ok(integration.suites.every((suite) => !SPRINT1_UNIT_SUITES.includes(suite)));
   assert.ok(
     integration.args.every(
@@ -330,7 +332,16 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const repair = workflow.jobs['focused-browser'];
-  assert.equal(repair.if, "${{ inputs.scope != 'sprint1' }}");
+  for (const input of ['sprint3_acceptance', 'sprint3_followup']) {
+    assert.equal(workflow.on.workflow_dispatch.inputs[input].type, 'boolean');
+    assert.equal(workflow.on.workflow_dispatch.inputs[input].required, false);
+    assert.equal(workflow.on.workflow_dispatch.inputs[input].default, false);
+    assert.equal(workflow.on.workflow_call.inputs[input], undefined);
+  }
+  assert.equal(
+    repair.if,
+    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+  );
   assert.ok(repair.steps.some((step) => step.run === 'test "$EVIDENCE_SCOPE" = repair'));
   const original = repair.steps.find(
     (step) => step.name === 'Exercise unchanged controls with failure diagnostics'
@@ -342,6 +353,10 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   ])
     assert.ok(original.run.includes(suite));
   const job = workflow.jobs.sprint1;
+  assert.equal(
+    job.if,
+    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+  );
   assert.equal(job['timeout-minutes'], 90);
   assert.equal(job.strategy, undefined, 'Heavy operations run in one serial worker');
   const execute = job.steps.find((step) => step.run?.includes('sprint1-evidence.mjs run'));

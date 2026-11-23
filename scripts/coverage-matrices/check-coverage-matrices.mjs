@@ -1,6 +1,9 @@
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { DIAGNOSTIC_IMPORT_ALLOWLIST } from './diagnostic-imports.mjs';
-import { BROWSER_COMPILER_IMPORT_ALLOWLIST } from './browser-compiler-imports.mjs';
+import {
+  BROWSER_COMPILER_IMPORT_ALLOWLIST,
+  BROWSER_COMPILER_INTERACTIVE_SOURCES,
+} from './browser-compiler-imports.mjs';
 import {
   LIBRARY_CARD_IMPORT_ALLOWLIST,
   LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES,
@@ -12849,10 +12852,11 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
         !isPublicExecutable &&
         !isReviewedOpticalHost &&
         !Object.hasOwn(LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES, sourcePath) &&
+        !Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath) &&
         sourcePath !== WEBSITE_STARTUP_EVENT_SOURCE)
     ) {
       issues.push(
-        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical/build-time event source`
+        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical, compiler-host, material or build-time event source`
       );
       continue;
     }
@@ -12902,6 +12906,25 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact startup event source, digest and build owner remain unverified`
+        );
+        continue;
+      }
+    }
+    if (Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath)) {
+      const expected = BROWSER_COMPILER_INTERACTIVE_SOURCES[sourcePath];
+      try {
+        assertPromotionModulePath(rootDir, absolutePath);
+        if (
+          !fs.lstatSync(absolutePath).isFile() ||
+          sourceScanDigest(absolutePath) !== expected ||
+          binding.digest !== expected ||
+          binding.ownerIds.length !== 1 ||
+          binding.ownerIds[0] !== 'www.demo.raw-adapter-runtimes'
+        )
+          throw new Error('unexpected browser compiler host bytes or owner');
+      } catch {
+        issues.push(
+          `${relativePath}:${binding.line}: exact browser compiler host source, digest and runtime owner remain unverified`
         );
         continue;
       }

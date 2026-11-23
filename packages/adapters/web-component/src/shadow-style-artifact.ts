@@ -22,6 +22,13 @@ export type ShadowStyleArtifactOwner = {
 
 const artifactOwners = new WeakMap<ShadowRoot, ShadowStyleArtifactOwner>();
 
+// Successful pure-text checks for this module's v1/host-color-scheme-v1 ABI.
+// Artifact shape and accessors are still validated on every public call.
+const SELECTOR_ABI_CACHE_ENTRIES = 32;
+const SELECTOR_ABI_CACHE_CHARACTERS = 1024 * 1024;
+const validatedSelectorCss = new Set<string>();
+let validatedSelectorCharacters = 0;
+
 /**
  * Validates the semantic artifact before any physical stylesheet mutation and
  * returns an immutable Adapter-owned copy.
@@ -106,6 +113,7 @@ export function createShadowStyleArtifactOwner(
 }
 
 function validateShadowSelectorAbi(cssText: string): void {
+  if (validatedSelectorCss.has(cssText)) return;
   const selectors = stripShadowCssComments(cssText);
   const structuralCss = selectors.replace(/(["'])(?:\\.|(?!\1)[^\\])*\1/g, '$1$1');
   const documentRule = structuralCss.match(
@@ -148,6 +156,19 @@ function validateShadowSelectorAbi(cssText: string): void {
   if (hasUnscopedDarkToken) {
     throw invalidArtifact('dark');
   }
+
+  // Oversized inputs receive the same validation without being retained.
+  if (cssText.length > SELECTOR_ABI_CACHE_CHARACTERS) return;
+  while (
+    validatedSelectorCss.size >= SELECTOR_ABI_CACHE_ENTRIES ||
+    validatedSelectorCharacters + cssText.length > SELECTOR_ABI_CACHE_CHARACTERS
+  ) {
+    const oldest = validatedSelectorCss.values().next().value!;
+    validatedSelectorCss.delete(oldest);
+    validatedSelectorCharacters -= oldest.length;
+  }
+  validatedSelectorCss.add(cssText);
+  validatedSelectorCharacters += cssText.length;
 }
 
 // Inspect only the leading host compound, including functional suffixes. A

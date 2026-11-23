@@ -6,7 +6,7 @@
 // See internal/records/2026-11-23-seven-sprint-website-source-inventory.md.
 const BROWSER_COMPILER_OWNER = Object.freeze({
   path: 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
-  sha256: 'c16bd248d5b532017ca0ba2400f78ca04344f136c6d2f85723e744660d84db7a',
+  sha256: 'f734e78b8ec62770c3432c8ffdf002c258b1378ce88ea90fbf7bdb746f7f9112',
 });
 
 export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
@@ -21,12 +21,12 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/gpui-source.ts': Object.freeze({
-    sourceSha256: '6811ba2189990a18ea29241b0660644d81a86f259aa89c3e93a3bc95b102d06d',
+    sourceSha256: '290a26176c307f7b81bec4379daef5a22926b23d8e1831eefe2fe15331a1283f',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/spec/feedback/semantic-merge']),
   }),
   'packages/compiler/src/ir-validation.ts': Object.freeze({
-    sourceSha256: 'e2d0d1f79a6b690a30e50dee37e2e5a44fa936ccba581201b20db3fc7e30c9c0',
+    sourceSha256: '99a5f98e932938c4371bdb630f85c222f8eb4731673a385d56e93c4bfdeeef5e',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/spec/feedback/tokens']),
   }),
@@ -91,7 +91,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
-    sourceSha256: 'fd8475e4d50ddcfec3ec48e6eb8ac12667e84b6ae047a29d8889d622a7d19475',
+    sourceSha256: '32cac013475c33f471733758531dbd96b674e3b667ccd80d4511d311afcbe33d',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -178,4 +178,13 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['./handles']),
   }),
+});
+
+// These two already-inventoried Worker lifecycle files have an exact source-scan
+// owner. This admits neither adjacent compiler files nor the panel's blocked UI.
+export const BROWSER_COMPILER_INTERACTIVE_SOURCES = Object.freeze({
+  'packages/compiler/src/browser/client.ts':
+    'f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7',
+  'packages/compiler/src/browser/worker.ts':
+    'd373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078',
 });

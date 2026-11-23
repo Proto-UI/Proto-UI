@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
+import { createHash } from 'node:crypto';
+import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,6 +10,7 @@ import { test } from 'node:test';
 import { parse } from 'yaml';
 import {
   runSearchProductionEvidence,
+  retainSearchProductionBuild,
   SEARCH_PRODUCTION_ROUTES,
   SEARCH_PRODUCTION_SUITE,
 } from './run-search-production-evidence.mjs';
@@ -474,3 +478,212 @@ for (const root of [
     assert.equal(preview, owned);
   });
 }
+
+async function syntheticBuild(t) {
+  const root = await mkdtemp(path.join(tmpdir(), 'search-build-capture-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const dist = path.join(root, 'apps/www/dist');
+  const directory = path.join(root, 'retained');
+  const bodies = new Map([
+    ['_astro/search.fixture.js', 'console.log("unchanged emitted script");\n'],
+    ['_astro/worker.fixture.mjs', 'export const fixture = "worker";\n'],
+    ['_astro/search.fixture.js.map', '{"version":3,"sources":["fixture.ts"]}\n'],
+    ['pagefind/pagefind.js', 'export const fixture = "pagefind";\n'],
+    ['proto-ui-bundle-graph.json', '{"version":1,"chunks":[],"modules":[]}\n'],
+    ['zh-cn/ui-libraries/shadcn/button/index.html', '<html>shadcn fixture</html>\n'],
+    [
+      'zh-cn/ui-libraries/brutalist/components/button/index.html',
+      '<html>brutalist fixture</html>\n',
+    ],
+    ['_astro/irrelevant.css', '.fixture { color: red; }\n'],
+    ['unselected/index.html', '<html>not a measured route</html>\n'],
+    ['private.txt', 'not a public emitted script\n'],
+  ]);
+  for (const [file, bytes] of bodies) {
+    const target = path.join(dist, file);
+    await mkdir(path.dirname(target), { recursive: true });
+    await writeFile(target, bytes);
+  }
+  const identity = { sha: 'a'.repeat(40), tree: 'b'.repeat(40), dirty: false };
+  const options = { root, directory, expectedSha: identity.sha, runnerOutcome: 'failure' };
+  return {
+    root,
+    dist,
+    directory,
+    bodies,
+    identity,
+    options,
+    capture: (overrides = {}, dependencies = {}) =>
+      retainSearchProductionBuild(
+        { ...options, ...overrides },
+        { readSource: () => ({ ...identity }), ...dependencies }
+      ),
+  };
+}
+
+test('terminal failure retains exact same-build scripts, existing maps, graph and both route HTML files', async (t) => {
+  const f = await syntheticBuild(t);
+  const manifest = await f.capture();
+  assert.equal(manifest.status, 'captured');
+  assert.equal(manifest.runnerOutcome, 'failure');
+  assert.equal(manifest.byteProvenance, 'same-build-output');
+  assert.equal(manifest.actualServedBytes, false);
+  assert.equal(manifest.establishesPerformanceAcceptance, false);
+  assert.equal(manifest.rebuildPerformed, false);
+  assert.deepEqual(manifest.sourceBefore, f.identity);
+  assert.deepEqual(manifest.sourceAfter, f.identity);
+  assert.deepEqual(
+    manifest.files.map((entry) => entry.path).sort(),
+    [...f.bodies.keys()]
+      .filter(
+        (file) => !['private.txt', 'unselected/index.html', '_astro/irrelevant.css'].includes(file)
+      )
+      .sort()
+  );
+  for (const entry of manifest.files) {
+    const original = Buffer.from(f.bodies.get(entry.path));
+    assert.equal(entry.bytes, original.length);
+    assert.equal(entry.copyVerified, true);
+    assert.equal(entry.sha256, createHash('sha256').update(original).digest('hex'));
+    assert.deepEqual(await readFile(path.join(f.directory, 'files', entry.path)), original);
+    assert.deepEqual(await readFile(path.join(f.dist, entry.path)), original);
+  }
+  assert.deepEqual(
+    JSON.parse(await readFile(path.join(f.directory, 'manifest.json'), 'utf8')),
+    manifest
+  );
+  await assert.rejects(f.capture(), { code: 'EEXIST' });
+});
+
+test('corrupted retained bytes cannot receive a verified source digest', async (t) => {
+  const f = await syntheticBuild(t);
+  const manifest = await f.capture(
+    {},
+    {
+      writeCopy: (file, bytes) =>
+        writeFile(file, file.endsWith('search.fixture.js') ? 'injected truncated copy' : bytes),
+    }
+  );
+  assert.equal(manifest.status, 'incomplete');
+  assert.ok(manifest.errors.some((error) => error.includes('Retained bytes differ')));
+  assert.ok(!manifest.files.some((entry) => entry.path === '_astro/search.fixture.js'));
+  assert.equal(
+    await readFile(path.join(f.directory, 'files/_astro/search.fixture.js'), 'utf8'),
+    'injected truncated copy'
+  );
+});
+
+test('absent source maps are recorded as absent without generating another build or map', async (t) => {
+  const f = await syntheticBuild(t);
+  await rm(path.join(f.dist, '_astro/search.fixture.js.map'));
+  const manifest = await f.capture({ runnerOutcome: 'success' });
+  assert.equal(manifest.status, 'captured');
+  assert.equal(manifest.files.filter((entry) => entry.kind === 'source-map').length, 0);
+  assert.equal(manifest.sourceMaps, 'retain-only-if-already-emitted');
+  assert.equal(manifest.rebuildPerformed, false);
+  assert.ok(!(await readdir(path.join(f.dist, '_astro'))).some((file) => file.endsWith('.map')));
+});
+
+test('a failed or partial build leaves an incomplete manifest while retaining every available script', async (t) => {
+  for (const missing of [
+    'proto-ui-bundle-graph.json',
+    'zh-cn/ui-libraries/shadcn/button/index.html',
+    'zh-cn/ui-libraries/brutalist/components/button/index.html',
+    null,
+  ]) {
+    const f = await syntheticBuild(t);
+    await rm(missing ? path.join(f.dist, missing) : f.dist, { recursive: true, force: true });
+    const manifest = await f.capture();
+    assert.equal(manifest.status, 'incomplete');
+    assert.ok(manifest.errors.some((error) => error.includes(missing ?? 'Build output')));
+    assert.equal(manifest.files.filter((entry) => entry.kind === 'script').length, missing ? 3 : 0);
+    assert.equal(
+      JSON.parse(await readFile(path.join(f.directory, 'manifest.json'), 'utf8')).status,
+      'incomplete'
+    );
+  }
+});
+
+test('stale, dirty or changing source and a skipped runner never produce a complete capture receipt', async (t) => {
+  for (const kind of ['stale', 'dirty', 'changed-tree', 'skipped']) {
+    const f = await syntheticBuild(t);
+    let reads = 0;
+    const manifest = await f.capture(kind === 'skipped' ? { runnerOutcome: 'skipped' } : {}, {
+      readSource: () => {
+        reads++;
+        return {
+          ...f.identity,
+          sha: kind === 'stale' ? 'c'.repeat(40) : f.identity.sha,
+          tree: kind === 'changed-tree' && reads === 2 ? 'd'.repeat(40) : f.identity.tree,
+          dirty: kind === 'dirty',
+        };
+      },
+    });
+    assert.equal(reads, 2);
+    assert.equal(manifest.status, 'incomplete');
+    assert.ok(manifest.errors.length > 0);
+    assert.equal(manifest.files.filter((entry) => entry.kind === 'script').length, 3);
+  }
+});
+
+test('capture does not follow outside symlinks or write into its source dist', async (t) => {
+  const f = await syntheticBuild(t);
+  await writeFile(path.join(f.root, 'outside.js'), 'outside source must not enter the artifact\n');
+  await symlink(path.join(f.root, 'outside.js'), path.join(f.dist, '_astro/outside.js'));
+  const manifest = await f.capture();
+  assert.equal(manifest.status, 'incomplete');
+  assert.ok(manifest.errors.some((error) => error.includes('did not follow symlink')));
+  assert.ok(!manifest.files.some((entry) => entry.path.endsWith('outside.js')));
+  await assert.rejects(
+    f.capture({ directory: path.join(f.dist, 'capture') }),
+    /outside the measured dist tree/
+  );
+  assert.ok(!(await readdir(f.dist)).includes('capture'));
+});
+
+test('a symlink dist root is retained as an incomplete receipt without reading the linked tree', async (t) => {
+  const f = await syntheticBuild(t);
+  const outside = path.join(f.root, 'outside-dist');
+  await mkdir(outside);
+  await writeFile(path.join(outside, 'outside.js'), 'not this build\\n');
+  await rm(f.dist, { recursive: true, force: true });
+  await symlink(outside, f.dist);
+  const manifest = await f.capture();
+  assert.equal(manifest.status, 'incomplete');
+  assert.deepEqual(manifest.files, []);
+  assert.ok(manifest.errors.some((error) => error.includes('symlink root')));
+});
+
+test('runtime diagnostic retains same-build output only after the original runner and before always upload', () => {
+  const workflow = parse(
+    readFileSync(
+      new URL('../../../.github/workflows/search-runtime-diagnostic.yml', import.meta.url),
+      'utf8'
+    )
+  );
+  const job = workflow.jobs['production-runtime-profile'];
+  const ownerIndex = job.steps.findIndex((step) => step.id === 'production_profile');
+  const captureIndex = job.steps.findIndex((step) => step.run?.includes(' retain-build '));
+  const uploadIndex = job.steps.findIndex((step) =>
+    step.uses?.startsWith('actions/upload-artifact@')
+  );
+  assert.ok(ownerIndex >= 0 && captureIndex > ownerIndex && uploadIndex > captureIndex);
+  const owner = job.steps[ownerIndex];
+  const capture = job.steps[captureIndex];
+  assert.equal(job['timeout-minutes'], 15);
+  assert.equal(owner['timeout-minutes'], 10);
+  assert.equal(owner.env.PROTO_UI_SEARCH_RUNTIME_PROFILE, '1');
+  assert.equal(owner['continue-on-error'], undefined);
+  assert.match(owner.run, /node apps\/www\/scripts\/run-search-production-evidence\.mjs \\/);
+  assert.equal(capture.if, 'always()');
+  assert.equal(
+    capture.env.PROTO_UI_SEARCH_DIAGNOSTIC_RUNNER_OUTCOME,
+    '${{ steps.production_profile.outcome }}'
+  );
+  assert.equal(
+    capture.run.trim(),
+    'node apps/www/scripts/run-search-production-evidence.mjs retain-build \\\n  "$RUNNER_TEMP/homepage-evidence/search-production/same-build"'
+  );
+  assert.equal(job.steps[uploadIndex].if, 'always()');
+  assert.equal(job.steps[uploadIndex].with.path, '${{ runner.temp }}/homepage-evidence');
+});

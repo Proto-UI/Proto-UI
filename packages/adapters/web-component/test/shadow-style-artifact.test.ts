@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { renderProtoShadowStyleArtifact } from '../../../cli/src/services/proto-style-css';
 import { createShadowOwnerShell } from '../src/shadow-owner-shell';
@@ -30,6 +30,25 @@ function createShell() {
   return createShadowOwnerShell(host.attachShadow({ mode: 'open' }));
 }
 
+// Count the real comment scanner without a timing threshold or a cache API.
+function withCommentScanCount(cssText: string, run: (count: () => number) => void) {
+  const indexOf = String.prototype.indexOf;
+  let scans = 0;
+  const spy = vi.spyOn(String.prototype, 'indexOf').mockImplementation(function (
+    this: string,
+    search: string,
+    position?: number
+  ) {
+    if (this === cssText && search === '*/' && position === 2) scans += 1;
+    return indexOf.call(this, search, position);
+  });
+  try {
+    run(() => scans);
+  } finally {
+    spy.mockRestore();
+  }
+}
+
 describe('adapter-web-component Shadow style artifact', () => {
   it('accepts the exact v1 shape as a frozen canonical copy', () => {
     const input = artifact();
@@ -52,6 +71,116 @@ describe('adapter-web-component Shadow style artifact', () => {
 
     expect(reads).toBe(1);
     expect(validated.cssText).toBe(SHADOW_CSS);
+  });
+
+  it('reuses successful CSS analysis while returning a fresh canonical copy', () => {
+    const cssText = `/* shared selector analysis */${SHADOW_CSS}`;
+    withCommentScanCount(cssText, (scans) => {
+      const first = validateShadowStyleArtifact(artifact(cssText));
+      const second = validateShadowStyleArtifact(artifact(cssText));
+      expect(scans()).toBe(1);
+      expect(second).toEqual(first);
+      expect(second).not.toBe(first);
+      expect(Object.isFrozen(second)).toBe(true);
+    });
+  });
+
+  it('reads keys and every field in order even for frozen inputs with cached CSS', () => {
+    const reads: string[] = [];
+    const values: Record<string, unknown> = artifact(`/* live artifact fields */${SHADOW_CSS}`);
+    const input = Object.freeze(
+      new Proxy(
+        Object.defineProperties(
+          {},
+          Object.fromEntries(
+            Object.keys(values).map((key) => [
+              key,
+              { enumerable: true, get: () => (reads.push(key), values[key]) },
+            ])
+          )
+        ),
+        {
+          ownKeys(target) {
+            reads.push('keys');
+            return Reflect.ownKeys(target);
+          },
+        }
+      )
+    );
+    const expected = ['keys', 'kind', 'version', 'cssText', 'environment'];
+    for (let index = 0; index < 2; index += 1) {
+      reads.length = 0;
+      expect(validateShadowStyleArtifact(input).cssText).toBe(values.cssText);
+      expect(reads).toEqual(expected);
+    }
+    for (const [field, value] of [
+      ['kind', 'other'],
+      ['version', 2],
+      ['environment', 'other'],
+      ['cssText', null],
+    ] as const) {
+      const previous = values[field];
+      values[field] = value;
+      reads.length = 0;
+      expect(() => validateShadowStyleArtifact(input)).toThrow(`invalid shadow-style:${field}`);
+      expect(reads).toEqual(expected);
+      values[field] = previous;
+    }
+    values.cssText = `[data-pui-style~='dark:bg-primary'] {}`;
+    reads.length = 0;
+    expect(() => validateShadowStyleArtifact(input)).toThrow('invalid shadow-style:dark');
+    expect(reads).toEqual(expected);
+
+    const get = vi.fn();
+    const extra = new Proxy({ ...artifact(), extra: true }, { get });
+    expect(() => validateShadowStyleArtifact(extra)).toThrow('invalid shadow-style:fields');
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('checks changed CSS and does not retain a failed selector analysis', () => {
+    const prefix = '/* changed selector analysis */';
+    validateShadowStyleArtifact(artifact(`${prefix}${SHADOW_CSS}`));
+    const invalid = `${prefix}[data-pui-style~='dark:bg-primary'] {}`;
+    withCommentScanCount(invalid, (scans) => {
+      for (let index = 0; index < 2; index += 1)
+        expect(() => validateShadowStyleArtifact(artifact(invalid))).toThrow(
+          'invalid shadow-style:dark'
+        );
+      expect(scans()).toBe(2);
+    });
+  });
+
+  it('bounds successful selector analysis by entry count', () => {
+    const cssText = '/* selector entry budget first */.first {}';
+    withCommentScanCount(cssText, (scans) => {
+      validateShadowStyleArtifact(artifact(cssText));
+      for (let index = 0; index < 32; index += 1)
+        validateShadowStyleArtifact(artifact(`/* selector entry budget ${index} */.next {}`));
+      validateShadowStyleArtifact(artifact(cssText));
+      expect(scans()).toBe(2);
+    });
+  });
+
+  it('bounds successful selector analysis by total characters', () => {
+    const padding = 'x'.repeat(600 * 1024);
+    const cssText = `/* selector character budget first ${padding} */.first {}`;
+    withCommentScanCount(cssText, (scans) => {
+      validateShadowStyleArtifact(artifact(cssText));
+      validateShadowStyleArtifact(
+        artifact(`/* selector character budget next ${padding} */.next {}`)
+      );
+      validateShadowStyleArtifact(artifact(cssText));
+      expect(scans()).toBe(2);
+    });
+  });
+
+  it('validates oversized CSS on every call without retaining it', () => {
+    const cssText = `/* oversized selector analysis ${'x'.repeat(1024 * 1024)} */.large {}`;
+    withCommentScanCount(cssText, (scans) => {
+      expect(validateShadowStyleArtifact(artifact(cssText)).cssText).toBe(cssText);
+      expect(validateShadowStyleArtifact(artifact(cssText)).cssText).toBe(cssText);
+      expect(scans()).toBe(2);
+    });
   });
 
   it('accepts the artifact produced by the CLI Shadow renderer', () => {
