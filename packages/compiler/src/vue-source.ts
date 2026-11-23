@@ -629,14 +629,23 @@ export function emitVueSource(
             return `${n('Scope')}.provide(${args.join(', ')})`;
           case 'context.subscribe':
           case 'context.trySubscribe': {
-            const key = node.arguments[0];
-            if (key.kind !== 'context-key')
-              throw new Error('Checked Context subscription requires a key declaration.');
-            const valueType = `${formatDataType(ir.contextKeys.find((entry) => entry.id === key.keyId)!.type)}${node.operation === 'context.trySubscribe' ? ' | null' : ''}`;
             const callback = node.arguments[1];
+            // Checked callbacks already carry the Context value types. Authored
+            // capture evaluates the key and callback once into references, so
+            // their lowering must not require a literal declaration node here.
             const invocation =
               callback?.kind === 'function'
-                ? `(${args[1]})(${[n('RunValue'), `next as ${valueType}`, `prev as ${valueType}`].slice(0, callback.function.parameters.length).join(', ')})`
+                ? `(${args[1]})(${[
+                    n('RunValue'),
+                    ...callback.function.parameters
+                      .slice(1, 3)
+                      .map(
+                        (parameter, index) =>
+                          `${index === 0 ? 'next' : 'prev'} as ${typeName(parameter.type)}`
+                      ),
+                  ]
+                    .slice(0, callback.function.parameters.length)
+                    .join(', ')})`
                 : `Reflect.apply(${args[1]}, undefined, [${n('RunValue')}, next, prev])`;
             return `${n('Scope')}.subscribe(${args[0]}, '${node.operation === 'context.subscribe' ? 'required' : 'optional'}'${callback ? `, (next, prev) => ${invocation}` : ''})`;
           }
