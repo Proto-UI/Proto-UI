@@ -578,7 +578,10 @@ export function collectVue2NativeChildShapes(ir: PrototypeIR) {
       // One unresolved call context prevents a narrower generated signature.
       if (!shape || shape.kind === 'legacy-template' || previous === null)
         parameterFacts.set(parameter, null);
-      else parameterFacts.set(parameter, [...(previous ?? []), shape]);
+      // Facts stay private until collection finishes. Retain every occurrence
+      // without copying the accumulated context list on each visit.
+      else if (previous) previous.push(shape);
+      else parameterFacts.set(parameter, [shape]);
     }
     invoked.add(fn);
     contexts.add(definition);
