@@ -19,22 +19,9 @@
       "height": 850
     },
     "theme": "light",
-    "runtimes": [
-      "wc",
-      "react",
-      "vue",
-      "vue2"
-    ],
-    "families": [
-      "base",
-      "shadcn",
-      "brutalist"
-    ],
-    "kinds": [
-      "resizable",
-      "carousel",
-      "date-picker"
-    ],
+    "runtimes": ["wc", "react", "vue", "vue2"],
+    "families": ["base", "shadcn", "brutalist"],
+    "kinds": ["resizable", "carousel", "date-picker"],
     "browser": "157.0.8103.78"
   },
   "boundary": "Actual public prototypes and Web adapters with generated production CSS; native Chromium mouse, keyboard and wheel. Physical IME, touch hardware, screen-reader and non-Web hosts are not claimed.",
@@ -45,16 +32,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 702,
-      "during": [
-        25,
-        39.99999652221332,
-        35.00000347778668
-      ],
-      "after": [
-        25,
-        45.00000173889334,
-        29.99999826110666
-      ],
+      "during": [25, 39.99999652221332, 35.00000347778668],
+      "after": [25, 45.00000173889334, 29.99999826110666],
       "innerExtent": 272,
       "pictures": [
         "wc-base-resizable-before.png",
@@ -78,10 +57,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "wc-base-carousel-snapped.png",
-        "wc-base-carousel-narrow.png"
-      ],
+      "pictures": ["wc-base-carousel-snapped.png", "wc-base-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -247,16 +223,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 716,
-      "during": [
-        25,
-        39.99999829510737,
-        35.00000170489263
-      ],
-      "after": [
-        25,
-        44.999996590214735,
-        30.000003409785265
-      ],
+      "during": [25, 39.99999829510737, 35.00000170489263],
+      "after": [25, 44.999996590214735, 30.000003409785265],
       "innerExtent": 279,
       "pictures": [
         "wc-shadcn-resizable-before.png",
@@ -280,10 +248,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "wc-shadcn-carousel-snapped.png",
-        "wc-shadcn-carousel-narrow.png"
-      ],
+      "pictures": ["wc-shadcn-carousel-snapped.png", "wc-shadcn-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -449,16 +414,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 698,
-      "during": [
-        25,
-        40.00000349771669,
-        34.99999650228331
-      ],
-      "after": [
-        25,
-        44.999998251141655,
-        30.000001748858345
-      ],
+      "during": [25, 40.00000349771669, 34.99999650228331],
+      "after": [25, 44.999998251141655, 30.000001748858345],
       "innerExtent": 264,
       "pictures": [
         "wc-brutalist-resizable-before.png",
@@ -482,10 +439,7 @@
       "status": "passed",
       "during": 0.1,
       "narrowVisible": 1.3888888888888888,
-      "pictures": [
-        "wc-brutalist-carousel-snapped.png",
-        "wc-brutalist-carousel-narrow.png"
-      ],
+      "pictures": ["wc-brutalist-carousel-snapped.png", "wc-brutalist-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -651,16 +605,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 702,
-      "during": [
-        25,
-        39.99999652221332,
-        35.00000347778668
-      ],
-      "after": [
-        25,
-        45.00000173889334,
-        29.99999826110666
-      ],
+      "during": [25, 39.99999652221332, 35.00000347778668],
+      "after": [25, 45.00000173889334, 29.99999826110666],
       "innerExtent": 272,
       "pictures": [
         "react-base-resizable-before.png",
@@ -684,10 +630,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "react-base-carousel-snapped.png",
-        "react-base-carousel-narrow.png"
-      ],
+      "pictures": ["react-base-carousel-snapped.png", "react-base-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -853,16 +796,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 716,
-      "during": [
-        25,
-        39.99999829510737,
-        35.00000170489263
-      ],
-      "after": [
-        25,
-        44.999996590214735,
-        30.000003409785265
-      ],
+      "during": [25, 39.99999829510737, 35.00000170489263],
+      "after": [25, 44.999996590214735, 30.000003409785265],
       "innerExtent": 279,
       "pictures": [
         "react-shadcn-resizable-before.png",
@@ -886,10 +821,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "react-shadcn-carousel-snapped.png",
-        "react-shadcn-carousel-narrow.png"
-      ],
+      "pictures": ["react-shadcn-carousel-snapped.png", "react-shadcn-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -1055,16 +987,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 698,
-      "during": [
-        25,
-        40.00000349771669,
-        34.99999650228331
-      ],
-      "after": [
-        25,
-        44.999998251141655,
-        30.000001748858345
-      ],
+      "during": [25, 40.00000349771669, 34.99999650228331],
+      "after": [25, 44.999998251141655, 30.000001748858345],
       "innerExtent": 264,
       "pictures": [
         "react-brutalist-resizable-before.png",
@@ -1088,10 +1012,7 @@
       "status": "passed",
       "during": 0.1,
       "narrowVisible": 1.3888888888888888,
-      "pictures": [
-        "react-brutalist-carousel-snapped.png",
-        "react-brutalist-carousel-narrow.png"
-      ],
+      "pictures": ["react-brutalist-carousel-snapped.png", "react-brutalist-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -1257,16 +1178,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 702,
-      "during": [
-        25,
-        39.99999652221332,
-        35.00000347778668
-      ],
-      "after": [
-        25,
-        45.00000173889334,
-        29.99999826110666
-      ],
+      "during": [25, 39.99999652221332, 35.00000347778668],
+      "after": [25, 45.00000173889334, 29.99999826110666],
       "innerExtent": 272,
       "pictures": [
         "vue-base-resizable-before.png",
@@ -1290,10 +1203,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "vue-base-carousel-snapped.png",
-        "vue-base-carousel-narrow.png"
-      ],
+      "pictures": ["vue-base-carousel-snapped.png", "vue-base-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -1459,16 +1369,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 716,
-      "during": [
-        25,
-        39.99999829510737,
-        35.00000170489263
-      ],
-      "after": [
-        25,
-        44.999996590214735,
-        30.000003409785265
-      ],
+      "during": [25, 39.99999829510737, 35.00000170489263],
+      "after": [25, 44.999996590214735, 30.000003409785265],
       "innerExtent": 279,
       "pictures": [
         "vue-shadcn-resizable-before.png",
@@ -1492,10 +1394,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "vue-shadcn-carousel-snapped.png",
-        "vue-shadcn-carousel-narrow.png"
-      ],
+      "pictures": ["vue-shadcn-carousel-snapped.png", "vue-shadcn-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -1661,16 +1560,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 698,
-      "during": [
-        25,
-        40.00000349771669,
-        34.99999650228331
-      ],
-      "after": [
-        25,
-        44.999998251141655,
-        30.000001748858345
-      ],
+      "during": [25, 40.00000349771669, 34.99999650228331],
+      "after": [25, 44.999998251141655, 30.000001748858345],
       "innerExtent": 264,
       "pictures": [
         "vue-brutalist-resizable-before.png",
@@ -1694,10 +1585,7 @@
       "status": "passed",
       "during": 0.1,
       "narrowVisible": 1.3888888888888888,
-      "pictures": [
-        "vue-brutalist-carousel-snapped.png",
-        "vue-brutalist-carousel-narrow.png"
-      ],
+      "pictures": ["vue-brutalist-carousel-snapped.png", "vue-brutalist-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -1863,16 +1751,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 702,
-      "during": [
-        25,
-        39.99999652221332,
-        35.00000347778668
-      ],
-      "after": [
-        25,
-        45.00000173889334,
-        29.99999826110666
-      ],
+      "during": [25, 39.99999652221332, 35.00000347778668],
+      "after": [25, 45.00000173889334, 29.99999826110666],
       "innerExtent": 272,
       "pictures": [
         "vue2-base-resizable-before.png",
@@ -1896,10 +1776,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "vue2-base-carousel-snapped.png",
-        "vue2-base-carousel-narrow.png"
-      ],
+      "pictures": ["vue2-base-carousel-snapped.png", "vue2-base-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -2065,16 +1942,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 716,
-      "during": [
-        25,
-        39.99999829510737,
-        35.00000170489263
-      ],
-      "after": [
-        25,
-        44.999996590214735,
-        30.000003409785265
-      ],
+      "during": [25, 39.99999829510737, 35.00000170489263],
+      "after": [25, 44.999996590214735, 30.000003409785265],
       "innerExtent": 279,
       "pictures": [
         "vue2-shadcn-resizable-before.png",
@@ -2098,10 +1967,7 @@
       "status": "passed",
       "during": 0.10027855153203342,
       "narrowVisible": 1.5444444444444445,
-      "pictures": [
-        "vue2-shadcn-carousel-snapped.png",
-        "vue2-shadcn-carousel-narrow.png"
-      ],
+      "pictures": ["vue2-shadcn-carousel-snapped.png", "vue2-shadcn-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",
@@ -2267,16 +2133,8 @@
       "kind": "resizable",
       "status": "passed",
       "extent": 698,
-      "during": [
-        25,
-        40.00000349771669,
-        34.99999650228331
-      ],
-      "after": [
-        25,
-        44.999998251141655,
-        30.000001748858345
-      ],
+      "during": [25, 40.00000349771669, 34.99999650228331],
+      "after": [25, 44.999998251141655, 30.000001748858345],
       "innerExtent": 264,
       "pictures": [
         "vue2-brutalist-resizable-before.png",
@@ -2300,10 +2158,7 @@
       "status": "passed",
       "during": 0.1,
       "narrowVisible": 1.3888888888888888,
-      "pictures": [
-        "vue2-brutalist-carousel-snapped.png",
-        "vue2-brutalist-carousel-narrow.png"
-      ],
+      "pictures": ["vue2-brutalist-carousel-snapped.png", "vue2-brutalist-carousel-narrow.png"],
       "checks": [
         "public control-label accessible names",
         "native continuous drag",

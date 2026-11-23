@@ -7,7 +7,7 @@ import { buildBrowserCompiler } from './build-browser.mjs';
 import { FileSourceGraph } from '../../packages/compiler/src/source-loader';
 import {
   assertSameInputFiles,
-  browserRepositoryRoot,
+  browserRepositoryRoot as root,
   digest,
   hashInputFiles,
   hashMetafileInputs,
@@ -15,7 +15,6 @@ import {
   snapshotBrowserRepositoryInputs,
 } from './browser-inputs.mjs';
 
-const root = browserRepositoryRoot;
 const compilerRequire = createRequire(path.join(root, 'packages/compiler/package.json'));
 const wwwRequire = createRequire(path.join(root, 'apps/www/package.json'));
 let preparation: Promise<Map<string, string>> | undefined;

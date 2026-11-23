@@ -176,7 +176,7 @@ mod native_hover_tests {
             Host{owner,focus:cx.focus_handle(),shown:false,_content:content}
         })
     }
-    fn frames(window:WindowHandle<Host>,cx:&mut TestAppContext) {
+    fn frames<T:Render>(window:WindowHandle<T>,cx:&mut TestAppContext) {
         for _ in 0..3 {
             cx.update_window(window.into(),|_,window,cx| {
                 window.refresh();window.draw(cx).clear(cx);
@@ -192,6 +192,63 @@ mod native_hover_tests {
             host.shown=true;cx.notify();
         }).unwrap();
         frames(window,cx);
+    }
+
+    struct LabelHost { label:OwnerRef, target:OwnerRef, focus:FocusHandle }
+    impl Render for LabelHost {
+        fn render(&mut self,_:&mut Window,_:&mut Context<Self>)->impl IntoElement {
+            let mut root=div().size_full().flex().flex_col();
+            for (owner,path) in [(&self.label,"hover-label"),(&self.target,"hover-target")] {
+                Owner::project(owner);
+                let snapshot=owner.borrow().projection.clone().unwrap();
+                root=root.child(paint_native_root(&snapshot,owner,&self.focus,path.into(),Rc::new(|_,_|{})));
+            }
+            root
+        }
+    }
+    #[gpui::test]
+    fn current_hover_leave_cancels_label_activation_but_retired_leave_does_not(cx:&mut TestAppContext) {
+        let calls=Rc::new(Cell::new(0));let observed=calls.clone();
+        let window=cx.open_window(size(px(160.),px(80.)),move |_,cx| {
+            let reference=ControlLabelRef::new();
+            let make=|target| {
+                let owner=Owner::new(serde_json::json!({}),Default::default(),|_,_|true,
+                    |_|true,|_,_|true,crate::gpui_native_style::vocabulary());
+                let weak=Rc::downgrade(&owner);let observed=observed.clone();
+                initialize_instance_associations(&owner,InstanceAssociations{control_label:Some(reference.clone())});
+                as_accessible(&weak);
+                control_label_declare(&weak,target,Value::Function(Rc::new(move |_| {
+                    observed.set(observed.get()+1);Value::Undefined
+                })),Value::Undefined);
+                control_label_sync(&weak,record(vec![("naming",Value::boolean(true)),("activation",Value::boolean(true))]));
+                owner.borrow_mut().slot=vec![NativeSnapshot::text_value(Value::string(if target{"Target"}else{"Label"}))];
+                Owner::finish(&owner,Value::Undefined);owner
+            };
+            LabelHost{label:make(false),target:make(true),focus:cx.focus_handle()}
+        });
+        window.update(cx,|_,window,_|window.activate_window()).unwrap();frames(window,cx);
+        window.update(cx,|host,window,cx| {
+            let position=host.label.borrow().bounds.unwrap().origin+point(px(2.),px(2.));
+            window.simulate_mouse_move(position,cx);
+            let current=native_hover_view(&host.label,window).unwrap();
+            let retired=NativeHoverView{epoch:current.epoch.wrapping_sub(1),..current};
+            for stale in [true,false] {
+                native_hover_input(&host.label,current,true,window,cx);
+                window.dispatch_event(gpui::PlatformInput::MouseDown(gpui::MouseDownEvent {
+                    position,button:gpui::MouseButton::Left,..Default::default()
+                }),cx);
+                assert!(host.label.borrow().modules.control_label.pointer.as_ref()
+                    .is_some_and(|pointer|pointer.request.is_current()),"native down starts a current label turn");
+                native_hover_input(&host.label,if stale{retired}else{current},false,window,cx);
+                assert_eq!(host.label.borrow().modules.control_label.pointer.is_some(),stale,
+                    "only a leave from the current native view may cancel its pending label activation");
+                window.dispatch_event(gpui::PlatformInput::MouseUp(gpui::MouseUpEvent {
+                    position,button:gpui::MouseButton::Left,..Default::default()
+                }),cx);
+                assert_eq!(calls.get(),1,"a cancelled hover turn cannot activate on the subsequent native click");
+            }
+            Owner::dispose(&host.label);Owner::dispose(&host.target);
+        }).unwrap();
     }
 
     #[gpui::test]

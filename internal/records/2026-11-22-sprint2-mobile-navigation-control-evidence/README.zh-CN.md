@@ -6,11 +6,11 @@
 
 [Run 45040087414](https://github.com/Proto-UI/Proto-UI/actions/runs/45040087414) 的 carrier 为 `648856da599106e5b8b1d7d6396683dfe4e1c227`。产品 source 仍为 `4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d`；修复 fixture SHA-256 为 `78009efe8cd85289acca6b1a86215943cd441a769f557e3c0fbe82dedefc593c`，重复控制后的执行源码 SHA-256 为 `a421408593ed1639fb66eeb52a5a546a49d75def0231c509afabade3c30fcf43`。
 
-| 分母 | 实际结果 |
-|---|---|
+| 分母                                 | 实际结果                                      |
+| ------------------------------------ | --------------------------------------------- |
 | 原 42 个逻辑场景 + 19 个额外目标重复 | **61 selected：38 PASS / 23 FAIL / 0 未终态** |
-| 中文 Brutalist enhanced 移动目标 | **20 次：0 PASS / 20 FAIL** |
-| 另外三个 enhanced-mobile 场景 | **3 FAIL** |
+| 中文 Brutalist enhanced 移动目标     | **20 次：0 PASS / 20 FAIL**                   |
+| 另外三个 enhanced-mobile 场景        | **3 FAIL**                                    |
 
 23 条失败均停在执行源码第 252 行的新增断言：
 
@@ -42,7 +42,6 @@ R1 artifact `14761726730` 为 14,763,894 bytes / 203 files；原 ZIP 与 GitHub 
 
 创建本目录未执行产品测试、构建或 browser，未修改 fixture、提交或写入 GitHub。
 
-
 ## 追加：Control R2 的实际双阶段结果
 
 [Run 45041365026](https://github.com/Proto-UI/Proto-UI/actions/runs/45041365026) 已取得真实终态。上文“尚未接收”的叙述是创建 R1 归档时的历史状态；这里追加新事实，`r1/` 每个文件及 manifest 均逐字节保持不变。
@@ -50,9 +49,9 @@ R1 artifact `14761726730` 为 14,763,894 bytes / 203 files；原 ZIP 与 GitHub 
 Carrier 为 `75431ad5bef39ee8dbc8d74a3287f66b5d25475c`，产品 source 仍为 `4541dfbca5001d4ff9b1cc6afd34d4fe1cf32d5d`。两个阶段分别记账：
 
 | 阶段 | 实际结果 | 说明 |
-|---|---|---|
-| 原 helper + 被动观察 | **1 PASS / 0 FAIL**，另41未选中，exit0 | 保留原 leaf.hover、原三项 wheel predicate 与原命中断言；这一新上下文未复现 R1 的 predicate 失败。不能反推旧23条哪个布尔值失败。|
-| 新 viewport helper control | **48 PASS / 13 FAIL / 0 未终态**，61 selected | 原42场景与19额外目标重复均保留；目标20次为8 PASS /12 FAIL，另一个英文Shadcn enhanced-mobile失败。|
+| --- | --- | --- |
+| 原 helper + 被动观察 | **1 PASS / 0 FAIL**，另41未选中，exit0 | 保留原 leaf.hover、原三项 wheel predicate 与原命中断言；这一新上下文未复现 R1 的 predicate 失败。不能反推旧23条哪个布尔值失败。 |
+| 新 viewport helper control | **48 PASS / 13 FAIL / 0 未终态**，61 selected | 原42场景与19额外目标重复均保留；目标20次为8 PASS /12 FAIL，另一个英文Shadcn enhanced-mobile失败。 |
 
 13条新失败均发生在执行源码第284行的 **exact-scroll poll**，使用原1000ms截止；它们尚未执行后面的原四点命中断言。这些失败确实记录了 trusted wheel、同一 scroll owner 的 composed path、delta -32 与后续位置。这里的 `startTop` 来自 wheel listener 内部，而没有独立的“送入输入前”位置：12条目标失败记录2216→期待2184→最终2216，另1条记录690→期待658→最终690；对应10条通过的enhanced控制记录的事件时位置高32px后到达同样的最终位置。**compositor先于listener更新是解释假说，不是这份数据已证明的因果关系。** 下一有界修复应直接冻结实际pre-input位置；归档没有替root修改夹具或降低断言。
 
@@ -61,7 +60,6 @@ Carrier 为 `75431ad5bef39ee8dbc8d74a3287f66b5d25475c`，产品 source 仍为 `4
 R2 artifact `14762565567` 为15,662,240 bytes /261个文件，原ZIP与API digest均为 `6b166144ebb89ccba48d88d160a23d4d98c096a61556317f07ca6f383b2a2777`。已逐字节核对全部261项；[capture inventory](r2/capture-inventory.json) 保留全部242个capture路径/大小/hash。原observer执行源码 `3ea5d5a966d3eb7ef711cb6efb0ca316d856824867025c64aaeb2a8d800c7eb8`；新fixture `cd825e63655e16759638241373ea3c55810b82b86fa3203dd5df61a020d39f1d`；重复后的实际执行源码 `25d95a60f72140acfa47d7db5b59a9fe604ae044fe7c8a040b91304a5f9da522`。完整source与carrier的独立review hash一起保全。
 
 R1旧失败原因、原R2失败四点时的PNG与具体scroll writer都没有被这轮补成已知。后续Control R3、最终clean head的site42/full304和84张逐图视觉审读仍待各自实际回执；本记录没有预填通过。
-
 
 ## 追加：Control R3 已取得完整终态
 

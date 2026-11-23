@@ -1408,7 +1408,9 @@ impl __PuiNativeRecordValue {
       depth + 1,
       true,
       nativeReturn,
-      // Authored hook setup captures the same checked renderer boundary as root setup.
+      // Authored hook setup captures a renderer just as root setup does. Convert
+      // its checked scalar/null return at that boundary, before it is carried
+      // through the hook's ordinary captured handle record.
       fn === ir.setup || ir.hooks.some((hook) => hook.setup === fn),
       recordReturn,
       false,
@@ -1722,7 +1724,7 @@ impl __PuiNativeRecordValue {
           case 'math.floor':
             return `Value::number((${args[0]}).scalar_number().floor())`;
           case 'string': {
-            if (!node.arguments.length) return 'Value::string("")';
+            if (!args.length) return 'Value::string("")';
             // GPUI values coerce scalars exactly as ECMAScript does; a
             // structured or unknown argument has no admitted native coercion.
             const type = node.arguments[0].type;
@@ -2871,7 +2873,11 @@ impl __PuiNativeRecordValue {
           if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
           outcome?; self.drive(window, cx)
       }
-      pub fn set_instance_associations(&mut self, associations: InstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| replace_instance_associations(&self.owner, associations))?; drive_owners(window, cx); self.drive(window, cx) }
+      pub fn set_instance_associations(&mut self, associations: InstanceAssociations, window: &mut Window, cx: &mut Context<Self>) -> Result<(), Value> {
+          let outcome = catch_authored(|| replace_instance_associations(&self.owner, associations));
+          if outcome.is_err() { drive_pending_native_events(&self.owner, window, cx); }
+          outcome?; drive_owners(window, cx); self.drive(window, cx)
+      }
       pub fn set_slot(&mut self, slot: Vec<native::gpui_native_owner::NativeSnapshot>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }) }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), Value> { catch_authored(|| { if let Err(error)=set_native_parent(&self.owner, parent.unwrap_or_default()){throw_error("NATIVE_PARENT_INVALID", error)} cx.notify(); }) }
       fn bind_window_activation(&mut self, window: &mut Window, cx: &mut Context<Self>) {

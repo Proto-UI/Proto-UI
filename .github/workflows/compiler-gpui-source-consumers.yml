@@ -18,9 +18,18 @@ on:
         type: boolean
         required: false
         default: false
+      browser_acceptance:
+        description: Run the separate browser compiler and source regression lanes
+        type: boolean
+        required: false
+        default: false
   workflow_call:
     inputs:
       adapter_acceptance:
+        type: boolean
+        required: false
+        default: false
+      browser_acceptance:
         type: boolean
         required: false
         default: false
@@ -47,6 +56,16 @@ jobs:
     permissions:
       contents: read
 
+  browser-compiler:
+    # Use the registered manual entry point to run this revision's reusable
+    # browser workflow independently of either native implementation.
+    if: ${{ inputs.browser_acceptance }}
+    uses: ./.github/workflows/compiler-browser-acceptance.yml
+    with:
+      source_regressions: true
+      production_build: true
+    permissions:
+      contents: read
   adapter-native:
     # A distinct receipt: generated Rust never stands in for the Adapter.
     # The optional input keeps existing full-cycle selection unchanged.
@@ -137,6 +156,18 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ordinary -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/consumer.log"
+      - name: Execute unchanged compiled Button Toggle and Label consumers
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test control_label -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/control-label-consumer.log"
+      - name: Verify bounded native text-selection style mapping
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test style_mapping -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/style-mapping-consumer.log"
+      - name: Verify native accessibility activation through authored operations
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test a11y_activation -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/a11y-activation-consumer.log"
       - name: Execute the generated numeric accessibility action bridge
         run: |
           set -euo pipefail
@@ -176,6 +207,14 @@ jobs:
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1 --nocapture \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-sdk-controls.log"
+      - name: Verify explicit native scroll pause against ordinary requests
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_pause -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-pause-consumer.log"
+      - name: Verify native scroll reader displacement and append behavior
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_reader -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-reader-consumer.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -557,6 +557,10 @@ async function numberFieldIme(runtime, family, prefix) {
           [accepted],
           'commit reports the accepted owner value, including refusal'
         );
+        result.pictures.push(
+          await capture(`${prefix}-ime-${controlled ? 'controlled' : 'uncontrolled'}-committed`)
+        );
+        result.stage = 'native-provenance';
         const native = await page.evaluate(() => window.__puiNumberFieldIme.events);
         assert.ok(native.length > 0, 'native composition events observed');
         // Chromium dispatches the compositionend that terminates a CDP
@@ -570,11 +574,8 @@ async function numberFieldIme(runtime, family, prefix) {
             .filter((event) => !event.isTrusted)
             .every((event) => event.type === 'compositionend'),
           'trusted native events except the insertText compositionend artifact'
+
         );
-        result.pictures.push(
-          await capture(`${prefix}-ime-${controlled ? 'controlled' : 'uncontrolled'}-committed`)
-        );
-        result.stage = 'native-provenance';
         assert.equal(control.status, 'passed', 'independent native IME control passed');
         result.compositionTrace = assertNumberFieldImeTrace(
           result.compositionEvents,

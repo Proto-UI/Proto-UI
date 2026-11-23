@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { definePrototype } from '@proto.ui/core';
-import {checkboxRoot} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/checkbox/index.ts';
-import {radioGroupRoot} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/index.ts';
-import {fieldCheckbox,fieldRadioGroup} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/field/index.ts';
+import { checkboxRoot } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/checkbox/index.ts';
+import { radioGroupRoot } from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/radio-group/index.ts';
+import {
+  fieldCheckbox,
+  fieldRadioGroup,
+} from '/workspace/scratch/44c416809288/s2-input/packages/prototypes/base/src/field/index.ts';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -114,25 +117,75 @@ function runtimeHarness() {
   };
 }
 
-
-
-const results: unknown[]=[];
-for (const [name,proto] of [['ordinary-radio',radioGroupRoot],['field-radio',fieldRadioGroup],['ordinary-checkbox',checkboxRoot],['field-checkbox',fieldCheckbox]] as const) {
- const {make}=runtimeHarness();const radio=name.includes('radio');const root=make(proto,null,radio?{value:'a'}:{checked:false});
- try {
-  await root.session.mount();const before=radio?root.exposes.value.get():root.exposes.checked.get();
-  await root.session.unmount();root.setProps(radio?{value:'b'}:{checked:true});await root.session.mount();
-  const actual=radio?root.exposes.value.get():root.exposes.checked.get();
-  results.push({name,scenario:'controlled-owner-updates-while-unmounted',before,expected:radio?'b':true,actual,passed:actual===(radio?'b':true)});
- } finally {await root.session.dispose();}
+const results: unknown[] = [];
+for (const [name, proto] of [
+  ['ordinary-radio', radioGroupRoot],
+  ['field-radio', fieldRadioGroup],
+  ['ordinary-checkbox', checkboxRoot],
+  ['field-checkbox', fieldCheckbox],
+] as const) {
+  const { make } = runtimeHarness();
+  const radio = name.includes('radio');
+  const root = make(proto, null, radio ? { value: 'a' } : { checked: false });
+  try {
+    await root.session.mount();
+    const before = radio ? root.exposes.value.get() : root.exposes.checked.get();
+    await root.session.unmount();
+    root.setProps(radio ? { value: 'b' } : { checked: true });
+    await root.session.mount();
+    const actual = radio ? root.exposes.value.get() : root.exposes.checked.get();
+    results.push({
+      name,
+      scenario: 'controlled-owner-updates-while-unmounted',
+      before,
+      expected: radio ? 'b' : true,
+      actual,
+      passed: actual === (radio ? 'b' : true),
+    });
+  } finally {
+    await root.session.dispose();
+  }
 }
-for (const [name,proto] of [['ordinary-checkbox',checkboxRoot],['field-checkbox',fieldCheckbox]] as const) {
- const {make,actions,setActionCallback}=runtimeHarness();const root=make(proto,null,{checked:false,indeterminate:true});
- const signals: any[]=[];await root.session.mount();setActionCallback((event,payload)=>{ signals.push({event,payload});if(event==='indeterminateChange')root.setProps({checked:true,indeterminate:false});else if(event==='checkedChange')root.setProps({checked:payload.checked,indeterminate:false});});
- try {
-  root.target.dispatchEvent(new Event('press.commit'));
-  results.push({name,scenario:'new-canonical-owner-in-mixed-callback',actions:[...actions],signals,checked:root.exposes.checked.get(),mixed:root.exposes.indeterminate.get(),expected:'new canonical checked=true remains authoritative; no stale checked=false inversion',passed:root.exposes.checked.get()===true&&!signals.some(s=>s.event==='checkedChange'&&s.payload.checked===false)});
- } finally {await root.session.dispose();}
+for (const [name, proto] of [
+  ['ordinary-checkbox', checkboxRoot],
+  ['field-checkbox', fieldCheckbox],
+] as const) {
+  const { make, actions, setActionCallback } = runtimeHarness();
+  const root = make(proto, null, { checked: false, indeterminate: true });
+  const signals: any[] = [];
+  await root.session.mount();
+  setActionCallback((event, payload) => {
+    signals.push({ event, payload });
+    if (event === 'indeterminateChange') root.setProps({ checked: true, indeterminate: false });
+    else if (event === 'checkedChange')
+      root.setProps({ checked: payload.checked, indeterminate: false });
+  });
+  try {
+    root.target.dispatchEvent(new Event('press.commit'));
+    results.push({
+      name,
+      scenario: 'new-canonical-owner-in-mixed-callback',
+      actions: [...actions],
+      signals,
+      checked: root.exposes.checked.get(),
+      mixed: root.exposes.indeterminate.get(),
+      expected:
+        'new canonical checked=true remains authoritative; no stale checked=false inversion',
+      passed:
+        root.exposes.checked.get() === true &&
+        !signals.some((s) => s.event === 'checkedChange' && s.payload.checked === false),
+    });
+  } finally {
+    await root.session.dispose();
+  }
 }
-const result={ok:results.every((r:any)=>r.passed),cases:results,boundary:'Independent real Runtime/choice Root source probe; no native browser.'};
-writeFileSync('/workspace/scratch/44c416809288/evidence/field-choice-owner-payload-review-probe-fixed.json',JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));
+const result = {
+  ok: results.every((r: any) => r.passed),
+  cases: results,
+  boundary: 'Independent real Runtime/choice Root source probe; no native browser.',
+};
+writeFileSync(
+  '/workspace/scratch/44c416809288/evidence/field-choice-owner-payload-review-probe-fixed.json',
+  JSON.stringify(result, null, 2) + '\n'
+);
+console.log(JSON.stringify(result));

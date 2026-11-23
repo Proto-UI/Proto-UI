@@ -167,6 +167,20 @@ describe('native String conversion', () => {
     ).toBe(false);
   });
 
+  it('admits a proven GPUI scalar and rejects an opaque object helper', () => {
+    const text = program('const value=String(1);');
+    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+    const unknown = compilePrototype(
+      program(
+        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
+      ),
+      { profile: 'gpui-source-v1' }
+    );
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok)
+      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
+  });
+
   it('admits bounded scalar conversion in GPUI', () => {
     const text = program(`
       def.expose.method('convert',(value:string|number|boolean|null)=>String(value));

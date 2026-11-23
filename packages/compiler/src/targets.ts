@@ -489,6 +489,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
         'controlLabel.target',
         'controlLabel.sync',
         'controlLabelRequest.isCurrent',
+        'eventControl.requestDefaultActionPrevention',
       ] as Operation[]
     ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
@@ -771,6 +772,7 @@ export function checkTargetOperations(
             );
           }
         }
+
         break;
       case 'style-handle':
         operation('style.tw', value.span);

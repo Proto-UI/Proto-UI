@@ -6,10 +6,12 @@ since: 0.3.0-alpha.2
 lifecycleRationale: >-
   A real native numeric control must accept the platform accessibility value setter. This bounded private GPUI repair requires native bridge and OS consumer evidence; it does not promote the compiler profile or require every Adapter to implement numeric accessibility actions.
 
+
 summary: GPUI SetValue forwards a finite native numeric request to the authored owner-local event route without taking ownership of State or domain writes.
 statement:
   en: >-
     In the private GPUI source profile, accessible.action('setValue', {event}) registers AccessKit SetValue. The event is an owner-local host:* route; omission selects host:a11y-set-value. A preceding checked literal declaration gives a matching local Event listener the A11ySetValueEventPayload schema: type names the configured route, value is a finite number, and control retains the ordinary synchronous Event capability lifetime. A numeric accessibility request is an input proposal, not an automatic State write. The prototype remains responsible for disabled, range, cancellation, revision and controlled-value policy.
+
 
 criteria:
   - id: C-COMPILER-GPUI-A11Y-VALUE-0001-PROJECTION

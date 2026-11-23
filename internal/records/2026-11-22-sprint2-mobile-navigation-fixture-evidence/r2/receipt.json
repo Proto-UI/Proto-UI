@@ -12,68 +12,42 @@
   "environment": {
     "node": "v24.22.3",
     "platform": "linux",
-    "families": [
-      "base",
-      "shadcn",
-      "brutalist"
-    ],
-    "runtimes": [
-      "wc",
-      "react",
-      "vue",
-      "vue2"
-    ]
+    "families": ["base", "shadcn", "brutalist"],
+    "runtimes": ["wc", "react", "vue", "vue2"]
   },
   "boundary": "Three admitted families and four real Web hosts. CDP/native browser actions do not certify physical touch, OS IME, assistive technology, non-Web delivery, the real Harness session journey, or historical acceptance.",
   "suites": [
     {
       "id": "input",
       "script": "scripts/analysis/sprint2-input-browser.mjs",
-      "kinds": [
-        "input-otp",
-        "slider-values"
-      ],
+      "kinds": ["input-otp", "slider-values"],
       "expectedCases": 72,
       "format": "native"
     },
     {
       "id": "collections",
       "script": "scripts/analysis/collections-recipes-browser.mjs",
-      "kinds": [
-        "tree",
-        "data-table",
-        "virtual-list"
-      ],
+      "kinds": ["tree", "data-table", "virtual-list"],
       "expectedCases": 36,
       "format": "native"
     },
     {
       "id": "geometry",
       "script": "scripts/analysis/component-capabilities-browser.mjs",
-      "kinds": [
-        "resizable",
-        "carousel",
-        "date-picker"
-      ],
+      "kinds": ["resizable", "carousel", "date-picker"],
       "expectedCases": 36,
       "format": "native"
     },
     {
       "id": "form-select",
       "script": "scripts/analysis/form-select-recipes-browser.mjs",
-      "kinds": [
-        "form",
-        "select",
-        "choices"
-      ],
+      "kinds": ["form", "select", "choices"],
       "expectedCases": 36,
       "format": "native"
     },
     {
       "id": "ordinary-linked-consumers",
-      "files": [
-        "packages/compiler/test/artifact-linking-consumer.test.ts"
-      ],
+      "files": ["packages/compiler/test/artifact-linking-consumer.test.ts"],
       "evidenceKind": "ordinary framework imports in Node/HappyDOM; not native browser evidence",
       "expectedCases": 12,
       "expectedIds": [
@@ -94,9 +68,7 @@
     },
     {
       "id": "compiled-consumers",
-      "files": [
-        "packages/compiler/test/sprint2-native.browser.test.ts"
-      ],
+      "files": ["packages/compiler/test/sprint2-native.browser.test.ts"],
       "evidenceVariable": "PROTO_UI_RUNTIME_EVIDENCE_DIR",
       "expectedCases": 20,
       "expectedIds": [
@@ -125,18 +97,14 @@
     },
     {
       "id": "site",
-      "files": [
-        "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts"
-      ],
+      "files": ["apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts"],
       "evidenceVariable": "PROTO_UI_SPRINT2_SITE_EVIDENCE_DIR",
       "expectedCases": 42,
       "format": "vitest"
     },
     {
       "id": "preferences",
-      "files": [
-        "apps/www/test/preferences.browser.test.ts"
-      ],
+      "files": ["apps/www/test/preferences.browser.test.ts"],
       "evidenceVariable": "PROTO_UI_PREFERENCE_EVIDENCE_DIR",
       "expectedCases": 4,
       "format": "vitest"
@@ -154,9 +122,7 @@
     },
     {
       "id": "accordion",
-      "files": [
-        "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts"
-      ],
+      "files": ["apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts"],
       "pattern": "^Accordion five families / four native Web consumers (?:base|shadcn|brutalist) ",
       "evidenceVariable": "PROTO_UI_ACCORDION_SCREENSHOT_DIR",
       "expectedCases": 23,
@@ -170,9 +136,7 @@
       "status": "passed",
       "invocation": {
         "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
-        "args": [
-          "scripts/build/public-packages.mjs"
-        ],
+        "args": ["scripts/build/public-packages.mjs"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/public-packages/run.log"
       },
@@ -189,12 +153,7 @@
       "status": "passed",
       "invocation": {
         "command": "corepack",
-        "args": [
-          "pnpm@10.32.1",
-          "--filter",
-          "apps-www",
-          "generate:proto-ui-style"
-        ],
+        "args": ["pnpm@10.32.1", "--filter", "apps-www", "generate:proto-ui-style"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/styles/run.log"
       },
@@ -211,10 +170,7 @@
       "status": "passed",
       "invocation": {
         "command": "corepack",
-        "args": [
-          "pnpm@10.32.1",
-          "check:types:workspace"
-        ],
+        "args": ["pnpm@10.32.1", "check:types:workspace"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/workspace-types/run.log"
       },
@@ -231,11 +187,7 @@
       "status": "passed",
       "invocation": {
         "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
-        "args": [
-          "--import",
-          "tsx",
-          "scripts/analysis/sprint2-input-browser.mjs"
-        ],
+        "args": ["--import", "tsx", "scripts/analysis/sprint2-input-browser.mjs"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/input/run.log"
       },
@@ -550,11 +502,7 @@
       "status": "passed",
       "invocation": {
         "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
-        "args": [
-          "--import",
-          "tsx",
-          "scripts/analysis/collections-recipes-browser.mjs"
-        ],
+        "args": ["--import", "tsx", "scripts/analysis/collections-recipes-browser.mjs"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/collections/run.log"
       },
@@ -725,11 +673,7 @@
       "status": "passed",
       "invocation": {
         "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
-        "args": [
-          "--import",
-          "tsx",
-          "scripts/analysis/component-capabilities-browser.mjs"
-        ],
+        "args": ["--import", "tsx", "scripts/analysis/component-capabilities-browser.mjs"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/geometry/run.log"
       },
@@ -900,11 +844,7 @@
       "status": "passed",
       "invocation": {
         "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
-        "args": [
-          "--import",
-          "tsx",
-          "scripts/analysis/form-select-recipes-browser.mjs"
-        ],
+        "args": ["--import", "tsx", "scripts/analysis/form-select-recipes-browser.mjs"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/form-select/run.log"
       },

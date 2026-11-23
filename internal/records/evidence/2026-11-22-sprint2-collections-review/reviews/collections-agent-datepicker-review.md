@@ -38,7 +38,6 @@ One initial reviewer oracle was incorrect and is retained in `datepicker-complet
 
 No unresolved defect was found in the repaired source and tested completion boundary. The definition change is a narrow clarification of existing lifetime/order obligations and stays draft. The retained native geometry suite is being expanded from Resizable/Carousel to include the existing Date Picker range popup journey for all three release families and four hosts. That suite checks actual popup presence/paint, retained range on reopening and controlled refusal; no native result is claimed here. Full native/browser/AT admission and whole-PR readiness remain separate.
 
-
 ## Subsequent independent finding: earlier state and context publication
 
 The compiler-consumer reviewer subsequently reproduced a distinct earlier boundary on commit `3bd5bcf363ab0de87b926ea25540fd87509cf05c`: a public Calendar value/selectedCount subscriber can open an initially closed Picker before its first selectionRequestId context publication. Both single and range then close that new popup incorrectly. The earlier four probes and 106-case receipt above do not cover this boundary and remain historical scoped results, not complete Date Picker acceptance.
@@ -46,7 +45,6 @@ The compiler-consumer reviewer subsequently reproduced a distinct earlier bounda
 An intermediate 11-line correction published the request ID before public State writes. I read that delta and the four new state-observer cases; it addresses that earlier State ordering. The compiler reviewer then found that an independently authored, legally earlier Calendar Context subscriber can open the popup before the Picker's own subscriber receives the same context publication. Two independent Context cases remain red on that intermediate correction. Final acceptance is therefore pending the later monotonic request/session capture correction, its exact source binding, and independent readback.
 
 The original red and intermediate green JSON files are preserved without rewriting their header fields. `compiler-review-picker-source-bindings.json` and the exact three-source snapshots distinguish the reviewed baseline from the actually executed intermediate working-tree bytes; an unchanged `reviewedCommit` header in a probe is not the executed candidate SHA. These later probes belong to the compiler reviewer, not to this reviewer's execution count.
-
 
 ## Final causal capture correction — known source findings resolved
 

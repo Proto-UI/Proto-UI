@@ -19,17 +19,8 @@
   "environment": {
     "node": "v24.22.3",
     "platform": "linux",
-    "families": [
-      "base",
-      "shadcn",
-      "brutalist"
-    ],
-    "runtimes": [
-      "wc",
-      "react",
-      "vue",
-      "vue2"
-    ]
+    "families": ["base", "shadcn", "brutalist"],
+    "runtimes": ["wc", "react", "vue", "vue2"]
   },
   "queueStatus": "failed",
   "integrityVerdict": "PASS",

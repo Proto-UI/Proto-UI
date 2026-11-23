@@ -46,10 +46,12 @@ const options = [
     >
       <SelectValue data-placeholder="选择适配器">Runtime</SelectValue>
     </SelectTrigger>
+    <!-- This Runtime field permits multi-line values at enlarged text sizes.
+         Its popup uses intrinsic rows rather than matching the Trigger box. -->
     <SelectContent
       data-site-select-content
       data-site-control-family={family}
-      data-position={family === 'brutalist' ? 'popper' : undefined}
+      data-position="popper"
       data-align={family === 'brutalist' ? 'end' : undefined}
     >
       {
@@ -66,7 +68,7 @@ const options = [
         ) : (
           options.map((opt) => (
             <SelectItem data-value={opt.value} data-text-value={opt.label}>
-              {opt.label}
+              <span class="adapter-select-option-text">{opt.label}</span>
             </SelectItem>
           ))
         )
@@ -98,6 +100,13 @@ const options = [
 
   .adapter-select-wrapper [data-site-select-trigger] {
     min-width: min(12rem, 100%);
+  }
+
+  /* The authored label can wrap inside Brutalist's unchanged slot wrapper. */
+  .adapter-select-option-text {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   /* Keep server-rendered chrome compact until the custom elements upgrade so

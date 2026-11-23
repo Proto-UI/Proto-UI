@@ -76,10 +76,7 @@
       "sha256": "2db6c301c2c8d73b41137b79cfac3bc2c1c6e7df22f1ea45135d8dbb034ba83b",
       "storedBytes": 12394,
       "storedSha256": "9afb6ad2aa019a4b80d9edf10cd7e77ce6def66ea81890c7c2eb6805e883f7c9",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  103 passed (103)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  103 passed (103)"]
     },
     {
       "path": "ci/sprint2-ordinary-inventory-review.json",
@@ -188,10 +185,7 @@
       "sha256": "bae08244112709847384c48afac8a16b76e531af61fd43c846fc2567830f7721",
       "storedBytes": 21729,
       "storedSha256": "3d1dcb864ef6b481453f202fe289d6a7a0f7c95680c963769cd5a35594142416",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  15 failed | 9 passed (24)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  15 failed | 9 passed (24)"]
     },
     {
       "path": "collections/collection-public-second.log.gz",
@@ -214,10 +208,7 @@
       "sha256": "2873c591976ccd8350402a430bd12031ae3dc924cb9efffbd02a73ed59fbaa1c",
       "storedBytes": 22840,
       "storedSha256": "16cdebe42013d2913289fffc149654298d53a8e1b7686bd31450a8f720641f76",
-      "printedTestSummary": [
-        "Test Files  3 passed (3)",
-        "Tests  43 passed (43)"
-      ]
+      "printedTestSummary": ["Test Files  3 passed (3)", "Tests  43 passed (43)"]
     },
     {
       "path": "collections/collections-boundary-green.log.gz",
@@ -227,10 +218,7 @@
       "sha256": "a7ed687d67e1ff1031e940ae452b035b764442c2c5db3f4fb4ab64db6abd8308",
       "storedBytes": 18761,
       "storedSha256": "82c2b4ced1388597b4117e9b410785850d19f18f78fa06beb3bf99b9a3714579",
-      "printedTestSummary": [
-        "Test Files  2 passed (2)",
-        "Tests  21 passed (21)"
-      ]
+      "printedTestSummary": ["Test Files  2 passed (2)", "Tests  21 passed (21)"]
     },
     {
       "path": "collections/collections-catalog.log.gz",
@@ -284,10 +272,7 @@
       "sha256": "d693c82b08dde7e8b55ca9b3385b22ce1680fcb28fb3b92e5506318bad8be386",
       "storedBytes": 25454,
       "storedSha256": "d3012a5f22f706de0f62db8acb10dd9d2f86969b358edd4a2e8b9f30d252afb9",
-      "printedTestSummary": [
-        "Test Files  20 passed (20)",
-        "Tests  287 passed (287)"
-      ]
+      "printedTestSummary": ["Test Files  20 passed (20)", "Tests  287 passed (287)"]
     },
     {
       "path": "collections/collections-review-reentry-green.log.gz",
@@ -297,10 +282,7 @@
       "sha256": "4a0b84b018a7be0e05e0a1334634b9c38efe9636494d2ea16f158c655893bcd3",
       "storedBytes": 17927,
       "storedSha256": "2fcf41f0f588f1eb4676fe36085fa2fcafd6e68d0ca51a73d96609f6b2799960",
-      "printedTestSummary": [
-        "Test Files  4 passed (4)",
-        "Tests  42 passed (42)"
-      ]
+      "printedTestSummary": ["Test Files  4 passed (4)", "Tests  42 passed (42)"]
     },
     {
       "path": "collections/collections-source-inventory-node.log.gz",
@@ -337,10 +319,7 @@
       "sha256": "99f6db137cc56efa7eafe6e8077b4373b8065cbf379e793b9f2861b23a6fdbb3",
       "storedBytes": 21762,
       "storedSha256": "960822c9e84ad581d689915296feaaa3223fb75253f867d948ba0a771d8ba4f7",
-      "printedTestSummary": [
-        "Test Files  3 passed (3)",
-        "Tests  36 passed (36)"
-      ]
+      "printedTestSummary": ["Test Files  3 passed (3)", "Tests  36 passed (36)"]
     },
     {
       "path": "collections/collections-types-2.log.gz",
@@ -377,10 +356,7 @@
       "sha256": "532c2103e74a7a8aa560fb6386d312edd8c366a6bb7a5b68a54de9254f900e58",
       "storedBytes": 18531,
       "storedSha256": "578d74aca5b9fafe2158ec5c461b1ecb2615fbbd10c8d7c14af303d1d5d1fba7",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  1 failed | 5 skipped (6)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 5 skipped (6)"]
     },
     {
       "path": "collections/data-table-green-1.log.gz",
@@ -390,10 +366,7 @@
       "sha256": "c23019046645012fc0804e52e5ce76457fed84f840c43f65565a56b89363d813",
       "storedBytes": 17959,
       "storedSha256": "7f616035718f54782e9536dd89fe8252c2e2380e480f8744a92ba5d193aaeff0",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  1 failed | 5 passed (6)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 5 passed (6)"]
     },
     {
       "path": "collections/data-table-green-2.log.gz",
@@ -416,10 +389,7 @@
       "sha256": "5e54aacf854c1f4c73ef3bb93eed3276d82f8fcd0c65e3ab8165cedef0eb07a0",
       "storedBytes": 21941,
       "storedSha256": "12f8857dea184446298ec6cb04b50a04679d0bddab054d2f667cd750e291a19e",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  12 failed (12)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  12 failed (12)"]
     },
     {
       "path": "collections/data-table-public-second.log.gz",
@@ -429,10 +399,7 @@
       "sha256": "9e97112ddea46f5c5f4a6be925d379bee49e92a5dae9e7dbfd15fe56232f3fc1",
       "storedBytes": 23672,
       "storedSha256": "ac8cd456ef1c63811d15b9cbce81ea566d6786a0e5a12bfcf2c0393d3ab78f85",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  12 failed (12)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  12 failed (12)"]
     },
     {
       "path": "collections/data-table-public-third.log.gz",
@@ -455,10 +422,7 @@
       "sha256": "0bc9e5e2d2dfa724b6048296582792ce3a911952505389939daff6fe866ef566",
       "storedBytes": 19078,
       "storedSha256": "24c57984bb56f01a5705394edc0a9c9da9f122cb02c560789509a0129104b756",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  6 failed (6)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  6 failed (6)"]
     },
     {
       "path": "collections/tree-claim-guard-green.log.gz",
@@ -468,10 +432,7 @@
       "sha256": "67168036c92eac25d20657c972a4754f972bea23fbbcb849b592d3a458e60f34",
       "storedBytes": 13948,
       "storedSha256": "28003fd87693cb5ca91a9e3d882d20d65efe2304e3b2586085aae880e6fd78de",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  8 passed (8)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  8 passed (8)"]
     },
     {
       "path": "collections/tree-green-1.log.gz",
@@ -494,10 +455,7 @@
       "sha256": "ba1018b0b4024d424cd082e7975a586af87142edf6b8af6734d327fafcc3319b",
       "storedBytes": 18083,
       "storedSha256": "40dc1fb8fb1fb08271c37fe07f5b0aa22e42761db43bc35aa1154b8f64024d43",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  7 passed (7)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  7 passed (7)"]
     },
     {
       "path": "collections/tree-green-3.log.gz",
@@ -507,10 +465,7 @@
       "sha256": "6ae153f6e1d50f0699fedcaee84707ebc2857a44a8264d91db04bcd740e26866",
       "storedBytes": 18314,
       "storedSha256": "369cf782c4431c3e920e13cdde34cab08aac025429fecf93c0e6d80493e0892c",
-      "printedTestSummary": [
-        "Test Files  4 passed (4)",
-        "Tests  27 passed (27)"
-      ]
+      "printedTestSummary": ["Test Files  4 passed (4)", "Tests  27 passed (27)"]
     },
     {
       "path": "collections/tree-public-direction-probe.log.gz",
@@ -520,10 +475,7 @@
       "sha256": "0cae823f1cea38a54d8c836c9e5459686a769f976dacfa42ddf99a20cb59b29e",
       "storedBytes": 21142,
       "storedSha256": "411c13623605bc492e59e62066e004f2f0be9e4c7d3899df7e2d3077600d4b80",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  1 failed | 23 skipped (24)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 23 skipped (24)"]
     },
     {
       "path": "collections/tree-public-direction-probe2.log.gz",
@@ -533,10 +485,7 @@
       "sha256": "9554d82f2a5eea97b79bc3ede09ef95539ce9b7eace3037463dd1fbc04687ee6",
       "storedBytes": 20717,
       "storedSha256": "9b61016d54302fcf41dc18124cde8e1be08724975ef7ddc67189aa85012c2448",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  1 failed | 23 skipped (24)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 23 skipped (24)"]
     },
     {
       "path": "collections/tree-public-direction-probe3.log.gz",
@@ -546,10 +495,7 @@
       "sha256": "16f9114a1b5f4d3a65b3fda9e9ecdb3a356039a39e2148538d3fcee206caa647",
       "storedBytes": 20674,
       "storedSha256": "821b32f480aab146b9098358a724adf45fc208c4d5c5ecc94c18cd83253a7906",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  1 failed | 23 skipped (24)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 23 skipped (24)"]
     },
     {
       "path": "collections/tree-public-direction-probe4.log.gz",
@@ -559,10 +505,7 @@
       "sha256": "01bc2d1429e9167596148834bbca33d13c80d2a9122b874c9e23b403c7db3262",
       "storedBytes": 20540,
       "storedSha256": "43cd8082a1728643ebfe39002cf7946a67092935e1ce6230701253ae0054e702",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  1 passed | 23 skipped (24)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  1 passed | 23 skipped (24)"]
     },
     {
       "path": "collections/tree-red.log.gz",
@@ -572,10 +515,7 @@
       "sha256": "237bb1783c9239809ca674abca22944af177c4096323a2835ff9fd7f5a75df42",
       "storedBytes": 19087,
       "storedSha256": "c7e283490e37ec4ac5819217b889ed206a96f9b2696d6ebcd8217c8adf8fb089",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  5 failed | 2 passed (7)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  5 failed | 2 passed (7)"]
     },
     {
       "path": "collections/virtual-owner-green-1.log.gz",
@@ -585,10 +525,7 @@
       "sha256": "ff73df0ea3b59719c03b725d6fa3442c001de21f0da2c2259cc646f0d95de4e4",
       "storedBytes": 1014,
       "storedSha256": "6cbe19543d3c821e92fd88c3f34aa19b010efe00affe7b615cc4e5a24fdeee86",
-      "printedTestSummary": [
-        "Test Files  4 passed (4)",
-        "Tests  33 passed (33)"
-      ]
+      "printedTestSummary": ["Test Files  4 passed (4)", "Tests  33 passed (33)"]
     },
     {
       "path": "collections/virtual-owner-red.log.gz",
@@ -598,10 +535,7 @@
       "sha256": "cfea2432c2a56aba62a2e28a41f25147d1c4cdb6a59f40dc79accadb5ea0d1b3",
       "storedBytes": 1648,
       "storedSha256": "cd8a1e05ee5281a1c30128269e5c9a07a585a3eba296a229cc020a8e676910d1",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  4 failed (4)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  4 failed (4)"]
     },
     {
       "path": "collections/virtual-root-dispose-red.log.gz",
@@ -611,10 +545,7 @@
       "sha256": "c8f619b1f844f2d2b4f21a1e10f1a1bad4fb9871c7725780b2bdbdd58534a0ce",
       "storedBytes": 17833,
       "storedSha256": "ad72255ce99e61cb2a6367f1ae8319d52f99677247d697046f57c4a91f66b226",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  1 failed | 6 passed (7)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  1 failed | 6 passed (7)"]
     },
     {
       "path": "collections/virtual-root-reentry-actual-red.log.gz",
@@ -624,10 +555,7 @@
       "sha256": "ba092d66a0caf86b3b10eb20b1672a9b7ccdc077d5499c7cdeda1f440d23f4bd",
       "storedBytes": 17989,
       "storedSha256": "1d98ae8f700dae6badec71421df50e2de40cd9c4c093b157e8bb713947c88d60",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  2 failed | 7 skipped (9)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  2 failed | 7 skipped (9)"]
     },
     {
       "path": "collections/virtual-root-reentry-red.log.gz",
@@ -637,10 +565,7 @@
       "sha256": "09d37ecc979251634180391e55759a83e700210529351a93692e2f1d89979fd8",
       "storedBytes": 20734,
       "storedSha256": "b13311227c678eeec7d0ecaaa0bf00aca23d7000abcf2b64211fa3a1e828a46c",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  2 failed | 24 skipped (26)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  2 failed | 24 skipped (26)"]
     },
     {
       "path": "compiler/compiler-agent-datepicker-review-status.txt",
@@ -1118,10 +1043,7 @@
       "sha256": "1cf48708937d5a4c91862953929213981b1bd2cc6d422aafb9419deb70676947",
       "storedBytes": 19777,
       "storedSha256": "e154263f473e93a038bedc9ed62d72e2f175ba8e10af37b70c690c3c5c819c2d",
-      "printedTestSummary": [
-        "Test Files  2 passed (2)",
-        "Tests  114 passed (114)"
-      ]
+      "printedTestSummary": ["Test Files  2 passed (2)", "Tests  114 passed (114)"]
     },
     {
       "path": "datepicker/datepicker-causal-capture-green.log.gz",
@@ -1144,10 +1066,7 @@
       "sha256": "642acbca606f741a181ebf5931efb4a4fe8f9838785bb5422e90fa5c95acc7f0",
       "storedBytes": 20909,
       "storedSha256": "dd4c27a010859044eeaf193932a7c1b9fd16beb6b8c9c652845def3561253974",
-      "printedTestSummary": [
-        "Test Files  3 passed (3)",
-        "Tests  144 passed (144)"
-      ]
+      "printedTestSummary": ["Test Files  3 passed (3)", "Tests  144 passed (144)"]
     },
     {
       "path": "datepicker/datepicker-completion-independent-probe.json",
@@ -1706,10 +1625,7 @@
       "sha256": "7a6e2d137a2c36dc6b4d71efea95287cb7f51fa90e5e35d572c8ff91794832e2",
       "storedBytes": 20667,
       "storedSha256": "a7ed56f73225d21fe2c818534dc9c297b145fe5b323bc8d62b5f9935e8a36f15",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  6 passed (6)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  6 passed (6)"]
     },
     {
       "path": "field/field-choice-focus-review.json",
@@ -1728,10 +1644,7 @@
       "sha256": "4f3ca04481e7289d2a43a647e2c8b4201e86c85a24d894843ebe64d47371c142",
       "storedBytes": 20978,
       "storedSha256": "9c312ea03f932677190928e618a8e8cdb8b8dd4f5e843e8c302216327f8481bc",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  3 failed | 3 passed (6)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  3 failed | 3 passed (6)"]
     },
     {
       "path": "field/field-choice-focus-review.test.ts",
@@ -1925,10 +1838,7 @@
       "sha256": "79dc3147cc739a1ef600ee43a088c74f3d4b6dbf66b1a39678b0715604f245af",
       "storedBytes": 28693,
       "storedSha256": "9de59cbdb1fe8fbff6ed3f7ca7b3df515e467b6bc8b4b10783bea36335a83a6b",
-      "printedTestSummary": [
-        "Test Files  4 passed (4)",
-        "Tests  212 passed (212)"
-      ]
+      "printedTestSummary": ["Test Files  4 passed (4)", "Tests  212 passed (212)"]
     },
     {
       "path": "field-owner/field-choice-independent-review-fixed.log.gz",
@@ -1938,10 +1848,7 @@
       "sha256": "85f1d08a82b10af4a9c7d413892c87b76bbc6a3e2597880d7141a66a67a2f5a9",
       "storedBytes": 24903,
       "storedSha256": "4f8ee8c4de4e26f4467ae29e540b4062a11d6b1b7b2319eeee92c039590edbb6",
-      "printedTestSummary": [
-        "Test Files  8 passed (8)",
-        "Tests  265 passed (265)"
-      ]
+      "printedTestSummary": ["Test Files  8 passed (8)", "Tests  265 passed (265)"]
     },
     {
       "path": "field-owner/field-choices-public-recipes-first.log.gz",
@@ -1951,10 +1858,7 @@
       "sha256": "495f01cb9c1fcd5ebb7c927f03100fa22ecd2a1357abcd4a2f5e9e599bcdb3db",
       "storedBytes": 26019,
       "storedSha256": "96d7db3aa70b15c87b0f66ed76d862a76304a7da1f5392ea6c0edeffe1b6494a",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  12 failed (12)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  12 failed (12)"]
     },
     {
       "path": "field-owner/field-choices-public-recipes-second.log.gz",
@@ -1964,10 +1868,7 @@
       "sha256": "23ddda51dffffe0d4e93fc334391a630d2a8bf3c8cac981c6c1ebd301f14e280",
       "storedBytes": 25404,
       "storedSha256": "084e78a82b2ba4aaac438aabe85b59653a0743ee486c34c85cc183ec1ccbe529",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  12 failed (12)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  12 failed (12)"]
     },
     {
       "path": "field-owner/field-choices-public-recipes-third.log.gz",
@@ -1977,10 +1878,7 @@
       "sha256": "d19fb82257487f4d1b9b55cdd118477d13d59d471a051de4328e67a7e22d54d1",
       "storedBytes": 25009,
       "storedSha256": "69c608739613b13e206e1a509ebf11b8f668874f16da6df38660fd6191609d2a",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  12 passed (12)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  12 passed (12)"]
     },
     {
       "path": "field-owner/field-switch-entry-lease-review-fixed.log.gz",
@@ -1990,10 +1888,7 @@
       "sha256": "105ee147574791baa5ddeea579b80ee6eb8b5431b60747aa4bca5197b4cac89a",
       "storedBytes": 28956,
       "storedSha256": "0de5e94c315397ce68be432d40f3e30f6bda574ab3187b4f0422585353254972",
-      "printedTestSummary": [
-        "Test Files  6 passed (6)",
-        "Tests  232 passed (232)"
-      ]
+      "printedTestSummary": ["Test Files  6 passed (6)", "Tests  232 passed (232)"]
     },
     {
       "path": "field-owner/field-switch-reset-lease-review-red.log.gz",
@@ -2016,10 +1911,7 @@
       "sha256": "c98f6874b0bf7215b07597cf88b00d37dd76b78b268190a794c37e65b5fc80ba",
       "storedBytes": 24773,
       "storedSha256": "8516e0c11980dfd93ff1bb98a8e463313e4967fe611dd90c6a3649080ac16321",
-      "printedTestSummary": [
-        "Test Files  2 failed (2)",
-        "Tests  10 failed | 147 skipped (157)"
-      ]
+      "printedTestSummary": ["Test Files  2 failed (2)", "Tests  10 failed | 147 skipped (157)"]
     },
     {
       "path": "field-owner/radio-focused-owner-review-red.log.gz",
@@ -2042,10 +1934,7 @@
       "sha256": "3a43e2b8a69f724250002b547261483abe73d0c7b010c6b25bf6766d45e32a42",
       "storedBytes": 17580,
       "storedSha256": "bdcc81d5a33ca0f12794fd4ab75a7ba1ee63d485e6d9a4584b4062a19aac3953",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  2 failed | 124 skipped (126)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  2 failed | 124 skipped (126)"]
     },
     {
       "path": "field-owner/radio-reset-blur-review-red.log.gz",
@@ -2158,10 +2047,7 @@
       "sha256": "d26771b218bdc949ed81630d43fcf6123f896dad74b077bc10c658b8e62e4663",
       "storedBytes": 10333,
       "storedSha256": "59a62c24747d020c9c28fc47a5f4ba35d8915ed8c6663d091d84211c0d9da0da",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  100 passed (100)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  100 passed (100)"]
     },
     {
       "path": "reviews/collections-agent-site-review.log.gz",
@@ -2171,10 +2057,7 @@
       "sha256": "7ea11e06c54a8140d9a924c926c227719d3104a7ef52a5b10144a9f178b97ea8",
       "storedBytes": 23652,
       "storedSha256": "493527fb49c4ac3fe5cac7abceff7d25e434ef91a471d74f045aeef85c8c388d",
-      "printedTestSummary": [
-        "Test Files  3 passed (3)",
-        "Tests  24 passed (24)"
-      ]
+      "printedTestSummary": ["Test Files  3 passed (3)", "Tests  24 passed (24)"]
     },
     {
       "path": "reviews/collections-agent-sprint2-ci-review-source-r2.json",
@@ -2310,10 +2193,7 @@
       "sha256": "8fa18a5d466fdb2a2faea7b30296398460b20dc7919d5632842c47a5df762314",
       "storedBytes": 18363,
       "storedSha256": "f54492c32ef28d77a7665c29e73925236dac6893c3931699f224576fa5b19d31",
-      "printedTestSummary": [
-        "Test Files  2 passed (2)",
-        "Tests  34 passed (34)"
-      ]
+      "printedTestSummary": ["Test Files  2 passed (2)", "Tests  34 passed (34)"]
     },
     {
       "path": "site/hero-focus-header-diagnostic.log.gz",
@@ -2323,10 +2203,7 @@
       "sha256": "de210666f03505678cf90b0e60ce7af18c0125037c28ae95e2d0fb21039576cf",
       "storedBytes": 18053,
       "storedSha256": "49c0f30890ad8c813cdd23c5849bbc9eb0d1f388627dad659f4458a19835c724",
-      "printedTestSummary": [
-        "Test Files  1 passed (1)",
-        "Tests  1 passed | 10 skipped (11)"
-      ]
+      "printedTestSummary": ["Test Files  1 passed (1)", "Tests  1 passed | 10 skipped (11)"]
     },
     {
       "path": "site/hero-focus-red.log.gz",
@@ -2336,10 +2213,7 @@
       "sha256": "11bc3c8c258eb02af6181c5fc5029c411d7434ee931d9bcdd2aa83a4d6ff8fa9",
       "storedBytes": 4120,
       "storedSha256": "61b3f7855975c44cd33d7455d1f37b24a750cab611334e40362d64ef13638b4a",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  3 failed | 20 passed (23)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  3 failed | 20 passed (23)"]
     },
     {
       "path": "site/hero-zh-cn-light-enhanced-focus.png",
@@ -2385,10 +2259,7 @@
       "sha256": "9e35e91c152c9d371117a9f6cac20037c27dab91a76839c7afc4fb8d61edc367",
       "storedBytes": 18252,
       "storedSha256": "dd3f34af01e4d73ed1af0eb1ed50ba66fb339a35de5decce39f3abe27c64b960",
-      "printedTestSummary": [
-        "Test Files  2 passed (2)",
-        "Tests  31 passed (31)"
-      ]
+      "printedTestSummary": ["Test Files  2 passed (2)", "Tests  31 passed (31)"]
     },
     {
       "path": "site/site-before.log.gz",
@@ -2398,10 +2269,7 @@
       "sha256": "2989fef8813bc1975489c8d7c9063bf20d76b986fdd362bb3e12780e7edf924b",
       "storedBytes": 18897,
       "storedSha256": "1691ae0bb639ccbed82d65ea065dff08bef8c1a99913f0fe6136f9edac856783",
-      "printedTestSummary": [
-        "Test Files  1 failed (1)",
-        "Tests  4 failed | 7 passed (11)"
-      ]
+      "printedTestSummary": ["Test Files  1 failed (1)", "Tests  4 failed | 7 passed (11)"]
     },
     {
       "path": "site/tabs-en-react-rhea.png",

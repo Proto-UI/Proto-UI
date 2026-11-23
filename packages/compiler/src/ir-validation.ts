@@ -621,7 +621,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     // Schema order follows authored definitions, not this validator's scheduling
     // of helper/hook typechecks. The derivation never trusts claimed schemas.
-    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR);
+    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR, span);
     const writtenFields = writtenMemberFields(input);
     let flow = new FlowProof(writtenFields);
 

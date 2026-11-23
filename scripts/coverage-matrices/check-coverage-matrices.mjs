@@ -750,7 +750,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: 'b9c2aa8cd3209387b129c8a56f7d5f495645f54977c02f07b0c4a6cbc87f55ea',
+    sourceSha256: 'c515576d70dda5728fb3de3dde2792d522776cbaf621aff24ab0d819e0f56f0f',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -8910,6 +8910,8 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
         [
           WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
@@ -9762,10 +9764,19 @@ const PROMOTION_RETRY_PLUGIN_SHA256 =
 // the current configuration to the general package resolver profiles below.
 const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
   'e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c';
-// Exact public S4 + S5 configuration: the two declared shader chunk owners,
-// three lazy compiler dependency exclusions and module Worker output are
-// reviewed additions. The four Retry owners and all helpers remain unchanged.
+// Exact public S4 + S5 configuration merge: only the two declared shader
+// chunk owners and three lazy compiler dependency exclusions are new. The
+// four Retry import owners and all helper identities remain unchanged.
 const WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99';
+// The Sprint 5 compiler adds three lazy QuickJS dependencies and preserves
+// module Worker output. The four Retry import owners, resolver and helpers are
+// unchanged; this exact profile does not admit general package promotion.
+const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'a9eeed0952291e3226c09f1a974dc0742472df8079240210afdbc3701db5dfa3';
+// Merged S4 + S5 site configuration: the accepted digest for the tree that
+// combines both sprints' module-graph changes on top of the train.
+const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
   'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
