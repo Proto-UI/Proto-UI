@@ -148,8 +148,8 @@ export function createPresencePresentationProjector(
     reason: PresentationOutcome,
     token: number
   ) => {
-    if (!current(candidate, token) || (completed && completedTarget === candidate.targetRevision))
-      return;
+    if (!current(candidate, token)) return;
+    const alreadyCompleted = completed && completedTarget === candidate.targetRevision;
     completed = true;
     completedTarget = candidate.targetRevision;
     reasons.add(reason);
@@ -159,7 +159,10 @@ export function createPresencePresentationProjector(
       reason = 'projection-failed';
       reasons.add(reason);
     }
-    if (!current(candidate, token)) return;
+    // A later environment notification or explicit settlement can project the
+    // endpoint again. Retire that new lease even when its completion receipt
+    // has already been delivered; only the receipt is once per target.
+    if (!current(candidate, token) || alreadyCompleted) return;
     if (candidate.owner.attempt) candidate.complete(host.binding, reason);
   };
   const settle = (outcome: PresentationOutcome): boolean => {

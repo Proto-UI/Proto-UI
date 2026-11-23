@@ -106,6 +106,7 @@ const page = await browser.newPage({
   colorScheme: 'light',
   reducedMotion: 'no-preference',
 });
+const accessibility = await page.context().newCDPSession(page);
 const errors = [];
 page.on('pageerror', (error) => errors.push(error.message));
 page.setDefaultTimeout(5000);
@@ -141,6 +142,7 @@ async function check(runtime, kind, name, action) {
   const row = { runtime, kind, name, status: 'running', errorsBefore: errors.length };
   report.cases.push(row);
   try {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     Object.assign(row, await action(row));
     assert.equal(errors.length, row.errorsBefore, errors.slice(row.errorsBefore).join('\n'));
     row.status = 'passed';
@@ -148,6 +150,16 @@ async function check(runtime, kind, name, action) {
     row.status = 'failed';
     row.error = String(error.stack ?? error);
     row.snapshot = await snapshot().catch(() => null);
+  } finally {
+    // A failing reduced-motion assertion must not change any later case's
+    // environment. Retire the actual consumer before resetting its preference.
+    try {
+      await run(() => BootstrapCollapse.dispose());
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+    } catch (error) {
+      row.status = 'failed';
+      row.cleanupError = String(error.stack ?? error);
+    }
   }
   await writeFile(path.join(output, 'report.json'), JSON.stringify(report, null, 2));
   console.log(`${row.status}: ${runtime}/${kind}/${name}`);
@@ -231,9 +243,22 @@ try {
         await page.waitForTimeout(500);
         await run(() => BootstrapCollapse.keepMounted(false));
         await page.waitForTimeout(50);
-        assert.equal((await snapshot()).height, 0);
-        assert.equal((await snapshot()).bodyPresent, false);
-        return { initial, closed, reopened };
+        const retired = await snapshot();
+        assert.equal(retired.height, 0);
+        assert.equal(retired.bodyVisible, false);
+        assert.equal(retired.controls, null);
+        // A WC view owns its projection, while its caller retains the supplied
+        // light-DOM children. Other renderers remove their rendered children.
+        if (runtime === 'wc') {
+          assert.equal(retired.viewDetached, true);
+          assert.equal(retired.bodySame, true);
+        } else assert.equal(retired.bodyPresent, false);
+        const ax = await accessibility.send('Accessibility.getFullAXTree');
+        const exposedContent = ax.nodes.filter(
+          (node) => !node.ignored && node.name?.value?.includes('authored disclosure content')
+        );
+        assert.equal(exposedContent.length, 0, 'Retired content must leave the Chromium AX tree.');
+        return { initial, closed, reopened, retired, retiredAxContent: exposedContent.length };
       });
       await check(runtime, kind, 'content-grows-and-shrinks-during-entry', async (row) => {
         await mount(runtime, kind, { controlled: true, keepMounted: true });

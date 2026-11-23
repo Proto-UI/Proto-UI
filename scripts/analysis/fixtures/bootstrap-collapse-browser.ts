@@ -127,6 +127,7 @@ export function remember() {
 }
 export function snapshot() {
   const content = find('content');
+  const body = find('body');
   return {
     time: performance.now(),
     height: content?.getBoundingClientRect().height ?? 0,
@@ -136,8 +137,11 @@ export function snapshot() {
     hidden: read('content', 'hidden.get'),
     open: read('content', 'open.get'),
     phase: read('content', 'transitionState.get'),
-    bodyPresent: !!find('body'),
-    bodySame: find('body') === formerBody,
+    bodyPresent: !!body,
+    bodyVisible: body?.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }) ?? false,
+    bodySame: body === formerBody,
+    viewDetached: content?.hasAttribute('data-pui-view-detached') ?? false,
+    controls: find('trigger')?.getAttribute('aria-controls') ?? null,
     ownerSame: api?.getPublicInstance?.('content') === formerOwner,
     requests: requests.slice(),
   };

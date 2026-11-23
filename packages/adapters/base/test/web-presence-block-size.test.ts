@@ -8,12 +8,12 @@ afterEach(() => {
   vi.restoreAllMocks();
   document.body.replaceChildren();
 });
-function fixture() {
+function fixture(preference: 'reduce' | 'no-preference' = 'no-preference') {
   vi.spyOn(window.CSS, 'supports').mockReturnValue(true);
   vi.spyOn(window, 'matchMedia').mockImplementation(
     (query) =>
       ({
-        matches: query.includes('no-preference'),
+        matches: query.includes(`: ${preference})`),
         media: query,
         addEventListener() {},
         removeEventListener() {},
@@ -158,4 +158,16 @@ it('preserves an external takeover occurring inside the semantic layout read', (
   expect(f.el.style.overflow).toBe('auto');
   expect(f.frames.size).toBe(0);
   expect(f.outcomes).toEqual(['projection-failed']);
+});
+it('repeated reduced-motion settlement releases renewed size leases without completing twice', () => {
+  const f = fixture('reduce');
+  expect(f.outcomes).toEqual(['reduced-motion']);
+  expect(f.el.style.getPropertyValue('block-size')).toBe('');
+  expect(f.el.style.overflow).toBe('auto');
+  f.natural(260);
+  f.sink.settle('deadline');
+  expect(f.el.style.getPropertyValue('block-size')).toBe('');
+  expect(f.el.style.overflow).toBe('auto');
+  expect(f.outcomes).toEqual(['reduced-motion']);
+  expect(f.frames.size).toBe(0);
 });
