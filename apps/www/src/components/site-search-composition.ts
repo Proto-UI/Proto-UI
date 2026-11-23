@@ -831,8 +831,14 @@ export function createSiteSearchComposition(options: {
             currentAction &&
             currentAction !== focusedFailureAction
           ) {
-            focusedFailureAction = currentAction;
+            // The real Retry control must own the focus after a failed
+            // preparation, so the user can retry without a pointer. A public
+            // instance can exist before its control can take focus, so the
+            // attempt is recorded only when the control's own focus fact
+            // proves the focus landed. An unrecorded attempt leaves the next
+            // paint free to try again instead of losing the focus forever.
             api.call('search-page-action', 'focusSelf');
+            if (targetHoldsFocus('search-page-action')) focusedFailureAction = currentAction;
           }
         }
         if (
