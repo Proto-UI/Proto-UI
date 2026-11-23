@@ -7,6 +7,7 @@ import {
   subscribeFocusTargetOwnerReady,
 } from '../src/platform/instance-tree';
 import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
+import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
 import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 // Port the deferred-valid control from signed reconciliation candidate 8e4da4df.
@@ -24,18 +25,15 @@ describe('composed Shadow prototype admission', () => {
     const parent = new Parent();
     setElementProps(parent, { open: true });
     document.body.append(parent);
-    const artifact = renderProtoShadowSplitStyleArtifact([
-      'fixed',
-      'inset-0',
-      'bg-background',
-      'bg-black/50',
-      'backdrop-blur-xs',
-      'hidden',
-      'animate-in',
-      'fade-in-0',
-      'animate-out',
-      'fade-out-0',
-    ]);
+    // This case exercises the actual public closure. A partial old hand-written
+    // token list rejected new source tokens before reaching the I1 control.
+    const closure = (
+      await Promise.all([
+        collectProtoStyleTokens('packages/prototypes/shadcn/src/dialog'),
+        collectProtoStyleTokens('packages/prototypes/base/src/dialog'),
+      ])
+    ).flat();
+    const artifact = renderProtoShadowSplitStyleArtifact(closure);
     const oldArtifact = {
       ...artifact,
       cssText: rewriteSplitBaseDeclarations(artifact.cssText, (declarations) =>
