@@ -3297,12 +3297,23 @@ class Frontend {
   }
 
   /** Follow checked module identities, never source names or type-only views. */
-  private staticArray(value: ExpressionIR): Extract<ExpressionIR, { kind: 'array' }> | undefined {
+  private staticArray(
+    value: ExpressionIR,
+    moduleInitializer = false
+  ): Extract<ExpressionIR, { kind: 'array' }> | undefined {
     while (value.kind === 'narrow') value = value.value;
     if (value.kind === 'reference') {
       const bound = this.moduleBindings.find((binding) => binding.name === value.name)?.value;
       if (!bound) return undefined;
-      return this.staticArray(bound);
+      return this.staticArray(bound, true);
+    }
+    if (value.kind === 'intrinsic' && value.name === 'object.freeze') {
+      const operand = value.arguments[0];
+      // A setup-time freeze of an existing array must read its current contents.
+      // A module initializer runs before any owner; a fresh literal has no old
+      // alias. Neither case replays an authored callback or nested allocation.
+      if (!operand || (!moduleInitializer && operand.kind !== 'array')) return undefined;
+      return this.staticArray(operand, moduleInitializer);
     }
     return value.kind === 'array' ? value : undefined;
   }
@@ -4173,6 +4184,17 @@ class Frontend {
                             ? 'json.stringify'
                             : undefined;
         if (name) {
+          if (
+            name === 'object.freeze' &&
+            (node.questionDotToken ||
+              node.expression.questionDotToken ||
+              node.typeArguments?.length)
+          )
+            rejectNode(
+              node,
+              'PUI1006',
+              'Object.freeze requires an ordinary call without type arguments.'
+            );
           if (
             name === 'object.assign' &&
             (node.questionDotToken || node.expression.questionDotToken)
@@ -6022,7 +6044,8 @@ function staticLoopValues(
   module: SourceModule,
   node: ts.Expression,
   active: Set<string>,
-  locals: ReadonlyMap<string, ts.Expression | undefined> = new Map()
+  locals: ReadonlyMap<string, ts.Expression | undefined> = new Map(),
+  moduleSnapshot = false
 ): (string | number)[] | undefined {
   while (
     ts.isParenthesizedExpression(node) ||
@@ -6034,6 +6057,18 @@ function staticLoopValues(
   if (ts.isArrayLiteralExpression(node)) {
     const values: (string | number)[] = [];
     for (let element of node.elements) {
+      if (ts.isSpreadElement(element)) {
+        const spread = staticLoopValues(
+          module,
+          element.expression,
+          new Set(active),
+          locals,
+          moduleSnapshot
+        );
+        if (!spread) return undefined;
+        values.push(...spread);
+        continue;
+      }
       while (ts.isParenthesizedExpression(element) || ts.isAsExpression(element))
         element = element.expression;
       if (ts.isStringLiteral(element) || ts.isNoSubstitutionTemplateLiteral(element))
@@ -6045,13 +6080,13 @@ function staticLoopValues(
   }
   const resolved = (
     identifier: ts.Identifier
-  ): { module: SourceModule; node: ts.Expression } | undefined => {
+  ): { module: SourceModule; node: ts.Expression; moduleSnapshot: boolean } | undefined => {
     if (locals.has(identifier.text)) {
       const node = locals.get(identifier.text);
       const identity = `${module.file.fileName}#local:${node?.pos}:${identifier.text}`;
       if (!node || node.pos >= identifier.pos || active.has(identity)) return undefined;
       active.add(identity);
-      return { module, node };
+      return { module, node, moduleSnapshot: false };
     }
     if (!module.declarations.has(identifier.text) && !module.imports.has(identifier.text))
       return undefined;
@@ -6060,7 +6095,7 @@ function staticLoopValues(
     const identity = `${binding.module.file.fileName}#${binding.name}`;
     if (active.has(identity)) return undefined;
     active.add(identity);
-    return { module: binding.module, node: binding.node };
+    return { module: binding.module, node: binding.node, moduleSnapshot: true };
   };
   if (ts.isIdentifier(node)) {
     const target = resolved(node);
@@ -6070,10 +6105,27 @@ function staticLoopValues(
         target.module,
         target.node,
         active,
-        target.module === module ? locals : new Map()
+        target.module === module ? locals : new Map(),
+        target.moduleSnapshot
       )
     );
   }
+  if (
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    ts.isIdentifier(node.expression.expression) &&
+    node.expression.expression.text === 'Object' &&
+    !locals.has('Object') &&
+    !module.declarations.has('Object') &&
+    !module.imports.has('Object') &&
+    node.expression.name.text === 'freeze' &&
+    !node.questionDotToken &&
+    !node.expression.questionDotToken &&
+    !node.typeArguments?.length &&
+    node.arguments.length === 1 &&
+    (moduleSnapshot || ts.isArrayLiteralExpression(node.arguments[0]))
+  )
+    return staticLoopValues(module, node.arguments[0], active, locals, moduleSnapshot);
   if (
     ts.isCallExpression(node) &&
     ts.isPropertyAccessExpression(node.expression) &&

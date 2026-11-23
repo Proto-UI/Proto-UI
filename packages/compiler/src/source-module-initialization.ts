@@ -183,6 +183,24 @@ export function validateStaticModuleInitialization(graph: SourceGraph): void {
       );
       return;
     }
+    if (
+      ts.isCallExpression(value) &&
+      !value.questionDotToken &&
+      !value.typeArguments?.length &&
+      ts.isPropertyAccessExpression(value.expression) &&
+      !value.expression.questionDotToken &&
+      ts.isIdentifier(value.expression.expression) &&
+      value.expression.expression.text === 'Object' &&
+      value.expression.name.text === 'freeze' &&
+      !module.declarations.has('Object') &&
+      !module.imports.has('Object') &&
+      value.arguments.length === 1
+    ) {
+      // The checked builtin is linked independently of the source module. Only
+      // its operand reads participate in authored ESM initialization and TDZ.
+      read(module, value.arguments[0]);
+      return;
+    }
     if (ts.isPropertyAccessExpression(value)) {
       read(module, value.expression);
       return;
@@ -199,7 +217,10 @@ export function validateStaticModuleInitialization(graph: SourceGraph): void {
       // A finite container snapshots a scalar let at this initialization point.
       // Its source TDZ is checked above and the semantic parser separately
       // checks the scalar storage type; later writes cannot replay this read.
-      if (target.module.mutableBindings.has(target.name) && !scalarInitializer(target.node))
+      if (
+        target.module.mutableBindings.has(target.name) &&
+        (!ts.isExpression(target.node) || !scalarInitializer(target.node))
+      )
         rejectNode(
           value,
           'PUI1008',

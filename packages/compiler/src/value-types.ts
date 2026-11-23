@@ -944,7 +944,15 @@ export function intrinsicResult(
     return 'number';
   if (name === 'string' && args.length === 1 && (isDataValueType(args[0]) || args[0] === 'unknown'))
     return 'string';
-  if (name === 'object.freeze' && args.length === 1 && objectFields(args[0])) return args[0];
+  if (name === 'object.freeze' && args.length === 1) {
+    const value = args[0];
+    // Object.freeze keeps the same array and only freezes its outer slots.
+    // Nested values retain their own permissions and object identities.
+    if (typeof value !== 'string' && value.kind === 'value-array')
+      return { ...value, readonly: true };
+    if (typeof value !== 'string' && value.kind === 'array') return value;
+    if (objectFields(value)) return value;
+  }
   if (
     name === 'object.hasOwn' &&
     args.length === 2 &&
