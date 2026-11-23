@@ -45,6 +45,9 @@ export async function startMatrixStartupDiagnostic(
   }
 ) {
   if (!options.enabled) return inert;
+  // A browser trace owns its CPU sampling channel. Do not start a second
+  // page profiler on the same isolate, including after browser setup failure.
+  const pageProfilerEnabled = !options.ownedBrowser;
   const browserDiagnostic = options.ownedBrowser
     ? startMatrixBrowserDiagnostic(options.ownedBrowser, options).catch((error) => {
         console.error('[demo-matrix-browser-diagnostic]', String(error));
@@ -64,7 +67,7 @@ export async function startMatrixStartupDiagnostic(
   let stopReason: StopReason | null = null;
   let finishReason: Exclude<StopReason, 'checkpoint'> | null = null;
   let setupRetired = false;
-  let profileState = 'starting';
+  let profileState = pageProfilerEnabled ? 'starting' : 'disabled-for-browser-trace';
   let profileError: string | null = null;
   let finished = false;
   let finishPromise: Promise<void> | undefined;
@@ -94,6 +97,7 @@ export async function startMatrixStartupDiagnostic(
   let truncated = false;
   const header = () => ({
     startedAt: new Date(startedAt).toISOString(),
+    profileMode: pageProfilerEnabled ? 'page-profiler' : 'browser-trace',
     requestedProfileWindowMs: PROFILE_WINDOW_MS,
     requestedChunkIntervalMs: PROFILE_CHUNK_MS,
     chunkSequence,
@@ -212,12 +216,13 @@ export async function startMatrixStartupDiagnostic(
     if (setupRetired) return detach();
     profileState = 'recording';
   };
-  await bounded(setup(), 'Profiler setup').catch((error) => {
-    setupRetired = true;
-    profileState = 'unavailable';
-    profileError = String(error);
-    void detach();
-  });
+  if (pageProfilerEnabled)
+    await bounded(setup(), 'Profiler setup').catch((error) => {
+      setupRetired = true;
+      profileState = 'unavailable';
+      profileError = String(error);
+      void detach();
+    });
   setupCompleted = profileState === 'recording';
   snapshot();
   const capture = async (reason: StopReason) => {

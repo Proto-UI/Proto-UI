@@ -209,6 +209,108 @@ describe('explicit owned-browser Matrix diagnosis', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('stops one CPU-only trace at 20 seconds while process CPU continues until the owner finishes', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const startedAt = Date.now();
+    const stoppedAt: number[] = [];
+    f.trace.send.mockImplementation(async (method) => {
+      if (method === 'Tracing.end') {
+        stoppedAt.push(Date.now() - startedAt);
+        f.trace.emit('Tracing.dataCollected', {
+          value: [{ name: 'ProfileChunk', cat: 'disabled-by-default-v8.cpu_profiler', ts: 100 }],
+        });
+        f.trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
+      }
+      return {};
+    });
+    const handle = await startMatrixBrowserDiagnostic(f.browser, options());
+    await vi.advanceTimersByTimeAsync(25_000);
+    const earlyStops = [...stoppedAt];
+    const laterCpuSamples = f.cpu.send.mock.calls.length;
+    f.trace.emit('Tracing.dataCollected', { value: [{ name: 'LATE_RETIRED_TRACE' }] });
+    await handle.finish();
+    const facts = await result();
+    expect(earlyStops).toEqual([20_000]);
+    expect(laterCpuSamples).toBe(6);
+    expect(stoppedAt).toEqual([20_000]);
+    expect(facts).toMatchObject({
+      finishReason: 'owner-finish',
+      cpu: { state: 'captured', sampleCount: 6 },
+      trace: {
+        state: 'complete',
+        stopReason: 'checkpoint',
+        requestedWindowMs: 20_000,
+        categories: ['disabled-by-default-v8.cpu_profiler'],
+        retainedEvents: 1,
+      },
+    });
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.start')).toHaveLength(
+      1
+    );
+    expect(f.trace.send).toHaveBeenCalledWith(
+      'Tracing.start',
+      expect.objectContaining({
+        traceConfig: expect.objectContaining({
+          includedCategories: ['disabled-by-default-v8.cpu_profiler'],
+          excludedCategories: ['*'],
+          traceBufferSizeInKb: 16_384,
+        }),
+      })
+    );
+    expect(facts.trace.outputChunkLimit).toBe(256);
+    expect(facts.commandLimitMs).toBe(2_000);
+    expect((await result('trace-0001.json')).traceEvents[0].name).toBe('ProfileChunk');
+    expect(f.trace.detach).toHaveBeenCalledTimes(1);
+    expect(f.trace.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('shares an in-flight early stop with owner finish and ignores acknowledgements after its bound', async () => {
+    vi.useFakeTimers();
+    const f = fixture();
+    const pending = held<Record<string, never>>();
+    f.trace.send.mockImplementation(async (method) =>
+      method === 'Tracing.end' ? pending.promise : {}
+    );
+    const handle = await startMatrixBrowserDiagnostic(f.browser, options());
+    await vi.advanceTimersByTimeAsync(20_000);
+    const earlyStops = f.trace.send.mock.calls.filter(
+      ([method]) => method === 'Tracing.end'
+    ).length;
+    f.trace.emit('Tracing.dataCollected', {
+      value: [{ name: 'ProfileChunk', cat: 'disabled-by-default-v8.cpu_profiler', ts: 100 }],
+    });
+    let resolved = false;
+    const finishing = handle.finish().then(() => {
+      resolved = true;
+    });
+    await vi.advanceTimersByTimeAsync(1_999);
+    const returnedBeforeBound = resolved;
+    await vi.advanceTimersByTimeAsync(1);
+    await finishing;
+    const terminal = await readFile(location('status.json'), 'utf8');
+    pending.resolve({});
+    f.trace.emit('Tracing.tracingComplete', { dataLossOccurred: false });
+    f.trace.emit('Tracing.dataCollected', { value: [{ name: 'LATE' }] });
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(earlyStops).toBe(1);
+    expect(returnedBeforeBound).toBe(false);
+    expect(JSON.parse(terminal).trace).toMatchObject({
+      state: 'partial',
+      stopReason: 'checkpoint',
+      stopAcknowledgedAt: null,
+      completeAt: null,
+      retainedEvents: 1,
+      stopError: expect.stringContaining('2000ms'),
+    });
+    expect(await readFile(location('status.json'), 'utf8')).toBe(terminal);
+    expect(f.trace.send.mock.calls.filter(([method]) => method === 'Tracing.end')).toHaveLength(1);
+    expect(f.trace.detach).toHaveBeenCalledTimes(1);
+    expect(f.trace.eventNames()).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it.each(['ack-only', 'complete-only'] as const)(
     'does not call a trace complete after %s',
     async (mode) => {
