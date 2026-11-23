@@ -37,6 +37,12 @@ cases:
     covers:
       - C-LIFECYCLE-OWNER-INITIALIZATION-0001-A
     expectation: rebind-retains-state-and-counts-while-new-owner-reruns-setup-created-and-retires-the-prior-owner
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-WC-RETIREMENT
+    title: Generated WC cleanup cannot close a replacement owner's port
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+    expectation: cleanup-reconnect-waits-for-captured-old-owner-and-port-retirement-before-fresh-owner-updates
   - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-TARGET-CONSUMER
     title: Complete source-bound browser adoption, controlled authority, trust and replacement journeys
     covers:
@@ -85,6 +91,15 @@ implementations:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-TARGET-CONSUMER
     notes:
       - Existing target experiments and the browser Worker revision lane provide narrower evidence. Complete per-target adoption, application-controlled input, trust and source/compiler/helper/revision binding remain required before target admission.
+  - id: generated-wc-retirement
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/owner-hydration-retirement.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-WC-RETIREMENT
+    notes:
+      - Executes actual emitted SSR and browser modules in happy-dom. Unmounted and beforeDispose reconnects retain distinct State identities and update the replacement's visible output; explicit terminal disposal stays terminal. Physical browser evidence and full target initialization remain separate.
 verifies:
   contracts:
     - id: C-LIFECYCLE-REQUEST-0001
