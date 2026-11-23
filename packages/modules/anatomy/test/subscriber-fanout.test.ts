@@ -42,6 +42,37 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
 }
 
 describe('Anatomy family subscriber notification', () => {
+  it('uses a replacement target acquired by a later recipient with the same comparator', () => {
+    const compareDocumentPosition = function (this: { position: number }, other: unknown) {
+      return this.position < (other as { position: number }).position ? 4 : 2;
+    };
+    const rootTarget = { position: 0, compareDocumentPosition };
+    const originalItemTarget = { position: 1, compareDocumentPosition };
+    const replacementItemTarget = { position: -1, compareDocumentPosition };
+    let itemReads = 0;
+    let replaceTarget = false;
+    let rootInstance: unknown;
+    const f = fixture((instance) => {
+      if (instance === rootInstance) {
+        return rootTarget;
+      }
+      return replaceTarget && ++itemReads >= 2 ? replacementItemTarget : originalItemTarget;
+    });
+    rootInstance = f.root.port.resolveSelfInstance();
+    f.make('item');
+    const first = f.make();
+    const second = f.make();
+    const firstOrder = vi.fn();
+    const secondOrder = vi.fn();
+    first.port.subscribeOrder(f.family, firstOrder);
+    second.port.subscribeOrder(f.family, secondOrder);
+
+    replaceTarget = true;
+    f.notify();
+    expect(firstOrder).not.toHaveBeenCalled();
+    expect(secondOrder).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the current host comparator when the target identity is unchanged', () => {
     const itemTarget = { compareDocumentPosition: () => 2 };
     const rootTarget = { compareDocumentPosition: () => 4 };

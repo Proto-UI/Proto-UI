@@ -88,14 +88,21 @@ type NotificationDomains = {
   claimsByRoot?: Map<AnatomyInstanceToken, ClaimRecord[]>;
   rootsByInstance: Map<AnatomyInstanceToken, AnatomyInstanceToken | null>;
 };
+type NotificationOrder = {
+  targets: Array<AnatomyRootTarget | null>;
+  comparators: Array<AnatomyRootTarget['compareDocumentPosition']>;
+  ordered: ClaimRecord[];
+};
 type OrderNotificationReads = {
   comparisons: OrderComparisons;
   domains: Map<AnatomyParentGetter, NotificationDomains>;
+  orders: Map<ClaimRecord[], NotificationOrder>;
 };
 
 function clearOrderNotificationReads(reads?: OrderNotificationReads): void {
   reads?.comparisons.clear();
   reads?.domains.clear();
+  reads?.orders.clear();
 }
 
 const CLAIM_BY_PART_VIEW = new WeakMap<AnatomyPartView, ClaimRecord>();
@@ -921,7 +928,11 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private static notifyStructuralChange(family: AnatomyFamily): void {
-    const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
+    const reads: OrderNotificationReads = {
+      comparisons: new Map(),
+      domains: new Map(),
+      orders: new Map(),
+    };
     for (const impl of this.subscribers(this.orderSubscribers, family)) {
       impl.emitOrderChangeIfNeeded(family, reads);
     }
@@ -969,7 +980,11 @@ export class AnatomyModuleImpl extends ModuleBase {
       // the current recipient's signature.
       clearOrderNotificationReads(reads);
       const off = observer(target, () => {
-        const reads: OrderNotificationReads = { comparisons: new Map(), domains: new Map() };
+        const reads: OrderNotificationReads = {
+          comparisons: new Map(),
+          domains: new Map(),
+          orders: new Map(),
+        };
         for (const impl of listeners) {
           impl.emitOrderChangeIfNeeded(family, reads);
         }
@@ -1044,7 +1059,9 @@ export class AnatomyModuleImpl extends ModuleBase {
 
   private computeOrderSignature(domain: CurrentDomain, reads?: OrderNotificationReads): string {
     if (!domain.rootInstance) return 'missing-domain';
-    const ordered = this.sortClaims(domain.claims, reads?.comparisons);
+    const ordered = reads
+      ? this.sortNotificationClaims(domain.claims, reads)
+      : this.sortClaims(domain.claims);
     return ordered.map((claim) => `${claim.role}:${this.getIdentityId(claim.instance)}`).join('|');
   }
 
@@ -1066,6 +1083,45 @@ export class AnatomyModuleImpl extends ModuleBase {
     return next;
   }
 
+  private sortNotificationClaims(
+    claims: ClaimRecord[],
+    reads: OrderNotificationReads
+  ): ClaimRecord[] {
+    if (claims.length < 2) return claims;
+    // Reacquire each current host target for every recipient. Read comparator
+    // identities afterwards: acquiring a target can replace a host method.
+    const targets = claims.map((claim) => claim.getRootTarget(claim.instance));
+    const comparators = targets.map((target) => target?.compareDocumentPosition);
+    const cached = reads.orders.get(claims);
+    if (
+      cached &&
+      targets.every(
+        (target, index) =>
+          target === cached.targets[index] && comparators[index] === cached.comparators[index]
+      )
+    ) {
+      return cached.ordered;
+    }
+
+    // The claims array is shared only by one family/root/parent bridge inside
+    // this notification. Reuse its order until current host inputs change or
+    // a callback / observer registration invalidates all notification reads.
+    const ordered = claims
+      .map((claim, index) => ({ claim, index }))
+      .sort((left, right) => {
+        const cmp = this.compareTargets(
+          targets[left.index]!,
+          targets[right.index]!,
+          comparators[left.index],
+          reads.comparisons
+        );
+        return cmp || left.index - right.index;
+      })
+      .map((entry) => entry.claim);
+    reads.orders.set(claims, { targets, comparators, ordered });
+    return ordered;
+  }
+
   private sortClaims(claims: ClaimRecord[], comparisons?: OrderComparisons): ClaimRecord[] {
     return claims
       .map((claim, index) => ({ claim, index }))
@@ -1081,7 +1137,16 @@ export class AnatomyModuleImpl extends ModuleBase {
     const aTarget = a.getRootTarget(a.instance);
     const bTarget = b.getRootTarget(b.instance);
     if (!aTarget || !bTarget || aTarget === bTarget) return 0;
-    const compare = aTarget.compareDocumentPosition;
+    return this.compareTargets(aTarget, bTarget, aTarget.compareDocumentPosition, comparisons);
+  }
+
+  private compareTargets(
+    aTarget: AnatomyRootTarget | null,
+    bTarget: AnatomyRootTarget | null,
+    compare: AnatomyRootTarget['compareDocumentPosition'],
+    comparisons?: OrderComparisons
+  ): number {
+    if (!aTarget || !bTarget || aTarget === bTarget) return 0;
     if (typeof compare !== 'function') return 0;
 
     let entry = comparisons?.get(aTarget);
