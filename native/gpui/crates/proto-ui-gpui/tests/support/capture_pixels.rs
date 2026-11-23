@@ -130,10 +130,10 @@ pub fn inspect(
         let mut columns = vec![false; roi.width];
         let mut rows = vec![false; roi.height];
         let mut segmented_rows = 0;
-        for y in 0..roi.height {
+        for (y, row_has_ink) in rows.iter_mut().enumerate() {
             let mut segments = 0;
             let mut in_ink = false;
-            for x in 0..roi.width {
+            for (x, column_has_ink) in columns.iter_mut().enumerate() {
                 let offset = ((roi.y + y) * width + roi.x + x) * 4;
                 let pixel = &rgba[offset..offset + 4];
                 if pixel[3] < 240 {
@@ -149,8 +149,8 @@ pub fn inspect(
                     }
                     in_ink = true;
                     ink += 1;
-                    columns[x] = true;
-                    rows[y] = true;
+                    *column_has_ink = true;
+                    *row_has_ink = true;
                 } else {
                     in_ink = false;
                 }
