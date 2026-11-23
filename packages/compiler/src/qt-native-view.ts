@@ -115,7 +115,7 @@ NativeNode {
             var maximum=Math.max(0,content-viewport)
             return {position:maximum>0?Math.max(0,Math.min(1,position/maximum)):0,visibleRatio:content>0?Math.min(1,viewport/content):1,canScrollBefore:position>0,canScrollAfter:position<maximum,atEnd:Math.abs(position-maximum)<=1}
         }
-        owner.scrollFacts({axes:scrollOptions.axes || "both",horizontal:axis(scroller.contentX,scroller.contentWidth,scroller.width),vertical:axis(scroller.contentY,scroller.contentHeight,scroller.height),scrolling:scroller.moving,projection:scrollOptions.projection === "composed" ? "composed" : "system"})
+        owner.scrollFacts({axes:scrollOptions.axes || "both",horizontal:axis(scroller.contentX,scroller.contentWidth,scroller.width),vertical:axis(scroller.contentY,scroller.contentHeight,scroller.height),scrolling:scroller.moving,projection:scrollOptions.projection === "composed" ? "composed" : "system"}, {horizontal:{offset:scroller.contentX,viewport:scroller.width,extent:scroller.contentWidth},vertical:{offset:scroller.contentY,viewport:scroller.height,extent:scroller.contentHeight}})
         scrollPositionChanged()
     }
     Rectangle {

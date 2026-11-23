@@ -41,7 +41,7 @@ export type NativeScrollSnapshot = Readonly<{axes: string; horizontal: NativeScr
 export type NativeScrollPositionRequest = {kind:'by';axis:'horizontal'|'vertical';delta:number}|{kind:'to'|'control-drag';axis:'horizontal'|'vertical';position:number}|{kind:'page';axis:'horizontal'|'vertical';direction:'before'|'after'}|{kind:'to-end';axis:'horizontal'|'vertical'};
 export type NativeScrollRequest = NativeScrollPositionRequest | {kind:'reveal';axis:'vertical';family:NativeAnatomyFamily;part:NativeAnatomyPart};
 export type NativeScrollRequestOutcome = {kind:'dispatched'}|{kind:'queued'}|{kind:'rejected';reason:'not-mounted'|'not-declared'|'unavailable'};
-export interface NativeScroll { axes: NativeObserved<string>; horizontal: NativeScrollAxis; vertical: NativeScrollAxis; scrolling: NativeObserved<boolean>; projection: NativeObserved<string>; endFollow: { state: NativeObserved<string>; requestStatus: NativeObserved<string> }; configure(config: NativeConfig): void; bindComposedChrome(binding: NativeConfig): void; request(request: NativeScrollRequest): NativeScrollRequestOutcome; getSnapshot(): NativeScrollSnapshot }
+export interface NativeScroll { axes: NativeObserved<string>; horizontal: NativeScrollAxis; vertical: NativeScrollAxis; scrolling: NativeObserved<boolean>; projection: NativeObserved<string>; endFollow: { state: NativeObserved<string>; requestStatus: NativeObserved<string> }; configure(config: NativeConfig): void; bindComposedChrome(binding: NativeConfig): void; request(request: NativeScrollRequest): NativeScrollRequestOutcome; pauseFollowing(): NativeScrollRequestOutcome; getSnapshot(): NativeScrollSnapshot }
 export type NativeTextSelection = Readonly<{start: number; end: number; direction: 'forward' | 'backward' | 'none'}>;
 export type NativeTextEvent = Readonly<{type: string; value: string; composing: boolean; data: string | null; inputType: string | null; selection: NativeTextSelection | null}>;
 export type NativeImageEvent = Readonly<{status: string; previousStatus: string; source: string}>;
@@ -1080,26 +1080,35 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   let scrollBinding: ScrollBinding | null = null;
   let scrollAttachment: { binding: ScrollBinding; requests: NativeConfig[] } | null = null;
   let scrollEndWork: ScrollEndWork | null = null;
-  let readerIntent = 0;
+  let readerIntent = 0, readerArrivalUntil = 0;
+  const readerPoints = new Map<number, { x: number; y: number }>(), readerArrivals = new Set<number>();
+  let explicitlyPaused = false, scrollCommandVersion = 0;
+  let lastScrollGeometry: { left: number; top: number; width: number; height: number; scrollWidth: number; scrollHeight: number } | null = null;
   const chromeCleanups: (() => void)[] = [];
   const chromeTargets = new Map<HTMLElement, { width: string; height: string; transform: string; display: string; size: string; offset: string }>();
   function currentScrollBinding(binding: ScrollBinding): boolean {
     return scrollBinding === binding && generation === binding.epoch && root === binding.surface && ready();
   }
-  function scrollFacts(resumeEndAxis?: 'horizontal' | 'vertical') {
+  function scrollFacts(resumeEndAxis?: 'horizontal' | 'vertical', version = scrollCommandVersion, readerArrival: false | 'observed' | 'command' = false) {
     const binding = scrollBinding;
     if (!binding || !currentScrollBinding(binding)) return;
-    const current = () => currentScrollBinding(binding), surface = binding.surface;
+    const current = () => currentScrollBinding(binding) && scrollCommandVersion === version, surface = binding.surface;
     const left = surface.scrollLeft, width = surface.clientWidth, scrollWidth = surface.scrollWidth;
     const top = surface.scrollTop, height = surface.clientHeight, scrollHeight = surface.scrollHeight;
     if (!current()) return;
+    const follow = scrollConfig.endFollow as NativeConfig;
+    const followAxis = follow?.axis === 'horizontal' ? 'horizontal' : 'vertical';
+    const previous = lastScrollGeometry;
+    const moved = previous && (followAxis === 'horizontal' ? left !== previous.left && width === previous.width && scrollWidth === previous.scrollWidth : top !== previous.top && height === previous.height && scrollHeight === previous.scrollHeight);
+    const arrivedAtEnd = followAxis === 'horizontal' ? Math.max(0, scrollWidth - width) - left <= 1 : Math.max(0, scrollHeight - height) - top <= 1;
+    lastScrollGeometry = { left, top, width, height, scrollWidth, scrollHeight };
+    if (readerArrival && moved && arrivedAtEnd && (readerArrival === 'command' || readerArrivals.size > 0 || Date.now() < readerArrivalUntil)) explicitlyPaused = false;
     horizontal.update(left, width, scrollWidth, current); if (!current()) return;
     vertical.update(top, height, scrollHeight, current); if (!current()) return;
-    const follow = scrollConfig.endFollow as NativeConfig;
     if (follow?.mode === 'while-at-end') {
-      const followAxis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
       const atEnd = (followAxis === 'horizontal' ? horizontal.handle : vertical.handle).atEnd.get();
-      if (resumeEndAxis === followAxis && atEnd) followState.set('following');
+      if (resumeEndAxis === followAxis && atEnd) { explicitlyPaused = false; followState.set('following'); }
+      else if (explicitlyPaused) followState.set('paused');
       else if (readerContacts || !atEnd && Date.now() < readerIntent) followState.set('paused');
       else if (atEnd) followState.set('following');
     }
@@ -1113,13 +1122,14 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (currentScrollBinding(binding)) setScrollRequestStatus('rejected');
   }
   function revealScroll(request: NativeConfig, binding: ScrollBinding): NativeScrollRequestOutcome {
+    let version = scrollCommandVersion;
     const rejected = { kind: 'rejected', reason: 'unavailable' } as const;
     if (request.axis !== 'vertical' || scrollConfig.axes === 'horizontal' || scrollAttachment) return rejected;
     const family = request.family as NativeAnatomyFamily, part = request.part as NativeAnatomyPart;
     const participant = part && typeof part === 'object' ? parts.get(part) : undefined;
     const role = claims.get(family)?.role, familyRoot = role ? domain(family, false) : null;
     if (!participant || participant === owner || !role || !familyRoot) return rejected;
-    const currentPart = () => currentScrollBinding(binding) && !scrollAttachment &&
+    const currentPart = () => currentScrollBinding(binding) && scrollCommandVersion === version && !scrollAttachment &&
       claims.get(family)?.role === role && domain(family, false) === familyRoot &&
       participant.alive() && participant.claims.get(family)?.part === part &&
       ancestor(participant, candidate => candidate.claims.get(family)?.role === 'root') === familyRoot &&
@@ -1128,14 +1138,19 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const target = participant.target();
     if (!target) return rejected;
     const currentTarget = () => currentPart() && participant.target() === target && targets.get(target) === participant && currentPart();
-    if (!revealNativeScrollTarget(binding.surface, target, currentTarget, () => cancelScrollEnd(binding, 'vertical')) || !currentTarget()) return rejected;
+    if (!revealNativeScrollTarget(binding.surface, target, currentTarget, () => {
+      // Advance intent only after geometry admission. A refused nested reveal
+      // must not retire a valid command already in progress.
+      version = ++scrollCommandVersion;
+      cancelScrollEnd(binding, 'vertical');
+    }) || !currentTarget()) return rejected;
     scrollFacts();
     if (!currentTarget()) return rejected;
     const follow = scrollConfig.endFollow as NativeConfig;
-    if (follow?.mode === 'while-at-end' && (follow.axis ?? 'vertical') === 'vertical') followState.set(vertical.handle.atEnd.get() ? 'following' : 'paused');
+    if (follow?.mode === 'while-at-end' && (follow.axis ?? 'vertical') === 'vertical' && !explicitlyPaused) followState.set(vertical.handle.atEnd.get() ? 'following' : 'paused');
     return currentTarget() ? { kind: 'dispatched' } : rejected;
   }
-  function applyScroll(request: NativeConfig): NativeScrollRequestOutcome {
+  function applyScroll(request: NativeConfig, draining = false, readerRequest = false): NativeScrollRequestOutcome {
     if (!hooks.has('asScrollSurface')) return {kind:'rejected',reason:'not-declared'};
     if (!root) return {kind:'rejected',reason:'not-mounted'};
     const surface = root, epoch = generation;
@@ -1143,16 +1158,20 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
     if (request.axis !== 'horizontal' && request.axis !== 'vertical') throw new Error('[Scroll] request axis must be horizontal or vertical.');
     const binding = scrollBinding;
-    if (request.kind === 'reveal') return binding && currentScrollBinding(binding) ? revealScroll(request, binding) : {kind:'rejected',reason:'unavailable'};
+    if (request.kind === 'reveal') {
+      if (!binding || !currentScrollBinding(binding) || scrollAttachment) return {kind:'rejected',reason:'unavailable'};
+      return revealScroll(request, binding);
+    }
     if (!['by', 'to', 'control-drag', 'page', 'to-end'].includes(String(request.kind))) throw new Error('[Scroll] invalid request kind.');
     const attachment = scrollAttachment;
-    if (attachment && attachment.binding.surface === surface && attachment.binding.epoch === epoch) {
+    if (!draining && attachment && attachment.binding.surface === surface && attachment.binding.epoch === epoch) {
       const queued = { ...request };
       if (!currentView() || scrollAttachment !== attachment) return {kind:'rejected',reason:'unavailable'};
       attachment.requests.push(queued);
       return {kind:'queued'};
     }
     if (!binding || !currentScrollBinding(binding)) return {kind:'rejected',reason:'unavailable'};
+    const version = ++scrollCommandVersion;
     const horizontalAxis = request.axis === 'horizontal';
     const viewport = horizontalAxis ? surface.clientWidth : surface.clientHeight, extent = horizontalAxis ? surface.scrollWidth : surface.scrollHeight;
     const current = horizontalAxis ? surface.scrollLeft : surface.scrollTop, range = Math.max(0, extent - viewport);
@@ -1167,16 +1186,44 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const statusVersion = scrollRequestStatusVersion;
     if (horizontalAxis) surface.scrollLeft = Math.max(0, Math.min(range, next)); else surface.scrollTop = Math.max(0, Math.min(range, next));
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
-    scrollFacts(request.kind === 'to-end' ? horizontalAxis ? 'horizontal' : 'vertical' : undefined);
+    // A composed control delivers the reader's movement synchronously. Its
+    // later native scroll event may have no remaining delta to attribute.
+    const follow = scrollConfig.endFollow as NativeConfig;
+    scrollFacts(request.kind === 'to-end' ? horizontalAxis ? 'horizontal' : 'vertical' : undefined, version, readerRequest && request.axis === (follow?.axis ?? 'vertical') ? 'command' : false);
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
     if (request.kind === 'to-end' && statusVersion === scrollRequestStatusVersion) setScrollRequestStatus('applied');
     return {kind:'dispatched'};
+  }
+  function pauseScrollFollowing(draining = false): NativeScrollRequestOutcome {
+    if (!hooks.has('asScrollSurface')) return {kind:'rejected',reason:'not-declared'};
+    if (!root) return {kind:'rejected',reason:'not-mounted'};
+    const follow = scrollConfig.endFollow as NativeConfig;
+    const axis = follow?.axis === 'horizontal' ? 'horizontal' : 'vertical';
+    if (!ready() || follow?.mode !== 'while-at-end' || scrollConfig.axes !== 'both' && scrollConfig.axes !== axis) return {kind:'rejected',reason:'unavailable'};
+    const attachment = scrollAttachment;
+    if (!draining && attachment && attachment.binding.surface === root && attachment.binding.epoch === generation) {
+      attachment.requests.push({kind:'pause-following'});
+      return {kind:'queued'};
+    }
+    const binding = scrollBinding;
+    if (!binding || !currentScrollBinding(binding)) return {kind:'rejected',reason:'unavailable'};
+    const version = ++scrollCommandVersion;
+    explicitlyPaused = true;
+    readerIntent = 0; readerArrivalUntil = 0; readerArrivals.clear();
+    cancelScrollEnd(binding, axis);
+    if (!currentScrollBinding(binding)) return {kind:'rejected',reason:'unavailable'};
+    // A subscriber may issue a newer command while cancellation is published.
+    if (scrollCommandVersion !== version) return {kind:'dispatched'};
+    followState.set('paused');
+    if (!currentScrollBinding(binding)) return {kind:'rejected',reason:'unavailable'};
+    if (scrollCommandVersion === version) scrollFacts();
+    return currentScrollBinding(binding) ? {kind:'dispatched'} : {kind:'rejected',reason:'unavailable'};
   }
   function endFollowContentChanged() {
     const binding = scrollBinding;
     if (!binding || !currentScrollBinding(binding) || scrollAttachment) return;
     const follow = scrollConfig.endFollow as NativeConfig;
-    if (follow?.mode !== 'while-at-end' || followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
+    if (follow?.mode !== 'while-at-end' || explicitlyPaused || followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
     const view = binding.surface.ownerDocument.defaultView;
     if (!view || scrollEndWork) return;
     const axis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
@@ -1237,7 +1284,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
           readerContacts++; readerIntent = Date.now() + 250; followState.set('paused'); thumb.setPointerCapture(event.pointerId); event.preventDefault();
         } else {
           const rect = thumb.getBoundingClientRect(); const before = coordinate < (axis === 'horizontal' ? rect.left : rect.top);
-          options.invoke(() => applyScroll({ kind: 'page', axis, direction: before ? 'before' : 'after' })); event.preventDefault();
+          options.invoke(() => applyScroll({ kind: 'page', axis, direction: before ? 'before' : 'after' }, false, true)); event.preventDefault();
         }
       };
       const move = (native: Event) => {
@@ -1245,7 +1292,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
         const travel = (axis === 'horizontal' ? track.clientWidth - thumb.getBoundingClientRect().width : track.clientHeight - thumb.getBoundingClientRect().height);
         if (travel <= 0) return;
         const coordinate = axis === 'horizontal' ? event.clientX : event.clientY;
-        options.invoke(() => applyScroll({ kind: 'control-drag', axis, position: drag!.offset + (coordinate - drag!.start) / travel })); event.preventDefault();
+        options.invoke(() => applyScroll({ kind: 'control-drag', axis, position: drag!.offset + (coordinate - drag!.start) / travel }, false, true)); event.preventDefault();
       };
       const end = (native: Event) => { const event = native as PointerEvent; if (!drag || event.pointerId !== drag.id) return; if (thumb.hasPointerCapture(drag.id)) thumb.releasePointerCapture(drag.id); drag = null; readerContacts = Math.max(0, readerContacts - 1); scrollFacts(); };
       track.addEventListener('pointerdown', down); thumb.addEventListener('pointermove', move); thumb.addEventListener('pointerup', end); thumb.addEventListener('pointercancel', end); thumb.addEventListener('lostpointercapture', end);
@@ -1258,6 +1305,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     configure(config) { setup('scroll.configure'); if (config.axes && !['horizontal','vertical','both'].includes(String(config.axes))) throw new Error('[Scroll] invalid axes.'); if (config.projection && !['auto','system','composed'].includes(String(config.projection))) throw new Error('[Scroll] invalid projection.'); scrollConfig = { ...scrollConfig, ...config }; scrollAxes.set(String(scrollConfig.axes)); const follow = scrollConfig.endFollow as NativeConfig; followState.set(follow?.mode === 'while-at-end' ? 'pending' : 'off'); },
     bindComposedChrome(binding) { setup('scroll.bindComposedChrome'); if (!binding.anatomy || !binding.scrollbarRole || !binding.thumbRole || !binding.orientationExpose || !binding.scope) throw new Error('[Scroll] composed chrome requires explicit Context/Anatomy binding.'); scrollChrome = binding; },
     request(request) { runtime('scroll.request'); return applyScroll(request); },
+    pauseFollowing() { runtime('scroll.pauseFollowing'); return pauseScrollFollowing(); },
     getSnapshot() {
       alive(); const snapshot = (axis: NativeScrollAxis) => Object.freeze({ position: axis.position.get(), visibleRatio: axis.visibleRatio.get(), canScrollBefore: axis.canScrollBefore.get(), canScrollAfter: axis.canScrollAfter.get(), atEnd: axis.atEnd.get() });
       return Object.freeze({ axes: scrollAxes.handle.get(), horizontal: snapshot(horizontal.handle), vertical: snapshot(vertical.handle), scrolling: scrolling.handle.get(), projection: scrollProjection.handle.get(), endFollow: { state: followState.handle.get(), requestStatus: followRequest.handle.get() } });
@@ -1270,7 +1318,6 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     scrollAttachment = attachment;
     const acquiring = () => scrollAttachment === attachment && generation === binding.epoch && root === surface && ready();
     const current = () => currentScrollBinding(binding);
-    let acquired = false;
     try {
       const preference = String(scrollConfig.requireProjection ?? scrollConfig.projection);
       if (preference === 'composed' && !scrollChrome) throw new Error('[Scroll] required composed projection needs authored chrome binding.');
@@ -1282,24 +1329,41 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       listen(surface, 'scroll', () => {
         if (!current()) return;
         scrolling.set(true); if (!current()) return;
-        scrollFacts(); if (!current()) return;
+        scrollFacts(undefined, scrollCommandVersion, 'observed'); if (!current()) return;
         view?.clearTimeout(scrollTimer);
         scrollTimer = view?.setTimeout(() => { if (!current()) return; scrollTimer = undefined; scrolling.set(false); if (current()) scrollFacts(); }, 120);
       }, { passive: true });
       listen(surface, 'wheel', event => {
         if (!current()) return;
-        readerIntent = Date.now() + 250; const wheel = event as WheelEvent;
+        const wheel = event as WheelEvent; if (wheel.defaultPrevented || wheel.ctrlKey) return;
+        readerIntent = Date.now() + 250;
+        const follow = scrollConfig.endFollow as NativeConfig, followDelta = follow?.axis === 'horizontal' ? wheel.deltaX || (wheel.shiftKey ? wheel.deltaY : 0) : wheel.deltaY;
+        if (followDelta !== 0) readerArrivalUntil = readerIntent;
         if (scrollProjection.handle.get() === 'composed') {
           const axis = scrollConfig.axes === 'horizontal' || Math.abs(wheel.deltaX) > Math.abs(wheel.deltaY) ? 'horizontal' : 'vertical';
           const delta = axis === 'horizontal' ? wheel.deltaX || wheel.deltaY : wheel.deltaY;
-          options.invoke(() => applyScroll({ kind: 'by', axis, delta: delta * (wheel.deltaMode === 1 ? 16 : wheel.deltaMode === 2 ? surface.clientHeight : 1) })); event.preventDefault();
+          options.invoke(() => applyScroll({ kind: 'by', axis, delta: delta * (wheel.deltaMode === 1 ? 16 : wheel.deltaMode === 2 ? surface.clientHeight : 1) }, false, true)); event.preventDefault();
         }
         if (current() && followState.handle.get() !== 'off' && !(scrollConfig.axes === 'horizontal' ? horizontal.handle : vertical.handle).atEnd.get()) followState.set('paused');
       }, { passive: false });
-      listen(surface, 'pointerdown', () => { if (current()) { readerContacts++; readerIntent = Date.now() + 250; } });
-      const endContact = () => { if (current()) { readerContacts = Math.max(0, readerContacts - 1); readerIntent = Date.now() + 250; scrollFacts(); } };
+      listen(surface, 'pointerdown', event => { if (current()) { const pointer = event as PointerEvent; if (!readerPoints.has(pointer.pointerId)) readerContacts++; readerPoints.set(pointer.pointerId, {x:pointer.clientX,y:pointer.clientY}); readerIntent = Date.now() + 250; } });
+      listen(surface.ownerDocument, 'pointermove', event => {
+        if (!current()) return;
+        const pointer = event as PointerEvent, previous = readerPoints.get(pointer.pointerId); if (!previous) return;
+        const follow = scrollConfig.endFollow as NativeConfig;
+        if (follow?.axis === 'horizontal' ? pointer.clientX !== previous.x : pointer.clientY !== previous.y) readerArrivals.add(pointer.pointerId);
+        readerPoints.set(pointer.pointerId, {x:pointer.clientX,y:pointer.clientY});
+      }, { capture: true });
+      const endContact = (event: Event) => { if (current()) { const id = (event as PointerEvent).pointerId; if (readerPoints.delete(id)) readerContacts = Math.max(0, readerContacts - 1); readerArrivals.delete(id); readerIntent = Date.now() + 250; scrollFacts(); } };
       listen(surface.ownerDocument, 'pointerup', endContact, { capture: true }); listen(surface.ownerDocument, 'pointercancel', endContact, { capture: true });
-      listen(surface, 'keydown', () => { if (current()) readerIntent = Date.now() + 250; });
+      listen(surface, 'keydown', event => {
+        if (!current()) return;
+        const key = event as KeyboardEvent;
+        if (key.defaultPrevented || key.ctrlKey || key.metaKey || key.altKey || isElement(key.target) && key.target.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])')) return;
+        const follow = scrollConfig.endFollow as NativeConfig;
+        const keys = follow?.axis === 'horizontal' ? ['ArrowLeft','ArrowRight','Home','End'] : ['ArrowUp','ArrowDown','Home','End','PageUp','PageDown',' '];
+        if (keys.includes(key.key)) { readerIntent = Date.now() + 250; readerArrivalUntil = readerIntent; }
+      });
       if (typeof ResizeObserver !== 'undefined') { const resize = new ResizeObserver(() => { if (current()) endFollowContentChanged(); }); resize.observe(surface); for (const child of surface.children) resize.observe(child); cleanups.push(() => resize.disconnect()); }
       if (typeof MutationObserver !== 'undefined') { const mutation = new MutationObserver(records => {
         if (!current() || records.every(record => record.type === 'attributes' && (record.target === surface || isElement(record.target) && chromeTargets.has(record.target) && record.attributeName === 'style'))) return;
@@ -1312,11 +1376,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       // requests belong to this transaction; reveal never joins its queue.
       scrollProjection.set(projection); if (!acquiring()) return;
       scrollFacts(); if (!acquiring()) return;
-      acquired = true;
+      // Keep the transaction active while draining: commands issued by fact
+      // subscribers append after every already queued command.
+      for (const request of attachment.requests) { if (!current()) break; if (request.kind === 'pause-following') pauseScrollFollowing(true); else applyScroll(request, true); }
     } finally {
       if (scrollAttachment === attachment) scrollAttachment = null;
     }
-    if (acquired) for (const request of attachment.requests) { if (!current()) break; applyScroll(request); }
   }
   let positionConnection: NativeConfig | null = null, positionSnapshot: NativePositionSnapshot | null = null, positionGeneration = 0;
   let removePosition: (() => void) | null = null;
@@ -1574,7 +1639,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('overlay')) unlockModal();
     root = null;
     if (__nativeFeature('scroll')) {
-      scrollBinding = null; scrollAttachment = null;
+      scrollBinding = null; scrollAttachment = null; explicitlyPaused = false; ++scrollCommandVersion;
       const work = scrollEndWork; scrollEndWork = null;
       if (work && work.frame !== null) work.binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
       if (work) setScrollRequestStatus('rejected');
@@ -1596,7 +1661,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('positioning')) for (const [target, snapshot] of positionBaselines) { target.style.position = snapshot.position; target.style.left = snapshot.left; target.style.top = snapshot.top; for (const [name, value] of snapshot.variables) { if (value) target.style.setProperty(name, value); else target.style.removeProperty(name); } if (snapshot.side === null) target.removeAttribute('data-side'); else target.setAttribute('data-side', snapshot.side); if (snapshot.align === null) target.removeAttribute('data-align'); else target.setAttribute('data-align', snapshot.align); }
     if (__nativeFeature('positioning')) positionBaselines.clear();
     if (__nativeFeature('scroll')) for (const [target, snapshot] of chromeTargets) { target.style.width = snapshot.width; target.style.height = snapshot.height; target.style.transform = snapshot.transform; target.style.display = snapshot.display; if (snapshot.size) target.style.setProperty('--proto-ui-scroll-thumb-size', snapshot.size); else target.style.removeProperty('--proto-ui-scroll-thumb-size'); if (snapshot.offset) target.style.setProperty('--proto-ui-scroll-thumb-offset', snapshot.offset); else target.style.removeProperty('--proto-ui-scroll-thumb-offset'); }
-    if (__nativeFeature('scroll')) { chromeTargets.clear(); readerContacts = 0; }
+    if (__nativeFeature('scroll')) { chromeTargets.clear(); readerContacts = 0; readerPoints.clear(); readerArrivals.clear(); readerIntent = 0; readerArrivalUntil = 0; lastScrollGeometry = null; }
     if (__nativeFeature('text')) { textComposing = false; queueTextSelection = null; textObservation = null; }
     if (__nativeFeature('overlay')) overlayMaterialized = false;
     if (previous) {

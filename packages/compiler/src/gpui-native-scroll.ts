@@ -8,6 +8,23 @@ pub fn scroll_configure(owner:&OwnerWeak,patch:Value)->Value{let owner=setup(own
 fn scroll_axis(owner:&OwnerRef,horizontal:bool)->Value{let o=owner.borrow();let scroll=&o.modules.scroll;let offset=scroll.handle().offset();let max=scroll.handle().max_offset();let bounds=scroll.handle().bounds();let extent=f64::from(f32::from(if horizontal{max.x}else{max.y})).max(0.);let size=f64::from(f32::from(if horizontal{bounds.size.width}else{bounds.size.height}));let offset=-f64::from(f32::from(if horizontal{offset.x}else{offset.y}));record(vec![("position",Value::number(if extent>0.{(offset/extent).clamp(0.,1.)}else{0.})),("visibleRatio",Value::number(if size+extent>0.{(size/(size+extent)).clamp(0.,1.)}else{1.})),("canScrollBefore",Value::boolean(offset>0.5)),("canScrollAfter",Value::boolean(extent-offset>0.5)),("atEnd",Value::boolean(extent-offset<=1.))])}
 pub fn scroll_snapshot(owner:&OwnerWeak)->Value{let owner=ensure(owner);let (axes,scrolling,state,status)={let o=owner.borrow();let s=&o.modules.scroll;let follow=field(&s.config,"endFollow");let enabled=!follow.nullish()&&text_or(follow.member("mode",false),"off")=="while-at-end";(text_or(field(&s.config,"axes"),"both"),s.last_input.is_some_and(|time|time.elapsed()<std::time::Duration::from_millis(120)),if !enabled{"off"}else if !o.mounted{"pending"}else if s.following{"following"}else{"paused"},if s.request_status.is_empty(){"idle".into()}else{s.request_status.clone()})};record(vec![("axes",Value::string(&axes)),("horizontal",scroll_axis(&owner,true)),("vertical",scroll_axis(&owner,false)),("scrolling",Value::boolean(scrolling)),("projection",Value::string(if ready(&owner){"system"}else{"unresolved"})),("endFollow",record(vec![("state",Value::string(state)),("requestStatus",Value::string(&status))]))])}
 fn scroll_rejected(reason:&str)->Value{record(vec![("kind",Value::string("rejected")),("reason",Value::string(reason))])}
+pub fn scroll_pause_following(owner:&OwnerWeak)->Value{
+    let owner=runtime(owner);
+    let mut o=owner.borrow_mut();
+    if !o.modules.hooks.contains("scroll"){return scroll_rejected("not-declared")}
+    if !o.mounted{return scroll_rejected("not-mounted")}
+    if o.disposed||!o.present||o.bounds.is_none(){return scroll_rejected("unavailable")}
+    let s=&mut o.modules.scroll;
+    let policy=field(&s.config,"endFollow");
+    if policy.nullish(){return scroll_rejected("unavailable")}
+    let axis=text_or(policy.member("axis",false),"vertical");
+    let axes=text_or(field(&s.config,"axes"),"both");
+    if policy.nullish()||text_or(policy.member("mode",false),"off")!="while-at-end"||s.handle.is_none()||axes!="both"&&axes!=axis{return scroll_rejected("unavailable")}
+    if s.pending_end.take().is_some(){s.request_status="rejected".into();}
+    s.following=false;
+    o.dirty=true;
+    record(vec![("kind",Value::string("dispatched"))])
+}
 pub fn scroll_request(owner:&OwnerWeak,request:Value)->Value{
     let owner=runtime(owner);
     {

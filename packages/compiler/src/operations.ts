@@ -2038,6 +2038,14 @@ export const OPERATION_RULES = {
     [{ role: 'value', valueSchema: SCROLL_REQUEST_TYPE }],
     [effect('write', 'view')]
   ),
+  'scroll.pauseFollowing': rule(
+    'scroll',
+    'pauseFollowing',
+    callbackPhase,
+    SCROLL_REQUEST_OUTCOME_TYPE,
+    [],
+    [effect('write', 'view')]
+  ),
   'scroll.getSnapshot': rule(
     'scroll',
     'getSnapshot',

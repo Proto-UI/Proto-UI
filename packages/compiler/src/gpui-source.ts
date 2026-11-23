@@ -243,6 +243,7 @@ export function emitGpuiSource(
     'hitParticipation.unregisterRegion',
     'scroll.configure',
     'scroll.request',
+    'scroll.pauseFollowing',
     'scroll.getSnapshot',
     'collection.configure',
     'collection.getItems',
@@ -2207,6 +2208,8 @@ impl __PuiNativeRecordValue {
             return `scroll_configure(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.request':
             return `scroll_request(${receiverOwner()}, ${argument(0)})`;
+          case 'scroll.pauseFollowing':
+            return `scroll_pause_following(${receiverOwner()})`;
           case 'scroll.getSnapshot':
             return `scroll_snapshot(${receiverOwner()})`;
           case 'hook.asTextControl':

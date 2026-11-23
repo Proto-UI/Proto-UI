@@ -1,0 +1,98 @@
+{
+  "editor-projection-focused.log": {
+    "bytes": 563,
+    "sha256": "e25ecd57b46a7c7de5b78b1def3a4119d7aa9a6abc41b92c3fcd60d8a65c3f1e"
+  },
+  "four-adapters-final.log": {
+    "bytes": 166225,
+    "sha256": "00158f614e839f985b361c74583fc95a752dfc68f1e8802a23cd31f9522b8da0"
+  },
+  "im-1280.png": {
+    "bytes": 198253,
+    "sha256": "a971a3006cf8cb1d998d85c6ba62c11e1498dd16ffebde8056a0717375d8477a"
+  },
+  "im-390.png": {
+    "bytes": 96973,
+    "sha256": "580bed9618ea4bb726199ecb6a47e0d6a7d70a8a5042ce4a73b6bcab638b1428"
+  },
+  "inspect-1280.png": {
+    "bytes": 123077,
+    "sha256": "3b7a64a396016d8fe333afddb644de94344d5ffcad269953fd2296c89982d819"
+  },
+  "inspect-390.png": {
+    "bytes": 76617,
+    "sha256": "4015410f08f01ce59dff30108a8dbb0fa2e35b8aac17deb5807433b1c5e4289f"
+  },
+  "matrix-pre-integration-check.log": {
+    "bytes": 271,
+    "sha256": "ee2cdfeb992758806cf5cb864fd35ab6d5bb5f08ece381a17e19367ddf188f58"
+  },
+  "matrix-pre-integration.log": {
+    "bytes": 19412,
+    "sha256": "a7764dd30be4ccbc5f30f1ea379c0874973b32bd9f018a8f506b55f6db4c3b73"
+  },
+  "pause-input-green.log": {
+    "bytes": 27723,
+    "sha256": "040dcac3891fd028f6704c581711a5f4f372919e37891ea2d988f45e327453d8"
+  },
+  "pause-input-red.log": {
+    "bytes": 25468,
+    "sha256": "58c4429f6b9979983c4657f983fd47bc75cbfdc03a1e2de2ff22743d181cd618"
+  },
+  "prototype-catalog.log": {
+    "bytes": 170,
+    "sha256": "1b1c3a10bff8ddf536d1e4e5097d780ee4e17ad8d736c26d3617a915d89dbd04"
+  },
+  "public-build-a437f89.json": {
+    "bytes": 5193,
+    "sha256": "ed29b8c56b4a384a45fca6cd7fb73bc9f5ccebd5f289cd3c3828107494b2d3b7"
+  },
+  "scroll-build-d5153ea.json": {
+    "bytes": 1004,
+    "sha256": "f708a8b062d5a5c3ec1d18bd7bb4a7d1901034ddaf80ff24db3c695c311879e1"
+  },
+  "shenko-build-v5.log": {
+    "bytes": 987,
+    "sha256": "40b7eaae42b2394ace8b5a36287172ed64a2d9bd62afecb8881402c70b557e6a"
+  },
+  "shenko-frozen-install.log": {
+    "bytes": 375,
+    "sha256": "e12518d4a05956ec493948f1ed230a590d5199c31fe80b3455d484426ef1439f"
+  },
+  "shenko-unit-frozen.log": {
+    "bytes": 5001,
+    "sha256": "b491906ce9a9d25405f271363b9f40cc586ae5e64c1fa7efe65245969331da42"
+  },
+  "shenko-unit-v5.log": {
+    "bytes": 4999,
+    "sha256": "823bced7b913e97c21aebf0b60bc0ff725cfccf4a03cdcdec6ab4329c654ef3a"
+  },
+  "shenko-v1.json": {
+    "bytes": 4749,
+    "sha256": "482d818c8573c44f6be2453f02373704d706a79eff3974221332d2288f18e6a8"
+  },
+  "shenko-v3.json": {
+    "bytes": 18554,
+    "sha256": "d7e496ac85be63f9c949674d07c07d46e4759659b8be3f9297857534cbbb6432"
+  },
+  "shenko-v4.json": {
+    "bytes": 30796,
+    "sha256": "f8b344e73beb41bb3b6905a54d4d3d30fdbbfa6f9b2babf29994f2d1f3a42215"
+  },
+  "shenko-v5-source.json": {
+    "bytes": 880,
+    "sha256": "85dce917f7b60efa82c31b8ecb6568bc4ee22ec9b51046d68dbc5ff006eae5b8"
+  },
+  "shenko-v5.json": {
+    "bytes": 51853,
+    "sha256": "97ce2b2d22a5a3422df33a2a6629abe45c4aa1d6beaa27920a26f85a834d05f6"
+  },
+  "types-during-build-failed.log": {
+    "bytes": 2203,
+    "sha256": "c82bc4ffb9f4fd0c1b07470c8f1f635cc50529f6fc855a9ecce2bc79dfa02dd3"
+  },
+  "validation.json": {
+    "bytes": 2265,
+    "sha256": "44986e8b551ccb2732b9c6e3e68c575ebd97bd336026e415f709aa06ddef3896"
+  }
+}

@@ -81,3 +81,13 @@ internal/records/evidence/2026-11-23-sprint6-preserved/originals-05.tar.gz
 internal/records/evidence/2026-11-23-sprint6-preserved/originals-06.tar.gz
 internal/records/evidence/2026-11-23-sprint6-preserved/originals-07.tar.gz
 internal/records/evidence/2026-11-23-sprint6-preserved/originals-08.tar.gz
+
+# Exact Sprint 7 historical observations and pinned upstream schema/license bytes.
+internal/records/2026-11-22-sprint-7-harness-evidence/
+internal/records/evidence/2026-11-22-s7-declarative/
+internal/records/evidence/2026-11-22-s7-scroll-pause/
+internal/records/evidence/2026-11-23-s7-continuation/
+scripts/analysis/declarative-agent-ui/upstream/catalog.json
+scripts/analysis/declarative-agent-ui/upstream/common_types.json
+scripts/analysis/declarative-agent-ui/upstream/agent_to_renderer.json
+scripts/analysis/declarative-agent-ui/upstream/LICENSE
