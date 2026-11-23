@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-offline-protocol-source-checkpoint-review",
+  "reviewedAt": "2026-11-22T19:10:04.692691+00:00",
+  "reviewerAgent": "/root/sprint1_3",
+  "mode": "human-assisted",
+  "repository": "Proto-UI/Proto-UI",
+  "candidateWorktree": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
+  "candidateBase": "38afc8942bfd245e12eaa661298c2feddbc63af8",
+  "originalWorktree": "/workspace/scratch/b8a4839de6ed/s7-experiments",
+  "originalHead": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+  "scope": "Read-only review of four byte-identical original Python files and the local checkpoint records. No source edits or external publication by this reviewer.",
+  "conclusion": "No blocker for the bounded original-source/offline-controls checkpoint. The separate full consumer runner is not delivered or accepted; PROTOCOL-BUILD-001 remains open in these original bytes and has a separately planned repair.",
+  "reviewedSourceFiles": [
+    {
+      "path": "scripts/analysis/value-experiments/model-request.py",
+      "sha256": "43ddc740d13a52fa68fc15dc5cd135dbaad3af9be73ca56092dc5282bd74e9d9",
+      "bytes": 10455,
+      "equalsOriginalUncommittedBytes": true
+    },
+    {
+      "path": "scripts/analysis/value-experiments/test-model-request.py",
+      "sha256": "c8901b2895d2af5050187c17e3bac9d98b754843c0277a32b778254f16eca0c5",
+      "bytes": 5258,
+      "equalsOriginalUncommittedBytes": true
+    },
+    {
+      "path": "scripts/analysis/value-experiments/consumer-broker.py",
+      "sha256": "f085a69d95bf79c70d4a728583d218ae552ebe8e3abf7cf774ebf0c80dd5b149",
+      "bytes": 15667,
+      "equalsOriginalUncommittedBytes": true
+    },
+    {
+      "path": "scripts/analysis/value-experiments/test-consumer-broker.py",
+      "sha256": "7c343e3953ffda90a65db57633039bbb33077f55103b4e395faaf50b76276445",
+      "bytes": 3976,
+      "equalsOriginalUncommittedBytes": true
+    }
+  ],
+  "reviewedMetadata": [
+    {
+      "path": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint/internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md",
+      "sha256": "4e8d3ea30b51f84544c6591e479aabef6aca5d39df993edf3ca5db290e1ca09b",
+      "bytes": 4822
+    },
+    {
+      "path": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint/internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json",
+      "sha256": "29cfe5378bd0c6257a05d9a1c27d728cc196e84e7e1d81ad4463240f9b21c0d6",
+      "bytes": 7121
+    },
+    {
+      "path": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint/internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/commands.json",
+      "sha256": "893b8aaf15672de8d42e5e6d2b9ede4e1fbab7bffcbb00d41926e2c8a3976c8b",
+      "bytes": 2236
+    }
+  ],
+  "closure": {
+    "implementationImports": "Python standard library only.",
+    "testImports": "Each test dynamically loads only its adjacent implementation; standard-library test dependencies and self-created temporary files cover the rest.",
+    "modelRequestCoverage": [
+      "build_request packet keys, bounded output paths, literal materials/history, sampling/timeout settings",
+      "response_text tool-call/truncation rejection",
+      "parse_files exact declared file set and inert source strings"
+    ],
+    "consumerBrokerCoverage": [
+      "validate_action declared fields, paths and bounded reads/writes",
+      "Broker initialization and temporary list/read/write/copy capabilities",
+      "Symlink/path and configuration/action rejection",
+      "Existing install-before-build and source-revision-before-observe guards"
+    ],
+    "notExecuted": [
+      "model-request.run",
+      "consumer-broker.main",
+      "Broker.command",
+      "Actual install/build/observe paths",
+      "HTTP transport/provider authentication",
+      "Browser and participant journey"
+    ]
+  },
+  "independentOfflineExecution": {
+    "pythonVersion": "Python 3.12.14",
+    "environmentControl": "PYTHONDONTWRITEBYTECODE=1 and -B; no source or bytecode write in the old worktree.",
+    "runs": [
+      {
+        "command": [
+          "python3",
+          "-B",
+          "/workspace/scratch/b8a4839de6ed/s7-experiments/scripts/analysis/value-experiments/test-model-request.py"
+        ],
+        "exitCode": 0,
+        "tests": 9,
+        "failures": 0,
+        "durationSeconds": 0.149,
+        "stdout": "",
+        "stderr": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.002s\n\nOK\n"
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "/workspace/scratch/b8a4839de6ed/s7-experiments/scripts/analysis/value-experiments/test-consumer-broker.py"
+        ],
+        "exitCode": 0,
+        "tests": 6,
+        "failures": 0,
+        "durationSeconds": 0.105,
+        "stdout": "",
+        "stderr": "......\n----------------------------------------------------------------------\nRan 6 tests in 0.007s\n\nOK\n"
+      }
+    ],
+    "sourceHashesBeforeAfterEqual": true,
+    "aggregate": {
+      "tests": 15,
+      "failures": 0,
+      "modelRuns": 0,
+      "apiRequests": 0,
+      "browserRuns": 0,
+      "packageInstalls": 0,
+      "consumerBuilds": 0,
+      "consumerObservations": 0,
+      "participantJourneys": 0
+    },
+    "temporaryFixtureFileActionsOccurred": true
+  },
+  "implementationEvidenceReadback": {
+    "commandsPath": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint/internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/commands.json",
+    "runs": 2,
+    "tests": 15,
+    "failures": 0,
+    "logs": [
+      {
+        "path": "model-request.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "matchesCommandRecord": true
+      },
+      {
+        "path": "model-request.stderr.log",
+        "sha256": "3eea58862ed4dc1fc5072e6a9611d39c1b06d3384e3615f864e6a03f76e27975",
+        "bytes": 1345,
+        "matchesCommandRecord": true
+      },
+      {
+        "path": "consumer-broker.stdout.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "matchesCommandRecord": true
+      },
+      {
+        "path": "consumer-broker.stderr.log",
+        "sha256": "053f30295a142af60f11caf0723bfbda9c0bd274b77f47895d59e3e6d02b5906",
+        "bytes": 916,
+        "matchesCommandRecord": true
+      }
+    ],
+    "allLogBytesAndHashesMatch": true
+  },
+  "findings": [
+    {
+      "id": "PROTOCOL-BUILD-001",
+      "severity": "P2-before-live-consumer-execution",
+      "status": "open-in-preserved-original",
+      "path": "scripts/analysis/value-experiments/consumer-broker.py",
+      "sourceLines": "139-153",
+      "problem": "A failed or timed-out build does not clear built_revision retained from an earlier successful build of the same source revision. A later observe can pass its guard even when the failed builder has cleared or partially changed dist.",
+      "minimalSourceCounterexample": [
+        "installed=true and built_revision==revision after one successful build",
+        "Request another build at the same revision",
+        "Typecheck/build fails or times out; built_revision remains equal to revision",
+        "observe passes its revision guard despite the unsuccessful latest build and potentially changed output"
+      ],
+      "reproductionScope": "Source-level state counterexample; no actual build or browser was run.",
+      "checkpointImpact": "Does not block preserving original bytes with this explicit limitation. Existing six broker tests do not cover this state sequence.",
+      "nextStep": "Separately invalidate prior build authority before a legal build starts; prove failure/timeout observation rejection before server/observer startup and successful recovery. S2 has scheduled a separate additive repair after the preservation commit."
+    }
+  ],
+  "executionInterpretationLimits": [
+    "Four files close the offline import/test dependencies, not the full live consumer stage. Stage-local build-submission.mjs, consumer-check.mjs, protocol/task/system texts, starter/distribution, declared runtime and fixed-lock dependencies are separate required inputs.",
+    "The model-request entrypoint stores parsed source as inert JSON. The consumer broker has explicit tool-like action dispatch; these two executor roles must not be conflated.",
+    "participant-finished and exit 0 mean a finish action was received; completed=false can still terminate normally. Process exit does not establish successful task or product behavior.",
+    "The consumer broker does not attach PUI_STUDY_API_KEY as Authorization; no provider/authentication support is established by the offline tests.",
+    "No complete process/network sandbox, complete artifact admission/freshness, experimental advantage or uninformed participant outcome is established.",
+    "The other 17 old experiment scripts and knowledge-consumer/Dialog changes are outside this checkpoint.",
+    "This review is not a formal GitHub approval, merge authorization, fresh model experiment or #750 acceptance."
+  ],
+  "metadataAssessment": "README and source-preservation.json accurately state offline closure, zero live executions, external stage dependencies, original uncommitted provenance, the open build finding and finish/auth limitations."
+}

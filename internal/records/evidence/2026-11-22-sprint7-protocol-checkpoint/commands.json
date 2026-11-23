@@ -1,0 +1,60 @@
+[
+  {
+    "name": "model-request",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-B",
+      "scripts/analysis/value-experiments/test-model-request.py",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
+    "startedAt": "2026-11-22T19:07:24.958632+00:00",
+    "finishedAt": "2026-11-22T19:07:25.052075+00:00",
+    "elapsedSeconds": 0.093696,
+    "exitCode": 0,
+    "tests": 9,
+    "failures": 0,
+    "pythonExecutable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "pythonVersion": "3.12.14",
+    "stdout": {
+      "path": "model-request.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "model-request.stderr.log",
+      "bytes": 1345,
+      "sha256": "3eea58862ed4dc1fc5072e6a9611d39c1b06d3384e3615f864e6a03f76e27975"
+    },
+    "scope": "Existing offline protocol boundary tests using standard-library temporary fixtures only; neither live executor entrypoint invoked."
+  },
+  {
+    "name": "consumer-broker",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+      "-B",
+      "scripts/analysis/value-experiments/test-consumer-broker.py",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/eb30117f7b2a/sprint7-protocol-checkpoint",
+    "startedAt": "2026-11-22T19:07:25.052385+00:00",
+    "finishedAt": "2026-11-22T19:07:25.372023+00:00",
+    "elapsedSeconds": 0.323111,
+    "exitCode": 0,
+    "tests": 6,
+    "failures": 0,
+    "pythonExecutable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+    "pythonVersion": "3.12.14",
+    "stdout": {
+      "path": "consumer-broker.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "consumer-broker.stderr.log",
+      "bytes": 916,
+      "sha256": "053f30295a142af60f11caf0723bfbda9c0bd274b77f47895d59e3e6d02b5906"
+    },
+    "scope": "Existing offline protocol boundary tests using standard-library temporary fixtures only; neither live executor entrypoint invoked."
+  }
+]
