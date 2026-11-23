@@ -249,7 +249,7 @@ mod authored_renderer_identity_tests {
 
     #[test]
     fn captured_native_renderer_retains_its_original_callable_identity() {
-        let native:NativeCallable<dyn Fn()->NativeSnapshot>=NativeCallable{identity:Rc::new(()),call:Rc::new(NativeSnapshot::empty)};
+        let native:NativeCallable<dyn Fn()->NativeSnapshot>=NativeCallable{identity:Rc::new(()),call:Rc::new(NativeSnapshot::empty),ordinary:None};
         let render:NativeRenderer=Rc::new(|_|NativeSnapshot::empty());
         let original=Value::NativeFunction{identity:native.identity.clone(),render:render.clone()};
         let captured=capture_renderer(original.clone(),render);
