@@ -27,7 +27,7 @@ fn cancel_delay(delay:&NativeDelay){delay.active.set(false);delay.callback.borro
 pub fn schedule_delay(owner:&OwnerWeak,duration:Value,callback:Value)->Value {
     let owner_ref=runtime(owner);let duration=duration.num();
     if !duration.is_finite()||duration<0.{value_type_error("Delay duration must be finite and nonnegative")}
-    if !matches!(callback,Value::Function(_)){value_type_error("Delay callback must be callable")}
+    if !callback.is_callback(){value_type_error("Delay callback must be callable")}
     let (app,window)={let owner=owner_ref.borrow();(owner.atoms.app.clone().expect("native scheduler is not bound"),owner.atoms.window.expect("native scheduler window is not bound"))};
     let delay=Rc::new(NativeDelay{active:Cell::new(true),callback:RefCell::new(Some(callback)),task:RefCell::new(None)});
     let executor=app.background_executor().clone();let start=executor.now();let weak=owner.clone();let pending=delay.clone();
@@ -94,7 +94,7 @@ pub fn presence_owner(owner:&OwnerWeak)->Value {
     let state=Rc::new(RefCell::new(NativePresence{reference:reference.clone(),writer:writer.clone(),frame:Value::Undefined,binding:Value::Undefined,pending:Value::Undefined,callback:Value::Undefined}));
     owner_ref.borrow_mut().atoms.presence.push(state.clone());let weak=owner.clone();
     freeze(record(vec![("ref",reference),("writer",writer),("onCompletionRequest",Value::Function(Rc::new(move|args|{
-        setup(&weak);let callback=arg(&args,0);if !matches!(callback,Value::Function(_))||!state.borrow().callback.nullish(){value_type_error("Exactly one presence completion receiver is required")}
+        setup(&weak);let callback=arg(&args,0);if !callback.is_callback()||!state.borrow().callback.nullish(){value_type_error("Exactly one presence completion receiver is required")}
         state.borrow_mut().callback=callback;Value::Undefined
     })))]))
 }

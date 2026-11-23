@@ -5,6 +5,7 @@ import { validateNativeInteraction } from './native-interaction';
 import { declaredSetValueEvent } from './a11y-event-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
+import { valueAlternatives } from './value-types';
 import {
   observableSemantics,
   type ObservableSemantics,
@@ -226,6 +227,7 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'textControl.on',
   'textControl.sync',
   'textControl.snapshot',
+  'textControl.resetValue',
   'imageView.on',
   'imageView.sync',
   'imageView.snapshot',
@@ -744,7 +746,21 @@ export function checkTargetOperations(
       case 'intrinsic':
         if (
           value.name === 'string' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(
+            selected.framework === 'gpui' &&
+            value.arguments.every((argument) =>
+              valueAlternatives(argument.type).every(
+                (member) =>
+                  member === 'string' ||
+                  member === 'number' ||
+                  member === 'boolean' ||
+                  member === 'null' ||
+                  member === 'void' ||
+                  (typeof member !== 'string' && member.kind === 'literal')
+              )
+            )
+          )
         )
           diagnostic(
             'PUI4003',
