@@ -146,11 +146,30 @@ export interface CallableEffectIssue {
  * unresolved source callable edges are diagnosed rather than treated as empty.
  */
 export function callableEffectIssue(ir: PrototypeIR): CallableEffectIssue | undefined {
+  // An event declaration is not a data escape. Omitted payloads and the actual
+  // undefined expression cannot retain an object graph; every other expression
+  // still needs its real value provenance, even when its checked type is void.
+  // Scan all executable bodies conservatively, including defaults, module
+  // helpers and dormant closures. Phase/callable analysis always runs below.
+  const seen = new Set<object>();
+  const hasPayload = (value: unknown): boolean => {
+    if (!value || typeof value !== 'object' || seen.has(value)) return false;
+    seen.add(value);
+    if (Array.isArray(value)) return value.some(hasPayload);
+    const node = value as Record<string, unknown>;
+    if (node.kind === 'operation' && node.operation === 'expose.emit') {
+      const payload = (node.arguments as ExpressionIR[])[1];
+      if (payload && payload.kind !== 'undefined') return true;
+    }
+    return Object.entries(node).some(
+      ([key, child]) => key !== 'type' && key !== 'span' && hasPayload(child)
+    );
+  };
   return analyzeCallableFlow(
     ir,
     undefined,
     undefined,
-    ir.exposes.some((item) => item.kind === 'event')
+    hasPayload([ir.setup, ir.moduleBindings, ir.hooks])
   );
 }
 

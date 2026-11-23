@@ -144,3 +144,6 @@ internal/records/evidence/2026-11-24-sprint2-cli-source-proof/
 
 # Exact Bootstrap observer source, frames, images and original execution bytes.
 internal/records/evidence/2026-11-24-sprint2-bootstrap-observer/
+
+# Original compiler profiles, controlled stops, inputs and independent review bytes.
+internal/records/evidence/2026-11-24-sprint2-compiler-convergence/
