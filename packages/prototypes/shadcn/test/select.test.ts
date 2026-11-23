@@ -93,8 +93,11 @@ describe('prototypes/shadcn: select', () => {
     expect(styleContains(content, 'min-w-[var(--proto-ui-anchor-width)]')).toBe(true);
     expect(styleContains(alpha, 'rounded-sm')).toBe(true);
     expect(styleContains(alpha, 'justify-between')).toBe(false);
-    expect(styleContains(alpha, 'pl-2')).toBe(true);
-    expect(styleContains(alpha, 'pr-8')).toBe(true);
+    // The Item reserves its inline-start and inline-end space with the
+    // logical inline tokens; the expectation follows that token change and
+    // stays exactly as strict as the physical pair it replaces.
+    expect(styleContains(alpha, 'ps-2')).toBe(true);
+    expect(styleContains(alpha, 'pe-8')).toBe(true);
     expect(alpha.querySelector('svg')).toBeNull();
     expect(alpha.lastElementChild?.tagName).toBe('SPAN');
   });
