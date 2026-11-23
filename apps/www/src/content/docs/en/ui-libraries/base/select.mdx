@@ -14,12 +14,35 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   <PrototypePreviewer
     demoId="demo-base-select"
     initialRuntime="wc"
-    runtimes={['wc', 'react', 'vue']}
+    runtimes={['wc', 'react', 'vue', 'vue2']}
     hasCode={true}
   />
 </div>
 
 It follows the APG select-only combobox pattern: Trigger projects `combobox`, Content projects `listbox`, and Item projects `option`. The committed selection is persistent state; the active item while open is transient navigation state.
+
+## Current-source installation and Usage
+
+The Code panels use the current workspace's public package exports. Install `@proto.ui/cli`, `@proto.ui/prototypes-base`, `@proto.ui/prototypes-lucide` and the selected Adapter from the same reviewed source revision. For a source checkout, the repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) supply the local packages and their declared dependency closure. This page does not assert that the workspace version is published to npm; the [stable Quick Start](/en/start-here/quick-start/) describes the published-version route.
+
+Each panel is a complete file for an existing application with a module bundler. React and Vue retain the application's existing mount entry. Vue 2 uses Vue `>=2.6.0 <2.7`.
+
+| Host           | Adapter package                   | File to copy  |
+| -------------- | --------------------------------- | ------------- |
+| Web Components | `@proto.ui/adapter-web-component` | `index.html`  |
+| React          | `@proto.ui/adapter-react`         | `src/App.tsx` |
+| Vue            | `@proto.ui/adapter-vue`           | `src/App.vue` |
+| Vue 2          | `@proto.ui/adapter-vue2`          | `src/App.vue` |
+
+For the first Proto UI integration, run the installed matching CLI from the application directory:
+
+```sh
+node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
+```
+
+Keep the generated `src/styles/proto-ui-style.css`: the examples import it for Proto UI's structural rules. Import it once if the application entry already loads it. Each example also contains its own small application stylesheet for Base Select's layout and paint; the initialization preset does not change the adapted Base prototypes.
+
+Copy the entire panel for the chosen host. WC registers its own `app-base-select-*` elements and supplies `accessibleLabel`, `placeholder`, icon size and item values through `setElementProps` before connecting them. React passes `createPortal` from `react-dom` into `createReactAdapter` so React owns Content's portal. Both Vue examples register all of the components they use. Trigger's `accessibleLabel` keeps the control name independent of the selected value.
 
 ## Family Parts
 
