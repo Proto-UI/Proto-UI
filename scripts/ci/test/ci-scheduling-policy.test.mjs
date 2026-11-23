@@ -447,16 +447,23 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
 });
 
 function assertReusableCompilerInputBoundary(workflow) {
-  // The separate Adapter lane is a default-off reusable input. Package-budget
-  // and Website evidence remain manual-only and cannot enter workflow_call.
+  // Adapter and browser lanes have separate default-off reusable inputs.
+  // Package-budget and Website evidence remain manual-only.
   assert.deepEqual(workflow.on.workflow_call, {
     inputs: {
       adapter_acceptance: { type: 'boolean', required: false, default: false },
+      browser_acceptance: { type: 'boolean', required: false, default: false },
     },
   });
+  const browser = workflow.jobs['browser-compiler'];
+  assert.equal(browser.if, '${{ inputs.browser_acceptance }}');
+  assert.equal(browser.uses, './.github/workflows/compiler-browser-acceptance.yml');
+  assert.equal(browser.needs, undefined);
+  assert.deepEqual(browser.with, { source_regressions: true, production_build: true });
+  assert.deepEqual(browser.permissions, { contents: 'read' });
 }
 
-test('reusable compiler inputs preserve the separate default-off Adapter boundary', () => {
+test('reusable compiler inputs preserve separate default-off Adapter and browser boundaries', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
   const mutations = [
@@ -471,6 +478,27 @@ test('reusable compiler inputs preserve the separate default-off Adapter boundar
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance.default = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance.required = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = 'true';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].needs = ['native-consumer'];
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].permissions.contents = 'write';
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.package_budget_evidence = {
@@ -560,6 +588,9 @@ test('native Scroll evidence rejects missing, filtered, optional or swallowed na
       workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
         (step) => !step.run?.includes('--test scroll_pause ')
       );
+    },
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps.push(structuredClone(targetStep(workflow)));
     },
     (workflow) => {
       targetStep(workflow).if = 'false';
