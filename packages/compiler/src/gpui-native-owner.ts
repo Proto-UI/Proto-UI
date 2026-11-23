@@ -824,14 +824,14 @@ element=element.child(canvas(move|_,window,_|{note_host_order(&measured);hover_v
         // A mounted/updated callback may publish before it throws. Preserve
         // the reported error and stopped callback list; only deliver events
         // already published, without retrying commit or authored projection.
-        if native_host_callback(&owner,"commit",||{
+        native_host_callback(&owner,"commit",||{
             let current={let o=owner.borrow();!o.disposed&&o.present&&o.bounds.is_some()&&o.epoch==epoch&&o.window_id==Some(window.window_handle().window_id())&&o.projection_revision==revision};
             if !current{return}if native_focus_observation_needed(&owner){owner.borrow_mut().modules.focus.native=Some(focus);}
             #[cfg(feature="experimental-focus-tree")]refresh_native_entry(&owner,window);
             Owner::commit(&owner,revision);if owner.borrow().disposed||!owner.borrow().present{return}
             if native_hover_reconcile(&owner,window,cx){window.prevent_default()}
             poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{drive(window,cx)}
-        }).is_none(){drive_pending_native_events(&owner,window,cx); }
+        });
     });
 }).absolute().size_full());
 if image_supported(owner){let fill_height=matches!(element.style().size.height,Some(gpui::Length::Definite(_)));element=element.child(image_element(owner,fill_height));}
