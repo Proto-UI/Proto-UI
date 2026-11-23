@@ -225,21 +225,50 @@ export function emitRustDataSource(
     const text = Object.is(value, -0) ? '-0' : String(value);
     return `${/^-?\d+$/.test(text) ? `${text}.0` : text}f64`;
   }
+  function optionalFieldData(type: DataType): DataType {
+    if (typeof type === 'string') return type;
+    if (type.kind === 'array') return { ...type, element: optionalFieldData(type.element) };
+    if (type.kind === 'union') return { ...type, members: type.members.map(optionalFieldData) };
+    if (type.kind !== 'record') return type;
+    return {
+      ...type,
+      fields: type.fields.map((field) => {
+        // Both ordinary objects and already checked DataType records can carry
+        // the optional field's read-domain undefined. The existing finite-data
+        // projection represents that absence once, through the optional bit.
+        const projected = field.optional
+          ? serializableDataType({ kind: 'record', fields: [field] })
+          : undefined;
+        const value =
+          projected && typeof projected !== 'string' && projected.kind === 'record'
+            ? projected.fields[0].type
+            : field.type;
+        return { ...field, type: optionalFieldData(value) };
+      }),
+    };
+  }
   function data(type: ExpressionIR['type'], span = ir.setup.span): DataType {
-    if (isDataValueType(type)) return type;
+    if (isDataValueType(type)) return optionalFieldData(type);
     if (typeof type !== 'string' && type.kind === 'value-array') {
       const schema = serializableDataType(type);
-      if (schema !== undefined) return schema;
+      if (schema !== undefined) return optionalFieldData(schema);
     }
-    if (typeof type !== 'string' && type.kind === 'object' && !type.index)
-      return {
+    if (typeof type !== 'string' && type.kind === 'object' && !type.index) {
+      // An optional ordinary field includes undefined in its read type; its
+      // finite-data schema already records absence with `optional`. Reuse that
+      // projection so the Rust ABI has one Option, while required explicit
+      // void fields and literal validation retain their existing handling.
+      const schema = serializableDataType(type);
+      if (schema !== undefined) return optionalFieldData(schema);
+      return optionalFieldData({
         kind: 'record',
         fields: type.fields.map((field) => ({
           name: field.name,
           type: data(field.type, span),
           ...(field.optional ? { optional: true } : {}),
         })),
-      };
+      });
+    }
     if (typeof type !== 'string' && type.kind === 'value-union')
       return { kind: 'union', members: type.members.map((member) => data(member, span)) };
     throw new Unsupported(

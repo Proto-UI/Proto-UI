@@ -138,45 +138,52 @@ function emitJavaScriptExternalCall(
 export function formatJavaScriptValueType(
   type: ValueType,
   atom: (type: ValueType) => string,
-  stored = false
+  stored = false,
+  override?: (type: ValueType) => string | undefined
 ): string {
+  const specialized = override?.(type);
+  if (specialized !== undefined) return specialized;
   const ordinary = ecmaTypeName(type);
   if (ordinary !== undefined) return ordinary;
   if (isDataValueType(type)) return formatNativeDataType(type, stored);
   if (typeof type === 'string') return atom(type);
   switch (type.kind) {
     case 'value-array':
-      return `${type.readonly ? 'ReadonlyArray' : 'Array'}<${formatJavaScriptValueType(type.element, atom, true)}>`;
+      return `${type.readonly ? 'ReadonlyArray' : 'Array'}<${formatJavaScriptValueType(type.element, atom, true, override)}>`;
     case 'map':
-      return `${type.readonly ? 'ReadonlyMap' : 'Map'}<${formatJavaScriptValueType(type.key, atom, true)}, ${formatJavaScriptValueType(type.value, atom, true)}>`;
+      return `${type.readonly ? 'ReadonlyMap' : 'Map'}<${formatJavaScriptValueType(type.key, atom, true, override)}, ${formatJavaScriptValueType(type.value, atom, true, override)}>`;
     case 'set':
-      return `${type.readonly ? 'ReadonlySet' : 'Set'}<${formatJavaScriptValueType(type.element, atom, true)}>`;
+      return `${type.readonly ? 'ReadonlySet' : 'Set'}<${formatJavaScriptValueType(type.element, atom, true, override)}>`;
     case 'capture':
       return '{ readonly stateHandles?: Readonly<Record<string, unknown>>; readonly getState?: (name: string) => unknown; readonly getMethod?: (name: string) => unknown; readonly getAsHook?: (name: string) => unknown; readonly getAsHookHandle?: (name: string) => unknown; readonly render?: unknown }';
     case 'cell':
-      return formatJavaScriptValueType(type.value, atom, true);
+      return formatJavaScriptValueType(type.value, atom, true, override);
     case 'value-union': {
       const members = type.members.map(
-        (member) => `(${formatJavaScriptValueType(member, atom, true)})`
+        (member) => `(${formatJavaScriptValueType(member, atom, true, override)})`
       );
       // Wrap the complete union as well: an arrow return ending in a lone
       // `(undefined) =>` would otherwise parse as a function-type member.
       return members.length ? `(${members.join(' | ')})` : 'never';
     }
     case 'callable': {
-      const parameters = emitJavaScriptSignatureParameters(type.parameters, (value) =>
-        formatJavaScriptValueType(value, atom)
+      const parameters = emitJavaScriptSignatureParameters(
+        type.parameters,
+        (value) => formatJavaScriptValueType(value, atom, false, override),
+        override
       );
-      return `(${parameters}) => ${formatJavaScriptValueType(type.returnType, atom)}`;
+      return `(${parameters}) => ${formatJavaScriptValueType(type.returnType, atom, false, override)}`;
     }
     case 'object':
       return `{ ${type.fields
         .map(
           (field) =>
-            `${field.readonly ? 'readonly ' : ''}${JSON.stringify(field.name)}${field.optional ? '?' : ''}: ${formatJavaScriptValueType(field.type, atom, true)}`
+            `${field.readonly ? 'readonly ' : ''}${JSON.stringify(field.name)}${field.optional ? '?' : ''}: ${formatJavaScriptValueType(field.type, atom, true, override)}`
         )
         .concat(
-          type.index ? [`[key: string]: ${formatJavaScriptValueType(type.index, atom, true)}`] : []
+          type.index
+            ? [`[key: string]: ${formatJavaScriptValueType(type.index, atom, true, override)}`]
+            : []
         )
         .join('; ')} }`;
   }
@@ -290,12 +297,13 @@ export function createJavaScriptValueReader(
 export function emitJavaScriptParameters(
   parameters: readonly ParameterIR[],
   emit: (value: ExpressionIR) => string,
-  typeName?: (type: ValueType) => string
+  typeName?: (type: ValueType) => string,
+  override?: (type: ValueType) => string | undefined
 ): string {
   return parameters
     .map(
       (parameter) =>
-        `${parameter.rest ? '...' : ''}${parameter.name}${typeName ? `${parameter.optional && !parameter.default ? '?' : ''}: ${formatJavaScriptValueType(parameter.type, typeName, true)}` : ''}${parameter.default ? ` = ${emit(parameter.default)}` : ''}`
+        `${parameter.rest ? '...' : ''}${parameter.name}${typeName ? `${parameter.optional && !parameter.default ? '?' : ''}: ${formatJavaScriptValueType(parameter.type, typeName, true, override)}` : ''}${parameter.default ? ` = ${emit(parameter.default)}` : ''}`
     )
     .join(', ');
 }
@@ -303,13 +311,14 @@ export function emitJavaScriptParameters(
 /** Types describe default acceptance without evaluating the initializer. */
 export function emitJavaScriptSignatureParameters(
   parameters: readonly ParameterIR[],
-  typeName: (type: ValueType) => string
+  typeName: (type: ValueType) => string,
+  override?: (type: ValueType) => string | undefined
 ): string {
   const required = minimumArgumentCount(parameters);
   return parameters
     .map((parameter, index) => {
       const optional = !!(parameter.optional || parameter.default);
-      const value = formatJavaScriptValueType(parameter.type, typeName, true);
+      const value = formatJavaScriptValueType(parameter.type, typeName, true, override);
       // Leading defaults still occupy required positions when followed by a
       // required argument. Only the trailing optional suffix may use '?'.
       return `${parameter.rest ? '...' : ''}${parameter.name}${optional && index >= required ? '?' : ''}: ${optional && index < required ? `(${value}) | undefined` : value}`;

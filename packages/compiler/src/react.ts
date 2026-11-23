@@ -93,6 +93,14 @@ export function emitReact(
       },
     ])
   );
+  // Core capture lookup keys come from this checked Hook's contract. Native
+  // source hosts have a different capture ABI, so keep this override local to
+  // the runtime target and carry it through nested parameter/value types.
+  function captureTypeName(type: ValueType): string | undefined {
+    if (typeof type !== 'string' && type.kind === 'capture')
+      return `${core}.AsHookResult<GeneratedProps, ${hookContract(ir.hooks.find((hook) => hook.id === type.hookId)!)}>`;
+    return undefined;
+  }
   function typeName(type: ValueType): string {
     if (type === 'delay-task') return `${core}.DelayTask`;
     if (type === 'presence-owner') return `${core}.PresenceOwnerDeclaration<GeneratedProps>`;
@@ -101,10 +109,11 @@ export function emitReact(
     if (type === 'presentation-view-binding') return `${core}.PresentationViewBinding`;
     if (type === 'context-key')
       return "import('@proto.ui/types').ContextKey<import('@proto.ui/types').JsonObject>";
-    if (typeof type !== 'string' && type.kind === 'capture')
-      return `${core}.AsHookResult<GeneratedProps, ${hookContract(ir.hooks.find((hook) => hook.id === type.hookId)!)}>`;
+    const capture = captureTypeName(type);
+    if (capture !== undefined) return capture;
     if (typeof type === 'string' && type.startsWith('lexical:')) return type.slice(8);
-    if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
+    if (typeof type !== 'string')
+      return formatJavaScriptValueType(type, typeName, false, captureTypeName);
     if (type === 'exception') return 'unknown';
     if (type === 'public-expose') return 'unknown';
     if (type === 'public-method') return '(...args: unknown[]) => unknown';
@@ -183,7 +192,7 @@ export function emitReact(
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return emitJavaScriptSignatureParameters(values, typeName);
+    return emitJavaScriptSignatureParameters(values, typeName, captureTypeName);
   }
   function hookContract(hook: AuthoredHookIR): string {
     const capture = hook.capture;
@@ -205,7 +214,7 @@ export function emitReact(
     return `{ state: { ${states} }; asHooks: { ${children} } }`;
   }
   function fn(value: FunctionIR, depth: number): string {
-    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
+    return `(${emitJavaScriptParameters(value.parameters, (item) => expression(item, depth), typeName, captureTypeName)})${value.context === 'helper' && value.returnType !== 'function' && value.returnType !== 'unknown' ? `: ${typeName(value.returnType)}` : ''} => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {

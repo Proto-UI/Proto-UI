@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "4d9a621618a63bace047776fbdf9eb7a20685cbc",
+  "revision": "b0397ecb21ca0a49287129a16058f64f42176906",
   "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners plus the Button example producer. Transitive/runtime and served-source proof remain unobserved.",
   "sourceAdmission": "unverified",
   "sources": [
@@ -79,7 +79,7 @@
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7"
+      "sha256": "fae7fd7ec4adfde8a9d493c14b73491f485c29b36db8ec405d89b6525f68d47f"
     },
     {
       "path": "apps/www/package.json",

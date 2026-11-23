@@ -982,8 +982,13 @@ ${propSchemas}
 ${
   hasAuthoredHooks
     ? `  const ${p}Authored = ${p}CreateAuthored({setup: () => ensurePhase('setup'), borrow(value) {
-    const state = value as ${p}State<unknown>, external = externalStates.get(state) as ${p}ExternalState<unknown>;
-    return Object.freeze({ get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: ${p}StateEvent<unknown>) => void) { ensurePhase('setup'); const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event))); authorStateWatchCleanups.push(off); return off; } });
+    const state = value as ${p}State<unknown>, external = externalStates.get(state) as ${p}ExternalState<unknown> | undefined;
+    if (!external) throw new Error('[State] borrowed state must belong to this instance.');
+    const borrowed = Object.freeze({ get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: ${p}StateEvent<unknown>) => void) { ensurePhase('setup'); const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event))); authorStateWatchCleanups.push(off); return off; } });
+    // A capture borrows the same owner State; native modules must retain its provenance.
+    externalStates.set(borrowed, external);
+${atoms.presentation ? `    ${p}Presence.registerSource(borrowed);` : ''}
+    return borrowed;
   } });`
     : ''
 }

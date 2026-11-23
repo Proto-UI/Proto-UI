@@ -1586,7 +1586,10 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     visit(source);
     expect(declarations.length).toBe(2);
     for (const declaration of declarations) {
-      const fn = declaration.initializer;
+      let fn = declaration.initializer;
+      // The shared uninvoked-body emitter can parenthesize the same original
+      // function allocation. Parentheses do not add a wrapper or projector.
+      while (fn && ts.isParenthesizedExpression(fn)) fn = fn.expression;
       expect(fn && ts.isArrowFunction(fn)).toBe(true);
       if (!fn || !ts.isArrowFunction(fn)) throw new Error('Expected original arrow creation');
       expect(fn.parameters.map((parameter) => parameter.name.getText(source))).toEqual([

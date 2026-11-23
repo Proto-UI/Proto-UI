@@ -2590,7 +2590,13 @@ class Frontend {
       if (!elementTypes.every(isDataValueType)) {
         if (elementTypes.every((type) => type === 'a11y-ref'))
           return { kind: 'array', type: 'a11y-ref-list', elements, span };
-        if (elementTypes.every(isTemplateChildType))
+        // Nested ordinary data arrays are also valid template children. Keep
+        // their actual data/storage identity instead of erasing them to the
+        // renderer-only array marker merely because both views are possible.
+        if (
+          elementTypes.every(isTemplateChildType) &&
+          !elementTypes.every((type) => serializableDataType(type) !== undefined)
+        )
           return { kind: 'array', type: 'array', elements, span };
         return {
           kind: 'array',

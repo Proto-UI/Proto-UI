@@ -434,6 +434,7 @@
     "src/behaviors/index.ts",
     "src/behaviors/use-typeahead-navigation.ts",
     "src/button/button.proto.ts",
+    "src/button/focus-retained-visibility.proto.ts",
     "src/button/index.ts",
     "src/button/types.ts",
     "src/calendar/calendar.proto.ts",
