@@ -193,11 +193,14 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'packages/compiler/test/pointer-facts-admission.test.ts',
     'packages/compiler/test/gpui-a11y-value.test.ts',
     'packages/compiler/test/numeric-a11y-emitter-admission.test.ts',
+    'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts',
+    'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts',
+    'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
   ]);
   const integration = steps.find((step) => step.id === 'integration-unit');
   assert.equal(integration.timeoutMs, 90_000);
   assert.deepEqual(integration.suites, SPRINT1_INTEGRATION_UNIT_SUITES);
-  assert.deepEqual(integration.args.slice(-8), SPRINT1_INTEGRATION_UNIT_SUITES);
+  assert.deepEqual(integration.args.slice(-11), SPRINT1_INTEGRATION_UNIT_SUITES);
   assert.ok(integration.suites.every((suite) => !SPRINT1_UNIT_SUITES.includes(suite)));
   assert.ok(
     integration.args.every(

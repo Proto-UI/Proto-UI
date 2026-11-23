@@ -168,7 +168,8 @@ export function initPreviewerBootstrap(
     visibility.disconnect();
     for (const root of pending.keys()) release(root);
   };
-  const removal = new view.MutationObserver(() => {
+  const removal = new view.MutationObserver((records) => {
+    if (!records.some((record) => record.removedNodes.length > 0)) return;
     for (const root of pending.keys()) if (!root.isConnected) release(root);
   });
   removal.observe(document.documentElement, { childList: true, subtree: true });

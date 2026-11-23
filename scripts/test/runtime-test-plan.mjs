@@ -6,7 +6,6 @@ export const READY_ROUTES = Object.freeze([
   '/en/ui-libraries/shadcn/menubar/',
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
-  '/en/test/bootstrap-state-controls/',
   '/en/test/liquid-glass-state-controls/',
   '/en/ui-libraries/bootstrap-2-3-2/button/',
   '/en/test/liquid-glass-material/',
