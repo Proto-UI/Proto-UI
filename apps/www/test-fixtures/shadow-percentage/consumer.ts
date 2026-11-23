@@ -1,8 +1,5 @@
 import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
-import {
-  AdaptToWebComponent,
-  type ShadowStyleArtifactV1,
-} from '@proto.ui/adapter-web-component';
+import { AdaptToWebComponent, type ShadowStyleArtifactV1 } from '@proto.ui/adapter-web-component';
 
 // Authored public inputs. The CLI discovers these ordinary tw() calls; the
 // browser observer maintains its equations independently of this list.
@@ -138,12 +135,15 @@ export function createPercentageLab(artifact: ShadowStyleArtifactV1) {
       transition: style.transitionProperty,
       transitionDuration: style.transitionDuration,
       surfaceTransition: surfaceStyle.transitionProperty,
-      surfaceInlineTransition: (surface as HTMLElement).style.getPropertyValue('transition-property'),
+      surfaceInlineTransition: (surface as HTMLElement).style.getPropertyValue(
+        'transition-property'
+      ),
       inlinePercentage: host.style.getPropertyValue('--pui-percentage'),
       computedPercentage: style.getPropertyValue('--pui-percentage').trim(),
       rootTokens: host.getAttribute('data-pui-split-root-style'),
       surfaceTokens: surface.getAttribute('data-pui-style'),
-      slotIdentity: profile === 'light' ? host.contains(caller) : slot?.assignedNodes().includes(caller),
+      slotIdentity:
+        profile === 'light' ? host.contains(caller) : slot?.assignedNodes().includes(caller),
       callerIdentity: host.firstChild === caller,
       hit: hit === host || (hit !== null && host.contains(hit)),
       trustedClicks: [...trustedClicks],
@@ -223,7 +223,10 @@ export function createPercentageLab(artifact: ShadowStyleArtifactV1) {
         state: controls(host).read(),
         inlinePercentage: host.style.getPropertyValue('--pui-percentage'),
         transform: getComputedStyle(host).transform,
-        slotContainsHost: host.shadowRoot?.querySelector('slot')?.assignedNodes().includes(rows[1]!.host),
+        slotContainsHost: host.shadowRoot
+          ?.querySelector('slot')
+          ?.assignedNodes()
+          .includes(rows[1]!.host),
       }));
     },
     dispose() {

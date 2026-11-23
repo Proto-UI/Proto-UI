@@ -31,9 +31,12 @@ const generated = spawnSync(process.execPath, cliArgs, { cwd: root, encoding: 'u
 await writeFile(join(out, 'cli.log'), generated.stdout + generated.stderr);
 assert.equal(generated.status, 0, generated.stderr || generated.stdout);
 const entry = join(out, 'entry.ts');
-await writeFile(entry, `import { createPercentageLab } from ${JSON.stringify(fixture)};
+await writeFile(
+  entry,
+  `import { createPercentageLab } from ${JSON.stringify(fixture)};
 import { protoShadowStyleArtifact } from ${JSON.stringify(join(out, 'artifact.js'))};
-export const lab = createPercentageLab(protoShadowStyleArtifact);\n`);
+export const lab = createPercentageLab(protoShadowStyleArtifact);\n`
+);
 const bundle = await build({
   entryPoints: [entry],
   bundle: true,
@@ -57,13 +60,23 @@ for (const input of inputs) {
   inputHashes[relative(root, path)] = hash(await readFile(path));
 }
 const outputs = {};
-for (const name of ['entry.ts', 'consumer.js', 'tokens.css', 'artifact.js', 'artifact.d.ts', 'metafile.json']) {
+for (const name of [
+  'entry.ts',
+  'consumer.js',
+  'tokens.css',
+  'artifact.js',
+  'artifact.d.ts',
+  'metafile.json',
+]) {
   const data = await readFile(join(out, name));
   outputs[name] = { bytes: data.length, sha256: hash(data) };
 }
 const manifest = {
   kind: 'shadow-percentage-public-producer',
-  sourceHead: spawnSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).stdout.trim(),
+  sourceHead: spawnSync('git', ['rev-parse', 'HEAD'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).stdout.trim(),
   startedAt,
   finishedAt: new Date().toISOString(),
   cliCommand: [process.execPath, ...cliArgs],

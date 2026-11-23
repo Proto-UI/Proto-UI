@@ -54,16 +54,26 @@ const near = (actual, expected, label, tolerance = 0.06) => {
 function displacement(expression, width, percentage) {
   const p = percentage / 100;
   switch (expression) {
-    case 0: return width - 4;
-    case 1: return (width - 2) * p;
-    case 2: return (width - 4) * p;
-    case 3: return (width - 8) * p;
-    case 4: return (2 - width) * p;
-    case 5: return (4 - width) * p;
-    case 6: return (8 - width) * p;
-    case 7: return 1 + (width + 1) * p;
-    case 8: return -1 - (width + 1) * p;
-    default: throw new Error(`Unknown equation ${expression}`);
+    case 0:
+      return width - 4;
+    case 1:
+      return (width - 2) * p;
+    case 2:
+      return (width - 4) * p;
+    case 3:
+      return (width - 8) * p;
+    case 4:
+      return (2 - width) * p;
+    case 5:
+      return (4 - width) * p;
+    case 6:
+      return (8 - width) * p;
+    case 7:
+      return 1 + (width + 1) * p;
+    case 8:
+      return -1 - (width + 1) * p;
+    default:
+      throw new Error(`Unknown equation ${expression}`);
   }
 }
 function verifyRows(rows, config, percentage) {
@@ -83,7 +93,11 @@ function verifyRows(rows, config, percentage) {
     assert.equal(row.callerIdentity, true, `${label}: actual caller node`);
     assert.equal(row.hit, true, `${label}: actual host hit region`);
     assert.equal(row.state, config.expression === 0 ? null : percentage, `${label}: owned state`);
-    assert.equal(row.inlinePercentage, config.expression === 0 ? '' : String(percentage), `${label}: own CSS projection`);
+    assert.equal(
+      row.inlinePercentage,
+      config.expression === 0 ? '' : String(percentage),
+      `${label}: own CSS projection`
+    );
     if (row.profile === 'split') {
       assert.equal(row.surfaceTransform, 'none', `${label}: no duplicate surface transform`);
       assert.ok(row.rootTokens.includes('translate-x-['), `${label}: complete boundary role`);
@@ -91,16 +105,28 @@ function verifyRows(rows, config, percentage) {
     }
   }
 }
-const browser = await playwright.chromium.launch({ executablePath, headless: true, args: launchArgs });
+const browser = await playwright.chromium.launch({
+  executablePath,
+  headless: true,
+  args: launchArgs,
+});
 report.browserVersion = browser.version();
 try {
-  const page = await browser.newPage({ viewport: { width: 1000, height: 700 }, reducedMotion: 'no-preference' });
+  const page = await browser.newPage({
+    viewport: { width: 1000, height: 700 },
+    reducedMotion: 'no-preference',
+  });
   page.setDefaultTimeout(10000);
   page.on('pageerror', (error) => report.pageErrors.push(String(error)));
-  await page.setContent('<!doctype html><html><head><meta charset="utf-8"><style>html{font-size:16px}body{margin:0}</style></head><body></body></html>');
+  await page.setContent(
+    '<!doctype html><html><head><meta charset="utf-8"><style>html{font-size:16px}body{margin:0}</style></head><body></body></html>'
+  );
   await page.addStyleTag({ content: await readFile(join(input, 'tokens.css'), 'utf8') });
   await page.addScriptTag({ content: await readFile(join(input, 'consumer.js'), 'utf8') });
-  const settle = () => page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const settle = () =>
+    page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    );
   const mount = async (config) => {
     await page.evaluate((value) => PuiPercentage.lab.mount(value), config);
     await settle();
@@ -124,14 +150,21 @@ try {
           // Native input at the displaced boundary, outside the 4px slot marker.
           const before = await page.evaluate(() => PuiPercentage.lab.sample());
           for (const row of before) {
-            await page.mouse.click(row.host.x + row.host.width / 2, row.host.y + row.host.height / 2);
+            await page.mouse.click(
+              row.host.x + row.host.width / 2,
+              row.host.y + row.host.height / 2
+            );
           }
           const after = await page.evaluate(() => PuiPercentage.lab.sample());
           for (let i = 0; i < after.length; i++) {
             assert.equal(after[i].clicks, before[i].clicks + 1);
             assert.deepEqual(after[i].trustedClicks, [true]);
           }
-          item.clicks = after.map(({ profile, clicks, trustedClicks }) => ({ profile, clicks, trustedClicks }));
+          item.clicks = after.map(({ profile, clicks, trustedClicks }) => ({
+            profile,
+            clicks,
+            trustedClicks,
+          }));
           item.passed = true;
         } catch (error) {
           item.error = String(error.stack ?? error);
@@ -179,10 +212,21 @@ try {
         for (const profile of ['light', 'split']) {
           const start = displacement(expression, 32, 0);
           const end = displacement(expression, 32, 100);
-          const samples = item.frames.map((frame) => ({ ...frame, row: frame.rows.find((row) => row.profile === profile) }));
-          const fractions = samples.map(({ row }) => (row.host.x - row.anchor.x - start) / (end - start));
-          assert.ok(fractions.some((value) => value > 0.05 && value < 0.95), `${profile}: real intermediate movement`);
-          assert.ok(fractions.slice(1).some((value, i) => value < fractions[i] - 0.02), `${profile}: actual reversal`);
+          const samples = item.frames.map((frame) => ({
+            ...frame,
+            row: frame.rows.find((row) => row.profile === profile),
+          }));
+          const fractions = samples.map(
+            ({ row }) => (row.host.x - row.anchor.x - start) / (end - start)
+          );
+          assert.ok(
+            fractions.some((value) => value > 0.05 && value < 0.95),
+            `${profile}: real intermediate movement`
+          );
+          assert.ok(
+            fractions.slice(1).some((value, i) => value < fractions[i] - 0.02),
+            `${profile}: actual reversal`
+          );
           for (const { row } of samples) {
             near(row.surface.x, row.host.x, `${profile}: animated surface`);
             near(row.caller.x, row.host.x, `${profile}: animated slot`);
@@ -246,13 +290,38 @@ try {
     }
   }
   try {
+    // In an RTL block container, a 16px child starts at the right edge of a
+    // 48px containing block before its own transform. Check that independent
+    // browser layout fact with plain elements; do not infer an expected offset
+    // from the candidate's generated CSS or measured transformed child.
+    report.nestedFlowControl = await page.evaluate(() => {
+      const parent = document.createElement('div');
+      parent.style.cssText =
+        'position:absolute;left:0;top:0;display:block;direction:rtl;width:48px;height:16px;padding:0;border:0;';
+      const child = document.createElement('div');
+      child.style.cssText = 'display:block;width:16px;height:16px;margin:0;padding:0;border:0;';
+      parent.append(child);
+      document.body.append(parent);
+      const p = parent.getBoundingClientRect();
+      const c = child.getBoundingClientRect();
+      const result = { parentWidth: p.width, childWidth: c.width, offset: c.x - p.x };
+      parent.remove();
+      return result;
+    });
+    assert.deepEqual(report.nestedFlowControl, { parentWidth: 48, childWidth: 16, offset: 32 });
     await page.evaluate(() => PuiPercentage.lab.nested());
     await settle();
     await settle();
     report.nested = await page.evaluate(() => PuiPercentage.lab.nestedSample());
     const [outer, inner] = report.nested;
+    near(outer.host.width, 48, 'outer fixed width');
+    near(inner.host.width, 16, 'inner fixed width');
     near(outer.host.x - outer.anchor.x, (48 - 4) * 0.75, 'outer own progress');
-    near(inner.host.x - outer.host.x, -1 - (16 + 1) * 0.25, 'inner own progress without inherited transform');
+    near(
+      inner.host.x - outer.host.x,
+      48 - 16 - 1 - (16 + 1) * 0.25,
+      'inner own progress after ordinary RTL alignment'
+    );
     near(inner.caller.x, inner.host.x, 'nested actual slot');
     assert.equal(outer.inlinePercentage, '75');
     assert.equal(inner.inlinePercentage, '25');
@@ -273,12 +342,22 @@ try {
     await page.evaluate(() => PuiPercentage.lab.duplicateSurfaceGeometry(14));
     const faulty = await page.evaluate(() => PuiPercentage.lab.sample());
     let caught = null;
-    try { verifyRows(faulty, config, 50); } catch (error) { caught = String(error); }
+    try {
+      verifyRows(faulty, config, 50);
+    } catch (error) {
+      caught = String(error);
+    }
     await page.evaluate(() => PuiPercentage.lab.duplicateSurfaceGeometry(null));
     const restored = await page.evaluate(() => PuiPercentage.lab.sample());
     verifyRows(restored, config, 50);
     assert.ok(caught, 'duplicate geometry control must actually fail');
-    report.controls.push({ kind: 'duplicate-surface-translation', before, faulty, caught, restored });
+    report.controls.push({
+      kind: 'duplicate-surface-translation',
+      before,
+      faulty,
+      caught,
+      restored,
+    });
   } catch (error) {
     errors.push({ phase: 'negative-control', error: String(error.stack ?? error) });
   }
@@ -301,16 +380,39 @@ try {
   await browser.close();
   const data = Buffer.from(JSON.stringify(report, null, 2) + '\n');
   await writeFile(join(output, 'report.json.gz'), gzipSync(data));
-  await writeFile(join(output, 'receipt.json'), JSON.stringify({
-    startedAt: report.startedAt,
-    finishedAt: report.finishedAt,
-    passed: report.passed,
-    reportSha256: hash(data),
-    matrix: { passed: report.matrix.filter((row) => row.passed).length, total: report.matrix.length },
-    animations: { passed: report.animations.filter((row) => row.passed).length, total: report.animations.length },
-    lifecycle: { passed: report.lifecycle.filter((row) => row.passed).length, total: report.lifecycle.length },
-    errors,
-    pageErrors: report.pageErrors,
-  }, null, 2) + '\n');
-  console.log(JSON.stringify({ passed: report.passed, errors: errors.length, pageErrors: report.pageErrors.length, output }));
+  await writeFile(
+    join(output, 'receipt.json'),
+    JSON.stringify(
+      {
+        startedAt: report.startedAt,
+        finishedAt: report.finishedAt,
+        passed: report.passed,
+        reportSha256: hash(data),
+        matrix: {
+          passed: report.matrix.filter((row) => row.passed).length,
+          total: report.matrix.length,
+        },
+        animations: {
+          passed: report.animations.filter((row) => row.passed).length,
+          total: report.animations.length,
+        },
+        lifecycle: {
+          passed: report.lifecycle.filter((row) => row.passed).length,
+          total: report.lifecycle.length,
+        },
+        errors,
+        pageErrors: report.pageErrors,
+      },
+      null,
+      2
+    ) + '\n'
+  );
+  console.log(
+    JSON.stringify({
+      passed: report.passed,
+      errors: errors.length,
+      pageErrors: report.pageErrors.length,
+      output,
+    })
+  );
 }
