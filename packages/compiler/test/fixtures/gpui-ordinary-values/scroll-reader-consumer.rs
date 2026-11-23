@@ -59,6 +59,7 @@ struct ReaderHarness {
     rows: Entity<Rows>,
     measured: Rc<Cell<Option<Bounds<Pixels>>>>,
     external: Option<Rc<ScrollEngineLease>>,
+    sibling: Option<Entity<ExternalViewport>>,
 }
 
 struct ExternalViewport {
@@ -85,7 +86,19 @@ impl Render for ExternalViewport {
 
 impl Render for ReaderHarness {
     fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
-        gpui::div().size_full().child(self.component.clone())
+        gpui::div()
+            .relative()
+            .size_full()
+            .child(self.component.clone())
+            .children(self.sibling.clone().map(|viewport| {
+                gpui::div()
+                    .absolute()
+                    .top_0()
+                    .left_0()
+                    .w(px(256.))
+                    .h(px(160.))
+                    .child(viewport)
+            }))
     }
 }
 
@@ -145,27 +158,35 @@ fn open(cx: &mut TestAppContext) -> WindowHandle<ReaderHarness> {
 }
 
 fn open_with_engine(cx: &mut TestAppContext, external_engine: bool) -> WindowHandle<ReaderHarness> {
+    open_with_engine_placement(cx, external_engine, false)
+}
+
+fn open_with_engine_placement(cx: &mut TestAppContext, external_engine: bool, sibling_engine: bool) -> WindowHandle<ReaderHarness> {
     let window = cx.open_window(size(px(600.), px(400.)), |window, cx| {
         let measured = Rc::new(Cell::new(None));
         let rows = cx.new(|_| Rows { count: 24, measured: measured.clone() });
         let component = scroll_reader::CompiledComponent::create(json!({}), None, window, cx)
             .expect("compile and construct the authored Scroll fixture");
         let owner = component.read(cx).owner.clone();
-        let (slot, external) = if external_engine {
+        let (slot, external, sibling) = if external_engine {
             let handle = gpui::ScrollHandle::new();
             let lease = Rc::new(attach_scroll_engine(Rc::downgrade(&owner), handle.clone())
                 .expect("bind the actual native viewport before mount"));
             let viewport = cx.new(|_| ExternalViewport {
                 rows: rows.clone(), handle, lease: lease.clone(),
             });
-            (NativeSnapshot::native_view(viewport.into()), Some(lease))
+            if sibling_engine {
+                (None, Some(lease), Some(viewport))
+            } else {
+                (Some(NativeSnapshot::native_view(viewport.into())), Some(lease), None)
+            }
         } else {
-            (NativeSnapshot::native_view(rows.clone().into()), None)
+            (Some(NativeSnapshot::native_view(rows.clone().into())), None, None)
         };
         component.update(cx, |view, cx| {
-            view.set_slot(vec![slot], cx).unwrap();
+            view.set_slot(slot.into_iter().collect(), cx).unwrap();
         });
-        ReaderHarness { component, rows, measured, external }
+        ReaderHarness { component, rows, measured, external, sibling }
     });
     window.update(cx, |_, window, _| window.activate_window()).unwrap();
     frames(window, cx);
@@ -348,5 +369,35 @@ fn external_engine_retains_pause_until_actual_follow_axis_reader_arrival(cx: &mu
     assert!(following.max.y > arrived.max.y);
     assert_eq!(following.offset.y, -following.max.y);
     assert!(following.at_end);
+    assert_eq!(following.state, "following");
+}
+
+#[gpui::test]
+fn sibling_engine_clamps_before_reader_input_can_resume_following(cx: &mut TestAppContext) {
+    let window = open_with_engine_placement(cx, true, true);
+    let paused = pause(window, cx);
+    wheel(window, cx, point(px(0.), px(-4096.)));
+    let clamped = observe(window, cx);
+    assert_eq!(clamped.max, paused.max);
+    assert_eq!(clamped.viewport.size, paused.viewport.size);
+    assert_eq!(clamped.offset, paused.offset, "the later sibling clamps the raw boundary sample");
+    assert_eq!(clamped.state, "paused", "an earlier owner prepaint cannot turn raw overscroll into reader arrival");
+    append(window, cx, 8);
+    let grown = observe(window, cx);
+    assert!(grown.max.y > paused.max.y);
+    assert_eq!(grown.offset, paused.offset, "a clamped boundary sample cannot authorize later following");
+    assert_eq!(grown.state, "paused");
+    assert!(!grown.at_end);
+    wheel(window, cx, point(px(0.), px(-4096.)));
+    let arrived = observe(window, cx);
+    assert_eq!(arrived.max, grown.max);
+    assert_eq!(arrived.viewport.size, grown.viewport.size);
+    assert!(arrived.offset.y < grown.offset.y, "actual followed-axis movement still resumes following");
+    assert_eq!(arrived.offset.y, -arrived.max.y);
+    assert_eq!(arrived.state, "following");
+    append(window, cx, 5);
+    let following = observe(window, cx);
+    assert!(following.max.y > arrived.max.y);
+    assert_eq!(following.offset.y, -following.max.y);
     assert_eq!(following.state, "following");
 }
