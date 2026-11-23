@@ -66,6 +66,7 @@ let target=resolved(&spec.member("target",false));let Some(ids)=relation_nodes(&
 _=>{},
 }}
 fn positive_integer(value:&Value)->Option<usize>{let number=match value{Value::Number(number)=>*number,Value::Json(serde_json::Value::Number(number))=>number.as_f64()?,_=>return None};if number>=1.&&number<=9007199254740991.&&number.fract()==0.{Some(number as usize)}else{None}}
+fn finite_number(value:&Value)->Option<f64>{let number=match value{Value::Number(number)=>*number,Value::Json(serde_json::Value::Number(number))=>number.as_f64()?,_=>return None};number.is_finite().then_some(number)}
 fn token_is(value:&Value,token:&str)->bool{matches!(value,Value::Json(serde_json::Value::String(value))if value.eq_ignore_ascii_case(token))}
 fn aria_boolean(value:&Value)->Option<bool>{match value{Value::Json(serde_json::Value::Bool(value))=>Some(*value),_ if token_is(value,"true")=>Some(true),_ if token_is(value,"false")=>Some(false),_=>None}}
 struct NativeViewLease{owner:OwnerWeak,hitbox:gpui::HitboxId}
@@ -103,6 +104,10 @@ if owner.name_content{node.set_label(text_content(&owner.projection,&owner.slot)
 for(key,value)in &owner.modules.accessible_text{let value=resolved(value);if value.nullish(){continue}match key.as_str(){"name"=>node.set_label(value.text()),"description"=>node.set_description(value.text()),"id"=>{},_=>panic!("unmapped accessible text field")}}
 if matches!(resolved(&owner.accessible_role),Value::Json(serde_json::Value::String(role))if role=="heading"){if let Some(level)=crate::gpui_native_owner::accessible_level_value(&owner.modules.accessible_level){node.set_level(level);}}
 for(key,state)in &owner.accessible_states{let value=state.get();if value.nullish()||token_is(&value,""){continue}match key.as_str(){
+"valueNow"=>{if let Some(value)=finite_number(&value){node.set_numeric_value(value)}},
+"valueMin"=>{if let Some(value)=finite_number(&value){node.set_min_numeric_value(value)}},
+"valueMax"=>{if let Some(value)=finite_number(&value){node.set_max_numeric_value(value)}},
+"valueText"=>{if let Value::Json(serde_json::Value::String(value))=value{node.set_value(value)}},
 "selected"=>{if let Some(value)=aria_boolean(&value){node.set_selected(value)}},"expanded"=>{if let Some(value)=aria_boolean(&value){node.set_expanded(value)}},
 "checked"|"pressed"=>{if let Some(value)=aria_boolean(&value){node.set_toggled(if value{gpui::Toggled::True}else{gpui::Toggled::False});}else if token_is(&value,"mixed"){node.set_toggled(gpui::Toggled::Mixed);}},
 "disabled"=>{if let Some(value)=aria_boolean(&value){if value{node.set_disabled()}else if !native_disabled{node.clear_disabled()}}},
