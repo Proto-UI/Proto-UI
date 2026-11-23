@@ -590,13 +590,25 @@ export function createShadowSplitEffectsPort({
     if (intrinsicTokens.every((token) => entries.some((entry) => entry.authorToken === token))) {
       const flex = entries.find((entry) => entry.authorToken === 'flex-1')!;
       if (!hasRecipe('intrinsic-nowrap', 'v1')) fail(flex, 'intrinsic recipe');
+      const dimensions = entries.filter((entry) =>
+        /^(?:w-|min-w-|max-w-|size-)/.test(entry.authorToken)
+      );
+      const fullWidth =
+        dimensions.length === 1 &&
+        dimensions[0].authorToken === 'w-full' &&
+        dimensions[0].token === 'w-full';
       if (
         intrinsicTokens.some((token) =>
           entries.some((entry) => entry.authorToken === token && entry.token !== token)
         ) ||
-        entries.some((entry) => /^(?:w-|min-w-|max-w-|size-)/.test(entry.authorToken))
+        (dimensions.length > 0 && !fullWidth)
       )
         fail(flex, 'intrinsic operands');
+      // The vertical Tabs source uses this exact unconditional width. Its
+      // separately certified recipe does not admit other sizing combinations
+      // or let an older nowrap-only companion claim the additional closure.
+      if (fullWidth && !hasRecipe('intrinsic-full-width', 'v1'))
+        fail(flex, 'intrinsic full-width recipe');
     }
     for (const entry of entries) {
       if (nativeText && entry.authorToken === 'overflow-y-auto') fail(entry, 'native scrollport');

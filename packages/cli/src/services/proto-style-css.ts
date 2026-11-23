@@ -994,6 +994,7 @@ function renderShadowSplitCss(tokens: string[]): string {
     '--pui-split-motion-recipe: h1;',
     '--pui-split-participation-coordinate-recipe: i1;',
     '--pui-split-intrinsic-nowrap-recipe: v1;',
+    '--pui-split-intrinsic-full-width-recipe: v1;',
     '--pui-split-dialog-motion-recipe: k1;',
     '--pui-split-native-text-recipe: l1;',
     '--pui-split-inline-display: initial;',
