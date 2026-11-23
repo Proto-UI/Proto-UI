@@ -13,6 +13,7 @@ import {
   joinValueTypes,
   objectValueType,
   isTemplateChildType,
+  publishedDataType,
 } from './value-types';
 export { isTemplateChildType } from './value-types';
 import {
@@ -1079,7 +1080,15 @@ export const OPERATION_RULES = {
     'state',
     setup,
     'void',
-    [key, { role: 'state-handle' }],
+    [
+      key,
+      { role: 'state-handle' },
+      {
+        role: 'value',
+        optional: true,
+        valueSchema: objectValueType([{ name: 'when', type: 'state:boolean', optional: true }]),
+      },
+    ],
     [effect('declare', 'accessibility')],
     { requiredCapabilities: ['accessibility-tree'] }
   ),
@@ -2032,6 +2041,14 @@ export const OPERATION_RULES = {
     [],
     [effect('read', 'view')]
   ),
+  'textControl.resetValue': rule(
+    'text-control',
+    'resetValue',
+    callbackPhase,
+    'boolean',
+    [{ role: 'value', types: [{ kind: 'union', members: ['string', 'void'] }], optional: true }],
+    [effect('write', 'view')]
+  ),
   'imageView.on': rule(
     'image-view',
     'on',
@@ -2129,7 +2146,7 @@ export interface OperationBindings {
   stateValueType?: 'boolean' | 'number' | 'string';
   stateDataType?: DataType;
   eventPayloadType?: DataType;
-  inputPayloadType?: 'event' | 'host-event';
+  inputPayloadType?: 'event' | 'host-event' | 'a11y-value-event';
   methodParameters?: readonly { type: ValueType; optional?: boolean }[];
   methodReturnType?: ValueType;
 }
@@ -2889,7 +2906,10 @@ export function validateOperationArguments(
       case 'event-payload':
         if (!bindings.eventPayloadType)
           reject('missing-signature', 'Emitted events require a declared payload signature.');
-        else if (!assignable(argument.type, bindings.eventPayloadType))
+        else if (
+          !publishedDataType(argument.type) ||
+          !isAssignable(publishedDataType(argument.type)!, bindings.eventPayloadType)
+        )
           reject('argument-type', 'Event payload does not match the declared signature.');
         break;
       case 'template-argument':

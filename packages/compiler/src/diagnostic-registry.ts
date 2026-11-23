@@ -259,6 +259,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     category: 'unsupported-input',
     meaning: 'GPUI host does not expose the requested SDK capability.',
   },
+  PUI_GPUI_A11Y_VALUE: {
+    category: 'unsupported-input',
+    meaning:
+      'GPUI SetValue requires its default route or a literal nonempty host:* event route.',
+  },
   PUI_GPUI_HOST_REQUIRED: {
     category: 'unsupported-input',
     meaning: 'GPUI lowering requires an owned host bridge.',
