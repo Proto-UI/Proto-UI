@@ -49,3 +49,9 @@ TextControl 合并的实际 diff 另由 fresh-context compiler Agent 只读审�
 首次本地正式 publisher 的回执与提交对象保留；它不证明冻结档案字节未变。此前格式化已改动主干历史记录，所以追加修复恢复上述 10 份档案的 b715b8a6 原 blob，并在 .prettierignore 按现有精确归档规则逐路径排除，正常 hooks 保留。没有重写已有提交或改变历史接受结论。
 
 实际 getFileInfo 确认这 10 个新增路径忽略，两个产品源码控制仍可格式化；再次执行正常 Prettier 后原字节保持。全部受保护历史和 protocol 档案的工作树与索引 blob 已逐一匹配主干；完整清单和 SHA-256 在压缩原始回执。原 21 项 history 控制、1697 对象 audit check 和 public-docs 检查已重新执行；ready 仍按预期以 1 退出，1697 个决定没有被冒充为接受。该修复没有改变先前 78 项源码验证的产品子树；原 304 项消费者及截图仍待最终分支执行。详见 formatter-recovery.json 及原始日志。
+
+## 并行原分支推进的正常合并
+
+推送前核查发现原 PR 已由另一会话推进到 16be2a37。保留本轮 e7e3/d9fb 与该提交的全部历史，正常 merge；3 个冲突逐项源审后保留并行提交的 Text reset/selection 生命周期新控制、网站真实动画完成观察、实际主题/浏览器偏好事实与五状态独立截图。网站仍为原 42 case，成功截图因不再覆盖重复 profile 状态由 84 增至 100。
+
+16be 原 workflow 45175883003 的原 304 项全部通过，整体仍因新增两个 mock 的 options 参数类型错误而失败。完整原始 job/type 日志与已核 ZIP 哈希保留，不能将该失败冒充为当前 head 通过。两个 options 改为宿主 API 的可选参数；TypeScript 前后生成 JavaScript 完全一致，原断言不变。当前源控制实际为 86/86，包含全部原 78 项加 8 个新 reset/selection 控制，工作区类型检查通过；134 份冻结档案仍匹配原主干。原 304 项与 100 张截图待最终 clean head 的完整工作流和独立视觉审查。

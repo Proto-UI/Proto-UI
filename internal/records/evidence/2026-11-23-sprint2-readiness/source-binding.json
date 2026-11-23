@@ -46,6 +46,40 @@
     "files": [
       {
         "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+        "sha256": "9dfd8afa22b03499b50f7df86edd4668e05b5ab8d9c90b00716ce863efcbf64a"
+      },
+      {
+        "path": "packages/compiler/test/text-reset-native.test.ts",
+        "sha256": "e894522b8fd97366a739f29ed66f37d48e0e3b4bb3253599f05aa25b6829fa4d"
+      },
+      {
+        "path": "apps/www/src/styles/site-library-family.css",
+        "sha256": "db68c8000c0d9709635fa7d178848a2cc2ad541e53195926bdcbdd7b2805c181"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts",
+        "sha256": "231d7507da67ecda5bedb0326b18ca7c5d26802f766321143c8264b7ccc91c22"
+      },
+      {
+        "path": "packages/prototypes/base/package.json",
+        "sha256": "f506961e79805a73e24e79a5ad205a41f19c68845482935b62e966b91aebb7c9"
+      },
+      {
+        "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+        "sha256": "232c977a85e10786f289457d874f8a67ee195b99ef2a3b2a81813761af8abe1d"
+      },
+      {
+        "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+        "sha256": "bd8bf4841ff0acb8306bbf1e29bc3eca3962502ba2e64584e13da2c168181237"
+      },
+      {
+        "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+        "sha256": "7cf8a7a58458fe309a03d0deaa56b0d5f8439ebd2b50cb13d8f6c4725a81bb75"
+      }
+    ],
+    "filesBeforeConcurrentMerge": [
+      {
+        "path": "packages/compiler/src/native-support/dom-modules.template.ts",
         "sha256": "5695e5a7bbd49e5186da9fefbdd4d579db61fddb42c996d93d31c20d2a3d96dc"
       },
       {
@@ -861,6 +895,14 @@
       "allProtectedBlobsMatchMain": true,
       "normalHooksRetained": true,
       "originalDecisionAcceptanceRemains0": true
+    },
+    "concurrentMerge": {
+      "record": "concurrent-merge.json",
+      "firstParent": "d9fb9eb0aa47b79cd886ae6c911d50edc4f73fec",
+      "concurrentParent": "16be2a37d3375c4c03b8c118d81bc021b5f669f6",
+      "sourceControlsPassed": 86,
+      "expectedSuccessfulSitePngs": 100,
+      "finalNativeAcceptance": "pending"
     }
   },
   "artifacts": [
@@ -1055,6 +1097,48 @@
       "rawBytes": 187,
       "rawSha256": "5fab6239115785df700603692825831ccbf96122b0e23fa8240a48d8f4429bfc",
       "gzipSha256": "fc59479571b0416cdb31cfd6a6d891405fe2cffe28983c5d4d3bfd86449a50ce"
+    },
+    {
+      "path": "concurrent-source-controls.json.gz",
+      "rawBytes": 29818,
+      "rawSha256": "98b76afb735f95831dae6af4da57a01e65db80824f613aa6b6daba942f02c296",
+      "gzipSha256": "d5b734885b4c11cb16e6b0f057360746d66d89fe3bd5ca9050747ded2ee95a34"
+    },
+    {
+      "path": "concurrent-source-controls.log.gz",
+      "rawBytes": 512814,
+      "rawSha256": "5c76248e312a0f757e953b7e87832647da3a757dfe420d0ece7a5d347082c78d",
+      "gzipSha256": "72f74bc0f85c3ea31fdc3c9aa22da731e94eb00a981299fd893ab70abab0dc9f"
+    },
+    {
+      "path": "concurrent-format-equivalence.log.gz",
+      "rawBytes": 4672,
+      "rawSha256": "122eda814832a7269abde65ca5a88990f70fd1c2622fc011e53cb5dcb1ac7bbe",
+      "gzipSha256": "d153cf66c52182df7f5176e1f0b2d932efabc9f3f6a203397295825641f32275"
+    },
+    {
+      "path": "concurrent-workspace-types.log.gz",
+      "rawBytes": 135,
+      "rawSha256": "f066c3be95fe4e99ff32eb813d3a65d8fb8140eebd887b93724fceeaa51da57b",
+      "gzipSha256": "de98342e6516860b47ad406cf85269972ef269596a5db3f71d4513d769cb8e97"
+    },
+    {
+      "path": "concurrent-whitespace.log.gz",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "concurrent-native-job.log.gz",
+      "rawBytes": 37159,
+      "rawSha256": "6ffd99cc9c1331104da81f5a054ed44e7ec9b1e2efcbc9ee571f1f47621405c4",
+      "gzipSha256": "95efc356565f780223eb88555c99d2eb330cdb7732214194fa3fe9f8e5dc79d4"
+    },
+    {
+      "path": "concurrent-native-workspace-types.log.gz",
+      "rawBytes": 2907,
+      "rawSha256": "43c44a8f5989d5280d342cb66be41a2c846ceed838b1acf14984f48be6fb6a15",
+      "gzipSha256": "093a6350f47c9ae085a3648669f5af6003a0aeb6feb1868fd4c3824b1209dad2"
     }
   ]
 }

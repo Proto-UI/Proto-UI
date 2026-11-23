@@ -875,11 +875,16 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     throw new Error('[TextControl] unsupported physical declaration.');
   const textListeners = new Map<string, Set<(run: Run, event: NativeTextEvent) => void>>();
   let textDeclared = false, textInitialized = false, textValue = '', textComposing = false, textMode = 'uncontrolled', textEpoch = 0;
+  const textCleanups: (() => void)[] = [];
   let textPatch: NativeConfig = {};
   let queueTextSelection: (() => void) | null = null;
   let textObservation: { epoch: number; ownerValue: string } | null = null;
-  const textCleanups: (() => void)[] = [];
-  function retireText() { ++textEpoch; queueTextSelection = null; textObservation = null; for (const cleanup of textCleanups.splice(0)) cleanup(); }
+  function retireText() {
+    ++textEpoch;
+    queueTextSelection = null;
+    textObservation = null;
+    for (const cleanup of textCleanups.splice(0)) cleanup();
+  }
   const canonicalText = (value: string) => { const normalized = value.replace(/\r\n?/g, '\n'); return textDeclaration?.config.lineMode === 'single' ? normalized.replace(/\n/g, '') : normalized; };
   function readTextSelection(target: HTMLInputElement | HTMLTextAreaElement, source: string): NativeTextSelection | null {
     try {
@@ -953,9 +958,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const target = root as HTMLInputElement | HTMLTextAreaElement, epoch = generation, lease = textEpoch;
     let lastSelection: string | undefined, selectionQueued = false;
     const current = () => lease === textEpoch && epoch === generation && ready() && root === target && (options.isReady?.() ?? true);
-    const listenText = (source: EventTarget, type: string, callback: (event: Event) => void) => {
+    const listenText = (host: EventTarget, type: string, callback: (event: Event) => void) => {
       const guarded = (event: Event) => { if (current()) callback(event); };
-      source.addEventListener(type, guarded); textCleanups.push(() => source.removeEventListener(type, guarded));
+      host.addEventListener(type, guarded);
+      textCleanups.push(() => host.removeEventListener(type, guarded));
     };
     const emitSelection = () => {
       if (!current()) return;
