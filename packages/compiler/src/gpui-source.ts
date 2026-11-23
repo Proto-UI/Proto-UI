@@ -1408,7 +1408,9 @@ impl __PuiNativeRecordValue {
       depth + 1,
       true,
       nativeReturn,
-      // Hooks capture the same checked renderer boundary as root setup.
+      // Authored hook setup captures a renderer just as root setup does. Convert
+      // its checked scalar/null return at that boundary, before it is carried
+      // through the hook's ordinary captured handle record.
       fn === ir.setup || ir.hooks.some((hook) => hook.setup === fn),
       recordReturn,
       false,
@@ -1722,7 +1724,7 @@ impl __PuiNativeRecordValue {
           case 'math.floor':
             return `Value::number((${args[0]}).scalar_number().floor())`;
           case 'string': {
-            if (!node.arguments.length) return 'Value::string("")';
+            if (!args.length) return 'Value::string("")';
             // GPUI values coerce scalars exactly as ECMAScript does; a
             // structured or unknown argument has no admitted native coercion.
             const type = node.arguments[0].type;

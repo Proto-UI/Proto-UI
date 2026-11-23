@@ -784,7 +784,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The reading viewport retains the public ScrollArea lease and the blocked
   // documentation-media owner; both authored source identities are required.
   'apps/www/src/components/documentation-image-reading-viewport.proto.ts': Object.freeze({
-    sourceSha256: '5c756216acffabcae06d99c1dd7e75fab539c4943207b8f63a2d6f4b8bde04bc',
+    sourceSha256: '38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec',
     companionSource: Object.freeze({
       path: 'apps/www/src/components/documentation-image-controls.ts',
       sha256: 'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07',
@@ -8910,6 +8910,8 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
         [
           WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
@@ -9767,6 +9769,15 @@ const WEBSITE_RETRY_VIRTUAL_CONFIG_SHA256 =
 // four Retry import owners and all helper identities remain unchanged.
 const WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256 =
   'dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99';
+// The Sprint 5 compiler adds three lazy QuickJS dependencies and preserves
+// module Worker output. The four Retry import owners, resolver and helpers are
+// unchanged; this exact profile does not admit general package promotion.
+const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'a9eeed0952291e3226c09f1a974dc0742472df8079240210afdbc3701db5dfa3';
+// Merged S4 + S5 site configuration: the accepted digest for the tree that
+// combines both sprints' module-graph changes on top of the train.
+const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

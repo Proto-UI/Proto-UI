@@ -167,7 +167,7 @@ describe('native String conversion', () => {
     ).toBe(false);
   });
 
-  it('admits only proven scalar GPUI coercion', () => {
+  it('admits a proven GPUI scalar and rejects an opaque object helper', () => {
     const text = program('const value=String(1);');
     expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
     const unknown = compilePrototype(

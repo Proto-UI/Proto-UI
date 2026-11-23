@@ -33,6 +33,23 @@ fn counts_two_separate_caption_regions_at_actual_content_offset_and_scale() {
         let report = inspect(width, height, &pixels, content, scale as f64).unwrap();
         assert!(report.passed(), "{report:?}");
         assert_eq!(report.content.y, chrome * scale);
+        for (index, label) in report.labels.iter().enumerate() {
+            assert_eq!(label.label, ["passive", "actionable"][index]);
+            assert_eq!(
+                label.roi,
+                Rect {
+                    x: 16 * scale,
+                    y: (chrome + index * 64 + 16) * scale,
+                    width: 268 * scale,
+                    height: 32 * scale,
+                }
+            );
+            // The fixture has sixty ink columns across twelve rows. All
+            // remaining pixels in the independently mapped ROI are background.
+            assert_eq!(label.background, (268 * 32 - 60 * 12) * scale * scale);
+            assert_eq!(label.ink, 60 * 12 * scale * scale);
+            assert_eq!(label.ink_rows, 12 * scale);
+        }
     }
 }
 
@@ -69,7 +86,7 @@ fn row_borders_do_not_count_as_caption_ink() {
     for row in [0, 64] {
         for y in 0..64 {
             for x in 0..300 {
-                if x < 2 || x >= 298 || y < 2 || y >= 62 {
+                if !(2..298).contains(&x) || !(2..62).contains(&y) {
                     let offset = ((content.y + row + y) * width + x) * 4;
                     pixels[offset..offset + 4].copy_from_slice(&[20, 34, 55, 255]);
                 }
