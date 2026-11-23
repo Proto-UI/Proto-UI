@@ -172,9 +172,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
   for (const family of families)
     for (const runtime of RUNTIMES)
       for (const theme of ['light', 'dark'] as const) {
-        it(
-          `${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`,
-          async () => {
+        it(`${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`, async () => {
           const { context, page, previewer } = await openRoute(browser, baseUrl, route(family), {
             width: 1440,
             height: 1000,
@@ -518,9 +516,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           } finally {
             await context.close();
           }
-          },
-          120_000
-        );
+        }, 120_000);
       }
 });
 
@@ -563,13 +559,55 @@ describe.sequential('actual family Text selection and typography', () => {
           expect(await page.evaluate(() => getSelection()?.toString())).toContain(
             'A reusable Text atom'
           );
-          expect(
-            await text.evaluate(
-              (node) =>
-                Number.parseFloat(getComputedStyle(node).fontSize) /
-                Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-            )
-          ).toBe(family === 'bootstrap-2-3-2' ? 1.96875 : 1.875);
+          const readTypography = () =>
+            text.evaluate((node) => {
+              const root = document.documentElement;
+              const computed = getComputedStyle(node);
+              return {
+                rootFontSize: Number.parseFloat(getComputedStyle(root).fontSize),
+                fontSize: Number.parseFloat(computed.fontSize),
+                lineHeight: Number.parseFloat(computed.lineHeight),
+                inlineRootFontSize: root.style.fontSize,
+              };
+            });
+          const normalTypography = await readTypography();
+          // P-BOOTSTRAP-2-3-2-TEXT-PROJECTION selects the standard rem size
+          // except for the explicit 2xl recipe; both 3xl demos use text-3xl.
+          expect(normalTypography.fontSize / normalTypography.rootFontSize).toBe(1.875);
+          let enlargedTypography: Awaited<ReturnType<typeof readTypography>>;
+          try {
+            await page.evaluate((rootFontSize) => {
+              document.documentElement.style.fontSize = String(rootFontSize * 2) + 'px';
+            }, normalTypography.rootFontSize);
+            enlargedTypography = await readTypography();
+            expect(enlargedTypography.rootFontSize).toBe(normalTypography.rootFontSize * 2);
+            expect(enlargedTypography.fontSize).toBeCloseTo(normalTypography.fontSize * 2, 3);
+            expect(enlargedTypography.lineHeight).toBeCloseTo(normalTypography.lineHeight * 2, 3);
+          } finally {
+            await page.evaluate((inlineRootFontSize) => {
+              document.documentElement.style.fontSize = inlineRootFontSize;
+            }, normalTypography.inlineRootFontSize);
+          }
+          if (captureDir)
+            await writeFile(
+              path.join(
+                captureDir,
+                String(family) + '-' + runtime + '-text-native-typography.json'
+              ),
+              JSON.stringify(
+                {
+                  source,
+                  family,
+                  runtime,
+                  normalTypography,
+                  enlargedTypography: enlargedTypography!,
+                  opticalPaintClaim: false,
+                  gpuiClaim: false,
+                },
+                null,
+                2
+              )
+            );
           expect(await text.evaluate((node) => node.getAttribute('role'))).toBeNull();
           expect(await text.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
           const trigger = runtimeSelectTrigger(previewer);
