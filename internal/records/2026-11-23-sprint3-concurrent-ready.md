@@ -29,6 +29,14 @@ The [manifest](evidence/2026-11-23-sprint3-concurrent-ready/manifest.json) binds
 
 ## Readiness and remaining acceptance
 
-Ready-for-review exposes this concrete reconciled implementation and retained evidence. The original 364 native cases, separate Select eight, fifteen-stage release rehearsal, strict measured budgets, production compiler journey, direct and installed public consumers, current generated-output type completion, real application/device/AT obligations and retirement propagation retain their original acceptance boundaries. The Sprint 3 sandbox's older acknowledgement behavior is not represented as Sprint 5's newer strict retirement protocol.
+Ready-for-review exposes this concrete reconciled implementation and retained evidence. The original 364 native cases, separate Select eight, fifteen-stage release rehearsal, strict measured budgets, production compiler journey, direct and installed public consumers, current generated-output type completion, real application/device/AT obligations and retirement propagation retain their original acceptance boundaries. The subsequent public retirement repair described below is now integrated; full native and production acceptance remains independently required.
 
 Both manual acceptance inputs can run independently on this exact newly published source. Submission and queue states are distinct from success. Independent GitHub review, DCO and integration rules continue to apply.
+
+## Subsequent acknowledged-retirement integration
+
+Public `9cd4d10d1953a3c030e679d8d11061660e202ed9` subsequently backported the reviewed Sprint 5 strict retirement path. It is retained through another normal two-parent merge after the previously reviewed checkpoint. The compiled sandbox, browser probe and full retirement test are exactly that public source's bytes. The compiler's production source remains exactly the reviewed `7a64255` source.
+
+On the final prepared product tree `1691f69ae901952781c8585e9eb57c840141da2f`, the complete client, revision-session and retirement selection passes **23/23**, zero failures/skips, including all ten protocol cases. A matching listener-ready handshake enables exactly one disposal request; the original 250-millisecond total deadline never restarts. Missing acknowledgement rejects while resources are reclaimed, actual cleanup errors survive acknowledgement, and late signals cannot revive a completed owner. Session controls retain failed-retirement propagation before replacement.
+
+The earlier record's older-acknowledgement observation remains historical to its source. The actual public repair's baseline 2/10 and repaired 10/10 evidence stays in its original archive. The additional current 23-case result and exact source-equivalence checks are retained in `final-retirement-validation.tar.gz` and the manifest, without replacing the earlier production-input failure or asserting full native-browser acceptance.

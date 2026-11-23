@@ -64,5 +64,26 @@
     "Independent direct and installed Tooltip/Select consumers remain actual native/application acceptance.",
     "The earlier workspace type command has two missing generated Shadow stylesheet declarations; no complete type pass is claimed.",
     "Static review is not GitHub APPROVED. Normal DCO/CI/review/integration requirements remain."
-  ]
+  ],
+  "subsequentRetirementIntegration": {
+    "parents": [
+      "e5abc7d5d36fbad4d082f421ed55157cf7f6a888",
+      "9cd4d10d1953a3c030e679d8d11061660e202ed9"
+    ],
+    "preparedSourceTree": "1691f69ae901952781c8585e9eb57c840141da2f",
+    "actualCurrentSelection": {
+      "files": 3,
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "includesProtocolCases": 10
+    },
+    "threeRetirementAndProbeFilesExactlyEqualTo": "9cd4d10d1953a3c030e679d8d11061660e202ed9",
+    "compilerProductionSourceExactlyEqualTo": "7a64255233be57a65f725604dc4f9c14017b5dfd",
+    "archive": {
+      "file": "final-retirement-validation.tar.gz",
+      "sha256": "55296eafa3db52e96058df583a5b762486a742ba513e7cd17ec338372de7ef6f",
+      "bytes": 4411
+    }
+  }
 }
