@@ -138,3 +138,6 @@ internal/records/evidence/2026-11-23-sprint2-compiler-inventory/
 internal/records/evidence/2026-11-24-sprint2-final-distribution/
 internal/records/evidence/2026-11-24-sprint2-regression-repairs/
 internal/records/evidence/2026-11-24-sprint2-runtime-final/
+
+# Frozen CLI source, generated preset and native Rhea regression receipts.
+internal/records/evidence/2026-11-24-sprint2-cli-source-proof/
