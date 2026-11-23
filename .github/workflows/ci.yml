@@ -206,6 +206,14 @@ jobs:
       - name: Install
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
 
+      - name: Install declarative catalog consumer dependencies
+        run: npm ci --prefix scripts/analysis/declarative-agent-ui --ignore-scripts --no-audit --no-fund
+
+      - name: Type check declarative catalog consumer
+        run: |
+          npm run check:types --prefix scripts/analysis/declarative-agent-ui
+          node --test scripts/analysis/declarative-agent-ui/schema.test.mjs
+
       - name: Type check
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:types
 

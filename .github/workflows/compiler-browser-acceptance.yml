@@ -166,7 +166,7 @@ jobs:
           retention-days: 30
   browser-acceptance:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 20
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       ASTRO_TELEMETRY_DISABLED: '1'
@@ -203,15 +203,16 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
-          node --test scripts/compiler/browser-production.test.mjs \
+          node --test scripts/compiler/browser-assets-production.test.mjs \
+            scripts/compiler/browser-production.test.mjs \
             scripts/compiler/browser-delivery-index.test.mjs \
             2>&1 | tee "$PUI_EVIDENCE_DIR/production-controls.log"
       - name: Install and record Chinese fonts for the bilingual captures
         timeout-minutes: 3
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig \
             > "$PUI_EVIDENCE_DIR/font-environment.txt"
           fc-match 'Noto Sans CJK SC' >> "$PUI_EVIDENCE_DIR/font-environment.txt"

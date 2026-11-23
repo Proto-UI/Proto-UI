@@ -8,6 +8,11 @@ on:
         type: boolean
         required: false
         default: false
+      sprint3_followup:
+        description: Run the independent Sprint 3 direct and installed consumer follow-up
+        type: boolean
+        required: false
+        default: false
       scope:
         description: Existing repair controls or complete selected Sprint 1 evidence
         type: choice
@@ -28,7 +33,7 @@ concurrency:
 
 jobs:
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -75,7 +80,7 @@ jobs:
           retention-days: 30
 
   sprint1:
-    if: ${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true }}
+    if: ${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -122,5 +127,12 @@ jobs:
   sprint3-acceptance:
     if: github.event_name == 'workflow_dispatch' && inputs.sprint3_acceptance == true
     uses: ./.github/workflows/sprint3-consumer-evidence.yml
+    permissions:
+      contents: read
+
+  # Separate explicit opt-in; the original five acceptance lanes stay unchanged.
+  sprint3-followup:
+    if: github.event_name == 'workflow_dispatch' && inputs.sprint3_followup == true
+    uses: ./.github/workflows/sprint3-followup-evidence.yml
     permissions:
       contents: read

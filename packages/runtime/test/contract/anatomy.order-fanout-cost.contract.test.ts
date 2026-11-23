@@ -38,6 +38,7 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
   const targets = new Map<Owner, HTMLElement>([[root, element]]);
   const parents = new Map<Owner, Owner | null>([[root, null]]);
   const parentReads = new Map<Owner, number>();
+  const targetReads = new Map<Owner, number>();
   const getParent = (instance: unknown) => {
     const owner = instance as Owner;
     parentReads.set(owner, (parentReads.get(owner) ?? 0) + 1);
@@ -102,6 +103,7 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
             ANATOMY_ROOT_TARGET_CAP,
             (instance: unknown) => {
               const owner = instance as Owner;
+              targetReads.set(owner, (targetReads.get(owner) ?? 0) + 1);
               return unreadyTargets.has(owner) ? null : (targets.get(owner) ?? null);
             },
           ],
@@ -147,6 +149,7 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
   const reset = () => {
     comparisons = 0;
     parentReads.clear();
+    targetReads.clear();
     for (const rows of notifications.values()) rows.length = 0;
   };
   cleanups.push(async () => {
@@ -166,6 +169,7 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
     targets,
     parents,
     parentReads,
+    targetReads,
     unreadyTargets,
     observerRegistration,
     metadata,
@@ -193,6 +197,46 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
 }
 
 describe('Runtime Anatomy synchronous order fanout cost', () => {
+  for (const source of ['sync', 'notify'] as const) {
+    it(`${source}: a stable shuffled domain reuses comparisons while reacquiring current targets`, () => {
+      const subscriberCount = 16;
+      const domain = createDomain(subscriberCount, 64, true);
+      const order = domain.items.map((_, index) => domain.items[(index * 37) % 64]!);
+      for (const owner of order) domain.element.append(domain.targets.get(owner)!);
+      domain[source]();
+      const versions = domain.items.slice(0, subscriberCount).map(domain.version);
+      domain.reset();
+
+      domain[source]();
+
+      expect([...domain.notifications.values()].flat()).toEqual([]);
+      const reads = [...domain.targetReads.values()];
+      // Host getters remain live at each comparison. A once-per-claim read
+      // budget would hide comparator replacement during a later host read.
+      expect(reads).toHaveLength(domain.items.length + 1);
+      expect(Math.min(...reads)).toBeGreaterThanOrEqual(subscriberCount);
+      const single = createDomain(1, 64, true);
+      const singleOrder = single.items.map((_, index) => single.items[(index * 37) % 64]!);
+      for (const owner of singleOrder) single.element.append(single.targets.get(owner)!);
+      single[source]();
+      single.reset();
+      single[source]();
+      expect(single.comparisons()).toBeGreaterThan(0);
+      expect(domain.comparisons()).toBeLessThanOrEqual(single.comparisons() * 2);
+      expect(domain.items.slice(0, subscriberCount).map(domain.version)).toEqual(versions);
+      expect(domain.query()).toEqual(order.map((owner) => owner.id));
+
+      // The notification-local work cannot survive a later real DOM reorder.
+      for (const owner of [...order].reverse()) domain.element.append(domain.targets.get(owner)!);
+      domain[source]();
+      for (const owner of domain.items.slice(0, subscriberCount)) {
+        expect(domain.notifications.get(owner)).toEqual([
+          [...order].reverse().map((part) => part.id),
+        ]);
+      }
+    });
+  }
+
   for (const source of ['sync', 'notify'] as const) {
     it(`${source}: unchanged subscribers do not multiply host order comparisons`, () => {
       const single = createDomain(1);

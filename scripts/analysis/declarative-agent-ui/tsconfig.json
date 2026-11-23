@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "resolveJsonModule": true,
+    "types": ["react", "react-dom", "node"]
+  },
+  "include": ["app.tsx", "mapping.mjs", "fixtures/settings.json"]
+}

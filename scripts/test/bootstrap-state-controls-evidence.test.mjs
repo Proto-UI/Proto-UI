@@ -3,13 +3,20 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { parse } from 'yaml';
 import ts from 'typescript';
+import path from 'node:path';
 import {
   BROWSER_SUITES,
   PRODUCTION_BROWSER_SUITES,
   PRODUCTION_BROWSER_OWNERS,
   READY_ROUTES,
+  browserShards,
   createRuntimeTestPlan,
 } from './runtime-test-plan.mjs';
+import {
+  BOOTSTRAP_BROWSER_CASES,
+  BOOTSTRAP_EVIDENCE_SUITES,
+  assertBootstrapEvidence,
+} from './bootstrap-state-controls-receipt.mjs';
 
 const fixturePath = 'apps/www/src/pages/en/test/bootstrap-state-controls.astro';
 const browserPath = 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts';
@@ -116,6 +123,29 @@ test('browser test and fixture script have no TypeScript syntax diagnostics', ()
   }
 });
 
+test('isolated Bootstrap producer stays out of both generic phases and every shared shard', () => {
+  assert.equal(BROWSER_SUITES.filter((suite) => suite === browserPath).length, 0);
+  assert.equal(PRODUCTION_BROWSER_SUITES.filter((suite) => suite === browserPath).length, 1);
+  assert.equal(
+    PRODUCTION_BROWSER_OWNERS[browserPath],
+    '.github/workflows/bootstrap-state-controls-evidence.yml'
+  );
+  const phases = createRuntimeTestPlan([]);
+  const excluded = phases[0].args.indexOf(browserPath);
+  assert.ok(excluded > 0);
+  assert.equal(phases[0].args[excluded - 1], '--exclude');
+  assert.ok(!phases[1].args.includes(browserPath));
+  assert.ok(!browserShards().flat().includes(browserPath));
+  assert.equal(
+    READY_ROUTES.filter((route) => route === '/en/test/bootstrap-state-controls/').length,
+    0
+  );
+  assert.match(
+    readFileSync('scripts/test/run-runtime-tests.mjs', 'utf8'),
+    /import \{[^}]*READY_ROUTES[^}]*\} from '\.\/runtime-test-plan\.mjs'/
+  );
+});
+
 test('navbar evidence is independently guarded, scheduled and terminal after another suite fails', () => {
   const beforeStart = navbar.slice(0, navbar.indexOf("baseUrl = await startServer('/en/')"));
   assert.match(beforeStart, /GITHUB_ACTIONS !== 'true'/);
@@ -209,15 +239,250 @@ test('registered browser suite stays with its dedicated owner, outside both gene
   const excluded = phases[0].args.indexOf(browserPath);
   assert.ok(excluded > 0);
   assert.equal(phases[0].args[excluded - 1], '--exclude');
+  assert.ok(!phases[1].args.includes(browserPath));
+  assert.ok(!browserShards().flat().includes(browserPath));
   assert.equal(
     READY_ROUTES.filter((route) => route === '/en/test/bootstrap-state-controls/').length,
-    1
+    0
   );
   assert.match(
     readFileSync('scripts/test/run-runtime-tests.mjs', 'utf8'),
     /import \{[^}]*READY_ROUTES[^}]*\} from '\.\/runtime-test-plan\.mjs'/
   );
 });
+
+test('the full CI cycle requires the same-commit independent Bootstrap producer and receipt', () => {
+  const ci = parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
+  const cycle = parse(readFileSync('.github/workflows/ci-production-suites.yml', 'utf8'));
+  assert.equal(ci.jobs['production-suites'].uses, './.github/workflows/ci-production-suites.yml');
+  assert.equal(ci.jobs['production-suites'].if, "${{ github.event_name != 'pull_request' }}");
+  assert.ok(ci.jobs['cycle-report'].needs.includes('production-suites'));
+  const calls = Object.values(cycle.jobs).filter(
+    (job) => job.uses === './.github/workflows/bootstrap-state-controls-evidence.yml'
+  );
+  assert.equal(
+    calls.length,
+    1,
+    'Exactly one required Bootstrap producer must enter each full cycle'
+  );
+  assert.ok(cycle.jobs[calls[0].needs], 'Reuse one existing bounded evidence chain');
+  assert.equal(calls[0].if, '${{ !cancelled() }}');
+  assert.equal(calls[0]['continue-on-error'], undefined);
+  assert.equal(workflow.concurrency['cancel-in-progress'], false);
+  const job = workflow.jobs['browser-evidence'];
+  const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+  assert.equal(checkout.with.ref, job.env.PROTO_UI_EXPECTED_HEAD_SHA);
+  assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha || github.sha }}');
+  assert.equal(checkout.with['persist-credentials'], false);
+  const execution = job.steps.find((step) => step.env?.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE);
+  assert.equal(execution.env.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE, '1');
+  for (const suite of BOOTSTRAP_EVIDENCE_SUITES) assert.ok(execution.run.includes(suite));
+  assert.match(execution.run, /--reporter=json/);
+  assert.match(execution.run, /--outputFile="\$PROTO_UI_BOOTSTRAP_EVIDENCE_DIR\/vitest\.json"/);
+  const gateIndex = job.steps.findIndex((step) =>
+    step.run?.includes('node scripts/test/bootstrap-state-controls-receipt.mjs')
+  );
+  assert.ok(gateIndex > job.steps.indexOf(execution));
+  assert.equal(job.steps[gateIndex].if, 'always()');
+  assert.equal(job.steps[gateIndex]['continue-on-error'], undefined);
+  assert.equal(
+    job.steps[gateIndex].env.PROTO_UI_BOOTSTRAP_EVIDENCE_DIR,
+    '${{ runner.temp }}/bootstrap-state-controls-evidence'
+  );
+  const uploadIndex = job.steps.findIndex((step) =>
+    step.uses?.startsWith('actions/upload-artifact@')
+  );
+  assert.ok(uploadIndex > gateIndex);
+  assert.equal(job.steps[uploadIndex].if, 'always()');
+  for (const environment of [job.env, ...job.steps.map((step) => step.env ?? {})]) {
+    assert.ok(
+      !Object.hasOwn(environment, 'GITHUB_ACTIONS'),
+      'Do not manufacture the Actions owner'
+    );
+    assert.ok(
+      !Object.hasOwn(environment, 'PROTO_UI_BROWSER_BASE_URL'),
+      'Keep the fresh server owner'
+    );
+  }
+});
+
+// These are deliberately synthetic receipts testing the gate, not browser evidence.
+const expectedReceipt = {
+  root: process.cwd(),
+  sha: 'a'.repeat(40),
+  runId: '123',
+  runAttempt: '2',
+};
+function receiptControl() {
+  const testResults = BOOTSTRAP_EVIDENCE_SUITES.map((suite) => ({
+    name: path.join(expectedReceipt.root, suite),
+    status: 'passed',
+    assertionResults: (suite === browserPath ? BOOTSTRAP_BROWSER_CASES : ['unit control']).map(
+      (title) => ({ title, fullName: `Synthetic receipt control ${title}`, status: 'passed' })
+    ),
+  }));
+  const count = testResults.reduce((total, result) => total + result.assertionResults.length, 0);
+  return {
+    manifest: {
+      sourceSha: expectedReceipt.sha,
+      expectedSha: expectedReceipt.sha,
+      runId: expectedReceipt.runId,
+      runAttempt: expectedReceipt.runAttempt,
+      status: 'passed',
+      workflowStatus: 'success',
+      route: '/en/test/bootstrap-state-controls/',
+      runtimes: ['wc', 'react', 'vue', 'vue2'],
+      themes: ['light', 'dark'],
+      pageErrors: [],
+      results: BOOTSTRAP_BROWSER_CASES.map((name) => ({ name, status: 'pass', errors: [] })),
+    },
+    report: {
+      success: true,
+      numFailedTests: 0,
+      numFailedTestSuites: 0,
+      numPassedTests: count,
+      numTotalTests: count,
+      testResults,
+    },
+  };
+}
+
+test('receipt gate admits exactly fifteen original journeys plus all supporting suites', () => {
+  assert.equal(BOOTSTRAP_BROWSER_CASES.length, 15);
+  assert.deepEqual(assertBootstrapEvidence(receiptControl(), expectedReceipt), {
+    browserCases: 15,
+    selectedSuites: 4,
+  });
+});
+for (const [name, mutate] of [
+  [
+    'missing source receipt',
+    (data) => {
+      delete data.manifest.sourceSha;
+    },
+  ],
+  [
+    'stale source',
+    (data) => {
+      data.manifest.sourceSha = 'b'.repeat(40);
+    },
+  ],
+  [
+    'wrong expected source',
+    (data) => {
+      data.manifest.expectedSha = 'b'.repeat(40);
+    },
+  ],
+  [
+    'other run',
+    (data) => {
+      data.manifest.runId = '124';
+    },
+  ],
+  [
+    'other attempt',
+    (data) => {
+      data.manifest.runAttempt = '1';
+    },
+  ],
+  [
+    'pending manifest',
+    (data) => {
+      data.manifest.status = 'setup-pending';
+    },
+  ],
+  [
+    'failed cleanup',
+    (data) => {
+      data.manifest.workflowStatus = 'failure';
+    },
+  ],
+  [
+    'startup failure',
+    (data) => {
+      data.manifest.startupError = 'launch failed';
+    },
+  ],
+  [
+    'zero browser results',
+    (data) => {
+      data.manifest.results = [];
+    },
+  ],
+  [
+    'partial browser results',
+    (data) => {
+      data.manifest.results.pop();
+    },
+  ],
+  [
+    'duplicate browser results',
+    (data) => {
+      data.manifest.results[14] = data.manifest.results[0];
+    },
+  ],
+  [
+    'skipped manifest result',
+    (data) => {
+      data.manifest.results[0].status = 'skip';
+    },
+  ],
+  [
+    'browser errors',
+    (data) => {
+      data.manifest.pageErrors.push('uncaught');
+    },
+  ],
+  [
+    'missing browser suite',
+    (data) => {
+      data.report.testResults.pop();
+    },
+  ],
+  [
+    'missing supporting suite',
+    (data) => {
+      data.report.testResults.shift();
+    },
+  ],
+  [
+    'skipped browser assertion',
+    (data) => {
+      data.report.testResults[3].assertionResults[0].status = 'skipped';
+    },
+  ],
+  [
+    'todo supporting assertion',
+    (data) => {
+      data.report.testResults[0].assertionResults[0].status = 'todo';
+    },
+  ],
+  [
+    'partial Vitest browser results',
+    (data) => {
+      data.report.testResults[3].assertionResults.pop();
+    },
+  ],
+  [
+    'duplicate Vitest browser results',
+    (data) => {
+      data.report.testResults[3].assertionResults[14] =
+        data.report.testResults[3].assertionResults[0];
+    },
+  ],
+  [
+    'false total count',
+    (data) => {
+      data.report.numTotalTests += 1;
+    },
+  ],
+]) {
+  test(`receipt gate rejects ${name}`, () => {
+    const data = receiptControl();
+    mutate(data);
+    assert.throws(() => assertBootstrapEvidence(data, expectedReceipt));
+  });
+}
 
 test('runner-dependent evidence paths are evaluated only in supported step env contexts', () => {
   // GitHub context availability: jobs.<job_id>.env does not admit runner;

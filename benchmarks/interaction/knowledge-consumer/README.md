@@ -4,7 +4,7 @@ Use the repository-owned [interaction knowledge skill](SKILL.md) to choose a tar
 
 The [clean project](example/) implements the public Tabs task using React 18.3.1, react-dom 18.3.1 and `@radix-ui/react-tabs` 1.1.13. A mature library fits this target, so the example uses its public API rather than rebuilding Tabs. Vite 6.4.1 bundles the project; Playwright Core 1.58.2 supplies the separate consumer observation command. No Proto package, compiler, Adapter, workspace alias or home skill is needed.
 
-The source is authored and **unrun**. No clean install, build, browser journey, model task, cost comparison or visual result is claimed. Exact direct pins are present; the execution operator must produce and retain a transitive lock before measuring any task. The example is a reference recipe, never an already-completed timed participant run.
+The clean reference project and its checker were [calibrated in Chromium on November 23](../../../internal/records/2026-11-23-sprint7-tabs-control-calibration.md): independent frozen-lock installs and builds succeeded, both specified positive journeys passed all 22 checks, and all three artificial controls failed at their intended checks. The ineffective earlier automatic control and the initial favicon failure remain in the evidence. This calibrates the public recipe; no timed participant run, model task or cost comparison has been performed. Produce and retain the transitive lock before measuring any new task.
 
 ## Read and use the workflow
 
@@ -64,8 +64,10 @@ These commands should exit nonzero with an actual failed check. Inspect the reas
 | `relationship` | The initial trigger loses its `aria-controls` relationship | `initial-selection` requires a reciprocal current trigger/panel relation |
 | `removal` | A capture listener prevents the host removal action | `removal` requires all tab controls and panels to detach |
 
+The automatic control dispatches a synthetic Enter keydown on focus because the pinned Radix Tabs 1.1.13 selects on Enter/Space or primary mousedown, not `HTMLElement.click()`. Its recorded `mutationEvents` explicitly retain `isTrusted: false`; this artificial fault injection is not physical-input evidence. The normal journey still uses browser keyboard/pointer actions.
+
 These are injected checker controls, not discovered product bugs. A missing browser, setup failure or unrelated earlier failure does not validate a control. All subsequent checks remain `not-run` after the first failure.
 
 ## Continue the original Issue
 
-The delivered workflow and authored example do not finish the controlled comparison. Main still needs actual consumer/visual validation, independent fact/oracle review, frozen model/environment/budget manifests, genuinely isolated fresh participants, repeated three-path task outputs, complete measurements and interpretation, concrete observed gap feedback, review and lawful integration. Keep the Issue open until its original conditions are earned. Do not turn an absent result into a favorable result, an empty defect list, zero cost or an `inconclusive` experiment that never ran.
+The delivered workflow and calibrated reference example do not finish the controlled comparison. Main still needs independent fact/oracle review, frozen model/environment/budget manifests, isolated fresh participants, repeated three-path task outputs, complete measurements and interpretation, concrete observed gap feedback, review and lawful integration. The November 23 browser evidence and two inspected focus-state screenshots have only their recorded scope; they do not establish screen-reader, Apple-host or physical-device acceptance. Keep the Issue open until its original conditions are earned. Do not turn an absent result into a favorable result, an empty defect list, zero cost or an `inconclusive` experiment that never ran.

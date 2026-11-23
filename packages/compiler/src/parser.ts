@@ -1,6 +1,7 @@
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { declaredSetValueEvent } from './a11y-event-types';
 import ts from 'typescript';
+import { unwrapSourceExpression } from './source-syntax';
 import { createHash } from 'node:crypto';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { admittedHookOperation } from './hook-admission';
@@ -44,7 +45,6 @@ import {
   staticScalarMembership,
   staticCallableSelection,
   staticGetterRecordInitializer,
-  unwrapSourceExpression,
   staticJoin,
   isSourceFunction,
   CORE_FUNCTIONS,

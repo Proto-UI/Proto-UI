@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "kind": "original-historical-cli-negative-fixture",
+  "sourceHead": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+  "sourceRecord": "internal/records/2026-11-22-sprint3-tooltip-public-consumers.json",
+  "archiveSha256": "8a0ff2bc26bf2321a50a33e88edc1ea2ce3d9946ba6e73465f87a7ebda8e2885",
+  "member": "tooltip-public-consumers-history/baseline-history/pack/tarballs/proto.ui-cli-0.3.0-alpha.2.tgz",
+  "tarball": "old-cli-830287.tgz",
+  "bytes": 198259,
+  "sha256": "0dd1537bdb151fa6f265df07c1ba35cef37adc20b7e2e7c69e7e0f2e60b7af9d",
+  "packManifestSha256": "5568e949447c3fc710fe2a99984d28430eed9dcb56d39349168956f050a18479",
+  "packManifestEntry": {
+    "name": "@proto.ui/cli",
+    "version": "0.3.0-alpha.2",
+    "stage": "proto.ui__cli",
+    "tarball": "tarballs/proto.ui-cli-0.3.0-alpha.2.tgz",
+    "integrity": "sha512-GdhBL9LzW5zrVkxL7eoVeM4kMAwLeMC08A77/slqfKY39BmW1ZMdZnxy1tjB9C6JuUCWC/mdJIi42iq8MpWafw==",
+    "shasum": "94d9f42b5a331a430e7738f25677519405e39a6b"
+  },
+  "scope": "Original recovered tarball bytes. Used only as the CLI override in a fresh current-App/current-other-packages counterfactual. The historical pack recorded dirty documentation files; no clean whole historical checkout claim is made."
+}
