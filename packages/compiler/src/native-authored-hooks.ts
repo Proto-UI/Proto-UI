@@ -7,6 +7,10 @@ export const nativeAuthoredHooksArtifact: NonNullable<GeneratedModule['supportin
     path: '.proto-ui/owner/authored-hooks-v1.ts',
     kind: 'source',
     contents: `export interface NativeHookCapture {
+  readonly props?: unknown; readonly state?: unknown; readonly context?: unknown; readonly event?: unknown; readonly feedback?: unknown;
+  readonly methods?: Readonly<Record<string, unknown>>;
+  readonly artifacts?: Readonly<{stateHandles?: Readonly<Record<string, unknown>>; methods?: Readonly<Record<string, unknown>>; eventKeys?: Readonly<Record<string, string>>; asHooks?: readonly NativeHookChild[]}>;
+  readonly disposers?: Readonly<{all: readonly (() => void)[]; props?: readonly (() => void)[]; context?: readonly (() => void)[]; rule?: readonly (() => void)[]; event?: readonly (() => void)[]; feedback?: readonly (() => void)[]}>;
   readonly asHooks?: readonly NativeHookChild[];
   readonly stateHandles?: Readonly<Record<string, unknown>>;
   readonly getState?: (name: string) => unknown;
@@ -28,16 +32,49 @@ type Definition = {
   configure?: (api: NativeHookApi, options: unknown, tools: {warn(message: string): void; conflict(message: string): never}) => void;
 };
 export function createNativeAuthoredHooks(options: { setup(): void; borrow(state: unknown): unknown }) {
-  type Frame = { names: Set<string>; states: Map<string, unknown>; methods: Map<string, unknown>; children: NativeHookChild[] };
+  type Bucket = 'props' | 'state' | 'context' | 'event' | 'feedback';
+  type DisposerGroup = 'props' | 'context' | 'rule' | 'event' | 'feedback';
+  type Frame = { names: Set<string>; states: Map<string, unknown>; methods: Map<string, unknown>; children: NativeHookChild[]; effects: Partial<Record<Bucket, unknown[]>>; disposers: Partial<Record<DisposerGroup, (() => void)[]>>; eventKeys: Map<string, string> };
   type Entry = { order: number; mode: NativeHookChild['mode']; api: NativeHookApi; result?: unknown; handle?: unknown; installing: boolean; privileged: boolean };
   const entries = new Map<string, Entry>(), frames: Frame[] = [], rootNames = new Set<string>();
-  const observedNames = new WeakMap<object, string>();
+  const observedNames = new WeakMap<object, string>(), stateNames = new WeakMap<object, string>(), borrowedStates = new WeakSet<object>();
+  function effect(bucket: Bucket, value: unknown): void { options.setup(); const frame = frames.at(-1); if (frame) (frame.effects[bucket] ??= []).push(value); }
+  function disposer(group: DisposerGroup, value: unknown): void {
+    options.setup(); const frame = frames.at(-1); if (!frame) return;
+    if (typeof value !== 'function') throw new TypeError('[Hook] captured disposer must be callable');
+    (frame.disposers[group] ??= []).push(value as () => void);
+  }
+  function finish(frame: Frame, render: unknown): NativeHookCapture {
+    const stateHandles = frame.states.size ? Object.freeze(Object.fromEntries([...frame.states].map(([name, state]) => { const projected = observedNames.has(state as object) || borrowedStates.has(state as object) ? state : options.borrow(state); if (!observedNames.has(projected as object)) borrowedStates.add(projected as object); stateNames.set(projected as object, name); return [name, projected]; }))) : undefined;
+    const methods = frame.methods.size ? Object.freeze(Object.fromEntries(frame.methods)) : undefined;
+    const asHooks = frame.children.length ? Object.freeze(frame.children.slice()) : undefined;
+    const eventKeys = frame.eventKeys.size ? Object.freeze(Object.fromEntries(frame.eventKeys)) : undefined;
+    const effects = Object.fromEntries(Object.entries(frame.effects).map(([name, values]) => [name, values.length === 1 ? values[0] : values.slice()]));
+    const groups: Partial<Record<DisposerGroup, readonly (() => void)[]>> = {}, all: (() => void)[] = [];
+    for (const name of ['props', 'context', 'rule', 'event', 'feedback'] as const) {
+      const source = frame.disposers[name]; if (!source?.length) continue;
+      const wrapped = source.map(off => () => { options.setup(); off(); });
+      groups[name] = Object.freeze(wrapped); all.push(...wrapped);
+    }
+    return Object.freeze({
+      ...effects,
+      ...(stateHandles ? {stateHandles, getState: (name: string) => Object.prototype.hasOwnProperty.call(stateHandles, name) ? stateHandles[name] : undefined} : {}),
+      ...(methods ? {methods, getMethod: (name: string) => Object.prototype.hasOwnProperty.call(methods, name) ? methods[name] : undefined} : {}),
+      ...(asHooks ? {asHooks, getAsHook: (name: string) => asHooks.find(child => child.name === name), getAsHookHandle: (name: string) => asHooks.find(child => child.name === name)?.handle} : {}),
+      ...(stateHandles || methods || eventKeys || asHooks ? {artifacts: Object.freeze({...(stateHandles ? {stateHandles} : {}), ...(methods ? {methods} : {}), ...(eventKeys ? {eventKeys} : {}), ...(asHooks ? {asHooks} : {})})} : {}),
+      ...(all.length ? {disposers: Object.freeze({all: Object.freeze(all), ...groups})} : {}),
+      ...(typeof render === 'function' ? {render} : {}),
+    });
+  }
   let order = 0;
   function record(definition: Definition, entry: Entry, result = entry.result, handle = entry.handle): void {
     const parent = frames.at(-1);
     if (parent) parent.children.push(Object.freeze({name: definition.name, order: entry.order, privileged: false, mode: definition.mode, result, handle}));
   }
   return {
+    effect, disposer,
+    eventKey(name: string): void { options.setup(); frames.at(-1)?.eventKeys.set(name, name); },
+    rule<T extends {dispose(): void}>(handle: T): T { const off = () => handle.dispose(); effect('context', {op: 'rule', handle, off}); disposer('rule', off); return handle; },
     privileged<T>(name: string, acquire: () => T, observedMembers?: readonly (keyof T & string)[]): T {
       options.setup();
       let entry = entries.get(name);
@@ -61,9 +98,9 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
       if (typeof name !== 'string' || !name || names.has(name)) throw new Error('[State] illegal or duplicate state name in setup frame: ' + name);
       names.add(name);
     },
-    state(name: string, state: unknown): void { options.setup(); frames.at(-1)?.states.set(name, state); },
+    state(name: string, state: unknown): void { options.setup(); stateNames.set(state as object, name); frames.at(-1)?.states.set(name, state); },
     introduceObserved(state: object): void {
-      const name = observedNames.get(state);
+      const name = observedNames.get(state) ?? stateNames.get(state);
       if (name !== undefined) frames.at(-1)?.states.set(name, state);
     },
     method(name: string, method: unknown): void { options.setup(); frames.at(-1)?.methods.set(name, method); },
@@ -85,22 +122,13 @@ export function createNativeAuthoredHooks(options: { setup(): void; borrow(state
       const api = Object.freeze({name: definition.name, order: order++, store: Object.create(null) as Record<string, unknown>});
       const entry: Entry = {order: api.order, mode: definition.mode, api, installing: true, privileged:false};
       if (definition.mode !== 'multiple') entries.set(definition.name, entry);
-      const frame: Frame = {names: new Set(), states: new Map(), methods: new Map(), children: []};
+      const frame: Frame = {names: new Set(), states: new Map(), methods: new Map(), children: [], effects: {}, disposers: {}, eventKeys: new Map()};
       frames.push(frame);
       let captureOpen = true;
       try {
         const render = definition.setup(input, api);
         frames.pop(); captureOpen = false;
-        const states = new Map([...frame.states].map(([name, value]) => [name, observedNames.has(value as object) ? value : options.borrow(value)]));
-        const stateHandles = states.size ? Object.freeze(Object.fromEntries(states)) : undefined;
-        const children = Object.freeze(frame.children.slice());
-        const capture: NativeHookCapture = Object.freeze({
-          asHooks: children,
-          ...(stateHandles ? {stateHandles, getState: (name: string) => Object.prototype.hasOwnProperty.call(stateHandles, name) ? stateHandles[name] : undefined} : {}),
-          ...(frame.methods.size ? {getMethod: (name: string) => frame.methods.get(name)} : {}),
-          ...(children.length ? {getAsHook: (name: string) => children.find(child => child.name === name), getAsHookHandle: (name: string) => children.find(child => child.name === name)?.handle} : {}),
-          ...(typeof render === 'function' ? {render} : {}),
-        });
+        const capture = finish(frame, render);
         entry.result = capture;
         entry.handle = definition.project ? definition.project(capture) : capture;
         entry.installing = false;
