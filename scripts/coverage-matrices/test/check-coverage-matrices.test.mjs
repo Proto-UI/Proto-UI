@@ -816,7 +816,7 @@ function writeCurrentRetryConfig(root) {
   );
   assert.equal(
     createHash('sha256').update(config).digest('hex'),
-    'e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c'
+    'dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99'
   );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
@@ -19612,5 +19612,142 @@ for (const scenario of [
       `@vite-ignore dynamic import in \`${sourcePath}\` is not reviewed against an exact URL boundary`
     );
     assert.equal(rejected, scenario !== 'exact', message);
+  });
+}
+
+test('review entry controls: TypeScript generic syntax preserves native resource scanning', () => {
+  const generic =
+    'const copy = <T>(value: T): T => value; const compared = new WeakMap<object, WeakSet<object>>();';
+  const cases = [
+    ['Generic.ts', generic, null],
+    ['Generic.mts', generic, null],
+    ['Generic.cts', generic, null],
+    [
+      'Generic.tsx',
+      'const copy = <T,>(value: T): T => value; const compared = new WeakMap<object, WeakSet<object>>();',
+      null,
+    ],
+    ['Generic.ts', `${generic}\ndocument.createElement('iframe');`, /unreviewed executable embed/],
+    ['Generic.ts', `${generic}\nimport('@proto.ui/core');`, /raw Proto UI import/],
+    ['Generic.ts', `${generic}\nnew Function('return 1')();`, /runtime code compilation/],
+    [
+      'Generic.tsx',
+      'export const view = () => <object data="https://example.invalid"/>;',
+      /unreviewed executable embed/,
+    ],
+    [
+      'Generic.ts',
+      'export const view = () => <iframe src="https://example.invalid"/>;',
+      /unreviewed executable embed/,
+    ],
+  ];
+  for (const [name, source, rejection] of cases) {
+    const root = createRoot();
+    const file = `apps/www/src/components/${name}`;
+    fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
+    fs.writeFileSync(path.join(root, file), source);
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[file, ['www.shell.primary-nav']]] });
+    if (rejection) assert.match(validationMessage(root), rejection, name);
+    else assert.doesNotThrow(() => validateCoverageMatrices({ rootDir: root }), name);
+  }
+});
+
+for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-import']) {
+  test(`integrated source import boundary: Finf registry ${scenario}`, () => {
+    const root = createRoot();
+    const reviewed = 'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts';
+    const owner =
+      scenario === 'foreign-owner' ? reviewed.replace('.ts', '-unreviewed.ts') : reviewed;
+    const source = fs.readFileSync(new URL(`../../../${reviewed}`, import.meta.url), 'utf8');
+    assert.equal(
+      createHash('sha256').update(source).digest('hex'),
+      'df133b1ddf6cb538ff4e602f7bcd68c7c24835e6bf19ac8e33339571057cae7a'
+    );
+    for (const name of ['@proto.ui/prototypes-base/field', '@proto.ui/prototypes-brutalist/field'])
+      assert.ok(source.includes(`'${name}'`));
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(
+      target,
+      source +
+        (scenario === 'changed-source'
+          ? '\n// unreviewed importer bytes'
+          : scenario === 'unlisted-import'
+            ? "\nimport '@proto.ui/runtime';"
+            : '')
+    );
+    writeValidMatrices(root);
+    const rejected = collectCoverageMatrixIssues({ rootDir: root }).some(
+      (issue) => issue.includes('raw Proto UI import') && issue.includes(`in \`${owner}\` escapes`)
+    );
+    assert.equal(rejected, scenario !== 'exact');
+  });
+}
+
+for (const reviewed of ['packages/core/src/internal.ts', 'packages/compiler/src/shader-plan.ts']) {
+  for (const scenario of [
+    'exact',
+    'changed-source',
+    'foreign-owner',
+    'changed-companion',
+    'missing-companion',
+  ]) {
+    test(`integrated source import boundary: compiler closure ${reviewed} ${scenario}`, () => {
+      const root = createRoot();
+      const companion = 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts';
+      const owner =
+        scenario === 'foreign-owner'
+          ? path.posix.join(
+              path.posix.dirname(reviewed),
+              'unreviewed-' + path.posix.basename(reviewed)
+            )
+          : reviewed;
+      const target = path.join(root, owner);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${reviewed}`, import.meta.url), target);
+      if (scenario === 'changed-source') fs.appendFileSync(target, '\n// changed closure bytes');
+      if (scenario !== 'missing-companion') {
+        const companionPath = path.join(root, companion);
+        fs.mkdirSync(path.dirname(companionPath), { recursive: true });
+        fs.copyFileSync(new URL(`../../../${companion}`, import.meta.url), companionPath);
+        if (scenario === 'changed-companion')
+          fs.appendFileSync(companionPath, '\n// changed compiler owner');
+      }
+      const entry = path.join(root, 'apps/www/src/components/CompilerClosureProbe.ts');
+      fs.mkdirSync(path.dirname(entry), { recursive: true });
+      fs.writeFileSync(
+        entry,
+        `import '${path.relative(path.dirname(entry), target).replaceAll('\\', '/')}';`
+      );
+      writeValidMatrices(root);
+      const rejected = collectCoverageMatrixIssues({ rootDir: root }).some(
+        (issue) =>
+          issue.includes('raw Proto UI import') && issue.includes(`in \`${owner}\` escapes`)
+      );
+      assert.equal(rejected, scenario !== 'exact');
+    });
+  }
+}
+
+for (const scenario of ['exact', 'changed-source', 'foreign-owner']) {
+  test(`integrated source import boundary: Form Field type ${scenario}`, () => {
+    const root = createRoot();
+    const reviewed = 'apps/www/src/content/docs/form-validation-demo.shared.ts';
+    const owner =
+      scenario === 'foreign-owner'
+        ? reviewed.replace('.shared.ts', '-unreviewed.shared.ts')
+        : reviewed;
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(new URL(`../../../${reviewed}`, import.meta.url), target);
+    if (scenario === 'changed-source')
+      fs.appendFileSync(target, '\n// changed validator controller');
+    writeValidMatrices(root);
+    const rejected = collectCoverageMatrixIssues({ rootDir: root }).some((issue) =>
+      issue.includes(
+        `raw Proto UI import \`@proto.ui/prototypes-base/field\` in \`${owner}\` escapes`
+      )
+    );
+    assert.equal(rejected, scenario !== 'exact');
   });
 }

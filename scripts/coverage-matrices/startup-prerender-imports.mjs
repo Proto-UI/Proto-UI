@@ -298,7 +298,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../host', '../session', './types', '@proto.ui/core']),
   }),
   'packages/runtime/src/instance/host.ts': Object.freeze({
-    sourceSha256: '2247e60b269e0925d8d7d7bba03da532936a2fccb10e05018d354878380ab2b2',
+    sourceSha256: '8fb845a5e76eb7c9b427eca5fc0c241b118b9926ad61fb921bb2194ebd633ca8',
     specifiers: Object.freeze([
       '../kernel/lifecycle-events',
       '../kernel/timeline',
@@ -311,7 +311,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['./execute', './host', './instance', './session']),
   }),
   'packages/runtime/src/instance/instance.ts': Object.freeze({
-    sourceSha256: '137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b',
+    sourceSha256: 'b4bf27ac468e1d4f1b2ba906ca29650412dea142810a5fc5eab5ecca82182c70',
     specifiers: Object.freeze([
       '../kernel',
       '../kernel/as-hook',
@@ -356,7 +356,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/runtime/src/instance/session.ts': Object.freeze({
-    sourceSha256: '70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0',
+    sourceSha256: '82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a',
     specifiers: Object.freeze([
       '../kernel',
       '../kernel/event',
@@ -442,7 +442,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/runtime/src/kernel/kernel.ts': Object.freeze({
-    sourceSha256: 'cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026',
+    sourceSha256: '714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122',
     specifiers: Object.freeze([
       '../orchestrator/module-orchestrator/types',
       './as-hook',
