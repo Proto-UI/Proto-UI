@@ -2,6 +2,8 @@
 
 This is the reproducible #757 experiment, not a public integration package. It realizes the same pinned A2UI 1.0 literal Tabs/Text input through Radix React Tabs and actual Proto-UI Base Tabs + React Adapter. The [record](../../../internal/records/2026-11-22-sprint-7-declarative-agent-ui.md) contains the null result, original failed attempt, exact source identity, reviewed expectation correction and limits.
 
+This study owns its `package-lock.json` and dependency installation. Its `build.mjs` bundles the study with esbuild; that command does not perform semantic TypeScript checking. The root workspace typecheck excludes this independently installed directory.
+
 From a prepared Proto-UI checkout with its frozen workspace dependencies:
 
 ```sh
