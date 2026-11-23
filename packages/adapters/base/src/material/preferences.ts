@@ -57,10 +57,47 @@ export function createWebMaterialPreferences(window: Window): WebMaterialPrefere
     }),
     subscribe(fn) {
       const all = [...motion, ...transparency, ...contrast, ...forced].filter((q) => q !== null);
-      for (const q of all) q.addEventListener('change', fn);
-      return () => {
-        for (const q of all) q.removeEventListener('change', fn);
+      const registered: MediaQueryList[] = [];
+      let live = true;
+      // Each subscription owns a distinct listener even if callers share their
+      // callback. A failed host removal must not keep a retired sink reachable.
+      const listener = () => {
+        if (live) fn();
       };
+      const dispose = () => {
+        if (!live) return;
+        live = false;
+        fn = () => {};
+        let failure: unknown;
+        let failed = false;
+        for (const q of registered.splice(0)) {
+          try {
+            q.removeEventListener('change', listener);
+          } catch (error) {
+            if (!failed) {
+              failure = error;
+              failed = true;
+            }
+          }
+        }
+        if (failed) throw failure;
+      };
+      try {
+        for (const q of all) {
+          // Include the failing call in rollback: a host can install its
+          // listener before reporting a registration failure.
+          registered.push(q);
+          q.addEventListener('change', listener);
+        }
+      } catch (error) {
+        try {
+          dispose();
+        } catch {
+          // Preserve the registration failure after attempting every removal.
+        }
+        throw error;
+      }
+      return dispose;
     },
   };
   windows.set(preferences, window);

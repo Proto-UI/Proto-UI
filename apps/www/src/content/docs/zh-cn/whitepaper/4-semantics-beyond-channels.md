@@ -275,7 +275,10 @@ AppUI(() => SwitchRoot({ defaultChecked: false }, () => SwitchThumb()));
 
 <figure class="whitepaper-figure">
   <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图">
-    <img src="/diagrams/whitepaper-switch-activation.zh-cn.svg" alt="非受控 Switch 激活后，Root 保存 State、发出 Expose、更新 Context 并刷新 Feedback，Thumb 随后更新派生展示状态。" width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-switch-activation.mobile.zh-cn.svg" width="500" height="1740" />
+      <img src="/diagrams/whitepaper-switch-activation.zh-cn.svg" alt="非受控 Switch 激活后，Root 保存 State、发出 Expose、更新 Context 并刷新 Feedback，Thumb 随后更新派生展示状态。" width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
   <figcaption>点击查看大图</figcaption>
 </figure>

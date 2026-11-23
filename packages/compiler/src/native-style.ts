@@ -5,7 +5,11 @@ import type { StyleTokenHandle } from './style-plan';
 
 /** Groups are resolved by the existing portable grammar at compile time, never a host grammar. */
 export function emitNativeStyleHandle(handle: StyleTokenHandle, typescript = true): string {
-  const value = JSON.stringify({ kind: 'tw', tokens: handle.tokens, groups: handle.tokens.map(getSemanticGroupKeyV0) });
+  const value = JSON.stringify({
+    kind: 'tw',
+    tokens: handle.tokens,
+    groups: handle.tokens.map(getSemanticGroupKeyV0),
+  });
   return typescript ? `(${value} as const)` : value;
 }
 
@@ -21,9 +25,12 @@ export function emitNativeRule(
   function condition(node: RuleCondition): string {
     if (node.type === 'true' || node.type === 'false') return node.type;
     if (node.type === 'eq') {
-      const signal = node.left.type === 'prop'
-        ? `${props}[${JSON.stringify(node.left.key)}]`
-        : `${expression(states.get(node.left.id)!)}.get()`;
+      const signal =
+        node.left.type === 'meta'
+          ? `${style}.meta(${JSON.stringify(node.left.key)})`
+          : node.left.type === 'prop'
+            ? `${props}[${JSON.stringify(node.left.key)}]`
+            : `${expression(states.get(node.left.id)!)}.get()`;
       return `(${signal} === ${JSON.stringify(node.right)})`;
     }
     if (node.type === 'not') return `!(${condition(node.expr)})`;
@@ -41,6 +48,7 @@ export const nativeStyleArtifact = {
 export type NativeStyleHandle = { readonly kind: 'tw'; readonly tokens: readonly string[]; readonly groups: readonly string[] };
 export type NativeRuleHandle = { readonly id: number; dispose(): void };
 export interface NativeStyle {
+  meta(key: string): unknown;
   use(...handles: NativeStyleHandle[]): () => void;
   patch(...handles: NativeStyleHandle[]): void;
   suppress(...handles: NativeStyleHandle[]): void;
@@ -69,11 +77,15 @@ export function createNativeStyle(options: {
   ensureSetup(): void;
   ensureRuntime(): void;
   isAlive(): boolean;
+  getMeta?(key: string): unknown;
+  subscribeMeta?(notify: () => void): () => void;
   project(tokens: readonly string[]): void;
 }): NativeStyle {
   const chunks: Chunk[] = [], rules: Rule[] = [];
   const patches = new Map<string, Patch>();
   let mounted = false, disposed = false, nextRuleId = 1;
+  let metaGeneration = 0;
+  let releaseMeta: (() => void) | undefined;
   let projected: readonly string[] = [];
   function snapshot(includeRules = mounted): string[] {
     const merged = new Map<string, string>();
@@ -105,6 +117,7 @@ export function createNativeStyle(options: {
     return { handles, active: true };
   }
   const style = {
+    meta(key: string): unknown { return key.startsWith('preference.') && !mounted ? 'unknown' : options.getMeta?.(key); },
     use(...handles: NativeStyleHandle[]): () => void {
       options.ensureSetup();
       const chunk = record(handles);
@@ -146,14 +159,26 @@ export function createNativeStyle(options: {
       } });
     },
     refresh,
-    mount(): void { mounted = true; const next = snapshot(); options.project(next); projected = next; },
-    unmount(): void { mounted = false; projected = []; },
+    mount(): void {
+      if (disposed || !options.isAlive()) return;
+      if (!mounted) { mounted = true; ++metaGeneration; }
+      const generation = metaGeneration;
+      if (!releaseMeta && options.subscribeMeta) {
+        let release: () => void;
+        try { release = options.subscribeMeta(() => { if (mounted && generation === metaGeneration) refresh(); }); }
+        catch (error) { if (generation === metaGeneration) { mounted = false; ++metaGeneration; } throw error; }
+        if (!mounted || disposed || generation !== metaGeneration) { release(); return; }
+        releaseMeta = release;
+      }
+      const next = snapshot(); options.project(next); projected = next;
+    },
+    unmount(): void { mounted = false; ++metaGeneration; const release = releaseMeta; releaseMeta = undefined; projected = []; release?.(); },
     tokens(): readonly string[] { return snapshot(); },
     serverTokens(): readonly string[] {
       if (disposed || !options.isAlive()) throw new Error('[Style] owner is terminally disposed');
       return snapshot(true);
     },
-    dispose(): void { disposed = true; mounted = false; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; },
+    dispose(): void { disposed = true; mounted = false; ++metaGeneration; const release = releaseMeta; releaseMeta = undefined; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; release?.(); },
   };
   return style;
 }

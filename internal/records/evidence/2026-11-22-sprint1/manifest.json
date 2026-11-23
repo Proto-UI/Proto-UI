@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original Sprint1 red/green development observations; final integration acceptance remains the separately source-bound native workflow receipt.",
+  "receipts": [
+    {
+      "file": "a-ime-unit.log.gz",
+      "originalBytes": 1350,
+      "originalSha256": "e6ed11ce57a3abe4c79fd23db16aa62e33fb546ecd7d45089db594167ecd8e51",
+      "gzipSha256": "9178b5e3f515e4502956cc6c2e69993c9636f23c8c256f0b709cb3b54f7a9aad",
+      "associatedCandidateCommit": "1df326e153dc499482661e177ee26bc910161847",
+      "observation": "Number Field oracle controls:13/13",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "347481015d900aee2eec30493edb8e39ddf31ad7"
+    },
+    {
+      "file": "a-number-field-focused.log.gz",
+      "originalBytes": 187774,
+      "originalSha256": "9b9058c0fb6663a2ec59d004f8110f2576ebb7a9d7dc58fe521edc135175bdea",
+      "gzipSha256": "f9bda04c73a0c764b80fabe652b47e7c2d58df7d1f7171fa5db3dd43950269d8",
+      "associatedCandidateCommit": "1df326e153dc499482661e177ee26bc910161847",
+      "observation": "Number Field capability/format:75/75",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "347481015d900aee2eec30493edb8e39ddf31ad7"
+    },
+    {
+      "file": "sprint1-b-hf-final-red.json.gz",
+      "originalBytes": 22025,
+      "originalSha256": "c5f527a41a87706c5eaa7225ec693d2a0ffeaa084ddb3e2ab5b5a83286168319",
+      "gzipSha256": "3f711ef10b49490e653a4cd78058bbf44c49a93e008cedd4ed59862d47f224cb",
+      "associatedCandidateCommit": "e4e34641c32f59d31e3d3370272ee39b1fe29bf9",
+      "observation": "Final31 unit cases with only two product files restored to dc3b184:21pass10fail",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "cadb881d3bbf0e689b22eb0b01cedd07aa28f4af"
+    },
+    {
+      "file": "sprint1-b-hf-affected-green.json.gz",
+      "originalBytes": 36981,
+      "originalSha256": "bed77ec36de4edddc45bced81c48755221826c8fd8faab3e09f2f1f5b1fe5c5d",
+      "gzipSha256": "2b0fd28f714142972ffce688d0d7905860d4d9bdfdd615099262ee151e74b11e",
+      "associatedCandidateCommit": "e4e34641c32f59d31e3d3370272ee39b1fe29bf9",
+      "observation": "Eight affected unit files:105/105",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "cadb881d3bbf0e689b22eb0b01cedd07aa28f4af"
+    },
+    {
+      "file": "sprint1-b-f-ax-unit.json.gz",
+      "originalBytes": 10723,
+      "originalSha256": "bcd00c72b206b8fab674529e029fb4c173b29ebac4826bae82fc70a98a9e484a",
+      "gzipSha256": "0ab8974cc29a07bb2c276d888e3a0c57eec737e88e9489d3130ad12f4301472a",
+      "associatedCandidateCommit": "439fcad404e67d457808aaefaf16335fb453f280",
+      "observation": "DOM approximation23 + AX identity4:27/27",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "5ea978da219f32112bb81e8ce61b748fc0adbe2e"
+    },
+    {
+      "file": "sprint1-c-props-fifth.log.gz",
+      "originalBytes": 196269,
+      "originalSha256": "f1b896c63db011f32d080ee0ccb85b07b3e5d6b7a1215319996eb73dddb35ef4",
+      "gzipSha256": "2f55ffdcdbdfe5b3053f99c66557a3f042045719e42ed21fc2a5887a49f91d32",
+      "associatedCandidateCommit": "7791e1034fdafc3ddd3cbce268cfd6374fc444d5",
+      "observation": "Props six-cell ownership matrix:6/6",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "e8171371e937d3f0738141c82f5d5cf90820afa1"
+    },
+    {
+      "file": "sprint1-c-matrix-fourth.log.gz",
+      "originalBytes": 247615,
+      "originalSha256": "8e970bb3d4e50b36cbe7ae9512fec92cd3fa495d4be42ff5abb8bff3f4bc6ccf",
+      "gzipSha256": "6857eb99ef7c15d66ee2a6e016bfb0723acc5a8e9db0c76109bf382a13a2b796",
+      "associatedCandidateCommit": "7791e1034fdafc3ddd3cbce268cfd6374fc444d5",
+      "observation": "Props plus real Select legacy control:11/11",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "e8171371e937d3f0738141c82f5d5cf90820afa1"
+    },
+    {
+      "file": "sprint1-c-props-select-local.log.gz",
+      "originalBytes": 304444,
+      "originalSha256": "ef54e75dab2432c010e5d149489793405799800b7e9f975da92b181504d11193",
+      "gzipSha256": "18d05152a66f86426a5abd57e3fcada1d0922c070855ea9395e6eedff8a9a6a8",
+      "associatedCandidateCommit": "7791e1034fdafc3ddd3cbce268cfd6374fc444d5",
+      "observation": "Existing consumers:88pass3fail, portal conceal frame boundary not delivered",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "e8171371e937d3f0738141c82f5d5cf90820afa1"
+    },
+    {
+      "file": "sprint1-c-props-select-final.log.gz",
+      "originalBytes": 302989,
+      "originalSha256": "34ff5380adeb956b9963753d62c51aafb1567613f4116f9681fda970c6846217",
+      "gzipSha256": "fd2ad8c0513cac6d5465da6f58459232c2a9c0b9c5527b73ee9c3800ecd4af15",
+      "associatedCandidateCommit": "11d65a39c593322591046b4234aabf24350f6de1",
+      "observation": "Same consumer scope after frame premise repair:91/91",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "0dfdff897e2503a9b239f8d52e06863bef416972"
+    },
+    {
+      "file": "sprint1-c-diagnostic-origin-red.log.gz",
+      "originalBytes": 79304,
+      "originalSha256": "04fd971534bbce01016864c72fdc9220be46e1e4579875b6875ec35685c63121",
+      "gzipSha256": "98f6863d5119af91500c83f7ac622ec3f34bd62b44da01e3bf07186a027227ef",
+      "associatedCandidateCommit": "f2dd91ebeace2247a72b3ebcb0f6093041936f09",
+      "observation": "New16 diagnostic controls against original implementation:14fail2pass",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "8dc541c40b5f1f2b2d4781284fce86aead134324"
+    },
+    {
+      "file": "sprint1-c-diagnostic-path-red.log.gz",
+      "originalBytes": 61282,
+      "originalSha256": "0b13914531027818675cd02fe649ddb16526509231af7d024116d804cd54f50d",
+      "gzipSha256": "f2a8a7894ccd319b6e93f828ba4f91ce7c1bb2c911007b4f460dde52500c39c8",
+      "associatedCandidateCommit": "f2dd91ebeace2247a72b3ebcb0f6093041936f09",
+      "observation": "Independent review path-admission finding: selected positive case fails",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "8dc541c40b5f1f2b2d4781284fce86aead134324"
+    },
+    {
+      "file": "sprint1-c-diagnostic-path-original.log.gz",
+      "originalBytes": 59835,
+      "originalSha256": "9d1741ddf1a735e23d76c6816d2c1cf832ce754fd751a41c6423655b09c2983b",
+      "gzipSha256": "90630b213aff29568fbd0e826d5bbaea7de4e7f74eda0537872c10251e730bf6",
+      "associatedCandidateCommit": "7b3497a617bb77eaa2ea2e5409a853203cbfa47b",
+      "observation": "Same single path positive control passes original compileFile; filtered others not accepted",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "df1aba2f574b8aabbb3788390f0b47ecbcb5bdff"
+    },
+    {
+      "file": "sprint1-c-diagnostic-origin-admission-final.log.gz",
+      "originalBytes": 75199,
+      "originalSha256": "d396929717aa0646a851f10e306b8bab37f9b84025346cfa479b3abdca661395",
+      "gzipSha256": "1e1dde271d3726658e33ac7100b5c7163b29d28fd7e1bb345557d4ddfa45b342",
+      "associatedCandidateCommit": "052533fa3a1b97bcb10f69d6cd87a4359f0aa0f0",
+      "observation": "All5 diagnostic/admission files:81/81, no filter skips",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "d128cb3285d044e758205dcb3ebf68ef7c0f4cdc"
+    },
+    {
+      "file": "sprint1-root-ci-controls.log.gz",
+      "originalBytes": 3281,
+      "originalSha256": "4f458a1d3f0f4924878ac20f120a92a5d8a2d435f99c0b718f60d2adebe9845e",
+      "gzipSha256": "21a498e06aec166fb123b7669d7506c3b6a66e4403687d88fe98075a4c92368b",
+      "associatedCandidateCommit": "022405f920f620cd08e06e57a6bf907d2d8b2a9b",
+      "observation": "Independent integration runner/production/toolbar controls:31/31",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution.",
+      "integratedPatchCommit": "022405f920f620cd08e06e57a6bf907d2d8b2a9b"
+    },
+    {
+      "file": "sprint1-root-ci-final-controls.log.gz",
+      "originalBytes": 3973,
+      "originalSha256": "19f2d011a88e0f96950553768757ce8474cb5e0a17ebfe78ce11859f782ca773",
+      "gzipSha256": "8d021ca3ed14fac10e08aaa20a3b945c37dd899939e140d83606f98f0c4fe002",
+      "associatedCandidateCommit": "2c798ed58fd6128edd99dada6e72bdd0f5d6a48e",
+      "integratedPatchCommit": "2b44f458aa437b293c518d3113789fa7649cdd8e",
+      "observation": "Independent integration runner/production/AB controls after detached-child fix:38/38",
+      "executionBinding": "Local working-tree development/review receipt. The associated commit identifies the reviewed patch; this is not relabelled as a clean later integration-head execution."
+    }
+  ]
+}

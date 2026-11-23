@@ -6,6 +6,7 @@ import type {
 import type { ResidentMotionDeclaration } from './resident-motion';
 // packages/core/src/handles.ts
 import type { MaterialCandidate, MaterialSlot } from './material';
+import type { ShaderPresentationDeclaration } from './shader-presentation';
 import {
   EventListenerToken,
   ExtensionEventType,
@@ -266,6 +267,8 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
     material: {
       declare(slot: MaterialSlot): UnUse;
       use(candidate: MaterialCandidate): UnUse;
+      /** Draft finite shader graph; setup-only, exclusive root paint owner. */
+      shader(declaration: ShaderPresentationDeclaration): UnUse;
     };
     style: {
       use: (...handles: StyleHandle[]) => UnUse;

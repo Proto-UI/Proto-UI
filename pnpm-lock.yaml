@@ -28,6 +28,9 @@ importers:
       '@vue/compiler-dom':
         specifier: 3.5.31
         version: 3.5.31
+      '@vue/compiler-sfc':
+        specifier: 3.5.31
+        version: 3.5.31
       ajv:
         specifier: 8.18.0
         version: 8.18.0
@@ -1366,6 +1369,9 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/hooks':
+        specifier: workspace:*
+        version: link:../../hooks
       '@proto.ui/prototypes-base':
         specifier: workspace:*
         version: link:../base

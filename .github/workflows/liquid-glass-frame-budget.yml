@@ -1,7 +1,16 @@
 name: Liquid Glass matched frame-budget observations
+run-name: ${{ (inputs.controlled_overlay || inputs.comparison_mode == 'controlled-overlay') && 'Liquid Glass controlled-overlay experiment' || 'Liquid Glass clean-source comparison' }} — ${{ github.ref_name }}
 on:
   workflow_dispatch:
     inputs:
+      comparison_mode:
+        description: Clean historical comparison or an explicitly attributed controlled-overlay experiment
+        type: choice
+        required: false
+        default: clean-source
+        options:
+          - clean-source
+          - controlled-overlay
       baseline_sha:
         description: Exact baseline commit for the matched observation
         type: string
@@ -9,6 +18,11 @@ on:
         default: 543c8a2990239dec7c08458a902da3f5a97b49dd
   workflow_call:
     inputs:
+      controlled_overlay:
+        description: Explicit controlled experiment using candidate dependencies and workload fixture over the original baseline algorithm
+        type: boolean
+        required: false
+        default: false
       baseline_sha:
         description: Exact baseline commit for the matched observation
         type: string
@@ -20,6 +34,7 @@ concurrency:
   group: liquid-glass-frame-budget-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 env:
+  CONTROLLED_OVERLAY: ${{ inputs.controlled_overlay || inputs.comparison_mode == 'controlled-overlay' }}
   BASELINE_SHA: ${{ inputs.baseline_sha || '543c8a2990239dec7c08458a902da3f5a97b49dd' }}
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   PROGRAM_REGRESSION_SHA: 19d175f454468fa27364c8283e084f3bb7a1016b
@@ -59,6 +74,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Prepare the explicitly selected controlled-overlay experiment
+        if: ${{ env.CONTROLLED_OVERLAY == 'true' }}
+        run: |
+          node candidate/scripts/analysis/liquid-glass-controlled-frame-overlay.mjs prepare \
+            "$GITHUB_WORKSPACE/baseline" "$GITHUB_WORKSPACE/candidate" \
+            "$BASELINE_SHA" "$CANDIDATE_SHA" \
+            "$RUNNER_TEMP/liquid-frame-budget/controlled-overlay"
       - name: Install separate source-bound workspaces
         timeout-minutes: 10
         run: |
@@ -73,13 +95,21 @@ jobs:
           node --version > "$RUNNER_TEMP/liquid-frame-budget/node.txt"
           corepack pnpm@10.32.1 --dir candidate --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --dir baseline --filter apps-www exec astro preferences disable devToolbar
+      - name: Verify controlled-overlay inputs after frozen installation
+        if: ${{ env.CONTROLLED_OVERLAY == 'true' }}
+        run: |
+          node candidate/scripts/analysis/liquid-glass-controlled-frame-overlay.mjs verify \
+            "$RUNNER_TEMP/liquid-frame-budget/controlled-overlay/receipt.json" \
+            "$GITHUB_WORKSPACE/baseline" "$GITHUB_WORKSPACE/candidate" after-install
       - name: Check measurement attribution
         working-directory: candidate
         run: |
           node --test scripts/analysis/liquid-glass-frame-budget.test.mjs \
             scripts/analysis/liquid-glass-gpu-prefilter.test.mjs \
             scripts/analysis/liquid-glass-source-progress.test.mjs \
-            scripts/analysis/liquid-glass-program-clear.test.mjs
+            scripts/analysis/liquid-glass-program-clear.test.mjs \
+            scripts/analysis/liquid-glass-controlled-frame-overlay.test.mjs \
+            scripts/test/check-liquid-material-evidence.test.mjs
       - name: Install and record the same Chinese fonts for both revisions
         timeout-minutes: 3
         run: |
@@ -117,9 +147,13 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
+          progress_source=()
+          if [[ "$CONTROLLED_OVERLAY" == 'true' ]]; then
+            progress_source=(--controlled-overlay "$RUNNER_TEMP/liquid-frame-budget/controlled-overlay/receipt.json")
+          fi
           timeout --signal=TERM --kill-after=20s 4m \
             node --import tsx "$GITHUB_WORKSPACE/candidate/scripts/analysis/liquid-glass-source-progress.mjs" \
-            "$RUNNER_TEMP/liquid-frame-budget/baseline-progress" \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline-progress" "${progress_source[@]}" \
             2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/baseline-progress.log"
       - name: Candidate four-host source progress
         id: candidate-progress
@@ -156,6 +190,7 @@ jobs:
         timeout-minutes: 8
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-frame-budget/candidate-release
+          PUI_LIQUID_GLASS_INCLUDE_WIP: '1'
         run: |
           set -euo pipefail
           mkdir -p "$PROTO_UI_MATERIAL_EVIDENCE_DIR"
@@ -166,11 +201,29 @@ jobs:
             --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
             --outputFile.json="$PROTO_UI_MATERIAL_EVIDENCE_DIR/vitest.json" \
             2>&1 | tee "$PROTO_UI_MATERIAL_EVIDENCE_DIR/browser.log"
+      - name: Require actual release lifecycle execution
+        if: always()
+        working-directory: candidate
+        run: |
+          node scripts/test/check-liquid-material-evidence.mjs \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate-release/vitest.json" frame-budget-release \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate-release/coverage.json"
+      - name: Verify controlled-overlay provenance after actual measurements
+        if: ${{ always() && env.CONTROLLED_OVERLAY == 'true' }}
+        run: |
+          node candidate/scripts/analysis/liquid-glass-controlled-frame-overlay.mjs verify \
+            "$RUNNER_TEMP/liquid-frame-budget/controlled-overlay/receipt.json" \
+            "$GITHUB_WORKSPACE/baseline" "$GITHUB_WORKSPACE/candidate" after-measurements \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline/report.json" \
+            "$RUNNER_TEMP/liquid-frame-budget/candidate/report.json"
       - name: Retain comparison and propagate evidence failures
         if: always()
         working-directory: candidate
         run: |
           set -euo pipefail
+          if [ '${{ env.CONTROLLED_OVERLAY }}' = 'true' ]; then
+            cat "$RUNNER_TEMP/liquid-frame-budget/controlled-overlay/README.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
           node scripts/analysis/liquid-glass-frame-budget.mjs --compare \
             "$RUNNER_TEMP/liquid-frame-budget/baseline/report.json" \
             "$RUNNER_TEMP/liquid-frame-budget/candidate/report.json" \
@@ -187,7 +240,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: liquid-frame-budget-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: liquid-frame-budget-${{ env.CONTROLLED_OVERLAY == 'true' && 'controlled-overlay-' || '' }}${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/liquid-frame-budget
           if-no-files-found: error
           retention-days: 30

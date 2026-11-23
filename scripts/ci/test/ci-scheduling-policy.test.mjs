@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'yaml';
 import { collectViolations, WORKFLOW_DIR } from '../check-ci-schedule.mjs';
+import { assertFlutterScrollReports } from '../check-flutter-scroll-evidence.mjs';
 
 const repoRoot = new URL('../../../', import.meta.url).pathname;
 
@@ -445,6 +446,310 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
   assert.equal(artifact.with['if-no-files-found'], 'error');
 });
 
+function assertReusableCompilerInputBoundary(workflow) {
+  // The separate Adapter lane is a default-off reusable input. Package-budget
+  // and Website evidence remain manual-only and cannot enter workflow_call.
+  assert.deepEqual(workflow.on.workflow_call, {
+    inputs: {
+      adapter_acceptance: { type: 'boolean', required: false, default: false },
+    },
+  });
+}
+
+test('reusable compiler inputs preserve the separate default-off Adapter boundary', () => {
+  const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  assertReusableCompilerInputBoundary(original);
+  const mutations = [
+    (workflow) => {
+      workflow.on.workflow_call = null;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.adapter_acceptance.default = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.adapter_acceptance.required = true;
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.package_budget_evidence = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.website_shader_evidence = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertReusableCompilerInputBoundary(changed));
+  }
+});
+
+test('manual compiler evidence can explicitly request the unchanged strict package gate', () => {
+  const workflows = readWorkflows();
+  const workflow = workflows['compiler-gpui-source-consumers.yml'];
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.package_budget_evidence, {
+    description: 'Also run the strict whole-entry package gate for this exact ref',
+    type: 'boolean',
+    required: false,
+    default: false,
+  });
+  assertReusableCompilerInputBoundary(workflow);
+  const job = workflow.jobs['package-budgets'];
+  assert.equal(
+    job.if,
+    "github.event_name == 'workflow_dispatch' && inputs.package_budget_evidence == true"
+  );
+  assert.equal(job.uses, './.github/workflows/package-budget-evidence.yml');
+  assert.deepEqual(job.permissions, { contents: 'read' });
+  assert.equal(job.secrets, undefined);
+  assert.equal(workflow.jobs['native-consumer'].if, undefined);
+  const gate = workflows['package-budget-evidence.yml'].jobs['whole-entry-budgets'];
+  assert.ok(
+    gate.steps.some((step) =>
+      step.run?.includes(
+        'node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA"'
+      )
+    )
+  );
+});
+
+function assertNativeScrollConsumerEvidence(workflow) {
+  const job = workflow.jobs['native-consumer'];
+  assert.equal(job.if, undefined);
+  assert.equal(job.needs, undefined);
+  for (const [target, log] of [
+    ['scroll_pause', 'scroll-pause-consumer.log'],
+    ['scroll_reader', 'scroll-reader-consumer.log'],
+  ]) {
+    const matches = job.steps.filter((step) =>
+      new RegExp(`--test ${target}(?:\\s|$)`, 'u').test(step.run ?? '')
+    );
+    assert.equal(matches.length, 1, `one complete native ${target} target is mandatory`);
+    const [step] = matches;
+    assert.equal(step.if, undefined);
+    assert.equal(step['continue-on-error'], undefined);
+    assert.deepEqual(step.run.trim().split('\n'), [
+      'set -euo pipefail',
+      `cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ${target} -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/${log}"`,
+    ]);
+  }
+}
+
+test('native Scroll evidence executes both complete locked targets in the existing native owner', () => {
+  assertNativeScrollConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
+});
+
+test('native Scroll evidence rejects missing, filtered, optional or swallowed native execution', () => {
+  const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  const targetStep = (workflow) =>
+    workflow.jobs['native-consumer'].steps.find((step) =>
+      step.run?.includes('--test scroll_reader ')
+    );
+  const mutations = [
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
+        (step) => !step.run?.includes('--test scroll_pause ')
+      );
+    },
+    (workflow) => {
+      targetStep(workflow).if = 'false';
+    },
+    (workflow) => {
+      targetStep(workflow)['continue-on-error'] = true;
+    },
+    (workflow) => {
+      targetStep(workflow).run = targetStep(workflow).run.replace(
+        '-- --test-threads=1',
+        'one-case -- --test-threads=1'
+      );
+    },
+    (workflow) => {
+      targetStep(workflow).run = targetStep(workflow).run.replace('--locked ', '');
+    },
+    (workflow) => {
+      targetStep(workflow).run = targetStep(workflow).run.replace('set -euo pipefail', 'set -eu');
+    },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertNativeScrollConsumerEvidence(changed));
+  }
+});
+
+function assertFlutterScrollConsumerEvidence(workflow) {
+  const job = workflow.jobs['flutter-scroll-consumer'];
+  assert.ok(job, 'real Flutter Widgets must have a continuous native owner');
+  assert.equal(job.if, undefined);
+  assert.equal(job.needs, undefined);
+  assert.equal(job['continue-on-error'], undefined);
+  assert.equal(job['runs-on'], 'ubuntu-24.04');
+  assert.equal(job['timeout-minutes'], 15);
+  const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+  assert.equal(checkout.with.ref, '${{ github.sha }}');
+  assert.equal(checkout.with['persist-credentials'], false);
+  const prepare = job.steps.filter((step) =>
+    step.run?.includes('node scripts/ci/prepare-flutter-scroll-sdk.mjs ')
+  );
+  assert.equal(prepare.length, 1);
+  assert.equal(prepare[0].if, undefined);
+  assert.equal(prepare[0]['continue-on-error'], undefined);
+  assert.ok(prepare[0].run.startsWith('set -euo pipefail\n'));
+  assert.ok(
+    prepare[0].run.includes(
+      'node scripts/ci/prepare-flutter-scroll-sdk.mjs "$RUNNER_TEMP/flutter-scroll-sdk" "$RUNNER_TEMP/flutter-scroll-evidence"'
+    )
+  );
+  const native = job.steps.filter((step) =>
+    step.run?.includes(
+      'exec vitest run packages/compiler/test/flutter-scroll-outcomes.native.test.ts '
+    )
+  );
+  assert.equal(native.length, 1);
+  assert.equal(native[0].if, undefined);
+  assert.equal(native[0]['continue-on-error'], undefined);
+  assert.deepEqual(native[0].run.trim().split('\n'), [
+    'set -euo pipefail',
+    'test -n "$PROTO_UI_FLUTTER"',
+    'test -x "$PROTO_UI_FLUTTER"',
+    'corepack pnpm@10.32.1 exec vitest run packages/compiler/test/flutter-scroll-outcomes.native.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile.json="$PROTO_UI_FLUTTER_EVIDENCE_DIR/vitest.json" 2>&1 | tee "$PROTO_UI_FLUTTER_EVIDENCE_DIR/native.log"',
+  ]);
+  const checks = job.steps.filter((step) =>
+    step.run?.includes('node scripts/ci/check-flutter-scroll-evidence.mjs ')
+  );
+  assert.equal(checks.length, 1);
+  assert.equal(checks[0].if, undefined);
+  assert.equal(checks[0]['continue-on-error'], undefined);
+  assert.equal(
+    checks[0].run,
+    'node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 14'
+  );
+  assert.ok(job.steps.indexOf(prepare[0]) < job.steps.indexOf(native[0]));
+  assert.ok(job.steps.indexOf(native[0]) < job.steps.indexOf(checks[0]));
+  const artifact = job.steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'));
+  assert.equal(artifact.if, 'always()');
+  assert.equal(artifact.with['if-no-files-found'], 'error');
+  assert.equal(artifact.with.path, '${{ runner.temp }}/flutter-scroll-evidence');
+  assert.ok(artifact.with.name.includes('${{ github.sha }}'));
+}
+
+test('dormant direct Flutter emission has mandatory real Widget evidence in the existing cycle', () => {
+  const workflow = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  assertFlutterScrollConsumerEvidence(workflow);
+  for (const mutate of [
+    (job) => {
+      job.if = 'false';
+    },
+    (job) => {
+      job['continue-on-error'] = true;
+    },
+    (job) => {
+      job.steps = job.steps.filter((step) => !step.run?.includes('prepare-flutter-scroll-sdk.mjs'));
+    },
+    (job) => {
+      job.steps.find((step) => step.run?.includes('exec vitest run')).run =
+        'corepack pnpm@10.32.1 exec vitest run --passWithNoTests';
+    },
+    (job) => {
+      job.steps = job.steps.filter(
+        (step) => !step.run?.includes('check-flutter-scroll-evidence.mjs')
+      );
+    },
+    (job) => {
+      job.steps.find((step) => step.run?.includes('check-flutter-scroll-evidence.mjs')).if =
+        'false';
+    },
+  ]) {
+    const changed = structuredClone(workflow);
+    mutate(changed.jobs['flutter-scroll-consumer']);
+    assert.throws(() => assertFlutterScrollConsumerEvidence(changed));
+  }
+});
+
+test('Flutter evidence rejects skipped wrappers and incomplete native execution', () => {
+  const original = {
+    vitest: {
+      success: true,
+      numTotalTests: 1,
+      numPassedTests: 1,
+      numFailedTests: 0,
+      numPendingTests: 0,
+      testResults: [
+        {
+          name: '/workspace/packages/compiler/test/flutter-scroll-outcomes.native.test.ts',
+          status: 'passed',
+          assertionResults: [{ status: 'passed' }],
+        },
+      ],
+    },
+    pubGet: {
+      command: ['/owned/flutter', 'pub', 'get', '--offline'],
+      status: 0,
+      signal: null,
+      stdout: 'ready',
+    },
+    widgets: {
+      command: [
+        '/owned/flutter',
+        'test',
+        '--no-pub',
+        '--reporter',
+        'expanded',
+        'test/consumer_test.dart',
+      ],
+      status: 0,
+      signal: null,
+      stdout: '00:02 +14: All tests passed!\n',
+    },
+  };
+  assert.deepEqual(assertFlutterScrollReports(original, 14), {
+    wrapperPassed: 1,
+    wrapperSkipped: 0,
+    dartPassed: 14,
+  });
+  for (const mutate of [
+    (reports) => {
+      reports.vitest.numPassedTests = 0;
+      reports.vitest.numPendingTests = 1;
+    },
+    (reports) => {
+      reports.vitest.testResults[0].assertionResults[0].status = 'pending';
+    },
+    (reports) => {
+      reports.pubGet.status = 1;
+    },
+    (reports) => {
+      reports.widgets.status = 1;
+    },
+    (reports) => {
+      reports.widgets.signal = 'SIGTERM';
+    },
+    (reports) => {
+      reports.widgets.command.push('--name', 'one case');
+    },
+    (reports) => {
+      reports.widgets.stdout = '00:02 +13: All tests passed!\n';
+    },
+    (reports) => {
+      reports.widgets.stdout = 'No tests were found.';
+    },
+  ]) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertFlutterScrollReports(changed, 14));
+  }
+});
+
 test('GPUI Cargo target is initialized after runner allocation in the shared step environment', () => {
   const workflow = readWorkflows()['compiler-gpui-source-consumers.yml'];
   const job = workflow.jobs['native-consumer'];
@@ -479,5 +784,319 @@ test('GPUI Cargo target is initialized after runner allocation in the shared ste
     );
   } finally {
     rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+const websiteShaderWorkflow = 'website-shader-ownership-evidence.yml';
+const docsColumnsSuite = 'apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts';
+
+function assertWebsiteShaderEvidence(workflows) {
+  const caller = workflows['compiler-gpui-source-consumers.yml'];
+  assert.deepEqual(caller.on.workflow_dispatch.inputs.website_shader_evidence, {
+    description: 'Also collect full Website source and original Docs evidence for this exact ref',
+    type: 'boolean',
+    required: false,
+    default: false,
+  });
+  assertReusableCompilerInputBoundary(caller);
+  const calls = Object.entries(workflows).flatMap(([workflow, definition]) =>
+    Object.entries(definition.jobs ?? {})
+      .filter(([, job]) => job.uses === `./.github/workflows/${websiteShaderWorkflow}`)
+      .map(([id, job]) => ({ workflow, id, job }))
+  );
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].workflow, 'compiler-gpui-source-consumers.yml');
+  assert.equal(
+    calls[0].job.if,
+    "github.event_name == 'workflow_dispatch' && inputs.website_shader_evidence == true"
+  );
+  assert.deepEqual(calls[0].job.permissions, { contents: 'read' });
+  assert.equal(calls[0].job.secrets, undefined);
+  assert.equal(calls[0].job['continue-on-error'], undefined);
+  assert.equal(caller.jobs['native-consumer'].if, undefined);
+  assert.equal(caller.jobs['native-consumer'].needs, undefined);
+  assert.deepEqual(caller.jobs['native-consumer'].strategy.matrix.os, ['ubuntu-24.04', 'macos-15']);
+  assert.equal(
+    caller.jobs['package-budgets'].if,
+    "github.event_name == 'workflow_dispatch' && inputs.package_budget_evidence == true"
+  );
+  assert.equal(caller.on.workflow_dispatch.inputs.package_budget_evidence.default, false);
+
+  const workflow = workflows[websiteShaderWorkflow];
+  assert.ok(workflow, 'the exact reusable Website evidence workflow exists');
+  assert.deepEqual(Object.keys(workflow.on), ['workflow_call']);
+  assert.deepEqual(workflow.permissions, { contents: 'read' });
+  assert.deepEqual(Object.keys(workflow.jobs).sort(), ['docs-columns', 'source-governance']);
+  for (const [id, job] of Object.entries(workflow.jobs)) {
+    assert.equal(job['runs-on'], 'ubuntu-24.04');
+    assert.equal(job['timeout-minutes'], id === 'source-governance' ? 45 : 20);
+    assert.equal(job.needs, undefined, 'source failure must not suppress original Docs evidence');
+    assert.equal(job.if, undefined);
+    assert.equal(job['continue-on-error'], undefined);
+    assert.equal(job.env.EXPECTED_HEAD, '${{ github.sha }}');
+    assert.doesNotMatch(JSON.stringify(job.env), /\$\{\{[^}]*\brunner\./u);
+    const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+    assert.equal(checkout.with.ref, '${{ github.sha }}');
+    assert.equal(checkout.with['persist-credentials'], false);
+    const binding = job.steps.find((step) => step.id === 'bind-source');
+    assert.match(binding.run, /test "\$\(git rev-parse HEAD\)" = "\$EXPECTED_HEAD"/u);
+    assert.match(binding.run, /git status --porcelain=v1 --untracked-files=all/u);
+    assert.match(binding.run, /test ! -s "\$EVIDENCE_DIR\/source-status-before\.txt"/u);
+    const terminal = job.steps.find((step) => step.id === 'record-terminal');
+    assert.equal(terminal.if, 'always()');
+    assert.match(terminal.run, /source-status-after\.txt/u);
+    assert.match(terminal.run, /test ! -s "\$EVIDENCE_DIR\/source-status-after\.txt"/u);
+    const artifact = job.steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'));
+    assert.equal(artifact.if, 'always()');
+    assert.equal(artifact.with['if-no-files-found'], 'error');
+    assert.equal(artifact.with['include-hidden-files'], true);
+    assert.ok(artifact.with.name.includes('${{ github.sha }}'));
+    assert.ok(artifact.with.name.includes('${{ github.run_id }}'));
+    assert.ok(artifact.with.name.includes('${{ github.run_attempt }}'));
+    for (const step of job.steps) {
+      assert.equal(step['continue-on-error'], undefined);
+    }
+  }
+  const source = workflow.jobs['source-governance'].steps.find(
+    (step) => step.id === 'run-source-scan'
+  );
+  assert.equal(source.if, undefined);
+  assert.match(
+    source.run,
+    /node scripts\/coverage-matrices\/check-coverage-matrices\.mjs 2>&1 \| tee/u
+  );
+  assert.doesNotMatch(source.run, /\|\| true|--(?:filter|source-only)/u);
+  const docs = workflow.jobs['docs-columns'];
+  assert.equal(docs.env.PROTO_UI_EXPECTED_HEAD, '${{ github.sha }}');
+  const execution = docs.steps.find((step) => step.id === 'run-docs-columns');
+  assert.equal(execution.if, undefined);
+  assert.equal(
+    execution.env.PROTO_UI_RUNTIME_EVIDENCE_DIR,
+    '${{ runner.temp }}/website-shader-docs'
+  );
+  assert.ok(execution.run.includes(docsColumnsSuite));
+  assert.match(execution.run, /timeout --signal=TERM --kill-after=10s 900s/u);
+  assert.doesNotMatch(
+    execution.run,
+    /--(?:retry|testNamePattern|passWithNoTests|testTimeout|hookTimeout)|(?:^|\s)-t(?:\s|=)|\|\| true/u
+  );
+  assert.ok(docs.steps.some((step) => step.id === 'verify-complete-docs'));
+  const font = docs.steps.find((step) => step.id === 'prepare-browser-fonts');
+  assert.equal(font['timeout-minutes'], 3);
+  assert.equal(font.run, 'bash apps/www/scripts/prepare-homepage-composition-fonts.sh');
+  const toolbar = docs.steps.find((step) => step.id === 'configure-browser');
+  assert.match(toolbar.run, /astro preferences disable devToolbar/u);
+  assert.match(toolbar.run, /astro preferences get devToolbar\.enabled/u);
+  assert.match(toolbar.run, /CHROME_PATH=\$CHROME/u);
+}
+
+test('manual Website shader evidence preserves full source, all original Docs and strict failure ownership', () => {
+  assertWebsiteShaderEvidence(readWorkflows());
+});
+
+test('Website evidence rejects automatic expansion, stale source, coupling and swallowed failures', () => {
+  const original = readWorkflows();
+  assertWebsiteShaderEvidence(original);
+  const mutations = [
+    (w) => {
+      w[
+        'compiler-gpui-source-consumers.yml'
+      ].on.workflow_dispatch.inputs.website_shader_evidence.default = true;
+    },
+    (w) => {
+      w['compiler-gpui-source-consumers.yml'].jobs['website-shader-evidence'].if = 'true';
+    },
+    (w) => {
+      w['compiler-gpui-source-consumers.yml'].on.workflow_call = {
+        inputs: { website_shader_evidence: { type: 'boolean', default: true } },
+      };
+    },
+    (w) => {
+      w['compiler-gpui-source-consumers.yml'].jobs['native-consumer'].if =
+        'inputs.website_shader_evidence';
+    },
+    (w) => {
+      w['compiler-gpui-source-consumers.yml'].jobs['package-budgets'].if =
+        'inputs.website_shader_evidence';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].on.workflow_dispatch = null;
+    },
+    (w) => {
+      w[websiteShaderWorkflow].permissions.contents = 'write';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['docs-columns'].needs = 'source-governance';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['source-governance']['continue-on-error'] = true;
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['docs-columns'].steps[0].with.ref = 'main';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['source-governance'].env.EXPECTED_HEAD = 'old-source';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['docs-columns'].steps.find(
+        (s) => s.id === 'run-docs-columns'
+      ).run += ' --retry=1';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['docs-columns'].steps.find(
+        (s) => s.id === 'run-docs-columns'
+      ).run += ' -t one-case';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['source-governance'].steps.find(
+        (s) => s.id === 'run-source-scan'
+      )['continue-on-error'] = true;
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['docs-columns'].steps.find((s) =>
+        s.uses?.startsWith('actions/upload-artifact@')
+      ).if = 'success()';
+    },
+    (w) => {
+      w[websiteShaderWorkflow].jobs['source-governance'].steps.find((s) =>
+        s.uses?.startsWith('actions/upload-artifact@')
+      ).with['if-no-files-found'] = 'warn';
+    },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertWebsiteShaderEvidence(changed));
+  }
+});
+
+test('Website evidence shell preserves complete diagnostic output and the real producer exit code', (t) => {
+  const workflows = readWorkflows();
+  assertWebsiteShaderEvidence(workflows);
+  const temporary = mkdtempSync(path.join(os.tmpdir(), 'pui-website-evidence-'));
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
+  const bin = path.join(temporary, 'bin');
+  mkdirSync(bin);
+  writeFileSync(
+    path.join(bin, 'git'),
+    '#!/bin/sh\nif [ "$1" = rev-parse ]; then printf "%s\\n" "$EXPECTED_HEAD"; fi\n',
+    { mode: 0o755 }
+  );
+  const child =
+    '#!/bin/sh\nprintf "%s\\0" "$@" > "$CAPTURE_ARGS"\nprintf "original stdout\\n"\nprintf "original stderr\\n" >&2\nexit "$CHILD_EXIT"\n';
+  for (const name of ['node', 'corepack'])
+    writeFileSync(path.join(bin, name), child, { mode: 0o755 });
+  for (const [jobId, stepId, logName] of [
+    ['source-governance', 'run-source-scan', 'source-scan.log'],
+    ['docs-columns', 'run-docs-columns', 'browser.log'],
+  ]) {
+    const step = workflows[websiteShaderWorkflow].jobs[jobId].steps.find((s) => s.id === stepId);
+    for (const status of [0, 1, 7]) {
+      const evidence = path.join(temporary, `${jobId}-${status}`);
+      mkdirSync(evidence);
+      const captured = path.join(evidence, 'args');
+      const result = spawnSync('bash', ['-euo', 'pipefail', '-c', step.run], {
+        cwd: temporary,
+        env: {
+          ...process.env,
+          PATH: `${bin}:${process.env.PATH}`,
+          EVIDENCE_DIR: evidence,
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: evidence,
+          EXPECTED_HEAD: 'a'.repeat(40),
+          CAPTURE_ARGS: captured,
+          CHILD_EXIT: String(status),
+        },
+        encoding: 'utf8',
+      });
+      assert.equal(result.status, status, result.stderr);
+      assert.equal(
+        readFileSync(path.join(evidence, 'command-exit-code.txt'), 'utf8'),
+        `${status}\n`
+      );
+      assert.equal(
+        readFileSync(path.join(evidence, logName), 'utf8'),
+        'original stdout\noriginal stderr\n'
+      );
+      const args = readFileSync(captured, 'utf8').split('\0').filter(Boolean);
+      assert.deepEqual(
+        args,
+        jobId === 'source-governance'
+          ? ['scripts/coverage-matrices/check-coverage-matrices.mjs']
+          : [
+              'pnpm@10.32.1',
+              'exec',
+              'vitest',
+              'run',
+              docsColumnsSuite,
+              '--no-file-parallelism',
+              '--maxWorkers=1',
+              '--minWorkers=1',
+              '--reporter=default',
+              '--reporter=json',
+              `--outputFile=${evidence}/vitest.json`,
+            ]
+      );
+    }
+  }
+});
+
+test('Docs evidence cannot accept a skipped, filtered, missing or failing case as ten passes', (t) => {
+  const workflows = readWorkflows();
+  assertWebsiteShaderEvidence(workflows);
+  const step = workflows[websiteShaderWorkflow].jobs['docs-columns'].steps.find(
+    (item) => item.id === 'verify-complete-docs'
+  );
+  const temporary = mkdtempSync(path.join(os.tmpdir(), 'pui-docs-inventory-'));
+  t.after(() => rmSync(temporary, { recursive: true, force: true }));
+  const valid = {
+    success: true,
+    numTotalTests: 10,
+    numPassedTests: 10,
+    numFailedTests: 0,
+    numPendingTests: 0,
+    numTodoTests: 0,
+    testResults: [
+      {
+        name: path.join(temporary, docsColumnsSuite),
+        assertionResults: Array.from({ length: 10 }, (_, index) => ({
+          fullName: `original case ${index}`,
+          status: 'passed',
+        })),
+      },
+    ],
+  };
+  const cases = [
+    [valid, 0],
+    [{ ...valid, numPassedTests: 9, numPendingTests: 1 }, 1],
+    [{ ...valid, numTotalTests: 9, numPassedTests: 9 }, 1],
+    [{ ...valid, success: false, numFailedTests: 1 }, 1],
+    [{ ...valid, testResults: [] }, 1],
+    [
+      { ...valid, testResults: [{ ...valid.testResults[0], name: 'different.browser.test.ts' }] },
+      1,
+    ],
+    [
+      {
+        ...valid,
+        testResults: [
+          {
+            ...valid.testResults[0],
+            assertionResults: valid.testResults[0].assertionResults.map((item, index) =>
+              index === 0 ? { ...item, status: 'pending' } : item
+            ),
+          },
+        ],
+      },
+      1,
+    ],
+  ];
+  for (const [report, expected] of cases) {
+    writeFileSync(path.join(temporary, 'vitest.json'), JSON.stringify(report));
+    const result = spawnSync('bash', ['-euo', 'pipefail', '-c', step.run], {
+      cwd: temporary,
+      env: { ...process.env, PROTO_UI_RUNTIME_EVIDENCE_DIR: temporary },
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, expected, result.stderr);
   }
 });

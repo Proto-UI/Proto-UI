@@ -1,6 +1,9 @@
 // @vitest-environment node
 
 import type { Browser, Page } from 'playwright-core';
+import { execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Locator } from 'playwright-core';
 import {
@@ -58,6 +61,34 @@ async function showRuntime(
 
 let browser: Browser;
 let baseUrl = '';
+
+async function retainObservation(page: Page, runtime: string, stage: string, observed: unknown) {
+  const directory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+  if (!directory) return;
+  await mkdir(directory, { recursive: true });
+  const key = `select-${runtime}-${stage}`;
+  await page.screenshot({ path: join(directory, `${key}.png`) });
+  await writeFile(
+    join(directory, `${key}.json`),
+    JSON.stringify(
+      {
+        testSource: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+        servedPageRevision: null,
+        sourceBinding:
+          'The supervising release receipt binds the separately served page; this file records the test checkout.',
+        runtime,
+        stage,
+        route: SELECT_ROUTE,
+        browser: browser.version(),
+        observed,
+        outcome: 'observation-only; the corresponding Vitest result records assertion acceptance',
+        scope: 'Native public Select projection and focus; not an OS assistive-technology session.',
+      },
+      null,
+      2
+    ) + '\n'
+  );
+}
 
 type ClosedSelect = {
   label: string;
@@ -127,6 +158,7 @@ describe.sequential('Select first paint with the popup never opened', () => {
       for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
         const closed = await readClosedSelect(page);
+        await retainObservation(page, runtime, 'never-opened-label', closed);
 
         // Nothing in this case may open the popup; the defect it guards only
         // shows before the first open cycle.
@@ -155,6 +187,7 @@ describe.sequential('Select first paint with the popup never opened', () => {
       for (const runtime of SELECT_RUNTIMES) {
         await showRuntime(page, previewer, runtime);
         const closed = await readClosedSelect(page);
+        await retainObservation(page, runtime, 'closed-mounted-content', closed);
 
         expect(closed.detachedHosts, `${runtime}/detached`).toBeGreaterThan(0);
         // Two authored options. Without them registered the label above can
@@ -199,6 +232,14 @@ describe.sequential('React Select retained native entry focus', () => {
           nativeFocused: true,
           observedFocused: true,
         });
+      await retainObservation(page, 'react', 'selected-entry', {
+        paper: await readFocus(paper),
+        ink: await readFocus(ink),
+        selected: {
+          paper: await paper.getAttribute('aria-selected'),
+          ink: await ink.getAttribute('aria-selected'),
+        },
+      });
       // Use page input: locator.press() would focus the option first and mask
       // a missing native entry event by injecting the fact navigation needs.
       await page.keyboard.press('End');
@@ -208,6 +249,14 @@ describe.sequential('React Select retained native entry focus', () => {
           nativeFocused: true,
           observedFocused: true,
         });
+      await retainObservation(page, 'react', 'native-End', {
+        paper: await readFocus(paper),
+        ink: await readFocus(ink),
+        selected: {
+          paper: await paper.getAttribute('aria-selected'),
+          ink: await ink.getAttribute('aria-selected'),
+        },
+      });
       // Home must move from a non-first member; an ignored Home cannot pass.
       await page.keyboard.press('Home');
       await expect
@@ -216,6 +265,14 @@ describe.sequential('React Select retained native entry focus', () => {
           nativeFocused: true,
           observedFocused: true,
         });
+      await retainObservation(page, 'react', 'native-Home', {
+        paper: await readFocus(paper),
+        ink: await readFocus(ink),
+        selected: {
+          paper: await paper.getAttribute('aria-selected'),
+          ink: await ink.getAttribute('aria-selected'),
+        },
+      });
       expect(await paper.getAttribute('aria-selected')).toBe('true');
       expect(await ink.getAttribute('aria-selected')).toBe('false');
     } finally {

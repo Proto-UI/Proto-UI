@@ -18,7 +18,7 @@ import {
 } from './liquid-tint-stage-diagnostic';
 
 export const REFRACTION_POLICY = Object.freeze({
-  version: 'test-visible-refraction-2-profile5-capability-bound',
+  version: 'test-visible-refraction-3-profile6-capability-bound',
   productAccepted: false,
   evidenceKind: 'scripted-renderer-sequence',
   sourceAdmissionProved: false,
@@ -30,10 +30,13 @@ export const REFRACTION_POLICY = Object.freeze({
   maximumSourcePixels: 131072,
   baselineTree: '20bb2794c8ef1f71f6fac1ec649e033677c818cf',
   baselineMeaning:
-    'local product-increment input tree; not the archived image source or an executed GPU candidate',
+    'historical profile5 increment input tree; not profile6, archived image origin or fresh GPU evidence',
+  profile6BaselineHead: '49fc3ac3a5df6f6850795f25503940c5a2d0f2e8',
+  profile6BaselineTree: '0d8d72af9c46232f38be26f7aaa73ec293b668c0',
+  profile6ObservedFailureHead: '9b6448e339a474bca6a8fbaae4ad8c24c522a84c',
   shaderSha256: {
-    static: '25260040b10ba143e849d30fe70e07fd0d14365542e44e9c20742eecce735a68',
-    contact: 'c3c3fbdb148fcdc4f515da9d86e807943b77f1e308e865c62b54a850d331cae5',
+    static: '3ea77d2ca49dcc55fcb5155bdfa022268af628205e24b21a3bddfb45b2af675d',
+    contact: '258d6bcfb58b828656561897289f7710600e8b041625235073bb62ae0f36da10',
   },
   comparison: 'same-source same-geometry same-float32-uniform strict-offset-zero',
   uncertainty: 'bounded correspondence resolution/ambiguity, not a statistical confidence interval',
@@ -1113,11 +1116,11 @@ export async function runVisibleRefractionFrame(request: RefractionRequest) {
     originalHead: frame.head,
     originalTree: frame.tree,
     originalProvenanceMeaning:
-      'archived source image/frame inputs only; not the candidate profile5 shader origin',
+      'archived source image/frame inputs only; not the candidate profile6 shader origin',
     executedShaderProvenance: {
       profile: request.staticProfile
-        ? 'pui-regular-style-tint-5'
-        : 'pui-regular-style-tint-contact-5',
+        ? 'pui-regular-style-tint-6'
+        : 'pui-regular-style-tint-contact-6',
       expectedSha256: request.staticProfile
         ? REFRACTION_POLICY.shaderSha256.static
         : REFRACTION_POLICY.shaderSha256.contact,

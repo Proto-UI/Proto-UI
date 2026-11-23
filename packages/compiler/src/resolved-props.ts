@@ -32,6 +32,7 @@ export function resolvedPropFacts(ir: PrototypeIR): {
   };
   visit(ir.setup);
   for (const hook of ir.hooks) visit(hook.setup);
+  for (const hook of ir.hooks) if (hook.configure) visit(hook.configure);
   for (const binding of ir.moduleBindings ?? []) visit(binding.value);
   const guaranteed = new Set<Operation>();
   // A conditional without an early setup exit cannot bypass a later declaration.
@@ -47,29 +48,102 @@ export function resolvedPropFacts(ir: PrototypeIR): {
             (!!statement.catch && canExit(statement.catch.body)) ||
             (!!statement.finally && canExit(statement.finally))))
     );
-  for (const statement of ir.setup.body) {
-    if (
-      statement.kind === 'return' ||
-      statement.kind === 'throw' ||
-      (statement.kind === 'if' && (canExit(statement.then) || canExit(statement.otherwise))) ||
-      (statement.kind === 'try' && canExit([statement]))
-    )
-      break;
-    if (statement.kind === 'effect' && statement.expression.kind === 'operation')
-      guaranteed.add(statement.expression);
-  }
+  const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
+  const reached = new Set<string>();
+  const immediate = (value: unknown): void => {
+    if (!value || typeof value !== 'object') return;
+    const node = value as ExpressionIR;
+    if (node.kind === 'function') return;
+    if (node.kind === 'conditional') {
+      immediate(node.condition);
+      return;
+    }
+    if (node.kind === 'binary' && ['&&', '||', '??'].includes(node.operator)) {
+      immediate(node.left);
+      return;
+    }
+    // Ordinary calls may contain an optional chain in their callee. Do not infer
+    // installation from their arguments; the direct authored-hook node is enough.
+    if (node.kind === 'call') {
+      immediate(node.callee);
+      return;
+    }
+    if (node.kind === 'element' && node.optional) {
+      immediate(node.object);
+      return;
+    }
+    if (node.kind === 'operation' && node.optional) {
+      immediate(node.receiver);
+      return;
+    }
+    if (node.kind === 'operation') guaranteed.add(node);
+    if (node.kind === 'authored-hook') {
+      const hook = hooks.get(node.hookId);
+      if (
+        hook &&
+        !reached.has(hook.id) &&
+        ir.hooks.filter((other) => other.name === hook.name).length === 1
+      ) {
+        reached.add(hook.id);
+        prefix(hook.setup.body);
+      }
+    }
+    for (const [key, child] of Object.entries(value))
+      if (key !== 'type' && key !== 'span') immediate(child);
+  };
+  const prefix = (body: readonly StatementIR[]): void => {
+    for (const statement of body) {
+      if (
+        statement.kind === 'return' ||
+        statement.kind === 'throw' ||
+        (statement.kind === 'if' && (canExit(statement.then) || canExit(statement.otherwise))) ||
+        (statement.kind === 'try' && canExit([statement]))
+      )
+        break;
+      if (statement.kind === 'effect') immediate(statement.expression);
+      if (statement.kind === 'const') immediate(statement.value);
+    }
+  };
+  prefix(ir.setup.body);
   const required = new Set<string>(),
     nonNull = new Set<string>();
   for (const prop of ir.props) {
     const declarations = definitions.get(prop.name) ?? [];
     if (declarations.some((declaration) => guaranteed.has(declaration))) required.add(prop.name);
-    if (declarations.length !== 1 || !guaranteed.has(declarations[0])) continue;
+    if (!declarations.some((declaration) => guaranteed.has(declaration))) continue;
     const record = declarations[0].arguments[0];
     const spec =
       record.kind === 'record'
         ? record.entries.find((entry) => entry.key === prop.name)?.value
         : undefined;
     if (opaque || spec?.kind !== 'record') continue;
+    // Identical repeated scalar descriptors retain one contract; other refinements
+    // remain conservative. In particular, a nullable first default is not erased.
+    if (declarations.length > 1) {
+      const signature = (value: ExpressionIR | undefined): string | undefined =>
+        value?.kind === 'record' && value.entries.every((entry) => entry.value.kind === 'literal')
+          ? JSON.stringify(
+              value.entries
+                .map((entry) => [
+                  entry.key,
+                  entry.value.kind === 'literal' ? entry.value.value : undefined,
+                ])
+                .sort(([a], [b]) => String(a).localeCompare(String(b)))
+            )
+          : undefined;
+      const expected = signature(spec);
+      if (
+        !expected ||
+        declarations.some((declaration) => {
+          const value = declaration.arguments[0];
+          return (
+            value?.kind !== 'record' ||
+            signature(value.entries.find((entry) => entry.key === prop.name)?.value) !== expected
+          );
+        })
+      )
+        continue;
+    }
     const fields = new Map(spec.entries.map((entry) => [entry.key, entry.value]));
     const empty = fields.get('empty');
     if (empty && (empty.kind !== 'literal' || empty.value === 'accept')) continue;

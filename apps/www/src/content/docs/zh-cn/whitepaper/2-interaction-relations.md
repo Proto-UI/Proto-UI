@@ -70,6 +70,8 @@ Proto UI 把这样识别出的关系称为 `information channel`，也就是“�
   class="whitepaper-diagram"
 />
 
+<div class="whitepaper-channel-table">
+
 | 信息通路   | 方向                  | 主要责任                               |
 | ---------- | --------------------- | -------------------------------------- |
 | `Event`    | User → Component      | 传递用户发起的操作、输入与交互意图     |
@@ -77,6 +79,8 @@ Proto UI 把这样识别出的关系称为 `information channel`，也就是“�
 | `Props`    | App Maker → Component | 配置组件                               |
 | `Expose`   | Component → App Maker | 对外提供值、状态、方法和变化信号等能力 |
 | `Context`  | Component ↔ Component | 让组件之间交换协作信息                 |
+
+</div>
 
 可以看到：Event 和 Feedback 连接的都是 User 与 Component，但因方向和责任不同，它们是两条不同的通路；Props 和 Expose 也是同样的关系。
 

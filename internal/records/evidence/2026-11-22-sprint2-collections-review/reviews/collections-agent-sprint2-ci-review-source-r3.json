@@ -1,0 +1,21 @@
+{
+  "head": "4cec628388b17e3853cbadce82d027c0da4d5fea",
+  "scope": "Reviewed working-tree source hashes, not committed-head acceptance",
+  "files": [
+    {
+      "path": "scripts/analysis/run-sprint2-consumers.mjs",
+      "sha256": "d1cd0b8b32921781345cc4b4387f6014c8fcf608bb5aaacb51ccd2744e3d7f80",
+      "bytes": 14103
+    },
+    {
+      "path": "scripts/analysis/test/sprint2-consumer-queue.test.mjs",
+      "sha256": "2f1cf16599d5ed751f4745e4bcc9f2d053dc4af5ff727bc2eee004890d0368d0",
+      "bytes": 5656
+    },
+    {
+      "path": ".github/workflows/projection-family-evidence.yml",
+      "sha256": "2a3ee36ee8f07498b7d0883ee853702d61547914621472fec07dd35926947b92",
+      "bytes": 4178
+    }
+  ]
+}

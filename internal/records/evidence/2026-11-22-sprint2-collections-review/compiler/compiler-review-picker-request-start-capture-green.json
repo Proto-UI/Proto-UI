@@ -1,0 +1,27 @@
+{
+  "reviewedCommit": "3bd5bcf363ab0de87b926ea25540fd87509cf05c",
+  "scope": "Independent real Runtime source probe; public exposed State subscription opens a previously closed Picker synchronously before first Calendar request Context publication. No browser or physical-input claim.",
+  "ok": true,
+  "results": [
+    {
+      "mode": "single",
+      "request": true,
+      "before": false,
+      "after": true,
+      "observed": true,
+      "actions": ["openChange", "valueChange"],
+      "expectedOpenAfter": true,
+      "pass": true
+    },
+    {
+      "mode": "range",
+      "request": true,
+      "before": false,
+      "after": true,
+      "observed": true,
+      "actions": ["openChange", "rangeChange"],
+      "expectedOpenAfter": true,
+      "pass": true
+    }
+  ]
+}

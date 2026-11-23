@@ -1,0 +1,49 @@
+{
+  "head": "d53d9cb41b90258c467b5614bcf4dd318786f256",
+  "scopeCommits": [
+    "a3b245ac1b8a284123eff3ea238b38ee59b9bbcb",
+    "12de6f461c45fbcb14677f776ff8c572672a34f4"
+  ],
+  "files": [
+    {
+      "path": "scripts/compiler/build-pinned.ts",
+      "sha256": "4b514e4eb43e21785a808a19cba90ab263ba0c2b83744f2067e780f533f816d7"
+    },
+    {
+      "path": "scripts/compiler/native-consumer-smoke.mjs",
+      "sha256": "f67db1458c857d7636fe1cf94dad312bb997418afaaa008bbbfa90c14ce79748"
+    },
+    {
+      "path": "scripts/compiler/release-family-smoke.mjs",
+      "sha256": "db7e1ca1ff8fb1db92521dd560155fde489edae3de33a86045f6467a41812ca2"
+    },
+    {
+      "path": "scripts/compiler/release-family-runtime.mjs",
+      "sha256": "48e889c3d78ca1bce7f812b66c786f61c3ea2eccc86621fd2ff089a2f6ba6fec"
+    },
+    {
+      "path": "scripts/compiler/pinned-cli-smoke.mjs",
+      "sha256": "e64dfe410c6e849328aba8bea8d1ef93d5ae139103531e7cee2873afca726066"
+    },
+    {
+      "path": "packages/compiler/src/compiler-build.ts",
+      "sha256": "9b696d4da0c00c3212a447b0ad184ff6f54d744676722e45c33f7dc9afdbf3cc"
+    },
+    {
+      "path": "packages/compiler/src/compile.ts",
+      "sha256": "9fff0036ec7bd9c1af3828b4b5aae1be84b645c91a6f5fa1a4247be6dc707811"
+    },
+    {
+      "path": "packages/compiler/test/output.test.ts",
+      "sha256": "da04e14b2d922b1e9161127fea0108e8b7e4768b7cf635d6cff05186ad5f5052"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/build/compiler-guide.md",
+      "sha256": "27cfdd804bcf645f854449ad8663dee265b74912844183872c53123744931bc0"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/build/compiler-guide.md",
+      "sha256": "64ef3d578b01cd9b3e3c5e9c6f83b6b500d04194aa85979791034791029ac214"
+    }
+  ]
+}

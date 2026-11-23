@@ -783,7 +783,7 @@ pub fn paint_native_root(value:&NativeSnapshot,owner:&OwnerRef,focus:&FocusHandl
 // Authored children are captured native factories, never semantic tag dispatch.
 let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(style,fixed,translation)=native_presentation(owner,&tokens);*element.style()=style;
 if image_supported(owner){element=element.role(gpui::Role::Image);}
-if owner.borrow().modules.hooks.contains("scroll")&&owner.borrow().modules.scroll.external_engine==0{let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
+if owner.borrow().modules.hooks.contains("scroll")&&owner.borrow().modules.scroll.external_engine==0{let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();let scroll_epoch=owner.borrow().epoch;element=element.on_scroll_wheel(move|event,window,cx|{if scroll_input(&scrolled,event,window,scroll_epoch){scroll_drive(window,cx);}});}
 let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let native_action=action_from_name(&action);if let Some(lease)=native_accessible_action_lease(owner,&action){element=element.on_a11y_action(native_action,move |data,window,cx|lease.request_data(data,window,cx));}}}
 if control_label_is_label(owner){
     element=element.role(gpui::Role::Label);
@@ -808,7 +808,17 @@ let on_key=owner.clone();element=element.on_key_down(move|event,window,cx|{let m
 let on_key=owner.clone();element=element.on_key_up(move|event,window,cx|{let mut fields=event_fields("host:keyup");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch(&on_key,"host:keyup",false,fields){window.prevent_default()}collect_key(&on_key);global_key_up(event,window,cx);});
 }
 let measured=owner.clone();let committed=owner.clone();let revision=owner.borrow().projection_revision;let commit_drive=drive.clone();let commit_focus=focus.clone();
-element=element.child(canvas(move|_,window,_|{note_host_order(&measured);scroll_frame(&measured,window);hover_view.set(native_hover_view(&measured,window));},move|_,_,window,cx|{
+element=element.child(canvas(move|_,window,_|{
+    note_host_order(&measured);
+    let external_scroll=measured.borrow().modules.scroll.external_engine!=0;
+    if !external_scroll{scroll_frame(&measured,window);}
+    hover_view.set(native_hover_view(&measured,window));
+},move|_,_,window,cx|{
+    // A bound child viewport commits and clamps its real ScrollHandle during
+    // prepaint. Observe it after the whole prepaint pass, never its raw wheel
+    // offset while the parent canvas is traversed ahead of that child.
+    let external_scroll=committed.borrow().modules.scroll.external_engine!=0;
+    if external_scroll{scroll_frame(&committed,window);}
     if native_pointer_input_needed(&committed){register_pointer_input(window,Some(Rc::downgrade(&committed)));}
     if crate::gpui_native_move::move_owner_has_binding(&committed){crate::gpui_native_move::register_move_input(window,Rc::downgrade(&committed));}
     if native_boundary_input_needed(&committed){window.on_mouse_event::<gpui::MouseDownEvent>(native_pointer_press);}

@@ -10,10 +10,12 @@ import * as brutalistDialog from '@proto.ui/prototypes-brutalist/dialog';
 import { BRUTALIST_THEME } from '@proto.ui/prototypes-brutalist/theme';
 import baseButton from '@proto.ui/prototypes-base/button';
 import { dialogContent, dialogMask } from '@proto.ui/prototypes-base/dialog';
+import { scrollAreaRoot } from '@proto.ui/prototypes-base/scroll-area';
 import shadcnSurface from '@proto.ui/prototypes-shadcn/surface';
 import brutalistSurface from '@proto.ui/prototypes-brutalist/surface';
 import shadcnText from '@proto.ui/prototypes-shadcn/text';
 import brutalistText from '@proto.ui/prototypes-brutalist/text';
+import readingViewport from './documentation-image-reading-viewport.proto';
 import './documentation-image-zoom.css';
 export const IMAGE_ZOOM_DURATION = 220;
 
@@ -29,6 +31,8 @@ const parts = {
     surface: shadcnSurface,
     text: shadcnText,
     imageTrigger: baseButton,
+    readingRoot: scrollAreaRoot,
+    readingViewport,
     ...shadcnDialog,
     dialogContent,
     dialogMask,
@@ -38,6 +42,8 @@ const parts = {
     surface: brutalistSurface,
     text: brutalistText,
     imageTrigger: baseButton,
+    readingRoot: scrollAreaRoot,
+    readingViewport,
     ...brutalistDialog,
     dialogContent,
     dialogMask,
@@ -48,6 +54,8 @@ const roles = [
   'surface',
   'text',
   'imageTrigger',
+  'readingRoot',
+  'readingViewport',
   'dialogRoot',
   'dialogMask',
   'dialogContent',
@@ -64,7 +72,10 @@ export function registerPreviewControls(): void {
       if (!customElements.get(tag))
         customElements.define(
           tag,
-          AdaptToWebComponent(parts[family][part] as any, { register: false, registerAs: tag })
+          AdaptToWebComponent(parts[family][part] as any, {
+            register: false,
+            registerAs: tag,
+          })
         );
     }
 }

@@ -16,6 +16,14 @@ Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，p
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 方向与分支关系
+
+Root 设置 `direction="rtl"` 后，左右导航键交换：左键展开或进入子项，右键折叠或返回父项；默认 LTR 的映射相反。上下键、Home/End 与首字母导航继续遵循逻辑可见顺序。Shadcn 与 Brutalist Group 的缩进跟随文字方向。
+
+每个 `TreeGroup` 的 `nodeKey` 与所属分支 Item 相同；把子 Item 放入 Group，并用 `parentKey` 指向该分支。Item 与 Group 通过作用域内的 key 建立 controls／labelled-by 关系。目标被移除、缺失或有歧义时，关系会撤回，不留下悬空引用。折叠隐藏 Group，但保留完整逻辑层级；原焦点在折叠分支内时移到可见祖先，树外焦点不被抢走。
+
+`readOnly` 阻止选择变更，仍允许导航和展开。受控 `value`、`expandedKeys` 在应用接受请求前保持已提交值。插入、移动或移除 Item 会更新层级，不伪造用户选择事件。
+
 ## API
 
 Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 或 `expandedKeys` 会使对应事实进入受控模式。
@@ -25,6 +33,7 @@ Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`
   rows={[
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'defaultExpandedKeys', type: 'readonly string[]', default: '[]' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: 'Tree' },
@@ -32,4 +41,3 @@ Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`
 />
 
 这些属性属于 Root。Item 的 `nodeKey`、`parentKey`、`textValue` 默认 `''`，`disabled` 默认 `false`。Group 接受 `nodeKey`。Toggle 额外接受 Button 的属性。
-

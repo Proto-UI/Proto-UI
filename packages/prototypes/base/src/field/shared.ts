@@ -60,7 +60,19 @@ export function normalizeFieldValue(value: unknown): FieldValue | undefined {
     (typeof value === 'number' && Number.isFinite(value))
   )
     return value;
-  return normalizeFieldStringArray(value);
+  if (!Array.isArray(value)) return undefined;
+  const normalized: (string | number)[] = [];
+  let kind: 'string' | 'number' | undefined;
+  for (let index = 0; index < value.length; index++) {
+    if (!Object.hasOwn(value, index)) return undefined;
+    const item: unknown = value[index];
+    if (typeof item !== 'string' && (typeof item !== 'number' || !Number.isFinite(item)))
+      return undefined;
+    if (kind !== undefined && kind !== typeof item) return undefined;
+    kind = typeof item as 'string' | 'number';
+    normalized.push(item as string | number);
+  }
+  return normalized as string[] | number[];
 }
 export const copyFieldValue = (value: FieldValue): FieldValue =>
   Array.isArray(value) ? value.slice() : value;

@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1714",
+  "sourceBaseline": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+  "finalPrHeadAcceptance": false,
+  "originalPrivateIR10Acceptance": false,
+  "implementationInventory": {
+    "packages/compiler/src/parser.ts": "c2917425e516f0c08ac5ecb6b3ad942e1b340b36748bc7ff66dc556b2338be93",
+    "packages/compiler/src/parser-module.ts": "cddb9abd2f8c5072d3c7ee1eb7a2ffe06fa40c8b8706a29757e13f59ba8c7e38",
+    "packages/compiler/src/parser-source-demand.ts": "2303ce1f6712bf37f2a99ceb2b585607fd89fbb04304fef3483f01895e9c10b3",
+    "packages/compiler/src/source-syntax.ts": "e910bb1e1004c7344dcf3a9f7df6998d9edad1b63e51dd4d2168ecf103687cd9",
+    "packages/compiler/src/source-module-initialization.ts": "42785f9f35a2ceeaaad0c731145a11daae71b234bb845805f279b3dced03e60d",
+    "packages/compiler/src/source-module-bindings.ts": "72f55b32db48b9ccce16f8d13c3ae57a8d29b1e313806b4ebba3b76344b61695",
+    "packages/compiler/test/dormant-source-admission.test.ts": "19aa87e96d7383a55f7045c66095e24521d586ec7dc70456d776978f3e635784",
+    "packages/compiler/test/dormant-callable-consumer.test.ts": "db13dbd556cf82ed10de3ca92ac65d41f55d6e6451fc9a2191bf0efd8e912a31",
+    "packages/compiler/test/module-callable-selection.test.ts": "822ed8312fd54122136ba19b2d57d14f3e1cb8e687655e40dafa45cda2cd60cc",
+    "packages/compiler/test/module-callable-selection-fixture.ts": "c0afc3245480e78bb07bbd96cbe4a19fd62343ea32ee573cd0b7bd149111744d",
+    "packages/compiler/test/module-callable-selection-consumer.test.ts": "7ae256368ef4c1568f3f152ebb7299aa1be3023c2b38504d0f63516fef1c284e",
+    "packages/compiler/test/call-literal-evidence.test.ts": "4cf5fcfde688635e8ce47b38fb9323658edbe958c0e9915322bbceecdc45b458",
+    "packages/compiler/test/throw-only-return.test.ts": "a443574d0e1132dfe3de2fee64356e5ad06a2854f55ead303ac7f449b14c63e2",
+    "scripts/compiler/verify-object-rest-controls.mjs": "45329119aac05b3e1d99474fd644a171a293e382b0d5651c25fbdb17e2d5bf2d",
+    "scripts/compiler/verify-object-rest-controls.test.mjs": "925e3c3426f3c3747ccbf25d3cb742fcab23366f67c3a50595596784d971501c",
+    "internal/compiler/source-language.md": "856c460f579eeb11c0f5fa624c90255db94ef5c3c9a988310003b1aea03a0947"
+  },
+  "focusedLogs": {
+    "public-final-focused.log": "a24c87686f414bda92e4bddefc04619444491321edd2b6eb4b7a526f21f60e82",
+    "optional-focused.log": "9ebff146408d1668e53dda4046639c89ad5a41d0205a9838075ec93a21466948",
+    "optional-native.log": "87eeca55e2df75ab9fb948f7902ce463c28834fb69e8be96581affd57da735b5",
+    "throw-consumer.log": "45a2bee79e495079353c706388294b3c54730b64e7298752c62164a81f7def2d",
+    "original-native.log": "cd5fe1b66677cf335c2cb1667748b148c664b6fce4f3381ed6a3d49a4a1e9c19",
+    "original-dormant.log": "fc535ea07e8ef16d53de58df3e95c111926ce790e7f4f3d108454172ea23ecfe",
+    "parser-types.log": "1378a6eabdcca02f55d00aca2d2df0ac1f3e96094fb92691259534e7d092e2e5",
+    "rest-controls.log": "4274b68d14960d0e414446462d2e928b4efb78b0fd391ac7c9b5b4229daeb7a1",
+    "rest-verifier-test.log": "bedce4495526e933b51250049075f33400a6f6f455c7d4ec85af9c645f45c427",
+    "focused-initial.log": "9139c0f0515d4e805720dbc07676a0d5245fcfe1c58792d993a14c015c3a3d21",
+    "call-literal-before.log": "7160896d70765cbede1bc36c6b1fd5f777497d5d3c7ccf147dada8eab64f46cd"
+  },
+  "originalOptionalCallable": [
+    {
+      "profile": "react-dom-source-v1",
+      "sourceHashes": {
+        "entry.proto.ts": "1f0af40b54592eebd4bf1b7bea369a498f4e5f91d2e65e3c018bb72f34347e17",
+        "a.ts": "d9157f136d9d649c7f8c80dad23aea23d109a142585ab097a29ffbd0f9165698",
+        "b.ts": "2a542421d6b623f4cfb20278d0b67c6c8c3a7f60096c82eb45ced93c11db1bc4"
+      },
+      "answer": 42,
+      "read": 42,
+      "disposeGuard": true,
+      "originalPrivateIR10Acceptance": false
+    },
+    {
+      "profile": "vue-source-v1",
+      "sourceHashes": {
+        "entry.proto.ts": "1f0af40b54592eebd4bf1b7bea369a498f4e5f91d2e65e3c018bb72f34347e17",
+        "a.ts": "d9157f136d9d649c7f8c80dad23aea23d109a142585ab097a29ffbd0f9165698",
+        "b.ts": "2a542421d6b623f4cfb20278d0b67c6c8c3a7f60096c82eb45ced93c11db1bc4"
+      },
+      "answer": 42,
+      "read": 42,
+      "disposeGuard": true,
+      "originalPrivateIR10Acceptance": false
+    },
+    {
+      "profile": "vue2-source-v1",
+      "sourceHashes": {
+        "entry.proto.ts": "1f0af40b54592eebd4bf1b7bea369a498f4e5f91d2e65e3c018bb72f34347e17",
+        "a.ts": "d9157f136d9d649c7f8c80dad23aea23d109a142585ab097a29ffbd0f9165698",
+        "b.ts": "2a542421d6b623f4cfb20278d0b67c6c8c3a7f60096c82eb45ced93c11db1bc4"
+      },
+      "answer": 42,
+      "read": 42,
+      "disposeGuard": true,
+      "originalPrivateIR10Acceptance": false
+    },
+    {
+      "profile": "web-component-source-v1",
+      "sourceHashes": {
+        "entry.proto.ts": "1f0af40b54592eebd4bf1b7bea369a498f4e5f91d2e65e3c018bb72f34347e17",
+        "a.ts": "d9157f136d9d649c7f8c80dad23aea23d109a142585ab097a29ffbd0f9165698",
+        "b.ts": "2a542421d6b623f4cfb20278d0b67c6c8c3a7f60096c82eb45ced93c11db1bc4"
+      },
+      "answer": 42,
+      "read": 42,
+      "disposeGuard": true,
+      "originalPrivateIR10Acceptance": false
+    }
+  ],
+  "originalDormant": {
+    "frozenTestSha256": "258ff5528e4acf1bb7df5f54b8e11d17ed0fbf6f1545cff44c6854bf90254176",
+    "selected": 1,
+    "passed": 1,
+    "unselected": 42,
+    "alreadyWorkedInPublicIR7": true
+  },
+  "rest": {
+    "typescript": "5.9.3",
+    "node": "v24.22.3",
+    "originalSourceHashes": {
+      "object-rest.proto.ts": "0620abf1a520182de62e4951f7f299bc2a4437e6411a02a9f021731102bbfaa1",
+      "object-rest-observer.ts": "01c37a7f4ffbdada283c0080550c8c67b6e4d3cf0f986ad2d00919ffd7048e66"
+    },
+    "originalDiagnostics": [
+      {
+        "code": 2322,
+        "category": "Error",
+        "file": "object-rest-observer.ts",
+        "graph": true,
+        "line": 61,
+        "column": 3,
+        "message": "Type '13' is not assignable to type '3'."
+      }
+    ],
+    "additiveControlName": "lawful-annotation-control",
+    "additiveSourceHashes": {
+      "object-rest.proto.ts": "0620abf1a520182de62e4951f7f299bc2a4437e6411a02a9f021731102bbfaa1",
+      "object-rest-observer.ts": "efd4b290467a99ec7f4df2071ba4ef3c7b906fb3d975085120980333a4ceb86c"
+    },
+    "additiveDiagnostics": [],
+    "identicalHelperJavaScript": true,
+    "helperJavaScriptSha256": "9b8ae27383098003fd56e8f99fb2bfc1036984b4e0af603cdfbf7333444c2d4a",
+    "archivedExpectedValuesMatched": true,
+    "wholePrototypeExecuted": false,
+    "compilerGeneratedNativeExecuted": false,
+    "edgeOnlyFixturesExecuted": false,
+    "currentPublicCompilerOriginal": {
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1004",
+          "category": "unsupported-input",
+          "message": "A destructured key must be a static name.",
+          "span": {
+            "file": "object-rest-observer.ts",
+            "start": 1360,
+            "end": 1373,
+            "line": 49,
+            "column": 11,
+            "endLine": 49,
+            "endColumn": 24
+          }
+        }
+      ]
+    },
+    "currentPublicCompilerAdditive": {
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1004",
+          "category": "unsupported-input",
+          "message": "A destructured key must be a static name.",
+          "span": {
+            "file": "object-rest-observer.ts",
+            "start": 1360,
+            "end": 1373,
+            "line": 49,
+            "column": 11,
+            "endLine": 49,
+            "endColumn": 24
+          }
+        }
+      ]
+    }
+  },
+  "typeSlice": {
+    "typescript": "5.9.3",
+    "rootFiles": [
+      "packages/compiler/src/parser.ts",
+      "packages/compiler/src/parser-module.ts",
+      "packages/compiler/src/parser-source-demand.ts",
+      "packages/compiler/src/source-module-initialization.ts",
+      "packages/compiler/src/source-syntax.ts"
+    ],
+    "sourceFiles": 282,
+    "diagnostics": []
+  }
+}

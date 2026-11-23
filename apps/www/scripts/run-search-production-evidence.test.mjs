@@ -25,6 +25,7 @@ function fixture({
   previewExit = false,
   missingAssets = false,
   browserMode = 'ready',
+  extraEnv = {},
 } = {}) {
   let clock = 0;
   let serial = 1;
@@ -129,7 +130,7 @@ function fixture({
           timeoutMs: 100,
           cleanupMs: 10,
           port: 4397,
-          env: { CANDIDATE_SHA: 'a'.repeat(40), CHROME_PATH: '/owned/chrome' },
+          env: { CANDIDATE_SHA: 'a'.repeat(40), CHROME_PATH: '/owned/chrome', ...extraEnv },
         },
         deps
       ),
@@ -195,6 +196,18 @@ test('build, exact preview, directly owned Chrome and mandatory two-case suite c
   assert.equal(f.calls.filter(([kind]) => kind === 'profile-remove').length, 1);
   assert.equal(f.timers.size, 0);
   assert.equal(f.signals.eventNames().length, 0);
+});
+
+test('an explicit Sprint 1 report path reaches the original mandatory production suite', async () => {
+  const f = fixture({ extraEnv: { PROTO_UI_SEARCH_PRODUCTION_REPORT: '/evidence/vitest.json' } });
+  await f.run();
+  const args = f.calls.filter(([kind]) => kind === 'spawn')[3][2];
+  assert.deepEqual(args.slice(-4), [
+    '--reporter=default',
+    '--reporter=json',
+    '--outputFile=/evidence/vitest.json',
+    SEARCH_PRODUCTION_SUITE,
+  ]);
 });
 
 test('build failure and missing generated Pagefind assets cannot start preview or Chrome', async () => {

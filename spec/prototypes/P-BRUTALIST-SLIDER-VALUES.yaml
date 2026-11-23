@@ -1,0 +1,61 @@
+id: P-BRUTALIST-SLIDER-VALUES
+type: prototype
+title: Brutalist Slider Values family projection
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
+summary: Six indexed Slider Values parts as a separate multi-value family, not scalar Thumb aliases.
+statement:
+  en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots, Track consumes shared input-origin facts, and the separate scalar family is untouched. The Base Track and optional grouped Field behavior are inherited; native and Compiler admission remain separate from family paint.
+criteria:
+  - id: P-BRUTALIST-SLIDER-VALUES-INHERITANCE
+    text:
+      en: Each of the six Values entries composes only with Values Root and preserves Base indexed mapping, controlled acceptance/refusal and keyboard semantics. Scalar Slider and Values remain distinct owners; no Values Thumb is a scalar-Thumb alias.
+  - id: P-BRUTALIST-SLIDER-VALUES-VISUAL
+    text:
+      en: Square rail, indexed range and thumb paint uses shared Brutalist theme tokens, a strong border and offset shadow, with visible keyboard focus and distinct disabled feedback. Family paint never invents pointer capture or measurement ownership.
+  - id: P-BRUTALIST-SLIDER-VALUES-BOUNDARY
+    text:
+      en: 'Values Track inherits the shared-origin physical input and grouped Field contract recorded on P-BASE-SLIDER-VALUES. Family-complete native input and Compiler acceptance remain independent obligations.'
+  - id: P-BRUTALIST-SLIDER-VALUES-CLOSURE
+    text:
+      en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
+  - id: P-BRUTALIST-SLIDER-VALUES-EVIDENCE-BOUNDARY
+    text:
+      en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-SLIDER-VALUE-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-SLIDER-VALUES
+verifies:
+  tests:
+    - T-SLIDER-VALUES-INPUT-0001
+openQuestions:
+  - id: P-BRUTALIST-SLIDER-VALUES-Q-POINTER
+    question:
+      en: When does independent native and Compiler evidence admit the remaining Values scope?
+    blocks:
+      - activation:P-BRUTALIST-SLIDER-VALUES
+sources:
+  - path: packages/prototypes/brutalist/src/slider/values-root.proto.ts
+  - path: packages/prototypes/brutalist/src/slider/values-track.proto.ts
+  - path: packages/prototypes/brutalist/src/slider/values-thumb.proto.ts
+  - path: packages/prototypes/brutalist/src/slider/values-indicator.proto.ts
+  - path: packages/prototypes/brutalist/src/slider/values-label.proto.ts
+  - path: packages/prototypes/brutalist/src/slider/values-value.proto.ts
+  - path: packages/prototypes/brutalist/src/slider/index.ts
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Brutalist Slider Values family projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - brutalist
+  - slider
+  - values
+  - draft

@@ -9,11 +9,29 @@ import { launchBrowser, runtimeSelectTrigger, startServer, stopServer } from './
 
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const baseline = process.env.PROTO_UI_STARTUP_SUBJECT === 'baseline';
+const historicalBaselineRevision = '48b80f8b8b0b94dbac04919e3516bc6a1ed2c37c';
+const historicalNewYork = baseline && revision === historicalBaselineRevision;
+const historicalLocaleSelector =
+  '#home-language [data-projection-generation-state="active"] a[data-home-locale][href][hreflang]';
+const localeApiKind = baseline
+  ? historicalNewYork
+    ? 'historical-native-locale-link'
+    : 'unreviewed-historical-api'
+  : 'current-locale-select';
+// The historical 48b80 production subject enhances a native locale link.
+// Current candidates must still expose the public Select combobox.
+const languageControlSelector = baseline
+  ? '#home-language [data-projection-generation-state="active"] a[data-home-locale][href]'
+  : '#home-language [data-projection-generation-state="active"] [role="combobox"]';
 const output = process.env.PROTO_UI_STARTUP_EVIDENCE_DIR;
 const records: unknown[] = [];
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
+  if (baseline && !historicalNewYork)
+    throw new Error(
+      `Unreviewed historical startup API: ${revision}. Only ${historicalBaselineRevision} has an exact source-reviewed baseline mapping.`
+    );
   if (!process.env.PROTO_UI_BROWSER_BASE_URL)
     throw new Error('Startup evidence requires the dedicated built production-site owner.');
   baseUrl = await startServer('/zh-cn/');
@@ -24,7 +42,11 @@ afterAll(async () => {
   if (output)
     await writeFile(
       path.join(output, 'observations.json'),
-      JSON.stringify({ revision, baseline, browser: browser?.version(), records }, null, 2)
+      JSON.stringify(
+        { revision, baseline, localeApiKind, browser: browser?.version(), records },
+        null,
+        2
+      )
     );
   await browser?.close();
   await stopServer();
@@ -100,6 +122,49 @@ async function firstScreen(page: Page) {
     }
     const preview = document.querySelector<HTMLElement>('.proto-previewer .host');
     const status = preview?.querySelector<HTMLElement>('.proto-previewer__skeleton');
+    const geometry = (element: Element | null) => {
+      if (!element) return null;
+      const style = getComputedStyle(element);
+      return {
+        tag: element.localName,
+        ref: element.getAttribute('data-demo-ref'),
+        prototype: element.getAttribute('data-projection-prototype'),
+        tokens: element.getAttribute('data-pui-style'),
+        bounds: element.getBoundingClientRect().toJSON(),
+        display: style.display,
+        visibility: style.visibility,
+        hiddenAncestor: !!element.closest('[hidden]'),
+        boxSizing: style.boxSizing,
+        minHeight: style.minHeight,
+        padding: style.padding,
+        margin: style.margin,
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        lineHeight: style.lineHeight,
+        letterSpacing: style.letterSpacing,
+        alignItems: style.alignItems,
+        verticalAlign: style.verticalAlign,
+      };
+    };
+    const eyebrow = document.querySelector('.homepage-hero__eyebrow');
+    const announcementAnchors = [...(eyebrow?.querySelectorAll('a') ?? [])];
+    const visibleAnnouncementAnchors = announcementAnchors.filter((element) => {
+      const bounds = element.getBoundingClientRect();
+      return (
+        bounds.width > 0 && bounds.height > 0 && getComputedStyle(element).visibility === 'visible'
+      );
+    });
+    const announcement =
+      visibleAnnouncementAnchors.find(
+        (element) =>
+          element.matches('.home-runtime-link') &&
+          element.closest('[data-projection-generation-state="active"]')
+      ) ??
+      visibleAnnouncementAnchors.find((element) =>
+        element.closest('[data-homepage-fallback]:not([hidden])')
+      ) ??
+      null;
     return {
       background: getComputedStyle(frame).backgroundColor,
       color: getComputedStyle(frame).color,
@@ -110,6 +175,25 @@ async function firstScreen(page: Page) {
       headerHeight: document.querySelector('[data-site-header]')!.getBoundingClientRect().height,
       headingFontFamily: getComputedStyle(heading).fontFamily,
       headingTop: heading.getBoundingClientRect().top,
+      // Observe the real cold/enhanced boxes without replacing the original
+      // text-range assertion. These explain an upstream announcement-height
+      // change separately from the heading's own typography.
+      startupGeometry: {
+        eyebrow: geometry(eyebrow),
+        announcement: geometry(announcement),
+        announcementAnchors: announcementAnchors.map(geometry),
+        announcementSurfaces: [
+          ...(announcement?.querySelectorAll('[data-demo-ref^="home-link-surface-"]') ?? []),
+        ].map(geometry),
+        announcementText: [
+          ...(announcement?.querySelectorAll('[data-demo-ref^="home-link-text-"]') ?? []),
+        ].map(geometry),
+        heading: geometry(heading),
+        headingText: [
+          ...heading.querySelectorAll('[data-site-typography-carrier] [data-demo-ref^="surface-"]'),
+        ].map(geometry),
+        scroll: { x: scrollX, y: scrollY },
+      },
       previewHeight: preview?.getBoundingClientRect().height ?? null,
       previewText: preview?.innerText.trim() ?? null,
       statusBorder: status ? getComputedStyle(status).borderTopWidth : null,
@@ -167,36 +251,79 @@ for (const width of [2048, 390, 430, 320]) {
           );
           await frames(page);
           const readFacts = () =>
-            page.evaluate(() => {
-              const header = document.querySelector<HTMLElement>('[data-homepage-runtime]')!;
-              const canonical = getComputedStyle(header);
-              const language = document.querySelector<HTMLElement>(
-                '#home-language [data-projection-generation-state="active"] [role="combobox"]'
-              )!;
-              const surfaces = [
-                ...document.querySelectorAll<HTMLElement>(
-                  '#home-language [data-projection-generation-state="active"] [data-projection-scope], #home-social [data-projection-generation-state="active"] [data-projection-scope]'
-                ),
-              ];
-              return {
-                open: header.dataset.siteMenuOpen,
-                theme: document.documentElement.dataset.theme,
-                canonical: {
-                  background: canonical.getPropertyValue('--pui-background').trim(),
-                  foreground: canonical.getPropertyValue('--pui-foreground').trim(),
-                },
-                language: {
-                  text: language?.textContent,
-                  width: language?.getBoundingClientRect().width,
-                  height: language?.getBoundingClientRect().height,
-                },
-                surfaces: surfaces.map((element) => ({
-                  background: getComputedStyle(element).getPropertyValue('--pui-background').trim(),
-                  foreground: getComputedStyle(element).getPropertyValue('--pui-foreground').trim(),
-                })),
-                overflow: document.documentElement.scrollWidth > innerWidth,
-              };
-            });
+            page.evaluate(
+              ({ selector, apiKind }) => {
+                const header = document.querySelector<HTMLElement>('[data-homepage-runtime]')!;
+                const canonical = getComputedStyle(header);
+                const languages = [...document.querySelectorAll<HTMLElement>(selector)];
+                const language = languages[0] ?? null;
+                const languageStyle = language ? getComputedStyle(language) : null;
+                const generation = language?.closest('[data-projection-generation-state="active"]');
+                const identity = (element: Element | null | undefined) =>
+                  element
+                    ? {
+                        tag: element.localName,
+                        ref: element.getAttribute('data-demo-ref'),
+                        prototype: element.getAttribute('data-projection-prototype'),
+                        coordinates: Object.fromEntries(
+                          ['owner', 'family', 'runtime', 'generation'].map((name) => [
+                            name,
+                            element.getAttribute(`data-projection-${name}`),
+                          ])
+                        ),
+                      }
+                    : null;
+                const surfaces = [
+                  ...document.querySelectorAll<HTMLElement>(
+                    '#home-language [data-projection-generation-state="active"] [data-projection-scope], #home-social [data-projection-generation-state="active"] [data-projection-scope]'
+                  ),
+                ];
+                return {
+                  apiKind,
+                  open: header.dataset.siteMenuOpen,
+                  theme: document.documentElement.dataset.theme,
+                  canonical: {
+                    background: canonical.getPropertyValue('--pui-background').trim(),
+                    foreground: canonical.getPropertyValue('--pui-foreground').trim(),
+                  },
+                  language: {
+                    count: languages.length,
+                    text: language?.textContent,
+                    width: language?.getBoundingClientRect().width,
+                    height: language?.getBoundingClientRect().height,
+                    href: language?.getAttribute('href'),
+                    hreflang: language?.getAttribute('hreflang'),
+                    locale: language?.getAttribute('data-home-locale'),
+                    owner: identity(language),
+                    generation: identity(generation),
+                    group: language?.closest('[data-homepage-actions]')?.id,
+                    paint: languageStyle
+                      ? {
+                          background: languageStyle.backgroundColor,
+                          color: languageStyle.color,
+                          display: languageStyle.display,
+                          visibility: languageStyle.visibility,
+                        }
+                      : null,
+                  },
+                  surfaces: surfaces.map((element) => ({
+                    background: getComputedStyle(element)
+                      .getPropertyValue('--pui-background')
+                      .trim(),
+                    foreground: getComputedStyle(element)
+                      .getPropertyValue('--pui-foreground')
+                      .trim(),
+                  })),
+                  overflow: document.documentElement.scrollWidth > innerWidth,
+                };
+              },
+              {
+                selector: historicalNewYork
+                  ? historicalLocaleSelector
+                  : languageControlSelector,
+                apiKind: localeApiKind,
+              }
+            );
           const immediateFacts = await readFacts();
           await capture(
             page,
@@ -226,20 +353,67 @@ for (const width of [2048, 390, 430, 320]) {
               for (const surface of facts.surfaces) expect(surface).toEqual(facts.canonical);
               expect(facts.overflow).toBe(false);
             }
+          if (historicalNewYork)
+            for (const facts of [immediateFacts, settledFacts]) {
+              // Observe this subject's real owner and paint, including any old
+              // theme defects. It exposes the other locale as a native link.
+              expect(facts.apiKind).toBe('historical-native-locale-link');
+              expect(facts.language.count).toBe(1);
+              expect(facts.language.owner?.tag).toBe('a');
+              expect(facts.language.text?.trim()).toBe('English');
+              expect(facts.language.href).toBe('/en/');
+              expect(facts.language.hreflang).toBe('en');
+              expect(facts.language.locale).toBe('en');
+              expect(facts.language.width).toBeGreaterThan(0);
+              expect(facts.language.height).toBeGreaterThan(0);
+              expect(facts.language.paint?.visibility).toBe('visible');
+            }
         }
         await page.keyboard.press('Escape');
         await menu(page).click();
-        await page
-          .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
-          .focus();
-        expect(
-          await page
-            .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
-            .evaluate((e) => e === document.activeElement)
-        ).toBe(true);
-        await capture(page, `home-${width}-reopened-keyboard`, {
-          input: 'native Escape, click, keyboard focus',
-        });
+        if (historicalNewYork) {
+          // Probe 3148794 recorded four failed current-Select focus lookups on
+          // this exact subject. Those API-mismatch failures remain historical
+          // evidence; this branch measures its actual native-link API instead.
+          const locale = page.locator(historicalLocaleSelector);
+          expect(await locale.count()).toBe(1);
+          await locale.waitFor({ state: 'visible' });
+          expect(await locale.isVisible()).toBe(true);
+          expect(
+            await page
+              .locator('#home-language [data-projection-generation-state="active"]')
+              .getByRole('link', { name: 'English', exact: true })
+              .count()
+          ).toBe(1);
+          expect((await locale.textContent())?.trim()).toBe('English');
+          expect(await locale.getAttribute('href')).toBe('/en/');
+          expect(await locale.getAttribute('hreflang')).toBe('en');
+          expect(await locale.getAttribute('data-home-locale')).toBe('en');
+          await locale.focus();
+          expect(await locale.evaluate((element) => element === document.activeElement)).toBe(true);
+          await capture(page, `home-${width}-reopened-keyboard`, {
+            input: 'native Escape, click, keyboard focus',
+            apiKind: localeApiKind,
+            measurementDisposition: 'captured-historical-owner',
+            accessibility: await locale.ariaSnapshot(),
+          });
+          await locale.press('Enter');
+          await page.waitForURL((url) => url.pathname === '/en/');
+          await homeReady(page);
+          await capture(page, `home-${width}-locale-native-navigation`, {
+            input: 'native link Enter',
+            apiKind: localeApiKind,
+            measurementDisposition: 'captured-historical-navigation',
+            route: new URL(page.url()).pathname,
+          });
+        } else {
+          const languageControl = page.locator(languageControlSelector);
+          await languageControl.focus();
+          expect(await languageControl.evaluate((e) => e === document.activeElement)).toBe(true);
+          await capture(page, `home-${width}-reopened-keyboard`, {
+            input: 'native Escape, click, keyboard focus',
+          });
+        }
         if (!baseline) {
           // The menu above remains on zh-cn; English is an option, not its
           // current value. Exercise the real Select before expecting English.
@@ -497,6 +671,9 @@ for (const width of [2048, 390]) {
             )
             .first();
           await trigger.waitFor();
+          const contentId = await trigger.getAttribute('aria-controls');
+          if (!contentId) throw new Error('The actual Dialog Trigger has no Content identity');
+          const content = page.locator(`[role="dialog"][id=${JSON.stringify(contentId)}]`);
           await trigger.click();
           if (runtime === 'react') {
             await page.getByRole('dialog').waitFor({ state: 'visible' });
@@ -522,16 +699,68 @@ for (const width of [2048, 390]) {
               )
             );
           }
-          const mask = page.locator('[data-pui-style~="backdrop-blur-xs"]').last();
+          await content.waitFor({ state: 'visible' });
+          await expect
+            .poll(() => content.getAttribute('data-transition-state'), { timeout: 30_000 })
+            .toBe('entered');
+          expect(await content.count()).toBe(1);
+          expect(await content.getAttribute('aria-modal')).toBe('true');
+          expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+          const contentHandle = await content.elementHandle();
+          if (!contentHandle) throw new Error('The opened Dialog Content handle is missing');
+          const coordinates = await content.evaluate((element) =>
+            Object.fromEntries(
+              ['owner', 'family', 'runtime', 'generation'].map((name) => [
+                name,
+                element.getAttribute(`data-projection-${name}`),
+              ])
+            )
+          );
+          if (!baseline) {
+            expect(Object.values(coordinates).every(Boolean)).toBe(true);
+            expect(coordinates.family).toBe('shadcn');
+            expect(coordinates.runtime).toBe(runtime);
+            expect(await content.getAttribute('data-projection-prototype')).toBe(
+              'shadcn-dialog-content'
+            );
+          }
+          // The unchanged current homepage and docs recipes explicitly consume
+          // Rhea. P-SHADCN-STYLE-SCOPE preserves this choice ahead of the separate
+          // New York compatibility default. The pinned Rhea source uses black/30
+          // and an 8px blur; C-RULE-STYLE-SUPPORT-0001 only admits a 4px fact, so
+          // the current bounded Rhea projection has no blur. This journey does
+          // not claim the unimplemented 8px source material or full Rhea parity.
+          // The exact historical subject keeps its old New York observation.
+          const materialProfile = baseline
+            ? historicalNewYork
+              ? 'historical-new-york-v4'
+              : 'historical-subject'
+            : 'public-rhea-8px-blur-unimplemented';
+          const mask = baseline
+            ? page.locator('[data-pui-style~="backdrop-blur-xs"]').last()
+            : page.locator(
+                '[data-projection-prototype="shadcn-dialog-mask"]' +
+                  Object.entries(coordinates)
+                    .map(([name, value]) => `[data-projection-${name}=${JSON.stringify(value)}]`)
+                    .join('')
+              );
+          if (!baseline) await expect.poll(() => mask.count(), { timeout: 30_000 }).toBe(1);
           await mask.waitFor({ state: 'visible' });
-          await page.waitForFunction(() => {
-            const mask = document.querySelector('[data-pui-style~="backdrop-blur-xs"]');
-            return mask?.getAttribute('data-transition-state') === 'entered';
-          });
+          await expect
+            .poll(() => mask.getAttribute('data-transition-state'), { timeout: 30_000 })
+            .toBe('entered');
           const maskHandle = await mask.elementHandle();
           if (!maskHandle) throw new Error('Visible DialogMask handle is missing');
-          const read = () =>
-            maskHandle.evaluate((element) => ({
+          const read = async () => ({
+            materialProfile,
+            ...(await maskHandle.evaluate((element) => ({
+              prototype: element.getAttribute('data-projection-prototype'),
+              coordinates: Object.fromEntries(
+                ['owner', 'family', 'runtime', 'generation'].map((name) => [
+                  name,
+                  element.getAttribute(`data-projection-${name}`),
+                ])
+              ),
               backdropFilter: getComputedStyle(element).backdropFilter,
               background: getComputedStyle(element).backgroundColor,
               backgroundAlpha: (() => {
@@ -543,10 +772,52 @@ for (const width of [2048, 390]) {
               })(),
               connected: element.isConnected,
               opacity: getComputedStyle(element).opacity,
+              position: getComputedStyle(element).position,
               rect: element.getBoundingClientRect().toJSON(),
+              viewport: { width: innerWidth, height: innerHeight },
+              ownsOutsidePoint: (() => {
+                const hit = document.elementFromPoint(5, 5);
+                return hit === element || (!!hit && element.contains(hit));
+              })(),
               reducedTransparency: matchMedia('(prefers-reduced-transparency: reduce)').matches,
               forcedColors: matchMedia('(forced-colors: active)').matches,
-            }));
+            }))),
+          });
+          const assertRetainedOwners = async () => {
+            if (baseline) return;
+            expect(await mask.evaluate((node, original) => node === original, maskHandle)).toBe(
+              true
+            );
+            expect(
+              await content.evaluate((node, original) => node === original, contentHandle)
+            ).toBe(true);
+            expect(await content.isVisible()).toBe(true);
+            expect(await content.getAttribute('data-transition-state')).toBe('entered');
+            expect(await trigger.getAttribute('aria-expanded')).toBe('true');
+            expect(
+              await contentHandle.evaluate((element) =>
+                Object.fromEntries(
+                  ['owner', 'family', 'runtime', 'generation'].map((name) => [
+                    name,
+                    element.getAttribute(`data-projection-${name}`),
+                  ])
+                )
+              )
+            ).toEqual(coordinates);
+            expect(
+              await contentHandle.evaluate((element) => element.contains(document.activeElement))
+            ).toBe(true);
+            const facts = await read();
+            expect(facts.coordinates).toEqual(coordinates);
+            expect(facts.prototype).toBe('shadcn-dialog-mask');
+            expect(facts.connected).toBe(true);
+            expect(facts.position).toBe('fixed');
+            expect(facts.rect.left).toBeCloseTo(0, 1);
+            expect(facts.rect.top).toBeCloseTo(0, 1);
+            expect(facts.rect.right).toBeCloseTo(facts.viewport.width, 1);
+            expect(facts.rect.bottom).toBeCloseTo(facts.viewport.height, 1);
+            expect(facts.ownsOutsidePoint).toBe(true);
+          };
           const settleMask = async () => {
             await maskHandle.evaluate(async (element) => {
               await Promise.all(
@@ -556,6 +827,7 @@ for (const width of [2048, 390]) {
             await frames(page);
           };
           await settleMask();
+          await assertRetainedOwners();
           const normal = await read();
           await capture(
             page,
@@ -565,9 +837,12 @@ for (const width of [2048, 390]) {
           if (!baseline) {
             expect(normal.reducedTransparency).toBe(false);
             expect(normal.forcedColors).toBe(false);
+            expect(normal.backdropFilter).toBe('none');
+            expect(normal.backgroundAlpha).toBeCloseTo(0.3, 2);
+            expect(Number(normal.opacity)).toBe(1);
+          } else if (historicalNewYork) {
             expect(normal.backdropFilter).toBe('blur(4px)');
             expect(normal.backgroundAlpha).toBeCloseTo(0.5, 2);
-            expect(Number(normal.opacity)).toBe(1);
           }
           const cdp = await context.newCDPSession(page);
           const retainedFocus = await page.evaluateHandle(() => document.activeElement);
@@ -583,6 +858,7 @@ for (const width of [2048, 390]) {
               ],
             });
             await settleMask();
+            await assertRetainedOwners();
             if (!baseline)
               expect(await retainedFocus.evaluate((node) => node === document.activeElement)).toBe(
                 true
@@ -640,10 +916,13 @@ for (const width of [2048, 390]) {
           if (!baseline) {
             expect(restored.reducedTransparency).toBe(false);
             expect(restored.forcedColors).toBe(false);
-            expect(restored.backdropFilter).toBe('blur(4px)');
-            expect(restored.backgroundAlpha).toBeCloseTo(0.5, 2);
+            expect(restored.backdropFilter).toBe('none');
+            expect(restored.backgroundAlpha).toBeCloseTo(0.3, 2);
             expect(Number(restored.opacity)).toBe(1);
             expect(restored.connected).toBe(true);
+          } else if (historicalNewYork) {
+            expect(restored.backdropFilter).toBe('blur(4px)');
+            expect(restored.backgroundAlpha).toBeCloseTo(0.5, 2);
           }
           await page.keyboard.press('Escape');
         } finally {

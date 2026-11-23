@@ -5,10 +5,12 @@ export default withShadcnRheaDemo({
   'root': {
     'kind': 'proto',
     'prototypeId': 'shadcn-tree-root',
+    'ref': 'tree',
     'children': [
       {
         'kind': 'proto',
         'prototypeId': 'shadcn-tree-item',
+        'ref': 'project',
         'children': ['Project files'],
         'props': {
           'nodeKey': 'project',
@@ -18,34 +20,46 @@ export default withShadcnRheaDemo({
       {
         'kind': 'proto',
         'prototypeId': 'shadcn-tree-toggle',
+        'ref': 'toggle',
         'children': ['Expand / collapse project'],
         'props': {
           'nodeKey': 'project',
         },
       },
       {
-        'kind': 'proto',
-        'prototypeId': 'shadcn-tree-item',
-        'children': ['README.md'],
-        'props': {
-          'nodeKey': 'readme',
-          'parentKey': 'project',
-          'textValue': 'README',
-        },
+        kind: 'proto',
+        prototypeId: 'shadcn-tree-group',
+        ref: 'branch',
+        props: { nodeKey: 'project' },
+        children: [
+          {
+            'kind': 'proto',
+            'prototypeId': 'shadcn-tree-item',
+            'ref': 'readme',
+            'children': ['README.md'],
+            'props': {
+              'nodeKey': 'readme',
+              'parentKey': 'project',
+              'textValue': 'README',
+            },
+          },
+          {
+            'kind': 'proto',
+            'prototypeId': 'shadcn-tree-item',
+            'ref': 'source',
+            'children': ['src'],
+            'props': {
+              'nodeKey': 'src',
+              'parentKey': 'project',
+              'textValue': 'Source',
+            },
+          },
+        ],
       },
       {
         'kind': 'proto',
         'prototypeId': 'shadcn-tree-item',
-        'children': ['src'],
-        'props': {
-          'nodeKey': 'src',
-          'parentKey': 'project',
-          'textValue': 'Source',
-        },
-      },
-      {
-        'kind': 'proto',
-        'prototypeId': 'shadcn-tree-item',
+        'ref': 'archive',
         'children': ['Archive'],
         'props': {
           'nodeKey': 'archive',

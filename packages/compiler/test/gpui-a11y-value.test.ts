@@ -307,7 +307,7 @@ describe('C-COMPILER-GPUI-A11Y-VALUE-0001 checked numeric host payload', () => {
     )!.contents;
     expect(owner).toContain('"setValue"=>gpui::AccessibleAction::SetValue');
     expect(owner).toContain(
-      'move |data,window,cx|lease.request_data(data,window,cx)'
+      'element=element.on_a11y_action(native_action,move |data,window,cx|lease.request_data(data,window,cx));'
     );
     const lease = owner.slice(
       owner.indexOf('impl NativeAccessibleActionLease {'),
@@ -315,6 +315,11 @@ describe('C-COMPILER-GPUI-A11Y-VALUE-0001 checked numeric host payload', () => {
     );
     expect(lease).toContain('if !current{return}');
     expect(lease).toContain('dispatch_accessibility_action(&owner,&self.key,data)');
+    expect(owner).toContain(
+      'pub fn request_data(&self,data:Option<&gpui::accesskit::ActionData>,window:&mut Window,cx:&mut App)'
+    );
+    expect(owner).toContain('let prevented=dispatch_accessibility_action(&owner,&self.key,data);');
+    expect(owner).toContain('self.request_data(None,window,cx)');
     expect(owner).toContain(
       'Some(gpui::accesskit::ActionData::NumericValue(value))=data else{return false}'
     );

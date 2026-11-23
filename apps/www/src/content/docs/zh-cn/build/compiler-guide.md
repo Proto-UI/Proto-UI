@@ -161,6 +161,34 @@ node --import tsx packages/compiler/src/cli-entry.ts watch packages/prototypes/b
 
 Compilation 先规划 source、supporting helper、standard source map 与 hash/provenance manifest，再 create-only 发布。现有 consumer file 从不被覆盖。`diff` 只读，通过记录的 hash 识别 consumer modification。`watch` 发布 immutable `<output>/<session UUID>/revision-<N>`，输入被拒绝时保留最后成功 generation，不维护可变 latest pointer。Consumer edit 使用普通 target rebuild；原 compiler map 是历史证据，编辑后可能 stale，rebuild 才生成当前 executable-to-edited-source map。
 
+### 受支持的固定源码编译器构建
+
+构建期编译器现在提供受支持的 **source-pinned Node CLI 与 JavaScript 产物**。这条路线保留 private experimental profile；不等于 npm 发布、稳定 declaration-file 发行或未实现 target 的准入。将已审查的完整 Git SHA、冻结的 pnpm lock 与选定 profile 一起固定。
+
+在该 SHA 的干净 checkout 中，使用 Node 24 与冻结的开发依赖：
+
+```sh
+corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+mkdir -p ../compiler-artifacts
+node --import tsx scripts/compiler/build-pinned.ts --revision <full-40-character-HEAD-SHA> --output ../compiler-artifacts/<fresh-name>
+cd ../compiler-artifacts/<fresh-name>
+npm ci --ignore-scripts
+node cli.js --build-info
+```
+
+Builder 拒绝不匹配 revision、脏源码、与 lock 不一致的 TypeScript/esbuild，以及已存在的输出目录。产物 package lock 从源码 lock 记录精确 TypeScript 版本和 registry integrity。执行 compiler 只需该 TypeScript 包和 Node built-in，不要求先构建全部公共包、安装 Runtime/Adapter，也不借用其他包偶然安装的 Floating UI。`compiler-build.json` 记录实际 bundled source input、交付文件 digest、toolchain 与 profile digest；source map 自带 source text。相同输入与工具链在不同目录生成相同字节。`index.js` 暴露现有 JavaScript API；`cli.js` 可直接由 Node 执行，不再需要 tsx。生成代码的 provenance 会记录本次 compiler build identity。
+
+少量 family consumer 可直接从同一 pinned checkout 编译 authored entry：
+
+```sh
+mkdir -p /absolute/consumer/generated
+node cli.js compile /absolute/Proto-UI/packages/prototypes/shadcn/src/button/button.proto.ts --root /absolute/Proto-UI --profile react-dom-source-v1 --output /absolute/consumer/generated/button
+```
+
+Source resolver 只读取已声明的作者源码闭包，不执行源码，也不要求 family `dist` 构建。安装**生成 provenance 声明的依赖**后，通过目标框架的普通构建导入 component 和 supporting files。三种 0.3 Button 家族的 React source profile 使用其精确版本 React/React DOM；需要几何能力的生成消费者另行拥有已声明的 Floating UI 依赖。Vue 3、Vue 2 与 Web Component 分别保留各自 profile 和依赖表。Shenko 九个 Shadcn 家族这类 runtime Adapter 消费仍有独立 runtime package 闭包；编译 Shenko 两个自有 prototype 不代表迁移这些家族。
+
+输出父目录是 **caller prerequisite**，artifact root 自身采用 exclusive creation。父目录缺失时失败且不创建祖先目录；已存在 root、symlink、artifact 冲突与并发竞争仍按既有 create-only 契约拒绝。`diff` 不写用户编辑，`watch` 生成不可变 session/revision 目录。Compiler build 保持不可变，用户编辑属于生成源码。编辑后原 compiler map 是历史记录；普通 target 重建为当前 executable-to-edited-source 提供新 map。
+
 ### 已执行证据与成本测量
 
 私有验证在四个 Web source profile 的独立物理 consumer 中编译、挂载三 component/Context assembly，type-check 生成的 TypeScript/helper，重建并执行 consumer-owned template edit，拒绝引入的 syntax error，并验证物理 dependency tree 与 artifact hash；这些 Web consumer 测量不执行 GPUI。Vue 2 的 JavaScript component body 不执行 `checkJs`。另有 offline private-package rehearsal，在普通 Node 中执行打包 Compiler 的 JavaScript API，并记录 tarball integrity、实际 bundled compile-time input、dependency、BOM 和 license；这不等于 official package 或 public declaration-file release。

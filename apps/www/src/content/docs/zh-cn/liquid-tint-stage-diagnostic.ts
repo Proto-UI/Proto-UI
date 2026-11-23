@@ -32,7 +32,7 @@ export const TINT_STAGE_POLICY = Object.freeze({
   candidateGeneralTransfer: 'rejected-analytically',
   expectedCompleteDiagnosticStatus: 'diagnostic-rejected-on-continuous-tone',
   productAccepted: false,
-  executionScope: 'historical-profile4-replay-on-current-profile5-host',
+  executionScope: 'historical-profile4-replay-on-current-profile6-host',
   currentProductValidation: false,
   statistic:
     'same-frame GPU postlighting clamped encoded luma; exact inShape == 1; includes foreground backing',
@@ -438,7 +438,7 @@ export function createTintStageHistoricalSubstitution(
   host: { profile: string; fragment: string; vertex: string },
   contact = true
 ) {
-  const expectedHost = contact ? 'pui-regular-style-tint-contact-5' : 'pui-regular-style-tint-5';
+  const expectedHost = contact ? 'pui-regular-style-tint-contact-6' : 'pui-regular-style-tint-6';
   const historical = contact ? tintProfile4ContactFragment : tintProfile4Fragment;
   const uniforms = (source: string) =>
     [
@@ -450,7 +450,17 @@ export function createTintStageHistoricalSubstitution(
       .sort();
   if (host.profile !== expectedHost || host.fragment === historical)
     throw new Error('tint-stage-current-host-profile-drift');
-  if (JSON.stringify(uniforms(host.fragment)) !== JSON.stringify(uniforms(historical)))
+  // Profile 6 owns one additional source-budget uniform. The complete frozen
+  // profile-4 shader has no such location: uniform4fv(null, ...) is ignored by
+  // WebGL and the capture records only locations actually used by history.
+  // Refuse every other schema difference instead of silently substituting it.
+  const currentUniforms = uniforms(host.fragment);
+  const sourceBudget = 'uniform vec4 u_styleTintSourceTone;';
+  if (
+    currentUniforms.filter((uniform) => uniform === sourceBudget).length !== 1 ||
+    JSON.stringify(currentUniforms.filter((uniform) => uniform !== sourceBudget)) !==
+      JSON.stringify(uniforms(historical))
+  )
     throw new Error('tint-stage-historical-uniform-schema-drift');
   const counts = { vertex: 0, fragment: 0 };
   return {
@@ -465,7 +475,11 @@ export function createTintStageHistoricalSubstitution(
     complete() {
       if (counts.vertex !== 1 || counts.fragment !== 1)
         throw new Error('tint-stage-historical-substitution-count-drift');
-      return { vertexSources: counts.vertex, fragmentReplacements: counts.fragment };
+      return {
+        vertexSources: counts.vertex,
+        fragmentReplacements: counts.fragment,
+        unusedAdapterUniforms: ['u_styleTintSourceTone'],
+      };
     },
   };
 }
@@ -477,14 +491,15 @@ export type TintStageKernelReceipt = {
   vertexSha256: string;
   vertexSources: number;
   fragmentReplacements: number;
+  unusedAdapterUniforms: string[];
 };
-/** A historical replay cannot become profile5 evidence by changing a label. */
+/** A historical replay cannot become profile6 evidence by changing a label. */
 export function assertTintStageHistoricalKernelReceipt(receipt?: TintStageKernelReceipt) {
   if (
     !receipt ||
     receipt.scope !== TINT_STAGE_POLICY.executionScope ||
     receipt.currentProductValidation !== false ||
-    receipt.currentAdapter?.profile !== 'pui-regular-style-tint-contact-5' ||
+    receipt.currentAdapter?.profile !== 'pui-regular-style-tint-contact-6' ||
     !/^[a-f0-9]{64}$/.test(receipt.currentAdapter.requestedFragmentSha256) ||
     receipt.currentAdapter.requestedFragmentSha256 === TINT_PROFILE4_FIXTURE.contact.sha256 ||
     receipt.compiledKernel?.profile !== TINT_PROFILE4_FIXTURE.contact.profile ||
@@ -493,13 +508,14 @@ export function assertTintStageHistoricalKernelReceipt(receipt?: TintStageKernel
     receipt.compiledKernel.tree !== TINT_PROFILE4_FIXTURE.tree ||
     !/^[a-f0-9]{64}$/.test(receipt.vertexSha256) ||
     receipt.vertexSources !== 1 ||
-    receipt.fragmentReplacements !== 1
+    receipt.fragmentReplacements !== 1 ||
+    JSON.stringify(receipt.unusedAdapterUniforms) !== JSON.stringify(['u_styleTintSourceTone'])
   )
     throw new Error('tint-stage-not-historical-profile4-evidence');
 }
 
 /** Wrap only this owned canvas context. No WebGL prototype or host provider patch.
- * The current adapter supplies preparation/uniforms; its profile5 fragment is
+ * The current adapter supplies preparation/uniforms; its profile6 fragment is
  * replaced before compilation. These draws validate only the historical kernel. */
 function captureProduction(frame: OpticalFrame) {
   const substitution = createTintStageHistoricalSubstitution(

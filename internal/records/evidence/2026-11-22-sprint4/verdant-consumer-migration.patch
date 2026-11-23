@@ -1,0 +1,1348 @@
+diff --git a/frontend/Cargo.lock b/frontend/Cargo.lock
+index db162cc..ff5858c 100644
+--- a/frontend/Cargo.lock
++++ b/frontend/Cargo.lock
+@@ -1872,7 +1872,7 @@ dependencies = [
+ ]
+ 
+ [[package]]
+-name = "generated-gpui-747190fccaf73db0fc7dec1a98598d3c"
++name = "generated-gpui-d06876dde058a10cffcd99a494a8113b"
+ version = "0.1.0"
+ dependencies = [
+  "gpui",
+@@ -6193,7 +6193,7 @@ dependencies = [
+  "async-channel",
+  "chrono",
+  "env_logger",
+- "generated-gpui-747190fccaf73db0fc7dec1a98598d3c",
++ "generated-gpui-d06876dde058a10cffcd99a494a8113b",
+  "gpui",
+  "gpui_platform",
+  "semver",
+@@ -6204,6 +6204,7 @@ dependencies = [
+  "verdant-backend",
+  "verdant-domain",
+  "verdant-exchange",
++ "verdant-gesture-decisions",
+  "verdant-import",
+  "verdant-media",
+  "verdant-midi",
+@@ -6295,6 +6296,10 @@ dependencies = [
+  "zip 6.0.0",
+ ]
+ 
++[[package]]
++name = "verdant-gesture-decisions"
++version = "0.1.0"
++
+ [[package]]
+ name = "verdant-import"
+ version = "0.1.0"
+@@ -6418,11 +6423,11 @@ dependencies = [
+ name = "verdant-session"
+ version = "0.1.0"
+ dependencies = [
+- "generated-gpui-747190fccaf73db0fc7dec1a98598d3c",
+  "serde",
+  "serde_json",
+  "unicode-segmentation",
+  "verdant-domain",
++ "verdant-gesture-decisions",
+ ]
+ 
+ [[package]]
+diff --git a/frontend/Cargo.toml b/frontend/Cargo.toml
+index 8e7f28f..a6b86eb 100644
+--- a/frontend/Cargo.toml
++++ b/frontend/Cargo.toml
+@@ -1,6 +1,6 @@
+ [workspace]
+ resolver = "3"
+-members = ["crates/*", "proto-ui/generated/pitch-gesture-surface"]
++members = ["crates/*", "proto-ui/generated/pitch-gesture-surface", "proto-ui/generated/gesture-decisions"]
+ 
+ [workspace.package]
+ version = "0.1.0"
+diff --git a/frontend/P0-DECISIONS.md b/frontend/P0-DECISIONS.md
+index 8685eac..b8b9f9b 100644
+--- a/frontend/P0-DECISIONS.md
++++ b/frontend/P0-DECISIONS.md
+@@ -7,7 +7,9 @@
+ - GPUI 与 `gpui_platform` 锁定到 [cyjin-yl/z3rm](https://github.com/cyjin-yl/z3rm/tree/e5f2f9db75e97613232b5c1946333e61fa3828ab) 的 `e5f2f9db75e97613232b5c1946333e61fa3828ab`，见 [Cargo.toml](Cargo.toml) 与 [Cargo.lock](Cargo.lock)。它继承最初 Zed `48741fd` 审阅基线并加入 Wayland 触摸支持；不能将原始审阅当成后续提交的验收。
+ - Linux 显式启用 `font-kit`、`x11`、`wayland`。缺少窗口后端特性会进入 headless，不能用进程存活判断窗口成功。
+ - 编译工具链由 [rust-toolchain.toml](rust-toolchain.toml) 固定。Cargo 工作区版本为 0.1.0；编辑器、worker、后端及 `verdant-voice` 共用版本。
+-- 控件使用 `frontend/crates/verdant-app/src/generated/controls.rs` 的检入源码。`frontend/proto-ui/` 的上游编译入口将卷帘投影和会话手势的状态转换编译为 Rust。Rust 会话调用编译出的数据方法并处理守卫与领域副作用。[compiler.pin.json](proto-ui/compiler.pin.json)
++- 控件使用 `frontend/crates/verdant-app/src/generated/controls.rs` 的检入源码。`frontend/proto-ui/` 将同一 authored source 分别编译为 GPUI 卷帘视图与显式选择的纯 Rust 数据工件。`EditorSession` 和设备编辑器调用 `verdant-gesture-decisions` 中的三个纯方法，Rust 绑定继续处理守卫、revision、pointer identity 与领域副作用。GPUI 视图仍通过真实 mounted owner 的 handle 管理。[compiler.pin.json](proto-ui/compiler.pin.json)
++
++从仓库根目录先运行 `node frontend/proto-ui/tools/build-proto-ui.mjs --upstream <固定源码目录>`，再运行 `node frontend/proto-ui/tools/build-proto-ui-data.mjs --upstream <固定源码目录>`。数据 producer 使用 `C-COMPILER-RUST-DATA-0001` 的 `rust-data-v1` 私有边界，显式选择 `planNoteGesture`、`planControlGesture` 和 `dragNormalized`，保留完整纯函数依赖闭包及类型／来源回执；它不执行组件 setup，不构造替代 owner，不改写生成 Rust。添加 `--check` 会从源码重编译并核对已保留字节，现有输出由 create-only writer 保护。
+ 
+ ## 状态与进程
+ 
+diff --git a/frontend/crates/verdant-app/Cargo.toml b/frontend/crates/verdant-app/Cargo.toml
+index 2445bba..5a38534 100644
+--- a/frontend/crates/verdant-app/Cargo.toml
++++ b/frontend/crates/verdant-app/Cargo.toml
+@@ -23,7 +23,8 @@ verdant-import = { path = "../verdant-import" }
+ verdant-exchange = { path = "../verdant-exchange" }
+ verdant-midi = { path = "../verdant-midi" }
+ verdant-media = { path = "../verdant-media" }
+-verdant-pitch-gesture-surface = { package = "generated-gpui-747190fccaf73db0fc7dec1a98598d3c", path = "../../proto-ui/generated/pitch-gesture-surface" }
++verdant-pitch-gesture-surface = { package = "generated-gpui-d06876dde058a10cffcd99a494a8113b", path = "../../proto-ui/generated/pitch-gesture-surface" }
++verdant-gesture-decisions = { path = "../../proto-ui/generated/gesture-decisions" }
+ serde.workspace = true
+ serde_json.workspace = true
+ semver.workspace = true
+diff --git a/frontend/crates/verdant-app/src/devices.rs b/frontend/crates/verdant-app/src/devices.rs
+index bd13fa8..eb3a304 100644
+--- a/frontend/crates/verdant-app/src/devices.rs
++++ b/frontend/crates/verdant-app/src/devices.rs
+@@ -19,7 +19,7 @@ use gpui::{
+     MouseMoveEvent, MouseUpEvent, Pixels, Role, SharedString, Window, canvas, div, fill, prelude::*, px, quad, svg,
+ };
+ use verdant_domain::TrackId;
+-use verdant_pitch_gesture_surface::PitchGestureSurfaceHandle;
++use verdant_gesture_decisions::{self as decisions, PlanControlGestureGuards};
+ use std::rc::Rc;
+ use std::time::{Duration, Instant};
+ use verdant_plugins::builtin_dsp::{self as dsp, BandKind, EqParams, Placement};
+@@ -69,17 +69,20 @@ struct Decision {
+ }
+ 
+ fn plan(phase: &str, event: &str, hit: bool, crossed: bool, reset: bool, double: bool) -> Decision {
+-    let value = PitchGestureSurfaceHandle::call_data_method("planControlGesture", vec![
++    let value = decisions::plan_control_gesture(
+         phase.into(),
+         event.into(),
+-        serde_json::json!({ "hit_control": hit, "threshold_crossed": crossed, "reset_modifier": reset, "double_click": double }),
+-    ]).unwrap_or_else(|error| panic!("compiled control gesture planner failed: {error:?}"));
+-    serde_json::from_value(value).unwrap_or_else(|error| panic!("compiled control gesture planner returned an incompatible decision: {error}"))
++        PlanControlGestureGuards::new(hit, crossed, reset, double),
++    ).unwrap_or_else(|error| panic!("compiled control gesture planner failed: {error:?}"));
++    serde_json::from_value(serde_json::json!({
++        "nextPhase": value.next_phase,
++        "consumed": value.consumed,
++        "effects": value.effects.as_slice(),
++    })).unwrap_or_else(|error| panic!("compiled control gesture planner returned an incompatible decision: {error}"))
+ }
+ 
+ fn drag_normalized(start: f64, delta: f64, travel: f64, fine: bool) -> f64 {
+-    PitchGestureSurfaceHandle::call_data_method("dragNormalized", vec![start.into(), delta.into(), travel.into(), fine.into()])
+-        .ok().and_then(|v| v.as_f64()).unwrap_or(start)
++    decisions::drag_normalized(start, delta, travel, fine).unwrap_or(start)
+ }
+ 
+ /// Keep modulation sources visible while the parameter area scrolls.
+diff --git a/frontend/crates/verdant-session/Cargo.toml b/frontend/crates/verdant-session/Cargo.toml
+index 00097b7..9eb5d4b 100644
+--- a/frontend/crates/verdant-session/Cargo.toml
++++ b/frontend/crates/verdant-session/Cargo.toml
+@@ -8,7 +8,7 @@ description = "EditorSession: viewport, selection, headless gesture planning, ly
+ 
+ [dependencies]
+ verdant-domain = { path = "../verdant-domain" }
+-verdant-pitch-gesture-surface = { package = "generated-gpui-747190fccaf73db0fc7dec1a98598d3c", path = "../../proto-ui/generated/pitch-gesture-surface" }
++verdant-gesture-decisions = { path = "../../proto-ui/generated/gesture-decisions" }
+ serde.workspace = true
+ serde_json.workspace = true
+ unicode-segmentation = "1.12"
+diff --git a/frontend/crates/verdant-session/src/bindings.rs b/frontend/crates/verdant-session/src/bindings.rs
+index 49f6904..8eb16e7 100644
+--- a/frontend/crates/verdant-session/src/bindings.rs
++++ b/frontend/crates/verdant-session/src/bindings.rs
+@@ -4,7 +4,7 @@
+ //! the real EditorSession/ProjectStore command boundary.
+ 
+ use serde::{Deserialize, Serialize};
+-use verdant_pitch_gesture_surface::PitchGestureSurfaceHandle;
++use verdant_gesture_decisions::{plan_note_gesture, PlanNoteGestureGuards};
+ 
+ use crate::session::{DRAG_THRESHOLD_PX, TOUCH_DRAG_THRESHOLD_PX};
+ use crate::{EditorSession, Effect, Gesture, GestureKind, Hit, InputEvent, Phase, PointerId, Preview};
+@@ -180,14 +180,32 @@ fn plan(machine: Machine, phase: NoteGesturePhase, event: &InputEvent, facts: &G
+         InputEvent::PointerUp => "PointerUp",
+         InputEvent::Cancel(_) => "Cancel",
+     };
+-    let decision = PitchGestureSurfaceHandle::call_data_method("planNoteGesture", vec![
++    // These pure source functions are compiled independently of the GPUI
++    // component instance; the session remains a headless domain boundary.
++    let decision = plan_note_gesture(
+         machine.as_str().into(),
+         phase.as_str().into(),
+         event.into(),
+-        serde_json::to_value(facts).expect("serializable note gesture guard facts"),
+-    ]).unwrap_or_else(|error| panic!("compiled note gesture planner failed: {error:?}"));
++        PlanNoteGestureGuards::new(
++            facts.hit_background,
++            facts.hit_selected_note,
++            facts.hit_unselected_note,
++            facts.hit_note_body,
++            facts.hit_resize_handle,
++            facts.toggle_modifier,
++            facts.extend_modifier,
++            facts.duplicate_modifier,
++            facts.pointer_threshold_crossed,
++            facts.base_revision_matches,
++            facts.base_revision_matches_and_delta_nonzero,
++        ),
++    ).unwrap_or_else(|error| panic!("compiled note gesture planner failed: {error:?}"));
+     // Decode every phase and effect before any operation can mutate the session.
+-    serde_json::from_value(decision)
++    serde_json::from_value(serde_json::json!({
++        "nextPhase": decision.next_phase,
++        "consumed": decision.consumed,
++        "effects": decision.effects.as_slice(),
++    }))
+         .unwrap_or_else(|error| panic!("compiled note gesture planner returned an incompatible decision: {error}"))
+ }
+ 
+diff --git a/frontend/proto-ui/compiler.pin.json b/frontend/proto-ui/compiler.pin.json
+index df05932..2bbcc0d 100644
+--- a/frontend/proto-ui/compiler.pin.json
++++ b/frontend/proto-ui/compiler.pin.json
+@@ -2,7 +2,7 @@
+   "schema": "verdant.proto-ui.compiler-pin.v1",
+   "upstream": {
+     "repository": "https://github.com/Proto-UI/Proto-UI",
+-    "revision": "e56b2d1a3d6b688a1cbc6930dab1d6757304d733"
++    "revision": "ef60557fbd2c486ca15885c3e38d92f599f140a3"
+   },
+   "packageVersions": {
+     "protoUi": "0.3.0-alpha.2",
+@@ -22,5 +22,14 @@
+   "output": {
+     "directory": "frontend/proto-ui/generated/pitch-gesture-surface",
+     "receipt": "frontend/proto-ui/receipts/pitch-gesture-surface.json"
++  },
++  "data": {
++    "profile": "rust-data-v1",
++    "crateName": "verdant-gesture-decisions",
++    "methods": ["planNoteGesture", "planControlGesture", "dragNormalized"],
++    "output": {
++      "directory": "frontend/proto-ui/generated/gesture-decisions",
++      "receipt": "frontend/proto-ui/receipts/gesture-decisions.json"
++    }
+   }
+ }
+diff --git a/frontend/proto-ui/generated/pitch-gesture-surface/.proto-ui/gpui-native/src/gpui-native-owner.rs b/frontend/proto-ui/generated/pitch-gesture-surface/.proto-ui/gpui-native/src/gpui-native-owner.rs
+index 9af78af..ed703df 100644
+--- a/frontend/proto-ui/generated/pitch-gesture-surface/.proto-ui/gpui-native/src/gpui-native-owner.rs
++++ b/frontend/proto-ui/generated/pitch-gesture-surface/.proto-ui/gpui-native/src/gpui-native-owner.rs
+@@ -494,7 +494,22 @@ fn expose_key(owner:&OwnerRef,key:Value)->String{
+     let key=key.text();if key.is_empty(){throw_error("EXPOSE_KEY_INVALID","Expose key must be nonempty")}
+     let owner=owner.borrow();if owner.exposes.contains_key(&key)||owner.declared_events.contains(&key){throw_error("EXPOSE_DUPLICATE",&format!("duplicate Expose key: {key}"))}key
+ }
+-pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,state);Value::Undefined}
++pub fn expose_state(owner:&OwnerWeak,key:Value,state:Value)->Value{
++    let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);
++    let mut owner=owner_ref.borrow_mut();
++    if let Value::Observed(_,observation)=&state {
++        let name=match *observation {
++            "focus.focused"=>Some("focused"),
++            "focus.visible"=>Some("focusVisible"),
++            "focus.ready"=>Some("focusable"),
++            _=>None,
++        };
++        if let (Some(name),Some(frame))=(name,owner.authored.frames.last_mut()) {
++            frame.states.insert(name.into(),state.clone());
++        }
++    }
++    owner.exposes.insert(key,state);Value::Undefined
++}
+ pub fn expose_value(owner:&OwnerWeak,key:Value,value:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().exposes.insert(key,value);Value::Undefined}
+ pub fn expose_method(owner:&OwnerWeak,key:Value,callback:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);capture_method(&owner_ref,key.clone(),callback.clone());owner_ref.borrow_mut().exposes.insert(key,callback);Value::Undefined}
+ pub fn expose_event(owner:&OwnerWeak,key:Value)->Value{let owner_ref=setup(owner);let key=expose_key(&owner_ref,key);owner_ref.borrow_mut().declared_events.insert(key);Value::Undefined}
+@@ -1183,7 +1198,7 @@ pub fn native_builtin_hook(owner:&OwnerWeak,name:&str,install:impl FnOnce()->Val
+ }
+ fn finish_capture(frame:AuthoredFrame,render:Value)->Value {
+     let mut fields=BTreeMap::new();
+-    if !frame.states.is_empty(){let states=frame.states;fields.insert("getState".into(),Value::Function(Rc::new(move|args|states.get(&arg(&args,0).text()).cloned().unwrap_or_default())));}
++    if !frame.states.is_empty(){let states=freeze(record_map(frame.states));fields.insert("stateHandles".into(),states.clone());fields.insert("getState".into(),Value::Function(Rc::new(move|args|states.member(&arg(&args,0).text(),false))));}
+     if !frame.methods.is_empty(){let methods=frame.methods;fields.insert("getMethod".into(),Value::Function(Rc::new(move|args|methods.get(&arg(&args,0).text()).cloned().unwrap_or_default())));}
+     if !frame.children.is_empty(){
+         let children=Rc::new(frame.children);let raw=children.clone();
+diff --git a/frontend/proto-ui/generated/pitch-gesture-surface/Cargo.toml b/frontend/proto-ui/generated/pitch-gesture-surface/Cargo.toml
+index e369bc2..1480877 100644
+--- a/frontend/proto-ui/generated/pitch-gesture-surface/Cargo.toml
++++ b/frontend/proto-ui/generated/pitch-gesture-surface/Cargo.toml
+@@ -1,8 +1,8 @@
+ [package]
+-  name = "generated-gpui-747190fccaf73db0fc7dec1a98598d3c"
++  name = "generated-gpui-d06876dde058a10cffcd99a494a8113b"
+   version = "0.1.0"
+   edition = "2021"
+-  
++
+   [features]
+   # An explicit local SDK experiment, never enabled by the default published profile.
+   experimental-focus-tree = ["proto-ui-gpui-native/experimental-focus-tree"]
+@@ -11,13 +11,13 @@
+   [lib]
+   name = "generated_gpui_component"
+   path = "Component.rs"
+-  
++
+   [dependencies]
+   proto-ui-gpui-native = { version = "=0.2.0", path = ".proto-ui/gpui-native", features = ["gpui-modern-element-api"] }
+   gpui = { workspace = true }
+   serde = { version = "1.0", features = ["derive"] }
+   serde_json = "1.0"
+-  
++
+   [dev-dependencies]
+   gpui = { workspace = true }
+   
+\ No newline at end of file
+diff --git a/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs b/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs
+index fd51f74..0d4143c 100644
+--- a/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs
++++ b/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs
+@@ -343,35 +343,38 @@ pub struct GeneratedData3 {
+         serde_json::from_value(result).expect("checked exposed method result")
+         })
+     }
+-      /// Calls a compiled data-only module function without accessing an instance.
+-      pub fn call_data_method(name: &str, arguments: Vec<Json>) -> Result<Json, Value> {
+-          catch_authored(|| match name {
++      /// Calls this live instance's registered data-only method. None preserves an undefined argument slot.
++      pub fn call_data_method(&self, name: &str, arguments: Vec<Option<Json>>) -> Result<Json, Value> {
++          catch_authored(|| { ensure(&self.owner()); match name {
+           "planNoteGesture" => {
+-            let arguments: Vec<Value> = arguments.into_iter().map(Value::json).collect();
++            let arguments: Vec<Value> = arguments.into_iter().map(|value| value.map(Value::json).unwrap_or(Value::Undefined)).collect();
+             check_method(name, &arguments);
+-            let result = v_5f5f7075694d6f64756c6530.with(|function| function.call_authored(arguments));
++            let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
++            let result = invoke(&self.owner, "expose-method", &callback, arguments);
+             let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
+         if !((result.is_object() && result.get("nextPhase").map_or(false, |field| field.is_string()) && result.get("consumed").map_or(false, |field| field.is_boolean()) && result.get("effects").map_or(false, |field| field.as_array().is_some_and(|items| items.iter().all(|item| item.is_string()))))) { value_type_error("exposed method returned invalid portable data") }
+             result
+         },
+         "planControlGesture" => {
+-            let arguments: Vec<Value> = arguments.into_iter().map(Value::json).collect();
++            let arguments: Vec<Value> = arguments.into_iter().map(|value| value.map(Value::json).unwrap_or(Value::Undefined)).collect();
+             check_method(name, &arguments);
+-            let result = v_5f5f7075694d6f64756c6533.with(|function| function.call_authored(arguments));
++            let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
++            let result = invoke(&self.owner, "expose-method", &callback, arguments);
+             let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
+         if !((result.is_object() && result.get("nextPhase").map_or(false, |field| field.is_string()) && result.get("consumed").map_or(false, |field| field.is_boolean()) && result.get("effects").map_or(false, |field| field.as_array().is_some_and(|items| items.iter().all(|item| item.is_string()))))) { value_type_error("exposed method returned invalid portable data") }
+             result
+         },
+         "dragNormalized" => {
+-            let arguments: Vec<Value> = arguments.into_iter().map(Value::json).collect();
++            let arguments: Vec<Value> = arguments.into_iter().map(|value| value.map(Value::json).unwrap_or(Value::Undefined)).collect();
+             check_method(name, &arguments);
+-            let result = v_5f5f7075694d6f64756c6534.with(|function| function.call_authored(arguments));
++            let callback = self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed method"));
++            let result = invoke(&self.owner, "expose-method", &callback, arguments);
+             let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
+         if !(result.as_f64().is_some_and(f64::is_finite)) { value_type_error("exposed method returned invalid portable data") }
+             result
+         },
+               _ => value_error("unknown or ineligible data method"),
+-          })
++          } })
+       }
+       pub fn owner(&self) -> OwnerWeak { Rc::downgrade(&self.owner) }
+       pub fn state(&self, name: &str) -> Result<Json, Value> { catch_authored(|| { let state=self.owner.borrow().exposes.get(name).cloned().unwrap_or_else(|| value_error("unknown exposed State")); state.get().data() }) }
+diff --git a/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs.map b/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs.map
+index da1f65d..ceef853 100644
+--- a/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs.map
++++ b/frontend/proto-ui/generated/pitch-gesture-surface/Component.rs.map
+@@ -1 +1 @@
+-{"version":3,"file":"Component.rs","sources":["pitch-gesture-surface.proto.ts"],"sourcesContent":["import { definePrototype, tw } from '@proto.ui/core';\n\ntype NoteGestureGuards = {\n  hit_background: boolean;\n  hit_selected_note: boolean;\n  hit_unselected_note: boolean;\n  hit_note_body: boolean;\n  hit_resize_handle: boolean;\n  toggle_modifier: boolean;\n  extend_modifier: boolean;\n  duplicate_modifier: boolean;\n  pointer_threshold_crossed: boolean;\n  base_revision_matches: boolean;\n  base_revision_matches_and_delta_nonzero: boolean;\n};\n\ntype NoteGestureDecision = {\n  nextPhase: string;\n  consumed: boolean;\n  effects: string[];\n};\n\n// The session binding supplies immutable guard facts and applies the ordered effects.\nfunction planNoteGesture(\n  machine: string,\n  phase: string,\n  event: string,\n  guards: NoteGestureGuards,\n): NoteGestureDecision {\n  if (machine !== 'marquee' && machine !== 'move' && machine !== 'resize' && machine !== 'duplicate') {\n    return { nextPhase: phase, consumed: false, effects: [] };\n  }\n\n  if (phase === 'idle' && event === 'PointerDown') {\n    if (machine === 'marquee' && guards.hit_background) {\n      return handled('armed', ['Session.BeginMarqueeGesture', 'Host.CapturePointer']);\n    }\n    if (machine === 'resize' && guards.hit_resize_handle) {\n      return handled('armed', ['Session.SelectIfUnselectedHit', 'Session.BeginResizeGesture', 'Host.CapturePointer']);\n    }\n    if (machine === 'move' && !guards.duplicate_modifier) {\n      if (guards.hit_selected_note && guards.toggle_modifier) {\n        return handled('idle', ['Session.ToggleHitNote']);\n      }\n      if (guards.hit_note_body && guards.toggle_modifier) {\n        return handled('armed', ['Session.ToggleHitNote', 'Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_note_body && guards.extend_modifier) {\n        return handled('armed', ['Session.ExtendSelectionToHit', 'Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_selected_note) {\n        return handled('armed', ['Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_unselected_note) {\n        return handled('armed', ['Session.SelectOnlyHitNote', 'Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n    }\n    if (machine === 'duplicate' && guards.duplicate_modifier) {\n      // Duplicate prioritizes unselected hits. Move prioritizes selected hits.\n      if (guards.hit_unselected_note && guards.toggle_modifier) {\n        return handled('armed', ['Session.ToggleHitNote', 'Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_selected_note && guards.toggle_modifier) {\n        return handled('idle', ['Session.ToggleHitNote']);\n      }\n      if (guards.hit_note_body && guards.extend_modifier) {\n        return handled('armed', ['Session.ExtendSelectionToHit', 'Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_unselected_note) {\n        return handled('armed', ['Session.SelectOnlyHitNote', 'Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_selected_note) {\n        return handled('armed', ['Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n    }\n  }\n\n  const active = phase === 'armed' || phase === 'dragging';\n  if (event === 'PointerMove' && (phase === 'dragging' || (phase === 'armed' && guards.pointer_threshold_crossed))) {\n    if (machine === 'marquee') return handled('dragging', ['Session.UpdateMarqueePreview']);\n    if (machine === 'resize') return handled('dragging', ['Session.UpdateResizePreview']);\n    return handled('dragging', ['Session.UpdateMovePreview']);\n  }\n  if (event === 'PointerUp' && phase === 'dragging') {\n    if (machine === 'marquee' && guards.base_revision_matches) {\n      return finishWith('Session.CommitMarqueeSelection');\n    }\n    if (machine !== 'marquee' && guards.base_revision_matches_and_delta_nonzero) {\n      if (machine === 'move') return finishWith('Domain.CommitMoveNotes');\n      if (machine === 'resize') return finishWith('Domain.CommitResizeNotes');\n      return finishWith('Domain.CommitDuplicateNotes');\n    }\n    return finishWith('Session.ReportConflictIfStale');\n  }\n  if (event === 'PointerUp' && phase === 'armed' && machine !== 'resize') {\n    return finishWith('Session.ClickReleaseSelection');\n  }\n  if ((event === 'Cancel' && active) || (event === 'PointerUp' && phase === 'armed')) {\n    return handled('idle', ['Session.ClearGesturePreview', 'Host.ReleasePointer']);\n  }\n  return { nextPhase: phase, consumed: active, effects: [] };\n}\n\nfunction handled(nextPhase: string, effects: string[]): NoteGestureDecision {\n  return { nextPhase, consumed: true, effects };\n}\n\nfunction finishWith(effect: string): NoteGestureDecision {\n  return handled('idle', [effect, 'Session.ClearGesturePreview', 'Host.ReleasePointer']);\n}\n\n// ---------------------------------------------------------------------------\n// Built-in effect editors (knobs, curve handles, threshold handles).\n//\n// The same compiled root also hosts those editors: the pinned GPUI target\n// vendors one native SDK crate per compiled unit under a fixed name, so a\n// second unit cannot share the Cargo workspace yet. The native slot draws the\n// editor; this protocol owns when a press becomes an edit, how a drag maps to\n// a value, and when the edit is committed, reset or discarded.\n\ntype ControlGuards = {\n  hit_control: boolean;\n  threshold_crossed: boolean;\n  reset_modifier: boolean;\n  double_click: boolean;\n};\n\ntype ControlDecision = {\n  nextPhase: string;\n  consumed: boolean;\n  effects: string[];\n};\n\nfunction planControlGesture(phase: string, event: string, guards: ControlGuards): ControlDecision {\n  if (phase === 'idle' && event === 'PointerDown') {\n    if (!guards.hit_control) return { nextPhase: 'idle', consumed: false, effects: [] };\n    // Double click, or Alt / Option click, restores the default; it never drags.\n    if (guards.double_click || guards.reset_modifier) {\n      return { nextPhase: 'idle', consumed: true, effects: ['Control.Select', 'Control.Reset'] };\n    }\n    return { nextPhase: 'armed', consumed: true, effects: ['Control.Select', 'Control.Begin', 'Host.CapturePointer'] };\n  }\n  if (phase === 'armed' && event === 'PointerMove') {\n    // A click selects; only movement past the threshold edits the value.\n    if (!guards.threshold_crossed) return { nextPhase: 'armed', consumed: true, effects: [] };\n    return { nextPhase: 'dragging', consumed: true, effects: ['Control.Preview'] };\n  }\n  if (phase === 'dragging' && event === 'PointerMove') {\n    return { nextPhase: 'dragging', consumed: true, effects: ['Control.Preview'] };\n  }\n  if (phase === 'dragging' && event === 'PointerUp') {\n    return { nextPhase: 'idle', consumed: true, effects: ['Control.Commit', 'Host.ReleasePointer'] };\n  }\n  if (phase === 'armed' && event === 'PointerUp') {\n    return { nextPhase: 'idle', consumed: true, effects: ['Control.Discard', 'Host.ReleasePointer'] };\n  }\n  if ((phase === 'armed' || phase === 'dragging') && event === 'Cancel') {\n    return { nextPhase: 'idle', consumed: true, effects: ['Control.Discard', 'Host.ReleasePointer'] };\n  }\n  return { nextPhase: phase, consumed: false, effects: [] };\n}\n\n// A drag of `travel` pixels sweeps the whole range; the fine modifier\n// (Shift) divides the rate by ten. Values are normalized to 0…1.\nfunction dragNormalized(start: number, delta: number, travel: number, fine: boolean): number {\n  const span = travel > 1 ? travel : 1;\n  const rate = fine ? 0.1 : 1;\n  const next = start + (delta / span) * rate;\n  if (next < 0) return 0;\n  if (next > 1) return 1;\n  return next;\n}\n\nexport default definePrototype({\n  name: 'verdant-pitch-gesture-surface',\n  setup(def) {\n    // The compiled root sizes and clips the viewport. The native slot draws\n    // the roll and translates pointer coordinates into the score's units.\n    def.feedback.style.use(tw('w-full h-full overflow-hidden'));\n    def.expose.method('planNoteGesture', planNoteGesture);\n    def.expose.method('planControlGesture', planControlGesture);\n    def.expose.method('dragNormalized', dragNormalized);\n    return (renderer) => renderer.slot();\n  },\n});\n"],"names":[],"mappings":";;;;;;;;;;;;;IA6BE;;QACE;;;IAGF;;QACE;;YACE;;;QAEF;;YACE;;;QAEF;;YACE;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;;QAGJ;;YAEE;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;;;IAKA;;IACN;;QACE;;YAA2B;;;QAC3B;;YAA0B;;;QAC1B;;;IAEF;;QACE;;YACE;;;QAEF;;YACE;;gBAAwB;;;YACxB;;gBAA0B;;;YAC1B;;;QAEF;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;;;;;IAIA;;;;;IAIA;;;;;;;IA0BA;;QACE;;YAAyB;;;QAEzB;;YACE;;;QAEF;;;IAEF;;QAEE;;YAA+B;;;QAC/B;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;;;;;;;IAMM;;IACA;;IACA;;IACN;;QAAc;;;IACd;;QAAc;;;IACd;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;YAQE;;YACA;;YACA;;YACA;;YACA;;;gBAAqB"}
++{"version":3,"file":"Component.rs","sources":["pitch-gesture-surface.proto.ts"],"sourcesContent":["import { definePrototype, tw } from '@proto.ui/core';\n\ntype NoteGestureGuards = {\n  hit_background: boolean;\n  hit_selected_note: boolean;\n  hit_unselected_note: boolean;\n  hit_note_body: boolean;\n  hit_resize_handle: boolean;\n  toggle_modifier: boolean;\n  extend_modifier: boolean;\n  duplicate_modifier: boolean;\n  pointer_threshold_crossed: boolean;\n  base_revision_matches: boolean;\n  base_revision_matches_and_delta_nonzero: boolean;\n};\n\ntype NoteGestureDecision = {\n  nextPhase: string;\n  consumed: boolean;\n  effects: string[];\n};\n\n// The session binding supplies immutable guard facts and applies the ordered effects.\nfunction planNoteGesture(\n  machine: string,\n  phase: string,\n  event: string,\n  guards: NoteGestureGuards,\n): NoteGestureDecision {\n  if (machine !== 'marquee' && machine !== 'move' && machine !== 'resize' && machine !== 'duplicate') {\n    return { nextPhase: phase, consumed: false, effects: [] };\n  }\n\n  if (phase === 'idle' && event === 'PointerDown') {\n    if (machine === 'marquee' && guards.hit_background) {\n      return handled('armed', ['Session.BeginMarqueeGesture', 'Host.CapturePointer']);\n    }\n    if (machine === 'resize' && guards.hit_resize_handle) {\n      return handled('armed', ['Session.SelectIfUnselectedHit', 'Session.BeginResizeGesture', 'Host.CapturePointer']);\n    }\n    if (machine === 'move' && !guards.duplicate_modifier) {\n      if (guards.hit_selected_note && guards.toggle_modifier) {\n        return handled('idle', ['Session.ToggleHitNote']);\n      }\n      if (guards.hit_note_body && guards.toggle_modifier) {\n        return handled('armed', ['Session.ToggleHitNote', 'Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_note_body && guards.extend_modifier) {\n        return handled('armed', ['Session.ExtendSelectionToHit', 'Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_selected_note) {\n        return handled('armed', ['Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_unselected_note) {\n        return handled('armed', ['Session.SelectOnlyHitNote', 'Session.BeginMoveGesture', 'Host.CapturePointer']);\n      }\n    }\n    if (machine === 'duplicate' && guards.duplicate_modifier) {\n      // Duplicate prioritizes unselected hits. Move prioritizes selected hits.\n      if (guards.hit_unselected_note && guards.toggle_modifier) {\n        return handled('armed', ['Session.ToggleHitNote', 'Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_selected_note && guards.toggle_modifier) {\n        return handled('idle', ['Session.ToggleHitNote']);\n      }\n      if (guards.hit_note_body && guards.extend_modifier) {\n        return handled('armed', ['Session.ExtendSelectionToHit', 'Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_unselected_note) {\n        return handled('armed', ['Session.SelectOnlyHitNote', 'Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n      if (guards.hit_selected_note) {\n        return handled('armed', ['Session.BeginDuplicateGesture', 'Host.CapturePointer']);\n      }\n    }\n  }\n\n  const active = phase === 'armed' || phase === 'dragging';\n  if (event === 'PointerMove' && (phase === 'dragging' || (phase === 'armed' && guards.pointer_threshold_crossed))) {\n    if (machine === 'marquee') return handled('dragging', ['Session.UpdateMarqueePreview']);\n    if (machine === 'resize') return handled('dragging', ['Session.UpdateResizePreview']);\n    return handled('dragging', ['Session.UpdateMovePreview']);\n  }\n  if (event === 'PointerUp' && phase === 'dragging') {\n    if (machine === 'marquee' && guards.base_revision_matches) {\n      return finishWith('Session.CommitMarqueeSelection');\n    }\n    if (machine !== 'marquee' && guards.base_revision_matches_and_delta_nonzero) {\n      if (machine === 'move') return finishWith('Domain.CommitMoveNotes');\n      if (machine === 'resize') return finishWith('Domain.CommitResizeNotes');\n      return finishWith('Domain.CommitDuplicateNotes');\n    }\n    return finishWith('Session.ReportConflictIfStale');\n  }\n  if (event === 'PointerUp' && phase === 'armed' && machine !== 'resize') {\n    return finishWith('Session.ClickReleaseSelection');\n  }\n  if ((event === 'Cancel' && active) || (event === 'PointerUp' && phase === 'armed')) {\n    return handled('idle', ['Session.ClearGesturePreview', 'Host.ReleasePointer']);\n  }\n  return { nextPhase: phase, consumed: active, effects: [] };\n}\n\nfunction handled(nextPhase: string, effects: string[]): NoteGestureDecision {\n  return { nextPhase, consumed: true, effects };\n}\n\nfunction finishWith(effect: string): NoteGestureDecision {\n  return handled('idle', [effect, 'Session.ClearGesturePreview', 'Host.ReleasePointer']);\n}\n\n// ---------------------------------------------------------------------------\n// Built-in effect editors (knobs, curve handles, threshold handles).\n//\n// The same compiled root also hosts those editors: the pinned GPUI target\n// vendors one native SDK crate per compiled unit under a fixed name, so a\n// second unit cannot share the Cargo workspace yet. The native slot draws the\n// editor; this protocol owns when a press becomes an edit, how a drag maps to\n// a value, and when the edit is committed, reset or discarded.\n\ntype ControlGuards = {\n  hit_control: boolean;\n  threshold_crossed: boolean;\n  reset_modifier: boolean;\n  double_click: boolean;\n};\n\ntype ControlDecision = {\n  nextPhase: string;\n  consumed: boolean;\n  effects: string[];\n};\n\nfunction planControlGesture(phase: string, event: string, guards: ControlGuards): ControlDecision {\n  if (phase === 'idle' && event === 'PointerDown') {\n    if (!guards.hit_control) return { nextPhase: 'idle', consumed: false, effects: [] };\n    // Double click, or Alt / Option click, restores the default; it never drags.\n    if (guards.double_click || guards.reset_modifier) {\n      return { nextPhase: 'idle', consumed: true, effects: ['Control.Select', 'Control.Reset'] };\n    }\n    return { nextPhase: 'armed', consumed: true, effects: ['Control.Select', 'Control.Begin', 'Host.CapturePointer'] };\n  }\n  if (phase === 'armed' && event === 'PointerMove') {\n    // A click selects; only movement past the threshold edits the value.\n    if (!guards.threshold_crossed) return { nextPhase: 'armed', consumed: true, effects: [] };\n    return { nextPhase: 'dragging', consumed: true, effects: ['Control.Preview'] };\n  }\n  if (phase === 'dragging' && event === 'PointerMove') {\n    return { nextPhase: 'dragging', consumed: true, effects: ['Control.Preview'] };\n  }\n  if (phase === 'dragging' && event === 'PointerUp') {\n    return { nextPhase: 'idle', consumed: true, effects: ['Control.Commit', 'Host.ReleasePointer'] };\n  }\n  if (phase === 'armed' && event === 'PointerUp') {\n    return { nextPhase: 'idle', consumed: true, effects: ['Control.Discard', 'Host.ReleasePointer'] };\n  }\n  if ((phase === 'armed' || phase === 'dragging') && event === 'Cancel') {\n    return { nextPhase: 'idle', consumed: true, effects: ['Control.Discard', 'Host.ReleasePointer'] };\n  }\n  return { nextPhase: phase, consumed: false, effects: [] };\n}\n\n// A drag of `travel` pixels sweeps the whole range; the fine modifier\n// (Shift) divides the rate by ten. Values are normalized to 0…1.\nfunction dragNormalized(start: number, delta: number, travel: number, fine: boolean): number {\n  const span = travel > 1 ? travel : 1;\n  const rate = fine ? 0.1 : 1;\n  const next = start + (delta / span) * rate;\n  if (next < 0) return 0;\n  if (next > 1) return 1;\n  return next;\n}\n\nexport default definePrototype({\n  name: 'verdant-pitch-gesture-surface',\n  setup(def) {\n    // The compiled root sizes and clips the viewport. The native slot draws\n    // the roll and translates pointer coordinates into the score's units.\n    def.feedback.style.use(tw('w-full h-full overflow-hidden'));\n    def.expose.method('planNoteGesture', planNoteGesture);\n    def.expose.method('planControlGesture', planControlGesture);\n    def.expose.method('dragNormalized', dragNormalized);\n    return (renderer) => renderer.slot();\n  },\n});\n"],"names":[],"mappings":";;;;;;;;;;;;;IA6BE;;QACE;;;IAGF;;QACE;;YACE;;;QAEF;;YACE;;;QAEF;;YACE;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;;QAGJ;;YAEE;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;YAEF;;gBACE;;;;;IAKA;;IACN;;QACE;;YAA2B;;;QAC3B;;YAA0B;;;QAC1B;;;IAEF;;QACE;;YACE;;;QAEF;;YACE;;gBAAwB;;;YACxB;;gBAA0B;;;YAC1B;;;QAEF;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;;;;;IAIA;;;;;IAIA;;;;;;;IA0BA;;QACE;;YAAyB;;;QAEzB;;YACE;;;QAEF;;;IAEF;;QAEE;;YAA+B;;;QAC/B;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;QACE;;;IAEF;;;;;;;;IAMM;;IACA;;IACA;;IACN;;QAAc;;;IACd;;QAAc;;;IACd;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;YAQE;;YACA;;YACA;;YACA;;YACA;;;gBAAqB"}
+diff --git a/frontend/proto-ui/generated/pitch-gesture-surface/provenance.json b/frontend/proto-ui/generated/pitch-gesture-surface/provenance.json
+index 126267a..cd9a44d 100644
+--- a/frontend/proto-ui/generated/pitch-gesture-surface/provenance.json
++++ b/frontend/proto-ui/generated/pitch-gesture-surface/provenance.json
+@@ -6,6 +6,15 @@
+   },
+   "irVersion": 7,
+   "backend": "gpui-source-v1",
++  "nativeSdk": {
++    "schemaVersion": 1,
++    "name": "proto-ui-gpui-native",
++    "version": "0.2.0",
++    "dependencyMode": "workspace",
++    "contentSha256": "d29162450a7b7f6fda340985db5c3f116830ad3a5f66c090440b90505821d68f",
++    "path": ".proto-ui/gpui-native",
++    "bundled": true
++  },
+   "observableSemantics": {
+     "version": "proto-ui-observables-v1",
+     "props": {
+@@ -77,17 +86,17 @@
+       "sha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78"
+     }
+   ],
+-  "generatedSha256": "554b6e508268c0f782195ad3f728fb2eabf44a10b3a7c9be95e710a772964dc4",
++  "generatedSha256": "cfaec14b59ed189227bf64794d079ca771498cc5a3e23b35125d96320c026776",
+   "artifacts": [
+     {
+       "path": "Component.rs",
+       "kind": "source",
+-      "sha256": "554b6e508268c0f782195ad3f728fb2eabf44a10b3a7c9be95e710a772964dc4"
++      "sha256": "cfaec14b59ed189227bf64794d079ca771498cc5a3e23b35125d96320c026776"
+     },
+     {
+       "path": "Cargo.toml",
+       "kind": "source",
+-      "sha256": "b2426d7f08c376224a42606281cc2875658082808dd15146b6f8aedcdfe0fc5e"
++      "sha256": "c52f3c108e27d8258d967dcde38659aa047ca63cb2834569926f99843b1fa5e6"
+     },
+     {
+       "path": ".proto-ui/gpui-native/LICENSE",
+@@ -107,7 +116,7 @@
+     {
+       "path": ".proto-ui/gpui-native/src/gpui-native-owner.rs",
+       "kind": "source",
+-      "sha256": "897c79b483fd54febce187ed62db95b64e7349c40434d526f87e629a6a165a39"
++      "sha256": "51ea54fc254243dabcd26efa1fd1de3138edf6a0da63c9cc51c0144b2dc4f149"
+     },
+     {
+       "path": ".proto-ui/gpui-native/src/gpui-native-a11y.rs",
+@@ -172,7 +181,7 @@
+     {
+       "path": "Component.rs.map",
+       "kind": "source-map",
+-      "sha256": "893edc7aeaaaf534056bbe2b096bc181e39e77b965a5f4ab23fd761fafa98aae"
++      "sha256": "807326e8160b06552ae440def19cc60faa2c065109200b89de16d6d0caff24de"
+     }
+   ]
+ }
+diff --git a/frontend/proto-ui/receipts/pitch-gesture-surface.json b/frontend/proto-ui/receipts/pitch-gesture-surface.json
+index c5b35f9..7644be4 100644
+--- a/frontend/proto-ui/receipts/pitch-gesture-surface.json
++++ b/frontend/proto-ui/receipts/pitch-gesture-surface.json
+@@ -5,7 +5,7 @@
+   "sourceSha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78",
+   "upstream": {
+     "repository": "https://github.com/Proto-UI/Proto-UI",
+-    "revision": "e56b2d1a3d6b688a1cbc6930dab1d6757304d733"
++    "revision": "ef60557fbd2c486ca15885c3e38d92f599f140a3"
+   },
+   "packageVersions": {
+     "protoUi": "0.3.0-alpha.2",
+@@ -70,7 +70,7 @@
+     {
+       "path": ".proto-ui/gpui-native/src/gpui-native-owner.rs",
+       "kind": "source",
+-      "sha256": "897c79b483fd54febce187ed62db95b64e7349c40434d526f87e629a6a165a39"
++      "sha256": "51ea54fc254243dabcd26efa1fd1de3138edf6a0da63c9cc51c0144b2dc4f149"
+     },
+     {
+       "path": ".proto-ui/gpui-native/src/lib.rs",
+@@ -105,22 +105,22 @@
+     {
+       "path": "Cargo.toml",
+       "kind": "source",
+-      "sha256": "b2426d7f08c376224a42606281cc2875658082808dd15146b6f8aedcdfe0fc5e"
++      "sha256": "c52f3c108e27d8258d967dcde38659aa047ca63cb2834569926f99843b1fa5e6"
+     },
+     {
+       "path": "Component.rs",
+       "kind": "source",
+-      "sha256": "554b6e508268c0f782195ad3f728fb2eabf44a10b3a7c9be95e710a772964dc4"
++      "sha256": "cfaec14b59ed189227bf64794d079ca771498cc5a3e23b35125d96320c026776"
+     },
+     {
+       "path": "Component.rs.map",
+       "kind": "source-map",
+-      "sha256": "893edc7aeaaaf534056bbe2b096bc181e39e77b965a5f4ab23fd761fafa98aae"
++      "sha256": "807326e8160b06552ae440def19cc60faa2c065109200b89de16d6d0caff24de"
+     },
+     {
+       "path": "provenance.json",
+       "kind": "manifest",
+-      "sha256": "e41740062c9cd04345802968978978ded62388014b4df717b1d70d58c27fd7ca"
++      "sha256": "9c2fc9647baa2827159578515dc585db9858bceda66d67666bdf30669f453ece"
+     }
+   ]
+ }
+diff --git a/frontend/proto-ui/tools/build-proto-ui-data.mjs b/frontend/proto-ui/tools/build-proto-ui-data.mjs
+new file mode 100644
+index 0000000..0d6252a
+--- /dev/null
++++ b/frontend/proto-ui/tools/build-proto-ui-data.mjs
+@@ -0,0 +1,82 @@
++#!/usr/bin/env node
++// The headless planner consumes the explicit checked Rust data boundary. The
++// authored source is shared with the separate GPUI view; generated Rust is
++// written verbatim by the compiler's create-only artifact writer.
++import assert from 'node:assert/strict';
++import { createHash } from 'node:crypto';
++import { execFileSync, spawnSync } from 'node:child_process';
++import { readFile, writeFile } from 'node:fs/promises';
++import { createRequire } from 'node:module';
++import path from 'node:path';
++import { fileURLToPath, pathToFileURL } from 'node:url';
++
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
++const options = { pin: path.join(root, 'frontend/proto-ui/compiler.pin.json'), check: false };
++for (let index = 2; index < process.argv.length; index += 1) {
++  const argument = process.argv[index];
++  if (argument === '--check') options.check = true;
++  else if (argument === '--pin' || argument === '--upstream') {
++    assert.ok(process.argv[index + 1], `${argument} requires a path`);
++    options[argument.slice(2)] = path.resolve(process.argv[++index]);
++  } else throw new Error(`Unknown argument ${argument}`);
++}
++assert.ok(options.upstream, '--upstream must name the pinned compiler checkout');
++const pin = JSON.parse(await readFile(options.pin, 'utf8'));
++assert.equal(pin.data?.profile, 'rust-data-v1');
++assert.ok(Array.isArray(pin.data.methods) && pin.data.methods.length > 0);
++assert.equal(new Set(pin.data.methods).size, pin.data.methods.length);
++assert.ok(pin.data.methods.every((name) => typeof name === 'string' && name.length > 0));
++assert.match(pin.data.crateName, /^[a-z][a-z0-9-]*$/);
++const projectPath = (name) => {
++  assert.equal(typeof name, 'string');
++  assert.ok(name.length > 0 && !path.isAbsolute(name));
++  const resolved = path.resolve(root, name);
++  assert.ok(resolved.startsWith(root + path.sep), 'Data artifact path must stay inside this app');
++  return resolved;
++};
++const source = projectPath(pin.source);
++const output = projectPath(pin.data.output.directory);
++const receiptPath = projectPath(pin.data.output.receipt);
++assert.notEqual(output, projectPath(pin.output.directory), 'The data and GPUI artifacts have separate ownership');
++
++// Reuse the existing producer's exact revision, clean checkout, package and
++// toolchain gates and verify the retained GPUI view against fresh compilation.
++const gate = spawnSync(process.execPath, [path.join(root, 'frontend/proto-ui/tools/build-proto-ui.mjs'),
++  '--pin', options.pin, '--upstream', options.upstream, '--check'], { cwd: root, stdio: 'inherit' });
++assert.equal(gate.status, 0, 'Pinned GPUI producer/source verification failed');
++const require = createRequire(path.join(options.upstream, 'package.json'));
++const { register } = await import(pathToFileURL(require.resolve('tsx/esm/api')).href);
++register();
++const compiler = await import(pathToFileURL(path.join(options.upstream, 'packages/compiler/src/rust-data.ts')).href);
++const compiled = await compiler.compileRustDataFile(source, {
++  root, methods: pin.data.methods, crateName: pin.data.crateName,
++});
++if (!compiled.ok) throw new Error(`Pure authored method selection rejected: ${JSON.stringify(compiled.diagnostics, null, 2)}`);
++const artifacts = compiler.rustDataCompilationArtifacts(compiled.value);
++const sha256 = (value) => createHash('sha256').update(value).digest('hex');
++const git = (...args) => execFileSync('git', ['-C', options.upstream, ...args], { encoding: 'utf8' }).trim();
++assert.equal(git('rev-parse', 'HEAD'), pin.upstream.revision);
++assert.equal(git('status', '--porcelain', '--untracked-files=all'), '');
++const receipt = {
++  schema: 'verdant.proto-ui.rust-data-receipt.v1',
++  upstream: { repository: pin.upstream.repository, revision: pin.upstream.revision, tree: git('rev-parse', 'HEAD^{tree}') },
++  source: { path: pin.source, sha256: sha256(await readFile(source)) },
++  profile: compiled.value.output.profile, irVersion: compiled.value.ir.schemaVersion,
++  sourceClosure: compiled.value.ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 })),
++  methods: compiled.value.output.methods, crateName: pin.data.crateName,
++  dependencies: compiled.value.output.dependencies,
++  output: pin.data.output.directory,
++  artifacts: artifacts.map(({ path, contents }) => ({ path, sha256: sha256(contents), bytes: Buffer.byteLength(contents) })),
++};
++if (options.check) {
++  const diff = await compiler.diffRustDataCompilation(compiled.value, output);
++  if (!diff.ok) throw new Error(JSON.stringify(diff.diagnostics));
++  assert.deepEqual(diff.value.changes.filter((entry) => entry.status !== 'unchanged' || entry.consumerModified), [], JSON.stringify(diff.value));
++  assert.deepEqual(JSON.parse(await readFile(receiptPath, 'utf8')), receipt, 'Retained Rust data receipt differs from the current pin/selection');
++  console.log(`Verified ${pin.data.methods.length} pure methods from the original authored source.`);
++} else {
++  const written = await compiler.writeRustDataCompilation(compiled.value, output);
++  if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
++  await writeFile(receiptPath, JSON.stringify(receipt, null, 2) + '\n', { flag: 'wx' });
++  console.log(`Published ${pin.data.methods.length} checked pure methods as ${pin.data.crateName}.`);
++}
+diff --git a/frontend/proto-ui/receipts/gesture-decisions.json b/frontend/proto-ui/receipts/gesture-decisions.json
+new file mode 100644
+index 0000000..a543bc4
+--- /dev/null
++++ b/frontend/proto-ui/receipts/gesture-decisions.json
+@@ -0,0 +1,249 @@
++{
++  "schema": "verdant.proto-ui.rust-data-receipt.v1",
++  "upstream": {
++    "repository": "https://github.com/Proto-UI/Proto-UI",
++    "revision": "ef60557fbd2c486ca15885c3e38d92f599f140a3",
++    "tree": "4631016b77d3af37a794979c19738a05b0ac70fc"
++  },
++  "source": {
++    "path": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
++    "sha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78"
++  },
++  "profile": "rust-data-v1",
++  "irVersion": 7,
++  "sourceClosure": [
++    {
++      "file": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
++      "sha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78"
++    }
++  ],
++  "methods": [
++    {
++      "name": "planNoteGesture",
++      "rustName": "plan_note_gesture",
++      "parameters": [
++        {
++          "name": "machine",
++          "rustName": "argument_0",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "phase",
++          "rustName": "argument_1",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "event",
++          "rustName": "argument_2",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "guards",
++          "rustName": "argument_3",
++          "type": {
++            "kind": "record",
++            "fields": [
++              {
++                "name": "hit_background",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_selected_note",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_unselected_note",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_note_body",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_resize_handle",
++                "type": "boolean"
++              },
++              {
++                "name": "toggle_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "extend_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "duplicate_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "pointer_threshold_crossed",
++                "type": "boolean"
++              },
++              {
++                "name": "base_revision_matches",
++                "type": "boolean"
++              },
++              {
++                "name": "base_revision_matches_and_delta_nonzero",
++                "type": "boolean"
++              }
++            ]
++          },
++          "optional": false,
++          "rustType": "Rc<PlanNoteGestureGuards>"
++        }
++      ],
++      "returnType": {
++        "kind": "record",
++        "fields": [
++          {
++            "name": "nextPhase",
++            "type": "string"
++          },
++          {
++            "name": "consumed",
++            "type": "boolean"
++          },
++          {
++            "name": "effects",
++            "type": {
++              "kind": "array",
++              "element": "string"
++            }
++          }
++        ]
++      },
++      "rustReturnType": "Rc<PlanNoteGestureResult>"
++    },
++    {
++      "name": "planControlGesture",
++      "rustName": "plan_control_gesture",
++      "parameters": [
++        {
++          "name": "phase",
++          "rustName": "argument_0",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "event",
++          "rustName": "argument_1",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "guards",
++          "rustName": "argument_2",
++          "type": {
++            "kind": "record",
++            "fields": [
++              {
++                "name": "hit_control",
++                "type": "boolean"
++              },
++              {
++                "name": "threshold_crossed",
++                "type": "boolean"
++              },
++              {
++                "name": "reset_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "double_click",
++                "type": "boolean"
++              }
++            ]
++          },
++          "optional": false,
++          "rustType": "Rc<PlanControlGestureGuards>"
++        }
++      ],
++      "returnType": {
++        "kind": "record",
++        "fields": [
++          {
++            "name": "nextPhase",
++            "type": "string"
++          },
++          {
++            "name": "consumed",
++            "type": "boolean"
++          },
++          {
++            "name": "effects",
++            "type": {
++              "kind": "array",
++              "element": "string"
++            }
++          }
++        ]
++      },
++      "rustReturnType": "Rc<PlanNoteGestureResult>"
++    },
++    {
++      "name": "dragNormalized",
++      "rustName": "drag_normalized",
++      "parameters": [
++        {
++          "name": "start",
++          "rustName": "argument_0",
++          "type": "number",
++          "optional": false,
++          "rustType": "f64"
++        },
++        {
++          "name": "delta",
++          "rustName": "argument_1",
++          "type": "number",
++          "optional": false,
++          "rustType": "f64"
++        },
++        {
++          "name": "travel",
++          "rustName": "argument_2",
++          "type": "number",
++          "optional": false,
++          "rustType": "f64"
++        },
++        {
++          "name": "fine",
++          "rustName": "argument_3",
++          "type": "boolean",
++          "optional": false,
++          "rustType": "bool"
++        }
++      ],
++      "returnType": "number",
++      "rustReturnType": "f64"
++    }
++  ],
++  "crateName": "verdant-gesture-decisions",
++  "dependencies": [],
++  "output": "frontend/proto-ui/generated/gesture-decisions",
++  "artifacts": [
++    {
++      "path": "lib.rs",
++      "sha256": "bdd7b34af18ba5356752cb3cbd3c22b5286184c89767b3abd863d524bf066df1",
++      "bytes": 29521
++    },
++    {
++      "path": "Cargo.toml",
++      "sha256": "f903280589e35571d184fac71a6c1bc2e102bb2652c77331f2c15cfb9f26bfed",
++      "bytes": 151
++    },
++    {
++      "path": "provenance.json",
++      "sha256": "9e927d74e1f6971b3b62ce34eaabdd280b09252bf040c4d2fb0a337fd37e6c2a",
++      "bytes": 6152
++    }
++  ]
++}
+diff --git a/frontend/proto-ui/generated/gesture-decisions/Cargo.toml b/frontend/proto-ui/generated/gesture-decisions/Cargo.toml
+new file mode 100644
+index 0000000..4b1ac80
+--- /dev/null
++++ b/frontend/proto-ui/generated/gesture-decisions/Cargo.toml
+@@ -0,0 +1,11 @@
++[package]
++name = "verdant-gesture-decisions"
++version = "0.1.0"
++edition = "2021"
++license = "MIT"
++publish = false
++
++[lib]
++path = "lib.rs"
++
++[dependencies]
+diff --git a/frontend/proto-ui/generated/gesture-decisions/lib.rs b/frontend/proto-ui/generated/gesture-decisions/lib.rs
+new file mode 100644
+index 0000000..0262043
+--- /dev/null
++++ b/frontend/proto-ui/generated/gesture-decisions/lib.rs
+@@ -0,0 +1,267 @@
++// Generated checked typed data functions. No setup, renderer, owner, dynamic object map or IR interpreter.
++#![allow(dead_code, unused_variables, unused_mut, unused_imports, unreachable_code)]
++
++use std::rc::Rc;
++
++#[derive(Clone, Debug, PartialEq, Eq)]
++pub enum DataError {
++    InvalidType(&'static str),
++    NonFiniteNumber,
++    InvalidString,
++    NullishProperty,
++}
++impl std::fmt::Display for DataError {
++    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:?}") }
++}
++impl std::error::Error for DataError {}
++
++/// The source language's undefined value, distinct from null and an omitted optional field.
++#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
++pub struct Undefined;
++
++
++/// Typed immutable array. Clones preserve the authored array's reference identity.
++#[derive(Clone, Debug)]
++pub struct DataArray<T> { items: Rc<Vec<T>>, identity: Rc<()> }
++impl<T> DataArray<T> {
++    pub fn new(items: Vec<T>) -> Self { Self { items: Rc::new(items), identity: Rc::new(()) } }
++    pub fn as_slice(&self) -> &[T] { self.items.as_slice() }
++}
++impl<T> From<Vec<T>> for DataArray<T> { fn from(items: Vec<T>) -> Self { Self::new(items) } }
++impl<T> std::ops::Deref for DataArray<T> {
++    type Target = [T];
++    fn deref(&self) -> &[T] { self.as_slice() }
++}
++
++
++
++
++#[derive(Debug)]
++pub struct PlanNoteGestureGuards {
++    identity: Rc<()>,
++    /// Source field "hit_background".
++    pub hit_background: bool,
++    /// Source field "hit_selected_note".
++    pub hit_selected_note: bool,
++    /// Source field "hit_unselected_note".
++    pub hit_unselected_note: bool,
++    /// Source field "hit_note_body".
++    pub hit_note_body: bool,
++    /// Source field "hit_resize_handle".
++    pub hit_resize_handle: bool,
++    /// Source field "toggle_modifier".
++    pub toggle_modifier: bool,
++    /// Source field "extend_modifier".
++    pub extend_modifier: bool,
++    /// Source field "duplicate_modifier".
++    pub duplicate_modifier: bool,
++    /// Source field "pointer_threshold_crossed".
++    pub pointer_threshold_crossed: bool,
++    /// Source field "base_revision_matches".
++    pub base_revision_matches: bool,
++    /// Source field "base_revision_matches_and_delta_nonzero".
++    pub base_revision_matches_and_delta_nonzero: bool,
++}
++impl PlanNoteGestureGuards {
++    pub fn new(hit_background: bool, hit_selected_note: bool, hit_unselected_note: bool, hit_note_body: bool, hit_resize_handle: bool, toggle_modifier: bool, extend_modifier: bool, duplicate_modifier: bool, pointer_threshold_crossed: bool, base_revision_matches: bool, base_revision_matches_and_delta_nonzero: bool) -> Rc<Self> {
++        Rc::new(Self { identity: Rc::new(()), hit_background, hit_selected_note, hit_unselected_note, hit_note_body, hit_resize_handle, toggle_modifier, extend_modifier, duplicate_modifier, pointer_threshold_crossed, base_revision_matches, base_revision_matches_and_delta_nonzero })
++    }
++}
++
++#[derive(Debug)]
++pub struct PlanNoteGestureResult {
++    identity: Rc<()>,
++    /// Source field "nextPhase".
++    pub next_phase: String,
++    /// Source field "consumed".
++    pub consumed: bool,
++    /// Source field "effects".
++    pub effects: DataArray<String>,
++}
++impl PlanNoteGestureResult {
++    pub fn new(next_phase: String, consumed: bool, effects: DataArray<String>) -> Rc<Self> {
++        Rc::new(Self { identity: Rc::new(()), next_phase, consumed, effects })
++    }
++}
++
++#[derive(Debug)]
++pub struct PlanControlGestureGuards {
++    identity: Rc<()>,
++    /// Source field "hit_control".
++    pub hit_control: bool,
++    /// Source field "threshold_crossed".
++    pub threshold_crossed: bool,
++    /// Source field "reset_modifier".
++    pub reset_modifier: bool,
++    /// Source field "double_click".
++    pub double_click: bool,
++}
++impl PlanControlGestureGuards {
++    pub fn new(hit_control: bool, threshold_crossed: bool, reset_modifier: bool, double_click: bool) -> Rc<Self> {
++        Rc::new(Self { identity: Rc::new(()), hit_control, threshold_crossed, reset_modifier, double_click })
++    }
++}
++
++fn pui_function_0(v_6d616368696e65: String, v_70686173655f5f30663032353262306361626664303561: String, v_6576656e745f5f33303431666434613538323438313265: String, v_6775617264735f5f30333465376531643063333637383239: Rc<PlanNoteGestureGuards>) -> Result<Rc<PlanNoteGestureResult>, DataError> {
++    if { let pui_local_17 = { let pui_local_0 = { let pui_local_2 = { let pui_local_4 = { let pui_local_6 = v_6d616368696e65.clone(); let pui_local_7 = "marquee".to_owned(); !(pui_local_6 == pui_local_7) }; if ({ let pui_local_8 = pui_local_4.clone(); pui_local_8 }) { { let pui_local_9 = v_6d616368696e65.clone(); let pui_local_10 = "move".to_owned(); !(pui_local_9 == pui_local_10) } } else { pui_local_4 } }; if ({ let pui_local_11 = pui_local_2.clone(); pui_local_11 }) { { let pui_local_12 = v_6d616368696e65.clone(); let pui_local_13 = "resize".to_owned(); !(pui_local_12 == pui_local_13) } } else { pui_local_2 } }; if ({ let pui_local_14 = pui_local_0.clone(); pui_local_14 }) { { let pui_local_15 = v_6d616368696e65.clone(); let pui_local_16 = "duplicate".to_owned(); !(pui_local_15 == pui_local_16) } } else { pui_local_0 } }; pui_local_17 } {
++        return Ok({ let pui_local_18 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_19 = false; let pui_local_20 = DataArray::new(vec![]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_18, consumed: pui_local_19, effects: pui_local_20 }) });
++    }
++    if { let pui_local_28 = { let pui_local_21 = { let pui_local_23 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_24 = "idle".to_owned(); (pui_local_23 == pui_local_24) }; if ({ let pui_local_25 = pui_local_21.clone(); pui_local_25 }) { { let pui_local_26 = v_6576656e745f5f33303431666434613538323438313265.clone(); let pui_local_27 = "PointerDown".to_owned(); (pui_local_26 == pui_local_27) } } else { pui_local_21 } }; pui_local_28 } {
++        if { let pui_local_34 = { let pui_local_29 = { let pui_local_31 = v_6d616368696e65.clone(); let pui_local_32 = "marquee".to_owned(); (pui_local_31 == pui_local_32) }; if ({ let pui_local_33 = pui_local_29.clone(); pui_local_33 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_background.clone() } else { pui_local_29 } }; pui_local_34 } {
++            return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.BeginMarqueeGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++        }
++        if { let pui_local_40 = { let pui_local_35 = { let pui_local_37 = v_6d616368696e65.clone(); let pui_local_38 = "resize".to_owned(); (pui_local_37 == pui_local_38) }; if ({ let pui_local_39 = pui_local_35.clone(); pui_local_39 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_resize_handle.clone() } else { pui_local_35 } }; pui_local_40 } {
++            return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.SelectIfUnselectedHit".to_owned(), "Session.BeginResizeGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++        }
++        if { let pui_local_47 = { let pui_local_41 = { let pui_local_43 = v_6d616368696e65.clone(); let pui_local_44 = "move".to_owned(); (pui_local_43 == pui_local_44) }; if ({ let pui_local_45 = pui_local_41.clone(); pui_local_45 }) { !({ let pui_local_46 = (v_6775617264735f5f30333465376531643063333637383239.clone()).duplicate_modifier.clone(); pui_local_46 }) } else { pui_local_41 } }; pui_local_47 } {
++            if { let pui_local_51 = { let pui_local_48 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_selected_note.clone(); if ({ let pui_local_50 = pui_local_48.clone(); pui_local_50 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).toggle_modifier.clone() } else { pui_local_48 } }; pui_local_51 } {
++                return Ok(pui_function_1("idle".to_owned(), DataArray::new(vec!["Session.ToggleHitNote".to_owned()]))?);
++            }
++            if { let pui_local_55 = { let pui_local_52 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_note_body.clone(); if ({ let pui_local_54 = pui_local_52.clone(); pui_local_54 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).toggle_modifier.clone() } else { pui_local_52 } }; pui_local_55 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.ToggleHitNote".to_owned(), "Session.BeginMoveGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++            if { let pui_local_59 = { let pui_local_56 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_note_body.clone(); if ({ let pui_local_58 = pui_local_56.clone(); pui_local_58 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).extend_modifier.clone() } else { pui_local_56 } }; pui_local_59 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.ExtendSelectionToHit".to_owned(), "Session.BeginMoveGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++            if { let pui_local_60 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_selected_note.clone(); pui_local_60 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.BeginMoveGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++            if { let pui_local_61 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_unselected_note.clone(); pui_local_61 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.SelectOnlyHitNote".to_owned(), "Session.BeginMoveGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++        }
++        if { let pui_local_67 = { let pui_local_62 = { let pui_local_64 = v_6d616368696e65.clone(); let pui_local_65 = "duplicate".to_owned(); (pui_local_64 == pui_local_65) }; if ({ let pui_local_66 = pui_local_62.clone(); pui_local_66 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).duplicate_modifier.clone() } else { pui_local_62 } }; pui_local_67 } {
++            if { let pui_local_71 = { let pui_local_68 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_unselected_note.clone(); if ({ let pui_local_70 = pui_local_68.clone(); pui_local_70 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).toggle_modifier.clone() } else { pui_local_68 } }; pui_local_71 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.ToggleHitNote".to_owned(), "Session.BeginDuplicateGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++            if { let pui_local_75 = { let pui_local_72 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_selected_note.clone(); if ({ let pui_local_74 = pui_local_72.clone(); pui_local_74 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).toggle_modifier.clone() } else { pui_local_72 } }; pui_local_75 } {
++                return Ok(pui_function_1("idle".to_owned(), DataArray::new(vec!["Session.ToggleHitNote".to_owned()]))?);
++            }
++            if { let pui_local_79 = { let pui_local_76 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_note_body.clone(); if ({ let pui_local_78 = pui_local_76.clone(); pui_local_78 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).extend_modifier.clone() } else { pui_local_76 } }; pui_local_79 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.ExtendSelectionToHit".to_owned(), "Session.BeginDuplicateGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++            if { let pui_local_80 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_unselected_note.clone(); pui_local_80 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.SelectOnlyHitNote".to_owned(), "Session.BeginDuplicateGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++            if { let pui_local_81 = (v_6775617264735f5f30333465376531643063333637383239.clone()).hit_selected_note.clone(); pui_local_81 } {
++                return Ok(pui_function_1("armed".to_owned(), DataArray::new(vec!["Session.BeginDuplicateGesture".to_owned(), "Host.CapturePointer".to_owned()]))?);
++            }
++        }
++    }
++    let v_616374697665: bool = { let pui_local_82 = { let pui_local_84 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_85 = "armed".to_owned(); (pui_local_84 == pui_local_85) }; if !({ let pui_local_86 = pui_local_82.clone(); pui_local_86 }) { { let pui_local_87 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_88 = "dragging".to_owned(); (pui_local_87 == pui_local_88) } } else { pui_local_82 } };
++    if { let pui_local_104 = { let pui_local_89 = { let pui_local_91 = v_6576656e745f5f33303431666434613538323438313265.clone(); let pui_local_92 = "PointerMove".to_owned(); (pui_local_91 == pui_local_92) }; if ({ let pui_local_93 = pui_local_89.clone(); pui_local_93 }) { { let pui_local_94 = { let pui_local_96 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_97 = "dragging".to_owned(); (pui_local_96 == pui_local_97) }; if !({ let pui_local_98 = pui_local_94.clone(); pui_local_98 }) { { let pui_local_99 = { let pui_local_101 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_102 = "armed".to_owned(); (pui_local_101 == pui_local_102) }; if ({ let pui_local_103 = pui_local_99.clone(); pui_local_103 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).pointer_threshold_crossed.clone() } else { pui_local_99 } } } else { pui_local_94 } } } else { pui_local_89 } }; pui_local_104 } {
++        if { let pui_local_107 = { let pui_local_105 = v_6d616368696e65.clone(); let pui_local_106 = "marquee".to_owned(); (pui_local_105 == pui_local_106) }; pui_local_107 } {
++            return Ok(pui_function_1("dragging".to_owned(), DataArray::new(vec!["Session.UpdateMarqueePreview".to_owned()]))?);
++        }
++        if { let pui_local_110 = { let pui_local_108 = v_6d616368696e65.clone(); let pui_local_109 = "resize".to_owned(); (pui_local_108 == pui_local_109) }; pui_local_110 } {
++            return Ok(pui_function_1("dragging".to_owned(), DataArray::new(vec!["Session.UpdateResizePreview".to_owned()]))?);
++        }
++        return Ok(pui_function_1("dragging".to_owned(), DataArray::new(vec!["Session.UpdateMovePreview".to_owned()]))?);
++    }
++    if { let pui_local_118 = { let pui_local_111 = { let pui_local_113 = v_6576656e745f5f33303431666434613538323438313265.clone(); let pui_local_114 = "PointerUp".to_owned(); (pui_local_113 == pui_local_114) }; if ({ let pui_local_115 = pui_local_111.clone(); pui_local_115 }) { { let pui_local_116 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_117 = "dragging".to_owned(); (pui_local_116 == pui_local_117) } } else { pui_local_111 } }; pui_local_118 } {
++        if { let pui_local_124 = { let pui_local_119 = { let pui_local_121 = v_6d616368696e65.clone(); let pui_local_122 = "marquee".to_owned(); (pui_local_121 == pui_local_122) }; if ({ let pui_local_123 = pui_local_119.clone(); pui_local_123 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).base_revision_matches.clone() } else { pui_local_119 } }; pui_local_124 } {
++            return Ok(pui_function_2("Session.CommitMarqueeSelection".to_owned())?);
++        }
++        if { let pui_local_130 = { let pui_local_125 = { let pui_local_127 = v_6d616368696e65.clone(); let pui_local_128 = "marquee".to_owned(); !(pui_local_127 == pui_local_128) }; if ({ let pui_local_129 = pui_local_125.clone(); pui_local_129 }) { (v_6775617264735f5f30333465376531643063333637383239.clone()).base_revision_matches_and_delta_nonzero.clone() } else { pui_local_125 } }; pui_local_130 } {
++            if { let pui_local_133 = { let pui_local_131 = v_6d616368696e65.clone(); let pui_local_132 = "move".to_owned(); (pui_local_131 == pui_local_132) }; pui_local_133 } {
++                return Ok(pui_function_2("Domain.CommitMoveNotes".to_owned())?);
++            }
++            if { let pui_local_136 = { let pui_local_134 = v_6d616368696e65.clone(); let pui_local_135 = "resize".to_owned(); (pui_local_134 == pui_local_135) }; pui_local_136 } {
++                return Ok(pui_function_2("Domain.CommitResizeNotes".to_owned())?);
++            }
++            return Ok(pui_function_2("Domain.CommitDuplicateNotes".to_owned())?);
++        }
++        return Ok(pui_function_2("Session.ReportConflictIfStale".to_owned())?);
++    }
++    if { let pui_local_149 = { let pui_local_137 = { let pui_local_139 = { let pui_local_141 = v_6576656e745f5f33303431666434613538323438313265.clone(); let pui_local_142 = "PointerUp".to_owned(); (pui_local_141 == pui_local_142) }; if ({ let pui_local_143 = pui_local_139.clone(); pui_local_143 }) { { let pui_local_144 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_145 = "armed".to_owned(); (pui_local_144 == pui_local_145) } } else { pui_local_139 } }; if ({ let pui_local_146 = pui_local_137.clone(); pui_local_146 }) { { let pui_local_147 = v_6d616368696e65.clone(); let pui_local_148 = "resize".to_owned(); !(pui_local_147 == pui_local_148) } } else { pui_local_137 } }; pui_local_149 } {
++        return Ok(pui_function_2("Session.ClickReleaseSelection".to_owned())?);
++    }
++    if { let pui_local_165 = { let pui_local_150 = { let pui_local_152 = { let pui_local_154 = v_6576656e745f5f33303431666434613538323438313265.clone(); let pui_local_155 = "Cancel".to_owned(); (pui_local_154 == pui_local_155) }; if ({ let pui_local_156 = pui_local_152.clone(); pui_local_156 }) { v_616374697665.clone() } else { pui_local_152 } }; if !({ let pui_local_157 = pui_local_150.clone(); pui_local_157 }) { { let pui_local_158 = { let pui_local_160 = v_6576656e745f5f33303431666434613538323438313265.clone(); let pui_local_161 = "PointerUp".to_owned(); (pui_local_160 == pui_local_161) }; if ({ let pui_local_162 = pui_local_158.clone(); pui_local_162 }) { { let pui_local_163 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_164 = "armed".to_owned(); (pui_local_163 == pui_local_164) } } else { pui_local_158 } } } else { pui_local_150 } }; pui_local_165 } {
++        return Ok(pui_function_1("idle".to_owned(), DataArray::new(vec!["Session.ClearGesturePreview".to_owned(), "Host.ReleasePointer".to_owned()]))?);
++    }
++    return Ok({ let pui_local_166 = v_70686173655f5f30663032353262306361626664303561.clone(); let pui_local_167 = v_616374697665.clone(); let pui_local_168 = DataArray::new(vec![]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_166, consumed: pui_local_167, effects: pui_local_168 }) });
++}
++
++fn pui_function_1(v_6e6578745068617365: String, v_65666665637473: DataArray<String>) -> Result<Rc<PlanNoteGestureResult>, DataError> {
++    return Ok({ let pui_local_169 = v_6e6578745068617365.clone(); let pui_local_170 = true; let pui_local_171 = v_65666665637473.clone(); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_169, consumed: pui_local_170, effects: pui_local_171 }) });
++}
++
++fn pui_function_2(v_656666656374: String) -> Result<Rc<PlanNoteGestureResult>, DataError> {
++    return Ok(pui_function_1("idle".to_owned(), DataArray::new(vec![v_656666656374.clone(), "Session.ClearGesturePreview".to_owned(), "Host.ReleasePointer".to_owned()]))?);
++}
++
++fn pui_function_3(v_70686173655f5f38643733653266323231336235363761: String, v_6576656e745f5f35663365313733613665643763623331: String, v_6775617264735f5f34316538643865623735643832643163: Rc<PlanControlGestureGuards>) -> Result<Rc<PlanNoteGestureResult>, DataError> {
++    if { let pui_local_179 = { let pui_local_172 = { let pui_local_174 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_175 = "idle".to_owned(); (pui_local_174 == pui_local_175) }; if ({ let pui_local_176 = pui_local_172.clone(); pui_local_176 }) { { let pui_local_177 = v_6576656e745f5f35663365313733613665643763623331.clone(); let pui_local_178 = "PointerDown".to_owned(); (pui_local_177 == pui_local_178) } } else { pui_local_172 } }; pui_local_179 } {
++        if { let pui_local_181 = !({ let pui_local_180 = (v_6775617264735f5f34316538643865623735643832643163.clone()).hit_control.clone(); pui_local_180 }); pui_local_181 } {
++            return Ok({ let pui_local_182 = "idle".to_owned(); let pui_local_183 = false; let pui_local_184 = DataArray::new(vec![]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_182, consumed: pui_local_183, effects: pui_local_184 }) });
++        }
++        if { let pui_local_188 = { let pui_local_185 = (v_6775617264735f5f34316538643865623735643832643163.clone()).double_click.clone(); if !({ let pui_local_187 = pui_local_185.clone(); pui_local_187 }) { (v_6775617264735f5f34316538643865623735643832643163.clone()).reset_modifier.clone() } else { pui_local_185 } }; pui_local_188 } {
++            return Ok({ let pui_local_189 = "idle".to_owned(); let pui_local_190 = true; let pui_local_191 = DataArray::new(vec!["Control.Select".to_owned(), "Control.Reset".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_189, consumed: pui_local_190, effects: pui_local_191 }) });
++        }
++        return Ok({ let pui_local_192 = "armed".to_owned(); let pui_local_193 = true; let pui_local_194 = DataArray::new(vec!["Control.Select".to_owned(), "Control.Begin".to_owned(), "Host.CapturePointer".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_192, consumed: pui_local_193, effects: pui_local_194 }) });
++    }
++    if { let pui_local_202 = { let pui_local_195 = { let pui_local_197 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_198 = "armed".to_owned(); (pui_local_197 == pui_local_198) }; if ({ let pui_local_199 = pui_local_195.clone(); pui_local_199 }) { { let pui_local_200 = v_6576656e745f5f35663365313733613665643763623331.clone(); let pui_local_201 = "PointerMove".to_owned(); (pui_local_200 == pui_local_201) } } else { pui_local_195 } }; pui_local_202 } {
++        if { let pui_local_204 = !({ let pui_local_203 = (v_6775617264735f5f34316538643865623735643832643163.clone()).threshold_crossed.clone(); pui_local_203 }); pui_local_204 } {
++            return Ok({ let pui_local_205 = "armed".to_owned(); let pui_local_206 = true; let pui_local_207 = DataArray::new(vec![]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_205, consumed: pui_local_206, effects: pui_local_207 }) });
++        }
++        return Ok({ let pui_local_208 = "dragging".to_owned(); let pui_local_209 = true; let pui_local_210 = DataArray::new(vec!["Control.Preview".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_208, consumed: pui_local_209, effects: pui_local_210 }) });
++    }
++    if { let pui_local_218 = { let pui_local_211 = { let pui_local_213 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_214 = "dragging".to_owned(); (pui_local_213 == pui_local_214) }; if ({ let pui_local_215 = pui_local_211.clone(); pui_local_215 }) { { let pui_local_216 = v_6576656e745f5f35663365313733613665643763623331.clone(); let pui_local_217 = "PointerMove".to_owned(); (pui_local_216 == pui_local_217) } } else { pui_local_211 } }; pui_local_218 } {
++        return Ok({ let pui_local_219 = "dragging".to_owned(); let pui_local_220 = true; let pui_local_221 = DataArray::new(vec!["Control.Preview".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_219, consumed: pui_local_220, effects: pui_local_221 }) });
++    }
++    if { let pui_local_229 = { let pui_local_222 = { let pui_local_224 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_225 = "dragging".to_owned(); (pui_local_224 == pui_local_225) }; if ({ let pui_local_226 = pui_local_222.clone(); pui_local_226 }) { { let pui_local_227 = v_6576656e745f5f35663365313733613665643763623331.clone(); let pui_local_228 = "PointerUp".to_owned(); (pui_local_227 == pui_local_228) } } else { pui_local_222 } }; pui_local_229 } {
++        return Ok({ let pui_local_230 = "idle".to_owned(); let pui_local_231 = true; let pui_local_232 = DataArray::new(vec!["Control.Commit".to_owned(), "Host.ReleasePointer".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_230, consumed: pui_local_231, effects: pui_local_232 }) });
++    }
++    if { let pui_local_240 = { let pui_local_233 = { let pui_local_235 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_236 = "armed".to_owned(); (pui_local_235 == pui_local_236) }; if ({ let pui_local_237 = pui_local_233.clone(); pui_local_237 }) { { let pui_local_238 = v_6576656e745f5f35663365313733613665643763623331.clone(); let pui_local_239 = "PointerUp".to_owned(); (pui_local_238 == pui_local_239) } } else { pui_local_233 } }; pui_local_240 } {
++        return Ok({ let pui_local_241 = "idle".to_owned(); let pui_local_242 = true; let pui_local_243 = DataArray::new(vec!["Control.Discard".to_owned(), "Host.ReleasePointer".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_241, consumed: pui_local_242, effects: pui_local_243 }) });
++    }
++    if { let pui_local_256 = { let pui_local_244 = { let pui_local_246 = { let pui_local_248 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_249 = "armed".to_owned(); (pui_local_248 == pui_local_249) }; if !({ let pui_local_250 = pui_local_246.clone(); pui_local_250 }) { { let pui_local_251 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_252 = "dragging".to_owned(); (pui_local_251 == pui_local_252) } } else { pui_local_246 } }; if ({ let pui_local_253 = pui_local_244.clone(); pui_local_253 }) { { let pui_local_254 = v_6576656e745f5f35663365313733613665643763623331.clone(); let pui_local_255 = "Cancel".to_owned(); (pui_local_254 == pui_local_255) } } else { pui_local_244 } }; pui_local_256 } {
++        return Ok({ let pui_local_257 = "idle".to_owned(); let pui_local_258 = true; let pui_local_259 = DataArray::new(vec!["Control.Discard".to_owned(), "Host.ReleasePointer".to_owned()]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_257, consumed: pui_local_258, effects: pui_local_259 }) });
++    }
++    return Ok({ let pui_local_260 = v_70686173655f5f38643733653266323231336235363761.clone(); let pui_local_261 = false; let pui_local_262 = DataArray::new(vec![]); Rc::new(PlanNoteGestureResult { identity: Rc::new(()), next_phase: pui_local_260, consumed: pui_local_261, effects: pui_local_262 }) });
++}
++
++fn pui_function_4(v_7374617274: f64, v_64656c7461: f64, v_74726176656c: f64, v_66696e65: bool) -> Result<f64, DataError> {
++    let v_7370616e: f64 = if { let pui_local_265 = { let pui_local_263 = v_74726176656c.clone(); let pui_local_264 = 1.0f64; (pui_local_263) > (pui_local_264) }; pui_local_265 } { v_74726176656c.clone() } else { 1.0f64 };
++    let v_72617465: f64 = if { let pui_local_266 = v_66696e65.clone(); pui_local_266 } { 0.1f64 } else { 1.0f64 };
++    let v_6e657874: f64 = { let pui_local_267 = v_7374617274.clone(); let pui_local_268 = { let pui_local_269 = { let pui_local_271 = v_64656c7461.clone(); let pui_local_272 = v_7370616e.clone(); (pui_local_271) / (pui_local_272) }; let pui_local_270 = v_72617465.clone(); (pui_local_269) * (pui_local_270) }; (pui_local_267) + (pui_local_268) };
++    if { let pui_local_275 = { let pui_local_273 = v_6e657874.clone(); let pui_local_274 = 0.0f64; (pui_local_273) < (pui_local_274) }; pui_local_275 } {
++        return Ok(0.0f64);
++    }
++    if { let pui_local_278 = { let pui_local_276 = v_6e657874.clone(); let pui_local_277 = 1.0f64; (pui_local_276) > (pui_local_277) }; pui_local_278 } {
++        return Ok(1.0f64);
++    }
++    return Ok(v_6e657874.clone());
++}
++
++/// Calls selected pure source function "planNoteGesture"; component setup is not executed.
++pub fn plan_note_gesture(argument_0: String, argument_1: String, argument_2: String, argument_3: Rc<PlanNoteGestureGuards>) -> Result<Rc<PlanNoteGestureResult>, DataError> {
++    
++    
++    
++    
++    let result = pui_function_0(argument_0, argument_1, argument_2, argument_3)?;
++    
++    Ok(result)
++}
++
++/// Calls selected pure source function "planControlGesture"; component setup is not executed.
++pub fn plan_control_gesture(argument_0: String, argument_1: String, argument_2: Rc<PlanControlGestureGuards>) -> Result<Rc<PlanNoteGestureResult>, DataError> {
++    
++    
++    
++    let result = pui_function_3(argument_0, argument_1, argument_2)?;
++    
++    Ok(result)
++}
++
++/// Calls selected pure source function "dragNormalized"; component setup is not executed.
++pub fn drag_normalized(argument_0: f64, argument_1: f64, argument_2: f64, argument_3: bool) -> Result<f64, DataError> {
++    { let pui_local_311 = (argument_0).clone(); if !pui_local_311.is_finite() { return Err(DataError::NonFiniteNumber); } }
++    { let pui_local_312 = (argument_1).clone(); if !pui_local_312.is_finite() { return Err(DataError::NonFiniteNumber); } }
++    { let pui_local_313 = (argument_2).clone(); if !pui_local_313.is_finite() { return Err(DataError::NonFiniteNumber); } }
++    
++    let result = pui_function_4(argument_0, argument_1, argument_2, argument_3)?;
++    { let pui_local_315 = (result).clone(); if !pui_local_315.is_finite() { return Err(DataError::NonFiniteNumber); } }
++    Ok(result)
++}
+diff --git a/frontend/proto-ui/generated/gesture-decisions/provenance.json b/frontend/proto-ui/generated/gesture-decisions/provenance.json
+new file mode 100644
+index 0000000..4a4194f
+--- /dev/null
++++ b/frontend/proto-ui/generated/gesture-decisions/provenance.json
+@@ -0,0 +1,246 @@
++{
++  "source": {
++    "file": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
++    "exportName": "default",
++    "sha256": "89d1b63256be12f5117658515a4ea305dad5c8f18853d0619169e15c64ea2e36"
++  },
++  "irVersion": 7,
++  "backend": "rust-data-v1",
++  "sourceResolution": {
++    "version": 1,
++    "imports": {},
++    "packages": []
++  },
++  "format": "proto-ui-rust-data",
++  "version": 1,
++  "profile": "rust-data-v1",
++  "dependencies": [],
++  "methods": [
++    {
++      "name": "planNoteGesture",
++      "rustName": "plan_note_gesture",
++      "parameters": [
++        {
++          "name": "machine",
++          "rustName": "argument_0",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "phase",
++          "rustName": "argument_1",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "event",
++          "rustName": "argument_2",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "guards",
++          "rustName": "argument_3",
++          "type": {
++            "kind": "record",
++            "fields": [
++              {
++                "name": "hit_background",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_selected_note",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_unselected_note",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_note_body",
++                "type": "boolean"
++              },
++              {
++                "name": "hit_resize_handle",
++                "type": "boolean"
++              },
++              {
++                "name": "toggle_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "extend_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "duplicate_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "pointer_threshold_crossed",
++                "type": "boolean"
++              },
++              {
++                "name": "base_revision_matches",
++                "type": "boolean"
++              },
++              {
++                "name": "base_revision_matches_and_delta_nonzero",
++                "type": "boolean"
++              }
++            ]
++          },
++          "optional": false,
++          "rustType": "Rc<PlanNoteGestureGuards>"
++        }
++      ],
++      "returnType": {
++        "kind": "record",
++        "fields": [
++          {
++            "name": "nextPhase",
++            "type": "string"
++          },
++          {
++            "name": "consumed",
++            "type": "boolean"
++          },
++          {
++            "name": "effects",
++            "type": {
++              "kind": "array",
++              "element": "string"
++            }
++          }
++        ]
++      },
++      "rustReturnType": "Rc<PlanNoteGestureResult>"
++    },
++    {
++      "name": "planControlGesture",
++      "rustName": "plan_control_gesture",
++      "parameters": [
++        {
++          "name": "phase",
++          "rustName": "argument_0",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "event",
++          "rustName": "argument_1",
++          "type": "string",
++          "optional": false,
++          "rustType": "String"
++        },
++        {
++          "name": "guards",
++          "rustName": "argument_2",
++          "type": {
++            "kind": "record",
++            "fields": [
++              {
++                "name": "hit_control",
++                "type": "boolean"
++              },
++              {
++                "name": "threshold_crossed",
++                "type": "boolean"
++              },
++              {
++                "name": "reset_modifier",
++                "type": "boolean"
++              },
++              {
++                "name": "double_click",
++                "type": "boolean"
++              }
++            ]
++          },
++          "optional": false,
++          "rustType": "Rc<PlanControlGestureGuards>"
++        }
++      ],
++      "returnType": {
++        "kind": "record",
++        "fields": [
++          {
++            "name": "nextPhase",
++            "type": "string"
++          },
++          {
++            "name": "consumed",
++            "type": "boolean"
++          },
++          {
++            "name": "effects",
++            "type": {
++              "kind": "array",
++              "element": "string"
++            }
++          }
++        ]
++      },
++      "rustReturnType": "Rc<PlanNoteGestureResult>"
++    },
++    {
++      "name": "dragNormalized",
++      "rustName": "drag_normalized",
++      "parameters": [
++        {
++          "name": "start",
++          "rustName": "argument_0",
++          "type": "number",
++          "optional": false,
++          "rustType": "f64"
++        },
++        {
++          "name": "delta",
++          "rustName": "argument_1",
++          "type": "number",
++          "optional": false,
++          "rustType": "f64"
++        },
++        {
++          "name": "travel",
++          "rustName": "argument_2",
++          "type": "number",
++          "optional": false,
++          "rustType": "f64"
++        },
++        {
++          "name": "fine",
++          "rustName": "argument_3",
++          "type": "boolean",
++          "optional": false,
++          "rustType": "bool"
++        }
++      ],
++      "returnType": "number",
++      "rustReturnType": "f64"
++    }
++  ],
++  "sourceFiles": [
++    {
++      "file": "frontend/proto-ui/src/pitch-gesture-surface.proto.ts",
++      "sha256": "9e1add6f335945f024db95ecdde0b65b960f84f0c12d69995fdbb2971e5e5e78"
++    }
++  ],
++  "generatedSha256": "bdd7b34af18ba5356752cb3cbd3c22b5286184c89767b3abd863d524bf066df1",
++  "artifacts": [
++    {
++      "path": "lib.rs",
++      "kind": "source",
++      "sha256": "bdd7b34af18ba5356752cb3cbd3c22b5286184c89767b3abd863d524bf066df1"
++    },
++    {
++      "path": "Cargo.toml",
++      "kind": "source",
++      "sha256": "f903280589e35571d184fac71a6c1bc2e102bb2652c77331f2c15cfb9f26bfed"
++    }
++  ]
++}

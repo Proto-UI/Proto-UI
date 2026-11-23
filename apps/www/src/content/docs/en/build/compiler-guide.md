@@ -161,6 +161,34 @@ node --import tsx packages/compiler/src/cli-entry.ts watch packages/prototypes/b
 
 Compilation plans source, supporting helpers, standard source maps and hash/provenance manifests before create-only publication. Existing consumer files are never overwritten. `diff` is read-only and identifies consumer modifications against recorded hashes. `watch` publishes immutable `<output>/<session UUID>/revision-<N>` generations, retaining the last successful generation on rejected input; it does not maintain a mutable latest pointer. Consumer edits require a normal target rebuild. The original compiler map remains historical and can be stale after an edit; a rebuild supplies the current executable-to-edited-source map.
 
+### Supported pinned-source compiler build
+
+The build-time compiler now has a supported **source-pinned Node CLI and JavaScript artifact**. This route preserves the private experimental profiles; it is not an npm publication, a stable declaration-file release, or admission of an unsupported target. Pin a reviewed full Git SHA, the frozen pnpm lock and the chosen profile together.
+
+From a clean checkout at that SHA, with Node 24 and the frozen development install:
+
+```sh
+corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+mkdir -p ../compiler-artifacts
+node --import tsx scripts/compiler/build-pinned.ts --revision <full-40-character-HEAD-SHA> --output ../compiler-artifacts/<fresh-name>
+cd ../compiler-artifacts/<fresh-name>
+npm ci --ignore-scripts
+node cli.js --build-info
+```
+
+The builder refuses a different revision, a dirty checkout, mismatched TypeScript/esbuild installations and an existing destination. Its package lock declares the exact TypeScript version and registry integrity from the source lock. The executable compiler needs only that TypeScript package and Node built-ins. It does not need the public workspace package build, a Runtime/Adapter, or a Floating UI installation borrowed from another package. `compiler-build.json` records every bundled source input, delivered file digest, toolchain and profile digest. Source maps include their source text, and the same inputs/toolchain produce the same artifact bytes in another destination. `index.js` exposes the existing JavaScript API; `cli.js` runs directly in Node without tsx. Each generated provenance records the compiler build identity.
+
+A minimal family consumer can compile an authored entry directly from the same pinned source checkout:
+
+```sh
+mkdir -p /absolute/consumer/generated
+node cli.js compile /absolute/Proto-UI/packages/prototypes/shadcn/src/button/button.proto.ts --root /absolute/Proto-UI --profile react-dom-source-v1 --output /absolute/consumer/generated/button
+```
+
+The source resolver reads the entry's declared authoring closure without executing it or requiring family `dist` builds. Install the **generated provenance's dependencies**, then import its ordinary component and supporting files through the target's normal build. The three 0.3 Button families on the React source profile need React and React DOM at the exact profile versions; a generated geometry consumer additionally owns its declared Floating UI dependency. Vue 3, Vue 2 and Web Component consumers retain their own profiles and dependency lists. A runtime Adapter consumer, such as Shenko's nine adopted Shadcn families, still has its separate declared runtime package closure; compiling Shenko's two own prototypes does not migrate those families.
+
+Output parent directories are a **caller prerequisite**. The artifact root itself is created exclusively. An absent parent fails without creating ancestors; an existing root, symlink, conflicting artifact or concurrent competing writer is rejected under the existing create-only contract. `diff` never writes user edits, and `watch` creates immutable session/revision directories. Keep the compiler build immutable and make consumer edits only in its generated source. The original compiler map is historical after an edit; the normal target rebuild supplies the current executable-to-edited-source map.
+
 ### Executed evidence and measured costs
 
 The private verification runs compile and mount three-component/Context assemblies in physically isolated consumers for all four Web source profiles, type-check generated TypeScript and helpers, rebuild and execute a consumer-owned template edit, reject an introduced syntax error, and verify the physical dependency tree and artifact hashes. These Web consumer measurements do not exercise GPUI. Vue 2 JavaScript component bodies are not `checkJs`-validated. A separate offline private-package rehearsal executes the bundled compiler JavaScript API in plain Node and records tarball integrity, bundled compile-time inputs, dependencies, BOM and licenses; this is not an official package or public declaration-file release.

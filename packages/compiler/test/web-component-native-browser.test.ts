@@ -85,6 +85,33 @@ export default definePrototype({name:'native-mixed-helper',setup(def){
 // Thin compiler completion standard: a representation change cannot erase an admitted occurrence.
 for (const shadow of [false, true]) {
   describe(`native browser lowering, shadow=${shadow}`, () => {
+    it.each([
+      ['null', ''],
+      ['undefined', ''],
+      ["'ordinary text'", 'ordinary text'],
+      ["['first',null,['second',3]]", 'firstsecond3'],
+    ])('normalizes a parameterless renderer returning %s', (value, expected) => {
+      const host = create(
+        `import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-parameterless-render',setup(){return ()=>${value};}});`,
+        shadow
+      );
+      document.body.append(host);
+      expect((host.shadowRoot ?? host).textContent).toBe(expected);
+      expect(host.logicalOwner).not.toBeNull();
+    });
+    it('retains rejection of a boolean returned by a parameterless renderer', () => {
+      const result = parsePrototype(
+        "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-invalid-empty-render',setup(){return ()=>false;}});"
+      );
+      if (!result.ok) expect(result.diagnostics.length).toBeGreaterThan(0);
+      else {
+        const host = create(
+          "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-invalid-empty-render',setup(){return ()=>false;}});",
+          shadow
+        );
+        expect(() => document.body.append(host)).toThrow(/Invalid template child/);
+      }
+    });
     it('constructs a legal tag-only empty element', () => {
       const host = create(
         "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-empty-el',setup(){return r=>r.el('div');}});",

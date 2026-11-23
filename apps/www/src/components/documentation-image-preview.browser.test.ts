@@ -102,6 +102,97 @@ async function open(page: Page, alt: string) {
   });
   return trigger;
 }
+async function readingFocusPaint(page: Page) {
+  await page.waitForFunction(() => {
+    const viewport = document.querySelector<
+      HTMLElement & {
+        getExposes?: () => { focusVisible?: { get?: () => boolean } };
+      }
+    >('[data-docs-image-viewport]');
+    return (
+      viewport === document.activeElement && viewport?.getExposes?.().focusVisible?.get?.() === true
+    );
+  });
+  const paint = await page.locator('[data-docs-image-viewport]').evaluate((node) => {
+    const style = getComputedStyle(node);
+    const viewport = node.getBoundingClientRect();
+    const content = node.closest<HTMLElement>('[data-docs-image-content]')!;
+    const clip = content.getBoundingClientRect();
+    const reach = parseFloat(style.outlineWidth) + Math.max(0, parseFloat(style.outlineOffset));
+    return {
+      outlineStyle: style.outlineStyle,
+      outlineWidth: style.outlineWidth,
+      outlineColor: style.outlineColor,
+      outlineOffset: style.outlineOffset,
+      boxShadow: style.boxShadow,
+      tokens: node.getAttribute('data-pui-style'),
+      outlineFitsDialog:
+        viewport.x - reach >= clip.x &&
+        viewport.y - reach >= clip.y &&
+        viewport.right + reach <= clip.x + content.clientWidth &&
+        viewport.bottom + reach <= clip.y + content.clientHeight,
+      outerScroll: { x: content.scrollLeft, y: content.scrollTop },
+      controls: Array.from(content.querySelectorAll<HTMLElement>('.docs-image-toolbar > *')).map(
+        (button) => {
+          const box = button.getBoundingClientRect();
+          const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+          return {
+            fitsDialog:
+              box.x >= clip.x &&
+              box.y >= clip.y &&
+              box.right <= clip.x + content.clientWidth &&
+              box.bottom <= clip.y + content.clientHeight,
+            hit: hit === button || (hit !== null && button.contains(hit)),
+          };
+        }
+      ),
+    };
+  });
+  // Computed feedback is necessary; the retained real screenshot also needs
+  // visual inspection for clipping or paint occlusion by the actual image.
+  expect(paint.outlineStyle).toBe('solid');
+  expect(parseFloat(paint.outlineWidth)).toBeGreaterThanOrEqual(2);
+  expect(paint.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
+  expect(paint.outlineColor).not.toBe('transparent');
+  expect(paint.outlineFitsDialog).toBe(true);
+  expect(paint.outerScroll).toEqual({ x: 0, y: 0 });
+  expect(paint.controls).toHaveLength(3);
+  for (const button of paint.controls) expect(button).toEqual({ fitsDialog: true, hit: true });
+  return paint;
+}
+async function fittedReadingViewport(page: Page) {
+  await page.waitForFunction(() => {
+    const port = document.querySelector<HTMLElement>('[data-docs-image-viewport]');
+    return (
+      port?.dataset.docsImageScale === 'fit' &&
+      port.tabIndex === -1 &&
+      Math.abs(port.scrollWidth - port.clientWidth) <= 1 &&
+      Math.abs(port.scrollHeight - port.clientHeight) <= 1
+    );
+  });
+  const fit = await page.locator('[data-docs-image-viewport]').evaluate((node) => {
+    const viewport = node.getBoundingClientRect();
+    const image = node.querySelector('img')!.getBoundingClientRect();
+    return {
+      x: viewport.x,
+      y: viewport.y,
+      width: node.clientWidth,
+      height: node.clientHeight,
+      scrollLeft: node.scrollLeft,
+      scrollTop: node.scrollTop,
+      image: { x: image.x, y: image.y, width: image.width, height: image.height },
+    };
+  });
+  expect(fit.width).toBeGreaterThan(0);
+  expect(fit.height).toBeGreaterThan(0);
+  expect(Math.abs(fit.scrollLeft)).toBeLessThanOrEqual(1);
+  expect(Math.abs(fit.scrollTop)).toBeLessThanOrEqual(1);
+  expect(fit.image.x).toBeGreaterThanOrEqual(fit.x - 1);
+  expect(fit.image.y).toBeGreaterThanOrEqual(fit.y - 1);
+  expect(fit.image.x + fit.image.width).toBeLessThanOrEqual(fit.x + fit.width + 1);
+  expect(fit.image.y + fit.image.height).toBeLessThanOrEqual(fit.y + fit.height + 1);
+  return fit;
+}
 type MotionFrame = {
   time: number;
   phase: string | null;
@@ -870,8 +961,59 @@ describe('automatic documentation image preview in real Chromium', () => {
         });
         expect(await page.locator('button[data-diagram-open]').count()).toBe(0);
         expect(await page.locator('.docs-image-full').getAttribute('src')).toContain(
-          `whitepaper-conditional-consistency.${locale}.svg`
+          `whitepaper-conditional-consistency${width < 640 ? '.mobile' : ''}.${locale}.svg`
         );
+        const viewport = page.locator('[data-docs-image-viewport]');
+        const zoom = page.locator('[data-docs-image-zoom]');
+        const zoomIn = page.locator('[data-docs-image-zoom-in]');
+        const zoomOut = page.locator('[data-docs-image-zoom-out]');
+        const readPosition = () =>
+          viewport.evaluate((node) => ({
+            x: node.scrollLeft,
+            y: node.scrollTop,
+            maxX: node.scrollWidth - node.clientWidth,
+            maxY: node.scrollHeight - node.clientHeight,
+          }));
+        expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
+        const readingWidth = (await page.locator('.docs-image-full').boundingBox())!.width;
+        expect(readingWidth).toBeGreaterThan((await trigger.locator('img').boundingBox())!.width);
+        await zoomIn.click();
+        const enlargedWidth = (await page.locator('.docs-image-full').boundingBox())!.width;
+        expect(enlargedWidth).toBeGreaterThan(readingWidth);
+        // PUI Button owns keyboard activation; native focus then reaches the
+        // browser scroll region rather than a second application key handler.
+        await page.keyboard.press('Tab');
+        expect(await viewport.evaluate((node) => node === document.activeElement)).toBe(true);
+        const keyboardFocus = await readingFocusPaint(page);
+        await capture(page, `whitepaper-${locale}-${width}-${colorScheme}-reading-keyboard-focus`);
+        const keyBefore = await readPosition();
+        if (keyBefore.maxY > keyBefore.y + 1) {
+          await page.keyboard.press('PageDown');
+          await expect.poll(async () => (await readPosition()).y).toBeGreaterThan(keyBefore.y);
+        }
+        const wheelBefore = await readPosition();
+        const background = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+        if (wheelBefore.maxX > wheelBefore.x + 1) {
+          await viewport.hover();
+          await page.mouse.wheel(wheelBefore.maxX * 2, 0);
+          await expect.poll(async () => (await readPosition()).x).toBeGreaterThan(wheelBefore.x);
+        }
+        expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(background);
+        const readingPosition = await readPosition();
+        await capture(page, `whitepaper-${locale}-${width}-${colorScheme}-reading`);
+        await zoomOut.click();
+        expect((await page.locator('.docs-image-full').boundingBox())!.width).toBeCloseTo(
+          readingWidth,
+          1
+        );
+        await zoom.click();
+        expect(await viewport.getAttribute('data-docs-image-scale')).toBe('fit');
+        const fitViewport = await fittedReadingViewport(page);
+        const fit = (await page.locator('.docs-image-full').boundingBox())!;
+        expect(fit.x).toBeGreaterThanOrEqual(0);
+        expect(fit.y).toBeGreaterThanOrEqual(0);
+        expect(fit.x + fit.width).toBeLessThanOrEqual(width + 1);
+        expect(fit.y + fit.height).toBeLessThanOrEqual(901);
         const canvas = await page.locator('[data-docs-image-canvas]').evaluate((el) => ({
           background: getComputedStyle(el).backgroundColor,
           padding: getComputedStyle(el).padding,
@@ -882,8 +1024,23 @@ describe('automatic documentation image preview in real Chromium', () => {
         expect(canvas.padding).toBe('0px');
         expect(canvas.border).toBe('0px');
         expect(canvas.shadow).toBe('none');
-        records.push({ whitepaper: locale, width, colorScheme, canvas });
+        records.push({
+          whitepaper: locale,
+          width,
+          colorScheme,
+          canvas,
+          readingWidth,
+          enlargedWidth,
+          keyBefore,
+          wheelBefore,
+          readingPosition,
+          keyboardFocus,
+          fit,
+          fitViewport,
+        });
         await capture(page, `whitepaper-${locale}-${width}-${colorScheme}`);
+        await page.keyboard.press('Enter');
+        expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
         await page.keyboard.press('Escape');
         await closed(page);
         expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
@@ -893,6 +1050,225 @@ describe('automatic documentation image preview in real Chromium', () => {
       }
     }, 90_000);
   }
+  for (const locale of ['zh-cn', 'en'] as const) {
+    it(`keeps the five ${locale} channel identifiers readable in the actual mobile table`, async () => {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = track(await context.newPage());
+      try {
+        await page.goto(`${baseUrl}/${locale}/whitepaper/2-interaction-relations/`, {
+          waitUntil: 'networkidle',
+        });
+        const words = page.locator('.whitepaper-channel-table tbody td:first-child code');
+        expect(await words.allTextContents()).toEqual([
+          'Event',
+          'Feedback',
+          'Props',
+          'Expose',
+          'Context',
+        ]);
+        const geometry = await words.evaluateAll((nodes) =>
+          nodes.map((node) => {
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            const lines = [...range.getClientRects()].filter(
+              (rect) => rect.width > 0 && rect.height > 0
+            );
+            return {
+              text: node.textContent,
+              lineTops: lines.map((rect) => rect.top),
+              whiteSpace: getComputedStyle(node).whiteSpace,
+            };
+          })
+        );
+        for (const word of geometry) {
+          expect(word.lineTops.length).toBeGreaterThan(0);
+          expect(Math.max(...word.lineTops) - Math.min(...word.lineTops)).toBeLessThan(2);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true
+        );
+        records.push({ channelTable: locale, geometry });
+        await words.first().scrollIntoViewIfNeeded();
+        await capture(page, `channel-table-${locale}-390`);
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+    for (const figure of ['lifecycle', 'translation'] as const) {
+      it(`reads the unchanged authored ${locale} ${figure} drawing through the mobile viewport`, async () => {
+        const context = await browser.newContext({
+          viewport: { width: 390, height: 844 },
+          colorScheme: locale === 'zh-cn' ? 'light' : 'dark',
+        });
+        const page = track(await context.newPage());
+        try {
+          const chapter =
+            figure === 'lifecycle' ? '4-semantics-beyond-channels' : '5-translation-layer';
+          const asset =
+            figure === 'lifecycle'
+              ? 'whitepaper-lifecycle.svg'
+              : `whitepaper-translation-responsibility.${locale}.svg`;
+          await page.goto(`${baseUrl}/${locale}/whitepaper/${chapter}/`, {
+            waitUntil: 'networkidle',
+          });
+          const authored = page.locator(`img[src="/diagrams/${asset}"]`).first();
+          const trigger = page.locator('[data-docs-image-trigger]').filter({ has: authored });
+          await trigger.click();
+          await entered(page);
+          const image = page.locator('.docs-image-full');
+          await image.evaluate((node) => (node as HTMLImageElement).decode());
+          expect(await image.getAttribute('src')).toContain(`/diagrams/${asset}`);
+          const viewport = page.locator('[data-docs-image-viewport]');
+          expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
+          const start = await viewport.evaluate((node) => ({
+            x: node.scrollLeft,
+            y: node.scrollTop,
+            maxX: node.scrollWidth - node.clientWidth,
+            maxY: node.scrollHeight - node.clientHeight,
+          }));
+          expect(start.maxX).toBeGreaterThan(0);
+          await capture(page, `authored-${locale}-${figure}-reading`);
+          await viewport.hover();
+          await page.mouse.wheel(start.maxX * 2, start.maxY * 2);
+          await expect
+            .poll(async () => viewport.evaluate((node) => node.scrollLeft))
+            .toBeGreaterThan(start.x);
+          const end = await viewport.evaluate((node) => ({
+            x: node.scrollLeft,
+            y: node.scrollTop,
+          }));
+          await capture(page, `authored-${locale}-${figure}-reading-end`);
+          await page.locator('[data-docs-image-zoom]').click();
+          expect(await viewport.getAttribute('data-docs-image-scale')).toBe('fit');
+          const fitViewport = await fittedReadingViewport(page);
+          const fit = (await image.boundingBox())!;
+          expect(fit.x).toBeGreaterThanOrEqual(0);
+          expect(fit.y).toBeGreaterThanOrEqual(0);
+          expect(fit.x + fit.width).toBeLessThanOrEqual(391);
+          expect(fit.y + fit.height).toBeLessThanOrEqual(845);
+          records.push({ authored: asset, locale, start, end, fit, fitViewport });
+          await capture(page, `authored-${locale}-${figure}-fit`);
+          await page.keyboard.press('Escape');
+          await closed(page);
+          expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+          await page.keyboard.press('Enter');
+          await entered(page);
+          expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
+          expect(
+            await viewport.evaluate((node) => ({ x: node.scrollLeft, y: node.scrollTop }))
+          ).toEqual({ x: 0, y: 0 });
+          await page.keyboard.press('Escape');
+          await closed(page);
+        } finally {
+          await capture(page, `authored-${locale}-${figure}-last-observed`);
+          await context.close();
+        }
+      }, 90_000);
+    }
+  }
+
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    it(`rejects stale ${family} diagram actions during close and after a new presentation`, async () => {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = track(await context.newPage());
+      try {
+        await page.goto(`${baseUrl}/en/whitepaper/6-consistency-boundary/`, {
+          waitUntil: 'networkidle',
+        });
+        await page.evaluate((family) => {
+          document.documentElement.dataset.siteLibraryFamily = family;
+        }, family);
+        await page.waitForFunction(
+          (family) =>
+            document.querySelector('.whitepaper-figure [data-docs-image-trigger]')?.localName ===
+            `docs-preview-${family}-image-trigger`,
+          family
+        );
+        const trigger = page.locator('.whitepaper-figure [data-docs-image-trigger]').first();
+        await trigger.click();
+        await entered(page);
+        await page
+          .locator('.docs-image-full')
+          .evaluate((node) => (node as HTMLImageElement).decode());
+        const oldButtons = await page
+          .locator('[data-docs-image-zoom-out], [data-docs-image-zoom], [data-docs-image-zoom-in]')
+          .elementHandles();
+        expect(oldButtons.length).toBe(3);
+        try {
+          const probeStaleActions = async (closeCurrent: boolean) =>
+            page.evaluate(
+              ({ oldButtons, closeCurrent }) => {
+                const root = document.querySelector<
+                  HTMLElement & {
+                    getExposes?: () => {
+                      close?: (reason: string) => void;
+                      open?: { get?: () => boolean };
+                    };
+                  }
+                >('[data-docs-image-dialog]');
+                if (closeCurrent) root?.getExposes?.().close?.('test.stale-diagram-action');
+                const snapshot = () => {
+                  const viewport = document.querySelector<HTMLElement>(
+                    '[data-docs-image-viewport]'
+                  );
+                  const image = document.querySelector<HTMLImageElement>('.docs-image-full');
+                  return {
+                    mode: viewport?.dataset.docsImageScale,
+                    width: image?.style.width,
+                    height: image?.style.height,
+                    x: viewport?.scrollLeft,
+                    y: viewport?.scrollTop,
+                  };
+                };
+                const before = snapshot();
+                // Retain obsolete public event producers deliberately. These
+                // synthetic negative controls are separate from native input.
+                const afterEach = oldButtons.map((button) => {
+                  button.dispatchEvent(new CustomEvent('click'));
+                  return snapshot();
+                });
+                return {
+                  open: root?.getExposes?.().open?.get?.(),
+                  oldConnected: oldButtons.map((button) => button.isConnected),
+                  before,
+                  afterEach,
+                };
+              },
+              { oldButtons, closeCurrent }
+            );
+          const leaving = await probeStaleActions(true);
+          expect(leaving.open).toBe(false);
+          expect(leaving.oldConnected).toEqual([true, true, true]);
+          for (const after of leaving.afterEach) expect(after).toEqual(leaving.before);
+          await closed(page);
+          await trigger.click();
+          await entered(page);
+          await page
+            .locator('.docs-image-full')
+            .evaluate((node) => (node as HTMLImageElement).decode());
+          const replaced = await probeStaleActions(false);
+          expect(replaced.open).toBe(true);
+          expect(replaced.oldConnected).toEqual([false, false, false]);
+          expect(replaced.before.mode).toBe('reading');
+          for (const after of replaced.afterEach) expect(after).toEqual(replaced.before);
+          const beforeZoom = (await page.locator('.docs-image-full').boundingBox())!.width;
+          await page.locator('[data-docs-image-zoom-in]').click();
+          expect((await page.locator('.docs-image-full').boundingBox())!.width).toBeGreaterThan(
+            beforeZoom
+          );
+          records.push({ staleDiagramActions: family, leaving, replaced });
+          await capture(page, `diagram-stale-actions-${family}`);
+          await page.keyboard.press('Escape');
+          await closed(page);
+        } finally {
+          await Promise.all(oldButtons.map((button) => button.dispose()));
+        }
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+
   it('preserves actual cross-origin image referrer and credential requests', async () => {
     const bytes = await readFile('apps/www/public/images/preview-fixture/raster.png');
     const requests: Array<{ cookie: string; referer: string; origin: string }> = [];
@@ -1015,6 +1391,21 @@ describe('automatic documentation image preview in real Chromium', () => {
       expect(focusPaint.width).toBe('2px');
       expect(focusPaint.color).not.toBe('rgba(0, 0, 0, 0)');
       await capture(page, 'forced-colors-keyboard-focus');
+      await page.goto(`${baseUrl}/en/whitepaper/6-consistency-boundary/`, {
+        waitUntil: 'networkidle',
+      });
+      await page.locator('.whitepaper-figure [data-docs-image-trigger]').first().click();
+      await entered(page);
+      await page
+        .locator('.docs-image-full')
+        .evaluate((node) => (node as HTMLImageElement).decode());
+      await page.locator('[data-docs-image-zoom-in]').click();
+      await page.keyboard.press('Tab');
+      const readingFocus = await readingFocusPaint(page);
+      records.push({ forcedColorsReadingFocus: readingFocus });
+      await capture(page, 'forced-colors-reading-keyboard-focus');
+      await page.keyboard.press('Escape');
+      await closed(page);
     } finally {
       await context.close();
     }

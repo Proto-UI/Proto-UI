@@ -31,7 +31,12 @@ export async function createPublicDrawerEntryFixture(
   }
   return {
     open() {
-      (host.querySelector('wc-shadcn-drawer-trigger') as HTMLElement).click();
+      const actions = host.querySelectorAll<HTMLElement>(
+        'wc-shadcn-drawer-trigger [data-demo-ref="trigger-action"]'
+      );
+      if (actions.length !== 1)
+        throw new Error('Public Drawer requires one physical trigger action');
+      actions[0]!.click();
     },
     async dispose() {
       await rendered.destroy();

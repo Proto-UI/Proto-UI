@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "scope": "Sprint 4 current Website ownership projection; draft lifecycle and all surrounding semantic owners unchanged",
+  "sourceHead": "9bd42c30cdf13093916f4866155de29afaab2e32",
+  "authority": "internal/website/self-hosting-coverage-matrix.md enforcement rule 6",
+  "sources": [
+    {
+      "path": "packages/modules/feedback/src/index.ts",
+      "baseSha256": "57307c4d4de4fae32758e64e0696c374908de7ab9b3261aa5e7c616518d2f81e",
+      "currentSha256": "1834c32e84d8def9a5f2c111c2c17f06d69ab24e28f55a1cb3624df8e1d14fad",
+      "bytes": 556,
+      "equalsCommitted9bd": true
+    },
+    {
+      "path": "packages/modules/feedback/src/types.ts",
+      "baseSha256": "26b604199f2bf9616abf5e327ca74c8344ce473bc8472eb0e8f8aed6ae7397ce",
+      "currentSha256": "f7df696c2cbc06ad392f4a35b44f527432f381c4c7ee82b6e4261cb11cbeba34",
+      "bytes": 4596,
+      "equalsCommitted9bd": true
+    },
+    {
+      "path": "packages/modules/feedback/src/create.ts",
+      "baseSha256": "4812506a51f80f2366c336a22b9378242e00fef6c2f7d6fa254e8cfd5c797148",
+      "currentSha256": "d3b7aa151bb0b354552c5105ab4073836006be2a91a8cdcbea221e5ea390098b",
+      "bytes": 39384,
+      "equalsCommitted9bd": true
+    },
+    {
+      "path": "packages/runtime/src/kernel/handles/def.ts",
+      "baseSha256": "b9d2c7e28189a34a1ef3c32abe678fc198dfc625f33821a87f9e7b7171f88c4d",
+      "currentSha256": "8ababe703c072d71c6b8529efe4c4249ddd34d952744213fc93df661db12d4c1",
+      "bytes": 16849,
+      "equalsCommitted9bd": true
+    },
+    {
+      "path": "packages/modules/feedback/src/shader/sink.ts",
+      "baseSha256": null,
+      "currentSha256": "140bd9adb239d3b1da1fb27296d74b2b8d8a7831ddaf724477c15051d40dc4cb",
+      "bytes": 944,
+      "equalsCommitted9bd": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/shader-webgl2.ts",
+      "baseSha256": null,
+      "currentSha256": "c81ce7cff0cf52a4783f931fc2a2e49e72402b20654cc0367722a80a7df88a86",
+      "bytes": 1705,
+      "equalsCommitted9bd": true
+    },
+    {
+      "path": "packages/adapters/base/src/material/shader-webgl2-host.ts",
+      "baseSha256": null,
+      "currentSha256": "558ed225533fe488dcdf177655e33cd8b485142045bf2e005ad0ca92dc0df248",
+      "bytes": 20488,
+      "equalsCommitted9bd": true
+    }
+  ],
+  "astroConfig": {
+    "beforeSha256": "eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7",
+    "afterSha256": "e1b7b417e40b95ccbc8183ade91a59910d17bd289a937e86205a40a38f390b3c",
+    "change": "Only the exact two default shader provider paths enter site-shadcn-controls before the existing optional-material exclusion; source resolver and helpers unchanged."
+  },
+  "evidence": [
+    {
+      "label": "Independent source review",
+      "sha256": "8c40aecb5e6ecf8094c175a88deff33836388c7d19bda37877e260103b91d6ea",
+      "bytes": 3784
+    },
+    {
+      "label": "Focused Website original and initial results",
+      "sha256": "6d664f1da6f77cf32b2eddeb1850d3cb1739d62c99bf910a3931e958ffb4c8d4",
+      "bytes": 2218
+    },
+    {
+      "label": "Current startup/Retry rerun",
+      "sha256": "91712d36d86011b333b7769b7bda2a07f6f98094066e38648010b9db1b271ee1",
+      "bytes": 517
+    },
+    {
+      "label": "Source scan and build resource outcomes",
+      "sha256": "ddf61192997179bee1b86051faa57cfa246958c4917b19dc9afc1d1603fa2fb3",
+      "bytes": 3886
+    },
+    {
+      "label": "CI manual-route controls",
+      "sha256": "a619d77ae0ab152b1225ba2610e0359b5a216c896d9d2c61ac3560191433b6fe",
+      "bytes": 955
+    },
+    {
+      "label": "Current original four Website regressions",
+      "sha256": "06dc19c7930e7dd8033eb98bfcaecda16df538abb3ba9ef80e243f46ed068528",
+      "bytes": 15700
+    },
+    {
+      "label": "Compiler controls original79",
+      "sha256": "7f23f55c5acba6781a478c0901a9a3aa98381d453df33bf480006a85576faba5",
+      "bytes": 27733
+    },
+    {
+      "label": "Compiler optional capture22/23",
+      "sha256": "73880cca942e620462c593378774781c5b4286d5dcea3601bf51b8f2ce134a1e",
+      "bytes": 18606
+    }
+  ],
+  "productionGraph": "Pending actual production build; 1977 graph-fixture passes do not replace it.",
+  "packageBudgets": "Unchanged strict ceilings; candidate canonical report and separate numeric transaction pending."
+}

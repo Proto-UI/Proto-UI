@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "reviewedSource": "f653cfc21be19861e3f7200de31ec1951bc19002",
+  "failure": {
+    "run": 45058974651,
+    "job": 137320400748,
+    "findings": 11,
+    "rawImports": 8,
+    "staleFingerprints": 3,
+    "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45058974651/job/137320400748",
+    "logSha256": "e617b9894099173445655caa711489b1c70b361b9607ca58afc423ffa0cc883e",
+    "artifactId": 14768482150,
+    "artifactSha256": "a593cdbeac1d781c1bc2aa44d202a2234c9ba3690b78dcc97f7bdc65590b5fb0"
+  },
+  "sources": [
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "old": {
+        "commit": "e4fc0f7c9fc200351bf8c48e7570e6b960ee06ed",
+        "blob": "5355a8a8dcfc7203b477e5c97db9519b29e84f98",
+        "sha256": "f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7"
+      },
+      "current": {
+        "blob": "62d4206a7b72360e2d7a23e374ec9d05e13ed733",
+        "sha256": "4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c"
+      },
+      "review": "Only the existing accordion-tight diagnostic makes its overlap destination visible. All eight literal raw imports are unchanged; existing diagnostic owners and rejection criteria remain."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "owners": ["www.demo.authored-controllers"],
+      "old": {
+        "commit": "4cef8f48098c9672d5fc58094a6369ffcf298ee8",
+        "blob": "321b4a0a4be6e497304c8118cf998feab47fecd4",
+        "sha256": "02942f7dee26c8dd7e3b0a3e02e17a28cdc1d3f65d5e49dfbf9845567639540a"
+      },
+      "current": {
+        "blob": "2cbd484e693cd25b1aa8d8073bb134bd67714407",
+        "sha256": "3ecd674e4bfc765319ce5c9c0783bd4c116ab1eaad068b0a3c546016fb08fa04"
+      },
+      "review": "Four authored margins change from mb-2 to mb-3. Controlled requests, acceptance, labels, status output and cleanup are unchanged."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "owners": [
+        "www.demo.lazy-mount-observer",
+        "www.demo.prototype-previewer",
+        "www.demo.runtime-select"
+      ],
+      "old": {
+        "commit": "7de7e9e64061123bc9195a3f10d80cec5614632f",
+        "blob": "19922b846c959fa58d3f0ee8c7deeb083347c9fb",
+        "sha256": "297a53f8a65cac3073858bae809bf985055ff83b4ecbc57c01b15d755891e5fc"
+      },
+      "current": {
+        "blob": "1364fd47f468105e4c21552980a79534e47dfed0",
+        "sha256": "5abf6359d556daf21777892ed99cec3b57d18c5102cfcaa9569987ab76086151"
+      },
+      "review": "Eager startup moves from the shared background helper to a local ordered abortable macrotask queue. Existing pending owner, post-import current/connection/visibility checks, removal and Astro-swap revocation remain. No new input/focus/selection/announcement ownership."
+    }
+  ],
+  "preserved": {
+    "ownerSets": true,
+    "rowStates": true,
+    "literalRawImports": true,
+    "fingerprintRules": true,
+    "scanScope": true,
+    "originalBrowserDeadlines": true
+  },
+  "validation": {
+    "sourceAdmission": {
+      "status": "passed",
+      "node": "v24.22.3",
+      "exitCode": 0,
+      "durationSeconds": 205.295,
+      "result": "[coverage-matrices] OK (2 matrices)",
+      "receipt": "evidence/2026-11-23-sprint-followthrough/sprint4-source-admission/s4-original-source-governance.receipt.json",
+      "logSha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    "targetedDiagnosticRegressions": {
+      "status": "passed",
+      "node": "v24.22.3",
+      "exitCode": 0,
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 4.495,
+      "receipt": "evidence/2026-11-23-sprint-followthrough/sprint4-source-admission/s4-diagnostic-boundaries.receipt.json",
+      "logSha256": "4a908510b06e04f9e9e648011d3e2c9e7e7aee62c1b66a847218ac8ad5d2ce4e"
+    },
+    "sourceStableDuringRuns": true,
+    "independentReview": "pending",
+    "finalHeadCI": "pending",
+    "localRecovery": "All five candidate files matched the recorded remote SHA-256 values before validation; same-lock installed dependencies reused, not a fresh local frozen installation.",
+    "subsequentFormatting": "Only the added Hover test tuple and this provenance JSON were formatted after the recorded runs; reviewed production sources and matrix bindings did not change.",
+    "formattedDiagnosticRegressions": {
+      "status": "passed",
+      "exitCode": 0,
+      "node": "v24.22.3",
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 3.855,
+      "testFileSha256": "b292c1df2fbb3176465adc4f3fb98ef0f095cd5a6b37763bfeb86912e52ab8ee",
+      "logSha256": "f9c897e56b1762a815ca5086b5a61d84c0e14a935b052043fc14bc74ba013406",
+      "receipt": "evidence/2026-11-23-sprint-followthrough/sprint4-source-admission/s4-diagnostic-boundaries-formatted.receipt.json"
+    }
+  }
+}

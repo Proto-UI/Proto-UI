@@ -58,14 +58,26 @@ implementations:
     status: passing
     path: apps/www/test/component-consumer-repairs.browser.test.ts
     required: true
-    consumesCases: [T-BASE-TOOLTIP-0001-CASE-SAME-NODE]
+    consumesCases:
+      - T-BASE-TOOLTIP-0001-CASE-SAME-NODE
+      - T-BASE-TOOLTIP-0001-CASE-A11Y
+      - T-BASE-TOOLTIP-0001-CASE-DISABLED
+      - T-BASE-TOOLTIP-0001-CASE-BOUNDARY
     notes:
-      [
-        Actual Chromium Tab/Shift+Tab,
-        hover,
-        focus,
-        Escape and single command signals across Base/Shadcn/Brutalist in React and Web Components. OS assistive technology remains separate.,
-      ]
+      - Actual Chromium Tab/Shift+Tab, hover, focus, Escape, dynamic child replacement and single command signals across Base/Shadcn/Brutalist in React, Vue, Vue 2 and Web Components.
+      - A real ShadowRoot with an explicitly registered same-tree Web portal retains the browser-computed description; the default body destination is a negative control with matching ID strings but no computed description.
+      - Standalone Trigger retains its exposes and focus behavior. The original nested-trigger shape is retained as a two-Tab-stop negative control, not as a current Shenko application acceptance.
+      - Source fb6a1ca3459ab90987fd51b3c4dc35b8dc8c2aba passed the containing 84-case native suite on Chromium 145 with its sandbox enabled. Native OS assistive technology and a true non-DOM host remain separate.
+  - id: react-tooltip-description-presence
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/tooltip-description-presence.integration.test.ts
+    required: true
+    consumesCases: [T-BASE-TOOLTIP-0001-CASE-A11Y]
+    notes:
+      - Two real React/createPortal cases in Happy DOM observe owned IDREF targets before batched open commits and after retained close/reopen.
+      - Preserves host description tokens, stable Content identity, optional Content teardown, and same-domain resolution without replacing controlled open ownership.
+      - This mapping records lifecycle and relationship evidence; native input, computed accessibility, paint, and attribution of an earlier native failure remain separate.
   - id: prototypes-base-tooltip-contract
     kind: module-test
     status: passing

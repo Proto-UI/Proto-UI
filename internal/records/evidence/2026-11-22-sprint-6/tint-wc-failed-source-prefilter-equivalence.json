@@ -1,0 +1,117 @@
+{
+  "kind": "read-only-source-bound-cpu-prefilter-equivalence-on-native-failure-inputs",
+  "createdAt": "2026-11-22T10:52:21.969Z",
+  "revisions": [
+    {
+      "sha": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "fileSha256": "04d7916739cc3200dbbd165bcd4d05ea86e61bd6fbb8393345f7f88a30ca4ffa",
+      "closureSha256": "40c16cc42b9c0c40c352b25a87273ab8057d3fd804d4e37af311c1964c698cf1"
+    },
+    {
+      "sha": "9b6448e339a474bca6a8fbaae4ad8c24c522a84c",
+      "fileSha256": "c3c41e9eaf560f56bd81431254f8ae03ba059a21078cabff3f2a158ee2119a86",
+      "closureSha256": "6280779c32c34ec180e622fd0a2e8a0735624594b48488106a5053daf7f13013"
+    }
+  ],
+  "artifact": 14750853650,
+  "scope": "Exact archived native source PNG pixels passed through each committed CPU prefilter declaration only. PNG decoded read-only via Pillow. No browser, shader execution, image decode/commit timing, or complete baseline product run.",
+  "rows": [
+    {
+      "name": "wc-light-button-text-pastel-0-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "74bfa2cfb85746382503c066659d76876f10a50671f1d721b4ad523a1a7e062d",
+      "reportedSourcePixelSha256": "74bfa2cfb85746382503c066659d76876f10a50671f1d721b4ad523a1a7e062d",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "c7cef2d800ddb94d9e16dd2e49a3c03c5da0355531a59ec97827612831cdb221",
+      "candidatePreparedSha256": "c7cef2d800ddb94d9e16dd2e49a3c03c5da0355531a59ec97827612831cdb221",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-light-button-text-pastel-1-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "932fdc869597c93c17d860728204db52c5011bd501cec8d041aec8dda35f7dd3",
+      "reportedSourcePixelSha256": "932fdc869597c93c17d860728204db52c5011bd501cec8d041aec8dda35f7dd3",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "ac7fb448a64a16b0b3b69eb27da41ca193dad1419275e41ea5c6dcb9f249bfa5",
+      "candidatePreparedSha256": "ac7fb448a64a16b0b3b69eb27da41ca193dad1419275e41ea5c6dcb9f249bfa5",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-light-button-icon-only-pastel-0-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "74bfa2cfb85746382503c066659d76876f10a50671f1d721b4ad523a1a7e062d",
+      "reportedSourcePixelSha256": "74bfa2cfb85746382503c066659d76876f10a50671f1d721b4ad523a1a7e062d",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "c7cef2d800ddb94d9e16dd2e49a3c03c5da0355531a59ec97827612831cdb221",
+      "candidatePreparedSha256": "c7cef2d800ddb94d9e16dd2e49a3c03c5da0355531a59ec97827612831cdb221",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-light-button-icon-only-pastel-1-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "932fdc869597c93c17d860728204db52c5011bd501cec8d041aec8dda35f7dd3",
+      "reportedSourcePixelSha256": "932fdc869597c93c17d860728204db52c5011bd501cec8d041aec8dda35f7dd3",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "ac7fb448a64a16b0b3b69eb27da41ca193dad1419275e41ea5c6dcb9f249bfa5",
+      "candidatePreparedSha256": "ac7fb448a64a16b0b3b69eb27da41ca193dad1419275e41ea5c6dcb9f249bfa5",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-dark-submit-text-pastel-0-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "9b80accc28ca2847987767045abea16b0aa81d9f51e07d45fc5f46cd4fd7a1ab",
+      "reportedSourcePixelSha256": "9b80accc28ca2847987767045abea16b0aa81d9f51e07d45fc5f46cd4fd7a1ab",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "b42683060e22b5ff2cc8431aef197c6b99d914c24efbc6c604542374bc98c19a",
+      "candidatePreparedSha256": "b42683060e22b5ff2cc8431aef197c6b99d914c24efbc6c604542374bc98c19a",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-dark-submit-text-pastel-1-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "f5a94533fbd227032adcbadfaf60e24cc06ee7b58b0470679718e0d5f1160f43",
+      "reportedSourcePixelSha256": "f5a94533fbd227032adcbadfaf60e24cc06ee7b58b0470679718e0d5f1160f43",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "20021f0113e62e4b03c9968f7426ae5775501ba978125b7fc0e733ccbcbd242b",
+      "candidatePreparedSha256": "20021f0113e62e4b03c9968f7426ae5775501ba978125b7fc0e733ccbcbd242b",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-dark-submit-icon-only-pastel-0-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "9b80accc28ca2847987767045abea16b0aa81d9f51e07d45fc5f46cd4fd7a1ab",
+      "reportedSourcePixelSha256": "9b80accc28ca2847987767045abea16b0aa81d9f51e07d45fc5f46cd4fd7a1ab",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "b42683060e22b5ff2cc8431aef197c6b99d914c24efbc6c604542374bc98c19a",
+      "candidatePreparedSha256": "b42683060e22b5ff2cc8431aef197c6b99d914c24efbc6c604542374bc98c19a",
+      "bytes": 260624,
+      "mismatches": 0
+    },
+    {
+      "name": "wc-dark-submit-icon-only-pastel-1-tinted",
+      "width": 358,
+      "height": 182,
+      "sourcePixelSha256": "f5a94533fbd227032adcbadfaf60e24cc06ee7b58b0470679718e0d5f1160f43",
+      "reportedSourcePixelSha256": "f5a94533fbd227032adcbadfaf60e24cc06ee7b58b0470679718e0d5f1160f43",
+      "inputHashMatches": true,
+      "baselinePreparedSha256": "20021f0113e62e4b03c9968f7426ae5775501ba978125b7fc0e733ccbcbd242b",
+      "candidatePreparedSha256": "20021f0113e62e4b03c9968f7426ae5775501ba978125b7fc0e733ccbcbd242b",
+      "bytes": 260624,
+      "mismatches": 0
+    }
+  ],
+  "allEqual": true
+}

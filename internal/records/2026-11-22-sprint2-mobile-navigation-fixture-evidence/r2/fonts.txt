@@ -1,0 +1,2 @@
+fonts-noto-cjk	1:20230817+repack1-3
+Noto Sans CJK SC

@@ -481,6 +481,28 @@ describe('proto style css renderer', () => {
       }
     }
   });
+  it.each(STYLE_CSS_LANES)(
+    '$target renders a literal white navbar ring without extending arbitrary color admission',
+    ({ render }) => {
+      const css = render([
+        'ring-2',
+        'ring-offset-0',
+        'ring-white',
+        'data-[focus-visible]:ring-white',
+      ]);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('--pui-ring-color: #ffffff;');
+      expect(css).not.toContain('var(--pui-primary-foreground)');
+      expect(css).toContain('--pui-ring-width: 2px;');
+      expect(css).toContain('--pui-ring-offset-width: 0px;');
+      expect(css).toContain('box-shadow: var(--pui-ring-offset-shadow');
+      for (const unsupported of ['ring-white/50', 'ring-[#fff]', 'ring-white;color:red']) {
+        const rejected = render([unsupported]);
+        expect(rejected).toContain('Unsupported Proto UI style tokens');
+        expect(rejected).not.toContain('--pui-ring-color: #ffffff;');
+      }
+    }
+  );
   it.each([
     ['w-72', 'width: 18rem;'],
     ['text-[1.3125rem]', 'font-size: 1.3125rem;'],

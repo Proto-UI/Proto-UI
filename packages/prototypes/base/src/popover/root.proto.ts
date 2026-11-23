@@ -13,6 +13,7 @@ function sameContext(a: PopoverContextValue, b: PopoverContextValue): boolean {
   return (
     a.rootId === b.rootId &&
     a.open === b.open &&
+    a.openSessionId === b.openSessionId &&
     a.openFocusReason === b.openFocusReason &&
     a.returnFocusReason === b.returnFocusReason &&
     a.controlled === b.controlled &&
@@ -45,6 +46,7 @@ function setupPopoverRoot(def: DefHandle<PopoverRootProps, PopoverRootExposes>):
   def.context.provide(POPOVER_CONTEXT, {
     rootId,
     open: false,
+    openSessionId: 0,
     openFocusReason: null,
     returnFocusReason: null,
     controlled: false,
@@ -69,42 +71,32 @@ function setupPopoverRoot(def: DefHandle<PopoverRootProps, PopoverRootExposes>):
 
   def.expose.event('openChange', { payload: 'json' });
 
-  const initialContext: PopoverContextValue = {
-    rootId,
-    open: false,
-    openFocusReason: null,
-    returnFocusReason: null,
-    controlled: false,
-    disabled: false,
-    alert: false,
-    a11yLabel: '',
-    requestedOpen: false,
-    requestReason: null,
-    requestFocusReason: null,
-    requestVersion: 0,
-  };
-  let snapshot: PopoverContextValue = initialContext;
-  let published: PopoverContextValue = initialContext;
   let lastRequestVersion = 0;
 
   const syncContext = (run: any) => {
+    const current: PopoverContextValue = run.context.read(POPOVER_CONTEXT);
+    const nextOpen = open?.get() ?? false;
     const next = {
-      ...snapshot,
-      open: open?.get() ?? false,
+      ...current,
+      open: nextOpen,
+      openSessionId: current.openSessionId + (!current.open && nextOpen ? 1 : 0),
+      controlled: run.props.isProvided('open'),
+      disabled: !!run.props.get().disabled,
+      alert: false,
+      a11yLabel: run.props.get().a11yLabel ?? '',
     };
-    snapshot = next;
-    if (sameContext(published, next)) return;
-    published = next;
+    if (sameContext(current, next)) return;
     run.context.update(POPOVER_CONTEXT, next);
   };
 
   def.context.subscribe(POPOVER_CONTEXT, (run, next) => {
-    snapshot = next;
-    published = next;
-    if (next.requestVersion !== lastRequestVersion) {
+    // next/prev describe a queued transition; the provider may already contain
+    // a newer opening. Never restore canonical state from an old notification.
+    const current = run.context.read(POPOVER_CONTEXT);
+    if (next.requestVersion > lastRequestVersion) {
       lastRequestVersion = next.requestVersion;
-      if (!next.controlled) {
-        open?.set(next.requestedOpen, 'reason: popover open request => uncontrolled sync');
+      if (!current.controlled) {
+        open?.set(current.open, 'reason: popover open request => uncontrolled sync');
       }
       run.expose.emit('openChange', {
         open: next.requestedOpen,
@@ -113,32 +105,14 @@ function setupPopoverRoot(def: DefHandle<PopoverRootProps, PopoverRootExposes>):
       });
       return;
     }
-    if (!snapshot.controlled) {
-      open?.set(next.open, 'reason: popover context sync => open');
+    if (!current.controlled) {
+      open?.set(current.open, 'reason: popover context sync => open');
     }
   });
 
-  def.lifecycle.onCreated((run) => {
-    snapshot = {
-      ...snapshot,
-      controlled: run.props.isProvided('open'),
-      disabled: !!run.props.get().disabled,
-      alert: false,
-      a11yLabel: run.props.get().a11yLabel ?? '',
-    };
-    syncContext(run);
-  });
+  def.lifecycle.onCreated(syncContext);
 
-  def.props.watch(['open', 'disabled', 'a11yLabel'], (run, next) => {
-    snapshot = {
-      ...snapshot,
-      controlled: run.props.isProvided('open'),
-      disabled: !!next.disabled,
-      alert: false,
-      a11yLabel: next.a11yLabel ?? '',
-    };
-    syncContext(run);
-  });
+  def.props.watch(['open', 'disabled', 'a11yLabel'], syncContext);
 
   open?.watch((run, event) => {
     if (event.type !== 'next') return;

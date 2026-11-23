@@ -28,8 +28,8 @@ criteria:
       en: input, change, compositionstart, compositionupdate, and compositionend must normalize native-order value, composing, data, and inputType facts without leaking the native Event object as a prototype event payload.
   - id: C-TEXT-CONTROL-0001-D
     text:
-      zh-CN: 首次同步确定 controlled 或 uncontrolled ownership 后，该模式必须保持稳定；controlled 编辑只构成 proposal，并在 callback boundary 后恢复 owner value。
-      en: The first synchronization must establish stable controlled or uncontrolled ownership; a controlled edit is only a proposal, and the owner value must be restored after the callback boundary.
+      zh-CN: 首次同步确定 controlled 或 uncontrolled ownership 后，该模式必须保持稳定；controlled 编辑只构成 proposal，并在 callback boundary 后恢复 owner value。在 input/change/compositionend 的回调内，未变的 owner 同步不得提前覆写不同的物理 candidate 或截断其 caret；明确的新 canonical owner 值仍立即有权更新。
+      en: The first synchronization must establish stable controlled or uncontrolled ownership; a controlled edit is only a proposal, and the owner value must be restored after the callback boundary. Within input/change/compositionend callbacks, synchronization of the unchanged owner must not prematurely replace a distinct physical candidate or truncate its caret; an explicitly different canonical owner value remains immediately authoritative.
   - id: C-TEXT-CONTROL-0001-E
     text:
       zh-CN: Controlled composition 期间不得恢复旧 value 或破坏 IME candidate/cursor；composition boundary 完成后才可以恢复未被 owner 接纳的 proposal。

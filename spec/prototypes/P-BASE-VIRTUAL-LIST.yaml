@@ -19,8 +19,9 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - { id: C-WINDOW-MATERIALIZER-OWNER-0001, since: 0.3.0-alpha.2 }
 verifies:
-  tests: []
+  tests: [{ id: T-WINDOW-MATERIALIZER-OWNER-0001, since: 0.3.0-alpha.2 }]
 sources:
   - path: packages/prototypes/base/src/virtual-list/
 openQuestions:

@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: diagnostic import review rejects owner, body and edge drift: liquid-toggle-tint-probe.ts
+ok 1 - diagnostic import review rejects owner, body and edge drift: liquid-toggle-tint-probe.ts
+  ---
+  duration_ms: 835.23872
+  type: 'test'
+  ...
+# Subtest: diagnostic import review rejects owner, body and edge drift: liquid-glass-portal.astro
+ok 2 - diagnostic import review rejects owner, body and edge drift: liquid-glass-portal.astro
+  ---
+  duration_ms: 432.961184
+  type: 'test'
+  ...
+# Subtest: diagnostic import review rejects owner, body and edge drift: liquid-glass-state-controls.astro
+ok 3 - diagnostic import review rejects owner, body and edge drift: liquid-glass-state-controls.astro
+  ---
+  duration_ms: 370.672177
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: preferences.ts exact
+ok 4 - private Liquid Card interactive source binding: preferences.ts exact
+  ---
+  duration_ms: 30.798883
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: preferences.ts wrong-owner
+ok 5 - private Liquid Card interactive source binding: preferences.ts wrong-owner
+  ---
+  duration_ms: 36.946722
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: preferences.ts changed-bytes
+ok 6 - private Liquid Card interactive source binding: preferences.ts changed-bytes
+  ---
+  duration_ms: 28.566592
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: preferences.ts adjacent-path
+ok 7 - private Liquid Card interactive source binding: preferences.ts adjacent-path
+  ---
+  duration_ms: 36.759461
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: style-tint-profile.ts exact
+ok 8 - private Liquid Card interactive source binding: style-tint-profile.ts exact
+  ---
+  duration_ms: 39.020312
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: style-tint-profile.ts wrong-owner
+ok 9 - private Liquid Card interactive source binding: style-tint-profile.ts wrong-owner
+  ---
+  duration_ms: 40.174679
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: style-tint-profile.ts changed-bytes
+ok 10 - private Liquid Card interactive source binding: style-tint-profile.ts changed-bytes
+  ---
+  duration_ms: 38.80962
+  type: 'test'
+  ...
+# Subtest: private Liquid Card interactive source binding: style-tint-profile.ts adjacent-path
+ok 11 - private Liquid Card interactive source binding: style-tint-profile.ts adjacent-path
+  ---
+  duration_ms: 26.534961
+  type: 'test'
+  ...
+# Subtest: private Liquid Card import stays source-bound: packages/adapters/base/src/material/preferences.ts
+ok 12 - private Liquid Card import stays source-bound: packages/adapters/base/src/material/preferences.ts
+  ---
+  duration_ms: 151.617426
+  type: 'test'
+  ...
+# Subtest: private Liquid Card import stays source-bound: packages/adapters/base/src/material/style-tint-profile.ts
+ok 13 - private Liquid Card import stays source-bound: packages/adapters/base/src/material/style-tint-profile.ts
+  ---
+  duration_ms: 179.665311
+  type: 'test'
+  ...
+# Subtest: merged material helper edges retain exact importers and reject neighboring modules
+ok 14 - merged material helper edges retain exact importers and reject neighboring modules
+  ---
+  duration_ms: 176.698262
+  type: 'test'
+  ...
+# Subtest: Sprint 6 Liquid state-controls admits the exact four-runtime demonstration
+ok 15 - Sprint 6 Liquid state-controls admits the exact four-runtime demonstration
+  ---
+  duration_ms: 14.24914
+  type: 'test'
+  ...
+# Subtest: Sprint 6 Liquid state-controls still rejects static-react
+ok 16 - Sprint 6 Liquid state-controls still rejects static-react
+  ---
+  duration_ms: 1.671103
+  type: 'test'
+  ...
+# Subtest: Sprint 6 Liquid state-controls still rejects copied-entry
+ok 17 - Sprint 6 Liquid state-controls still rejects copied-entry
+  ---
+  duration_ms: 0.764885
+  type: 'test'
+  ...
+# Subtest: Sprint 6 Liquid state-controls still rejects ordinary-shell-import
+ok 18 - Sprint 6 Liquid state-controls still rejects ordinary-shell-import
+  ---
+  duration_ms: 0.694849
+  type: 'test'
+  ...
+# Subtest: Sprint 6 fixture classification retains static Adapter rejection for liquid-tint-stage-diagnostic
+ok 19 - Sprint 6 fixture classification retains static Adapter rejection for liquid-tint-stage-diagnostic
+  ---
+  duration_ms: 0.889513
+  type: 'test'
+  ...
+# Subtest: Sprint 6 fixture classification retains static Adapter rejection for liquid-visible-refraction-diagnostic
+ok 20 - Sprint 6 fixture classification retains static Adapter rejection for liquid-visible-refraction-diagnostic
+  ---
+  duration_ms: 0.638864
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5308.178211

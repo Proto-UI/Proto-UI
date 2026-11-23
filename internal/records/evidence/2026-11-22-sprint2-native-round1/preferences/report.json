@@ -1,0 +1,76 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 4,
+  "numPassedTests": 4,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1795355719709,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["bounded preferences in real Web hosts"],
+          "fullName": "bounded preferences in real Web hosts wc repaints live preferences and retains safe unknown fallback",
+          "status": "passed",
+          "title": "wc repaints live preferences and retains safe unknown fallback",
+          "duration": 2163.723706,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bounded preferences in real Web hosts"],
+          "fullName": "bounded preferences in real Web hosts react repaints live preferences and retains safe unknown fallback",
+          "status": "passed",
+          "title": "react repaints live preferences and retains safe unknown fallback",
+          "duration": 1493.7532899999997,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bounded preferences in real Web hosts"],
+          "fullName": "bounded preferences in real Web hosts vue repaints live preferences and retains safe unknown fallback",
+          "status": "passed",
+          "title": "vue repaints live preferences and retains safe unknown fallback",
+          "duration": 1512.6255179999998,
+          "failureMessages": [],
+          "meta": {}
+        },
+        {
+          "ancestorTitles": ["bounded preferences in real Web hosts"],
+          "fullName": "bounded preferences in real Web hosts vue2 repaints live preferences and retains safe unknown fallback",
+          "status": "passed",
+          "title": "vue2 repaints live preferences and retains safe unknown fallback",
+          "duration": 1430.905764,
+          "failureMessages": [],
+          "meta": {}
+        }
+      ],
+      "startTime": 1795355720493,
+      "endTime": 1795355727093.9058,
+      "status": "passed",
+      "message": "",
+      "name": "/home/runner/work/Proto-UI/Proto-UI/apps/www/test/preferences.browser.test.ts"
+    }
+  ]
+}

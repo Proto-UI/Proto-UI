@@ -1,0 +1,79 @@
+id: T-DATA-TABLE-RECIPES-0001
+type: test
+title: Data Table public recipe and portable activation evidence
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: The bounded deterministic and real-adapter public recipe suites are recorded independently of pending native browser execution, assistive technology and stable semantic admission.
+summary: Verifies portable ownership and actual authored public consumption without replacing independent host or compiler acceptance.
+cases:
+  - id: T-DATA-TABLE-RECIPES-0001-CASE-FILTER
+    title: Column queries compose with global filtering before paging
+    covers: [C-DATA-TABLE-RECIPES-0001-FILTER]
+    expectation: column-queries-compose-with-global-filtering-before-paging
+  - id: T-DATA-TABLE-RECIPES-0001-CASE-VISIBILITY
+    title: Hidden columns preserve authored children and complete table topology
+    covers: [C-DATA-TABLE-RECIPES-0001-VISIBILITY]
+    expectation: hidden-columns-preserve-authored-children-and-complete-table-topology
+  - id: T-DATA-TABLE-RECIPES-0001-CASE-SELECTION
+    title: Page selection preserves other pages and controlled authority
+    covers: [C-DATA-TABLE-RECIPES-0001-SELECTION]
+    expectation: page-selection-preserves-other-pages-and-controlled-authority
+  - id: T-DATA-TABLE-RECIPES-0001-CASE-CUSTOM-CELL
+    title: Custom cells track current and same-ID replacement records
+    covers: [C-DATA-TABLE-RECIPES-0001-CUSTOM-CELL]
+    expectation: custom-cells-track-current-and-same-id-replacement-records
+  - id: T-DATA-TABLE-RECIPES-0001-CASE-ACTIVATION
+    title: Native-shaped row and sorting activation stays exact-once
+    covers: [C-DATA-TABLE-RECIPES-0001-ACTIVATION]
+    expectation: native-shaped-row-and-sorting-activation-stays-exact-once
+verifies:
+  contracts: [C-DATA-TABLE-RECIPES-0001]
+exercises:
+  prototypes: [P-BASE-DATA-TABLE]
+implementations:
+  - id: source-conformance
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/data-table-recipes.test.ts
+    required: true
+    consumesCases:
+      [
+        T-DATA-TABLE-RECIPES-0001-CASE-FILTER,
+        T-DATA-TABLE-RECIPES-0001-CASE-VISIBILITY,
+        T-DATA-TABLE-RECIPES-0001-CASE-SELECTION,
+        T-DATA-TABLE-RECIPES-0001-CASE-CUSTOM-CELL,
+        T-DATA-TABLE-RECIPES-0001-CASE-ACTIVATION,
+      ]
+  - id: public-web-adapter-recipes
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/data-table-recipes.test.ts
+    required: true
+    consumesCases:
+      [
+        T-DATA-TABLE-RECIPES-0001-CASE-FILTER,
+        T-DATA-TABLE-RECIPES-0001-CASE-VISIBILITY,
+        T-DATA-TABLE-RECIPES-0001-CASE-SELECTION,
+        T-DATA-TABLE-RECIPES-0001-CASE-CUSTOM-CELL,
+        T-DATA-TABLE-RECIPES-0001-CASE-ACTIVATION,
+      ]
+  - id: native-public-recipes
+    kind: runtime-test
+    status: active
+    path: scripts/analysis/collections-recipes-browser.mjs
+    required: true
+    consumesCases:
+      [
+        T-DATA-TABLE-RECIPES-0001-CASE-FILTER,
+        T-DATA-TABLE-RECIPES-0001-CASE-VISIBILITY,
+        T-DATA-TABLE-RECIPES-0001-CASE-SELECTION,
+        T-DATA-TABLE-RECIPES-0001-CASE-CUSTOM-CELL,
+        T-DATA-TABLE-RECIPES-0001-CASE-ACTIVATION,
+      ]
+    notes:
+      - Runner is implemented; current-candidate browser report is required separately and no native pass is inferred from source or happy-dom.
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Map deterministic ownership and public recipe evidence while keeping native, assistive technology and stable admission separate.
+tags: [sprint2, collections, ownership, conformance]

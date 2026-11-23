@@ -11,7 +11,11 @@ import { asOptionalFieldControl } from '../field/control-binding.proto';
 import { FIELD_LABEL_PAIR } from '../field/shared';
 import type { SwitchRootAsHookContract, SwitchRootExposes, SwitchRootProps } from './types';
 
-export type SwitchRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
+export type SwitchRootSetupOptions = Readonly<{
+  fieldBinding?: boolean;
+  /** Explicit Field composition installs its reset entry; the ordinary Root API stays independent. */
+  registerResetValue?: (resetValue: () => boolean) => void;
+}>;
 /** Definition-time semantic composition; ordinary Switch remains independent of Field. */
 export function setupSwitchRoot(
   def: DefHandle<SwitchRootProps, SwitchRootExposes>,
@@ -104,10 +108,12 @@ export function setupSwitchRoot(
   });
 
   let controlled = false;
+  let initialChecked = false;
   let accepted = false;
   let startProgress = 0;
   let live = true;
   let interactionEpoch = 0;
+  let intentEpoch = 0;
   let currentRun: RunHandle<SwitchRootProps> | null = null;
   let viewEpoch = 0;
   const reportTasks = new Set<{ cancel(): void }>();
@@ -184,6 +190,7 @@ export function setupSwitchRoot(
   };
 
   const syncDisabled = (run: RunHandle<SwitchRootProps>, nextDisabled: boolean) => {
+    if (nextDisabled !== disabled.get()) intentEpoch++;
     disabled.set(nextDisabled, 'reason: switch root sync disabled');
     focusable.setDisabled(nextDisabled);
     if (nextDisabled) {
@@ -199,6 +206,7 @@ export function setupSwitchRoot(
       if (currentRun) syncDisabled(currentRun, binding.state.fieldDisabled.get());
     });
     binding.state.fieldReadOnly.watch(() => {
+      intentEpoch++;
       if (currentRun) invalidatePreview(currentRun);
     });
     focused.watch((_, event) => {
@@ -211,10 +219,8 @@ export function setupSwitchRoot(
   def.lifecycle.onCreated((run) => {
     currentRun = run;
     controlled = run.props.isProvided('checked');
-    checked.set(
-      controlled ? !!run.props.get().checked : !!run.props.get().defaultChecked,
-      'reason: switch root initialize checked'
-    );
+    initialChecked = controlled ? !!run.props.get().checked : !!run.props.get().defaultChecked;
+    checked.set(initialChecked, 'reason: switch root initialize checked');
     syncDisabled(run, binding ? binding.state.fieldDisabled.get() : !!run.props.get().disabled);
     publishContext(run);
     reportField();
@@ -234,6 +240,7 @@ export function setupSwitchRoot(
     const changed =
       nextControlled !== controlled || (nextControlled && !!next.checked !== checked.get());
     controlled = nextControlled;
+    if (changed) intentEpoch++;
     if (controlled) checked.set(!!next.checked, 'reason: switch root controlled checked sync');
     if (changed) invalidatePreview(run);
     else publishContext(run);
@@ -246,6 +253,7 @@ export function setupSwitchRoot(
   });
 
   def.props.watch(['draggable', 'direction'], (run) => {
+    intentEpoch++;
     invalidatePreview(run);
     publishContext(run);
   });
@@ -294,6 +302,7 @@ export function setupSwitchRoot(
   // P-BASE-SWITCH-PRESS-LIFECYCLE
   def.event.on('pointer.down', () => {
     if (disabled.get()) return;
+    intentEpoch++;
     pressed.set(true, 'reason: switch root pointer.down => pressed');
   });
   def.event.on('pointer.up', () => {
@@ -311,9 +320,15 @@ export function setupSwitchRoot(
     if (!live || disabled.get() || readOnly() || !isCurrent() || nextChecked === checked.get())
       return;
     const previousChecked = checked.get();
+    const intent = ++intentEpoch;
     const epoch = ++interactionEpoch;
     const current = () =>
-      live && !disabled.get() && !readOnly() && interactionEpoch === epoch && isCurrent();
+      live &&
+      intentEpoch === intent &&
+      !disabled.get() &&
+      !readOnly() &&
+      interactionEpoch === epoch &&
+      isCurrent();
     if (!controlled) checked.set(nextChecked, 'reason: switch accepted checked request');
     if (!current()) return;
     publishContext(run);
@@ -333,8 +348,11 @@ export function setupSwitchRoot(
     }
   };
   const activate = (run: RunHandle<SwitchRootProps>, isCurrent: () => boolean = () => true) => {
+    const intent = ++intentEpoch,
+      view = viewEpoch;
     pressed.set(false, 'reason: switch root press.commit => pressed');
-    if (!live || disabled.get() || readOnly() || !isCurrent()) return;
+    if (!live || currentRun !== run || viewEpoch !== view || intentEpoch !== intent) return;
+    if (disabled.get() || readOnly() || !isCurrent()) return;
     if (accepted) invalidatePreview(run);
     requestChecked(run, !checked.get(), isCurrent);
   };
@@ -348,6 +366,7 @@ export function setupSwitchRoot(
     }
     if (sample.phase === 'start') {
       if (disabled.get() || readOnly() || !draggable.get()) return;
+      intentEpoch++;
       const epoch = ++interactionEpoch;
       accepted = true;
       startProgress = checked.get() ? 1 : 0;
@@ -385,6 +404,36 @@ export function setupSwitchRoot(
     },
     options.fieldBinding ? FIELD_LABEL_PAIR : undefined
   );
+  options.registerResetValue?.(() => {
+    const run = currentRun,
+      view = viewEpoch;
+    if (!run || !live) return false;
+    const intent = ++intentEpoch;
+    const ownsView = () => live && currentRun === run && viewEpoch === view;
+    const current = () => ownsView() && intentEpoch === intent;
+    // Fix the lease before teardown: its public state notifications may commit
+    // another owner, start another request, reset again, or dispose the view.
+    try {
+      for (const task of reportTasks) task.cancel();
+      reportTasks.clear();
+      invalidatePreview(run, false);
+      if (!current()) return true;
+      const operation = interactionEpoch;
+      const settled = () => current() && interactionEpoch === operation;
+      if (!controlled) checked.set(initialChecked, 'reason: FieldSwitch reset canonical checked');
+      if (!settled() || !publishContext(run)) return true;
+      reportField();
+      if (!settled()) return true;
+      if (controlled) run.expose.emit('checkedChange', { checked: initialChecked });
+      if (!settled() || !publishContext(run)) return true;
+      reportField();
+      return true;
+    } finally {
+      // Restore only current policy/axis availability, never an old value. A
+      // callback may have replaced the intent while retaining this same view.
+      if (ownsView()) syncAxis(run);
+    }
+  });
 }
 
 /*

@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import type { Browser, Locator } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RUNTIMES, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
 import { documentRect } from './browser-geometry';
@@ -22,6 +22,90 @@ async function bounds(locator: Locator, label: string) {
   const box = await locator.boundingBox();
   if (!box) throw new Error(`${label}: expected rendered geometry.`);
   return box;
+}
+
+async function scrollFacts(viewport: Locator) {
+  return viewport.evaluate((surface) => ({
+    scrollTop: surface.scrollTop,
+    scrollLeft: surface.scrollLeft,
+    clientWidth: surface.clientWidth,
+    clientHeight: surface.clientHeight,
+    scrollWidth: surface.scrollWidth,
+    scrollHeight: surface.scrollHeight,
+    attributes: Object.fromEntries(
+      Array.from(surface.attributes)
+        .filter(({ name }) => name.startsWith('data-scroll-'))
+        .map(({ name, value }) => [name, value])
+    ),
+  }));
+}
+
+async function thumbDragStart(page: Page, thumb: Locator, viewport: Locator, label: string) {
+  const box = await bounds(thumb, label);
+  const before = await scrollFacts(viewport);
+  console.info('[shadcn-scroll-thumb-drag-geometry]', JSON.stringify({ label, box, before }));
+  expect(box.width, `${label}/width`).toBeGreaterThan(0);
+  expect(box.height, `${label}/height`).toBeGreaterThan(0);
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  await page.mouse.move(point.x, point.y);
+  const hit = await thumb.evaluate((element, point) => {
+    const target = document.elementFromPoint(point.x, point.y);
+    const style = getComputedStyle(element);
+    return {
+      onThumb: Boolean(target && element.contains(target)),
+      target: target?.tagName ?? null,
+      targetRef: target?.getAttribute('data-demo-ref') ?? null,
+      stack: document.elementsFromPoint(point.x, point.y).map((item) => ({
+        tag: item.tagName,
+        ref: item.getAttribute('data-demo-ref'),
+      })),
+      flexGrow: style.flexGrow,
+      flexBasis: style.flexBasis,
+      width: style.width,
+      height: style.height,
+    };
+  }, point);
+  console.info('[shadcn-scroll-thumb-drag-hit]', JSON.stringify({ label, point, hit }));
+  expect(hit.onThumb, `${label}/pointer hit ${hit.target}`).toBe(true);
+  return { box, before };
+}
+
+async function checkZeroBasisCounterexample(
+  thumb: Locator,
+  axis: 'vertical' | 'horizontal',
+  label: string
+) {
+  // A bounded native CSS counterexample on the actual Thumb, not a simulation
+  // of layout or a claim to rerun the old product. Run after the unmodified
+  // consumer's input checks and restore before asynchronous host/observer
+  // delivery, including when measurement throws.
+  const comparison = await thumb.evaluate((element) => {
+    const target = element as HTMLElement;
+    const rect = () => {
+      const box = target.getBoundingClientRect();
+      return { width: box.width, height: box.height };
+    };
+    const before = rect();
+    const value = target.style.getPropertyValue('flex-basis');
+    const priority = target.style.getPropertyPriority('flex-basis');
+    let zeroBasis: { width: number; height: number };
+    try {
+      target.style.setProperty('flex-basis', '0%');
+      zeroBasis = rect();
+    } finally {
+      if (value) target.style.setProperty('flex-basis', value, priority);
+      else target.style.removeProperty('flex-basis');
+    }
+    return { before, zeroBasis, restored: rect() };
+  });
+  console.info(
+    '[shadcn-scroll-thumb-zero-basis-counterexample]',
+    JSON.stringify({ label, axis, ...comparison })
+  );
+  const crossAxis = axis === 'vertical' ? 'width' : 'height';
+  expect(comparison.before[crossAxis], `${label}/ordinary-cross-axis`).toBeCloseTo(7, 5);
+  expect(comparison.zeroBasis[crossAxis], `${label}/zero-basis-cross-axis`).toBe(0);
+  expect(comparison.restored, `${label}/restored`).toEqual(comparison.before);
 }
 
 async function focusGeometry(locator: Locator, label: string) {
@@ -286,37 +370,80 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           expect(paint.tabIndex, `${runtime}/${name}-thumb-tabindex`).toBe(-1);
         }
 
-        const verticalStart = await bounds(verticalThumb, `${runtime}/vertical-thumb-start`);
-        await page.mouse.move(
-          verticalStart.x + verticalStart.width / 2,
-          verticalStart.y + verticalStart.height / 2
+        const verticalDrag = await thumbDragStart(
+          page,
+          verticalThumb,
+          viewport,
+          `${runtime}/vertical-thumb-start`
         );
-        await page.mouse.down();
-        await page.mouse.move(
-          verticalStart.x + verticalStart.width / 2,
-          verticalStart.y + verticalStart.height / 2 + 36,
-          { steps: 4 }
-        );
-        await page.mouse.up();
-        await expect
-          .poll(() => viewport.evaluate((surface) => surface.scrollTop), { message: runtime })
-          .toBeGreaterThan(0);
+        try {
+          await page.mouse.down();
+          await page.mouse.move(
+            verticalDrag.box.x + verticalDrag.box.width / 2,
+            verticalDrag.box.y + verticalDrag.box.height / 2 + 36,
+            { steps: 4 }
+          );
+          await page.mouse.up();
+          await expect
+            .poll(() => viewport.evaluate((surface) => surface.scrollTop), { message: runtime })
+            .toBeGreaterThan(0);
+          expect(
+            (await scrollFacts(viewport)).scrollTop,
+            `${runtime}/vertical-drag-delta`
+          ).toBeGreaterThan(verticalDrag.before.scrollTop);
+        } finally {
+          console.info(
+            '[shadcn-scroll-thumb-drag-result]',
+            JSON.stringify({
+              runtime,
+              axis: 'vertical',
+              before: verticalDrag.before,
+              after: await scrollFacts(viewport),
+            })
+          );
+        }
 
-        const horizontalStart = await bounds(horizontalThumb, `${runtime}/horizontal-thumb-start`);
-        await page.mouse.move(
-          horizontalStart.x + horizontalStart.width / 2,
-          horizontalStart.y + horizontalStart.height / 2
+        const horizontalDrag = await thumbDragStart(
+          page,
+          horizontalThumb,
+          viewport,
+          `${runtime}/horizontal-thumb-start`
         );
-        await page.mouse.down();
-        await page.mouse.move(
-          horizontalStart.x + horizontalStart.width / 2 + 36,
-          horizontalStart.y + horizontalStart.height / 2,
-          { steps: 4 }
+        try {
+          await page.mouse.down();
+          await page.mouse.move(
+            horizontalDrag.box.x + horizontalDrag.box.width / 2 + 36,
+            horizontalDrag.box.y + horizontalDrag.box.height / 2,
+            { steps: 4 }
+          );
+          await page.mouse.up();
+          await expect
+            .poll(() => viewport.evaluate((surface) => surface.scrollLeft), { message: runtime })
+            .toBeGreaterThan(0);
+          expect(
+            (await scrollFacts(viewport)).scrollLeft,
+            `${runtime}/horizontal-drag-delta`
+          ).toBeGreaterThan(horizontalDrag.before.scrollLeft);
+        } finally {
+          console.info(
+            '[shadcn-scroll-thumb-drag-result]',
+            JSON.stringify({
+              runtime,
+              axis: 'horizontal',
+              before: horizontalDrag.before,
+              after: await scrollFacts(viewport),
+            })
+          );
+        }
+
+        // Mutation controls follow the real drags, so they cannot become an
+        // implicit remeasurement/recovery prerequisite for successful input.
+        await checkZeroBasisCounterexample(verticalThumb, 'vertical', `${runtime}/vertical-thumb`);
+        await checkZeroBasisCounterexample(
+          horizontalThumb,
+          'horizontal',
+          `${runtime}/horizontal-thumb`
         );
-        await page.mouse.up();
-        await expect
-          .poll(() => viewport.evaluate((surface) => surface.scrollLeft), { message: runtime })
-          .toBeGreaterThan(0);
 
         expect(
           await page.evaluate(

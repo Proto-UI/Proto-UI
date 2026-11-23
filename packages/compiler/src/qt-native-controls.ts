@@ -8,7 +8,7 @@ export function createControls(options) {
   const textListeners=[],imageListeners=[],facts=new Map();
   let scrollConfig={axes:'both',projection:'auto',endFollow:{mode:'off'}};
   let scrollSnapshot={axes:'both',horizontal:{position:0,visibleRatio:1,canScrollBefore:false,canScrollAfter:false,atEnd:true},vertical:{position:0,visibleRatio:1,canScrollBefore:false,canScrollAfter:false,atEnd:true},scrolling:false,projection:'unresolved',endFollow:{state:'off',requestStatus:'idle'}};
-  let followRequest='idle',followState='off',wasAtEnd=true;
+  let followRequest='idle',followState='off',wasAtEnd=true,explicitlyPaused=false,scrollGeometry=null;
   function observed(key,initial) {
     let value=initial;const listeners=new Set(),watchers=new Set();
     const handle={get() {options.alive();return value;},spec:{kind:typeof initial==='boolean'?'bool':typeof initial==='number'?'number.range':'string'},watch(cb){options.setup();watchers.add(cb);return ()=>{options.alive();watchers.delete(cb);};},subscribe(cb) {options.alive();listeners.add(cb);return ()=>{options.alive();listeners.delete(cb);};},unsubscribe(off) {options.alive();off();}};
@@ -49,8 +49,18 @@ export function createControls(options) {
     options.runtime();const root=options.root();
     if(!root){if(request.kind==='to-end'){followRequest='rejected';facts.get('followRequest').set(followRequest);}return;}
     if(request.kind==='to-end'&&scrollConfig.endFollow.mode==='while-at-end'&&request.axis!==scrollConfig.endFollow.axis){followRequest='rejected';facts.get('followRequest').set(followRequest);return;}
-    if(request.kind==='to-end'){followRequest='applied';if(scrollConfig.endFollow.mode==='while-at-end')followState='following';}
+    if(request.kind==='to-end'){explicitlyPaused=false;followRequest='applied';if(scrollConfig.endFollow.mode==='while-at-end')followState='following';}
     root.scrollRequest(request);
+  },pauseFollowing() {
+    options.runtime();
+    if(!scrollDeclared)return {kind:'rejected',reason:'not-declared'};
+    const root=options.root();if(!root)return {kind:'rejected',reason:'not-mounted'};
+    const policy=scrollConfig.endFollow,axis=policy.axis||'vertical';
+    if(!options.ready()||policy.mode!=='while-at-end'||scrollConfig.axes!=='both'&&scrollConfig.axes!==axis)return {kind:'rejected',reason:'unavailable'};
+    explicitlyPaused=true;followState='paused';
+    scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{endFollow:Object.freeze({state:followState,requestStatus:followRequest})}));
+    facts.get('followState').set(followState);
+    return options.root()===root&&options.ready()?{kind:'dispatched'}:{kind:'rejected',reason:'unavailable'};
   },getSnapshot() {options.alive();return scrollSnapshot;}});
   return {hooks:{asTextControl() {options.setup();if(!textDeclaration)throw new Error('TextControl requires its checked Module declaration');textDeclared=true;return text;},asImageView() {options.setup();if(!imageDeclaration)throw new Error('ImageView requires its checked Module declaration');imageDeclared=true;return image;},asScrollSurface() {options.setup();scrollDeclared=true;return scroll;}},
     mount() {
@@ -80,13 +90,20 @@ export function createControls(options) {
       if(next===imageStatus)return;const prev=imageStatus;imageStatus=next;
       notify(imageListeners,'loadingStatusChange',Object.freeze({status:next,previousStatus:prev,source:imagePatch.source}));
     },
-    scrollFacts(next) {
+    scrollFacts(next,geometry) {
       if(!scrollDeclared||!options.ready())return;
       const policy=scrollConfig.endFollow;
+      const previousGeometry=scrollGeometry;scrollGeometry=geometry||null;
       if(policy.mode==='while-at-end') {
         const atEnd=next[policy.axis].atEnd;
-        if(wasAtEnd&&!atEnd&&!next.scrolling){wasAtEnd=false;const root=options.root();followState='following';if(root){root.scrollRequest({kind:'to-end',axis:policy.axis});return;}}
-        else if(next.scrolling&&!atEnd)followState='paused';else if(atEnd)followState='following';
+        const previous=previousGeometry&&previousGeometry[policy.axis],current=scrollGeometry&&scrollGeometry[policy.axis];
+        // Native moving/start notifications and other-axis movement do not
+        // establish arrival. Physical position is private host evidence;
+        // normalized position alone also changes when content is resized.
+        const arrived=next.scrolling&&atEnd&&previous&&current&&current.offset!==previous.offset&&current.viewport===previous.viewport&&current.extent===previous.extent;
+        if(arrived)explicitlyPaused=false;
+        if(!explicitlyPaused&&followState==='following'&&wasAtEnd&&!atEnd&&!next.scrolling){wasAtEnd=false;const root=options.root();followState='following';if(root){root.scrollRequest({kind:'to-end',axis:policy.axis});return;}}
+        else if(explicitlyPaused||next.scrolling&&!atEnd)followState='paused';else if(atEnd)followState='following';
         wasAtEnd=atEnd;
       }
       next.endFollow=Object.freeze({state:followState,requestStatus:followRequest});next.horizontal=Object.freeze(next.horizontal);next.vertical=Object.freeze(next.vertical);scrollSnapshot=Object.freeze(next);
@@ -99,7 +116,7 @@ export function createControls(options) {
       if(imageDeclared)return {role:'img',name:imagePatch.alternativeText||'',accessibleIgnored:imagePatch.a11yMode==='decorative'};
       return {};
     },
-    unmount() {++imageGeneration;composing=false;scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{projection:'unresolved',scrolling:false}));facts.get('scrolling').set(false);facts.get('projection').set('unresolved');},
+    unmount() {++imageGeneration;composing=false;explicitlyPaused=false;scrollGeometry=null;scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{projection:'unresolved',scrolling:false}));facts.get('scrolling').set(false);facts.get('projection').set('unresolved');},
     dispose() {++imageGeneration;textListeners.length=0;imageListeners.length=0;let failure;for(const fact of facts.values())try{fact.clear();}catch(error){if(failure===undefined)failure=error;}if(failure!==undefined)throw failure;}
   };
 }

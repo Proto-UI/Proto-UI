@@ -309,8 +309,8 @@ criteria:
         - D-BASE-PROTOTYPE-INDEPENDENCE-0001
   - id: P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED
     text:
-      zh-CN: Checkbox root 在 enabled 状态下成功 User activation 后，必须计算与当前 checked 相反的 next checked value。
-      en: After successful User activation while enabled, Checkbox root must compute a next checked value opposite to the current checked value.
+      zh-CN: Checkbox root 在 enabled 且可编辑状态下成功 User activation 后，以激活开始时的 canonical checked 计算相反候选值。清除 mixed 的向外回调如果提交了新的 checked owner 值，旧激活的 checked 阶段必须退休，包括 owner 值先改变再回到原值的情况；只确认 indeterminate=false 而 checked 未改变时，原候选请求仍有效。
+      en: After successful editable User activation while enabled, Checkbox root computes the opposite of the canonical checked value at activation start. If the outward mixed-clear callback commits a newer checked owner value, the older activation's checked stage retires, including owner transitions away and back. Confirming only indeterminate=false while checked stays unchanged retains the original checked proposal.
     dependsOn:
       contracts:
         - C-EVENT-TYPE-0001
@@ -508,8 +508,8 @@ criteria:
         - C-A11Y-0001
   - id: P-BASE-CHECKBOX-FORM-INTEGRATION-DEFERRED
     text:
-      zh-CN: Checkbox 是 form-relevant input control，但 `name`、`value`、`form`、`required`、validation、hidden input 与提交行为不进入第一轮实现；实现中必须作为 TODO 或断口保留。
-      en: Checkbox is a form-relevant input control, but `name`, `value`, `form`, `required`, validation, hidden input, and submission behavior do not enter the first implementation layer; the implementation must preserve them as TODOs or gaps.
+      zh-CN: 普通 Checkbox 不拥有 `name`、`form`、`required`、validation、hidden input 或提交行为。显式 FieldCheckbox 的 boolean 值、required 与 Form 接入由 P-BASE-FIELD-CHOICES 定义；普通根只新增保留 focus 的 readOnly 与初始 checked/mixed reset，不通过祖先自动变成字段。
+      en: Ordinary Checkbox does not own name/form/required, validation, hidden inputs or submission. P-BASE-FIELD-CHOICES defines the explicit FieldCheckbox boolean value, required and Form integration; ordinary roots only add focus-preserving readOnly and initial checked/mixed reset, without ancestor-based field registration.
     dependsOn:
       contracts:
         - C-PROPS-0001
@@ -567,8 +567,8 @@ openQuestions:
       zh-CN: Checkbox 的 `name`、`value`、`form`、`required`、validation、hidden input 与提交行为应归属于 Checkbox root core、Form protocol capability，还是 adapter/host capability？
       en: Should Checkbox `name`, `value`, `form`, `required`, validation, hidden input, and submission behavior belong to Checkbox root core, Form protocol capabilities, or adapter/host capabilities?
     context:
-      zh-CN: Checkbox 是 form-relevant input control；本轮编目记录该兼容面，但暂不实现。
-      en: Checkbox is a form-relevant input control; this cataloging round records that compatibility surface but does not implement it.
+      zh-CN: 0.3 的显式 FieldCheckbox 接入已由 P-BASE-FIELD-CHOICES 有界定义；native form、hidden input 和其他完整宿主保证继续开放。
+      en: P-BASE-FIELD-CHOICES now defines the bounded 0.3 explicit FieldCheckbox integration; native forms, hidden inputs and full host guarantees remain open.
     blocks:
       - checkbox form integration
       - form protocol design
@@ -659,6 +659,9 @@ verifies:
         - T-BASE-CHECKBOX-0001-CASE-CONTEXT
         - T-BASE-CHECKBOX-0001-CASE-A11Y-AND-DEFERRED-SURFACES
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Preserve the activation-start boolean request and retire its old checked stage when a mixed callback commits a newer canonical owner decision; ordinary mixed confirmation remains valid.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.

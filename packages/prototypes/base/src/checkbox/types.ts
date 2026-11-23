@@ -10,12 +10,15 @@ export interface CheckboxRootProps {
   checked?: boolean;
   defaultChecked?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
   indeterminate?: boolean;
   defaultIndeterminate?: boolean;
 }
 
 export type CheckboxRootExposes = {
   disabled: ExposeState<boolean>;
+  readOnly: ExposeState<boolean>;
+  resetValue: ExposeMethod<() => boolean>;
   hovered: ExposeState<boolean>;
   focused: ExposeState<boolean>;
   focusVisible: ExposeState<boolean>;
@@ -29,6 +32,7 @@ export type CheckboxRootExposes = {
 
 export type CheckboxRootStateHandles = {
   disabled: State<boolean>;
+  readOnly: State<boolean>;
   hovered: State<boolean>;
   focused: ObservedStateHandle<boolean, CheckboxRootProps>;
   focusVisible: ObservedStateHandle<boolean, CheckboxRootProps>;

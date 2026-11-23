@@ -25,6 +25,7 @@ import {
   watchProjectionThemeSurfaceStyle,
   type ProjectionThemeSurfaceStyle,
 } from './projection-theme';
+import { scheduleProjectionThemeRead } from './projection-theme-read';
 import { loadPrototypes } from './prototype-modules';
 import { previewerStartupTask } from './previewer-startup-task';
 import {
@@ -71,12 +72,12 @@ export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
     host: HTMLElement;
     scope: HTMLElement;
     setThemeSurfaceStyle(theme: ProjectionThemeSurfaceStyle): void;
-   /**
-    * Seal this generation's open external portals without switching.
-    * Candidates that do not own external portals (e.g. typography) may omit
-    * this; the callback is a no-op for them.
-    */
-   sealExternalPortals?(): void;
+    /**
+     * Seal this generation's open external portals without switching.
+     * Candidates that do not own external portals (e.g. typography) may omit
+     * this; the callback is a no-op for them.
+     */
+    sealExternalPortals?(): void;
   }>;
 
 // A focus lease belongs to the exact materialized composition, not a DOM role.
@@ -289,12 +290,30 @@ export async function materializeProjectionCandidate(
 
   let theme!: ProjectionThemeSurfaceStyle;
   let candidate: MaterializedProjectionCandidate | undefined;
-  const stopTheme = watchProjectionThemeSurfaceStyle(source.family, source.scope, (next) => {
-    theme = next;
-    if (source.isCurrent()) candidate?.setThemeSurfaceStyle(next);
+  const assertCurrentAcquisition = () => {
+    options.backgroundPreparation?.signal.throwIfAborted();
+    if (!source.isCurrent())
+      throw new DOMException(
+        '[PrototypePreviewer] The themed projection owner was retired.',
+        'AbortError'
+      );
+  };
+  // A preference event can synchronously lock several old generations. Read
+  // their live themes together after those writes, before any new preparation
+  // resumes. Each scope still reads its own computed values; nothing is cached
+  // across owners or deliveries.
+  const stopTheme = await scheduleProjectionThemeRead(source.scope, () => {
+    assertCurrentAcquisition();
+    return watchProjectionThemeSurfaceStyle(source.family, source.scope, (next) => {
+      theme = next;
+      if (source.isCurrent()) candidate?.setThemeSurfaceStyle(next);
+    });
   });
   const initialTheme = theme;
   try {
+    // Another callback in the read batch may retire this owner before this
+    // promise continues. Release its newly acquired watch without rendering.
+    assertCurrentAcquisition();
     const prepared = await prepareProjectionCandidate(request, options, initialTheme);
     candidate = prepared;
     if (!source.isCurrent()) {

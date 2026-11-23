@@ -14,7 +14,10 @@ import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prot
 import { DRAWER_PRESENCE_SOURCE_FILES } from './fixtures/drawer-presence-sources';
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
 const output =
-  process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-drawer-presence-evidence');
+  process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ??
+  (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+    ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'shadcn-drawer-presence')
+    : path.join(tmpdir(), 'pui-drawer-presence-evidence'));
 beforeAll(async () => {
   tokens = (await collectProtoStyleTokensFromFiles(DRAWER_PRESENCE_SOURCE_FILES)).filter(
     (x): x is string => typeof x === 'string'
@@ -106,10 +109,29 @@ describe('real Shadcn Drawer source physical presentation', () => {
         samples.push({ stage: 'leaving', ...leaving });
         expect(leaving.contentPhase).toBe('leaving');
         expect(leaving.detached).toBe(false);
-        await target(true);
-        const reversal = await sample();
+        // Separate browser calls can straddle a leave frame. Compare the real
+        // reopen boundary in one synchronous task and retain the earlier gap.
+        const { before: reversalBefore, after: reversal } = await page.evaluate(() => {
+          const fixture = (window as any).fixture;
+          const before = fixture.sample();
+          fixture.target(true);
+          const after = fixture.sample();
+          return { before, after };
+        });
+        samples.push({
+          stage: 'reversal-before',
+          ...reversalBefore,
+          elapsedSinceLeavingMs: reversalBefore.time - leaving.time,
+          yDeltaSinceLeavingPx: reversalBefore.rect.y - leaving.rect.y,
+        });
         samples.push({ stage: 'reversal', ...reversal });
-        expect(Math.abs(reversal.rect.y - leaving.rect.y)).toBeLessThan(15);
+        expect(reversalBefore.contentPhase).toBe('leaving');
+        expect(reversalBefore.maskPhase).toBe('leaving');
+        expect(reversalBefore.detached).toBe(false);
+        expect(reversal.contentPhase).toBe('entering');
+        expect(reversal.maskPhase).toBe('entering');
+        expect(reversal.detached).toBe(false);
+        expect(Math.abs(reversal.rect.y - reversalBefore.rect.y)).toBeLessThan(15);
         await page.waitForTimeout(600);
         expect((await sample()).contentPhase).toBe('entered');
         await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -340,9 +362,54 @@ describe('public www Drawer cold-entry diagnostic', () => {
             window as any
           ).PublicDrawerEntry.createPublicDrawerEntryFixture(fixed);
         }, fixedControl);
-        // Let initial closed admission finish, exactly as a human clicks a ready demo.
-        await page.locator('wc-shadcn-drawer-trigger').waitFor({ state: 'visible' });
+        // The public nested Button is the sole physical action. Read its actual
+        // closed readiness before the same programmatic click used by this probe.
+        await page
+          .locator('wc-shadcn-drawer-trigger [data-demo-ref="trigger-action"]')
+          .waitFor({ state: 'visible' });
+        await page.waitForFunction(() => {
+          const actions = document.querySelectorAll<HTMLElement>(
+            'wc-shadcn-drawer-trigger [data-demo-ref="trigger-action"]'
+          );
+          return (
+            actions.length === 1 &&
+            actions[0]!.getAttribute('role') === 'button' &&
+            actions[0]!.tabIndex === 0 &&
+            !actions[0]!.matches('[disabled], [aria-disabled="true"]')
+          );
+        });
         await page.evaluate(() => {
+          const root = document.querySelector('wc-shadcn-drawer-root') as HTMLElement & {
+            getExposes(): { open: { get(): boolean } };
+          };
+          const action = root.querySelector<HTMLElement>('[data-demo-ref="trigger-action"]')!;
+          (window as any).__entryRoot = root;
+          (window as any).__entryBefore = {
+            rootOpen: root.getExposes().open.get(),
+            actionRole: action.getAttribute('role'),
+            actionConnected: action.isConnected,
+          };
+          (window as any).__entryInput = null;
+          (window as any).__entryClickEvents = [];
+          action.addEventListener(
+            'click',
+            (event) => {
+              const observation = {
+                trusted: event.isTrusted,
+                targetRef: (event.target as HTMLElement).getAttribute('data-demo-ref'),
+                sameAction: event.target === action,
+                originalOwner: root.contains(action),
+                constructor: event.constructor.name,
+                mouseEvent: event instanceof MouseEvent,
+                customEvent: event instanceof CustomEvent,
+              };
+              (window as any).__entryClickEvents.push(observation);
+              // The public Button's outward CustomEvent has the same name.
+              // It cannot stand in for the fixture's physical click sample.
+              if (event instanceof MouseEvent) (window as any).__entryInput = observation;
+            },
+            { capture: true }
+          );
           const samples: unknown[] = [];
           (window as any).__entryFrames = samples;
           const sample = () => {
@@ -373,10 +440,40 @@ describe('public www Drawer cold-entry diagnostic', () => {
         await page.evaluate(() => (window as any).__entryDone);
         result = await page.evaluate(() => ({
           requestedAt: (window as any).__entryRequestedAt,
+          before: (window as any).__entryBefore,
+          input: (window as any).__entryInput,
+          clickEvents: (window as any).__entryClickEvents,
+          sameRoot:
+            !!(window as any).__entryRoot &&
+            (window as any).__entryRoot === document.querySelector('wc-shadcn-drawer-root'),
+          rootOpen: (window as any).__entryRoot?.getExposes().open.get(),
+          probeRecorded: Array.isArray((window as any).__drawerEntryProbe),
           events: (window as any).__drawerEntryProbe,
           frames: (window as any).__entryFrames,
         }));
         expect(errors).toEqual([]);
+        expect((result as any).before).toMatchObject({
+          rootOpen: false,
+          actionRole: 'button',
+          actionConnected: true,
+        });
+        expect((result as any).input).toMatchObject({
+          trusted: false,
+          targetRef: 'trigger-action',
+          sameAction: true,
+          originalOwner: true,
+          mouseEvent: true,
+          customEvent: false,
+        });
+        expect((result as any).clickEvents.filter((event: any) => event.mouseEvent)).toHaveLength(
+          1
+        );
+        expect((result as any).sameRoot).toBe(true);
+        expect((result as any).rootOpen).toBe(true);
+        expect(
+          (result as any).probeRecorded,
+          'The real projector must record the cold transition'
+        ).toBe(true);
         const events = (result as any).events as any[];
         expect(
           events.some(
@@ -417,6 +514,14 @@ describe('public www Drawer cold-entry diagnostic', () => {
         if (!result)
           result = await page
             .evaluate(() => ({
+              before: (window as any).__entryBefore,
+              input: (window as any).__entryInput,
+              clickEvents: (window as any).__entryClickEvents,
+              sameRoot:
+                !!(window as any).__entryRoot &&
+                (window as any).__entryRoot === document.querySelector('wc-shadcn-drawer-root'),
+              rootOpen: (window as any).__entryRoot?.getExposes().open.get(),
+              probeRecorded: Array.isArray((window as any).__drawerEntryProbe),
               events: (window as any).__drawerEntryProbe,
               frames: (window as any).__entryFrames,
             }))

@@ -497,14 +497,18 @@ export function emitFlutterSource(
         return style(value.handle);
       case 'rule': {
         const bindings = new Map(value.states.map((entry) => [entry.id, entry.value]));
-        const condition = (node: RuleCondition): string =>
-          node.type === 'true' || node.type === 'false'
+        const condition = (node: RuleCondition): string => {
+          if (node.type === 'eq') {
+            if (node.left.type === 'meta')
+              throw new Error('Rule Meta must fail Flutter target admission.');
+            return `(${node.left.type === 'prop' ? `_owner.props.${publicName(node.left.key)}` : `${expr(bindings.get(node.left.id)!, depth)}.get()`} == ${quote(node.right)})`;
+          }
+          return node.type === 'true' || node.type === 'false'
             ? node.type
-            : node.type === 'eq'
-              ? `(${node.left.type === 'prop' ? `_owner.props.${publicName(node.left.key)}` : `${expr(bindings.get(node.left.id)!, depth)}.get()`} == ${quote(node.right)})`
-              : node.type === 'not'
-                ? `!(${condition(node.expr)})`
-                : `(${node.exprs.map(condition).join(node.type === 'all' ? ' && ' : ' || ') || (node.type === 'all' ? 'true' : 'false')})`;
+            : node.type === 'not'
+              ? `!(${condition(node.expr)})`
+              : `(${node.exprs.map(condition).join(node.type === 'all' ? ' && ' : ' || ') || (node.type === 'all' ? 'true' : 'false')})`;
+        };
         return `_owner.style.rule(() => ${condition(value.declaration.when)}, <NativeStyleHandle>[${value.declaration.intent.ops
           .flatMap((op) => op.handles)
           .map(style)
