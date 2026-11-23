@@ -59,6 +59,7 @@ exports[`diagnostic registry > keeps a stable registered code set and category t
   "PUI_QT_NAME:invalid-input",
   "PUI_QT_PUBLIC_DATA:unsupported-input",
   "PUI_QT_STYLE:unsupported-input",
+  "PUI_RUST_DATA_LICENSE:unsupported-input",
   "PUI_RUST_DATA_NAME:unsupported-input",
   "PUI_RUST_DATA_PURITY:unsupported-input",
   "PUI_RUST_DATA_SELECTION:unsupported-input",
