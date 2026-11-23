@@ -909,6 +909,8 @@ ${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | nu
   let hostProps = initial;
   let root: HTMLElement | null = null;
   let rootGeneration = 0;
+  let rootBinding: 'retiring' | 'binding' | null = null;
+  let pendingRoot: { value: HTMLElement | null } | undefined;
 ${
   decorations
     ? `  const decorationNodes = new WeakMap<object, object>();
@@ -1572,16 +1574,34 @@ ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}   
     : ''
 }
     bindRoot(nextRoot) {
-      if (root === nextRoot || lifetime !== 'alive') return;
-      const generation = ++rootGeneration;
+      if (lifetime !== 'alive') return;
+      if (rootBinding) {
+        if (rootBinding === 'binding' && root === nextRoot && !pendingRoot) return;
+        pendingRoot = { value: nextRoot }; ++rootGeneration;
+        return;
+      }
+      if (root === nextRoot) return;
+      let next = nextRoot;
       let failure: { error: unknown } | undefined;
-      try { ${p}CompleteSteps([
-${atoms.physicalPresentation ? `        () => { ${atoms.detach} },\n` : ''}${decorations ? '        () => { if (root) releaseDecorations(); },\n' : ''}${interaction ? `        () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? "        () => root?.removeAttribute('data-pui-style'),\n" : ''}      ]); } catch (error) { failure = { error }; }
-      if (generation !== rootGeneration || lifetime !== 'alive') { if (failure) throw failure.error; return; }
-      root = nextRoot;
-      const current = () => generation === rootGeneration && lifetime === 'alive';
-      try { ${p}CompleteSteps([
-${usesStyle ? `        () => { if (current() && mounted) projectStyle(${p}Style.tokens()); },\n` : ''}${decorations ? '        () => { if (current() && mounted && desiredPresent) bindDecorations(); },\n' : ''}${atoms.physicalPresentation ? `        () => { if (current() && mounted && desiredPresent && root) { ${atoms.mount} } },\n` : ''}${interaction ? `        () => { if (current() && mounted && desiredPresent && viewConnected) ${p}Interaction.mount(); },\n` : ''}      ]); } catch (error) { failure ??= { error }; }
+      try {
+        for (;;) {
+          // Cleanup owns the previous Root and all of its reached resources.
+          // Reentrant requests coalesce until that complete transaction returns.
+          rootBinding = 'retiring'; ++rootGeneration;
+          const previousRoot = root;
+          try { ${p}CompleteSteps([
+${atoms.physicalPresentation ? `            () => { ${atoms.detach} },\n` : ''}${decorations ? '            () => { if (previousRoot) releaseDecorations(); },\n' : ''}${interaction ? `            () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? "            () => previousRoot?.removeAttribute('data-pui-style'),\n" : ''}          ]); } catch (error) { failure ??= { error }; }
+          if (lifetime !== 'alive') break;
+          if (pendingRoot) { next = pendingRoot.value; pendingRoot = undefined; }
+          root = next; rootBinding = 'binding';
+          const generation = ++rootGeneration;
+          const current = () => generation === rootGeneration && lifetime === 'alive';
+          try { ${p}CompleteSteps([
+${usesStyle ? `            () => { if (current() && mounted) projectStyle(${p}Style.tokens()); },\n` : ''}${decorations ? '            () => { if (current() && mounted && desiredPresent) bindDecorations(); },\n' : ''}${atoms.physicalPresentation ? `            () => { if (current() && mounted && desiredPresent && root) { ${atoms.mount} } },\n` : ''}${interaction ? `            () => { if (current() && mounted && desiredPresent && viewConnected) ${p}Interaction.mount(); },\n` : ''}          ]); } catch (error) { failure ??= { error }; }
+          if (lifetime !== 'alive' || !pendingRoot) break;
+          next = pendingRoot.value; pendingRoot = undefined;
+        }
+      } finally { rootBinding = null; pendingRoot = undefined; }
       if (failure) throw failure.error;
     },
     connect() { connected = true; ++cleanupVersion; },

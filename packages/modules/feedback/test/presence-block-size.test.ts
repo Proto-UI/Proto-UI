@@ -20,6 +20,7 @@ function fixture() {
     revision = 0,
     releases = 0;
   let invalidate = () => {};
+  let onRelease: (() => void) | undefined;
   let accept = true;
   const scheduled = new Map<number, () => void>();
   const samples: PresenceSample[] = [];
@@ -61,6 +62,7 @@ function fixture() {
     },
     release() {
       releases++;
+      onRelease?.();
     },
   });
   function commit(
@@ -106,6 +108,9 @@ function fixture() {
     env,
     scheduled,
     invalidate: () => invalidate(),
+    onRelease: (callback?: () => void) => {
+      onRelease = callback;
+    },
     releases: () => releases,
     reject: () => {
       accept = false;
@@ -212,5 +217,108 @@ describe('intrinsic block-size presence extension', () => {
     expect(f.scheduled.size).toBe(0);
     f.sink.settle('deadline');
     expect(f.outcomes).toEqual(['projection-failed']);
+  });
+
+  it.each(['reduce', 'no-preference'] as const)(
+    'does not reacquire a terminal endpoint during synchronous %s release notifications',
+    (preference) => {
+      const f = fixture();
+      f.env.value = { ...f.env.value, preference };
+      // Bound the deliberately reentrant host so the failing implementation
+      // reports its repeated release instead of overflowing the test runner.
+      f.onRelease(() => {
+        if (f.releases() < 6) f.invalidate();
+      });
+      f.commit();
+      if (preference === 'no-preference') {
+        f.at(16);
+        f.at(366);
+      }
+      expect(f.releases()).toBe(1);
+      expect(f.outcomes).toEqual([preference === 'reduce' ? 'reduced-motion' : 'finished']);
+      const samples = f.samples.length;
+      f.invalidate();
+      expect(f.sink.settle('deadline')).toBe(false);
+      expect(f.samples).toHaveLength(samples);
+      expect(f.releases()).toBe(1);
+    }
+  );
+
+  it.each(['revision', 'attempt', 'target'] as const)(
+    'publishes only the current %s receipt after a commit inside host release',
+    (replacement) => {
+      const f = fixture();
+      const first = f.commit();
+      const currentOutcomes: PresentationOutcome[] = [];
+      f.onRelease(() => {
+        f.onRelease();
+        f.sink.commit({
+          ...first,
+          revision: first.revision + 1,
+          targetRevision: first.targetRevision + (replacement === 'target' ? 1 : 0),
+          owner: {
+            ...first.owner,
+            revision: first.owner.revision + 1,
+            attempt: {
+              ownerEpoch: 1,
+              phaseAttempt: 1 + (replacement === 'attempt' ? 1 : 0),
+            },
+          },
+          complete: (_binding, outcome) => currentOutcomes.push(outcome),
+        });
+      });
+      f.env.value = { ...f.env.value, preference: 'reduce' };
+      f.invalidate();
+      expect(f.outcomes).toEqual([]);
+      expect(currentOutcomes).toEqual(['reduced-motion']);
+      expect(f.releases()).toBe(replacement === 'revision' ? 1 : 2);
+      expect(f.scheduled.size).toBe(0);
+    }
+  );
+
+  it('keeps completion reentry finite and leaves timer-mode terminal frames without a receipt', () => {
+    const f = fixture();
+    f.env.value = { ...f.env.value, preference: 'reduce' };
+    const outcomes: PresentationOutcome[] = [];
+    f.commit('entering', {
+      complete: (_binding, outcome) => {
+        outcomes.push(outcome);
+        f.sink.settle('deadline');
+        f.invalidate();
+      },
+    });
+    expect(outcomes).toEqual(['reduced-motion']);
+    expect(f.releases()).toBe(1);
+    const timer = fixture();
+    const initial = timer.commit('entered');
+    timer.sink.commit({
+      ...initial,
+      revision: 2,
+      owner: {
+        ...initial.owner,
+        revision: 2,
+        phase: 'entering',
+        attempt: { ownerEpoch: 1, phaseAttempt: 2 },
+        completion: 'timer',
+      },
+    });
+    const releases = timer.releases();
+    timer.invalidate();
+    expect(timer.outcomes).toEqual([]);
+    expect(timer.releases()).toBe(releases);
+  });
+
+  it('completes a new attempt requested by the previous completion callback exactly once', () => {
+    const f = fixture();
+    f.env.value = { ...f.env.value, preference: 'reduce' };
+    const outcomes: PresentationOutcome[] = [];
+    const complete: PresencePresentationFrame['complete'] = (_binding, outcome) => {
+      outcomes.push(outcome);
+      if (outcomes.length === 1) f.commit('leaving', { complete });
+    };
+    f.commit('entering', { complete });
+    expect(outcomes).toEqual(['reduced-motion', 'reduced-motion']);
+    expect(f.releases()).toBe(2);
+    expect(f.scheduled.size).toBe(0);
   });
 });

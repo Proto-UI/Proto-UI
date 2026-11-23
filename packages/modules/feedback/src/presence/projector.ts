@@ -93,6 +93,8 @@ export function createPresencePresentationProjector(
   let preparedFrame: PresencePresentationFrame | null = null;
   let preparingFrame: PresencePresentationFrame | null = null;
   let commitDepth = 0;
+  let completionDepth = 0;
+  let releasing = false;
   let pendingTick = false;
   let pendingFrameTick: { frame: PresencePresentationFrame; token: number } | null = null;
   let pendingSettlement: {
@@ -101,6 +103,12 @@ export function createPresencePresentationProjector(
     outcome: PresentationOutcome;
   } | null = null;
   let completedTarget: number | null = null;
+  let pendingCompletion: {
+    frame: PresencePresentationFrame;
+    token: number;
+    outcome: PresentationOutcome;
+    notify: boolean;
+  } | null = null;
   const reasons = new Set<string>();
   const cancel = () => {
     const old = ticket;
@@ -120,6 +128,19 @@ export function createPresencePresentationProjector(
     left.owner.owner === right.owner.owner && attemptKey(left) === attemptKey(right);
   const currentSettlement = (queued: NonNullable<typeof pendingSettlement>) =>
     !retired && !!frame && queued.token === generation && sameAttempt(queued.frame, frame);
+  const releaseHost = () => {
+    // A release may synchronously notify, cancel, or replace the current frame.
+    // No nested operation can acquire a transient lease until it has returned.
+    if (releasing) return;
+    releasing = true;
+    completionDepth++;
+    try {
+      host.release();
+    } finally {
+      completionDepth--;
+      releasing = false;
+    }
+  };
   const render = (
     candidate: PresencePresentationFrame,
     value: readonly number[],
@@ -146,28 +167,52 @@ export function createPresencePresentationProjector(
   const complete = (
     candidate: PresencePresentationFrame,
     reason: PresentationOutcome,
-    token: number
+    token: number,
+    notify = true
   ) => {
-    if (!current(candidate, token)) return;
-    const alreadyCompleted = completed && completedTarget === candidate.targetRevision;
+    if (!current(candidate, token) || (completed && completedTarget === candidate.targetRevision))
+      return;
+    if (completionDepth) {
+      pendingCompletion = { frame: candidate, token, outcome: reason, notify };
+      return;
+    }
     completed = true;
     completedTarget = candidate.targetRevision;
     reasons.add(reason);
+    completionDepth++;
     try {
-      host.release();
-    } catch {
-      reason = 'projection-failed';
-      reasons.add(reason);
+      try {
+        releaseHost();
+      } catch {
+        reason = 'projection-failed';
+        reasons.add(reason);
+      }
+      // Semantic preparation may publish a newer revision during release. The
+      // same attempt/target receives its sole receipt at that current revision;
+      // a replacement attempt or target cannot inherit the old completion.
+      const latest = frame;
+      if (
+        retired ||
+        !latest ||
+        token !== generation ||
+        !sameAttempt(candidate, latest) ||
+        latest.targetRevision !== candidate.targetRevision
+      )
+        return;
+      if (preparedFrame !== latest) {
+        reason = 'projection-failed';
+        reasons.add(reason);
+      }
+      if (notify && latest.owner.attempt) latest.complete(host.binding, reason);
+    } finally {
+      completionDepth--;
+      flushPendingWork();
     }
-    // A later environment notification or explicit settlement can project the
-    // endpoint again. Retire that new lease even when its completion receipt
-    // has already been delivered; only the receipt is once per target.
-    if (!current(candidate, token) || alreadyCompleted) return;
-    if (candidate.owner.attempt) candidate.complete(host.binding, reason);
   };
   const settle = (outcome: PresentationOutcome): boolean => {
     if (!frame || retired) return false;
-    if (commitDepth) {
+    if (completed && completedTarget === frame.targetRevision) return false;
+    if (commitDepth || completionDepth) {
       if (!pendingSettlement || !currentSettlement(pendingSettlement))
         pendingSettlement = { frame, token: generation, outcome };
       // The finite synchronous preparation must unwind before any environment
@@ -200,6 +245,22 @@ export function createPresencePresentationProjector(
     complete(candidate, accepted ? outcome : 'projection-failed', token);
     return accepted;
   };
+  function flushPendingWork() {
+    if (commitDepth || completionDepth) return;
+    const completion = pendingCompletion;
+    const settlement = pendingSettlement;
+    const delivered = pendingFrameTick;
+    const requested = pendingTick;
+    pendingCompletion = null;
+    pendingSettlement = null;
+    pendingFrameTick = null;
+    pendingTick = false;
+    if (completion && current(completion.frame, completion.token))
+      complete(completion.frame, completion.outcome, completion.token, completion.notify);
+    else if (settlement && currentSettlement(settlement) && preparedFrame === frame)
+      settle(settlement.outcome);
+    else if (requested) tick(!!delivered && current(delivered.frame, delivered.token));
+  }
   function schedule() {
     if (retired || !frame || ticket !== null || completed) return;
     const token = generation;
@@ -220,7 +281,7 @@ export function createPresencePresentationProjector(
     if (retired || !frame) return;
     // A synchronous style flush may notify or replace this frame. Only the
     // latest fully prepared frame may consume dimensions or acknowledge paint.
-    if (commitDepth) {
+    if (commitDepth || completionDepth) {
       pendingTick = true;
       if (fromFrame) pendingFrameTick = { frame, token: generation };
       return;
@@ -228,6 +289,9 @@ export function createPresencePresentationProjector(
     if (preparedFrame !== frame) return;
     const candidate = frame,
       token = generation;
+    // Terminal semantic sizing is already restored. An environment notification
+    // must not reacquire a lease or replay motion for the same endpoint target.
+    if (completed && completedTarget === candidate.targetRevision) return;
     // This first host profile only admits neutral entered modulation. General
     // typed declarations remain representable and receive explicit diagnostics.
     const enteredNeutral =
@@ -250,12 +314,7 @@ export function createPresencePresentationProjector(
         reasons.add('projection-failed');
       }
       if (!current(candidate, failedToken)) return;
-      try {
-        host.release();
-      } catch {
-        reasons.add('projection-failed');
-      }
-      if (candidate.owner.attempt) complete(candidate, 'unsupported-endpoint', failedToken);
+      complete(candidate, 'unsupported-endpoint', failedToken, !!candidate.owner.attempt);
       return;
     }
     if (
@@ -300,15 +359,7 @@ export function createPresencePresentationProjector(
       if (!current(candidate, token)) return;
       if (!accepted) reasons.add('projection-failed');
       target = next;
-      if (animated && completedTarget !== candidate.targetRevision) {
-        complete(candidate, accepted ? 'finished' : 'projection-failed', token);
-      } else {
-        try {
-          host.release();
-        } catch {
-          reasons.add('projection-failed');
-        }
-      }
+      complete(candidate, accepted ? 'finished' : 'projection-failed', token, animated);
       return;
     }
     if (candidate.owner.durationMs === 0) {
@@ -433,14 +484,7 @@ export function createPresencePresentationProjector(
             sampler = null;
             samplerConfig = '';
             awaitingInitialFrame = false;
-            if (next.owner.attempt) complete(next, 'projection-failed', generation);
-            else {
-              try {
-                host.release();
-              } catch {
-                reasons.add('projection-failed');
-              }
-            }
+            complete(next, 'projection-failed', generation, !!next.owner.attempt);
             return;
           }
           preparedFrame = next;
@@ -456,17 +500,7 @@ export function createPresencePresentationProjector(
         if (operation === op) tick();
       } finally {
         commitDepth--;
-        if (!commitDepth) {
-          const settlement = pendingSettlement;
-          const delivered = pendingFrameTick;
-          const requested = pendingTick;
-          pendingSettlement = null;
-          pendingFrameTick = null;
-          pendingTick = false;
-          if (settlement && currentSettlement(settlement) && preparedFrame === frame)
-            settle(settlement.outcome);
-          else if (requested) tick(!!delivered && current(delivered.frame, delivered.token));
-        }
+        flushPendingWork();
       }
     },
     settle,
@@ -484,7 +518,11 @@ export function createPresencePresentationProjector(
       cold = true;
       completed = false;
       awaitingInitialFrame = false;
-      host.release();
+      try {
+        releaseHost();
+      } finally {
+        flushPendingWork();
+      }
     },
     release(epoch) {
       if (view !== epoch || retired) return;
@@ -501,7 +539,11 @@ export function createPresencePresentationProjector(
         off?.();
       } finally {
         off = null;
-        host.release();
+        try {
+          releaseHost();
+        } finally {
+          flushPendingWork();
+        }
       }
     },
     diagnostics: () => [...reasons],

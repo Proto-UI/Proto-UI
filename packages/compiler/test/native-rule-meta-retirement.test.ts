@@ -218,3 +218,124 @@ it('refuses an unpaired viewport source and retains the captured add/remove API 
   expect(replacement).not.toHaveBeenCalled();
   expect(host.listeners.size).toBe(0);
 });
+
+it('does not duplicate the current lease when host retirement synchronously reads it', async () => {
+  const { createNativeRuleMeta } = await load(),
+    first = environment(900),
+    next = environment(700);
+  let doc = first.doc;
+  const reader = createNativeRuleMeta(() => doc, ['viewport.width']),
+    notify = vi.fn();
+  const release = reader.subscribe(notify, ['viewport.width']);
+  first.onRemove(() => {
+    first.onRemove();
+    expect(reader.read('viewport.width')).toBe(700);
+  });
+  doc = next.doc;
+  expect(reader.read('viewport.width')).toBe(700);
+  next.view.innerWidth = 600;
+  for (const callback of next.listeners) callback();
+  await Promise.resolve();
+  expect(notify).toHaveBeenCalledTimes(1);
+  release();
+  expect(next.listeners.size).toBe(0);
+});
+
+it('cannot overwrite a newer Document acquired by synchronous retirement', async () => {
+  const { createNativeRuleMeta } = await load(),
+    first = environment(900),
+    superseded = environment(700),
+    current = environment(500);
+  let doc = first.doc;
+  const reader = createNativeRuleMeta(() => doc, ['viewport.width']);
+  const release = reader.subscribe(() => {}, ['viewport.width']);
+  first.onRemove(() => {
+    first.onRemove();
+    doc = current.doc;
+    expect(reader.read('viewport.width')).toBe(500);
+  });
+  doc = superseded.doc;
+  expect(reader.read('viewport.width')).toBe(500);
+  expect(superseded.listeners.size).toBe(0);
+  expect(current.listeners.size).toBe(1);
+  release();
+  expect(current.listeners.size).toBe(0);
+});
+
+it('preserves a newer lease when a superseded registration fails after reentry', async () => {
+  const { createNativeRuleMeta } = await load(),
+    first = environment(900),
+    superseded = environment(700),
+    current = environment(500);
+  let doc = first.doc;
+  const reader = createNativeRuleMeta(() => doc, ['viewport.width']);
+  const release = reader.subscribe(() => {}, ['viewport.width']);
+  const failure = { code: 'superseded-registration' };
+  superseded.onAdd(() => {
+    superseded.onAdd();
+    doc = current.doc;
+    expect(reader.read('viewport.width')).toBe(500);
+    throw failure;
+  });
+  superseded.onRemove(() => {
+    throw 0;
+  });
+  doc = superseded.doc;
+  expect(capture(() => reader.read('viewport.width'))).toEqual({ failed: true, error: failure });
+  expect(superseded.listeners.size).toBe(0);
+  expect(current.listeners.size).toBe(1);
+  expect(reader.read('viewport.width')).toBe(500);
+  release();
+  expect(current.listeners.size).toBe(0);
+});
+
+it('does not publish an old source value after its getter admits a newer Document', async () => {
+  const { createNativeRuleMeta } = await load(),
+    first = environment(900),
+    current = environment(500);
+  let doc = first.doc;
+  const reader = createNativeRuleMeta(() => doc, ['viewport.width']);
+  const release = reader.subscribe(() => {}, ['viewport.width']);
+  let reenter = true;
+  Object.defineProperty(first.view, 'innerWidth', {
+    get() {
+      if (reenter) {
+        reenter = false;
+        doc = current.doc;
+        expect(reader.read('viewport.width')).toBe(500);
+      }
+      return 900;
+    },
+  });
+  expect(reader.read('viewport.width')).toBe('unknown');
+  expect(first.listeners.size).toBe(0);
+  expect(current.listeners.size).toBe(1);
+  expect(reader.read('viewport.width')).toBe(500);
+  release();
+});
+
+it('does not overwrite a Document admitted reentrantly by getDocument', async () => {
+  const { createNativeRuleMeta } = await load(),
+    first = environment(900),
+    superseded = environment(700),
+    current = environment(500);
+  let doc = first.doc,
+    onRead: (() => void) | undefined;
+  const reader = createNativeRuleMeta(() => {
+    const observed = doc,
+      callback = onRead;
+    onRead = undefined;
+    callback?.();
+    return observed;
+  }, ['viewport.width']);
+  const release = reader.subscribe(() => {}, ['viewport.width']);
+  onRead = () => {
+    doc = current.doc;
+    expect(reader.read('viewport.width')).toBe(500);
+  };
+  doc = superseded.doc;
+  expect(reader.read('viewport.width')).toBe(500);
+  expect(superseded.listeners.size).toBe(0);
+  expect(current.listeners.size).toBe(1);
+  release();
+});

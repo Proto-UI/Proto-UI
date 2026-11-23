@@ -254,15 +254,17 @@ it('public cancellation does not clear a reentrant replacement', () => {
   expect(f.samples.at(-1)?.translate).toEqual([0, 0]);
   expect(f.results).toEqual(['finished']);
 });
-it('settled invalidations withdraw all transient leases each time', () => {
+it('settled invalidations keep semantic layout without reacquiring transient leases', () => {
   const f = fixture();
   f.commit();
   f.frameAt(16);
   f.frameAt(516);
   const releases = f.releases();
   f.commit({ phase: 'entered', attempt: null });
+  const samples = f.samples.length;
   f.invalidate();
-  expect(f.releases()).toBe(releases + 2);
+  expect(f.releases()).toBe(releases + 1);
+  expect(f.samples).toHaveLength(samples);
   expect(f.frames.size).toBe(0);
 });
 

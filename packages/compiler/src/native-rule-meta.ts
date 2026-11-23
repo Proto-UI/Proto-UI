@@ -77,7 +77,11 @@ function sourceFor(doc: Document, key: string): Source | undefined {
     releaseNativeMeta(releases);
   }
   const source: Source = {
-    read() { return live && ready && doc.defaultView === view ? readNativeWebMeta(doc, key) : 'unknown'; },
+    read() {
+      if (!live || !ready || doc.defaultView !== view) return 'unknown';
+      const value = readNativeWebMeta(doc, key);
+      return live && ready && doc.defaultView === view ? value : 'unknown';
+    },
     subscribe(notify) {
       if (!live) return undefined;
       // Distinct leases even if the same callback is reused by separate owners.
@@ -144,6 +148,8 @@ export function createNativeRuleMeta(getDocument: () => Document | undefined, ke
   type Mount = { active: boolean; document: Document | undefined; generation: number;
     invalidate(): void; requested: readonly string[]; cleanups: (() => void)[]; leased: Map<string, Source> };
   let mounted: Mount | undefined;
+  const currentMount = (mount: Mount, generation: number) =>
+    mount.active && mounted === mount && mount.generation === generation;
   function release(mount: Mount): void {
     ++mount.generation;
     const cleanups = mount.cleanups; mount.cleanups = [];
@@ -152,16 +158,22 @@ export function createNativeRuleMeta(getDocument: () => Document | undefined, ke
   }
   function reconcile(mount: Mount): void {
     if (!mount.active || mounted !== mount) return;
+    const observed = mount.generation;
     const next = getDocument();
+    if (!currentMount(mount, observed)) return;
     if (next === mount.document) return;
+    const current = observed + 1;
     release(mount);
-    if (!mount.active || mounted !== mount) return;
+    // A host release may already reconcile this same mount to a newer Document.
+    // The outer operation cannot publish its captured destination or release the
+    // nested operation's leases, even if its own registration later fails.
+    if (!currentMount(mount, current)) return;
     mount.document = next;
     if (!next) return;
-    const current = mount.generation;
     try {
       for (const key of mount.requested) {
         const source = sourceFor(next, key);
+        if (!currentMount(mount, current)) return;
         if (!source) continue;
         const off = source.subscribe(() => {
           if (!mount.active || mounted !== mount || current !== mount.generation) return;
@@ -174,17 +186,26 @@ export function createNativeRuleMeta(getDocument: () => Document | undefined, ke
         mount.cleanups.push(off);
         mount.leased.set(key, source);
       }
-    } catch (error) { try { release(mount); } catch {} throw error; }
+    } catch (error) {
+      if (currentMount(mount, current)) { try { release(mount); } catch {} }
+      throw error;
+    }
   }
   return {
     read(key: string): unknown {
       const mount = mounted;
       if (!mount?.active) return 'unknown';
       reconcile(mount);
-      if (!mount.active || mounted !== mount) return 'unknown';
-      if (key === 'colorScheme' || key === 'reducedMotion' || key === 'styleSupport.alphaFill' || key === 'styleSupport.backdropBlur4px')
-        return readNativeWebMeta(mount.document, key);
-      return mount.leased.get(key)?.read() ?? 'unknown';
+      const generation = mount.generation;
+      if (!currentMount(mount, generation)) return 'unknown';
+      const value = key === 'colorScheme' || key === 'reducedMotion' || key === 'styleSupport.alphaFill' || key === 'styleSupport.backdropBlur4px'
+        ? readNativeWebMeta(mount.document, key)
+        : mount.leased.get(key)?.read() ?? 'unknown';
+      if (!currentMount(mount, generation)) return 'unknown';
+      const document = getDocument();
+      if (!currentMount(mount, generation)) return 'unknown';
+      if (document !== mount.document) { reconcile(mount); return 'unknown'; }
+      return value;
     },
     subscribe(notify: () => void, requested: readonly string[]): () => void {
       if (mounted) throw new Error('[Rule meta] one mounted lease per logical owner');

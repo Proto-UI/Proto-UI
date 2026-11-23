@@ -416,3 +416,95 @@ it('reacquires the same-document viewport lease after a failed physical Root reb
   expect(drainTerminal(() => owner.disconnect())).toEqual([]);
   expect(listeners.size).toBe(0);
 });
+
+it('finishes old Root retirement before admitting a synchronous replacement and preserves its first failure', async () => {
+  const generated = await load(
+    `import {definePrototype,delay,tw} from '@proto.ui/core';
+export default definePrototype({name:'reentrant-root-retirement',setup(def){
+  def.feedback.style.use(tw('block'));
+  const owner=def.feedback.presence.owner();
+  def.feedback.style.presence({owner:owner.ref,closed:{opacity:0},entered:{opacity:1},easing:[0,0,1,1]});
+  def.lifecycle.onMounted(()=>{delay(10000,()=>{});});
+  return r=>r.el('div','consumer');
+}});`,
+    true
+  );
+  const frames: any[] = [];
+  const owner = generated.observeGeneratedOwner(
+    {},
+    (frame: unknown) => frames.push(frame),
+    () => null,
+    () => {}
+  );
+  cleanup.push(() => {
+    drainTerminal(() => owner.disconnect());
+  });
+  const previous = document.createElement('div'),
+    superseded = document.createElement('div'),
+    replacement = document.createElement('div');
+  document.body.append(previous, superseded, replacement);
+  owner.start();
+  await Promise.resolve();
+  owner.bindRoot(previous);
+  owner.accept(frames.at(-1));
+  expect(previous.getAttribute('data-pui-style')).toBe('block');
+  const nativeClear = globalThis.clearTimeout;
+  let reentered = false;
+  vi.spyOn(globalThis, 'clearTimeout').mockImplementation((ticket) => {
+    nativeClear(ticket);
+    if (!reentered) {
+      reentered = true;
+      owner.bindRoot(replacement);
+      throw 0;
+    }
+  });
+  expect(capture(() => owner.bindRoot(superseded))).toEqual({ failed: true, error: 0 });
+  expect(reentered).toBe(true);
+  expect(previous.hasAttribute('data-pui-style')).toBe(false);
+  expect(superseded.hasAttribute('data-pui-style')).toBe(false);
+  expect(replacement.getAttribute('data-pui-style')).toBe('block');
+});
+
+it('coalesces B then the current A during Root admission to the last requested A', async () => {
+  const generated = await load(liveOwner, true),
+    host = media();
+  const frames: any[] = [];
+  const owner = generated.observeGeneratedOwner(
+    { present: true },
+    (frame: unknown) => frames.push(frame),
+    () => null,
+    () => {}
+  );
+  cleanup.push(() => {
+    drainTerminal(() => owner.disconnect());
+  });
+  const previous = document.createElement('div'),
+    a = document.createElement('div'),
+    b = document.createElement('div');
+  document.body.append(previous, a, b);
+  owner.start();
+  await Promise.resolve();
+  owner.bindRoot(previous);
+  owner.accept(frames.at(-1));
+  const state = owner.handle.getExposes().count;
+  expect(host.live()).toBe(2);
+  const setAttribute = a.setAttribute;
+  let reentered = false;
+  vi.spyOn(a, 'setAttribute').mockImplementation((name, value) => {
+    setAttribute.call(a, name, value);
+    if (name === 'data-pui-style' && !reentered) {
+      reentered = true;
+      owner.bindRoot(b);
+      owner.bindRoot(a);
+    }
+  });
+  owner.bindRoot(a);
+  expect(reentered).toBe(true);
+  expect(previous.hasAttribute('data-pui-style')).toBe(false);
+  expect(a.getAttribute('data-pui-style')).toBe('opacity-50');
+  expect(b.hasAttribute('data-pui-style')).toBe(false);
+  expect(owner.handle.getExposes().count).toBe(state);
+  expect(host.live()).toBe(2);
+  expect(drainTerminal(() => owner.disconnect())).toEqual([]);
+  expect(host.live()).toBe(0);
+});
