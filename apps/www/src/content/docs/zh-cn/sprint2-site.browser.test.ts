@@ -174,7 +174,7 @@ function expectBrutalistRadius(observation: Awaited<ReturnType<typeof paint>>) {
   // The public Brutalist Surface's default uses rounded-base and the same
   // family radius bank as sidebar.css. Equality of two incorrect square rows
   // must not satisfy family parity. Other site chrome has its own recipes.
-  expect(observation.brutalistRadius).not.toBe('');
+  expect(observation.brutalistRadius).toBe('5px');
   expect(observation.radius).toEqual(Array(4).fill(observation.brutalistRadius));
 }
 

@@ -67,6 +67,31 @@ afterEach(async () => {
 });
 
 describe('shared GPUI SDK compatibility', () => {
+  it.each([false, true])(
+    'requires a separate opt-in for native text selection notification (workspace=%s)',
+    (workspace) => {
+      const files = component(undefined, workspace).output.supportingFiles!;
+      const manifest = files.find((file) =>
+        file.path.endsWith('/gpui-native/Cargo.toml')
+      )!.contents;
+      expect(manifest).toContain('gpui-text-selection-notification = []');
+      expect(manifest.match(/^default = .*$/m)?.[0] ?? '').not.toContain(
+        'gpui-text-selection-notification'
+      );
+      const owner = files.find((file) => file.path.endsWith('gpui-native-owner.rs'))!.contents;
+      expect(owner).toContain(
+        '#[cfg(feature="gpui-text-selection-notification")]\n    window.notify_text_selection_changed(focus);'
+      );
+      expect(owner).toContain(
+        '#[cfg(not(feature="gpui-text-selection-notification"))]\n    if focus.is_focused(window){'
+      );
+      expect(owner).toContain('window.invalidate_character_coordinates();');
+      expect(owner).toContain(
+        'fn legacy_selection_notifies_the_live_native_input_and_respects_focus('
+      );
+    }
+  );
+
   it('carries workspace GPUI through the SDK CLI and two independent component publications', async () => {
     const root = await fixture();
     expect(

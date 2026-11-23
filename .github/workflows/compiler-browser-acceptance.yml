@@ -141,7 +141,21 @@ jobs:
           node --version > "$EVIDENCE/node.txt"
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          node --test scripts/coverage-matrices/test/check-website-production-bundle.test.mjs \
+            2>&1 | tee "$EVIDENCE/bundle-gate-controls.log"
           corepack pnpm@10.32.1 check:website-production-bundle 2>&1 | tee "$EVIDENCE/production-build.log"
+      - name: Retain the unmodified emitted production graph for independent replay
+        if: always()
+        run: |
+          set -euo pipefail
+          GRAPH=apps/www/dist/proto-ui-bundle-graph.json
+          EVIDENCE="$RUNNER_TEMP/compiler-production-build"
+          if [ -f "$GRAPH" ]; then
+            mkdir -p "$EVIDENCE"
+            cp "$GRAPH" "$EVIDENCE/proto-ui-bundle-graph.json"
+            sha256sum "$GRAPH" > "$EVIDENCE/production-graph.sha256"
+            cmp "$GRAPH" "$EVIDENCE/proto-ui-bundle-graph.json"
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

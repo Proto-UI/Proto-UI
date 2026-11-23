@@ -11,6 +11,7 @@ import {
   MODULE_CAPABILITY_TYPES,
   isDataValueType,
   isPublicValueType,
+  hasCaptureLookup,
   isCapabilityAssignable,
   lexicalValueType,
   lexicalStoredType,
@@ -20,6 +21,7 @@ import {
   type ExpressionIR,
   type FunctionIR,
   type HookCaptureIR,
+  type AuthoredHookIR,
   type ModuleDeclarationIR,
   type Phase,
   type PrototypeIR,
@@ -81,6 +83,7 @@ import {
   valueAlternatives,
 } from './value-types';
 import { derivePrototypeCaptures } from './capture-analysis';
+import { captureFacadeFields, checkedSpreadFields, mergeSpreadField } from './capture-types';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
 import { hasAccessorField, moduleAccessorStorageIssue } from './record-accessors';
 
@@ -377,8 +380,8 @@ function valueType(value: unknown, location = FALLBACK): ValueType {
       };
     }
     if (type.kind === 'callable') {
-      object(type, ['kind', 'parameters', 'returnType']);
-      return {
+      object(type, ['kind', 'parameters', 'returnType', 'lookup']);
+      const result: Extract<ValueType, { kind: 'callable' }> = {
         kind: 'callable',
         parameters: array(type.parameters).map((item) => {
           const parameter = object(item, ['name', 'type', 'optional']);
@@ -395,6 +398,25 @@ function valueType(value: unknown, location = FALLBACK): ValueType {
         }),
         returnType: valueType(type.returnType, location),
       };
+      if (type.lookup !== undefined) {
+        if (
+          result.parameters.length !== 1 ||
+          result.parameters[0].type !== 'string' ||
+          result.parameters[0].optional
+        )
+          bad('Capture getter lookup signatures require one string key.', location);
+        const keys = new Set<string>();
+        result.lookup = array(type.lookup).map((item) => {
+          const entry = object(item, ['key', 'type']);
+          const key = text(entry.key),
+            value = valueType(entry.type, location);
+          if (keys.has(key) || !valueAssignable(value, result.returnType))
+            bad('Invalid capture getter lookup signature.', location);
+          keys.add(key);
+          return { key, type: value };
+        });
+      }
+      return result;
     }
   }
   try {
@@ -833,7 +855,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         if (!isDataValueType(valueType(exposure.payload, location)))
           bad('Outward event payload must be serializable data.', location);
       } else if (exposure.kind === 'method') {
-        parameters(exposure.parameters, false);
+        if (
+          parameters(exposure.parameters, false).some((parameter) =>
+            hasCaptureLookup(parameter.type)
+          )
+        )
+          bad('Public method parameters cannot claim capture getter lookup signatures.', location);
         if (!isPublicValueType(valueType(exposure.returnType, location)))
           bad('Exposed methods cannot return setup or execution-scope capabilities.', location);
       } else bad('Invalid exposure kind.', location);
@@ -922,7 +949,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (hook.kind === 'hook') valueType(hook.optionsType, span(hook.span));
       else if (hook.optionsType !== undefined) bad('As-hooks have no invocation options.');
       if (hook.capture !== undefined) {
-        const capture = object(hook.capture, ['states', 'methods', 'children']);
+        const capture = object(hook.capture, ['states', 'methods', 'children', 'events']);
+        if (capture.events !== undefined) {
+          const events = array(capture.events).map((name) => text(name));
+          if (!events.length || new Set(events).size !== events.length)
+            bad('Capture event metadata requires distinct direct declarations.');
+        }
         for (const item of array(capture.states)) {
           const state = object(item, ['name', 'type', 'valueType', 'definite']);
           if (state.definite !== undefined && typeof state.definite !== 'boolean')
@@ -950,6 +982,21 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       hookIds.add(id);
     }
     for (const requirement of array(root.requirements)) text(requirement);
+    const captureFields = (id: string) => {
+      const hook = hooks.find((hook) => hook.id === id);
+      if (!hook) bad('Capture facade requires a declared authored hook.');
+      return captureFacadeFields(
+        hook as unknown as AuthoredHookIR,
+        new Map(
+          hooks.map((child) => [
+            String(child.id),
+            child.projectHandle
+              ? valueType(object(child.projectHandle).returnType)
+              : { kind: 'capture', hookId: String(child.id) },
+          ])
+        )
+      );
+    };
     const active = new Set<object>();
     function parameters(value: unknown, declaration = true): Parameter[] {
       const names = new Set<string>();
@@ -1490,27 +1537,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                       if (node.optional) return 'void';
                       throw new TypeError('Nullish member receiver.');
                     }
-                    if (
-                      typeof member !== 'string' &&
-                      member.kind === 'capture' &&
-                      key === 'stateHandles'
-                    )
-                      return captureStateHandlesType(
-                        hooks.find((hook) => hook.id === member.hookId)?.capture as
-                          | HookCaptureIR
-                          | undefined
+                    if (typeof member !== 'string' && member.kind === 'capture')
+                      return memberValueType(
+                        { kind: 'object', fields: captureFields(member.hookId) },
+                        key,
+                        node.optional as boolean
                       );
-                    if (
-                      typeof member !== 'string' &&
-                      member.kind === 'capture' &&
-                      key === 'render'
-                    ) {
-                      const hook = hooks.find((hook) => hook.id === member.hookId);
-                      return joinValueTypes([
-                        hook ? valueType(object(hook.setup).returnType, location) : 'void',
-                        'void',
-                      ]);
-                    }
                     const capability = capabilityMemberType(member, key, node.optional as boolean);
                     if (capability !== undefined) return capability;
                     if (member === 'props' && props.has(key)) return props.get(key)!;
@@ -1521,18 +1553,14 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               );
               break;
             }
-            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'stateHandles') {
-              type = captureStateHandlesType(
-                hooks.find((hook) => hook.id === owner.hookId)?.capture as HookCaptureIR | undefined
+            if (typeof owner !== 'string' && owner.kind === 'capture') {
+              type = valueAction(location, () =>
+                memberValueType(
+                  { kind: 'object', fields: captureFields(owner.hookId) },
+                  key,
+                  node.optional as boolean
+                )
               );
-              break;
-            }
-            if (typeof owner !== 'string' && owner.kind === 'capture' && key === 'render') {
-              const hook = hooks.find((hook) => hook.id === owner.hookId);
-              type = joinValueTypes([
-                hook ? valueType(object(hook.setup).returnType, location) : 'void',
-                'void',
-              ]);
               break;
             }
             const capabilityType = capabilityMemberType(owner, key, node.optional as boolean);
@@ -1816,6 +1844,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                     : undefined,
                 ...(phase === 'callback' ? { callbackContext: context as CallbackContext } : {}),
               };
+            let eventPayloadTypes: DataType[] | undefined;
             if (captureReceiver) {
               const owner = hooks.find((hook) => hook.id === captureReceiver.hookId);
               if (!owner?.capture)
@@ -1874,8 +1903,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                     bad('Emit requires a declared outward event.', location);
                   return valueType(exposure.payload, location) as DataType;
                 });
-                if (!types.every((type) => sameType(type, types[0])))
-                  bad('Dynamic events require one shared payload signature.', location);
+                // A shared emission need not give each target the same final
+                // schema: another call may add a legal shape to one target.
+                // Validate this payload against every possible key after its
+                // own expression and provenance have been independently checked.
+                eventPayloadTypes = types;
                 bindings.eventPayloadType = types[0];
               } else {
                 if (first?.kind !== 'literal' || typeof first.value !== 'string')
@@ -1921,11 +1953,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                   operationArgumentRule(operation, index)
                 );
             });
-            const argumentIssues = validateOperationArguments(
-              operation,
-              args as never,
-              receiver,
-              bindings
+            const argumentIssues = (
+              eventPayloadTypes?.length ? eventPayloadTypes : [undefined]
+            ).flatMap((eventPayloadType) =>
+              validateOperationArguments(
+                operation,
+                args as never,
+                receiver,
+                eventPayloadType === undefined ? bindings : { ...bindings, eventPayloadType }
+              )
             );
             if (argumentIssues.length) bad(argumentIssues[0].message, location);
             if (operation === 'expose.state') {

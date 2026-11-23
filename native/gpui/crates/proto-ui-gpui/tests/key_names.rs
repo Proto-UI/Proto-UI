@@ -110,6 +110,13 @@ fn every_named_key_reaches_a_prototype_with_its_web_spelling(cx: &mut TestAppCon
 }
 
 #[gpui::test]
+fn context_menu_key_reaches_the_focused_native_subject(cx: &mut TestAppContext) {
+    let harness = Harness::open(cx);
+    let event = harness.press(cx, "menu");
+    assert_eq!(web_key(&event), "ContextMenu");
+}
+
+#[gpui::test]
 fn enter_tab_and_space_are_named_although_gpui_fills_a_typed_character(cx: &mut TestAppContext) {
     // The trap, observed rather than assumed: GPUI's simulated input fills
     // `key_char` for these three. A translation that preferred the typed
