@@ -13,6 +13,7 @@ import button from '../../../prototypes/shadcn/src/button';
 import { switchRoot, switchThumb } from '../../../prototypes/shadcn/src/switch';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import { createShadowSplitEffectsPort } from '../src/shadow-split-effects';
+import { rewriteSplitBaseDeclarations } from './shadow-split-test-utils';
 
 // Happy DOM does not project @layer/:host stylesheet geometry; materialize only the
 // declared physical prerequisites here. Real Shadow geometry remains a browser gate.
@@ -27,10 +28,10 @@ beforeAll(() => {
 });
 afterAll(() => recipeSheet.remove());
 
-// These newer profile/drag branches have no admitted split application role.
-// Their atomic rejection controls do not satisfy the complete-prototype inventory
-// gate below, which still requires no unresolved Root token.
-const unresolvedSwitchThumb = [
+// The new draft recipe retains an explicit old-companion rejection boundary.
+// These controls do not replace the unchanged complete-prototype inventory or
+// native whole-Root/owner-source acceptance.
+const percentageSwitchThumb = [
   'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
   'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
   'translate-x-[calc((100%_-_8px)*var(--pui-percentage)/100)]',
@@ -74,16 +75,22 @@ afterEach(async () => {
 });
 
 describe('S2 current public admission boundary', () => {
-  it.each(unresolvedSwitchThumb)(
-    'rejects unsupported active Switch token %s atomically',
+  it.each(percentageSwitchThumb)(
+    'rejects an old companion for Switch token %s atomically',
     (token) => {
       const host = document.createElement('s2-unsupported-switch');
       const surface = document.createElement('div');
       host.attachShadow({ mode: 'open' }).append(surface);
+      const current = renderProtoShadowSplitStyleArtifact(['block', token]);
       const port = createShadowSplitEffectsPort({
         host,
         surface,
-        artifact: renderProtoShadowSplitStyleArtifact(['block', token]),
+        artifact: {
+          ...current,
+          cssText: rewriteSplitBaseDeclarations(current.cssText, (declarations) =>
+            declarations.replace('--pui-split-percentage-translation-recipe: v1;', '')
+          ),
+        },
         prototypeName: 's2-unsupported-switch',
       });
       const effect = (tokens: string[]) =>
@@ -92,7 +99,9 @@ describe('S2 current public admission boundary', () => {
         port.queueStyle(effect(['block']));
         port.flushNow!();
         const before = [host.outerHTML, surface.outerHTML];
-        expect(() => port.queueStyle(effect(['block', token]))).toThrow(/unresolved/);
+        expect(() => port.queueStyle(effect(['block', token]))).toThrow(
+          /percentage translation recipe/
+        );
         port.flushNow!();
         expect([host.outerHTML, surface.outerHTML]).toEqual(before);
       } finally {

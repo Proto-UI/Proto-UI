@@ -992,6 +992,7 @@ function renderShadowSplitCss(tokens: string[]): string {
   const baseSelector = `:host([${SPLIT_ROOT_ATTR}])`;
   const baseDeclarations = [
     '--pui-split-motion-recipe: h1;',
+    '--pui-split-percentage-translation-recipe: v1;',
     '--pui-split-participation-coordinate-recipe: i1;',
     '--pui-split-intrinsic-nowrap-recipe: v1;',
     '--pui-split-intrinsic-full-width-recipe: v1;',

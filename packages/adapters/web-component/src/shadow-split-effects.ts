@@ -4,10 +4,12 @@ import {
   mergeRootStyleEntries,
   readRootStyleEntries,
   resolveRootStyleEntry,
+  isPercentageRootTranslationV1,
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
 import { createOwnedTwTokenApplier, PUI_STYLE_ATTR } from './feedback-style';
 import { stripShadowCssComments, type ShadowStyleArtifactV1 } from './shadow-style-artifact';
+import type { ShadowPercentageSource } from './shadow-percentage-source';
 
 export const SHADOW_SPLIT_ROOT_STYLE_ATTR = 'data-pui-split-root-style';
 export const SHADOW_SPLIT_SURFACE_ATTR = 'data-pui-split-surface';
@@ -29,7 +31,12 @@ const COMPOSITES = new Set(['block', 'flex', 'grid', 'inline-flex']);
 const NATIVE_TEXT_ATTR = 'data-pui-split-text-control';
 const SPLIT_COMPILED_RECEIPT = '--pui-split-compiled-receipt';
 
-type Projection = { root: string; surface: string[]; borderWidths: string };
+type Projection = {
+  root: string;
+  surface: string[];
+  borderWidths: string;
+  percentage?: { source: ShadowPercentageSource; entry: RootStyleEntry };
+};
 type CompiledStyleRule = { selector: string; declarations: string };
 
 function splitCompiledReceipt(selector: string, declarations: string): string {
@@ -71,6 +78,23 @@ function declarationsBeforeReceipt(rule: CompiledStyleRule): string | null {
 // Canonical recipes affecting boundary sizing or scrolling are Adapter trust
 // anchors. A new generated spelling requires an Adapter update and parity evidence.
 function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleEntry): boolean {
+  if (needsPercentageTranslationRecipe(entry.authorToken)) {
+    const host = compiledReceiptSelector(entry.token);
+    const selector = rule.selector.replace(/\s/g, '');
+    const escaped = entry.token.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
+    const surface = `${host}>[${SHADOW_SPLIT_SURFACE_ATTR}][data-pui-style~="${escaped}"]`;
+    if (selector !== host && selector !== surface) return false;
+    const operand = entry.authorToken.slice('translate-x-['.length, -1).replaceAll('_', '');
+    const transform =
+      'translate(var(--pui-translate-x,0),var(--pui-translate-y,0))scale(var(--pui-scale-x,1),var(--pui-scale-y,1))';
+    const expected = `--pui-translate-x:${operand};transform:${transform};`;
+    // The generated surface rule has no active token for a Root geometry
+    // entry. The actual host rule must carry the whole-Root rest transform.
+    return (
+      declarationsBeforeReceipt(rule) ===
+      (selector === host ? `${expected}--pui-split-rest-transform:${transform};` : expected)
+    );
+  }
   const expected =
     entry.authorToken === 'w-full'
       ? 'width:100%;'
@@ -81,6 +105,10 @@ function hasCanonicalProjectionRecipe(rule: CompiledStyleRule, entry: RootStyleE
           : null;
   if (!expected) return true;
   return declarationsBeforeReceipt(rule) === expected;
+}
+
+function needsPercentageTranslationRecipe(token: string): boolean {
+  return token === 'translate-x-[calc(100%_-_4px)]' || isPercentageRootTranslationV1(token);
 }
 
 function nextCssBoundary(
@@ -335,6 +363,8 @@ function hasExactCompiledReceipt(
   return (
     matching.length === candidates.length &&
     matching.length > 0 &&
+    (!needsPercentageTranslationRecipe(entry.authorToken) ||
+      matching.some((rule) => rule.selector.replace(/\s/g, '') === receipt)) &&
     ((!selection && !placeholder && entry.roleSource === 'fallback') ||
       matching.every(
         (rule) => hasValidDeclarationReceipt(rule) && hasCanonicalProjectionRecipe(rule, entry)
@@ -372,11 +402,13 @@ export function createShadowSplitEffectsPort({
   surface,
   artifact,
   prototypeName,
+  capturePercentageSource,
 }: {
   host: HTMLElement;
   surface: HTMLElement;
   artifact: ShadowStyleArtifactV1;
   prototypeName: string;
+  capturePercentageSource?: () => ShadowPercentageSource | null;
 }): EffectsPort & { dispose(): void } {
   const invalid = (reason: string) => new Error(`[${prototypeName}]${reason}`);
   const nativeText = surface.localName === 'input' || surface.localName === 'textarea';
@@ -576,6 +608,7 @@ export function createShadowSplitEffectsPort({
       throw invalid('root-provenance');
     }
     const entries = mergeRootStyleEntries(readRootStyleEntries(handle, 'setup'));
+    let percentage: Projection['percentage'];
     if (
       entries.some((entry) =>
         ['animate-in', 'animate-out', '-translate-x-1/2', '-translate-y-1/2'].includes(
@@ -635,6 +668,15 @@ export function createShadowSplitEffectsPort({
         fail(entry, 'canonical-origin');
       }
       if (entry.role === 'unresolved') fail(entry, 'unresolved-role');
+      if (needsPercentageTranslationRecipe(entry.authorToken)) {
+        if (!hasRecipe('percentage-translation', 'v1'))
+          fail(entry, 'percentage translation recipe');
+        if (isPercentageRootTranslationV1(entry.authorToken) && !percentage) {
+          const source = capturePercentageSource?.();
+          if (!source) return fail(entry, 'percentage owner source');
+          percentage = { source, entry };
+        }
+      }
       const needsK1 = [
         '-translate-x-1/2',
         '-translate-y-1/2',
@@ -682,6 +724,7 @@ export function createShadowSplitEffectsPort({
     }
     return {
       borderWidths,
+      percentage,
       root: entries.map((e) => e.token).join(' '),
       surface: entries
         .filter(
@@ -703,9 +746,15 @@ export function createShadowSplitEffectsPort({
       flushRequested = true;
       return;
     }
-    flushing = true;
     const previous = applied;
     const next = latest;
+    if (next.percentage && !next.percentage.source.isCurrent()) {
+      // The source may have been revoked between queue and publish. Reject
+      // before either target or its initial-transition style is touched.
+      latest = previous;
+      fail(next.percentage.entry, 'percentage source not current');
+    }
+    flushing = true;
     const suppressInitialTransition = !previous;
     try {
       // The surface is already connected, so the first opacity publication

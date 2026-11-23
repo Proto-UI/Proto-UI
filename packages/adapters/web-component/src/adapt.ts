@@ -110,6 +110,9 @@ import { completeCleanup, createWebComponentHostSession } from './runtime/sessio
 import { createShadowOwnerShell } from './shadow-owner-shell';
 import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
 import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
+import { captureShadowPercentageSource } from './shadow-percentage-source';
+import type { ExposeStatePort } from '@proto.ui/module-expose-state';
+import type { ExposeStateWebPort } from '@proto.ui/module-expose-state-web';
 import {
   createShadowSplitEffectsPort,
   hasVerifiedShadowSplitBaseRecipe,
@@ -907,6 +910,21 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 surface: splitResources.surface.element,
                 artifact: splitResources.artifact.artifact,
                 prototypeName: proto.name,
+                capturePercentageSource: () => {
+                  const session = owner.session;
+                  return captureShadowPercentageSource({
+                    host: thisEl,
+                    exposeState: session?.caps.getPort<ExposeStatePort>('expose-state'),
+                    exposeStateWeb: session?.caps.getPort<ExposeStateWebPort>('expose-state-web'),
+                    isOwnerCurrent: () =>
+                      !!session &&
+                      owner.session === session &&
+                      !disposed &&
+                      !ownerResourcesReleased &&
+                      !this._terminalDisposing &&
+                      this._instanceToken === instanceToken,
+                  });
+                },
               })
             : undefined);
           const eventGate = (resources.eventGate = createEventGate());
