@@ -445,7 +445,7 @@ export function emitVue2Source(
             // type: its checked literal discriminants otherwise widen to string.
             const type =
               value.operation === 'props.define' && argumentIndex === 0
-                ? `Record<string, ${prefix}PropSpec>`
+                ? `Parameters<typeof ${prefix}CaptureReceiver.props.define>[0]`
                 : ['lexical-cell', 'record', 'object-spread'].includes(item.kind)
                   ? typeName(item.type)
                   : undefined;

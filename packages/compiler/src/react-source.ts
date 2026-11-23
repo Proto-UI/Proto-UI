@@ -317,6 +317,17 @@ export function emitReactSource(
           manager: `${p}Authored`,
           interaction: `${p}Interaction`,
           emit: (item, capture = true) => expression(item, depth, capture),
+          declaration: (_item, name, initializer, argumentIndex) => {
+            // Preserve the fixed argument's call-site context without applying
+            // Parameters to generic operations such as expose.method.
+            const type =
+              value.operation === 'props.define' && argumentIndex === 0
+                ? `Parameters<typeof ${p}CaptureReceiver.props.define>[0]`
+                : value.operation === 'expose.event' && argumentIndex === 1
+                  ? `Parameters<typeof ${p}CaptureReceiver.expose.event>[1]`
+                  : undefined;
+            return `const ${name}${type ? `: ${type}` : ''} = ${initializer};`;
+          },
         });
         if (captured !== undefined) return captured;
       }
