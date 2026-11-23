@@ -48,7 +48,9 @@ export type AnatomyClaimDecl = {
 
 export type AnatomyPartView = {
   readonly role: string;
+  /** Retired declarations or unavailable target exposes are absent, not revived. */
   hasExpose(key: string): boolean;
+  /** Re-reads the target entry; previously returned methods keep their own lifecycle guards. */
   getExpose(key: string): unknown | null;
   hasHook(name: string): boolean;
 };

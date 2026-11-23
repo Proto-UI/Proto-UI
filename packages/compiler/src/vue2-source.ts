@@ -1386,7 +1386,7 @@ ${
     invoke: (fn) => invoke(fn), getRun: () => run,
     getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
     identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
-    getExposes: () => exposed,
+    getExposes: () => terminal ? {} : exposed,
     requestHostUpdate: force,
   });`
         : `/** @type {PUINativeInteraction<typeof run>} */
@@ -1405,7 +1405,7 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
     getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
     identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
     declarations: ${declarations}, tableFamily: ${tableFamily},
-    getExposes: () => exposed,
+    getExposes: () => terminal ? {} : exposed,
     registerExpose: (key, value) => {
       setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration: ' + key);
       if (value !== null && typeof value === 'object' && observedExternals.has(value)) exposed[key] = observedExternals.get(value);

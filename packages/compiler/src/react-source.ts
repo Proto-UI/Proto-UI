@@ -1218,7 +1218,7 @@ ${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' 
     getLogicalParent: getParent,
     declarations: ${JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config })))},
     tableFamily: ${staticCapabilities.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'},
-    getExposes: () => exposes,
+    getExposes: () => connected && lifetime === 'alive' ? exposes : {},
     registerExpose(key, value) {
       const state = value && typeof value === 'object' ? externalStates.get(value) : undefined;
       if (state) registerExpose(key, state);

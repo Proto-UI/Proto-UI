@@ -1,4 +1,5 @@
 import {
+  type AnatomyPartView,
   type AvailableLayoutBinding,
   type AxisInputSample,
   type DefHandle,
@@ -55,14 +56,22 @@ export function setupDrawerSnap(
   const instanceId = createDrawerContentInstanceId();
   let ownerId: string | null = null;
   let leaseGeneration = 0;
-  let releaseMethod: ((id: string, generation: number) => void) | null = null;
+  let admissionRoot: AnatomyPartView | null = null;
   let initialized = false;
   let registering = false;
   let declarationDisposed = false;
+  const releaseRootAdmission = (root: AnatomyPartView | null, generation: number) => {
+    // Re-read the original declaration after local callbacks: it may have
+    // retired synchronously, while a still-live former Root still owns its lease.
+    const release = root?.getExpose('__releaseContent') as
+      | ((id: string, generation: number) => void)
+      | null;
+    if (typeof release === 'function') release(instanceId, generation);
+  };
   const releaseAdmission = () => {
-    const release = releaseMethod,
+    const root = admissionRoot,
       oldGeneration = leaseGeneration;
-    releaseMethod = null;
+    admissionRoot = null;
     leaseGeneration = 0;
     ownerId = null;
     try {
@@ -70,7 +79,7 @@ export function setupDrawerSnap(
       onAdmissionChange(false);
     } catch (error) {
       try {
-        release?.(instanceId, oldGeneration);
+        releaseRootAdmission(root, oldGeneration);
       } catch (releaseError) {
         throw new AggregateError(
           [error, releaseError],
@@ -79,7 +88,7 @@ export function setupDrawerSnap(
       }
       throw error;
     }
-    release?.(instanceId, oldGeneration);
+    releaseRootAdmission(root, oldGeneration);
   };
   const admit = (run: RunHandle<DrawerContentProps>) => {
     if (declarationDisposed) throw new Error('[Drawer] Disposed Content cannot acquire admission.');
@@ -88,13 +97,13 @@ export function setupDrawerSnap(
     const root = run.anatomy.partsOf(DRAWER_FAMILY, 'root')[0];
     const register = root?.getExpose('__admitContent');
     const release = root?.getExpose('__releaseContent');
-    if (typeof register !== 'function' || typeof release !== 'function')
+    if (!root || typeof register !== 'function' || typeof release !== 'function')
       throw new Error('[Drawer] Content requires its Root admission methods.');
     registering = true;
     ownerId = rootId;
     try {
       leaseGeneration = register(instanceId) as number;
-      releaseMethod = release as (id: string, generation: number) => void;
+      admissionRoot = root;
       if (declarationDisposed || run.context.read(DRAWER_CONTEXT).rootId !== rootId)
         throw new Error('[Drawer] Content owner changed during admission.');
       admitted.set(true, 'reason: drawer declaration admitted');

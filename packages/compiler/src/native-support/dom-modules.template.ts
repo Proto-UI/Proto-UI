@@ -575,7 +575,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       setup('anatomy.claim');
       if (!family?.roles[declaration.role] || claims.has(family)) throw new Error('[Anatomy] invalid/duplicate family role claim.');
       if (declaration.profile && (declaration.role !== 'root' || !family.profiles?.[declaration.profile])) throw new Error('[Anatomy] invalid root profile.');
-      const part: NativeAnatomyPart = Object.freeze({ role: declaration.role, hasExpose(key: string) { return Object.hasOwn(owner.exposes(), key); }, getExpose(key: string) { return owner.exposes()[key] ?? null; }, hasHook(name: string) { return hooks.has(name); } });
+      const exposesAvailable = (): boolean => owner.alive() && claims.get(family)?.part === part;
+      const part: NativeAnatomyPart = Object.freeze({ role: declaration.role, hasExpose(key: string) { return exposesAvailable() && Object.hasOwn(owner.exposes(), key); }, getExpose(key: string) { return exposesAvailable() ? owner.exposes()[key] ?? null : null; }, hasHook(name: string) { return hooks.has(name); } });
       claims.set(family, { family, ...declaration, part }); parts.set(part, owner);
     },
     has(family, role) { alive(); return domain(family, false) !== null && anatomyOwners(family, role).length > 0; },
@@ -1403,7 +1404,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const moved = previous && (followAxis === 'horizontal' ? left !== previous.left && width === previous.width && scrollWidth === previous.scrollWidth : top !== previous.top && height === previous.height && scrollHeight === previous.scrollHeight);
     const arrivedAtEnd = followAxis === 'horizontal' ? Math.max(0, scrollWidth - width) - left <= 1 : Math.max(0, scrollHeight - height) - top <= 1;
     lastScrollGeometry = { left, top, width, height, scrollWidth, scrollHeight };
-    if (readerArrival && moved && arrivedAtEnd && (readerArrival === 'command' || readerArrivals.size > 0 || Date.now() < readerArrivalUntil)) explicitlyPaused = false;
+    if (readerArrival && moved && arrivedAtEnd && (readerArrival === 'command' || readerArrivals.size > 0 || Date.now() < readerArrivalUntil)) {
+      explicitlyPaused = false;
+      // A proved reader arrival retires the older departure window. Immediate
+      // content growth must remain following rather than look like new input.
+      readerIntent = 0;
+    }
     horizontal.update(left, width, scrollWidth, current); if (!current()) return;
     vertical.update(top, height, scrollHeight, current); if (!current()) return;
     if (follow?.mode === 'while-at-end') {
@@ -1415,12 +1421,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     }
     if (current()) projectChrome();
   }
-  function cancelScrollEnd(binding: ScrollBinding, axis: 'horizontal' | 'vertical') {
+  function cancelScrollEnd(binding: ScrollBinding, axis: 'horizontal' | 'vertical', rejected = true) {
     const work = scrollEndWork;
     if (!work || work.binding !== binding || work.axis !== axis) return;
     scrollEndWork = null;
     if (work.frame !== null) binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
-    if (currentScrollBinding(binding)) setScrollRequestStatus('rejected');
+    if (rejected && currentScrollBinding(binding)) setScrollRequestStatus('rejected');
   }
   function revealScroll(request: NativeConfig, binding: ScrollBinding): NativeScrollRequestOutcome {
     let version = scrollCommandVersion;
@@ -1484,6 +1490,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     else throw new Error('[Scroll] invalid request kind.');
     if (!Number.isFinite(next)) throw new Error('[Scroll] request coordinate must be finite.');
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    if (scrollCommandVersion !== version) return {kind:'dispatched'};
+    // A newer same-axis command supersedes automatic initial/layout work.
+    // Cancellation observers may themselves deliver a newer command.
+    cancelScrollEnd(binding, horizontalAxis ? 'horizontal' : 'vertical', request.kind !== 'to-end');
+    if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    if (scrollCommandVersion !== version) return {kind:'dispatched'};
     const statusVersion = scrollRequestStatusVersion;
     if (horizontalAxis) surface.scrollLeft = Math.max(0, Math.min(range, next)); else surface.scrollTop = Math.max(0, Math.min(range, next));
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
@@ -1520,23 +1532,26 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (scrollCommandVersion === version) scrollFacts();
     return currentScrollBinding(binding) ? {kind:'dispatched'} : {kind:'rejected',reason:'unavailable'};
   }
-  function endFollowContentChanged() {
+  function endFollowContentChanged(initial = false) {
     const binding = scrollBinding;
-    if (!binding || !currentScrollBinding(binding) || scrollAttachment) return;
+    if (!binding || !currentScrollBinding(binding) || scrollAttachment && !initial) return;
     const follow = scrollConfig.endFollow as NativeConfig;
-    if (follow?.mode !== 'while-at-end' || explicitlyPaused || followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
+    if (follow?.mode !== 'while-at-end' || explicitlyPaused || !initial && followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
     const view = binding.surface.ownerDocument.defaultView;
     if (!view || scrollEndWork) return;
     const axis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
     const work: ScrollEndWork = { binding, axis, frame: null };
     scrollEndWork = work;
+    if (initial) followState.set('pending');
+    if (scrollEndWork !== work || !currentScrollBinding(binding)) return;
     setScrollRequestStatus('pending');
     if (scrollEndWork !== work || !currentScrollBinding(binding)) return;
     work.frame = view.requestAnimationFrame(() => {
       if (scrollEndWork !== work) return;
       scrollEndWork = null;
       if (!currentScrollBinding(binding)) return;
-      if (readerContacts || Date.now() < readerIntent || followState.handle.get() !== 'following') { setScrollRequestStatus('rejected'); return; }
+      const state = followState.handle.get();
+      if (readerContacts || Date.now() < readerIntent || state !== 'following' && !(initial && state === 'pending')) { setScrollRequestStatus('rejected'); return; }
       options.invoke(() => applyScroll({ kind: 'to-end', axis }));
     });
   }
@@ -1677,6 +1692,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       // requests belong to this transaction; reveal never joins its queue.
       scrollProjection.set(projection); if (!acquiring()) return;
       scrollFacts(); if (!acquiring()) return;
+      // Canonical while-at-end acquisition schedules its first movement even
+      // when the initial content already overflows. Install it before FIFO
+      // command drain so a queued pause or position request can cancel it.
+      endFollowContentChanged(true); if (!acquiring()) return;
       // Keep the transaction active while draining: commands issued by fact
       // subscribers append after every already queued command.
       for (const request of attachment.requests) { if (!current()) break; if (request.kind === 'pause-following') pauseScrollFollowing(true); else applyScroll(request, true); }

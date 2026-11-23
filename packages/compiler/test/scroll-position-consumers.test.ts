@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   mountNativeOwner,
   nativeOwnerProfiles,
@@ -9,6 +9,7 @@ import {
 const cleanup: (() => void | Promise<void>)[] = [];
 afterEach(async () => {
   for (const dispose of cleanup.splice(0).reverse()) await dispose();
+  vi.restoreAllMocks();
   document.body.replaceChildren();
 });
 
@@ -31,6 +32,18 @@ export default definePrototype({name:'scroll-position-consumer',setup(def){
 
 /** Explicit model geometry, including replacement roots; no browser layout claim. */
 function geometry() {
+  // As in scroll-to-end-consumers, keep mount-owned frames separate from the
+  // explicit command under observation. The while-at-end host now owns one.
+  let nextFrame = 0;
+  const pendingFrames = new Map<number, FrameRequestCallback>();
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    const frame = ++nextFrame;
+    pendingFrames.set(frame, callback);
+    return frame;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((frame) =>
+    pendingFrames.delete(frame)
+  );
   const prototype = HTMLElement.prototype;
   for (const [name, extent] of Object.entries({
     clientHeight: 200,

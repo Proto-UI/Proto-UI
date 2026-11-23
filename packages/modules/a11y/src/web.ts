@@ -1275,14 +1275,13 @@ function projectedStateAttributeValue(key: string, value: unknown): string | und
         ? value
         : undefined;
   // Range readouts use canonical numeric text so nullable values/bounds can withdraw facts.
-  if (
-    (key === 'valueMin' || key === 'valueMax' || key === 'valueNow') &&
-    typeof value === 'string' &&
-    /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) &&
-    Number.isFinite(Number(value))
-  )
-    return value;
   if (key === 'valueMin' || key === 'valueMax' || key === 'valueNow') {
+    if (
+      typeof value === 'string' &&
+      /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) &&
+      Number.isFinite(Number(value))
+    )
+      return value;
     return typeof value === 'number' && Number.isFinite(value) ? String(value) : undefined;
   }
   if (key === 'valueText') return typeof value === 'string' && value !== '' ? value : undefined;

@@ -1003,7 +1003,7 @@ ${controlLabel ? '      getAssociations: () => _props.instanceAssociations,\n' :
       identity: ${n('Scope')}, getLogicalParent: () => ${n('ParentScope')},
       declarations: ${JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config })))},
       tableFamily: ${staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'},
-      getExposes: () => ${n('Exposes')},
+      getExposes: () => !${n('Disposed')} && !${n('Disposing')} ? ${n('Exposes')} : {},
       registerExpose: (key, value) => {
         if (value && typeof value === 'object' && ${n('States')}.has(value)) ${n('ExposeState')}(key, value as ${n('State')}<unknown>);
         else if (typeof value === 'function') ${n('Declare')}(key, (...args: unknown[]) => { ${n('PublicAlive')}(); return ${n('Invoke')}('expose-method', () => value(...args)); });

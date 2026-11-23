@@ -1286,7 +1286,7 @@ ${controlLabel ? '    getAssociations,\n' : ''}
     getHost: () => ${ssr ? 'host.host' : 'host'},
     identity: context, getLogicalParent: () => ${ssr ? 'host.parentContext()' : `${p}ContextParent(host)`},
     declarations: ${declarations}, tableFamily: ${tableFamily},
-    getExposes: () => exposes,
+    getExposes: () => alive && !disposing ? exposes : {},
     registerExpose(key, value) {
       if (value && typeof value === 'object' && 'external' in value) expose(key, value.external);
       else if (typeof value === 'function') expose(key, (...args: unknown[]) => { ensureExternal(); return invoke(value, args, false); });

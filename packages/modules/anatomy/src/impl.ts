@@ -68,6 +68,7 @@ type ClaimRecord = {
   profile?: string;
   prototype: Prototype<any> | null;
   exposePort: ExposePort;
+  exposesAvailable: () => boolean;
   getRootTarget: AnatomyRootTargetGetter;
   getParent: AnatomyParentGetter | null;
   invoke: AnatomyOrderCallbackDispatcher;
@@ -376,6 +377,13 @@ export class AnatomyModuleImpl extends ModuleBase {
       profile: decl.profile,
       prototype: this.getPrototypeGetter()(instance),
       exposePort: this.exposePort,
+      exposesAvailable: () => {
+        if (this.disposed) return false;
+        const sys = this.sys;
+        if (sys?.isDisposed()) return false;
+        const phase = sys?.instancePhase?.() ?? this.instancePhase;
+        return phase !== 'disposing' && phase !== 'disposed';
+      },
       getRootTarget: this.getRootTargetGetter(),
       getParent: this.caps.has(ANATOMY_PARENT_CAP) ? this.getParentGetter() : null,
       invoke: (fn) => this.orderDispatch(fn),
@@ -1355,11 +1363,13 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   private toPartView(claim: ClaimRecord): AnatomyPartView {
+    const exposesAvailable = () =>
+      CENTER.getClaim(claim.instance, claim.family) === claim && claim.exposesAvailable();
     const part: AnatomyPartView = {
       role: claim.role,
-      hasExpose: (key: string) => claim.exposePort.has(key),
+      hasExpose: (key: string) => exposesAvailable() && claim.exposePort.has(key),
       getExpose: (key: string) => {
-        if (!claim.exposePort.has(key)) return null;
+        if (!exposesAvailable() || !claim.exposePort.has(key)) return null;
         const exposed = claim.exposePort.get(key) ?? null;
         if (typeof exposed !== 'function') return exposed;
         return (...args: unknown[]) => {
