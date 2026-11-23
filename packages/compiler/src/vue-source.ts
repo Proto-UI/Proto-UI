@@ -437,6 +437,13 @@ export function emitVueSource(
           manager: `${prefix}Authored`,
           interaction: `${prefix}Interaction`,
           emit: (item, capture = true) => expression(item, depth, capture),
+          declaration: (_item, name, initializer, argumentIndex) => {
+            const type =
+              node.operation === 'props.define' && argumentIndex === 0
+                ? `Parameters<typeof ${n('DefineProps')}>[0]`
+                : undefined;
+            return `const ${name}${type ? `: ${type}` : ''} = ${initializer};`;
+          },
         });
         if (captured !== undefined) return captured;
       }

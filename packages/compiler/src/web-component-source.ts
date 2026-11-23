@@ -593,6 +593,13 @@ export function emitWebComponentSource(
           manager: `${prefix}Authored`,
           interaction: `${prefix}Interaction`,
           emit: (item, capture = true) => expr(item, depth, capture),
+          declaration: (_item, name, initializer, argumentIndex) => {
+            const type =
+              node.operation === 'props.define' && argumentIndex === 0
+                ? `Parameters<typeof ${prefix}CaptureReceiver.props.define>[0]`
+                : undefined;
+            return `const ${name}${type ? `: ${type}` : ''} = ${initializer};`;
+          },
         });
         if (captured !== undefined) return captured;
       }

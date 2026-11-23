@@ -163,10 +163,12 @@ export function emitCapturedWebOperation(options: {
       ? [manager + '.introduceObserved(' + argument(effect.introducedState) + ');']
       : []),
   ];
+  // JSDoc must start on its own line to attach to the declaration, including
+  // the first temporary. Same-line comments can belong to the preceding token.
   return (
-    '(() => { ' +
-    definitions.join(' ') +
-    ' const ' +
+    '(() => {\n' +
+    definitions.join('\n') +
+    '\nconst ' +
     result +
     ' = ' +
     call +
