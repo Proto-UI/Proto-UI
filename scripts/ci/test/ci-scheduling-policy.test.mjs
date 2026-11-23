@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { parse } from 'yaml';
 import { collectViolations, WORKFLOW_DIR } from '../check-ci-schedule.mjs';
+import { assertFlutterScrollReports } from '../check-flutter-scroll-evidence.mjs';
 
 const repoRoot = new URL('../../../', import.meta.url).pathname;
 
@@ -520,6 +521,233 @@ test('manual compiler evidence can explicitly request the unchanged strict packa
       )
     )
   );
+});
+
+function assertNativeScrollConsumerEvidence(workflow) {
+  const job = workflow.jobs['native-consumer'];
+  assert.equal(job.if, undefined);
+  assert.equal(job.needs, undefined);
+  for (const [target, log] of [
+    ['scroll_pause', 'scroll-pause-consumer.log'],
+    ['scroll_reader', 'scroll-reader-consumer.log'],
+  ]) {
+    const matches = job.steps.filter((step) =>
+      new RegExp(`--test ${target}(?:\\s|$)`, 'u').test(step.run ?? '')
+    );
+    assert.equal(matches.length, 1, `one complete native ${target} target is mandatory`);
+    const [step] = matches;
+    assert.equal(step.if, undefined);
+    assert.equal(step['continue-on-error'], undefined);
+    assert.deepEqual(step.run.trim().split('\n'), [
+      'set -euo pipefail',
+      `cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ${target} -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/${log}"`,
+    ]);
+  }
+}
+
+test('native Scroll evidence executes both complete locked targets in the existing native owner', () => {
+  assertNativeScrollConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
+});
+
+test('native Scroll evidence rejects missing, filtered, optional or swallowed native execution', () => {
+  const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  const targetStep = (workflow) =>
+    workflow.jobs['native-consumer'].steps.find((step) =>
+      step.run?.includes('--test scroll_reader ')
+    );
+  const mutations = [
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
+        (step) => !step.run?.includes('--test scroll_pause ')
+      );
+    },
+    (workflow) => {
+      targetStep(workflow).if = 'false';
+    },
+    (workflow) => {
+      targetStep(workflow)['continue-on-error'] = true;
+    },
+    (workflow) => {
+      targetStep(workflow).run = targetStep(workflow).run.replace(
+        '-- --test-threads=1',
+        'one-case -- --test-threads=1'
+      );
+    },
+    (workflow) => {
+      targetStep(workflow).run = targetStep(workflow).run.replace('--locked ', '');
+    },
+    (workflow) => {
+      targetStep(workflow).run = targetStep(workflow).run.replace('set -euo pipefail', 'set -eu');
+    },
+  ];
+  for (const mutate of mutations) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertNativeScrollConsumerEvidence(changed));
+  }
+});
+
+function assertFlutterScrollConsumerEvidence(workflow) {
+  const job = workflow.jobs['flutter-scroll-consumer'];
+  assert.ok(job, 'real Flutter Widgets must have a continuous native owner');
+  assert.equal(job.if, undefined);
+  assert.equal(job.needs, undefined);
+  assert.equal(job['continue-on-error'], undefined);
+  assert.equal(job['runs-on'], 'ubuntu-24.04');
+  assert.equal(job['timeout-minutes'], 15);
+  const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+  assert.equal(checkout.with.ref, '${{ github.sha }}');
+  assert.equal(checkout.with['persist-credentials'], false);
+  const prepare = job.steps.filter((step) =>
+    step.run?.includes('node scripts/ci/prepare-flutter-scroll-sdk.mjs ')
+  );
+  assert.equal(prepare.length, 1);
+  assert.equal(prepare[0].if, undefined);
+  assert.equal(prepare[0]['continue-on-error'], undefined);
+  assert.ok(prepare[0].run.startsWith('set -euo pipefail\n'));
+  assert.ok(
+    prepare[0].run.includes(
+      'node scripts/ci/prepare-flutter-scroll-sdk.mjs "$RUNNER_TEMP/flutter-scroll-sdk" "$RUNNER_TEMP/flutter-scroll-evidence"'
+    )
+  );
+  const native = job.steps.filter((step) =>
+    step.run?.includes(
+      'exec vitest run packages/compiler/test/flutter-scroll-outcomes.native.test.ts '
+    )
+  );
+  assert.equal(native.length, 1);
+  assert.equal(native[0].if, undefined);
+  assert.equal(native[0]['continue-on-error'], undefined);
+  assert.deepEqual(native[0].run.trim().split('\n'), [
+    'set -euo pipefail',
+    'test -n "$PROTO_UI_FLUTTER"',
+    'test -x "$PROTO_UI_FLUTTER"',
+    'corepack pnpm@10.32.1 exec vitest run packages/compiler/test/flutter-scroll-outcomes.native.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile.json="$PROTO_UI_FLUTTER_EVIDENCE_DIR/vitest.json" 2>&1 | tee "$PROTO_UI_FLUTTER_EVIDENCE_DIR/native.log"',
+  ]);
+  const checks = job.steps.filter((step) =>
+    step.run?.includes('node scripts/ci/check-flutter-scroll-evidence.mjs ')
+  );
+  assert.equal(checks.length, 1);
+  assert.equal(checks[0].if, undefined);
+  assert.equal(checks[0]['continue-on-error'], undefined);
+  assert.equal(
+    checks[0].run,
+    'node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 14'
+  );
+  assert.ok(job.steps.indexOf(prepare[0]) < job.steps.indexOf(native[0]));
+  assert.ok(job.steps.indexOf(native[0]) < job.steps.indexOf(checks[0]));
+  const artifact = job.steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'));
+  assert.equal(artifact.if, 'always()');
+  assert.equal(artifact.with['if-no-files-found'], 'error');
+  assert.equal(artifact.with.path, '${{ runner.temp }}/flutter-scroll-evidence');
+  assert.ok(artifact.with.name.includes('${{ github.sha }}'));
+}
+
+test('dormant direct Flutter emission has mandatory real Widget evidence in the existing cycle', () => {
+  const workflow = readWorkflows()['compiler-gpui-source-consumers.yml'];
+  assertFlutterScrollConsumerEvidence(workflow);
+  for (const mutate of [
+    (job) => {
+      job.if = 'false';
+    },
+    (job) => {
+      job['continue-on-error'] = true;
+    },
+    (job) => {
+      job.steps = job.steps.filter((step) => !step.run?.includes('prepare-flutter-scroll-sdk.mjs'));
+    },
+    (job) => {
+      job.steps.find((step) => step.run?.includes('exec vitest run')).run =
+        'corepack pnpm@10.32.1 exec vitest run --passWithNoTests';
+    },
+    (job) => {
+      job.steps = job.steps.filter(
+        (step) => !step.run?.includes('check-flutter-scroll-evidence.mjs')
+      );
+    },
+    (job) => {
+      job.steps.find((step) => step.run?.includes('check-flutter-scroll-evidence.mjs')).if =
+        'false';
+    },
+  ]) {
+    const changed = structuredClone(workflow);
+    mutate(changed.jobs['flutter-scroll-consumer']);
+    assert.throws(() => assertFlutterScrollConsumerEvidence(changed));
+  }
+});
+
+test('Flutter evidence rejects skipped wrappers and incomplete native execution', () => {
+  const original = {
+    vitest: {
+      success: true,
+      numTotalTests: 1,
+      numPassedTests: 1,
+      numFailedTests: 0,
+      numPendingTests: 0,
+      testResults: [
+        {
+          name: '/workspace/packages/compiler/test/flutter-scroll-outcomes.native.test.ts',
+          status: 'passed',
+          assertionResults: [{ status: 'passed' }],
+        },
+      ],
+    },
+    pubGet: {
+      command: ['/owned/flutter', 'pub', 'get', '--offline'],
+      status: 0,
+      signal: null,
+      stdout: 'ready',
+    },
+    widgets: {
+      command: [
+        '/owned/flutter',
+        'test',
+        '--no-pub',
+        '--reporter',
+        'expanded',
+        'test/consumer_test.dart',
+      ],
+      status: 0,
+      signal: null,
+      stdout: '00:02 +14: All tests passed!\n',
+    },
+  };
+  assert.deepEqual(assertFlutterScrollReports(original, 14), {
+    wrapperPassed: 1,
+    wrapperSkipped: 0,
+    dartPassed: 14,
+  });
+  for (const mutate of [
+    (reports) => {
+      reports.vitest.numPassedTests = 0;
+      reports.vitest.numPendingTests = 1;
+    },
+    (reports) => {
+      reports.vitest.testResults[0].assertionResults[0].status = 'pending';
+    },
+    (reports) => {
+      reports.pubGet.status = 1;
+    },
+    (reports) => {
+      reports.widgets.status = 1;
+    },
+    (reports) => {
+      reports.widgets.signal = 'SIGTERM';
+    },
+    (reports) => {
+      reports.widgets.command.push('--name', 'one case');
+    },
+    (reports) => {
+      reports.widgets.stdout = '00:02 +13: All tests passed!\n';
+    },
+    (reports) => {
+      reports.widgets.stdout = 'No tests were found.';
+    },
+  ]) {
+    const changed = structuredClone(original);
+    mutate(changed);
+    assert.throws(() => assertFlutterScrollReports(changed, 14));
+  }
 });
 
 test('GPUI Cargo target is initialized after runner allocation in the shared step environment', () => {

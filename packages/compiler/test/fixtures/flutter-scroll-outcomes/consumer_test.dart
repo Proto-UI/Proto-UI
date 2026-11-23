@@ -244,6 +244,34 @@ void registerPauseFollowingCases() {
     expect(probe.scroll.endFollow.state.get(), 'following');
   });
 
+  testWidgets('fresh reader movement after pause within the same contact can resume follow', (tester) async {
+    final probe = await mountPauseProbe(tester);
+    expect(probe.exposed.toKind(), 'dispatched');
+    final initial = probe.position.pixels;
+    final gesture = await tester.startGesture(tester.getCenter(probe.verticalView));
+    try {
+      await gesture.moveBy(const Offset(0, -100));
+      await tester.pump();
+      expect(probe.position.pixels, greaterThan(initial));
+      expect(probe.position.pixels, lessThan(probe.position.maxScrollExtent));
+      expect(probe.exposed.pauseKind(), 'dispatched');
+      expect(probe.scroll.endFollow.state.get(), 'paused');
+      final pausedPixels = probe.position.pixels;
+      probe.notifications.clear();
+      await gesture.moveBy(const Offset(0, -1000));
+      await tester.pump();
+      expect(probe.position.pixels, greaterThan(pausedPixels));
+      expect(probe.position.pixels, closeTo(probe.position.maxScrollExtent, 0.001));
+      expect(probe.notifications.whereType<ScrollUpdateNotification>().any(
+        (event) => event.metrics.axis == Axis.vertical && event.dragDetails != null &&
+          (event.scrollDelta ?? 0) > 0), isTrue);
+    } finally {
+      await gesture.up();
+    }
+    await tester.pumpAndSettle();
+    expect(probe.scroll.endFollow.state.get(), 'following');
+  });
+
   testWidgets('clamped reader intent with no native displacement preserves pause', (tester) async {
     final probe = await mountPauseProbe(tester);
     expect(probe.exposed.endKind(), 'dispatched');
