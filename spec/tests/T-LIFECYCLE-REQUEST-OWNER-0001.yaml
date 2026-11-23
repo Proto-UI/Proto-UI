@@ -57,6 +57,13 @@ cases:
       - C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
       - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
     expectation: mismatch-and-native-or-deferred-startup-failure-retire-native-scopes-and-listeners-with-primary-error-retained-and-fresh-recovery
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-REACT-ADOPTION-RETIREMENT
+    title: Rejected React recovery retires native effects while accepted owners retain identity
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-A
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+    expectation: rejected-suspense-adoption-retires-native-root-and-refuses-updates-while-accepted-updates-retain-state-and-explicit-reinitialization-creates-fresh-state
   - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-TARGET-CONSUMER
     title: Complete source-bound browser adoption, controlled authority, trust and replacement journeys
     covers:
@@ -125,6 +132,15 @@ implementations:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-VUE-ADOPTION-RETIREMENT
     notes:
       - Executes actual emitted SSR and hydration with Vue 3 native slot children in happy-dom. Rejected hydration, a falsy mounted error with subsequent cleanup errors, deferred logical startup failure, and terminal disposal inside a native mounted hook retire native effect scopes and event listeners. A fresh application from explicitly selected original input succeeds after rejection. Physical adoption and the complete target matrix remain separate.
+  - id: generated-react-adoption-retirement
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/react-owner-hydration.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-REACT-ADOPTION-RETIREMENT
+    notes:
+      - Executes actual emitted SSR and hydration with a native React Suspense child in happy-dom. Recoverable hydration rejection retires real effects and event listeners; accepted updates retain State identity and explicit reinitialization creates a fresh State. Checks the complete emitted artifact closure with strict TypeScript. Physical browser and full target acceptance remain separate.
 verifies:
   contracts:
     - id: C-LIFECYCLE-REQUEST-0001

@@ -1318,7 +1318,7 @@ ${interaction ? `        ${p}Interaction.projectAttributes();\n` : ''}        sl
           phase = 'render';
           try { node = normalize(render(${p}Renderer)); } finally { phase = 'idle'; }
         }
-        const tokens = ${usesStyle ? `${p}Style.serverTokens()` : '[]'};
+        const tokens: readonly string[] = ${usesStyle ? `${p}Style.serverTokens()` : '[]'};
         return { source: ${JSON.stringify(ir.source.sha256)}, present: desiredPresent, rootTag: ${interaction ? `${p}Interaction.rootTag() ?? 'div'` : "'div'"}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, template: ${p}EncodeTemplate(node),
           attributes: { 'data-pui-root': '',
             ...(tokens.length ? { 'data-pui-style': tokens.join(' ') } : {}),
