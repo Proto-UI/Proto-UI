@@ -143,6 +143,22 @@ describe('intrinsic block-size presence extension', () => {
     expect(f.scheduled.size).toBe(0);
     expect(f.releases()).toBe(1);
   });
+  it('animates the first close of initially visible content without a prior presentation frame', () => {
+    const f = fixture();
+    // Initial open without appear is semantic natural layout. Some renderers
+    // do not publish a presentation frame until the first actual transition.
+    f.commit('leaving');
+    expect(f.outcomes).toEqual([]);
+    expect(f.scheduled.size).toBe(1);
+    f.at(175);
+    expect(f.samples.at(-1)?.blockSize).toBeCloseTo(120 * (1 - cubicProgress(0.5, ease)), 8);
+    expect(f.outcomes).toEqual([]);
+    f.at(350);
+    expect(f.samples.at(-1)).toEqual({ blockSize: 0 });
+    expect(f.outcomes).toEqual(['finished']);
+    expect(f.scheduled.size).toBe(0);
+    expect(f.releases()).toBe(1);
+  });
   it.each([50, 260])('retargets intrinsic changes to %s from the last accepted sample', (size) => {
     const f = fixture();
     f.commit();

@@ -345,7 +345,12 @@ export function createPresencePresentationProjector(
         ? candidate.closed
         : candidate.entered;
     const next = vector(endpoint, env);
-    const initial = vector(candidate.closed, env);
+    // An initially visible view may never have published an entered frame.
+    // Its first leave starts at the semantic entered endpoint, not its target.
+    const initial = vector(
+      candidate.owner.phase === 'leaving' ? candidate.entered : candidate.closed,
+      env
+    );
     if (!next || !initial) {
       settle('unresolved-units');
       return;
@@ -375,11 +380,7 @@ export function createPresencePresentationProjector(
         easing: candidate.easing,
       });
       samplerConfig = config;
-      sampler.target(
-        acknowledged ?? (candidate.owner.phase === 'entering' ? initial : next),
-        now,
-        false
-      );
+      sampler.target(acknowledged ?? initial, now, false);
     }
     if (cold && candidate.owner.phase === 'entering') {
       if (!awaitingInitialFrame) {

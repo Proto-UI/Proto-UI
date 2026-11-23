@@ -138,6 +138,26 @@ describe('neutral presence presentation', () => {
     expect(f.frames.size).toBe(0);
     expect(f.results).toEqual([]);
   });
+  it('the first leave starts at the entered endpoint and can reverse before completion', () => {
+    const f = fixture();
+    f.commit({ phase: 'leaving', attempt: { ownerEpoch: 1, phaseAttempt: 1 } });
+    expect(f.results).toEqual([]);
+    expect(f.frames.size).toBe(1);
+    f.frameAt(100);
+    const sample = f.samples.at(-1)!;
+    expect(sample.translate![1]).toBeGreaterThan(0);
+    expect(sample.translate![1]).toBeLessThan(200);
+    expect(sample.opacity).toBeGreaterThan(0);
+    expect(sample.opacity).toBeLessThan(1);
+    f.commit({ phase: 'entering', attempt: { ownerEpoch: 1, phaseAttempt: 2 } });
+    expect(f.samples.at(-1)?.translate).toEqual(sample.translate);
+    expect(f.samples.at(-1)?.opacity).toBe(sample.opacity);
+    f.frameAt(600);
+    expect(f.samples.at(-1)?.translate).toEqual([0, 0]);
+    expect(f.samples.at(-1)?.opacity).toBe(1);
+    expect(f.results).toEqual(['finished']);
+    expect(f.frames.size).toBe(0);
+  });
   it('leave then reopen anchors to the last displayed sample', () => {
     const f = fixture();
     f.commit({ phase: 'entered', attempt: null });
