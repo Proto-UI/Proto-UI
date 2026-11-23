@@ -5025,7 +5025,9 @@ class Frontend {
             : callback.phase,
           expected,
           context,
-          sourceMethod?.returnType
+          callback.parameterPolicy === 'context-updater'
+            ? bindings.contextValueType
+            : sourceMethod?.returnType
         );
         if (callback.parameterPolicy === 'declared-method') {
           bindings.methodParameters = fn.parameters;
