@@ -72,6 +72,7 @@ jobs:
             packages/compiler/test/browser-wasm.test.ts \
             packages/compiler/test/browser-preview-retirement.test.ts \
             packages/compiler/test/browser-panel-retirement.test.ts \
+            packages/compiler/test/browser-source-input.test.ts \
             packages/compiler/test/request-owner-ssr.test.ts \
             packages/compiler/test/button-ssr-server.test.ts \
             packages/compiler/test/gpui-a11y-value.test.ts \
