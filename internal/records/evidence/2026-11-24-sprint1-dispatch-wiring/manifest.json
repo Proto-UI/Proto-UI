@@ -1,0 +1,151 @@
+{
+  "validation": {
+    "stage": "validated",
+    "base": "824f7b12d828a179670e1d751f5f2c14d97d995d",
+    "sourceBefore": "",
+    "commands": [
+      {
+        "name": "install-frozen",
+        "command": ["corepack", "pnpm@10.32.1", "install", "--frozen-lockfile"],
+        "exitCode": 0
+      },
+      {
+        "name": "original-wiring-red",
+        "command": [
+          "node",
+          "--test",
+          "--test-reporter=tap",
+          "--test-name-pattern=the existing repair scope and manual serial Sprint 1 owner retain actual workflow wiring",
+          "scripts/test/sprint1-evidence.test.mjs"
+        ],
+        "exitCode": 1
+      },
+      {
+        "name": "format",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "prettier",
+          "--write",
+          "scripts/test/sprint1-evidence.test.mjs"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "wiring-green",
+        "command": [
+          "node",
+          "--test",
+          "--test-reporter=tap",
+          "--test-name-pattern=the existing repair scope and manual serial Sprint 1 owner retain actual workflow wiring",
+          "scripts/test/sprint1-evidence.test.mjs"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "adjacent-workflow-controls",
+        "command": [
+          "node",
+          "--test",
+          "--test-reporter=tap",
+          "--test-concurrency=1",
+          "scripts/test/sprint3-consumer-workflow.test.mjs",
+          "scripts/test/sprint3-followup-workflow.test.mjs",
+          "scripts/test/sprint3-followup-evidence.test.mjs"
+        ],
+        "exitCode": 0
+      },
+      {
+        "name": "schedule",
+        "command": ["node", "scripts/ci/check-ci-schedule.mjs"],
+        "exitCode": 0
+      },
+      {
+        "name": "diff-check",
+        "command": ["git", "diff", "--check"],
+        "exitCode": 0
+      }
+    ],
+    "testBeforeSha256": "726bbca5da2205f18bf22065a814f4ca196e03c29d52fab6c322fe6ddc0b2238",
+    "testAfterSha256": "7f2672bb1513312caf863fe7e124c37145d374d9962cfa474c51b6f6eaee7325",
+    "workflowSha256": "8a54132707e8ec363d4d023dd6a5fb7ee0d732657fd638bb6934648672c14346",
+    "targetRed": {
+      "tests": 1,
+      "pass": 0,
+      "fail": 1,
+      "skipped": 0
+    },
+    "targetGreen": {
+      "tests": 1,
+      "pass": 1,
+      "fail": 0,
+      "skipped": 0
+    },
+    "adjacentControls": {
+      "tests": 32,
+      "pass": 32,
+      "fail": 0,
+      "skipped": 0
+    },
+    "finishedAt": "2026-11-23T16:23:10.386546+00:00"
+  },
+  "evidence": [
+    {
+      "name": "original-wiring-red",
+      "rawBytes": 1406,
+      "rawSha256": "17e90a0e03a681f9b5170a934eaea33d8562295d4d3039781f3de9ada062dedd",
+      "storedPath": "original-wiring-red.log.gz",
+      "storedBytes": 613,
+      "storedSha256": "b752975dea11c555299110ded55296eb64030f457f0985a98fb44b0c99966d1a"
+    },
+    {
+      "name": "wiring-green",
+      "rawBytes": 367,
+      "rawSha256": "3053e6b55f03e92eb5a130b21e910ae5217a247cf2fff63eb72099d408d60422",
+      "storedPath": "wiring-green.log.gz",
+      "storedBytes": 220,
+      "storedSha256": "421d6ca27ab2ab3d845bdadc92e61ea6919ef078dcf8334039e8a064d9db095e"
+    },
+    {
+      "name": "adjacent-workflow-controls",
+      "rawBytes": 8036,
+      "rawSha256": "1516cc8a1857647388b4e29df88ae04571e9ce32803d84da61d98858887a48d8",
+      "storedPath": "adjacent-workflow-controls.log.gz",
+      "storedBytes": 2008,
+      "storedSha256": "c0dc0015b6633d97566e2be8c31da94934c4c9c3aae16b1c8b6d37dacab62862"
+    },
+    {
+      "name": "schedule",
+      "rawBytes": 91,
+      "rawSha256": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31",
+      "storedPath": "schedule.log.gz",
+      "storedBytes": 103,
+      "storedSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52"
+    },
+    {
+      "name": "format",
+      "rawBytes": 67,
+      "rawSha256": "340eb98e95fdf677b750e240cc12e23b61099008e538c4975d6f1e51d669f461",
+      "storedPath": "format.log.gz",
+      "storedBytes": 85,
+      "storedSha256": "cf25d96be48b865c73433fa52351565ce7c85c5f03f8471ccb0888b05194571f"
+    },
+    {
+      "name": "diff-check",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "storedPath": "diff-check.log.gz",
+      "storedBytes": 20,
+      "storedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "name": "install-frozen",
+      "rawBytes": 1442,
+      "rawSha256": "18771766d5eea7fb2859f57dbdcb1c343e816a164a81660a99fb21188c83f8d9",
+      "storedPath": "install-frozen.log.gz",
+      "storedBytes": 584,
+      "storedSha256": "8db9b30e0dcfe29e80c410e47ad5b191fe707dd849adcff86117a24b57693d73"
+    }
+  ]
+}
