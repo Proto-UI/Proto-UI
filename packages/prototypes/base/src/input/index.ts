@@ -1,4 +1,4 @@
-export { default, default as inputRoot, asInputRoot } from './root.proto';
+export { default, default as inputRoot, asInputRoot, asInputEditor } from './root.proto';
 export type {
   InputChangeDetail,
   InputCompositionDetail,

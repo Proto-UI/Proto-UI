@@ -78,6 +78,11 @@ export function portableDataMethods(
       case 'record':
       case 'object-spread':
         return gpuiExpressionChildren(value).every((child) => expression(child, locals));
+      case 'intrinsic':
+        return (
+          ['math.round', 'math.floor', 'number', 'string'].includes(value.name) &&
+          value.arguments.every((child) => expression(child, locals))
+        );
       // Unknown syntax, operations, mutable storage and nested closures fail closed.
       default:
         return false;

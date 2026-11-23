@@ -314,12 +314,16 @@ export function emitJavaScriptValue(
     case 'intrinsic': {
       const args = value.arguments.map(emit);
       switch (value.name) {
+        case 'number':
+          return `Number(${args.join(', ')})`;
         case 'string':
           return `String(${args.join(', ')})`;
         case 'number.isFinite':
           return `Number.isFinite(${args.join(', ')})`;
-        case 'string':
-          return `String(${args[0]})`;
+        case 'math.round':
+          return `Math.round(${args[0]})`;
+        case 'math.floor':
+          return `Math.floor(${args[0]})`;
         case 'object.freeze':
           return `Object.freeze(${args.join(', ')})`;
         case 'object.assign':
