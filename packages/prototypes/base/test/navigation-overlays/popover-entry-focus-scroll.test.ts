@@ -43,6 +43,7 @@ import * as bootstrap from '../../../bootstrap-2-3-2/src/popover';
 import * as liquid from '../../../liquid-glass/src/popover';
 import * as datePicker from '../../src/date-picker';
 import type { PopoverRootProps } from '../../src/popover/types';
+import { afterTwoHostFrames } from '../../../test-utils/host-rendering';
 
 // P-BASE-POPOVER opening-entry/lifetime/handback and T-POPOVER-OPENING-ENTRY-0001.
 // Real Runtime/Focus/WC effects in Happy DOM are source-host evidence, separate
@@ -68,7 +69,34 @@ for (const family of families)
     });
 const flush = async () => {
   for (let i = 0; i < 20; i++) await Promise.resolve();
+  // A newly acquired WC Portal remains display:none until its actual reveal
+  // barrier completes. Microtask delivery alone cannot establish presentation.
+  await afterTwoHostFrames();
+  for (let i = 0; i < 20; i++) await Promise.resolve();
 };
+
+function observeNativeFocus(
+  element: HTMLElement,
+  observe?: (options: FocusOptions | undefined) => void
+) {
+  const nativeEffect = vi.fn(element.focus.bind(element));
+  const attempts: Array<{ rendered: boolean; focused: boolean }> = [];
+  const focus = vi.spyOn(element, 'focus').mockImplementation((options) => {
+    observe?.(options);
+    // Happy DOM otherwise reports successful focus inside display:none. Model
+    // only that missing native precondition for these Light DOM fixtures; keep
+    // the real focus effect and events once all containing boxes are rendered.
+    for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+      if (getComputedStyle(current).display === 'none') {
+        attempts.push({ rendered: false, focused: document.activeElement === element });
+        return;
+      }
+    }
+    nativeEffect(options);
+    attempts.push({ rendered: true, focused: document.activeElement === element });
+  });
+  return Object.assign(focus, { nativeEffect, attempts });
+}
 afterEach(async () => {
   for (const node of owned) node.remove();
   owned.clear();
@@ -119,14 +147,12 @@ function fixture(
   // Spy before first mount, forwarding to the real HTMLElement focus effect.
   const focusObservations: Array<{ options: FocusOptions | undefined; alreadyActive: boolean }> =
     [];
-  const nativeFocus = close.focus.bind(close);
-  const closeFocus = vi.spyOn(close, 'focus').mockImplementation((options) => {
+  const closeFocus = observeNativeFocus(close, (options) => {
       focusObservations.push({ options, alreadyActive: document.activeElement === close });
-      nativeFocus(options);
     }),
-    triggerFocus = vi.spyOn(trigger, 'focus'),
-    linkFocus = vi.spyOn(link, 'focus'),
-    contentFocus = vi.spyOn(content, 'focus');
+    triggerFocus = observeNativeFocus(trigger),
+    linkFocus = observeNativeFocus(link),
+    contentFocus = observeNativeFocus(content);
   const requests: unknown[] = [];
   root.addEventListener('openChange', (e) => requests.push((e as CustomEvent).detail));
   if (initiallyAttach) document.body.append(root, outside);
@@ -161,6 +187,41 @@ function expectEntry(p: ReturnType<typeof fixture>) {
   expect(p.contentFocus).not.toHaveBeenCalled();
   expect(p.trigger.getAttribute('aria-expanded')).toBe('true');
 }
+
+it('calibrates hidden-focus refusal and preserves the real visible native focus effect', () => {
+  const parent = document.createElement('div');
+  const link = document.createElement('a');
+  const outside = document.createElement('button');
+  link.href = '#calibration';
+  parent.append(link);
+  document.body.append(parent, outside);
+  owned.add(parent);
+  owned.add(outside);
+  const linkFocus = observeNativeFocus(link);
+  const focus = vi.fn();
+  link.addEventListener('focus', focus);
+  outside.focus();
+  parent.style.display = 'none';
+  link.focus();
+  expect(document.activeElement).toBe(outside);
+  expect(focus).not.toHaveBeenCalled();
+  parent.style.display = '';
+  link.style.display = 'none';
+  link.focus();
+  expect(document.activeElement).toBe(outside);
+  expect(focus).not.toHaveBeenCalled();
+  link.style.display = '';
+  link.focus();
+  expect(document.activeElement).toBe(link);
+  expect(focus).toHaveBeenCalledOnce();
+  expect(linkFocus).toHaveBeenCalledTimes(3);
+  expect(linkFocus.nativeEffect).toHaveBeenCalledOnce();
+  expect(linkFocus.attempts).toEqual([
+    { rendered: false, focused: false },
+    { rendered: false, focused: false },
+    { rendered: true, focused: true },
+  ]);
+});
 describe.each(families.map((family) => [family.popoverRoot.name, family] as const))(
   '%s opening entry policy',
   (_name, family) => {
@@ -197,7 +258,13 @@ describe.each(families.map((family) => [family.popoverRoot.name, family] as cons
       await flush();
       expect(document.activeElement).toBe(p.link);
       expect(p.linkFocus.mock.calls[0]).toEqual([{ preventScroll: true }]);
-      expect(p.contentFocus).not.toHaveBeenCalled();
+      // Before Portal reveal, the sampler has no rendered descendant and may
+      // attempt its self fallback. The native platform refuses that hidden
+      // target; it must never acquire focus or consume the eventual link entry.
+      expect(p.contentFocus.nativeEffect).not.toHaveBeenCalled();
+      expect(p.contentFocus.attempts.every(({ rendered, focused }) => !rendered && !focused)).toBe(
+        true
+      );
       expect(p.closeFocus).not.toHaveBeenCalled();
       expect(p.content.getExposes()).not.toHaveProperty('focused');
       expect(p.content.getExposes()).not.toHaveProperty('focusVisible');
@@ -212,6 +279,10 @@ describe.each(families.map((family) => [family.popoverRoot.name, family] as cons
       await flush();
       expect(document.activeElement).toBe(p.link);
       expect(p.linkFocus.mock.calls[0]).toEqual([{ preventScroll: true }]);
+      expect(p.contentFocus.nativeEffect).not.toHaveBeenCalled();
+      expect(p.contentFocus.attempts.every(({ rendered, focused }) => !rendered && !focused)).toBe(
+        true
+      );
       expect(p.requests).toEqual([
         { open: true, reason: 'trigger.press', focusReason: 'pointer' },
         { open: false, reason: 'escape', focusReason: 'keyboard' },
@@ -753,10 +824,8 @@ it('Date Picker Content inherits entry preservation and Day selection still clos
     command = make(base.popoverClose.name);
   command.textContent = 'Close';
   const observations: Array<{ options: FocusOptions | undefined; alreadyActive: boolean }> = [];
-  const native = command.focus.bind(command);
-  vi.spyOn(command, 'focus').mockImplementation((options) => {
+  observeNativeFocus(command, (options) => {
     observations.push({ options, alreadyActive: document.activeElement === command });
-    native(options);
   });
   const changes: unknown[] = [];
   root.addEventListener('openChange', (e) => changes.push((e as CustomEvent).detail));
