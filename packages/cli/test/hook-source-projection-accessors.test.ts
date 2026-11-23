@@ -233,7 +233,7 @@ return { ...r };`)
     expect(css).toContain('--pui-ring-color: #000000;');
   });
 
-  it('does not substitute built-in states for a rejected authored projection', async () => {
+  it('uses the authored projection state instead of a built-in state table', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'hook-source-rejected-name-'));
     try {
       await writeFile(
@@ -252,7 +252,45 @@ const bag = asFormSubmit().stateHandles;
 def.rule({ when: w => w.state(bag.disabled).eq(true),
   intent: i => i.feedback.style.use(tw('bg-primary')) });`
       );
-      expect(await collectProtoStyleTokensFromFiles([file])).toEqual(['bg-primary']);
+      // The authored projection publishes the author's own state, so the rule
+      // lowers against that state. A built-in spelling table for the same
+      // hook name would answer `data-[disabled]` instead, so the token also
+      // proves that no table substituted the authored handle.
+      expect(await collectProtoStyleTokensFromFiles([file])).toEqual([
+        'bg-primary',
+        'data-[alpha]:bg-primary',
+      ]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps the members a partly observed projection proved', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'hook-source-partial-projection-'));
+    try {
+      await writeFile(
+        path.join(dir, 'producer.ts'),
+        `import { defineAsHook } from '@proto.ui/core';
+export const asParent = defineAsHook({ name: 'parent',
+  setup(d) { d.state.bool('alpha', false); },
+  projectHandle(r) { return { ...r, stateHandles: { alpha: r.stateHandles.alpha } }; }
+});`
+      );
+      const file = path.join(dir, 'consumer.proto.ts');
+      await writeFile(
+        file,
+        `import { asParent } from './producer';
+const bag = asParent().stateHandles;
+def.rule({ when: w => w.state(bag.alpha).eq(true),
+  intent: i => i.feedback.style.use(tw('bg-primary')) });`
+      );
+      // A projection that republishes another hook's handles next to a spread
+      // of its own result cannot enumerate every key it publishes, but the
+      // member it assigns is proven and stays readable.
+      expect(await collectProtoStyleTokensFromFiles([file])).toEqual([
+        'bg-primary',
+        'data-[alpha]:bg-primary',
+      ]);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
@@ -300,10 +338,16 @@ def.rule({ when: w => w.state(bag.disabled).eq(true),
       };
       visit(source);
       expect(calls).toHaveLength(1);
-      expect(summary.resolveCall(calls[0]!, source)).toEqual({
-        matched: true,
-        value: { kind: 'unknown', reason: 'unproved public projection' },
-      });
+      const resolved = summary.resolveCall(calls[0]!, source);
+      expect(resolved.matched).toBe(true);
+      const retained = resolved.value;
+      if (retained.kind !== 'object')
+        throw new Error(`expected a retained projection, received ${retained.kind}`);
+      // The projection is kept instead of discarded, and the member set it
+      // publishes was not fully observed, so it is not claimed complete.
+      expect(retained.uncertainKeys).toBe(true);
+      // A member the projection did not prove is never presented as proven.
+      for (const member of retained.members.values()) expect(member.kind).toBe('unknown');
 
       const scan = scanRuleStateReads(text, file, createHookSourceSummaryContext());
       expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual([
