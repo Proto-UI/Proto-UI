@@ -6,6 +6,7 @@ since: 0.3.0-alpha.2
 lifecycleRationale: >-
   These executable source-to-native tests exercise the actual emitted components and SDK host atoms. The GPUI test platform does not establish OS accessibility or real IME delivery; source-bound native receipts and independent review are required separately.
 
+
 cases:
   - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-ACTIVATION
     title: Assistive activation executes authored policy before outward signaling
@@ -26,7 +27,15 @@ cases:
         C-TEXT-CONTROL-0001-G,
         C-TEXT-CONTROL-0001-I,
       ]
-    expectation: Reset retires IME and history, controlled truth is retained, UTF-16 selection snaps whole codepoints and rejects wrong windows or inactive leases, and ordinary editing cannot disturb composition.
+    expectation: Reset retires IME and history, controlled truth is retained, UTF-16 selection snaps whole codepoints and rejects wrong windows or inactive leases, and ordinary editing cannot disturb composition. The default GPUI host re-queries the accepted selection through its focused native input handler on the next frame; an unfocused or retired editing lease cannot invalidate another editor.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-HOVER
+    title: Initial and delayed native hover retain the current physical view
+    covers: [C-EVENT-TYPE-0003-B, C-EVENT-TYPE-0003-C]
+    expectation: A native hover observed before the first deferred mount is delivered after that mount exactly once. Consecutive draws use the current host hit-test rather than a stale cached boolean; detach, replacement and terminal retirement invalidate earlier physical observations.
+  - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-OUTPUT
+    title: Published output survives a later authored failure and reaches retained observers
+    covers: [C-EXPOSE-EVENT-0001-B, C-EXPOSE-EVENT-0001-E, C-EXPOSE-EVENT-0001-F]
+    expectation: Actual generated Props, dynamic-method and typed-method entries return the original falsy authored exception while an already-published event wakes the native consumer once after the current lease. Delivery does not require another input or manual polling. An undrained queue does not request repeated notifications, and terminal retirement preserves delivery of output emitted before disposal without permitting a new emission.
   - id: T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA
     title: Checked scalar and readonly data source executes unchanged
     covers:
@@ -51,6 +60,22 @@ cases:
     notes:
       - The witness guards the current native handle, owner view lease and authored focus intent. It does not claim detection of an arbitrary native-only focus-away-and-back round trip to the same handle within an unconsumed keystroke, because the public GPUI API exposes no such generation.
 implementations:
+  - id: native-hover-view-ownership
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/src/gpui-native-hover.ts
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-HOVER]
+    notes:
+      - Execute the emitted SDK library tests with test-support. TestAppContext supplies physical mouse and draw observations; this is not an operating-system input claim.
+  - id: generated-native-output-delivery
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/fixtures/gpui-ordinary-values/delivery.rs
+    required: true
+    consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-OUTPUT]
+    notes:
+      - Both the ordinary producer and the focused produce-delivery.mjs compile the same authored validation source. The consumer observes actual generated component entries and GPUI Entity observers; it never patches emitted Rust or drives the missing notification itself.
   - id: checked-json-source-provenance
     kind: module-test
     status: needs-review
@@ -101,6 +126,10 @@ implementations:
       - Repeated Props updates and host driving on the same physical epoch/window/handle must not notify the App focus registry. A real detach/reattach registers the replacement binding, after which steady-state updates remain silent. The executable assertion observes native registry effects rather than a machine-dependent time limit; current target eligibility is still checked at dispatch.
 verifies:
   contracts:
+    - id: C-EVENT-TYPE-0003
+      anchors: [C-EVENT-TYPE-0003-B, C-EVENT-TYPE-0003-C]
+    - id: C-EXPOSE-EVENT-0001
+      anchors: [C-EXPOSE-EVENT-0001-B, C-EXPOSE-EVENT-0001-E, C-EXPOSE-EVENT-0001-F]
     - id: C-AS-FOCUSABLE-0001
       anchors: [C-AS-FOCUSABLE-0001-E, C-AS-FOCUSABLE-0001-F]
     - id: C-AS-FOCUS-SCOPE-0002
@@ -135,6 +164,9 @@ verifies:
     - id: HC-FOCUS-TARGET-0001
       anchors: [HC-FOCUS-TARGET-0001-B]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: strengthened
+    summary: Map cold-hover ownership, post-failure native output delivery and focused legacy selection notification to real generated consumers without promoting platform acceptance.
   - version: 0.3.0-alpha.2
     change: strengthened
     summary: Bind native sequential default-action evidence to existing Focus participation, scope trapping and editing-session criteria without changing their draft lifecycle.

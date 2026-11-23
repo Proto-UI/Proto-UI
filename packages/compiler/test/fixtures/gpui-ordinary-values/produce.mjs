@@ -207,6 +207,8 @@ writeFileSync(
 mkdirSync(path.join(output, 'transition/tests'));
 copyFileSync(path.join(fixture, 'consumer.rs'), path.join(output, 'transition/tests/ordinary.rs'));
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
+copyFileSync(path.join(fixture, 'delivery.rs'), path.join(output, 'transition/tests/delivery.rs'));
+receipt.deliveryConsumerSha256 = digest(readFileSync(path.join(fixture, 'delivery.rs')));
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.
 const scalarInputs = [
