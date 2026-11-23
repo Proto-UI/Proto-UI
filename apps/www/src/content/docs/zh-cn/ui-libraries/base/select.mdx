@@ -14,12 +14,35 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   <PrototypePreviewer
     demoId="demo-base-select"
     initialRuntime="wc"
-    runtimes={['wc', 'react', 'vue']}
+    runtimes={['wc', 'react', 'vue', 'vue2']}
     hasCode={true}
   />
 </div>
 
 它使用 APG select-only combobox 语义：Trigger 投影 `combobox`，Content 投影 `listbox`，Item 投影 `option`。选中值是持久状态；打开后的 active item 是瞬时导航状态，两者不会混为一谈。
+
+## 当前源码的安装与 Usage
+
+Code 面板使用当前工作区中的公开包导出。请先安装 `@proto.ui/cli`、`@proto.ui/prototypes-base`、`@proto.ui/prototypes-lucide` 和所选宿主的 Adapter，并确保这些 Proto UI 包和 CLI 来自同一份审阅过的源码修订。对于源码检出版本，可以使用仓库的[仅打包流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs)和[干净消费者安装流程](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs)准备本地包及其声明的完整依赖。这里不承诺工作区版本已经发布到 npm；已发布版本的接入方式见[稳定版 Quick Start](/zh-cn/start-here/quick-start/)。
+
+每个面板都提供用于已有应用构建配置的完整文件。React 和 Vue 沿用应用原有的挂载入口；Vue 2 使用 Vue `>=2.6.0 <2.7`。
+
+| 宿主           | Adapter 包                        | 复制到的文件  |
+| -------------- | --------------------------------- | ------------- |
+| Web Components | `@proto.ui/adapter-web-component` | `index.html`  |
+| React          | `@proto.ui/adapter-react`         | `src/App.tsx` |
+| Vue            | `@proto.ui/adapter-vue`           | `src/App.vue` |
+| Vue 2          | `@proto.ui/adapter-vue2`          | `src/App.vue` |
+
+首次接入 Proto UI 时，在应用目录运行已经安装的同版本 CLI：
+
+```sh
+node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
+```
+
+保留生成的 `src/styles/proto-ui-style.css`：示例通过导入它取得 Proto UI 的结构规则；如果应用入口已经导入，保留一次导入即可。每份示例还包含应用自身的 Base Select 布局与装饰样式，初始化预设不会改变所适配的 Base 原型。
+
+选择一个宿主并复制完整面板。WC 注册应用自己的 `app-base-select-*` 元素，并在连接到文档前通过 `setElementProps` 设置 `accessibleLabel`、`placeholder`、图标尺寸和各选项值。React 将 `react-dom` 的 `createPortal` 传给 `createReactAdapter`，由 React 持有 Content 的 portal。两种 Vue 示例都注册了自身使用的全部组件。Trigger 的 `accessibleLabel` 为控件提供独立于选中值的名称。
 
 ## Family Parts
 
@@ -72,16 +95,20 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 它们提供 `asSelectGroup`、`asSelectLabel`、`asSelectSeparator`；asHook 继承语义声明，使用 `asSelectSeparator` 的作者必须显式返回空 renderer。标签缺失或重复时命名 fail closed，嵌套 Select 根之间不串名。选择、collection 与焦点仍由原 owner 持有。原生辅助技术验收仍待完成；GPUI peer 当前尚未传输 Separator 的 hidden-tree 事实。
 
-
 ## 鼠标、键盘与触摸所有权
 
-<PrototypePreviewer demoId="demo-base-select-input" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+<PrototypePreviewer
+  demoId="demo-base-select-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
 
 这个可滚动的公开配方区分焦点与已提交选择。已知、无按住按钮的鼠标移动可导航；触摸、笔与拖动不借用该 hover 路径。受控拒绝开关显示提案，同时由 owner 保留当前值。弹层采用公开 popper 定位，触摸滚动与捕获由浏览器负责。
 
 ## API
 
-Select 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 或 `value` 会使对应事实进入受控模式。
+Select 是工作区源码。当前工作区 CLI 目标为 `base-select`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 或 `value` 会使对应事实进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}

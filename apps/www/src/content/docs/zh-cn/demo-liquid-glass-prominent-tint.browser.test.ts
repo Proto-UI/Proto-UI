@@ -8,8 +8,10 @@ import { afterAll, beforeAll, describe, expect, it, onTestFailed } from 'vitest'
 import { RUNTIMES, chromeExecutable, startServer, stopServer } from './browser-harness';
 import {
   PROMINENT_TINT_CONTROLS,
+  PROMINENT_TINT_CONSTANT_CODES,
   createProminentTintPlan,
   createProminentTintCheckpoint,
+  assessProminentTintCompletion,
   finalizeProminentTintStatus,
   type TintCheckpointStatus,
   prominentTintPreferenceStages,
@@ -20,6 +22,7 @@ import {
 } from './liquid-prominent-tint-fixture';
 import {
   measureProminentTintPair,
+  measureConstantTintField,
   classifyProminentTintEvidence,
   PROMINENT_TINT_POLICY,
   type DetailImage,
@@ -63,6 +66,8 @@ const safe = {
 };
 let browser: Browser, baseUrl: string;
 const results: unknown[] = [];
+const nativeErrors: string[] = [];
+const cleanupErrors: string[] = [];
 const coverage = new Map<string, { status: string; error?: string }>(
   collectionPlan.cases.map((entry) => [entry.id, { status: 'not-run' }])
 );
@@ -102,6 +107,15 @@ function checkpoint(phase: 'planned' | 'running' | 'terminal') {
     ),
     behavior: Object.fromEntries(behaviorCoverage),
     optical: Object.fromEntries(opticalCoverage),
+    terminal:
+      phase === 'terminal'
+        ? assessProminentTintCompletion(
+            collectionPlan,
+            Object.fromEntries(coverage),
+            Object.fromEntries(captureCoverage),
+            [...nativeErrors, ...cleanupErrors]
+          )
+        : undefined,
   };
   checkpointQueue = checkpointQueue.then(async () => {
     const temporary = path.join(output, `coverage-checkpoint-${sequence}.tmp`);
@@ -168,64 +182,80 @@ beforeAll(async () => {
 }, 150_000);
 afterAll(async () => {
   if (!includeLiquidWip) return;
-  try {
-    // Use one terminal reconciliation for both checkpoint and final results.
-    // A timeout has executed; only untouched entries may become blocked.
-    for (const [name, record] of coverage) {
-      coverage.set(name, finalizeProminentTintStatus(record));
-      if (record.status === 'running' && behaviorCoverage.get(name) !== 'passed')
-        behaviorCoverage.set(name, 'interrupted');
-    }
-    for (const [name, record] of captureCoverage)
-      captureCoverage.set(name, finalizeProminentTintStatus(record));
-    if (checkpointEnabled) await checkpoint('terminal');
-    if (checkpointEnabled)
-      await json('results', {
-        ...revision,
-        browser: browser?.version(),
-        node: process.version,
-        route,
-        coverage: Object.fromEntries(coverage),
-        behavior: Object.fromEntries(
-          ['passed', 'failed', 'interrupted', 'not-run'].map((status) => [
-            status,
-            [...behaviorCoverage.values()].filter((value) => value === status).length,
-          ])
-        ),
-        behaviorCoverage: Object.fromEntries(
-          [...behaviorCoverage].map(([name, status]) => [
-            name,
-            status === 'not-run' ? 'blocked-by-earlier-case-failure' : status,
-          ])
-        ),
-        opticalCoverage: Object.fromEntries(
-          [...opticalCoverage].map(([name, status]) => [
-            name,
-            status === 'not-run' ? 'blocked-by-earlier-case-failure' : status,
-          ])
-        ),
-        optical: Object.fromEntries(
-          ['passed', 'failed', 'inconclusive', 'diagnostic-only', 'invalid-control'].map(
-            (status) => [
-              status,
-              results.filter((result: any) => result.classification?.status === status).length,
-            ]
-          )
-        ),
-        captureCoverage: Object.fromEntries(captureCoverage),
-        results,
-        visualAcceptance:
-          'pending actual-size manual review; numerical diagnostic passes do not establish visual acceptance',
-        scope:
-          'Four Web runtimes with the existing owned visible canvas provider. No arbitrary DOM capture, Apple pixel equivalence or local GPU acceptance.',
-      });
-  } finally {
+  for (const [stage, cleanup] of [
+    ['browser.close', () => browser?.close()],
+    ['server.stop', () => stopServer()],
+  ] as const) {
     try {
-      await browser?.close();
-    } finally {
-      await stopServer();
+      await cleanup();
+    } catch (error) {
+      cleanupErrors.push(`${stage}: ${errorText(error)}`);
     }
   }
+  // Use one terminal reconciliation for both checkpoint and final results.
+  // A timeout has executed; only untouched entries may become blocked.
+  for (const [name, record] of coverage) {
+    coverage.set(name, finalizeProminentTintStatus(record));
+    if (record.status === 'running' && behaviorCoverage.get(name) !== 'passed')
+      behaviorCoverage.set(name, 'interrupted');
+  }
+  for (const [name, record] of captureCoverage)
+    captureCoverage.set(name, finalizeProminentTintStatus(record));
+  if (checkpointEnabled) await checkpoint('terminal');
+  if (checkpointEnabled)
+    await json('results', {
+      ...revision,
+      browser: browser?.version(),
+      node: process.version,
+      route,
+      coverage: Object.fromEntries(coverage),
+      terminal: assessProminentTintCompletion(
+        collectionPlan,
+        Object.fromEntries(coverage),
+        Object.fromEntries(captureCoverage),
+        [...nativeErrors, ...cleanupErrors]
+      ),
+      nativeErrors,
+      cleanupErrors,
+      behavior: Object.fromEntries(
+        ['passed', 'failed', 'interrupted', 'not-run'].map((status) => [
+          status,
+          [...behaviorCoverage.values()].filter((value) => value === status).length,
+        ])
+      ),
+      behaviorCoverage: Object.fromEntries(
+        [...behaviorCoverage].map(([name, status]) => [
+          name,
+          status === 'not-run' ? 'blocked-by-earlier-case-failure' : status,
+        ])
+      ),
+      opticalCoverage: Object.fromEntries(
+        [...opticalCoverage].map(([name, status]) => [
+          name,
+          status === 'not-run' ? 'blocked-by-earlier-case-failure' : status,
+        ])
+      ),
+      optical: Object.fromEntries(
+        ['passed', 'failed', 'inconclusive', 'diagnostic-only', 'invalid-control'].map((status) => [
+          status,
+          results.filter((result: any) => result.classification?.status === status).length,
+        ])
+      ),
+      captureCoverage: Object.fromEntries(captureCoverage),
+      results,
+      visualAcceptance:
+        'pending actual-size manual review; numerical diagnostic passes do not establish visual acceptance',
+      scope:
+        'Four Web runtimes with the existing owned visible canvas provider. No arbitrary DOM capture, Apple pixel equivalence or local GPU acceptance.',
+    });
+  const terminal = assessProminentTintCompletion(
+    collectionPlan,
+    Object.fromEntries(coverage),
+    Object.fromEntries(captureCoverage),
+    [...nativeErrors, ...cleanupErrors]
+  );
+  if (terminal.status !== 'completed')
+    throw new Error(`Incomplete prominent tint evidence: ${JSON.stringify(terminal)}`);
 }, 60_000);
 async function open(runtime: string, theme: string, part: TintPart, content: TintContent) {
   const context = await browser.newContext({
@@ -242,6 +272,9 @@ async function open(runtime: string, theme: string, part: TintPart, content: Tin
   await context.addInitScript(installProminentTintPreferenceProbe);
   const page = await context.newPage(),
     cdp = await context.newCDPSession(page);
+  page.on('pageerror', (error) =>
+    nativeErrors.push(`${runtime}/${theme}/${part}/${content}: ${errorText(error)}`)
+  );
   page.setDefaultTimeout(8000);
   try {
     await preferences(cdp, theme);
@@ -487,7 +520,7 @@ async function runCase(name: string, run: () => Promise<void>) {
     },
   });
 }
-if (includeLiquidWip) for (const runtime of runtimes)
+for (const runtime of includeLiquidWip ? runtimes : [])
   for (const theme of ['light', 'dark'] as const)
     for (const part of ['button', 'submit'] as const) {
       for (const content of ['text', 'icon-only'] as const) {
@@ -830,4 +863,106 @@ if (includeLiquidWip) for (const runtime of runtimes)
           120_000
         );
       });
+      if (part === 'button') {
+        const name = `${runtime}-${theme}-button-constant-field`;
+        behaviorCoverage.set(name, 'not-run');
+        describe(name, () => {
+          it(
+            'retains actual source brightness across constant fields and return to A',
+            () =>
+              runCase(name, async () => {
+                const { context, page } = await open(runtime, theme, 'button', 'text');
+                const captures: Array<Awaited<ReturnType<typeof sample>>> = [];
+                const fields: Array<{
+                  step: number;
+                  code: number;
+                  sourceRevision: number;
+                  sourceSha256: string;
+                  tinted: ReturnType<typeof measureConstantTintField>;
+                  opaque: ReturnType<typeof measureConstantTintField>;
+                }> = [];
+                try {
+                  await page.mouse.move(0, 0);
+                  for (const [step, code] of PROMINENT_TINT_CONSTANT_CODES.entries()) {
+                    await call(page, 'paintConstant', code);
+                    const tinted = await sample(
+                      page,
+                      `${name}-${step}-${code}-tinted`,
+                      'tinted',
+                      'self-optical',
+                      'rest'
+                    );
+                    const opaque = await sample(
+                      page,
+                      `${name}-${step}-${code}-opaque`,
+                      'opaque',
+                      'opaque-fallback'
+                    );
+                    if (!tinted.sourceCrop || !tinted.source)
+                      throw new Error('Missing constant source');
+                    const source = measureConstantTintField(tinted.sourceCrop, tinted.cells);
+                    expect(source.fullyOpaque).toBe(true);
+                    expect(Math.abs(source.meanLuma - code)).toBeLessThanOrEqual(1);
+                    const actual = measureConstantTintField(tinted.image, tinted.cells);
+                    const negative = measureConstantTintField(opaque.image, opaque.cells);
+                    expect(actual.fullyOpaque).toBe(true);
+                    expect(negative.fullyOpaque).toBe(true);
+                    expect(tinted.snapshot.receipt.profile).toMatch(
+                      /^pui-regular-style-tint(?:-contact)?-6$/
+                    );
+                    if (step) {
+                      const first = captures[0];
+                      expect(tinted.geometry).toEqual(first.geometry);
+                      expect(tinted.cells).toEqual(first.cells);
+                      expect(tinted.snapshot.foreground).toEqual(first.snapshot.foreground);
+                      expect(tinted.snapshot.receipt.profile).toBe(first.snapshot.receipt.profile);
+                      expect(tinted.source.revision).toBeGreaterThan(
+                        fields[step - 1].sourceRevision
+                      );
+                      expect(negative.meanLuma).toBeCloseTo(fields[0].opaque.meanLuma, 10);
+                      if (step < PROMINENT_TINT_CONSTANT_CODES.length - 1) {
+                        // A fixed 64-code source step must remain visibly distinct.
+                        // This new brightness control does not waive the original
+                        // structured span/RMS/correlation/refraction criteria.
+                        expect(
+                          actual.meanLuma - fields[step - 1].tinted.meanLuma
+                        ).toBeGreaterThanOrEqual(8);
+                        expect(tinted.source.pixelSha256).not.toBe(fields[step - 1].sourceSha256);
+                      } else {
+                        expect(tinted.source.pixelSha256).toBe(fields[0].sourceSha256);
+                        expect(
+                          Math.abs(actual.meanLuma - fields[0].tinted.meanLuma)
+                        ).toBeLessThanOrEqual(1);
+                      }
+                    }
+                    captures.push(tinted);
+                    fields.push({
+                      step,
+                      code,
+                      sourceRevision: tinted.source.revision,
+                      sourceSha256: tinted.source.pixelSha256,
+                      tinted: actual,
+                      opaque: negative,
+                    });
+                  }
+                  behaviorCoverage.set(name, 'passed');
+                  const result = {
+                    ...revision,
+                    name,
+                    fields,
+                    scope:
+                      'Actual owned constant-field source brightness response and A recovery only; no spatial optics, physical input or visual acceptance claim',
+                  };
+                  results.push(result);
+                  await json(`${name}-summary`, result);
+                } finally {
+                  // A context-close rejection stays inside runCase, so its case
+                  // receipt is failed rather than an already-written success.
+                  await context.close();
+                }
+              }),
+            120_000
+          );
+        });
+      }
     }

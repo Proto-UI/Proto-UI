@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "upstream": {
+    "repository": "https://github.com/Proto-UI/Proto-UI.git",
+    "commit": "8ec14275018f98d7e23b5ad8ec7de474cf7aa3fa",
+    "previous_reviewed_commit": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "lock_sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "source_checkout": "/workspace/scratch/b8a4839de6ed/s7-harness-pin",
+    "build_receipt": {
+      "script": "scripts/build/public-packages.mjs",
+      "selected_package_count": 42,
+      "receipt_path": "/tmp/s7-public-build-final.json",
+      "receipt_sha256": "1d0d7ca0a7788245b0ea703e5f3f2f3b9d3ded4bbfd753b4d794038a4143bc36"
+    }
+  },
+  "packages": [
+    "@proto.ui/adapter-react@0.3.0-alpha.2",
+    "@proto.ui/prototypes-shadcn@0.3.0-alpha.2",
+    "@proto.ui/cli@0.3.0-alpha.2"
+  ],
+  "adopted_families": [
+    "button",
+    "textarea",
+    "scroll-area",
+    "message-scroller",
+    "collapsible",
+    "drawer",
+    "toggle-group",
+    "input",
+    "separator",
+    "toggle"
+  ],
+  "realisation": {
+    "compiled": [
+      "transport-badge",
+      "message-bubble"
+    ],
+    "adapter": [
+      {
+        "family": "button",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "textarea",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "scroll-area",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "message-scroller",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "collapsible",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "drawer",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "toggle-group",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "input",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "separator",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      },
+      {
+        "family": "toggle",
+        "mode": "adapter",
+        "compiler_blocker": "shenko#335"
+      }
+    ]
+  },
+  "adoption": {
+    "runtime": "createReactAdapter({ ...React, createPortal })",
+    "why": "Current main provides a real React runtime adapter and family exports; the older npm next tarball lacks current main profiles and family exports.",
+    "style_profile": "rhea (explicit); no Shadow split profile",
+    "source_assets": [
+      "packages/adapters/react/dist/index.js",
+      "packages/prototypes/shadcn/dist/button/index.js",
+      "packages/prototypes/shadcn/dist/textarea/index.js",
+      "packages/prototypes/shadcn/dist/scroll-area/index.js",
+      "packages/prototypes/shadcn/dist/message-scroller/index.js",
+      "packages/prototypes/shadcn/dist/collapsible/index.js",
+      "packages/prototypes/shadcn/dist/drawer/index.js",
+      "packages/prototypes/shadcn/dist/toggle-group/index.js",
+      "packages/prototypes/shadcn/dist/input/index.js",
+      "packages/prototypes/shadcn/dist/separator/index.js",
+      "packages/prototypes/shadcn/dist/toggle/index.js",
+      "packages/cli/bin/proto-ui.js",
+      "packages/compiler/package.json",
+      "packages/compiler/src/index.ts"
+    ],
+    "shadcn_provenance": {
+      "rhea_luma": "shadcn-ui/ui@25af02b1b467fcd53b63e0c6d6d324c57c16ef18",
+      "new_york": "shadcn-ui/ui@02cad61166c4c20edbc8a3f71bd720eed4c1f49b",
+      "api_baseline": "shadcn-ui/ui@f31ed81983653919dd4fe77aee4b4859f610f1dc"
+    }
+  },
+  "compiler": {
+    "status": "build_time_compiled",
+    "runtime_imported": false,
+    "profile": "react-dom-source-v1",
+    "package": "packages/compiler",
+    "package_sha256": "393793c94cc5f71cef2d835edc1b4552412743bec00b76ea7f053e2d2cf20f2f",
+    "entry": "packages/compiler/src/index.ts",
+    "entry_sha256": "0eef1147ef4daaeba697e8004d5f78b175092aa330a6c2e31f8679060f11d008",
+    "source_tree_sha256": "126fc4ae4f37a3d9f54043d0e8134edb61bc0adfea29b4a0ac1451355e86556a",
+    "typescript": "5.9.3",
+    "bundle": {
+      "path": "generated/compiler/proto-ui-compiler.mjs",
+      "sha256": "c47e9faa6e7f9bd28ac60f89f01e25318b3bb9cd68e8d997044b5ba563c90e80",
+      "bytes": 3005770,
+      "format": "esm",
+      "entry": "packages/compiler/src/index.ts",
+      "external": [
+        "typescript"
+      ]
+    },
+    "resolutions": [
+      {
+        "specifier": "@floating-ui/dom",
+        "owner": "packages/modules/positioning",
+        "version": "1.8.0",
+        "package_sha256": "59643af1b1bfc5a80b172c21ccbe21ea56eaa0115378f6077d9934458db25ac1"
+      }
+    ],
+    "public_package_selection": {
+      "script": "scripts/build/public-packages.mjs",
+      "selected_package_count": 42,
+      "includes_compiler": false,
+      "note": "The compiler exports TypeScript source only and is private, so it is never one of the built public packages; Shenko compiles it at build time instead."
+    },
+    "prototypes": [
+      {
+        "name": "transport-badge",
+        "entry": "prototypes/transport-badge.proto.ts",
+        "entry_sha256": "2ee02ccc9ca4fdd8bb4d031d4d390ba4fe78113d290cd9f011735f77c1d272ae",
+        "profile": "react-dom-source-v1",
+        "component_name": "CompiledTransportBadge",
+        "output_directory": "generated/prototypes/transport-badge",
+        "generated_source": "generated/prototypes/transport-badge/Component.tsx",
+        "generated_sha256": "b284643c66be259be713f1263928337c7f25533ecdd2b02db16845030d866c9c",
+        "generated_imports": [
+          " + phase);\n    const previous = phase;\n    phase = ",
+          "react"
+        ],
+        "provenance": "generated/prototypes/transport-badge/provenance.json",
+        "provenance_sha256": "927ffadf7e8c5513d79658f79e14585daa883e005a8e6176c3d29e260bc339c3",
+        "compiler_ir_version": 7,
+        "compiler_backend": "react-dom-source-v1",
+        "compiler_source_sha256": "d96e8c6034df472d348a6be97a150505405bd933c075230e31bf5b8d9b527009"
+      },
+      {
+        "name": "message-bubble",
+        "entry": "prototypes/message-bubble.proto.ts",
+        "entry_sha256": "50915675a5fb64b14bf4784594819ea64a76ceb2234e15f7db3321be03f61e8d",
+        "profile": "react-dom-source-v1",
+        "component_name": "CompiledMessageBubble",
+        "output_directory": "generated/prototypes/message-bubble",
+        "generated_source": "generated/prototypes/message-bubble/Component.tsx",
+        "generated_sha256": "0fcd3e607105f60f57cee1673b6178bfc96bb013f1741ecdca79118f48e175e3",
+        "generated_imports": [
+          " + phase);\n    const previous = phase;\n    phase = ",
+          "react"
+        ],
+        "provenance": "generated/prototypes/message-bubble/provenance.json",
+        "provenance_sha256": "5bfcaf41133f1af311a4c2b49baad9c18383c401803a236a21a6a45ba677cc39",
+        "compiler_ir_version": 7,
+        "compiler_backend": "react-dom-source-v1",
+        "compiler_source_sha256": "276686d95d44f9191bef18c29327a20e2b6aa9ec65ac3c61ec7a2c9941f40180"
+      }
+    ]
+  },
+  "toolchain": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "esbuild": "0.25.12",
+    "react": "19.3.1",
+    "react_dom": "19.3.1"
+  },
+  "web_root": "/workspace/scratch/b8a4839de6ed/shenko-harness/crates/shenko-ui/web",
+  "built_at": "2026-11-22T11:30:37.144Z",
+  "artifacts": {
+    "theme-bootstrap.js": {
+      "bytes": 770,
+      "sha256": "6fe832f8731ccbcebfc746413f6d197ed6d3abadaa8c74e032e234b0283e1f4d"
+    },
+    "app.js": {
+      "bytes": 1163096,
+      "sha256": "3f021c483fbdfe26d9e7e25303cdd2a7d2dec31ae07f64f2900120f4fe7a5cbf"
+    },
+    "chunks/chunk-O3OVBR66.js": {
+      "bytes": 65273,
+      "sha256": "b79d2f7224934764cfc53bf54cda1b6d9252c5ba3d6c30acd341a84f0bad2873"
+    },
+    "chunks/demo-controller-IAYPJLAD.js": {
+      "bytes": 15700,
+      "sha256": "ba878393767fa080bdaf7a9cd520813e6299f65b71b541027280d8fe41fb6901"
+    },
+    "app.css": {
+      "bytes": 62853,
+      "sha256": "5ce400125a97a86886ad3c3dcf0ce956522d26ac99863342e318116e857105f1"
+    },
+    "proto-ui-style.css": {
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+    },
+    "proto-ui-tokens.generated.css": {
+      "bytes": 166521,
+      "sha256": "bf25d0730b5e71c92cf1f2cf8170308d7318134dba42ad26d27f6feb45538f1a"
+    },
+    "shadcn-theme.css": {
+      "bytes": 6473,
+      "sha256": "3de2d4ce2a38e83086128c8863d3391eb74159adde7b1a8b7f450f93fd643f96"
+    },
+    "licenses/PROTO-UI-LICENSE": {
+      "bytes": 1078,
+      "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+    },
+    "licenses/SHADCN-NOTICES.md": {
+      "bytes": 8656,
+      "sha256": "4edb0cb2e55245016029372facc725ca3fda68f6b71c09158e9d82e75a7fddb5"
+    },
+    "licenses/REACT-LICENSE": {
+      "bytes": 1088,
+      "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+    },
+    "licenses/REACT-DOM-LICENSE": {
+      "bytes": 1088,
+      "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+    }
+  }
+}

@@ -12,10 +12,18 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./browser": {
+      "types": "./src/browser/index.ts",
+      "default": "./src/browser/index.ts"
     }
   },
   "dependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
+    "@noble/hashes": "2.4.0",
+    "path-browserify": "1.0.1",
+    "quickjs-emscripten-core": "0.32.0"
   },
   "devDependencies": {
     "@proto.ui/core": "workspace:*",

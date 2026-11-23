@@ -1852,3 +1852,202 @@ it('owns representative Finf image journeys in their explicit sandboxed evidence
   assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
   assert.ok(!plan[1].args.includes(suite));
 });
+
+const draftFamilyBrowserOwners = [
+  {
+    suite: 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
+    owner: '.github/workflows/bootstrap-state-controls-evidence.yml',
+    step: 'state-controls',
+    flag: 'PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE',
+  },
+  {
+    suite: 'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts',
+    owner: '.github/workflows/bootstrap-state-controls-evidence.yml',
+    step: 'navbar',
+    flag: 'PROTO_UI_BOOTSTRAP_NAVBAR_EVIDENCE',
+  },
+  {
+    suite: 'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts',
+    owner: '.github/workflows/bootstrap-state-controls-evidence.yml',
+    step: 'button-motion',
+    flag: 'PROTO_UI_BOOTSTRAP_BUTTON_MOTION_EVIDENCE',
+  },
+  {
+    suite: 'apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts',
+    owner: '.github/workflows/liquid-material-evidence.yml',
+    step: 'state-controls',
+    flag: 'PROTO_UI_LIQUID_CONTROLS_BROWSER_EVIDENCE',
+  },
+];
+
+function assertDraftFamilyOwner(
+  entry,
+  {
+    development = BROWSER_SUITES,
+    production = PRODUCTION_BROWSER_SUITES,
+    owners = PRODUCTION_BROWSER_OWNERS,
+    workflow = YAML.parse(readFileSync(entry.owner, 'utf8')),
+  } = {}
+) {
+  assert.equal(development.filter((suite) => suite === entry.suite).length, 0);
+  assert.equal(production.filter((suite) => suite === entry.suite).length, 1);
+  assert.equal(owners[entry.suite], entry.owner);
+  assert.ok(Object.hasOwn(workflow.on, 'workflow_call'), 'The owner must be callable by CI');
+  const job = workflow.jobs['browser-evidence'];
+  assert.equal(job['continue-on-error'], undefined);
+  assert.equal(job.if, undefined, 'The dedicated browser job cannot be conditionally omitted');
+  const executions = job.steps.filter((step) => step.id === entry.step);
+  assert.equal(executions.length, 1);
+  const execution = executions[0];
+  assert.equal(execution['continue-on-error'], undefined);
+  assert.equal(
+    execution.if,
+    entry.flag === 'PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE' ? undefined : '${{ !cancelled() }}'
+  );
+  assert.equal(execution.env?.[entry.flag], '1');
+  const expectedHead =
+    execution.env?.PROTO_UI_EXPECTED_HEAD_SHA ?? job.env?.PROTO_UI_EXPECTED_HEAD_SHA;
+  assert.ok(
+    [
+      '${{ github.event.pull_request.head.sha || github.sha }}',
+      '${{ env.CANDIDATE_SHA }}',
+    ].includes(expectedHead),
+    'Dedicated execution must retain its exact-source guard'
+  );
+  const commands = execution.run.replaceAll(/\\\r?\n/g, ' ').split(/\r?\n/);
+  const vitest = commands.filter((command) =>
+    /^\s*corepack pnpm@10\.32\.1 exec vitest run\s/.test(command)
+  );
+  assert.equal(
+    vitest.length,
+    1,
+    'The suite must be an actual Vitest argument, not a comment or echo'
+  );
+  const args = vitest[0].trim().split(/\s+/);
+  assert.equal(args.filter((arg) => arg === entry.suite).length, 1);
+  assert.ok(!args.some((arg) => /^--(?:exclude|testNamePattern|passWithNoTests)(?:=|$)/.test(arg)));
+}
+
+for (const entry of draftFamilyBrowserOwners)
+  it(`dedicated draft-family owner executes all cases in ${path.basename(entry.suite)}`, () => {
+    assertDraftFamilyOwner(entry);
+  });
+
+it('dedicated draft-family suites remain registered but leave every general browser shard', () => {
+  assert.doesNotThrow(() => assertBrowserInventory());
+  const plan = createRuntimeTestPlan([]);
+  const shards = browserShards();
+  for (const { suite } of draftFamilyBrowserOwners) {
+    assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+    assert.ok(!plan[1].args.includes(suite));
+    assert.ok(shards.every((shard) => !shard.includes(suite)));
+  }
+});
+
+function assertDraftFamilyCycle(cycle) {
+  for (const [id, owner, predecessor] of [
+    [
+      'bootstrap-state-controls',
+      '.github/workflows/bootstrap-state-controls-evidence.yml',
+      'select-item-sizing',
+    ],
+    [
+      'liquid-material',
+      '.github/workflows/liquid-material-evidence.yml',
+      'material-source-specializer',
+    ],
+  ]) {
+    const calls = Object.entries(cycle.jobs).filter(([, job]) => job.uses === `./${owner}`);
+    assert.equal(calls.length, 1, `${owner} must run exactly once in the owned cycle`);
+    assert.equal(calls[0][0], id);
+    const job = calls[0][1];
+    assert.equal(job.needs, predecessor);
+    assert.ok(cycle.jobs[predecessor]);
+    assert.equal(job.if, '${{ !cancelled() }}', 'An earlier failure must not omit later evidence');
+    assert.equal(job['continue-on-error'], undefined);
+    assert.equal(
+      job.with?.browser_only,
+      undefined,
+      'The cycle must keep the complete Liquid workflow'
+    );
+  }
+}
+
+it('dedicated draft-family owners are mandatory successors in the existing production cycle', () => {
+  assertDraftFamilyCycle(
+    YAML.parse(readFileSync('.github/workflows/ci-production-suites.yml', 'utf8'))
+  );
+  const ci = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
+  assert.equal(ci.jobs['production-suites'].uses, './.github/workflows/ci-production-suites.yml');
+  assert.ok(Object.values(ci.jobs).some((job) => job.needs?.includes?.('production-suites')));
+});
+
+it('dedicated draft-family coverage rejects duplicate, missing, disabled and dead owners', () => {
+  for (const entry of draftFamilyBrowserOwners) {
+    assert.throws(() =>
+      assertDraftFamilyOwner(entry, { development: [...BROWSER_SUITES, entry.suite] })
+    );
+    assert.throws(() =>
+      assertDraftFamilyOwner(entry, {
+        production: PRODUCTION_BROWSER_SUITES.filter((suite) => suite !== entry.suite),
+      })
+    );
+    assert.throws(() =>
+      assertDraftFamilyOwner(entry, { production: [...PRODUCTION_BROWSER_SUITES, entry.suite] })
+    );
+    assert.throws(() =>
+      assertDraftFamilyOwner(entry, {
+        owners: {
+          ...PRODUCTION_BROWSER_OWNERS,
+          [entry.suite]: '.github/workflows/missing-owner.yml',
+        },
+      })
+    );
+    for (const mutation of [
+      'disabled',
+      'comment-only',
+      'partial-selection',
+      'soft-failure',
+      'skipped-job',
+      'skipped-step',
+    ]) {
+      const workflow = YAML.parse(readFileSync(entry.owner, 'utf8'));
+      const step = workflow.jobs['browser-evidence'].steps.find((step) => step.id === entry.step);
+      if (mutation === 'disabled') step.env[entry.flag] = '0';
+      if (mutation === 'comment-only')
+        step.run = `# ${step.run.replaceAll('\n', '\n# ')}\necho ${entry.suite}`;
+      if (mutation === 'partial-selection')
+        step.run = step.run.replace(
+          'exec vitest run',
+          'exec vitest run --testNamePattern=one-case'
+        );
+      if (mutation === 'soft-failure') step['continue-on-error'] = true;
+      if (mutation === 'skipped-job') workflow.jobs['browser-evidence'].if = '${{ false }}';
+      if (mutation === 'skipped-step') step.if = '${{ false }}';
+      assert.throws(() => assertDraftFamilyOwner(entry, { workflow }), mutation);
+    }
+  }
+});
+
+it('dedicated draft-family cycle rejects an uncalled owner or an omitted successor after failure', () => {
+  for (const id of ['bootstrap-state-controls', 'liquid-material']) {
+    for (const mutation of [
+      'missing',
+      'duplicate',
+      'success-only',
+      'parallel',
+      'partial',
+      'soft-failure',
+    ]) {
+      const cycle = YAML.parse(readFileSync('.github/workflows/ci-production-suites.yml', 'utf8'));
+      const job = cycle.jobs[id];
+      if (mutation === 'missing') delete cycle.jobs[id];
+      if (mutation === 'duplicate') cycle.jobs[`duplicate-${id}`] = structuredClone(job);
+      if (mutation === 'success-only') job.if = '${{ success() }}';
+      if (mutation === 'parallel') delete job.needs;
+      if (mutation === 'partial') job.with = { browser_only: true };
+      if (mutation === 'soft-failure') job['continue-on-error'] = true;
+      assert.throws(() => assertDraftFamilyCycle(cycle), mutation);
+    }
+  }
+});

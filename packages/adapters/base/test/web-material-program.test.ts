@@ -11,6 +11,7 @@ import {
 } from '../src/material/style-tint-profile';
 import { acquireWebOpticalProgram, inspectWebOpticalResources } from '../src/material/program-pool';
 import { colorContrast, type OpaqueRgba } from '../src/material/style';
+import { styleTintSourceTone } from '../src/material/style-tint-source';
 type PrefilterFactory = NonNullable<Parameters<typeof createWebOpticalProgram>[2]>;
 function fixture(
   control: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null,
@@ -808,6 +809,91 @@ function cacheSource(width = 4, height = 4, seed = 0) {
   };
 }
 
+describe('profile 6 prepared-source tone ownership (GL spy, no GPU execution)', () => {
+  const constant = (code: number) => {
+    const source = cacheSource();
+    source.pixels = Uint8Array.from({ length: 64 }, (_, at) => (at % 4 === 3 ? 255 : code));
+    return source;
+  };
+
+  for (const backend of ['cpu', 'gpu'] as const) {
+    const create = () =>
+      fixture(
+        null,
+        backend === 'gpu'
+          ? () => ({
+              filter: () => ({ texture: {} as WebGLTexture, release() {} }),
+              dispose() {},
+            })
+          : undefined
+      );
+    it(`${backend}: derives tint facts lazily and retains exact A-to-B-to-A ownership`, () => {
+      const f = create();
+      const a = constant(32),
+        b = constant(128);
+      try {
+        f.program.render({ ...f.frame, source: a });
+        expect(f.program.inspect().tintSourcePreparations).toBe(0);
+        expect(f.writes.has('u_styleTintSourceTone')).toBe(false);
+        const render = (source: typeof a) =>
+          f.program.render({ ...f.frame, source, tint: 'style-fill' });
+        render(a);
+        const first = f.writes.get('u_styleTintSourceTone');
+        expect(first).toEqual(styleTintSourceTone(a.pixels));
+        render(b);
+        const second = f.writes.get('u_styleTintSourceTone');
+        expect(second).toEqual(styleTintSourceTone(b.pixels));
+        expect(second).not.toEqual(first);
+        render(a);
+        expect(f.writes.get('u_styleTintSourceTone')).toBe(first);
+        expect(f.program.inspect()).toMatchObject({
+          sourcePreparations: 2,
+          tintSourcePreparations: 2,
+          sourcePreparationCacheEntries: 2,
+        });
+        f.program.clear();
+        expect(f.program.inspect().sourcePreparationCacheEntries).toBe(0);
+        render(a);
+        expect(f.writes.get('u_styleTintSourceTone')).not.toBe(first);
+        expect(f.program.inspect().tintSourcePreparations).toBe(3);
+      } finally {
+        f.program.dispose();
+      }
+    });
+
+    it(`${backend}: invalidates the same-frame facts on revision and pixel-view replacement`, () => {
+      const f = create();
+      const source = constant(32);
+      const render = () => f.program.render({ ...f.frame, source, tint: 'style-fill' });
+      try {
+        render();
+        const first = f.writes.get('u_styleTintSourceTone');
+        source.pixels.set(constant(96).pixels);
+        source.revision++;
+        render();
+        const revised = f.writes.get('u_styleTintSourceTone');
+        expect(revised).toEqual(styleTintSourceTone(source.pixels));
+        expect(revised).not.toEqual(first);
+        source.pixels = constant(160).pixels;
+        render();
+        const replacement = f.writes.get('u_styleTintSourceTone');
+        expect(replacement).toEqual(styleTintSourceTone(source.pixels));
+        expect(replacement).not.toEqual(revised);
+        // Frame identity also participates even when every field is shared.
+        f.program.render({ ...f.frame, source: { ...source }, tint: 'style-fill' });
+        expect(f.writes.get('u_styleTintSourceTone')).not.toBe(replacement);
+        expect(f.program.inspect().tintSourcePreparations).toBe(4);
+        // Current source alpha is still admitted before reusing any facts.
+        source.pixels[3] = 254;
+        expect(render).toThrow('nonopaque-optical-source');
+        expect(f.program.inspect().tintSourcePreparations).toBe(4);
+      } finally {
+        f.program.dispose();
+      }
+    });
+  }
+});
+
 describe('bounded prepared-source cache (CPU and GL spy only)', () => {
   it('requires frame identity even when revision, geometry, pixel view and owner are shared', () => {
     const f = fixture();
@@ -1277,8 +1363,11 @@ describe('regular prefilter byte equivalence (CPU and GL spy only)', () => {
     [19, 1],
     [2, 3],
     [3, 2],
+    [4, 9],
+    [5, 4],
     [6, 7],
     [7, 6],
+    [8, 3],
     [13, 11],
     [64, 37],
     [257, 129],

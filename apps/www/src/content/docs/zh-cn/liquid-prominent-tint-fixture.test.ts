@@ -2,9 +2,12 @@ import { describe, it, expect, vi } from 'vitest';
 import {
   prominentTintDemo,
   paintProminentTintSource,
+  paintProminentTintConstantSource,
+  PROMINENT_TINT_CONSTANT_CODES,
   PROMINENT_TINT_CONTROLS,
   createProminentTintPlan,
   createProminentTintCheckpoint,
+  assessProminentTintCompletion,
   prominentTintPreferenceStages,
 } from './liquid-prominent-tint-fixture';
 import type { DemoNode, DemoRuntimeApi } from '../../../components/PrototypePreviewer/demo-types';
@@ -53,18 +56,24 @@ describe('real prominent command fixture ownership', () => {
     expect(calls).toHaveLength(10);
     expect(calls[0]).toEqual([0, 0, 32, 180]);
   });
-  it('predeclares all 48 cases and every preference capture before any browser launch', () => {
+  it('keeps all 48 original cases and adds exactly eight constant-field sequences', () => {
     const plan = createProminentTintPlan();
-    expect(plan.cases).toHaveLength(48);
+    expect(plan.cases).toHaveLength(56);
     expect(plan.cases.filter((entry) => entry.kind === 'journey')).toHaveLength(32);
     expect(plan.cases.filter((entry) => entry.kind === 'preferences')).toHaveLength(16);
+    expect(plan.cases.filter((entry) => entry.kind === 'constant-field')).toHaveLength(8);
     const captures = plan.cases.flatMap((entry) => entry.captures);
-    expect(captures).toHaveLength(1608);
-    expect(new Set(captures).size).toBe(1608);
+    expect(captures).toHaveLength(1688);
+    expect(new Set(captures).size).toBe(1688);
+    expect(
+      plan.cases
+        .filter((entry) => entry.kind !== 'constant-field')
+        .flatMap((entry) => entry.captures)
+    ).toHaveLength(1608);
     for (const runtime of plan.runtimes) {
       const shard = createProminentTintPlan(runtime);
-      expect(shard.cases).toHaveLength(12);
-      expect(shard.cases.flatMap((entry) => entry.captures)).toHaveLength(402);
+      expect(shard.cases).toHaveLength(14);
+      expect(shard.cases.flatMap((entry) => entry.captures)).toHaveLength(422);
     }
     expect(() => createProminentTintPlan('invalid')).toThrow(/shard/);
     expect(prominentTintPreferenceStages('button')).toHaveLength(33);
@@ -75,7 +84,7 @@ describe('real prominent command fixture ownership', () => {
       first = plan.cases[0];
     const planned = createProminentTintCheckpoint(plan, { cases: {}, captures: {} }, 'planned');
     expect(planned.partial).toBe(true);
-    expect(planned.expectedCases).toBe(12);
+    expect(planned.expectedCases).toBe(14);
     expect(planned.cases.every((entry) => entry.status === 'not-run')).toBe(true);
     const state = {
       cases: { [first.id]: { status: 'running' } },
@@ -100,5 +109,57 @@ describe('real prominent command fixture ownership', () => {
     expect(final.cases[0].captures[2].status).toBe('interrupted-at-normal-finalization');
     expect(final.cases[0].captures[3].status).toBe('blocked-at-normal-finalization');
     expect(final.cases[1].status).toBe('blocked-at-normal-finalization');
+  });
+  it('paints only the separately frozen solid fields, with an exact return to A', () => {
+    const fillRect = vi.fn();
+    const ctx = { fillStyle: '', fillRect } as unknown as CanvasRenderingContext2D;
+    const styles: string[] = [];
+    for (const code of PROMINENT_TINT_CONSTANT_CODES) {
+      paintProminentTintConstantSource(ctx, 358, 182, code);
+      styles.push(String(ctx.fillStyle));
+    }
+    expect(styles).toEqual([
+      'rgb(32, 32, 32)',
+      'rgb(96, 96, 96)',
+      'rgb(160, 160, 160)',
+      'rgb(224, 224, 224)',
+      'rgb(32, 32, 32)',
+    ]);
+    expect(fillRect).toHaveBeenCalledTimes(5);
+    expect(fillRect.mock.calls.every((args) => JSON.stringify(args) === '[0,0,358,182]')).toBe(
+      true
+    );
+    for (const code of [NaN, -1, 0, 31, 255, 256])
+      expect(() => paintProminentTintConstantSource(ctx, 358, 182, code)).toThrow('Undeclared');
+  });
+  it('never marks a subset or a cleanup failure complete even when every executed case passed', () => {
+    const plan = createProminentTintPlan('wc');
+    const cases = Object.fromEntries(
+      plan.cases.map((entry) => [entry.id, { status: 'completed' }])
+    );
+    const captures = Object.fromEntries(
+      plan.cases.flatMap((entry) =>
+        entry.captures.map((id) => [id, { status: 'passed-observation-checks' }])
+      )
+    );
+    expect(assessProminentTintCompletion(plan, cases, captures).status).toBe('completed');
+    expect(
+      assessProminentTintCompletion(plan, cases, captures, ['browser.close failed']).status
+    ).toBe('incomplete');
+    const partial = { ...cases };
+    delete partial[plan.cases.at(-1)!.id];
+    expect(assessProminentTintCompletion(plan, partial, captures).incompleteCases).toEqual([
+      plan.cases.at(-1)!.id,
+    ]);
+    const missing = { ...captures };
+    delete missing[plan.cases[0].captures[0]];
+    expect(assessProminentTintCompletion(plan, cases, missing).status).toBe('incomplete');
+    expect(
+      assessProminentTintCompletion(
+        plan,
+        { ...cases, unrelated: { status: 'completed' } },
+        captures
+      ).status
+    ).toBe('incomplete');
   });
 });

@@ -1,0 +1,18 @@
+▲ [WARNING] This case clause will never be evaluated because it duplicates an earlier case clause [duplicate-case]
+
+    packages/compiler/src/native-value-lowering.ts:321:13:
+      321 │         case 'string':
+          ╵              ~~~~~~~~
+
+  The earlier case clause is here:
+
+    packages/compiler/src/native-value-lowering.ts:317:13:
+      317 │         case 'string':
+          ╵              ~~~~~~~~
+
+Shenko prototypes compiled by Proto-UI d5153ea45530446aa01288c3cd4d2c346c381920 (react-dom-source-v1): transport-badge, message-bubble
+[proto-ui] tokens(preset): wrote ../src/static/proto-ui-tokens.generated.css
+[proto-ui] theme(shadcn): wrote ../src/static/shadcn-theme.css
+[proto-ui] style: wrote ../src/static/proto-ui-style.css
+[proto-ui] setup(shadcn): completed tokens + theme + proto-ui style in /workspace/scratch/b8a4839de6ed/shenko-harness/crates/shenko-ui/src/static
+Shenko UI built with Proto-UI d5153ea45530446aa01288c3cd4d2c346c381920; 12 hashed assets

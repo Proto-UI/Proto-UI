@@ -16,9 +16,9 @@ function prototypes(node: DemoChild): string[] {
 }
 
 // Select is published for base, shadcn, brutalist, bootstrap-2-3-2, and
-// liquid-glass. All declare initialRuntime="wc". base exposes a three-runtime
-// selector (no vue2); bootstrap and liquid-glass expose a four-runtime selector
-// (including vue2); shadcn and brutalist declare only initialRuntime.
+// liquid-glass. All declare initialRuntime="wc". base, bootstrap and
+// liquid-glass expose a four-runtime selector (including vue2);
+// shadcn and brutalist declare only initialRuntime.
 // base/shadcn/bootstrap/liquid-glass use `select.mdx`; brutalist publishes at
 // `components/select.mdx`. base has no manifest entry (non-manifest guard); the
 // other four are manifest-bound. Every family's MDX demoId matches its recipe id.
@@ -26,7 +26,7 @@ const SELECT_FAMILIES = [
   {
     family: 'base',
     mdxPath: 'select.mdx',
-    runtimes: "runtimes={['wc', 'react', 'vue']}",
+    runtimes: "runtimes={['wc', 'react', 'vue', 'vue2']}",
     slug: 'ui-libraries/base/select',
     manifestBound: false,
   },
@@ -90,10 +90,17 @@ describe('Select actual DemoSpec registration', () => {
           `apps/www/src/content/docs/${locale}/ui-libraries/${family}/${mdxPath}`,
           'utf8'
         );
+        const preview =
+          family === 'base'
+            ? source
+                .match(/<PrototypePreviewer\b[\s\S]*?\/>/g)
+                ?.find((tag) => tag.includes('demoId="demo-base-select"'))
+            : source;
         expect(source).toContain(`demoId="demo-${family}-select"`);
-        expect(source).toContain('initialRuntime="wc"');
+        expect(preview).toBeDefined();
+        expect(preview).toContain('initialRuntime="wc"');
         if (runtimes) {
-          expect(source).toContain(runtimes);
+          expect(preview).toContain(runtimes);
         }
       });
     }

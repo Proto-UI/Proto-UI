@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 1,
+  "subject": "Sprint 3 Shadcn Scroll Area cross-axis hit area repair candidate",
+  "issues": [1178, 1164],
+  "pullRequest": 1713,
+  "originalNative": {
+    "source": "830287f95959a4a1a4fb797df68b0bd6889e0bae",
+    "runId": 45018250847,
+    "jobId": 137199303858,
+    "shard": "4/18",
+    "jobTests": {
+      "passed": 24,
+      "failed": 1,
+      "files": 6
+    },
+    "failingConsumer": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+    "observation": "WC vertical drag left scrollTop=0; greater-than-zero poll timed out after 1000ms.",
+    "unrunBranches": ["wc/horizontal", "react/both axes", "vue/both axes", "vue2/both axes"],
+    "thumbGeometryInOriginalLog": false,
+    "hitTargetInOriginalLog": false,
+    "focus": {
+      "beforeEqualsAfter": true,
+      "viewportRect": {
+        "x": 34,
+        "y": 504.5,
+        "width": 252,
+        "height": 190
+      },
+      "documentScroll": {
+        "x": 0,
+        "y": 1263
+      }
+    },
+    "log": {
+      "name": "job137199303858.log",
+      "bytes": 80557,
+      "sha256": "8684b0d3f6e748966d9ad71e457518e09f38347d57b6c333f1f91b3da82faf6e"
+    }
+  },
+  "candidate": {
+    "base": "4adb6076a6d9e93ddfd6eb02d07ce06c319eb2d2",
+    "branch": "work/s3-shadcn-scroll-thumb-20261122",
+    "files": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+        "sha256": "30df56d49decf97efebebad60ba87b98d12ca665e98565c8a422841cca77a746"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts",
+        "sha256": "3c3b5085842b4a51eaae762c19cafc6c3892efd2d95aab074ae3546adc173717"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/layout-profiles-r91.test.ts",
+        "sha256": "7cd87b57658efc3acea84cae20e5eab929589fcce4760c7a0df81a40b092cfb0"
+      },
+      {
+        "path": "packages/prototypes/shadcn/test/scroll-area.test.ts",
+        "sha256": "bc58d43c096925067b43bb06c01916289bb48c662cec5a5c762588ad3c6b0c50"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-SCROLL-AREA-THUMB.yaml",
+        "sha256": "806e59f35e73df58ba318a15345c32f5cbdfa80cb5e54ad4880e4aed23a6d746"
+      },
+      {
+        "path": "spec/tests/T-SHADCN-SCROLL-AREA-0001.yaml",
+        "sha256": "d11106da418c038373ec1927d5840c51b88f2ad2646db09909331a2d45211988"
+      },
+      {
+        "path": "internal/records/2026-11-22-sprint3-shadcn-scroll-thumb.md",
+        "sha256": "961eb293436ef98aa51c35b56d233121eb52d534b211bad85e8f1321a18f21f9"
+      }
+    ],
+    "productChange": "Shadcn passive Thumb replaces flex-1 with h-full w-full; shared Scroll and Move remain unchanged.",
+    "inferenceBoundary": "Zero-basis thickness collapse is a source-derived diagnosis; actual candidate native layout/hit/drag remains unrun."
+  },
+  "originalToIntegrationBase": [
+    {
+      "path": "packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts",
+      "originalSha256": "c172cdba68e589464bd0b9f43a10aaba9dff00a5209680b5e6438ad9bf45820e",
+      "integrationBaseSha256": "c172cdba68e589464bd0b9f43a10aaba9dff00a5209680b5e6438ad9bf45820e",
+      "equal": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts",
+      "originalSha256": "b74951b4288a01309ea9e4796e74b5f56bbc187ff7e33a555708b73b5a424b26",
+      "integrationBaseSha256": "b74951b4288a01309ea9e4796e74b5f56bbc187ff7e33a555708b73b5a424b26",
+      "equal": true
+    },
+    {
+      "path": "packages/prototypes/shadcn/src/scroll-area/viewport.proto.ts",
+      "originalSha256": "f7a0e57aefc329b6113e54e029ff5f5975a460c56bdb506ce51b53b209f4af05",
+      "integrationBaseSha256": "f7a0e57aefc329b6113e54e029ff5f5975a460c56bdb506ce51b53b209f4af05",
+      "equal": true
+    },
+    {
+      "path": "packages/prototypes/base/src/scroll-area/thumb.proto.ts",
+      "originalSha256": "9b1d821b02d07245d52dfd86de9923e1fc9dd90415a2614bd0d87949c40bf8a5",
+      "integrationBaseSha256": "9b1d821b02d07245d52dfd86de9923e1fc9dd90415a2614bd0d87949c40bf8a5",
+      "equal": true
+    },
+    {
+      "path": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+      "originalSha256": "dffdd42415e2adc09b22bb248038b45dbd947cf1ac2bd8ee4a8c5d8c839723e6",
+      "integrationBaseSha256": "dffdd42415e2adc09b22bb248038b45dbd947cf1ac2bd8ee4a8c5d8c839723e6",
+      "equal": true
+    },
+    {
+      "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+      "originalSha256": "60ae8ff2274daf3844dd585fb108209e062a577e7b94ceb3fc834e210e5497d2",
+      "integrationBaseSha256": "60ae8ff2274daf3844dd585fb108209e062a577e7b94ceb3fc834e210e5497d2",
+      "equal": true
+    },
+    {
+      "path": "packages/modules/scroll/src/impl.ts",
+      "originalSha256": "9d21a2fe08ca4217ae376537664539a85abd17792bb956ecca7a4bbcf5ec1450",
+      "integrationBaseSha256": "9d21a2fe08ca4217ae376537664539a85abd17792bb956ecca7a4bbcf5ec1450",
+      "equal": true
+    },
+    {
+      "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+      "originalSha256": "72f39b9419b4c168ed138846eaaeb61c4a667e9536987cb1904ddf3bdad3bd83",
+      "integrationBaseSha256": "72f39b9419b4c168ed138846eaaeb61c4a667e9536987cb1904ddf3bdad3bd83",
+      "equal": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.demo.ts",
+      "originalSha256": "6f7ec64b0e12efb5f0fbba8b5034163867cc110cbcdbb986e8222fdbfdf6f5f7",
+      "integrationBaseSha256": "6f7ec64b0e12efb5f0fbba8b5034163867cc110cbcdbb986e8222fdbfdf6f5f7",
+      "equal": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts",
+      "originalSha256": "5bbc28148b981c4524c5e6354b260f1c4df6c9976c8a905dd69eb5119cdae2f0",
+      "integrationBaseSha256": "5bbc28148b981c4524c5e6354b260f1c4df6c9976c8a905dd69eb5119cdae2f0",
+      "equal": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "originalSha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+      "integrationBaseSha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71",
+      "equal": true
+    }
+  ],
+  "validation": [
+    {
+      "kind": "updated-style-contract-against-old-product",
+      "exitCode": 1,
+      "files": 2,
+      "passed": 17,
+      "failed": 2,
+      "failure": "Missing h-full in ordinary and profile projections; not a native layout run.",
+      "log": {
+        "name": "updated-contract-old-source.log",
+        "bytes": 234449,
+        "sha256": "04440e3cce370b316c0bbfdad77635bde09f03b353a9437e0aed064b133e68a4"
+      }
+    },
+    {
+      "kind": "candidate-focused-unit",
+      "exitCode": 0,
+      "files": 4,
+      "passed": 35,
+      "failed": 0,
+      "overlap": "19 family cases are included in 35.",
+      "suites": [
+        {
+          "path": "packages/prototypes/shadcn/test/scroll-area.test.ts",
+          "tests": 5
+        },
+        {
+          "path": "packages/prototypes/shadcn/test/layout-profiles-r91.test.ts",
+          "tests": 14
+        },
+        {
+          "path": "packages/modules/scroll/test/web-scroll-host.test.ts",
+          "tests": 12
+        },
+        {
+          "path": "packages/modules/scroll/test/web-scroll-corner.test.ts",
+          "tests": 4
+        }
+      ],
+      "laterDelta": "Thumb explanatory comment clarified after execution; tested style expression and all four suite bodies unchanged.",
+      "log": {
+        "name": "candidate-focused.log",
+        "bytes": 233341,
+        "sha256": "6f9373c5c6296cb2e09757a4c38404de9dcab8444b3a19aef13b6c89efaefd81"
+      }
+    },
+    {
+      "kind": "final-browser-consumer-types",
+      "exitCode": 0,
+      "scope": "Strict TypeScript single entry and imports, no native browser.",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "tsc",
+        "--noEmit",
+        "--strict",
+        "--skipLibCheck",
+        "--target",
+        "ES2024",
+        "--module",
+        "ESNext",
+        "--moduleResolution",
+        "Bundler",
+        "--esModuleInterop",
+        "--lib",
+        "ES2024,DOM",
+        "apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts"
+      ],
+      "log": {
+        "name": "browser-test-final-typecheck.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "kind": "initial-style-checks",
+      "observation": {
+        "firstCommand": [
+          "node",
+          "--import",
+          "tsx",
+          "scripts/styles/generate-shadcn-style-tokens.ts",
+          "--check"
+        ],
+        "terminalObservation": "Shell reported Killed; first command status was not separately captured.",
+        "log": {
+          "name": "shadcn-token-manifest.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "followingCommand": [
+          "node",
+          "--import",
+          "tsx",
+          "scripts/gpui/generate-style-fixture.mts",
+          "--check"
+        ],
+        "followingCommandExit": 1,
+        "shellSequenceExit": 1,
+        "followingLog": {
+          "name": "gpui-style-fixture.log",
+          "bytes": 196,
+          "sha256": "3e8a26c8e5de0e679fc2db142838569849a18179d9b5e607684b9a091861a39a"
+        }
+      }
+    },
+    {
+      "kind": "isolated-style-diagnosis",
+      "receipt": {
+        "name": "style-diagnosis-receipt.json",
+        "bytes": 7934,
+        "sha256": "a41b32c4d4fd0ba4e87d6d36498fc6bbec0d6789b2c0bd375b80899f56f75654"
+      },
+      "commands": [
+        {
+          "name": "candidate-shadcn-check-locked",
+          "cwd": "/workspace/scratch/828b7e591003/s3-shadcn-scroll-thumb",
+          "command": [
+            "node",
+            "--max-old-space-size=768",
+            "--import",
+            "tsx",
+            "scripts/styles/generate-shadcn-style-tokens.ts",
+            "--check"
+          ],
+          "startedAt": "2026-11-22T12:58:55.016381+00:00",
+          "endedAt": "2026-11-22T12:59:13.603629+00:00",
+          "exitCode": null,
+          "signal": 9,
+          "log": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/candidate-shadcn-check-locked.log",
+          "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "logBytes": 0
+        },
+        {
+          "name": "candidate-gpui-check-locked",
+          "cwd": "/workspace/scratch/828b7e591003/s3-shadcn-scroll-thumb",
+          "command": [
+            "node",
+            "--max-old-space-size=384",
+            "--import",
+            "tsx",
+            "scripts/gpui/generate-style-fixture.mts",
+            "--check"
+          ],
+          "startedAt": "2026-11-22T12:59:13.620877+00:00",
+          "endedAt": "2026-11-22T12:59:14.963251+00:00",
+          "exitCode": 1,
+          "signal": null,
+          "log": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/candidate-gpui-check-locked.log",
+          "logSha256": "3e8a26c8e5de0e679fc2db142838569849a18179d9b5e607684b9a091861a39a",
+          "logBytes": 196
+        },
+        {
+          "name": "candidate-gpui-generate-scratch",
+          "cwd": "/workspace/scratch/828b7e591003/s3-shadcn-scroll-thumb",
+          "command": [
+            "node",
+            "--max-old-space-size=384",
+            "--import",
+            "tsx",
+            "scripts/gpui/generate-style-fixture.mts",
+            "--fixture",
+            "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/candidate-style-tokens.json",
+            "--theme-fixture",
+            "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/candidate-theme-tokens.json"
+          ],
+          "startedAt": "2026-11-22T12:59:14.964398+00:00",
+          "endedAt": "2026-11-22T12:59:15.387626+00:00",
+          "exitCode": 0,
+          "signal": null,
+          "log": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/candidate-gpui-generate-scratch.log",
+          "logSha256": "a0931c3ceea366d5dd16717bbf31457f2abfd3730d4943ebf5f8f69d8b5242fb",
+          "logBytes": 234
+        },
+        {
+          "name": "baseline-gpui-check-locked",
+          "cwd": "/workspace/scratch/828b7e591003/s3-shadcn-scroll-baseline-4adb",
+          "command": [
+            "node",
+            "--max-old-space-size=384",
+            "--import",
+            "tsx",
+            "scripts/gpui/generate-style-fixture.mts",
+            "--check"
+          ],
+          "startedAt": "2026-11-22T12:59:15.388655+00:00",
+          "endedAt": "2026-11-22T12:59:16.028101+00:00",
+          "exitCode": 1,
+          "signal": null,
+          "log": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/baseline-gpui-check-locked.log",
+          "logSha256": "3e8a26c8e5de0e679fc2db142838569849a18179d9b5e607684b9a091861a39a",
+          "logBytes": 196
+        },
+        {
+          "name": "baseline-gpui-generate-scratch",
+          "cwd": "/workspace/scratch/828b7e591003/s3-shadcn-scroll-baseline-4adb",
+          "command": [
+            "node",
+            "--max-old-space-size=384",
+            "--import",
+            "tsx",
+            "scripts/gpui/generate-style-fixture.mts",
+            "--fixture",
+            "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/baseline-style-tokens.json",
+            "--theme-fixture",
+            "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/baseline-theme-tokens.json"
+          ],
+          "startedAt": "2026-11-22T12:59:16.028507+00:00",
+          "endedAt": "2026-11-22T12:59:16.358122+00:00",
+          "exitCode": 0,
+          "signal": null,
+          "log": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/baseline-gpui-generate-scratch.log",
+          "logSha256": "751768d6432bd9766e5a50174116182740eb3ddde37a4336370342fcefe43d4e",
+          "logBytes": 232
+        }
+      ],
+      "outputs": [
+        {
+          "family": "style",
+          "candidateSha256": "ecaa4e9cca0f2d527edf9c0d5878c0ae5d3f6fc6a9d23a479230f2ea5c3b6528",
+          "baselineSha256": "ecaa4e9cca0f2d527edf9c0d5878c0ae5d3f6fc6a9d23a479230f2ea5c3b6528",
+          "candidateMatchesBaseline": true,
+          "baselineMatchesTracked": false,
+          "trackedSha256": "a07746bbdc0cdea309981ac339802f9e205253671e5597dc2278a0d56c2c5182",
+          "diff": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/baseline-tracked-style.diff",
+          "diffSha256": "d38bd7c6b4ec3d0251aac489f94b36fc8d49e75452a6a5c04a0b26359a084371"
+        },
+        {
+          "family": "theme",
+          "candidateSha256": "126f7eecba69462ab39a7e0fd6ed389fc13d541187128c407eee4a0de5bd3155",
+          "baselineSha256": "126f7eecba69462ab39a7e0fd6ed389fc13d541187128c407eee4a0de5bd3155",
+          "candidateMatchesBaseline": true,
+          "baselineMatchesTracked": false,
+          "trackedSha256": "f7fdec0dcff4379693b45fab61a9890dcd8b1abfa5d10510bcbe9595aeb32b8e",
+          "diff": "/workspace/scratch/828b7e591003/s3-scroll-area-triage-830287/baseline-tracked-theme.diff",
+          "diffSha256": "ef8ccebe320fa2d64e5d5bbf4018b338564acd6a658d569b0332946efede5e6f"
+        }
+      ]
+    }
+  ],
+  "nativeCandidate": {
+    "status": "not-run",
+    "requirements": [
+      "Four Web runtimes, original focus/track/paint assertions",
+      "Positive Thumb dimensions and actual pointer hit",
+      "Original 36px/four-sample drags and unchanged 1000ms poll",
+      "Positive before/after deltas",
+      "Zero-basis controls after both unmodified native drags, restoration",
+      "Separate corner/forced-color visual acceptance"
+    ]
+  },
+  "remaining": [
+    "Canonical Shadcn preset check interrupted twice; no pass",
+    "Pre-existing GPUI style/theme fixture drift demonstrated on clean integration baseline; no tracked outputs changed",
+    "Final native execution and independent visual/source review",
+    "Final-source CI, merge and original-condition tracking"
+  ],
+  "evidenceDirectory": "s3-scroll-area-triage-830287",
+  "rawFiles": [
+    {
+      "name": "baseline-gpui-check-locked.log",
+      "bytes": 196,
+      "sha256": "3e8a26c8e5de0e679fc2db142838569849a18179d9b5e607684b9a091861a39a"
+    },
+    {
+      "name": "baseline-gpui-generate-scratch.log",
+      "bytes": 232,
+      "sha256": "751768d6432bd9766e5a50174116182740eb3ddde37a4336370342fcefe43d4e"
+    },
+    {
+      "name": "baseline-style-tokens.json",
+      "bytes": 112501,
+      "sha256": "ecaa4e9cca0f2d527edf9c0d5878c0ae5d3f6fc6a9d23a479230f2ea5c3b6528"
+    },
+    {
+      "name": "baseline-theme-tokens.json",
+      "bytes": 15671,
+      "sha256": "126f7eecba69462ab39a7e0fd6ed389fc13d541187128c407eee4a0de5bd3155"
+    },
+    {
+      "name": "baseline-tracked-style.diff",
+      "bytes": 108802,
+      "sha256": "d38bd7c6b4ec3d0251aac489f94b36fc8d49e75452a6a5c04a0b26359a084371"
+    },
+    {
+      "name": "baseline-tracked-theme.diff",
+      "bytes": 7335,
+      "sha256": "ef8ccebe320fa2d64e5d5bbf4018b338564acd6a658d569b0332946efede5e6f"
+    },
+    {
+      "name": "browser-test-final-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "browser-test-typecheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "candidate-focused.log",
+      "bytes": 233341,
+      "sha256": "6f9373c5c6296cb2e09757a4c38404de9dcab8444b3a19aef13b6c89efaefd81"
+    },
+    {
+      "name": "candidate-gpui-check-locked.log",
+      "bytes": 196,
+      "sha256": "3e8a26c8e5de0e679fc2db142838569849a18179d9b5e607684b9a091861a39a"
+    },
+    {
+      "name": "candidate-gpui-generate-scratch.log",
+      "bytes": 234,
+      "sha256": "a0931c3ceea366d5dd16717bbf31457f2abfd3730d4943ebf5f8f69d8b5242fb"
+    },
+    {
+      "name": "candidate-shadcn-check-locked.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "candidate-style-tokens.json",
+      "bytes": 112501,
+      "sha256": "ecaa4e9cca0f2d527edf9c0d5878c0ae5d3f6fc6a9d23a479230f2ea5c3b6528"
+    },
+    {
+      "name": "candidate-theme-tokens.json",
+      "bytes": 15671,
+      "sha256": "126f7eecba69462ab39a7e0fd6ed389fc13d541187128c407eee4a0de5bd3155"
+    },
+    {
+      "name": "gpui-style-fixture.log",
+      "bytes": 196,
+      "sha256": "3e8a26c8e5de0e679fc2db142838569849a18179d9b5e607684b9a091861a39a"
+    },
+    {
+      "name": "initial-generator-terminal.json",
+      "bytes": 736,
+      "sha256": "9cbcf1598b384de97096cbca830f3aa311c8676841ee8d0bf060ab2a0f2d516a"
+    },
+    {
+      "name": "job137199303858.log",
+      "bytes": 80557,
+      "sha256": "8684b0d3f6e748966d9ad71e457518e09f38347d57b6c333f1f91b3da82faf6e"
+    },
+    {
+      "name": "run-style-diagnosis.py",
+      "bytes": 4915,
+      "sha256": "8b6a676e5c0caae8aa25051491db4d2f03c84ef993e69bd5aaf8eac9aece88f3"
+    },
+    {
+      "name": "shadcn-token-manifest.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "style-diagnosis-receipt.json",
+      "bytes": 7934,
+      "sha256": "a41b32c4d4fd0ba4e87d6d36498fc6bbec0d6789b2c0bd375b80899f56f75654"
+    },
+    {
+      "name": "updated-contract-old-source.log",
+      "bytes": 234449,
+      "sha256": "04440e3cce370b316c0bbfdad77635bde09f03b353a9437e0aed064b133e68a4"
+    }
+  ]
+}

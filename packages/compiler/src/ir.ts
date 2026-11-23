@@ -119,7 +119,14 @@ export type StructuredValueType =
   | { kind: 'callable'; parameters: ParameterIR[]; returnType: ValueType }
   | {
       kind: 'object';
-      fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[];
+      fields: {
+        name: string;
+        type: ValueType;
+        optional?: boolean;
+        readonly?: boolean;
+        /** Reading invokes the stored zero-argument callable, never object creation. */
+        accessor?: 'get';
+      }[];
       index?: ValueType;
     }
   | { kind: 'value-union'; members: ValueType[] }
@@ -213,7 +220,8 @@ export function isPublicValueType(type: ValueType): boolean {
   if (typeof type !== 'string') {
     if (type.kind === 'object')
       return (
-        type.index === undefined && type.fields.every((field) => isPublicValueType(field.type))
+        type.index === undefined &&
+        type.fields.every((field) => !field.accessor && isPublicValueType(field.type))
       );
     if (type.kind === 'callable')
       return (
@@ -319,7 +327,7 @@ export type ExpressionIR = ExpressionBase &
         kind: 'object-spread';
         parts: (
           | { kind: 'spread'; value: ExpressionIR }
-          | { kind: 'entry'; key: string; value: ExpressionIR }
+          | { kind: 'entry'; key: string; value: ExpressionIR; accessor?: 'get' }
         )[];
       }
     | { kind: 'unary'; operator: '!' | '-' | '+'; operand: ExpressionIR }
@@ -344,7 +352,7 @@ export type ExpressionIR = ExpressionBase &
         right: ExpressionIR;
       }
     | { kind: 'array'; elements: ExpressionIR[] }
-    | { kind: 'record'; entries: { key: string; value: ExpressionIR }[] }
+    | { kind: 'record'; entries: { key: string; value: ExpressionIR; accessor?: 'get' }[] }
     | {
         kind: 'operation';
         operation: Operation;

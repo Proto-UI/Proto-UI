@@ -1,6 +1,27 @@
 import type { CompilerDiagnostic, ExpressionIR, Operation } from './ir';
 import { interactionValueAlternatives } from './interaction-value-shape';
 import type { NativeLexicalScope } from './template-shape';
+import { valueAlternatives } from './value-types';
+
+/** Native language atoms whose complete coercion/prototype boundary is known. */
+export function gpuiIntrinsicSupported(
+  value: Extract<ExpressionIR, { kind: 'intrinsic' }>
+): boolean {
+  if (value.name === 'string')
+    return (
+      !value.arguments.length ||
+      valueAlternatives(value.arguments[0].type).every(
+        (type) =>
+          ['boolean', 'number', 'string', 'null', 'void'].includes(String(type)) ||
+          (typeof type !== 'string' && type.kind === 'literal')
+      )
+    );
+  if (value.name === 'object.assign')
+    return (
+      value.arguments.length > 0 && value.arguments.every((argument) => argument.kind === 'record')
+    );
+  return true;
+}
 
 /** These operations need physical discovery, not just an already-known focus handle. */
 export const GPUI_UNAVAILABLE_OPERATIONS: ReadonlySet<Operation> = new Set([

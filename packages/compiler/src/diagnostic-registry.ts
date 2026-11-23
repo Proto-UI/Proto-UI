@@ -2,8 +2,9 @@ import type { CompilerDiagnostic } from './ir';
 
 /**
  * Stable diagnostic registry: the canonical code → category/meaning table for
- * every PUI diagnostic the compiler emits. The registry records the category
- * the call sites actually use; it does not redesign them.
+ * every PUI diagnostic the compiler emits. Existing category variants are
+ * explicit; one correct emission must not mask another unregistered category.
+ * This table records the governed emission meanings; it does not redesign them.
  *
  * `PUI_*` literals that are generated-source placeholders rather than
  * diagnostics (e.g. `PUI_CONTEXT_KEY_` Rust bindings,
@@ -12,7 +13,10 @@ import type { CompilerDiagnostic } from './ir';
  * absent and are tracked in the drift test's placeholder denylist, not here.
  */
 export interface DiagnosticRegistration {
+  /** Stable primary category retained by the existing single-category lookup. */
   readonly category: CompilerDiagnostic['category'];
+  /** Existing meaning-specific variants in addition to the primary category. */
+  readonly additionalCategories?: readonly CompilerDiagnostic['category'][];
   /** One-sentence meaning, bound to the real emission path. */
   readonly meaning: string;
 }
@@ -21,16 +25,22 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   // Parser/module semantic front end (1xxx) — source conformance failures.
   PUI1001: {
     category: 'unsupported-input',
+    // SourceGraph.load reports authored TypeScript parse diagnostics as invalid input.
+    additionalCategories: ['invalid-input'],
     meaning:
       'Static type/source graph could not resolve or check the authored type. Also emitted as invalid-input from explicit-category reject sites in parser-module.ts.',
   },
   PUI1002: {
     category: 'unsupported-input',
+    // SourceGraph.publishExport rejects a duplicate export as invalid input.
+    additionalCategories: ['invalid-input'],
     meaning:
       'Local declaration or binding conflicts with the module namespace. Also emitted once as invalid-input from parser-module.ts for a duplicate-export boundary.',
   },
   PUI1003: {
     category: 'invalid-input',
+    // The parser's reasoned unsupported import/re-export boundary uses rejectNode.
+    additionalCategories: ['unsupported-input'],
     meaning:
       'Import boundary: unsupported specifier, import kind, or a file/root/closed-source read failure. rejectNode call sites without an explicit category default to unsupported-input; the explicit-category boundary sites dominate the registered meaning.',
   },
@@ -125,6 +135,8 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   // Target/profile admission (4xxx) — profile and host-capability conformance.
   PUI4001: {
     category: 'unsupported-input',
+    // watchProject input and filesystem rejection; target admission stays unsupported.
+    additionalCategories: ['invalid-input'],
     meaning:
       'Profile or target is not implemented/admitted; also used by watch for unreadable project.',
   },
@@ -134,11 +146,17 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   },
   PUI4003: {
     category: 'unsupported-input',
-    meaning: 'Public method/interaction signature cannot cross the portable data boundary.',
+    // watchProject retains this code for a thrown compiler invocation, not a target rejection.
+    additionalCategories: ['compiler-defect'],
+    meaning:
+      'Public method/interaction signature cannot cross the portable data boundary. Also emitted as compiler-defect when a watch compiler invocation throws; the failed revision retains only explicitly old output.',
   },
   PUI4004: {
     category: 'unsupported-input',
-    meaning: 'Operation or requested capability is unavailable in the selected profile.',
+    // A throwing watch report consumer terminates that watch after cleanup.
+    additionalCategories: ['compiler-defect'],
+    meaning:
+      'Operation or requested capability is unavailable in the selected profile. Also emitted as compiler-defect when a watch report consumer callback throws; the watch closes and reports the original exception.',
   },
   PUI4006: {
     category: 'unsupported-input',
@@ -146,12 +164,19 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   },
   PUI4007: {
     category: 'invalid-input',
+    // checkTargetOperations reports an unavailable Context scope as unsupported.
+    additionalCategories: ['unsupported-input'],
     meaning:
       'Component identifier is reserved/invalid (Vue name check). The same code also reports a context-scope requirement at targets.ts:747 as unsupported-input.',
   },
   PUI4008: {
     category: 'unsupported-input',
     meaning: 'Requested props-update policy or capability override is not admitted.',
+  },
+  PUI4009: {
+    category: 'unsupported-input',
+    meaning:
+      'Native shader declaration fails graph validation or static lowering, or combines Shader and Presence without an admitted atomic material profile.',
   },
   PUI4101: {
     category: 'invalid-input',
@@ -163,11 +188,15 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   },
   PUI4201: {
     category: 'invalid-input',
+    // evaluateStylePlan validates IR; prepareCompilerLibrary requires a DOM source profile.
+    additionalCategories: ['invalid-ir', 'unsupported-input'],
     meaning:
-      'Compiler library manifest or artifact input is invalid. Also emitted as invalid-ir from style-plan.ts when a style contribution cannot be projected.',
+      'Compiler library manifest or artifact input is invalid. Also emitted as invalid-ir from style-plan.ts when a style contribution cannot be projected, and as unsupported-input when nominal DOM library linking is requested for a non-DOM source profile.',
   },
   PUI4202: {
     category: 'invalid-input',
+    // A valid contribution with no supported target style mapping remains unsupported.
+    additionalCategories: ['unsupported-input'],
     meaning:
       'Style plan could not be applied to the library surface. Also emitted as unsupported-input from style-plan.ts for an unsupported style contribution.',
   },
@@ -234,6 +263,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     meaning:
       'Rust data package or normalized public function names are invalid, reserved or colliding.',
   },
+  PUI_RUST_DATA_LICENSE: {
+    category: 'unsupported-input',
+    meaning:
+      'Rust data source-license metadata must be a non-empty Unicode string without control characters or unpaired surrogates.',
+  },
   PUI_RUST_DATA_PURITY: {
     category: 'unsupported-input',
     meaning: 'A selected Rust data function does not have a proven pure portable helper closure.',
@@ -262,6 +296,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   PUI_GPUI_A11Y_VALUE: {
     category: 'unsupported-input',
     meaning: 'GPUI SetValue requires its default route or a literal nonempty host:* event route.',
+  },
+  PUI_GPUI_CONTROL_LABEL_ANATOMY: {
+    category: 'unsupported-input',
+    meaning:
+      'GPUI ControlLabel supports explicit typed InstanceAssociations but has no native lowering for Anatomy pairing.',
   },
   PUI_GPUI_HOST_REQUIRED: {
     category: 'unsupported-input',
@@ -292,6 +331,13 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
 /** Registered diagnostic category, or `undefined` for an unregistered code. */
 export function diagnosticCategory(code: string): CompilerDiagnostic['category'] | undefined {
   return DIAGNOSTIC_REGISTRY[code]?.category;
+}
+
+/** Complete permitted category set, including only the registered meaning-specific variants. */
+export function diagnosticCategories(code: string): readonly CompilerDiagnostic['category'][] {
+  if (!Object.hasOwn(DIAGNOSTIC_REGISTRY, code)) return [];
+  const registration = DIAGNOSTIC_REGISTRY[code];
+  return [registration.category, ...(registration.additionalCategories ?? [])];
 }
 
 /** True when the literal is an emitted diagnostic code, not a generated-source placeholder. */

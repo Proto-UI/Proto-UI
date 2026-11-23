@@ -1,80 +1,52 @@
 {
-  "families": [
-    "base",
-    "shadcn",
-    "brutalist"
-  ],
-  "runtimes": [
-    "wc",
-    "react",
-    "vue",
-    "vue2"
-  ],
+  "families": ["base", "shadcn", "brutalist"],
+  "runtimes": ["wc", "react", "vue", "vue2"],
   "suites": [
     {
       "id": "input",
       "script": "scripts/analysis/sprint2-input-browser.mjs",
-      "kinds": [
-        "input-otp",
-        "slider-values"
-      ],
+      "kinds": ["input-otp", "slider-values"],
       "expectedCases": 72,
       "format": "native"
     },
     {
       "id": "collections",
       "script": "scripts/analysis/collections-recipes-browser.mjs",
-      "kinds": [
-        "tree",
-        "data-table",
-        "virtual-list"
-      ],
+      "kinds": ["tree", "data-table", "virtual-list"],
       "expectedCases": 36,
       "format": "native"
     },
     {
       "id": "geometry",
       "script": "scripts/analysis/component-capabilities-browser.mjs",
-      "kinds": [
-        "resizable",
-        "carousel"
-      ],
+      "kinds": ["resizable", "carousel"],
       "expectedCases": 24,
       "format": "native"
     },
     {
       "id": "form-select",
       "script": "scripts/analysis/form-select-recipes-browser.mjs",
-      "kinds": [
-        "form",
-        "select"
-      ],
+      "kinds": ["form", "select"],
       "expectedCases": 24,
       "format": "native"
     },
     {
       "id": "compiled-consumers",
-      "files": [
-        "packages/compiler/test/sprint2-native.browser.test.ts"
-      ],
+      "files": ["packages/compiler/test/sprint2-native.browser.test.ts"],
       "evidenceVariable": "PROTO_UI_RUNTIME_EVIDENCE_DIR",
       "expectedCases": 20,
       "format": "vitest"
     },
     {
       "id": "site",
-      "files": [
-        "apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts"
-      ],
+      "files": ["apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts"],
       "evidenceVariable": "PROTO_UI_SPRINT2_SITE_EVIDENCE_DIR",
       "expectedCases": 42,
       "format": "vitest"
     },
     {
       "id": "preferences",
-      "files": [
-        "apps/www/test/preferences.browser.test.ts"
-      ],
+      "files": ["apps/www/test/preferences.browser.test.ts"],
       "evidenceVariable": "PROTO_UI_PREFERENCE_EVIDENCE_DIR",
       "expectedCases": 4,
       "format": "vitest"
@@ -92,9 +64,7 @@
     },
     {
       "id": "accordion",
-      "files": [
-        "apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts"
-      ],
+      "files": ["apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts"],
       "pattern": "^Accordion five families / four native Web consumers (?:base|shadcn|brutalist) ",
       "evidenceVariable": "PROTO_UI_ACCORDION_SCREENSHOT_DIR",
       "expectedCases": 23,

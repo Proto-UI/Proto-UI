@@ -29,9 +29,7 @@
       "status": "passed",
       "invocation": {
         "command": "/opt/hostedtoolcache/node/24.22.3/x64/bin/node",
-        "args": [
-          "scripts/build/public-packages.mjs"
-        ],
+        "args": ["scripts/build/public-packages.mjs"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/public-packages/run.log"
       },
@@ -48,12 +46,7 @@
       "status": "passed",
       "invocation": {
         "command": "corepack",
-        "args": [
-          "pnpm@10.32.1",
-          "--filter",
-          "apps-www",
-          "generate:proto-ui-style"
-        ],
+        "args": ["pnpm@10.32.1", "--filter", "apps-www", "generate:proto-ui-style"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/styles/run.log"
       },
@@ -70,10 +63,7 @@
       "status": "failed",
       "invocation": {
         "command": "corepack",
-        "args": [
-          "pnpm@10.32.1",
-          "check:types:workspace"
-        ],
+        "args": ["pnpm@10.32.1", "check:types:workspace"],
         "cwd": "/home/runner/work/Proto-UI/Proto-UI/",
         "log": "/home/runner/work/_temp/sprint2-consumers/workspace-types/run.log"
       },

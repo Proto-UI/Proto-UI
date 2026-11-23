@@ -30,6 +30,7 @@ import {
   type OutputArtifact,
 } from './artifact-output';
 import { IR_VERSION, type CompileResult } from './ir';
+import { unknownDiagnosticSpan } from './diagnostics';
 
 const hash = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
 const shaPattern = /^[0-9a-f]{64}$/;
@@ -738,7 +739,7 @@ export async function migrateNativeSupport(
           message:
             'Native support migration rejected: ' +
             (error instanceof Error ? error.message : String(error)),
-          span: { file: planFile, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+          span: unknownDiagnosticSpan(planFile),
         },
       ],
     };

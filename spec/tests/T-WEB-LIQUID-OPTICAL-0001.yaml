@@ -48,11 +48,27 @@ cases:
       - Refraction evidence separates interior and edge spatial displacement from tint, lighting, shape and uniform magnification. A same-source strict final-offset-zero control must run after every offset addition and reject late writes, while preserving the other shader inputs and sampler branches. Record each actual canvas's precision capabilities, compiled highp/mediump branch, renderer and shader hashes; unavailable capability data stays explicit. Preserve real-background and structured-source controls, static/contact and interrupted recovery evidence. Extra highp arithmetic has unmeasured GPU cost until timed; numerical and source-transform checks are not visible-refraction acceptance.
       - Derive polarity from the admitted opaque semantic fill/foreground pair. For light foreground use its per-channel clamped minus 1.5/255 endpoint; for dark foreground use plus 1.5/255. This interval covers the existing one-code CSS match allowance plus nominal half-code display rounding, not a contrast guarantee for every antialiased glyph edge. No computed CSS color becomes a new owner.
       - The light luminance bound is the feasible lower endpoint after exactly 32 bisections of X plus the monotone luminance-domain reserve, using 5.5/255 encoded upward error, saturation-corrected per-channel caps and the exact sRGB decoder join allowance. The dark bound adds the fixed 0.0675118372261112 linear reserve. These reserves include the current full shape/black-shadow model. Empty or zero-width proof budgets explicitly refuse enhancement rather than clamping into a guarantee. This stricter budget and interval readback may refuse nominally admitted near-4.5 pairs that profile 2 enhanced; finite-matrix old-pass retention is not a universal no-fallback-regression claim.
-      - Map source code-luma affinely in encoded space from zero to the encoded light bound, or from the encoded dark bound to one; decode this target and retain the existing 75 percent fill / 25 percent source linear-light hue and 2^-12 normalization floor. No palette-name branch, parameter fitting or noise injection is permitted. Per-channel fill bounds and every-pixel fixed blue hue are not the definition of readable tint.
+      - Historical profiles 4 and 5 map source code-luma affinely in encoded space from zero to the encoded light bound, or from the encoded dark bound to one; decode this target and retain the existing 75 percent fill / 25 percent source linear-light hue and 2^-12 normalization floor. No palette-name branch, parameter fitting or noise injection is permitted. Per-channel fill bounds and every-pixel fixed blue hue are not the definition of readable tint.
       - Both static/contact tint programs receive one private luminance-bound uniform derived anew from the same semantic frame as polarity, fill, foreground and paint lease. Convert that bound inward to float32; this only budgets uniform representation, not accumulated highp or mediump GPU arithmetic. Actual readback remains fail-closed at 4.5 contrast and original polarity against that same worst foreground endpoint, including opaque pixels and alpha 250 through 254 over black/white composites, with nonempty opaque coverage required.
-      - Preserve all original detail thresholds and original 30-cell / fixed 504-cell inputs, old-pass classifications and Toggle controls. The old muted near-white cell remains failed at span 7.17568 and reorder RMS 3.91629 in arithmetic; improvement is not acceptance. Report fallback separately from successful optical paint. No-tint shader bytes, source admission, seed tint rejection, preference guards and selected-state semantics remain unchanged.
+      - Preserve all original detail thresholds and original 30-cell / fixed 504-cell inputs, old-pass classifications and Toggle controls. The historical profile 4/5 muted near-white cell remains failed at span 7.17568 and reorder RMS 3.91629 in arithmetic; improvement is not acceptance. Report fallback separately from successful optical paint. No-tint shader bytes, source admission, seed tint rejection, preference guards and selected-state semantics remain unchanged.
       - Whole-image color count is only a coarse diagnostic, not an appearance acceptance criterion. The independently frozen inner-content challenge requires structured amplitude and same-histogram source response against flat, noise and retired-map controls. Its engineering thresholds are not Apple numeric criteria; actual public selected appearance still requires independent exact-head visual review.
       - Numerical oracle and mocked ABI are not GPU evidence. Fixed source revision, geometry and motion must distinguish tinted optical pixels from neutral and zero-refraction controls without mistaking opaque overlay or empty samples for success.
+  - id: T-WEB-LIQUID-OPTICAL-0001-CASE-TONE
+    title: Profile 6 preserves bounded source detail without collapsing continuous tone or brightness changes
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-OWNERSHIP
+      - C-FEEDBACK-MATERIAL-0001-SAFETY
+      - C-FEEDBACK-MATERIAL-0001-QUALITY
+    expectation: source-bound-positive-slope-tone-budget-and-unchanged-native-optical-thresholds
+    notes:
+      - Private profiles pui-regular-style-tint-6 and pui-regular-style-tint-contact-6 keep profile 5 refraction, palette hue, foreground envelope, same-state fallback and actual-byte readback guards. Profile 4/5 history and the rejected mean-anchored clamp control remain historical, not relabeled as profile 6 evidence.
+      - Derive one encoded-tone work interval from the admitted opaque source's per-channel extrema using the same 0.2126/0.7152/0.0722 weights. The low endpoint reserves one encoded byte below the source minimum; the high endpoint reserves one encoded byte above the channel maximum plus the full existing static/contact lighting ceiling 0.21. Clamp endpoints to zero and one. This is a conservative source work interval, not a GPU arithmetic error bound or permission to sample another source.
+      - Let low be the interval start, range its width, boost be 0.5 divided by max(range, 1-range), and outside be 1-boost*range. Map the postlighting clamped code-luma t to outside*t + boost*clamp(t-low, 0, range), bounded to zero and one for finite-precision representation. The real-valued transfer preserves both endpoints, has positive slopes between 0.5 and 1.5 everywhere, and remains the identity for a full-domain interval. Clamping the interior contribution does not create a flat output interval because the outside term remains positive.
+      - Upload the float32 low endpoint, inward-represented range and a boost derived from that same represented range and rounded inward. Require low+range no greater than one and retain the real-valued slope bounds after uniform representation. The shader uses the algebraically equivalent t+boost*(clamp(t-low,0,range)-range*t), avoiding an independently rounded outside coefficient. This does not establish accumulated GPU precision or byte equivalence with another algebraic evaluation order.
+      - Apply the existing encoded-affine foreground envelope to this bounded tone before the unchanged linear-light hue map. No palette-name branch, fitted per-case parameter, noise injection, mean normalization, additional texture fetch or GPU readback is admitted. Ordinary sRGB8 quantization and inherited input/shape/gamut clipping remain distinct from the analytically rejected additional constant-tone intervals.
+      - The source interval belongs to the exact prepared-source identity, revision, dimensions, view, canvas and scope for both CPU and experimental GPU preparation. Lazily compute it only for tint, retain only finite scalar facts with the existing bounded cache, retire it on the same source invalidations and clear/disposal, and count its CPU time explicitly. Neutral-only consumers do not acquire a statistics pass.
+      - Constant-field changes across real source revisions retain brightness response; source-range adaptation must not normalize every constant source to the same output. Test near-black/near-white ramps, unchanged full-domain mapping, same-histogram reorder, old positive/negative controls, A-to-B-to-A reuse, per-frame source replacement, preferences and cleanup. The original detail, foreground, native three-control and visual gates remain unchanged; arithmetic and source presence are not native or physical-hardware acceptance.
+      - The additive native constant-field sequence uses owned neutral gray codes 32, 96, 160, 224, then 32 again on each Web runtime in both themes. The actual tinted opaque interior must increase mean encoded luma by at least eight codes per increasing step; the ordinary opaque control stays unchanged. Source revisions advance, returning A restores its source hash and output mean within one encoded code, and original contrast/polarity guards remain mandatory. This isolated brightness check neither replaces the unchanged structured-source three-control journeys nor proves visible refraction or Apple appearance.
 implementations:
   - id: web-optical-detail-metrics
     kind: module-test
@@ -78,6 +94,22 @@ implementations:
     consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-VIEW]
     notes:
       - Real preference resolver with synthetic MediaQueryList delivery and mocked GPU; current preferences reject late held decode across source/material transitions. This does not prove browser event delivery latency.
+  - id: web-optical-style-tint-source
+    kind: module-test
+    status: planned
+    path: packages/adapters/base/test/web-material-style-tint-source.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-TONE]
+    notes:
+      - Independent source-range, continuous-slope and constant-field numerical controls; real shader precision and full optical output remain subject to unchanged native evidence.
+  - id: web-optical-style-tint-constant-browser
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-liquid-glass-prominent-tint.browser.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-TONE]
+    notes:
+      - Eight additional runtime/theme cases keep the existing 48 journeys/preferences and all original thresholds. Complete source-bound terminal receipts include every expected capture, native page error and cleanup failure; physical input and complete visual fidelity remain separate acceptance.
   - id: web-optical-style-tint
     kind: module-test
     status: passing
@@ -138,6 +170,9 @@ sources:
   - path: packages/adapters/base/src/material/program.ts
   - path: scripts/build/generate-web-material-kernel.mjs
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Define draft private profile 6 source-owned bounded tone gain with strictly positive full-domain slopes, preserved constant-field response, unchanged foreground and optical gates, and prepared-source cache ownership; retain profile 4/5 formulas, failures and rejected research controls as history.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Define private profile 5's frozen all-fetch-budgeted relative refraction shoulder and strict final-offset evidence; preserve profile 4 tint safety, mediump and neutral paths, historical failures and pending actual GPU, lease, performance and visual acceptance.

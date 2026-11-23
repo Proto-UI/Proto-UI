@@ -302,8 +302,7 @@ const roundedReceiptPng = (() => {
     let crc = 0xffffffff;
     for (const byte of body) {
       crc ^= byte;
-      for (let bit = 0; bit < 8; bit++)
-        crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+      for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
     }
     const result = Buffer.alloc(data.length + 12);
     result.writeUInt32BE(data.length, 0);
@@ -337,8 +336,10 @@ function setRoundedMeasuredRect({ frame, fingerprints }, rect) {
   const snapshot = JSON.parse(fingerprints.before);
   snapshot.surfaces[1].target[0].rect = [rect.x, rect.y, rect.width, rect.height];
   fingerprints.before = fingerprints.facts = fingerprints.after = JSON.stringify(snapshot);
-  frame.beforeFingerprintDigest = frame.afterFingerprintDigest = frame.facts.stateFingerprintDigest =
-    receiptDigest(fingerprints.before);
+  frame.beforeFingerprintDigest =
+    frame.afterFingerprintDigest =
+    frame.facts.stateFingerprintDigest =
+      receiptDigest(fingerprints.before);
 }
 function roundedFrameFixture() {
   const rootRect = { x: 10, y: 10, width: 100, height: 100 };
@@ -391,8 +392,13 @@ function roundedFrameFixture() {
     sameProjectionLease: true,
     sameMeasurementLease: true,
     primaryPaint: {
-      prototype: 'brutalist-scroll-area-viewport', achieved: false, visibility,
-      owner: 'owner', generation: '1', physicalNodeId: 2, rect: { ...viewportRect },
+      prototype: 'brutalist-scroll-area-viewport',
+      achieved: false,
+      visibility,
+      owner: 'owner',
+      generation: '1',
+      physicalNodeId: 2,
+      rect: { ...viewportRect },
     },
     image: { path: 'scroll-area-react-light-rest.png', digest: receiptDigest(roundedReceiptPng) },
     factsFile: { path: 'scroll-area-react-light-rest.facts.json' },
@@ -408,13 +414,21 @@ function roundedFrameFixture() {
       surfaces: [
         {
           prototype: 'brutalist-scroll-area-root',
-          hostNodeId: 1, physicalNodeId: 1, owner: 'owner', generation: '1', rect: rootRect,
+          hostNodeId: 1,
+          physicalNodeId: 1,
+          owner: 'owner',
+          generation: '1',
+          rect: rootRect,
           visible: true,
           visibility: { classification: 'source-model-visible', limits: [] },
         },
         {
           prototype: 'brutalist-scroll-area-viewport',
-          hostNodeId: 2, physicalNodeId: 2, owner: 'owner', generation: '1', rect: viewportRect,
+          hostNodeId: 2,
+          physicalNodeId: 2,
+          owner: 'owner',
+          generation: '1',
+          rect: viewportRect,
           visible: true,
           visibility: {
             classification: visibility.classification,
@@ -426,11 +440,17 @@ function roundedFrameFixture() {
     },
   };
   const state = JSON.stringify({
-    owner: 'owner', generation: '1', viewport: [128, 128, 1, 0, 0],
-    scope: { attributes: [
-      ['data-projection-owner', 'owner'], ['data-projection-generation', '1'],
-      ['data-projection-family', 'brutalist'], ['data-projection-runtime', item.runtime],
-    ] },
+    owner: 'owner',
+    generation: '1',
+    viewport: [128, 128, 1, 0, 0],
+    scope: {
+      attributes: [
+        ['data-projection-scope', 'owner'],
+        ['data-projection-generation', '1'],
+        ['data-projection-family', 'brutalist'],
+        ['data-projection-runtime', item.runtime],
+      ],
+    },
     theme: { attributes: [['data-theme', item.theme]] },
     surfaces: frame.facts.surfaces.map((surface) => ({
       host: {
@@ -441,17 +461,21 @@ function roundedFrameFixture() {
           ['data-projection-generation', surface.generation],
         ],
       },
-      target: [{
-        id: surface.physicalNodeId,
-        rect: [surface.rect.x, surface.rect.y, surface.rect.width, surface.rect.height],
-      }, []],
+      target: [
+        {
+          id: surface.physicalNodeId,
+          rect: [surface.rect.x, surface.rect.y, surface.rect.width, surface.rect.height],
+        },
+        [],
+      ],
     })),
   });
   frame.beforeFingerprintDigest = receiptDigest(state);
   frame.afterFingerprintDigest = receiptDigest(state);
   frame.facts.stateFingerprintDigest = receiptDigest(state);
   const fixture = {
-    item, frame,
+    item,
+    frame,
     raw: { image: Buffer.from(roundedReceiptPng) },
     fingerprints: { before: state, facts: state, after: state },
   };
@@ -466,7 +490,10 @@ test('declared rounded ScrollArea is retained as unmeasured, never achieved or h
   assert.equal(result.followup, 'https://github.com/Proto-UI/Proto-UI/issues/853');
   assert.deepEqual(result.unexecutedTargets, item.plannedStates);
   assert.deepEqual(result.declaredProfile, {
-    radiusPx: 5, borderPx: 2, overflowX: 'hidden', overflowY: 'hidden',
+    radiusPx: 5,
+    borderPx: 2,
+    overflowX: 'hidden',
+    overflowY: 'hidden',
   });
   assert.deepEqual(result.fingerprintsFile, frame.fingerprintsFile);
   assert.equal(result.physicalNodeId, frame.primaryPaint.physicalNodeId);
@@ -614,58 +641,156 @@ for (const [name, damage] of [
       frame.factsFile = null;
     },
   ],
-  ['undeclared fixed radius', ({ frame }) => {
-    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
-      visibility.roundedOverflowClips[0].radii = ['10px', '10px', '10px', '10px'];
-  }],
-  ['elliptical radius', ({ frame }) => {
-    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
-      visibility.roundedOverflowClips[0].radii = ['5px 10px', '5px', '5px', '5px'];
-  }],
-  ['zero radius despite fixed-px flag', ({ frame }) => {
-    frame.primaryPaint.visibility.roundedOverflowClips[0].radii = ['0px', '0px', '0px', '0px'];
-  }],
-  ['undeclared border geometry', ({ frame }) => {
-    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
-      visibility.roundedOverflowClips[0].borderWidths[0] = '0px';
-  }],
-  ['forged safe rectangle', ({ frame }) => {
-    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
-      visibility.roundedOverflowClips[0].safeRect.left = 12;
-  }],
-  ['unpaired target geometry', ({ frame }) => {
-    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
-      visibility.roundedOverflowClips[0].targetBoxes[0].width = 95;
-  }],
-  ['replaced primary node', ({ frame }) => { frame.primaryPaint.physicalNodeId = 3; }],
-  ['foreign primary owner', ({ frame }) => { frame.primaryPaint.owner = 'other'; }],
-  ['replaced clip node', ({ frame }) => {
-    for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
-      visibility.roundedOverflowClips[0].physicalNodeId = 3;
-  }],
-  ['replaced measured node', ({ frame }) => { frame.facts.surfaces[1].physicalNodeId = 3; }],
-  ['foreign physical part', ({ frame }) => { frame.facts.surfaces[0].owner = 'other'; }],
-  ['unpaired image digest', ({ frame }) => { frame.facts.imageDigest = receiptDigest('different PNG'); }],
-  ['unpaired image dimensions', ({ frame }) => { frame.facts.raster.width = 127; }],
-  ['unpaired fingerprint bytes', ({ fingerprints }) => { fingerprints.after += ' '; }],
-  ['missing complete fingerprints', ({ raw }) => { raw.fingerprints = null; }],
-  ['tampered raw PNG', ({ raw }) => { raw.image[raw.image.length - 1] ^= 1; }],
-  ['wrong runtime artifact name', ({ frame }) => { frame.image.path = 'scroll-area-vue-light-rest.png'; }],
-  ['foreign anatomy owner', ({ frame }) => { frame.anatomyBefore.owner = 'other'; }],
-  ['unpaired facts family', ({ frame }) => { frame.facts.family = 'tooltip'; }],
-  ['unpaired facts theme', ({ frame }) => { frame.facts.theme = 'dark'; }],
-  ['rounded-corner geometry despite safe-interior flag', (fixture) => {
-    setRoundedMeasuredRect(fixture, { x: 12, y: 12, width: 1, height: 1 });
-  }],
-  ['offscreen measured geometry', (fixture) => {
-    setRoundedMeasuredRect(fixture, { x: -1, y: 12, width: 96, height: 96 });
-  }],
-  ['fully central box despite unsupported flag', (fixture) => {
-    setRoundedMeasuredRect(fixture, { x: 20, y: 20, width: 20, height: 20 });
-  }],
-  ['partially clipped measured geometry', (fixture) => {
-    setRoundedMeasuredRect(fixture, { x: 12, y: 12, width: 97, height: 96 });
-  }],
+  [
+    'undeclared fixed radius',
+    ({ frame }) => {
+      for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+        visibility.roundedOverflowClips[0].radii = ['10px', '10px', '10px', '10px'];
+    },
+  ],
+  [
+    'elliptical radius',
+    ({ frame }) => {
+      for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+        visibility.roundedOverflowClips[0].radii = ['5px 10px', '5px', '5px', '5px'];
+    },
+  ],
+  [
+    'zero radius despite fixed-px flag',
+    ({ frame }) => {
+      frame.primaryPaint.visibility.roundedOverflowClips[0].radii = ['0px', '0px', '0px', '0px'];
+    },
+  ],
+  [
+    'undeclared border geometry',
+    ({ frame }) => {
+      for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+        visibility.roundedOverflowClips[0].borderWidths[0] = '0px';
+    },
+  ],
+  [
+    'forged safe rectangle',
+    ({ frame }) => {
+      for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+        visibility.roundedOverflowClips[0].safeRect.left = 12;
+    },
+  ],
+  [
+    'unpaired target geometry',
+    ({ frame }) => {
+      for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+        visibility.roundedOverflowClips[0].targetBoxes[0].width = 95;
+    },
+  ],
+  [
+    'replaced primary node',
+    ({ frame }) => {
+      frame.primaryPaint.physicalNodeId = 3;
+    },
+  ],
+  [
+    'foreign primary owner',
+    ({ frame }) => {
+      frame.primaryPaint.owner = 'other';
+    },
+  ],
+  [
+    'replaced clip node',
+    ({ frame }) => {
+      for (const visibility of [frame.primaryPaint.visibility, frame.facts.surfaces[1].visibility])
+        visibility.roundedOverflowClips[0].physicalNodeId = 3;
+    },
+  ],
+  [
+    'replaced measured node',
+    ({ frame }) => {
+      frame.facts.surfaces[1].physicalNodeId = 3;
+    },
+  ],
+  [
+    'foreign physical part',
+    ({ frame }) => {
+      frame.facts.surfaces[0].owner = 'other';
+    },
+  ],
+  [
+    'unpaired image digest',
+    ({ frame }) => {
+      frame.facts.imageDigest = receiptDigest('different PNG');
+    },
+  ],
+  [
+    'unpaired image dimensions',
+    ({ frame }) => {
+      frame.facts.raster.width = 127;
+    },
+  ],
+  [
+    'unpaired fingerprint bytes',
+    ({ fingerprints }) => {
+      fingerprints.after += ' ';
+    },
+  ],
+  [
+    'missing complete fingerprints',
+    ({ raw }) => {
+      raw.fingerprints = null;
+    },
+  ],
+  [
+    'tampered raw PNG',
+    ({ raw }) => {
+      raw.image[raw.image.length - 1] ^= 1;
+    },
+  ],
+  [
+    'wrong runtime artifact name',
+    ({ frame }) => {
+      frame.image.path = 'scroll-area-vue-light-rest.png';
+    },
+  ],
+  [
+    'foreign anatomy owner',
+    ({ frame }) => {
+      frame.anatomyBefore.owner = 'other';
+    },
+  ],
+  [
+    'unpaired facts family',
+    ({ frame }) => {
+      frame.facts.family = 'tooltip';
+    },
+  ],
+  [
+    'unpaired facts theme',
+    ({ frame }) => {
+      frame.facts.theme = 'dark';
+    },
+  ],
+  [
+    'rounded-corner geometry despite safe-interior flag',
+    (fixture) => {
+      setRoundedMeasuredRect(fixture, { x: 12, y: 12, width: 1, height: 1 });
+    },
+  ],
+  [
+    'offscreen measured geometry',
+    (fixture) => {
+      setRoundedMeasuredRect(fixture, { x: -1, y: 12, width: 96, height: 96 });
+    },
+  ],
+  [
+    'fully central box despite unsupported flag',
+    (fixture) => {
+      setRoundedMeasuredRect(fixture, { x: 20, y: 20, width: 20, height: 20 });
+    },
+  ],
+  [
+    'partially clipped measured geometry',
+    (fixture) => {
+      setRoundedMeasuredRect(fixture, { x: 12, y: 12, width: 97, height: 96 });
+    },
+  ],
 ])
   test(`known-unsupported policy rejects ${name}`, () => {
     const fixture = roundedFrameFixture();
@@ -1183,6 +1308,117 @@ async function auditFunction(name, next, dependencies) {
   );
 }
 
+for (const fault of ['none', 'unsettled', 'identity', 'ax', 'retired']) {
+  test(`actual Dropdown caller establishes stable paint before identity/AX (${fault})`, async () => {
+    // Injected ordering controls execute the real caller. They stop at native
+    // entry and do not certify a browser, an AX tree, or a completed gesture.
+    const calls = [];
+    let settled = false;
+    let identityReads = 0;
+    const entryBoundary = new Error('controlled native-entry boundary');
+    const rows = [
+      { name: 'Profile', identity: 'default' },
+      { name: 'Delete', identity: 'destructive' },
+    ];
+    const physical = {
+      dispose: async () => {
+        calls.push('dispose');
+      },
+    };
+    const target = {
+      elementHandle: async () => {
+        calls.push('physical');
+        return physical;
+      },
+    };
+    const popup = {
+      and() {
+        return this;
+      },
+      waitFor: async () => {},
+      locator: () => ({
+        waitFor: async () => {
+          calls.push('entry');
+          throw entryBoundary;
+        },
+      }),
+    };
+    const page = {
+      locator: () => ({}),
+      keyboard: {
+        press: async (key) => {
+          calls.push(key);
+        },
+      },
+      mouse: { move: async () => {} },
+    };
+    const trigger = { getAttribute: async () => 'owned-popup', click: async () => {} };
+    const item = { family: 'dropdown-menu' };
+    const journey = await auditFunction('popupItemPointerJourneys', 'dialogOpenObservation', {
+      phase: '',
+      dropdownPointerRows: () => rows,
+      dropdownPointerTarget: async () => target,
+      owned: async () => popup,
+      establishNativeItemPointerBaseline,
+      stableFingerprint: async () => {
+        calls.push('paint');
+        if (fault === 'unsettled') throw new Error('controlled unsettled paint');
+        settled = true;
+        return 'stable-authored-paint';
+      },
+      dropdownPointerIdentity: async (_page, _popup, actual, row) => {
+        assert.equal(actual, physical);
+        assert.equal(row, rows[0]);
+        calls.push('identity');
+        identityReads++;
+        return {
+          achieved:
+            settled && fault !== 'identity' && !(fault === 'retired' && identityReads === 2),
+        };
+      },
+      dropdownPointerAX: async () => {
+        calls.push('ax');
+        return { achieved: fault !== 'ax' };
+      },
+      targetObservation: async () => {
+        calls.push('target');
+        assert.equal(settled, true);
+        return { achieved: true };
+      },
+    });
+    const expected =
+      fault === 'none'
+        ? entryBoundary
+        : fault === 'unsettled'
+          ? /controlled unsettled paint/
+          : fault === 'identity'
+            ? /Invalid current Dropdown pointer row/
+            : fault === 'ax'
+              ? /Invalid native Dropdown item name/
+              : /Dropdown Item retired during AX observation/;
+    await assert.rejects(() => journey(page, item, trigger), expected);
+    const stages = calls.filter((call) => call !== 'Escape');
+    assert.deepEqual(
+      stages,
+      fault === 'none'
+        ? ['paint', 'physical', 'identity', 'ax', 'identity', 'dispose', 'target', 'entry']
+        : fault === 'unsettled'
+          ? ['paint']
+          : fault === 'identity'
+            ? ['paint', 'physical', 'identity', 'dispose']
+            : fault === 'ax'
+              ? ['paint', 'physical', 'identity', 'ax', 'dispose']
+              : ['paint', 'physical', 'identity', 'ax', 'identity', 'dispose']
+    );
+    assert.equal(item.pointerItemBaselines[0].achieved, false);
+    assert.equal(
+      item.pointerItemBaselines[0].dropdownAX?.achieved,
+      fault === 'unsettled' || fault === 'identity' ? undefined : fault !== 'ax'
+    );
+    assert.equal(calls.includes('End') || calls.includes('Home'), false);
+  });
+}
+
 for (const family of ['label', 'collapsible', 'accordion']) {
   test(`actual ${family} native journey captures each finite target once and never claims a failed transition`, async () => {
     for (const fault of [
@@ -1397,13 +1633,13 @@ test('new journeys match the actual recipe association and uncontrolled domain i
 test('new source-bound plans keep naming and default-L1 observations separate from full family acceptance', async () => {
   const { transform } = await import('esbuild');
   const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
-  const start = source.indexOf('function plannedStates('),
+  const start = source.indexOf('const passiveFamilies ='),
     end = source.indexOf('// Populate this matrix', start);
   const plannedStates = new Function(
-    'passiveFamilies',
     'contrastHeldBinaryTargets',
     (await transform(source.slice(start, end), { loader: 'ts' })).code + ';return plannedStates;'
-  )(new Set(['badge', 'card', 'skeleton', 'separator', 'spinner']), contrastHeldBinaryTargets);
+  )(contrastHeldBinaryTargets);
+  assert.deepEqual(plannedStates('image'), ['rest']);
   assert.deepEqual(plannedStates('label'), [
     'rest',
     'label-hover',

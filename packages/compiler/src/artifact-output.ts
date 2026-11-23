@@ -3,6 +3,7 @@ import { constants, type Stats } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import type { CompileResult, CompilerDiagnostic } from './ir';
+import { unknownDiagnosticSpan } from './diagnostics';
 
 export interface OutputArtifact {
   path: string;
@@ -148,19 +149,15 @@ export async function diffArtifactSet(
   directory: string
 ): Promise<CompileResult<ArtifactDiff>> {
   const absolute = path.resolve(directory);
-  const location = (filename: string) => ({
-    file: filename,
-    start: 0,
-    end: 0,
-    line: 1,
-    column: 1,
-    endLine: 1,
-    endColumn: 1,
-  });
   const reject = (message: string, filename = absolute): CompileResult<ArtifactDiff> => ({
     ok: false,
     diagnostics: [
-      { code: 'PUI5001', category: 'output-conflict', message, span: location(filename) },
+      {
+        code: 'PUI5001',
+        category: 'output-conflict',
+        message,
+        span: unknownDiagnosticSpan(filename),
+      },
     ],
   });
   const problem = validateArtifacts(artifacts);
@@ -419,15 +416,7 @@ export async function writeArtifactSet(
           code: 'PUI3004',
           category: 'invalid-input',
           message: invalid,
-          span: {
-            file: typeof directory === 'string' ? directory : '<output>',
-            start: 0,
-            end: 0,
-            line: 1,
-            column: 1,
-            endLine: 1,
-            endColumn: 1,
-          },
+          span: unknownDiagnosticSpan(typeof directory === 'string' ? directory : '<output>'),
         },
       ],
     };
@@ -582,15 +571,7 @@ export async function writeArtifactSet(
       ]
         .filter(Boolean)
         .join('; '),
-      span: {
-        file: primary.filename,
-        start: 0,
-        end: 0,
-        line: 1,
-        column: 1,
-        endLine: 1,
-        endColumn: 1,
-      },
+      span: unknownDiagnosticSpan(primary.filename),
     };
     return { ok: false, diagnostics: [diagnostic] };
   }

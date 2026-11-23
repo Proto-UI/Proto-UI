@@ -322,9 +322,7 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
           .evaluate((element) => getComputedStyle(element).color);
         observations.push({ runtime, theme, cardForeground });
         // Consumer labels use the foreground paired with the family page surface.
-        expect(cardForeground).toBe(
-          theme === 'light' ? 'rgb(51, 51, 51)' : 'rgb(238, 238, 238)'
-        );
+        expect(cardForeground).toBe(theme === 'light' ? 'rgb(51, 51, 51)' : 'rgb(238, 238, 238)');
         const checkbox = await paint(part(runtime, 'checkbox'));
         const indicator = await paint(part(runtime, 'indicator'));
         const switchRoot = await paint(part(runtime, 'switch'));
@@ -336,6 +334,31 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         const textarea = await paint(
           host(runtime).getByRole('textbox', { name: 'Draft notes', exact: true })
         );
+        // Retain the actual formatting context alongside the unchanged paint
+        // equality oracle. Direct grid items are blockified by CSS; the native
+        // editor must have the same flow premise in all four adapter topologies.
+        const editorLayout = await host(runtime)
+          .getByRole('textbox')
+          .evaluateAll((editors) =>
+            editors.map((editor) => ({
+              tag: editor.tagName,
+              display: getComputedStyle(editor).display,
+              parentTag: editor.parentElement?.tagName,
+              parentDisplay: editor.parentElement
+                ? getComputedStyle(editor.parentElement).display
+                : null,
+              consumerSlot: Boolean(editor.closest('.fixture-editor-slot')),
+            }))
+          );
+        observations.push({ runtime, theme, editorLayout });
+        expect(editorLayout).toHaveLength(4);
+        expect(editorLayout.every((editor) => editor.consumerSlot)).toBe(true);
+        expect(
+          editorLayout.every(
+            (editor) =>
+              !['grid', 'inline-grid', 'flex', 'inline-flex'].includes(editor.parentDisplay ?? '')
+          )
+        ).toBe(true);
         const separator = await paint(part(runtime, 'separator'));
         const facts = {
           checkbox,

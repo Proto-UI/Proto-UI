@@ -1,0 +1,494 @@
+{
+  "schema": "pui-sprint6-coverage-source-review/v1",
+  "sourceBase": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+  "reviewedSourceHead": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+  "scope": "Bounded source/import ownership review; not emitted-bundle or runtime acceptance.",
+  "renewedSourceBindings": [
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "a638682698b1012916f06bce84457adc73bd9e5f",
+      "previousRawSha256": "3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b",
+      "previousSourceScanSha256": "3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "3965d271e9f14d1933f37b5287eb30339f62f19e",
+      "reviewedRawSha256": "09c6c7e464793b0ce40e4f834c99d6aeb1e8c9a93e3e8c3b5f444955308b1aad",
+      "reviewedSourceScanSha256": "09c6c7e464793b0ce40e4f834c99d6aeb1e8c9a93e3e8c3b5f444955308b1aad",
+      "reviewedBytes": 8505,
+      "reason": "Adds an explicit owned constant-field source command alongside the existing structured-source controls; source painting remains a diagnostic fixture responsibility."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts",
+      "owners": ["www.demo.demo-matrix"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "08c487f273d397ce62d5056c8dc11b3570ba11c4",
+      "previousRawSha256": "aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56",
+      "previousSourceScanSha256": "aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "547947d6c34adfef2cded85dc4a1676b08656017",
+      "reviewedRawSha256": "1a781ab430cfc6df1ced99d9b2c554b1a7b2f770a3bcf64a2381b20134f2674a",
+      "reviewedSourceScanSha256": "1a781ab430cfc6df1ced99d9b2c554b1a7b2f770a3bcf64a2381b20134f2674a",
+      "reviewedBytes": 43742,
+      "reason": "Names the actual profile 6 shader and exact expected hashes while retaining historical source provenance, scripted scope, and productAccepted=false."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "3c699840b9614dceaa64ec7655a844aa91bcc418",
+      "previousRawSha256": "bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3",
+      "previousSourceScanSha256": "bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "87aaca3d58a835e253fbf08fbc20701545373d69",
+      "reviewedRawSha256": "2ba157d7251051ceb837d53ed2fcf66874de1c0dfde086d8dbd6a67a4b1a8310",
+      "reviewedSourceScanSha256": "2ba157d7251051ceb837d53ed2fcf66874de1c0dfde086d8dbd6a67a4b1a8310",
+      "reviewedBytes": 15106,
+      "reason": "Updates only the expected private static/contact profile identifiers from 5 to 6."
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts",
+      "owners": ["www.demo.demo-matrix"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "d87a192b24678f1ddb2d0eae2d86ed27dac4f3ce",
+      "previousRawSha256": "a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6",
+      "previousSourceScanSha256": "a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "2815a0272694382bc64637f473d6d9eede2fe6ee",
+      "reviewedRawSha256": "a15d4864f21efc3008eb4caad0e2e8512e0bda657b289ce12848515909cb95bb",
+      "reviewedSourceScanSha256": "a15d4864f21efc3008eb4caad0e2e8512e0bda657b289ce12848515909cb95bb",
+      "reviewedBytes": 57776,
+      "reason": "Replays the complete frozen profile 4 shader on the profile 6 host; admits only the one unused source-tone uniform and retains historical-only receipts and productAccepted=false."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/bootstrap-state-controls.astro",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "cc926331b8ec939bf370035cc86c509f2fac48cc",
+      "previousRawSha256": "6af770d6bd60744cd5dda7b8f729cb82f9ad5449cabf4d9de935342c7207086f",
+      "previousSourceScanSha256": "6af770d6bd60744cd5dda7b8f729cb82f9ad5449cabf4d9de935342c7207086f",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "d6845c96bc080a7e9dc78d0b02757c3794a400c2",
+      "reviewedRawSha256": "674d45c03594182e46eb2a79e6b7a5c0facd29eb84eef20612a05b40210a2d97",
+      "reviewedSourceScanSha256": "674d45c03594182e46eb2a79e6b7a5c0facd29eb84eef20612a05b40210a2d97",
+      "reviewedBytes": 15769,
+      "reason": "Wraps native Input/Textarea in ordinary-flow consumer slots so the comparison does not blockify only the framework editors through direct grid placement."
+    },
+    {
+      "path": "apps/www/src/components/Homepage/homepage-runtime-client.ts",
+      "owners": [
+        "www.content.typography-presentation",
+        "www.demo.home-demo-select",
+        "www.search.dialog",
+        "www.search.launcher",
+        "www.search.loading-failure",
+        "www.shell.adapter-select",
+        "www.shell.hero-actions",
+        "www.shell.hero-hash-scroll",
+        "www.shell.language-select",
+        "www.shell.mobile-menu-panel",
+        "www.shell.mobile-menu-toggle",
+        "www.shell.native-link-presentation",
+        "www.shell.primary-nav",
+        "www.shell.social-links",
+        "www.shell.theme-toggle"
+      ],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "1d64ae3da984786b82371b3f47421832fd014d4e",
+      "previousRawSha256": "a19a55f273d7dd5db6c7ccbd995c4b9ef50b77de7dbc8ad387a6f1bbd893dcd8",
+      "previousSourceScanSha256": "a19a55f273d7dd5db6c7ccbd995c4b9ef50b77de7dbc8ad387a6f1bbd893dcd8",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "77fc462b7756e56598bc4b73eff289d8f6ad11a8",
+      "reviewedRawSha256": "5beb9b6087eceecfb3121abbd491a3ae59760e916e03d0b22397c734f9bb8b1f",
+      "reviewedSourceScanSha256": "5beb9b6087eceecfb3121abbd491a3ae59760e916e03d0b22397c734f9bb8b1f",
+      "reviewedBytes": 42680,
+      "reason": "Passes the existing navbar brand/link context to public Surface/Text composition without changing native navigation ownership."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts",
+      "owners": ["www.demo.raw-adapter-runtimes"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "09f6ce1e311c5dd78a8bc4b91d13afefee15eb89",
+      "previousRawSha256": "0f4ab1ce59f374c1f39f732fc8d3b7418f7bffcb65369f69a3279e55bc43eeed",
+      "previousSourceScanSha256": "0f4ab1ce59f374c1f39f732fc8d3b7418f7bffcb65369f69a3279e55bc43eeed",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "a441d839f2d88f0f4d83ebc6af8f3e594949c025",
+      "reviewedRawSha256": "591262014e5be6db86b013dfd21cde229b1f467e2e37568aa9172bafbd9cf5cf",
+      "reviewedSourceScanSha256": "591262014e5be6db86b013dfd21cde229b1f467e2e37568aa9172bafbd9cf5cf",
+      "reviewedBytes": 21211,
+      "reason": "Observes physical source pixels and coalesces resize/resolution notifications into one owned layout frame, rebinding to the freshly read DPR; no polling or user-input owner is added. Native DPR acceptance remained failed at this head."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+      "owners": ["www.demo.home-demo-select", "www.demo.runtime-select"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "7f2cdc426076260c33b8d1c3305c357f15ed7dc1",
+      "previousRawSha256": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+      "previousSourceScanSha256": "07d67873148d186c3de544dce0e4ef5edf4f65d21fd2589226599b9a17694f3e",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "d43736c83993cfd4badbb352ba409900c9045be8",
+      "reviewedRawSha256": "87fbfe03d53fc3995f5c0964111e9fdb52f20478f1866951fb0f10bac7059687",
+      "reviewedSourceScanSha256": "87fbfe03d53fc3995f5c0964111e9fdb52f20478f1866951fb0f10bac7059687",
+      "reviewedBytes": 60031,
+      "reason": "Uses the renderer-created theme-entry identity instead of authored token-key shape when pushing nested theme updates. This exact source binding does not settle the remaining theme-copy lifecycle regression."
+    },
+    {
+      "path": "apps/www/src/components/override/Search.astro",
+      "owners": [
+        "www.search.dialog",
+        "www.search.input-results",
+        "www.search.launcher",
+        "www.search.loading-failure",
+        "www.search.pagefind-engine"
+      ],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "884dc70b49452aa0d1d04d81c6f3bbdb0381ad3b",
+      "previousRawSha256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0",
+      "previousSourceScanSha256": "5dd4a5bd1aa53673c5af4f56b395ea439bbe08c5dd19f04b3f51bb34aff8bde0",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "e7db07c606312807c51035aab0ef424f03ccfbbd",
+      "reviewedRawSha256": "043a32a80c35a73801ef5b4a4d7a4b27df512de5481852b1f04572b46f88f921",
+      "reviewedSourceScanSha256": "043a32a80c35a73801ef5b4a4d7a4b27df512de5481852b1f04572b46f88f921",
+      "reviewedBytes": 6403,
+      "reason": "Passes the selected family into the existing responsive header Button feedback recipe; search commands and input owners are retained."
+    },
+    {
+      "path": "apps/www/src/components/override/ThemeToggle.astro",
+      "owners": ["www.shell.theme-toggle"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "867efd6e8841078d267303a58fdebe2e21f718ad",
+      "previousRawSha256": "0e0717ece099a80a5d3facff933d8f187f43367e79d0be94c4e911931a367cfe",
+      "previousSourceScanSha256": "0e0717ece099a80a5d3facff933d8f187f43367e79d0be94c4e911931a367cfe",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "49b58c7d7815d9ab802dddb4074f968e6c83a3ff",
+      "reviewedRawSha256": "343da75ff4a3ded93be875afe59837a85851bb42dc6df9b469b71e78594933da",
+      "reviewedSourceScanSha256": "343da75ff4a3ded93be875afe59837a85851bb42dc6df9b469b71e78594933da",
+      "reviewedBytes": 3824,
+      "reason": "Marks the authored header command as icon-sized before runtime enhancement; existing theme command ownership remains."
+    },
+    {
+      "path": "apps/www/src/components/site-header-surface.ts",
+      "owners": ["www.shell.mobile-menu-panel", "www.shell.mobile-menu-toggle"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "c42188355c9dddd3387a10bd56e05efb32963ecd",
+      "previousRawSha256": "7d6f1107d4761555fbfd8373da0704da4be96b0b1ef5d3288ac00a46603f2864",
+      "previousSourceScanSha256": "7d6f1107d4761555fbfd8373da0704da4be96b0b1ef5d3288ac00a46603f2864",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "64a51874da870a72319cd38b44071c044391be1c",
+      "reviewedRawSha256": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+      "reviewedSourceScanSha256": "b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a",
+      "reviewedBytes": 15861,
+      "reason": "Reads the navbar-specific horizontal-padding variable with the original one-rem fallback."
+    },
+    {
+      "path": "apps/www/src/components/site-link-recipes.ts",
+      "owners": ["www.shell.native-link-presentation"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "2d67c5903a1c88a9cd678ec9fc0cf7a0b666d971",
+      "previousRawSha256": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+      "previousSourceScanSha256": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "d1309656633313f0177a4d6f7357fd0be22e7b97",
+      "reviewedRawSha256": "3d5d5c21bf52e09aa2cab337d8a64b266a3b8b7e7434cfb40b3ef5b44a0a6602",
+      "reviewedSourceScanSha256": "3d5d5c21bf52e09aa2cab337d8a64b266a3b8b7e7434cfb40b3ef5b44a0a6602",
+      "reviewedBytes": 12867,
+      "reason": "Adds explicit Bootstrap navbar text, passive Surface state, and native-link layout recipes using the same public imports and existing navigation owner."
+    },
+    {
+      "path": "apps/www/src/components/site-native-controls.ts",
+      "owners": ["www.shell.native-link-presentation", "www.shell.table-of-contents"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "0ee7f72aeb04ce0030fe848d4ba9bcb5e0e09f47",
+      "previousRawSha256": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+      "previousSourceScanSha256": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "741d496f3329e6b5eba72865378a31c782620880",
+      "reviewedRawSha256": "5882e6eca56a9d883d7cd3fac29807a53ee249a2150a9d80a6c18726be17d8e4",
+      "reviewedSourceScanSha256": "5882e6eca56a9d883d7cd3fac29807a53ee249a2150a9d80a6c18726be17d8e4",
+      "reviewedBytes": 21212,
+      "reason": "Projects the new navbar text/layout facts through the existing public native-link Surface/Text bridge while preserving the anchor and its navigation ownership."
+    },
+    {
+      "path": "apps/www/src/components/site-search-commands.ts",
+      "owners": ["www.search.dialog", "www.search.input-results", "www.search.launcher"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "53fade32a4c7929fbfa06e64b2fc2f9fb34e44ca",
+      "previousRawSha256": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+      "previousSourceScanSha256": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "80716e991c05643379c1100ea8008cb4844e51cc",
+      "reviewedRawSha256": "243c9bee1fa10ef122f223f520c5a069330a19e05d6e01d8193b330061962b51",
+      "reviewedSourceScanSha256": "243c9bee1fa10ef122f223f520c5a069330a19e05d6e01d8193b330061962b51",
+      "reviewedBytes": 32327,
+      "reason": "Keeps the exact selected library family, valid Bootstrap Button variants, and authored header command height; existing Search command imports and ownership remain."
+    },
+    {
+      "path": "apps/www/src/components/site-search-composition.ts",
+      "owners": ["www.search.dialog", "www.search.input-results", "www.search.loading-failure"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "18f0d5cb70a71ebd8f1e52bf4629249d2878a5ab",
+      "previousRawSha256": "8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7",
+      "previousSourceScanSha256": "8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "34e111e5cbcb9005143069bbf9344dc78f6a8e0f",
+      "reviewedRawSha256": "817b4fc4e22a701c6bd15d371b5a7dbfb9a231cedb28f51b743c8a21ba5ce645",
+      "reviewedSourceScanSha256": "817b4fc4e22a701c6bd15d371b5a7dbfb9a231cedb28f51b743c8a21ba5ce645",
+      "reviewedBytes": 42878,
+      "reason": "Selects the valid Bootstrap default Button variant alongside the existing Shadcn/Brutalist variants; the public InputShell binding and Search owner remain."
+    },
+    {
+      "path": "apps/www/src/components/site-shadcn-controls.ts",
+      "owners": [
+        "www.demo.runtime-select",
+        "www.docs.code-panel-expand",
+        "www.docs.install-manager-tabs",
+        "www.shell.adapter-select",
+        "www.shell.language-select",
+        "www.shell.mobile-menu-toggle",
+        "www.shell.theme-toggle"
+      ],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "97212bbc75389520c4d5ad4856d295fd4d53f034",
+      "previousRawSha256": "a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f",
+      "previousSourceScanSha256": "a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "9d176d2863a04de958622ec96bf48fa1cd5945b0",
+      "reviewedRawSha256": "b9c2aa8cd3209387b129c8a56f7d5f495645f54977c02f07b0c4a6cbc87f55ea",
+      "reviewedSourceScanSha256": "b9c2aa8cd3209387b129c8a56f7d5f495645f54977c02f07b0c4a6cbc87f55ea",
+      "reviewedBytes": 17546,
+      "reason": "Carries the authored header command size through the existing public Button size mapping, without changing the seven literal Adapter/Button/Select imports."
+    },
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-material.astro",
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "065bd3fcb0748fde7fc6da0a5a9fd36ff4def5b0",
+      "previousRawSha256": "38eda9a1fd180efb8a33b91ba2859b64c2a502abdcd0b11ffead61d56b0c0f7c",
+      "previousSourceScanSha256": "38eda9a1fd180efb8a33b91ba2859b64c2a502abdcd0b11ffead61d56b0c0f7c",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "9514c9afe8cbfff2f1ff18e39c6dff20cd1cbe31",
+      "reviewedRawSha256": "03f438cc939f200916a940562ff4dd27ad7b5c8b13dfc96083c1c2a758a7d50f",
+      "reviewedSourceScanSha256": "03f438cc939f200916a940562ff4dd27ad7b5c8b13dfc96083c1c2a758a7d50f",
+      "reviewedBytes": 9702,
+      "reason": "Reserves both adjacent contact envelopes plus the existing fixture movement in its layout. The full-footprint foreign-overlap guard and obstruction negative controls are unchanged."
+    },
+    {
+      "path": "packages/adapters/base/src/material/preferences.ts",
+      "owners": ["www.gallery.ui-library-cards"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "9e5e7be3bcc5e400a9cb1c61eae629152347e74b",
+      "previousRawSha256": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "previousSourceScanSha256": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "188f37e18ea687044b287cc89de322b2d47a8599",
+      "reviewedRawSha256": "b1ffcdca8b3b58ff4ba7f9edc6d9dd8595b1e99b513fa7e71086af14759b533f",
+      "reviewedSourceScanSha256": "b1ffcdca8b3b58ff4ba7f9edc6d9dd8595b1e99b513fa7e71086af14759b533f",
+      "reviewedBytes": 3682,
+      "reason": "Gives each subscription a distinct listener, rolls back every attempted registration, makes failed-removal listeners inert, and releases the caller callback before cleanup; a host removal failure is still reported."
+    },
+    {
+      "path": "packages/adapters/base/src/material/style-tint-profile.ts",
+      "owners": ["www.gallery.ui-library-cards"],
+      "previousSourceRevision": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+      "previousGitBlob": "d84b4869afdc86fae962801b46a18579ed1daf47",
+      "previousRawSha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "previousSourceScanSha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "35a65506f3fbc65987f58cb7101c85573eb7b9da",
+      "reviewedRawSha256": "2e9bb4ca8c903ec0863f4d5a6b18c7486c609a4ef4e806ba6eaf459cd49003cc",
+      "reviewedSourceScanSha256": "2e9bb4ca8c903ec0863f4d5a6b18c7486c609a4ef4e806ba6eaf459cd49003cc",
+      "reviewedBytes": 12330,
+      "reason": "Names private profile 6 and applies bounded source-owned tone gain before the existing foreground map, retaining neutral shaders, shoulder and foreground/readback requirements."
+    }
+  ],
+  "renewedImporterGuards": [
+    {
+      "registry": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "source": "apps/www/src/components/site-link-recipes.ts",
+      "oldSha256": "9c150849a3b2b8022da96c0756dc9ea1ece52f3e7a627ebe17eb70376d637907",
+      "sha256": "3d5d5c21bf52e09aa2cab337d8a64b266a3b8b7e7434cfb40b3ef5b44a0a6602"
+    },
+    {
+      "registry": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "source": "apps/www/src/components/site-native-controls.ts",
+      "oldSha256": "3df06efca6901ba7376e22945954037f02c68ddd3a18f87f8dc63b2fc33bbf80",
+      "sha256": "5882e6eca56a9d883d7cd3fac29807a53ee249a2150a9d80a6c18726be17d8e4"
+    },
+    {
+      "registry": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "source": "apps/www/src/components/site-search-commands.ts",
+      "oldSha256": "7fa9135a6c446af8a8f9b4af9d585c80e85c210d831c429873e12f4dc6b67bf3",
+      "sha256": "243c9bee1fa10ef122f223f520c5a069330a19e05d6e01d8193b330061962b51"
+    },
+    {
+      "registry": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "source": "apps/www/src/components/site-search-composition.ts",
+      "oldSha256": "8574e57260fd676bf407b7161f3409b2ea07a996c65a56ef935291cef21296b7",
+      "sha256": "817b4fc4e22a701c6bd15d371b5a7dbfb9a231cedb28f51b743c8a21ba5ce645"
+    },
+    {
+      "registry": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "source": "apps/www/src/components/site-shadcn-controls.ts",
+      "oldSha256": "a4b6af3c3354ee0a6afd7d5409cfddddc92e0c33d328a983edcafa2b4d096b0f",
+      "sha256": "b9c2aa8cd3209387b129c8a56f7d5f495645f54977c02f07b0c4a6cbc87f55ea"
+    },
+    {
+      "registry": "scripts/coverage-matrices/diagnostic-imports.mjs",
+      "source": "apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro",
+      "oldSha256": "3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b",
+      "sha256": "09c6c7e464793b0ce40e4f834c99d6aeb1e8c9a93e3e8c3b5f444955308b1aad"
+    },
+    {
+      "registry": "scripts/coverage-matrices/diagnostic-imports.mjs",
+      "source": "apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts",
+      "oldSha256": "aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56",
+      "sha256": "1a781ab430cfc6df1ced99d9b2c554b1a7b2f770a3bcf64a2381b20134f2674a"
+    },
+    {
+      "registry": "scripts/coverage-matrices/diagnostic-imports.mjs",
+      "source": "apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts",
+      "oldSha256": "bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3",
+      "sha256": "2ba157d7251051ceb837d53ed2fcf66874de1c0dfde086d8dbd6a67a4b1a8310"
+    },
+    {
+      "registry": "scripts/coverage-matrices/diagnostic-imports.mjs",
+      "source": "apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts",
+      "oldSha256": "a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6",
+      "sha256": "a15d4864f21efc3008eb4caad0e2e8512e0bda657b289ce12848515909cb95bb"
+    },
+    {
+      "registry": "scripts/coverage-matrices/library-card-imports.mjs",
+      "source": "packages/adapters/base/src/material/preferences.ts",
+      "oldSha256": "65f4f5549fa8c8826f522b34cfd159caa4c05a09bae163196c89a524d3982819",
+      "sha256": "b1ffcdca8b3b58ff4ba7f9edc6d9dd8595b1e99b513fa7e71086af14759b533f"
+    },
+    {
+      "registry": "scripts/coverage-matrices/library-card-imports.mjs",
+      "source": "packages/adapters/base/src/material/style-tint-profile.ts",
+      "oldSha256": "5af91e288e35e1a3c46c655a6a1820a5c222d0e8ee07dc6b4f24c07cabfdc246",
+      "sha256": "2e9bb4ca8c903ec0863f4d5a6b18c7486c609a4ef4e806ba6eaf459cd49003cc"
+    }
+  ],
+  "newSourceBindings": [
+    {
+      "owners": ["www.demo.authored-controllers", "www.demo.demo-matrix"],
+      "reason": "Eight-part Liquid fixture: public props, state requests, explicit owner acceptance and cleanup remain blocked authored composition; route mounting and four-runtime comparison are demonstration infrastructure. Opaque fallback does not claim optical or physical IME acceptance.",
+      "path": "apps/www/src/pages/en/test/liquid-glass-state-controls.astro",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "531458be2ef5f0f5d3eac112c92f5841f2e3101b",
+      "rawSha256": "f62df3e8178f7adc34d14f49597bb524288695bc2b49cbec45604838a438efce",
+      "sourceScanSha256": "f62df3e8178f7adc34d14f49597bb524288695bc2b49cbec45604838a438efce",
+      "bytes": 15551
+    },
+    {
+      "owners": ["www.demo.demo-matrix"],
+      "reason": "Test-only native event observer and independent plain-editor comparison; observes script dispatch without changing event flags and restores its wrapper. No production command/input owner or new scan exclusion.",
+      "path": "apps/www/src/content/docs/zh-cn/native-composition-evidence.ts",
+      "reviewedSourceRevision": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+      "reviewedGitBlob": "f663dba7481f095bbb5b8f0b5737ff43b78775d9",
+      "rawSha256": "500383b4dec06992582ba5132e36fc3fa73036d7648e5fdc39ccd7a87d3d599b",
+      "sourceScanSha256": "500383b4dec06992582ba5132e36fc3fa73036d7648e5fdc39ccd7a87d3d599b",
+      "bytes": 6993
+    }
+  ],
+  "newProgramEdge": {
+    "importer": "packages/adapters/base/src/material/program.ts",
+    "importerSha256": "a88a37c5297d89c34fc87d36a439ae392152d7b61b1d63d595ba551856c71fef",
+    "literalSpecifier": "./style-tint-source",
+    "resolvedPath": "packages/adapters/base/src/material/style-tint-source",
+    "helperPath": "packages/adapters/base/src/material/style-tint-source.ts",
+    "helperSha256": "0d68f94dd948ee7c555157057e0a07a6b6ceda84de331525f2e807f5e8f61acd",
+    "helperBytes": 3084,
+    "imports": [],
+    "reason": "Pure source-byte statistics and bounded float32 tuple; caller owns admission, cache identity and retirement. Existing importer policy is exact-edge-only, not a source-hash guard."
+  },
+  "retainedFingerprintDebt": [
+    {
+      "path": "apps/www/src/pages/en/test/liquid-glass-hover.astro",
+      "recordedSourceScanSha256": "f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7",
+      "actualBaseAndReviewedSha256": "4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c",
+      "sourceIdenticalAtComparedRevisions": true,
+      "admittedByThisChange": false,
+      "meaning": "Source equality does not prove inherited native behavior or acceptance; historical fingerprint debt retained."
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "recordedSourceScanSha256": "02942f7dee26c8dd7e3b0a3e02e17a28cdc1d3f65d5e49dfbf9845567639540a",
+      "actualBaseAndReviewedSha256": "3ecd674e4bfc765319ce5c9c0783bd4c116ab1eaad068b0a3c546016fb08fa04",
+      "sourceIdenticalAtComparedRevisions": true,
+      "admittedByThisChange": false,
+      "meaning": "Source equality does not prove inherited native behavior or acceptance; historical fingerprint debt retained."
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts",
+      "recordedSourceScanSha256": "297a53f8a65cac3073858bae809bf985055ff83b4ecbc57c01b15d755891e5fc",
+      "actualBaseAndReviewedSha256": "5abf6359d556daf21777892ed99cec3b57d18c5102cfcaa9569987ab76086151",
+      "sourceIdenticalAtComparedRevisions": true,
+      "admittedByThisChange": false,
+      "meaning": "Source equality does not prove inherited native behavior or acceptance; historical fingerprint debt retained."
+    }
+  ],
+  "retainedProductionBundleRejections": [
+    "apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts",
+    "apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts"
+  ],
+  "nativeAcceptanceClaim": false,
+  "rowDispositionChanges": [],
+  "scanExclusionChanges": [],
+  "historicalFailureRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/45030540222",
+  "historicalGeneralArtifact": "https://github.com/Proto-UI/Proto-UI/actions/runs/45030540222/artifacts/14759186964",
+  "prepublicationSourceFollowup": {
+    "path": "apps/www/src/components/PrototypePreviewer/projection-composition.ts",
+    "sourceOrigin": "Parent integration working tree; copied byte-for-byte only for the source checker, excluded from this governance delivery patch.",
+    "parentWorkingTreeHead": "050a1ded7726773486fa56211aa1df7820d19919",
+    "committedAtParentHead": false,
+    "previousSourceHead": "7871a8da3967ae4bb29cd50c655860cf87d374c0",
+    "previousRawSha256": "87fbfe03d53fc3995f5c0964111e9fdb52f20478f1866951fb0f10bac7059687",
+    "finalRawSha256": "a75d279fb6a2a82dd1ec4fca6ae2a5003efff5475cf171847938d32f1c60cb40",
+    "finalSourceScanSha256": "a75d279fb6a2a82dd1ec4fca6ae2a5003efff5475cf171847938d32f1c60cb40",
+    "bytes": 60232,
+    "reason": "Register the existing private empty renderer theme slot for omitted initial palette. Nested authored surfaces still receive undefined and no lease. No new import, owner, row state or prototype lifecycle.",
+    "testFileSha256": "6159521daad48801fecccf5d8c836765df8557d7ca6340cde823daa0c01d80ef",
+    "testAndKeeperSourceScan": "Existing test-named root exclusion remains; no new exclusion. Reachability from production would restore the source and its closure.",
+    "newRuntimeAcceptanceClaim": false
+  },
+  "validation": {
+    "rawEvidenceDirectory": "internal/records/evidence/2026-11-22-sprint-6/coverage-source-bindings",
+    "copiesManifest": "internal/records/evidence/2026-11-22-sprint-6/coverage-source-bindings/copy-manifest.json",
+    "red": {
+      "selected": 7,
+      "pass": 4,
+      "fail": 3,
+      "exitCode": 1
+    },
+    "focusedCandidate": {
+      "selected": 20,
+      "pass": 20,
+      "fail": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    "fullSourceChecker": {
+      "exitCode": 1,
+      "elapsedSeconds": 185.51717853546143,
+      "completeRemainingIssues": [
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `../../../../../../packages/prototypes/liquid-glass/src/theme` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/button` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/toggle` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/form` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/accordion` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/collapsible` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/select` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md: raw Proto UI import `@proto.ui/prototypes-liquid-glass/dropdown` in `apps/www/src/pages/en/test/liquid-glass-hover.astro` escapes the website consumer-wall allowlist",
+        "internal/website/self-hosting-coverage-matrix.md:214: source fingerprint for `apps/www/src/pages/en/test/liquid-glass-hover.astro` does not match its reviewed SHA-256",
+        "internal/website/self-hosting-coverage-matrix.md:266: source fingerprint for `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` does not match its reviewed SHA-256",
+        "internal/website/self-hosting-coverage-matrix.md:323: source fingerprint for `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` does not match its reviewed SHA-256"
+      ],
+      "inputMatrixSha256": "53379f57572f27ea2166b42322115cfd1ef42de7fc696248a9cc1f9a3d4ff6b1",
+      "inputProjectionSha256": "a75d279fb6a2a82dd1ec4fca6ae2a5003efff5475cf171847938d32f1c60cb40"
+    },
+    "fullProductionBuildRepeated": false,
+    "newNativeRun": false,
+    "meaning": "Focused source/entry boundary controls passed; the complete source gate still fails on the eleven preserved prior issues. No production emitted-graph or native acceptance is added."
+  }
+}

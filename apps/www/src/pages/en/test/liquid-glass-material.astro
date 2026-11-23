@@ -245,8 +245,12 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
   .material-controls {
     display: flex;
     flex-wrap: wrap;
-    /* Leave room for the contact paint after the fixture moves a control. */
-    gap: 21px;
+    /* Both adjacent controls may own expanded contact paint, including after
+       revocation lets a formerly opaque neighbour acquire its source. Reserve
+       both envelopes and the fixture's 5px movement, rather than relying on
+       which control acquires the source first. Full-footprint negative controls
+       deliberately insert their obstruction inside this otherwise clear gap. */
+    gap: 32px;
     align-items: center;
   }
   .material-controls [data-demo-ref='regular'] {

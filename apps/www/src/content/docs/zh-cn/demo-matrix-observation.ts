@@ -1,6 +1,17 @@
 // Browser-evaluated observations: keep these functions self-contained so
 // Playwright can serialize them without importing page-side dependencies.
-export type InteractiveFact = { role: string; name: string };
+export type InteractiveFact = { role: string; name: string; selector?: string };
+
+/** Original complete-matrix predicate, shared with the real-scroll controls. */
+export function matrixPreviewersInitialized(runtimeCount: number): boolean {
+  const demos = document.querySelectorAll('.demo-matrix__item').length;
+  const previewers = document.querySelectorAll('[data-previewer-id]').length;
+  const initialized = document.querySelectorAll('[data-previewer-id][data-inited="1"]').length;
+  const unavailable = document.querySelectorAll('.demo-matrix__adapter[data-unavailable]').length;
+  return (
+    demos > 0 && previewers === demos * runtimeCount - unavailable && initialized === previewers
+  );
+}
 
 export function matrixHostsReady(): boolean {
   const hosts = [...document.querySelectorAll<HTMLElement>('[data-previewer-id] .host')];
@@ -24,13 +35,18 @@ export function matrixHostsReady(): boolean {
   );
 }
 
+/** DOM-only HTML-AAM/name approximation. Browser parity must use the AX
+ * collector, because browser-native mappings can differ (for example Chromium
+ * renders multiple size=1 as a popup combobox). Selectors retain the exact same
+ * candidate membership and order for that independent browser observation. */
 export function collectMatrixInteractiveFacts(
-  interactiveRoles: readonly string[]
+  input: readonly string[] | { roles: readonly string[]; selectors: true }
 ): Record<string, InteractiveFact[][]> {
-  const roles = new Set<string>(interactiveRoles);
-  // Map native elements to their implicit ARIA roles so that cross-adapter
-  // comparisons use the same role vocabulary. An <input type="text"> has the
-  // implicit role "textbox", not "input".
+  const options = Array.isArray(input)
+    ? { roles: input, selectors: false }
+    : (input as { roles: readonly string[]; selectors: true });
+  const roles = new Set<string>(options.roles);
+  // The normative DOM vocabulary is useful for diagnosis, but is not an AX fact.
   const implicitRole = (element: HTMLElement): string => {
     const tag = element.tagName.toLowerCase();
     if (tag === 'input') {
@@ -44,7 +60,10 @@ export function collectMatrixInteractiveFacts(
       return 'textbox';
     }
     if (tag === 'textarea') return 'textbox';
-    if (tag === 'select') return (element as HTMLSelectElement).multiple ? 'listbox' : 'combobox';
+    if (tag === 'select') {
+      const select = element as HTMLSelectElement;
+      return select.multiple || select.size > 1 ? 'listbox' : 'combobox';
+    }
     if (tag === 'button') return 'button';
     return tag;
   };
@@ -56,17 +75,14 @@ export function collectMatrixInteractiveFacts(
           .map((id) => document.getElementById(id)?.textContent ?? '')
           .join(' ')
       : '';
-    // Resolve associated <label for="id"> or wrapping <label> for form controls.
-    const labelText = (() => {
-      const id = element.id;
-      if (id) {
-        const label = document.querySelector<HTMLLabelElement>(`label[for="${CSS.escape(id)}"]`);
-        if (label) return label.textContent ?? '';
-      }
-      const wrapper = element.closest('label');
-      if (wrapper) return wrapper.textContent ?? '';
-      return '';
-    })();
+    // Native labels includes both for/id and wrapping associations once, in
+    // document order. Sampling only the first label hides parity regressions
+    // when a later associated label is lost. This remains a plain-text name
+    // approximation, not the full accessible-name or accessibility-tree algorithm.
+    const labels = (element as HTMLInputElement).labels;
+    const labelText = labels
+      ? Array.from(labels, (label) => label.textContent ?? '').join(' ')
+      : '';
     return (
       element.getAttribute('aria-label') ||
       labelledText ||
@@ -86,6 +102,14 @@ export function collectMatrixInteractiveFacts(
     return (
       rect.width > 0 && rect.height > 0 && style.display !== 'none' && style.visibility !== 'hidden'
     );
+  };
+
+  const selector = (element: Element): string => {
+    const parts: string[] = [];
+    for (let node = element; node.parentElement; node = node.parentElement) {
+      parts.unshift(`:nth-child(${Array.from(node.parentElement.children).indexOf(node) + 1})`);
+    }
+    return `:root${parts.length ? ' > ' + parts.join(' > ') : ''}`;
   };
 
   const result: Record<string, InteractiveFact[][]> = {};
@@ -109,6 +133,7 @@ export function collectMatrixInteractiveFacts(
           .map((element) => ({
             role: element.getAttribute('role') || implicitRole(element),
             name: accessibleName(element),
+            ...(options.selectors ? { selector: selector(element) } : {}),
           }))
       );
   });
@@ -139,6 +164,9 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
       adapter: root.closest('.demo-matrix__adapter')?.getAttribute('aria-label') ?? null,
       previewerId: root.dataset.previewerId ?? null,
       initialized: root.dataset.inited === '1',
+      lazy: root.dataset.lazy ?? null,
+      lazyObserved: root.dataset.lazyObserved ?? null,
+      mounting: root.dataset.mounting ?? null,
       projectionMode: root.dataset.projectionMode ?? null,
       projectionState: root.dataset.projectionState ?? null,
       hostPresent: !!host,
@@ -155,6 +183,7 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
   return {
     demos,
     runtimeCount,
+    documentReadyState: document.readyState,
     unavailable,
     expectedPreviewers: demos * runtimeCount - unavailable,
     previewers: roots.length,
@@ -166,6 +195,8 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
     notReadyRows: notReady.slice(0, 1000),
     previewErrors: errors.slice(0, 1000),
     truncated: uninitialized.length > 1000 || notReady.length > 1000 || errors.length > 1000,
+    activation:
+      (window as typeof window & { __puiMatrixActivation?: unknown }).__puiMatrixActivation ?? null,
   };
 }
 

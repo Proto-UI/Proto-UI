@@ -30,14 +30,11 @@ Root 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@p
 
 ## API
 
-Async Region 是工作区源码，没有公开的 `proto-ui add` 目标。
+Async Region 是工作区源码。当前工作区 CLI 目标为 `brutalist-async-region`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[
-    { name: 'busy', type: 'boolean', default: 'false' },
-  ]}
+  rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
 />
 
 这些属性属于 Root。
-

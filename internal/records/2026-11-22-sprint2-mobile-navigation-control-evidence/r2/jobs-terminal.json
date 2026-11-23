@@ -141,9 +141,7 @@
         }
       ],
       "check_run_url": "https://api.github.com/repos/Proto-UI/Proto-UI/check-runs/137266356291",
-      "labels": [
-        "ubuntu-24.04"
-      ],
+      "labels": ["ubuntu-24.04"],
       "runner_id": 1000115988,
       "runner_name": "GitHub Actions 1000115988",
       "runner_group_id": 0,

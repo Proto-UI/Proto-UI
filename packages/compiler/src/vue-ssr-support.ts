@@ -1,20 +1,25 @@
+import { ownerInitialDataGuard, ownerInitialDataDecoder } from './owner-initial-data';
 /** Target-native request ownership and render-data transport; never semantic IR. */
 export const vueSsrSupportArtifact = {
-  path: '.proto-ui/vue/ssr-v1.ts', kind: 'source' as const,
+  path: '.proto-ui/vue/ssr-v1.ts',
+  kind: 'source' as const,
   contents: `import * as Vue from 'vue';
+${ownerInitialDataGuard('cloneInitialData')}
+${ownerInitialDataDecoder('decodeInitialData', 'cloneInitialData')}
 export type Data = null | boolean | number | string | ['undefined'] | ['negative-zero'] | ['array', Data[]] | ['record', [string, Data][]];
 export type Projection = null | string | number | Projection[] | { tag: string; attrs: Record<string, unknown> | null; children: Projection[] } | { slot: true };
 export type RecordData = { source: string; raw: Data; present: boolean; tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; attrs: Record<string, string | null>; children: Projection[] };
 export type Handoff = { version: 1; profile: 'vue-ssr-v1'; source: string; html: string; records: Record<string, RecordData> };
 export type Tree = { id: string; next: number; ready?: () => boolean };
 export type Session = {
-  server: boolean; hydrating: boolean; data: Handoff; next: number; closed: boolean; failure?: unknown;
+  server: boolean; hydrating: boolean; data: Handoff; next: number; closed: boolean; failure?: { value: unknown };
   owners: Set<() => void>; pending: Map<string, () => void>; scheduled: boolean;
 };
 // Shared across independently generated components, but values belong to one app/request.
 export const sessionKey = Symbol.for('ProtoUI.Vue.SSR.Session.v1');
 export const treeKey = Symbol.for('ProtoUI.Vue.SSR.Tree.v1');
 export function encode(value: unknown, ancestors = new Set<object>()): Data {
+  if (!ancestors.size) value = cloneInitialData(value);
   if (value === undefined) return ['undefined'];
   if (Object.is(value, -0)) return ['negative-zero'];
   if (value === null || typeof value === 'boolean' || typeof value === 'string') return value;
@@ -37,14 +42,7 @@ export function encode(value: unknown, ancestors = new Set<object>()): Data {
     return ['record', entries];
   } finally { ancestors.delete(value); }
 }
-export function decode(value: Data): unknown {
-  if (!Array.isArray(value)) return value;
-  if (value[0] === 'undefined') return undefined;
-  if (value[0] === 'negative-zero') return -0;
-  if (value[0] === 'array') return value[1].map(decode);
-  if (value[0] === 'record') return Object.fromEntries(value[1].map(([key, item]) => [key, decode(item)]));
-  throw new TypeError('[Vue SSR] invalid handoff data');
-}
+export function decode(value: Data): unknown { return decodeInitialData(value); }
 export function project(nodes: Vue.VNodeArrayChildren, slot: Vue.Component): Projection[] {
   const output: Projection[] = [];
   function visit(value: unknown): void {
@@ -72,7 +70,12 @@ export function adopt(nodes: Projection[], slot: () => Vue.VNode): Vue.VNodeArra
   });
 }
 export function createSession(server: boolean, source: string, data?: Handoff): Session {
+  if (data) data = cloneInitialData(data);
   if (data && (data.version !== 1 || data.profile !== 'vue-ssr-v1' || data.source !== source)) throw new TypeError('[Vue SSR] handoff source/profile mismatch');
+  if (data) {
+    if (!data.records || typeof data.records !== 'object' || Array.isArray(data.records)) throw new TypeError('[Vue SSR] malformed handoff records');
+    for (const record of Object.values(data.records)) decode(record.raw);
+  }
   return { server, hydrating: !server, data: data ?? { version: 1, profile: 'vue-ssr-v1', source, html: '', records: Object.create(null) }, next: 0, closed: false, owners: new Set(), pending: new Map(), scheduled: false };
 }
 export function close(session: Session): void {
@@ -81,6 +84,7 @@ export function close(session: Session): void {
   const errors: unknown[] = [];
   for (const dispose of [...session.owners].reverse()) try { dispose(); } catch (error) { errors.push(error); }
   session.owners.clear();
+  if (errors.length === 1) throw errors[0];
   if (errors.length) throw new AggregateError(errors, '[Vue SSR] owner cleanup failed');
 }
 export function committed(session: Session, id: string, callback: () => void): void {
@@ -94,7 +98,7 @@ export function committed(session: Session, id: string, callback: () => void): v
     const tasks = [...session.pending].sort(([a], [b]) => a.split('.').length - b.split('.').length);
     session.pending.clear();
     for (const [, task] of tasks) { if (session.closed) return; task(); }
-  }).catch(error => { session.failure = error; close(session); throw error; });
+  }).catch(error => { session.failure ??= { value: error }; try { close(session); } catch { /* Preserve the initiating asynchronous failure. */ } });
 }
 `,
 };

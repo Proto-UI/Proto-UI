@@ -31,7 +31,7 @@
 验证保留如下差异：
 
 | 原始运行 | 真实结果与边界 |
-|---|---|
+| --- | --- |
 | `datepicker-causal-capture-first.log` | 新实现对既有两文件 114/114；当时尚未加入全部新回归。 |
 | `datepicker-causal-capture-green.log` | 143/144；唯一失败为新测试在 dispose 后重新读取已清空 exposes。文件名不代表绿色。 |
 | `datepicker-causal-capture-r2.log` | 将 oracle 改为预先持有的旧 request handle，3 文件 144/144，含 Popover entry 原回归。产品源未因这个测试前提改写。 |
@@ -45,19 +45,19 @@
 
 最终入口为 `scripts/analysis/run-sprint2-consumers.mjs`；现候选 `dbcdecb` 具备如下固定清单。单机只运行一条重型队列；普通套件失败不会跳过其他独立套件。共享 packages/styles 前置缺失时准确记 not-run，不生成虚构通过。
 
-| 套件 | 选定数量 |
-|---|---:|
-| OTP / SliderValues，三发布家族 × 四宿主 | 72 |
-| Tree / Data Table / Virtual List | 36 |
-| Resizable / Carousel / DatePicker | 36 |
-| Form / Select / Field choices | 36 |
-| 普通框架 imports / children / slots / Context / 事件 / disposal | 12 |
-| 编译产物真实浏览器消费者 | 20 |
-| 双语网站、同实例 profile、导航与 Hero | 42 |
-| Web preferences 活更新 | 4 |
-| Collapsible | 23 |
-| Accordion | 23 |
-| **合计** | **304** |
+| 套件                                                            | 选定数量 |
+| --------------------------------------------------------------- | -------: |
+| OTP / SliderValues，三发布家族 × 四宿主                         |       72 |
+| Tree / Data Table / Virtual List                                |       36 |
+| Resizable / Carousel / DatePicker                               |       36 |
+| Form / Select / Field choices                                   |       36 |
+| 普通框架 imports / children / slots / Context / 事件 / disposal |       12 |
+| 编译产物真实浏览器消费者                                        |       20 |
+| 双语网站、同实例 profile、导航与 Hero                           |       42 |
+| Web preferences 活更新                                          |        4 |
+| Collapsible                                                     |       23 |
+| Accordion                                                       |       23 |
+| **合计**                                                        |  **304** |
 
 其中 292 条属于浏览器清单，12 条 ordinary-linked 使用 Node/HappyDOM，二者不混记。preferences 的 4 条不证明 material-support/blur/alpha/fallback 完整接受。物理 OS IME、辅助技术、非 Web、原历史接受和实验家族继续保留原范围。
 

@@ -1,0 +1,64 @@
+[
+  {
+    "file": "afde-bootstrap-docs-desktop-focus.png",
+    "sourceFileName": "docs-light-1440-navigation-focus.png",
+    "runId": 45018120859,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "sha256": "0cef15fe396535c464a9c001afacbf9fbb061697522ef88148ee8afbd77d5d52",
+    "bytes": 12735,
+    "scope": "Bootstrap Docs light1440 nativefocus; actual Theme and Search surfaces",
+    "transformation": "none; exact artifact bytes; not generated"
+  },
+  {
+    "file": "afde-bootstrap-docs-mobile-expanded.png",
+    "sourceFileName": "docs-dark-390-expanded.png",
+    "runId": 45018120859,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "sha256": "74624e7c1c1f1e289146e1663f70c6482928c6ff4eafae1446cb9c6c82972b60",
+    "bytes": 63826,
+    "scope": "Bootstrap Docs dark390 expanded panel",
+    "transformation": "none; exact artifact bytes; not generated"
+  },
+  {
+    "file": "afde-liquid-vue2-light-button-pastel.png",
+    "sourceFileName": "vue2-light-button-text-pastel-0-tinted-context.png",
+    "runId": 45018126008,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "sha256": "aa407b42a487db7dea09018be6d363807ab33f353b4133bbc0ecc13f15f9a605",
+    "bytes": 10102,
+    "scope": "Vue2 lightButton pastel currentrealcomponent",
+    "transformation": "none; exact artifact bytes; not generated"
+  },
+  {
+    "file": "afde-liquid-vue2-dark-button-pastel-inconclusive.png",
+    "sourceFileName": "vue2-dark-button-text-pastel-0-tinted-context.png",
+    "runId": 45018126008,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "sha256": "9629f393c13c976bae04a7a5c4f2b0725cf7dd9125e5a00463c9ef558bcf9979",
+    "bytes": 9270,
+    "scope": "Vue2 darkButton pastel; low optical signal retained as inconclusive",
+    "transformation": "none; exact artifact bytes; not generated"
+  },
+  {
+    "file": "baseline-bootstrap-docs-desktop-closed.png",
+    "sourceFileName": "before-docs-wc-light-1440-closed.png",
+    "runId": 45018120859,
+    "executedSha": "dc3b184ba10b0de53e40359c52d012b204b2cd01",
+    "scriptSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "sha256": "37eb7362a7f3c7eec187fd7d80398688651eda6dba58cecfbcf83b87bcbca1a4",
+    "bytes": 171182,
+    "scope": "Baseline Docs light, WC, 1440x1000, closed; measured baseline with afde capture script",
+    "transformation": "none; exact artifact bytes; not generated"
+  },
+  {
+    "file": "afde-bootstrap-docs-desktop-closed.png",
+    "sourceFileName": "docs-light-1440-closed.png",
+    "runId": 45018120859,
+    "executedSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "scriptSha": "afde3097f880dca9d09e9b67b40913bc1576db59",
+    "sha256": "0a207374f535fdc5d91c84733aac07b1b553b2d94f4a858db3d10bbc4a8e29b4",
+    "bytes": 173544,
+    "scope": "Candidate Docs light, WC, 1440x1000, closed; same viewport and state",
+    "transformation": "none; exact artifact bytes; not generated"
+  }
+]

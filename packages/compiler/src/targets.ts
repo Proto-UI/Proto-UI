@@ -1,3 +1,5 @@
+import { readNativeShaderPlan } from './shader-plan';
+import type { ShaderKernel } from '../../core/src/shader-presentation';
 import { pruneDeadValues } from './demand-pruning';
 import type { RuleMetaKey } from './rule-declarations';
 import { traceCallableDemand } from './callable-effects';
@@ -5,8 +7,12 @@ import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
 import { declaredSetValueEvent } from './a11y-event-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
-import { GPUI_UNAVAILABLE_OPERATIONS, GPUI_MISSING_FOCUS_TREE } from './gpui-capabilities';
-import { valueAlternatives } from './value-types';
+import {
+  GPUI_UNAVAILABLE_OPERATIONS,
+  GPUI_MISSING_FOCUS_TREE,
+  gpuiIntrinsicSupported,
+} from './gpui-capabilities';
+import { unknownDiagnosticSpan } from './diagnostics';
 import {
   observableSemantics,
   type ObservableSemantics,
@@ -224,6 +230,7 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'scroll.configure',
   'scroll.bindComposedChrome',
   'scroll.request',
+  'scroll.pauseFollowing',
   'scroll.getSnapshot',
   'textControl.on',
   'textControl.sync',
@@ -351,6 +358,8 @@ const VUE2_DEFERRED_OPERATIONS: ReadonlySet<Operation> = new Set([
 
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
+  'feedback.style.presence',
+  'feedback.material.shader',
   'accessible.part',
   'eventControl.requestDefaultActionPrevention',
   'hook.asControlLabel',
@@ -471,10 +480,18 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8',
     mode: 'source',
     implemented: true,
-    operations: [
-      ...nativeOperations.filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
-      'eventControl.requestDefaultActionPrevention',
-    ],
+    operations: (
+      [
+        ...nativeOperations,
+        'eventControl.requestDefaultActionPrevention',
+        'hook.asControlLabel',
+        'controlLabel.label',
+        'controlLabel.target',
+        'controlLabel.sync',
+        'controlLabelRequest.isCurrent',
+        'eventControl.requestDefaultActionPrevention',
+      ] as Operation[]
+    ).filter((operation) => !GPUI_UNAVAILABLE_OPERATIONS.has(operation)),
     hostCapabilities: nativeHostCapabilities,
     dependencies: [
       { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
@@ -556,15 +573,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   }),
 });
 
-const selectionSpan: SourceSpan = {
-  file: '<target>',
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-};
+const selectionSpan: SourceSpan = unknownDiagnosticSpan('<target>');
 function unsupported<T>(code: string, message: string, span: SourceSpan): CompileResult<T> {
   return { ok: false, diagnostics: [{ code, category: 'unsupported-input', message, span }] };
 }
@@ -666,6 +675,7 @@ export interface TargetOperationAnalysis {
   readonly authoredHooks: readonly string[];
   readonly functions: readonly FunctionIR[];
   readonly ruleMetaKeys: readonly RuleMetaKey[];
+  readonly shaderKernels: readonly ShaderKernel[];
 }
 /** Calls, host callbacks and outward callables are invocation roots. Creation alone is inert. */
 export function checkTargetOperations(
@@ -688,6 +698,7 @@ export function checkTargetOperations(
   const capabilities = new Set(selected.hostCapabilities);
   const operations = new Set<Operation>();
   const ruleMetaKeys = new Set<RuleMetaKey>();
+  const shaderKernels = new Set<ShaderKernel>();
   const sites: { operation: Operation; span: SourceSpan }[] = [];
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   const reachedHooks = new Set<string>(),
@@ -723,6 +734,13 @@ export function checkTargetOperations(
   function expression(value: ExpressionIR) {
     if (visited.has(value)) return;
     visited.add(value);
+    if (
+      ((value.kind === 'record' && value.entries.some((entry) => entry.accessor === 'get')) ||
+        (value.kind === 'object-spread' &&
+          value.parts.some((part) => part.kind === 'entry' && part.accessor === 'get'))) &&
+      !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+    )
+      diagnostic('PUI4003', `Record getters are not implemented by ${selected.id}.`, value.span);
     switch (value.kind) {
       case 'operation':
         operation(value.operation, value.span);
@@ -738,6 +756,23 @@ export function checkTargetOperations(
             'SetValue requires a literal nonempty host:* event route or its default route.',
             value.span
           );
+        if (
+          value.operation === 'feedback.material.shader' &&
+          selected.mode === 'source' &&
+          allowed.has(value.operation)
+        ) {
+          try {
+            for (const pass of readNativeShaderPlan(value.arguments[0]).passes)
+              shaderKernels.add(pass.kernel);
+          } catch (error) {
+            diagnostic(
+              'PUI4009',
+              error instanceof Error ? error.message : 'Invalid native shader graph',
+              value.span
+            );
+          }
+        }
+
         break;
       case 'style-handle':
         operation('style.tw', value.span);
@@ -767,20 +802,7 @@ export function checkTargetOperations(
         if (
           value.name === 'string' &&
           !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
-          !(
-            selected.framework === 'gpui' &&
-            value.arguments.every((argument) =>
-              valueAlternatives(argument.type).every(
-                (member) =>
-                  member === 'string' ||
-                  member === 'number' ||
-                  member === 'boolean' ||
-                  member === 'null' ||
-                  member === 'void' ||
-                  (typeof member !== 'string' && member.kind === 'literal')
-              )
-            )
-          )
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
         )
           diagnostic(
             'PUI4003',
@@ -789,7 +811,8 @@ export function checkTargetOperations(
           );
         if (
           value.name === 'object.assign' &&
-          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
         )
           diagnostic('PUI4003', `Object.assign is not implemented by ${selected.id}.`, value.span);
         break;
@@ -885,8 +908,15 @@ export function checkTargetOperations(
       retain(item.configure);
     });
   }
-  if (selected.mode === 'source')
+  if (selected.mode === 'source') {
     diagnostics.push(...validateNativeInteraction(ir, reachedFunctions));
+    if (operations.has('feedback.material.shader') && operations.has('feedback.style.presence'))
+      diagnostic(
+        'PUI4009',
+        'Shader and Presence require an atomic combined material profile; this native profile implements separate owners only.',
+        ir.setup.span
+      );
+  }
   return diagnostics.length
     ? { ok: false, diagnostics }
     : {
@@ -898,6 +928,7 @@ export function checkTargetOperations(
           authoredHooks: [...reachedHooks],
           functions: [...reachedFunctions],
           ruleMetaKeys: [...ruleMetaKeys].sort(),
+          shaderKernels: [...shaderKernels],
         },
       };
 }

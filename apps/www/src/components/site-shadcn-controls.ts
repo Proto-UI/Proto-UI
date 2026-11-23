@@ -242,7 +242,13 @@ function initializeButton(button: HTMLElement): void {
   }
   if (button.dataset.size) props.size = button.dataset.size;
   if (button.closest('[data-site-header]'))
-    Object.assign(props, headerButtonProps(family, button.dataset.size ?? 'icon'));
+    // Preserve the authored command purpose separately from the public family
+    // size. Bootstrap maps the icon command to size=default, so feeding that
+    // normalized output back into the recipe would lose its navbar context.
+    Object.assign(
+      props,
+      headerButtonProps(family, button.dataset.headerButtonSize ?? button.dataset.size ?? 'icon')
+    );
   if (button.dataset.disabled === 'true') props.disabled = true;
   const surfaceStyle = headerSurfaceStyle(button, 'button');
   if (surfaceStyle) props.surfaceStyle = surfaceStyle;
@@ -312,7 +318,8 @@ function initializeSelect(root: SiteSelectRoot): void {
   if (!customElements.get(root.localName)) return;
   retainFocusedNativeSelectFallback(root);
   const family = siteControlFamily(root);
-  const { SelectTrigger, SelectValue, SelectContent, SelectItem } = siteControlTags(family);
+  const { SelectTrigger, SelectValue, SelectContent, SelectItem, SelectItemText } =
+    siteControlTags(family);
   root.dataset.siteControlFamily = family;
   const initialized = root.dataset.siteShadcnInitialized === '1';
   bindSiteSelectDismissal(root, (reason) => {
@@ -396,6 +403,21 @@ function initializeSelect(root: SiteSelectRoot): void {
       disabled: item.dataset.disabled === 'true',
     });
   });
+
+  if (root.closest('[data-docs-site-header] [data-adapter-select]')) {
+    // This consumer explicitly uses popper, whose intrinsic rows can grow with
+    // the same enlarged text already allowed by its Trigger/Value surface.
+    root.querySelectorAll<HTMLElement>(SelectItemText).forEach((text) => {
+      applyProps(text, {
+        surfaceStyle: {
+          minWidth: '0',
+          flex: '1 1 auto',
+          whiteSpace: 'normal',
+          overflowWrap: 'anywhere',
+        },
+      });
+    });
+  }
 
   closeSelectAfterValueChange(root);
   root.dataset.siteShadcnInitialized = '1';

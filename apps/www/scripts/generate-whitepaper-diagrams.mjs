@@ -38,7 +38,7 @@ const heading = (number, title, sub) => {
 };
 const foot = (y, value) => text(48, y, value, 21, 'start', 'muted');
 
-function anatomy() {
+function anatomyDescription() {
   parts.push(
     `<desc id="description">${esc(
       tr(
@@ -47,6 +47,10 @@ function anatomy() {
       )
     )}</desc>`
   );
+}
+
+function anatomy() {
+  anatomyDescription();
   heading(
     '03',
     tr('看得见的结构，不等于组件边界', 'Visible structure and component boundaries'),
@@ -126,7 +130,7 @@ function anatomy() {
   return 920;
 }
 
-function activation() {
+function activationPrelude() {
   // One main sequence belongs to Root. Horizontal arrows cross owner boundaries;
   // their position is not a promise of synchronous Context callback delivery.
   parts.push(
@@ -147,6 +151,10 @@ ${handFonts
   .join('\n')}
 text{font-family:"Proto Diagram Hand Latin","Proto Diagram Hand CJK",sans-serif;font-weight:400}.strong{font-weight:400}.hand-stroke{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.hand-echo{opacity:.45;stroke-width:1}.hand-muted{stroke:var(--muted)}
 </style><defs><marker id="hand-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M2 1 Q6 4 10 6 Q6 7 1 11" fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`);
+}
+
+function activation() {
+  activationPrelude();
   const pen = (d, cls = '') => parts.push(`<path d="${d}" class="hand-stroke ${cls}"/>`);
   const arrow = (id, d) =>
     parts.push(
@@ -236,7 +244,7 @@ text{font-family:"Proto Diagram Hand Latin","Proto Diagram Hand CJK",sans-serif;
   return 920;
 }
 
-function consistency() {
+function consistencyDescription() {
   parts.push(
     `<desc id="description">${esc(
       tr(
@@ -245,6 +253,10 @@ function consistency() {
       )
     )}</desc>`
   );
+}
+
+function consistency() {
+  consistencyDescription();
   heading(
     '06',
     tr('共同条件决定比较精度', 'Shared conditions determine comparison detail'),
@@ -487,10 +499,386 @@ function evolutionMobile() {
   return 1000;
 }
 
+function anatomyMobile() {
+  anatomyDescription();
+  text(
+    32,
+    44,
+    tr('看得见的结构，|不等于组件边界', 'Visible structure and|component boundaries'),
+    28,
+    'start',
+    'strong'
+  );
+  text(32, 132, tr('用责任解释拆分', 'Boundaries follow responsibility'), 26, 'start', 'muted');
+
+  parts.push('<g data-comparison="switch" data-node="switch">');
+  rect(24, 170, 452, 544);
+  text(48, 214, 'Switch', 30, 'start', 'strong');
+  rect(48, 242, 404, 94, 'blue', 47);
+  parts.push('<g data-part="switch-root">');
+  text(138, 299, 'Root', 28);
+  parts.push('</g><g data-part="switch-thumb">');
+  parts.push('<circle cx="398" cy="289" r="32" class="green"/>');
+  text(398, 382, 'Thumb', 26);
+  path('M398 354 V326', false);
+  parts.push('</g>');
+  text(
+    48,
+    425,
+    tr('Root：checked 的唯一 owner', 'Root: sole owner of checked'),
+    26,
+    'start',
+    'strong'
+  );
+  text(48, 466, tr('由 Root 处理 activation', 'Root handles activation'), 26, 'start');
+  parts.push('<g data-relation="context" data-from="switch-root" data-to="switch-thumb">');
+  text(90, 534, 'Root', 26);
+  text(251, 513, 'Context', 26);
+  path('M132 528 H349');
+  text(397, 534, 'Thumb', 26);
+  parts.push('</g>');
+  text(48, 598, tr('Thumb：派生展示状态', 'Thumb: derived display state'), 26, 'start');
+  text(48, 638, 'checked / disabled', 26, 'start', 'muted');
+  text(
+    48,
+    682,
+    tr('两个 Component，一个 Switch', 'Two Components, one Switch'),
+    26,
+    'start',
+    'muted'
+  );
+  parts.push('</g>');
+
+  parts.push('<g data-comparison="select">');
+  text(32, 782, tr('Select：结构示意', 'Select: structural illustration'), 28, 'start', 'strong');
+  parts.push('<g data-part="select-root" data-node="select-root">');
+  rect(44, 816, 412, 320, 'scope');
+  text(64, 858, tr('Root：open 与选中值', 'Root: open and selection'), 26, 'start', 'muted');
+  parts.push('<g data-part="trigger">');
+  rect(62, 890, 376, 70, 'blue');
+  text(80, 1000, 'Trigger', 26, 'start', 'muted');
+  parts.push('<g data-part="value">');
+  text(86, 935, 'Value', 28, 'start');
+  parts.push('</g><g data-example="fixed-caret">');
+  path('M379 916 L393 930 L407 916', false);
+  parts.push('</g></g>');
+  parts.push('<g data-part="content">');
+  rect(62, 1020, 376, 96, 'green');
+  text(80, 1055, 'Content', 26, 'start', 'muted');
+  parts.push('<g data-part="item">');
+  box(216, 1037, 204, 62, 'Item', 'panel', 26);
+  parts.push('</g></g></g>');
+  text(32, 1200, 'Trigger / Value / Content / Item', 26, 'start', 'strong');
+  text(32, 1240, tr('各自承担独立交互关系', 'Each has independent relations'), 26, 'start');
+  parts.push('<g data-boundary-rule="caret">');
+  text(
+    32,
+    1310,
+    tr('固定 Caret：只有 Feedback', 'Fixed Caret: Feedback only'),
+    26,
+    'start',
+    'strong'
+  );
+  text(32, 1352, tr('可以附属于 Trigger', 'May remain inside Trigger'), 26, 'start');
+  text(
+    32,
+    1414,
+    tr(
+      '独立的 Event / Props / Expose|或 Context：|需要独立 Component。',
+      'Own Event / Props / Expose|or Context: a separate|Component.'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  parts.push('</g></g>');
+  text(
+    32,
+    1558,
+    tr(
+      'Caret 是设计对照案例，|不是新增的 Base Select part；|结构示意不规定实际 Host tree。',
+      'Caret is a design example,|not a new Base Select part.|This does not prescribe|a Host tree.'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  return 1740;
+}
+
+function activationMobile() {
+  activationPrelude();
+  const pen = (d, cls = '') => parts.push('<path d="' + d + '" class="hand-stroke ' + cls + '"/>');
+  const arrow = (id, d) =>
+    parts.push(
+      '<path data-edge="' +
+        id +
+        '" d="' +
+        d +
+        '" class="hand-stroke" marker-end="url(#hand-arrow)"/>'
+    );
+  const index = (n, x, y) => {
+    pen(
+      'M' +
+        (x - 18) +
+        ' ' +
+        (y - 8) +
+        ' C' +
+        (x - 14) +
+        ' ' +
+        (y - 25) +
+        ' ' +
+        (x + 17) +
+        ' ' +
+        (y - 23) +
+        ' ' +
+        (x + 19) +
+        ' ' +
+        (y - 4) +
+        ' C' +
+        (x + 22) +
+        ' ' +
+        (y + 17) +
+        ' ' +
+        (x - 15) +
+        ' ' +
+        (y + 23) +
+        ' ' +
+        (x - 19) +
+        ' ' +
+        (y + 4) +
+        ' Q' +
+        (x - 22) +
+        ' ' +
+        (y - 3) +
+        ' ' +
+        (x - 18) +
+        ' ' +
+        (y - 8)
+    );
+    text(x, y + 8, String(n), 26);
+  };
+  text(32, 48, tr('一次 Switch 激活', 'One Switch activation'), 32, 'start', 'strong');
+  text(
+    32,
+    96,
+    tr('非受控、未禁用|本章伪代码的执行关系', 'Uncontrolled and enabled|This chapter’s pseudocode'),
+    26,
+    'start',
+    'muted'
+  );
+  text(150, 198, 'User', 28, 'middle', 'strong');
+  arrow('event-to-root', 'M150 215 C147 225 153 240 150 251');
+  text(182, 235, 'Event · activate', 26, 'start', 'muted');
+
+  parts.push('<g data-owner="root">');
+  pen(
+    'M47 260 C171 256 317 263 452 258 Q463 258 461 270 C465 455 458 664 462 856 Q463 870 450 868 C319 872 182 865 49 870 Q38 870 40 856 C37 661 43 457 39 273 Q38 260 47 260'
+  );
+  pen(
+    'M44 263 C178 260 322 265 452 261 M459 273 C462 455 456 660 459 857 M449 872 C316 875 181 868 49 873 M37 855 C35 663 41 457 36 274',
+    'hand-echo'
+  );
+  text(66, 310, 'Switch Root', 30, 'start', 'strong');
+  text(66, 352, tr('checked 的唯一 owner', 'The sole owner of checked'), 26, 'start', 'muted');
+  const step = (n, y, label, detail) => {
+    index(n, 76, y - 9);
+    text(114, y, label, 28, 'start', 'strong');
+    if (detail) text(114, y + 42, detail, 26, 'start', 'muted');
+  };
+  step(1, 418, tr('读取 checked', 'Read checked'), 'nextChecked = !checked');
+  step(2, 536, tr('保存 State', 'Store State'), 'checked ← nextChecked');
+  step(3, 654, tr('发出 checkedChange', 'Emit checkedChange'));
+  step(
+    4,
+    772,
+    tr('更新 Context', 'Update Context'),
+    tr('请求 Root 的|Feedback 重新求值', 'Request Root’s|Feedback refresh')
+  );
+  [476, 594, 682].forEach((y, i) =>
+    arrow(
+      'root-step-' + (i + 1) + '-to-' + (i + 2),
+      'M76 ' + y + ' C73 ' + (y + 10) + ' 79 ' + (y + 22) + ' 76 ' + (y + 36)
+    )
+  );
+  parts.push('</g>');
+
+  // Each route leaves Root and terminates at its own recipient; there is no
+  // Maker-to-Thumb edge and no cross-owner timing promise.
+  arrow('expose-to-maker', 'M40 650 C27 651 17 648 17 666 L17 910 Q17 924 34 924 H144 V952');
+  text(78, 907, 'Expose', 26, 'start', 'muted');
+  parts.push('<g data-owner="maker">');
+  text(144, 994, 'App Maker', 28, 'middle', 'strong');
+  parts.push('</g>');
+  arrow(
+    'context-to-thumb',
+    'M462 766 C476 764 484 772 484 786 V1030 Q484 1047 467 1047 H250 V1080'
+  );
+  text(360, 1029, 'Context', 26, 'middle', 'muted');
+  parts.push('<g data-owner="thumb">');
+  text(66, 1128, 'Switch Thumb', 30, 'start', 'strong');
+  pen(
+    'M42 1147 Q40 1153 42 1160 M42 1207 C41 1260 45 1323 42 1370 Q222 1375 460 1370',
+    'hand-muted'
+  );
+  index(5, 76, 1190);
+  text(114, 1198, tr('接收 Context', 'Receive Context'), 26, 'start');
+  text(114, 1240, tr('保存派生展示状态', 'Store derived state'), 26, 'start');
+  text(114, 1282, 'checked / disabled', 26, 'start', 'muted');
+  text(114, 1324, tr('请求自己的', 'Request its own'), 26, 'start');
+  text(114, 1360, tr('Feedback 重新求值', 'Feedback refresh'), 26, 'start');
+  parts.push('</g>');
+  text(
+    32,
+    1450,
+    tr(
+      'State 只保存事实；|对外效果由 Root 与 Thumb|分别显式发起。',
+      'State stores facts.|Root and Thumb request|their effects explicitly.'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  text(
+    32,
+    1594,
+    tr(
+      '跨组件箭头表示信息通路，|不规定 callback 的同步时序。',
+      'Cross-component arrows show|channels, not synchronous|callback timing.'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  return 1740;
+}
+
+function consistencyMobile() {
+  consistencyDescription();
+  text(
+    32,
+    44,
+    tr('共同条件决定|比较精度', 'Shared conditions determine|comparison detail'),
+    28,
+    'start',
+    'strong'
+  );
+  text(
+    32,
+    136,
+    tr(
+      '先明确必要义务，|再明确两个 realization context',
+      'Establish obligations, then|define both realization contexts'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  parts.push('<g data-comparison-baseline="obligations" data-node="obligations">');
+  rect(24, 236, 452, 252, 'blue');
+  text(48, 280, tr('共同底线：必要义务', 'Shared baseline: obligations'), 28, 'start', 'strong');
+  text(48, 324, 'Prototype / applicable profile', 26, 'start');
+  text(
+    48,
+    370,
+    tr(
+      '身份 · 通路 · State transition|Lifecycle order · 必需 Feedback',
+      'Identity · channels|State transitions · lifecycle order|required Feedback'
+    ),
+    26,
+    'start'
+  );
+  parts.push('</g>');
+
+  // Three independent condition-to-comparison mappings, never a promotion ladder.
+  const rows = [
+    [
+      'input-feedback',
+      544,
+      312,
+      tr(
+        '相同输入媒介、viewport、|单位、字体等受控条件',
+        'Same input medium, viewport,|units, fonts,|and related conditions'
+      ),
+      tr('输入行为与 Feedback', 'Input behavior and Feedback'),
+    ],
+    [
+      'normalized-dom',
+      902,
+      312,
+      tr(
+        '同属 Web family；共享受治理的|结构、事件、样式基础|与 projection policy',
+        'Same Web family; governed|structure, events, styles,|and projection policy'
+      ),
+      'Normalized DOM',
+    ],
+    [
+      'pixels',
+      1260,
+      354,
+      tr(
+        '进一步控制 device metrics、|单位比例、字体 shaping、|色彩与 rasterization 等条件',
+        'Also control device metrics,|unit scale, font shaping,|color, rasterization|and related conditions'
+      ),
+      tr('像素表现', 'Pixel output'),
+    ],
+  ];
+  rows.forEach(([id, y, h, conditions, result]) => {
+    parts.push('<g data-comparison="' + id + '" data-node="' + id + '">');
+    rect(24, y, 452, h);
+    text(
+      48,
+      y + 42,
+      tr('共享且受控的条件', 'Shared, controlled conditions'),
+      26,
+      'start',
+      'strong'
+    );
+    text(48, y + 90, conditions, 26, 'start');
+    parts.push(
+      '<g data-relation="permits-comparison" data-from="' +
+        id +
+        '-conditions" data-to="' +
+        id +
+        '-result">'
+    );
+    path('M250 ' + (y + h - 104) + ' V' + (y + h - 68));
+    parts.push('</g>');
+    text(250, y + h - 30, result, 26);
+    parts.push('</g>');
+  });
+  text(
+    32,
+    1678,
+    tr(
+      'tolerance / exclusion 的理由与范围|需预先约定。',
+      'Agree tolerance / exclusion|reasons and scope in advance.'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  text(
+    32,
+    1786,
+    tr(
+      '这些条件不是自动晋级的等级。|本图不代表已有完整跨 Host 证据。',
+      'These are conditions, not tiers.|They do not imply complete|evidence across Hosts.'
+    ),
+    26,
+    'start',
+    'muted'
+  );
+  return 1920;
+}
+
 const figures = {
   'component-anatomy': anatomy,
+  'component-anatomy.mobile': anatomyMobile,
   'switch-activation': activation,
+  'switch-activation.mobile': activationMobile,
   'conditional-consistency': consistency,
+  'conditional-consistency.mobile': consistencyMobile,
   'evolution-feedback': evolution,
   'evolution-feedback.mobile': evolutionMobile,
 };
@@ -500,12 +888,13 @@ for (const locale of ['zh-cn', 'en']) {
   for (const [name, render] of Object.entries(figures)) {
     parts = [];
     const height = render();
-    const mobile = name === 'evolution-feedback.mobile';
+    const mobile = name.endsWith('.mobile');
+    const baseName = mobile ? name.slice(0, -'.mobile'.length) : name;
     const width = mobile ? 500 : 960;
-    const isEvolution = name === 'evolution-feedback' || mobile;
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title"${name === 'switch-activation' || isEvolution ? ' aria-describedby="description"' : ''} xml:lang="${locale}"${mobile ? ' data-layout="mobile"' : ''}>
+    const isEvolution = baseName === 'evolution-feedback';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title"${baseName === 'switch-activation' || isEvolution || mobile ? ' aria-describedby="description"' : ''} xml:lang="${locale}"${mobile ? ' data-layout="mobile"' : ''}>
 <!-- Generated by apps/www/scripts/generate-whitepaper-diagrams.mjs. -->
-<title id="title">${esc(name === 'switch-activation' ? tr('一次 Switch 激活', 'One Switch activation') : isEvolution ? tr('实践怎样修正当前近似', 'How practice revises the current approximation') : name.replaceAll('-', ' '))}</title>
+<title id="title">${esc(baseName === 'switch-activation' ? tr('一次 Switch 激活', 'One Switch activation') : isEvolution ? tr('实践怎样修正当前近似', 'How practice revises the current approximation') : baseName.replaceAll('-', ' '))}</title>
 <defs><style>
   :root { --ink:#24313d; --muted:#596875; --line:#94a3ae; --panel:#f7f9fb; --blue:#eaf2fc; --green:#eaf5ee; --amber:#fbf2e2; }
   @media(prefers-color-scheme:dark) { :root { --ink:#e1e8ed; --muted:#a6b5c0; --line:#667986; --panel:#161c22; --blue:#192d43; --green:#1a3028; --amber:#362d1c; } }

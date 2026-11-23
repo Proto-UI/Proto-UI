@@ -1,0 +1,10 @@
+{
+  "crates/shenko-ui/web/src/ui-kit.tsx": "f3d0ea9f20196c948a14ab97a7152d9eeff410ef572be6db00d59b315def880f",
+  "crates/shenko-ui/web/src/im.tsx": "fa064fe2b232732e9604c5a2ccfa9babb5fd478d0d109977be63b9ecc04857f9",
+  "crates/shenko-ui/web/src/timeline-surface.tsx": "0bd2a93ad499b4a49196cbf8846423e62c97d9a4ef00ffb7056f31bfc48b591a",
+  "crates/shenko-ui/web/src/react-renderer.tsx": "566c086fa4e13ac8f0e7a2d3583ae1b5bc478d330e4eab2724a3470942938d46",
+  "crates/shenko-ui/web/src/app.css": "5ce400125a97a86886ad3c3dcf0ce956522d26ac99863342e318116e857105f1",
+  "crates/shenko-ui/web/build.mjs": "df77a4cb722977680541f3d9f3ddbbd79cfb39f66922388722476b40f7e0c6d3",
+  "crates/shenko-ui/web/upstream-pin.json": "929d17087e2ab52303288cbb882f0ea9a53c77c94ff62acd50612e2809cec8ef",
+  "scripts/web_reading_journey.mjs": "c17151c4ed8951230a07c542eaeb5d41d0de8901176933283a8b75267a3c1512"
+}

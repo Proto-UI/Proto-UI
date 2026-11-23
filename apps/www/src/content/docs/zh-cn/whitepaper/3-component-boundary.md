@@ -139,7 +139,10 @@ Content 和 Item 也是类似的情况：Content 要根据 Root 的状态决定�
 
 <figure class="whitepaper-figure">
   <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图">
-    <img src="/diagrams/whitepaper-component-anatomy.zh-cn.svg" alt="Switch Root 与 Thumb 通过 Context 协作；Select 各 part 具有独立责任，而固定 Caret 可以附属于 Trigger。" width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-component-anatomy.mobile.zh-cn.svg" width="500" height="1740" />
+      <img src="/diagrams/whitepaper-component-anatomy.zh-cn.svg" alt="Switch Root 与 Thumb 通过 Context 协作；Select 各 part 具有独立责任，而固定 Caret 可以附属于 Trigger。" width="960" height="920" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
   <figcaption>点击查看大图</figcaption>
 </figure>

@@ -80,6 +80,7 @@ function historicalKernelReceipt(): TintStageKernelReceipt {
     vertexSha256: hash(vertex),
     vertexSources: 1,
     fragmentReplacements: 1,
+    unusedAdapterUniforms: ['u_styleTintSourceTone'],
   };
 }
 function nativeSummaryFixture() {
@@ -186,9 +187,9 @@ describe('test-only Tint4 stage diagnosis, never product acceptance', () => {
     expect(TINT_STAGE_POLICY.candidateGeneralTransfer).toBe('rejected-analytically');
     expect(TINT_STAGE_POLICY.productAccepted).toBe(false);
   });
-  it('binds frozen profile4 bytes independently of current profile5 and finite derivative anchors', () => {
-    expect(styleTintProfile).toBe('pui-regular-style-tint-5');
-    expect(styleTintContactProfile).toBe('pui-regular-style-tint-contact-5');
+  it('binds frozen profile4 bytes independently of current profile6 and finite derivative anchors', () => {
+    expect(styleTintProfile).toBe('pui-regular-style-tint-6');
+    expect(styleTintContactProfile).toBe('pui-regular-style-tint-contact-6');
     expect(hash(styleTintFragment)).not.toBe(TINT_STAGE_POLICY.shaderSha256.static);
     expect(hash(styleTintContactFragment)).not.toBe(TINT_STAGE_POLICY.shaderSha256.contact);
     expect(hash(tintProfile4Fragment)).toBe(TINT_STAGE_POLICY.shaderSha256.static);
@@ -208,7 +209,7 @@ describe('test-only Tint4 stage diagnosis, never product acceptance', () => {
     expect(tintStageShader('target-clamp')).toContain('tintStageRaw < tintStageLow');
     expect(() => tintStageShader('author-code' as any)).toThrow('unknown-stage');
   });
-  it('substitutes the complete current source exactly once and preserves the uniform schema', () => {
+  it('substitutes current source exactly once and accounts for its sole adapter-only uniform', () => {
     for (const contact of [false, true]) {
       const host = {
         profile: contact ? styleTintContactProfile : styleTintProfile,
@@ -221,7 +222,11 @@ describe('test-only Tint4 stage diagnosis, never product acceptance', () => {
       expect(replacement.source('vertex', vertex)).toBe(vertex);
       expect(() => replacement.complete()).toThrow('substitution-count-drift');
       expect(replacement.source('fragment', host.fragment)).toBe(historical);
-      expect(replacement.complete()).toEqual({ vertexSources: 1, fragmentReplacements: 1 });
+      expect(replacement.complete()).toEqual({
+        vertexSources: 1,
+        fragmentReplacements: 1,
+        unusedAdapterUniforms: ['u_styleTintSourceTone'],
+      });
       expect(() => replacement.source('fragment', host.fragment)).toThrow('source-or-count-drift');
       expect(() => replacement.source('vertex', vertex)).toThrow('source-or-count-drift');
       expect(() =>
@@ -236,6 +241,20 @@ describe('test-only Tint4 stage diagnosis, never product acceptance', () => {
           contact
         )
       ).toThrow('historical-uniform-schema-drift');
+      for (const replacement of [
+        '',
+        'uniform float u_styleTintSourceTone;',
+        'uniform vec4 u_styleTintSourceTone;\nuniform vec4 u_styleTintSourceTone;',
+      ])
+        expect(() =>
+          createTintStageHistoricalSubstitution(
+            {
+              ...host,
+              fragment: host.fragment.replace('uniform vec4 u_styleTintSourceTone;', replacement),
+            },
+            contact
+          )
+        ).toThrow('historical-uniform-schema-drift');
       const stale = createTintStageHistoricalSubstitution(host, contact);
       expect(() => stale.source('fragment', host.fragment + '\n')).toThrow('source-or-count-drift');
       expect(() => stale.source('fragment', historical)).toThrow('source-or-count-drift');
@@ -244,9 +263,12 @@ describe('test-only Tint4 stage diagnosis, never product acceptance', () => {
       expect(() => stale.complete()).toThrow('substitution-count-drift');
     }
   });
-  it('forbids relabeling historical replay as current profile5 evidence or dropping replacement receipts', () => {
+  it('forbids relabeling historical replay as current profile6 evidence or dropping replacement receipts', () => {
     expect(() => assertTintStageHistoricalKernelReceipt(historicalKernelReceipt())).not.toThrow();
     const mutations: ((receipt: TintStageKernelReceipt) => void)[] = [
+      (r) => {
+        r.unusedAdapterUniforms = [];
+      },
       (r) => {
         r.scope = 'current-production';
       },

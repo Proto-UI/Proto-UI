@@ -5,7 +5,7 @@ import { types as nodeTypes } from 'node:util';
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { inferInputPayloadSchemas } from './a11y-event-types';
 import { createHash } from 'node:crypto';
-import { CompilerRejection, reject } from './diagnostics';
+import { CompilerRejection, reject, unknownDiagnosticSpan } from './diagnostics';
 import {
   IR_VERSION,
   MODULE_CAPABILITY_TYPES,
@@ -69,8 +69,10 @@ import {
   joinValueTypes,
   objectFields,
   objectValueType,
+  spreadObjectField,
   memberValueType,
   functionValueType,
+  callableValue,
   checkedCall,
   minimumArgumentCount,
   intrinsicResult,
@@ -80,6 +82,7 @@ import {
 } from './value-types';
 import { derivePrototypeCaptures } from './capture-analysis';
 import { HOOK_API_TYPE, HOOK_TOOLS_TYPE } from './core-value-types';
+import { hasAccessorField, moduleAccessorStorageIssue } from './record-accessors';
 
 const CAPABILITIES = new Set([
   'unknown',
@@ -138,15 +141,7 @@ const RESERVED = new Set(
     ' '
   )
 );
-const FALLBACK: SourceSpan = {
-  file: '<ir>',
-  start: 0,
-  end: 0,
-  line: 1,
-  column: 1,
-  endLine: 1,
-  endColumn: 1,
-};
+const FALLBACK: SourceSpan = unknownDiagnosticSpan('<ir>');
 
 export function validIdentifier(value: unknown): value is string {
   return (
@@ -360,12 +355,14 @@ function valueType(value: unknown, location = FALLBACK): ValueType {
         kind: 'object',
         ...(type.index !== undefined ? { index: valueType(type.index, location) } : {}),
         fields: array(type.fields).map((item) => {
-          const field = object(item, ['name', 'type', 'optional', 'readonly']);
+          const field = object(item, ['name', 'type', 'optional', 'readonly', 'accessor']);
           const name = text(field.name);
           if (
             names.has(name) ||
             (field.optional !== undefined && typeof field.optional !== 'boolean') ||
-            (field.readonly !== undefined && typeof field.readonly !== 'boolean')
+            (field.readonly !== undefined && typeof field.readonly !== 'boolean') ||
+            (field.accessor !== undefined &&
+              (field.accessor !== 'get' || field.readonly !== true || !!field.optional))
           )
             bad('Invalid object value field.', location);
           names.add(name);
@@ -374,6 +371,7 @@ function valueType(value: unknown, location = FALLBACK): ValueType {
             type: valueType(field.type, location),
             ...(field.optional ? { optional: true } : {}),
             ...(field.readonly ? { readonly: true } : {}),
+            ...(field.accessor === 'get' ? { accessor: 'get' as const } : {}),
           };
         }),
       };
@@ -602,9 +600,28 @@ type Scope = Map<string, Binding>;
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
     assertDataGraph(input);
+    // Admit the inert envelope and its version before deriving this version's
+    // input schemas. Unsupported versions retain their own public diagnostic.
+    const root = object(input, [
+      'schemaVersion',
+      'name',
+      'source',
+      'sourceFiles',
+      'setup',
+      'hooks',
+      'contextKeys',
+      'staticDeclarations',
+      'moduleDeclarations',
+      'moduleBindings',
+      'props',
+      'exposes',
+      'requirements',
+    ]);
+    if (root.schemaVersion !== IR_VERSION)
+      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     // Schema order follows authored definitions, not this validator's scheduling
     // of helper/hook typechecks. The derivation never trusts claimed schemas.
-    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR);
+    const inputPayloadSchemas = inferInputPayloadSchemas(input as PrototypeIR, span);
     const writtenFields = writtenMemberFields(input);
     let flow = new FlowProof(writtenFields);
 
@@ -749,23 +766,6 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       }
       return output as T;
     }
-    const root = object(input, [
-      'schemaVersion',
-      'name',
-      'source',
-      'sourceFiles',
-      'setup',
-      'hooks',
-      'contextKeys',
-      'staticDeclarations',
-      'moduleDeclarations',
-      'moduleBindings',
-      'props',
-      'exposes',
-      'requirements',
-    ]);
-    if (root.schemaVersion !== IR_VERSION)
-      reject('PUI2001', 'Unsupported private IR schema version.', FALLBACK, 'invalid-ir');
     text(root.name);
     const source = object(root.source, ['file', 'exportName', 'sha256']);
     const entry = safeFile(source.file);
@@ -1362,11 +1362,24 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               const fields: Extract<ValueType, { kind: 'object' }>['fields'] = [];
               const names = new Set<string>();
               for (const item of array(node.entries)) {
-                const entry = object(item, ['key', 'value']),
+                const entry = object(item, ['key', 'value', 'accessor']),
                   name = text(entry.key);
                 if (names.has(name)) bad('Duplicate IR record key.', location);
                 names.add(name);
-                fields.push({ name, type: expression(entry.value, scope, phase, context, true) });
+                const field = expression(entry.value, scope, phase, context, true);
+                if (entry.accessor !== undefined) {
+                  const getter = object(entry.value, EXPRESSION_FIELDS);
+                  if (
+                    entry.accessor !== 'get' ||
+                    getter.kind !== 'function' ||
+                    typeof field === 'string' ||
+                    field.kind !== 'callable' ||
+                    field.parameters.length !== 0 ||
+                    object(getter.function).context !== 'helper'
+                  )
+                    bad('A getter requires a zero-argument ordinary function.', location);
+                  fields.push({ name, type: field.returnType, readonly: true, accessor: 'get' });
+                } else fields.push({ name, type: field });
               }
               type = { kind: 'object', fields };
               break;
@@ -1463,6 +1476,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'member': {
             const owner = expression(node.object, scope, phase, context),
               key = text(node.property);
+            if (hasAccessorField(owner, key)) invalidateFlow(scope, true, true);
             if (typeof node.optional !== 'boolean')
               bad('IR member optionality must be explicit.', location);
             if (
@@ -1556,6 +1570,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'element': {
             const owner = expression(node.object, scope, phase, context),
               index = expression(node.index, scope, phase, context);
+            if (hasAccessorField(owner)) invalidateFlow(scope, true, true);
             if (typeof node.optional !== 'boolean')
               bad('Element access optionality must be explicit.', location);
             if (typeof owner !== 'string' && owner.kind === 'array' && index === 'number')
@@ -1595,10 +1610,19 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             type = valueAction(location, () =>
               checkedCall(
                 callee,
-                args.map((type) =>
+                args.map((type, index) =>
                   type === 'props'
                     ? { kind: 'record', fields: [...props].map(([name, type]) => ({ name, type })) }
-                    : type
+                    : assignable(
+                          type,
+                          callableValue(callee, node.optional as boolean).parameters[index]?.type ??
+                            'unknown'
+                        )
+                      ? type
+                      : // Source calls use literal contents after checking the
+                        // whole expression. Importers must retain that same proof
+                        // for nested discriminants, never from a stale reference.
+                        (argumentData((node.arguments as ExpressionIR[])[index]) ?? type)
                 ),
                 node.optional as boolean
               )
@@ -1639,16 +1663,38 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               Extract<ValueType, { kind: 'object' }>['fields'][number]
             >();
             for (const item of array(node.parts)) {
-              const part = object(item, ['kind', 'key', 'value']);
+              const part = object(item, ['kind', 'key', 'value', 'accessor']);
               const value = expression(part.value, scope, phase, context, true);
               if (part.kind === 'entry') {
                 const name = text(part.key);
-                fields.set(name, { name, type: value });
-              } else if (part.kind === 'spread' && part.key === undefined) {
+                if (part.accessor !== undefined) {
+                  const getter = object(part.value, EXPRESSION_FIELDS);
+                  if (
+                    part.accessor !== 'get' ||
+                    getter.kind !== 'function' ||
+                    typeof value === 'string' ||
+                    value.kind !== 'callable' ||
+                    value.parameters.length !== 0 ||
+                    object(getter.function).context !== 'helper'
+                  )
+                    bad('A getter requires a zero-argument ordinary function.', location);
+                  fields.set(name, {
+                    name,
+                    type: value.returnType,
+                    readonly: true,
+                    accessor: 'get',
+                  });
+                } else fields.set(name, { name, type: value });
+              } else if (
+                part.kind === 'spread' &&
+                part.key === undefined &&
+                part.accessor === undefined
+              ) {
                 const source = objectFields(value);
                 if (!source) bad('Object spread requires a checked ordinary record.', location);
-                for (const { readonly: _readonly, ...field } of source)
-                  fields.set(field.name, field);
+                if (hasAccessorField(value)) invalidateFlow(scope, true, true);
+                for (const field of source)
+                  fields.set(field.name, spreadObjectField(fields.get(field.name), field));
               } else bad('Invalid object spread part.', location);
             }
             type = objectValueType([...fields.values()]);
@@ -2128,6 +2174,33 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           String(object(item, ['kind', 'name', 'bindingId', 'value', 'span']).name)
         )
       );
+      // Optional immutable aliases may select only a checked module function or
+      // undefined. This is not authority to persist an owner-created closure.
+      const staticCallables = new Set<string>();
+      const callableAlias = (binding: Record<string, unknown>): boolean => {
+        let value = object(binding.value, EXPRESSION_FIELDS);
+        const declared = valueType(value.type, span(binding.span));
+        if (
+          !valueAlternatives(declared).every(
+            (type) => type === 'void' || (typeof type !== 'string' && type.kind === 'callable')
+          )
+        )
+          return false;
+        while (value.kind === 'narrow') value = object(value.value, EXPRESSION_FIELDS);
+        return (
+          value.kind === 'function' ||
+          value.kind === 'undefined' ||
+          (value.kind === 'reference' && staticCallables.has(String(value.name)))
+        );
+      };
+      for (;;) {
+        const before = staticCallables.size;
+        for (const value of array(root.moduleBindings)) {
+          const binding = object(value, ['kind', 'name', 'bindingId', 'value', 'span']);
+          if (callableAlias(binding)) staticCallables.add(String(binding.name));
+        }
+        if (before === staticCallables.size) break;
+      }
       for (const value of array(root.moduleBindings)) {
         const binding = object(value, ['kind', 'name', 'bindingId', 'value', 'span']);
         if (binding.kind !== 'const')
@@ -2144,10 +2217,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             ? object(initializer.value, EXPRESSION_FIELDS)
             : initializer;
         while (scalar.kind === 'narrow') scalar = object(scalar.value, EXPRESSION_FIELDS);
+        if (initializer.kind !== 'lexical-cell' && callableAlias(binding)) continue;
         if (
           initializer.kind !== 'lexical-cell' &&
           (scalar.kind === 'array' || scalar.kind === 'record') &&
-          staticDataExpression(scalar, moduleNames) &&
+          (staticDataExpression(scalar, moduleNames) ||
+            staticGetterRecordExpression(scalar, moduleNames)) &&
           readonlyModuleData(valueType(initializer.type, span(binding.span)))
         )
           continue;
@@ -2248,6 +2323,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           'Hook capture metadata does not match its checked closed-graph installations.',
           hook.setup.span
         );
+    const accessorStorage = moduleAccessorStorageIssue(result);
+    if (accessorStorage) bad(accessorStorage.message, accessorStorage.span);
     const effect = callableEffectIssue(result);
     if (effect) bad(effect.message, effect.span);
     return { ok: true, value: result };
@@ -2295,6 +2372,30 @@ function staticDataExpression(
       )
     );
   return false;
+}
+
+/** A getter literal only creates functions at initialization; bodies are checked separately. */
+function staticGetterRecordExpression(
+  node: Record<string, unknown>,
+  moduleNames: ReadonlySet<string>
+): boolean {
+  if (node.kind !== 'record' || !Array.isArray(node.entries)) return false;
+  let getter = false;
+  return (
+    node.entries.every((item: unknown) => {
+      const entry = object(item, ['key', 'value', 'accessor']);
+      const value = object(entry.value, EXPRESSION_FIELDS);
+      if (entry.accessor === 'get') {
+        getter = true;
+        if (value.kind !== 'function') return false;
+        const fn = object(value.function);
+        return (
+          Array.isArray(fn.parameters) && fn.parameters.length === 0 && fn.context === 'helper'
+        );
+      }
+      return entry.accessor === undefined && staticDataExpression(value, moduleNames);
+    }) && getter
+  );
 }
 
 /** Shared module data must be a read-only view at every depth. */

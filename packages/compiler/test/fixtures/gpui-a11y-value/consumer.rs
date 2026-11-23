@@ -234,3 +234,61 @@ fn numeric_projection_rejects_invalid_native_facts_instead_of_coercing_to_zero(c
         }
     }).unwrap();
 }
+
+// This additional integration case traverses the production lease used by
+// on_a11y_action. The original eight dispatcher/projection cases stay intact.
+// Calling this bridge is GPUI framework evidence, not an OS AT delivery claim.
+#[gpui::test]
+fn production_numeric_lease_preserves_payload_and_rejected_ingress_once(cx: &mut TestAppContext) {
+    let first = open(cx, false);
+    let foreign = open(cx, false);
+    for window in [first, foreign] {
+        let mut visual = VisualTestContext::from_window(AnyWindowHandle::from(window), cx);
+        frames(&mut visual);
+    }
+    let lease = first.update(cx, |host, _, cx| {
+        proto_ui_gpui_native::gpui_native_owner::native_accessible_action_lease(
+            &host.component.read(cx).handle().owner, "setValue",
+        ).expect("the actual compiled numeric action must have a native callback lease")
+    }).unwrap();
+    foreign.update(cx, |host, window, cx| {
+        lease.request_data(Some(&ActionData::NumericValue(0.25)), window, cx);
+        let foreign_handle = host.component.read(cx).handle();
+        assert!(foreign_handle.take_events().is_empty());
+        assert_eq!(foreign_handle.state("calls").expect("foreign calls").as_f64(), Some(0.));
+    }).unwrap();
+    first.update(cx, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        assert!(handle.take_events().is_empty(),
+            "the wrong actual Window must not dispatch to the original owner");
+        assert_eq!(handle.state("calls").expect("calls").as_f64(), Some(0.));
+        // The no-payload compatibility method must not synthesize numeric zero.
+        lease.request(window, cx);
+        for invalid in [None, Some(ActionData::Value("0.63".into())),
+            Some(ActionData::NumericValue(f64::NAN)),
+            Some(ActionData::NumericValue(f64::INFINITY)),
+            Some(ActionData::NumericValue(f64::NEG_INFINITY))] {
+            lease.request_data(invalid.as_ref(), window, cx);
+        }
+        assert!(handle.take_events().is_empty());
+        for key in ["calls", "once", "onceZero", "onceOne", "obsolete"] {
+            assert_eq!(handle.state(key).expect("exposed counter").as_f64(), Some(0.),
+                "invalid ingress must not dispatch or consume a once listener at any callback arity");
+        }
+        for (index, next) in [0., 0.63, -3.125].into_iter().enumerate() {
+            lease.request_data(Some(&ActionData::NumericValue(next)), window, cx);
+            assert_eq!(handle.take_events(), vec![("requested".into(),
+                json!({"type": "host:numeric-request", "value": next}))],
+                "the callback lease must forward the actual finite payload through the final declared route");
+            assert_eq!(handle.state("calls").expect("calls").as_f64(), Some((index + 1) as f64));
+            assert_eq!(handle.state("value").expect("controlled State").as_f64(), Some(0.5),
+                "a native request is not a State write or a range clamp");
+            for key in ["once", "onceZero", "onceOne"] {
+                assert_eq!(handle.state(key).expect("once counter").as_f64(), Some(1.),
+                    "zero is a valid first request after rejected ingress; later requests keep once consumed");
+            }
+            assert_eq!(handle.state("obsolete").expect("obsolete route").as_f64(), Some(0.));
+        }
+        assert!(handle.take_failures().is_empty());
+    }).unwrap();
+}

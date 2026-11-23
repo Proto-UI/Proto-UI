@@ -30,7 +30,7 @@ The current workspace also inherits the bounded [Base Mask pointer-default behav
 
 ## API
 
-Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+Dialog is workspace source. For this workspace version, the CLI target is `brutalist-dialog`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -43,4 +43,3 @@ Dialog is workspace source. There is no public `proto-ui add` target. Passing `o
 />
 
 These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `focusEntry` to `auto` and also accepts the Transition props. Trigger, Title, Description and Close have no props.
-

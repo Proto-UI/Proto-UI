@@ -156,53 +156,9 @@ jobs:
   public_package_build:
     needs: public_package_plan
     if: github.event_name != 'pull_request' && needs.public_package_plan.outputs.affected_count != '0'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.32.1 --activate
-
-      - name: Install
-        run: corepack pnpm@10.32.1 install --frozen-lockfile
-
-      - name: Build affected publish graph
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            corepack pnpm@10.32.1 build:packages --changed-from "${BASE_SHA}"
-          else
-            corepack pnpm@10.32.1 build:packages
-          fi
-
-      - name: Check public manifests and budget measurement controls
-        run: |
-          corepack pnpm@10.32.1 check:package-manifests
-          corepack pnpm@10.32.1 test:package-budget-policy
-
-      - name: Enforce strict whole-entry bundle budgets
-        run: |
-          mkdir -p "$RUNNER_TEMP/package-budgets"
-          node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha "$GITHUB_SHA" > "$RUNNER_TEMP/package-budgets/report.json"
-
-      - name: Preserve actual strict budget comparisons and source closure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-budgets-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/package-budgets/report.json
-          if-no-files-found: error
-          retention-days: 30
+    uses: ./.github/workflows/package-budget-evidence.yml
+    permissions:
+      contents: read
 
   type-check:
     if: ${{ github.event_name != 'pull_request' }}

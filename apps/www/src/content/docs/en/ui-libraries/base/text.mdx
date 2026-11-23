@@ -70,16 +70,24 @@ The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping st
 
 ## API
 
-Text is workspace source. There is no public `proto-ui add` target.
+Text is workspace source. For this workspace version, the CLI target is `base-text`. Use matching CLI and package versions; check the chosen release's availability before installing.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+    },
     { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
     { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
     { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
-    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+    },
     { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
     { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
     { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },

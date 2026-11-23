@@ -3,9 +3,13 @@
 // do not admit ordinary website consumers, certify the optical algorithm, or
 // promote Liquid Glass from WIP / Experimental. Changed bytes require review.
 // Ownership and historical failures: internal/records/2026-11-22-regression-source-bindings.md.
+// Hover-only digest renewal: internal/records/2026-11-23-sprint4-source-admission-followup.md.
+// Exact reviewed source: Sprint 4 commit 53194e0c01e6073b9ba3e7852c755ab57cfbe12d.
+// The bounded Sprint 6 delta and exact new fixture are recorded separately in
+// internal/records/2026-11-22-sprint-6-coverage-source-bindings.md.
 export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/content/docs/zh-cn/liquid-tint-stage-diagnostic.ts': Object.freeze({
-    sourceSha256: 'a83a3f9a2b34cebfdb5d13f3a2042eeb6211dd8ef82599b416388bb8c4b7fcd6',
+    sourceSha256: 'a15d4864f21efc3008eb4caad0e2e8512e0bda657b289ce12848515909cb95bb',
     specifiers: Object.freeze([
       '../../../../../../packages/adapters/base/src/material/program',
       '../../../../../../packages/adapters/base/src/material/liquidgl-kernel.generated',
@@ -22,7 +26,7 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/liquid-toggle-tint-probe.ts': Object.freeze({
-    sourceSha256: 'bfea53dd59376c70a2ba3493aa254498ffeb8101b860df02d07b0375b2f045d3',
+    sourceSha256: '2ba157d7251051ceb837d53ed2fcf66874de1c0dfde086d8dbd6a67a4b1a8310',
     specifiers: Object.freeze([
       '../../../../../../packages/adapters/base/src/material/program',
       '../../../../../../packages/adapters/base/src/material/style',
@@ -30,7 +34,7 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/content/docs/zh-cn/liquid-visible-refraction-diagnostic.ts': Object.freeze({
-    sourceSha256: 'aa9c0864c6e25ca643709c4882b2872863d2a511ebce5d5b2d79b3f54dd93d56',
+    sourceSha256: '1a781ab430cfc6df1ced99d9b2c554b1a7b2f770a3bcf64a2381b20134f2674a',
     specifiers: Object.freeze([
       '../../../../../../packages/adapters/base/src/material/program',
       '../../../../../../packages/adapters/base/src/material/style-tint-profile',
@@ -38,7 +42,7 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-hover.astro': Object.freeze({
-    sourceSha256: 'f39b2dbc22e2a2ad265b2e7b7e3670aeadbc61a7d8d1af404570aa3a931622c7',
+    sourceSha256: '4db4262c4c5136993373e9d280b9bb54807b69cc91455943634cc195c974ad9c',
     specifiers: Object.freeze([
       '../../../../../../packages/prototypes/liquid-glass/src/theme',
       '@proto.ui/prototypes-liquid-glass/button',
@@ -60,11 +64,18 @@ export const DIAGNOSTIC_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro': Object.freeze({
-    sourceSha256: '3c4613474d5fd8554fd851e1a07ce7c10f202483ac02c34defabbe5bcaecd26b',
+    sourceSha256: '09c6c7e464793b0ce40e4f834c99d6aeb1e8c9a93e3e8c3b5f444955308b1aad',
     specifiers: Object.freeze([
       '../../../../../../packages/prototypes/liquid-glass/src/theme',
       '@proto.ui/prototypes-liquid-glass/button',
       '@proto.ui/prototypes-liquid-glass/form',
+    ]),
+  }),
+  'apps/www/src/pages/en/test/liquid-glass-state-controls.astro': Object.freeze({
+    sourceSha256: 'f62df3e8178f7adc34d14f49597bb524288695bc2b49cbec45604838a438efce',
+    specifiers: Object.freeze([
+      '../../../../../../packages/prototypes/liquid-glass/src/theme',
+      '@proto.ui/prototypes-liquid-glass',
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-toggle.astro': Object.freeze({
