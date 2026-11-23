@@ -141,6 +141,8 @@ export interface CallableDemandObserver {
   expression(value: ExpressionIR): void;
   function(value: FunctionIR): void;
   hook(value: Extract<ExpressionIR, { kind: 'authored-hook' }>, recursive?: boolean): void;
+  /** The actual closure crosses an open host/public invocation boundary. */
+  escape?(value: FunctionIR): void;
   /** Actual call provenance, including separate invocations of a shared helper. */
   call?(
     value: Extract<ExpressionIR, { kind: 'call' }>,
@@ -943,8 +945,10 @@ function analyzeCallableFlow(
         if (!value.data && (!type || carriesCallable(type))) opaque(ir.setup.span);
         continue;
       }
-      if (value.kind === 'closure') enqueueCallback({ closure: value, execution, outward: true });
-      else if (value.kind === 'capture-lookup' && value.property !== 'getState')
+      if (value.kind === 'closure') {
+        demand?.escape?.(value.fn);
+        enqueueCallback({ closure: value, execution, outward: true });
+      } else if (value.kind === 'capture-lookup' && value.property !== 'getState')
         pending.push(...captureLookup(value, UNKNOWN).map((value) => ({ value, type: undefined })));
       else if (value.kind === 'getter')
         pending.push(...value.callable.map((value) => ({ value, type: undefined })));

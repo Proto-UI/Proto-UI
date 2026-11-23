@@ -65,7 +65,7 @@ import { sourceTypeIdentity } from './source-type-resolution';
 import { parseSourceValueType, type TypeSubstitutions } from './source-values';
 import { deriveHookCapture, derivePrototypeCaptures, mergeHookCaptures } from './capture-analysis';
 import { captureFacadeFields, checkedSpreadFields, mergeSpreadField } from './capture-types';
-import { callableEffectIssue } from './callable-effects';
+import { callableEffectIssue, traceCallableDemand } from './callable-effects';
 import {
   FlowProof,
   callSiteKey,
@@ -163,6 +163,7 @@ import {
   type PrimitiveType,
   type PropIR,
   type PrototypeIR,
+  type SourceSpan,
   type StatementIR,
   type ValueType,
   type StaticCapabilityIR,
@@ -378,6 +379,20 @@ function union(types: readonly ValueType[], node: ts.Node): ValueType {
     return 'template';
   return joinValueTypes(types);
 }
+
+/** A source-only inference request. The partially checked graph is discarded;
+ * the next pass checks the same closure and every call against the retained
+ * nominal parameters. This never appears in portable IR or emitted code. */
+class LocalParameterRefinement extends Error {
+  constructor(
+    readonly binding: string,
+    readonly parameters: readonly ValueType[],
+    readonly span: SourceSpan
+  ) {
+    super('Recheck a closed local helper with its actual nominal parameters.');
+  }
+}
+
 class Frontend {
   readonly graph: SourceGraph;
   readonly hooks = new Map<string, AuthoredHookIR>();
@@ -400,6 +415,8 @@ class Frontend {
   private readonly moduleBindings: Extract<StatementIR, { kind: 'const' }>[] = [];
   private readonly moduleValues = new Map<string, Binding & { name: string }>();
   private readonly moduleHelpers = new Map<string, { name: string; fn: FunctionIR }>();
+  private readonly localHelpers = new WeakMap<FunctionIR, string>();
+  private readonly retainedLocalParameters = new Set<FunctionIR>();
   private readonly parsingDeclarations = new Map<ts.Node, Binding>();
   private readonly previewingDeclarations = new Set<ts.Node>();
   private readonly normalizedBindingIds = new WeakMap<ts.Node, string>();
@@ -882,15 +899,34 @@ class Frontend {
         typeof binding.type !== 'string' && binding.type.kind === 'callable'
           ? binding.type
           : this.previewFunction(binding.module, init, binding.pendingScope);
+      const key = binding.bindingId;
+      const retained = key && this.localParameterTypes.get(key);
       const fn = this.function(
         binding.module,
         init,
         binding.pendingScope,
         this.helperPhase(binding.module, init, binding.pendingScope),
-        signature.parameters.map((parameter) => parameter.type),
+        retained || signature.parameters.map((parameter) => parameter.type),
         'helper',
-        ts.isVariableDeclaration(declaration) && declaration.type ? signature.returnType : undefined
+        ts.isVariableDeclaration(declaration) && declaration.type
+          ? signature.returnType
+          : undefined,
+        false,
+        !!retained
       );
+      if (
+        key &&
+        !(ts.isVariableDeclaration(declaration) && declaration.type) &&
+        init.parameters.every(
+          (parameter) =>
+            ts.isIdentifier(parameter.name) &&
+            !parameter.initializer &&
+            !parameter.questionToken &&
+            !parameter.dotDotDotToken
+        )
+      )
+        this.localHelpers.set(fn, key);
+      if (retained) this.retainedLocalParameters.add(fn);
       binding.helper = fn;
       binding.phase = fn.phase;
       binding.type = functionValueType(fn);
@@ -975,10 +1011,37 @@ class Frontend {
     private readonly writtenFields: ReadonlySet<string> = new Set(),
     private readonly captureTypes: ReadonlyMap<string, import('./ir').HookCaptureIR> = new Map(),
     private readonly readonlyCallSites: ReadonlySet<string> = new Set(),
-    private readonly deferCallFlow = false
+    private readonly deferCallFlow = false,
+    private readonly localParameterTypes: ReadonlyMap<string, readonly ValueType[]> = new Map()
   ) {
     this.graph = new SourceGraph(input, options);
     this.flow = new FlowProof(this.writtenFields);
+  }
+
+  checkLocalParameters(ir: PrototypeIR): void {
+    if (!this.retainedLocalParameters.size) return;
+    let escaped: FunctionIR | undefined;
+    let opaque = false;
+    traceCallableDemand(ir, {
+      expression() {},
+      function() {},
+      hook() {},
+      escape: (fn) => {
+        if (this.retainedLocalParameters.has(fn)) escaped ??= fn;
+      },
+      opaque() {
+        opaque = true;
+      },
+    });
+    if (escaped || opaque)
+      throw new CompilerRejection({
+        code: 'PUI1006',
+        category: 'unsupported-input',
+        message: escaped
+          ? 'A local helper retaining nominal parameters cannot escape to open callers.'
+          : 'Local nominal parameter inference requires a closed callable graph.',
+        span: (escaped ?? this.retainedLocalParameters.values().next().value!).span,
+      });
   }
 
   private helperPhase(module: SourceModule, node: FunctionNode, scope: Scope): Phase {
@@ -3828,23 +3891,55 @@ class Frontend {
         ts.isSpreadElement(argument) ? undefined : expected
       );
     });
-    const type = this.checkedValue(node, () =>
-      checkedCall(
-        callee.type,
-        args.map((argument, index) =>
-          argument.type === 'props'
-            ? {
-                kind: 'record',
-                fields: [...this.props].map(([name, prop]) => ({ name, type: prop.type })),
-              }
-            : assignable(argument.type, signature.parameters[index]?.type ?? 'unknown')
-              ? argument.type
-              : argumentValue(argument)
-        ),
-        optional,
-        spreads
-      )
+    const argumentTypes: ValueType[] = args.map((argument, index) =>
+      argument.type === 'props'
+        ? {
+            kind: 'record',
+            fields: [...this.props].map(([name, prop]) => ({ name, type: prop.type })),
+          }
+        : assignable(argument.type, signature.parameters[index]?.type ?? 'unknown')
+          ? argument.type
+          : argumentValue(argument)
     );
+    const type = this.checkedValue(node, () => {
+      try {
+        return checkedCall(callee.type, argumentTypes, optional, spreads);
+      } catch (error) {
+        const binding = known && this.localHelpers.get(known);
+        if (error instanceof TypeError && binding && !optional && !spreads.some(Boolean)) {
+          let changed = false;
+          const parameters = signature.parameters.map((parameter, index) => {
+            const actual = argumentTypes[index];
+            if (
+              typeof actual === 'string' &&
+              !isDataValueType(actual) &&
+              objectFields(parameter.type)?.length &&
+              canRetainParameterType(actual, parameter.type)
+            ) {
+              changed = true;
+              return { ...parameter, type: actual };
+            }
+            return parameter;
+          });
+          if (changed) {
+            let compatible = false;
+            try {
+              checkedCall({ ...signature, parameters }, argumentTypes);
+              compatible = true;
+            } catch {
+              // Another incompatible argument must retain its original refusal.
+            }
+            if (compatible)
+              throw new LocalParameterRefinement(
+                binding,
+                parameters.map((parameter) => parameter.type),
+                known!.span
+              );
+          }
+        }
+        throw error;
+      }
+    });
     if (known && this.context !== 'helper' && this.context !== 'expose-method')
       this.enforceHelperContext(known, this.context, phase);
     if (
@@ -5563,8 +5658,10 @@ export function parsePrototype(
     let fields: ReadonlySet<string> = new Set();
     let captures: ReadonlyMap<string, import('./ir').HookCaptureIR> = new Map();
     let readonlyCalls: ReadonlySet<string> = new Set();
+    const localParameters = new Map<string, readonly ValueType[]>();
     let candidate = true;
     let value: PrototypeIR;
+    let frontend: Frontend;
     const observedFootprints = new Set<string>();
     for (;;) {
       const key = JSON.stringify([
@@ -5572,6 +5669,7 @@ export function parsePrototype(
         [...fields].sort(),
         [...captures],
         [...readonlyCalls].sort(),
+        [...localParameters],
       ]);
       if (observedFootprints.has(key))
         throw new Error(
@@ -5582,7 +5680,45 @@ export function parsePrototype(
       // closures and later writes are visible to the same closed-store analysis.
       // It is never returned or emitted. The strict pass below grants an
       // observation only at sites proven read-only across every invocation.
-      value = new Frontend(source, options, fields, captures, readonlyCalls, candidate).compile();
+      try {
+        frontend = new Frontend(
+          source,
+          options,
+          fields,
+          captures,
+          readonlyCalls,
+          candidate,
+          localParameters
+        );
+        value = frontend.compile();
+      } catch (error) {
+        if (!(error instanceof LocalParameterRefinement)) throw error;
+        const previous = localParameters.get(error.binding);
+        if (
+          previous &&
+          (previous.every((type, index) => sameType(type, error.parameters[index])) ||
+            previous.some(
+              (type, index) =>
+                typeof type === 'string' &&
+                !isDataValueType(type) &&
+                !sameType(type, error.parameters[index])
+            ))
+        )
+          throw new CompilerRejection({
+            code: 'PUI1006',
+            category: 'unsupported-input',
+            message: 'Local helper instances require one compatible retained nominal signature.',
+            span: error.span,
+          });
+        localParameters.set(error.binding, error.parameters);
+        // All calls, aliases, escapes, phases and owner operations are checked
+        // again. No preliminary structural body can survive this refinement.
+        fields = new Set();
+        captures = new Map();
+        readonlyCalls = new Set();
+        candidate = true;
+        continue;
+      }
       const closedCaptures = derivePrototypeCaptures(value);
       const capturesStable = JSON.stringify([...captures]) === JSON.stringify([...closedCaptures]);
       for (const hook of value.hooks) hook.capture = closedCaptures.get(hook.id);
@@ -5607,6 +5743,7 @@ export function parsePrototype(
     const effect = callableEffectIssue(value);
     if (effect)
       throw new CompilerRejection({ code: 'PUI1007', category: 'unsupported-input', ...effect });
+    frontend.checkLocalParameters(value);
     const accessorStorage = moduleAccessorStorageIssue(value);
     if (accessorStorage)
       throw new CompilerRejection({
