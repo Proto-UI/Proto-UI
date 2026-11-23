@@ -24,6 +24,7 @@ const moduleFiles = [
   'scripts/compiler/browser-inputs.mjs',
   'scripts/test/sprint3-consumer-evidence.mjs',
   'scripts/test/sprint3-source-server.mjs',
+  'scripts/compiler/browser-repository-root.mjs',
 ];
 const artifactNames = ['build.log', 'dist-files.json', 'preview-requests.jsonl'];
 const workerFile = '_astro/negative-worker.js';
@@ -32,7 +33,7 @@ const serialize = (value) => JSON.stringify(value, null, 2) + '\n';
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 // Only throwaway repositories are written. The helper and its complete current
-// local import closure are copied byte-for-byte, so its fixed import.meta root
+// local import closure are copied byte-for-byte. The same workspace discovery
 // remains the authority; the production verifier receives no new root override.
 async function fixture(t) {
   const parent = await realpath(await mkdtemp(path.join(tmpdir(), 'pui-production-negative-')));
@@ -40,6 +41,7 @@ async function fixture(t) {
   const root = path.join(parent, 'source');
   const output = path.join(parent, 'evidence');
   await mkdir(path.join(root, 'apps/www'), { recursive: true });
+  await mkdir(path.join(root, 'packages/compiler'), { recursive: true });
   await mkdir(output);
   for (const relative of moduleFiles) {
     const destination = path.join(root, relative);
@@ -50,12 +52,20 @@ async function fixture(t) {
   await writeFile(path.join(root, '.gitignore'), 'apps/www/dist/\n');
   await writeFile(path.join(root, 'pnpm-lock.yaml'), "lockfileVersion: '9.0'\n");
   await writeFile(
+    path.join(root, 'pnpm-workspace.yaml'),
+    'packages:\n  - apps/*\n  - packages/*\n'
+  );
+  await writeFile(
     path.join(root, 'package.json'),
-    serialize({ private: true, packageManager: 'pnpm@10.32.1' })
+    serialize({ name: 'proto-ui', private: true, packageManager: 'pnpm@10.32.1' })
+  );
+  await writeFile(
+    path.join(root, 'packages/compiler/package.json'),
+    serialize({ name: '@proto.ui/compiler', private: true })
   );
   await writeFile(
     path.join(root, 'apps/www/package.json'),
-    serialize({ private: true, scripts: { build: 'node failed-build.cjs' } })
+    serialize({ name: 'apps-www', private: true, scripts: { build: 'node failed-build.cjs' } })
   );
   await writeFile(
     path.join(root, 'apps/www/failed-build.cjs'),

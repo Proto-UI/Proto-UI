@@ -1,0 +1,90 @@
+{
+  "kind": "original-byte-validation-evidence",
+  "executedParent": "b8d20315ad028de77891071db0786b7350ee7d3c",
+  "sourceUpstream": "3148794da5e44581cc5578a688c0ec5eacefe256",
+  "stagedSourceTree": "4fe06b7b68821d9a9c963ae8e13f200c69ee811a",
+  "result": {
+    "completeFiles": 5,
+    "passed": 48,
+    "failed": 0,
+    "skipped": 0,
+    "negativeControlExit": 1
+  },
+  "sourceHashes": {
+    "packages/modules/anatomy/src/impl.ts": "cbb63398679e6fbd29db453cc3bf9e8ec992010c9023daeed4d44b7c24fdd5db",
+    "packages/modules/anatomy/test/subscriber-fanout.test.ts": "698496edba22019337a1deaf9121ee7d712a3da103036ff5f050f56ed9c8d240",
+    "packages/runtime/test/contract/anatomy.order-fanout-cost.contract.test.ts": "1c0a050bdf2b2cbed41283b4ca84a455ad1601dfbdac1786b91cb3c86a0a8798"
+  },
+  "entries": [
+    {
+      "name": "anatomy-correction.patch",
+      "bytes": 11647,
+      "sha256": "f96a8aebc7fb96eb43c2eafdfe22cba7606382946524fef2189f804a01f113c4"
+    },
+    {
+      "name": "anatomy.order-fanout-cost.contract.test.ts.before",
+      "bytes": 18046,
+      "sha256": "6aecd441b21b458e535835c55eb882f51e34fede02a9eed3b3b94ce330e582f9"
+    },
+    {
+      "name": "anatomy.order-fanout-cost.contract.test.ts.patch",
+      "bytes": 2057,
+      "sha256": "ee0e93bc68d5a603ed078d28ae5e380091d89809179d3c88accffefdb89f6f7b"
+    },
+    {
+      "name": "complete-anatomy-controls.json",
+      "bytes": 19804,
+      "sha256": "9e3143d114c8848c42e016450c37ea2af17f56f0afc1494b91623cb97ba88b39"
+    },
+    {
+      "name": "complete-anatomy-controls.log",
+      "bytes": 123572,
+      "sha256": "aa84ee6034223ae0fa72e3e26eec2525168266cd00b9461ce2fb14e1c143618c"
+    },
+    {
+      "name": "format.log",
+      "bytes": 220,
+      "sha256": "2dfe43b9fe24f8f5cea44bf78ad8cc988e3700fb0437111ec3d8cfbfba29ce56"
+    },
+    {
+      "name": "impl.ts.before",
+      "bytes": 57635,
+      "sha256": "ad4dfd2a32f01bda329d7ce044df92f857379f07c746235ca4b4ec880e36cc61"
+    },
+    {
+      "name": "impl.ts.patch",
+      "bytes": 5294,
+      "sha256": "d59598fa4495a34b226fa21fc6f0eab431fd9eaab1579ccc083b7f334be511e1"
+    },
+    {
+      "name": "new-live-getter-negative-control.log",
+      "bytes": 24831,
+      "sha256": "c6941dd0cd20858d09acd9ac9653ff5b9157c2df621cc056799852d00c07138e"
+    },
+    {
+      "name": "subscriber-fanout.test.ts.before",
+      "bytes": 10950,
+      "sha256": "463606eece892589a1fe1d8a9fee867ffd3fb985b39c376ab743c44fe521f674"
+    },
+    {
+      "name": "subscriber-fanout.test.ts.patch",
+      "bytes": 3371,
+      "sha256": "a0c4a34b1edd3743abf51233ca6759080348589b65b0784302ad6c96d4b10f4c"
+    },
+    {
+      "name": "anatomy-correction-status.json",
+      "bytes": 4356,
+      "sha256": "ed62403cee8842395acfddcf6300c1c02f111d693b20f07a837dce348ff0a3f8"
+    },
+    {
+      "name": "anatomy-correction.py",
+      "bytes": 4585,
+      "sha256": "f615ce5a8ddc5f8d527dd9addbd69b56f0ecc4d50168bfa9f71e6757fc08836a"
+    }
+  ],
+  "archive": {
+    "file": "commands-and-output.tar.gz",
+    "bytes": 44036,
+    "sha256": "7779d8ef110b8689c9d30592968e52a4b66e6bad536a1ab20279bdd506a1a43c"
+  }
+}

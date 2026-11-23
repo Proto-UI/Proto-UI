@@ -98,7 +98,12 @@ for (const [name, family] of Object.entries(families))
         .split(/\s+/)
         .filter((token) => !/^data-\[(focus-visible|selected)\]:/.test(token))
         .filter(Boolean);
-      expect((staticRecipe ?? '').split(/\s+/).filter(Boolean)).toEqual(bodyStaticTokens);
+      // Independent owners can first record the display group at different
+      // positions. Compare the complete static recipe, retaining extra or
+      // duplicate-token failures, rather than incidental group insertion order.
+      expect((staticRecipe ?? '').split(/\s+/).filter(Boolean).sort()).toEqual(
+        bodyStaticTokens.sort()
+      );
       expect(staticRecipe ?? '').not.toMatch(/data-\[(focus-visible|selected)\]:/);
       expect(structure.rows[1].cells[0].columnHeaders).toEqual([structure.rows[0].cells[0].ref]);
       expect(structure.rows[1].cells[1].columnHeaders).toEqual([structure.rows[0].cells[1].ref]);

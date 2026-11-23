@@ -69,8 +69,8 @@ jobs:
             corepack pnpm@10.32.1 --version
             "$CHROME" --version
             df -h "$TMPDIR" "$SPRINT3_EVIDENCE_DIR"
-            sudo apt-get update -qq
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
           } 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/environment.log"
       - name: Execute independent native suites serially and one owned production preview
@@ -157,8 +157,8 @@ jobs:
             corepack pnpm@10.32.1 --version
             "$CHROME" --version
             df -h "$TMPDIR" "$SPRINT3_EVIDENCE_DIR"
-            sudo apt-get update -qq
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
           } 2>&1 | tee "$SPRINT3_EVIDENCE_DIR/environment.log"
       - name: Execute all eight Base Select cases on one owned production preview
@@ -236,8 +236,8 @@ jobs:
           printf 'CHROME_PATH=%s\nPUI_CHROME_EXECUTABLE=%s\n' "$CHROME" "$CHROME" >> "$GITHUB_ENV"
           {
             "$CHROME" --version &&
-            sudo apt-get update -qq &&
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk &&
+            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
           } 2>&1 | tee "$REHEARSAL_EVIDENCE_DIR/environment.log"
       - name: Execute all 15 original non-publishing release gates

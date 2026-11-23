@@ -1,0 +1,405 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded numeric package-budget transaction",
+  "date": "2026-11-23",
+  "pullRequest": 1713,
+  "scope": "Four existing whole-entry ceilings for this exact integrated development source; no feature or measurement change.",
+  "capabilityLifecycle": "Axis, TextControl selection and Scroll end-follow remain draft; all other definitions retain their existing lifecycle. This transaction accepts measured package cost only.",
+  "sourceBefore": {
+    "head": "2bdcad076ad93b727c1e0f775e0c136d588ad888",
+    "tree": "71ac65f299987575001ed24015e481dcb97fe872",
+    "workingTreeClean": true,
+    "measuredSourceMatchesHead": true,
+    "scope": [
+      "packages",
+      "scripts/analysis",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "fileCount": 7782,
+    "fingerprintSha256": "51c9be8f606d412f27a8125775f27444d07093ed2a99d51aea67e9f4bf5726bd",
+    "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stableDuringMeasurement": true,
+    "requireClean": true,
+    "expectedSha": "2bdcad076ad93b727c1e0f775e0c136d588ad888"
+  },
+  "canonicalCombinationBefore": {
+    "run": 45206446598,
+    "job": 137806713547,
+    "artifact": 14834916416,
+    "source": {
+      "head": "6a2bb11a1e8abf3fffa8921d267db215bb70b10d",
+      "tree": "91298e468edafcaa227d1c082e54c7a2d48299ad",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7782,
+      "fingerprintSha256": "51c9be8f606d412f27a8125775f27444d07093ed2a99d51aea67e9f4bf5726bd",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "6a2bb11a1e8abf3fffa8921d267db215bb70b10d"
+    },
+    "reportSha256": "a8a0396e45eafd5cea5d54ab157aa8aab965e08c6aafc1fecc20149bf6f28b5b",
+    "zipSha256": "0ae687dbc2c466cc95895674796a53daa1c52337802c266448c55a7ac305edff",
+    "result": "5/9 strict passed; 4/9 strict failed; exit 1"
+  },
+  "canonicalHistoricalBefore": {
+    "run": 45202101258,
+    "job": 137788020534,
+    "artifact": 14833046035,
+    "source": {
+      "head": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+      "tree": "496aa5aea4861860af1e10deb1d90b18c5c68d07",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7779,
+      "fingerprintSha256": "1f750bee94577aa0e8e17c666a9127f62fc7762a3b2aa6ead70810761327e660",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "1658768483ba5d81e4502a64945fe5c0a21dda1d"
+    },
+    "reportSha256": "0b2c275b20efa5f7d5f9e277e50fb73100ed82277c6e4a69a1274702d43063da",
+    "result": "5/9 strict passed; 4/9 strict failed; exit 1"
+  },
+  "previousShaderCostMeasurement": {
+    "run": 45027817094,
+    "job": 137224601142,
+    "artifact": 14755904646,
+    "source": {
+      "head": "9ecfeef2bfc418c4246ad4bb2f9adc669afa0049",
+      "tree": "8826e2eb56c5c723a10d5c7ea187d825b1051287",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7606,
+      "fingerprintSha256": "f8923f89bc5eab89df2d564c43801b531dde5ae0d56d23e51f1b2364a14f2ee3",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "9ecfeef2bfc418c4246ad4bb2f9adc669afa0049"
+    },
+    "result": "Original shader candidate report retains its original five pre-transaction failures; its values are historical cost comparisons, not current acceptance."
+  },
+  "canonicalLocalEquivalence": {
+    "environment": true,
+    "measurement": true,
+    "fingerprintSha256": "51c9be8f606d412f27a8125775f27444d07093ed2a99d51aea67e9f4bf5726bd",
+    "allNineResultsIncludingClosures": true,
+    "diagnostics": true,
+    "reason": "2bd differs from 6a2 only outside the declared measurement scope. Both receipts are clean and source-stable."
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "entries": [
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "oldCeiling": 103100,
+      "newCeiling": 104000,
+      "canonicalGzipBytes": 103858,
+      "oldOverrunBytes": 758,
+      "headroomBytes": 142,
+      "headroomPercent": 0.1367,
+      "minifiedBytes": 400805,
+      "minifiedSha256": "4fc8f94dd31da83d282199d14e79ff4355c676d8a77e2444f56f9c968e6e5d48"
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 170600,
+      "newCeiling": 172200,
+      "canonicalGzipBytes": 172018,
+      "oldOverrunBytes": 1418,
+      "headroomBytes": 182,
+      "headroomPercent": 0.1058,
+      "minifiedBytes": 604745,
+      "minifiedSha256": "0fad77312f17a228f004bafd77bd6e46a07cc67a7fc8beb92bb4647512787e68"
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 169400,
+      "newCeiling": 171000,
+      "canonicalGzipBytes": 170832,
+      "oldOverrunBytes": 1432,
+      "headroomBytes": 168,
+      "headroomPercent": 0.0983,
+      "minifiedBytes": 600237,
+      "minifiedSha256": "f83b5b1af2e0b19a2aa8761f35ecb850ca81e9315390a1029d6d2cf26694a28b"
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 204000,
+      "newCeiling": 205600,
+      "canonicalGzipBytes": 205444,
+      "oldOverrunBytes": 1444,
+      "headroomBytes": 156,
+      "headroomPercent": 0.0759,
+      "minifiedBytes": 704484,
+      "minifiedSha256": "1383186836e7e2040a9e3b7b4b293a3dfcd9fdd040d5a6bd2ad64f3bcaf6b60c"
+    }
+  ],
+  "unchangedCeilingEntries": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "ceiling": 3000,
+      "measuredGzipBytes": 2941,
+      "headroomBytes": 59
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "ceiling": 700000,
+      "measuredGzipBytes": 637384,
+      "headroomBytes": 62616
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "ceiling": 12600,
+      "measuredGzipBytes": 12596,
+      "headroomBytes": 4
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "ceiling": 6000,
+      "measuredGzipBytes": 5337,
+      "headroomBytes": 663
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "ceiling": 7900,
+      "measuredGzipBytes": 7871,
+      "headroomBytes": 29
+    }
+  ],
+  "headroomRationale": "Round the measured combined gzip cost upward to the next 100-byte step, then retain one fixed 100-byte margin. The four resulting margins are 142, 182, 168 and 156 bytes (0.076\u20130.137%); they budget no future feature. Core stays at 12600 with four bytes of headroom, and Shadcn Button stays at 7900 with 29 bytes.",
+  "sourceAttribution": [
+    {
+      "id": "C-AXIS-INPUT-ORIGIN-0001",
+      "path": "spec/contracts/C-AXIS-INPUT-ORIGIN-0001.yaml",
+      "lifecycle": "draft",
+      "commits": ["08b3804ca157c0ededf861edbfa9d0161edb7f07"]
+    },
+    {
+      "id": "C-TEXT-CONTROL-SELECTION-0001",
+      "path": "spec/contracts/C-TEXT-CONTROL-SELECTION-0001.yaml",
+      "lifecycle": "draft",
+      "commits": [
+        "7da60bbdb3fd1080a54806814f56d4e5d31a0170",
+        "64353ee959e7598e51f9191c710e6487492b94c3",
+        "f5de20585de610f777d3542c2176686d970d196d",
+        "93aef32ad6cfb160b6f92fb493385fb3414d07d4",
+        "1670c810687ef0604d06e57324f6d809035b2f9d"
+      ]
+    },
+    {
+      "id": "C-SCROLL-END-FOLLOW-0001",
+      "path": "spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml",
+      "lifecycle": "draft",
+      "commits": [
+        "a3b1b43ba658bbb6e7a3de2e02e241b9dae7784d",
+        "6bacee91e8a3fafd7844ee4588bc27798e1999d5",
+        "cfe63199ca302db7bf48b8ba2ece3135be99a97f",
+        "87a82f5aee21f55d9aa9467af252acb21825177c",
+        "8ec14275018f98d7e23b5ad8ec7de474cf7aa3fa"
+      ]
+    },
+    {
+      "id": "bounded startup rollback",
+      "path": "internal/records/2026-11-22-sprint5-request-owner-review-fixes.md",
+      "lifecycle": "unchanged",
+      "commits": ["4ea7e8ffe5f83c08ef38e2fa73775554bbfec0b2"]
+    },
+    {
+      "id": "Anatomy live comparison",
+      "path": "internal/records/2026-11-23-anatomy-live-host-correction.md",
+      "lifecycle": "unchanged",
+      "commits": [
+        "e76d97b8398fa2c4da00955671288c12d5863a03",
+        "7a64255233be57a65f725604dc4f9c14017b5dfd"
+      ]
+    }
+  ],
+  "closureInspection": {
+    "addedOrRemovedInputsAcrossComparedFourRoots": 0,
+    "duplicateInputPaths": 0,
+    "retainedCompilerInputs": 0,
+    "observedGrowth": "Axis origin leases, TextControl selection/owner/IME protection, Scroll reader pause/arrival guards and partial-allocation startup rollback. Independent source inspection identified no safely removable duplicate or dead implementation sufficient to erase the observed cost.",
+    "alternatives": "Removing owner, exception, disabled or epoch guards would weaken the actual contracts. Potential small helper refactors were not treated as measured sufficient savings. No such product refactor is included.",
+    "anatomyCorrection": "The new live-host Anatomy implementation is the only changed reached source from 165 to 6a2: -91 retained/minified bytes per failed root; gzip -37 runtime, -37 React, -38 Vue, -33 WC. No whole-order cache was restored.",
+    "attributionUnit": "Per-input retained bytes precede gzip and cannot be summed as gzip deltas."
+  },
+  "preparedValidation": {
+    "source": {
+      "head": "2bdcad076ad93b727c1e0f775e0c136d588ad888",
+      "tree": "71ac65f299987575001ed24015e481dcb97fe872",
+      "workingTreeClean": false,
+      "measuredSourceMatchesHead": false,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7782,
+      "fingerprintSha256": "8258e613e46f52bd6de894721b8893f6752cfd411300961e0b9a47771edec56d",
+      "statusSha256": "9b8d60241819f5e20eae1b1aee796cdc4d6f057fbecae11ceb045df8ed70f187",
+      "stableDuringMeasurement": true,
+      "requireClean": false,
+      "expectedSha": null
+    },
+    "result": "9/9 strict comparisons passed with exactly unchanged output hashes, byte sizes, closures and diagnostic vectors. This was a stable dirty prepared source, not a clean commit or canonical acceptance.",
+    "reportSha256": "0c571abb4edda86a76828e6bd232e3b92f001060061631cb236002c924f10d0f",
+    "controls": "28/28 policy and provenance controls passed, no skips."
+  },
+  "finalCandidateValidation": "Pending local clean committed-candidate check and final canonical exact-head CI. No success of a submitted or queued run is inferred.",
+  "independentReview": "Requested on this exact numeric diff, source-bound reports and record; prior source inspection is not GitHub approval.",
+  "preservedGate": "Only four numeric literals and this explanatory record change. Entry paths, tree shaking, minification, external boundary, gzip, diagnostics, Finf policy/expiry, clean-source checks, strict failure behavior and all feature source remain unchanged.",
+  "rawEvidence": [
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/canonical-165.json.gz",
+      "rawSha256": "0b2c275b20efa5f7d5f9e277e50fb73100ed82277c6e4a69a1274702d43063da",
+      "rawBytes": 1546188,
+      "storedSha256": "421eb1f530d9e9300b515706474bcf55915073b0e421e1094c4b39e33158aa31",
+      "storedBytes": 311129
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/canonical-6a2.json.gz",
+      "rawSha256": "a8a0396e45eafd5cea5d54ab157aa8aab965e08c6aafc1fecc20149bf6f28b5b",
+      "rawBytes": 1546188,
+      "storedSha256": "aaa34327fd98cf582d827721a73ac2bcd219b57bc747aca6b2055d4d4b889e87",
+      "storedBytes": 311133
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/current-before.json.gz",
+      "rawSha256": "bb3c4bd1380f60a829fdf5f49dd1263cf23784021171be0ba61f6bbfc6ae8936",
+      "rawBytes": 1546188,
+      "storedSha256": "16395a802e99e20ab3527b51d8ba76c613596eea1a690cacdc0ebc498ca111a4",
+      "storedBytes": 311134
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/prepared-after.json.gz",
+      "rawSha256": "0c571abb4edda86a76828e6bd232e3b92f001060061631cb236002c924f10d0f",
+      "rawBytes": 1546141,
+      "storedSha256": "06cd4695f6d5d847d785de896a39591abdc655a7fa683d73fbb9fc5a253fba1f",
+      "storedBytes": 311114
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/historical-attribution.json.gz",
+      "rawSha256": "de8045a76439f4e4a5089a7f327461b5629b7bd8ccffeb5465fdd87312555b38",
+      "rawBytes": 74310,
+      "storedSha256": "223e3acc76dd3fc765ffd2ad921d0d49b667b24b6cb2efc4cb990e63163a81bf",
+      "storedBytes": 6494
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/165-to-current-attribution.json.gz",
+      "rawSha256": "e60f11f842c492fde58d0344f631534c9b692b0f23533baa09c6140ca8adbdda",
+      "rawBytes": 10710,
+      "storedSha256": "a7d3c6efca3d61dae7332bc92668d87439c372a06d33bdc6a7c1dbdf8b94bc5c",
+      "storedBytes": 2184
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/baseline-to-current-attribution.json.gz",
+      "rawSha256": "4c5f74357f3738fac31defc324d682e00bb1cb1c0b785037bd932a93896863fa",
+      "rawBytes": 96004,
+      "storedSha256": "5bac17b2fc73f1d93c7612cad89c9530b4cf6a01198afa42212cbf1156e637af",
+      "storedBytes": 7238
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/policy-controls.log.gz",
+      "rawSha256": "12049e1417b0ddc11b7c037587f54b39d845107b702b7e646688b255c5971fd8",
+      "rawBytes": 2612,
+      "storedSha256": "874dfda611d9cf9e5607d9997c709ec30fa8ffa4ba04b10104b773136c6a5e57",
+      "storedBytes": 1155
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint3-package-budget/canonical-6a2-original.zip",
+      "storedSha256": "0ae687dbc2c466cc95895674796a53daa1c52337802c266448c55a7ac305edff",
+      "storedBytes": 302114,
+      "artifact": 14834916416
+    },
+    {
+      "path": "internal/records/evidence/2026-11-23-sprint4-package-budget/candidate-before.json.gz",
+      "rawSha256": "f817df70ca383a2f49eae873dfcb3d54627fac932ea9f94890d3f8c58b14b278",
+      "storedSha256": "6ab485bfb5f6f2e52b8b05e2aba744fb96b6c360693ec19968ea03bf8670a725",
+      "retainedPreviously": true
+    }
+  ],
+  "rollback": "Revert this standalone numeric transaction to restore 103100/170600/169400/204000 and their real strict failures. No implementation commit or historical receipt is removed.",
+  "remainingOutsideTransaction": [
+    "Final native and production Compiler consumer acceptance on the actual candidate.",
+    "All 15 release rehearsal stages and remaining direct consumers.",
+    "Definition lifecycle, physical-device/AT, release and application adoption conditions.",
+    "Trusted CI/DCO, eligible independent platform review and normal integration controls."
+  ]
+}

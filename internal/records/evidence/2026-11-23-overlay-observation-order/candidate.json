@@ -1,0 +1,27 @@
+{
+  "base": "d0392fb31513b12f55b9e99b1fcf26a6338569c9",
+  "ciRun": 45146424504,
+  "dialog": {
+    "job": 137596891706,
+    "originalFailure": "No trusted pointer sample hit partial mask/content detachment within original five attempts",
+    "nativeRerun": "pending",
+    "leaveDurationsMs": [150, 200],
+    "attempts": 5,
+    "partialWaitMs": 1000,
+    "dismissWaitMs": 2000
+  },
+  "menubar": {
+    "job": 137596893964,
+    "originalFailureWidths": [
+      143.8817138671875, 143.88134765625, 143.8818359375, 143.8822021484375
+    ],
+    "unchangedMinimum": 143.9,
+    "entryAnimation": "animate-in fade-in-0 zoom-in-95; duration-100",
+    "completionPollMs": 1000,
+    "nativeRerun": "pending"
+  },
+  "independentReview": {
+    "finding": "No blocking finding",
+    "nativeAcceptance": false
+  }
+}

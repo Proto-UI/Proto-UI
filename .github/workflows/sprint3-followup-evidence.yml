@@ -1,0 +1,241 @@
+name: Sprint 3 independent follow-up consumers
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sprint3-followup-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  direct-consumers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [drawer, scroll, image-preview]
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FOLLOWUP_SUITE: ${{ matrix.suite }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - name: Prepare independent owned output and temporary directories
+        run: |
+          set -euo pipefail
+          SPRINT3_FOLLOWUP_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-direct-$FOLLOWUP_SUITE-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3-XXXXXX")
+          mkdir -p "$SPRINT3_FOLLOWUP_EVIDENCE_DIR" "$FOLLOWUP_TMP"
+          printf '%s\n' "SPRINT3_FOLLOWUP_EVIDENCE_DIR=$SPRINT3_FOLLOWUP_EVIDENCE_DIR" "TMPDIR=$FOLLOWUP_TMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the complete original file before dependency setup
+        id: inventory
+        run: node scripts/test/sprint3-followup-evidence.mjs init --suite "$FOLLOWUP_SUITE"
+      - name: Install the declared frozen workspace
+        id: dependencies
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts \
+            2>&1 | tee "$SPRINT3_FOLLOWUP_EVIDENCE_DIR/install.log"
+      - name: Check rejection of incomplete and mixed evidence
+        id: controls
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          node --test scripts/test/sprint3-followup-evidence.test.mjs \
+            2>&1 | tee "$SPRINT3_FOLLOWUP_EVIDENCE_DIR/controls.log"
+      - name: Identify sandboxed Chrome and install actual video and CJK dependencies
+        id: environment
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          printf 'CHROME_PATH=%s\n' "$CHROME" >> "$GITHUB_ENV"
+          {
+            node --version &&
+            corepack pnpm@10.32.1 --version &&
+            "$CHROME" --version &&
+            test -f apps/www/node_modules/playwright-core/cli.js &&
+            node apps/www/node_modules/playwright-core/cli.js install ffmpeg &&
+            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
+            sudo apt-get install -y --no-install-recommends fonts-noto-cjk fontconfig -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
+            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig &&
+            for CJK_LANGUAGE in zh-cn ja ko; do
+              case "$CJK_LANGUAGE" in
+                zh-cn) EXPECTED_CJK_FAMILY='Noto Sans CJK SC' ;;
+                ja) EXPECTED_CJK_FAMILY='Noto Sans CJK JP' ;;
+                ko) EXPECTED_CJK_FAMILY='Noto Sans CJK KR' ;;
+              esac
+              CJK_FAMILY=$(fc-match -f '%{family}\n' "sans-serif:lang=$CJK_LANGUAGE") &&
+                printf 'Resolved %s family: %s\n' "$CJK_LANGUAGE" "$CJK_FAMILY" &&
+                [[ "$CJK_FAMILY" == *"$EXPECTED_CJK_FAMILY"* ]] || exit 1
+            done
+          } 2>&1 | tee "$SPRINT3_FOLLOWUP_EVIDENCE_DIR/environment.log"
+      - name: Execute the complete unchanged file with its own original browser harness
+        id: consumer
+        timeout-minutes: 100
+        run: |
+          set -euo pipefail
+          node scripts/test/sprint3-followup-evidence.mjs run --suite "$FOLLOWUP_SUITE" \
+            2>&1 | tee "$SPRINT3_FOLLOWUP_EVIDENCE_DIR/runner.log"
+      - name: Independently verify original exit, complete cases, source and sealed artifacts
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          : "${SPRINT3_FOLLOWUP_EVIDENCE_DIR:?Evidence directory unavailable}"
+          printf '%s\n' "$WORKFLOW_STEP_OUTCOMES" > "$SPRINT3_FOLLOWUP_EVIDENCE_DIR/workflow-steps.json"
+          if [[ -f scripts/test/sprint3-followup-evidence.mjs ]]; then
+            node scripts/test/sprint3-followup-evidence.mjs finalize --suite "$FOLLOWUP_SUITE"
+          else
+            printf '%s\n' '{"status":"blocked","reason":"The exact candidate checkout was unavailable."}' \
+              > "$SPRINT3_FOLLOWUP_EVIDENCE_DIR/bootstrap-failure.json"
+            exit 1
+          fi
+      - name: Retain every original outcome and all captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprint3-direct-${{ matrix.suite }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.SPRINT3_FOLLOWUP_EVIDENCE_DIR }}
+          if-no-files-found: error
+          retention-days: 30
+
+  installed-consumers:
+    runs-on: ubuntu-24.04
+    # Leave finalization/upload time after the independent source and installed producers.
+    timeout-minutes: 150
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - name: Prepare independent installed and public source output roots
+        run: |
+          set -euo pipefail
+          FOLLOWUP_EVIDENCE_DIR="$RUNNER_TEMP/sprint3-installed-$CANDIDATE_SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          FOLLOWUP_TMP=$(mktemp -d "$RUNNER_TEMP/s3-XXXXXX")
+          mkdir -p "$FOLLOWUP_EVIDENCE_DIR" "$FOLLOWUP_TMP"
+          printf '%s\n' "FOLLOWUP_EVIDENCE_DIR=$FOLLOWUP_EVIDENCE_DIR" \
+            "SPRINT3_FOLLOWUP_EVIDENCE_DIR=$FOLLOWUP_EVIDENCE_DIR/public-select-source" \
+            "TMPDIR=$FOLLOWUP_TMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind all four public Select source consumers before setup
+        id: inventory
+        run: node scripts/test/sprint3-followup-evidence.mjs init --suite select-public-usage
+      - name: Install the declared frozen workspace
+        id: dependencies
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts \
+            2>&1 | tee "$FOLLOWUP_EVIDENCE_DIR/install.log"
+      - name: Check direct finalizers, manual admission and installed owner failure controls
+        id: controls
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          {
+            node --test scripts/test/sprint3-followup-evidence.test.mjs \
+              scripts/test/sprint3-followup-workflow.test.mjs \
+              scripts/test/sprint3-consumer-workflow.test.mjs &&
+            node scripts/ci/check-ci-schedule.mjs &&
+            python3 -B -m unittest discover -s scripts/test/installed-public-consumers -p 'test_*.py' &&
+            node --test scripts/test/installed-public-consumers/native-cleanup.test.mjs \
+              scripts/test/installed-public-consumers/verify-native.test.mjs \
+              scripts/test/installed-public-consumers/verify-result.test.mjs
+          } 2>&1 | tee "$FOLLOWUP_EVIDENCE_DIR/controls.log"
+      - name: Identify the unchanged sandboxed browser and Python baseline
+        id: environment
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$CHROME"
+          printf 'CHROME_PATH=%s\n' "$CHROME" >> "$GITHUB_ENV"
+          {
+            node --version &&
+            corepack pnpm@10.32.1 --version &&
+            python3 --version &&
+            "$CHROME" --version
+          } 2>&1 | tee "$FOLLOWUP_EVIDENCE_DIR/environment.log"
+      - name: Execute the complete four-host public Select source file
+        id: public-source
+        if: ${{ !cancelled() && steps.inventory.outcome == 'success' && steps.dependencies.outcome == 'success' && steps.controls.outcome == 'success' && steps.environment.outcome == 'success' }}
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          node scripts/test/sprint3-followup-evidence.mjs run --suite select-public-usage \
+            2>&1 | tee "$FOLLOWUP_EVIDENCE_DIR/public-source-runner.log"
+      - name: Run installed Tooltip 12, Select 4 and old CLI negative consumers independently
+        id: installed
+        if: ${{ !cancelled() && steps.inventory.outcome == 'success' && steps.dependencies.outcome == 'success' && steps.controls.outcome == 'success' && steps.environment.outcome == 'success' }}
+        timeout-minutes: 100
+        run: |
+          set -euo pipefail
+          python3 -B scripts/test/installed-public-consumers/run.py \
+            --repository "$GITHUB_WORKSPACE" --candidate "$CANDIDATE_SHA" \
+            --output "$FOLLOWUP_EVIDENCE_DIR/installed" \
+            2>&1 | tee "$FOLLOWUP_EVIDENCE_DIR/installed-runner.log"
+      - name: Retain and verify the independent public source result
+        if: always()
+        env:
+          WORKFLOW_STEP_OUTCOMES: ${{ toJSON(steps) }}
+        run: |
+          set -euo pipefail
+          : "${FOLLOWUP_EVIDENCE_DIR:?Evidence directory unavailable}"
+          printf '%s\n' "$WORKFLOW_STEP_OUTCOMES" > "$FOLLOWUP_EVIDENCE_DIR/workflow-steps.json"
+          if [[ -f scripts/test/sprint3-followup-evidence.mjs ]]; then
+            node scripts/test/sprint3-followup-evidence.mjs finalize --suite select-public-usage
+          else
+            printf '%s\n' '{"status":"blocked","reason":"The exact candidate checkout was unavailable."}' \
+              > "$FOLLOWUP_EVIDENCE_DIR/bootstrap-failure.json"
+            exit 1
+          fi
+      - name: Verify installed consumed bytes and complete receipts before artifact exclusion
+        if: always()
+        run: |
+          set -euo pipefail
+          : "${FOLLOWUP_EVIDENCE_DIR:?Evidence directory unavailable}"
+          if [[ -f scripts/test/installed-public-consumers/verify-result.mjs ]]; then
+            node scripts/test/installed-public-consumers/verify-result.mjs \
+              "$FOLLOWUP_EVIDENCE_DIR/installed" "$GITHUB_WORKSPACE" "$CANDIDATE_SHA" \
+              2>&1 | tee "$FOLLOWUP_EVIDENCE_DIR/installed-verification.log"
+          else
+            printf '%s\n' '{"status":"blocked","reason":"The installed consumer verifier was unavailable."}' \
+              > "$FOLLOWUP_EVIDENCE_DIR/installed-bootstrap-failure.json"
+            exit 1
+          fi
+      - name: Retain tarballs, generated consumers, locks, code, images and failure logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sprint3-installed-and-public-source-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.FOLLOWUP_EVIDENCE_DIR }}
+            !${{ env.FOLLOWUP_EVIDENCE_DIR }}/**/node_modules/**
+            !${{ env.FOLLOWUP_EVIDENCE_DIR }}/**/__pycache__/**
+          if-no-files-found: error
+          retention-days: 30

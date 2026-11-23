@@ -5,7 +5,6 @@ import {
   type BrowserTargetAssets,
 } from '../../../apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox';
 import type { BrowserCompileResult } from '../src/browser/protocol';
-import { IR_VERSION } from '../src/ir';
 
 /** Host protocol tests inject messages/time, not executed iframe or WASM evidence. */
 function preview(listenerReady = true) {

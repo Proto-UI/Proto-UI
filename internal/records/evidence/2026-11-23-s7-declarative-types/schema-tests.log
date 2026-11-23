@@ -1,0 +1,16 @@
+✔ both paths consume an officially schema-valid literal fixture (7.706382ms)
+✔ schema validity and accessibility sufficiency are different observations (0.921621ms)
+✔ valid external binding is rejected explicitly by the common literal subset (0.971196ms)
+✔ malformed external input does not get a schema-valid label (0.738925ms)
+✔ external function RPC is explicit application work, not a Tabs operation (1.070456ms)
+✔ unconsumed catalog features fail explicitly rather than silently disappear (0.44425ms)
+✔ surface retirement rejects stale update and duplicate owner creation (0.520726ms)
+✔ malformed external messages and updates cannot enter a typed renderer surface (0.605605ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 261.351898
