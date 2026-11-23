@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { parsePrototype } from '../../../src/parser.ts';
 import { emitGpuiSource } from '../../../src/gpui-source.ts';
 import { captureFacadeSource, captureRendererSource } from '../capture-facade.ts';
+import { childRendererAliasSource } from '../capture-renderer-alias.ts';
 
 const fixture = path.dirname(fileURLToPath(import.meta.url));
 const repository = path.resolve(fixture, '../../../../..');
@@ -95,6 +96,15 @@ for (const [name, result] of [
 receipt.sources.push({
   path: 'packages/compiler/test/fixtures/capture-facade.ts',
   sha256: digest(readFileSync(path.join(fixture, '../capture-facade.ts'))),
+});
+
+for (const mode of ['direct', 'copied', 'forwarded']) {
+  const name = `capture_child_${mode}`;
+  dependencies.push([name, emit(name, childRendererAliasSource(mode))]);
+}
+receipt.sources.push({
+  path: 'packages/compiler/test/fixtures/capture-renderer-alias.ts',
+  sha256: digest(readFileSync(path.join(fixture, '../capture-renderer-alias.ts'))),
 });
 
 for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])

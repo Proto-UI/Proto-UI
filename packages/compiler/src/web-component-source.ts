@@ -561,9 +561,21 @@ export function emitWebComponentSource(
         span: node.span,
       });
     try {
+      // A renderer may omit its unused public parameter. It still needs the
+      // host's frame for native return construction; ordinary zero-argument
+      // helpers and exposed methods retain their scalar return values.
+      const implicitRenderer =
+        !options.ssr && node.context === 'render' && node.parameters.length === 0
+          ? `${prefix}Renderer${nativeSequence++}`
+          : undefined;
       const renderer =
-        !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
-      const callable = `(${emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName)})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+        !options.ssr && node.parameters[0]?.type === 'render'
+          ? node.parameters[0].name
+          : implicitRenderer;
+      const formals = implicitRenderer
+        ? `${implicitRenderer}: ${prefix}Renderer`
+        : emitJavaScriptParameters(node.parameters, (item) => expr(item, depth), typeName);
+      const callable = `(${formals})${node.context === 'helper' && !['function', 'unknown', 'template'].includes(node.returnType as string) ? `: ${typeName(node.returnType)}` : ''} => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
       return callBoundaries.authored.has(node)
         ? `${prefix}MarkAuthoredCallable(${callable})`
         : callable;

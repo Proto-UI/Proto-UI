@@ -1024,7 +1024,8 @@ fn no_unrelated_capability_state_handles_listeners_or_metadata_are_initialized(
             assert_eq!(ordinary["metadataKeys"], json!(0));
             assert_eq!(ordinary["nativeSubscriptions"], json!(0));
             let focus = host.first.read(cx).native_resource_counts();
-            assert_eq!(focus["nativeSubscriptions"], json!(3));
+            // Focus observation now owns the subtree-exit subscription too.
+            assert_eq!(focus["nativeSubscriptions"], json!(4));
             assert_eq!(focus["scrollHandles"], json!(0));
             println!(
                 "native-resource-evidence {}",
@@ -1374,6 +1375,144 @@ fn native_focus_draw_notifications_reach_entity_observers(cx: &mut TestAppContex
     }).unwrap();
     drop(observation);
 }
+
+// This fixture mounts the actual emitted component. It does not recreate
+// generated focus subscriptions or call native_press_blur from the host.
+struct FocusSubtreeContent {
+    first: gpui::FocusHandle,
+    second: gpui::FocusHandle,
+}
+impl Render for FocusSubtreeContent {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        gpui::div().flex().flex_col()
+            .child(gpui::div().id("focus-subtree-first").track_focus(&self.first).w(px(96.)).h(px(36.)))
+            .child(gpui::div().id("focus-subtree-second").track_focus(&self.second).w(px(96.)).h(px(36.)))
+    }
+}
+struct FocusSubtreeHarness {
+    component: Entity<focus_scope::CompiledComponent>,
+    first: gpui::FocusHandle,
+    second: gpui::FocusHandle,
+    outside: gpui::FocusHandle,
+    observed: Rc<RefCell<Vec<Json>>>,
+    _content: Entity<FocusSubtreeContent>,
+    _observation: gpui::Subscription,
+}
+impl Render for FocusSubtreeHarness {
+    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        gpui::div().size_full().flex()
+            .child(self.component.clone())
+            .child(gpui::div().id("focus-subtree-outside").track_focus(&self.outside).size(px(40.)))
+    }
+}
+fn focus_subtree_key(window: WindowHandle<FocusSubtreeHarness>, down: bool, cx: &mut TestAppContext) {
+    cx.update_window(window.into(), |_, window, cx| {
+        let keystroke = gpui::Keystroke::parse("enter").unwrap();
+        window.dispatch_event(if down {
+            gpui::PlatformInput::KeyDown(gpui::KeyDownEvent {
+                keystroke, is_held: false, prefer_character_input: false,
+            })
+        } else { gpui::PlatformInput::KeyUp(gpui::KeyUpEvent { keystroke }) }, cx);
+    }).unwrap();
+    cx.run_until_parked();
+}
+
+#[gpui::test]
+fn generated_root_cancels_a_native_child_press_on_subtree_exit_once(cx: &mut TestAppContext) {
+    let window = cx.open_window(size(px(260.), px(120.)), |window, cx| {
+        let component = focus_scope::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let first = cx.focus_handle();
+        let second = cx.focus_handle();
+        let content = cx.new(|_| FocusSubtreeContent { first: first.clone(), second: second.clone() });
+        component.update(cx, |component, cx| {
+            component.set_slot(vec![NativeSnapshot::native_view(content.clone().into())], cx).unwrap();
+        });
+        let observed = Rc::new(RefCell::new(Vec::new()));
+        let output = observed.clone();
+        let observation = window.observe(&component, cx, move |component, _, cx| {
+            output.borrow_mut().push(component.read(cx).handle().state("pressed").unwrap());
+        });
+        FocusSubtreeHarness {
+            component, first, second, outside: cx.focus_handle(), observed,
+            _content: content, _observation: observation,
+        }
+    });
+    window.update(cx, |_, window, _| window.activate_window()).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, window, cx| window.focus(&host.first, cx)).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, window, cx| {
+        let root_focus = host.component.focus_handle(cx);
+        assert!(host.first.is_focused(window));
+        assert!(root_focus.contains(&host.first, window));
+        assert!(!root_focus.is_focused(window), "the generated root never owned direct focus for this gesture");
+        host.observed.borrow_mut().clear();
+    }).unwrap();
+    focus_subtree_key(window, true, cx);
+    frames(window, cx);
+    window.update(cx, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        assert!(host.first.is_focused(window));
+        assert_eq!(handle.state("pressed").unwrap(), json!(true));
+        assert_eq!(handle.state("pressStarts").unwrap().as_f64(), Some(1.));
+        assert_eq!(handle.state("pressCommits").unwrap().as_f64(), Some(1.));
+        assert_eq!(handle.state("pressCancels").unwrap().as_f64(), Some(0.));
+        window.focus(&host.second, cx);
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        assert!(host.second.is_focused(window));
+        assert_eq!(handle.state("pressed").unwrap(), json!(true), "moving between native descendants stays inside the root");
+        assert_eq!(handle.state("pressCancels").unwrap().as_f64(), Some(0.));
+        assert_eq!(handle.state("hostBlurs").unwrap().as_f64(), Some(0.));
+        host.observed.borrow_mut().clear();
+        window.focus(&host.outside, cx);
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        assert!(host.outside.is_focused(window));
+        assert!(!host.component.focus_handle(cx).contains_focused(window, cx));
+        assert_eq!(handle.state("pressed").unwrap(), json!(false), "leaving the native subtree retires the ancestor press before key-up");
+        assert_eq!(handle.state("pressCancels").unwrap().as_f64(), Some(1.));
+        assert_eq!(handle.state("pressEnds").unwrap().as_f64(), Some(0.));
+        assert_eq!(handle.state("hostBlurs").unwrap().as_f64(), Some(0.), "subtree exit must not invent a direct root blur");
+        assert_eq!(host.observed.borrow().last(), Some(&json!(false)), "draw-phase retirement reaches generated-entity observers");
+    }).unwrap();
+    focus_subtree_key(window, false, cx);
+    frames(window, cx);
+    window.update(cx, |host, window, cx| {
+        let handle = host.component.read(cx).handle();
+        assert_eq!(handle.state("pressed").unwrap(), json!(false));
+        assert_eq!(handle.state("pressCommits").unwrap().as_f64(), Some(1.));
+        assert_eq!(handle.state("pressCancels").unwrap().as_f64(), Some(1.));
+        window.focus(&host.component.focus_handle(cx), cx);
+    }).unwrap();
+    frames(window, cx);
+    // Direct root blur and subtree exit now describe the same transition.
+    // Both subscriptions may run, but the held lease is consumed only once.
+    focus_subtree_key(window, true, cx);
+    window.update(cx, |host, window, cx| {
+        assert!(host.component.focus_handle(cx).is_focused(window));
+        assert_eq!(host.component.read(cx).handle().state("pressed").unwrap(), json!(true));
+        window.focus(&host.outside, cx);
+    }).unwrap();
+    frames(window, cx);
+    window.update(cx, |host, _, cx| {
+        let handle = host.component.read(cx).handle();
+        assert_eq!(handle.state("pressed").unwrap(), json!(false));
+        assert_eq!(handle.state("pressCancels").unwrap().as_f64(), Some(2.), "root blur and focus-out cannot cancel the same lease twice");
+        assert_eq!(handle.state("hostBlurs").unwrap().as_f64(), Some(1.), "the actual direct root blur remains observable exactly once");
+    }).unwrap();
+    focus_subtree_key(window, false, cx);
+    window.update(cx, |host, _, cx| {
+        let handle = host.component.read(cx).handle();
+        assert_eq!(handle.state("pressCommits").unwrap().as_f64(), Some(2.));
+        assert_eq!(handle.state("pressCancels").unwrap().as_f64(), Some(2.));
+    }).unwrap();
+}
+
 
 struct RenderOutputHarness {
     component: Entity<validation::CompiledComponent>,

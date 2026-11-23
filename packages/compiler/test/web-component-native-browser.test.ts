@@ -14,7 +14,7 @@ const floatingUi = createRequire(
 interface NativeElement extends HTMLElement {
   logicalOwner: symbol | null;
   update(): void;
-  getExposes(): { bump?: (next: number) => void };
+  getExposes(): { bump?: (next: number) => void; read?: () => string | number | null };
   dispose(): void;
 }
 let nextTag = 0;
@@ -85,6 +85,44 @@ export default definePrototype({name:'native-mixed-helper',setup(def){
 // Thin compiler completion standard: a representation change cannot erase an admitted occurrence.
 for (const shadow of [false, true]) {
   describe(`native browser lowering, shadow=${shadow}`, () => {
+    for (const scalar of ['plain scalar', 7, null] as const) {
+      it(`constructs zero-parameter renderer ${JSON.stringify(scalar)} without changing ordinary methods`, async () => {
+        const value = JSON.stringify(scalar);
+        const host = create(
+          `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'native-scalar-renderer',setup(def){
+  const read=()=>${value};
+  def.expose.method('read',()=>read());
+  return ()=>${value};
+}});`,
+          shadow
+        );
+        const child = document.createElement('button');
+        child.textContent = 'native child';
+        host.append(child);
+        document.body.append(host);
+        const root = host.shadowRoot ?? host;
+        const renderedText = () =>
+          Array.from(root.childNodes)
+            .filter((node) => node.nodeType === Node.TEXT_NODE)
+            .map((node) => node.textContent);
+        expect(host.logicalOwner).not.toBeNull();
+        expect(renderedText()).toEqual(scalar === null ? [] : [String(scalar)]);
+        expect(host.querySelector('button')).toBe(child);
+        expect(child.parentNode).toBe(host);
+        const exposes = host.getExposes();
+        expect(exposes.read?.()).toBe(scalar);
+        host.update();
+        await Promise.resolve();
+        expect(renderedText()).toEqual(scalar === null ? [] : [String(scalar)]);
+        expect(host.querySelector('button')).toBe(child);
+        expect(child.parentNode).toBe(host);
+        expect(exposes.read?.()).toBe(scalar);
+        host.dispose();
+        expect(child.parentNode).toBe(host);
+        expect(() => exposes.read?.()).toThrow(/disposed/);
+      });
+    }
     it('constructs a legal tag-only empty element', () => {
       const host = create(
         "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'native-empty-el',setup(){return r=>r.el('div');}});",

@@ -79,19 +79,26 @@ export function nativeFieldSources(
   ir: PrototypeIR,
   callables: (value: ExpressionIR, scope: NativeLexicalScope) => readonly NativeCallableSource[]
 ): NativeValueSource[] {
+  // A copied native getter remains bound to its actual capture. It is not an
+  // authored FunctionIR and must not be fabricated as one for either emitter.
+  type ChildGetter = { hookId: string; getter: 'getAsHookHandle' };
+  type Source = NativeValueSource | ChildGetter;
+  const values = (sources: readonly Source[]): NativeValueSource[] =>
+    sources.filter((source): source is NativeValueSource => 'value' in source);
   const hooks = new Map(ir.hooks.map((hook) => [hook.id, hook]));
   const module = moduleLexicalScope(ir);
   const active = new Map<ExpressionIR, Map<string, Set<NativeLexicalScope>>>();
+  const activeGetters = new Map<ExpressionIR, Set<NativeLexicalScope>>();
   const capture = (id: string, span: ExpressionIR['span']): ExpressionIR => ({
     kind: 'reference',
     name: '\0native-capture-' + id,
     type: { kind: 'capture', hookId: id },
     span,
   });
-  function projected(id: string, key: string): NativeValueSource[] {
+  function projected(id: string, key: string): Source[] {
     const hook = hooks.get(id);
     if (!hook) return [];
-    if (!hook.projectHandle) return key === 'render' ? nativeReturnSources(hook.setup, module) : [];
+    if (!hook.projectHandle) return field(capture(id, hook.span), key, module);
     return nativeReturnSources(
       hook.projectHandle,
       module,
@@ -99,7 +106,87 @@ export function nativeFieldSources(
       module
     ).flatMap((source) => field(source.value, key, source.scope));
   }
-  function field(node: ExpressionIR, key: string, scope: NativeLexicalScope): NativeValueSource[] {
+  function callee(node: Extract<ExpressionIR, { kind: 'call' | 'helper-call' }>): ExpressionIR {
+    return node.kind === 'call'
+      ? node.callee
+      : {
+          kind: 'reference',
+          name: node.name,
+          type: 'function',
+          span: node.span,
+        };
+  }
+  function callResults<T>(
+    node: Extract<ExpressionIR, { kind: 'call' | 'helper-call' }>,
+    scope: NativeLexicalScope,
+    select: (source: NativeValueSource) => T[]
+  ): T[] {
+    return callables(callee(node), scope).flatMap((target) =>
+      nativeReturnSources(target.fn, target.scope, node.arguments, scope).flatMap(select)
+    );
+  }
+  function getters(node: ExpressionIR, scope: NativeLexicalScope): ChildGetter[] {
+    const contexts = activeGetters.get(node) ?? new Set<NativeLexicalScope>();
+    if (contexts.has(scope)) return [];
+    contexts.add(scope);
+    activeGetters.set(node, contexts);
+    try {
+      if (node.kind === 'narrow') return getters(node.value, scope);
+      if (node.kind === 'reference') {
+        const binding = scope.lookup(node.name);
+        return binding?.value ? getters(binding.value, binding.environment) : [];
+      }
+      if (node.kind === 'conditional')
+        return [...getters(node.then, scope), ...getters(node.otherwise, scope)];
+      if (node.kind === 'member' || (node.kind === 'element' && node.index.kind === 'literal')) {
+        const key =
+          node.kind === 'member'
+            ? node.property
+            : node.index.kind === 'literal'
+              ? String(node.index.value)
+              : '';
+        return field(node.object, key, scope).flatMap((source) =>
+          'getter' in source ? [source] : getters(source.value, source.scope)
+        );
+      }
+      if (node.kind === 'call' || node.kind === 'helper-call')
+        return callResults(node, scope, (source) => getters(source.value, source.scope));
+      if (node.kind === 'authored-hook') {
+        const hook = hooks.get(node.hookId);
+        return hook?.projectHandle
+          ? nativeReturnSources(
+              hook.projectHandle,
+              module,
+              [capture(hook.id, hook.span)],
+              module
+            ).flatMap((source) => getters(source.value, source.scope))
+          : [];
+      }
+      return [];
+    } finally {
+      contexts.delete(scope);
+    }
+  }
+  function childFields(getter: ChildGetter, name: ExpressionIR | undefined, key: string): Source[] {
+    if (!name) return [];
+    const names = valueAlternatives(name.type);
+    const literalNames =
+      nodeName(name) ??
+      (names.every(
+        (type) =>
+          typeof type !== 'string' && type.kind === 'literal' && typeof type.value === 'string'
+      )
+        ? names.map((type) => (type as { value: string }).value)
+        : undefined);
+    // A broad string may name any declared child, but never an invented one.
+    return (hooks.get(getter.hookId)?.capture?.children ?? [])
+      .filter((child) => !literalNames || literalNames.includes(child.name))
+      .flatMap((child) => projected(child.id, key));
+  }
+  function nodeName(value: ExpressionIR): string[] | undefined {
+    return value.kind === 'literal' && typeof value.value === 'string' ? [value.value] : undefined;
+  }
+  function field(node: ExpressionIR, key: string, scope: NativeLexicalScope): Source[] {
     const properties = active.get(node) ?? new Map<string, Set<NativeLexicalScope>>();
     const contexts = properties.get(key) ?? new Set<NativeLexicalScope>();
     if (contexts.has(scope)) return [];
@@ -116,6 +203,8 @@ export function nativeFieldSources(
           const hook = hooks.get(hookId);
           return hook ? nativeReturnSources(hook.setup, module) : [];
         });
+      if (key === 'getAsHookHandle' && captures.length)
+        return captures.map(({ hookId }) => ({ hookId, getter: 'getAsHookHandle' }));
       if (node.kind === 'narrow') return field(node.value, key, scope);
       if (node.kind === 'reference') {
         const binding = scope.lookup(node.name);
@@ -128,7 +217,7 @@ export function nativeFieldSources(
         return entry ? [{ value: entry.value, scope }] : [];
       }
       if (node.kind === 'object-spread') {
-        const result: NativeValueSource[] = [];
+        const result: Source[] = [];
         // Later explicit entries replace preceding properties. A spread's
         // optional property may be absent, so retain preceding alternatives.
         for (const part of [...node.parts].reverse()) {
@@ -143,40 +232,32 @@ export function nativeFieldSources(
       }
       if (node.kind === 'authored-hook') return projected(node.hookId, key);
       if (node.kind === 'member')
-        return field(node.object, node.property, scope).flatMap((source) =>
+        return values(field(node.object, node.property, scope)).flatMap((source) =>
           field(source.value, key, source.scope)
         );
       if (node.kind === 'operation' && node.operation === 'capture.getAsHookHandle') {
-        const name = node.arguments[0];
-        if (name?.kind !== 'literal' || typeof name.value !== 'string' || !node.receiver) return [];
+        if (!node.receiver) return [];
         return valueAlternatives(node.receiver.type).flatMap((type) => {
           if (typeof type === 'string' || type.kind !== 'capture') return [];
-          const child = hooks
-            .get(type.hookId)
-            ?.capture?.children.find((child) => child.name === name.value);
-          return child ? projected(child.id, key) : [];
+          return childFields(
+            { hookId: type.hookId, getter: 'getAsHookHandle' },
+            node.arguments[0],
+            key
+          );
         });
       }
       if (node.kind === 'call' || node.kind === 'helper-call') {
-        const callee =
-          node.kind === 'call'
-            ? node.callee
-            : {
-                kind: 'reference' as const,
-                name: node.name,
-                type: 'function' as const,
-                span: node.span,
-              };
-        return callables(callee, scope).flatMap((target) =>
-          nativeReturnSources(target.fn, target.scope, node.arguments, scope).flatMap((source) =>
-            field(source.value, key, source.scope)
-          )
-        );
+        return [
+          ...getters(callee(node), scope).flatMap((getter) =>
+            childFields(getter, node.arguments[0], key)
+          ),
+          ...callResults(node, scope, (source) => field(source.value, key, source.scope)),
+        ];
       }
       return [];
     } finally {
       contexts.delete(scope);
     }
   }
-  return field(value, property, environment);
+  return values(field(value, property, environment));
 }

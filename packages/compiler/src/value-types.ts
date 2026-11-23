@@ -224,9 +224,12 @@ export function valueAssignable(actual: ValueType, expected: ValueType): boolean
   ) {
     // A precise lookup result is authority supplied by the actual capture getter,
     // never by an arbitrary function with a superficially compatible signature.
+    // The map is complete: checkedCall interprets an absent key as undefined.
+    // Dropping entries would therefore erase real return values and capabilities.
     if (
       expected.lookup !== undefined &&
       (actual.lookup === undefined ||
+        actual.lookup.length !== expected.lookup.length ||
         !expected.lookup.every((entry) =>
           actual.lookup!.some(
             (other) => entry.key === other.key && valueTypeEqual(entry.type, other.type)
