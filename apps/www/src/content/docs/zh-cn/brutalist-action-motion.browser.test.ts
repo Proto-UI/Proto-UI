@@ -992,6 +992,30 @@ async function captureItemPair(
   originalRects: number[][] | null,
   action: () => Promise<void>
 ) {
+  // The Select Content ancestor runs the family's enter animation (150ms
+  // fade/zoom). While it runs, the ancestor carries a partial opacity and a
+  // scale, so the Item's effective paint differs from its own computed paint
+  // and the contrast cannot be certified from that frame. Measure the settled
+  // content: the observer only starts once the ancestor animation finished.
+  await expect
+    .poll(
+      () =>
+        items.evaluateAll((all) =>
+          all.every((node) => {
+            const content = node.closest('[role="listbox"]');
+            return (
+              !content ||
+              content
+                .getAnimations({ subtree: true })
+                .every(
+                  (animation) => !animation.pending && animation.playState !== 'running'
+                )
+            );
+          })
+        ),
+      { timeout: 5_000 }
+    )
+    .toBe(true);
   await itemBounded(
     'Item observer installation',
     items.evaluateAll((all, fixedRects) => {
