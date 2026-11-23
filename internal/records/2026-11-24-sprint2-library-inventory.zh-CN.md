@@ -76,3 +76,5 @@ exit 0 只表示本次所选执行预算正常完成且没有 compiler defect / 
 [完整小样本证据与逐文件哈希](./evidence/2026-11-24-sprint2-library-inventory/validation.json)随本记录保存。完整源码与新定义融合后的全库 sweep 尚未在此记录中执行；必须使用最终确切来源另留结果。
 
 随后还增加了真实工具身份绑定：description 读取 compiler 实际解析的 TypeScript、source-loader 的 TypeScript 和 tsx 的 package / implementation 哈希。直接 `--describe` 已实际观察 TypeScript 5.9.3 与 tsx 4.21.0；正式执行会将各自实际路径、版本和哈希写入 run fingerprint。这是执行元数据增量，没有重标上述小样本的脚本 SHA 或扩大其通过范围。
+
+执行器自审进一步收紧了恢复和失败边界：每个 entry worker 在读取源码前再次核对 checkout、HEAD、干净状态、脚本、compiler 入口、source-loader 及实际 TypeScript / tsx 身份；共享 snapshot 的不可变检查移到每份收据持久化之前。恢复读取会核对 profile 身份和原诊断分类，PASS 必须同时有对应 profile 的输出及匹配的 artifact 哈希。报告保留全部 worker attempt 的退出状态、信号、资源和缺失终态收据，后继 resume 不会抹掉先前 OOM / 中断等执行失败；编译行结果与进程是否正常结束分开记录。可选 ratchet baseline 另绑定实际报告文件字节的 SHA-256，避免只列候选来源却没有绑定所比较的结果内容。

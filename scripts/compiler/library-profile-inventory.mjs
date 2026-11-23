@@ -241,6 +241,19 @@ async function compilerModule(modulePath) {
       : new URL('../../packages/compiler/src/index.ts', import.meta.url).href
   );
 }
+function packageIdentity(owner, name) {
+  const require = createRequire(owner);
+  const manifestPath = require.resolve(`${name}/package.json`);
+  const entryPath = require.resolve(name);
+  return {
+    name,
+    version: json(manifestPath).version,
+    manifestPath,
+    manifestSha256: sha(readFileSync(manifestPath)),
+    entryPath,
+    entrySha256: sha(readFileSync(entryPath)),
+  };
+}
 async function describe(modulePath) {
   const compiler = await compilerModule(modulePath);
   const profiles = Object.values(compiler.TARGET_PROFILES)
@@ -260,19 +273,7 @@ async function describe(modulePath) {
         `Pinned implementation drift: ${input.path}`
       );
   }
-  const packageIdentity = (owner, name) => {
-    const require = createRequire(owner);
-    const manifestPath = require.resolve(`${name}/package.json`);
-    const entryPath = require.resolve(name);
-    return {
-      name,
-      version: json(manifestPath).version,
-      manifestPath,
-      manifestSha256: sha(readFileSync(manifestPath)),
-      entryPath,
-      entrySha256: sha(readFileSync(entryPath)),
-    };
-  };
+  const sourceLoaderTypeScript = packageIdentity(script, 'typescript');
   return {
     profiles,
     compilerBuild: compiler.compilerBuildIdentity,
@@ -284,8 +285,10 @@ async function describe(modulePath) {
       readFileSync(path.join(root, 'packages/compiler/src/source-loader.ts'))
     ),
     node: process.version,
-    compilerTypeScript: packageIdentity(modulePath ?? script, 'typescript'),
-    sourceLoaderTypeScript: packageIdentity(script, 'typescript'),
+    compilerTypeScript: modulePath
+      ? packageIdentity(modulePath, 'typescript')
+      : sourceLoaderTypeScript,
+    sourceLoaderTypeScript,
     typescriptLoader: packageIdentity(script, 'tsx'),
   };
 }
@@ -333,6 +336,45 @@ async function compileEntry(requestPath) {
   const request = json(requestPath),
     plan = json(path.join(request.output, 'plan.json'));
   assert.equal(request.universeFingerprint, plan.universeFingerprint);
+  assert.equal(root, plan.binding.sourceRoot, 'Worker checkout differs from its plan');
+  assert.equal(sha(readFileSync(script)), plan.binding.scriptSha256, 'Worker script changed');
+  assert.equal(
+    git('rev-parse', 'HEAD').trim(),
+    plan.binding.revision,
+    'Worker source revision changed'
+  );
+  assert.equal(git('status', '--porcelain', '--untracked-files=no'), '', 'Worker source is dirty');
+  assert.equal(
+    sha(
+      readFileSync(
+        plan.binding.compilerModulePath ?? path.join(root, 'packages/compiler/src/index.ts')
+      )
+    ),
+    plan.binding.compilerModuleSha256,
+    'Worker compiler entry changed'
+  );
+  assert.equal(
+    sha(readFileSync(path.join(root, 'packages/compiler/src/source-loader.ts'))),
+    plan.binding.sourceLoaderSha256
+  );
+  const loaderTypeScript = packageIdentity(script, 'typescript');
+  assert.deepEqual(
+    loaderTypeScript,
+    plan.binding.sourceLoaderTypeScript,
+    'Source-loader TypeScript changed'
+  );
+  assert.deepEqual(
+    plan.binding.compilerModulePath
+      ? packageIdentity(plan.binding.compilerModulePath, 'typescript')
+      : loaderTypeScript,
+    plan.binding.compilerTypeScript,
+    'Compiler TypeScript changed'
+  );
+  assert.deepEqual(
+    packageIdentity(script, 'tsx'),
+    plan.binding.typescriptLoader,
+    'TypeScript loader changed'
+  );
   const compiler = await compilerModule(plan.binding.compilerModulePath);
   const { FileSourceGraph } = await import('../../packages/compiler/src/source-loader.ts');
   const entry = plan.entries.find((row) => row.entry === request.entry);
@@ -456,6 +498,11 @@ async function compileEntry(requestPath) {
       };
     }
     row.memory.after = resourceSnapshot();
+    assert.equal(
+      digest(closureBinding(snapshot, graph, failures, entry.entry)),
+      closureSha256,
+      'Shared source snapshot changed before receipt publication'
+    );
     save(path.join(request.output, 'rows', `${id(key(entry.entry, profile))}.json`), row);
     process.stdout.write(
       JSON.stringify({
@@ -468,11 +515,6 @@ async function compileEntry(requestPath) {
       }) + '\n'
     );
   }
-  assert.equal(
-    digest(closureBinding(snapshot, graph, failures, entry.entry)),
-    closureSha256,
-    'Shared source snapshot changed during profile execution'
-  );
   save(requestPath.replace(/\.request\.json$/, '.resources.json'), {
     heapLimitMiB: request.heapMb,
     final: resourceSnapshot(),
@@ -499,14 +541,31 @@ function storedRows(directory, plan, selectedKeys) {
     );
     assert.equal(file, `${id(key(row.entry, row.profile))}.json`);
     assert.equal(row.entrySha256, plan.entries.find((item) => item.entry === row.entry)?.sha256);
-    assert.ok(plan.profiles.find((profile) => profile.id === row.profile)?.implemented);
+    const profile = plan.profiles.find((profile) => profile.id === row.profile);
+    assert.ok(profile?.implemented);
+    assert.equal(row.profileSha256, digest(profile), 'Stored profile identity changed');
+    assert.equal(row.execution, 'compileFile-source-to-emitter');
     assert.ok(['PASS', 'FAIL', 'UNSUPPORTED'].includes(row.status));
+    assert.equal(row.closure.file, `closures/${id(row.entry)}.json`);
     assert.equal(digest(json(path.join(directory, row.closure.file))), row.closure.sha256);
-    if (row.output)
+    if (row.status === 'PASS') {
+      assert.ok(row.output, 'PASS receipt requires an emitted output');
+      assert.equal(row.output.profile, row.profile);
+      assert.equal(row.firstDiagnostic, null);
+      assert.equal(row.failureKind, null);
+      assert.deepEqual(row.diagnostics, []);
+      assert.equal(row.output.artifacts.file, `emitted/${id(key(row.entry, row.profile))}.json`);
       assert.equal(
         digest(json(path.join(directory, row.output.artifacts.file))),
         row.output.artifacts.sha256
       );
+    } else {
+      const classified = classifyResult({ ok: false, diagnostics: row.diagnostics });
+      assert.equal(row.status, classified.status, 'Stored diagnostic classification changed');
+      assert.equal(row.failureKind, classified.failureKind);
+      assert.deepEqual(row.firstDiagnostic, classified.firstDiagnostic);
+      assert.equal(row.output, undefined, 'Refused receipt must not claim an emitted output');
+    }
     assert.ok(!rows.has(key(row.entry, row.profile)), 'Duplicate stored receipt');
     rows.set(key(row.entry, row.profile), row);
   }
@@ -541,6 +600,32 @@ function report(plan, completed, receipts) {
   );
   const currentNames = new Set(plan.entries.map((row) => row.entry));
   const oldNames = new Set(plan.history.members?.map((row) => row.entry) ?? []);
+  const executionAttempts = [],
+    missingProcessReceipts = [];
+  for (const receipt of receipts) {
+    const directory = path.join(receipt.directory, 'attempts');
+    for (const file of existsSync(directory)
+      ? readdirSync(directory)
+          .filter((name) => name.endsWith('.request.json'))
+          .sort()
+      : []) {
+      const processPath = path.join(directory, file.replace(/\.request\.json$/, '.process.json'));
+      if (existsSync(processPath)) {
+        const actual = json(processPath);
+        executionAttempts.push({
+          file: processPath,
+          entry: actual.entry,
+          profiles: actual.profiles,
+          status: actual.status,
+          signal: actual.signal,
+          error: actual.error,
+          elapsedMs: actual.elapsedMs,
+          heapLimitMiB: actual.heapLimitMiB,
+          resources: actual.resources,
+        });
+      } else missingProcessReceipts.push(path.join(directory, file));
+    }
+  }
   return {
     schema: SCHEMA,
     universeFingerprint: plan.universeFingerprint,
@@ -561,6 +646,15 @@ function report(plan, completed, receipts) {
       statuses.UNTESTED === 0 && statuses.FAIL === 0 && statuses.UNSUPPORTED === 0,
     profiles: plan.profiles,
     history: plan.history,
+    execution: {
+      scope:
+        'All actual worker attempts, including earlier failures retained across resume. Completed compilation rows and process exit outcomes are distinct.',
+      recordedAttempts: executionAttempts.length,
+      failedAttempts: executionAttempts.filter((attempt) => attempt.status !== 0 || attempt.error)
+        .length,
+      missingProcessReceipts,
+      attempts: executionAttempts,
+    },
     historicalMembership: plan.history.recovered
       ? {
           retained: [...oldNames].filter((name) => currentNames.has(name)),
@@ -822,7 +916,13 @@ async function run(args) {
       'Tracked source changed during inventory'
     );
     const final = report(plan, completed, [{ directory: opt.output, selection }]);
-    if (opt.baseline) final.ratchet = compareReports(json(opt.baseline), final);
+    if (opt.baseline) {
+      const baselineBytes = readFileSync(opt.baseline);
+      final.ratchet = {
+        ...compareReports(JSON.parse(baselineBytes.toString('utf8')), final),
+        baselineReportSha256: sha(baselineBytes),
+      };
+    }
     final.selectedComplete = selectedEntries.every((entry) =>
       selectedProfiles.every(
         (profile) =>
@@ -856,10 +956,12 @@ async function run(args) {
 function merge(args) {
   const output = path.resolve(args.shift()),
     baselineIndex = args.indexOf('--baseline');
-  let baseline;
+  let baseline, baselineReportSha256;
   if (baselineIndex !== -1) {
     assert.equal(baselineIndex, args.length - 2, '--baseline must be the final merge option');
-    baseline = json(path.resolve(args[baselineIndex + 1]));
+    const baselineBytes = readFileSync(path.resolve(args[baselineIndex + 1]));
+    baseline = JSON.parse(baselineBytes.toString('utf8'));
+    baselineReportSha256 = sha(baselineBytes);
     args.splice(baselineIndex);
   }
   assert.ok(args.length, 'Provide run directories to merge');
@@ -885,7 +987,7 @@ function merge(args) {
       selection: plans[index].selection,
     }))
   );
-  if (baseline) result.ratchet = compareReports(baseline, result);
+  if (baseline) result.ratchet = { ...compareReports(baseline, result), baselineReportSha256 };
   save(output, result);
   console.log(
     JSON.stringify({
