@@ -147,9 +147,13 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
+          progress_source=()
+          if [[ "$CONTROLLED_OVERLAY" == 'true' ]]; then
+            progress_source=(--controlled-overlay "$RUNNER_TEMP/liquid-frame-budget/controlled-overlay/receipt.json")
+          fi
           timeout --signal=TERM --kill-after=20s 4m \
             node --import tsx "$GITHUB_WORKSPACE/candidate/scripts/analysis/liquid-glass-source-progress.mjs" \
-            "$RUNNER_TEMP/liquid-frame-budget/baseline-progress" \
+            "$RUNNER_TEMP/liquid-frame-budget/baseline-progress" "${progress_source[@]}" \
             2>&1 | tee "$RUNNER_TEMP/liquid-frame-budget/baseline-progress.log"
       - name: Candidate four-host source progress
         id: candidate-progress

@@ -10,6 +10,10 @@ import {
   verifyOverlay,
   WORKLOAD_FIXTURE,
 } from './liquid-glass-controlled-frame-overlay.mjs';
+import {
+  admitProgressSource,
+  assertProgressIdentityStable,
+} from './liquid-glass-source-progress.mjs';
 
 const MATERIAL = 'packages/adapters/base/src/material/program.ts';
 const KERNEL = 'packages/adapters/base/src/material/liquidgl-kernel.generated.ts';
@@ -181,5 +185,160 @@ test('measurement source and end snapshots bind to the prepared dirty baseline a
   await assert.rejects(
     verifyOverlay({ ...context, phase: 'restamped-report', reports }),
     /measurement patch differs/
+  );
+});
+
+test('four-host progress admits the exact verified overlay without treating it as a clean source', async (t) => {
+  const context = await fixture(t);
+  const receipt = await prepareOverlay(context);
+  const verification = await verifyOverlay({ ...context, phase: 'before-baseline-progress' });
+  const source = {
+    sha: receipt.after.baseline.sha,
+    tree: receipt.after.baseline.tree,
+    changes: receipt.after.baseline.changes,
+    diffSha256: receipt.after.baseline.probeDiffSha256,
+    hashes: { [MATERIAL]: digest(await readFile(path.join(context.baseline, MATERIAL))) },
+  };
+  const admission = {
+    mode: 'controlled-overlay',
+    receiptSha256: verification.receiptSha256,
+    source: {
+      sha: source.sha,
+      tree: source.tree,
+      changes: source.changes,
+      diffSha256: source.diffSha256,
+    },
+  };
+  const probe = { sha256: 'a'.repeat(64), latencyProbeSha256: 'b'.repeat(64) };
+  assert.notEqual(source.changes, '');
+  assert.throws(() => assertProgressIdentityStable(source, source, probe, probe));
+  assert.doesNotThrow(() =>
+    assertProgressIdentityStable(
+      source,
+      structuredClone(source),
+      probe,
+      probe,
+      admission,
+      admission
+    )
+  );
+  for (const mutate of [
+    (end) => {
+      end.source.diffSha256 = 'c'.repeat(64);
+    },
+    (end) => {
+      end.source.hashes[MATERIAL] = 'd'.repeat(64);
+    },
+    (end) => {
+      end.admission.receiptSha256 = 'e'.repeat(64);
+    },
+    (end) => {
+      end.admission.source.changes = '';
+    },
+    (end) => {
+      end.probe.overlayVerifierSha256 = 'f'.repeat(64);
+    },
+  ]) {
+    const end = {
+      source: structuredClone(source),
+      admission: structuredClone(admission),
+      probe: structuredClone(probe),
+    };
+    mutate(end);
+    assert.throws(() =>
+      assertProgressIdentityStable(source, end.source, probe, end.probe, admission, end.admission)
+    );
+  }
+});
+
+async function progressContext(t) {
+  const context = await fixture(t);
+  const receipt = await prepareOverlay(context);
+  const expected = receipt.after.baseline;
+  const source = {
+    sha: expected.sha,
+    tree: expected.tree,
+    changes: expected.changes,
+    diffSha256: expected.probeDiffSha256,
+    hashes: { [MATERIAL]: digest(await readFile(path.join(context.baseline, MATERIAL))) },
+  };
+  return {
+    context,
+    source,
+    options: { root: context.baseline, source, receiptFile: context.receiptFile },
+  };
+}
+
+test('progress admission revalidates both source trees before and after the real observation', async (t) => {
+  const { context, source, options } = await progressContext(t);
+  await assert.rejects(admitProgressSource({ root: context.baseline, source }), /clean checkout/);
+  const start = await admitProgressSource({ ...options, phase: 'before-baseline-progress' });
+  const end = await admitProgressSource({ ...options, phase: 'after-baseline-progress' });
+  assert.deepEqual(end, start);
+  assert.equal(start.receiptSha256, digest(await readFile(context.receiptFile)));
+  for (const phase of ['before-baseline-progress', 'after-baseline-progress']) {
+    const verification = JSON.parse(
+      await readFile(path.join(context.output, `${phase}.json`), 'utf8')
+    );
+    assert.equal(verification.passed, true);
+    assert.equal(verification.receiptSha256, start.receiptSha256);
+  }
+});
+
+test('progress receipt cannot admit an unprepared tree, changed implementation, extra source or overlay drift', async (t) => {
+  for (const [tree, relative] of [
+    ['baseline', MATERIAL],
+    ['baseline', 'pnpm-lock.yaml'],
+    ['baseline', 'untracked-source.mjs'],
+    ['candidate', MATERIAL],
+  ]) {
+    const { context, options } = await progressContext(t);
+    await admitProgressSource({ ...options, phase: 'before-baseline-progress' });
+    await file(context[tree], relative, 'unexpected source change\n');
+    await assert.rejects(
+      admitProgressSource({ ...options, phase: 'after-baseline-progress' }),
+      /source or overlay changed/
+    );
+    const verification = JSON.parse(
+      await readFile(path.join(context.output, 'after-baseline-progress.json'), 'utf8')
+    );
+    assert.equal(verification.passed, false);
+  }
+  const { context, options } = await progressContext(t);
+  await assert.rejects(
+    admitProgressSource({ ...options, root: context.candidate, phase: 'before-baseline-progress' }),
+    /prepared baseline tree/
+  );
+  await assert.rejects(
+    admitProgressSource({
+      ...options,
+      receiptFile: path.join(context.output, 'missing.json'),
+      phase: 'before-baseline-progress',
+    }),
+    /ENOENT/
+  );
+});
+
+test('progress rejects restamped source identities and a replaced receipt even with unchanged material', async (t) => {
+  const { context, source, options } = await progressContext(t);
+  const admission = await admitProgressSource({ ...options, phase: 'before-baseline-progress' });
+  await writeFile(context.receiptFile, (await readFile(context.receiptFile, 'utf8')) + '\n');
+  const changedAdmission = await admitProgressSource({
+    ...options,
+    phase: 'after-baseline-progress',
+  });
+  const probe = { sha256: 'a'.repeat(64) };
+  assert.throws(
+    () => assertProgressIdentityStable(source, source, probe, probe, admission, changedAdmission),
+    /Source admission changed/
+  );
+  const other = await progressContext(t);
+  await assert.rejects(
+    admitProgressSource({
+      ...other.options,
+      source: { ...other.source, diffSha256: '0'.repeat(64) },
+      phase: 'before-baseline-progress',
+    }),
+    /Progress source differs from receipt: diffSha256/
   );
 });

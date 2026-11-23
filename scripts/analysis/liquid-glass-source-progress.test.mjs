@@ -11,6 +11,7 @@ import {
   assertProgressWindow,
   installProgressCollector,
   observeAfterTwoRaf,
+  parseProgressArguments,
   summarizeProgressWindow,
 } from './liquid-glass-source-progress.mjs';
 
@@ -64,6 +65,23 @@ test('source-progress requires stable final source and instrument identities, in
     change(end);
     assert.throws(() => assertProgressIdentityStable(source, end.source, probe, end.probe));
   }
+});
+
+test('progress CLI keeps clean-source as default and requires an explicit receipt option', () => {
+  assert.equal(parseProgressArguments(['output']).receiptFile, undefined);
+  assert.match(
+    parseProgressArguments(['output', '--controlled-overlay', '/tmp/receipt.json']).receiptFile,
+    /\/tmp\/receipt\.json$/
+  );
+  for (const args of [
+    [],
+    ['output', '--allow-dirty'],
+    ['output', '--controlled-overlay'],
+    ['output', '--controlled-overlay', ''],
+    ['output', '--unknown', '/tmp/receipt.json'],
+    ['output', '--controlled-overlay', '/tmp/receipt.json', 'extra'],
+  ])
+    assert.throws(() => parseProgressArguments(args), /Usage:/);
 });
 
 // Artificial delivery controls exercise the actual serialized collector.
