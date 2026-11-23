@@ -492,7 +492,7 @@ async function tooltipCase(page, row, group, screenshot) {
   });
 }
 
-export async function assertSelectCommittedProjection(root, value) {
+export async function assertSelectCommit(root, value) {
   await until(() => root.getAttribute('data-value'), 'vue', 'native Enter commits Vue');
   assert.equal(await root.getAttribute('data-text-value'), 'Vue');
   // Exposed semantic state can project before the host commits rendered children.
@@ -502,6 +502,8 @@ export async function assertSelectCommittedProjection(root, value) {
     'committed selection reaches rendered Select Value'
   );
   assert.equal(await value.textContent(), 'Vue');
+  assert.equal(await root.getAttribute('data-value'), 'vue');
+  assert.equal(await root.getAttribute('data-text-value'), 'Vue');
 }
 
 async function selectCase(page, row, screenshot) {
@@ -547,7 +549,7 @@ async function selectCase(page, row, screenshot) {
   assert.equal(await root.getAttribute('data-value'), '', 'focus movement does not commit');
   await screenshot('open');
   await page.keyboard.press('Enter');
-  await assertSelectCommittedProjection(root, value);
+  await assertSelectCommit(root, value);
   await until(() => trigger.getAttribute('aria-expanded'), 'false', 'commit closes Select');
   await until(
     () => trigger.evaluate((element) => document.activeElement === element),

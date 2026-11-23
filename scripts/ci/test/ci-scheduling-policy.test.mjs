@@ -485,6 +485,9 @@ test('compiler inputs preserve the reusable Adapter and manual browser boundarie
       workflow.on.workflow_call.inputs.adapter_acceptance.type = 'string';
     },
     (workflow) => {
+      delete workflow.on.workflow_dispatch.inputs.browser_acceptance;
+    },
+    (workflow) => {
       workflow.on.workflow_dispatch.inputs.browser_acceptance.default = true;
     },
     (workflow) => {
@@ -492,6 +495,13 @@ test('compiler inputs preserve the reusable Adapter and manual browser boundarie
     },
     (workflow) => {
       workflow.on.workflow_dispatch.inputs.browser_acceptance.type = 'string';
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.unreviewed_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.browser_acceptance = {
@@ -504,10 +514,19 @@ test('compiler inputs preserve the reusable Adapter and manual browser boundarie
       workflow.jobs['browser-compiler'].if = 'true';
     },
     (workflow) => {
+      workflow.jobs['browser-compiler'].if = '${{ inputs.adapter_acceptance }}';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].uses = './.github/workflows/unreviewed.yml';
+    },
+    (workflow) => {
       workflow.jobs['browser-compiler'].needs = ['native-consumer'];
     },
     (workflow) => {
       workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.production_build = false;
     },
     (workflow) => {
       workflow.jobs['browser-compiler'].permissions.contents = 'write';
@@ -589,13 +608,17 @@ test('native Scroll evidence executes both complete locked targets in the existi
   assertNativeScrollConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
 });
 
-test('native Scroll evidence rejects missing, filtered, optional or swallowed native execution', () => {
+test('native Scroll evidence rejects missing, duplicate, filtered, optional or swallowed native execution', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   const targetStep = (workflow) =>
     workflow.jobs['native-consumer'].steps.find((step) =>
       step.run?.includes('--test scroll_reader ')
     );
   const mutations = [
+    (workflow) => {
+      const steps = workflow.jobs['native-consumer'].steps;
+      steps.push(structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause '))));
+    },
     (workflow) => {
       workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
         (step) => !step.run?.includes('--test scroll_pause ')

@@ -112,9 +112,9 @@ describe('Base Input documentation registration', () => {
     // This owner accepts the public normalized callback once. Raw host events
     // are not a second proposal channel, including distinct synthetic values.
     expect(ownerWrites()).toHaveLength(2);
-    callback({ value: 'Accepted next callback' });
+    callback({ value: 'Accepted second callback' });
     expect(ownerWrites()[2]?.props).toMatchObject({
-      value: 'Accepted next callback',
+      value: 'Accepted second callback',
       ariaLabel: 'Controlled Base Input',
     });
     cleanup();

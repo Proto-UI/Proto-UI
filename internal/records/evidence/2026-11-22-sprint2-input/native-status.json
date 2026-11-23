@@ -15,24 +15,49 @@
       "observationSource": "Parent agent readback delivered in this session; this author did not receive or read the raw report.",
       "rawHeldLocally": false,
       "rawDigest": null,
-      "correctionReferences": ["b1033a4", "14c47f2"],
+      "correctionReferences": [
+        "b1033a4",
+        "14c47f2"
+      ],
       "replayAfterCorrection": "NOT_EXECUTED_IN_THIS_RECORD"
     }
   ],
   "pending": [
     {
       "runner": "scripts/analysis/sprint2-input-browser.mjs",
-      "families": ["base", "shadcn", "brutalist"],
-      "runtimes": ["wc", "react", "vue", "vue2"],
+      "families": [
+        "base",
+        "shadcn",
+        "brutalist"
+      ],
+      "runtimes": [
+        "wc",
+        "react",
+        "vue",
+        "vue2"
+      ],
       "casesPerCell": 6,
       "expected": 72,
       "status": "UNTESTED_AT_ARCHIVED_FINAL_SOURCE"
     },
     {
       "runner": "scripts/analysis/form-select-recipes-browser.mjs",
-      "families": ["base", "shadcn", "brutalist"],
-      "runtimes": ["wc", "react", "vue", "vue2"],
-      "kinds": ["form", "select", "choices"],
+      "families": [
+        "base",
+        "shadcn",
+        "brutalist"
+      ],
+      "runtimes": [
+        "wc",
+        "react",
+        "vue",
+        "vue2"
+      ],
+      "kinds": [
+        "form",
+        "select",
+        "choices"
+      ],
       "expected": 36,
       "status": "UNTESTED_AT_ARCHIVED_FINAL_SOURCE"
     }
@@ -40,7 +65,9 @@
   "environment": "Local Chromium cannot start due to socket EPERM. Remote Desktop Commander reported exhausted monthly quota and was not retried or reconnected. Root uses the independent GitHub-hosted queue. No browser sandbox reduction was accepted.",
   "requiredSandbox": {
     "chromiumSandbox": true,
-    "args": ["--disable-dev-shm-usage"]
+    "args": [
+      "--disable-dev-shm-usage"
+    ]
   },
   "nonClaims": [
     "Source/HappyDOM success is not native browser success.",

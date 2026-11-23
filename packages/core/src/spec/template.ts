@@ -3,6 +3,7 @@ import type { Prototype } from '../prototype';
 import type { OwnedDecorationTarget } from './feedback/style';
 import { isTemplateStyleHandle, type TemplateStyleHandle } from './feedback/style';
 import { ElementFactory, ReservedFactories } from '../handles';
+import { assertSvgProps, isSvgNodeTag } from './svg-tags';
 
 /**
  * Template is the platform-agnostic render blueprint.
@@ -259,174 +260,10 @@ export interface SvgFactories {
   polygon(props: SvgPolygonProps): SvgPolygonNode;
 }
 
-function isSvgNodeTag(tag: unknown): tag is SvgTemplateTag {
-  return (
-    tag === 'svg' ||
-    tag === 'g' ||
-    tag === 'path' ||
-    tag === 'circle' ||
-    tag === 'rect' ||
-    tag === 'line' ||
-    tag === 'polyline' ||
-    tag === 'ellipse' ||
-    tag === 'polygon'
-  );
-}
-
 export function isSvgTemplateNode(value: unknown): value is SvgTemplateNode {
   if (!value || typeof value !== 'object') return false;
   const node = value as { kind?: unknown; tag?: unknown; props?: unknown };
   return node.kind === 'svg-node' && isSvgNodeTag(node.tag) && !!node.props;
-}
-
-const SVG_ALLOWED_KEYS: Record<SvgTemplateTag, ReadonlyArray<string>> = {
-  svg: [
-    'viewBox',
-    'width',
-    'height',
-    'aria-hidden',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  g: [
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  path: [
-    'd',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  circle: [
-    'cx',
-    'cy',
-    'r',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  rect: [
-    'x',
-    'y',
-    'width',
-    'height',
-    'rx',
-    'ry',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  line: [
-    'x1',
-    'y1',
-    'x2',
-    'y2',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  polyline: [
-    'points',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  ellipse: [
-    'cx',
-    'cy',
-    'rx',
-    'ry',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-  polygon: [
-    'points',
-    'fill',
-    'stroke',
-    'strokeWidth',
-    'strokeLinecap',
-    'strokeLinejoin',
-    'fillRule',
-    'clipRule',
-    'opacity',
-  ],
-};
-
-const SVG_REQUIRED_KEYS: Partial<Record<SvgTemplateTag, ReadonlyArray<string>>> = {
-  svg: ['viewBox'],
-  path: ['d'],
-  circle: ['cx', 'cy', 'r'],
-  rect: ['width', 'height'],
-  line: ['x1', 'y1', 'x2', 'y2'],
-  polyline: ['points'],
-  ellipse: ['cx', 'cy', 'rx', 'ry'],
-  polygon: ['points'],
-};
-
-function assertSvgProps(tag: SvgTemplateTag, props: unknown): void {
-  if (!props || typeof props !== 'object' || Array.isArray(props)) {
-    throw new Error(`[Template][SVG] ${tag} props must be an object.`);
-  }
-
-  const allowed = new Set(SVG_ALLOWED_KEYS[tag]);
-  const keys = Object.keys(props as Record<string, unknown>);
-  for (const key of keys) {
-    if (!allowed.has(key)) {
-      throw new Error(`[Template][SVG] ${tag} does not support prop '${key}'.`);
-    }
-  }
-
-  const required = SVG_REQUIRED_KEYS[tag] ?? [];
-  for (const key of required) {
-    const value = (props as Record<string, unknown>)[key];
-    if (value === undefined || value === null || value === '') {
-      throw new Error(`[Template][SVG] ${tag} requires non-empty prop '${key}'.`);
-    }
-  }
 }
 
 function createSvgNode<TTag extends SvgTemplateTag, TProps>(

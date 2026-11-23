@@ -20,72 +20,100 @@
     {
       "sha": "94006b3d1253684afb4340452f9fbef835dd69ac",
       "tree": "79f75e36522866a36233670b9b98a25aeebcd977",
-      "parents": ["e4f7fa8e46c87edaf5354f8d9553b261f66e16c8"],
+      "parents": [
+        "e4f7fa8e46c87edaf5354f8d9553b261f66e16c8"
+      ],
       "author": "Codex <codex@openai.com> 1795349310 +0000",
       "committer": "Codex <codex@openai.com> 1795349488 +0000",
       "message": "test(ci): select Search runtime diagnostic controls\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "1bba824fcdc6661778fdb0da3a4f8772ad58cd3ad883694fa8f0f883325a9fb4",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "d247c782c19bacbb926b52b5afa75fe76999e014",
       "tree": "4f91562eb1ef54bcbade03970b4d3bd2af76f0ea",
-      "parents": ["94006b3d1253684afb4340452f9fbef835dd69ac"],
+      "parents": [
+        "94006b3d1253684afb4340452f9fbef835dd69ac"
+      ],
       "author": "Codex <codex@openai.com> 1795350109 +0000",
       "committer": "Codex <codex@openai.com> 1795350109 +0000",
       "message": "docs: preserve Sprint 1 integration failures and source corrections\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "f19a09051d8e89a5a5e3d0809aee667d80bc3d63644a41798b27deefde253cbd",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "01110811771289ba812cfe0e829a989c88657f91",
       "tree": "dcf13d9b685dd97ad135bd9f6ba80a8d592c79f8",
-      "parents": ["d247c782c19bacbb926b52b5afa75fe76999e014"],
+      "parents": [
+        "d247c782c19bacbb926b52b5afa75fe76999e014"
+      ],
       "author": "Codex <codex@openai.com> 1795351264 +0000",
       "committer": "Codex <codex@openai.com> 1795351346 +0000",
       "message": "fix(compiler): enforce diagnostic categories and truthful origins\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "76568089bf99365bea279f5646f21467e46afcfec078e223b288c5b948d10f04",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "27245e0e9a1531d4512053a15c2ff8c21f6c1167",
       "tree": "a172b3cc210fef60acfdc4a353ac9d31877776c9",
-      "parents": ["01110811771289ba812cfe0e829a989c88657f91"],
+      "parents": [
+        "01110811771289ba812cfe0e829a989c88657f91"
+      ],
       "author": "Codex <codex@openai.com> 1795352281 +0000",
       "committer": "Codex <codex@openai.com> 1795352511 +0000",
       "message": "fix(compiler): preserve public diagnostic failure boundaries\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "1c5b3a583af9ebb2b505a57e833793250924c951e60a2fdb57c5fd39a67894e7",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "d5a2e82abdfdb9cfd753d50fbbb87372c3334742",
       "tree": "2bd3ec1378e6f09b4be25430c5058736663ce440",
-      "parents": ["27245e0e9a1531d4512053a15c2ff8c21f6c1167"],
+      "parents": [
+        "27245e0e9a1531d4512053a15c2ff8c21f6c1167"
+      ],
       "author": "Codex <codex@openai.com> 1795352392 +0000",
       "committer": "Codex <codex@openai.com> 1795352511 +0000",
       "message": "test(ci): select complete Sprint 1 diagnostic boundaries\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "547e7a9d3016e629ca55a0942007357e7cee98884f6297baec116555c76b8d28",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "bd4c6d86f2b310c872d66abc5886f34d8caa5266",
       "tree": "ba5ebfba490f1d2dbcb7411d09ae4ff12163d67e",
-      "parents": ["d5a2e82abdfdb9cfd753d50fbbb87372c3334742"],
+      "parents": [
+        "d5a2e82abdfdb9cfd753d50fbbb87372c3334742"
+      ],
       "author": "Codex <codex@openai.com> 1795354317 +0000",
       "committer": "Codex <codex@openai.com> 1795354317 +0000",
       "message": "docs: preserve compiler reviews and source-bound diagnostic failures\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "2838c7d36a2ad0e4163d1d072272e98da0f6c7f37097e23d4ffc2ee337471332",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "0405733d3e0e05630e96006afe04210e7a31c63e",
       "tree": "0981b78f4e4c8718b04db8a232be53bd79150fdc",
-      "parents": ["bd4c6d86f2b310c872d66abc5886f34d8caa5266"],
+      "parents": [
+        "bd4c6d86f2b310c872d66abc5886f34d8caa5266"
+      ],
       "author": "Codex <codex@openai.com> 1795354035 +0000",
       "committer": "Codex <codex@openai.com> 1795354389 +0000",
       "message": "fix(www): batch initial projection theme acquisition\n\nSigned-off-by: Codex <codex@openai.com>\n(cherry picked from commit bc35ade1daff802be242b00fdcb0e3211e6f8d0d)\n",
       "rawCommitSha256": "4f73be52b4c1009f790c8db00ffbf6cdb2fcab41baf339c0995f14d831b2842d",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     },
     {
       "sha": "1b65ace710c64df1f3a69ef03920771875e39746",
@@ -98,7 +126,9 @@
       "committer": "Codex <codex@openai.com> 1795367893 +0000",
       "message": "chore: reconcile Sprint 1 with accepted Search A/B controls\n\nSigned-off-by: Codex <codex@openai.com>\n",
       "rawCommitSha256": "2a545bd28d6b8402fef52cc83af2ae07c3b9c5b72de678d2a8c81f05c8f08a01",
-      "signoffs": ["Signed-off-by: Codex <codex@openai.com>"]
+      "signoffs": [
+        "Signed-off-by: Codex <codex@openai.com>"
+      ]
     }
   ],
   "changedFiles": [

@@ -72,8 +72,9 @@ for (const profile of nativeOwnerProfiles) {
     expect(api.snapshot()).toEqual({
       value: 'ab😀',
       composing: false,
-      selection: hostSelection(input),
+      selection: { start: 1, end: 4, direction: 'backward' },
     });
+    expect(api.snapshot().selection).toEqual(hostSelection(input));
     expect(api.calls.get()).toBe(0);
     await owner.act(() => api.reset());
     expect(input.value).toBe('seed');
@@ -96,8 +97,9 @@ for (const profile of nativeOwnerProfiles) {
     expect(api.snapshot()).toEqual({
       value: 'owner',
       composing: false,
-      selection: hostSelection(input),
+      selection: { start: 1, end: 4, direction: 'forward' },
     });
+    expect(api.snapshot().selection).toEqual(hostSelection(input));
   });
   it(`${profile}: reentrant reset retires the current input callback lease`, async () => {
     const owner = await mountNativeOwner(source(false, true), profile);
@@ -127,8 +129,9 @@ for (const profile of nativeOwnerProfiles) {
     expect(owner.handle.getExposes().snapshot()).toEqual({
       value: 'changed😀',
       composing: false,
-      selection: hostSelection(input),
+      selection: { start: 2, end: 9, direction: 'backward' },
     });
+    expect(owner.handle.getExposes().snapshot().selection).toEqual(hostSelection(input));
     expect(owner.handle.getExposes().calls.get()).toBe(0);
   });
   it(`${profile}: change without input cannot replace controlled authority`, async () => {
@@ -145,8 +148,9 @@ for (const profile of nativeOwnerProfiles) {
     expect(owner.handle.getExposes().snapshot()).toEqual({
       value: 'owner',
       composing: false,
-      selection: hostSelection(input),
+      selection: { start: 2, end: 5, direction: 'forward' },
     });
+    expect(owner.handle.getExposes().snapshot().selection).toEqual(hostSelection(input));
     expect(input.value).toBe('owner');
     expect(hostSelection(input)).toEqual({ start: 2, end: 5, direction: 'forward' });
   });

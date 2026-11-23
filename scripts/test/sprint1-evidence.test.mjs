@@ -330,7 +330,12 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const repair = workflow.jobs['focused-browser'];
-  assert.equal(repair.if, "${{ inputs.scope != 'sprint1' }}");
+  assert.equal(workflow.on.workflow_dispatch.inputs.sprint3_acceptance.default, false);
+  assert.equal(workflow.on.workflow_dispatch.inputs.sprint3_followup.default, false);
+  assert.equal(
+    repair.if,
+    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+  );
   assert.ok(repair.steps.some((step) => step.run === 'test "$EVIDENCE_SCOPE" = repair'));
   const original = repair.steps.find(
     (step) => step.name === 'Exercise unchanged controls with failure diagnostics'
@@ -342,6 +347,10 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   ])
     assert.ok(original.run.includes(suite));
   const job = workflow.jobs.sprint1;
+  assert.equal(
+    job.if,
+    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+  );
   assert.equal(job['timeout-minutes'], 90);
   assert.equal(job.strategy, undefined, 'Heavy operations run in one serial worker');
   const execute = job.steps.find((step) => step.run?.includes('sprint1-evidence.mjs run'));
