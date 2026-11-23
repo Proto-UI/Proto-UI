@@ -11,7 +11,9 @@ import {
 import { compilationArtifacts } from './compile';
 import { generatedSourcePath } from './emitter-map';
 import { IR_VERSION, type CompileResult } from './ir';
-import { checkTargetOperations, TARGET_PROFILES } from './targets';
+import { checkTargetOperations, TARGET_PROFILES, type TargetOperationAnalysis } from './targets';
+import type { ShaderKernel } from '../../core/src/shader-presentation';
+import { nativeShaderArtifacts } from './native-shader';
 import { nativeInteractionArtifacts } from './native-interaction';
 import { verifyGpuiCompilationSdk } from './gpui-native-sdk-compatibility';
 import type { SuccessfulProjectGeneration } from './project';
@@ -99,11 +101,16 @@ export function projectCompilationArtifacts(
   // One project has one reached support closure. Upgrade only bytes emitted by
   // this compiler, retaining the ordinary conflicting/tampered artifact rejection.
   let controlLabel = false;
+  const shaderKernels = new Set<ShaderKernel>();
+  const admissions = new Map<string, TargetOperationAnalysis>();
   for (const entry of entries) {
     const admitted = checkTargetOperations(entry.compilation.ir, TARGET_PROFILES[profile]);
     if (!admitted.ok) return admitted;
     controlLabel ||= admitted.value.operations.includes('hook.asControlLabel');
+    admissions.set(entry.entry, admitted.value);
+    for (const kernel of admitted.value.shaderKernels) shaderKernels.add(kernel);
   }
+  const projectShader = shaderKernels.size ? nativeShaderArtifacts([...shaderKernels]) : [];
   const baseNative = nativeInteractionArtifacts('full');
   const pairedNative = controlLabel
     ? nativeInteractionArtifacts('full', { controlLabel: true })
@@ -113,7 +120,39 @@ export function projectCompilationArtifacts(
   const artifacts = new Map<string, OutputArtifact>();
   for (let index = 0; index < entries.length; index++) {
     let { compilation } = entries[index];
-    const supporting = compilation.output.supportingFiles;
+    let supporting = compilation.output.supportingFiles;
+    const entryKernels = admissions.get(entries[index].entry)!.shaderKernels;
+    const canonicalShader = entryKernels.length ? nativeShaderArtifacts(entryKernels) : [];
+    const actualShader = (supporting ?? []).filter((file) =>
+      file.path.startsWith('.proto-ui/shader/')
+    );
+    if (
+      actualShader.length !== canonicalShader.length ||
+      canonicalShader.some(
+        (expected) =>
+          !actualShader.some(
+            (actual) =>
+              actual.path === expected.path &&
+              actual.kind === expected.kind &&
+              actual.contents === expected.contents
+          )
+      )
+    )
+      return reject(
+        'Project contains unknown, missing or modified shader support; cannot unify reached kernels.',
+        entries[index].entry,
+        'output-conflict'
+      );
+    if (canonicalShader.length) {
+      supporting = [
+        ...(supporting ?? []).filter((file) => !file.path.startsWith('.proto-ui/shader/')),
+        ...projectShader,
+      ];
+      compilation = {
+        ...compilation,
+        output: { ...compilation.output, supportingFiles: supporting },
+      };
+    }
     if (
       controlLabel &&
       supporting?.some((file) => file.path === '.proto-ui/interaction/native-v1.ts')

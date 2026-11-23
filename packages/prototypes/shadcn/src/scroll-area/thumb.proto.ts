@@ -9,7 +9,10 @@ const scrollAreaThumb = definePrototype<ShadcnScrollAreaThumbProps, ShadcnScroll
   setup(def) {
     const inherited = asScrollAreaThumb();
     const style = setupShadcnStyleSelection(def, 'new-york-v4');
-    def.feedback.style.use(tw('relative flex-1 bg-border'));
+    // Fill the track's cross-axis thickness. The Scroll host overrides the
+    // scrolling-axis dimension with its measured extent and owns flex-grow: 0.
+    // Keeping flex-1 would leave a zero flex basis on the empty hit target.
+    def.feedback.style.use(tw('relative h-full w-full bg-border'));
     def.rule({
       when: (w) => w.meta('preference.forcedColors').eq('active'),
       intent: (i) => i.feedback.style.use(tw('box-border border border-current')),

@@ -51,6 +51,7 @@ fn native_hover_flush(owner:&OwnerRef,window:&mut Window)->bool {
         // this same enter twice. A newer observation remains independently owned.
         o.native_hover.delivered=hover;
     }
+    if !hover{control_label_cancel(owner);}
     let kind=if hover{"pointer.enter"}else{"pointer.leave"};
     let mut prevented=dispatch_root_route(owner,kind,event_fields(kind));
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}

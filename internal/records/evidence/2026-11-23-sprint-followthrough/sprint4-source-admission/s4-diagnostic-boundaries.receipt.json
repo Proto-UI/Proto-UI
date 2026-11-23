@@ -1,0 +1,23 @@
+{
+  "phase": "s4-diagnostic-boundaries",
+  "head": "f653cfc21be19861e3f7200de31ec1951bc19002",
+  "cwd": "/workspace/scratch/9c42f522da14/Proto-UI-sprint4-followthrough",
+  "node": "v24.22.3",
+  "sourceSha256": {
+    "internal/website/self-hosting-coverage-matrix.md": "36b512abc8f7e0f7ea177056bf4387e2f3bdbfeea9ec5999e0bcda51fb25a621",
+    "scripts/coverage-matrices/diagnostic-imports.mjs": "330ed2605cfb4de2b0aec036f36a1e9620bd15e9982a4cbb75d3e1a5dce594e3",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs": "351ffa9001c43ec9a111903fcf7cd5a4d864932b091f3a1426b2ae99a07df928"
+  },
+  "startedAt": "2026-11-22T19:37:22.382936+00:00",
+  "command": [
+    "node",
+    "--test",
+    "--test-name-pattern=diagnostic import review rejects owner, body and edge drift",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "exitCode": 0,
+  "durationSeconds": 4.495,
+  "logSha256": "4a908510b06e04f9e9e648011d3e2c9e7e7aee62c1b66a847218ac8ad5d2ce4e",
+  "sourceStableDuringRun": true,
+  "outputSummary": []
+}

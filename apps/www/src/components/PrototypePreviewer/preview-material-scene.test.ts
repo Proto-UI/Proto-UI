@@ -229,6 +229,47 @@ describe('bounded visible Previewer source layout', () => {
     s.redraw();
     expect(s.lease.current()).toBeNull();
   });
+  it('refreshes a paused source from physical-pixel resize without a CSS resize or media callback', () => {
+    const registrations: Array<{
+      callback: ResizeObserverCallback;
+      target: Element;
+      options?: ResizeObserverOptions;
+    }> = [];
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(private callback: ResizeObserverCallback) {}
+        observe(target: Element, options?: ResizeObserverOptions) {
+          registrations.push({ callback: this.callback, target, options });
+        }
+        unobserve() {}
+        disconnect = disconnect;
+      }
+    );
+    const s = scene();
+    const canvas = s.scope.querySelector('canvas')!;
+    const original = s.lease.current()!;
+    expect(original.width).toBe(420);
+    const pixelObserver = registrations.find(
+      (entry) => entry.target === canvas && entry.options?.box === 'device-pixel-content-box'
+    );
+    expect(pixelObserver).toBeDefined();
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+    // Only the physical pixel box changes; CSS geometry stays 420 x 104.
+    pixelObserver!.callback([], {} as ResizeObserver);
+    for (const [id, callback] of [...frames]) {
+      frames.delete(id);
+      callback(0);
+    }
+    expect(s.lease.current()).toMatchObject({ width: 840, height: 208 });
+    expect(s.lease.current()!.revision).toBeGreaterThan(original.revision);
+    s.dispose();
+    pixelObserver!.callback([], {} as ResizeObserver);
+    expect(frames.size).toBe(0);
+    expect(disconnect).toHaveBeenCalledOnce();
+    expect(s.lease.current()).toBeNull();
+  });
   it('rejects fractional edge overflow and non-finite DPR without fabricating a smaller source', () => {
     const s = scene();
     width = 2048;
@@ -405,6 +446,122 @@ describe('public material scene presentation', () => {
     expect(s.lease.current()?.width).toBe(460);
     expect(s.lease.current()?.revision).toBeGreaterThan(initial!.revision);
     expect(frames.size).toBe(0);
+  });
+
+  it.each(['resolution', 'resize'])(
+    'refreshes a quiet source when %s arrives before the new DPR is readable',
+    (notification) => {
+      const s = preview();
+      const initial = s.lease.current()!;
+      expect(initial).toMatchObject({ width: 420, height: 104 });
+      // Deliberately deliver the notification with the old readable ratio. This
+      // is a controlled ordering counterexample, not a claim about the browser
+      // internals behind the archived native timeout. No RO callback, second
+      // notification or explicit scene.redraw may repair this quiet scene.
+      if (notification === 'resolution')
+        media.get('(resolution: 1dppx)')!.dispatchEvent(new Event('change'));
+      else window.dispatchEvent(new Event('resize'));
+      expect(s.lease.current()).toBe(initial);
+      vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+      frame(16.67);
+      expect(s.lease.current()).toMatchObject({ width: 840, height: 208 });
+      expect(s.lease.current()!.revision).toBeGreaterThan(initial.revision);
+      expect(frames.size).toBe(0);
+    }
+  );
+
+  it('coalesces viewport notifications and retires each previous resolution listener', () => {
+    const s = preview();
+    const initial = s.lease.current()!;
+    const firstQuery = media.get('(resolution: 1dppx)')!;
+    for (let i = 0; i < 3; i++) {
+      firstQuery.dispatchEvent(new Event('change'));
+      window.dispatchEvent(new Event('resize'));
+      for (const callback of resizeCallbacks) callback([], {} as ResizeObserver);
+    }
+    expect(frames.size).toBe(1);
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+    frame(16.67);
+    expect(s.lease.current()).toMatchObject({
+      width: 840,
+      height: 208,
+      revision: initial.revision + 1,
+    });
+    expect(frames.size).toBe(0);
+    firstQuery.dispatchEvent(new Event('change'));
+    expect(frames.size).toBe(0);
+
+    const secondQuery = media.get('(resolution: 2dppx)')!;
+    expect(secondQuery).toBeDefined();
+    secondQuery.dispatchEvent(new Event('change'));
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(1);
+    frame(33.34);
+    expect(s.lease.current()).toMatchObject({
+      width: 420,
+      height: 104,
+      revision: initial.revision + 2,
+    });
+    secondQuery.dispatchEvent(new Event('change'));
+    expect(frames.size).toBe(0);
+  });
+
+  it('refreshes a later CSS layout notification even when the frame DPR is already current', () => {
+    const s = preview();
+    window.dispatchEvent(new Event('resize'));
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+    frame(16.67);
+    const changedRatio = s.lease.current()!;
+    expect(changedRatio).toMatchObject({ width: 840, height: 208 });
+
+    // The next observed CSS layout belongs to the same DPR. A no-op media
+    // rebind must not suppress layout/paint, even when it follows a DPR frame.
+    width = 466;
+    flowHeight = 108;
+    for (const callback of resizeCallbacks) callback([], {} as ResizeObserver);
+    expect(frames.size).toBe(1);
+    frame(33.34);
+    expect(s.scope.style.minHeight).toBe('172px');
+    expect(s.lease.current()).toMatchObject({ width: 932, height: 344 });
+    expect(s.lease.current()!.revision).toBeGreaterThan(changedRatio.revision);
+    expect(frames.size).toBe(0);
+  });
+
+  it('keeps a pending viewport repair when dynamic animation is paused', () => {
+    const s = preview();
+    const initial = s.lease.current()!;
+    s.pause(false);
+    expect(frames.size).toBe(1);
+    media.get('(resolution: 1dppx)')!.dispatchEvent(new Event('change'));
+    expect(frames.size).toBe(2);
+    s.pause(true);
+    expect(frames.size).toBe(1);
+    expect(s.lease.current()).toBe(initial);
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+    frame(16.67);
+    expect(s.lease.current()).toMatchObject({ width: 840, height: 208 });
+    expect(frames.size).toBe(0);
+  });
+
+  it('retires both pending frames and ignores viewport notifications after disposal', () => {
+    const s = preview();
+    s.pause(false);
+    const query = media.get('(resolution: 1dppx)')!;
+    query.dispatchEvent(new Event('change'));
+    expect(frames.size).toBe(2);
+    const lateCallbacks = [...frames.values()];
+    s.dispose();
+    expect(frames.size).toBe(0);
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2);
+    // Even a previously captured callback cannot resurrect a retired source or
+    // rebind a media listener. Late observer delivery is subject to the same guard.
+    for (const callback of lateCallbacks) callback(16.67);
+    query.dispatchEvent(new Event('change'));
+    window.dispatchEvent(new Event('resize'));
+    for (const callback of resizeCallbacks) callback([], {} as ResizeObserver);
+    expect(frames.size).toBe(0);
+    expect(media.has('(resolution: 2dppx)')).toBe(false);
+    expect(s.lease.current()).toBeNull();
+    expect(s.scope.isConnected).toBe(false);
   });
 
   it.each(['class', 'data-theme'])(

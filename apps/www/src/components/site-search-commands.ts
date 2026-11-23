@@ -21,7 +21,7 @@ import {
   type ProjectionMaterializerOptions,
 } from './PrototypePreviewer/projection-materializer';
 import { collectPrototypeIds, type DemoSpec } from './PrototypePreviewer/demo-types';
-import type { SiteLibraryFamily } from './site-library-family';
+import { requireSiteLibraryFamily, type SiteLibraryFamily } from './site-library-family';
 import type { SiteSearchFocusRestore } from './site-search-composition';
 
 // These fixed glyphs are required by every Search generation. Keep them in
@@ -170,10 +170,13 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     const isHeaderOpen = command === 'open' && !!root.closest('[data-site-header]');
     const props = isHeaderOpen
       ? headerButtonProps(family, 'default')
-      : {
-          variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
-          size: command === 'open' ? 'default' : 'sm',
-        };
+      : family === 'bootstrap-2-3-2'
+        ? { variant: 'default', size: command === 'open' ? 'default' : 'small' }
+        : {
+            variant:
+              family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
+            size: command === 'open' ? 'default' : 'sm',
+          };
     return {
       type: 'demo',
       root: {
@@ -187,11 +190,11 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                 width: 'var(--site-search-trigger-width, 2.75rem)',
                 minWidth: '0',
                 maxWidth: '100%',
-                height: '2.75rem',
-                minHeight: '2.75rem',
+                height: 'var(--site-control-height, 2.75rem)',
+                minHeight: 'var(--site-control-height, 2.75rem)',
                 paddingInline: 'var(--site-search-trigger-padding, 0)',
                 justifyContent: 'var(--site-search-trigger-justify, center)',
-                ...(isHeaderOpen ? headerResponsiveButtonFeedback() : {}),
+                ...(isHeaderOpen ? headerResponsiveButtonFeedback(family) : {}),
               }
             : { minHeight: '2.75rem' },
         className:
@@ -633,7 +636,7 @@ export function initDocumentationSearchCommands(participant: SearchCommandPartic
   } catch {
     /* Optional storage. */
   }
-  const family = root.dataset.searchInitialFamily === 'brutalist' ? 'brutalist' : 'shadcn';
+  const family = requireSiteLibraryFamily(root.dataset.searchInitialFamily ?? 'shadcn');
   let alive = true;
   // The same owner supplies the initial theme and later color-mode updates.
   // Each candidate keeps its own lease, including the retained rollback view.

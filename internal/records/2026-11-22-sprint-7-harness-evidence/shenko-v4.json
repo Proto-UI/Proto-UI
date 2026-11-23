@@ -1,0 +1,1361 @@
+{
+  "schema_version": 1,
+  "scope": "real Shenko live frontend; fixture HTTP/WS reads",
+  "upstream": {
+    "repository": "https://github.com/Proto-UI/Proto-UI.git",
+    "commit": "0d8e71a23a435071bca1dab92330dd908e07d8a8",
+    "previous_reviewed_commit": "f29738eb6a804ccfc58510cc5a5bd1692690716e",
+    "lock_sha256": "e374ba03f76079fd191d63c2da1f62861b7e90bbeba64a0b310027fc2c15b7f8",
+    "source_checkout": "/workspace/scratch/b8a4839de6ed/s7-harness",
+    "build_receipt": {
+      "script": "scripts/build/public-packages.mjs",
+      "selected_package_count": 42,
+      "receipt_path": "/tmp/s7-public-build.json",
+      "receipt_sha256": "6674287a384107d66d54758977a23172c4b5b6ce6de81d92c14867f462c47e54"
+    }
+  },
+  "bundle_manifest_sha256": "ee893532cccc3c7f9a6ac82ad38f41cc5856e894cad3fbec7a9bec5da5335e97",
+  "fixture": "committed mixed Chinese/English Markdown, stable owner/reply IDs, replay duplicates",
+  "physical_input": false,
+  "model_or_backend_acceptance": false,
+  "runs": [
+    {
+      "tab": "inspect",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 14029,
+          "extent": 14759,
+          "viewport": 730,
+          "endGap": 0,
+          "count": 60,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -196.25,
+          "focused": "",
+          "reading": "following_latest"
+        },
+        {
+          "name": "departed",
+          "top": 13997,
+          "extent": 15247,
+          "viewport": 730,
+          "endGap": 520,
+          "count": 62,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -164.25,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "append-paused",
+          "top": 13997,
+          "extent": 15736,
+          "viewport": 730,
+          "endGap": 1009,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -164.25,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "history-reopened",
+          "top": 13997,
+          "extent": 15736,
+          "viewport": 730,
+          "endGap": 1009,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -164.25,
+          "focused": "",
+          "reading": "reading_history"
+        }
+      ],
+      "checks": [
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 14517,
+            "extent": 15247,
+            "viewport": 730,
+            "endGap": 0,
+            "count": 62,
+            "key": "part.[\"reading-message-30\",\"text/0\"]",
+            "offset": -195.5,
+            "focused": "composer-input",
+            "reading": "following_latest"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 13997,
+            "extent": 15247,
+            "viewport": 730,
+            "endGap": 520,
+            "count": 62,
+            "key": "part.[\"reading-message-29\",\"text/0\"]",
+            "offset": -164.25,
+            "focused": "composer-input",
+            "reading": "reading_history"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 13997,
+              "extent": 15247,
+              "viewport": 730,
+              "endGap": 520,
+              "count": 62,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -164.25,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "paused": {
+              "top": 13997,
+              "extent": 15736,
+              "viewport": 730,
+              "endGap": 1009,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -164.25,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        },
+        {
+          "name": "reopening restores the saved reader key across replay materialization",
+          "passed": true,
+          "details": {
+            "paused": {
+              "top": 13997,
+              "extent": 15736,
+              "viewport": 730,
+              "endGap": 1009,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -164.25,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "restored": {
+              "top": 13997,
+              "extent": 15736,
+              "viewport": 730,
+              "endGap": 1009,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -164.25,
+              "focused": "",
+              "reading": "reading_history"
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "status": "failed",
+      "failure": "TimeoutError: locator.focus: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.jump-latest button').first()\u001b[22m\n"
+    },
+    {
+      "tab": "im",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 2403,
+          "extent": 3139,
+          "viewport": 736,
+          "endGap": 0,
+          "count": 60,
+          "key": "submission.reading-input-24",
+          "offset": 10.5625,
+          "focused": ""
+        },
+        {
+          "name": "departed",
+          "top": 1985,
+          "extent": 3241,
+          "viewport": 736,
+          "endGap": 520,
+          "count": 62,
+          "key": "submission.reading-input-20",
+          "offset": 19.8125,
+          "focused": "composer-input"
+        },
+        {
+          "name": "append-paused",
+          "top": 1985,
+          "extent": 3343,
+          "viewport": 736,
+          "endGap": 622,
+          "count": 64,
+          "key": "submission.reading-input-20",
+          "offset": 19.8125,
+          "focused": "composer-input"
+        }
+      ],
+      "checks": [
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 2505,
+            "extent": 3241,
+            "viewport": 736,
+            "endGap": 0,
+            "count": 62,
+            "key": "submission.reading-input-25",
+            "offset": 10.75,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 1985,
+            "extent": 3241,
+            "viewport": 736,
+            "endGap": 520,
+            "count": 62,
+            "key": "submission.reading-input-20",
+            "offset": 19.8125,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 1985,
+              "extent": 3241,
+              "viewport": 736,
+              "endGap": 520,
+              "count": 62,
+              "key": "submission.reading-input-20",
+              "offset": 19.8125,
+              "focused": "composer-input"
+            },
+            "paused": {
+              "top": 1985,
+              "extent": 3343,
+              "viewport": 736,
+              "endGap": 622,
+              "count": 64,
+              "key": "submission.reading-input-20",
+              "offset": 19.8125,
+              "focused": "composer-input"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        }
+      ],
+      "errors": [],
+      "status": "failed",
+      "failure": "TimeoutError: locator.focus: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.jump-latest button').first()\u001b[22m\n"
+    },
+    {
+      "tab": "inspect",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 17982,
+          "extent": 18672,
+          "viewport": 690,
+          "endGap": 0,
+          "count": 60,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -486.25,
+          "focused": "",
+          "reading": "following_latest"
+        },
+        {
+          "name": "departed",
+          "top": 18082,
+          "extent": 19292,
+          "viewport": 690,
+          "endGap": 520,
+          "count": 62,
+          "key": "submission.reading-input-30",
+          "offset": -50,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "append-paused",
+          "top": 18082,
+          "extent": 19912,
+          "viewport": 690,
+          "endGap": 1140,
+          "count": 64,
+          "key": "submission.reading-input-30",
+          "offset": -50,
+          "focused": "composer-input",
+          "reading": "reading_history"
+        },
+        {
+          "name": "history-reopened",
+          "top": 17546,
+          "extent": 19912,
+          "viewport": 690,
+          "endGap": 1676,
+          "count": 64,
+          "key": "part.[\"reading-message-29\",\"text/0\"]",
+          "offset": -50.25,
+          "focused": "",
+          "reading": "reading_history"
+        }
+      ],
+      "checks": [
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 18602,
+            "extent": 19292,
+            "viewport": 690,
+            "endGap": 0,
+            "count": 62,
+            "key": "part.[\"reading-message-30\",\"text/0\"]",
+            "offset": -486.25,
+            "focused": "composer-input",
+            "reading": "following_latest"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 18082,
+            "extent": 19292,
+            "viewport": 690,
+            "endGap": 520,
+            "count": 62,
+            "key": "submission.reading-input-30",
+            "offset": -50,
+            "focused": "composer-input",
+            "reading": "reading_history"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 18082,
+              "extent": 19292,
+              "viewport": 690,
+              "endGap": 520,
+              "count": 62,
+              "key": "submission.reading-input-30",
+              "offset": -50,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "paused": {
+              "top": 18082,
+              "extent": 19912,
+              "viewport": 690,
+              "endGap": 1140,
+              "count": 64,
+              "key": "submission.reading-input-30",
+              "offset": -50,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        },
+        {
+          "name": "reopening restores the saved reader key across replay materialization",
+          "passed": false,
+          "details": {
+            "paused": {
+              "top": 18082,
+              "extent": 19912,
+              "viewport": 690,
+              "endGap": 1140,
+              "count": 64,
+              "key": "submission.reading-input-30",
+              "offset": -50,
+              "focused": "composer-input",
+              "reading": "reading_history"
+            },
+            "restored": {
+              "top": 17546,
+              "extent": 19912,
+              "viewport": 690,
+              "endGap": 1676,
+              "count": 64,
+              "key": "part.[\"reading-message-29\",\"text/0\"]",
+              "offset": -50.25,
+              "focused": "",
+              "reading": "reading_history"
+            }
+          }
+        }
+      ],
+      "errors": [],
+      "status": "failed",
+      "failure": "AssertionError [ERR_ASSERTION]: reopening restores the saved reader key across replay materialization: {\"paused\":{\"top\":18082,\"extent\":19912,\"viewport\":690,\"endGap\":1140,\"count\":64,\"key\":\"submission.reading-input-30\",\"offset\":-50,\"focused\":\"composer-input\",\"reading\":\"reading_history\"},\"restored\":{\"top\":17546,\"extent\":19912,\"viewport\":690,\"endGap\":1676,\"count\":64,\"key\":\"part.[\\\"reading-message-29\\\",\\\"text/0\\\"]\",\"offset\":-50.25,\"focused\":\"\",\"reading\":\"reading_history\"}}"
+    },
+    {
+      "tab": "im",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "reduced_motion": "reduce",
+      "observations": [
+        {
+          "name": "initial",
+          "top": 2888,
+          "extent": 3667,
+          "viewport": 779,
+          "endGap": 0,
+          "count": 60,
+          "key": "quiet-part.[\"reading-message-24\",\"text/0\"]",
+          "offset": -2.25,
+          "focused": ""
+        },
+        {
+          "name": "departed",
+          "top": 2488,
+          "extent": 3787,
+          "viewport": 779,
+          "endGap": 520,
+          "count": 62,
+          "key": "submission.reading-input-21",
+          "offset": -27,
+          "focused": "composer-input"
+        },
+        {
+          "name": "append-paused",
+          "top": 2488,
+          "extent": 3907,
+          "viewport": 779,
+          "endGap": 640,
+          "count": 64,
+          "key": "submission.reading-input-21",
+          "offset": -27,
+          "focused": "composer-input"
+        }
+      ],
+      "checks": [
+        {
+          "name": "append follows the actual tail and retains composer focus",
+          "passed": true,
+          "details": {
+            "top": 3008,
+            "extent": 3787,
+            "viewport": 779,
+            "endGap": 0,
+            "count": 62,
+            "key": "quiet-part.[\"reading-message-25\",\"text/0\"]",
+            "offset": -2.0625,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "trusted wheel departs from the end",
+          "passed": true,
+          "details": {
+            "top": 2488,
+            "extent": 3787,
+            "viewport": 779,
+            "endGap": 520,
+            "count": 62,
+            "key": "submission.reading-input-21",
+            "offset": -27,
+            "focused": "composer-input"
+          }
+        },
+        {
+          "name": "append preserves the same reader key and offset",
+          "passed": true,
+          "details": {
+            "before": {
+              "top": 2488,
+              "extent": 3787,
+              "viewport": 779,
+              "endGap": 520,
+              "count": 62,
+              "key": "submission.reading-input-21",
+              "offset": -27,
+              "focused": "composer-input"
+            },
+            "paused": {
+              "top": 2488,
+              "extent": 3907,
+              "viewport": 779,
+              "endGap": 640,
+              "count": 64,
+              "key": "submission.reading-input-21",
+              "offset": -27,
+              "focused": "composer-input"
+            }
+          }
+        },
+        {
+          "name": "replayed committed identity adds no duplicate row",
+          "passed": true,
+          "details": {
+            "count": 64
+          }
+        }
+      ],
+      "errors": [],
+      "status": "failed",
+      "failure": "TimeoutError: locator.focus: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.jump-latest button').first()\u001b[22m\n"
+    }
+  ],
+  "browser": {
+    "engine": "Chromium",
+    "version": "145.0.7632.6",
+    "headless": true
+  },
+  "status": "failed",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/theme-bootstrap.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-style.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/app.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/shadcn-theme.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/proto-ui-tokens.generated.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/chunks/chunk-O3OVBR66.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/memory"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/health"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/build-manifest.json"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/self"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/owner/state"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/conversations"
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/playground"
+    },
+    {
+      "method": "GET",
+      "path": "/api/config/namespaces"
+    },
+    {
+      "method": "GET",
+      "path": "/api/submissions"
+    }
+  ]
+}

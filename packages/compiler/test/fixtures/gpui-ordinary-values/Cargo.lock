@@ -2466,6 +2466,36 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-ui-gpui-consumer-base-button"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-base-label"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-base-toggle"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "proto-ui-gpui-consumer-cold"
 version = "0.1.0"
 dependencies = [
@@ -2537,6 +2567,36 @@ dependencies = [
 
 [[package]]
 name = "proto-ui-gpui-consumer-focus-target"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-generic-label"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-generic-label-target"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "proto-ui-gpui-consumer-generic-setup-label"
 version = "0.1.0"
 dependencies = [
  "gpui",
@@ -2666,6 +2726,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-ui-gpui-consumer-named-button"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "proto-ui-gpui-consumer-ordinary"
 version = "0.1.0"
 dependencies = [
@@ -2726,10 +2796,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-ui-gpui-consumer-scroll-reader"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "proto-ui-gpui-consumer-transition"
 version = "0.1.0"
 dependencies = [
  "gpui",
+ "proto-ui-gpui-consumer-base-button",
+ "proto-ui-gpui-consumer-base-label",
+ "proto-ui-gpui-consumer-base-toggle",
  "proto-ui-gpui-consumer-cold",
  "proto-ui-gpui-consumer-context-a",
  "proto-ui-gpui-consumer-context-b",
@@ -2738,6 +2821,9 @@ dependencies = [
  "proto-ui-gpui-consumer-duplicate",
  "proto-ui-gpui-consumer-focus-scope",
  "proto-ui-gpui-consumer-focus-target",
+ "proto-ui-gpui-consumer-generic-label",
+ "proto-ui-gpui-consumer-generic-label-target",
+ "proto-ui-gpui-consumer-generic-setup-label",
  "proto-ui-gpui-consumer-hook-conditional",
  "proto-ui-gpui-consumer-hook-conditional-multiple",
  "proto-ui-gpui-consumer-hook-conditional-taken",
@@ -2750,12 +2836,14 @@ dependencies = [
  "proto-ui-gpui-consumer-hook-project-failed",
  "proto-ui-gpui-consumer-hook-undefined",
  "proto-ui-gpui-consumer-mutant",
+ "proto-ui-gpui-consumer-named-button",
  "proto-ui-gpui-consumer-ordinary",
  "proto-ui-gpui-consumer-plain",
  "proto-ui-gpui-consumer-public-mutation",
  "proto-ui-gpui-consumer-render-mutation",
  "proto-ui-gpui-consumer-roundtrip",
  "proto-ui-gpui-consumer-scalars",
+ "proto-ui-gpui-consumer-scroll-reader",
  "proto-ui-gpui-consumer-validation",
  "proto-ui-gpui-consumer-validation-retry",
  "proto-ui-gpui-native",

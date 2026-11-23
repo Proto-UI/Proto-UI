@@ -8,16 +8,26 @@ import { afterEach, expect, it } from 'vitest';
 const path = `${process.cwd()}/apps/www/src/components/documentation-image-preview.browser.test.ts`;
 const source = readFileSync(path, 'utf8');
 const ast = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
-let predicate: ts.Expression | undefined;
+const predicates: ts.Expression[] = [];
 const visit = (node: ts.Node) => {
   if (ts.isCallExpression(node) && node.expression.getText(ast) === 'page.waitForFunction') {
     const candidate = node.arguments[0];
-    if (candidate?.getText(ast).includes('docs-preview-${family}')) predicate = candidate;
+    // Later diagram journeys also wait for a family trigger. Bind the complete
+    // two-trigger admission predicate rather than whichever callback comes last.
+    const text = candidate?.getText(ast) ?? '';
+    if (
+      candidate &&
+      text.includes('docs-preview-${family}') &&
+      text.includes('triggers.length === 2')
+    )
+      predicates.push(candidate);
   }
   ts.forEachChild(node, visit);
 };
 visit(ast);
-if (!predicate) throw new Error('Missing exact image-trigger browser readiness predicate');
+if (predicates.length !== 1)
+  throw new Error('Missing or ambiguous exact image-trigger browser readiness predicate');
+const predicate = predicates[0]!;
 const evaluate = ts.transpileModule(`const ready = ${predicate.getText(ast)}; ready;`, {
   compilerOptions: { target: ts.ScriptTarget.ES2022 },
 }).outputText;

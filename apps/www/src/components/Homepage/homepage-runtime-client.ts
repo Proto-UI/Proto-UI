@@ -13,6 +13,7 @@ import { homeActionIcon, appendHomeActionGlyph } from './home-action-icons';
 import {
   linkSurfaceProps,
   navbarLinkContext,
+  navbarLinkTextStyle,
   linkSurfaceLayout,
   linkTextProps,
   appendSiteLinkGlyph,
@@ -164,7 +165,14 @@ export function createHomepageContent(
           prototypeId: `${family}-surface-root`,
           ref: `home-link-surface-${index}`,
           surfaceStyle: {
-            ...linkSurfaceLayout(family, siteLinkAppearance(link), siteLinkEmphasis(link)),
+            ...linkSurfaceLayout(
+              family,
+              siteLinkAppearance(link),
+              siteLinkEmphasis(link),
+              undefined,
+              false,
+              navbarLinkContext(link)
+            ),
             // The native announcement already owns its pill padding and minimum
             // height. An inner text-link target must not add a second line box.
             ...(announcement ? { minHeight: '0', marginBottom: '0' } : {}),
@@ -194,17 +202,24 @@ export function createHomepageContent(
                     prototypeId: `${family}-text-root`,
                     rootTag: 'span',
                     ref: `home-link-text-${index}`,
-                    // Keep the authored announcement's cold-frame metrics while
-                    // the passive Text still owns its family and fact feedback.
-                    surfaceStyle: announcement
-                      ? {
-                          fontFamily: 'inherit',
-                          fontSize: 'inherit',
-                          fontWeight: 'inherit',
-                          lineHeight: 'inherit',
-                          letterSpacing: 'inherit',
-                        }
-                      : undefined,
+                    surfaceStyle: {
+                      ...navbarLinkTextStyle(
+                        family,
+                        siteLinkAppearance(link),
+                        navbarLinkContext(link)
+                      ),
+                      // Keep the authored announcement's cold-frame metrics while
+                      // the passive Text still owns its family and fact feedback.
+                      ...(announcement
+                        ? {
+                            fontFamily: 'inherit',
+                            fontSize: 'inherit',
+                            fontWeight: 'inherit',
+                            lineHeight: 'inherit',
+                            letterSpacing: 'inherit',
+                          }
+                        : {}),
+                    },
                     props: {
                       ...linkTextProps(
                         siteLinkAppearance(link),
@@ -216,7 +231,10 @@ export function createHomepageContent(
                             link.hasAttribute('aria-current') &&
                             link.getAttribute('aria-current') !== 'false',
                         },
-                        family
+                        family,
+                        undefined,
+                        false,
+                        navbarLinkContext(link)
                       ),
                     },
                     children: [
@@ -330,7 +348,14 @@ export function createHomepageContent(
             });
             if (context.refs[`home-link-text-${index}`])
               context.api.setProps(`home-link-text-${index}`, {
-                ...linkTextProps(siteLinkAppearance(group.links[index]!), facts, family),
+                ...linkTextProps(
+                  siteLinkAppearance(group.links[index]!),
+                  facts,
+                  family,
+                  undefined,
+                  false,
+                  navbarLinkContext(group.links[index]!)
+                ),
               });
           },
           { isActive }

@@ -1,0 +1,19 @@
+src/composer.tsx(138,29): error TS7006: Parameter 'detail' implicitly has an 'any' type.
+src/im.tsx(226,33): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/im.tsx(239,40): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/im.tsx(249,33): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/im.tsx(252,32): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/im.tsx(338,80): error TS2339: Property 'jumpToEnd' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(56,35): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(89,91): error TS2339: Property 'jumpToEnd' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(91,91): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(233,79): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(271,35): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(296,35): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(350,33): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(353,17): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(358,33): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(364,33): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(375,37): error TS2339: Property 'following' does not exist on type 'ProtoAdapterExposes<any>'.
+src/timeline-surface.tsx(398,43): error TS2339: Property 'pauseFollowing' does not exist on type 'ProtoAdapterExposes<any>'.
+src/ui-kit.tsx(5,47): error TS2307: Cannot find module '@proto.ui/core' or its corresponding type declarations.

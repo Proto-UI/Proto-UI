@@ -1,6 +1,12 @@
 name: Liquid Glass material and library evidence
 on:
   workflow_dispatch:
+    inputs:
+      browser_only:
+        description: Run material/library and state controls only; other partitions are not selected
+        type: boolean
+        required: false
+        default: false
   workflow_call:
 permissions:
   contents: read
@@ -12,7 +18,9 @@ env:
 jobs:
   browser-evidence:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Material/library acceptance and 31 independent state-control cases run
+    # sequentially, with separate complete manifests and retained failures.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,10 +39,47 @@ jobs:
         run: |
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences list
+      - name: Record selected evidence scope
+        env:
+          MANUAL_BROWSER_ONLY: ${{ github.event_name == 'workflow_dispatch' && inputs.browser_only == true }}
+          REQUEST_EVENT: ${{ github.event_name }}
+          EVIDENCE_DIRECTORY: ${{ runner.temp }}/liquid-material-evidence
+        run: |
+          node --input-type=module - <<'NODE'
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          import path from 'node:path';
+          const otherJobs = [
+            ...['wc', 'react', 'vue', 'vue2'].map(host => `prominent-tint-evidence (${host})`),
+            ...['wc', 'react', 'vue', 'vue2'].map(host => `hover-evidence (${host})`),
+            'tint-stage-diagnostic', 'visible-refraction-diagnostic',
+          ];
+          const browserOnly = process.env.MANUAL_BROWSER_ONLY === 'true';
+          const record = {
+            schemaVersion: 1,
+            sourceSha: process.env.CANDIDATE_SHA,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            event: process.env.REQUEST_EVENT,
+            selection: browserOnly ? 'explicit-manual-browser-only' : 'complete-workflow',
+            selectedJobs: ['browser-evidence', ...(browserOnly ? [] : otherJobs)],
+            notSelectedJobs: browserOnly ? otherJobs : [],
+            workflowSha256: createHash('sha256').update(readFileSync('.github/workflows/liquid-material-evidence.yml')).digest('hex'),
+            limitation: 'Selection is not execution or acceptance. Unselected partitions require separately bound evidence and are never counted as passing here.',
+          };
+          mkdirSync(process.env.EVIDENCE_DIRECTORY, { recursive: true });
+          writeFileSync(path.join(process.env.EVIDENCE_DIRECTORY, 'selection.json'), JSON.stringify(record, null, 2) + '\n');
+          console.log(JSON.stringify(record));
+          NODE
       - name: Source closure and real material/library evidence
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
+          PUI_LIQUID_GLASS_INCLUDE_WIP: '1'
         run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          mkdir -p "$PROTO_UI_MATERIAL_EVIDENCE_DIR"
+          node --test scripts/test/check-liquid-material-evidence.test.mjs
           node --test scripts/docs/test/liquid-toggle-mdx.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
@@ -49,12 +94,17 @@ jobs:
             packages/adapters/base/test/portal-destination.test.ts \
             packages/adapters/base/test/portal-inline-size.test.ts \
             packages/adapters/base/test/web-material-program.test.ts \
+            packages/adapters/base/test/web-material-image.test.ts \
+            packages/adapters/base/test/web-material-preferences-ownership.test.ts \
             packages/adapters/base/test/web-material-preferences-sequence.test.ts \
             packages/adapters/base/test/web-material-style-tint.test.ts \
+            packages/adapters/base/test/web-material-style-tint-source.test.ts \
             packages/adapters/base/test/web-material-style.test.ts \
             packages/adapters/base/test/web-material-source.test.ts \
             packages/adapters/base/test/web-material-sink.test.ts \
             apps/www/src/content/docs/zh-cn/material-paint-observation.test.ts \
+            apps/www/src/content/docs/zh-cn/trace-category-admission.test.ts \
+            apps/www/src/content/docs/zh-cn/portal-boundary-calibration.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-toggle-failure-diagnostics.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-toggle-snapshot.test.ts \
             apps/www/src/content/docs/zh-cn/liquid-toggle-detail-metrics.test.ts \
@@ -67,16 +117,81 @@ jobs:
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts \
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts \
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts \
-            --maxWorkers=1 --minWorkers=1
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile.json="$PROTO_UI_MATERIAL_EVIDENCE_DIR/vitest.json"
+      - name: Require actual material and lifecycle execution
+        if: always()
+        run: |
+          node scripts/test/check-liquid-material-evidence.mjs \
+            "$RUNNER_TEMP/liquid-material-evidence/vitest.json" material-library \
+            "$RUNNER_TEMP/liquid-material-evidence/coverage.json"
       - name: Retain exact-source evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: liquid-material-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/liquid-material-evidence
-          if-no-files-found: warn
+          if-no-files-found: error
+          retention-days: 30
+      - name: Run all eight Liquid parts through four real Web hosts
+        if: ${{ !cancelled() }}
+        id: state-controls
+        env:
+          PROTO_UI_LIQUID_CONTROLS_BROWSER_EVIDENCE: '1'
+          PUI_LIQUID_GLASS_INCLUDE_WIP: '1'
+          PROTO_UI_EXPECTED_HEAD_SHA: ${{ env.CANDIDATE_SHA }}
+          PROTO_UI_LIQUID_CONTROLS_EVIDENCE_DIR: ${{ runner.temp }}/liquid-state-controls-evidence
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/prototypes/liquid-glass/test/draft-control-projections.test.ts \
+            apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/native-composition-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/liquid-state-controls-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile.json="$PROTO_UI_LIQUID_CONTROLS_EVIDENCE_DIR/vitest.json"
+      - name: Preserve the separate Liquid controls terminal result
+        if: always()
+        env:
+          PROTO_UI_LIQUID_CONTROLS_EVIDENCE_DIR: ${{ runner.temp }}/liquid-state-controls-evidence
+          EVIDENCE_STEP_STATUS: ${{ steps.state-controls.outcome }}
+        run: |
+          mkdir -p "$PROTO_UI_LIQUID_CONTROLS_EVIDENCE_DIR"
+          node --input-type=module <<'JS'
+          import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          import { LIQUID_STATE_CONTROL_CASES, assessLiquidStateControls } from './apps/www/src/content/docs/zh-cn/liquid-state-controls-evidence.ts';
+          const file = path.join(process.env.PROTO_UI_LIQUID_CONTROLS_EVIDENCE_DIR, 'manifest.json');
+          const previous = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+          const failures = [...(previous.pageErrors ?? [])];
+          if (previous.startupError) failures.push(previous.startupError);
+          if (previous.sourceSha !== process.env.CANDIDATE_SHA) failures.push('Measured source is not the candidate SHA.');
+          if (process.env.EVIDENCE_STEP_STATUS !== 'success') failures.push('The selected suite did not complete successfully.');
+          if (previous.status !== 'passed') failures.push('The suite did not retain a passed terminal result.');
+          const terminal = assessLiquidStateControls(previous.results ?? [], failures);
+          const result = {
+            ...previous,
+            expectedSha: process.env.CANDIDATE_SHA,
+            stepStatus: process.env.EVIDENCE_STEP_STATUS,
+            expectedCases: LIQUID_STATE_CONTROL_CASES,
+            results: terminal.results,
+            terminal,
+            status: terminal.status,
+            scope: 'Eight Liquid parts, four Web hosts, provider-free fallback and CDP composition. No optical, physical OS IME, Compiler or non-Web acceptance.',
+          };
+          writeFileSync(file, JSON.stringify(result, null, 2));
+          if (result.status !== 'passed') throw new Error('The complete Liquid state-controls evidence is missing or failed.');
+          JS
+      - name: Retain Liquid controls screenshots and complete expected-case record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-state-controls-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/liquid-state-controls-evidence
+          if-no-files-found: error
           retention-days: 30
   prominent-tint-evidence:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -132,6 +247,7 @@ jobs:
           retention-days: 30
 
   hover-evidence:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:
@@ -174,6 +290,7 @@ jobs:
           retention-days: 30
 
   tint-stage-diagnostic:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -213,6 +330,7 @@ jobs:
           retention-days: 30
 
   visible-refraction-diagnostic:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.browser_only != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

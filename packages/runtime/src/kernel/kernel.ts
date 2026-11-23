@@ -48,6 +48,11 @@ export type Kernel<P extends PropsBaseType> = {
   renderOnce(): TemplateChildren;
 };
 
+export type KernelSetupOwner<P extends PropsBaseType> = Pick<
+  Kernel<P>,
+  'getPhase' | 'setPhase' | 'lifecycle' | 'viewIntent' | 'run'
+>;
+
 export type CreateKernelOptions = {
   allowRunUpdate?: boolean;
   onPhaseChange?: (p: ExecPhase) => void;
@@ -61,7 +66,11 @@ export type CreateKernelOptions = {
 export function createKernel<P extends PropsBaseType>(
   proto: Prototype<P>,
   modules: ModuleOrchestratorFacadeView,
-  opt?: CreateKernelOptions & { eventSink?: EventCallbacksSink<P> }
+  opt?: CreateKernelOptions & {
+    eventSink?: EventCallbacksSink<P>;
+    /** The allocating Runtime owns rollback before a partially started kernel escapes. */
+    onSetupFailure?: (owner: KernelSetupOwner<P>, error: unknown) => void;
+  }
 ): Kernel<P> {
   let phase: ExecPhase = 'unknown';
   const setPhase = (p: ExecPhase) => {
@@ -81,28 +90,6 @@ export function createKernel<P extends PropsBaseType>(
 
   const def = createDefHandle<P>(st, lifecycle, rules, modules, opt?.eventSink);
   const asHookRuntime = attachAsHookRuntime(def, st, proto, opt?.asHook);
-
-  // ----------------
-  // setup
-  // ----------------
-  setPhase('setup');
-  opt?.asHook?.enterSetup?.({ def, rt: asHookRuntime });
-  let maybeRender: RenderFn | void;
-  try {
-    maybeRender = proto.setup(def);
-  } finally {
-    opt?.asHook?.exitSetup?.();
-  }
-  const defaultRender: RenderFn = (renderer) => [renderer.slot()];
-  let renderFn: RenderFn = defaultRender;
-  if (typeof maybeRender === 'function') {
-    renderFn = maybeRender;
-  } else if (typeof maybeRender !== 'undefined') {
-    throw new Error(
-      `[Prototype] setup() must return render function or void, got: ${typeof maybeRender}.`
-    );
-  }
-  setPhase('unknown');
 
   // ----------------
   // run handle
@@ -126,6 +113,52 @@ export function createKernel<P extends PropsBaseType>(
     (present) => viewIntent.setPresent(present),
     () => viewOperations.capture()
   );
+
+  // The callback handle exists before authored setup so the allocating Runtime
+  // can retire registered callbacks and resources when setup does not return.
+  let maybeRender: RenderFn | void = undefined;
+  let setupFailure: { value: unknown } | undefined;
+  let enteredSetup = false;
+  try {
+    setPhase('setup');
+    opt?.asHook?.enterSetup?.({ def, rt: asHookRuntime });
+    enteredSetup = true;
+    maybeRender = proto.setup(def);
+  } catch (error) {
+    setupFailure = { value: error };
+  } finally {
+    if (enteredSetup) {
+      try {
+        opt?.asHook?.exitSetup?.();
+      } catch (error) {
+        setupFailure ??= { value: error };
+      }
+    }
+  }
+  const defaultRender: RenderFn = (renderer) => [renderer.slot()];
+  let renderFn: RenderFn = defaultRender;
+  if (!setupFailure) {
+    if (typeof maybeRender === 'function') renderFn = maybeRender;
+    else if (typeof maybeRender !== 'undefined') {
+      setupFailure = {
+        value: new Error(
+          `[Prototype] setup() must return render function or void, got: ${typeof maybeRender}.`
+        ),
+      };
+    }
+  }
+  if (setupFailure) {
+    try {
+      opt?.onSetupFailure?.(
+        { getPhase: () => phase, setPhase, lifecycle, viewIntent, run },
+        setupFailure.value
+      );
+    } catch {
+      /* Rollback cannot replace the initiating setup failure, including undefined. */
+    }
+    throw setupFailure.value;
+  }
+  setPhase('unknown');
 
   // ----------------
   // read / renderer

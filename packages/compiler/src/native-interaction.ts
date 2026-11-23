@@ -297,10 +297,16 @@ export function validateNativeInteraction(
   return diagnostics;
 }
 
+let fullInteractionTemplate: string | undefined;
 export const nativeInteractionArtifact = {
   path: interactionFile,
   kind: 'source' as const,
-  contents: fullNativeInteractionTemplate(semanticEvents, stateAttributes),
+  get contents() {
+    return (fullInteractionTemplate ??= fullNativeInteractionTemplate(
+      semanticEvents,
+      stateAttributes
+    ));
+  },
 };
 
 /**
@@ -360,15 +366,12 @@ export function nativeInteractionArtifacts(
     return [ownership, nativeTextControlArtifact(selection === 'text-single')];
   const source =
     "import { rootOwners, logicalOwners, exposeSignals, defaultPreventedSamples, type RootOwner } from './ownership-v1';\n" +
-    omitSupportDeclarations(options.controlLabel
-      ? fullNativeInteractionTemplate(semanticEvents, stateAttributes, options)
-      : nativeInteractionArtifact.contents, [
-      'RootOwner',
-      'rootOwners',
-      'logicalOwners',
-      'exposeSignals',
-      'defaultPreventedSamples',
-    ]);
+    omitSupportDeclarations(
+      options.controlLabel
+        ? fullNativeInteractionTemplate(semanticEvents, stateAttributes, options)
+        : nativeInteractionArtifact.contents,
+      ['RootOwner', 'rootOwners', 'logicalOwners', 'exposeSignals', 'defaultPreventedSamples']
+    );
   // Keep the established component import ABI. Explicit directory migration
   // reassembles old/new artifacts into one actual helper instance; untouched
   // legacy support is not silently overwritten or claimed compatible.

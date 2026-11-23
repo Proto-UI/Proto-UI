@@ -473,6 +473,11 @@ describe('source-bound layout profiles preserve inherited owners', () => {
       expect(viewport.firstChild).toBe(payload);
       expect(styleContains(viewport, 'rounded-[inherit]')).toBe(true);
       expect(styleContains(vertical, 'p-px')).toBe(true);
+      for (const thumb of [vThumb, hThumb]) {
+        expect(styleContains(thumb, 'h-full')).toBe(true);
+        expect(styleContains(thumb, 'w-full')).toBe(true);
+        expect(styleContains(thumb, 'flex-1')).toBe(false);
+      }
       expect(styleContains(vThumb, 'rounded-none')).toBe(profile === 'lyra' || profile === 'sera');
       expect(styleContains(hThumb, 'rounded-none')).toBe(profile === 'lyra' || profile === 'sera');
       expect(vThumb.hasAttribute('role')).toBe(false);

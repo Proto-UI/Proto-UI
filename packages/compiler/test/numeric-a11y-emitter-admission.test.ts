@@ -9,7 +9,9 @@ import {
   emitVue2Source,
   emitWebComponentSource,
   parsePrototype,
+  validateIR,
 } from '../src/index';
+import { pruneDeadValues } from '../src/demand-pruning';
 import type { PrototypeIR } from '../src/ir';
 
 const fileName = 'numeric-a11y-emitter.proto.ts';
@@ -18,6 +20,13 @@ const imports = `import {definePrototype,defineAsHook} from '@proto.ui/core';
 const action = `const accessible=asAccessible();
   accessible.action('setValue',{event:'host:numeric'});`;
 const state = `const count=def.state.numberDiscrete('count',0);def.expose.state('count',count);`;
+const numericSetupHook = `const useNumeric=defineAsHook({name:'numeric-child',setup(def){
+  ${action}${state}def.event.on('host:numeric',(_run,event)=>{count.set(event.value);});
+}});`;
+const numericProjectionHook = `import type {A11ySetValueEventPayload} from '@proto.ui/core';
+const useNumeric=defineAsHook({name:'numeric-projection',setup(){},projectHandle(){
+  return (event:A11ySetValueEventPayload)=>event.value;
+}});`;
 function prototype(body: string, declarations = ''): string {
   return `${imports}${declarations}
     export default definePrototype({name:'numeric-a11y-emitter',setup(def){
@@ -31,6 +40,16 @@ function parse(source: string): PrototypeIR {
 }
 function listener(body: string): PrototypeIR {
   return parse(prototype(`${action}${state}def.event.on('host:numeric',(_run,event)=>{${body}});`));
+}
+function expectRetainedUnreferencedHook(ir: PrototypeIR): void {
+  // An explicit outer type retains source-admission obligations even when its
+  // local callable is unused. The emitter still prints the checked Hook after
+  // pruning that callable; this fixture must actually reach that boundary.
+  expect(validateIR(ir)).toMatchObject({ ok: true });
+  expect(ir.hooks).toHaveLength(1);
+  const pruned = pruneDeadValues(ir);
+  expect(pruned.hooks).toHaveLength(1);
+  expect(JSON.stringify(pruned.setup)).not.toContain('"kind":"authored-hook"');
 }
 const unsupportedEmitters = [
   emitQtSource,
@@ -100,15 +119,20 @@ describe('numeric accessibility payload admission at public emitter entries', ()
       if (result.ok) expect(result.value.code).not.toContain('unused');
     });
 
+    it('does not emit a Hook discovered only inside a dormant untyped source callable', () => {
+      const source = prototype('const unused=()=>useNumeric();', numericSetupHook);
+      const ir = parse(source);
+      expect(ir.sourceFiles[0].content).toBe(source);
+      expect(ir.hooks).toEqual([]);
+      const result = emit(ir);
+      expect(result.ok, JSON.stringify(result.ok ? {} : result.diagnostics)).toBe(true);
+      if (result.ok)
+        expect(result.value.code).not.toMatch(/numeric-child|host:numeric|event\.value/);
+    });
+
     it('checks unreferenced Hook setup bodies that the emitter still prints', () => {
-      const ir = parse(
-        prototype(
-          'const unused=()=>useNumeric();',
-          `const useNumeric=defineAsHook({name:'numeric-child',setup(def){
-            ${action}${state}def.event.on('host:numeric',(_run,event)=>{count.set(event.value);});
-          }});`
-        )
-      );
+      const ir = parse(prototype('const unused:()=>unknown=()=>useNumeric();', numericSetupHook));
+      expectRetainedUnreferencedHook(ir);
       expect(emit(ir)).toMatchObject({
         ok: false,
         diagnostics: [
@@ -123,14 +147,9 @@ describe('numeric accessibility payload admission at public emitter entries', ()
 
   it('checks an unreferenced Hook projection that React Runtime still emits', () => {
     const ir = parse(
-      prototype(
-        'const unused=()=>useNumeric();',
-        `import type {A11ySetValueEventPayload} from '@proto.ui/core';
-        const useNumeric=defineAsHook({name:'numeric-projection',setup(){},projectHandle(){
-          return (event:A11ySetValueEventPayload)=>event.value;
-        }});`
-      )
+      prototype('const unused:()=>unknown=()=>useNumeric();', numericProjectionHook)
     );
+    expectRetainedUnreferencedHook(ir);
     expect(emitReact(ir)).toMatchObject({
       ok: false,
       diagnostics: [
@@ -141,6 +160,19 @@ describe('numeric accessibility payload admission at public emitter entries', ()
         },
       ],
     });
+  });
+
+  it('does not emit a Hook projection discovered only inside a dormant untyped source callable', () => {
+    const source = prototype('const unused=()=>useNumeric();', numericProjectionHook);
+    const ir = parse(source);
+    expect(ir.sourceFiles[0].content).toBe(source);
+    expect(ir.hooks).toEqual([]);
+    const result = emitReact(ir);
+    expect(result.ok, JSON.stringify(result.ok ? {} : result.diagnostics)).toBe(true);
+    if (result.ok)
+      expect(result.value.code).not.toMatch(
+        /numeric-projection|A11ySetValueEventPayload|event\.value/
+      );
   });
 
   it.each(['return;', "throw 'finished';"])(

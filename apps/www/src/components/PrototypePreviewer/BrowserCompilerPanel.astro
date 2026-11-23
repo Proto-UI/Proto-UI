@@ -1,0 +1,159 @@
+---
+import type { CompiledPreviewItem } from './compiled-preview-sandbox';
+interface Props {
+  prototypeId: string;
+  items?: CompiledPreviewItem[];
+  isZh?: boolean;
+}
+const { prototypeId, items = [{ props: {}, text: 'Preview' }], isZh = false } = Astro.props;
+---
+
+<pui-browser-compiler
+  data-prototype-id={prototypeId}
+  data-items={JSON.stringify(items)}
+  data-language={isZh ? 'zh' : 'en'}
+>
+  <details data-compiler-panel>
+    <summary>{isZh ? '在浏览器中编译并编辑' : 'Compile and edit in your browser'}</summary>
+    <div class="compiler-body">
+      <p class="compiler-explanation">
+        {
+          isZh
+            ? '选择目标后查看此原型的生成源码与预览。展开编辑器可以修改源码；每次编译创建新的预览实例。'
+            : 'Choose a target to inspect this prototype’s generated source and preview. Open the editor to change its source; each compilation creates a fresh preview instance.'
+        }
+      </p>
+      <div class="compiler-controls">
+        <label
+          >{isZh ? '生成目标' : 'Target'}
+          <select data-compiler-target>
+            <option value="web-component-source-v1">Web Components</option>
+            <option value="react-dom-source-v1">React 19</option>
+            <option value="vue-source-v1">Vue 3</option>
+            <option value="vue2-source-v1">Vue 2</option>
+          </select></label
+        >
+        <button type="button" data-compiler-run>{isZh ? '编译' : 'Compile'}</button>
+        <button type="button" data-compiler-cancel disabled>{isZh ? '取消' : 'Cancel'}</button>
+      </div>
+      <p data-compiler-status role="status" aria-live="polite">
+        {isZh ? '展开后加载编译器。' : 'The compiler loads when this panel opens.'}
+      </p>
+      <div data-compiled-preview aria-label={isZh ? '编译结果预览' : 'Compiled preview'}></div>
+      <output data-compiler-events aria-live="polite"></output>
+      <pre data-compiler-diagnostics role="alert" hidden></pre>
+      <details data-source-editor>
+        <summary>{isZh ? '编辑原型源码' : 'Edit prototype source'}</summary>
+        <label>{isZh ? '源文件' : 'Source file'} <select data-source-file></select></label>
+        <label
+          >{isZh ? '原型源码' : 'Prototype source'}<textarea
+            data-source-text
+            spellcheck="false"
+            aria-label={isZh ? '原型源码' : 'Prototype source'}></textarea></label
+        >
+        <p>
+          {
+            isZh
+              ? '修改在短暂暂停后自动编译。未通过检查时会清除预览；修复后可重新编译。'
+              : 'Changes compile after a short pause. A failed check clears the preview; fix the source and compile again.'
+          }
+        </p>
+      </details>
+      <details data-generated-source>
+        <summary>{isZh ? '查看生成源码' : 'View generated source'}</summary>
+        <label>{isZh ? '生成文件' : 'Generated file'} <select data-generated-file></select></label>
+        <pre data-generated-text tabindex="0"></pre>
+      </details>
+    </div>
+  </details>
+</pui-browser-compiler>
+<script>
+  import './browser-compiler-panel';
+</script>
+<style>
+  pui-browser-compiler {
+    display: block;
+    min-width: 0;
+    border: 1px solid var(--sl-color-gray-5, #ccd0d5);
+    border-radius: 0.5rem;
+    padding: 0.8rem 1rem;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .compiler-body {
+    display: grid;
+    gap: 0.8rem;
+    min-width: 0;
+    padding-top: 0.75rem;
+  }
+  .compiler-body p {
+    margin: 0;
+    font-size: 0.875rem;
+  }
+  .compiler-controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  label {
+    display: block;
+    font-size: 0.875rem;
+  }
+  select,
+  button,
+  textarea {
+    font: inherit;
+    color: inherit;
+    background: var(--sl-color-bg, #fff);
+    border: 1px solid var(--sl-color-gray-4, #adb5bd);
+    border-radius: 0.3rem;
+  }
+  select,
+  button {
+    padding: 0.35rem 0.6rem;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 20rem;
+    padding: 0.8rem;
+    font:
+      12px/1.6 ui-monospace,
+      monospace;
+    tab-size: 2;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+  pre {
+    white-space: pre;
+    overflow: auto;
+    max-height: 28rem;
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    font:
+      12px/1.6 ui-monospace,
+      monospace;
+    background: var(--sl-color-gray-6, #f5f6f7);
+    border-radius: 0.3rem;
+  }
+  [data-compiler-diagnostics] {
+    white-space: pre-wrap;
+    border-left: 3px solid #c53c3c;
+  }
+  details details {
+    min-width: 0;
+  }
+  details details > label {
+    margin-top: 0.65rem;
+  }
+</style>

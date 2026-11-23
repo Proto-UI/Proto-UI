@@ -1,0 +1,24 @@
+[
+  {
+    "version": "1.0",
+    "createSurface": {
+      "surfaceId": "settings-1",
+      "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+      "components": [
+        {
+          "id": "root",
+          "component": "Tabs",
+          "@accessibility": { "label": "Account settings" },
+          "tabs": [
+            { "title": "General", "child": "general" },
+            { "title": "Privacy", "child": "privacy" },
+            { "title": "Notifications", "child": "notifications" }
+          ]
+        },
+        { "id": "general", "component": "Text", "text": "Choose your display name." },
+        { "id": "privacy", "component": "Text", "text": "Choose who can see your profile." },
+        { "id": "notifications", "component": "Text", "text": "Choose when to receive updates." }
+      ]
+    }
+  }
+]

@@ -7,9 +7,15 @@ export const READY_ROUTES = Object.freeze([
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
   '/en/test/bootstrap-state-controls/',
+  '/en/test/liquid-glass-state-controls/',
+  '/en/ui-libraries/bootstrap-2-3-2/button/',
   '/en/test/liquid-glass-material/',
   '/en/test/liquid-glass-portal/',
   '/en/ui-libraries/base/image/',
+  '/en/ui-libraries/base/tooltip/',
+  '/zh-cn/ui-libraries/base/tooltip/',
+  '/en/ui-libraries/base/select/',
+  '/zh-cn/ui-libraries/base/select/',
   '/en/ui-libraries/base/collapsible/',
   '/en/ui-libraries/shadcn/collapsible/',
   '/zh-cn/ui-libraries/shadcn/collapsible/',
@@ -85,10 +91,16 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/compiler/test/sprint1-ownership.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/sprint2-site.browser.test.ts',
   'packages/compiler/test/sprint2-native.browser.test.ts',
+  'apps/www/test/release-docs-reading.browser.test.ts',
   'apps/www/test/component-consumer-repairs.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-tooltip.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-select.browser.test.ts',
   'packages/compiler/test/control-label-native.browser.test.ts',
+  'packages/compiler/test/transition-native.browser.test.ts',
   'packages/compiler/test/vue2-native-editor.browser.test.ts',
   'packages/compiler/test/focus-scope-native.browser.test.ts',
+  'packages/compiler/test/shader-presentation.browser.test.ts',
+  'packages/compiler/test/presence-presentation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
   'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
@@ -180,7 +192,6 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-portal.browser.test.ts',
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
@@ -190,6 +201,10 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts',
@@ -227,6 +242,14 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts':
+    '.github/workflows/bootstrap-state-controls-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts':
+    '.github/workflows/bootstrap-state-controls-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts':
+    '.github/workflows/bootstrap-state-controls-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts':
+    '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts':

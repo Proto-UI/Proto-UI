@@ -5,6 +5,7 @@ import { vertex, fragment, uniformNames } from './liquidgl-kernel.generated';
 import type { OpaqueRgba } from './style';
 import type { CanvasBackdropFrame } from './source';
 import type { WebOpticalPrefilter } from './prefilter';
+import { styleTintSourceTone, type StyleTintSourceTone } from './style-tint-source';
 
 const decodeSrgb = (channel: number) =>
   channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
@@ -70,6 +71,8 @@ export function createWebOpticalProgram(
     sourcePreparations: 0,
     sourcePreparationMilliseconds: 0,
     sourcePreparationCacheHits: 0,
+    tintSourcePreparations: 0,
+    tintSourcePreparationMilliseconds: 0,
     cpuSourcePreparations: 0,
     cpuSourcePreparationMilliseconds: 0,
     gpuSourcePreparations: 0,
@@ -91,7 +94,11 @@ export function createWebOpticalProgram(
     height: number;
     byteOffset: number;
   };
-  type PreparedSource = { identity: SourceIdentity; byteLength: number } & (
+  type PreparedSource = {
+    identity: SourceIdentity;
+    byteLength: number;
+    tintSourceTone?: StyleTintSourceTone;
+  } & (
     | { backend: 'cpu'; pixels: Uint8Array }
     | { backend: 'gpu'; texture: WebGLTexture; release(): void }
   );
@@ -285,7 +292,9 @@ export function createWebOpticalProgram(
         [
           ...uniformNames,
           'u_contactShape',
-          ...(tinted ? ['u_styleTintLightForeground', 'u_styleTintLuminanceBound'] : []),
+          ...(tinted
+            ? ['u_styleTintLightForeground', 'u_styleTintLuminanceBound', 'u_styleTintSourceTone']
+            : []),
         ].map((name) => [name, g.getUniformLocation(program!, name)])
       );
       if (!buffer) {
@@ -371,6 +380,16 @@ export function createWebOpticalProgram(
       // Clear frames must also retire older revisions of their canvas/scope.
       prunePrepared(source);
       const currentPrepared = variant === 'regular' ? prepareSource(source) : null;
+      if (tintEnvelope && currentPrepared && !currentPrepared.tintSourceTone) {
+        const toneStarted = performance.now();
+        currentPrepared.tintSourceTone = styleTintSourceTone(source.pixels);
+        const elapsed = performance.now() - toneStarted;
+        metrics.tintSourcePreparations++;
+        metrics.tintSourcePreparationMilliseconds += elapsed;
+        // Total preparation includes this CPU pass for either backend. Backend
+        // counters continue to describe their existing filtering work only.
+        metrics.sourcePreparationMilliseconds += elapsed;
+      }
       // The prefilter has its own framebuffer/program/VAO. Reassert every main
       // draw binding rather than relying on a particular preparation backend.
       g.viewport(0, 0, width, height);
@@ -453,6 +472,9 @@ export function createWebOpticalProgram(
       if (tintEnvelope) {
         f('u_styleTintLightForeground', tintEnvelope.lightForeground ? 1 : 0);
         f('u_styleTintLuminanceBound', tintEnvelope.luminanceBound);
+        // Tint is regular-only; its facts were derived after the same admission
+        // and cache validation as the actual uploaded/sampled source bytes.
+        v4('u_styleTintSourceTone', currentPrepared!.tintSourceTone!);
       }
       i('u_stack', 1);
       v4('u_stackMapping', [0, 0, 0, 0]);
@@ -587,27 +609,29 @@ function prefilter(
       0x00200020;
     return ((even >>> 6) & 0x00ff00ff) | (((odd >>> 6) & 0x00ff00ff) << 8);
   }
-  // Clamp the horizontal neighborhood once per column, not per pixel or lane.
-  const offsets = new Int32Array(width * 6);
-  for (let x = 0; x < width; x++) {
-    let at = x * 6;
-    for (let k = -3; k < 0; k++) offsets[at++] = Math.max(0, x + k);
-    for (let k = 1; k <= 3; k++) offsets[at++] = Math.min(width - 1, x + k);
-  }
   for (let y = 0; y < height; y++) {
     const base = y * width;
+    // Adjacent horizontal neighborhoods share six words. Keep those words in
+    // the sliding window instead of repeating seven RGBA and six offset loads
+    // for every pixel. The replicated border and both rounding steps remain
+    // identical to the separable reference, including sources narrower than
+    // the seven-tap kernel.
+    let a = input[base],
+      b = a,
+      c = a,
+      center = a,
+      d = input[base + Math.min(width - 1, 1)],
+      e = input[base + Math.min(width - 1, 2)],
+      f = input[base + Math.min(width - 1, 3)];
     for (let x = 0; x < width; x++) {
-      const at = base + x,
-        offset = x * 6;
-      scratch[at] = sample(
-        input[base + offsets[offset]],
-        input[base + offsets[offset + 1]],
-        input[base + offsets[offset + 2]],
-        input[at],
-        input[base + offsets[offset + 3]],
-        input[base + offsets[offset + 4]],
-        input[base + offsets[offset + 5]]
-      );
+      scratch[base + x] = sample(a, b, c, center, d, e, f);
+      a = b;
+      b = c;
+      c = center;
+      center = d;
+      d = e;
+      e = f;
+      f = input[base + Math.min(width - 1, x + 4)];
     }
   }
   for (let y = 0; y < height; y++) {

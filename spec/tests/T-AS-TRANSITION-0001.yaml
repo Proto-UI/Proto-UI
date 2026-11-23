@@ -60,6 +60,21 @@ cases:
       - C-AS-TRANSITION-0001-Q
     expectation: context-field-initial-fallback-is-setup-only-and-sampled-once
 implementations:
+  - id: transition-native-runtime-and-generated-consumers
+    kind: adapter-test
+    status: passing
+    path: packages/compiler/test/transition-native.browser.test.ts
+    required: true
+    consumesCases:
+      - T-AS-TRANSITION-0001-CASE-INITIAL
+      - T-AS-TRANSITION-0001-CASE-SEQUENCING
+      - T-AS-TRANSITION-0001-CASE-DELAY
+      - T-AS-TRANSITION-0001-CASE-REDUCED-MOTION
+    notes:
+      - Source 94e934f11310a9d9c2f7304b4990dcce333af2a4 passed 64 native Chromium 145 cases with its sandbox enabled; all four Web Runtime Adapters and generated profiles independently satisfy the shared expectations.
+      - Covers cold start and preparation, reentrant afterLeave-to-enter with retained DOM, superseded native timers, duplicate complete, disposal, captured old controls and replacement ownership, and browser reduced-motion preference.
+      - Generated consumers use canonical compilePrototype/writeCompilation and real framework imports. Each target has a separately bounded compiler prerequisite; lifecycle assertions and timer deadlines are unchanged.
+      - Source-specific native Web evidence; no native OS assistive technology, GPUI execution, Qt/Flutter/SSR support or promotion of draft lifecycle guarantees is inferred.
   - id: transition-initial-context-source
     kind: runtime-test
     status: passing

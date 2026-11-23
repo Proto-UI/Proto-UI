@@ -113,6 +113,12 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         close: '关闭预览',
         error: '图片暂时无法加载',
         hint: '按 Escape 或点击图片外的背景关闭',
+        read: '放大阅读',
+        fit: '适应窗口',
+        larger: '放大',
+        smaller: '缩小',
+        viewport: '插图，可横向和纵向滚动',
+        panHint: '放大后可滚动查看插图；也可以切换到适应窗口查看全图',
       }
     : {
         title: 'Image preview',
@@ -120,6 +126,13 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         close: 'Close preview',
         error: 'This image could not be loaded',
         hint: 'Press Escape or press the background outside the image to close',
+        read: 'Reading size',
+        fit: 'Fit to window',
+        larger: 'Zoom in',
+        smaller: 'Zoom out',
+        viewport: 'Illustration, scroll horizontally and vertically',
+        panHint:
+          'Scroll to read the enlarged illustration, or fit it to the window for an overview',
       };
   let family: PreviewFamily = previewFamily(doc);
   let enhancements: Enhancement[] = [];
@@ -139,6 +152,16 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   let activeItem: Enhancement | null = null;
   let sourceSize = { width: 0, height: 0 };
   let originWasUnavailable = false;
+  let diagramFrame: HTMLDivElement | null = null;
+  let diagramRoot: PreviewControl | null = null;
+  let diagramViewport: PreviewControl | null = null;
+  let zoomToolbar: HTMLDivElement | null = null;
+  let zoomButton: PreviewControl | null = null;
+  let zoomInButton: PreviewControl | null = null;
+  let zoomOutButton: PreviewControl | null = null;
+  let diagramAbort: AbortController | null = null;
+  let diagramReadingSize = false;
+  let diagramScale = 1;
 
   const releaseSource = () => {
     if (ownedUrl) URL.revokeObjectURL(ownedUrl);
@@ -152,6 +175,11 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       content,
       maskSurface,
       contentSurface,
+      ...(diagramRoot ? [diagramRoot] : []),
+      ...(diagramViewport ? [diagramViewport] : []),
+      ...(zoomButton ? [zoomButton] : []),
+      ...(zoomInButton ? [zoomInButton] : []),
+      ...(zoomOutButton ? [zoomOutButton] : []),
       ...enhancements.map((item) => item.surface),
     ])
       themePreviewControl(control, family, dark);
@@ -193,6 +221,59 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       image.naturalHeight || sourceSize.height,
       viewport
     );
+    if (diagramViewport && diagramRoot && diagramFrame) {
+      // Keep tools and the focus outline inside Dialog Content's real clip.
+      // The inner public ScrollArea owns the only reading scroll surface.
+      const inset = Math.min(16, viewport.width / 20, viewport.height / 20);
+      target.x = viewport.x + inset;
+      target.y = viewport.y + inset;
+      target.width = Math.max(1, viewport.width - inset * 2);
+      target.height = Math.max(1, viewport.height - inset * 2);
+      const gutter = 6;
+      const toolsHeight = Math.min(40, target.height / 4);
+      diagramFrame.style.setProperty('--docs-image-tools-height', `${toolsHeight}px`);
+      diagramFrame.style.setProperty('--docs-image-reading-gutter', `${gutter}px`);
+      const readingSpace = {
+        x: target.x + gutter,
+        y: target.y + toolsHeight + gutter * 2,
+        width: Math.max(1, target.width - gutter * 2),
+        height: Math.max(1, target.height - toolsHeight - gutter * 3),
+      };
+      const fitting = imageContainRect(
+        image.naturalWidth || sourceSize.width,
+        image.naturalHeight || sourceSize.height,
+        readingSpace
+      );
+      diagramRoot.style.width = `${diagramReadingSize ? readingSpace.width : fitting.width}px`;
+      diagramRoot.style.height = `${diagramReadingSize ? readingSpace.height : fitting.height}px`;
+      diagramViewport.dataset.docsImageScale = diagramReadingSize ? 'reading' : 'fit';
+      if (diagramReadingSize) {
+        const width = image.naturalWidth || sourceSize.width;
+        const height = image.naturalHeight || sourceSize.height;
+        // A viewBox-only SVG may report a 300px default intrinsic width. Honor
+        // the authored dimensions only for that same selected source, never a
+        // desktop fallback's dimensions when <picture> selects a mobile asset.
+        const authoredWidth =
+          activeItem.media instanceof HTMLImageElement &&
+          activeItem.media.currentSrc === activeItem.media.src
+            ? Number(activeItem.media.getAttribute('width'))
+            : 0;
+        const readingWidth =
+          diagramScale *
+          Math.max(
+            640,
+            width,
+            Number.isFinite(authoredWidth) && authoredWidth > 0 ? authoredWidth : 0
+          );
+        if (width > 0 && height > 0) {
+          image.style.width = `${readingWidth}px`;
+          image.style.height = `${(readingWidth * height) / width}px`;
+        }
+      } else {
+        image.style.removeProperty('width');
+        image.style.removeProperty('height');
+      }
+    }
     const origin =
       activeItem.media.isConnected && activeItem.trigger.contains(activeItem.media)
         ? activeItem.media.getBoundingClientRect()
@@ -201,7 +282,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     // A later focus-restoration scroll must not silently revive a destination
     // that disappeared while this image was presented. Reset for the next open.
     if (!measuredTransform) originWasUnavailable = true;
-    const transform = originWasUnavailable ? null : measuredTransform;
+    // The diagram frame includes controls and a scrollport, so it has no single
+    // source-image return rectangle. Its existing Surface fades in both modes;
+    // ordinary contained media keeps its original measured image flight.
+    const transform = originWasUnavailable || diagramViewport ? null : measuredTransform;
     const values = {
       '--docs-image-left': `${target.x}px`,
       '--docs-image-top': `${target.y}px`,
@@ -213,6 +297,39 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       if (content.style.getPropertyValue(name) !== value) content.style.setProperty(name, value);
     setPreviewProps(contentSurface, { fade: !transform });
     content.dataset.docsImageReturn = transform ? 'origin' : 'fade';
+  };
+  const syncZoomControls = () => {
+    const unavailable = !image.complete || !image.naturalWidth || !status.hidden;
+    if (zoomButton) {
+      zoomButton.textContent = diagramReadingSize ? labels.fit : labels.read;
+      setPreviewProps(zoomButton, { disabled: unavailable });
+    }
+    if (zoomInButton)
+      setPreviewProps(zoomInButton, {
+        disabled: unavailable || (diagramReadingSize && diagramScale >= 4),
+      });
+    if (zoomOutButton)
+      setPreviewProps(zoomOutButton, { disabled: unavailable || !diagramReadingSize });
+  };
+  const setDiagramScale = (reading: boolean, scale: number) => {
+    if (!diagramViewport || !image.complete || !image.naturalWidth || !status.hidden) return;
+    const previous = image.getBoundingClientRect();
+    const center = {
+      x: diagramViewport.scrollLeft + diagramViewport.clientWidth / 2,
+      y: diagramViewport.scrollTop + diagramViewport.clientHeight / 2,
+    };
+    const preserveCenter = reading && diagramReadingSize;
+    diagramReadingSize = reading;
+    diagramScale = scale;
+    geometry();
+    if (preserveCenter && previous.width > 0 && previous.height > 0) {
+      const next = image.getBoundingClientRect();
+      diagramViewport.scrollTo(
+        (center.x * next.width) / previous.width - diagramViewport.clientWidth / 2,
+        (center.y * next.height) / previous.height - diagramViewport.clientHeight / 2
+      );
+    } else diagramViewport.scrollTo(0, 0);
+    syncZoomControls();
   };
   const createImage = () => {
     mediaAbort.abort();
@@ -227,6 +344,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         if (nextImage !== image || !nextImage.hasAttribute('src')) return;
         status.hidden = true;
         nextImage.hidden = false;
+        syncZoomControls();
         geometry();
       },
       mediaOptions
@@ -237,12 +355,102 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         if (nextImage !== image || !nextImage.hasAttribute('src')) return;
         status.hidden = false;
         nextImage.hidden = true;
+        syncZoomControls();
       },
       mediaOptions
     );
     return nextImage;
   };
+  const clearDiagramControls = () => {
+    diagramAbort?.abort();
+    diagramAbort = null;
+    if (diagramFrame) diagramFrame.replaceWith(image);
+    diagramFrame = null;
+    diagramRoot = null;
+    diagramViewport = null;
+    zoomToolbar = null;
+    zoomButton = null;
+    zoomInButton = null;
+    zoomOutButton = null;
+    diagramReadingSize = false;
+    diagramScale = 1;
+    image.style.removeProperty('width');
+    image.style.removeProperty('height');
+  };
+  const installDiagramControls = () => {
+    diagramAbort?.abort();
+    const controlsAbort = new AbortController();
+    diagramAbort = controlsAbort;
+    diagramReadingSize = true;
+    diagramScale = 1;
+    diagramFrame = doc.createElement('div');
+    diagramFrame.className = 'docs-image-reading-layout';
+    diagramRoot = makePreviewControl(family, 'readingRoot');
+    diagramRoot.dataset.docsImageReadingRoot = '';
+    diagramViewport = makePreviewControl(family, 'readingViewport', {
+      a11yLabel: labels.viewport,
+    });
+    diagramViewport.dataset.docsImageViewport = '';
+    image.replaceWith(diagramFrame);
+    diagramRoot.append(diagramViewport);
+    diagramViewport.append(image);
+    const ownedImage = image;
+    const ownedViewport = diagramViewport;
+    const ownedRoot = root;
+    zoomToolbar = doc.createElement('div');
+    zoomToolbar.className = 'docs-image-toolbar';
+    const action = (label: string, invoke: () => void) => {
+      const button = makePreviewControl(family, 'button', {
+        variant: family === 'brutalist' ? 'surface' : 'secondary',
+        size: 'sm',
+        disabled: true,
+      });
+      button.textContent = label;
+      button.addEventListener(
+        'click',
+        (event) => {
+          if (
+            event instanceof CustomEvent &&
+            !controlsAbort.signal.aborted &&
+            button.isConnected &&
+            ownedViewport.isConnected &&
+            image === ownedImage &&
+            diagramViewport === ownedViewport &&
+            root === ownedRoot &&
+            ownedRoot.getExposes?.().open?.get?.() === true
+          )
+            invoke();
+        },
+        { signal: controlsAbort.signal }
+      );
+      return button;
+    };
+    zoomButton = action(labels.fit, () => setDiagramScale(!diagramReadingSize, 1));
+    zoomButton.dataset.docsImageZoom = '';
+    zoomInButton = action(labels.larger, () =>
+      setDiagramScale(true, diagramReadingSize ? Math.min(4, diagramScale * 2) : 1)
+    );
+    zoomInButton.dataset.docsImageZoomIn = '';
+    zoomOutButton = action(labels.smaller, () =>
+      setDiagramScale(diagramScale > 1, Math.max(1, diagramScale / 2))
+    );
+    zoomOutButton.dataset.docsImageZoomOut = '';
+    zoomToolbar.append(zoomOutButton, zoomButton, zoomInButton);
+    diagramFrame.append(zoomToolbar, diagramRoot);
+    theme();
+  };
   const createDialog = () => {
+    diagramAbort?.abort();
+    diagramAbort = null;
+    diagramFrame = null;
+    diagramRoot = null;
+    diagramViewport = null;
+    zoomToolbar = null;
+    zoomButton = null;
+    zoomInButton = null;
+    zoomOutButton = null;
+    diagramReadingSize = false;
+    diagramScale = 1;
     const epoch = ++generation;
     root = makePreviewControl(family, 'dialogRoot', { a11yLabel: labels.title });
     root.dataset.docsImageDialog = '';
@@ -306,6 +514,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       () => {
         if (epoch !== generation || root.getExposes?.().open?.get?.()) return;
         restoreOrigin();
+        clearDiagramControls();
         activeItem = null;
         image.removeAttribute('src');
         releaseSource();
@@ -324,6 +533,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     if (!source) return;
     releaseSource();
     restoreOrigin();
+    clearDiagramControls();
     activeItem = item;
     sourceSize = { width: source.width, height: source.height };
     originWasUnavailable = false;
@@ -334,7 +544,11 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     image.hidden = false;
     image.alt = source.alt;
     image.dataset.sourceUrl = source.sourceUrl;
-    description.textContent = [labels.hint, source.caption].filter(Boolean).join('. ');
+    const diagram = item.media.classList.contains('whitepaper-diagram');
+    if (diagram) installDiagramControls();
+    description.textContent = [labels.hint, diagram ? labels.panHint : '', source.caption]
+      .filter(Boolean)
+      .join('. ');
     geometry();
     item.trigger.setAttribute('data-docs-image-source-instant', '');
     item.trigger.setAttribute('data-docs-image-origin-hidden', '');
@@ -502,6 +716,8 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     generation++;
     renderAbort.abort();
     mediaAbort.abort();
+    diagramAbort?.abort();
+    diagramAbort = null;
     contentObserver.disconnect();
     themeObserver.disconnect();
     abort.abort();

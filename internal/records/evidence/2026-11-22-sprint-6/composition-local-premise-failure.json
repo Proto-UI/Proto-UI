@@ -1,0 +1,13 @@
+{
+  "kind": "retained-intermediate-local-test-premise-failure",
+  "file": "composition-local-premise-failure.log.gz",
+  "compressedSha256": "c51822c3b00e6936c5a64a85c83ec984153ade6432623beea59c4898000e822e",
+  "uncompressedSha256": "3f70387ce3bd42701c2fa703fe5b6f6076a716ebb28ce19cce3db027467c1a0c",
+  "compressedBytes": 1438,
+  "uncompressedBytes": 5185,
+  "passed": 37,
+  "failed": 1,
+  "sourceRecording": "Intermediate isolated mutable working tree; the exact earlier test revision was not frozen. This log is not used as an exact-source product regression negative control.",
+  "cause": "HappyDOM 15 exposes CompositionEvent as Event without data and its element dispatch override bypasses EventTarget.prototype. The local unit now checks actual EventTarget forwarding; actual CompositionEvent dispatch remains an independent real-browser negative control.",
+  "laterUnitResult": "43/43 leaf; 70/70 integrated scoped units; native pending at commit time"
+}

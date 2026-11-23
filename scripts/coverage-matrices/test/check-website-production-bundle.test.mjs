@@ -820,7 +820,12 @@ for (const family of ['react', 'vue', 'vue2', 'wc'])
       else assert.deepEqual(issues, []);
     });
 
+const reviewedShaderProviders = [
+  'packages/adapters/base/src/material/shader-webgl2.ts',
+  'packages/adapters/base/src/material/shader-webgl2-host.ts',
+];
 const reviewedWcHelpers = [
+  ...reviewedShaderProviders,
   'packages/adapters/base/src/events/keyboard-press-owner.ts',
   'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/platform/portal-direction.ts',
@@ -909,6 +914,57 @@ for (const [entry, owner] of siteOwners) {
       .find((item) => item.id === 'apps/www/src/components/site-shadcn-controls.ts')
       .imports.push(target);
     return bridge;
+  }
+  test(`bridge origin: ${entry} admits the exact WC shader provider chain`, () => {
+    const { graph } = siteGraph();
+    const modules = 'packages/adapters/web-component/src/runtime/modules.ts';
+    const [provider, host] = reviewedShaderProviders;
+    const bridge = addReviewedBridgeTarget(graph, modules);
+    bridge.moduleIds.push(provider, host);
+    graph.modules.push(
+      { id: provider, imports: [host], dynamicImports: [] },
+      { id: host, imports: [], dynamicImports: [] }
+    );
+    graph.modules.find((item) => item.id === modules).imports.push(provider);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    // A nearby legacy material program has not acquired this owner allowance.
+    const adjacent = 'packages/adapters/base/src/material/program.ts';
+    bridge.moduleIds.push(adjacent);
+    graph.modules.push({ id: adjacent, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === provider).imports.push(adjacent);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(adjacent)
+      )
+    );
+  });
+  for (const target of reviewedShaderProviders) {
+    const forms =
+      owner === 'library-card-client.ts'
+        ? ['query API lookalike']
+        : ['direct owner', 'query API lookalike'];
+    for (const form of forms) {
+      test(`bridge origin: ${entry} rejects ${form} shader access: ${target}`, () => {
+        const { graph, root } = siteGraph();
+        addReviewedBridgeTarget(graph, target);
+        const importer =
+          form === 'direct owner'
+            ? `apps/www/src/components/${owner}`
+            : 'apps/www/src/components/site-shadcn-controls.ts?foreign';
+        let source = graph.modules.find((item) => item.id === importer);
+        if (!source) {
+          source = { id: importer, imports: [], dynamicImports: [] };
+          graph.modules.push(source);
+          root.moduleIds.push(importer);
+        }
+        source.imports.push(target);
+        const issues = collectWebsiteProductionBundleIssues({ graph });
+        assert.ok(
+          issues.some((issue) => issue.includes('unowned importer edge') && issue.includes(target)),
+          issues.join('\n')
+        );
+      });
+    }
   }
   test(`bridge origin: ${entry} admits router-owned pointer contact transitively`, () => {
     const { graph } = siteGraph();
@@ -1323,6 +1379,73 @@ test('Bootstrap state-controls admission is exact and keeps frameworks lazy', ()
   );
 });
 
+function liquidStateControlsGraph() {
+  const graph = graphFixture();
+  graph.chunks.push(
+    chunk('_astro/liquid-glass-state-controls.js', {
+      isEntry: true,
+      facadeModuleId:
+        'apps/www/src/pages/en/test/liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts',
+      imports: ['_astro/wc-host.js'],
+      dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+      moduleIds: ['apps/www/src/pages/en/test/liquid-glass-state-controls.astro'],
+    })
+  );
+  return graph;
+}
+
+test('Sprint 6 Liquid state-controls admits the exact four-runtime demonstration', () => {
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: liquidStateControlsGraph() }), []);
+});
+
+for (const scenario of ['static-react', 'copied-entry', 'ordinary-shell-import']) {
+  test(`Sprint 6 Liquid state-controls still rejects ${scenario}`, () => {
+    const graph = liquidStateControlsGraph();
+    const entry = graph.chunks.find(
+      (candidate) => candidate.fileName === '_astro/liquid-glass-state-controls.js'
+    );
+    if (scenario === 'static-react') entry.imports.push('_astro/react.js');
+    else if (scenario === 'copied-entry')
+      entry.facadeModuleId =
+        'apps/www/src/pages/en/test/copied-liquid-glass-state-controls.astro?astro&type=script&index=0&lang.ts';
+    else graph.chunks[0].imports.push(entry.fileName);
+    const issues = collectWebsiteProductionBundleIssues({ graph });
+    assert.ok(
+      issues.some((issue) =>
+        scenario === 'static-react'
+          ? issue.includes('liquid-glass-state-controls.astro') &&
+            issue.includes('statically includes the react Adapter')
+          : issue.includes('Website shell entry') && issue.includes('reaches forbidden')
+      ),
+      issues.join('\n')
+    );
+  });
+}
+
+for (const diagnostic of ['liquid-tint-stage-diagnostic', 'liquid-visible-refraction-diagnostic']) {
+  test(`Sprint 6 fixture classification retains static Adapter rejection for ${diagnostic}`, () => {
+    const graph = graphFixture();
+    const facade = `apps/www/src/pages/en/test/${diagnostic}.astro?astro&type=script&index=0&lang.ts`;
+    graph.chunks.push(
+      chunk(`_astro/${diagnostic}.js`, {
+        isEntry: true,
+        facadeModuleId: facade,
+        moduleIds: [
+          `apps/www/src/pages/en/test/${diagnostic}.astro`,
+          'packages/adapters/base/src/material/program.ts',
+        ],
+      })
+    );
+    const issues = collectWebsiteProductionBundleIssues({ graph });
+    assert.ok(
+      issues.some(
+        (issue) => issue.includes(facade) && issue.includes('statically reaches forbidden')
+      ),
+      issues.join('\n')
+    );
+  });
+}
+
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const configSource = ts.createSourceFile(
   'astro.config.mjs',
@@ -1359,7 +1482,7 @@ const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)
 const materialBoundary = chunkFunction.body.statements.find(
   (node) =>
     ts.isIfStatement(node) &&
-    node.getText(configSource).includes('packages/adapters/base/src/material/')
+    node.getText(configSource).includes("startsWith('packages/adapters/base/src/material/')")
 );
 assert.ok(materialBoundary);
 const regroupMaterial = vm.runInNewContext(
@@ -1369,7 +1492,15 @@ const regroupMaterial = vm.runInNewContext(
 const optionalMaterialSources = fs
   .readdirSync(path.join(repositoryRoot, 'packages/adapters/base/src/material'))
   .filter((name) => name.endsWith('.ts'))
-  .map((name) => `packages/adapters/base/src/material/${name}`);
+  .map((name) => `packages/adapters/base/src/material/${name}`)
+  .filter((moduleId) => !reviewedShaderProviders.includes(moduleId));
+for (const moduleId of reviewedShaderProviders) {
+  test(`manual chunk binds the reviewed default shader provider: ${moduleId}`, () => {
+    assert.equal(classifyChunk(moduleId), 'site-shadcn-controls');
+    assert.equal(classifyChunk(`${moduleId}?used`), 'site-shadcn-controls');
+    assert.equal(classifyChunk(moduleId.replace('.ts', '-unreviewed.ts')), undefined);
+  });
+}
 for (const moduleId of optionalMaterialSources) {
   test(`manual chunk preserves existing lazy material boundary: ${moduleId}`, () => {
     assert.equal(classifyChunk(moduleId), undefined);

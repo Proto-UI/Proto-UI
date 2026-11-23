@@ -1,0 +1,102 @@
+id: T-LIFECYCLE-REQUEST-OWNER-0001
+type: test
+title: Independent request lifetime and finite owner initialization conformance
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Runtime and real private generated server cases have passed, but target-wide hydration, application trust and complete source/compiler/helper binding acceptance remain required. These cases do not admit canonical SSR or promote either draft definition.
+summary: Distinguish zero-view-epoch request execution, fresh logical ownership, finite initial data, terminal invalidation and explicit unsupported target admission.
+cases:
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-RUNTIME
+    title: Runtime request ownership, zero epochs, abort, failure precedence and isolation
+    covers:
+      - C-LIFECYCLE-REQUEST-0001-A
+      - C-LIFECYCLE-REQUEST-0001-B
+      - C-LIFECYCLE-REQUEST-0001-C
+      - C-LIFECYCLE-REQUEST-0001-D
+      - C-LIFECYCLE-REQUEST-0001-E
+      - C-LIFECYCLE-REQUEST-0001-F
+    expectation: real-session-setup-created-projection-terminal-without-mount-and-without-stale-revival
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-GENERATED
+    title: Real React, Vue 3, Vue 2 and Web Component generated server paths
+    covers:
+      - C-LIFECYCLE-REQUEST-0001-A
+      - C-LIFECYCLE-REQUEST-0001-B
+      - C-LIFECYCLE-REQUEST-0001-C
+      - C-LIFECYCLE-REQUEST-0001-E
+      - C-LIFECYCLE-REQUEST-0001-G
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-G
+    expectation: emitted-ordinary-source-with-real-framework-serialization-preserves-primary-errors-and-rejects-public-ssr
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-DATA
+    title: Independent Runtime and generated data boundaries
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-B
+    expectation: immutable-data-copy-no-live-capabilities-or-getter-read-with-finite-budgets-and-strict-tags
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-IDENTITY
+    title: Same-owner rebind and fresh request/browser logical owner are distinct
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-A
+    expectation: rebind-retains-state-and-counts-while-new-owner-reruns-setup-created-and-retires-the-prior-owner
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-TARGET-CONSUMER
+    title: Complete source-bound browser adoption, controlled authority, trust and replacement journeys
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-C
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-F
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-H
+    expectation: trusted-current-revision-with-complete-source-compiler-helper-binding-and-independent-physical-adoption-evidence
+implementations:
+  - id: runtime-request
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.request.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-RUNTIME
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-IDENTITY
+    notes:
+      - Uses real RuntimeSession ownership in Node with no browser globals. The fresh browser owner is a real manually hosted Runtime session, not a physical hydration acceptance claim.
+  - id: runtime-initial-data
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.initial-data.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-DATA
+    notes:
+      - Descriptor validation assumes trusted in-process objects or decoded wire data; it cannot sandbox Proxy traps.
+  - id: generated-server-request
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/request-owner-ssr.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-GENERATED
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-DATA
+    notes:
+      - Uses actual emitted artifacts with React DOM server, Vue 3 server-renderer, matching Vue 2.6.14 and vue-server-renderer 2.6.14, and the generated WC server port. No authored-source execution or mocked renderer. All four canonical SSR profiles still reject with PUI4001.
+      - This is source-shaped server conformance, not Shenko application acceptance, full hydration, assistive technology, streaming SSR or arbitrary State migration.
+  - id: complete-target-initialization
+    kind: runtime-test
+    status: missing
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-TARGET-CONSUMER
+    notes:
+      - Existing target experiments and the browser Worker revision lane provide narrower evidence. Complete per-target adoption, application-controlled input, trust and source/compiler/helper/revision binding remain required before target admission.
+verifies:
+  contracts:
+    - id: C-LIFECYCLE-REQUEST-0001
+    - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001
+openQuestions:
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-Q-CONSUMER
+    question: Independently accept complete target-specific initialization and physical adoption with actual application provenance before claiming stable SSR or state transfer.
+    blocks:
+      - implementation:T-LIFECYCLE-REQUEST-OWNER-0001#complete-target-initialization
+      - activation:T-LIFECYCLE-REQUEST-OWNER-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Added independent Runtime and actual generated server evidence, finite-data negatives and an explicit required missing target-consumer record.
+tags: [lifecycle, request, owner, initialization, ssr, conformance]

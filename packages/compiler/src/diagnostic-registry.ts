@@ -173,6 +173,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     category: 'unsupported-input',
     meaning: 'Requested props-update policy or capability override is not admitted.',
   },
+  PUI4009: {
+    category: 'unsupported-input',
+    meaning:
+      'Native shader declaration fails graph validation or static lowering, or combines Shader and Presence without an admitted atomic material profile.',
+  },
   PUI4101: {
     category: 'invalid-input',
     meaning: 'Project source/manifest entry is not a valid project.',
@@ -258,6 +263,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
     meaning:
       'Rust data package or normalized public function names are invalid, reserved or colliding.',
   },
+  PUI_RUST_DATA_LICENSE: {
+    category: 'unsupported-input',
+    meaning:
+      'Rust data source-license metadata must be a non-empty Unicode string without control characters or unpaired surrogates.',
+  },
   PUI_RUST_DATA_PURITY: {
     category: 'unsupported-input',
     meaning: 'A selected Rust data function does not have a proven pure portable helper closure.',
@@ -286,6 +296,11 @@ export const DIAGNOSTIC_REGISTRY: Readonly<Record<string, DiagnosticRegistration
   PUI_GPUI_A11Y_VALUE: {
     category: 'unsupported-input',
     meaning: 'GPUI SetValue requires its default route or a literal nonempty host:* event route.',
+  },
+  PUI_GPUI_CONTROL_LABEL_ANATOMY: {
+    category: 'unsupported-input',
+    meaning:
+      'GPUI ControlLabel supports explicit typed InstanceAssociations but has no native lowering for Anatomy pairing.',
   },
   PUI_GPUI_HOST_REQUIRED: {
     category: 'unsupported-input',

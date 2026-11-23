@@ -50,6 +50,26 @@ export function navbarLinkContext(link: Element): 'default' | 'navbar' {
     : 'default';
 }
 
+/** The archived Navbar has its own 20px brand and 14px navigation, independent
+ * of the general Text size scale. These are public Text layout inputs at the
+ * website composition boundary; the family still owns ink and state paint. */
+export function navbarLinkTextStyle(
+  family: SiteLibraryFamily,
+  appearance: SiteLinkAppearance,
+  colorContext: 'default' | 'navbar'
+): Record<string, string> {
+  return family === 'bootstrap-2-3-2' &&
+    colorContext === 'navbar' &&
+    (appearance === 'brand' || appearance === 'nav')
+    ? {
+        fontSize: appearance === 'brand' ? '20px' : '14px',
+        lineHeight: '20px',
+        fontWeight: appearance === 'brand' ? '200' : '400',
+        letterSpacing: 'normal',
+      }
+    : {};
+}
+
 /** Choose a public family recipe; native anchor identity is not rewritten. */
 export function linkActionAppearance(
   family: SiteLibraryFamily,
@@ -82,9 +102,9 @@ export function linkSurfaceProps(
       elevation: 'none',
       colorContext: 'navbar',
       focusVisible: facts.focusVisible,
-      hovered: facts.hovered,
-      pressed: facts.pressed,
-      current: facts.current,
+      hovered: appearance === 'nav' && facts.hovered,
+      pressed: appearance === 'nav' && facts.pressed,
+      current: appearance === 'nav' && facts.current,
     };
   // The shared TOC range owns background selection. The native anchor and
   // Text still consume current/hover facts; this passive row keeps focus only
@@ -160,8 +180,24 @@ export function linkTextProps(
   facts = initial,
   family: SiteLibraryFamily = 'shadcn',
   sidebarRole?: SidebarTextRole,
-  readingToc = false
+  readingToc = false,
+  colorContext: 'default' | 'navbar' = 'default'
 ): TextRootProps {
+  if (
+    family === 'bootstrap-2-3-2' &&
+    colorContext === 'navbar' &&
+    (appearance === 'nav' || appearance === 'brand')
+  )
+    return {
+      size: 'base',
+      tone: 'inherit',
+      weight: 'normal',
+      font: 'body',
+      leading: 'size',
+      tracking: 'normal',
+      emphasis: 'normal',
+      decoration: 'none',
+    };
   if (family === 'shadcn' && appearance === 'nav')
     return {
       ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).text,
@@ -212,8 +248,27 @@ export function linkSurfaceLayout(
   appearance: SiteLinkAppearance,
   emphasis: SiteLinkEmphasis,
   facts = initial,
-  readingToc = false
+  readingToc = false,
+  colorContext: 'default' | 'navbar' = 'default'
 ): Record<string, string> {
+  if (
+    family === 'bootstrap-2-3-2' &&
+    colorContext === 'navbar' &&
+    (appearance === 'nav' || appearance === 'brand')
+  )
+    return {
+      pointerEvents: 'none',
+      display: 'inline-flex',
+      boxSizing: 'border-box',
+      flexShrink: '0',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: '0',
+      maxWidth: '100%',
+      minHeight: 'var(--site-header-row-height, 40px)',
+      marginBottom: '0',
+      padding: appearance === 'brand' ? '10px 0' : '10px 15px',
+    };
   if (family === 'shadcn' && appearance === 'nav')
     return {
       ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout,

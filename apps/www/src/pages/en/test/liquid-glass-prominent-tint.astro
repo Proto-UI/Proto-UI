@@ -42,6 +42,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
       import {
         prominentTintDemo,
         paintProminentTintSource,
+        paintProminentTintConstantSource,
         PROMINENT_TINT_CONTROLS,
         type TintPart,
         type TintControl,
@@ -84,6 +85,15 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
             );
           }
           return { source, phase, fixedSourceTime: 0 };
+        },
+        paintConstant(code: number) {
+          for (const scene of scenes.values()) {
+            scene.pause(true);
+            scene.lease.draw((ctx, width, height) =>
+              paintProminentTintConstantSource(ctx, width, height, code)
+            );
+          }
+          return { kind: 'constant-field', code, fixedSourceTime: 0 };
         },
         state(control: TintControl, name: string) {
           return (

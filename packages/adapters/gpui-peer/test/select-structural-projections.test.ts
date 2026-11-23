@@ -7,6 +7,7 @@ import {
   ANATOMY_GET_PROTO_CAP,
 } from '@proto.ui/module-anatomy';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import * as base from '@proto.ui/prototypes-base/select';
 import * as shadcn from '@proto.ui/prototypes-shadcn/select';
 import { createPeerSession, type PeerSession } from '../src/session';
@@ -92,6 +93,7 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
     });
     it('declares tree-hidden before the peer serialization boundary', async () => {
       const snapshots: A11ySemanticObjectSnapshot[] = [];
+      const instanceToken = {};
       const host: RuntimeHost<any> = {
         prototypeName: `select-separator-source-${family}`,
         getRawProps: () => ({}),
@@ -99,9 +101,15 @@ for (const [family, prototypes] of Object.entries({ base, shadcn })) {
         schedule: (task) => task(),
         onRuntimeReady: (wiring) => {
           wiring.attach('anatomy', [
-            [ANATOMY_INSTANCE_TOKEN_CAP, {}],
+            [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
             [ANATOMY_PARENT_CAP, () => null],
             [ANATOMY_GET_PROTO_CAP, () => prototypes.selectSeparator],
+          ]);
+          // The real Shadcn style selection subscribes to its optional scope.
+          // Even a rootless fixture has an actual owner and empty ancestry.
+          wiring.attach('context', [
+            [CONTEXT_INSTANCE_TOKEN_CAP, instanceToken],
+            [CONTEXT_PARENT_CAP, () => null],
           ]);
           wiring.attach('a11y', [
             [

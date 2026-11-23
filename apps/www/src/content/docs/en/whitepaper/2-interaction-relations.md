@@ -70,6 +70,8 @@ In Proto UI's current working model, which still needs to be tested in practice,
   class="whitepaper-diagram"
 />
 
+<div class="whitepaper-channel-table">
+
 | Information channel | Direction | Primary responsibility |
 | --- | --- | --- |
 | `Event` | User → Component | Carry operations, input, and interaction intent initiated by the User |
@@ -77,6 +79,8 @@ In Proto UI's current working model, which still needs to be tested in practice,
 | `Props` | App Maker → Component | Configure the component |
 | `Expose` | Component → App Maker | Provide values, state, methods, change signals, and other outward capabilities |
 | `Context` | Component ↔ Component | Let components exchange information for cooperation |
+
+</div>
 
 Event and Feedback both connect User and Component, but their direction and responsibility make them distinct channels. The same distinction separates Props from Expose.
 

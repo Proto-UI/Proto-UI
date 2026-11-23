@@ -238,7 +238,7 @@ describe.each(['#0061cc', '#0a6cdb'])(
           strength: 0,
         });
       expect(f.host.dataset.materialQuality).toBe('self-optical');
-      expect(f.host.dataset.materialProfile).toBe('pui-regular-style-tint-contact-5');
+      expect(f.host.dataset.materialProfile).toBe('pui-regular-style-tint-contact-6');
       optical.render.mockReturnValue('data:image/png;base64,AA==');
       media.set(false);
       expect(f.host.dataset.materialMotion).toBe('press');
@@ -306,7 +306,7 @@ describe.each(['#0061cc', '#0a6cdb'])(
         expect(f.host.dataset.materialQuality).toBe('self-optical');
         expect(f.host.dataset.materialPhase).toBe('rest');
       }
-      expect(tinted.host.dataset.materialProfile).toBe('pui-regular-style-tint-contact-5');
+      expect(tinted.host.dataset.materialProfile).toBe('pui-regular-style-tint-contact-6');
       expect(neutral.host.dataset.materialProfile).not.toBe(tinted.host.dataset.materialProfile);
       tinted.sink.release(1);
       expect(media.subscriptions).toBe(10);

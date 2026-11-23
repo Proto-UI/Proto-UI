@@ -816,7 +816,7 @@ function writeCurrentRetryConfig(root) {
   );
   assert.equal(
     createHash('sha256').update(config).digest('hex'),
-    'eb88adbc496c6ae23bb77efa3af68e60e17fb3d3bc06a2828f8622e1e92e48b7'
+    'dbe4b6c9b9ae3c1145a9712c306b80943f1428fe742178974822beb8e18daa99'
   );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
@@ -12404,7 +12404,8 @@ test('documentation media allowances remain bound to exact reviewed sources and 
     '@proto.ui/prototypes-brutalist/dialog',
     '@proto.ui/prototypes-brutalist/theme',
   ];
-  const bridgeSource = allowed.map((specifier) => `import '${specifier}';`).join('\n');
+  allowed.push('@proto.ui/prototypes-base/scroll-area');
+  const bridgeSource = fs.readFileSync(new URL(`../../../${bridge}`, import.meta.url), 'utf8');
   for (const [relative, source] of [
     [bridge, bridgeSource],
     [presentation, "import '@proto.ui/core'; import '@proto.ui/prototypes-base/dialog';"],
@@ -17669,7 +17670,7 @@ for (const helper of ['browser-harness', 'site-search-evidence']) {
 
 for (const [source, specifiers] of [
   ['Homepage/homepage-text.ts', ['@proto.ui/prototypes-base/text']],
-  ['InstallCommandCard.astro', ['@proto.ui/adapter-web-component']],
+  ['install-command-card-client.ts', ['@proto.ui/adapter-web-component']],
   [
     'site-link-recipes.ts',
     [
@@ -17729,7 +17730,9 @@ for (const [source, specifiers] of [
     const nativeLinkSource =
       source === 'site-link-recipes.ts' || source === 'site-native-controls.ts';
     const sourceBound =
+      source === 'documentation-image-controls.ts' ||
       source === 'site-search-commands.ts' ||
+      source === 'install-command-card-client.ts' ||
       nativeLinkSource ||
       source === 'site-shadcn-controls.ts';
     const content = sourceBound
@@ -18934,6 +18937,47 @@ for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {
   });
 }
 
+for (const [relative, allowed] of [
+  ['packages/modules/feedback/src/create.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/index.ts', './shader/sink'],
+  ['packages/modules/feedback/src/types.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/shader/sink.ts', '@proto.ui/core'],
+  ['packages/runtime/src/kernel/handles/def.ts', '@proto.ui/core/internal'],
+]) {
+  test(`startup shader closure remains source-bound: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const original = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const importer = path.join(root, 'apps/www/src/components/StartupImportProbe.ts');
+    const importFile = (file) =>
+      fs.writeFileSync(
+        importer,
+        `import '${path.relative(path.dirname(importer), file).replaceAll('\\', '/')}';`
+      );
+    fs.mkdirSync(path.dirname(importer), { recursive: true });
+    importFile(target);
+    fs.writeFileSync(target, original);
+    const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    assert.ok(!validationMessage(root).includes(issue));
+    fs.writeFileSync(target, original + '\n// unreviewed source change\n');
+    assert.ok(validationMessage(root).includes(issue));
+    fs.writeFileSync(target, original + "\nimport '@proto.ui/adapter-react';\n");
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/adapter-react\` in \`${relative}\``
+      )
+    );
+    const foreign = relative.replace('.ts', '-foreign.ts');
+    fs.writeFileSync(path.join(root, foreign), original);
+    importFile(path.join(root, foreign));
+    assert.ok(
+      validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+    );
+  });
+}
+
 for (const source of ['site-startup-paint.ts', 'snapshot-prototype-style.ts']) {
   for (const scenario of ['exact', 'foreign', 'changed', 'adjacent-import', 'dynamic-css']) {
     test(`startup prerender import boundary: ${source} ${scenario}`, () => {
@@ -19055,6 +19099,10 @@ for (const [relative, allowed] of [
   [
     'apps/www/src/pages/en/test/liquid-glass-hover.astro',
     '@proto.ui/prototypes-liquid-glass/button',
+  ],
+  [
+    'apps/www/src/pages/en/test/liquid-glass-state-controls.astro',
+    '@proto.ui/prototypes-liquid-glass',
   ],
 ]) {
   test(`diagnostic import review rejects owner, body and edge drift: ${path.basename(relative)}`, () => {
@@ -19230,6 +19278,7 @@ for (const source of [
   'packages/adapters/base/src/material/geometry-watch.ts',
   'packages/adapters/base/src/material/initial-paint-experiment.ts',
   'packages/adapters/base/src/material/preferences.ts',
+  'packages/adapters/base/src/material/style-tint-profile.ts',
 ])
   for (const scenario of ['exact', 'wrong-owner', 'changed-bytes', 'adjacent-path']) {
     test(`private Liquid Card interactive source binding: ${path.basename(source)} ${scenario}`, () => {
@@ -19262,6 +19311,11 @@ for (const [relative, allowed] of [
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
   ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
   ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
+  [
+    'packages/adapters/base/src/material/preferences.ts',
+    '@proto.ui/module-feedback/internal/shared-policy',
+  ],
+  ['packages/adapters/base/src/material/style-tint-profile.ts', './contact-profile'],
 ])
   test(`private Liquid Card import stays source-bound: ${relative}`, () => {
     const root = createRoot();
@@ -19305,7 +19359,7 @@ test('merged material helper edges retain exact importers and reject neighboring
   writeValidMatrices(root);
   const material = 'packages/adapters/base/src/material/';
   for (const [name, imports] of [
-    ['program.ts', ['./program-inputs', './prefilter']],
+    ['program.ts', ['./program-inputs', './prefilter', './style-tint-source']],
     ['program-pool.ts', ['./source-refresh-task']],
   ]) {
     const relative = material + name;
@@ -19560,5 +19614,195 @@ for (const scenario of [
       `@vite-ignore dynamic import in \`${sourcePath}\` is not reviewed against an exact URL boundary`
     );
     assert.equal(rejected, scenario !== 'exact', message);
+  });
+}
+
+test('review entry controls: TypeScript generic syntax preserves native resource scanning', () => {
+  const generic =
+    'const copy = <T>(value: T): T => value; const compared = new WeakMap<object, WeakSet<object>>();';
+  const cases = [
+    ['Generic.ts', generic, null],
+    ['Generic.mts', generic, null],
+    ['Generic.cts', generic, null],
+    [
+      'Generic.tsx',
+      'const copy = <T,>(value: T): T => value; const compared = new WeakMap<object, WeakSet<object>>();',
+      null,
+    ],
+    ['Generic.ts', `${generic}\ndocument.createElement('iframe');`, /unreviewed executable embed/],
+    ['Generic.ts', `${generic}\nimport('@proto.ui/core');`, /raw Proto UI import/],
+    ['Generic.ts', `${generic}\nnew Function('return 1')();`, /runtime code compilation/],
+    [
+      'Generic.tsx',
+      'export const view = () => <object data="https://example.invalid"/>;',
+      /unreviewed executable embed/,
+    ],
+    [
+      'Generic.ts',
+      'export const view = () => <iframe src="https://example.invalid"/>;',
+      /unreviewed executable embed/,
+    ],
+  ];
+  for (const [name, source, rejection] of cases) {
+    const root = createRoot();
+    const file = `apps/www/src/components/${name}`;
+    fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
+    fs.writeFileSync(path.join(root, file), source);
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[file, ['www.shell.primary-nav']]] });
+    if (rejection) assert.match(validationMessage(root), rejection, name);
+    else assert.doesNotThrow(() => validateCoverageMatrices({ rootDir: root }), name);
+  }
+});
+
+for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-import']) {
+  test(`integrated source import boundary: Finf registry ${scenario}`, () => {
+    const root = createRoot();
+    const reviewed = 'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts';
+    const owner =
+      scenario === 'foreign-owner' ? reviewed.replace('.ts', '-unreviewed.ts') : reviewed;
+    const source = fs.readFileSync(new URL(`../../../${reviewed}`, import.meta.url), 'utf8');
+    assert.equal(
+      createHash('sha256').update(source).digest('hex'),
+      'df133b1ddf6cb538ff4e602f7bcd68c7c24835e6bf19ac8e33339571057cae7a'
+    );
+    for (const name of ['@proto.ui/prototypes-base/field', '@proto.ui/prototypes-brutalist/field'])
+      assert.ok(source.includes(`'${name}'`));
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(
+      target,
+      source +
+        (scenario === 'changed-source'
+          ? '\n// unreviewed importer bytes'
+          : scenario === 'unlisted-import'
+            ? "\nimport '@proto.ui/runtime';"
+            : '')
+    );
+    writeValidMatrices(root);
+    const rejected = collectCoverageMatrixIssues({ rootDir: root }).some(
+      (issue) => issue.includes('raw Proto UI import') && issue.includes(`in \`${owner}\` escapes`)
+    );
+    assert.equal(rejected, scenario !== 'exact');
+  });
+}
+
+for (const reviewed of ['packages/core/src/internal.ts', 'packages/compiler/src/shader-plan.ts']) {
+  for (const scenario of [
+    'exact',
+    'changed-source',
+    'foreign-owner',
+    'changed-companion',
+    'missing-companion',
+  ]) {
+    test(`integrated source import boundary: compiler closure ${reviewed} ${scenario}`, () => {
+      const root = createRoot();
+      const companion = 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts';
+      const owner =
+        scenario === 'foreign-owner'
+          ? path.posix.join(
+              path.posix.dirname(reviewed),
+              'unreviewed-' + path.posix.basename(reviewed)
+            )
+          : reviewed;
+      const target = path.join(root, owner);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${reviewed}`, import.meta.url), target);
+      if (scenario === 'changed-source') fs.appendFileSync(target, '\n// changed closure bytes');
+      if (scenario !== 'missing-companion') {
+        const companionPath = path.join(root, companion);
+        fs.mkdirSync(path.dirname(companionPath), { recursive: true });
+        fs.copyFileSync(new URL(`../../../${companion}`, import.meta.url), companionPath);
+        if (scenario === 'changed-companion')
+          fs.appendFileSync(companionPath, '\n// changed compiler owner');
+      }
+      const entry = path.join(root, 'apps/www/src/components/CompilerClosureProbe.ts');
+      fs.mkdirSync(path.dirname(entry), { recursive: true });
+      fs.writeFileSync(
+        entry,
+        `import '${path.relative(path.dirname(entry), target).replaceAll('\\', '/')}';`
+      );
+      writeValidMatrices(root);
+      const rejected = collectCoverageMatrixIssues({ rootDir: root }).some(
+        (issue) =>
+          issue.includes('raw Proto UI import') && issue.includes(`in \`${owner}\` escapes`)
+      );
+      assert.equal(rejected, scenario !== 'exact');
+    });
+  }
+}
+
+for (const scenario of ['exact', 'changed-source', 'foreign-owner']) {
+  test(`integrated source import boundary: Form Field type ${scenario}`, () => {
+    const root = createRoot();
+    const reviewed = 'apps/www/src/content/docs/form-validation-demo.shared.ts';
+    const owner =
+      scenario === 'foreign-owner'
+        ? reviewed.replace('.shared.ts', '-unreviewed.shared.ts')
+        : reviewed;
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(new URL(`../../../${reviewed}`, import.meta.url), target);
+    if (scenario === 'changed-source')
+      fs.appendFileSync(target, '\n// changed validator controller');
+    writeValidMatrices(root);
+    const rejected = collectCoverageMatrixIssues({ rootDir: root }).some((issue) =>
+      issue.includes(
+        `raw Proto UI import \`@proto.ui/prototypes-base/field\` in \`${owner}\` escapes`
+      )
+    );
+    assert.equal(rejected, scenario !== 'exact');
+  });
+}
+
+for (const variant of [
+  'exact source and bridge',
+  'changed viewport source',
+  'foreign viewport owner',
+  'changed bridge companion',
+  'missing bridge companion',
+  'changed source with unrelated import',
+]) {
+  test(`documentation reading viewport import boundary: ${variant}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const viewport = 'apps/www/src/components/documentation-image-reading-viewport.proto.ts';
+    const bridge = 'apps/www/src/components/documentation-image-controls.ts';
+    const exactViewport = fs.readFileSync(new URL(`../../../${viewport}`, import.meta.url), 'utf8');
+    const exactBridge = fs.readFileSync(new URL(`../../../${bridge}`, import.meta.url), 'utf8');
+    const relative =
+      variant === 'foreign viewport owner'
+        ? 'apps/www/src/components/copied-reading-viewport.proto.ts'
+        : viewport;
+    const content =
+      variant === 'changed viewport source'
+        ? `${exactViewport}\n// Changed source requires another review.\n`
+        : variant === 'changed source with unrelated import'
+          ? `${exactViewport}\nimport '@proto.ui/runtime';\n`
+          : exactViewport;
+    fs.mkdirSync(path.dirname(path.join(root, relative)), { recursive: true });
+    fs.writeFileSync(path.join(root, relative), content);
+    if (variant !== 'missing bridge companion') {
+      fs.writeFileSync(
+        path.join(root, bridge),
+        variant === 'changed bridge companion'
+          ? `${exactBridge}\n// Changed companion requires another review.\n`
+          : exactBridge
+      );
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    for (const specifier of [
+      '@proto.ui/core',
+      '@proto.ui/hooks',
+      '@proto.ui/prototypes-base/scroll-area',
+    ]) {
+      const rejected = message.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``);
+      assert.equal(rejected, variant !== 'exact source and bridge', message);
+    }
+    if (variant === 'changed source with unrelated import') {
+      assert.ok(
+        message.includes(`raw Proto UI import \`@proto.ui/runtime\` in \`${relative}\``),
+        message
+      );
+    }
   });
 }

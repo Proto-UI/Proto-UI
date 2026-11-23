@@ -12,6 +12,7 @@ import { gpuiNativeTextSource } from './gpui-native-text';
 import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
+import { gpuiNativeControlLabelSource } from './gpui-native-control-label';
 import { gpuiNativeNotifySource } from './gpui-native-notify';
 import { gpuiNativeHoverSource } from './gpui-native-hover';
 
@@ -34,15 +35,15 @@ pub fn capture_renderer(callable:Value,render:NativeRenderer)->Value {
 }
 // A native helper is an ordinary typed closure with its own runtime identity.
 // Its identity is independent of both its FunctionIR declaration and child snapshots.
-pub struct NativeCallable<F:?Sized> { pub identity:Rc<()>, pub call:Rc<F> }
+pub struct NativeCallable<F:?Sized> { pub identity:Rc<()>, pub call:Rc<F>, pub ordinary:Option<Value> }
 impl<F:?Sized> Clone for NativeCallable<F> {
-    fn clone(&self)->Self { Self { identity:self.identity.clone(), call:self.call.clone() } }
+    fn clone(&self)->Self { Self { identity:self.identity.clone(), call:self.call.clone(), ordinary:self.ordinary.clone() } }
 }
 impl<F:?Sized> NativeCallable<F> {
     pub fn truthy(&self)->bool { true }
     pub fn nullish(&self)->bool { false }
     pub fn equals_native<G:?Sized>(&self,other:&NativeCallable<G>)->bool { Rc::ptr_eq(&self.identity,&other.identity) }
-    pub fn equals_value(&self,other:&Value)->bool { matches!(other.callable_value(),Value::NativeFunction{identity,..} if Rc::ptr_eq(&self.identity,identity)) }
+    pub fn equals_value(&self,other:&Value)->bool { self.ordinary.as_ref().map(|value|strict_equal(value,other)).unwrap_or_else(||matches!(other.callable_value(),Value::NativeFunction{identity,..} if Rc::ptr_eq(&self.identity,identity))) }
 }
 pub type NativeFrame = Rc<dyn Fn(&OwnerRef,&FocusHandle,&str,&Drive,&[NativeSnapshot],&mut usize)->Vec<AnyElement>>;
 #[derive(Clone)]
@@ -69,7 +70,7 @@ impl NativeSnapshot {
     pub fn equals(&self,other:&Self)->bool{match(&self.observation,&other.observation){(Some(a),Some(b))=>strict_equal(a,b),(None,None)=>Rc::ptr_eq(&self.identity,&other.identity),_=>false}}
     pub fn equals_value(&self,other:&Value)->bool{self.observation.as_ref().is_some_and(|value|strict_equal(value,other))}
     pub fn invalid(value:Value)->Self{let mut result=Self::empty();result.observation=Some(value);result.valid=false;result}
-    pub fn text_value(value:Value)->Self{assert!(matches!(&value,Value::Number(_)|Value::Json(Json::String(_)|Json::Number(_))),"native text children require string or number");let text=value.scalar_text();let frame_text=text.clone();Self{identity:Rc::new(()),observation:Some(value),valid:true,slot_count:0,frame:Rc::new(move|_,_,_,_,_,index|{*index+=1;vec![frame_text.clone().into_any_element()]}),text:Rc::new(move|_|text.clone())}}
+    pub fn text_value(value:Value)->Self{assert!(value.is_string()||matches!(&value,Value::Number(_)|Value::Json(Json::Number(_))),"native text children require string or number");let text=value.scalar_text();let frame_text=text.clone();Self{identity:Rc::new(()),observation:Some(value),valid:true,slot_count:0,frame:Rc::new(move|_,_,_,_,_,index|{*index+=1;vec![frame_text.clone().into_any_element()]}),text:Rc::new(move|_|text.clone())}}
     // These are ordinary native child factories, not tagged template/IR nodes.
     pub fn sequence(children:Vec<Self>,observation:Option<Value>)->Self{let valid=children.iter().all(|child|child.valid);let slot_count=children.iter().fold(0u8,|count,child|count.saturating_add(child.slot_count).min(2));let frame_children=children.clone();Self{identity:Rc::new(()),observation:Some(observation.unwrap_or_else(||Value::Opaque(Rc::new(())))),valid,slot_count,
         frame:Rc::new(move|owner,focus,path,drive,slot,index|{let mut result=Vec::new();for child in &frame_children{result.extend((child.frame)(owner,focus,path,drive,slot,index));}result}),
@@ -80,7 +81,7 @@ impl NativeSnapshot {
         frame:Rc::new(|owner,focus,path,drive,slot,index|{let mut result=Vec::new();for child in slot{result.extend((child.frame)(owner,focus,path,drive,&[],index));}result}),
         text:Rc::new(|slot|slot.iter().map(|child|(child.text)(&[])).collect::<Vec<_>>().join("")),
     } }
-    pub fn native_view(view:gpui::AnyView)->Self { Self { identity:Rc::new(()),observation:None,valid:true,slot_count:0, frame:Rc::new(move|_,_,_,_,_,index|{*index+=1;vec![view.clone().into_any_element()]}),text:Rc::new(|_|String::new()) } }
+    pub fn native_view(view:gpui::AnyView)->Self { Self { identity:Rc::new(()),observation:None,valid:true,slot_count:0, frame:Rc::new(move|owner,_,_,_,_,index|{*index+=1;vec![control_label_native_child(owner,view.clone().into_any_element())]}),text:Rc::new(|_|String::new()) } }
 }
 // External slot children are already native factories. Validate the whole
 // incoming collection before replacing the retained slot; no semantic walk.
@@ -92,10 +93,10 @@ pub fn assert_native_slot_children(children:&[NativeSnapshot]) {
 }
 #[derive(Clone)]
 pub enum Value {
-    Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16),
+    Undefined, Opaque(Rc<()>), ContextKey(NativeContextKey), Number(f64), Json(Json), Record(Rc<NativeRecord>), Array(Rc<Vec<Value>>), CaughtStringUnit(u16), Utf16String(Rc<Vec<u16>>),
     Function(Callback), NativeFunction{identity:Rc<()>,render:NativeRenderer}, Renderer(Rc<RendererAdapter>), Owner(OwnerWeak), DefinitionOwner(OwnerWeak), RenderOwner(OwnerWeak), State(Rc<State>), BorrowedState(Rc<State>),
     Style(Vec<(String, String)>), Resource(Rc<Cell<bool>>),
-    Input(Rc<Input>),
+    Input(Rc<Input>), ControlLabelRequest(Rc<ControlLabelRequest>),
     StaticCapability(&'static StaticDeclaration), Handle(OwnerWeak, &'static str),
     Observed(OwnerWeak, &'static str), Part(OwnerWeak, String), ObjectRef(OwnerWeak), HostTarget(OwnerWeak),
 }
@@ -125,6 +126,8 @@ pub fn take_native_failures(owner:&OwnerRef)->Vec<NativeFailure>{std::mem::take(
 impl Value {
     pub fn json(value: Json) -> Self { match value { Json::Object(entries)=>record_map(entries.into_iter().map(|(key,value)|(key,Self::json(value))).collect()),Json::Array(items)=>Self::Array(Rc::new(items.into_iter().map(Self::json).collect())),Json::Number(number)=>Self::Number(number.as_f64().expect("JSON number")),other=>Self::Json(other) } }
     pub fn string(value: &str) -> Self { Self::Json(Json::String(value.into())) }
+    pub fn from_string_units(units:Vec<u16>)->Self{match String::from_utf16(&units){Ok(text)=>Self::string(&text),Err(_)=>Self::Utf16String(Rc::new(units))}}
+    pub fn is_string(&self)->bool{matches!(self,Self::Json(Json::String(_))|Self::CaughtStringUnit(_)|Self::Utf16String(_))}
     pub fn boolean(value: bool) -> Self { Self::Json(Json::Bool(value)) }
     pub fn number(value: f64) -> Self { Self::Number(value) }
     pub fn try_data(&self) -> Option<Json> { match self {
@@ -132,12 +135,14 @@ impl Value {
         Self::Json(value) => Some(value.clone()),
         Self::Record(entries) => entries.fields.borrow().iter().map(|(key,value)|Some((key.clone(),value.try_data()?))).collect::<Option<Map<String,Json>>>().map(Json::Object),
         Self::Array(items) => items.iter().map(Self::try_data).collect::<Option<Vec<_>>>().map(Json::Array),
+        Self::CaughtStringUnit(_)|Self::Utf16String(_) => String::from_utf16(&self.string_units()).ok().map(Json::String),
         _ => None,
     } }
     pub fn data(&self) -> Json { match self {
         Self::Number(value)=>{if !value.is_finite(){value_type_error("non-finite portable data")}Json::from(*value)},Self::Json(value) => value.clone(),
         Self::Record(value) => Json::Object(value.fields.borrow().iter().map(|(k,v)|(k.clone(),v.data())).collect()),
         Self::Array(value) => Json::Array(value.iter().map(Self::data).collect()),
+        Self::CaughtStringUnit(_)|Self::Utf16String(_) => self.try_data().unwrap_or_else(||value_type_error("unpaired UTF-16 units cannot cross the native UTF-8 data boundary")),
         _ => value_type_error("semantic capability is not portable data"),
     } }
     pub fn member(&self, key: &str, optional: bool) -> Self { match self {
@@ -147,6 +152,7 @@ impl Value {
         Self::Array(value) => if key=="length"{Self::number(value.len()as f64)}else{key.parse::<usize>().ok().and_then(|index|value.get(index).cloned()).unwrap_or(Self::Undefined)},
         Self::Input(_) if key=="control" => self.clone(),
         Self::Input(value) => value.fields.get(key).cloned().map(Self::Json).unwrap_or(Self::Undefined),
+        Self::ControlLabelRequest(request) if key == "source" => Self::string(request.source),
         Self::ContextKey(_) if key=="__brand" => Self::string("ContextKey"),
         Self::Handle(owner, kind) => capability_member(owner, kind, key),
         Self::Part(_, role) if key == "role" => Self::string(role),
@@ -159,17 +165,22 @@ impl Value {
         Self::Json(Json::String(value)) => key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|value.encode_utf16().nth(index)).map(Self::CaughtStringUnit).unwrap_or(Self::Undefined),
         Self::CaughtStringUnit(_) if key=="length" => Self::number(1.),
         Self::CaughtStringUnit(value) if key=="0" => Self::CaughtStringUnit(*value),
+        Self::Utf16String(units) if key=="length" => Self::number(units.len()as f64),
+        Self::Utf16String(units) => key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|units.get(index)).map(|value|Self::CaughtStringUnit(*value)).unwrap_or(Self::Undefined),
         Self::Array(items) => if key=="length" { Self::number(items.len()as f64) } else { key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|items.get(index).cloned()).unwrap_or(Self::Undefined) },
         Self::Json(Json::Array(items)) => if key=="length" { Self::number(items.len()as f64) } else { key.parse::<usize>().ok().filter(|index|index.to_string()==key).and_then(|index|items.get(index).cloned()).map(Self::json).unwrap_or(Self::Undefined) },
         Self::Record(_) | Self::Json(Json::Object(_)) => self.member(key,optional),
         _ => Self::Undefined,
     } }
-    pub fn text(&self) -> String { match self { Self::Json(Json::String(v))=>v.clone(), Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()), _=>value_type_error("expected string or number") } }
+    pub fn text(&self) -> String { match self { Self::Json(Json::String(v))=>v.clone(),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>String::from_utf16(&self.string_units()).unwrap_or_else(|_|value_type_error("unpaired UTF-16 units cannot cross the native UTF-8 text boundary")), Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()), _=>value_type_error("expected string or number") } }
+    pub fn string_units(&self)->Vec<u16>{match self{Self::Json(Json::String(value))=>value.encode_utf16().collect(),Self::CaughtStringUnit(value)=>vec![*value],Self::Utf16String(units)=>(**units).clone(),_=>value_type_error("expected string")}}
+    pub fn string_value(&self)->Self{if self.is_string(){self.clone()}else{Self::string(&self.scalar_text())}}
+    pub fn scalar_units(&self)->Vec<u16>{if self.is_string(){self.string_units()}else{self.scalar_text().encode_utf16().collect()}}
     pub fn bool(&self) -> bool { match self {Self::Json(Json::Bool(v))=>*v,_=>value_type_error("expected boolean")} }
     pub fn num(&self) -> f64 { match self {Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),_=>value_type_error("expected number")} }
-    pub fn truthy(&self)->bool{match self{Self::Undefined|Self::Json(Json::Null)=>false,Self::Json(Json::Bool(v))=>*v,Self::Number(v)=>*v!=0.&&!v.is_nan(),Self::Json(Json::Number(v))=>v.as_f64().is_some_and(|v|v!=0.&&!v.is_nan()),Self::Json(Json::String(v))=>!v.is_empty(),_=>true}}
-    pub fn scalar_text(&self)->String{match self{Self::Undefined=>"undefined".into(),Self::Json(Json::Null)=>"null".into(),Self::Json(Json::Bool(v))=>v.to_string(),Self::Json(Json::String(v))=>v.clone(),Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()),_=>panic!("structured coercion is not admitted")}}
-    pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>ecma_string_number(v),Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
+    pub fn truthy(&self)->bool{match self{Self::Undefined|Self::Json(Json::Null)=>false,Self::Json(Json::Bool(v))=>*v,Self::Number(v)=>*v!=0.&&!v.is_nan(),Self::Json(Json::Number(v))=>v.as_f64().is_some_and(|v|v!=0.&&!v.is_nan()),Self::Json(Json::String(v))=>!v.is_empty(),Self::Utf16String(units)=>!units.is_empty(),_=>true}}
+    pub fn scalar_text(&self)->String{match self{Self::Undefined=>"undefined".into(),Self::Json(Json::Null)=>"null".into(),Self::Json(Json::Bool(v))=>v.to_string(),Self::Json(Json::String(v))=>v.clone(),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>self.text(),Self::Number(v)=>ecma_number_text(*v),Self::Json(Json::Number(v))=>ecma_number_text(v.as_f64().unwrap()),_=>panic!("structured coercion is not admitted")}}
+    pub fn scalar_number(&self)->f64{match self{Self::Number(v)=>*v,Self::Json(Json::Number(v))=>v.as_f64().unwrap(),Self::Json(Json::Null)=>0.,Self::Json(Json::Bool(v))=>if *v{1.}else{0.},Self::Json(Json::String(v))=>ecma_string_number(v),Self::CaughtStringUnit(_)|Self::Utf16String(_)=>String::from_utf16(&self.string_units()).map(|text|ecma_string_number(&text)).unwrap_or(f64::NAN),Self::Undefined=>f64::NAN,_=>panic!("structured coercion is not admitted")}}
     pub fn nullish(&self) -> bool { matches!(self,Self::Undefined|Self::Json(Json::Null)) }
     pub fn call(&self,args:Vec<Self>)->Result<Self,Self>{catch_authored(||self.call_authored(args))}
     pub fn callable_value(&self)->&Self { match self { Self::Renderer(adapter)=>adapter.callable.callable_value(), _=>self } }
@@ -183,18 +194,14 @@ impl Value {
 }
 pub fn strict_equal(a:&Value,b:&Value)->bool {
     let a=a.callable_value();let b=b.callable_value();
-    match (a,b) {
-        (Value::CaughtStringUnit(a),Value::CaughtStringUnit(b))=>return a==b,
-        (Value::CaughtStringUnit(unit),Value::Json(Json::String(text)))|(Value::Json(Json::String(text)),Value::CaughtStringUnit(unit))=>return text.encode_utf16().eq(std::iter::once(*unit)),
-        _=>{},
-    }
-    match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::ContextKey(a),Value::ContextKey(b))=>a==b,(Value::Owner(a),Value::Owner(b))|(Value::DefinitionOwner(a),Value::DefinitionOwner(b))|(Value::RenderOwner(a),Value::RenderOwner(b))=>Weak::ptr_eq(a,b),(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))|(Value::BorrowedState(a),Value::BorrowedState(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.identity()==b.identity(),(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
+    if a.is_string()&&b.is_string(){return a.string_units()==b.string_units()}
+    match (a,b){(Value::Undefined,Value::Undefined)=>true,(Value::Opaque(a),Value::Opaque(b))=>Rc::ptr_eq(a,b),(Value::ControlLabelRequest(a),Value::ControlLabelRequest(b))=>Rc::ptr_eq(a,b),(Value::ContextKey(a),Value::ContextKey(b))=>a==b,(Value::Owner(a),Value::Owner(b))|(Value::DefinitionOwner(a),Value::DefinitionOwner(b))|(Value::RenderOwner(a),Value::RenderOwner(b))=>Weak::ptr_eq(a,b),(Value::Number(a),Value::Number(b))=>a==b,(Value::Json(a),Value::Json(b))=>match(a,b){(Json::Array(_)|Json::Object(_),_)=>false,(Json::Number(a),Json::Number(b))=>a.as_f64()==b.as_f64(),_=>a==b},(Value::Record(a),Value::Record(b))=>Rc::ptr_eq(a,b),(Value::Array(a),Value::Array(b))=>Rc::ptr_eq(a,b),(Value::State(a),Value::State(b))|(Value::BorrowedState(a),Value::BorrowedState(b))=>Rc::ptr_eq(a,b),(Value::Function(a),Value::Function(b))=>Rc::ptr_eq(a,b),(Value::NativeFunction{identity:a,..},Value::NativeFunction{identity:b,..})=>Rc::ptr_eq(a,b),(Value::StaticCapability(a),Value::StaticCapability(b))=>a.identity()==b.identity(),(Value::Handle(a,ak),Value::Handle(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::Observed(a,ak),Value::Observed(b,bk))=>ak==bk&&Weak::ptr_eq(a,b),(Value::ObjectRef(a),Value::ObjectRef(b))|(Value::HostTarget(a),Value::HostTarget(b))=>Weak::ptr_eq(a,b),(Value::Part(a,ar),Value::Part(b,br))=>ar==br&&Weak::ptr_eq(a,b),_=>false}}
 fn same_value(a:&Value,b:&Value)->bool{
     if matches!(a,Value::Number(_)|Value::Json(Json::Number(_)))&&matches!(b,Value::Number(_)|Value::Json(Json::Number(_))){
         let a=a.num();let b=b.num();a.to_bits()==b.to_bits()||(a.is_nan()&&b.is_nan())
     }else{strict_equal(a,b)}
 }
-pub fn add(a:Value,b:Value)->Value {if matches!(&a,Value::Json(Json::String(_)))||matches!(&b,Value::Json(Json::String(_))){Value::string(&(a.scalar_text()+&b.scalar_text()))}else{Value::number(a.scalar_number()+b.scalar_number())}}
+pub fn add(a:Value,b:Value)->Value {if a.is_string()||b.is_string(){let mut units=a.scalar_units();units.extend(b.scalar_units());Value::from_string_units(units)}else{Value::number(a.scalar_number()+b.scalar_number())}}
 pub fn record(entries:Vec<(&str,Value)>)->Value{record_map(entries.into_iter().map(|(k,v)|(k.to_owned(),v)).collect())}
 // The unwind payload is Send; authored values retain their original UI-thread
 // identity in a private slot. Only this exact marker, on its creating thread,
@@ -334,7 +341,7 @@ impl Owner {
         let owner=Rc::new(RefCell::new(Self{atoms:NativeHostAtoms::default(),lexical_slots:Vec::new(),authored:AuthoredHooks::default(),public_values:PublicValues::default(),failures:Vec::new(),phase:"setup",disposed:false,disposing:false,present:true,mounted:false,epoch:0,dirty:true,pending_native_events:false,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:None,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_state_conditions:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None,native_hover:NativeHoverState::default()}));
         OWNERS.with(|all|all.borrow_mut().push(Rc::downgrade(&owner)));owner
     }
-    pub fn finish(owner:&OwnerRef,renderer:Value){finish_public_exposes(owner);owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
+    pub fn finish(owner:&OwnerRef,renderer:Value){control_label_finish(owner);finish_public_exposes(owner);owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
         if let Err(failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||life(owner,"created"))){
             attempt_failed_created_cleanup(||Self::failed_created_cleanup(owner));
             std::panic::resume_unwind(failure);
@@ -387,6 +394,7 @@ impl Owner {
         if let Some(failure)=failure{std::panic::resume_unwind(failure);}
     }
     fn retire(owner:&OwnerRef){
+        control_label_dispose(owner);
         retire_entry_intent(owner);clear_scope_recipient(owner);
         let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.projection=None;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.authored=AuthoredHooks::default();o.public_values=PublicValues::default();o.atoms=NativeHostAtoms::default();o.modules=Modules::default();
     }
@@ -396,6 +404,7 @@ impl Owner {
     // acquired resources (including module-held tasks/leases inside Modules)
     // therefore retire even when a callback capture's destructor panics.
     fn failed_created_retire(owner:&OwnerRef){
+        attempt_failed_created_cleanup(||control_label_dispose(owner));
         retire_entry_intent(owner);clear_scope_recipient(owner);
             let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();
             (std::mem::take(&mut o.projection),std::mem::take(&mut o.renderer),std::mem::take(&mut o.watchers),std::mem::take(&mut o.listeners),std::mem::take(&mut o.contributions),std::mem::take(&mut o.subscriptions),std::mem::take(&mut o.providers),std::mem::take(&mut o.exposes),std::mem::take(&mut o.states),std::mem::take(&mut o.lifecycle),std::mem::take(&mut o.slot),std::mem::take(&mut o.modules))};
@@ -430,7 +439,7 @@ fn attempt_native_cleanup<T>(failure:&mut Option<Box<dyn std::any::Any+Send>>,op
         if failure.is_none(){*failure=Some(next);}else{attempt_failed_created_cleanup(||drop(next));}
     }
 }
-const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);6]=[text_detach,image_detach,positioning_detach,overlay_detach,atoms_detach,crate::gpui_native_move::move_detach];
+const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);7]=[text_detach,image_detach,positioning_detach,overlay_detach,control_label_detach,atoms_detach,crate::gpui_native_move::move_detach];
 fn begin_native_detach(owner:&OwnerRef)->bool{
     withdraw_entry_view(owner);
     let mut o=owner.borrow_mut();let mounted=o.mounted;o.epoch=o.epoch.wrapping_add(1);o.mounted=false;o.bounds=None;o.native_hitbox=None;o.native_hover=NativeHoverState::default();o.focused=false;o.modules.focus.visible=false;o.modules.focus.native=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
@@ -492,7 +501,7 @@ fn normalize_state(kind:&str,value:Value,spec:&Value,initial:bool)->Value{
     match kind{
         "bool"=>{value.bool();},
         "string"|"enum"=>{
-            if !matches!(value,Value::Json(Json::String(_))){value_error("State string required")}
+            if !value.is_string(){value_error("State string required")}
             let options=spec.member("options",true);
             if options.nullish()&&kind=="enum"{value_error("enum options required")}
             if !options.nullish()&&!options.items().iter().any(|option|strict_equal(option,&value)){value_error("State value outside options")}
@@ -685,7 +694,7 @@ pub fn focus_disabled(owner:&OwnerWeak,disabled:Value)->Value{let owner=runtime(
 pub fn focus_self(owner:&OwnerWeak)->Value{focus_request(owner,Value::Undefined,false)}
 pub fn accessible_role(owner:&OwnerWeak,role:Value)->Value{setup(owner).borrow_mut().accessible_role=role;Value::Undefined}
 pub fn accessible_state(owner:&OwnerWeak,key:Value,state:Value,options:Value)->Value{let owner=setup(owner);let condition=options.member("when",true);if !condition.nullish(){condition.get().bool();}let mut owner=owner.borrow_mut();let key=key.text();owner.accessible_states.insert(key.clone(),state);owner.accessible_state_conditions.remove(&key);if !condition.nullish(){owner.accessible_state_conditions.insert(key,condition);}Value::Undefined}
-pub fn accessible_action(owner:&OwnerWeak,key:Value)->Value{setup(owner).borrow_mut().accessible_actions.insert(key.text());Value::Undefined}
+pub fn accessible_action(owner:&OwnerWeak,key:Value)->Value{accessible_action_spec(owner,key,Value::Undefined)}
 pub fn name_content(owner:&OwnerWeak)->Value{let owner=setup(owner);let mut o=owner.borrow_mut();o.name_content=true;o.modules.accessible_text.remove("name");Value::Undefined}
 pub fn listen(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{listen_with_schema(owner,key,global,callback,options,false)}
 pub fn listen_numeric_value(owner:&OwnerWeak,key:Value,global:bool,callback:Value,options:Value)->Value{assert!(!global,"numeric accessibility actions are owner-local");listen_with_schema(owner,key,global,callback,options,true)}
@@ -719,6 +728,10 @@ pub fn default_accessibility_event(action:&str)->String{if action=="setValue"{"h
 /// A SetValue request carries finite numeric input; policy and State stay authored.
 pub fn dispatch_accessibility_action(owner:&OwnerRef,action:&str,data:Option<&gpui::accesskit::ActionData>)->bool{
     let kind={let o=owner.borrow();if o.disposed||!o.present||!o.mounted||!o.accessible||!o.accessible_actions.contains(action){return false}o.modules.action_events.get(action).cloned().unwrap_or_else(||default_accessibility_event(action))};
+    // C-A11Y-0001-F: activate.event describes the authored outward event.
+    // Native activation takes the existing semantic input route; the
+    // Prototype owns its disabled/controlled guards, State and final emit.
+    if action=="activate"{return dispatch_root_route(owner,"press.commit",event_fields("press.commit"))}
     let mut fields=event_fields(&kind);
     if action=="setValue"{
         let Some(gpui::accesskit::ActionData::NumericValue(value))=data else{return false};
@@ -770,17 +783,23 @@ pub fn paint_native_root(value:&NativeSnapshot,owner:&OwnerRef,focus:&FocusHandl
 // Authored children are captured native factories, never semantic tag dispatch.
 let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(style,fixed,translation)=native_presentation(owner,&tokens);*element.style()=style;
 if image_supported(owner){element=element.role(gpui::Role::Image);}
-if owner.borrow().modules.hooks.contains("scroll")&&owner.borrow().modules.scroll.external_engine==0{let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();element=element.on_scroll_wheel(move|_,window,cx|{scroll_input(&scrolled);scroll_drive(window,cx);});}
-let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let owner=owner.clone();let drive=drive.clone();let kind=action.clone();element=element.on_a11y_action(action_from_name(&action),move |data,window,cx|{if dispatch_accessibility_action(&owner,&kind,data){window.prevent_default()}drive(window,cx)});}}
+if owner.borrow().modules.hooks.contains("scroll")&&owner.borrow().modules.scroll.external_engine==0{let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();let scroll_epoch=owner.borrow().epoch;element=element.on_scroll_wheel(move|event,window,cx|{if scroll_input(&scrolled,event,window,scroll_epoch){scroll_drive(window,cx);}});}
+let (accessible,role,name,actions,slot)={let o=owner.borrow();(o.accessible,o.accessible_role.clone(),o.name_content,o.accessible_actions.clone(),o.slot.clone())};if native_focus_available(owner)&&!text_disabled(owner){element=element.track_focus(focus)}if text_supported(owner){element=element.role(gpui::Role::TextInput);}if accessible{let role=resolved(&role);if !role.nullish(){if let Some(role)=role_from_name(&role.text()){native_role=Some(role);if role!=gpui::Role::GenericContainer{element=element.role(role);}}}if name{element=element.aria_label((value.text)(&slot));}for action in actions{let native_action=action_from_name(&action);if let Some(lease)=native_accessible_action_lease(owner,&action){element=element.on_a11y_action(native_action,move |data,window,cx|lease.request_data(data,window,cx));}}}
+if control_label_is_label(owner){
+    element=element.role(gpui::Role::Label);
+    if let Some(lease)=control_label_action_lease(owner){
+        element=element.on_a11y_action(gpui::AccessibleAction::Click,move|_,window,cx|lease.request(window,cx));
+    }
+}
 let hover_view=Rc::new(Cell::new(None));
 if native_pointer_input_needed(owner){
-let capture_down=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_down(move|event,window,cx|{let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_down,"host:mousedown",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
-let on_down=owner.clone();let down_drive=drive.clone();element.interactivity().on_any_mouse_down(move|event,window,cx|{if claim_pointer(&on_down){let mut fields=event_fields("pointer.down");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_down,"pointer.down",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_down,"press.start",press_fields("press.start",&fields));}if prevented{window.prevent_default()}else if !window.default_prevented(){text_pointer_down(&on_down,event,window,cx);}if event.button==gpui::MouseButton::Right&&dispatch_root_route(&on_down,"context.menu",event_fields("context.menu")){window.prevent_default()}}let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch(&on_down,"host:mousedown",false,fields){window.prevent_default()}down_drive(window,cx)});
+let capture_down=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_down(move|event,window,cx|{control_label_pointer_capture(&capture_down);let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_down,"host:mousedown",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
+let on_down=owner.clone();let down_drive=drive.clone();element.interactivity().on_any_mouse_down(move|event,window,cx|{let eligible=claim_pointer(&on_down);control_label_down(&on_down,event,eligible,window);if eligible{let mut fields=event_fields("pointer.down");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_down,"pointer.down",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_down,"press.start",press_fields("press.start",&fields));}if prevented{window.prevent_default()}else if !window.default_prevented(){text_pointer_down(&on_down,event,window,cx);}if event.button==gpui::MouseButton::Right&&dispatch_root_route(&on_down,"context.menu",event_fields("context.menu")){window.prevent_default()}}let mut fields=event_fields("host:mousedown");modifiers(&mut fields,event.modifiers);if dispatch(&on_down,"host:mousedown",false,fields){window.prevent_default()}if window.default_prevented(){control_label_cancel(&on_down);}down_drive(window,cx)});
 let capture_up=owner.clone();let capture_drive=drive.clone();element.interactivity().capture_any_mouse_up(move|event,window,cx|{let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch_phase(&capture_up,"host:mouseup",false,true,fields){window.prevent_default()}capture_drive(window,cx)});
 let on_up=owner.clone();let up_drive=drive.clone();element.interactivity().on_any_mouse_up(move|event,window,cx|{if claim_pointer(&on_up){let mut fields=event_fields("pointer.up");modifiers(&mut fields,event.modifiers);let mut prevented=dispatch_root_route(&on_up,"pointer.up",fields.clone());if event.button==gpui::MouseButton::Left{prevented|=pointer_intent(&on_up,"press.end",press_fields("press.end",&fields));}if prevented{window.prevent_default()}}let mut fields=event_fields("host:mouseup");modifiers(&mut fields,event.modifiers);if dispatch(&on_up,"host:mouseup",false,fields){window.prevent_default()}up_drive(window,cx)});
 let on_move=owner.clone();let move_drive=drive.clone();let hover_motion=hover_view.clone();element=element.on_mouse_move(move|event,window,cx|{if claim_pointer(&on_move){let mut fields=event_fields("pointer.move");modifiers(&mut fields,event.modifiers);if dispatch_root_route(&on_move,"pointer.move",fields){window.prevent_default()}else if !window.default_prevented(){text_pointer_move(&on_move,event,window,cx);}}let mut fields=event_fields("host:mousemove");modifiers(&mut fields,event.modifiers);if dispatch(&on_move,"host:mousemove",false,fields){window.prevent_default()}if native_hover_motion(&on_move,hover_motion.get(),window,cx){window.prevent_default()}move_drive(window,cx)});
 let on_hover=owner.clone();let hover_drive=drive.clone();let hover_input=hover_view.clone();element=element.on_hover(move|hover,window,cx|{if let Some(view)=hover_input.get(){if native_hover_input(&on_hover,view,*hover,window,cx){window.prevent_default()}}hover_drive(window,cx)});
-let on_click=owner.clone();let click_drive=drive.clone();element=element.on_click(move|event,window,cx|{let(suppress,cancelled)={let mut o=on_click.borrow_mut();(std::mem::take(&mut o.suppress_click),std::mem::take(&mut o.press.cancelled))};if !cancelled&&!(suppress&&matches!(event,gpui::ClickEvent::Keyboard(_)))&&claim_click(&on_click)&&dispatch_root_route(&on_click,"press.commit",event_fields("press.commit")){window.prevent_default()}if dispatch(&on_click,"host:click",false,event_fields("host:click")){window.prevent_default()}global_native_click(event,window,cx);click_drive(window,cx)});
+let on_click=owner.clone();let click_drive=drive.clone();element=element.on_click(move|event,window,cx|{let(suppress,cancelled)={let mut o=on_click.borrow_mut();(std::mem::take(&mut o.suppress_click),std::mem::take(&mut o.press.cancelled))};let eligible=claim_click(&on_click);if !cancelled&&!(suppress&&matches!(event,gpui::ClickEvent::Keyboard(_)))&&eligible&&dispatch_root_route(&on_click,"press.commit",event_fields("press.commit")){window.prevent_default()}if dispatch(&on_click,"host:click",false,event_fields("host:click")){window.prevent_default()}control_label_click(&on_click,event,eligible&&!cancelled,window,cx);global_native_click(event,window,cx);click_drive(window,cx)});
 
 }
 if native_key_input_needed(owner){
@@ -952,6 +971,38 @@ pub fn role_from_name(name:&str)->Option<gpui::Role>{
     }None
 }
 pub fn action_from_name(name:&str)->gpui::AccessibleAction{match name{"activate"|"click"|"press"=>gpui::AccessibleAction::Click,"focus"=>gpui::AccessibleAction::Focus,"increment"=>gpui::AccessibleAction::Increment,"decrement"=>gpui::AccessibleAction::Decrement,"setValue"=>gpui::AccessibleAction::SetValue,_=>panic!("unsupported native accessibility action: {name}")}}
+// A native action callback belongs to one declaration and one committed view.
+// It does not keep the owner alive or regain authority after same-key setup
+// replacement, detach/remount, disposal or migration to another Window.
+#[derive(Clone)]
+pub struct NativeAccessibleActionLease {
+    owner:OwnerWeak, key:String, event:String, identity:Rc<()>, epoch:u64, window:gpui::WindowId,
+}
+impl NativeAccessibleActionLease {
+    pub fn request(&self,window:&mut Window,cx:&mut App) {
+        self.request_data(None,window,cx)
+    }
+    pub fn request_data(&self,data:Option<&gpui::accesskit::ActionData>,window:&mut Window,cx:&mut App) {
+        let Some(owner)=self.owner.upgrade() else{return};
+        let current={let o=owner.borrow();!o.disposed&&!o.disposing&&o.present&&o.mounted&&o.bounds.is_some()
+            &&o.accessible&&o.epoch==self.epoch&&o.window_id==Some(self.window)
+            &&window.window_handle().window_id()==self.window&&o.accessible_actions.contains(&self.key)
+            &&o.modules.action_identities.get(&self.key).is_some_and(|identity|Rc::ptr_eq(identity,&self.identity))
+            &&o.modules.action_events.get(&self.key)==Some(&self.event)};
+        if !current{return}
+        let prevented=dispatch_accessibility_action(&owner,&self.key,data);
+        if prevented{window.prevent_default()}
+        drive_owners(window,cx);
+    }
+}
+pub fn native_accessible_action_lease(owner:&OwnerRef,key:&str)->Option<NativeAccessibleActionLease> {
+    let o=owner.borrow();
+    if o.disposed||o.disposing||!o.present||!o.accessible||!o.accessible_actions.contains(key){return None}
+    // Paint precedes first commit; bind to the epoch that this view will commit.
+    Some(NativeAccessibleActionLease {owner:Rc::downgrade(owner),key:key.into(),
+        event:o.modules.action_events.get(key)?.clone(),identity:o.modules.action_identities.get(key)?.clone(),
+        epoch:o.epoch+u64::from(!o.mounted),window:o.window_id?})
+}
 thread_local!{static KEY_TARGET:RefCell<Option<OwnerWeak>>=RefCell::new(None);static KEY_DISPATCHED:Cell<bool>=Cell::new(false);static CLICK_TARGET:RefCell<Option<OwnerWeak>>=RefCell::new(None);static POINTER_TARGET:RefCell<Option<OwnerWeak>>=RefCell::new(None);static POINTER_DISPATCHED:Cell<bool>=Cell::new(false);static GLOBAL_CLICK_DISPATCHED:Cell<bool>=Cell::new(false);}
 thread_local!{static KEY_SCOPES:RefCell<Vec<(gpui::WindowId,gpui::WeakFocusHandle)>>=RefCell::new(Vec::new());}
 pub fn register_key_scope(focus:&FocusHandle,window:&Window){let id=window.window_handle().window_id();KEY_SCOPES.with(|scopes|{let mut scopes=scopes.borrow_mut();if scopes.iter().any(|(window,scope)|*window==id&&scope==focus){return}scopes.retain(|(_,scope)|scope.upgrade().is_some());scopes.push((id,focus.downgrade()));});}
@@ -961,7 +1012,7 @@ pub fn outer_key_scope(focus:&FocusHandle,window:&Window)->bool{let id=window.wi
 // Hooks and listeners are installed during checked setup; these direct host
 // predicates acquire only the native input resources actually requested.
 pub fn native_focus_observation_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.focusable||o.modules.hooks.iter().any(|hook|matches!(*hook,"focus"|"focus-entry"|"focus-scope"|"focus-roving"|"trigger"|"text-control"))||o.listeners.iter().any(|listener|matches!(listener.kind.as_str(),"host:focus"|"host:blur"|"focus"|"blur")||listener.kind.starts_with("press."))}
-pub fn native_pointer_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.modules.hooks.contains("trigger")||o.modules.hooks.contains("text-control")||o.listeners.iter().any(|listener|listener.kind.starts_with("pointer.")||listener.kind.starts_with("press.")||listener.kind.starts_with("host:mouse")||matches!(listener.kind.as_str(),"host:click"|"context.menu"))}
+pub fn native_pointer_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.modules.control_label.kind==Some(ControlLabelKind::Label)||o.modules.hooks.contains("trigger")||o.modules.hooks.contains("text-control")||o.listeners.iter().any(|listener|listener.kind.starts_with("pointer.")||listener.kind.starts_with("press.")||listener.kind.starts_with("host:mouse")||matches!(listener.kind.as_str(),"host:click"|"context.menu"))}
 pub fn native_key_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.focusable||o.modules.hooks.iter().any(|hook|matches!(*hook,"focus-scope"|"focus-roving"|"trigger"|"text-control"))||o.listeners.iter().any(|listener|listener.kind.starts_with("key.")||listener.kind.starts_with("press.")||matches!(listener.kind.as_str(),"host:keydown"|"host:keyup"))}
 pub fn native_boundary_input_needed(owner:&OwnerRef)->bool{let o=owner.borrow();o.modules.boundary.observing||o.modules.hooks.contains("overlay")}
 pub fn window_input_needed(owner:&OwnerRef)->bool{let owner=owner.borrow();owner.modules.hooks.contains("focus-scope")||owner.modules.focus.roving_declared||owner.listeners.iter().any(|listener|listener.global&&(listener.kind.starts_with("key.")||listener.kind.starts_with("press.")||matches!(listener.kind.as_str(),"host:keydown"|"host:keyup")))}
@@ -1008,6 +1059,7 @@ fn pointer_intent(owner:&OwnerRef,kind:&str,fields:Map<String,Json>)->bool{
 }
 pub fn native_press_blur(owner:&OwnerRef)->bool{let held=owner.borrow_mut().press.key.take().is_some();held&&dispatch_root_route(owner,"press.cancel",event_fields("press.cancel"))}
 pub fn native_window_blur(owner:&OwnerRef)->bool{
+    control_label_cancel(owner);
     crate::gpui_native_move::move_blur(owner);
     let(root,global)={let mut o=owner.borrow_mut();let root=o.press.key.take().is_some()||o.press.pointer;let global=o.press.global_key.take().is_some()||o.press.global_pointer;let keyboard_click=o.press.global_keyboard_click;let pointer_cancelled=o.press.cancelled||o.press.pointer;let global_pointer_cancelled=o.press.global_pointer_cancelled||o.press.global_pointer;o.press=NativePress::default();o.press.global_keyboard_click=keyboard_click;o.press.cancelled=pointer_cancelled;o.press.global_pointer_cancelled=global_pointer_cancelled;(root,global)};
     let mut prevented=false;if root{prevented|=dispatch_root_route(owner,"press.cancel",event_fields("press.cancel"));}if global{prevented|=dispatch(owner,"press.cancel",true,event_fields("press.cancel"));}prevented
@@ -1032,9 +1084,10 @@ fn global_pointer(kind:&str,host_kind:&str,modifiers_value:gpui::Modifiers,prima
 }
 fn global_host_pointer_capture(owner:&Option<OwnerWeak>,kind:&str,modifiers_value:gpui::Modifiers,phase:gpui::DispatchPhase,window:&mut Window,cx:&mut App){if !phase.capture(){return}let Some(owner)=owner.as_ref().and_then(Weak::upgrade)else{return};if !ready(&owner)||owner.borrow().window_id!=Some(window.window_handle().window_id())||!has_listener(&owner,kind,true,true){return}let mut fields=event_fields(kind);modifiers(&mut fields,modifiers_value);if dispatch_phase(&owner,kind,true,true,fields){window.prevent_default()}let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}}
 pub fn register_pointer_input(window:&mut Window,owner:Option<OwnerWeak>){
-    let down=owner.clone();window.on_mouse_event::<gpui::MouseDownEvent>(move|event,phase,window,cx|{global_host_pointer_capture(&down,"host:mousedown",event.modifiers,phase,window,cx);global_pointer("pointer.down","host:mousedown",event.modifiers,event.button==gpui::MouseButton::Left,phase,window,cx);});
-    let up=owner.clone();window.on_mouse_event::<gpui::MouseUpEvent>(move|event,phase,window,cx|{global_host_pointer_capture(&up,"host:mouseup",event.modifiers,phase,window,cx);global_pointer("pointer.up","host:mouseup",event.modifiers,event.button==gpui::MouseButton::Left,phase,window,cx);});
-    window.on_mouse_event::<gpui::MouseMoveEvent>(move|event,phase,window,cx|{global_host_pointer_capture(&owner,"host:mousemove",event.modifiers,phase,window,cx);global_pointer("pointer.move","host:mousemove",event.modifiers,false,phase,window,cx);});
+    let down=owner.clone();window.on_mouse_event::<gpui::MouseDownEvent>(move|event,phase,window,cx|{if phase.capture(){for owner in owners_in(window){control_label_cancel(&owner);}}global_host_pointer_capture(&down,"host:mousedown",event.modifiers,phase,window,cx);global_pointer("pointer.down","host:mousedown",event.modifiers,event.button==gpui::MouseButton::Left,phase,window,cx);});
+    let up=owner.clone();window.on_mouse_event::<gpui::MouseUpEvent>(move|event,phase,window,cx|{if phase.capture(){for owner in owners_in(window){control_label_pointer_sample(&owner,event.position,event.button==gpui::MouseButton::Left&&control_label_unmodified(event.modifiers),true,window);}}global_host_pointer_capture(&up,"host:mouseup",event.modifiers,phase,window,cx);global_pointer("pointer.up","host:mouseup",event.modifiers,event.button==gpui::MouseButton::Left,phase,window,cx);});
+    window.on_mouse_event::<gpui::MouseMoveEvent>(move|event,phase,window,cx|{if phase.capture(){for owner in owners_in(window){control_label_pointer_sample(&owner,event.position,event.pressed_button==Some(gpui::MouseButton::Left)&&control_label_unmodified(event.modifiers),false,window);}}global_host_pointer_capture(&owner,"host:mousemove",event.modifiers,phase,window,cx);global_pointer("pointer.move","host:mousemove",event.modifiers,false,phase,window,cx);});
+    window.on_mouse_event::<gpui::MouseExitEvent>(move|_,phase,window,_|{if phase.capture(){for owner in owners_in(window){control_label_cancel(&owner);}}});
 }
 fn global_host_key_down_capture(owner:&OwnerRef,event:&gpui::KeystrokeEvent,window:&mut Window,cx:&mut App){if !ready(owner)||owner.borrow().window_id!=Some(window.window_handle().window_id())||!has_listener(owner,"host:keydown",true,true){return}let mut fields=event_fields("host:keydown");fields.insert("key".into(),Json::String(portable_key(&event.keystroke).expect("portable key string")));modifiers(&mut fields,event.keystroke.modifiers);if dispatch_phase(owner,"host:keydown",true,true,fields){window.prevent_default()}let drive=owner.borrow().native_drive.clone();if let Some(drive)=drive{drive(window,cx)}}
 pub fn subscribe_global_key_capture(owner:&OwnerRef,cx:&mut App)->Option<gpui::Subscription>{if !has_listener(owner,"host:keydown",true,true){return None}let owner=Rc::downgrade(owner);Some(cx.intercept_keystrokes(move|event,window,cx|{if let Some(owner)=owner.upgrade(){global_host_key_down_capture(&owner,event,window,cx);}}))}
@@ -1089,5 +1142,6 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
   gpuiNativeImageSource +
   gpuiNativePositioningSource +
   gpuiNativeOverlaySource +
+  gpuiNativeControlLabelSource +
   gpuiNativeNotifySource +
   gpuiNativeHoverSource;

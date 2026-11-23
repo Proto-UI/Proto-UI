@@ -1915,6 +1915,28 @@ fn replaced_members_of_public_records_receive_the_owner_lifetime_guard(cx: &mut 
 
 #[gpui::test]
 fn scalar_conversion_matches_the_ecmascript_operator_reference(cx: &mut TestAppContext) {
+    // JavaScript has one Number domain. serde_json's integer-versus-float
+    // storage tag is not an authored distinction; compare Node's exact bits.
+    fn matches_reference(actual: &Json, expected: &Json, bits: &Json) -> bool {
+        match expected {
+            Json::Number(_) => actual.as_f64().is_some_and(|value| {
+                bits.as_str().and_then(|bits| u64::from_str_radix(bits, 16).ok()) == Some(value.to_bits())
+            }),
+            Json::Array(items) => actual.as_array().is_some_and(|values| {
+                values.len() == items.len() && values.iter().zip(items).enumerate()
+                    .all(|(index, (value, item))| matches_reference(value, item, &bits[index]))
+            }),
+            Json::Object(fields) => actual.as_object().is_some_and(|values| {
+                values.len() == fields.len() && fields.iter().all(|(key, value)| {
+                    values.get(key).is_some_and(|actual| matches_reference(actual, value, &bits[key]))
+                })
+            }),
+            _ => actual == expected,
+        }
+    }
+    assert!(matches_reference(&json!(1.0), &json!(1), &json!("3ff0000000000000")));
+    assert!(!matches_reference(&json!(1.5), &json!(1), &json!("3ff0000000000000")));
+    assert!(!matches_reference(&json!(0.0), &json!(0), &json!("8000000000000000")));
     let reference: Json = serde_json::from_str(include_str!("scalar-reference.json")).unwrap();
     let window = open(cx, json!({}));
     window
@@ -1948,6 +1970,13 @@ fn scalar_conversion_matches_the_ecmascript_operator_reference(cx: &mut TestAppC
                     "arithmetic text: expected {}, actual {texts}",
                     reference["arithmeticTexts"]
                 ));
+            }
+            for case in reference["nativeCases"].as_array().unwrap() {
+                let method = case["method"].as_str().unwrap();
+                let actual = handle.call(method, vec![], window, cx).unwrap();
+                if !matches_reference(&actual, &case["expected"], &case["numberBits"]) {
+                    failures.push(format!("{method}: expected {}, actual {actual}", case["expected"]));
+                }
             }
             assert!(failures.is_empty(), "{}", failures.join("\n"));
         })

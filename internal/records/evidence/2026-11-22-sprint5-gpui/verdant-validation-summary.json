@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "kind": "isolated-real-application-consumer-candidate",
+  "application": {
+    "repository": "https://github.com/OpenGreendam/verdant",
+    "publicSourceCommit": "91a775546ebd21a87d76d76568195a6513437719",
+    "originalCompilerPin": "e56b2d1a3d6b688a1cbc6930dab1d6757304d733"
+  },
+  "candidate": {
+    "indexTree": "ffadf3702b130184be3d4ef5359786e82b5531b2",
+    "compilerPin": "5da7a4d254544543040c209fad7c9d63f85fda80",
+    "published": false,
+    "patch": "verdant-candidate.patch.gz",
+    "uncompressedPatchSha256": "f0fb30560ad8f577f3166f935912297f8e33a82f7cf2f4c56d7ebdd74a49b751",
+    "uncompressedPatchBytes": 156178,
+    "files": [
+      {
+        "path": "frontend/Cargo.lock",
+        "sha256": "4d4dd38abaf39c67a94309b4c2c53efe0d403b8c20eaadbcfe03ed4c56898e71"
+      },
+      {
+        "path": "frontend/crates/verdant-app/Cargo.toml",
+        "sha256": "b2107518b249f1d670f19c9a5d6b9b1ed148b75dae930853eae749b04cda26d2"
+      },
+      {
+        "path": "frontend/crates/verdant-app/src/clock_tests.rs",
+        "sha256": "433ddd46946f1f5444063862e8ea7e9a1d3976dac597c218e39c2df73b1faf94"
+      },
+      {
+        "path": "frontend/crates/verdant-app/src/devices.rs",
+        "sha256": "94d8caef72d90504ef8c3c12627a7066224e4df9a8f749ac09a8be590d16042c"
+      },
+      {
+        "path": "frontend/crates/verdant-app/src/editor.rs",
+        "sha256": "0f989bb6b31afa761206aa8d2792f813c4468652d851ca78fca2ea924b7bf07c"
+      },
+      {
+        "path": "frontend/crates/verdant-app/src/proto_roll.rs",
+        "sha256": "df1b1c2307d4c236d561fee8a514d11975dd1978774ebf6f1c7229c1f0e22ce9"
+      },
+      {
+        "path": "frontend/crates/verdant-app/src/roll_other_track_tests.rs",
+        "sha256": "dcb40322048cfcff82b0b4b4ca9b6fb5a02ef98168b4104f64b74159f6519ce7"
+      },
+      {
+        "path": "frontend/crates/verdant-session/Cargo.toml",
+        "sha256": "2b0469fab9097e6ff95337ebe6711fe6aa3d5cf5cbfe1cc27a9534c40a3a2ea5"
+      },
+      {
+        "path": "frontend/crates/verdant-session/src/bindings.rs",
+        "sha256": "204914dbc8dd0275fd05b896a08220851c0456409f2abe167ba4c4da6d086226"
+      },
+      {
+        "path": "frontend/crates/verdant-session/src/session.rs",
+        "sha256": "eb2061bd625e2de0c10c8397660139229a78977fdbdc74abe14e4d112d72f44c"
+      },
+      {
+        "path": "frontend/crates/verdant-session/tests/common/mod.rs",
+        "sha256": "b7777fdfa0b0eefd29278c176eaae7319f60422e53edd5fb227d4530a9f08d69"
+      },
+      {
+        "path": "frontend/crates/verdant-session/tests/contract_traces.rs",
+        "sha256": "4354b5ff9ea5cb3f4363bd0a8db317ae223c5b230d0fa3ad5b4497285cccaaf8"
+      },
+      {
+        "path": "frontend/crates/verdant-session/tests/generated_gestures.rs",
+        "sha256": "b8b7dfc888941231e38974d6a5d58ea0d5a710fb97f26d1e6b1d8db065ba09d8"
+      },
+      {
+        "path": "frontend/proto-ui/README.md",
+        "sha256": "eeaf00a29c2911fe2db22157c49740e7d39cb7875426d03bad0b017caeb3b13c"
+      },
+      {
+        "path": "frontend/proto-ui/compiler.pin.json",
+        "sha256": "6d59d0435a387002dabaa67c3a57186b9843dc5dd4152ad35b93028b5acfbe5e"
+      },
+      {
+        "path": "frontend/proto-ui/generated/pitch-gesture-surface/.proto-ui/gpui-native/src/gpui-native-owner.rs",
+        "sha256": "e4a87f9bda05108c98e0d6c77c3a0c6967ed0fb007ad7ef431aa926337ccc575"
+      },
+      {
+        "path": "frontend/proto-ui/generated/pitch-gesture-surface/Cargo.toml",
+        "sha256": "b5f0d8f331a22da8d015ec4d7492704a5e0b77c07d7fe91142e4628db081126f"
+      },
+      {
+        "path": "frontend/proto-ui/generated/pitch-gesture-surface/Component.rs",
+        "sha256": "f3a0c11495513892b2653b93afad51edc764c44637e086a431981a6453a4b85f"
+      },
+      {
+        "path": "frontend/proto-ui/generated/pitch-gesture-surface/Component.rs.map",
+        "sha256": "b3087aa35ba24d205b6b449bce66f6eeb2fb1060e9db8b2c8480f9248197cc95"
+      },
+      {
+        "path": "frontend/proto-ui/generated/pitch-gesture-surface/provenance.json",
+        "sha256": "57d93746fdd710fcc9e51ecc6da16c191f72e40d804a29c13b521883800ea838"
+      },
+      {
+        "path": "frontend/proto-ui/receipts/pitch-gesture-surface.json",
+        "sha256": "a40f3ff2676d7f27846dd95a3b2b18e5cf1a18a82375ea3386c2ba35e8ac6634"
+      }
+    ]
+  },
+  "producer": {
+    "entry": "frontend/proto-ui/tools/build-proto-ui.mjs",
+    "modified": false,
+    "generatedRustHandEdited": false,
+    "check": "passed",
+    "artifacts": 20,
+    "componentName": "PitchGestureSurface",
+    "packageName": "generated-gpui-49e4bc3d059f93b183b577ae8ca52b4f"
+  },
+  "results": {
+    "pinOnlyUpgrade": "E0061 at static call_data_method consumer; preserved before migration",
+    "applicationBuild": "passed with original Linux font-kit/x11/wayland features",
+    "applicationTests": {
+      "passed": 158,
+      "failed": 0,
+      "ignored": 0
+    },
+    "sessionTests": {
+      "passed": 24,
+      "failed": 0,
+      "ignored": 0
+    },
+    "cliHelp": "exit 0",
+    "dependencyGraph": {
+      "resolvedPackages": 820,
+      "gpuiCrates": 1,
+      "nativeSdkCrates": 1
+    },
+    "xvfbProbe": "Failed to create local/Unix X11 listening sockets; no visible-window or physical-input pass",
+    "workerBuild": "passed, real public-source verdant-worker; no fake worker",
+    "workerNoModelProbe": {
+      "events": ["ready", "capabilities", "shutdown"],
+      "exitCode": 0,
+      "stderrBytes": 0,
+      "voiceVersion": null,
+      "scope": "isolated state, data, cache, empty resources and workspace; no synthesis or model acceptance"
+    }
+  },
+  "evidenceBoundary": "Application source is public 91a7755 plus the explicit candidate patch. The unrelated unpublished active worktree was not used or modified. Compiler source is 5da7a4d2. This is not a published application adoption, final integration HEAD certification, physical input, assistive technology, model synthesis or audio-output acceptance.",
+  "logs": [
+    {
+      "name": "verdant-candidate-session-before.log",
+      "bytes": 59802,
+      "sha256": "af3592ba76d7b5eb57f3596acd190effe0944374cb1f53dcc55eb54a85e3e5e3"
+    },
+    {
+      "name": "verdant-candidate-app-build.log",
+      "bytes": 6387,
+      "sha256": "9e83d8249236ee5a7957f7e4c493017939edd03cd5ea124f2704bdcd108416f5"
+    },
+    {
+      "name": "verdant-owner-app-build.log",
+      "bytes": 6902,
+      "sha256": "3072da564d066aef36aeabc05f1048bbdd6489228af656dbc749dae307ad84de"
+    },
+    {
+      "name": "verdant-owner-app-build-fonts.log",
+      "bytes": 72436,
+      "sha256": "621e310888e615750b396e2ff6397a82e25204b9ef0cf5237ad345eea0c6fd58"
+    },
+    {
+      "name": "verdant-owner-app-session-test.log",
+      "bytes": 81976,
+      "sha256": "c1ed319fef0ad9ff023fbcdfd41011744fb29ba2674964886b62f5c5ee25ea4a"
+    },
+    {
+      "name": "verdant-owner-producer-check.log",
+      "bytes": 410,
+      "sha256": "9ecc065f3de29057126c059bc52340240a6dc7e88ebdc5f09c15337c95fff512"
+    },
+    {
+      "name": "verdant-owner-cli-help.log",
+      "bytes": 315,
+      "sha256": "7b46df7f8585a77597897cd720f8f74d7963596824eccb17de1e084820ca5964"
+    },
+    {
+      "name": "host-libs/xvfb-probe.log",
+      "bytes": 524,
+      "sha256": "993d72412a5dd1c202d5c1e1edd20c63879bed3926f8a9b3f24bff518b3b1f67"
+    },
+    {
+      "name": "verdant-owner-worker-build.log",
+      "bytes": 3870,
+      "sha256": "8a2ac08315881b3093aa6ad2479a862347760eff304a400813275cf388aa5d4c"
+    },
+    {
+      "name": "verdant-worker-smoke/stdout.jsonl",
+      "bytes": 40437,
+      "sha256": "f8c9346500d60786a8b89069370c2e3baea3aca4f339041e9df5594b2b5401a8"
+    },
+    {
+      "name": "verdant-worker-smoke/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "nativeExecutables": [
+    {
+      "name": "verdant",
+      "bytes": 193502512,
+      "sha256": "3836ccb36f6d0dcb3a5464221e5258718b06899b7def7fdfc9d13a1b111c16a1",
+      "maximumRequiredGlibc": "2.39",
+      "profile": "unoptimized debug with debug info disabled; not retained production-cost measurement"
+    },
+    {
+      "name": "verdant-worker",
+      "bytes": 30788752,
+      "sha256": "3c9998d415fa56f6426ee84a5270fd9a731f28094360782471492dd13e84543c",
+      "maximumRequiredGlibc": "2.39",
+      "profile": "unoptimized debug with debug info disabled; not retained production-cost measurement"
+    }
+  ]
+}

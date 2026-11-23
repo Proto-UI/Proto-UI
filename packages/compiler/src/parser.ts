@@ -1,10 +1,12 @@
 import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { declaredSetValueEvent } from './a11y-event-types';
 import ts from 'typescript';
-import { unwrapSourceExpression } from './source-syntax';
 import { createHash } from 'node:crypto';
 import { CompilerRejection, unexpectedFailureEvidence, unknownDiagnosticSpan } from './diagnostics';
 import { admittedHookOperation } from './hook-admission';
+import { dormantSourceDeclarations } from './parser-source-demand';
+import { moduleBoolean } from './source-module-initialization';
+import { hasAccessorField, moduleAccessorStorageIssue } from './record-accessors';
 
 import {
   OPERATION_RULES,
@@ -39,6 +41,10 @@ import {
   sourceSpan,
   scalarInitializer,
   staticDataInitializer,
+  staticScalarMembership,
+  staticCallableSelection,
+  staticGetterRecordInitializer,
+  unwrapSourceExpression,
   staticJoin,
   isSourceFunction,
   CORE_FUNCTIONS,
@@ -68,6 +74,7 @@ import {
   joinValueTypes,
   objectFields,
   objectValueType,
+  spreadObjectField,
   memberValueType,
   functionValueType,
   callableValue,
@@ -354,6 +361,66 @@ class Frontend {
     return { kind: 'callable', parameters, returnType };
   }
 
+  /** Check declaration/signature grammar while keeping body/default admission deferred. */
+  private deferredSignature(module: SourceModule, node: FunctionNode): ValueType {
+    if (
+      node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+      ('asteriskToken' in node && node.asteriskToken) ||
+      !node.body
+    )
+      rejectNode(node, 'PUI1004', 'Async/generator/external functions are unsupported.');
+    const names = new Set<string>();
+    const parameterNames = node.parameters.map((parameter) => identifier(parameter.name));
+    const parameters = node.parameters.map((parameter, index) => {
+      if (parameter.dotDotDotToken)
+        rejectNode(parameter, 'PUI1004', 'Rest callback parameters are unsupported.');
+      const name = identifier(parameter.name);
+      if (names.has(name)) rejectNode(parameter, 'PUI1005', `Duplicate parameter ${name}.`);
+      names.add(name);
+      if (parameter.initializer) {
+        const uninitialized = new Set(parameterNames.slice(index));
+        const inspect = (part: ts.Node): void => {
+          if (ts.isFunctionLike(part)) return;
+          if (
+            ts.isAsExpression(part) ||
+            ts.isTypeAssertionExpression(part) ||
+            ts.isSatisfiesExpression(part)
+          ) {
+            inspect(part.expression);
+            return;
+          }
+          if (
+            ts.isIdentifier(part) &&
+            uninitialized.has(part.text) &&
+            !(ts.isPropertyAccessExpression(part.parent) && part.parent.name === part) &&
+            !(ts.isPropertyAssignment(part.parent) && part.parent.name === part)
+          )
+            rejectNode(
+              part,
+              'PUI1006',
+              'A parameter default cannot read its current or a later uninitialized parameter.'
+            );
+          ts.forEachChild(part, inspect);
+        };
+        inspect(parameter.initializer);
+      }
+      return {
+        name,
+        type: parameter.type
+          ? parseSourceValueType(module, parameter.type, this.substitutions)
+          : ('unknown' as ValueType),
+        ...(parameter.questionToken || parameter.initializer ? { optional: true } : {}),
+      };
+    });
+    return {
+      kind: 'callable',
+      parameters,
+      returnType: node.type
+        ? parseSourceValueType(module, node.type, this.substitutions)
+        : 'unknown',
+    };
+  }
+
   private resolvePending(binding: Binding): void {
     if (
       !binding.declaration ||
@@ -420,7 +487,8 @@ class Frontend {
     module: SourceModule,
     nodes: readonly ts.Statement[],
     scope: Scope,
-    forbidden: ReadonlySet<string> = new Set()
+    forbidden: ReadonlySet<string> = new Set(),
+    dormant: ReadonlySet<ts.Node> = new Set()
   ): void {
     const declarations: (ts.VariableDeclaration | FunctionNode)[] = [];
     const names = new Set<string>();
@@ -434,14 +502,19 @@ class Frontend {
         rejectNode(declaration, 'PUI1005', `Duplicate local ${name}.`);
       names.add(name);
       const init = ts.isVariableDeclaration(declaration) ? declaration.initializer : declaration;
+      const callable = init && ts.isExpression(init) ? unwrapSourceExpression(init) : init;
       const annotation = ts.isVariableDeclaration(declaration) ? declaration.type : undefined;
-      const type = annotation
-        ? parseSourceValueType(module, annotation, this.substitutions)
-        : init && isSourceFunction(init)
-          ? this.previewFunction(module, init, scope)
-          : init
-            ? this.previewExpression(module, init as ts.Expression, scope)
-            : 'unknown';
+      const type = dormant.has(declaration)
+        ? callable && isSourceFunction(callable)
+          ? this.deferredSignature(module, callable)
+          : 'unknown'
+        : annotation
+          ? parseSourceValueType(module, annotation, this.substitutions)
+          : init && isSourceFunction(init)
+            ? this.previewFunction(module, init, scope)
+            : init
+              ? this.previewExpression(module, init as ts.Expression, scope)
+              : 'unknown';
       const mutable =
         ts.isVariableDeclaration(declaration) &&
         ts.isVariableDeclarationList(declaration.parent) &&
@@ -468,7 +541,7 @@ class Frontend {
     for (const declaration of declarations) {
       const binding = scope.get(identifier(declaration.name!))!,
         init = ts.isVariableDeclaration(declaration) ? declaration.initializer : declaration;
-      if (init && isSourceFunction(init))
+      if (init && isSourceFunction(init) && !dormant.has(declaration))
         binding.type = this.previewFunction(module, init, scope, binding.type);
     }
   }
@@ -972,7 +1045,8 @@ class Frontend {
     ))
       staticLocals.set(name, value);
     nodes = unrollStaticLoops(module, lowerObjectPatterns(nodes), staticLocals);
-    this.predeclare(module, nodes, scope, forbidden);
+    const dormant = dormantSourceDeclarations(nodes);
+    this.predeclare(module, nodes, scope, forbidden, dormant);
     for (const node of nodes) {
       const span = sourceSpan(node);
       if (ts.isVariableStatement(node)) {
@@ -984,6 +1058,12 @@ class Frontend {
           const pending = scope.get(name)!;
           if (!declaration.initializer)
             rejectNode(declaration, 'PUI1004', 'Binding requires a value.');
+          if (dormant.has(declaration)) {
+            // Keep the original declaration in its lexical binding and in source
+            // provenance. No callable signature/body is fabricated into checked IR.
+            pending.initializerParsed = true;
+            continue;
+          }
           const init = declaration.initializer;
           let value: ExpressionIR;
           if (ts.isArrowFunction(init) || ts.isFunctionExpression(init)) {
@@ -1083,6 +1163,7 @@ class Frontend {
           });
         }
       } else if (ts.isFunctionDeclaration(node) && node.name) {
+        if (dormant.has(node)) continue;
         const binding = scope.get(node.name.text)!;
         this.resolvePending(binding);
         output.unshift({
@@ -1412,6 +1493,18 @@ class Frontend {
       return { kind: 'literal', value: null, type: 'null', span };
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
       return { kind: 'literal', value: node.text, type: literalType(node.text), span };
+    const membership = staticScalarMembership(node);
+    if (
+      membership !== undefined &&
+      ts.isCallExpression(node) &&
+      ts.isPropertyAccessExpression(node.expression)
+    ) {
+      // Validate all literal nodes and type views before using the syntactic
+      // proof. No authored call, getter, search coercion or module executes.
+      this.expression(module, node.expression.expression, scope, phase);
+      this.expression(module, node.arguments[0], scope, phase);
+      return { kind: 'literal', value: membership, type: literalType(membership), span };
+    }
     const joined = staticJoin(node);
     if (joined) {
       // Folded at compile time: a join of finite literal strings is itself a
@@ -1669,18 +1762,19 @@ class Frontend {
     if (ts.isObjectLiteralExpression(node)) {
       const keys = new Set<string>();
       const parts: Extract<ExpressionIR, { kind: 'object-spread' }>['parts'] = [];
-      const entries: { key: string; value: ExpressionIR }[] = [];
+      const entries: Extract<ExpressionIR, { kind: 'record' }>['entries'] = [];
       const fields = new Map<
         string,
-        { name: string; type: ValueType; optional?: boolean; readonly?: boolean }
+        { name: string; type: ValueType; optional?: boolean; readonly?: boolean; accessor?: 'get' }
       >();
       const entry = (
         property: ts.ObjectLiteralElementLike
-      ): { key: string; value: ExpressionIR } => {
+      ): Extract<ExpressionIR, { kind: 'record' }>['entries'][number] => {
         if (
           !ts.isPropertyAssignment(property) &&
           !ts.isShorthandPropertyAssignment(property) &&
-          !ts.isMethodDeclaration(property)
+          !ts.isMethodDeclaration(property) &&
+          !ts.isGetAccessorDeclaration(property)
         )
           rejectNode(property, 'PUI1004', 'Object members require data or ordinary methods.');
         const key = propertyName(property.name);
@@ -1689,7 +1783,9 @@ class Frontend {
         const expected = expectedType
           ? objectFields(expectedType)?.find((field) => field.name === key)?.type
           : undefined;
-        if (ts.isMethodDeclaration(property)) {
+        if (ts.isMethodDeclaration(property) || ts.isGetAccessorDeclaration(property)) {
+          if (ts.isGetAccessorDeclaration(property) && property.parameters.length)
+            rejectNode(property, 'PUI1006', 'A getter cannot declare parameters.');
           const signature =
             expected && typeof expected !== 'string' && expected.kind === 'callable'
               ? expected
@@ -1705,6 +1801,7 @@ class Frontend {
           );
           return {
             key,
+            ...(ts.isGetAccessorDeclaration(property) ? { accessor: 'get' as const } : {}),
             value: {
               kind: 'function',
               function: fn,
@@ -1752,16 +1849,35 @@ class Frontend {
           if (!spread)
             rejectNode(property, 'PUI1006', 'Object spread requires a checked ordinary record.');
           parts.push({ kind: 'spread', value });
-          for (const { readonly: _readonly, ...field } of spread) fields.set(field.name, field);
+          for (const field of spread)
+            fields.set(field.name, spreadObjectField(fields.get(field.name), field));
+          if (hasAccessorField(value.type)) this.invalidateFlow(scope, true, true);
         } else {
           const parsed = entry(property);
           entries.push(parsed);
           parts.push({ kind: 'entry', ...parsed });
-          fields.set(parsed.key, { name: parsed.key, type: parsed.value.type });
+          fields.set(
+            parsed.key,
+            parsed.accessor === 'get' && parsed.value.kind === 'function'
+              ? {
+                  name: parsed.key,
+                  type: parsed.value.function.returnType,
+                  readonly: true,
+                  accessor: 'get',
+                }
+              : { name: parsed.key, type: parsed.value.type }
+          );
         }
       }
       if (node.properties.some(ts.isSpreadAssignment))
         return { kind: 'object-spread', parts, type: objectValueType([...fields.values()]), span };
+      if (entries.some((entry) => entry.accessor))
+        return {
+          kind: 'record',
+          entries,
+          type: { kind: 'object', fields: [...fields.values()] },
+          span,
+        };
       if (entries.some((entry) => !isDataValueType(entry.value.type))) {
         if (
           phase === 'render' &&
@@ -2004,6 +2120,7 @@ class Frontend {
           // Structural records may contain additional fields absent from this type view.
           type = 'unknown';
         else rejectNode(node, 'PUI1006', 'Dynamic index requires a checked array or record.');
+        if (hasAccessorField(object.type)) this.invalidateFlow(scope, true, true);
         return { kind: 'element', object, index, optional, type, span };
       }
       const property = ts.isPropertyAccessExpression(node)
@@ -2012,6 +2129,7 @@ class Frontend {
       const object = this.expression(module, node.expression, scope, phase);
       const optional = ts.isPropertyAccessChain(node) || ts.isElementAccessChain(node);
       const type = this.checkedValue(node, () => this.memberType(object.type, property, optional));
+      if (hasAccessorField(object.type, property)) this.invalidateFlow(scope, true, true);
       return { kind: 'member', object, property, optional, type, span };
     }
     if (ts.isCallExpression(node)) return this.call(module, node, scope, phase, expectedType);
@@ -2114,6 +2232,46 @@ class Frontend {
       initializer.parent.expression === initializer
     )
       initializer = initializer.parent;
+    let selectionType: ValueType | undefined;
+    if (staticCallableSelection(value)) {
+      const condition = this.expression(module, value.condition, new Map(), 'setup');
+      if (!assignable(condition.type, 'boolean'))
+        rejectNode(
+          value.condition,
+          'PUI1006',
+          'Static callable selection requires a boolean condition.'
+        );
+      const branchType = (branch: ts.Expression): ValueType => {
+        while (ts.isParenthesizedExpression(branch)) branch = branch.expression;
+        if (!ts.isIdentifier(branch))
+          return rejectNode(
+            branch,
+            'PUI1006',
+            'Static callable selection requires a module function or undefined.'
+          );
+        if (
+          branch.text === 'undefined' &&
+          !module.declarations.has(branch.text) &&
+          !module.imports.has(branch.text)
+        )
+          return 'void';
+        const resolved = this.graph.resolveBinding(module, branch.text);
+        if (!resolved.module || !isSourceFunction(resolved.node))
+          return rejectNode(
+            branch,
+            'PUI1006',
+            'Static callable selection requires a module function or undefined.'
+          );
+        // Branch selection defers execution, not declaration/signature grammar.
+        // Validate both callable branches without admitting either body/default.
+        this.deferredSignature(resolved.module, resolved.node);
+        return this.previewFunction(resolved.module, resolved.node, new Map());
+      };
+      selectionType = joinValueTypes([branchType(value.whenTrue), branchType(value.whenFalse)]);
+      initializer = moduleBoolean(this.graph, module, value.condition)
+        ? value.whenTrue
+        : value.whenFalse;
+    }
     const initial = this.expression(module, initializer, new Map(), 'setup');
     const scalar =
       initial.type === 'boolean' || initial.type === 'number' || initial.type === 'string';
@@ -2121,13 +2279,40 @@ class Frontend {
     // finite data written as a literal (finiteness is checked below).
     if (!scalar && (module.mutableBindings.has(name) || scalarInitializer(value)))
       rejectNode(value, 'PUI1006', 'Module initializer must be scalar data.');
-    const annotation = ts.isVariableDeclaration(initializer.parent)
-      ? initializer.parent.type
+    let declarationValue: ts.Expression = value;
+    while (
+      declarationValue.parent &&
+      (ts.isParenthesizedExpression(declarationValue.parent) ||
+        ts.isAsExpression(declarationValue.parent) ||
+        ts.isTypeAssertionExpression(declarationValue.parent) ||
+        ts.isSatisfiesExpression(declarationValue.parent)) &&
+      declarationValue.parent.expression === declarationValue
+    )
+      declarationValue = declarationValue.parent;
+    const annotation = ts.isVariableDeclaration(declarationValue.parent)
+      ? declarationValue.parent.type
       : undefined;
     const declared = annotation
       ? parseSourceValueType(module, annotation, this.substitutions)
-      : initial.type;
-    if (!isDataValueType(declared))
+      : (selectionType ?? initial.type);
+    const callableSelection =
+      selectionType !== undefined &&
+      valueAlternatives(declared).every(
+        (type) => type === 'void' || (typeof type !== 'string' && type.kind === 'callable')
+      );
+    if (selectionType !== undefined && (!callableSelection || !assignable(selectionType, declared)))
+      rejectNode(
+        annotation ?? value,
+        'PUI1006',
+        'Static callable branches do not satisfy their declared optional function type.'
+      );
+    const getterRecord =
+      staticGetterRecordInitializer(value) &&
+      typeof declared !== 'string' &&
+      declared.kind === 'object' &&
+      hasAccessorField(declared) &&
+      declared.fields.every((field) => isDataValueType(field.type));
+    if (!isDataValueType(declared) && !callableSelection && !getterRecord)
       rejectNode(
         annotation ?? value,
         'PUI1006',
@@ -2135,7 +2320,7 @@ class Frontend {
       );
     // Immutable module data is shared by every instance, so every field
     // reached through it is read-only whatever the literal's inferred type.
-    const stored = scalar ? declared : deepReadonly(declared);
+    const stored = scalar || callableSelection ? declared : deepReadonly(declared);
     if (stored === undefined)
       rejectNode(
         value,
@@ -2707,6 +2892,14 @@ class Frontend {
       if (!module.imports.has(name) && !module.declarations.has(name))
         rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
       const resolved = this.graph.resolveBinding(module, name);
+      if (resolved.module && staticCallableSelection(resolved.node))
+        return this.ordinaryCall(
+          module,
+          node,
+          this.expression(module, node.expression, scope, phase),
+          scope,
+          phase
+        );
       if (resolved.module && isSourceFunction(resolved.node)) {
         const signature = resolved.node.typeParameters?.length
           ? undefined
@@ -3377,7 +3570,11 @@ class Frontend {
     ]);
     for (const loaded of this.graph.modules.values())
       for (const [name, declaration] of loaded.declarations) {
-        if (ts.isCallExpression(declaration) && !staticJoin(declaration)) {
+        if (
+          ts.isCallExpression(declaration) &&
+          !staticJoin(declaration) &&
+          staticScalarMembership(declaration) === undefined
+        ) {
           if (
             ts.isIdentifier(declaration.expression) &&
             this.graph.resolveCoreImport(loaded, declaration.expression.text) === 'createContextKey'
@@ -3471,6 +3668,13 @@ export function parsePrototype(
     const effect = callableEffectIssue(value);
     if (effect)
       throw new CompilerRejection({ code: 'PUI1007', category: 'unsupported-input', ...effect });
+    const accessorStorage = moduleAccessorStorageIssue(value);
+    if (accessorStorage)
+      throw new CompilerRejection({
+        code: 'PUI1007',
+        category: 'unsupported-input',
+        ...accessorStorage,
+      });
     return { ok: true, value };
   } catch (error) {
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
@@ -3493,6 +3697,8 @@ export function parsePrototype(
 function moduleDataNode(node: ts.Node): boolean {
   if (!ts.isExpression(node)) return false;
   if (scalarInitializer(node)) return true;
+  if (staticCallableSelection(node)) return true;
+  if (staticGetterRecordInitializer(node)) return true;
   return !ts.isIdentifier(node) && !isSourceFunction(node) && staticDataInitializer(node);
 }
 
@@ -3507,7 +3713,13 @@ function deepReadonly(type: ValueType): ValueType | undefined {
   if (type.kind === 'literal') return type;
   if (type.kind === 'record' || type.kind === 'object') {
     if (type.kind === 'object' && type.index !== undefined) return undefined;
-    const fields: { name: string; type: ValueType; optional?: boolean; readonly?: boolean }[] = [];
+    const fields: {
+      name: string;
+      type: ValueType;
+      optional?: boolean;
+      readonly?: boolean;
+      accessor?: 'get';
+    }[] = [];
     for (const field of type.fields) {
       const inner = deepReadonly(field.type);
       if (inner === undefined) return undefined;
@@ -3515,6 +3727,7 @@ function deepReadonly(type: ValueType): ValueType | undefined {
         name: field.name,
         type: inner,
         ...(field.optional ? { optional: true } : {}),
+        ...('accessor' in field && field.accessor ? { accessor: field.accessor } : {}),
         readonly: true,
       });
     }

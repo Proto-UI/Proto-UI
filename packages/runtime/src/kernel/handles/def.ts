@@ -174,6 +174,15 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         },
       },
       material: {
+        shader(declaration) {
+          ensureSetup('def.feedback.material.shader');
+          const off = feedback.material.shader(declaration);
+          recordCaptured(def, 'feedback', off);
+          return () => {
+            ensureSetup('def.feedback.material.shader:dispose');
+            off();
+          };
+        },
         declare(slot) {
           ensureSetup('def.feedback.material.declare');
           const off = feedback.material.declare(slot);

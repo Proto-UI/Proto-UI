@@ -124,15 +124,32 @@ describe('native String conversion', () => {
     expect(validateIR(wrongResult).ok).toBe(false);
   });
 
+  it('retains the original source while omitting a wholly uncalled callback', () => {
+    const text = program('const callback=()=>1;const value=String(1);');
+    const ir = portable(text);
+    expect(ir.sourceFiles[0].content).toBe(text);
+    expect(
+      ir.setup.body.some((statement) => statement.kind === 'const' && statement.name === 'callback')
+    ).toBe(false);
+    expect(conversions(ir)).toHaveLength(1);
+  });
+
   it('rejects a coherent callable operand in serialized IR', () => {
-    const ir = portable(program('const callback=()=>1;const value=String(1);'));
+    const ir = portable(program('const callback=()=>1;callback();const value=String(1);'));
     const callback = ir.setup.body.find(
       (statement): statement is Extract<StatementIR, { kind: 'const' }> =>
         statement.kind === 'const' && statement.name === 'callback'
     );
     if (!callback) throw new Error('Missing callable control.');
+    expect(callback.value.kind).toBe('function');
+    expect(validateIR(ir).ok).toBe(true);
     conversions(ir)[0].arguments[0] = callback.value;
-    expect(validateIR(ir).ok).toBe(false);
+    const checked = validateIR(ir);
+    expect(checked.ok).toBe(false);
+    if (!checked.ok)
+      expect(checked.diagnostics.some((diagnostic) => diagnostic.message.includes('String'))).toBe(
+        true
+      );
   });
 
   it('invalidates saved mutable observations across opaque coercion', () => {
@@ -148,6 +165,20 @@ describe('native String conversion', () => {
     `)
       ).ok
     ).toBe(false);
+  });
+
+  it('admits only proven scalar GPUI coercion', () => {
+    const text = program('const value=String(1);');
+    expect(compilePrototype(text, { profile: 'gpui-source-v1' }).ok).toBe(true);
+    const unknown = compilePrototype(
+      program(
+        "function coerce(value:unknown){return String(value);}def.expose.method('coerce',()=>coerce({}));"
+      ),
+      { profile: 'gpui-source-v1' }
+    );
+    expect(unknown.ok).toBe(false);
+    if (!unknown.ok)
+      expect(unknown.diagnostics.some((entry) => entry.code === 'PUI4003')).toBe(true);
   });
 
   it('admits bounded scalar conversion in GPUI', () => {

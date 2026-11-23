@@ -18,6 +18,8 @@ import {
 export { isTemplateChildType } from './value-types';
 import {
   COMPLETION_REQUEST_TYPE,
+  PRESENTATION_DECLARATION_TYPE,
+  SHADER_PRESENTATION_TYPE,
   PRESENTATION_COMPLETION_TYPE,
   PRESENTATION_FRAME_TYPE,
   PRESENTATION_OUTCOME_TYPE,
@@ -605,6 +607,24 @@ export const OPERATION_RULES = {
     requiredCapabilities: ['style-projection'],
   }),
   'feedback.style.use': styleRule('def', 'feedback.style.use', setup, 'style-disposer'),
+  'feedback.material.shader': rule(
+    'def',
+    'feedback.material.shader',
+    setup,
+    'style-disposer',
+    [{ role: 'value', valueSchema: SHADER_PRESENTATION_TYPE }],
+    [effect('declare', 'style'), effect('write', 'style')],
+    { requiredCapabilities: ['style-projection'] }
+  ),
+  'feedback.style.presence': rule(
+    'def',
+    'feedback.style.presence',
+    setup,
+    'style-disposer',
+    [{ role: 'value', types: [PRESENTATION_DECLARATION_TYPE] }],
+    [effect('declare', 'presence'), effect('write', 'style')],
+    { requiredCapabilities: ['style-projection'] }
+  ),
   'feedback.style.release': rule(
     'style-disposer',
     'call',
@@ -2025,6 +2045,14 @@ export const OPERATION_RULES = {
     callbackPhase,
     SCROLL_REQUEST_OUTCOME_TYPE,
     [{ role: 'value', valueSchema: SCROLL_REQUEST_TYPE }],
+    [effect('write', 'view')]
+  ),
+  'scroll.pauseFollowing': rule(
+    'scroll',
+    'pauseFollowing',
+    callbackPhase,
+    SCROLL_REQUEST_OUTCOME_TYPE,
+    [],
     [effect('write', 'view')]
   ),
   'scroll.getSnapshot': rule(

@@ -1,4 +1,11 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
+
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 
 import {
   collectPrototypeIds,
@@ -447,6 +454,94 @@ describe('Website projection composition', () => {
 
   describe('renderer theme ownership', () => {
     it.each(['object', 'array'] as const)(
+      'owns the initially omitted theme slot with %s authored styles before the first palette arrives',
+      (shape) => {
+        const childDemo: DemoSpec = {
+          type: 'demo',
+          root: {
+            kind: 'proto',
+            prototypeId: 'shadcn-button',
+            ref: 'outer',
+            surfaceStyle: shape === 'object' ? { color: 'navy' } : 'color: navy;',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-text-root',
+                ref: 'inner',
+                surfaceStyle: { '--pui-foreground': '#aabbcc' },
+              },
+            ],
+          },
+        };
+        const original = structuredClone(childDemo.root);
+        const composition = createProjectionComposition({
+          ownerId: `initial-theme-${shape}`,
+          runtimeId: 'wc',
+          projectionFamilyId: 'shadcn',
+          generation: 3,
+          componentId: 'button',
+          contentRecipe: {
+            id: 'button-with-authored-text',
+            prototypeIds: ['shadcn-button', 'shadcn-text-root'],
+            rootPrototypeId: 'shadcn-button',
+          },
+          childDemo,
+          controls: controls(),
+          controlIds: [],
+        });
+        const outer = findNode(
+          composition.demo,
+          (node) => node.kind === 'proto' && node.ref === 'outer'
+        );
+        const inner = findNode(
+          composition.demo,
+          (node) => node.kind === 'proto' && node.ref === 'inner'
+        );
+        if (outer.kind !== 'proto' || inner.kind !== 'proto')
+          throw new Error('Expected Proto nodes');
+        const owned = outer.surfaceStyle;
+        const authored = inner.surfaceStyle;
+        composition.setThemeSurfaceStyle({ '--pui-foreground': '#eeeeee' });
+        expect(outer.surfaceStyle).toBe(owned);
+        expect(outer.surfaceStyle).toEqual(
+          shape === 'object'
+            ? { color: 'navy', maxWidth: '100%', '--pui-foreground': '#eeeeee' }
+            : ['color: navy;', { maxWidth: '100%' }, { '--pui-foreground': '#eeeeee' }]
+        );
+        composition.setThemeSurfaceStyle({ '--pui-foreground': '#111111' });
+        expect(outer.surfaceStyle).toBe(owned);
+        expect(outer.surfaceStyle).toEqual(
+          shape === 'object'
+            ? { color: 'navy', maxWidth: '100%', '--pui-foreground': '#111111' }
+            : ['color: navy;', { maxWidth: '100%' }, { '--pui-foreground': '#111111' }]
+        );
+        expect(inner.surfaceStyle).toBe(authored);
+        expect(inner.surfaceStyle).toEqual({ '--pui-foreground': '#aabbcc' });
+        expect(childDemo.root).toEqual(original);
+      }
+    );
+
+    it('rejects an explicitly empty initial theme rather than treating it as an omitted palette', () => {
+      expect(() =>
+        createProjectionComposition({
+          ownerId: 'empty-theme',
+          runtimeId: 'wc',
+          projectionFamilyId: 'shadcn',
+          generation: 3,
+          componentId: 'button',
+          contentRecipe: buttonFixtureRecipe('shadcn'),
+          childDemo: {
+            type: 'demo',
+            root: { kind: 'proto', prototypeId: 'shadcn-button', ref: 'child' },
+          },
+          controls: controls(),
+          controlIds: [],
+          themeSurfaceStyle: {},
+        })
+      ).toThrow(/projection theme copy must not be empty/);
+    });
+
+    it.each(['object', 'array'] as const)(
       'preserves nested authored theme tokens in %s styles while updating owned copies inside Tabs',
       (shape) => {
         const authored: DemoSurfaceStyle =
@@ -520,24 +615,51 @@ describe('Website projection composition', () => {
           return entry;
         });
 
-        composition.setThemeSurfaceStyle({
-          '--pui-background': '#090909',
-          '--pui-foreground': '#eeeeee',
-        });
+        // Exercise the mounted renderer channel as well as the definition.
+        // A frozen author entry can stay unchanged while setSurfaceStyle still
+        // overwrites its real surface during a theme refresh.
+        const { host, refs } = mountDemoTree(composition.demo);
+        const setSurfaceStyle = vi.fn();
+        const cleanup = composition.demo.setup!({
+          host,
+          refs,
+          api: {
+            call: () => undefined,
+            getExposes: () => undefined,
+            setProps: () => undefined,
+            setSurfaceStyle,
+          },
+        }) as () => void;
 
-        expect(inner.surfaceStyle).toEqual(authored);
-        expect(JSON.stringify(inner.surfaceStyle)).not.toContain('--pui-background');
-        for (const entry of owned) {
-          expect(entry['--pui-background']).toBe('#090909');
-          expect(entry['--pui-foreground']).toBe('#eeeeee');
+        try {
+          composition.setThemeSurfaceStyle({
+            '--pui-background': '#090909',
+            '--pui-foreground': '#eeeeee',
+          });
+
+          expect(setSurfaceStyle.mock.calls.some(([ref]) => ref === 'inner')).toBe(false);
+          expect(setSurfaceStyle).toHaveBeenCalledWith(
+            'outer',
+            shape === 'object'
+              ? expect.objectContaining({ '--pui-foreground': '#eeeeee' })
+              : expect.arrayContaining([expect.objectContaining({ '--pui-foreground': '#eeeeee' })])
+          );
+          expect(inner.surfaceStyle).toEqual(authored);
+          expect(JSON.stringify(inner.surfaceStyle)).not.toContain('--pui-background');
+          for (const entry of owned) {
+            expect(entry['--pui-background']).toBe('#090909');
+            expect(entry['--pui-foreground']).toBe('#eeeeee');
+          }
+          if (Array.isArray(outer.surfaceStyle)) expect(outer.surfaceStyle[0]).toBe('color: navy;');
+          else expect(outer.surfaceStyle).toMatchObject({ color: 'navy' });
+          expect(childDemo.root).toEqual(original);
+        } finally {
+          cleanup();
         }
-        if (Array.isArray(outer.surfaceStyle)) expect(outer.surfaceStyle[0]).toBe('color: navy;');
-        else expect(outer.surfaceStyle).toMatchObject({ color: 'navy' });
-        expect(childDemo.root).toEqual(original);
       }
     );
 
-    it.each(['no initial copy', 'replaced copy'] as const)(
+    it.each(['removed copy', 'replaced copy'] as const)(
       'rejects an update with %s instead of inferring ownership from the tree',
       (condition) => {
         const composition = createProjectionComposition({
@@ -553,9 +675,7 @@ describe('Website projection composition', () => {
           },
           controls: controls(),
           controlIds: [],
-          ...(condition === 'replaced copy'
-            ? { themeSurfaceStyle: { '--pui-foreground': '#111' } }
-            : {}),
+          themeSurfaceStyle: { '--pui-foreground': '#111' },
         });
         const node = findNode(
           composition.demo,
@@ -563,14 +683,14 @@ describe('Website projection composition', () => {
         );
         if (node.kind !== 'proto') throw new Error('Expected the child Proto.');
         const previous = node.surfaceStyle;
-        if (condition === 'replaced copy') node.surfaceStyle = { color: 'red' };
+        node.surfaceStyle = condition === 'replaced copy' ? { color: 'red' } : undefined;
         expect(() => composition.setThemeSurfaceStyle({ '--pui-foreground': '#eeeeee' })).toThrow(
           /missing renderer-owned theme state/
         );
         if (condition === 'replaced copy') {
           expect(node.surfaceStyle).toEqual({ color: 'red' });
-          expect(previous).toMatchObject({ '--pui-foreground': '#111' });
-        }
+        } else expect(node.surfaceStyle).toBeUndefined();
+        expect(previous).toMatchObject({ '--pui-foreground': '#111' });
       }
     );
   });
