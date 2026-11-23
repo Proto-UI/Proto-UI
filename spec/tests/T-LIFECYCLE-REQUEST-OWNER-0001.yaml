@@ -32,6 +32,14 @@ cases:
     covers:
       - C-LIFECYCLE-OWNER-INITIALIZATION-0001-B
     expectation: immutable-data-copy-no-live-capabilities-or-getter-read-with-finite-budgets-and-strict-tags
+  - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-SUSPENDED
+    title: Real Vue 3 and Vue 2 native async children settle after request abort
+    covers:
+      - C-LIFECYCLE-REQUEST-0001-C
+      - C-LIFECYCLE-REQUEST-0001-D
+      - C-LIFECYCLE-REQUEST-0001-E
+      - C-LIFECYCLE-REQUEST-0001-F
+    expectation: abort-retires-before-held-serialization-settles-without-late-owner-revival-or-concurrent-request-interference
   - id: T-LIFECYCLE-REQUEST-OWNER-0001-CASE-IDENTITY
     title: Same-owner rebind and fresh request/browser logical owner are distinct
     covers:
@@ -80,9 +88,11 @@ implementations:
     consumesCases:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-GENERATED
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-DATA
+      - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-SUSPENDED
     notes:
       - Uses actual emitted artifacts with React DOM server, Vue 3 server-renderer, matching Vue 2.6.14 and vue-server-renderer 2.6.14, and the generated WC server port. No authored-source execution or mocked renderer. All four canonical SSR profiles still reject with PUI4001.
       - This is source-shaped server conformance, not Shenko application acceptance, full hydration, assistive technology, streaming SSR or arbitrary State migration.
+      - Held real Vue 3 async setup and Vue 2 serverPrefetch journeys independently complete a concurrent request, abort the held request with false, then resolve or reject its actual serializer. A late native render cannot start a generated logical child. This is a bounded isolation witness, not complete Context/capability closure.
   - id: complete-target-initialization
     kind: runtime-test
     status: missing

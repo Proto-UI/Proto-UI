@@ -52,6 +52,14 @@ The run took 26.23 seconds. Existing intentional Vue setup-failure warnings and 
 
 The lifecycle authoring check against the integration baseline passed for the one changed catalog input, using `node --import tsx` after the CLI's IPC socket was blocked and the worktree's existing spec dependencies were made available. Prettier and `git diff --check` also passed. Neither environment setup attempt is reported as a spec or product failure.
 
+## S5-REQUEST-004: held real serializers, late settlement and concurrent isolation
+
+The request suite now also exercises a real Vue 3 native child with asynchronous setup and a real Vue 2 native child with `serverPrefetch`. Each child holds its actual framework serializer on a controllable Promise. The helper observes the framework's returned Promise without providing synthetic HTML, owner behavior or lifecycle results.
+
+While the first request is suspended with State `7`, a second request using the same emitted module completes independently with State `11` and exactly one serialized owner. The test then aborts the first request with `false`, requires its response to reject and its cleanup to finish before releasing the held serializer, and independently resolves or rejects the pending native work. In the fulfillment case, the resumed native render actually attempts to render a new generated child; the closed request prevents that child's authored lifecycle from starting. Late settlement cannot change the already rejected response, repeat the old cleanup, or modify the completed request's events or accepted carrier.
+
+These four journeys passed on their first execution; they are added acceptance evidence rather than a new production repair. The subsequent complete `request-owner-ssr.test.ts` run passed **87/87** in 12.23 seconds with no skips. Its strict TypeScript program resolved 458 source files with zero diagnostics. The raw output is retained in the integration handoff as `owner-async-final.log`. Expected Vue warnings from late refused/failed setup remain visible. The draft test catalog maps this bounded witness to request abort, late-settlement, first-reason preservation and concurrent isolation. It does not establish every Context/resource capability combination or streaming SSR.
+
 ## Prepared physical browser evidence
 
 `owner-hydration-retirement.browser.test.ts` serves the actual generated SSR HTML, the generated CSS and a bundle containing only the emitted client artifact set. It launches Chromium with `chromiumSandbox: true`. The four scenarios are:
