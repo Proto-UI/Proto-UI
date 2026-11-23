@@ -1,0 +1,70 @@
+id: C-COMPILER-SCALAR-0001
+type: contract
+title: Bounded scalar operations in checked compiler source
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale: >-
+  User-directed native control work requires ordinary scalar conversion, rounding and text length without copying control policy into the compiler. This private admission slice has checked source and generated Rust evidence; full native component execution and independent acceptance remain separate. It does not promote any compiler profile or promise arbitrary JavaScript coercion.
+
+
+summary: Checked scalar operations preserve source-language values and evaluation while keeping capability authority and target admission explicit.
+statement:
+  en: >-
+    The private compiler may admit ordinary Number and String conversion, Math.round, Math.floor and string length through checked expression forms. Recognition follows an unshadowed language binding and an independently validated operand domain, never a component, method, package or source-path identity. The bounded native scalar domain is string, number, Boolean, null or undefined, including checked literal alternatives and unions of those scalars. Source admission, target lowering, generated Rust data execution and mounted native component evidence remain distinct claims.
+
+
+  zh-CN: >-
+    私有编译器可通过经过检查的表达式形式接纳普通 Number 与 String 转换、Math.round、Math.floor 及字符串长度。识别依据是未被遮蔽的语言绑定和独立校验的操作数范围，不得依据组件、方法、包或源码路径身份选择行为。原生有界标量范围为 string、number、Boolean、null 和 undefined，包括经过检查的字面量及这些标量的联合。源码接纳、目标 lowering、生成 Rust 数据制品的执行与已挂载原生组件证据必须分开陈述。
+
+
+criteria:
+  - id: C-COMPILER-SCALAR-0001-BINDING
+    text: >-
+      Number, String and Math operations are recognized only at the resolved unshadowed language binding. Local or imported names remain ordinary bindings. Frontend and independently supplied serialized IR recheck operation identity, arity, operand domain and result type; an assertion, renamed component or retained source text cannot supply missing authority.
+
+
+  - id: C-COMPILER-SCALAR-0001-NUMBER
+    text: >-
+      Number admits zero or one checked scalar operand and returns a number. Zero arguments produce positive zero; explicit undefined produces NaN, null produces positive zero, Booleans produce zero or one, numbers preserve their value, and strings use ECMAScript numeric-string semantics including whitespace, radix prefixes, signed zero and invalid-input NaN. Unknown, structured, callable and owner-capability operands, optional calls, constructor forms and extra operands are outside this bounded admission and require an explicit diagnostic.
+
+
+  - id: C-COMPILER-SCALAR-0001-STRING
+    text: >-
+      GPUI and the pure Rust data artifact admit String with zero or one checked scalar operand. Zero arguments produce the empty string; explicit undefined, null and Booleans retain their distinct source-language spellings, and number text preserves ECMAScript formatting including zero, negative zero, finite precision and non-finite values. Structured and opaque unknown operands remain unsupported on these native paths. Existing broader JavaScript-host String admission is separate and must not be silently narrowed or treated as evidence for native object coercion.
+
+
+  - id: C-COMPILER-SCALAR-0001-ROUNDING
+    text: >-
+      Math.round and Math.floor each require exactly one checked number. Math.round chooses the nearest integer with halfway values toward positive infinity, preserves negative zero for values from negative one half through negative zero, and preserves zero, non-finite values and already integral precision-limit values. Math.floor chooses the greatest integer no larger than the input and retains source-language signed-zero and non-finite behavior. Native lowering must not substitute Rust's different negative-tie rounding or lose precision by unconditionally adding one half.
+
+
+  - id: C-COMPILER-SCALAR-0001-UTF16
+    text: >-
+      The length property of a checked string or string literal counts UTF-16 code units. Astral characters therefore contribute two units; combining characters are not collapsed into graphemes. This rule grants no general member access on numbers or Booleans, no dynamic indexing authority, and no missing length field on an ordinary record.
+
+
+  - id: C-COMPILER-SCALAR-0001-EVALUATION
+    text: >-
+      Each admitted receiver and operand is evaluated once in source order. Conversion does not execute authored source during compilation, grant field or capability access, or change owner, State, event or lifecycle authority. Any existing finite public-data boundary remains in force: an internally produced NaN or infinity does not become an accepted finite public Rust input or result merely because the scalar expression is supported.
+
+
+  - id: C-COMPILER-SCALAR-0001-TARGET-EVIDENCE
+    text: >-
+      Target support is explicit and fails closed where lowering is unavailable. Generated native language helpers follow actual reached expressions and retain declared language-support dependencies. Browser source admission, headless Rust execution, GPUI component execution and OS interaction are reported independently; one does not certify the others or a stable release.
+
+
+references:
+  contracts: [C-COMPILER-RUST-DATA-0001, C-COMPILER-OBSERVABLES-0001]
+sources:
+  - path: internal/compiler/source-language.md
+  - path: internal/compiler/atomic-lowering-completion.md
+  - path: internal/records/2026-11-22-compiler-control-consumer-boundaries.md
+openQuestions:
+  - id: C-COMPILER-SCALAR-0001-Q-NATIVE-ACCEPTANCE
+    question: Stable admission requires reviewed source-bound GPUI component executions of scalar boundaries as well as the recorded source and pure Rust tests; the current combined native consumer build is not yet acceptance evidence.
+    blocks: [activation:C-COMPILER-SCALAR-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define ordinary bounded scalar conversion, rounding and UTF-16 length independently of application control policy.
+tags: [compiler, scalar, rust, gpui, data, conformance]

@@ -1,0 +1,590 @@
+{
+  "schemaVersion": 1,
+  "reason": "Lossless storage preserves exact raw receipts and reviewed historical source while retaining the ordinary repository formatting hook. Use gzip decompression at the listed original path when following a raw receipt.",
+  "files": [
+    {
+      "originalPath": "attempt01/after-install.result.json",
+      "originalSha256": "801e7895d924b8840a180a8ca01b8d92665784b8ad65b517d65f4667949847e1",
+      "originalBytes": 1161,
+      "retainedPath": "attempt01/after-install.result.json.gz",
+      "retainedSha256": "0a0231331d4f6e42b196e1171ef1c4b22ea007e06b48ded6b4d3b5c2b95ed772",
+      "retainedBytes": 481
+    },
+    {
+      "originalPath": "attempt01/before-observation.result.json",
+      "originalSha256": "7aeb8158f66a1bc41820c075c4daca71c43a85cd24d1827f16070c5d0d84e38c",
+      "originalBytes": 1171,
+      "retainedPath": "attempt01/before-observation.result.json.gz",
+      "retainedSha256": "07415a85658a9d17184f0096587697448e2977bfc4d687bd8cf8258ad5fb22bf",
+      "retainedBytes": 483
+    },
+    {
+      "originalPath": "attempt01/browser/result.json",
+      "originalSha256": "82ec4494011c763108ce8c2971a5abff97421c5349159fa9f6e651f8d0b8cdb2",
+      "originalBytes": 4332,
+      "retainedPath": "attempt01/browser/result.json.gz",
+      "retainedSha256": "1bbc0d233ac772d1e21bc577d1f675209848920ee6a61581b9847d7b3f1bc30c",
+      "retainedBytes": 1079
+    },
+    {
+      "originalPath": "attempt01/environment.json",
+      "originalSha256": "192a4722c933702cc10db4f8fd779654a98c08bf5ed0164038e9c1dbf15ac752",
+      "originalBytes": 787,
+      "retainedPath": "attempt01/environment.json.gz",
+      "retainedSha256": "f28c6545d17abddc2630740d1be7400d3983bfa740aa442f242aa0d518979469",
+      "retainedBytes": 498
+    },
+    {
+      "originalPath": "attempt01/independent-dependencies.result.json",
+      "originalSha256": "178ff3b48ccec08382e5b8ca92efc79a290adaae94c07ac3fc62cbf8c038358a",
+      "originalBytes": 1339,
+      "retainedPath": "attempt01/independent-dependencies.result.json.gz",
+      "retainedSha256": "1d04e3b04af3dc9eeb4d0defb836255c334bd84e3131df5ade1870e1315b7332",
+      "retainedBytes": 723
+    },
+    {
+      "originalPath": "attempt01/npm-ci.result.json",
+      "originalSha256": "8e00c5be953b2ef6037872479575de2718fa58f973b04b744ce6e4c6fb7df28d",
+      "originalBytes": 838,
+      "retainedPath": "attempt01/npm-ci.result.json.gz",
+      "retainedSha256": "87d14ffd61c2a219bc315423f824a80a461e03141c16c9dc6c233504048d2898",
+      "retainedBytes": 451
+    },
+    {
+      "originalPath": "attempt01/observe.failure.json",
+      "originalSha256": "13c97edc740bad06b5e260b2fe8228f99e3423b208cd8e61a09e66bf1369baa9",
+      "originalBytes": 1839,
+      "retainedPath": "attempt01/observe.failure.json.gz",
+      "retainedSha256": "b1ce043ed67d0db692960c77caba20902ec11a17322d5697c6f3ed35a5ffdd6d",
+      "retainedBytes": 760
+    },
+    {
+      "originalPath": "attempt01/observer.result.json",
+      "originalSha256": "013a0b30b3e4d092097fb796a1bb6d62aafbde9793d98ec3424e3d6f67dc1b2a",
+      "originalBytes": 966,
+      "retainedPath": "attempt01/observer.result.json.gz",
+      "retainedSha256": "437ae9104ecbe10216ffd69f64f375649627b92231f0ae317d6457f07ad238e7",
+      "retainedBytes": 500
+    },
+    {
+      "originalPath": "attempt01/prepare.completed.json",
+      "originalSha256": "eeed1e0d7234da9dbd21e253f0bb7e087078c5d405abb587dac38b8d1fc66410",
+      "originalBytes": 108,
+      "retainedPath": "attempt01/prepare.completed.json.gz",
+      "retainedSha256": "d6434d8758e116668206eb33825ebd0a689c4f4cc32475b00a1d96c4943e0096",
+      "retainedBytes": 118
+    },
+    {
+      "originalPath": "attempt01/preview-process.json",
+      "originalSha256": "bd0f1c1f1853f6b459b2020896c74d94dc7034e3cdb5b7b2590bc81d1fe2b91c",
+      "originalBytes": 366,
+      "retainedPath": "attempt01/preview-process.json.gz",
+      "retainedSha256": "f2e7395db4ccb6a0cce6730331182671b1fe23f7798ffdab97966d048f68f86b",
+      "retainedBytes": 255
+    },
+    {
+      "originalPath": "attempt01/preview-stopped.json",
+      "originalSha256": "d01a6a289be227ff68439849150dedc31bb0a1a9e04749edf72e0e366cdc99d6",
+      "originalBytes": 122,
+      "retainedPath": "attempt01/preview-stopped.json.gz",
+      "retainedSha256": "b716326e691d6e0be2f21fed97bdee33cb21405603cbff8cc851f73d002652c9",
+      "retainedBytes": 128
+    },
+    {
+      "originalPath": "attempt01/restore.result.json",
+      "originalSha256": "71612f5dd45b8ff2e46c874edf7ab7de1c6960a885bcd85c66e678b2dd2a1b2d",
+      "originalBytes": 1277,
+      "retainedPath": "attempt01/restore.result.json.gz",
+      "retainedSha256": "8ecd0407cf9ace4af867961833bdddbe41ced3ca2d370a5a1223c8d16526cd38",
+      "retainedBytes": 502
+    },
+    {
+      "originalPath": "attempt01/status.json",
+      "originalSha256": "4d7c2335cee27f34a32d1c53cc5abf4286bd976483f873af9fb8f54e2258d82e",
+      "originalBytes": 1962,
+      "retainedPath": "attempt01/status.json.gz",
+      "retainedSha256": "6f99b8053029b7e35050af267d1a7b7a9a9dd5a15044b1b3ddaa4e052be6a865",
+      "retainedBytes": 832
+    },
+    {
+      "originalPath": "attempt01/version-chrome.result.json",
+      "originalSha256": "1bac1845067d9a526f319b256e70b4c9a3032d3e75355c2b0a1ae9604a41fcf1",
+      "originalBytes": 778,
+      "retainedPath": "attempt01/version-chrome.result.json.gz",
+      "retainedSha256": "b0f2ecbcb2d047b51e6e3c2cd8d16852090aacbd6474b26564521a4b13e31441",
+      "retainedBytes": 430
+    },
+    {
+      "originalPath": "attempt01/version-node.result.json",
+      "originalSha256": "fefbc2c6c439aa50415bbe2832f5a6273b10ea0898b7f5fdf4cb89410a1fa4c3",
+      "originalBytes": 753,
+      "retainedPath": "attempt01/version-node.result.json.gz",
+      "retainedSha256": "ef2d6e1230202dc35b6e27dc83dfcdec6c51a49f996239aa53a95429add6b125",
+      "retainedBytes": 417
+    },
+    {
+      "originalPath": "attempt01/version-npm.result.json",
+      "originalSha256": "c33a426b19d0ed2c4f41fc894458650c84c5af5ec67d2879cd0a6f30f6bb881e",
+      "originalBytes": 645,
+      "retainedPath": "attempt01/version-npm.result.json.gz",
+      "retainedSha256": "87b91596e7580365a3e4e9c2fb4c0070e86a641cc6aec34b1f2bc50f3e05f740",
+      "retainedBytes": 393
+    },
+    {
+      "originalPath": "attempt01/version-os.result.json",
+      "originalSha256": "14ef664a0ab1a15b4901a3378e467c799e260b59c3f81facb775683fda4b6f84",
+      "originalBytes": 641,
+      "retainedPath": "attempt01/version-os.result.json.gz",
+      "retainedSha256": "d0cc00353a97d1275ebb7e627cc4b76772c7ba397167da420459d2d65f430a77",
+      "retainedBytes": 389
+    },
+    {
+      "originalPath": "attempt01/version-registry.result.json",
+      "originalSha256": "07d3f709f36f247ec3b0416bbb6212a303e462a9b8680e1fdd49192b224bcac5",
+      "originalBytes": 680,
+      "retainedPath": "attempt01/version-registry.result.json.gz",
+      "retainedSha256": "5952fbfd156140cdffadb4c280ceb9c7229fdb36f51e0340efa4d70dc5ebd2f8",
+      "retainedBytes": 404
+    },
+    {
+      "originalPath": "attempt02/after-install.result.json",
+      "originalSha256": "b00455f8a6d14d937028a2f374ac30a81e86255bb49a7b778d9bbf61904d264c",
+      "originalBytes": 1162,
+      "retainedPath": "attempt02/after-install.result.json.gz",
+      "retainedSha256": "582da43f8fe043a0c32a310aa183a4ffef45475b8c5c66e7dcb191b212f25b83",
+      "retainedBytes": 481
+    },
+    {
+      "originalPath": "attempt02/after-observation.result.json",
+      "originalSha256": "821f3771fcb47dd47537cc37620f82ac33733f784272732f215f6c444f202865",
+      "originalBytes": 1193,
+      "retainedPath": "attempt02/after-observation.result.json.gz",
+      "retainedSha256": "9a86b4e6aae529cbbe98ed65839339703d2bccca7118f6fd7d64a5531e6d6cd5",
+      "retainedBytes": 493
+    },
+    {
+      "originalPath": "attempt02/before-observation.result.json",
+      "originalSha256": "d3ee10b56c7c7a87d325e47ba53a313ab3713f835a37f3dd549f159f5f60c3d4",
+      "originalBytes": 1172,
+      "retainedPath": "attempt02/before-observation.result.json.gz",
+      "retainedSha256": "8fdd223f955f96964f3a331ce4887a7dc9474cc03181a9465ecad5580dd7fe09",
+      "retainedBytes": 482
+    },
+    {
+      "originalPath": "attempt02/browser/result.json",
+      "originalSha256": "5bf0b0c64686618f316fb6338832bb50170f5c1decd5855501950c32e9826a30",
+      "originalBytes": 7811,
+      "retainedPath": "attempt02/browser/result.json.gz",
+      "retainedSha256": "601862d490620e57e5e4077677b76941a5298c9c5855787db333012bcceefc06",
+      "retainedBytes": 1202
+    },
+    {
+      "originalPath": "attempt02/browser-inventory.json",
+      "originalSha256": "60f81bf7215b2c737685e8b1001c5eb990a2d8c28f88c0be16836acc00e926ad",
+      "originalBytes": 2094,
+      "retainedPath": "attempt02/browser-inventory.json.gz",
+      "retainedSha256": "34bbe9b6217eac0121ef4917b50a2326971ab9f25fbb6ec781cf4c50648cc2ac",
+      "retainedBytes": 758
+    },
+    {
+      "originalPath": "attempt02/environment.json",
+      "originalSha256": "192a4722c933702cc10db4f8fd779654a98c08bf5ed0164038e9c1dbf15ac752",
+      "originalBytes": 787,
+      "retainedPath": "attempt02/environment.json.gz",
+      "retainedSha256": "f28c6545d17abddc2630740d1be7400d3983bfa740aa442f242aa0d518979469",
+      "retainedBytes": 498
+    },
+    {
+      "originalPath": "attempt02/independent-dependencies.result.json",
+      "originalSha256": "b8cbcda087c97cff93d1cee823e6dd2a3b1835759696de94be58ca38f0aa0199",
+      "originalBytes": 1339,
+      "retainedPath": "attempt02/independent-dependencies.result.json.gz",
+      "retainedSha256": "2f40a02222da127b4251f0b955b9104553a9059ad83131180ed48af1beb15981",
+      "retainedBytes": 724
+    },
+    {
+      "originalPath": "attempt02/npm-ci.result.json",
+      "originalSha256": "1ad1adedaf29311587d38529f6ab2d540190fc548059866dd0988d6b11fabb59",
+      "originalBytes": 839,
+      "retainedPath": "attempt02/npm-ci.result.json.gz",
+      "retainedSha256": "79dd143b4e8b0c2100121b7644e7bc8202ec2a551e59e09da7ad8363888bc21e",
+      "retainedBytes": 453
+    },
+    {
+      "originalPath": "attempt02/observer-source-after-run.json",
+      "originalSha256": "e5dec7a19ad6fd8ea9f5f98b5e61b2a8a77a2e25ded3cbf7c4bf9b87c0e2e70a",
+      "originalBytes": 1487,
+      "retainedPath": "attempt02/observer-source-after-run.json.gz",
+      "retainedSha256": "fd63e504f30fd0eb8d178bfa96cdd8b2f95def1a0b599efa6a22d141f21753e6",
+      "retainedBytes": 719
+    },
+    {
+      "originalPath": "attempt02/observer-source-before-prepare.json",
+      "originalSha256": "a3cbabe5d991a464f50736ae1f951477e67ef1b17523ab31148ed9ffcfa8f2c2",
+      "originalBytes": 1487,
+      "retainedPath": "attempt02/observer-source-before-prepare.json.gz",
+      "retainedSha256": "576dd23a0a045f3c5cb826f7fd29f8a9d7876d65b28f4714b552d7c71fd06356",
+      "retainedBytes": 719
+    },
+    {
+      "originalPath": "attempt02/observer-source-before-run.json",
+      "originalSha256": "a5174e94d0a607086c2e13d03c69adc49c1278921c06cee7d9aae8e2541b037d",
+      "originalBytes": 1487,
+      "retainedPath": "attempt02/observer-source-before-run.json.gz",
+      "retainedSha256": "0bb97f8819719c32c6d8c1ebf85f4c23cbbfdba738ad8a8d20f3e401635a9da3",
+      "retainedBytes": 719
+    },
+    {
+      "originalPath": "attempt02/observer.result.json",
+      "originalSha256": "7ba1d92b8e84e3fd4662afb60e5e3369b2357f48b7572ca005df16ab5aef736a",
+      "originalBytes": 986,
+      "retainedPath": "attempt02/observer.result.json.gz",
+      "retainedSha256": "0dbd54c81e14e26bd0c4b3b6168bac48a72a7396c4cf38ce0676e21417c59c1f",
+      "retainedBytes": 472
+    },
+    {
+      "originalPath": "attempt02/prepare.completed.json",
+      "originalSha256": "275af62224be0ff9517a0c0aa907f5c544334a99168b8ae108eecb2715e0ef75",
+      "originalBytes": 108,
+      "retainedPath": "attempt02/prepare.completed.json.gz",
+      "retainedSha256": "e305db9bb81efb61d79a51d63183dd6f36c4eaafd01de6467cf3f4eba98a77a7",
+      "retainedBytes": 118
+    },
+    {
+      "originalPath": "attempt02/preview-process.json",
+      "originalSha256": "d6e7d75ace5319ebef57a6bc8baa3f984c234ae8e0c259108427e4087f622dfe",
+      "originalBytes": 366,
+      "retainedPath": "attempt02/preview-process.json.gz",
+      "retainedSha256": "1fd63dd1a57773e72d976fd43b73cdcbea7a751781cf967d0b9d121441b6631f",
+      "retainedBytes": 255
+    },
+    {
+      "originalPath": "attempt02/preview-stopped.json",
+      "originalSha256": "0ea9da5691f4f484b5ab77709c48b311e7eccb0ddc4cd90475870bcb776d31eb",
+      "originalBytes": 122,
+      "retainedPath": "attempt02/preview-stopped.json.gz",
+      "retainedSha256": "465bf9361299a4b9e1c651932d17e3edd702d456a785023da98d2075d1d2a5a2",
+      "retainedBytes": 128
+    },
+    {
+      "originalPath": "attempt02/restore.result.json",
+      "originalSha256": "67b8531135b164a3a401326c6897635dd554b25bc7e1edc46dde8ed5d99d9fd6",
+      "originalBytes": 1279,
+      "retainedPath": "attempt02/restore.result.json.gz",
+      "retainedSha256": "851b0c257b04846ff2f3387da3cd7d8dea57edcae0cdde5fb4ad9c402135bd26",
+      "retainedBytes": 500
+    },
+    {
+      "originalPath": "attempt02/status.json",
+      "originalSha256": "648db0b43407e40d648f3342cbab06da49a21e321c500a329c19701ad1e118fe",
+      "originalBytes": 281,
+      "retainedPath": "attempt02/status.json.gz",
+      "retainedSha256": "270c9931fd3c58407c714b7b82029adbcc9a34ea1f4e578d57957eb45ad51a49",
+      "retainedBytes": 230
+    },
+    {
+      "originalPath": "attempt02/version-chrome.result.json",
+      "originalSha256": "6f35fa086b18e5ff854991e1fe94abaf56b6f4c4f92916cac47b531660cc1478",
+      "originalBytes": 779,
+      "retainedPath": "attempt02/version-chrome.result.json.gz",
+      "retainedSha256": "ac823a25786b828c43780c1ddfaa2e05004edff522ca5a56595f6b8c0cfcc6c8",
+      "retainedBytes": 428
+    },
+    {
+      "originalPath": "attempt02/version-node.result.json",
+      "originalSha256": "b513179c8808d79cc68453af0221cd39bd9bb283b6dc214a8806b471abfd5f08",
+      "originalBytes": 753,
+      "retainedPath": "attempt02/version-node.result.json.gz",
+      "retainedSha256": "8ffec4e75d5c087386b57e4a4f1dd82e7954a9d2c53891485ccc4c870595f520",
+      "retainedBytes": 418
+    },
+    {
+      "originalPath": "attempt02/version-npm.result.json",
+      "originalSha256": "9a9a5f8f714de495c205f83ca4d4b922296eb661f589b630a5658f76f37e4916",
+      "originalBytes": 646,
+      "retainedPath": "attempt02/version-npm.result.json.gz",
+      "retainedSha256": "f66e6aff5834fa9a9c46b55d78a98d208d12a524bdfc83b9acdae1f18e838ef1",
+      "retainedBytes": 392
+    },
+    {
+      "originalPath": "attempt02/version-os.result.json",
+      "originalSha256": "da30ed55b7325fe4d7f681ccaa99d8db8bf5e6e33ca0d1a87c95c73c31449632",
+      "originalBytes": 641,
+      "retainedPath": "attempt02/version-os.result.json.gz",
+      "retainedSha256": "b4ec2fbc3765d42ded570936488a445eca636177369626218ada42ccca952106",
+      "retainedBytes": 391
+    },
+    {
+      "originalPath": "attempt02/version-registry.result.json",
+      "originalSha256": "b62c730fa386aeb7e8ae0349cc37e492b24d43dab46d297a31bd4b2de4e9d053",
+      "originalBytes": 678,
+      "retainedPath": "attempt02/version-registry.result.json.gz",
+      "retainedSha256": "44f6305255ae64f89248e3de348a1cd190e37c9ad81677a61044fa2148bc1e7f",
+      "retainedBytes": 403
+    },
+    {
+      "originalPath": "formatting/after/scripts/analysis/invisible-consumption/asset-binding.mjs",
+      "originalSha256": "3c8e5c12757b9789324fe6c57c05711679c1e63e04adedbd17a2e85de077ef18",
+      "originalBytes": 1961,
+      "retainedPath": "formatting/after/scripts/analysis/invisible-consumption/asset-binding.mjs.gz",
+      "retainedSha256": "e883a16df7dbdcbc01fbf3b20b5deaf278297acfc9466e055ffadc92f0101a1d",
+      "retainedBytes": 739
+    },
+    {
+      "originalPath": "formatting/after/scripts/analysis/invisible-consumption/observe-button.mjs",
+      "originalSha256": "b8c65aca7a4d907b2add38d80b0202a8e45bff68235dbe03054784b2b94d70d7",
+      "originalBytes": 9798,
+      "retainedPath": "formatting/after/scripts/analysis/invisible-consumption/observe-button.mjs.gz",
+      "retainedSha256": "2a43ceed94e24271d59cb9ca52743b66faea7ff7ea30167268469e97fba39a04",
+      "retainedBytes": 3475
+    },
+    {
+      "originalPath": "formatting/after/scripts/analysis/invisible-consumption/test/asset-binding.test.mjs",
+      "originalSha256": "59d87a49be675075cb384cc6347e1e535e5c45749b982e30a98951fdb987a9fe",
+      "originalBytes": 3198,
+      "retainedPath": "formatting/after/scripts/analysis/invisible-consumption/test/asset-binding.test.mjs.gz",
+      "retainedSha256": "6cd46ef692f863f7267ecfef38500a5d05d2830d63b36ef10b307a9691f8847f",
+      "retainedBytes": 1063
+    },
+    {
+      "originalPath": "formatting/ast-after.json",
+      "originalSha256": "d3701fc3bbf4822bfeb556b0414001ee30ad615cd55dba080b410ceedb7aee39",
+      "originalBytes": 617,
+      "retainedPath": "formatting/ast-after.json.gz",
+      "retainedSha256": "0e40009042e75ba582cfef16adf2795494e687cf03acc863b095067a2768b314",
+      "retainedBytes": 309
+    },
+    {
+      "originalPath": "formatting/ast-before.json",
+      "originalSha256": "7355fc30aeb00184a87a55aa0aaea764f96e6067a8234c8082c354ec9d4126ad",
+      "originalBytes": 617,
+      "retainedPath": "formatting/ast-before.json.gz",
+      "retainedSha256": "bc77884d020ee270b69568cd1f774e9239855201caecbcf3af0145721e915836",
+      "retainedBytes": 309
+    },
+    {
+      "originalPath": "formatting/before/scripts/analysis/invisible-consumption/asset-binding.mjs",
+      "originalSha256": "b4066247fd2d91722968e2489e6d1fe0696af243c2c52fc11009c9d8f735d5e9",
+      "originalBytes": 1827,
+      "retainedPath": "formatting/before/scripts/analysis/invisible-consumption/asset-binding.mjs.gz",
+      "retainedSha256": "3911b20237d719008281195716147f714eb21b3c71c8eda1a9940f91df6bb0d0",
+      "retainedBytes": 704
+    },
+    {
+      "originalPath": "formatting/before/scripts/analysis/invisible-consumption/observe-button.mjs",
+      "originalSha256": "bd6c870031558123b149748d7a6050cc95ef556eb6e9a91eb5af1a4eafe1bc62",
+      "originalBytes": 8970,
+      "retainedPath": "formatting/before/scripts/analysis/invisible-consumption/observe-button.mjs.gz",
+      "retainedSha256": "e9847ab57fbb7ea8c2181189f7dda78e9571cbeb6fa4f9eff4e7cfc48662e873",
+      "retainedBytes": 3331
+    },
+    {
+      "originalPath": "formatting/before/scripts/analysis/invisible-consumption/test/asset-binding.test.mjs",
+      "originalSha256": "daf6ac39f8f8755fdbc1488556500bad578a99f612911c4edb0385a1b74113b2",
+      "originalBytes": 3058,
+      "retainedPath": "formatting/before/scripts/analysis/invisible-consumption/test/asset-binding.test.mjs.gz",
+      "retainedSha256": "d559aceaf10c1b2a71e5437da737a28dae592fbb0c931e9b2dabefa903c128a3",
+      "retainedBytes": 1020
+    },
+    {
+      "originalPath": "formatting/cache-tests.json",
+      "originalSha256": "e593b625929d5995bb0d6ecde5a5609801a01648181b02416a122a8498bec71c",
+      "originalBytes": 362,
+      "retainedPath": "formatting/cache-tests.json.gz",
+      "retainedSha256": "1255d0372254eb85dccc3f85b3f5c84df6e11cf10e97568d5334b19e901ca7f7",
+      "retainedBytes": 260
+    },
+    {
+      "originalPath": "formatting/format.json",
+      "originalSha256": "22420a1dbd63414719387c1f5553298e48de072b39fe88f8057db74e275c173d",
+      "originalBytes": 544,
+      "retainedPath": "formatting/format.json.gz",
+      "retainedSha256": "1c8a5b9301d2abf2d95f7a254d73e9cb9bfedc6b01659e6d4b8b924a51157abf",
+      "retainedBytes": 302
+    },
+    {
+      "originalPath": "formatting/formatting-only.json",
+      "originalSha256": "8b17941a0b599fd6df7c30e5ebed7f45f7af00680a5837de013b7de06bb70bb4",
+      "originalBytes": 3334,
+      "retainedPath": "formatting/formatting-only.json.gz",
+      "retainedSha256": "6565fbcca070187e3886edaccebb40c335641f842fd2175c8de84387d352ea67",
+      "retainedBytes": 1019
+    },
+    {
+      "originalPath": "formatting/formatting.patch",
+      "originalSha256": "2a542fd967dfb024a8b4e1d997a10ba300ca1d5ec76d0df478cc48ffb56c8c6e",
+      "originalBytes": 25467,
+      "retainedPath": "formatting/formatting.patch.gz",
+      "retainedSha256": "2f8a643787014a81e206ab6063921de6995ac8e9e3a8b21937344256eac9ed90",
+      "retainedBytes": 5791
+    },
+    {
+      "originalPath": "independent-observer-review/source-review.json",
+      "originalSha256": "3c84359cb901c1b0d02981606b47cc4fa82772ef2453840f046143871b908426",
+      "originalBytes": 3077,
+      "retainedPath": "independent-observer-review/source-review.json.gz",
+      "retainedSha256": "5854a2109cd80ab2530292360d5acdf17913c8360f7a9a36f10bdacf75711a1f",
+      "retainedBytes": 1524
+    },
+    {
+      "originalPath": "independent-space-authority-review.json",
+      "originalSha256": "7ecafd1ba24924725dc78845e417021a07f78f627d37f98872835e95bef2a0b6",
+      "originalBytes": 3690,
+      "retainedPath": "independent-space-authority-review.json.gz",
+      "retainedSha256": "fe4776506f5ab5e8f41d83437965f18fc35d2c9f82a0be3a7df551fe19a1b08f",
+      "retainedBytes": 1766
+    },
+    {
+      "originalPath": "inventory.before-publication-validation.json",
+      "originalSha256": "9a9bda69f7a3856a12ea9607cc256ad0107946ac8690f121293268502d379b16",
+      "originalBytes": 24047,
+      "retainedPath": "inventory.before-publication-validation.json.gz",
+      "retainedSha256": "f3523a9ef2678a2f570aacdddc160fef251d1eac0dfbccfe08591d35d75b7304",
+      "retainedBytes": 5135
+    },
+    {
+      "originalPath": "observer-candidate.json",
+      "originalSha256": "9595fd50d3976550bd617c6a9ada36a0bd27fd3fdd9c113079534ad7936d18ec",
+      "originalBytes": 1387,
+      "retainedPath": "observer-candidate.json.gz",
+      "retainedSha256": "2977cd3bdb077fcaf73dc75df9c3e77be8cd45d0f1e6bc39410ae9c53ded9a71",
+      "retainedBytes": 686
+    },
+    {
+      "originalPath": "observer-preparation/apply-check.json",
+      "originalSha256": "e6b32b81c31c1ad1cdbfaf8a74c164d1642d62c874fcbfa79e0692f11f3b6b09",
+      "originalBytes": 668,
+      "retainedPath": "observer-preparation/apply-check.json.gz",
+      "retainedSha256": "ecf3f98894be0b2f9c074c125fe7d9719d0c758f4fa6ef5e0304fb114c50e19a",
+      "retainedBytes": 345
+    },
+    {
+      "originalPath": "observer-preparation/apply.json",
+      "originalSha256": "c409d4917170e3fbebe52076e4650e971e385ac64d4898d52b09aa4109f198d2",
+      "originalBytes": 653,
+      "retainedPath": "observer-preparation/apply.json.gz",
+      "retainedSha256": "5d5d7be7812c7b260bae7253c1c1e28ac4bfdf404c8060609324bf9bf4f884e2",
+      "retainedBytes": 338
+    },
+    {
+      "originalPath": "observer-preparation/cache-regressions.json",
+      "originalSha256": "00972a78e7672a84c57a83006a1629fc9454d083702bee6bc8c271e0de4a7fc7",
+      "originalBytes": 590,
+      "retainedPath": "observer-preparation/cache-regressions.json.gz",
+      "retainedSha256": "10518e03fd53c99c872cf3481de6e9836eeedca72d5d3465ecc702b6bce68ce4",
+      "retainedBytes": 398
+    },
+    {
+      "originalPath": "observer-preparation/diff-check.json",
+      "originalSha256": "b8039b066ff1a18f142760a07ff912c1ab9279d098e9ae84f42c40a0cf5e90a5",
+      "originalBytes": 528,
+      "retainedPath": "observer-preparation/diff-check.json.gz",
+      "retainedSha256": "5ea85db28f40cf7448db26f5de185fa8f59b5a43a79c9808be42ccf06afadbf2",
+      "retainedBytes": 315
+    },
+    {
+      "originalPath": "observer-preparation/frozen-install.json",
+      "originalSha256": "f7f7605bbed5eaa4f0d5fed5936777aad15dfe1229cb25dcc7fb2af63a65045c",
+      "originalBytes": 671,
+      "retainedPath": "observer-preparation/frozen-install.json.gz",
+      "retainedSha256": "1496add4ef12cfc7b94f49028165b37ebbf79ebfe581795480b084a02d880eb6",
+      "retainedBytes": 398
+    },
+    {
+      "originalPath": "observer-preparation/ready.json",
+      "originalSha256": "478ecd543097226ebb458ecdb73f46af21ec580c440a243a2459964d30f295bb",
+      "originalBytes": 1388,
+      "retainedPath": "observer-preparation/ready.json.gz",
+      "retainedSha256": "2f2004df4e2a2ac720ce168c885d890e55fa741af8e5677a35ea6fab03a74597",
+      "retainedBytes": 689
+    },
+    {
+      "originalPath": "observer-preparation/source-status.json",
+      "originalSha256": "78d1a4ef39a500d033e472aef6b7f0cf5a2406abe82fc0ef0c03ddff858a31d8",
+      "originalBytes": 530,
+      "retainedPath": "observer-preparation/source-status.json.gz",
+      "retainedSha256": "38038747300202a666926e4811378d422d710d3e4dca16fea3a9d2c758da73b4",
+      "retainedBytes": 354
+    },
+    {
+      "originalPath": "observer-preparation/status.json",
+      "originalSha256": "d06ba0a67c1c73e10bab35cb5a89c0244fcc733027d15322616936fed3341cd1",
+      "originalBytes": 67,
+      "retainedPath": "observer-preparation/status.json.gz",
+      "retainedSha256": "5d1356d3f9bdfa6dc2d1740db98e32685376e1288767844b3db208d52293874e",
+      "retainedBytes": 85
+    },
+    {
+      "originalPath": "observer-preparation/syntax.json",
+      "originalSha256": "fbc2791120de46714767e88101556217c3e32cf861138d0e8e703c1ab1814940",
+      "originalBytes": 583,
+      "retainedPath": "observer-preparation/syntax.json.gz",
+      "retainedSha256": "4f13d33e021c4bbf92041de7dc6e6baad038d8c326386b54ee284f2cb36dec81",
+      "retainedBytes": 349
+    },
+    {
+      "originalPath": "observer-preparation/worktree.json",
+      "originalSha256": "9b406f7c7c262cc2120f0ddba16b37eb6858e6c9bfe18c7e7e7e7dd079471964",
+      "originalBytes": 690,
+      "retainedPath": "observer-preparation/worktree.json.gz",
+      "retainedSha256": "4062f31787351f589e136697e98fc20be9a9dcc5492e917394f4de69fba1853c",
+      "retainedBytes": 410
+    },
+    {
+      "originalPath": "publication-validation/proto-public-docs.json",
+      "originalSha256": "ea089e453f72b943b87b429bd78a12c0f6223348f374e46c66483ecc90811e14",
+      "originalBytes": 396,
+      "retainedPath": "publication-validation/proto-public-docs.json.gz",
+      "retainedSha256": "92517a849abd6794c01926a489369693ae9ee350667250d8fe3a7eff17caf165",
+      "retainedBytes": 273
+    },
+    {
+      "originalPath": "raw-evidence-compression.json",
+      "originalSha256": "090f2710bcad927bb9af564dde54c29dcc5c9df6ff31c52cd9ceb2282682d33c",
+      "originalBytes": 1102,
+      "retainedPath": "raw-evidence-compression.json.gz",
+      "retainedSha256": "dde2010260c62169db5c1a5c1ff3f238d8d025ad032c1ad164db1473545b3aa3",
+      "retainedBytes": 416
+    },
+    {
+      "originalPath": "transfer/transfer-manifest.json",
+      "originalSha256": "0823fae15fe2bffb176dfeb1fd13a1b3d81f123a8136a63925565590f55d9607",
+      "originalBytes": 46488,
+      "retainedPath": "transfer/transfer-manifest.json.gz",
+      "retainedSha256": "4df36ee0e98fef0e3e1252cbf3d5487c70829d7ee4d8c78ef98e215466d7c6a4",
+      "retainedBytes": 12733
+    },
+    {
+      "originalPath": "transfer/transfer-result.json",
+      "originalSha256": "c1e33c14127eb47a89e9944a708a19c1459443d64bf490c93b60e08603b92eb2",
+      "originalBytes": 192,
+      "retainedPath": "transfer/transfer-result.json.gz",
+      "retainedSha256": "0d18a323e665c28e46e367afb2aad54e7d3c7a37202994ea5902bd1ae6b5c30e",
+      "retainedBytes": 168
+    },
+    {
+      "originalPath": "visual-review.json",
+      "originalSha256": "a2688dde2f8f99e8c752c918b3a717151a8f032f5166d294ada56b011341a53e",
+      "originalBytes": 4034,
+      "retainedPath": "visual-review.json.gz",
+      "retainedSha256": "73621dd7c620a26832e2b7a6cd0e38724d878bc219722012fa88bed2e7bac6ae",
+      "retainedBytes": 1592
+    },
+    {
+      "originalPath": "formatting-independent-review.json",
+      "originalSha256": "65c93d9dc6d446216295d66f28a7cd8ebac4cddbd2823b621b9b21b9f85514da",
+      "originalBytes": 4976,
+      "retainedPath": "formatting-independent-review.json.gz",
+      "retainedSha256": "16182d3c51bc88fbd855c68200ca4b85349170bc54099b8cf35375261d0443b3",
+      "retainedBytes": 2291
+    },
+    {
+      "originalPath": "compare-js-ast.mjs",
+      "originalSha256": "88f7e6254bf703192af0041123f607d15c152fc6cfe40b863f2a2990ec48a96e",
+      "originalBytes": 1792,
+      "retainedPath": "compare-js-ast.mjs.gz",
+      "retainedSha256": "5d92c203f7a55de2208ea9cc6fb84a10826775c269fbaa304739c038db3f4157",
+      "retainedBytes": 919
+    }
+  ]
+}

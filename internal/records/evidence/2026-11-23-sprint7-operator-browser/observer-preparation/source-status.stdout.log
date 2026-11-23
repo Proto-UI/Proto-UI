@@ -1,0 +1,4 @@
+ M scripts/analysis/invisible-consumption/README.md
+ M scripts/analysis/invisible-consumption/observe-button.mjs
+?? scripts/analysis/invisible-consumption/asset-binding.mjs
+?? scripts/analysis/invisible-consumption/test/asset-binding.test.mjs
