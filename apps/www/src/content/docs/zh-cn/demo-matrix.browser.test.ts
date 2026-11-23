@@ -205,6 +205,9 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
       caseName: state.caseName,
       origin: new URL(baseUrl).origin,
       phase: () => state.phase,
+      // This suite launches and exclusively owns the Browser. Browser-wide
+      // tracing/counters require their own opt-in in addition to page profiling.
+      ownedBrowser: process.env.PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC === '1' ? browser : undefined,
     });
   }
   await persistReadinessDiagnostic(page, 'route-open', 'started');

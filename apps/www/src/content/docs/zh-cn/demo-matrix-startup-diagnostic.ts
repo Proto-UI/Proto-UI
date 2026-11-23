@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { CDPSession, Page, Request, Response } from 'playwright-core';
+import type { Browser, CDPSession, Page, Request, Response } from 'playwright-core';
+import { startMatrixBrowserDiagnostic } from './demo-matrix-browser-diagnostic';
 
 // The original case still owns its 180s deadline. Its existing finally stops
 // capture earlier; this cap must not truncate navigation plus the 60s init wait.
@@ -40,9 +41,16 @@ export async function startMatrixStartupDiagnostic(
     caseName: string;
     origin: string;
     phase(): string;
+    ownedBrowser?: Browser;
   }
 ) {
   if (!options.enabled) return inert;
+  const browserDiagnostic = options.ownedBrowser
+    ? startMatrixBrowserDiagnostic(options.ownedBrowser, options).catch((error) => {
+        console.error('[demo-matrix-browser-diagnostic]', String(error));
+        return inert;
+      })
+    : Promise.resolve(inert);
   const startedAt = Date.now();
   const file = join(options.directory, 'demo-matrix', 'startup-profile');
   let session: CDPSession | undefined;
@@ -320,12 +328,15 @@ export async function startMatrixStartupDiagnostic(
       page.off('response', response);
       page.off('requestfinished', requestFinished);
       page.off('requestfailed', requestFailed);
+      const finishBrowser = browserDiagnostic
+        .then((diagnostic) => diagnostic.finish())
+        .catch((error) => console.error('[demo-matrix-browser-diagnostic]', String(error)));
       // An in-flight checkpoint already owns its bounded stop/restart. Let it
       // settle without starting another protocol operation for the same owner.
       await chunkWork;
       await capture(reason);
       snapshot();
-      await detach();
+      await Promise.all([detach(), finishBrowser]);
       // Bound the caller, not the underlying filesystem: an outstanding write
       // can settle later, with the terminal receipt still last in this queue.
       await bounded(writes, 'Diagnostic writes').catch((error) =>

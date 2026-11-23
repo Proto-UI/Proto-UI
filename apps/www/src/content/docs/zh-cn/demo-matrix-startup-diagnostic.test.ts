@@ -470,9 +470,23 @@ it.each([
     name: 'mounts every demo in every official Web adapter',
     expected: 1,
   },
+  {
+    flag: '0',
+    browserFlag: '1',
+    evidence: '/evidence',
+    name: 'mounts every demo in every official Web adapter',
+    expected: 0,
+  },
+  {
+    flag: '1',
+    browserFlag: '1',
+    evidence: '/evidence',
+    name: 'mounts every demo in every official Web adapter',
+    expected: 1,
+  },
 ])(
   'actual route opens unchanged with startup profile gate $flag/$name/$evidence',
-  async ({ flag, evidence, name, expected }) => {
+  async ({ flag, browserFlag, evidence, name, expected }) => {
     const source = ts.createSourceFile(
       'matrix.ts',
       readFileSync(new URL('./demo-matrix.browser.test.ts', import.meta.url), 'utf8'),
@@ -486,13 +500,14 @@ it.each([
     const waitFor = vi.fn(async () => {});
     Object.assign(page, { locator: () => ({ first: () => ({ waitFor }) }) });
     const context = { newPage: async () => page, close: vi.fn(async () => {}) };
+    const browser = { newContext: async () => context };
     const start = vi.fn(async () => ({ finish: async () => {} }));
     const readDiagnostic = vi.fn(async () => {});
     const run = vm.runInNewContext(
       transformSync(`${open.getText(source)}\nopenMatrixRoute;`, { loader: 'ts', target: 'es2022' })
         .code,
       {
-        browser: { newContext: async () => context },
+        browser,
         expect: {
           getState: () => ({ currentTestName: `Website Demo Matrix browser smoke > ${name}` }),
         },
@@ -502,7 +517,11 @@ it.each([
         Date,
         URL,
         process: {
-          env: { PROTO_UI_MATRIX_STARTUP_PROFILE: flag, PROTO_UI_RUNTIME_EVIDENCE_DIR: evidence },
+          env: {
+            PROTO_UI_MATRIX_STARTUP_PROFILE: flag,
+            PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: browserFlag,
+            PROTO_UI_RUNTIME_EVIDENCE_DIR: evidence,
+          },
         },
         baseUrl: 'http://127.0.0.1:4321',
         MATRIX_ROUTE: '/zh-cn/internal/demo-matrix/',
@@ -512,6 +531,10 @@ it.each([
     );
     await run({ width: 1440, height: 900 });
     expect(start).toHaveBeenCalledTimes(expected);
+    if (expected)
+      expect((start.mock.calls[0] as unknown[])[1]).toMatchObject({
+        ownedBrowser: browserFlag === '1' ? browser : undefined,
+      });
     expect(page.goto).toHaveBeenCalledWith('http://127.0.0.1:4321/zh-cn/internal/demo-matrix/', {
       waitUntil: 'networkidle',
     });
