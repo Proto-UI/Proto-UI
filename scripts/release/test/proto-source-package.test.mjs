@@ -252,6 +252,94 @@ test('the actual Transition package source export stages its machine and types u
     );
 });
 
+test('the actual Shadcn source package retains shared helpers, types and notices when packed', (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), 'proto-shadcn-source-stage-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const stage = path.join(root, 'stage');
+  mkdirSync(stage);
+  const pkg = getPublicPackages().find(
+    (candidate) => candidate.name === '@proto.ui/prototypes-shadcn'
+  );
+  assert.ok(pkg);
+  assert.equal(pkg.manifest.exports['./dialog'].proto, './src/dialog/index.ts');
+  const closure = protoSourceFiles(pkg);
+  for (const file of [
+    'src/dialog/index.ts',
+    'src/dialog/recipes.ts',
+    'src/dialog/types.ts',
+    'src/switch/hit-lease.ts',
+    'src/switch/root-visual.ts',
+    'src/switch/types.ts',
+    'src/tabs/indicator.proto.ts',
+    'src/tabs/visual.ts',
+    'src/tabs/types.ts',
+    'src/style-scope/context.ts',
+    'src/style-scope/selection.ts',
+  ])
+    assert.ok(closure.includes(file), file);
+  const manifest = createPublishManifest(pkg, { access: 'public' });
+  assert.deepEqual(manifest.exports, pkg.manifest.exports);
+  assert.deepEqual(
+    manifest.files.filter((file) => file.startsWith('src/')),
+    closure
+  );
+  writeSupportingFiles(pkg, stage);
+  for (const file of closure)
+    assert.deepEqual(readFileSync(path.join(stage, file)), readFileSync(path.join(pkg.dir, file)));
+  assert.deepEqual(
+    readFileSync(path.join(stage, 'THIRD_PARTY_NOTICES.md')),
+    readFileSync(path.join(pkg.dir, 'THIRD_PARTY_NOTICES.md'))
+  );
+  assert.deepEqual(
+    readFileSync(path.join(stage, 'LICENSE')),
+    readFileSync(path.join(ROOT_DIR, 'LICENSE'))
+  );
+  // This is a source-payload check. The ordinary package build separately
+  // validates runtime dist outputs; reading/packing source must not run hooks.
+  writeFileSync(
+    path.join(stage, 'package.json'),
+    JSON.stringify({ ...manifest, scripts: { prepack: 'exit 41' } })
+  );
+  const packed = spawnSync(
+    process.execPath,
+    [
+      path.join(ROOT_DIR, 'node_modules/npm/bin/npm-cli.js'),
+      'pack',
+      '--offline',
+      '--ignore-scripts',
+      '--json',
+      '--pack-destination',
+      root,
+    ],
+    {
+      cwd: stage,
+      encoding: 'utf8',
+      timeout: 20_000,
+      env: {
+        ...process.env,
+        npm_config_cache: path.join(root, 'cache'),
+        npm_config_audit: 'false',
+        npm_config_fund: 'false',
+      },
+    }
+  );
+  assert.equal(packed.status, 0, packed.stderr || packed.stdout);
+  const [result] = JSON.parse(packed.stdout);
+  assert.deepEqual(
+    result.files
+      .filter((file) => file.path.startsWith('src/'))
+      .map((file) => file.path)
+      .sort(),
+    closure
+  );
+  for (const file of ['LICENSE', 'THIRD_PARTY_NOTICES.md'])
+    assert.ok(
+      result.files.some((entry) => entry.path === file),
+      file
+    );
+  assert.ok(readFileSync(path.join(root, result.filename)).length > 0);
+});
+
 test('ordinary runtime exports never imply a source publication', (t) => {
   const { pkg } = fixture(t);
   delete pkg.manifest.exports['.'].proto;
