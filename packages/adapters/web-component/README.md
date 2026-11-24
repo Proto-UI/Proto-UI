@@ -48,22 +48,28 @@ npm install @proto.ui/adapter-web-component@0.3.0-alpha.2
 
 `AdaptToWebComponent` registers the custom-element tag supplied through `registerAs`; that tag is the DOM host that document CSS styles. Some composed families add a wrapper whose public tag differs from the raw prototype name. The Shadcn switch is the current example: the generated facade exports `ShadcnSwitchElement` as `<proto-ui-shadcn-switch>` (Root plus Thumb), while the raw adapter target is separately registered as `<proto-ui-shadcn-switch-root>`.
 
-Track geometry belongs on the composed tag. For a compact profile, the switch pair is:
+Track geometry belongs on the tag used in your markup. For a default-size, left-to-right compact composition, keep the Root dimensions, Thumb dimensions and checked travel together:
 
 ```css
 proto-ui-shadcn-switch {
   width: 2rem;
   height: 1.25rem;
-  padding-inline: 0;
+  padding: 0;
   border-width: 2px;
 }
 
-proto-ui-shadcn-switch-thumb[data-checked] {
+proto-ui-shadcn-switch > proto-ui-shadcn-switch-thumb {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0;
+}
+
+proto-ui-shadcn-switch > proto-ui-shadcn-switch-thumb[data-checked] {
   --pui-translate-x: calc(100% - 4px);
 }
 ```
 
-CSS that targets `proto-ui-shadcn-switch-root` does not reach the composed instance. Thumb-only rules still apply, so a custom thumb can travel inside the default `w-11 h-6` track and appear stranded before the checked edge. See [#1720](https://github.com/Proto-UI/Proto-UI/issues/1720) for the measured case. When a composed wrapper exists, style the tag exported by the generated Web Components facade.
+CSS that targets `proto-ui-shadcn-switch-root` does not reach the composed instance. Thumb-only rules can still apply, leaving a custom Thumb inside the unchanged profile's track. See [#1720](https://github.com/Proto-UI/Proto-UI/issues/1720) for the measured half-travel case. The raw Root remains a valid separate composition target when that is the tag in your markup. The custom geometry above is a single default-size LTR example; use the family recipes for other sizes, directions or optional drag behavior.
 
 ## Experimental Shadow split profile
 
