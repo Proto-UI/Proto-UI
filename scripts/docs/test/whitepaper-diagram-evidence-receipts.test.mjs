@@ -11,6 +11,7 @@ import {
   selectDiagramVariant,
 } from '../../../apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs';
 import {
+  diagramContainLimitations,
   diagramPagePaths,
   diagramPngReceipt,
   diagramSha256,
@@ -337,6 +338,101 @@ function fixture(figure = 'conditional-consistency') {
   };
 }
 
+// A separate synthetic v2 fixture, never a converted published v1 report.
+// It models contain only and deliberately preserves actual sub-16px font sizes.
+function containFixture(figure = 'conditional-consistency') {
+  const current = fixture(figure);
+  Object.assign(current.report, {
+    schemaVersion: 2,
+    presentation: 'source-contain',
+    readingAcceptance: 'not-assessed',
+    motionMode: 'reduced',
+    limitations: [...diagramContainLimitations],
+  });
+  for (const entry of current.report.cases) {
+    const selected = selectDiagramVariant(current.profile, entry.locale, entry.viewport.width);
+    const source = {
+      ...entry.image,
+      x: 16,
+      y: 64,
+      width: 120,
+      height: (120 * selected.height) / selected.width,
+      minimumRenderedFontSize: (26 * 120) / selected.width,
+    };
+    const image = {
+      ...entry.preview,
+      minimumRenderedFontSize: (26 * entry.preview.width) / selected.width,
+    };
+    const contained = {
+      outcome: 'passed',
+      presentation: 'source-contain',
+      source,
+      image,
+      dialog: {
+        x: image.x,
+        y: image.y,
+        width: image.width,
+        height: image.height,
+        role: 'dialog',
+        modal: 'true',
+        phase: 'entered',
+        returnMode: 'origin',
+        toolbarCount: 0,
+        zoomControlCount: 0,
+        readingViewportCount: 0,
+        closeCount: 1,
+        closeClip: 'inset(50%)',
+        style: {
+          border: '0px',
+          padding: '0px',
+          radius: '0px',
+          shadow: 'none',
+          background: 'rgba(0, 0, 0, 0)',
+        },
+        scroll: { x: 0, y: 0, maxX: 0, maxY: 0 },
+      },
+      dismissal: {
+        input: 'Escape',
+        closed: true,
+        focusReturned: true,
+        originHidden: false,
+        sourceOpacity: 1,
+        source: structuredClone(source),
+      },
+    };
+    entry.containedPreviews = entry.readingPreviews.map(() => structuredClone(contained));
+    entry.image = structuredClone(source);
+    entry.preview = entry.containedPreviews[0].image;
+    entry.articleCapture.source = entry.image;
+    const figureSize = { width: 120, height: Math.ceil(source.height) };
+    const figureBytes = png(figureSize.width, figureSize.height);
+    current.screenshots.set(entry.figureCapture.file, figureBytes);
+    Object.assign(entry.figureCapture, {
+      source: structuredClone(source),
+      kind: 'document-region',
+      clip: { x: 0, y: 0, ...figureSize },
+      ...diagramPngReceipt(figureBytes),
+    });
+    entry.previewCapture.source = entry.preview;
+    entry.previewCapture.after = structuredClone(entry.preview);
+    for (const [index, interaction] of (entry.interactions ?? []).entries()) {
+      interaction.article = structuredClone(source);
+      interaction.preview = entry.containedPreviews[index + 1].image;
+    }
+    current.screenshots.delete(entry.readingCapture.file);
+    if (entry.readingEndCapture) current.screenshots.delete(entry.readingEndCapture.file);
+    delete entry.readingPreviews;
+    delete entry.readingCapture;
+    delete entry.readingEndCapture;
+    entry.screenshots = [
+      entry.articleCapture.file,
+      entry.figureCapture.file,
+      entry.previewCapture.file,
+    ];
+  }
+  return current;
+}
+
 test('complete five-profile locale/theme/view matrices retain separate capture and acceptance meaning', async () => {
   const counts = [];
   for (const profile of diagramProfiles()) {
@@ -650,4 +746,171 @@ test('PNG receipts reject truncation and invalid headers instead of trusting fil
   const invalid = Buffer.from(bytes);
   invalid[0] = 0;
   assert.throws(() => diagramPngReceipt(invalid), /PNG signature/);
+});
+
+test('v2 contain receipts retain all profiles and low measured fonts without a reading acceptance claim', async () => {
+  const counts = [];
+  let measuredSmallText = false;
+  for (const profile of diagramProfiles()) {
+    const current = containFixture(profile.figure);
+    const result = await current.verify();
+    counts.push(result.cases);
+    assert.equal(result.schemaVersion, 2);
+    assert.equal(result.presentation, 'source-contain');
+    assert.equal(result.readingAcceptance, 'not-assessed');
+    assert.equal(result.motionMode, 'reduced');
+    assert.deepEqual(result.limitations, diagramContainLimitations);
+    assert.equal(result.screenshots, current.report.cases.length * 3);
+    assert.equal(result.fontProbes, diagramVariants(profile, 'en').length * 4);
+    assert.equal(Object.hasOwn(result, 'accepted'), false);
+    measuredSmallText ||= current.report.cases.some(
+      (entry) => entry.preview.minimumRenderedFontSize < 16
+    );
+  }
+  assert.deepEqual(counts, [28, 28, 28, 28, 8]);
+  assert.equal(measuredSmallText, true, 'The overview must not invent a 16px reading result');
+});
+
+test('v2 refuses unknown scope, legacy relabeling and missing or contaminated contain evidence', async () => {
+  for (const mutate of [
+    (report) => {
+      report.schemaVersion = 3;
+    },
+    (report) => {
+      report.schemaVersion = 1;
+    },
+    (report) => {
+      report.presentation = 'reading';
+    },
+    (report) => {
+      report.readingAcceptance = 'passed';
+    },
+    (report) => {
+      report.motionMode = 'full';
+    },
+    (report) => {
+      report.limitations = [];
+    },
+    (report) => {
+      report.cases[0].readingPreviews = [];
+    },
+    (report) => {
+      report.cases[0].readingCapture = report.cases[0].previewCapture;
+    },
+    (report) => {
+      delete report.cases[0].containedPreviews;
+    },
+    (report) => {
+      report.cases[0].containedPreviews.pop();
+    },
+    (report) => {
+      report.cases[0].interactions.pop();
+    },
+  ]) {
+    const current = containFixture();
+    mutate(current.report);
+    await assert.rejects(current.verify);
+  }
+  const legacy = fixture();
+  Object.assign(legacy.report, {
+    schemaVersion: 2,
+    presentation: 'source-contain',
+    readingAcceptance: 'not-assessed',
+    motionMode: 'reduced',
+    limitations: [...diagramContainLimitations],
+  });
+  await assert.rejects(legacy.verify, /relabel reading evidence/);
+});
+
+test('v2 rejects toolbar, clipped geometry, fabricated font sizes and failed source restoration', async () => {
+  for (const mutate of [
+    (sample) => {
+      sample.outcome = 'failed';
+    },
+    (sample) => {
+      sample.dialog.toolbarCount = 1;
+    },
+    (sample) => {
+      sample.dialog.zoomControlCount = 3;
+    },
+    (sample) => {
+      sample.dialog.readingViewportCount = 1;
+    },
+    (sample) => {
+      sample.dialog.closeCount = 0;
+    },
+    (sample) => {
+      sample.dialog.closeClip = 'none';
+    },
+    (sample) => {
+      sample.dialog.returnMode = 'fade';
+    },
+    (sample) => {
+      sample.dialog.style.padding = '8px';
+    },
+    (sample) => {
+      sample.dialog.scroll.maxY = 50;
+    },
+    (sample) => {
+      sample.image.x = -20;
+    },
+    (sample) => {
+      sample.image.height *= 2;
+    },
+    (sample) => {
+      sample.source.y = -100000;
+    },
+    (sample) => {
+      sample.image.minimumRenderedFontSize = 999;
+    },
+    (sample) => {
+      sample.image.alt = 'Replacement meaning';
+    },
+    (sample) => {
+      sample.dismissal.focusReturned = false;
+    },
+    (sample) => {
+      sample.dismissal.originHidden = true;
+    },
+    (sample) => {
+      sample.dismissal.sourceOpacity = 0;
+    },
+    (sample) => {
+      sample.dismissal.source.src = 'http://127.0.0.1:4321/unrelated.svg';
+    },
+  ]) {
+    const current = containFixture();
+    mutate(current.report.cases[0].containedPreviews[0]);
+    await assert.rejects(current.verify);
+  }
+});
+
+test('v2 still binds every SVG, current source, production build and PNG including its post-capture geometry', async () => {
+  for (const mutate of [
+    (current) => {
+      current.report.completedProvenance.tree = 'e'.repeat(40);
+    },
+    (current) => {
+      current.report.build.inventorySha256 = 'e'.repeat(64);
+    },
+    (current) => {
+      current.report.cases[0].containedPreviews[0].source.sourceSha256 = 'e'.repeat(64);
+    },
+    (current) => {
+      current.report.cases[0].previewCapture.after.x += 1;
+    },
+    (current) => {
+      current.report.cases[0].previewCapture.screenshotSha256 = 'e'.repeat(64);
+    },
+    (current) => {
+      current.screenshots.delete(current.report.cases[0].previewCapture.file);
+    },
+    (current) => {
+      current.sources.set(current.report.pages.en.sourcePath, Buffer.from('changed article'));
+    },
+  ]) {
+    const current = containFixture();
+    mutate(current);
+    await assert.rejects(current.verify);
+  }
 });

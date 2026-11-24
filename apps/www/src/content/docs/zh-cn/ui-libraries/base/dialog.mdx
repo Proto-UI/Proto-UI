@@ -64,7 +64,7 @@ Base Dialog 提供构建模态对话框所需的基础部件，负责开关状�
 ### 其他组件属性
 
 - **Mask**：`passthrough` 默认为 `false`，同时支持 Transition 属性。
-- **Content**：`focusEntry` 默认为 `'auto'`，同时支持 Transition 属性。
+- **Content**：`focusEntry: 'auto' | 'content' | 'manual'` 默认为 `'auto'`，同时支持 Transition 属性。`'content'` 在打开时聚焦 Content 本身，但不把它加入 Tab 顺序；Tab 仍进入弹窗内的控件。`'manual'` 将初始焦点安排交给消费者。每次激活时读取策略，打开期间修改该属性不会移动焦点。三种模式均保留焦点约束和关闭后的恢复。
 - **Trigger、Title、Description、Close**：无额外属性。
 
 ## 参考

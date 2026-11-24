@@ -1,5 +1,6 @@
-/* Consumer-measured geometry only. Base Dialog owns presence/focus, public
- * Surface owns color/opacity/focus feedback and mirrors that Transition phase. */
+/* Consumer-measured geometry and #796's static-entry UA outline reset.
+ * Base Dialog owns presence/focus. Public Surface owns color/opacity and
+ * interactive focus feedback; this file does not change focus facts. */
 [data-docs-image-trigger] {
   display: inline-block;
   width: auto;
@@ -27,6 +28,12 @@
   transition-property: transform;
   transition-duration: var(--docs-image-duration, 220ms);
   transition-timing-function: linear;
+}
+[data-docs-image-content][tabindex='-1'] {
+  /* Keep the nonsequential media entry frameless. Keyboard Close and thumbnail
+   * controls retain their public family focus paint and native focus facts. */
+  outline: none;
+  outline-width: 0;
 }
 [data-docs-image-content]:is(
   [data-transition-state='entering'],

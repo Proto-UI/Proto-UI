@@ -4,12 +4,9 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readContrastProvenance } from './contrast-provenance.mjs';
-import {
-  observeDiagramReadingViewport,
-  verifyDiagramReadingCapture,
-} from './diagram-reading-observation.mjs';
 import { verifyDiagramBuild } from './whitepaper-diagram-build.mjs';
 import {
+  diagramContainLimitations,
   diagramPagePaths,
   diagramPngReceipt,
   diagramSha256,
@@ -49,8 +46,12 @@ const build = await verifyDiagramBuild({ root, directory: evidenceRoot, revision
 const { chromium } = await import('playwright-core');
 await fs.mkdir(out, { recursive: true });
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   kind: 'proto-ui.whitepaper-diagram-capture',
+  presentation: 'source-contain',
+  readingAcceptance: 'not-assessed',
+  motionMode: 'reduced',
+  limitations: [...diagramContainLimitations],
   revision,
   figure: profile.figure,
   profile,
@@ -632,9 +633,10 @@ try {
           // substitute direct SVG navigation for a broken production preview.
           const trigger = page.locator('[data-docs-image-trigger]').filter({ has: image });
           const preview = page.locator('.docs-image-full');
-          entry.readingPreviews = [];
-          entry.readingObservations = [];
+          entry.containedPreviews = [];
           const openPreview = async () => {
+            await trigger.scrollIntoViewIfNeeded();
+            const source = bindMeasurement(await image.evaluate(measureImage), selected);
             await trigger.click();
             await preview.waitFor({ state: 'visible' });
             await preview.evaluate((node) => node.decode());
@@ -647,245 +649,62 @@ try {
                   .every((animation) => !animation.pending && animation.playState !== 'running')
               );
             });
-            const readingViewport = page.locator('[data-docs-image-viewport]');
-            const zoom = page.locator('[data-docs-image-zoom]');
-            const readViewport = () =>
-              readingViewport.evaluate((node) => {
-                const box = node.getBoundingClientRect();
-                const style = getComputedStyle(node);
-                return {
-                  x: box.x,
-                  y: box.y,
-                  width: box.width,
-                  height: box.height,
-                  clientWidth: node.clientWidth,
-                  clientHeight: node.clientHeight,
-                  scrollWidth: node.scrollWidth,
-                  scrollHeight: node.scrollHeight,
-                  scrollLeft: node.scrollLeft,
-                  scrollTop: node.scrollTop,
-                  mode: node.dataset.docsImageScale,
-                  role: node.getAttribute('role'),
-                  label: node.getAttribute('aria-label'),
-                  tabIndex: node.tabIndex,
-                  overflowX: style.overflowX,
-                  overflowY: style.overflowY,
-                };
-              });
-            const scrollPosition = (state) => ({
-              x: state.scrollLeft,
-              y: state.scrollTop,
-            });
-            const observeReading = async (phase) => {
-              const packet = await readingViewport.evaluate(observeDiagramReadingViewport, {
-                timeoutMs: 10_000,
-              });
-              entry.readingObservations.push({
-                open: entry.readingPreviews.length,
-                phase,
-                ...packet,
-              });
-              return packet;
-            };
-            const stableReading = async (phase) => {
-              const packet = await observeReading(phase);
-              if (packet.outcome !== 'passed') await save();
-              assert.equal(packet.outcome, 'passed', packet.error || 'Reading observation failed');
-              return packet;
-            };
-            const captureReading = async (key, filename, before) => {
-              const capture = {
-                kind: 'viewport',
-                file: filename,
-                source: bindMeasurement(before.observation.image, selected),
-                before,
-                outcome: 'running',
-              };
-              entry[key] = capture;
-              try {
-                await page.screenshot({ path: path.join(out, filename) });
-                entry.screenshots.push(filename);
-                Object.assign(
-                  capture,
-                  diagramPngReceipt(await fs.readFile(path.join(out, filename)))
-                );
-                capture.after = await observeReading(key + '-after-png');
-                capture.consistency = verifyDiagramReadingCapture(before, capture.after);
-                assert.equal(
-                  capture.consistency.outcome,
-                  'passed',
-                  capture.consistency.problems.join('\n')
-                );
-                capture.outcome = 'passed';
-              } catch (error) {
-                capture.outcome = 'failed';
-                capture.error = String(error);
-                // Retain the original PNG and both observations. Do not retry a
-                // changed capture or replace its pre-PNG source with later data.
-                await save();
-                throw error;
-              }
-            };
-            const opened = await stableReading('opened');
-            assert.equal(
-              opened.observation.viewport.mode,
-              'reading',
-              'Every new open starts readable'
-            );
-            let readingImage = bindMeasurement(opened.observation.image, selected);
-            let zoomClicks = 0;
-            while (readingImage.minimumRenderedFontSize < 16 && zoomClicks < 2) {
-              const previousWidth = readingImage.width;
-              await page.locator('[data-docs-image-zoom-in]').click();
-              await page.waitForFunction(
-                (width) =>
-                  document.querySelector('.docs-image-full').getBoundingClientRect().width > width,
-                previousWidth
-              );
-              zoomClicks++;
-              const zoomed = await stableReading('zoom-' + zoomClicks);
-              readingImage = bindMeasurement(zoomed.observation.image, selected);
-            }
-            assert.ok(
-              readingImage.minimumRenderedFontSize >= 16,
-              'The actual reading viewport must make every diagram label at least 16 CSS px'
-            );
-            await readingViewport.hover();
-            const extent = await readViewport();
-            // Native wheel returns to the start after any center-preserving zoom.
-            // No direct scroll writes or synthetic wheel events are used as evidence.
-            await page.mouse.wheel(-extent.scrollWidth * 2, -extent.scrollHeight * 2);
-            await page.waitForFunction(() => {
-              const node = document.querySelector('[data-docs-image-viewport]');
-              return node.scrollLeft <= 1 && node.scrollTop <= 1;
-            });
-            await page.waitForFunction(() => {
-              const node = document.querySelector('[data-docs-image-viewport]');
-              const scrollable =
-                node.scrollWidth > node.clientWidth + 1 ||
-                node.scrollHeight > node.clientHeight + 1;
-              return node.tabIndex === (scrollable ? 0 : -1);
-            });
-            // One settled browser task binds both sides of the panning equation.
-            const beforeReadingPng = await stableReading('reading-start');
-            const initial = beforeReadingPng.observation.viewport;
-            readingImage = bindMeasurement(beforeReadingPng.observation.image, selected);
-            assert.ok(
-              initial.x >= -1 &&
-                initial.y >= -1 &&
-                initial.x + initial.width <= viewport.width + 1 &&
-                initial.y + initial.height <= viewport.height + 1,
-              'The reading viewport, including its scroll range, stays inside the window'
-            );
-            assert.equal(initial.role, 'region');
-            assert.ok(initial.label?.trim());
-            const hasScrollRange =
-              initial.scrollWidth > initial.clientWidth + 1 ||
-              initial.scrollHeight > initial.clientHeight + 1;
-            assert.equal(initial.tabIndex, hasScrollRange ? 0 : -1);
-            assert.equal(initial.overflowX, 'auto');
-            assert.equal(initial.overflowY, 'auto');
-            const backgroundBefore = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
-            const reading = {
-              image: readingImage,
-              viewport: initial,
-              zoomClicks,
-              wheel: [],
-              keyboard: [],
-              backgroundBefore,
-            };
-            if (entry.readingPreviews.length === 0) {
-              await captureReading('readingCapture', `${id}-reading.png`, beforeReadingPng);
-            }
-            for (const axis of ['x', 'y']) {
-              const range =
-                axis === 'x'
-                  ? initial.scrollWidth - initial.clientWidth
-                  : initial.scrollHeight - initial.clientHeight;
-              if (range <= 1) continue;
-              const before = await readViewport();
-              await readingViewport.hover();
-              await page.mouse.wheel(axis === 'x' ? range * 2 : 0, axis === 'y' ? range * 2 : 0);
-              await page.waitForFunction(
-                ({ axis, range }) => {
-                  const node = document.querySelector('[data-docs-image-viewport]');
-                  return Math.abs((axis === 'x' ? node.scrollLeft : node.scrollTop) - range) <= 1;
-                },
-                { axis, range }
-              );
-              const after = await readViewport();
-              reading.wheel.push({
-                axis,
-                before: scrollPosition(before),
-                after: scrollPosition(after),
-              });
-            }
-            if (entry.readingPreviews.length === 0 && reading.wheel.length) {
-              const beforeEndPng = await stableReading('reading-end');
-              await captureReading('readingEndCapture', `${id}-reading-end.png`, beforeEndPng);
-            }
-            // The native focusable scroll region must also be operable without
-            // pointer panning. Click establishes native focus; keys move it back.
-            if (reading.wheel.length) {
-              await readingViewport.click({ position: { x: 12, y: 12 } });
-              assert.ok(await readingViewport.evaluate((node) => node === document.activeElement));
-            }
-            for (const axis of reading.wheel.map((sample) => sample.axis)) {
-              const before = await readViewport();
-              const key = axis === 'x' ? 'ArrowLeft' : 'ArrowUp';
-              await page.keyboard.press(key);
-              await page.waitForFunction(
-                ({ axis, previous }) => {
-                  const node = document.querySelector('[data-docs-image-viewport]');
-                  return (axis === 'x' ? node.scrollLeft : node.scrollTop) < previous - 1;
-                },
-                { axis, previous: axis === 'x' ? before.scrollLeft : before.scrollTop }
-              );
-              const after = await readViewport();
-              reading.keyboard.push({
-                axis,
-                key,
-                before: scrollPosition(before),
-                after: scrollPosition(after),
-              });
-            }
-            reading.backgroundAfter = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
-            assert.deepEqual(
-              reading.backgroundAfter,
-              backgroundBefore,
-              'Panning stays in the modal viewport'
-            );
-            await zoom.click();
-            await page.waitForFunction(
-              () => document.querySelector('[data-docs-image-viewport]').tabIndex === -1
-            );
-            assert.equal((await readViewport()).mode, 'fit');
             const measurement = bindMeasurement(await preview.evaluate(measureImage), selected);
+            const dialog = await page.locator('[data-docs-image-content]').evaluate((node) => {
+              const { x, y, width, height } = node.getBoundingClientRect();
+              const style = getComputedStyle(node);
+              const close = node.querySelector('[data-docs-image-close]');
+              return {
+                x,
+                y,
+                width,
+                height,
+                role: node.getAttribute('role'),
+                modal: node.getAttribute('aria-modal'),
+                phase: node.getAttribute('data-transition-state'),
+                returnMode: node.dataset.docsImageReturn,
+                toolbarCount: node.querySelectorAll('.docs-image-toolbar').length,
+                zoomControlCount: node.querySelectorAll(
+                  '[data-docs-image-zoom], [data-docs-image-zoom-in], [data-docs-image-zoom-out]'
+                ).length,
+                readingViewportCount: node.querySelectorAll('[data-docs-image-viewport]').length,
+                closeCount: node.querySelectorAll('[data-docs-image-close]').length,
+                closeClip: close ? getComputedStyle(close).clipPath : null,
+                style: {
+                  border: style.borderWidth,
+                  padding: style.padding,
+                  radius: style.borderRadius,
+                  shadow: style.boxShadow,
+                  background: style.backgroundColor,
+                },
+                scroll: {
+                  x: node.scrollLeft,
+                  y: node.scrollTop,
+                  maxX: node.scrollWidth - node.clientWidth,
+                  maxY: node.scrollHeight - node.clientHeight,
+                },
+              };
+            });
             assert.equal(measurement.alt, entry.image.alt);
+            assert.equal(dialog.toolbarCount + dialog.zoomControlCount, 0, 'No persistent toolbar');
+            assert.equal(dialog.readingViewportCount, 0);
+            assert.equal(dialog.returnMode, 'origin');
             assert.ok(
               measurement.x >= -1 &&
                 measurement.y >= -1 &&
                 measurement.x + measurement.width <= viewport.width + 1 &&
                 measurement.y + measurement.height <= viewport.height + 1,
-              'Fit overview must still contain the complete diagram'
+              'Contain must show the complete selected diagram'
             );
-            reading.fit = measurement;
-            reading.fitViewport = await readViewport();
-            assert.ok(
-              reading.fitViewport.clientWidth > 0 &&
-                reading.fitViewport.clientHeight > 0 &&
-                reading.fitViewport.scrollWidth <= reading.fitViewport.clientWidth + 1 &&
-                reading.fitViewport.scrollHeight <= reading.fitViewport.clientHeight + 1 &&
-                measurement.x >= reading.fitViewport.x - 1 &&
-                measurement.y >= reading.fitViewport.y - 1 &&
-                measurement.x + measurement.width <=
-                  reading.fitViewport.x + reading.fitViewport.clientWidth + 1 &&
-                measurement.y + measurement.height <=
-                  reading.fitViewport.y + reading.fitViewport.clientHeight + 1,
-              'Fit overview must show the complete image inside its own native scrollport'
-            );
-            reading.outcome = 'passed';
-            entry.readingPreviews.push(reading);
+            // The actual scaled font size remains in the source-bound measurement.
+            // This capture is an overview, not a 16px reading/panning acceptance.
+            entry.containedPreviews.push({
+              outcome: 'passed',
+              presentation: 'source-contain',
+              source,
+              image: measurement,
+              dialog,
+            });
             assert.equal(new URL(page.url()).pathname, route, 'Preview must stay on the article');
             return measurement;
           };
@@ -895,6 +714,25 @@ try {
               const content = document.querySelector('[data-docs-image-content]');
               return !content || content.hasAttribute('data-pui-view-detached');
             });
+            const restoration = await trigger.evaluate((node) => ({
+              focusReturned: document.activeElement === node,
+              originHidden: node.hasAttribute('data-docs-image-origin-hidden'),
+              sourceOpacity: Number(
+                getComputedStyle(node.querySelector('[data-docs-image-source-surface]')).opacity
+              ),
+            }));
+            assert.equal(restoration.focusReturned, true);
+            assert.equal(restoration.originHidden, false);
+            assert.equal(restoration.sourceOpacity, 1);
+            entry.containedPreviews.at(-1).dismissal = {
+              input: 'Escape',
+              closed: await page.evaluate(() => {
+                const content = document.querySelector('[data-docs-image-content]');
+                return !content || content.hasAttribute('data-pui-view-detached');
+              }),
+              ...restoration,
+              source: bindMeasurement(await image.evaluate(measureImage), selected),
+            };
           };
           entry.accessibility = {
             triggerLabel: await trigger.locator('.docs-image-trigger-label').textContent(),
@@ -925,8 +763,14 @@ try {
             kind: 'viewport',
             file: fullSize,
             source: entry.preview,
+            after: bindMeasurement(await preview.evaluate(measureImage), selected),
             ...diagramPngReceipt(await fs.readFile(path.join(out, fullSize))),
           };
+          assert.deepEqual(
+            entry.previewCapture.after,
+            entry.previewCapture.source,
+            'The contained image must remain unchanged across its PNG capture'
+          );
           await dismissPreview();
           if (diagramVariants(profile, locale).some((item) => item.name === 'mobile')) {
             entry.interactions = [];

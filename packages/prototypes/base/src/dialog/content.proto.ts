@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
-import { asAccessible, asBoundary, asFocusScope, asOverlay } from '@proto.ui/hooks';
+import { asAccessible, asBoundary, asFocusable, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import {
   DIALOG_CONTEXT,
@@ -31,7 +31,7 @@ function projectDialogContentHandle(
 
 function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExposes>): void {
   def.props.define({
-    focusEntry: { type: 'enum', empty: 'fallback', options: ['auto', 'manual'] },
+    focusEntry: { type: 'enum', empty: 'fallback', options: ['auto', 'manual', 'content'] },
   });
   def.props.setDefaults({ focusEntry: 'auto' });
   const accessible = asAccessible();
@@ -75,6 +75,10 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
   // P-BASE-DIALOG-CONTENT-FOCUS
   const focusScope = asFocusScope<DialogContentProps>();
   focusScope.configure({ trap: true, loop: true });
+  // P-BASE-DIALOG-CONTENT-CONTENT-ENTRY: the optional initial target is never
+  // a sequential member. Auto/manual keep the ordinary disabled projection.
+  const contentFocus = asFocusable<DialogContentProps>();
+  contentFocus.configure({ disabled: true, navParticipation: 'none' });
 
   // P-BASE-DIALOG-CONTENT-PRESENCE
   const transition = asTransition();
@@ -92,6 +96,17 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
   let mountedRun: any = null;
   let currentContext: DialogContextValue | null = null;
   let warnedMissingAlertDescription = false;
+  let focusRevision = 0;
+  let syncedRootId: string | undefined;
+  let contentEntry: { rootId: string } | null = null;
+
+  const retireContentEntry = () => {
+    if (!contentEntry) return;
+    // Publish retirement before disabling: fact notifications and native blur
+    // can synchronously close, replace or reactivate this logical owner.
+    contentEntry = null;
+    contentFocus.setDisabled(true);
+  };
 
   const hasLivePart = (run: any, role: 'title' | 'description'): boolean => {
     try {
@@ -144,38 +159,73 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     options?: { focusReason?: DialogOpenFocusReason | null }
   ) => {
     // P-BASE-DIALOG-CONTENT-PRESENCE, P-BASE-DIALOG-CONTENT-FOCUS
-    const closingRun = logicalRun;
-    const closingRootId = currentContext?.rootId;
+    const syncRun = logicalRun;
+    const syncRootId = currentContext?.rootId;
+    if (!syncRootId || currentContext?.open !== nextOpen) return;
     const prevOpen = open.get();
+    if (prevOpen !== nextOpen || syncedRootId !== syncRootId) focusRevision++;
+    syncedRootId = syncRootId;
+    let revision = focusRevision;
+    const isCurrent = () =>
+      focusRevision === revision &&
+      logicalRun === syncRun &&
+      currentContext?.rootId === syncRootId &&
+      currentContext?.open === nextOpen &&
+      open.get() === nextOpen;
     open.set(nextOpen, reason ?? 'reason: dialog content sync => open');
-    if (nextOpen) {
-      overlay.openOverlay(reason ?? 'dialog.open');
-    } else {
-      overlay.close(reason ?? 'dialog.close');
-    }
-    // Accepted close retires the logical focus scope even when zero-duration
-    // Presence has already detached its view. Reentry may have replaced the
-    // Root, disposed this instance or opened it again while Overlay closed.
+    if (!isCurrent()) return;
     if (!nextOpen) {
-      if (
-        prevOpen &&
-        closingRun &&
-        logicalRun === closingRun &&
-        currentContext?.rootId === closingRootId &&
-        currentContext?.open === false &&
-        !open.get() &&
-        !overlay.isOpen()
-      )
+      // Scope deactivation cancels descendants, not its own target. Retire
+      // that request before Presence can detach or rematerialize the view.
+      retireContentEntry();
+      if (!isCurrent()) return;
+      overlay.close(reason ?? 'dialog.close');
+      // Accepted close retires the logical scope even if zero-duration
+      // Presence detached it; a newer activation owns its own restoration.
+      if (prevOpen && syncRun && isCurrent() && !overlay.isOpen())
         focusScope.deactivate({ reason: options?.focusReason ?? 'programmatic' });
       return;
     }
+
+    if (contentEntry && contentEntry.rootId !== syncRootId) {
+      retireContentEntry();
+      if (!isCurrent()) return;
+      focusScope.deactivate({ reason: 'programmatic' });
+      if (!isCurrent()) return;
+    }
+    overlay.openOverlay(reason ?? 'dialog.open');
+    if (!isCurrent()) return;
     // Entry still needs the mounted physical view; do not consume it early.
     if (!mountedRun) return;
     if (!prevOpen || !focusScope.isActive()) {
+      revision = ++focusRevision;
+      const entryRun = mountedRun;
+      const isCurrentEntry = () => isCurrent() && mountedRun === entryRun && overlay.isOpen();
+      // A synchronous close/reopen can supersede the closing callback before
+      // it reaches cleanup. Retire that old activation before capturing anew.
+      if (contentEntry) {
+        retireContentEntry();
+        if (!isCurrentEntry()) return;
+        focusScope.deactivate({ reason: 'programmatic' });
+        if (!isCurrentEntry()) return;
+      }
       // P-BASE-DIALOG-CONTENT-ENTRY-POLICY: read only for this activation.
       // Prop changes while active do not configure or reactivate the scope.
       const focusReason = options?.focusReason ?? 'programmatic';
-      if (mountedRun.props.get().focusEntry === 'manual') {
+      const policy = entryRun.props.get().focusEntry;
+      if (policy === 'content') {
+        const activation = { rootId: syncRootId };
+        contentEntry = activation;
+        // Capture the previous owner with ordinary scope semantics, while
+        // suppressing automatic child entry for this activation only.
+        focusScope.activate({ reason: focusReason, entry: 'manual' });
+        if (!isCurrentEntry() || contentEntry !== activation || !focusScope.isActive()) return;
+        contentFocus.setDisabled(false);
+        if (!isCurrentEntry() || contentEntry !== activation || !focusScope.isActive()) return;
+        // Native acquisition owns facts and current readiness retry; no
+        // synthetic focus-visible override or page-specific target is needed.
+        contentFocus.focusSelf({ reason: focusReason, preventScroll: true });
+      } else if (policy === 'manual') {
         focusScope.activate({ reason: focusReason, entry: 'manual' });
       } else {
         focusScope.activate({ reason: focusReason });
@@ -233,8 +283,13 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     mountedRun = null;
   });
   def.lifecycle.onBeforeDispose(() => {
+    focusRevision++;
     logicalRun = null;
+    mountedRun = null;
     currentContext = null;
+    // Focus's disposing phase already cancels the target and removes its
+    // Center entry. Calling a live setter here would register it again.
+    contentEntry = null;
   });
   const readLiveContext = (run: import('@proto.ui/core').RunHandle<DialogContentProps>) => {
     try {
