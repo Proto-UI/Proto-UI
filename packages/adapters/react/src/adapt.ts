@@ -292,18 +292,21 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       // mount. Relocating the mount keeps createPortal's container identity and
       // therefore does not replace the physical host or its event capabilities.
       const portalMountRef = runtime.useRef<HTMLElement | null>(null);
-      // The container is allocated with the view's first content commit, so a
-      // portaled view is committed into its destination exactly once. Waiting
-      // for the origin's Document first commits the whole portaled subtree
-      // inline and replaces its root element afterwards: that remounts the
-      // subtree and moves the view's event-routing target under the reader
-      // that already owns it.
-      const [portalDocument, setPortalDocument] = runtime.useState<Document | null>(
-        typeof document !== 'undefined' ? document : null
-      );
+      // Resolve the author's actual Document from the origin marker before
+      // committing content. While this is null the render emits only that
+      // marker, never an inline copy of the portaled subtree. Guessing the
+      // ambient document would route iframe content to the wrong body and
+      // acquire view capabilities again when the real document arrives.
+      const [portalDocument, setPortalDocument] = runtime.useState<Document | null>(null);
       runtime.useLayoutEffect(() => {
         const origin = portalOriginRef.current;
-        if (origin?.isConnected && origin.ownerDocument !== portalDocument)
+        // A live physical epoch keeps its original document and destination.
+        // An adopted origin is reconciled only after that portal is retired.
+        if (
+          origin?.isConnected &&
+          !portalMountRef.current &&
+          origin.ownerDocument !== portalDocument
+        )
           setPortalDocument(origin.ownerDocument);
       });
       const portalProjectionRef = runtime.useRef<{
@@ -1240,12 +1243,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         overlayPort?.getConfig().portal === true &&
         typeof runtime.createPortal === 'function' &&
         typeof document !== 'undefined';
-      if (portalEnabled && !portalMountRef.current) {
-        // The container exists before the first commit, so this view's root
-        // element is committed into its destination once. The origin's
-        // Document adopts the container afterwards, including same-origin
-        // iframe roots, without replacing the committed root element.
-        const mount = (portalDocument ?? document).createElement('div');
+      if (portalEnabled && portalDocument && !portalMountRef.current) {
+        // Origin-first allocation keeps the first physical content root and
+        // its owner document stable for the lifetime of this portal epoch.
+        const mount = portalDocument.createElement('div');
         mount.dataset.puiPortalMount = '';
         mount.style.display = 'contents';
         portalMountRef.current = mount;
