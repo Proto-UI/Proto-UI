@@ -309,7 +309,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts` | `www.demo.demo-matrix` | `4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5` |
 | `apps/www/src/content/docs/demo_components/tabs/demo-shadcn-tabs-profile-switch.demo.ts` | `www.demo.authored-controllers` | `5fcc777f315f41748b13965613c3ee24bdea052ed4b181e6042d58156e629ad8` |
 | `apps/www/src/content/docs/zh-cn/demo-matrix-observation.ts` | `www.demo.demo-matrix` | `1d40c4e675797928a60d6e3d2e7f09c89996e38d85c3574a63db2409f199ee0d` |
-| `apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts` | `www.shell.mobile-menu-panel` | `5cb63d1997b7c567784b96d4f78e7cd2f687c57c9a33b11a102f4c457c0a7b12` |
+| `apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts` | `www.shell.mobile-menu-panel` | `60fb4c507d00ed9795c17a6fc991c9eb514e0062acb3c49522705dcf63425944` |
 | `apps/www/src/components/DocumentationImagePreview.astro` | `www.docs.whitepaper-diagram-viewer` | `a4262c4ce8a4a491c6766a466381248704d4d297af4f722e689cf129fd855cff` |
 | `apps/www/src/components/Homepage/HomeActions.astro` | `www.shell.adapter-select`, `www.shell.hero-actions`, `www.shell.mobile-menu-toggle`, `www.shell.native-link-presentation`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `aae02e68c94fca95e06ba50abb9d82e45b55302be2d4bdb520b9a6f4b4195605` |
 | `apps/www/src/components/Homepage/HomepageRuntime.astro` | `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav`, `www.shell.social-links`, `www.shell.theme-toggle` | `d56557a3ba35c4ab139b13a350ebf4bb59bd3e310ba8623768a93bc6991bd21a` |
