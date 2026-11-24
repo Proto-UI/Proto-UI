@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "sourceIntegration": "67ae70c3369e1bfc03d3fa0d3c279b23d6d058d5",
+  "reviewedCandidate": "88589aded9e0d556f6821b31999eb5fca50e70f8",
+  "result": "partial",
+  "productionChanges": [
+    "Use exact structurally validated per-chunk zero-length/no-retained-export records for emitted-code checks; keep source identities and edges, invalid or absent metadata fail-closed.",
+    "Admit only the reviewed finite shared WC helpers; no shader whitelist.",
+    "Move synchronous reservation callback/lease/style ownership to one platform module while retaining legacy function identity and keeping geometry in a dynamic material module."
+  ],
+  "independentReview": {
+    "graphControlsPassed": 2355,
+    "originalMaterialTestsPassed": 9,
+    "newGraphProbesPassed": 17,
+    "newIdentityCleanupCasesPassed": 5,
+    "realEmittedBundleScenariosPassed": 2,
+    "sourceHashesMatched": 7,
+    "result": "No blocking finding in reviewed scope; no GitHub approval submitted."
+  },
+  "importIntegration": {
+    "lazyGeometry": "09845878f6672da933ac8a1cf4bc529962ea6cbfe7ed4e010737a283ba382622",
+    "sharedPhysicalOwner": "dc3e8851ed9ed863b59072d4ae21122710dc09e13d3d389774d0b52cd595f7c8",
+    "basis": "Only exact reviewed source and literal imports updated after the structural split. Original material geometry remains forbidden in ordinary emitted shells.",
+    "sourceBindingControlsPassed": 10
+  },
+  "additionalControls": {
+    "cliFullSourceAndTestTypes": {
+      "command": "node --max-old-space-size=768 node_modules/typescript/lib/tsc.js -p cli-tsconfig.json --pretty false",
+      "exitCode": 0,
+      "scope": "All CLI source and test files plus their TypeScript dependencies, not complete workspace/docs types."
+    },
+    "originalFailedFamilyCases": {
+      "selectedPassed": 4,
+      "failed": 0,
+      "otherCasesIntentionallyFiltered": 4,
+      "result": "The unchanged selector matched all four family inherited-Drawer cases; all four passed, including both earlier failures. Four unrelated cases were intentionally filtered. Earlier failures are retained."
+    }
+  },
+  "markupReference": {
+    "previousLocalRevision": "a54155f36de41a4fe47de6adc203d907bc117a25",
+    "reachableRevision": "67ae70c3369e1bfc03d3fa0d3c279b23d6d058d5",
+    "sourceMembers": 33,
+    "changedSourceHashes": 0,
+    "sourceAdmission": "unverified",
+    "basis": "Only reference metadata rebound to reachable reviewed integration; no served/runtime acceptance implied."
+  },
+  "evidence": [
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/production-repair-report.json.gz",
+      "sha256": "475543623ca8713a0cfa888c95d449b89c34f0e5fc1f7f71f6c0b7b0f66595aa",
+      "uncompressedSha256": "453d2968301f299bbb14274428cfc0012d042628f3a322993dc007499e7c4aa0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/material-owner-bundle-report.json.gz",
+      "sha256": "b45a06ae0944a19fe53b7b6ab58d26a47f6629f04535f7c08aece4f68e37e5cd",
+      "uncompressedSha256": "1e9bf5b683e592a46aeb1173803a0e77ec139cb3fe68a1479c2f7bcff6f0af0f"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/material-owner-mechanical-proof.json.gz",
+      "sha256": "ed01c748db06d1558459982fc9107429c19cee7cc7c3b2febb0a1221a7715766",
+      "uncompressedSha256": "79528e792118fe5282164a713c4d1e7fb418e3a4207bd4e42e006c37d2a47076"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/material-owner-bundle-controls.log.gz",
+      "sha256": "2bc4df4baeb8e927bc963ccb312964466ae178c4651531e758ee4f3137c7160a",
+      "uncompressedSha256": "7c0c56beb4bcfe983fd7a2256afe1e42d900898080814ec717f883d7c7e237ba"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/report.md.gz",
+      "sha256": "e82446d7bb82b2216c44f83531344b07c5f81ab583b466bcfd7412d7a800785f",
+      "uncompressedSha256": "80a60a2e7089a0fb78f3a99473ced625dae7c51f798f37d3fdaeb504ab6e3ec3"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/source-binding.json.gz",
+      "sha256": "1741d82a6fcd0aaa7ffbd2e22d6bb66914aaf09a6be48f14bb13701f63b7d21b",
+      "uncompressedSha256": "5a13236ec20e85d3ce85ee890a78e7a3d9c76cb8b3a4346301d8b204f57f0f30"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/environment.json.gz",
+      "sha256": "668c28fad662d45d858c16f7315dc4d0caa3209f387ef0f138a413cf77a5ffc8",
+      "uncompressedSha256": "5a82099302a37ca435440f9efa12882bf9f6f2d18487375888112c83599e2038"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/bundle-controls.mjs.gz",
+      "sha256": "025e4aa01e3c72c60115d4417e336974ff8cb455c93a21f90183c677612cccbf",
+      "uncompressedSha256": "bc5a2a2ec78f17e85fdb524d0d0cab28ce75cc439a013ffc3c28a863135b8388"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/bundle-controls.json.gz",
+      "sha256": "a864c8a313d65cb9c208ca337fc13eff704cb99f86bfe60ba8b4bfaacf00a2c8",
+      "uncompressedSha256": "eb91b505de2fde704b8feb3c0938df7ca707ac2bfc76015e2b4ecab07f6731b1"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/canonical-graph-validation.json.gz",
+      "sha256": "28b4d7ff6ce4ad7a9defe4c143bc5c51c48fc2d622253964b54503e9565a1719",
+      "uncompressedSha256": "cafac5c0cf1ea513c60db16f6cde340b9a57b89e1cabece5b6a83c4c33f18a92"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/boundary-controls.mjs.gz",
+      "sha256": "b4e9d32ca884ccecbc2ee50ea65a630fae5e6eb9960c1aebea924e11f29ca07e",
+      "uncompressedSha256": "10944f7492da6b17009fea3b0105cbdce80766f51402ef2111af97b09d61c20b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/material-controls.mts.gz",
+      "sha256": "738ddc6783ae44d5908c31faa0a999d9adb12afad33bb9729be8170d5b779d50",
+      "uncompressedSha256": "4dd64dedd92f55b55a9112c90d5c07be2776d2a4fe21b37bdec8f4391a1b2941"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/material-import-binding-controls.log.gz",
+      "sha256": "2977c4021e712d70182ccd0731ba8977b48afc595481a78804413a5dab19de05",
+      "uncompressedSha256": "982e1deb925c4068fadb3c856fe68dd8a9e9aa1eb57749d5f4fa6d1b9f6c052a"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/cli-types-final.log.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "uncompressedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/cli-tsconfig.json.gz",
+      "sha256": "08bc5f1f5125a78cbc54f2e40e2b293965ab8efc50091f03dd487cf0b949dbae",
+      "uncompressedSha256": "9e8f3a6d16eb5fe71fcdabf54dc89d99df7f3d80be7bd4d8667fdd372b4b4935"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/family-closure-final.json.gz",
+      "sha256": "89f89ffe28f578b4f0028d624624f8db0b87c34c179f498b9f3096c299e407c4",
+      "uncompressedSha256": "2102c8e29a395e54e099070672f8136b43e3c443ccc29d08ab994c76917e82b0"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/family-closure-final.log.gz",
+      "sha256": "fa727dff0284eeebd1f07932b19179f02af875f4ec103bbe3b79a1435904988e",
+      "uncompressedSha256": "ff5c765fd8e7961be1bec7a11b24cbc284f85701cc6630a22033768a6c5b268b"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-production-closure-repair/independent-emitted-bundles.tar.gz",
+      "sha256": "2d65b36757f21580d6d42b36bbc377cfe9acd74037c46a03f6e2b8b80a1a9eb1"
+    }
+  ],
+  "limits": [
+    "Actual Vite fixtures are not the complete Astro build. Missing full-site inventory/owner issues in these bounded graphs remain recorded.",
+    "Full Website graph, canonical strict budgets, full workspace/docs types, native/browser and release gates remain separate.",
+    "CLI full-source inventory remains red with unproved legal contexts; no gate assertion was changed."
+  ]
+}

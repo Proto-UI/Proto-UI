@@ -2839,6 +2839,7 @@ function createHookSourceSummaryContextInternal(
             reference = reference.parent;
           const member = reference.parent;
           if (
+            ts.findAncestor(node, isFunctionLike) !== parameter.parent ||
             (!ts.isPropertyAccessExpression(member) && !ts.isElementAccessExpression(member)) ||
             member.expression !== reference ||
             memberName(member) === null
@@ -3176,6 +3177,12 @@ function createHookSourceSummaryContextInternal(
       nested: boolean
     ): boolean | null => {
       if (ts.isTypeNode(node) || isFunctionLike(node)) return true;
+      if (ts.isSpreadElement(node)) {
+        walk(node.expression, module, env, certain, children, nested);
+        // Iteration runs after the operand and before the next argument.
+        opaque = true;
+        return true;
+      }
       if (ts.isExpressionStatement(node))
         return walk(node.expression, module, env, certain, children, nested);
       if (ts.isAwaitExpression(node) || ts.isYieldExpression(node)) {
@@ -3427,6 +3434,9 @@ function createHookSourceSummaryContextInternal(
           argumentOrigins.push(capabilityOrigin(argument, module, env));
           argumentSources.push(ruleSource(argument, module, env));
         }
+        // The evaluations above do not prove expanded argument positions.
+        // Do not bind values or capabilities by the syntactic argument index.
+        if (node.arguments.some(ts.isSpreadElement)) return true;
         if (memberName(node.expression) === 'method') {
           const owner = memberOwner(node.expression);
           const method = literal(node.arguments[0], module, env);
@@ -3994,6 +4004,9 @@ function createHookSourceSummaryContextInternal(
     return {
       entries,
       invoke,
+      markSpreadBoundary: () => {
+        opaque = true;
+      },
       proveRuleOnlyInvocation,
       replayHelper: (
         node: ts.CallExpression,
@@ -4258,6 +4271,11 @@ function createHookSourceSummaryContextInternal(
       if (conflict) return;
       if (cutoffAllowed && reachedTarget) return;
       if (node !== call && isFunctionLike(node)) return;
+      if (ts.isSpreadElement(node)) {
+        visit(node.expression, pathCertain);
+        replay.markSpreadBoundary();
+        return;
+      }
       if (
         ts.isBinaryExpression(node) &&
         (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||

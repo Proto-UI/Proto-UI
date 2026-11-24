@@ -323,4 +323,14 @@ describe('native Props initialization before authored hook capture', () => {
     expect(tokens).toContain('data-[focus-visible]:ring-3');
     expect(tokens).toContain('data-[focus-visible]:outline-1');
   });
+
+  it('retains the actual Brutalist Toggle active paint and pressed inset rules', async () => {
+    const tokens = await collectProtoStyleTokensFromFiles([
+      path.resolve(process.cwd(), 'packages/prototypes/brutalist/src/toggle/toggle.proto.ts'),
+    ]);
+    expect(tokens).toContain('data-[active]:bg-main');
+    expect(tokens).toContain('data-[active]:text-main-foreground');
+    expect(tokens).toContain('data-[active]:data-[pressed]:shadow-[inset_0_0_0_2px_#000]');
+    expect(tokens).toContain('data-[active]:not-[data-pressed]:shadow-[inset_0_0_0_2px_#000]');
+  });
 });

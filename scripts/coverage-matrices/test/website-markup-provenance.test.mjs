@@ -37,6 +37,8 @@ test('834 separates an original response match, a native sample and unobservable
   const input = capture();
   const report = analyzeMarkupObservation(input);
   assert.equal(report.matchesRecordedProducer, true);
+  assert.equal(report.matchesExpectedNativeOutput, true);
+  assert.equal(report.nativeRuntime.comparison.transformation, null);
   assert.equal(report.sourceAdmission, 'unverified');
   assert.equal(report.servedSource, 'unobservable');
   assert.equal(report.nativeRuntime.kind, 'native-runtime-output');
@@ -44,6 +46,126 @@ test('834 separates an original response match, a native sample and unobservable
   assert.ok(input.response.html.slice(start, end).startsWith('<div data-previewer-id="p1"'));
   assert.equal(report.originalHTML.receiver.contentCount, 1);
   assert.deepEqual(report.issues, []);
+});
+
+function enhancedCapture(tabindex = '0') {
+  const input = capture();
+  for (const path of [
+    'apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro',
+    'apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts',
+    'apps/www/src/components/PrototypePreviewer/code-panel-client.ts',
+  ]) {
+    input.profile.sources.push({ path, sha256: markupDigest(`supplied source for ${path}`) });
+  }
+  input.binding.sources = structuredClone(input.profile.sources);
+  input.observation.contentHtml = input.observation.contentHtml.replace(' tabindex="0"', '');
+  // Supplied relationship facts exercise the receipt model. The browser suite
+  // samples these independently from actual public ScrollArea DOM/exposes.
+  input.observation.codeScrollFocus = {
+    kind: 'public-scroll-area-viewport', ready: true,
+    anatomyCount: 1, anatomyTag: 'wc-site-code-scroll-root',
+    viewportCount: 1, viewportTag: 'wc-site-code-scroll-viewport',
+    anatomyIsContainerChild: true, viewportIsAnatomyChild: true, receiverIsViewportChild: true,
+    connected: true, ownerPreviewerId: 'p1', tabindex, role: 'region', label: 'Example source',
+    projection: 'composed',
+  };
+  return input;
+}
+
+for (const tabindex of ['0', '-1']) {
+  test(`834 records the exact focus handover separately from producer equality at viewport tabindex ${tabindex}`, () => {
+    const input = enhancedCapture(tabindex);
+    const report = analyzeMarkupObservation(input);
+    assert.deepEqual(report.issues, []);
+    assert.equal(report.matchesRecordedProducer, false);
+    assert.equal(report.matchesExpectedNativeOutput, true);
+    assert.equal(report.sourceAdmission, 'unverified');
+    assert.equal(report.servedSource, 'unobservable');
+    assert.equal(report.nativeRuntime.comparison.transformation, 'code-scroll-viewport-focus-handover');
+    assert.equal(report.nativeRuntime.comparison.producer.matches, false);
+    assert.equal(report.nativeRuntime.comparison.expected.matches, true);
+    assert.notEqual(report.nativeRuntime.comparison.producer.expectedDigest,
+      report.nativeRuntime.comparison.expected.expectedDigest);
+    assert.equal(report.nativeRuntime.observation.contentHtml, input.observation.contentHtml);
+    assert.equal(report.originalHTML.receiver.contentHtml.includes('tabindex="0"'), true);
+  });
+}
+
+test('834 keeps a public viewport system fallback explicit without changing producer markup', () => {
+  const input = enhancedCapture();
+  input.observation.codeScrollFocus.projection = 'system';
+  const report = analyzeMarkupObservation(input);
+  assert.deepEqual(report.issues, []);
+  assert.equal(report.matchesRecordedProducer, false);
+  assert.equal(report.matchesExpectedNativeOutput, true);
+});
+
+for (const [name, alter, expected] of [
+  ['missing handover observation', (input) => { delete input.observation.codeScrollFocus; }, /native output differs/],
+  ['an unbound transformer', (input) => {
+    input.profile.sources = input.profile.sources.filter((source) => !source.path.endsWith('code-scroll-area-client.ts'));
+    input.binding.sources = structuredClone(input.profile.sources);
+  }, /transformation source is unbound/],
+  ['a different transformation', (input) => { input.observation.codeScrollFocus.kind = 'arbitrary-tabindex-removal'; }, /ownership is unproven/],
+  ['an unready container', (input) => { input.observation.codeScrollFocus.ready = false; }, /ownership is unproven/],
+  ['ambiguous anatomy roots', (input) => { input.observation.codeScrollFocus.anatomyCount = 2; }, /ownership is unproven/],
+  ['a foreign root', (input) => { input.observation.codeScrollFocus.anatomyTag = 'div'; }, /ownership is unproven/],
+  ['ambiguous viewports', (input) => { input.observation.codeScrollFocus.viewportCount = 2; }, /ownership is unproven/],
+  ['a foreign viewport', (input) => { input.observation.codeScrollFocus.viewportTag = 'div'; }, /ownership is unproven/],
+  ['an unrelated root', (input) => { input.observation.codeScrollFocus.anatomyIsContainerChild = false; }, /ownership is unproven/],
+  ['an unrelated viewport', (input) => { input.observation.codeScrollFocus.viewportIsAnatomyChild = false; }, /ownership is unproven/],
+  ['a receiver outside the viewport', (input) => { input.observation.codeScrollFocus.receiverIsViewportChild = false; }, /ownership is unproven/],
+  ['a detached viewport', (input) => { input.observation.codeScrollFocus.connected = false; }, /ownership is unproven/],
+  ['a different previewer owner', (input) => { input.observation.codeScrollFocus.ownerPreviewerId = 'p2'; }, /ownership is unproven/],
+  ['a nonfocusable viewport', (input) => { input.observation.codeScrollFocus.tabindex = null; }, /ownership is unproven/],
+  ['an unexpected viewport tab order', (input) => { input.observation.codeScrollFocus.tabindex = '1'; }, /ownership is unproven/],
+  ['a missing region role', (input) => { input.observation.codeScrollFocus.role = null; }, /ownership is unproven/],
+  ['an unnamed viewport', (input) => { input.observation.codeScrollFocus.label = ' '; }, /ownership is unproven/],
+  ['an unresolved host projection', (input) => { input.observation.codeScrollFocus.projection = null; }, /ownership is unproven/],
+  ['a changed pre tabindex', (input) => { input.observation.contentHtml = input.observation.contentHtml.replace('<pre ', '<pre tabindex="-1" '); }, /native output differs/],
+  ['a second native tab stop', (input) => { input.observation.contentHtml = JSON.parse(input.observation.highlightsAttribute).react; }, /native output differs/],
+  ['an arbitrary attribute', (input) => { input.observation.contentHtml = input.observation.contentHtml.replace('<pre ', '<pre data-extra="changed" '); }, /native output differs/],
+  ['changed highlighted classes', (input) => { input.observation.contentHtml = input.observation.contentHtml.replace('class="line"', 'class="other"'); }, /native output differs/],
+  ['changed highlighted style', (input) => { input.observation.contentHtml = input.observation.contentHtml.replace('<span ', '<span style="color:#000" '); }, /native output differs/],
+  ['changed example text', (input) => { input.observation.contentHtml = input.observation.contentHtml.replace('中文&lt;', 'changed&lt;'); }, /native output differs/],
+  ['changed raw source bytes', (input) => { input.observation.contentHtml = input.observation.contentHtml.replace('data-raw-code="', 'data-raw-code="changed'); }, /native output differs/],
+  ['an introduced executable entry', (input) => { input.observation.contentHtml += '<script>changed()</script>'; }, /native output differs/],
+  ['focus withdrawal in the original response', (input) => {
+    const original = JSON.parse(input.observation.highlightsAttribute).wc;
+    input.response.html = input.response.html.replace(`<div data-code-content>${original}</div>`, `<div data-code-content>${input.observation.contentHtml}</div>`);
+    input.observation.responseDigest = markupDigest(input.response.html);
+  }, /original SSR output differs/],
+]) {
+  test(`834 does not hide ${name} behind the focus handover`, () => {
+    const input = enhancedCapture();
+    alter(input);
+    const report = analyzeMarkupObservation(input);
+    assert.equal(report.matchesRecordedProducer, false);
+    assert.equal(report.matchesExpectedNativeOutput, false);
+    assert.equal(report.sourceAdmission, 'unverified');
+    assert.match(report.issues.join('\n'), expected);
+  });
+}
+
+test('834 does not normalize a changed producer or arbitrary focusable pre as a code viewport', () => {
+  for (const replace of [
+    (fragment) => fragment.replace('proto-previewer__code', 'unrelated-pre'),
+    (fragment) => fragment.replace('</pre>', '</pre><script>changed()</script>'),
+  ]) {
+    const input = enhancedCapture();
+    const old = JSON.parse(input.observation.highlightsAttribute).wc;
+    const changed = replace(old);
+    const highlights = JSON.stringify({ wc: changed, react: changed });
+    input.response.html = input.response.html.replace(escapeAttribute(input.observation.highlightsAttribute), escapeAttribute(highlights))
+      .replace(`<div data-code-content>${old}</div>`, `<div data-code-content>${changed}</div>`);
+    input.observation.highlightsAttribute = highlights;
+    input.observation.contentHtml = changed.replace(' tabindex="0"', '');
+    input.observation.responseDigest = markupDigest(input.response.html);
+    const report = analyzeMarkupObservation(input);
+    assert.equal(report.matchesExpectedNativeOutput, false);
+    assert.match(report.issues.join('\n'), /unrecognized/);
+    assert.equal(report.sourceAdmission, 'unverified');
+  }
 });
 
 for (const [name, alter, expected] of [
