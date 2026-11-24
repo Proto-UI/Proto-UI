@@ -1,0 +1,15 @@
+{
+  "head": "af14e17f3fa2b7de79e8fb4eca370212f4d89ac7",
+  "name": "workspace-types-before",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "check:types:workspace"
+  ],
+  "startedAt": "2026-11-24T05:20:01.293619+00:00",
+  "exitCode": 2,
+  "timedOut": false,
+  "elapsedMs": 70135,
+  "headAfter": "af14e17f3fa2b7de79e8fb4eca370212f4d89ac7",
+  "statusAfter": ""
+}

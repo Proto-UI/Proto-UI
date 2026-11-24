@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-24T10:05:23.011516+00:00",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+  "parent": "68572676752b86a3527547bf9c56f13098aead29",
+  "purpose": "Repair two source-test fixtures exposed by current Liquid CI, preserving the real capability, border and geometry refusal contracts.",
+  "originalRun": {
+    "head": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "id": 45365833929,
+    "attempt": 1,
+    "materialArtifact": 14907169573,
+    "materialZipSha256": "6690e753b54498ca7db5a1187daeffc3e5fde6a1f852fb98f95d70d0d48cf4d7",
+    "total": 965,
+    "passed": 954,
+    "failed": 11,
+    "nativeBrowserFiles": {
+      "material": 6,
+      "portal": 55,
+      "toggle": 13,
+      "allPassed": true
+    }
+  },
+  "changes": {
+    "files": {
+      "packages/prototypes/liquid-glass/test/interactive-surface.test.ts": "3cc33f12faa1c1237841096d5a63f1b3bb5642f9795e1d8f2418efe018223c2f",
+      "apps/www/src/content/docs/zh-cn/liquid-hover-source-layout.test.ts": "62663470c7082ed82760f534a5bcb46a1546480f64490c59dcb17fee2c4340ac"
+    },
+    "portableHarness": "Register the existing Boolean material reservation capability. Capture the actual Runtime-validated TemplateChildren and assert its reservation/slot shape plus the required reservation of the published material slot. No claim of physical host layout is made.",
+    "computedStyleFixture": "Happy DOM retains border-image-source initial from the shorthand. Inject only this known no-image computed getter as none for the exact fixture item. Other computed styles, production source admission, painted borders and inset checks remain real observations.",
+    "newRefusalControls": "Unknown initial and image border sources remain rejected. Painted border overlap remains rejected at zero inset and accepted only with actual clearance.",
+    "productionCodeChanged": false,
+    "originalAssertionsChanged": false,
+    "originalDeadlinesChanged": false
+  },
+  "validation": {
+    "before": {
+      "files": 2,
+      "total": 46,
+      "passed": 35,
+      "failed": 11
+    },
+    "focusedAfter": {
+      "files": 2,
+      "total": 48,
+      "passed": 48,
+      "failed": 0,
+      "original46Retained": true
+    },
+    "affectedAfter": {
+      "files": 9,
+      "total": 113,
+      "passed": 113,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0
+    },
+    "formatAndDiffCheck": "Passed. No further repeat after final verification.",
+    "runnerSetupFailure": "An initial bare pnpm wrapper selected an unsupported version and exited before Vitest; retained as unexecuted setup failure, not a failed test."
+  },
+  "independentReview": {
+    "reviewer": "Root, independent of fixture implementer s6_final_union_review",
+    "findings": [],
+    "scope": "Complete two-file diff, preservation of all original expectations, declared input versus observed geometry boundary, real template capture and explicit negative controls.",
+    "githubApproval": false
+  },
+  "remaining": "The separate four-host reservation journey still fails because the entire authored source area exceeds its unchanged pixel budget. That requires its own bounded consumer/layout repair and current native verification; these fixture passes do not resolve it.",
+  "rawEvidence": {
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/liquid-fixture-repair.tar.gz",
+    "sha256": "227be75fb7982273c481b293ee0d0f66039ab8586726885ac3cc3beffde8bf64",
+    "bytes": 108293,
+    "members": 20,
+    "relocation": "Original repo-relative scratch references in retained handoff refer to the archived members; live evidence moved to the parent workspace s6-evidence/liquid-fixture-repair."
+  }
+}

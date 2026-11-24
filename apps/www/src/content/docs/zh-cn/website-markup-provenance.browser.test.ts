@@ -90,6 +90,15 @@ async function sample(root: Locator, response: MarkupResponse) {
     const root = element as HTMLElement & { __previewer__?: { getCurrentRuntime(): string | null } };
     const receivers = root.querySelectorAll<HTMLElement>('[data-code-content]');
     const receiver = receivers.length === 1 ? receivers[0]! : null;
+    const container = receiver?.closest<HTMLElement>('[data-code-scroll-root]');
+    const anatomies = container?.querySelectorAll<HTMLElement>('[data-code-scroll-anatomy]');
+    const anatomy = anatomies?.length === 1 ? anatomies[0]! : null;
+    const viewports = container?.querySelectorAll<HTMLElement>('[data-code-scroll-viewport]');
+    const viewport = viewports?.length === 1 ? viewports[0]! : null;
+    const enhanced = container?.hasAttribute('data-code-scroll-ready') || (viewports?.length ?? 0) > 0;
+    const projection = (viewport as HTMLElement & {
+      getExposes?: () => { scrollProjection?: { get(): unknown } };
+    } | null)?.getExposes?.().scrollProjection?.get();
     return {
       responseDigest: receipt.digest, navigationId: receipt.navigationId, previewerId: root.dataset.previewerId ?? null,
       ownerPreviewerId: receiver?.closest<HTMLElement>('[data-previewer-id]')?.dataset.previewerId ?? null,
@@ -97,6 +106,20 @@ async function sample(root: Locator, response: MarkupResponse) {
       receiverTag: receiver?.localName ?? null, receiverCount: receivers.length,
       highlightsAttribute: root.dataset.codeHighlights ?? '', codeMapAttribute: root.dataset.codeMap ?? '',
       contentHtml: receiver?.innerHTML ?? null,
+      codeScrollFocus: enhanced ? {
+        kind: 'public-scroll-area-viewport' as const,
+        ready: container?.hasAttribute('data-code-scroll-ready') ?? false,
+        anatomyCount: anatomies?.length ?? 0, anatomyTag: anatomy?.localName ?? null,
+        viewportCount: viewports?.length ?? 0, viewportTag: viewport?.localName ?? null,
+        anatomyIsContainerChild: anatomy?.parentElement === container,
+        viewportIsAnatomyChild: viewport?.parentElement === anatomy,
+        receiverIsViewportChild: receiver?.parentElement === viewport,
+        connected: viewport?.isConnected ?? false,
+        ownerPreviewerId: viewport?.closest<HTMLElement>('[data-previewer-id]')?.dataset.previewerId ?? null,
+        tabindex: viewport?.getAttribute('tabindex') ?? null,
+        role: viewport?.getAttribute('role') ?? null, label: viewport?.getAttribute('aria-label') ?? null,
+        projection: typeof projection === 'string' ? projection : null,
+      } : null,
     };
   }, { digest: markupDigest(response.html), navigationId: response.navigationId });
 }
@@ -175,6 +198,8 @@ for (const route of routes) for (const theme of ['light', 'dark'] as const) for 
         await writeFile(join(directory, `${name}.json`), JSON.stringify({ evidence, errors }, null, 2));
         await root.screenshot({ path: join(directory, `${name}-${index}-${runtime}.png`) });
         expect(report.issues).toEqual([]);
+        expect(report.matchesExpectedNativeOutput).toBe(true);
+        expect(report.matchesRecordedProducer).toBe(report.nativeRuntime.comparison?.transformation === null);
         expect(report.sourceAdmission).toBe('unverified');
         expect(raw).toBe(authoredRaw);
         expect(producerComparison.matches).toBe(true);
@@ -197,7 +222,9 @@ for (const route of routes) for (const theme of ['light', 'dark'] as const) for 
       const stale = analyzeMarkupObservation({ profile, binding, response, observation: next });
       evidence.push({ phase: 'full-document-remount', report, staleReceiptControl: stale });
       expect(report.issues).toEqual([]);
+      expect(report.matchesExpectedNativeOutput).toBe(true);
       expect(stale.matchesRecordedProducer).toBe(false);
+      expect(stale.matchesExpectedNativeOutput).toBe(false);
       await copyWithKeyboard(nextRoot, JSON.parse(nextPanel.codeMapAttribute).wc);
     } finally {
       await writeFile(join(directory, `${name}.json`), JSON.stringify({ evidence, errors,
@@ -219,6 +246,7 @@ for (const theme of ['light', 'dark'] as const) for (const width of [390, 1180])
         expect((await code.textContent())?.trim().length).toBeGreaterThan(0);
         expect(await code.isVisible()).toBe(true);
         expect((await code.getAttribute('data-raw-code'))?.length).toBeGreaterThan(0);
+        expect(await code.locator('..').getAttribute('tabindex')).toBe('0');
         await writeFile(join(directory, `${name}.theme.json`), JSON.stringify(await page.evaluate(() => ({
           actualThemeAttribute: document.documentElement.dataset.theme ?? null,
           background: getComputedStyle(document.documentElement).backgroundColor,

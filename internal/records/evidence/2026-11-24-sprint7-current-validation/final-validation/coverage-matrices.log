@@ -1,0 +1,66 @@
+
+> proto-ui@ check:coverage-matrices /var/tmp/proto-ui-s7-456f
+> node scripts/coverage-matrices/check-coverage-matrices.mjs && node --test scripts/coverage-matrices/test/*.test.mjs
+
+[coverage-matrices] OK (2 matrices)
+警告：re-init：已忽略 --initial-branch=main
+
+Interrupted while running:
+
+⚠ scripts/coverage-matrices/test/check-coverage-matrices.test.mjs (scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:1:1)
+✖ scripts/coverage-matrices/test/check-coverage-matrices.test.mjs (514364.704489ms)
+✖ scripts/coverage-matrices/test/check-website-production-bundle.test.mjs
+✖ scripts/coverage-matrices/test/decode-video-evidence.test.mjs
+✖ scripts/coverage-matrices/test/editor-boundary-projection.test.mjs
+✖ scripts/coverage-matrices/test/embed-comment-ranges.test.mjs
+✖ scripts/coverage-matrices/test/node-loader-complexity.test.mjs
+✖ scripts/coverage-matrices/test/prototype-coverage.test.mjs
+✖ scripts/coverage-matrices/test/sync-github-governance-snapshot.test.mjs
+✖ scripts/coverage-matrices/test/website-markup-provenance.test.mjs
+ℹ tests 9
+ℹ suites 0
+ℹ pass 0
+ℹ fail 0
+ℹ cancelled 9
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 514453.184344
+ ELIFECYCLE  Command failed.
+
+✖ failing tests:
+
+test at scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:1:1
+✖ scripts/coverage-matrices/test/check-coverage-matrices.test.mjs (514364.704489ms)
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/check-website-production-bundle.test.mjs:1:1
+✖ scripts/coverage-matrices/test/check-website-production-bundle.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/decode-video-evidence.test.mjs:1:1
+✖ scripts/coverage-matrices/test/decode-video-evidence.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/editor-boundary-projection.test.mjs:1:1
+✖ scripts/coverage-matrices/test/editor-boundary-projection.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/embed-comment-ranges.test.mjs:1:1
+✖ scripts/coverage-matrices/test/embed-comment-ranges.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/node-loader-complexity.test.mjs:1:1
+✖ scripts/coverage-matrices/test/node-loader-complexity.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/prototype-coverage.test.mjs:1:1
+✖ scripts/coverage-matrices/test/prototype-coverage.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/sync-github-governance-snapshot.test.mjs:1:1
+✖ scripts/coverage-matrices/test/sync-github-governance-snapshot.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/coverage-matrices/test/website-markup-provenance.test.mjs:1:1
+✖ scripts/coverage-matrices/test/website-markup-provenance.test.mjs
+  'Promise resolution is still pending but the event loop has already resolved'

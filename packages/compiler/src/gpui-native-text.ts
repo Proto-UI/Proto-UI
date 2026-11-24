@@ -571,6 +571,30 @@ mod text_owner_tests {
         accesskit_consumer::Tree::new(TreeUpdate{nodes,tree:Some(Tree::new(root)),tree_id:TreeId::ROOT,focus:root},true)
     }
     #[gpui::test]
+    fn text_a11y_parent_value_without_text_runs_cannot_expose_editable_text(cx:&mut TestAppContext){
+        use gpui::accesskit::{Node,NodeId,Role,Tree,TreeId,TreeUpdate};
+        let window=open(cx);window.update(cx,|_,window,_|{
+            for value in ["", "a😀候e\u{301}"] {
+                let owner=text_owner(window,value);let root=NodeId(100);
+                let semantics=crate::gpui_native_a11y::Semantics{
+                    element:div().id("native-parent-text-a11y").role(gpui::Role::TextInput).into_element(),
+                    owner:Rc::downgrade(&owner),role:None,
+                };
+                let mut parent=Node::new(Role::TextInput);
+                gpui::Element::write_a11y_info(&semantics,&mut parent);
+                assert_eq!(parent.value(),Some(value));
+                let missing_children=accesskit_consumer::Tree::new(TreeUpdate{
+                    nodes:vec![(root,parent)],tree:Some(Tree::new(root)),tree_id:TreeId::ROOT,focus:root,
+                },true);
+                assert!(!missing_children.state().root().supports_text_ranges(),
+                    "a complete root value cannot replace the synthetic TextRun publication");
+                let complete=text_a11y_tree(&owner);let node=complete.state().root();
+                assert!(node.supports_text_ranges());assert_eq!(node.document_range().text(),value);
+                Owner::dispose(&owner);
+            }
+        }).unwrap();
+    }
+    #[gpui::test]
     fn text_a11y_exposes_the_complete_canonical_text_to_the_consumer(cx:&mut TestAppContext){
         let window=open(cx);window.update(cx,|_,window,_|{
             let owner=text_owner(window,"a😀候e\u{301}");

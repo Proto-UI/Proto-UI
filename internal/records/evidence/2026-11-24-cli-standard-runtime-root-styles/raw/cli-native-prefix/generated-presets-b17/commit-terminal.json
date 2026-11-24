@@ -1,0 +1,16 @@
+{
+  "head": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+  "exitCode": 0,
+  "elapsedMs": 3835,
+  "before": {
+    "packages/cli/src/generated/shadcn-style-tokens.ts": "ecca6c18728c49baef1f62032c9943e2b861d4faa2230ba8d188d201640c2cbe",
+    "packages/cli/src/generated/brutalist-style-tokens.ts": "132206860118eb4a5977eb0f112b3846fb6088acba1b9aea4cac932acb0b3e8f",
+    "packages/cli/src/generated/draft-family-style-tokens.ts": "c1526a048cdfc2e09a8504015aecac2ef4c7d403ccd3ade387527b09f2098adf"
+  },
+  "after": {
+    "packages/cli/src/generated/shadcn-style-tokens.ts": "ecca6c18728c49baef1f62032c9943e2b861d4faa2230ba8d188d201640c2cbe",
+    "packages/cli/src/generated/brutalist-style-tokens.ts": "132206860118eb4a5977eb0f112b3846fb6088acba1b9aea4cac932acb0b3e8f",
+    "packages/cli/src/generated/draft-family-style-tokens.ts": "c1526a048cdfc2e09a8504015aecac2ef4c7d403ccd3ade387527b09f2098adf"
+  },
+  "status": ""
+}

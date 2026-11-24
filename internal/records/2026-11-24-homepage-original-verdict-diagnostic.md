@@ -1,0 +1,13 @@
+# Homepage original-verdict diagnostic
+
+This diagnostic starts from `78af4d4c9dc822e66a525b1ddc2794d618b1afc3`. The Homepage/component/browser-test and generated style sources are unchanged from the recorded native baseline `24dfb9f112b11c2f0c6789dfab3aa86b528656ee`.
+
+The unchanged baseline failed the real family Popover wheel check (`scrollTop` stayed zero) and the Brutalist family commit's original 1000 ms assertion. Its native dataset write brackets place the actual family marker update about 1.078 seconds after the polling interval began. This proves delayed query delivery alone does not explain that run; it does not identify which product stage caused the delay.
+
+The passive wheel observer and its eight injected-layout controls originate in the same repository's separate diagnostic candidate `9bd8a7da39e47141900dcf7fc243703c9796fb5a`, read without modifying that checkout. This candidate additionally records the actual WheelEvent client coordinates. The original Homepage wheel coordinates, native input, scroll-offset assertion, document-scroll assertion, and 1000 ms deadline remain unchanged. No readiness wait is added here. Initial and post-verdict geometry, current dialog/surface identity, composed event path, trust and final cancellation are retained around that original observation.
+
+`PROTO_UI_HOMEPAGE_PROFILE=1` additionally enables a sampled CDP CPU profile immediately before the original Brutalist preference selection. The original family polling verdict and post-verdict pending-query ledger remain unchanged. The profile is stopped and written after the verdict and its existing collection; it may perturb timing and is diagnostic evidence only. It does not advance publication, bypass atomic preparation/rollback, or extend the deadline.
+
+These changes contain no product fix and no native acceptance claim. The stronger readiness oracle from the separate candidate has not been applied as a presumed root-cause repair. A native run of the unchanged assertion with these observations must precede attribution to positioning, input delivery, renderer preparation, Anatomy order work, or query scheduling.
+
+Local verification: the eight observer controls and eleven existing `site-contents-evidence.test.ts` controls pass (19/19) with a 768 MiB heap. A token comparison confirms that the entire original wheel input/assertion block is unchanged inside the diagnostic wrapper. The browser test passes TypeScript syntax transpilation, and `git diff --check` passes. These checks are not native browser acceptance. The old Happy DOM WheelEvent does not expose client coordinates; absent coordinates are recorded as null, never invented as zero.

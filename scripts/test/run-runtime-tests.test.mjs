@@ -10,6 +10,7 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import YAML from 'yaml';
 import { WC_NATIVE_BROWSER_SUITE } from './wc-native-isolation.mjs';
+import './runtime-process-tree.test.mjs';
 // Synthetic clean-source controls; these are not execution evidence.
 const cleanSourceControl = (sha) => {
   const snapshot = {
@@ -564,7 +565,7 @@ describe('bounded documentation readiness', () => {
     }
     // The process-owning runner retains its existing finally cleanup. Helper
     // tests below prove request/timer cleanup; this is only a wiring guard.
-    assert.match(runner, /finally \{\s*try \{\s*await stopChildren\(\)/);
+    assert.match(runner, /finally \{\s*await stopOwnedProcesses\(\)/);
   });
 
   it('keeps the style generation outside every browser readiness window', () => {

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "reviewedSource": "6635347b3376e90fdb7dc9618c815aa12b66341d",
+  "source": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+  "sha256": "5cb63d1997b7c567784b96d4f78e7cd2f687c57c9a33b11a102f4c457c0a7b12",
+  "owner": "www.shell.mobile-menu-panel",
+  "state": "blocked",
+  "review": "Read-only geometry and passive wheel capture with bounded8event retention; event cancellation is read after dispatch, exact live dialog/surface identity is retained, listener disposed. No package imports or product-module import edge. Only existing browser diagnostic imports it.",
+  "inputAndDeadline": "Original coordinates, wheel delta selection, offset/document assertions and1000ms deadline unchanged; extra observations may perturb timing and are not an acceptance repair.",
+  "changes": "Bind the exact new diagnostic path to its existing blocked panel owner and fingerprint. No allowlist, acceptance or lifecycle widening.",
+  "coverageBefore": {
+    "exitCode": 1,
+    "issues": 2,
+    "reason": "New diagnostic source missing exact owner and fingerprint"
+  },
+  "nativeEvidence": "Pending frozen663 run; no retroactive success claim",
+  "coverageAfter": {
+    "source": "9c75da40680f20498c3ae408ef468724ecec0db0",
+    "officialGeneratedPortfolio": true,
+    "exitCode": 0,
+    "matrices": 2
+  },
+  "artifacts": [
+    {
+      "path": "internal/records/evidence/2026-11-24-homepage-wheel-source-binding/initial-coverage-failure.log.gz",
+      "sha256": "0ca3f31aa7326850d76368ff4f36fafb491139993e31283520eca48089b88a70",
+      "uncompressedSha256": "676d142cacaa0a281a20d2d94e1d91a5dfe395e0120fd49720e7704d5bdc27b2"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-homepage-wheel-source-binding/official-portfolio-refresh.log.gz",
+      "sha256": "38b07d5c1c63caae307cfdeeb29e61a26c1f2dcb3f76682f0e2b28b874191ae9",
+      "uncompressedSha256": "7d57342cce864601c4ee5ff8d506e5ce9aafca298b1ff7557009f797eb44e4b8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-homepage-wheel-source-binding/complete-coverage-check.log.gz",
+      "sha256": "1a1e40812e2955c175bcaf96b3cd8914a205a398f13a90ecc6a07c1ebd1eacf2",
+      "uncompressedSha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    }
+  ]
+}

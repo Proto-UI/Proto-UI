@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "read-only-s7-candidate-refresh-audit",
+  "baselineCommit": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+  "advertisedSourceCommit": "ba81d77e73814b32c2c14afc74ef3a809faffc1a",
+  "repo": "/var/tmp/proto-ui-s7-delivery-456f",
+  "doesNotReplace": [
+    "original prototype producer validation and generated Markdown checks",
+    "original complete source and coverage/agent-operations gates",
+    "115 original plus49 recovery frozen payload mode/blob audit",
+    "current-head runtime, native or research acceptance"
+  ],
+  "headAtAudit": "ba81d77e73814b32c2c14afc74ef3a809faffc1a",
+  "matrixSha256": {
+    "baseline": "8a58c556738f70eba49ef0b818e3532fd1e1e6aef632f04065d65d10ce74c40f",
+    "currentWorkingTree": "df66774d0bb69e28a073acdd00bfed045437e5fca9e0363e642f51c05968020f"
+  },
+  "unchangedHistoricalKeys": [
+    "atomicProjectionMapping",
+    "comparisonRows",
+    "countPolicy",
+    "counts",
+    "deliveryPlan",
+    "evidenceOnlyBranches",
+    "gpuiCoverageRows",
+    "mainSourceEvidence",
+    "migrationLedger",
+    "observedAt",
+    "ownScopeBeyondComparators",
+    "packageConsumption",
+    "projectionRows",
+    "protoMain",
+    "prototypeInventory",
+    "qualityBoundary",
+    "referencePolicy",
+    "referenceSnapshots",
+    "schemaVersion",
+    "tracker",
+    "workstreams"
+  ],
+  "historicalFieldChanges": [],
+  "consumerSemanticDelta": [
+    {
+      "ID": "harness.transcript.follow-tail",
+      "changedFields": [
+        "issues"
+      ]
+    }
+  ],
+  "followTailIssues": {
+    "baseline": [
+      515,
+      519,
+      623,
+      746
+    ],
+    "current": [
+      746,
+      1323
+    ]
+  },
+  "candidateChangedKeys": [
+    "revision",
+    "sourceBindings",
+    "sourceBindingsObject",
+    "sourceObjectProof"
+  ],
+  "candidateInventoryAndEvidenceKeysPreserved": [
+    "atomicProjectionMapping",
+    "baseMain",
+    "counts",
+    "gpuiCoverageRows",
+    "kind",
+    "packageConsumption",
+    "projectionRows",
+    "prototypeInventory",
+    "shadcnStyleCoverage"
+  ],
+  "candidateMetrics": {
+    "sourceBindings": 6016,
+    "projectionRows": 57,
+    "atomicProjectionMapping": 117,
+    "gpuiCoverageRows": 468
+  },
+  "actualSourceTree": "51dce6231fd87a3382c438b9fd3b6e1adb6f5675",
+  "sourceBindingDelta": [
+    {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "baselineSha256": "89b9cc97f3543dc8de426c7e3bfabea022a4b2c4aba71624c66c14970bdb59fd",
+      "currentSha256": "d8f85993d3878aaddb2284b07a37f64bd9a2d77deea3a1c1188eeb7a706a31b3"
+    }
+  ],
+  "websiteLedgerBinding": {
+    "sha256": "d8f85993d3878aaddb2284b07a37f64bd9a2d77deea3a1c1188eeb7a706a31b3",
+    "workingTreeMatchesSourceCommit": true,
+    "gitBlob": "c2d8a2114be2c9ceac78aab3076f6b2587ab62aa",
+    "bytes": 239491
+  },
+  "issues": [],
+  "status": "passed"
+}

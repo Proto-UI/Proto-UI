@@ -7,6 +7,11 @@ export const markupDigest = (bytes) => createHash('sha256').update(bytes).digest
 
 const attribute = (node, name) => node.attrs?.find((attr) => attr.name === name)?.value;
 const descendants = (node) => (node.childNodes ?? []).flatMap((child) => [child, ...descendants(child)]);
+const serializedComparison = (left, right) => ({
+  matches: left === right,
+  expectedDigest: markupDigest(left),
+  observedDigest: markupDigest(right),
+});
 
 export function markupComparison(expected, observed) {
   if (typeof expected !== 'string' || typeof observed !== 'string') {
@@ -15,11 +20,7 @@ export function markupComparison(expected, observed) {
   // This is a parser-normalized observation, not original HTML byte equality.
   const left = serialize(parseFragment(expected));
   const right = serialize(parseFragment(observed));
-  return {
-    matches: left === right,
-    expectedDigest: markupDigest(left),
-    observedDigest: markupDigest(right),
-  };
+  return serializedComparison(left, right);
 }
 
 export function sourceBindingIssues(profile, binding) {
@@ -151,6 +152,59 @@ export function highlightedFragmentIssues(html, raw) {
   return [...new Set(issues)];
 }
 
+const codeScrollSources = [
+  'apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro',
+  'apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts',
+  'apps/www/src/components/PrototypePreviewer/code-panel-client.ts',
+];
+
+// The public ScrollArea enhancement moves the existing receiver below its
+// Viewport and withdraws only the native pre's tabindex="0". Keep this named,
+// source-bound transformation separate from an unchanged producer comparison.
+// A marker alone, an unrelated viewport, or any other markup change cannot
+// supply this observation. This remains a supplied native sample, not proof of
+// served source, arbitrary intervening mutations, or general HTML admission.
+function nativeCodeComparison(profile, observation, producer) {
+  const producerComparison = markupComparison(producer, observation?.contentHtml);
+  const result = { producerComparison, expectedComparison: producerComparison, transformation: null, issues: [] };
+  const focus = observation?.codeScrollFocus;
+  if (focus === undefined || focus === null) return result;
+
+  const sourcePaths = new Set((Array.isArray(profile?.sources) ? profile.sources : []).map((source) => source?.path));
+  if (!codeScrollSources.every((path) => sourcePaths.has(path))) {
+    result.issues.push('code scroll focus transformation source is unbound');
+  }
+  if (focus.kind !== 'public-scroll-area-viewport' || focus.ready !== true ||
+      focus.anatomyCount !== 1 || focus.anatomyTag !== 'wc-site-code-scroll-root' ||
+      focus.viewportCount !== 1 || focus.viewportTag !== 'wc-site-code-scroll-viewport' ||
+      focus.anatomyIsContainerChild !== true || focus.viewportIsAnatomyChild !== true ||
+      focus.receiverIsViewportChild !== true || focus.connected !== true ||
+      focus.ownerPreviewerId !== observation?.previewerId ||
+      !['0', '-1'].includes(focus.tabindex) || focus.role !== 'region' ||
+      typeof focus.label !== 'string' || !focus.label.trim() ||
+      !['composed', 'system'].includes(focus.projection)) {
+    result.issues.push('code scroll viewport focus ownership is unproven');
+  }
+  if (result.issues.length) return result;
+
+  const fragment = parseFragment(producer);
+  const roots = fragment.childNodes.filter((node) => node.nodeName !== '#text' || node.value.trim());
+  const pre = roots.length === 1 && roots[0].tagName === 'pre' ? roots[0] : null;
+  if (!pre || attribute(pre, 'tabindex') !== '0' ||
+      !attribute(pre, 'class')?.split(/\s+/).includes('proto-previewer__code')) {
+    result.issues.push('code scroll focus transformation producer is unrecognized');
+    return result;
+  }
+  pre.attrs = pre.attrs.filter((attr) => attr.name !== 'tabindex');
+  result.transformation = 'code-scroll-viewport-focus-handover';
+  // Parse each side once: reparsing serialized attributes would normalize a
+  // producer's character-reference-preserved CR into LF and lose raw bytes.
+  result.expectedComparison = typeof observation.contentHtml === 'string'
+    ? serializedComparison(serialize(fragment), serialize(parseFragment(observation.contentHtml)))
+    : markupComparison(null, observation.contentHtml);
+  return result;
+}
+
 /** Correlate a supplied native sample to a retained navigation response.
  * The caller records browser/runner identity. This function cannot authenticate it.
  */
@@ -174,6 +228,7 @@ export function analyzeMarkupObservation({ profile, binding, response, observati
   const runtime = observation?.runtime;
   const selected = typeof runtime === 'string' && ['wc', 'react', 'vue', 'vue2'].includes(runtime) &&
     raw && highlights && Object.hasOwn(raw, runtime) && Object.hasOwn(highlights, runtime);
+  const nativeComparison = selected ? nativeCodeComparison(profile, observation, highlights[runtime]) : null;
   if (!selected) issues.push('selected original producer output is unavailable');
   if (original?.contentCount !== 1) issues.push('original code receiver is missing or ambiguous');
   if (!observation?.connected || observation.receiverTag !== 'div' ||
@@ -184,7 +239,8 @@ export function analyzeMarkupObservation({ profile, binding, response, observati
       observation.codeMapAttribute !== original.codeMapAttribute) issues.push('native producer attributes changed');
   if (selected) {
     issues.push(...highlightedFragmentIssues(highlights[runtime], raw[runtime]));
-    if (!markupComparison(highlights[runtime], observation.contentHtml).matches) {
+    issues.push(...nativeComparison.issues);
+    if (!nativeComparison.expectedComparison.matches) {
       issues.push('native output differs from recorded producer output');
     }
     const initial = original.initialRuntime;
@@ -201,13 +257,19 @@ export function analyzeMarkupObservation({ profile, binding, response, observati
     sourceReferenceRevision: profile?.revision ?? null,
     captureRevision: binding?.revision ?? null,
     originalHTML: { responseDigest, navigationId: response?.navigationId ?? null, receiver: original },
-    nativeRuntime: { kind: 'native-runtime-output', observation },
-    matchesRecordedProducer: issues.length === 0,
+    nativeRuntime: { kind: 'native-runtime-output', observation, comparison: nativeComparison && {
+      producer: nativeComparison.producerComparison,
+      expected: nativeComparison.expectedComparison,
+      transformation: nativeComparison.transformation,
+    } },
+    matchesRecordedProducer: issues.length === 0 && nativeComparison?.producerComparison.matches === true,
+    matchesExpectedNativeOutput: issues.length === 0,
     issues: [...new Set(issues)],
     limits: [
       'Local source digests do not authenticate which source produced the response.',
       'A response match and a native DOM sample do not prove intervening mutations or arbitrary JavaScript data flow.',
       'Parser normalization is separate from original response bytes and native insertion-context equivalence.',
+      'A named code-scroll focus handover models only removal of the original pre tabindex="0" after the observed public viewport takes ownership.',
       'This finite observation cannot admit opaque snapshots or promote Website matrix rows.',
     ],
   };

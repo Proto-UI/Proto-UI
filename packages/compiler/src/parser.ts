@@ -1863,7 +1863,14 @@ class Frontend {
               !assignable(argumentValue(value), expected)
             )
               rejectNode(declaration, 'PUI1006', 'Initializer does not satisfy its declared type.');
-            if (expected && !sameType(value.type, expected))
+            const constant = !mutable ? scalarConstant(value) : undefined;
+            // A checked immutable nullish initializer remains that exact value.
+            // A wider annotation does not introduce optional own properties.
+            if (
+              expected &&
+              !sameType(value.type, expected) &&
+              !(constant && constant.value == null)
+            )
               value = { kind: 'narrow', value, type: expected, span: sourceSpan(init) };
             const aliasName = value.kind === 'reference' ? value.name : undefined;
             const alias =

@@ -1,0 +1,103 @@
+{
+  "task": "Read-only final CLI candidate integration and generated-style dependency review",
+  "fixed_base": "1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62",
+  "reviewed_main": "b17c4f88ea4a333da042fd778bf10d657c39f772",
+  "scope": "No Device, CI, GitHub write, test execution, or generator invocation performed by this peer.",
+  "method": "Pinned GitHub content fetch for each of the four paths. Compare API file array was capped at 300, so absence from that list was not used as evidence.",
+  "paths": [
+    {
+      "path": "packages/cli/src/services/hook-source-summary.ts",
+      "base_git_blob": "749def0cca82b67a1705556c3f369b28bd169d92",
+      "current_git_blob": "749def0cca82b67a1705556c3f369b28bd169d92",
+      "current_fetch_status": "ok",
+      "same_existing_blob": true,
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/b17c4f88ea4a333da042fd778bf10d657c39f772/packages/cli/src/services/hook-source-summary.ts"
+    },
+    {
+      "path": "packages/cli/src/services/prototype-style-tokens.ts",
+      "base_git_blob": "39d4875383955fa976e6fb9230fa52421656057f",
+      "current_git_blob": "39d4875383955fa976e6fb9230fa52421656057f",
+      "current_fetch_status": "ok",
+      "same_existing_blob": true,
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/b17c4f88ea4a333da042fd778bf10d657c39f772/packages/cli/src/services/prototype-style-tokens.ts"
+    },
+    {
+      "path": "packages/cli/test/hook-source-props-initialization.test.ts",
+      "base_git_blob": null,
+      "current_git_blob": null,
+      "current_fetch_status": "NOT_FOUND",
+      "same_existing_blob": null,
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/b17c4f88ea4a333da042fd778bf10d657c39f772/packages/cli/test/hook-source-props-initialization.test.ts"
+    },
+    {
+      "path": "packages/cli/README.md",
+      "base_git_blob": "1349d953c6e933a8495f75111513e899c725613f",
+      "current_git_blob": "1349d953c6e933a8495f75111513e899c725613f",
+      "current_fetch_status": "ok",
+      "same_existing_blob": true,
+      "url": "https://github.com/Proto-UI/Proto-UI/blob/b17c4f88ea4a333da042fd778bf10d657c39f772/packages/cli/README.md"
+    }
+  ],
+  "conclusion": "All three existing candidate paths are exact original base blobs; the new regression file is absent on reviewed main. The existing four-file candidate patch has no textual conflict on these paths. Parent must perform normal whole-tree merge and validate the resulting tree.",
+  "candidate_patch": {
+    "path": "standard-runtime-root-style-candidate.patch",
+    "sha256": "385acda7a380945e1f3914cd99a43725907c6251e72b365525bfaa7cbfeee8d1"
+  },
+  "generated_gate": {
+    "package_json_blob": "471ed66d1cfd3d471fd159813c14d94aeafcedb3",
+    "command": "corepack pnpm@10.32.1 -s check:styles:preset",
+    "dependency_chain": "Three token generators -> scripts/styles/family-style-closure.ts -> collectProtoStyleTokensFromFiles in the changed collector.",
+    "family_closure_blob": "c80a74817dece25b12ca2710d014f5419eda4046",
+    "generators": [
+      {
+        "path": "scripts/styles/generate-shadcn-style-tokens.ts",
+        "blob": "64ea169220c191e437931826c1ceb9ccb9bf8c88"
+      },
+      {
+        "path": "scripts/styles/generate-brutalist-style-tokens.ts",
+        "blob": "3ea5902f26418a2be1b4d19b7c1440b0fb66c95f"
+      },
+      {
+        "path": "scripts/styles/generate-draft-family-style-tokens.ts",
+        "blob": "ddf46ba1caac7ad9ac13fc6f98ed4bd68b5d0b49"
+      }
+    ],
+    "current_outputs": [
+      {
+        "path": "packages/cli/src/generated/shadcn-style-tokens.ts",
+        "blob": "86a1d880aa100320fd99497ade5d0d2f56778f2c"
+      },
+      {
+        "path": "packages/cli/src/generated/brutalist-style-tokens.ts",
+        "blob": "0d9e531305235aa362742b189c2ab6e26c852331"
+      },
+      {
+        "path": "packages/cli/src/generated/draft-family-style-tokens.ts",
+        "blob": "125e3ccdc8837b93fe33e81acd561f0c676932e7"
+      }
+    ],
+    "preceding_merge": {
+      "pr": "https://github.com/Proto-UI/Proto-UI/pull/1778",
+      "merge_commit": "d5d9849f2745ddad7f1002c2d080c43b405647cc",
+      "head": "d168220049d39ff617824690fae3f262ce9fb5a0",
+      "observed": "The merged generator-only diff removed data-[selected]:bg-background and data-[selected]:shadow-sm from Shadcn, alongside other source-derived token changes. Current main Shadcn manifest lacks these two tokens."
+    },
+    "expected_impact": "At least Shadcn needs regeneration because the proven actual Tabs path now contributes these Rule variants. Other family outputs are affected by the same collector and must be determined by actual generation, without guessing exact output deltas.",
+    "independent_outputs": "Brutalist theme imports its theme source directly. Shadcn motion palette parses legacy theme variable literal directly. Neither uses this collector; no change predicted from this four-file patch.",
+    "recommendation": "After normal merge to the fixed main, retain first check result, run normal styles:preset:generate, review every output delta, keep only actual generated changes, and rerun the unmodified check. Preserve #1778 source fingerprint and independent additions.",
+    "limitations": "This is static dependency and exact-blob review. It does not claim generator pass, exact final token counts, full-tree merge success, or behavioral compatibility on merged main."
+  },
+  "latest_behavior_reported_by_parent": [
+    {
+      "source": "Parent /root and independent peer /root/s7_acceptance messages",
+      "candidate": "summary3af / collector e621 + test3951",
+      "result": "19 total,18 pass,1 fail,0 skip,5455 ms. Only same Rule token Root/Template collision fails."
+    },
+    {
+      "source": "Parent /root and independent peer /root/s7_acceptance messages",
+      "candidate": "summary3af / collector60a + test3951",
+      "result": "19/19 pass,0 skip,4336 ms."
+    }
+  ],
+  "next_binding": "Post-format hashes, committed source SHA/tree, normal main merge, generated outputs, original79, related602 and actual typecheck scope are pending parent's independent execution."
+}

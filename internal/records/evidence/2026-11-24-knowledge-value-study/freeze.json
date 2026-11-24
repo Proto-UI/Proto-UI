@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "kind": "public-development-controlled-knowledge-and-zero-marginal-cost-study",
+  "issues": [
+    734,
+    751
+  ],
+  "frozenAt": "2026-11-23T19:40:12.235609+00:00",
+  "status": "frozen-before-first-participant-release",
+  "taskSha256": "4aee6df56c7ee6a2e998e867ecbf1b507e9f4f8989c986415415fed8fe9fa155",
+  "knowledgeSha256": "b45c258a5f6407aa8943d4dde6bec100a2feca704b68ce334a074fa70461cc16",
+  "lockSha256": "ecc57929f0f6759784f818c2405306ac8e2c1d10aa6f96b91bf555635c21dc66",
+  "evaluatorSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+  "sourceBase": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "scope": "One public manual Tabs task; React18.3.1/react-dom18.3.1/Vite6.4.1, pinned Radix1.1.13 available to all; library arm must integrate Radix. No deterministic Tabs path is admitted in this study.",
+  "repeats": 3,
+  "arms": [
+    "library",
+    "unassisted",
+    "knowledge"
+  ],
+  "releaseOrders": [
+    [
+      "library",
+      "unassisted",
+      "knowledge"
+    ],
+    [
+      "unassisted",
+      "knowledge",
+      "library"
+    ],
+    [
+      "knowledge",
+      "library",
+      "unassisted"
+    ]
+  ],
+  "models": {
+    "configuredAssistant": "GPT-6 Astra Pro",
+    "forkHistory": "none",
+    "override": false,
+    "providerModelSnapshot": null,
+    "reasoningSamplingSeed": null,
+    "unavailableReason": "Provider does not expose these fields through the participant tool/session; inherited configuration is held constant, exact hidden backend identity is not asserted."
+  },
+  "tools": {
+    "participant": "same exec/file editing/public-search capabilities; local Node24.22.3/npm11.19.1; clean npm ci and production build",
+    "observer": {
+      "node": "v24.22.3",
+      "browser": "Google Chrome for Testing 145.0.7632.6",
+      "browserSha256": "481fea1516a1f2b76454664272f12cd9dd1f20117b21e1f1498e08bc7f872c00",
+      "playwrightCore": "1.58.2",
+      "os": "doesvm Linux x64",
+      "sandbox": true,
+      "temporaryDirectory": "/tank/shared/projects/proto-ui-agent/t0d7d"
+    },
+    "isolation": "Separate fresh forks and packet directories; instruction enforced only, not secure filesystem isolation. No formal blind/held-out claim."
+  },
+  "budget": {
+    "initialMinutes": 10,
+    "initialToolCalls": 40,
+    "maximumRepairRounds": 3,
+    "repairMinutes": 5,
+    "repairToolCalls": 20,
+    "correctnessTarget": "22/22 task checks with no runtime or cleanup errors; stop at first complete observation or explicit refusal/abandonment/budget exhaustion. Protocol limits are instructed, actual deviations retained.",
+    "noImplementationAssistance": "Feedback contains actual failed observation and relevant task requirement, not replacement code or hidden oracle."
+  },
+  "scoring": {
+    "checks": 22,
+    "firstFailure": "Evaluator is sequential; later checks are not-run, never counted as passes. Record full vector and independent adjudication.",
+    "initialEntryDecision": "Only before the first keyboard entry, a single focusable tablist may delegate to selected tab; real Tab must reach selected tab and all later states require one enabled tab stop.",
+    "legalStructures": [
+      "conditional panels",
+      "retained hidden panels with one reciprocal owner each",
+      "accessible-name-preserving decoration",
+      "focusable panel children",
+      "ordinary counter prose"
+    ],
+    "disputes": "Keep raw automated result. Any code-supported equivalent behavior or count prose/numeric ambiguity is an oracle dispute for separate independent adjudication, not an automatic product defect. Do not alter the frozen evaluator to fit participants.",
+    "limits": [
+      "No actual screen-reader claim",
+      "Bounded 12-Tab reachability is not universal keyboard accessibility",
+      "Live DOM/role observation is not proof of announcement by AT",
+      "No business composition or complete library conclusion"
+    ]
+  },
+  "maintenance": {
+    "selectedRuns": [
+      "library-1",
+      "unassisted-1",
+      "knowledge-1"
+    ],
+    "afterInitialOutcome": "Add a standard More information link inside each rendered active panel (href #reference-information), preserve every task behavior, and change the polite count wording to Completed actions: N. Keep dependency pins.",
+    "budgetMinutes": 5,
+    "maximumFeedbackRepairRounds": 1,
+    "oracle": "same frozen 22 checks plus source-bound confirmation of the requested link and wording",
+    "scope": "Small in-place content change, not long-term or cross-target maintenance economics"
+  },
+  "stressScenario": {
+    "assumption": "Implementation iterations and test execution have zero marginal token/test expense for interpretation; this is an adverse accounting assumption, not a measurement or prediction.",
+    "availableComparison": "unassisted versus knowledge-assisted, with library integration reported separately; same collected initial runs and repair trajectories serve #734 and #751 and are not independent replications.",
+    "retainedCosts": [
+      "oracle development and ambiguity adjudication",
+      "human/evaluator/coordination interventions",
+      "real elapsed time and commands",
+      "unavailable actual token/compute/billing recorded as null with reason"
+    ],
+    "limits": "Fixed finite repair cap; no future AI forecast, no broad deterministic projection advantage, no attribution of any measured equality to statistical equivalence."
+  }
+}

@@ -1793,6 +1793,8 @@ impl __PuiNativeRecordValue {
             return `Value::number(${rustMathRound(`(${args[0]}).scalar_number()`)})`;
           case 'math.floor':
             return `Value::number((${args[0]}).scalar_number().floor())`;
+          case 'math.abs':
+            return `Value::number((${args[0]}).scalar_number().abs())`;
           case 'string': {
             if (!args.length) return 'Value::string("")';
             // GPUI values coerce scalars exactly as ECMAScript does; a
@@ -1829,6 +1831,20 @@ impl __PuiNativeRecordValue {
             return `freeze(${args[0]})`;
           case 'object.hasOwn':
             return `has_own(&(${args[0]}), &(${args[1]}))`;
+          case 'array.isArray':
+            if (snapshotAbi(node.arguments[0]) || recordAbi(node.arguments[0])) {
+              diagnostics.push({
+                code: 'PUI4003',
+                category: 'unsupported-input',
+                message:
+                  'GPUI Array.isArray currently inspects ordinary values, not native template aggregates.',
+                span: node.span,
+              });
+              return 'Value::boolean(false)';
+            }
+            // Native arrays retain their identity; JSON ingress may retain its
+            // own array tag. Inspect the value once without reading properties.
+            return `Value::boolean(matches!(&(${args[0]}), Value::Array(_) | Value::Json(Json::Array(_))))`;
           case 'array.every':
             return `array_every(${args[0]}, ${args[1]})`;
           case 'array.includes': {

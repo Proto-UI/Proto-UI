@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded-reading-regression-evidence",
+  "repository": "Proto-UI/Proto-UI",
+  "issue": 1099,
+  "integrationTracking": 1673,
+  "baseline": "88fc0883bec70abbc0d7505d88370657c279639e",
+  "integratedBase": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "sourceCommit": "fe134ee3a08c2875d7cee49899034ffdd442e441",
+  "environment": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "vitest": "2.1.9",
+    "dom": "happy-dom; deterministic finite host facts, no native browser"
+  },
+  "sources": [
+    {
+      "path": "packages/prototypes/base/src/message-scroller/reading-plan.ts",
+      "sha256": "564e4ebc8a70908be83b6d44383b8c5b3df78e672c44e7e41ae310ebc8ec84b4"
+    },
+    {
+      "path": "packages/prototypes/base/test/message-scroller-reading.test.ts",
+      "sha256": "eed588394fc372fd6470c2e093af1595d483854c697a218c237ce64052b06c9d"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-MESSAGE-SCROLLER.yaml",
+      "sha256": "8ca9062b074969f5194cfc17c63e64042516105429ce04108d04cd58c896b5a2"
+    },
+    {
+      "path": "spec/tests/T-BASE-MESSAGE-SCROLLER-READING-0001.yaml",
+      "sha256": "2adeeebc2654542eaeaba584dbdf65b8360a69ca1a6ebb9976e37e999895eafd"
+    }
+  ],
+  "rawReceipts": [
+    {
+      "file": "reading-first.json",
+      "originalSha256": "ce67b45b7d04f64810dafedb4f53321f3a74d7eda455ccbfc07b60eefbf0097c",
+      "publishedSha256": "927094b338b2d3d7a69c4690e3c03d9a8cad9cd3bc414f73f9ee305967f71eaa",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "visibility-boundaries-red.json",
+      "originalSha256": "d3f19580321d62981c320e231a830cff94d699a857a71511d323202ee40aed6d",
+      "publishedSha256": "e21456c7c0fc9bb733fa827de774f21a68c32c72a25c1729c5216c15e15280d7",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "integrated-reading.json",
+      "originalSha256": "a23ea9495d70b0b2f61bd3ba8cdfc15606635c2d892ada511bca92cc3cdec8cd",
+      "publishedSha256": "61165f3853a190c0e90dfaac9b22a371bacd2c76e650fd397ca391f6298f4d3f",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "independent-reading-review.json",
+      "originalSha256": "0b6cdd0f2f20f4f26c27c82913c6c9beb9e34870b76e3549f16cea85c484226c",
+      "publishedSha256": "2fc691eccb6e5e96c483a4cf176d492a3e514f63bc4bc84116f3178fed18a885",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "independent-review-summary.json",
+      "originalSha256": "51e329d56dfab29612d5b605eee2e27c0aded50d010afd7249bb64ea63ee7bef",
+      "publishedSha256": "826af43d92c268706159af2b4209bc1c4521838603d5933a0ce9ed68ccd320ba",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "spec-graph-accepted.json",
+      "originalSha256": "010155f8d0ec53c2687cbab8ce47191c69dd743ca89804ba12cff21e81eae697",
+      "publishedSha256": "e4020b3e9967e528984a84c84842971ccafd3cdef76a0d87c3101028bddaae8a",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "spec-graph-baseline-control.json",
+      "originalSha256": "273d7534d8c4c80d81afb3281001355d13019700d0819a93be60754f3a66e7aa",
+      "publishedSha256": "9ff035731458861ca1147c6028a588586c1fac587f36b050df3d4fd030846aaa",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "catalog-before.log",
+      "originalSha256": "65e3df92b64173523b91d4b623155b8260c527170abb79adff854d248875b09c",
+      "publishedSha256": "65e3df92b64173523b91d4b623155b8260c527170abb79adff854d248875b09c",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "integrated-catalog.log",
+      "originalSha256": "e378dd930287bbadba61ad6d5b6ac6b6c02ea9875b5a506eaa3791012f21006f",
+      "publishedSha256": "e378dd930287bbadba61ad6d5b6ac6b6c02ea9875b5a506eaa3791012f21006f",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "spec-authoring-final.log",
+      "originalSha256": "9735c64d49b717e7366c67ec07d98f14bb55001ac9d3b56d55a407c824df3606",
+      "publishedSha256": "818f989755956fde51397f9e8e71fcb1f9470ebd51fc103da3dc2737ad86fbe6",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "spec-authoring-green.log",
+      "originalSha256": "eedb0d2b0a2830c155c3f2eadd6db0a139280420bf7e1d4437be4cbf85f64472",
+      "publishedSha256": "dfb789880445232d9f3e24bca035d6ca0f6f58dcd278f28c4874399116da8af2",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "integrated-spec-authoring.log",
+      "originalSha256": "f31085f2f521978283800eae9d7f0df04b021ffaac619cb322cac7642eb9be1c",
+      "publishedSha256": "f31085f2f521978283800eae9d7f0df04b021ffaac619cb322cac7642eb9be1c",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "integrated-projection.log",
+      "originalSha256": "33b9a143d6c3103ca7eb124f9b8b30bc06d33faaf408e844787f858339a81630",
+      "publishedSha256": "33b9a143d6c3103ca7eb124f9b8b30bc06d33faaf408e844787f858339a81630",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "integrated-spec-graph.json",
+      "originalSha256": "1ab90b29a795fd72643a476e94f9a8d84987a3498e866d1e02536262facc32d4",
+      "publishedSha256": "4460732d096b30396d316d176a41b87ac03db9000816ad24c3702b3f223b1a0d",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "baseline-materialization.json",
+      "originalSha256": "3d95e54305da88f20491f6a312bff01e3c91cd673d65f72a34ebee070d4152b3",
+      "publishedSha256": "3d95e54305da88f20491f6a312bff01e3c91cd673d65f72a34ebee070d4152b3",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "baseline-workspace-valid.json",
+      "originalSha256": "e9d189b672deb4239e8b04b3d18201edbbf3c075358cab77ac6eb8917e5245c7",
+      "publishedSha256": "e9d189b672deb4239e8b04b3d18201edbbf3c075358cab77ac6eb8917e5245c7",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "spec-graph-baseline-valid.json",
+      "originalSha256": "82e3cffec479983aca43959be94c08344631f3b308f1eacbfc217fe218f2e92e",
+      "publishedSha256": "9ad683a04cd0e875b078f513dd58eabd1ea682f51ae48ba4b05e4eebaecd1141",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    },
+    {
+      "file": "baseline-workspace-issues.json",
+      "originalSha256": "19201110906f801c5541f70fe1c3a0acb3e88f5a1eb4c05a43ec43d3c65605da",
+      "publishedSha256": "54af1a4f8085f5d795ee436b2bbec2519a872aa4122f7dac090d8e0f91f19370",
+      "normalization": "Local checkout/dependency/evidence prefixes and JSON formatting only; all assertion values, statuses and failures preserved."
+    }
+  ],
+  "claims": {
+    "newConformance": {
+      "passed": 33,
+      "failed": 0
+    },
+    "integratedReading": {
+      "files": 4,
+      "passed": 36,
+      "failed": 0,
+      "skipped": 0
+    },
+    "baselineVisibilityRed": {
+      "passed": 30,
+      "failed": 3,
+      "skipped": 0
+    },
+    "preintegrationGraph": {
+      "passed": 25,
+      "failed": 4,
+      "skipped": 0,
+      "failures": "5000ms timeout in three existing Checkbox baseline tests and one Dropdown evidence test"
+    },
+    "unmodifiedBaselineControl": {
+      "passed": 2,
+      "failed": 2,
+      "skipped": 0,
+      "failures": "Two workspace.issues assertion failures (103 issues), not timeouts; the sparse control is not valid attribution evidence for the candidate timeouts."
+    },
+    "specLifecycle": "draft remains draft",
+    "platformApproval": false,
+    "validBaselineControl": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "workspaceIssues": 0,
+      "materializedFiles": 81,
+      "materializedBytes": 1063614,
+      "source": "Exact baseline 88fc0883 blobs; no test or implementation change"
+    },
+    "integratedGraph": {
+      "files": 7,
+      "passed": 29,
+      "failed": 0,
+      "skipped": 0,
+      "sourceCommit": "fe134ee3a08c2875d7cee49899034ffdd442e441",
+      "budget": "Default 5000ms, one worker, no file parallelism"
+    },
+    "scopedTypes": {
+      "exitCode": 0,
+      "command": "corepack pnpm@10.32.1 exec tsc -p internal/records/evidence/2026-11-24-message-scroller-reading/typecheck.json --noEmit",
+      "stdout": "",
+      "stderr": "",
+      "sourceCommit": "fe134ee3a08c2875d7cee49899034ffdd442e441",
+      "strictness": "Unchanged inherited repository tsconfig"
+    }
+  },
+  "limitations": [
+    "Native browser, physical input, assistive technology and non-Web admission not tested",
+    "No position restore-ticket replay assertion",
+    "No full workspace, package, release-cycle or platform review acceptance claimed",
+    "Preintegration graph timeouts and invalid sparse-control failures remain historical; later valid runs do not change those results or establish a complete cause."
+  ]
+}

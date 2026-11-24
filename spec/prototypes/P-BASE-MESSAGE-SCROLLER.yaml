@@ -36,9 +36,13 @@ dependsOn:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
 verifies:
-  tests: []
+  tests:
+    - id: T-BASE-MESSAGE-SCROLLER-READING-0001
+      since: 0.3.0-alpha.2
 sources:
   - path: packages/prototypes/base/src/message-scroller/
+  - path: packages/prototypes/base/src/message-scroller/reading.proto.ts
+  - path: packages/prototypes/base/src/message-scroller/reading-plan.ts
 openQuestions:
   - id: P-BASE-MESSAGE-SCROLLER-Q-ADMISSION
     question:
@@ -47,6 +51,9 @@ openQuestions:
     blocks:
       - activation:P-BASE-MESSAGE-SCROLLER
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Bound the existing draft reading Hook to its concrete declaration and criterion-level conformance tests without promoting family admission.
   - version: 0.3.0-alpha.2
     change: revised
     summary: Added the opt-in public stable-key reading Hook, finite capture/restore/selection plans and explicit host measurement and lease boundaries; browser and native admission remains draft.

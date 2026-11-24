@@ -8,6 +8,8 @@ Write crisp, natural, developer-friendly component documentation on par with Bas
 
 ## 1. Remove defensive hedging and internal audit boilerplate
 
+Preserve facts a developer needs to choose an API or host: catalog lifecycle, published versus workspace-only availability, exact supported versions, unavailable capabilities, and known limitations. State them briefly beside the relevant preview, installation or usage instructions. A draft catalog identity must remain visibly **early draft** when its status is discussed; a runtime selector lists preview choices and does not establish compatibility or completed host validation. Keep a concise link to the governing test coverage when that distinction affects use. Shortening prose must not remove these facts or turn them into an unqualified compatibility claim.
+
 - **Do not include site-wide compliance or acceptance disclaimers** in component pages, such as:
   - `这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成`
   - `当前为 Draft 源码工作…不宣称 Finf 验收通过`

@@ -1,0 +1,1 @@
+{"name": "prototype-coverage", "pid": 1698354, "startedAt": "2026-11-24T06:15:19.241865+00:00", "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs"], "outerTimeoutSeconds": 300}

@@ -1,0 +1,23 @@
+✔ bounded real decoder verifies faststart.mp4 with seekable sealed input (517.410229ms)
+✔ bounded real decoder verifies moov-at-end.mp4 with seekable sealed input (221.30084ms)
+✔ bounded real decoder verifies colors.mov with seekable sealed input (210.230247ms)
+✔ bounded real decoder verifies colors.mkv with seekable sealed input (213.151339ms)
+✔ bounded real decoder verifies colors.webm with seekable sealed input (195.895023ms)
+✔ bounded decoder rejects truncation rather than accepting a decoded prefix (200.285251ms)
+✔ bounded decoder enforces the bytes limit (0.323597ms)
+✔ bounded decoder enforces the pixels limit (106.340272ms)
+✔ bounded decoder enforces the frames limit (195.686793ms)
+✔ bounded decoder enforces the duration limit (115.94821ms)
+✔ bounded decoder enforces the wall time limit (2.342021ms)
+✔ PATH-prepended fake media tools cannot substitute for the distro toolchain (204.716511ms)
+✔ a genuine one-frame clip cannot satisfy multi-frame evidence (195.473712ms)
+✔ multiple encoded frames with identical pixels cannot satisfy a transition (188.024866ms)
+✔ CI version receipt and baseline checks use the same absolute distro tools (334.653686ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3093.052994

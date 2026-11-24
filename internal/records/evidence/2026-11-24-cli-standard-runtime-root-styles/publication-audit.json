@@ -1,0 +1,8 @@
+{
+  "scope": "Selected controlled source-analysis fixtures, command output, source bindings and review receipts. No participant collection or private service requests.",
+  "credentialPatternFlags": [],
+  "symlinks": [],
+  "originalCliFailureHead": "3edafee1ea871240015b99aaebd6cf8064db7ba3",
+  "testedProductHead": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+  "finalValidationHead": "28037549e478bc76f95a7192d7ff643330044a03"
+}

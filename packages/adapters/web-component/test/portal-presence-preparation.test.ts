@@ -132,7 +132,7 @@ function fixture(scope: 'document' | 'shadow' = 'document') {
       .spyOn(document.body, 'appendChild')
       .mockImplementation(<T extends Node>(node: T) => {
         const result = appendChild(node);
-        if (node === host) {
+        if (Object.is(node, host)) {
           observed = true;
           expect(host.parentElement).toBe(document.body);
           expect(host.hasAttribute(PUI_PORTAL_PREPARING_ATTR)).toBe(true);

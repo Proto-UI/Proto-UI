@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-24",
+  "scope": "Restore standard Runtime Root CSS resources and retain conservative source-analysis boundaries after the b939 integration. This does not certify ordinary source readiness or release acceptance.",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "baseRevision": "473f868a47adea3c71ab90bc73e98acc1e6e9025",
+  "sources": {
+    "rootCssProjection": "Proto-UI/Proto-UI#1785 exact proposed source delta, reconciled with current local-helper replay",
+    "earlierRegressionRepairs": [
+      "private closed token-map property reads lost in b939",
+      "spread iteration evaluation order and argument-position conservatism",
+      "canonical setup reference and deferred capability capture boundaries"
+    ],
+    "thirdPartyImplementation": "none; repository-owned implementation and new regression cases",
+    "author": "Codex <codex@openai.com>"
+  },
+  "observedFailure": {
+    "brutalistToggleTokensBefore": 35,
+    "activeVariantsBefore": 0,
+    "brutalistToggleTokensAfter": 48,
+    "restoredExamples": [
+      "data-[active]:bg-main",
+      "data-[active]:text-main-foreground",
+      "data-[active]:data-[pressed]:shadow-[inset_0_0_0_2px_#000]"
+    ],
+    "baselineCounterexamples": "Six actual assertion failures in spread ordering and private map extraction were retained before the integration repairs."
+  },
+  "boundaries": [
+    "Only a separately constructed standard Runtime instance of the concrete default Prototype can use the fresh Props initialization scenario.",
+    "Only final immutable Root CSS token strings leave the isolated scenario; ordinary source queries remain conservative.",
+    "Literal Props prefixes must be closed over the complete preceding interval, with no getter, external call, borrowed setup, mutable schema or unproven registration.",
+    "Private token maps reject writes, escape, export, accessors, spread and unproven index keys.",
+    "Spread evaluation observes iteration before later arguments and never maps expanded arguments by syntax position.",
+    "An actual Core/Runtime reentry counterexample proves the former opaque-object-spread positive unsound. The exact opaque expression remains unresolved; a closed inline object spread positive is retained.",
+    "Prototype behavior, browser matchers, deadlines and skips are unchanged."
+  ],
+  "validation": [
+    {
+      "name": "integrated focused source suites",
+      "files": 7,
+      "passedAssertions": 203,
+      "failedAssertions": 0,
+      "log": "cli-root-integrated.log.gz"
+    },
+    {
+      "name": "final Props initialization suite including actual Toggle",
+      "passedAssertions": 20,
+      "failedAssertions": 0,
+      "log": "toggle-resource-final.log.gz"
+    },
+    {
+      "name": "actual Core/Runtime projector reentry controls",
+      "passedAssertions": 2,
+      "failedAssertions": 0,
+      "log": "runtime-projector-control.log.gz"
+    },
+    {
+      "name": "default-heap official preset generation attempt",
+      "exitCode": 137,
+      "result": "Shadcn and Brutalist outputs generated; draft-family stage interrupted. No OOM attribution or passing complete generation claim."
+    },
+    {
+      "name": "full related CLI replay and complete bounded-heap preset generation",
+      "result": "in progress when source was frozen; terminal receipts required separately"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": "packages/cli/README.md",
+      "sha256": "608e5b47e582d73f67ed985a6db10184d0539e6b386a7e3cf9ed294f1b6602a0"
+    },
+    {
+      "path": "packages/cli/src/services/hook-source-summary.ts",
+      "sha256": "3af59befabc925beb86b6bad91b8a6d5fcaf4f796895cf79a468c8252ce68748"
+    },
+    {
+      "path": "packages/cli/src/services/lowered-hook-coverage.ts",
+      "sha256": "c9d5087b3b26147204051113f7e41ff4e9d370a9cb93b69f9db06f7e29539ea4"
+    },
+    {
+      "path": "packages/cli/src/services/prototype-style-tokens.ts",
+      "sha256": "bdc3f221a1d01d9019bc645cee90673d196dd5cf91f2d9a64c06b894bcec0b56"
+    },
+    {
+      "path": "packages/cli/test/prototype-style-tokens.test.ts",
+      "sha256": "526665ba7d5f8d362e335eb5a275abe8ea3c104739a1f1cce5bebf0045f09515"
+    },
+    {
+      "path": "packages/cli/test/hook-source-projector-reentry.runtime.test.ts",
+      "sha256": "e6a1c59356741dc655e1576d0c784b5eb3d7661653c7489b3a218c6067a007f3"
+    },
+    {
+      "path": "packages/cli/test/hook-source-projector-reentry.source.test.ts",
+      "sha256": "ecac3e37887527f7ec4a182446a382012e9dada53970683946895f8cd1afbec7"
+    },
+    {
+      "path": "packages/cli/test/hook-source-props-initialization.test.ts",
+      "sha256": "b073bf55196f8a6b35bc423e6911fd519313c5985aead9275861d7e3871461b7"
+    },
+    {
+      "path": "packages/cli/test/hook-source-spread-registration.test.ts",
+      "sha256": "6de8d95a66a9387ddf46f4f25f4fc60aa19896c3a32986caf2f9c3aee4314781"
+    }
+  ],
+  "commandEvidence": [
+    {
+      "path": "internal/records/evidence/2026-11-24-cli-style-resource-integration/cli-integration-controls-before.log.gz",
+      "sha256": "c2c1a7134b42668af18d242797f68d2395f1dbaa6f0c66a992a97c89dd28aa10",
+      "uncompressedSha256": "875e5badec71cc7e0e9aa3d3d05039af67a66657a9d4a9f7bda98674a7114e3e"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-cli-style-resource-integration/runtime-projector-control.log.gz",
+      "sha256": "e97605d23db8c90e902901c6f9708c9f139a2c3c240e67d58d8516f6f08f1824",
+      "uncompressedSha256": "6c1d1a42b05e4815da9a76c91f5026536eade82a52009d8b7e3cfb172cb840d8"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-cli-style-resource-integration/cli-root-integrated.log.gz",
+      "sha256": "3955346d059abeb9d01ca73bc62d33f34b27728f7f4495ec19e845b6d2de56a6",
+      "uncompressedSha256": "671e3f4c2fc8b3855698b7da8c12ca6a0af6c793d34e8acd3a99513d7b3050f7"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-cli-style-resource-integration/toggle-resource-final.log.gz",
+      "sha256": "50bb293ad33afd4cd6c83217b187a968e8ac63514ce5374e48f2efac4c261d37",
+      "uncompressedSha256": "c8afd085bf77edd906eedbf0df22a01a0e0bcd5a41a800380eaa196a35320bd9"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-cli-style-resource-integration/styles-preset-generate.log.gz",
+      "sha256": "77bfcb24c62e2204b85bbcc1fa0137bd482aa10ce4cf5b9b46e3e29b5922f8bb",
+      "uncompressedSha256": "8c9d5d42db97027aa283c8e3033d2f31774690977c869ce17c63142bd90e5acb"
+    }
+  ],
+  "acceptance": "partial; independent technical review, generated outputs, final union, true browser feedback and full release gates are separately bound"
+}

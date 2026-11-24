@@ -22,6 +22,24 @@ export default definePrototype({
       negativeInfinity: -1 / 0 + '',
       nan: 0 / 0 + '',
     }));
+    def.expose.method('absoluteValues', () => {
+      let evaluations = 0;
+      const next = () => {
+        evaluations++;
+        return -3;
+      };
+      const once = Math.abs(next());
+      const nan = Math.abs(0 / 0);
+      return {
+        negative: Math.abs(-12.5),
+        positive: Math.abs(12.5),
+        negativeZeroBecomesPositive: 1 / Math.abs(-0) > 0,
+        infinity: Math.abs(-1 / 0) === 1 / 0,
+        nan: nan !== nan,
+        once,
+        evaluations,
+      };
+    });
     let count = 0;
     let trace = '';
     const step = (value: number) => {
@@ -94,6 +112,41 @@ export default definePrototype({
       nil: String(null),
       missing: String(undefined),
     }));
+    const inspectArray = (input: unknown) => Array.isArray(input);
+    def.expose.method(
+      'isArray',
+      (input?: number[] | { length: number } | string | number | boolean | null) =>
+        inspectArray(input)
+    );
+    def.expose.method('arrayKinds', () => {
+      let observations = 0;
+      const values = [1, 2];
+      const tuple = [1, 'two'] as const;
+      const readonlyValues: readonly number[] = values;
+      const once = () => {
+        observations += 10;
+        return values;
+      };
+      const result = {
+        array: Array.isArray(values),
+        empty: Array.isArray([]),
+        tuple: Array.isArray(tuple),
+        readonly: Array.isArray(readonlyValues),
+        frozen: Array.isArray(Object.freeze([1])),
+        record: Array.isArray({ '0': 1, length: 1 }),
+        text: Array.isArray('[]'),
+        number: Array.isArray(1),
+        boolean: Array.isArray(false),
+        nil: Array.isArray(null),
+        missing: Array.isArray(undefined),
+        callable: Array.isArray(() => {
+          observations += 100;
+          return values;
+        }),
+        once: Array.isArray(once()),
+      };
+      return { ...result, observations };
+    });
     def.expose.method('assignment', () => {
       trace = '';
       const nested = { value: 3 };

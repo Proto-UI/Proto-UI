@@ -175,12 +175,6 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   ...DIAGNOSTIC_IMPORT_ALLOWLIST,
   ...BROWSER_COMPILER_IMPORT_ALLOWLIST,
-  // The feedback presence projector is reached by the website's presence
-  // projection. Its imports stay inside Core and the motion sampler it owns.
-  'packages/modules/feedback/src/presence/projector.ts': Object.freeze({
-    sourceSha256: '3a5c3749050071ad5308800c2619c36e37ac56462a5ee34c718971655531e87c',
-    specifiers: Object.freeze(['@proto.ui/core', '../motion/sampler', './sink']),
-  }),
   // The authored Form demo consumes only the public Field request type.
   // Its interactive controller remains owned by the existing blocked demo row.
   'apps/www/src/content/docs/form-validation-demo.shared.ts': Object.freeze({
@@ -346,9 +340,6 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // These reviewed edges admit neither sibling modules nor foreign consumers.
   'packages/adapters/base/src/material/contact-profile.ts': Object.freeze({
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/liquidgl-kernel.generated']),
-  }),
-  'packages/adapters/base/src/material/source.ts': Object.freeze({
-    resolvedPaths: Object.freeze(['packages/adapters/base/src/material/contact-carrier']),
   }),
   'packages/adapters/base/src/material/contact-carrier.ts': Object.freeze({
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/paint-mutations']),
@@ -12966,6 +12957,17 @@ function validateWebsiteSourceBindings(
         continue;
       }
     }
+    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
+      // The compiler browser sources are not derived from a Website Path cell,
+      // so their reviewed owner is asserted here instead of by the grouped
+      // binding rule. Keep the exact host validation below independent so
+      // a wrong owner retains both diagnostics without bypassing source checks.
+      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
+        issues.push(
+          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
+        );
+      }
+    }
     if (Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath)) {
       const expected = BROWSER_COMPILER_INTERACTIVE_SOURCES[sourcePath];
       try {
@@ -13019,17 +13021,6 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact optical host source, digest and owner remain unverified`
-        );
-        continue;
-      }
-    }
-    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
-      // The compiler browser sources are not derived from a Website Path cell,
-      // so their reviewed owner is asserted here instead of by the grouped
-      // binding rule.
-      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
-        issues.push(
-          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
         );
         continue;
       }

@@ -186,6 +186,37 @@ internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-
 internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
 # Preserve original Tooltip view-readiness receipts, probes and captures.
 internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/
+
+# Preserve the exact incoming Sprint 5 observations and receipt hashes.
+
+# Exact Sprint 7 experiment records, frozen inputs and independently reviewed
+# evidence are hash-bound; maintained analysis scripts remain formatted.
+internal/records/2026-11-24-button-projection-comparison.md
+internal/records/2026-11-24-generated-button-consumption.md
+internal/records/2026-11-24-sprint7-dcbot-production-readback.md
+internal/records/2026-11-24-sprint7-idle-batch-review.md
+internal/records/2026-11-24-sprint7-knowledge-comparison.md
+internal/records/2026-11-24-sprint7-zero-marginal-cost-study.md
+internal/records/evidence/2026-11-24-button-projection-study/
+internal/records/evidence/2026-11-24-generated-button-consumption/
+internal/records/evidence/2026-11-24-knowledge-value-study/
+internal/records/evidence/2026-11-24-sprint7-dcbot/
+internal/records/evidence/2026-11-24-sprint7-idle-batch/
+internal/records/evidence/2026-11-24-sprint7-integration/
+# Preserve exact imported Sprint 5 acceptance records and producer receipts.
+internal/records/2026-11-24-sprint5-native-direction-acceptance.md
+internal/records/2026-11-24-sprint5-native-integration.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
+internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
+
+# Preserve captured CLI source-analysis evidence bytes.
+internal/records/evidence/2026-11-24-cli-standard-runtime-root-styles/**
+
+# Preserve exact Sprint 7 validation receipts, logs, manifests, and browser archives.
+internal/records/evidence/2026-11-24-sprint7-current-validation/
+
 # Exact Sprint 6 integration receipts and archives; narrative records stay formatted.
 
 # Exact original Sprint 2 manifests and execution receipts retain their bound bytes.
@@ -193,3 +224,8 @@ internal/records/evidence/2026-11-24-sprint2-compiler-local/manifest.json
 internal/records/evidence/2026-11-24-sprint2-distribution/manifest.json
 internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json
 internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json
+
+# Imported GPUI preparation receipts retain the exact bytes bound by their manifests.
+internal/records/evidence/2026-11-24-gpui-dependency-preparation/
+# Retained original Sprint 6 hosted archive manifest is byte-bound by its receipt.
+internal/records/evidence/2026-11-24-sprint6-main-reconciliation/hosted-041-evidence-manifest.json

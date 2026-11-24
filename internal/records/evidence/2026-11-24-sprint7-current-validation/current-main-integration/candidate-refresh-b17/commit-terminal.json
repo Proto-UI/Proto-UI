@@ -1,0 +1,14 @@
+{
+  "exitCode": 0,
+  "elapsedMs": 5301,
+  "head": "0a0e8f1768c86768804741d2b607231b150fbad3",
+  "before": {
+    "internal/coverage-matrices/prototype-coverage-matrix.json": "bbe7704ef6702d80f57cb9384d868c4afa9d82549bcbb54aa13059ba8a805457",
+    "internal/coverage-matrices/prototype-coverage-matrix.md": "2efa85fcab1cd02e9c9d04c3e700a51037bc2ef58a70973220255a7f605d71e7"
+  },
+  "after": {
+    "internal/coverage-matrices/prototype-coverage-matrix.json": "c651f5df456a7303da98a4a970141f7ff60ef4e13a670581f498f17e185e5af1",
+    "internal/coverage-matrices/prototype-coverage-matrix.md": "2efa85fcab1cd02e9c9d04c3e700a51037bc2ef58a70973220255a7f605d71e7"
+  },
+  "status": ""
+}

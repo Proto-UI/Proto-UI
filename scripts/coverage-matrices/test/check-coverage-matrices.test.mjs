@@ -108,10 +108,9 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
       path.join(root, panel),
       `import { createBrowserCompilerClient } from '../../../../../packages/compiler/src/browser/client';\nexport const panel = createBrowserCompilerClient;\n`
     );
-    fs.writeFileSync(
-      path.join(root, client),
-      "export function createBrowserCompilerClient() {\n  addEventListener('message', () => {});\n  return { compile: () => Promise.resolve(null) };\n}\n"
-    );
+    // A positive owner fixture must first satisfy the independent source gate.
+    // Synthetic client bytes made the old "exact" case pass while still denied.
+    fs.copyFileSync(new URL(`../../../${client}`, import.meta.url), path.join(root, client));
     let boundSource = client;
     let boundOwners = ['www.demo.raw-adapter-runtimes'];
     if (scenario === 'foreign-owner') boundOwners = ['www.shell.primary-nav'];
@@ -125,9 +124,14 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
     writeValidMatrices(root, {}, {}, { websiteBindings: [[boundSource, boundOwners]] });
     const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
     if (scenario === 'exact') {
+      assert.equal(message, '');
       assert.doesNotMatch(message, /source binding must name exactly one/);
       assert.doesNotMatch(message, /is missing a reviewed Source-scan binding/);
       assert.doesNotMatch(message, /is not bound to a matrix row/);
+      assert.doesNotMatch(
+        message,
+        /exact browser compiler host source, digest and runtime owner remain unverified/
+      );
       assert.doesNotMatch(
         message,
         /compiler browser source .* must name exactly the matrix Path owner/
@@ -135,7 +139,7 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
     } else if (scenario === 'foreign-owner') {
       assert.match(
         message,
-        /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/
+        /exact browser compiler host source, digest and runtime owner remain unverified/
       );
     } else {
       assert.match(message, /source binding must name exactly one/);
@@ -18992,8 +18996,19 @@ for (const [relative, allowed] of [
   ['packages/modules/feedback/src/types.ts', '@proto.ui/core'],
   ['packages/modules/feedback/src/shader/sink.ts', '@proto.ui/core'],
   ['packages/runtime/src/kernel/handles/def.ts', '@proto.ui/core/internal'],
+  ['packages/runtime/src/kernel/kernel.ts', '@proto.ui/module-feedback'],
+  ['packages/modules/feedback/src/material/paint-reservation.ts', '@proto.ui/module-anatomy'],
+  ['packages/modules/feedback/src/motion/numeric-sources.ts', '@proto.ui/module-state'],
+  ['packages/modules/feedback/src/motion/projector.ts', '@proto.ui/core/internal'],
+  ['packages/modules/feedback/src/motion/sink.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/motion/targets.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/presence/controller.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/presence/projector.ts', './top-target'],
+  ['packages/modules/feedback/src/presence/sampler.ts', '../motion/sampler'],
+  ['packages/modules/feedback/src/presence/sink.ts', '@proto.ui/core'],
+  ['packages/modules/feedback/src/presence/top-target.ts', '@proto.ui/core'],
 ]) {
-  test(`startup shader closure remains source-bound: ${relative}`, () => {
+  test(`startup Feedback closure remains source-bound: ${relative}`, () => {
     const root = createRoot();
     writeValidMatrices(root);
     const target = path.join(root, relative);
@@ -19221,11 +19236,16 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, source);
     };
-    for (const name of ['program-pool.ts', 'contact-carrier.ts'])
+    // Admission binds the real importer and its exact shared host companion.
+    for (const name of [
+      'program-pool.ts',
+      'contact-carrier.ts',
+      'source.ts',
+      '../host/synchronous-steps.ts',
+    ])
       write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
     write('program.ts', "import './contact-profile'; import './source'; export {};");
     write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
-    write('source.ts', "import './contact-carrier'; export {};");
     for (const name of ['image-prepare.ts', 'liquidgl-kernel.generated.ts', 'paint-mutations.ts'])
       write(name, 'export {};');
     const entryPath = 'apps/www/src/pages/en/test/liquid-glass-material.astro';
@@ -19358,6 +19378,15 @@ for (const [relative, allowed] of [
   ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
   ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
+  [
+    'packages/adapters/base/src/material/paint-reservation.ts',
+    '../platform/web-material-paint-reservation',
+  ],
+  [
+    'packages/adapters/base/src/platform/web-material-paint-reservation.ts',
+    '@proto.ui/module-feedback',
+  ],
+  ['packages/adapters/base/src/material/source.ts', '../host/synchronous-steps'],
   ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
   ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
   [
@@ -19372,6 +19401,16 @@ for (const [relative, allowed] of [
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     const bytes = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const helper = 'packages/adapters/base/src/host/synchronous-steps.ts';
+    const companion =
+      relative === 'packages/adapters/base/src/material/sink.ts' ||
+      relative === 'packages/adapters/base/src/material/source.ts'
+        ? path.join(root, helper)
+        : null;
+    if (companion) {
+      fs.mkdirSync(path.dirname(companion), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+    }
     const importer = path.join(root, 'apps/www/src/components/CardImportProbe.ts');
     fs.mkdirSync(path.dirname(importer), { recursive: true });
     fs.writeFileSync(
@@ -19381,6 +19420,15 @@ for (const [relative, allowed] of [
     fs.writeFileSync(target, bytes);
     const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
     assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    if (companion) {
+      const helperIssue = 'raw Proto UI import `../host/synchronous-steps` in `' + relative + '`';
+      assert.ok(!validationMessage(root).includes(helperIssue), 'exact helper remains admitted');
+      fs.appendFileSync(companion, '\n// unreviewed helper bytes\n');
+      assert.ok(validationMessage(root).includes(helperIssue), 'changed helper is rejected');
+      fs.unlinkSync(companion);
+      assert.ok(validationMessage(root).includes(helperIssue), 'missing helper is rejected');
+      fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+    }
     fs.writeFileSync(target, bytes + '\n// unreviewed bytes\n');
     assert.ok(collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
     fs.writeFileSync(target, bytes + "\nimport '@proto.ui/adapter-react';\n");
@@ -19737,12 +19785,22 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-im
 
 for (const reviewed of [
   'packages/core/src/internal.ts',
+  'packages/core/src/handles.ts',
+  'packages/core/src/material-paint-reservation.ts',
+  'packages/core/src/presence-presentation.ts',
   'packages/core/src/spec/owned-template-blueprint.ts',
   'packages/core/src/spec/template.ts',
   'packages/core/src/spec/svg-tags.ts',
   'packages/compiler/src/shader-plan.ts',
+  'packages/compiler/src/core-value-types.ts',
+  'packages/compiler/src/flutter-source.ts',
   'packages/compiler/src/gpui-source.ts',
   'packages/compiler/src/ir-validation.ts',
+  'packages/compiler/src/native-async.ts',
+  'packages/compiler/src/native-style.ts',
+  'packages/compiler/src/rule-declarations.ts',
+  'packages/compiler/src/rule-plan.ts',
+  'packages/compiler/src/static-declarations.ts',
   'packages/compiler/src/targets.ts',
 ]) {
   for (const scenario of [

@@ -187,6 +187,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-sidebar-disclosure.browser.test.ts',
