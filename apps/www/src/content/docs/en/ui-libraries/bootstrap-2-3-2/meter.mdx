@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 bounded measurement gauge with optimal, suboptim
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Meter displays a scalar measurement within a known range—such as disk usage, quota, or score—and classifies readings using `low`, `high`, and `optimum` thresholds.
+Bootstrap 2.3.2 Meter pairs the classic 20px inset-shadowed track and green, amber, and red linear gradient fills with bounded scalar measurement semantics driven by `low`, `high`, and `optimum` thresholds.
 
 ## Preview
 
@@ -13,12 +15,11 @@ Bootstrap 2.3.2 Meter displays a scalar measurement within a known range—such 
   demoId="demo-bootstrap-2-3-2-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the meter parts from `@proto.ui/prototypes-bootstrap-2-3-2/meter`:
 
 ```ts
 import {
@@ -32,18 +33,109 @@ import {
 
 ## Usage
 
-Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`:
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/meter';
 
-- **Bounded values**: `Root` clamps `value` between `min` (default `0`) and `max` (default `100`). When `min` equals `max`, the computed percentage is `0`.
-- **Threshold classification**: Providing `low`, `high`, and `optimum` derives `status` as `'optimal'`, `'suboptimal'`, or `'critical'` without altering the numeric value.
-- **Read-only display**: `Label` names the gauge, `Track` and `Indicator` render the fill bar, and `Value` displays `valueText` or the formatted number. Meter is passive and adds no Tab stop.
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
+
+export function BootstrapStorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
+
+### Anatomy and thresholds
+
+- **Root**: Clamps `value` within `[min, max]` (defaulting to `0..100`) and computes `0` percentage when `min === max`.
+- **Label / Value**: `Label` provides the accessible name; `Value` renders `valueText` or the normalized numeric reading with `tabular-nums`.
+- **Track / Indicator**: Preserves Bootstrap 2.3.2's 20px track height, 4px corners, and inset depth while mapping `optimal`, `suboptimal`, and `critical` to the classic `success` (green), `warning` (amber), and `danger` (red) bar gradients.
+- Meter is passive (`role="meter"`) with no keyboard tab stop, exposing synchronized read-only state across all parts.
+
+## Examples
+
+### Threshold zones (success / warning / danger gradients)
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom range and formatted `valueText`
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Server capacity summary panel
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-meter-quota-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / States | Description |
-| --- | --- | --- |
-| `Root` | `value` / `min` / `max` | Numeric reading and bounds (`min=0`, `max=100` by default) |
-| `Root` | `low` / `high` / `optimum` | Thresholds classifying `status` as `optimal`, `suboptimal`, or `critical` |
-| `Root` | `ariaLabel` / `valueText` | Accessible name and custom display text |
-| All parts | `value` / `percentage` / `indeterminate` / `status` | Synchronized read-only measurement states |
-| `Label` / `Track` / `Indicator` / `Value` | — | Label, track container, fill indicator, and value readout |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+`Label`, `Track`, `Indicator`, and `Value` declare no props of their own.
+
+### Exposed states
+
+<ApiPropsTable
+  headers={{ name: 'State', type: 'Type', default: 'Notes' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: 'Current reading clamped to [min, max]' },
+    {
+      name: 'percentage',
+      type: 'State<number>',
+      default: 'Normalized percentage between 0 and 100',
+    },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Always false for Meter' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-METER.yaml', 'P-BASE-METER.yaml']}
+/>

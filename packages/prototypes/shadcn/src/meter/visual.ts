@@ -70,9 +70,10 @@ export function setupMeterValuePaint<
   Exposes = Record<string, unknown>,
 >(def: DefHandle<Props, Exposes>) {
   const style = setupMeterStyle(def);
-  def.feedback.style.use(tw('ml-auto tabular-nums text-muted-foreground'));
+  def.feedback.style.use(tw('ms-auto tabular-nums text-muted-foreground'));
   def.rule({
-    when: (w) => w.any(w.state(style).eq('lyra'), w.state(style).eq('mira')),
+    when: (w) =>
+      w.any(w.state(style).eq('lyra'), w.state(style).eq('mira'), w.state(style).eq('sera')),
     intent: (i) => i.feedback.style.use(tw('text-xs')),
   });
   def.rule({
@@ -80,7 +81,8 @@ export function setupMeterValuePaint<
     intent: (i) => i.feedback.style.use(tw('leading-relaxed')),
   });
   def.rule({
-    when: (w) => w.not(w.any(w.state(style).eq('lyra'), w.state(style).eq('mira'))),
+    when: (w) =>
+      w.not(w.any(w.state(style).eq('lyra'), w.state(style).eq('mira'), w.state(style).eq('sera'))),
     intent: (i) => i.feedback.style.use(tw('text-sm')),
   });
 }

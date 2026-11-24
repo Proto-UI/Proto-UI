@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Progress displays a task's completion progress or an indeterminate loading state with bold Brutalist borders and a high-contrast fill bar.
+Brutalist Progress displays task completion or an indeterminate loading state with 5px `rounded-base` corners, a 2px black-bordered track, and a high-contrast accent fill bar.
 
 ## Preview
 
@@ -15,28 +15,78 @@ Brutalist Progress displays a task's completion progress or an indeterminate loa
   demoId="demo-brutalist-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-brutalist/progress`:
 
-- **Package exports**: import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from `@proto.ui/prototypes-brutalist/progress`
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-brutalist/progress';
+```
 
 ## Usage
 
-### Parts
+Place `Label` and `Value` before `Track` to align the label and percentage on a single header row above the bar. Labels use DM Sans `font-sans font-medium` and preserve original text casing:
 
-- **Root**: Manages `value`, bounds `min` / `max` (default `0` / `100`), and `indeterminate` state. Values clamp to `[min, max]`, and equal bounds evaluate to `0` percentage.
-- **Label**: Provides the accessible name for the progress bar.
-- **Track / Indicator**: Render the track container and filled indicator bar.
-- **Value**: Displays `valueText` when provided, otherwise the clamped numeric value.
+```tsx
+<BrutalistProgressRoot value={56} valueText="56%" className="w-full max-w-sm">
+  <BrutalistProgressLabel>Upload progress</BrutalistProgressLabel>
+  <BrutalistProgressValue />
+  <BrutalistProgressTrack>
+    <BrutalistProgressIndicator />
+  </BrutalistProgressTrack>
+</BrutalistProgressRoot>
+```
 
-### Indeterminate mode and accessibility
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
 
-- Omitting `value` or setting `indeterminate={true}` puts the progress bar into an indeterminate state and withholds a concrete numeric value from assistive technologies.
-- Progress is a passive display with no keyboard tab stop; updating `Root` props automatically synchronizes `value`, `percentage`, `indeterminate`, and `status` across all parts.
+- **Bounds and indeterminate mode**: `value` clamps to `[min, max]` (equal bounds produce `0%`). Omitting `value` or setting `indeterminate={true}` enters indeterminate mode and omits `aria-valuenow`.
+- **Passive display**: Progress adds no keyboard tab stop; updating `Root` props keeps `value`, `percentage`, `indeterminate`, and `status` synchronized across all parts.
+
+## Examples
+
+### Label
+
+Use `ProgressLabel` and `ProgressValue` to render an inline label and value readout above the track.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+A Brutalist progress bar controlled interactively by a Slider.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Indeterminate
+
+Use `indeterminate` when completion percentage is not yet known, then toggle back to a determinate bar once measured.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -45,17 +95,21 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'value', type: 'number', default: 'undefined' },
+    { name: 'value', type: 'number | undefined', default: 'omitted (indeterminate)' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
+    { name: 'indeterminate', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
-    { name: 'indeterminate', type: 'boolean', default: 'false' },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: 'inherited' },
   ]}
 />
 
-`Label`, `Track`, `Indicator`, and `Value` declare no props of their own.
+`Label`, `Track`, `Indicator`, and `Value` declare no props of their own; all parts expose synchronized `value`, `percentage`, `indeterminate`, and `status` states.
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-PROGRESS.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-PROGRESS.yaml', 'P-BASE-PROGRESS.yaml']}
+/>

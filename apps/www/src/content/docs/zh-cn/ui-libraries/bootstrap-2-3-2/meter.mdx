@@ -4,8 +4,10 @@ description: '用于展示已知区间标量测量值与优劣区段的 Bootstra
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Meter 用于展示已知上下界范围内的标量测量值（如磁盘占用、配额或评分），并根据 `low`、`high` 和 `optimum` 自动区分正常、偏离与告警区间。
+Bootstrap 2.3.2 Meter 沿用经典的 20px 内阴影浅灰轨道与绿、琥珀、红三档线性渐变条，用于展示已知上下界范围内的标量测量值（如磁盘占用、配额或评分），并根据 `low`、`high` 和 `optimum` 自动分类状态。
 
 ## 预览
 
@@ -13,12 +15,11 @@ Bootstrap 2.3.2 Meter 用于展示已知上下界范围内的标量测量值（�
   demoId="demo-bootstrap-2-3-2-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-bootstrap-2-3-2/meter` 导入各部件原型：
 
 ```ts
 import {
@@ -32,18 +33,105 @@ import {
 
 ## 用法
 
-由 `Root`、`Label`、`Track`、`Indicator` 和 `Value` 组成：
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/meter';
 
-- **数值与区间**：`Root` 管理 `value` 以及 `min`（默认 `0`）、`max`（默认 `100`），越界数值会自动钳制到 `[min, max]`；当 `min === max` 时比例为 `0`。
-- **区间状态分类**：配置 `low`、`high` 与 `optimum` 后，组件自动将当前值归类为 `'optimal'`、`'suboptimal'` 或 `'critical'`（不会修改数值本身）。
-- **只读展示**：`Label` 提供无障碍名称，`Track` 与 `Indicator` 渲染比例条，`Value` 优先显示 `valueText` 或规范化后的数值。作为被动展示控件，不占用 Tab 焦点顺序。
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
+
+export function BootstrapStorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
+
+### 部件组成与状态区间
+
+- **Root**：管理 `value` 与有限边界 `min`（默认 `0`）、`max`（默认 `100`），越界数值自动钳制在 `[min, max]`；当 `min === max` 时比例为 `0`。
+- **Label / Value**：`Label` 提供无障碍名称，`Value` 使用 `tabular-nums` 等宽数字优先渲染 `valueText` 或规范数值。
+- **Track / Indicator**：轨道保持 Bootstrap 2.3.2 经典的 `20px` 高度、`4px` 圆角与内凹阴影；指示条将 `optimal`、`suboptimal`、`critical` 分别映射为经典 `success`（绿色）、`warning`（琥珀色）与 `danger`（红色）渐变。
+- Meter 为被动展示控件（`role="meter"`），不占用 Tab 焦点顺序，全部部件同步暴露只读状态。
+
+## 示例
+
+### 阈值区间（绿 / 琥珀 / 红经典渐变）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义范围与格式化文本
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 服务器容量概览面板
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-meter-quota-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 状态 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `min` / `max` | 测量值与上下界（默认 `min=0`、`max=100`） |
-| `Root` | `low` / `high` / `optimum` | 将当前值划分为 `optimal`、`suboptimal` 或 `critical` |
-| `Root` | `ariaLabel` / `valueText` | 可访问名称与自定义格式化显示文本 |
-| 全部部件 | `value` / `percentage` / `indeterminate` / `status` | 同步暴露的只读测量状态 |
-| `Label` / `Track` / `Indicator` / `Value` | — | 名称、轨道、填充指示条与数值展示部件 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+`Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性。
+
+### 暴露状态
+
+<ApiPropsTable
+  headers={{ name: '状态', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: '钳制在 [min, max] 内的当前数值' },
+    { name: 'percentage', type: 'State<number>', default: '0 到 100 之间的归一化百分比' },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Meter 恒为 false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-METER.yaml', 'P-BASE-METER.yaml']}
+/>

@@ -11,7 +11,7 @@ export default definePrototype<MeterPartProps, MeterPartExposes>({
     const inherited = asMeterIndicator();
     def.feedback.style.use(
       tw(
-        'block float-left h-full box-border w-[calc(var(--pui-percentage)*1%)] text-[12px] text-center text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)] shadow-[inset_0_-1px_0_rgb(0_0_0/15%)]'
+        'block float-left h-full box-border w-[calc(var(--pui-percentage)*1%)] text-[12px] text-center text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)] shadow-[inset_0_-1px_0_rgb(0_0_0/15%)] transition-all duration-200 ease-in-out'
       )
     );
     // Public Base zones select the source's success/warning/danger paints;

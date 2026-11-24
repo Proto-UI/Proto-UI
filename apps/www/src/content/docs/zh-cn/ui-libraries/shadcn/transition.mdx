@@ -1,37 +1,102 @@
 ---
 title: 'Transition'
-description: '用于协调组件进出场显隐阶段的状态机容器组件。'
+description: '用于协调组件进出场显隐阶段与挂载生命周期的 Shadcn 风格过渡容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Transition 为传入的子元素提供透明的进出场阶段状态机（`closed → preparing → entering → entered → leaving`），将具体的视觉过渡样式交由应用或 `Surface` 自由定义。本页示例使用 **Shadcn Rhea** 风格。
+Transition 为传入的子元素提供透明的五阶段显隐状态机（`closed → preparing → entering → entered → leaving`），将端点透明度绑定到感知阶段，并把具体动效曲线交给应用或宿主样式表自由控制。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
+
+使用下方的命令按钮手动驱动 `enter`、`leave` 与 `complete`，观察五个阶段状态与挂载（`Mounted` / `Detached`）的实时变化；预览卡片放置在固定高度舞台中，离场卸载不会引起布局跳动。
 
 <PrototypePreviewer
   demoId="demo-shadcn-transition"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版，也尚未加入 `@proto.ui/cli` 安装目标。可直接从工作区源码导入：
+
+```ts
+import { transition } from '@proto.ui/prototypes-shadcn/transition';
+```
 
 ## 用法
 
-- 通过受控属性 `open` 或非受控属性 `defaultOpen` 控制显隐；将 `appear` 设为 `true` 可在首次挂载时直接触发进场阶段。
-- 可通过 `enterDuration`（默认 `300ms`）、`leaveDuration`（默认 `200ms`）以及 `interrupt`（`'reverse' | 'wait' | 'immediate'`，默认 `'reverse'`）配置过渡时长与中途打断策略。
-- 组件暴露 `transitionState` 和 `isPresent` 状态，并在边界时机触发 `beforeEnter`、`afterEnter`、`beforeLeave` 和 `afterLeave` 事件。
-- 支持通过 `enter`、`leave`、`complete`（也可经 `controls` 调用）手动驱动状态机，其中 `complete` 会将 `entering` 推进至 `entered`，或将 `leaving` 推进至 `closed`。
+```tsx
+import { useState } from 'react';
+import { ShadcnButton, ShadcnStyleScope, ShadcnTransition } from '../proto-ui/components/react';
+
+export function NotificationTransition() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <ShadcnStyleScope styleProfile="rhea" className="contents">
+      <ShadcnTransition
+        open={open}
+        appear
+        className="block transition-opacity duration-300 ease-out motion-reduce:transition-none"
+      >
+        <div className="rounded-lg border border-border bg-card p-5 text-card-foreground shadow-sm">
+          Workspace synced
+        </div>
+      </ShadcnTransition>
+      <ShadcnButton styleProfile="rhea" onClick={() => setOpen((value) => !value)}>
+        Toggle
+      </ShadcnButton>
+    </ShadcnStyleScope>
+  );
+}
+```
+
+- **端点透明度投影**：`shadcn-transition` 在 `entering` 与 `entered` 阶段输出 `opacity-100`，在 `closed`、`preparing` 与 `leaving` 阶段输出 `opacity-0`，同时保持子内容插槽透明。配合 CSS `transition-opacity` 或 `[data-transition-state]` 选择器即可实现平滑过渡。
+- **五个阶段与冷准备**：默认路径为 `closed → entering → entered → leaving → closed`；当高层组合启用 `coldEntryPreparation` 并调用 `capturePreparation()` 时，会在进入前先经过 `preparing` 阶段以完成布局或测量准备。
+- **减少动态效果（Reduced Motion）**：当宿主环境启用 `prefers-reduced-motion: reduce` 时，自动兜底延时自动缩短为 `0ms`，同时完整保留阶段顺序、边界事件与视图卸载时序；建议在应用样式中配合 `motion-reduce:transition-none`。
+- **底层语义**：所有阶段排序、资源保留与打断语义均继承自 [Base Transition](/zh-cn/ui-libraries/base/transition/)。
+
+## 示例
+
+### 受控模式与 `transitionend` 同步
+
+传入 `open` 进入受控模式。默认在 `enterDuration` / `leaveDuration` 到期后自动推进状态，也可以监听宿主 `transitionend` 并调用 `controls.complete()` 与真实动画精准同步。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-transition-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 中途打断策略（`interrupt`）
+
+对比 `'reverse'`（立即反向）、`'wait'`（等待当前阶段结束后切换至最新目标）与 `'immediate'`（立即丢弃当前阶段并切入新阶段）在中途打断时的表现。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-transition-interrupt"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 生命周期事件与 `appear`
+
+将 `appear` 设为 `true` 可在初次挂载时执行入场过渡；监听 `beforeEnter`、`afterEnter`、`beforeLeave` 与 `afterLeave` 即可在每个边界时机同步副作用，并读取实时的 `isPresent` 状态。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-transition-lifecycle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Transition`（传入 `open` 可进入受控模式）：
+### Transition 属性
+
+传入 `open` 可进入受控模式：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -42,6 +107,61 @@ Transition 为传入的子元素提供透明的进出场阶段状态机（`close
     { name: 'enterDuration', type: 'number', default: '300' },
     { name: 'leaveDuration', type: 'number', default: '200' },
     { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+### 暴露状态
+
+<ApiPropsTable
+  headers={{ name: '状态', type: '类型', default: '说明' }}
+  rows={[
+    {
+      name: 'transitionState',
+      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      default: '当前感知过渡阶段',
+    },
+    {
+      name: 'isPresent',
+      type: 'boolean',
+      default: '视图资源是否需要保持挂载（包含 preparing 与 leaving）',
+    },
+  ]}
+/>
+
+### 生命周期事件
+
+<ApiPropsTable
+  headers={{ name: '事件', type: '负载', default: '触发时机' }}
+  rows={[
+    { name: 'beforeEnter', type: 'void', default: '视图挂载完成、进入 entering 前' },
+    { name: 'afterEnter', type: 'void', default: '进入 entered 后' },
+    { name: 'beforeLeave', type: 'void', default: '开始 leaving 前' },
+    { name: 'afterLeave', type: 'void', default: '进入 closed 后、请求卸载视图前' },
+  ]}
+/>
+
+### 命令式方法
+
+<ApiPropsTable
+  headers={{ name: '方法', type: '签名', default: '说明' }}
+  rows={[
+    { name: 'enter / controls.enter', type: '() => void', default: '触发入场过渡' },
+    { name: 'leave / controls.leave', type: '() => void', default: '触发离场过渡' },
+    {
+      name: 'complete / controls.complete',
+      type: '() => void',
+      default: '将 entering 推进至 entered，或将 leaving 推进至 closed',
+    },
+    {
+      name: 'retainClosedView',
+      type: '(retained: boolean) => void',
+      default: '控制 closed 阶段是否继续保留视图节点',
+    },
+    {
+      name: 'capturePreparation',
+      type: '() => (() => void) | null',
+      default: '在 preparing 阶段捕获冷准备句柄，返回释放回调',
+    },
   ]}
 />
 

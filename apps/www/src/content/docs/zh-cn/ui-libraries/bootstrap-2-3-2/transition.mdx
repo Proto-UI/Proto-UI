@@ -1,0 +1,137 @@
+---
+title: 'Bootstrap 2.3.2 Transition'
+description: '保持透明插槽并完整继承 Base 五阶段状态机的 Bootstrap 2.3.2 过渡容器，便于自由组合经典的 .fade 或 .collapse 效果。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Transition 提供透明的五阶段进出场状态机（`closed → preparing → entering → entered → leaving`）。原型本身刻意不替调用方隐式二选一 `.fade`（150ms 线性透明度）或 `.collapse`（高度折叠），从而让应用可以按需为经典的 Bootstrap 2.3.2 Alert、Well 或面板绑定最合适的过渡样式。
+
+## 预览
+
+下方示例在经典的 Bootstrap 2.3.2 Well 舞台与 Alert Info 表面上演示 `enter`、`leave`、`complete` 控制及 150ms 线性 `.fade` 淡入淡出，支持切换 Web Components、React、Vue 3 与 Vue 2。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-transition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版或 CLI 安装列表。可直接从工作区源码导入：
+
+```ts
+import { transition } from '@proto.ui/prototypes-bootstrap-2-3-2/transition';
+```
+
+## 用法
+
+```html
+<wc-bootstrap-2-3-2-transition default-open appear class="bs-fade-host">
+  <div class="rounded-[4px] border border-[#bce8f1] bg-[#d9edf7] px-4 py-3.5 text-[#3a87ad]">
+    <strong>Workspace synced</strong> — Your classic alert surface stays mounted until leaving ends.
+  </div>
+</wc-bootstrap-2-3-2-transition>
+
+<style>
+  .bs-fade-host > * {
+    transition: opacity 0.15s linear;
+  }
+  .bs-fade-host[data-transition-state='leaving'] > *,
+  .bs-fade-host[data-transition-state='closed'] > * {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bs-fade-host > * {
+      transition: none;
+    }
+  }
+</style>
+```
+
+- **保持透明插槽**：`bootstrap-2-3-2-transition` 不注入默认样式 token，也不覆盖 Base 默认时长，避免与业务自定义的 `.fade` 或 `.collapse` 轨迹冲突。
+- **经典视觉搭配**：配合 4px 圆角、14px/20px 像素排版与 `#d9edf7` / `#f5f5f5` 经典表面即可呈现地道的 Bootstrap 2.3.2 过渡体验。
+- **减少动态效果**：当宿主启用 `prefers-reduced-motion: reduce` 时，自动兜底延时坍缩为 `0ms`，同时保留完整事件与卸载顺序。所有核心语义由 [Base Transition](/zh-cn/ui-libraries/base/transition/) 统一提供。
+
+## 示例
+
+### 受控模式与 `transitionend` 同步
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-transition-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 中途打断策略（`interrupt`）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-transition-interrupt"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 生命周期事件与 `appear`
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-transition-lifecycle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Transition 属性
+
+传入 `open` 进入受控模式：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+### 暴露状态与方法
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '类型 / 签名', default: '说明' }}
+  rows={[
+    {
+      name: 'transitionState',
+      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      default: '当前感知过渡阶段',
+    },
+    { name: 'isPresent', type: 'boolean', default: '视图是否保持挂载' },
+    { name: 'beforeEnter / afterEnter', type: 'ExposeEvent<void>', default: '入场边界事件' },
+    { name: 'beforeLeave / afterLeave', type: 'ExposeEvent<void>', default: '离场边界事件' },
+    {
+      name: 'enter / leave / complete',
+      type: '() => void',
+      default: '手动推进状态机（亦挂载于 controls）',
+    },
+    {
+      name: 'retainClosedView',
+      type: '(retained: boolean) => void',
+      default: '控制 closed 阶段是否保留视图节点',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
+/>

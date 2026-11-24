@@ -1,11 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Progress'
-description: 'A Bootstrap 2.3.2 progress bar supporting determinate values and indeterminate loading states.'
+description: 'A classic Bootstrap 2.3.2 progress bar supporting contextual gradient variants, determinate values, and indeterminate states.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Progress communicates task completion percentage or an ongoing indeterminate operation using shared Base Progress semantics.
+Bootstrap 2.3.2 Progress preserves the classic 20px bar height, 4px corners, inset track shadow, vertical linear gradients, and 600ms width transition while reusing shared Base Progress semantics.
 
 ## Preview
 
@@ -13,12 +15,11 @@ Bootstrap 2.3.2 Progress communicates task completion percentage or an ongoing i
   demoId="demo-bootstrap-2-3-2-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-bootstrap-2-3-2/progress`:
 
 ```ts
 import {
@@ -32,17 +33,102 @@ import {
 
 ## Usage
 
-Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`:
+Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`. Place `Label` and `Value` before `Track` for an inline header row above the bar:
 
-- **Determinate and indeterminate**: `Root` clamps `value` between `min` (default `0`) and `max` (default `100`), returning `0` percentage when `min === max`. Omit `value` or set `indeterminate={true}` for unknown progress without reporting a numeric percentage.
-- **Read-only display**: `Label` names the bar, `Track` and `Indicator` render the fill, and `Value` shows `valueText` or the formatted number. Progress is passive and adds no Tab stop.
+```tsx
+<Bootstrap232ProgressRoot variant="success" value={60} valueText="60%" className="w-full max-w-sm">
+  <Bootstrap232ProgressLabel>Upload progress</Bootstrap232ProgressLabel>
+  <Bootstrap232ProgressValue />
+  <Bootstrap232ProgressTrack>
+    <Bootstrap232ProgressIndicator />
+  </Bootstrap232ProgressTrack>
+</Bootstrap232ProgressRoot>
+```
+
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
+
+- **Contextual variants**: `Root` and `Indicator` support `default`, `info`, `success`, `warning`, and `danger` classic Bootstrap 2.3.2 gradients with the 600ms CSS ease width transition (respecting reduced-motion preferences).
+- **Determinate and indeterminate**: `value` clamps to `[min, max]` (equal bounds evaluate to `0%`). Omitting `value` or setting `indeterminate={true}` enters indeterminate mode and omits `aria-valuenow`.
+- **Read-only display**: Progress adds no Tab stop, and every part exposes synchronized `value`, `percentage`, `indeterminate`, and `status` states.
+
+## Examples
+
+### Contextual Variants
+
+Classic Bootstrap 2.3.2 `default`, `info`, `success`, `warning`, and `danger` progress bar gradients.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label
+
+Inline `ProgressLabel` and `ProgressValue` aligned above the 20px track.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Control the progress bar interactively with a Slider to observe the 600ms width transition.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Indeterminate
+
+Represent unknown progress with `indeterminate` and toggle back to a determinate percentage.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / States | Description |
-| --- | --- | --- |
-| `Root` | `value` / `min` / `max` | Current progress and bounds (`0`–`100` by default) |
-| `Root` | `indeterminate` | Set `true` (or omit `value`) for indeterminate state |
-| `Root` | `ariaLabel` / `valueText` | Accessible name and custom display string |
-| All parts | `value` / `percentage` / `indeterminate` / `status` | Synchronized read-only progress states |
-| `Label` / `Track` / `Indicator` / `Value` | — | Label, track, fill indicator, and value readout |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'omitted (indeterminate)' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'indeterminate', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+    {
+      name: 'variant',
+      type: "'default' | 'info' | 'success' | 'warning' | 'danger'",
+      default: "'default'",
+    },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: 'inherited' },
+  ]}
+/>
+
+### Indicator and exposed states
+
+- `ProgressIndicator` accepts an optional `variant` override (`'default' | 'info' | 'success' | 'warning' | 'danger' | 'inherit'`, default `'inherit'`).
+- All parts expose synchronized read-only states: `value`, `percentage`, `indeterminate`, and `status`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-PROGRESS.yaml', 'P-BASE-PROGRESS.yaml']}
+/>

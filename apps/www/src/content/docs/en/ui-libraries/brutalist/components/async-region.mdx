@@ -6,35 +6,99 @@ description: 'A semantic container that projects aria-busy for asynchronously up
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Async Region is a single-part semantic container that sets `aria-busy` on a region during asynchronous updates while keeping your children mounted and focused.
+Brutalist Async Region is a single-part semantic container that projects `aria-busy` during asynchronous updates while keeping your children mounted and focused.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-async-region" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-async-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Available directly through package exports; Async Region is not registered as a `proto-ui add` CLI target. Import from `@proto.ui/prototypes-brutalist` or its subpath:
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-async-region`
-- **Package exports**: import from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/async-region`
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-brutalist/async-region';
+```
 
 ## Usage
 
-- Setting `busy={true}` sets `aria-busy="true"` on the region element and exposes the same boolean through `getExposes().busy`.
-- When updating `busy`, your children stay mounted and keep focus. The Brutalist layer applies only `min-w-0 max-w-full text-foreground` without adding borders, shadows, or built-in loading visuals.
-- Compose with `Spinner`, `Skeleton`, or `Progress` for visual loading indicators, and pair with `Live Region` when status updates should be announced to screen readers.
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-brutalist/async-region';
+
+const BrutalistAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
+
+export function ReleaseFeed() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <BrutalistAsyncRegionRoot busy={busy}>
+      <p>Authored descendants and focus stay intact during refresh.</p>
+    </BrutalistAsyncRegionRoot>
+  );
+}
+```
+
+- **Busy semantics**: Setting `busy={true}` synchronously reflects `aria-busy="true"` on `brutalist-async-region-root` and exposes the same boolean through `getExposes().busy`.
+- **Brutalist surface grammar**: The semantic container applies only `block min-w-0 max-w-full font-sans text-foreground` without adding borders, hard shadows, or motion tokens; 2px black borders and 4px shadows belong to surrounding cards and action controls.
+- **Composition**: Style busy states using `[aria-busy="true"]` and compose with `Spinner`, `Skeleton`, `Progress`, or `Live Region` for visual or spoken updates.
+
+## Examples
+
+### Focus-Preserving Refresh
+
+Place a Brutalist input inside `Async Region` and toggle `busy` without disturbing active focus or unsaved draft text.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-async-region-focus"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Composed with Live Region
+
+Pair `brutalist-async-region-root` with `brutalist-live-region-root` so assistive technology announces refresh start and completion alongside `aria-busy`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-async-region-live-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-### Root
+### Root (`brutalist-async-region-root`)
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
+/>
+
+### Exposed State (`getExposes()`)
+
+<ApiPropsTable
+  headers={{ name: 'Handle', type: 'Type', default: 'Initial' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-ASYNC-REGION.yaml', 'P-BASE-ASYNC-REGION.yaml']}
 />

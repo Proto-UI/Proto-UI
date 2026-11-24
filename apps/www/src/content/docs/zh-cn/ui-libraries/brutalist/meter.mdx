@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Meter 用于直观展示已知范围内的标量度量值（如磁盘占用、配额或健康评分），支持按 `low`、`high` 与 `optimum` 划分状态区间。
+Brutalist Meter 用于直观展示已知范围内的标量度量值（如磁盘占用、配额或健康评分），遵循 5px 圆角（`rounded-base`）、2px 黑框、DM Sans 正文排版与即时落位反馈，并按 `low`、`high` 与 `optimum` 将填充色划分为主蓝、金丝雀黄与警示红三档状态。
 
 ## 预览
 
@@ -15,28 +15,87 @@ Brutalist Meter 用于直观展示已知范围内的标量度量值（如磁盘�
   demoId="demo-brutalist-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist/meter` 导入各部件原型：
 
-- **包导出**：从 `@proto.ui/prototypes-brutalist/meter` 导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator`、`meterValue`
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-brutalist/meter';
+```
 
 ## 用法
 
-### 部件组成
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-brutalist/meter';
 
-- **Root**：管理度量值 `value`、范围 `min` / `max` 以及阈值 `low`、`high`、`optimum`。数值会自动约束在 `[min, max]` 区间内；当 `min` 与 `max` 相等时比例为 `0`。
-- **Label**：提供可读的计量名称。
-- **Track / Indicator**：轨道与填充指示条，根据计算出的百分比呈现当前占比。
-- **Value**：显示 `valueText` 或格式化后的当前数值。
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
 
-### 状态区间与无障碍
+export function BrutalistStorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
 
-- 配置 `low`、`high` 与 `optimum` 可将当前度量值自动分类为 `'optimal'`、`'suboptimal'` 或 `'critical'`，且不会改动原始数值。
-- Meter 为被动展示组件，不增加键盘 Tab 停靠点，各部件自动同步暴露 `value`、`percentage`、`indeterminate` 与 `status`。
+### 部件组成与状态区间
+
+- **Root**：管理度量值 `value`、范围 `min` / `max` 以及阈值 `low`、`high`、`optimum`。数值自动钳制在 `[min, max]` 区间内；当 `min === max` 时比例为 `0`。
+- **Label / Value**：保留原始大小写并使用 DM Sans 500 排版，`Value` 采用等宽数字（`tabular-nums`）展示 `valueText` 或规范化后的数值。
+- **Track / Indicator**：轨道使用 5px 圆角、2px 黑色边框与 `bg-secondary-background` 表面；指示条随 `status` 分别切换 `bg-primary`（`optimal`）、`bg-canary`（`suboptimal`）与 `bg-destructive`（`critical`），保持即时切换无多余缓动。
+- Meter 为被动展示组件（`role="meter"`），不增加键盘 Tab 停靠点，各部件同步暴露 `value`、`percentage`、`indeterminate` 与 `status`。
+
+## 示例
+
+### 阈值区间（`optimal` / `suboptimal` / `critical`）
+
+<PrototypePreviewer
+  demoId="demo-brutalist-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义范围与格式化文本
+
+<PrototypePreviewer
+  demoId="demo-brutalist-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 资源配额面板
+
+<PrototypePreviewer
+  demoId="demo-brutalist-meter-quota-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -45,19 +104,34 @@ Brutalist Meter 用于直观展示已知范围内的标量度量值（如磁盘�
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'value', type: 'number', default: 'undefined' },
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
-    { name: 'low', type: 'number', default: 'undefined' },
-    { name: 'high', type: 'number', default: 'undefined' },
-    { name: 'optimum', type: 'number', default: 'undefined' },
   ]}
 />
 
 `Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性。
 
+### 暴露状态
+
+<ApiPropsTable
+  headers={{ name: '状态', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: '钳制在 [min, max] 内的当前数值' },
+    { name: 'percentage', type: 'State<number>', default: '0 到 100 之间的归一化百分比' },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Meter 恒为 false' },
+  ]}
+/>
+
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-METER.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-METER.yaml', 'P-BASE-METER.yaml']}
+/>

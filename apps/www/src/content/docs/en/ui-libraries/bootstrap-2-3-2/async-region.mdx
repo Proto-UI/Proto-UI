@@ -1,0 +1,98 @@
+---
+title: 'Bootstrap 2.3.2 Async Region'
+description: 'A semantic aria-busy region container for Bootstrap 2.3.2 layouts that preserves children and focus during async updates.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Async Region wraps asynchronously updating sections with `aria-busy` semantics inherited from [Base Async Region](/en/ui-libraries/base/async-region/) without overwriting classic Bootstrap 2.3.2 wells, panels, or focus state.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-async-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the `0.2.0` stable release. Import directly from the workspace subpath:
+
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/async-region';
+```
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/async-region';
+
+const BootstrapAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
+
+export function OrdersPanel() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <BootstrapAsyncRegionRoot busy={busy}>
+      <p>Existing order rows and keyboard focus stay intact while refreshing.</p>
+    </BootstrapAsyncRegionRoot>
+  );
+}
+```
+
+- **Semantic-only projection**: Archived Bootstrap 2.3.2 has no Async Region widget, so `bootstrap-2-3-2-async-region-root` forwards Base `busy` and `aria-busy` semantics without injecting extra paint or jQuery APIs.
+- **Classic surface framing**: Keep your Bootstrap 2.3.2 `#f5f5f5` wells, `#ffffff` panels, `1px` `#dddddd` borders, `4px` corners, and fixed `14px` metrics, and target `[aria-busy="true"]` for optional visual feedback.
+- **Focus stability**: Toggling `busy` keeps descendants mounted and interactive; pair with `bootstrap-2-3-2-live-region-root` when assistive technology should announce refresh status.
+
+## Examples
+
+### Focus-Preserving Refresh
+
+Keep a Bootstrap 2.3.2 text input mounted and focused inside `Async Region` while refresh state toggles.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-async-region-focus"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Composed with Live Region
+
+Pair `bootstrap-2-3-2-async-region-root` with a classic Bootstrap info/success status banner wrapping `bootstrap-2-3-2-live-region-root`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-async-region-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root (`bootstrap-2-3-2-async-region-root`)
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
+/>
+
+### Exposed State (`getExposes()`)
+
+<ApiPropsTable
+  headers={{ name: 'Handle', type: 'Type', default: 'Initial' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-ASYNC-REGION.yaml', 'P-BASE-ASYNC-REGION.yaml']}
+/>

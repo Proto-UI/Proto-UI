@@ -6,39 +6,164 @@ description: 'A Brutalist-styled presence transition with a five-phase lifecycle
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Transition manages mounting and a five-phase presence lifecycle (`closed → preparing → entering → entered → leaving`) with Brutalist flat fade presentation and no extra slide, zoom, or shadow choreography.
+Transition manages mounting and a five-phase presence lifecycle (`closed → preparing → entering → entered → leaving`) following Brutalist's flat fade boundary: endpoint opacity only, with no zoom, slide, translate, or shadow choreography.
 
 ## Preview
 
+Drive `enter`, `leave`, and `complete` below to inspect the flat fade endpoints, live five-phase strip, and presence badge around a Brutalist 2px-bordered, 4px-shadow card.
+
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-transition" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import Transition from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/transition` (workspace CLI target: `brutalist-transition`).
+Exported from `@proto.ui/prototypes-brutalist` and its `./transition` anatomy subpath. Transition is not registered as a `proto-ui add` CLI target:
+
+```ts
+import { transition } from '@proto.ui/prototypes-brutalist/transition';
+// Or from the package root:
+import { brutalistTransition } from '@proto.ui/prototypes-brutalist';
+```
 
 ## Usage
 
-- **Lifecycle & presence**: Exposes live `transitionState` and `isPresent` along with `enter`, `leave`, and `complete` controls. Content stays mounted while leaving and unmounts once the `closed` phase is reached.
-- **Flat fade styling**: Binds endpoint opacity only (`opacity-0` during `closed`, `preparing`, and `leaving`; `opacity-100` during `entering` and `entered`) while keeping the content slot transparent.
-- **Interruption & reduced motion**: Configure mid-transition behavior via `interrupt` (`'reverse'`, `'wait'`, or `'immediate'`). Under `prefers-reduced-motion: reduce`, durations collapse so phases complete immediately.
-- **Controlled vs. uncontrolled**: Use `defaultOpen` for uncontrolled state or pass `open` for controlled mode; set `appear={true}` to animate on initial mount.
+```tsx
+import { useState } from 'react';
+import { BrutalistButton, BrutalistTransition } from '../proto-ui/components/react';
+
+export function BrutalistBannerTransition() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <BrutalistTransition
+        open={open}
+        appear
+        className="block transition-opacity duration-150 ease-linear motion-reduce:transition-none"
+      >
+        <div className="rounded-[5px] border-2 border-black bg-[#dcebfe] p-5 font-sans font-medium text-black shadow-[4px_4px_0_0_#000]">
+          Workspace synced
+        </div>
+      </BrutalistTransition>
+      <BrutalistButton onClick={() => setOpen((value) => !value)}>Toggle</BrutalistButton>
+    </div>
+  );
+}
+```
+
+- **Lifecycle & presence**: Exposes live `transitionState` and `isPresent` along with `enter`, `leave`, and `complete` controls. Content stays mounted throughout `leaving` and unmounts once `closed` is reached.
+- **Flat fade boundary**: `brutalist-transition` binds endpoint opacity only (`opacity-0` during `closed`, `preparing`, and `leaving`; `opacity-100` during `entering` and `entered`) while keeping the authored slot transparent.
+- **Interruption & reduced motion**: Configure mid-transition behavior via `interrupt` (`'reverse'`, `'wait'`, or `'immediate'`). Under `prefers-reduced-motion: reduce`, automatic waits collapse to `0ms` while keeping phase and event ordering intact.
+- **Shared semantics**: Inherited directly from [Base Transition](/en/ui-libraries/base/transition/).
+
+## Examples
+
+### Controlled Mode & `transitionend` Sync
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition-controlled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Interruption Policies (`interrupt`)
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition-interrupt"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Lifecycle Events & `appear`
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition-lifecycle"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The following props belong to `Root` (pass `open` for controlled mode):
+### Transition Props
+
+Pass `open` for controlled mode:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'appear', type: 'boolean', default: 'false' },
     { name: 'enterDuration', type: 'number', default: '300' },
     { name: 'leaveDuration', type: 'number', default: '200' },
     { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
   ]}
+/>
+
+### Exposed States
+
+<ApiPropsTable
+  headers={{ name: 'State', type: 'Type', default: 'Description' }}
+  rows={[
+    {
+      name: 'transitionState',
+      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      default: 'Current perceptual phase',
+    },
+    {
+      name: 'isPresent',
+      type: 'boolean',
+      default: 'Whether view resources stay mounted',
+    },
+  ]}
+/>
+
+### Lifecycle Events & Imperative Methods
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Signature', default: 'Description' }}
+  rows={[
+    {
+      name: 'beforeEnter / afterEnter',
+      type: 'ExposeEvent<void>',
+      default: 'Enter boundary signals',
+    },
+    {
+      name: 'beforeLeave / afterLeave',
+      type: 'ExposeEvent<void>',
+      default: 'Leave boundary signals',
+    },
+    {
+      name: 'enter / leave / complete',
+      type: '() => void',
+      default: 'Drive the phase machine (also on controls)',
+    },
+    {
+      name: 'retainClosedView',
+      type: '(retained: boolean) => void',
+      default: 'Retain or detach the closed view',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
 />

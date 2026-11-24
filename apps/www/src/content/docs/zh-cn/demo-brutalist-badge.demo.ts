@@ -7,7 +7,7 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-badge-root',
-        props: { tone: 'accent', variant: 'outline' },
+        props: { tone: 'accent' },
         children: ['Accent'],
       },
       {

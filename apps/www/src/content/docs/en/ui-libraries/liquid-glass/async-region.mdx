@@ -1,0 +1,104 @@
+---
+title: 'Async Region'
+description: 'A content-layer semantic container for Liquid Glass layouts that projects aria-busy without applying glass material to content.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Async Region inherits `aria-busy` and focus-preservation semantics from [Base Async Region](/en/ui-libraries/base/async-region/) as a restrained content-layer container designed to sit cleanly beneath floating Liquid Glass controls.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-async-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the `0.2.0` stable release or CLI registry. Import directly from the workspace subpath:
+
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-liquid-glass/async-region';
+```
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-liquid-glass/async-region';
+
+const LiquidGlassAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
+
+export function FeedContent() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <LiquidGlassAsyncRegionRoot busy={busy}>
+      <p>Content-layer descendants and focus stay intact during refresh.</p>
+    </LiquidGlassAsyncRegionRoot>
+  );
+}
+```
+
+### Material Layering & Accessibility
+
+Layering follows Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) guidance:
+
+- **Content stays off the glass layer**: Translucent Liquid Glass belongs strictly to floating navigation and controls layers above content—never to underlying content containers and never stacked glass-on-glass. Accordingly, `liquid-glass-async-region-root` applies only `block min-w-0 max-w-full text-foreground` with no optical material carrier or `backdrop-*` tokens.
+- **Control hierarchy & concentric geometry**: Keep Async Region on an opaque, readable content surface with concentric radii (`rounded-2xl` outer card pairing with `rounded-xl` nested panels) and trigger updates using floating `variant="prominent"` (primary) and `variant="regular"` (secondary) Liquid Glass buttons.
+- **Vibrancy & accessibility fallbacks**: Neutral family foreground tokens remain legible across light mode, dark mode, reduced transparency, increased contrast, and reduced motion preferences without introducing motion chrome.
+
+## Examples
+
+### Focus-Preserving Refresh
+
+Keep an editable Liquid Glass input inside the content-layer `Async Region` while toggling refresh from floating `prominent` and `regular` glass buttons.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-async-region-focus"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Composed with Live Region
+
+Combine `liquid-glass-async-region-root` with an opaque status banner wrapping `liquid-glass-live-region-root`, driven by floating Liquid Glass controls.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-async-region-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root (`liquid-glass-async-region-root`)
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
+/>
+
+### Exposed State (`getExposes()`)
+
+<ApiPropsTable
+  headers={{ name: 'Handle', type: 'Type', default: 'Initial' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+> Because Async Region belongs to the content layer rather than a floating glass control layer, it intentionally omits the `material` prop.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-ASYNC-REGION.yaml', 'P-BASE-ASYNC-REGION.yaml']}
+/>

@@ -1,4 +1,4 @@
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asAsyncRegionRoot,
   type AsyncRegionRootExposes,
@@ -9,8 +9,11 @@ import {
 export const asyncRegionRoot = definePrototype<AsyncRegionRootProps, AsyncRegionRootExposes>({
   name: 'shadcn-async-region-root',
   modules: asAsyncRegionRoot.modules,
-  setup() {
-    return asAsyncRegionRoot().render;
+  setup(def) {
+    const behavior = asAsyncRegionRoot();
+    // P-SHADCN-ASYNC-REGION-VISUAL: neutral readable foreground and block layout bounds only.
+    def.feedback.style.use(tw('block min-w-0 max-w-full text-foreground'));
+    return behavior.render;
   },
 });
 

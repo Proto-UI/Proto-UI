@@ -1,0 +1,113 @@
+---
+title: 'Bootstrap 2.3.2 Live Region'
+description: '向屏幕阅读器播报动态状态更新与紧急提示的 Bootstrap 2.3.2 纯语义 ARIA 实时区域组件。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Live Region 继承 [Base Live Region](/zh-cn/ui-libraries/base/live-region/) 的无障碍实时播报语义，根据 `politeness` 与 `atomic` 自动维护 `role`、`aria-live` 与 `aria-atomic`，保持纯语义展示而不伪装为 Bootstrap 的视觉 Alert 提示框。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版或 CLI 安装目标。请直接从工作区包 `@proto.ui/prototypes-bootstrap-2-3-2/live-region` 导入 `liveRegionRoot`：
+
+```ts
+import { liveRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/live-region';
+```
+
+## 用法
+
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { liveRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/live-region';
+
+const BootstrapLiveRegionRoot = AdaptToReact(liveRegionRoot);
+
+export function StatusBanner({ message }: { message: string }) {
+  return (
+    <BootstrapLiveRegionRoot politeness="polite" atomic>
+      {message}
+    </BootstrapLiveRegionRoot>
+  );
+}
+```
+
+- **播报优先级**：`politeness="polite"`（默认）投射 `role="status"` 与 `aria-live="polite"`；`politeness="assertive"` 投射 `role="alert"` 与 `aria-live="assertive"`。
+- **原子播报**：`atomic={true}`（默认）投射 `aria-atomic="true"`；设为 `false` 时仅播报实际变更的子节点。
+- **语义与视觉分离**：`Root` 保持无外框的纯语义容器，直接继承所在容器的可读前景排版，不附加 Bootstrap 2.3.2 的 `.alert` 背景、边框或关闭按钮，方便嵌入经典 Well、表单反馈行或 `.sr-only` 隐式播报区。
+
+## 示例
+
+### 原子播报与增量播报
+
+对比 `atomic={true}`（整句播报）与 `atomic={false}`（仅播报变化的进度片段）。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-atomic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 动态切换播报级别
+
+在挂载后的实时区域上切换 `politeness` 与 `atomic`，ARIA 属性即时更新且已渲染子文本保持不变。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-dynamic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 异步保存与表单校验反馈
+
+搭配 Bootstrap 2.3.2 经典按钮变体（`primary`、`danger`、`default`）展示非打断式保存反馈与紧急校验错误。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-feedback"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 仅屏幕阅读器可见的播报
+
+在 `.sr-only` 容器内承载实时区域，让操作反馈对屏幕阅读器可见而不改变经典页面排版。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-sr-only"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+`Root` 无额外暴露状态、事件或方法。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
+/>

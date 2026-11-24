@@ -6,39 +6,156 @@ description: '提供五阶段显隐状态机与纯粹扁平淡入淡出效果的
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Transition 负责管理内容的挂载与显隐过渡阶段（`closed → preparing → entering → entered → leaving`），Brutalist 风格采用简洁的扁平淡入淡出样式，不附加缩放、位移或阴影编排。
+Transition 负责管理内容的挂载与五阶段显隐生命周期（`closed → preparing → entering → entered → leaving`）。Brutalist 风格严格遵循[设计契约](/zh-cn/ui-libraries/brutalist/design-contract/)的扁平淡入淡出边界，只绑定端点透明度，不叠加缩放、位移或阴影编排。
 
 ## 预览
 
+使用下方的 Brutalist 控件驱动 `enter`、`leave` 与 `complete`，观察 2px 黑色边框与 4px 硬阴影卡片在固定高度舞台中的纯粹扁平淡入淡出。
+
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-transition" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/transition` 导入（当前工作区 CLI 目标为 `brutalist-transition`）。
+当前从公开包 `@proto.ui/prototypes-brutalist` 及其 `./transition` 子路径导出，不进入 `proto-ui add` CLI 目标列表：
+
+```ts
+import { transition } from '@proto.ui/prototypes-brutalist/transition';
+// 或从包根导出：
+import { brutalistTransition } from '@proto.ui/prototypes-brutalist';
+```
 
 ## 用法
 
+```tsx
+import { useState } from 'react';
+import { BrutalistButton, BrutalistTransition } from '../proto-ui/components/react';
+
+export function BrutalistBannerTransition() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <BrutalistTransition
+        open={open}
+        appear
+        className="block transition-opacity duration-150 ease-linear motion-reduce:transition-none"
+      >
+        <div className="rounded-[5px] border-2 border-black bg-[#dcebfe] p-5 font-sans font-medium text-black shadow-[4px_4px_0_0_#000]">
+          Workspace synced
+        </div>
+      </BrutalistTransition>
+      <BrutalistButton onClick={() => setOpen((value) => !value)}>Toggle</BrutalistButton>
+    </div>
+  );
+}
+```
+
 - **显隐阶段与挂载**：组件暴露实时阶段 `transitionState` 与 `isPresent`，以及 `enter`、`leave`、`complete` 控制方法。离场期间内容节点保持挂载直至 `leaving` 结束，关闭后默认卸载内容节点。
-- **扁平淡入淡出**：Brutalist 样式仅按阶段绑定端点透明度（`closed`、`preparing`、`leaving` 为 `opacity-0`；`entering`、`entered` 为 `opacity-100`），内容插槽保持透明。
-- **中断策略与减少动态效果**：通过 `interrupt` 配置中途反转（`'reverse'`）、等待完成（`'wait'`）或立即切换（`'immediate'`）。当系统启用 `prefers-reduced-motion: reduce` 时，过渡时长自动折叠并即时完成。
-- **受控与非受控**：使用 `defaultOpen` 初始化非受控状态，或传入 `open` 进入受控模式；设置 `appear={true}` 可在初次挂载时执行入场过渡。
+- **扁平淡入淡出边界**：`brutalist-transition` 仅按阶段绑定端点透明度（`closed`、`preparing`、`leaving` 为 `opacity-0`；`entering`、`entered` 为 `opacity-100`），内容插槽保持透明且不添加缩放或位移动效。
+- **中断策略与减少动态效果**：通过 `interrupt` 配置中途反转（`'reverse'`）、等待完成（`'wait'`）或立即切换（`'immediate'`）。当系统启用 `prefers-reduced-motion: reduce` 时，过渡等待自动缩短为 `0ms` 并保持事件顺序不变。
+- **底层语义**：相位机与视图存在性治理继承自 [Base Transition](/zh-cn/ui-libraries/base/transition/)。
+
+## 示例
+
+### 受控模式与 `transitionend` 同步
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition-controlled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 中途打断策略（`interrupt`）
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition-interrupt"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 生命周期事件与 `appear`
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-transition-lifecycle"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下属性属于 `Root`（传入 `open` 进入受控模式）：
+### Transition 属性
+
+传入 `open` 进入受控模式：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'appear', type: 'boolean', default: 'false' },
     { name: 'enterDuration', type: 'number', default: '300' },
     { name: 'leaveDuration', type: 'number', default: '200' },
     { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
   ]}
+/>
+
+### 暴露状态
+
+<ApiPropsTable
+  headers={{ name: '状态', type: '类型', default: '说明' }}
+  rows={[
+    {
+      name: 'transitionState',
+      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      default: '当前感知过渡阶段',
+    },
+    {
+      name: 'isPresent',
+      type: 'boolean',
+      default: '视图资源是否需要保持挂载',
+    },
+  ]}
+/>
+
+### 生命周期事件与命令式方法
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '签名', default: '说明' }}
+  rows={[
+    { name: 'beforeEnter / afterEnter', type: 'ExposeEvent<void>', default: '入场边界事件' },
+    { name: 'beforeLeave / afterLeave', type: 'ExposeEvent<void>', default: '离场边界事件' },
+    {
+      name: 'enter / leave / complete',
+      type: '() => void',
+      default: '手动推进状态机（亦挂载于 controls）',
+    },
+    {
+      name: 'retainClosedView',
+      type: '(retained: boolean) => void',
+      default: '控制 closed 阶段是否保留视图节点',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
 />

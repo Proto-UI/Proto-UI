@@ -1,0 +1,104 @@
+---
+title: 'Async Region'
+description: '位于内容层的 Liquid Glass 异步忙碌语义容器，保持非玻璃可读表面并与悬浮玻璃控件清晰分层。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Async Region 继承 [Base Async Region](/zh-cn/ui-libraries/base/async-region/) 的 `aria-busy` 与焦点保留语义，作为位于内容层的克制中性容器，与上方悬浮的 Liquid Glass 操作控件保持清晰的视觉层级。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-async-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 `0.2.0` 稳定版，不支持 CLI 安装。可直接从子路径导入：
+
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-liquid-glass/async-region';
+```
+
+## 用法
+
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-liquid-glass/async-region';
+
+const LiquidGlassAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
+
+export function FeedContent() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <LiquidGlassAsyncRegionRoot busy={busy}>
+      <p>内容层区域在异步刷新期间保持挂载与焦点稳定。</p>
+    </LiquidGlassAsyncRegionRoot>
+  );
+}
+```
+
+### 材质分层与无障碍
+
+设计取舍参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 指南：
+
+- **内容层不施加玻璃材质**：半透明 Liquid Glass 专属于浮于内容之上的导航与操作控件层，不应用于底层内容容器，且避免玻璃叠玻璃（glass-on-glass）。因此 `liquid-glass-async-region-root` 仅输出 `block min-w-0 max-w-full text-foreground`，不声明光学材质承载器或 `backdrop-*` 样式。
+- **层级与同心圆角**：将 Async Region 放在高可读性的不透明内容卡片（如 `rounded-2xl` 外容器搭配 `rounded-xl` 内部区块）中，上方或下方再搭配 `variant="prominent"`（主操作）与 `variant="regular"`（次操作）的 Liquid Glass 按钮形成清晰主次。
+- **对比度与系统偏好回退**：内容区域直接使用家族前景色变量，在浅色、深色以及系统开启减少透明度、增强对比度或减弱动态效果时均保持稳定可读，不添加干扰性动画。
+
+## 示例
+
+### 保持焦点的草稿刷新
+
+内容卡片内的输入框位于 `liquid-glass-async-region-root` 中，点击外部悬浮的 Liquid Glass 按钮切换刷新状态时，焦点与编辑内容保持不变。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-async-region-focus"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配 Live Region 播报状态
+
+内容层同时包含 `liquid-glass-async-region-root` 与非玻璃状态条 `liquid-glass-live-region-root`，由悬浮的 `prominent` / `regular` 玻璃按钮驱动刷新与播报。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-async-region-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root（`liquid-glass-async-region-root`）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
+/>
+
+### 暴露状态（`getExposes()`）
+
+<ApiPropsTable
+  headers={{ name: '状态句柄', type: '类型', default: '初始值' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+> 由于 Async Region 属于内容层而非悬浮玻璃控件层，本部件不声明 `material` 属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-ASYNC-REGION.yaml', 'P-BASE-ASYNC-REGION.yaml']}
+/>

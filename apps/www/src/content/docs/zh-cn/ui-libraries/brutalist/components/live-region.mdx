@@ -6,29 +6,100 @@ description: '向屏幕阅读器播报动态状态更新（polite / assertive）
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Live Region 是一个单部件无障碍实时播报容器，用于在内容变化时向屏幕阅读器播报动态通知，同时保持简洁可读的排版样式，不附加多余边框或阴影。
+Brutalist Live Region 是一个单部件无障碍实时播报容器，继承 [Base Live Region](/zh-cn/ui-libraries/base/live-region/) 的 `role`、`aria-live` 与 `aria-atomic` 语义，同时遵循 [Brutalist 设计契约](../../design-contract/) 保持简洁可读的前景排版，不附加多余边框或阴影。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-live-region" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。Brutalist Live Region 不进入 `proto-ui add` CLI 目标列表，请直接从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/live-region` 导入：
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-live-region`
-- **包导出**：从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/live-region` 导入 `Root`
+```ts
+import { BrutalistLiveRegionRoot } from '@proto.ui/prototypes-brutalist/live-region';
+```
 
 ## 用法
 
-- **播报优先级**：`politeness="polite"`（默认）输出 `role="status"` 与 `aria-live="polite"`，适合常规状态反馈；`politeness="assertive"` 输出 `role="alert"` 与 `aria-live="assertive"`，适合需要立即打断播报的紧急提醒。
-- **原子播报**：`atomic`（默认 `true`）输出 `aria-atomic`，确保整段文本作为完整语义播报。直接更新传入的子元素文本即可触发播报。
-- 容器本身不进入键盘 Tab 顺序，只应用 `min-w-0 max-w-full text-foreground` 保证内容在亮暗模式下清晰可读。
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { BrutalistLiveRegionRoot } from '@proto.ui/prototypes-brutalist/live-region';
+
+const LiveRegionRoot = AdaptToReact(BrutalistLiveRegionRoot);
+
+export function StatusAnnouncement({ message }: { message: string }) {
+  return (
+    <LiveRegionRoot politeness="polite" atomic>
+      {message}
+    </LiveRegionRoot>
+  );
+}
+```
+
+- **播报优先级**：`politeness="polite"`（默认）输出 `role="status"` 与 `aria-live="polite"`，适合常规状态反馈；`politeness="assertive"` 输出 `role="alert"` 与 `aria-live="assertive"`，适合需要立即播报的紧急提醒。
+- **原子播报**：`atomic`（默认 `true`）输出 `aria-atomic`，确保整段文本作为完整语义播报；设为 `false` 时仅播报变更片段。直接更新传入的子元素文本即可触发播报。
+- **视觉克制**：容器本身不进入键盘 Tab 顺序，只应用 `min-w-0 max-w-full text-foreground` 保证在亮暗模式下清晰可读，不附加 `border-2`、`rounded-base` 或阴影等通知外框。
+
+## 示例
+
+### 原子播报与增量播报
+
+对比 `atomic={true}` 整句播报与 `atomic={false}` 仅播报变更片段的语义差异。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-atomic"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 动态切换播报级别
+
+动态更新 `politeness` 与 `atomic` 属性会立即同步无障碍属性，而不会重置内部子内容。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-dynamic"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 异步保存与表单校验反馈
+
+在 Brutalist 卡片布局中组合 `polite` 保存状态与 `assertive` 表单校验错误，触发更新时不转移焦点。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-feedback"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 仅屏幕阅读器可见的播报
+
+通过 `.sr-only` 隐藏实时区域，在不干扰视觉布局的前提下向辅助技术播报操作反馈。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-sr-only"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
@@ -40,4 +111,13 @@ Brutalist Live Region 是一个单部件无障碍实时播报容器，用于在�
     { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
     { name: 'atomic', type: 'boolean', default: 'true' },
   ]}
+/>
+
+`Root` 无额外暴露状态、事件或方法。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
 />

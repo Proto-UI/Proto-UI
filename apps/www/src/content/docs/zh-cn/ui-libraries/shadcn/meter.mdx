@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Meter 用于在已知上下界的范围内展示测量值（如磁盘占用、配额余量或强度评分），并可根据阈值区间自动划分状态。本页示例使用 **Shadcn Rhea** 风格。
+Meter 用于在已知上下界的范围内展示测量值（如磁盘占用、配额余量或电量评分），并根据阈值区间自动划分状态。本页示例默认采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,43 +15,150 @@ Meter 用于在已知上下界的范围内展示测量值（如磁盘占用、�
   demoId="demo-shadcn-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-shadcn/meter` 子路径直接导入各部件原型：
+
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-shadcn/meter';
+```
 
 ## 用法
 
-在完成包入口注册后，可从 `meter` 子路径导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator` 和 `meterValue`：
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-shadcn/meter';
 
-- `Root` 统一管理有界数值范围与状态计算。
-- `Label` 为仪表提供可读名称。
-- `Track` 与 `Indicator` 展示测量值在区间内的占比。
-- `Value` 显示 `valueText`，未设置时显示规范化后的数值。
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
 
-### 数值与阈值分段
+export function StorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
 
-- `value` 会自动限制在 `[min, max]` 合法范围内；当 `min` 等于 `max` 时，百分比为 `0`。
-- `low`、`high` 和 `optimum` 用于将测量值划分为 `optimal`、`suboptimal` 或 `critical` 状态，不改变数值本身。
-- Meter 为只读展示组件，不会引入额外的键盘焦点停靠点。`Root` 及各部件会随属性更新同步暴露 `value`、`percentage`、`indeterminate` 和 `status`。
+### 部件组成
+
+- **Root**：管理有限范围 `[min, max]`、当前值 `value` 与阈值计算。数值越界时自动钳制在 `[min, max]`；当 `min === max` 时百分比为 `0`。
+- **Label**：通过 `aria-labelledby` 为仪表提供可读名称；未渲染 `Label` 时可通过 `ariaLabel` 命名。
+- **Track / Indicator**：根据 `--pui-percentage` 呈现测量占比，并按 `status` 区分 `optimal`、`suboptimal` 与 `critical` 视觉填充。
+- **Value**：优先显示 `valueText`，未设置时回退到规范化后的数值字符串。
+
+### 阈值分段与无障碍
+
+- `low`、`high` 和 `optimum` 将测量值划分为 `optimal`、`suboptimal` 或 `critical` 状态，不改变数值本身。当「越低越好」（如磁盘占用）时将 `optimum` 设在 `low` 以下；当「越高越好」（如电量）时将 `optimum` 设在 `high` 以上。
+- Meter 为只读展示组件（`role="meter"`），不会引入额外的键盘焦点停靠点。`Root` 及各子部件会随属性更新同步暴露 `value`、`percentage`、`indeterminate` 和 `status`。
+
+### 风格预设（`styleProfile`）
+
+支持的预设包括 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（`new-york` 作为兼容别名）。省略或设为 `inherit` 时优先继承最近的 [Style Scope](../style-scope/)（本页示例通过 Style Scope 设为 `rhea`），独立使用时回退到 `luma`。
+
+## 示例
+
+### 阈值区间（`optimal` / `suboptimal` / `critical`）
+
+通过调整 `optimum` 相对于 `[low, high]` 的位置，可以分别表达「越低越好」（磁盘占用）与「越高越好」（电池电量）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义范围与格式化文本
+
+设置自定义 `min`、`max` 与 `valueText`，呈现带单位的业务配额读数。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 配额概览卡片
+
+在卡片容器内组合多个 Meter，统一展示计算与存储资源的健康度。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-quota-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 风格预设对比
+
+通过 `shadcn-style-scope` 切换不同 `styleProfile`，可同时调整轨道高度、圆角与标题/读数字号。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'value', type: 'number | undefined', default: '省略' },
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
-    { name: 'low', type: 'number | undefined', default: '未设置' },
-    { name: 'high', type: 'number | undefined', default: '未设置' },
-    { name: 'optimum', type: 'number | undefined', default: '未设置' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Label / Track / Indicator / Value
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" }]}
+/>
+
+### 暴露状态与 CSS 变量
+
+`Root` 与各子部件同步暴露以下只读状态，`Indicator` 同时以 `--pui-percentage` 驱动宽度比例：
+
+<ApiPropsTable
+  headers={{ name: '状态', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: '钳制在 [min, max] 内的当前数值' },
+    { name: 'percentage', type: 'State<number>', default: '0 到 100 之间的归一化百分比' },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Meter 恒为 false' },
   ]}
 />
 

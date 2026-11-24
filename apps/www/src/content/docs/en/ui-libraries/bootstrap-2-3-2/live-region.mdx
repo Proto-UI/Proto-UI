@@ -1,0 +1,113 @@
+---
+title: 'Bootstrap 2.3.2 Live Region'
+description: 'A semantic ARIA live region for Bootstrap 2.3.2 that announces dynamic status updates and alerts to assistive technologies.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Live Region inherits ARIA live-region semantics from [Base Live Region](/en/ui-libraries/base/live-region/), projecting `role`, `aria-live`, and `aria-atomic` as an unboxed semantic container rather than styling itself as a Bootstrap visual alert box.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source only; not included in the 0.2.0 stable release or CLI targets. Import `liveRegionRoot` from `@proto.ui/prototypes-bootstrap-2-3-2/live-region`:
+
+```ts
+import { liveRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/live-region';
+```
+
+## Usage
+
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { liveRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/live-region';
+
+const BootstrapLiveRegionRoot = AdaptToReact(liveRegionRoot);
+
+export function StatusBanner({ message }: { message: string }) {
+  return (
+    <BootstrapLiveRegionRoot politeness="polite" atomic>
+      {message}
+    </BootstrapLiveRegionRoot>
+  );
+}
+```
+
+- **Politeness levels**: `politeness="polite"` (default) sets `role="status"` and `aria-live="polite"`; `politeness="assertive"` sets `role="alert"` and `aria-live="assertive"`.
+- **Atomic updates**: `atomic={true}` (default) sets `aria-atomic="true"` so the entire message is announced together; set `false` to announce only mutated child text.
+- **Unboxed semantic role**: `Root` inherits readable typography from its surrounding container without adding Bootstrap `.alert` fills, borders, or dismiss chrome, so you can place it inside classic wells, form feedback rows, or `.sr-only` containers.
+
+## Examples
+
+### Atomic vs. Incremental Updates
+
+Compare full-sentence announcements (`atomic={true}`) with incremental fragment announcements (`atomic={false}`).
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-atomic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Politeness Switching
+
+Toggle `politeness` and `atomic` on a mounted region to synchronize ARIA attributes while keeping its authored child content intact.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-dynamic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Async Save & Validation Feedback
+
+Pair polite background save updates with assertive validation alerts triggered by classic Bootstrap 2.3.2 button variants (`primary`, `danger`, `default`).
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-feedback"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Visually Hidden Announcements
+
+Render `Live Region` inside an `.sr-only` container to deliver screen-reader announcements without modifying page layout.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-live-region-sr-only"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+`Root` exposes no additional state, events, or methods.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
+/>

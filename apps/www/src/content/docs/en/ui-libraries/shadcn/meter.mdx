@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Meter displays a known numerical measurement within a bounded range—such as disk usage, quota balance, or strength—and classifies it against optional thresholds. The examples on this page use the **Shadcn Rhea** style preset.
+Meter displays a known numerical measurement within a bounded range—such as disk usage, quota balance, or charge level—and classifies readings against optional thresholds. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,43 +15,154 @@ Meter displays a known numerical measurement within a bounded range—such as di
   demoId="demo-shadcn-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the meter parts directly from `@proto.ui/prototypes-shadcn/meter`:
+
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-shadcn/meter';
+```
 
 ## Usage
 
-After registering the package entry, import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from the `meter` subpath:
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-shadcn/meter';
 
-- `Root` manages the finite range and status calculation.
-- `Label` provides the accessible name.
-- `Track` and `Indicator` visualize the current proportion within the range.
-- `Value` displays `valueText`, or falls back to the normalized numeric value.
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
 
-### Range and threshold classification
+export function StorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
 
-- Values are clamped within `[min, max]`; when `min` equals `max`, the percentage is `0`.
-- `low`, `high`, and `optimum` classify the reading as `optimal`, `suboptimal`, or `critical` without altering the numeric value.
-- Meter is a read-only display with no keyboard tab stop. `Root` and its parts expose `value`, `percentage`, `indeterminate`, and `status`, updating together whenever props change.
+### Anatomy
+
+- **Root**: Manages the finite `[min, max]` bounds, clamped `value`, and threshold classification. Equal bounds produce `0` percentage.
+- **Label**: Names the meter through `aria-labelledby`; pass `ariaLabel` when rendering without a visible `Label`.
+- **Track / Indicator**: Visualize `--pui-percentage` and adjust the indicator fill across `optimal`, `suboptimal`, and `critical` zones.
+- **Value**: Displays `valueText` when provided, otherwise falls back to the normalized numeric value.
+
+### Thresholds and accessibility
+
+- `low`, `high`, and `optimum` classify readings as `optimal`, `suboptimal`, or `critical` without altering the numeric value. Place `optimum` below `low` when lower readings are better (disk usage), or above `high` when higher readings are better (battery charge).
+- Meter is a read-only display (`role="meter"`) with no keyboard tab stop. `Root` and its parts expose synchronized `value`, `percentage`, `indeterminate`, and `status` states.
+
+### Style presets (`styleProfile`)
+
+Supported presets are `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` alias). When omitted or set to `'inherit'`, parts inherit from the nearest [Style Scope](../style-scope/) (wrapped in `rhea` on this page) and fall back to `luma` when mounted standalone.
+
+## Examples
+
+### Threshold zones (`optimal` / `suboptimal` / `critical`)
+
+Position `optimum` outside `[low, high]` to model both lower-is-better usage gauges and higher-is-better level gauges.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom range and formatted `valueText`
+
+Supply custom `min`, `max`, and `valueText` props to display domain units cleanly.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Workspace quota card
+
+Stack multiple meters inside a summary card to show compute and storage health at a glance.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-quota-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Style profile presets
+
+Switch `styleProfile` via `shadcn-style-scope` to adjust track height, radius, and label/value typography together.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-meter-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'value', type: 'number | undefined', default: 'omitted' },
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
-    { name: 'low', type: 'number | undefined', default: 'unset' },
-    { name: 'high', type: 'number | undefined', default: 'unset' },
-    { name: 'optimum', type: 'number | undefined', default: 'unset' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" },
+  ]}
+/>
+
+### Label / Track / Indicator / Value
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit'" }]}
+/>
+
+### Exposed states and CSS variable
+
+`Root` and its parts expose the following read-only states, and `Indicator` projects `--pui-percentage` for width scaling:
+
+<ApiPropsTable
+  headers={{ name: 'State', type: 'Type', default: 'Notes' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: 'Current reading clamped to [min, max]' },
+    {
+      name: 'percentage',
+      type: 'State<number>',
+      default: 'Normalized percentage between 0 and 100',
+    },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Always false for Meter' },
   ]}
 />
 
