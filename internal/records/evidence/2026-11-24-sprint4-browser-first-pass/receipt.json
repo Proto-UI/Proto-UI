@@ -1,0 +1,16 @@
+{
+  "candidateSha": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+  "tree": "8f284229ff76e51ec109af2fd8f4d9694a739a35",
+  "suite": "packages/compiler/test/shader-presentation.browser.test.ts",
+  "expectedCases": 37,
+  "selectionSha256": "e3db32445d1aeb0eef5832f1c39e0d2041b25973d10924000329295c1ecc7133",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "outcome": "passed",
+  "builds": [
+    "shader-presentation-inline-onBiMz/build.json",
+    "shader-presentation-scene-yrWqQb/build.json",
+    "shader-presentation-static-data-moz0pk/build.json"
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent pre-budget exact-candidate continuation receipt",
+  "reviewer": "/root/ir10_semantics",
+  "head": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+  "runId": 45266820171,
+  "attempt": 1,
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45266820171",
+  "priorCanonicalHead": "9fff88cf23d4e55375979bc5c68c033e3deaed38",
+  "source": {
+    "head": "c1f0332eed6ba79734b92bd4407b274f45d5c274",
+    "tree": "ef4ef8fb55f867f41d70717dde180f04d1233d1c",
+    "workingTreeClean": true,
+    "measuredSourceMatchesHead": true,
+    "scope": [
+      "packages",
+      "scripts/analysis",
+      "package.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
+      "tsconfig.json",
+      "internal/coverage-matrices/prototype-coverage-matrix.json"
+    ],
+    "fileCount": 7831,
+    "fingerprintSha256": "ab707891c7ffe4053be5eaa95000c267569a94c8d1b161154ef46bdf32b5599b",
+    "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stableDuringMeasurement": true,
+    "requireClean": true,
+    "expectedSha": "c1f0332eed6ba79734b92bd4407b274f45d5c274"
+  },
+  "archive": "/workspace/scratch/1494db44bb7b/integration-evidence/canonical-prebudget-originals.tar.gz",
+  "archiveSha256": "b2fb242e53637823041b5040ec133c868175b06a360ac6cf7cb9fdd05bac4a02",
+  "originals": {
+    "report.json": {
+      "bytes": 1551024,
+      "sha256": "8a91ff237ec8a0cb1e04402f48e700247599fb979070a63b8f157023a119ecf6",
+      "archiveMember": "report.json"
+    },
+    "terminal.json": {
+      "bytes": 1480,
+      "sha256": "428933938557d0cf77df15b5748491b76c7480d4f7469e6208582848530bdf5e",
+      "archiveMember": "terminal.json"
+    },
+    "setup.log": {
+      "bytes": 1976,
+      "sha256": "5d869f2f02368b6e0b70e83e27e4324fdb627a34746a437c1e1840dbf1e56597",
+      "archiveMember": "setup.log"
+    },
+    "build.log": {
+      "bytes": 2933,
+      "sha256": "f4201ffc33254172cc0d2d70c104f5b476e466cb0cd6595004a70a83e7b6a632",
+      "archiveMember": "build.log"
+    },
+    "controls.log": {
+      "bytes": 2963,
+      "sha256": "896c19f12da05cab48cd892aadafff1d68aa54983182ea917427a36d36eb8c24",
+      "archiveMember": "controls.log"
+    },
+    "gate.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveMember": "gate.log"
+    }
+  },
+  "checks": {
+    "allSixOriginalsMatchArchive": true,
+    "fullResultsAndDiagnosticsExactlyEqualPriorCanonicalReport": true,
+    "environmentMeasurementAndPolicyExactlyEqual": true,
+    "freshExpectedHeadCleanAndStable": true,
+    "fullSourceFingerprintRecomputedFromExactGitBlobs": true,
+    "sourceFilesChecked": 7831,
+    "uniqueClosureInputsChecked": 3831,
+    "closureInputsUnchangedAndMatchExactNewGitCandidate": true,
+    "onlyMeasuredScopeSourceChange": ["packages/compiler/test/shader-presentation.browser.test.ts"],
+    "publicBuild": "47/47",
+    "manifestCheck": 47,
+    "measurementControls": "28/28"
+  },
+  "strictResult": {
+    "passed": 6,
+    "total": 9,
+    "exitCode": 1,
+    "terminal": "failed",
+    "originalFailurePreserved": true
+  },
+  "costConclusion": "The complete source-bound 9-entry and 2-consumer results, including hashes, retained closure inputs and policy outcomes, are unchanged from the independently reviewed 9fff canonical candidate. The prior closure and attribution conclusions continue to hold for this new exact candidate.",
+  "parentProposedNumericArithmetic": [
+    {
+      "entry": "adapter-react root",
+      "oldCeiling": 172600,
+      "candidateGzipBytes": 172749,
+      "parentProposedCeiling": 172800,
+      "proposedIncrease": 200,
+      "proposedHeadroom": 51,
+      "smallest100ByteCeilingAboveObservedValue": true
+    },
+    {
+      "entry": "adapter-vue root",
+      "oldCeiling": 171400,
+      "candidateGzipBytes": 171536,
+      "parentProposedCeiling": 171600,
+      "proposedIncrease": 200,
+      "proposedHeadroom": 64,
+      "smallest100ByteCeilingAboveObservedValue": true
+    },
+    {
+      "entry": "adapter-web-component root",
+      "oldCeiling": 207200,
+      "candidateGzipBytes": 207303,
+      "parentProposedCeiling": 207400,
+      "proposedIncrease": 200,
+      "proposedHeadroom": 97,
+      "smallest100ByteCeilingAboveObservedValue": true
+    }
+  ],
+  "numericDecisionStatus": "Parent proposal only; no numeric source edit reviewed or post-edit validation available yet.",
+  "requiredNextStep": "Review the separately committed numeric-only transaction and its fresh exact-SHA canonical strict evidence; do not reuse the pre-edit red report as post-edit validation.",
+  "testsOrBuildsRerunByThisReview": 0,
+  "numericEditsMadeByThisReview": false,
+  "finalAcceptance": false,
+  "recordedAtUtc": "2026-11-23T21:24:32.915861+00:00"
+}

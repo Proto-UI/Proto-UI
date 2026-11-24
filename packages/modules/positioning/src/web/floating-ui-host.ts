@@ -120,6 +120,7 @@ function positionReference(anchor: HTMLElement, config: AnchoredPositionConfig) 
 function middlewareFor(
   config: AnchoredPositionConfig,
   isCurrent: () => boolean,
+  projected: ReturnType<typeof ownStyles>,
   available?: (width: number, height: number) => void
 ): Middleware[] {
   const middleware: Middleware[] = [
@@ -137,11 +138,10 @@ function middlewareFor(
       boundary,
       rootBoundary: 'viewport',
       padding: config.collisionPadding,
-      apply({ availableWidth, availableHeight, rects, elements }) {
+      apply({ availableWidth, availableHeight, rects }) {
         if (!isCurrent()) return;
         available?.(availableWidth, availableHeight);
         if (!isCurrent()) return;
-        const style = elements.floating.style;
         for (const [name, value] of [
           ['--proto-ui-anchor-width', `${rects.reference.width}px`],
           ['--proto-ui-anchor-height', `${rects.reference.height}px`],
@@ -149,7 +149,7 @@ function middlewareFor(
           ['--proto-ui-available-height', `${availableHeight}px`],
         ]) {
           if (!isCurrent()) return;
-          style.setProperty(name, value);
+          if (!projected.write(name, value)) return;
         }
       },
     })
@@ -316,6 +316,12 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let sizing: ReturnType<typeof createEdgeSizeLease> | null = null;
       let sizeObservers: ResizeObserver[] = [];
       let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
+      let projectedSize: ReturnType<typeof ownStyles> | null = null;
+      const retireProjectedSize = () => {
+        const previous = projectedSize;
+        projectedSize = null;
+        previous?.restore();
+      };
       const retireStrategyPin = () => {
         const previous = strategyPin;
         strategyPin = null;
@@ -348,6 +354,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           !disposed &&
           version === generation &&
           !!reference?.isLive() &&
+          (!projectedSize || projectedSize.isCurrent()) &&
           (!strategyPin || strategyPin.styles.isCurrent());
         if (disposed) return;
         if (!reference || !isElement(floating)) {
@@ -363,8 +370,19 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           }
           return;
         }
+        // Available-space variables are outputs of the last solve. Measuring
+        // through that cap can make an overflowing preferred side appear to
+        // fit forever after content/font/viewport changes. Release only our
+        // claims before measuring intrinsic geometry; authored values and any
+        // replacement owner's writes remain intact. Each solve then owns a
+        // fresh projection, guarded by the existing computation generation.
+        retireProjectedSize();
+        if (!isCurrent()) return;
+        const ownProjection = ownStyles(floating);
+        projectedSize = ownProjection;
         if (!strategyPin || strategyPin.target !== floating) {
           retireStrategyPin();
+          if (!isCurrent()) return;
           strategyPin = { target: floating, styles: ownStyles(floating) };
         }
         pinAnchoredStrategy(floating, config.strategy, strategyPin.styles);
@@ -384,7 +402,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
               result = await computePosition(reference.reference, floating, {
                 placement: toPlacement(config),
                 strategy: config.strategy,
-                middleware: middlewareFor(config, isCurrent, (width, height) => {
+                middleware: middlewareFor(config, isCurrent, ownProjection, (width, height) => {
                   available = { width, height };
                 }),
               });
@@ -441,7 +459,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         const result = await computePosition(reference.reference, floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
-          middleware: middlewareFor(config, isCurrent),
+          middleware: middlewareFor(config, isCurrent, ownProjection),
         });
         if (!isCurrent()) return;
         retireStrategyPin();
@@ -462,6 +480,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         cleanup = null;
         retireSizing();
         retireStrategyPin();
+        retireProjectedSize();
         if (connection.sizeMatch) {
           const epoch = sizingEpoch;
           sizing = createEdgeSizeLease(connection, () => !disposed && epoch === sizingEpoch);
@@ -505,6 +524,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           generation++;
           retireSizing();
           retireStrategyPin();
+          retireProjectedSize();
           cleanup?.();
           cleanup = null;
         });
@@ -549,6 +569,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           generation += 1;
           retireSizing();
           retireStrategyPin();
+          retireProjectedSize();
           cleanup?.();
           cleanup = null;
         },

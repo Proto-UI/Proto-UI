@@ -1,0 +1,1159 @@
+{
+  "schemaVersion": 1,
+  "scope": "Vue Context capture emitter repair: original failing producer, fixture calibration, corrected red/green controls, two generated Vue consumer journeys, and full16product assembly. No Chromium execution is claimed.",
+  "archive": {
+    "file": "raw-evidence.zip",
+    "bytes": 1938903,
+    "sha256": "f3da03f17bf71ea4d3bfb3e28d54f741408632c9482b22da13613d79bf3052a0",
+    "entries": [
+      {
+        "path": "context-binding-fixture-calibration.json",
+        "bytes": 13332,
+        "sha256": "87892f5e40df336215dc224aac1a4b617bce421cca16158ff10820288676dc68"
+      },
+      {
+        "path": "context-binding-fixture-calibration.log",
+        "bytes": 58353,
+        "sha256": "60ddc22ea22797decae2cbddaaa36f9f45b7ac50b446ddc6ebdab8e4321969f8"
+      },
+      {
+        "path": "context-binding-green.json",
+        "bytes": 12656,
+        "sha256": "53fa5905e250081145de20747c3bca4bc9f382c432a84f8ccd20ea3ac3fce8f2"
+      },
+      {
+        "path": "context-binding-green.log",
+        "bytes": 107775,
+        "sha256": "d0bf7c62d0d499395e13b72955bf95164cd1560468dde5e3ac2c4a49d6d25545"
+      },
+      {
+        "path": "context-binding-red.json",
+        "bytes": 8300,
+        "sha256": "727228382f7b0b13b32fe89fe21a10a544db9141b6c857deabc2cd365ba4474d"
+      },
+      {
+        "path": "context-binding-red.log",
+        "bytes": 55987,
+        "sha256": "f6c88a57f7bcbc4629115f90dd185d4c334a84f9f4816209f5574031dbdb874c"
+      },
+      {
+        "path": "context-consumer-first.json",
+        "bytes": 1512,
+        "sha256": "e57912a6dccf0473eed003dfeb9a1840dd918669a6b15bbe32d16208565ee2e9"
+      },
+      {
+        "path": "context-consumer-first.log",
+        "bytes": 53542,
+        "sha256": "938b48eff3a7b664394e7031d275a176cdc913e361e50d3efd30e61cfb0456f8"
+      },
+      {
+        "path": "source-after.json",
+        "bytes": 1496,
+        "sha256": "08d14cbd074989992f56c4f0229ee4e09c1e59ece4b22893c4847dacb7c8f3bb"
+      },
+      {
+        "path": "source-before.json",
+        "bytes": 980,
+        "sha256": "48a190d3658b158f7a2c4566b521645369fc213b0f487089c36a2d78819cabc7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/build.json",
+        "bytes": 135669,
+        "sha256": "1034d0f7975db562bc4b11fa0edeb65e0d5af8fc6780e184512d26d514bb3a69"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/client.js",
+        "bytes": 4746605,
+        "sha256": "87ddf3551a54cdd02f825688751b4d99fc3754bae5f45f7551494cf91c64684b"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/entry.ts",
+        "bytes": 2844,
+        "sha256": "d9e2823e76751b03cbf1523f86f174131fe05ead74f56485b1e86f7cb93c211d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/context/react-v1.ts",
+        "bytes": 161,
+        "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/Component.tsx",
+        "bytes": 57190,
+        "sha256": "ea50ca924c2e26d4e26639b9a09f88d09808c31ba5a1956cb24180bf100294b7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/Component.tsx.map",
+        "bytes": 8261,
+        "sha256": "e9ddc911dd59fb6d677a13eaed5a98440e77f29864a718625a589adf12dd75dd"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/base/provenance.json",
+        "bytes": 4147,
+        "sha256": "15a7d5906c1fd65f773d83b226a36431bdb96d11469e98dbe7b78d9b6c1eb8ff"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/context/react-v1.ts",
+        "bytes": 161,
+        "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/meta/preference-source-v1.ts",
+        "bytes": 3853,
+        "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/Component.tsx",
+        "bytes": 80860,
+        "sha256": "90537f1c386b455aad6fe616bf01769a71969764ec14940504bf64a1c70d8760"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/Component.tsx.map",
+        "bytes": 18188,
+        "sha256": "0fd40b18792ce9818fa565b0f60b81af0047455d4bdbcbb46fc59fbb29548c1d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/brutalist/provenance.json",
+        "bytes": 5585,
+        "sha256": "f478fa16f3f4f8c22ebf45f0a9a4ceceeba4db89f7ff0312e37faf6b9e0ca9ee"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+        "bytes": 626,
+        "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/context/react-v1.ts",
+        "bytes": 161,
+        "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+        "bytes": 2319,
+        "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/Component.tsx",
+        "bytes": 137762,
+        "sha256": "7114b9d5c43f5d713dd33756db08dfc06ecab4ee258003569aa4d689f4a83123"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/Component.tsx.map",
+        "bytes": 42836,
+        "sha256": "fb41985e38851b1bb17f056f6f1ebc12099cfa9b55611e0bf9d8b0d619e8ca86"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/shadcn/provenance.json",
+        "bytes": 6809,
+        "sha256": "81e40684dd6fb88b8b73517ccdabb9079233f5f18b286cbcd3823fe6d49d1986"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/.proto-ui/context/react-v1.ts",
+        "bytes": 161,
+        "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+        "bytes": 41781,
+        "sha256": "050fc83992641a07b8ba4820533fa68bf6db8aee8d01e8a7092fa262e697e498"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+        "bytes": 16141,
+        "sha256": "ac41eda24060321e91b7d5f5d53020f3efde87d9c37c8496ff08c234e4a5574d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/Component.tsx",
+        "bytes": 47825,
+        "sha256": "11306db4fd07a8e351a70e2b508a5f0b2d9a54be3287b1c044bd5c97ad2d3167"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/Component.tsx.map",
+        "bytes": 1843,
+        "sha256": "c13f84dd0a8d86f7b5d0937997bb5ff4e6e58a42fb12e673c83249ae21bf5e87"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/react/text/provenance.json",
+        "bytes": 2915,
+        "sha256": "8410180e4b61560d3f8aea530d1b9fdeeb8b43446d0d12ad55fa9b4699bb09f7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/Component.ts",
+        "bytes": 55413,
+        "sha256": "ae02b0a8f43d0829417dc51ebb4858d823fa915f9105f235ad79d8a8e2edaff2"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/Component.ts.map",
+        "bytes": 8133,
+        "sha256": "43b58affa51c4d8bbc8efb3c076e046438a2bab13751f07fceed750244d0bc08"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/base/provenance.json",
+        "bytes": 3868,
+        "sha256": "d324b6643b4df914b07e6468136991f310d0c4b5c3deec58c83b6fefb8c473f5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/meta/preference-source-v1.ts",
+        "bytes": 3853,
+        "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/Component.ts",
+        "bytes": 79590,
+        "sha256": "6f9c46037747edaacf28b4e39c0427fc94dfb104dc1797e7d314b22b3387ba77"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/Component.ts.map",
+        "bytes": 18064,
+        "sha256": "68781aff0da5020c81406c682e17334fce7be6eb4b5f07de522411edbd0176ae"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/brutalist/provenance.json",
+        "bytes": 5306,
+        "sha256": "4e96d62675daef94959b24a3ccfa9b4365f173ae17622b7c7564ee56e61f10c6"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+        "bytes": 626,
+        "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+        "bytes": 2319,
+        "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/Component.ts",
+        "bytes": 140350,
+        "sha256": "ad3a79a73b11f8e4830d3dd4997c66d86863839e9b01fe5a456d5a20df8ca93b"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/Component.ts.map",
+        "bytes": 42731,
+        "sha256": "da05b0f63ced418e33c8b06ab6aa82420ae3ea8f362d0cda86fe0047111147c3"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/shadcn/provenance.json",
+        "bytes": 6530,
+        "sha256": "be6c055be5662c4b1da875a927b92c355a79a37dd32a3261b88dea7e578f86c8"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+        "bytes": 41781,
+        "sha256": "050fc83992641a07b8ba4820533fa68bf6db8aee8d01e8a7092fa262e697e498"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+        "bytes": 16141,
+        "sha256": "ac41eda24060321e91b7d5f5d53020f3efde87d9c37c8496ff08c234e4a5574d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/Component.ts",
+        "bytes": 45665,
+        "sha256": "9e62119886feaa08100164968a818e421f51e7ec84e794fca6c9812bc1ecb195"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/Component.ts.map",
+        "bytes": 1729,
+        "sha256": "e9ad4b9775ecfae7fe5669d4a95a0a0fd8a4cc3c47e2b91fa9a5239f45bfa200"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue/text/provenance.json",
+        "bytes": 2636,
+        "sha256": "e4b6a53853faa61ab4444bf949319a64086d8b0db5669326721ba04c7085d090"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/interaction/vue2-associations-v1.ts",
+        "bytes": 2356,
+        "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/Component.js",
+        "bytes": 59370,
+        "sha256": "af266b4e3d2cd4b20ea54f866f890d80ec6ea2735259705e66499e6ae2cb89ab"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/Component.js.map",
+        "bytes": 8379,
+        "sha256": "cfc28f46c4f037ada736e889f1d0bd5cfb7a8e1e79d1d563c2c31a2b592147e6"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/base/provenance.json",
+        "bytes": 4048,
+        "sha256": "8fe0614e61d5ef2ff075b70101f7f6114cd29fdbd318eb8d0c794e29661cc7ed"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/interaction/vue2-associations-v1.ts",
+        "bytes": 2356,
+        "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/meta/preference-source-v1.ts",
+        "bytes": 3853,
+        "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/Component.js",
+        "bytes": 84038,
+        "sha256": "24191f9fd5e6c4608462bbd82fc615764d9598720cfd8504090a7009c9da6cad"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/Component.js.map",
+        "bytes": 18309,
+        "sha256": "f1b5cb9a90a114a7ce46a2acf1b08b97a0889e1e7740f25cc06e58d75bdccf59"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/brutalist/provenance.json",
+        "bytes": 5486,
+        "sha256": "a494056d74bb75ede8ed7f0b04ce5bb662189feee40a5ef7a8aa544d8a05d6db"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+        "bytes": 626,
+        "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/interaction/vue2-associations-v1.ts",
+        "bytes": 2356,
+        "sha256": "711470b6104a57673e3c055a0bff684e835be87fc1081c121caa5c9f554ada4a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+        "bytes": 2319,
+        "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/Component.js",
+        "bytes": 145615,
+        "sha256": "e827656e4007654c033d3cd858f35834be5b703a93908183d52312414d4ca8d3"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/Component.js.map",
+        "bytes": 42957,
+        "sha256": "ebcc1fe83f67c0e1fae4ce8ec6c89d8f3ba0bfb96a755c89a24ad7580b59dd2d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/shadcn/provenance.json",
+        "bytes": 6710,
+        "sha256": "e77d562cb212f690e3ad387a798f224b2714055410839dc9badf65716eb72f70"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+        "bytes": 41781,
+        "sha256": "050fc83992641a07b8ba4820533fa68bf6db8aee8d01e8a7092fa262e697e498"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+        "bytes": 16141,
+        "sha256": "ac41eda24060321e91b7d5f5d53020f3efde87d9c37c8496ff08c234e4a5574d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/Component.js",
+        "bytes": 49850,
+        "sha256": "66378322cfd1ac00645e7d9e4eff8794ae19fb2962c6ad30913a5db8e6459381"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/Component.js.map",
+        "bytes": 1968,
+        "sha256": "ba31d7c7dbb724728c67d3ed39bce8f55e3f59f9c5241c155d73033693736e53"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/vue2/text/provenance.json",
+        "bytes": 2633,
+        "sha256": "8c143c742640f974d98fde7979c444defa94d9f3a89afe8410166c548e906001"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/.proto-ui/web-component/browser-v1.ts",
+        "bytes": 12784,
+        "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/Component.ts",
+        "bytes": 46754,
+        "sha256": "74dd01f7d30842c3911e8625f54046e3b72332903b92fae36f679d8f2b695f57"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/Component.ts.map",
+        "bytes": 8084,
+        "sha256": "e08d3179b40019ed50119a30f0ee35ea28eb50e110f81a3be45959dcd7ba77a1"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/base/provenance.json",
+        "bytes": 3985,
+        "sha256": "91ad52d8cd450dbe4df9df1b82e1ccbbbf1f08ac1744521115947e6c6f343bbe"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/meta/preference-source-v1.ts",
+        "bytes": 3853,
+        "sha256": "1e8abfc05ae67f858618035b21d3c646bdc9323ebb8cd898a75f4b3db73ed916"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/.proto-ui/web-component/browser-v1.ts",
+        "bytes": 12784,
+        "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/Component.ts",
+        "bytes": 69908,
+        "sha256": "e3e0cfe7a889d7a7302367133f7bf52d8236bca2e6a108e26986bd4118bd4c0c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/Component.ts.map",
+        "bytes": 18012,
+        "sha256": "4f36dace8f636d2843de9313fff2805651ae8e9dba58d48900f60d7b75a3352c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/brutalist/provenance.json",
+        "bytes": 5423,
+        "sha256": "1e8abdfb6f43a8ce9c5d8cce75e0d82980f47252313619027071664be1b1aeca"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/context/key-3b78218c16abf6ec58c87de2ca3750964b015dc709f9d123d79d8ddb43fc57f9.ts",
+        "bytes": 626,
+        "sha256": "e0ef8a4352adbd3beddbdd067bea90566a3e1e410cee6dd5e66ae1e9dfaf9aec"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/interaction/control-label-types-v1.ts",
+        "bytes": 1072,
+        "sha256": "4e49e94b7ccea306437bd0d1c60c12975b74dc9861327bc9b87f50c71913fff9"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/interaction/control-label-v1.ts",
+        "bytes": 58048,
+        "sha256": "0e92fb47ac24f3326d7120283e03e4c4d8e4cf25c109b252e751a3ee5680fa3a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/interaction/focus-ownership-v2.ts",
+        "bytes": 798,
+        "sha256": "7d640992676cd7b99d128bc7d2c0dba4512155e51b5b3ddfaa8c3c1856816fc5"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/interaction/modules-e6807d4f71af1465-v2.ts",
+        "bytes": 45840,
+        "sha256": "b8145e32e3218896707bcc1dcdead4daa939b4de927516e35e140c7f7f89a26a"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/interaction/native-e6807d4f71af1465-v2.ts",
+        "bytes": 55054,
+        "sha256": "e01f916fbc0ef7da2801c438569ad2041d37bb24fe576f77319e397a6f523bd7"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/meta/color-scheme-source-v1.ts",
+        "bytes": 2319,
+        "sha256": "671074e1eda872fa708909077eefcd920494cafa7e737d2e537e0da4f5198f32"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/meta/subscription-v1.ts",
+        "bytes": 1137,
+        "sha256": "845b53e5827ec7685caa4f1044c1849e563cb10485b9758ca0cc780b8d683356"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/meta/web-snapshot-v1.ts",
+        "bytes": 2163,
+        "sha256": "d9bbd494b94126c42e549a2ccf3f27ea7d909c05925d3f5e41fb063b628c7288"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/owner/authored-hooks-v1.ts",
+        "bytes": 10061,
+        "sha256": "f9c3a7d6e4a90233596698b9ee2def2f998875fff9edab407669add001512954"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/style/native-v1.ts",
+        "bytes": 5912,
+        "sha256": "cd288dd77dbb2f901c4c0751933e025e72091756b7f43b7cbe83c7a61dee2f66"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/.proto-ui/web-component/browser-v1.ts",
+        "bytes": 12784,
+        "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/Component.ts",
+        "bytes": 128295,
+        "sha256": "43f6ddc71cf594947d8538948fd142a493aa355313da309d1a18c468af4cbd4b"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/Component.ts.map",
+        "bytes": 42660,
+        "sha256": "391f195545cc23e452dbc232035899d8a40e3281e85466c00d7a8790817618db"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/shadcn/provenance.json",
+        "bytes": 6647,
+        "sha256": "bd96213488b67ae29f65f50eb7826689398a4d81d9e4d2cf66bf8e3fca987cc8"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/.proto-ui/context/scope-v1.ts",
+        "bytes": 8996,
+        "sha256": "22d8ff617d3bcea8876c13c68073172ceb37db7b087d0b0782df18f4d7a1ff6c"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/.proto-ui/interaction/modules-07c2bdddf56a203b-v2.ts",
+        "bytes": 41781,
+        "sha256": "050fc83992641a07b8ba4820533fa68bf6db8aee8d01e8a7092fa262e697e498"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/.proto-ui/interaction/native-07c2bdddf56a203b-v2.ts",
+        "bytes": 16141,
+        "sha256": "ac41eda24060321e91b7d5f5d53020f3efde87d9c37c8496ff08c234e4a5574d"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/.proto-ui/interaction/ownership-v2.ts",
+        "bytes": 4849,
+        "sha256": "e74ec914f93b0b7e58901841c35bc1fb1a5c895bb2a245f568283326c23d78af"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/.proto-ui/web-component/browser-v1.ts",
+        "bytes": 12784,
+        "sha256": "f6b7fee77ba9e15dd42f96073bfef3d435923e2e280fd0338c5867a96f9583ee"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/Component.ts",
+        "bytes": 36636,
+        "sha256": "642d5dac7b41032715eae95f72d114fdbe6be13df8d5f483643f38c3821bae74"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/Component.ts.map",
+        "bytes": 1669,
+        "sha256": "c5f4fedbda32a08c8af7f32da5ba27fbcd2079ba5307caaa2c41cf7eb6496452"
+      },
+      {
+        "path": "sprint2-native-NY0oxa/generated/wc/text/provenance.json",
+        "bytes": 2753,
+        "sha256": "00f82941b6e0f0674745df1bee25767df6d702f69a9b04671354dc8f73451c7f"
+      },
+      {
+        "path": "sprint2-producer-fixed.json",
+        "bytes": 2302,
+        "sha256": "d0e5d09c03c8196dd3e05126cdff0f257bfce9afdeb7b19f88bef55b1b8e61d6"
+      },
+      {
+        "path": "sprint2-producer-fixed.log",
+        "bytes": 2302,
+        "sha256": "d0e5d09c03c8196dd3e05126cdff0f257bfce9afdeb7b19f88bef55b1b8e61d6"
+      },
+      {
+        "path": "sprint2-producer-original.json",
+        "bytes": 3703,
+        "sha256": "8e7fd6e8ef896785e10dd7af9c5e8179458dc09053fa1bf9fda08b7c66d70578"
+      },
+      {
+        "path": "sprint2-producer-original.log",
+        "bytes": 3659,
+        "sha256": "9c93fe0dcce5e352cb412cedabf37f746e9a351abf523e687d6998d653bfc540"
+      }
+    ]
+  },
+  "sourceBefore": "source-before.json",
+  "sourceAfter": "source-after.json",
+  "results": {
+    "producerOriginal": "vue/shadcn PUI1999 at original Vue subscription literal-key assertion",
+    "focusedRed": {
+      "passed": 5,
+      "failed": 4,
+      "pending": 0
+    },
+    "focusedGreen": {
+      "files": 4,
+      "passed": 33,
+      "failed": 0,
+      "pending": 0
+    },
+    "generatedConsumers": {
+      "passed": 2,
+      "failed": 0,
+      "pending": 0
+    },
+    "fullProducer": {
+      "products": 16,
+      "ok": true,
+      "startedAt": "2026-11-23T19:14:47.332Z",
+      "finishedAt": "2026-11-23T19:14:53.287Z",
+      "buildSha256": "1034d0f7975db562bc4b11fa0edeb65e0d5af8fc6780e184512d26d514bb3a69"
+    }
+  }
+}

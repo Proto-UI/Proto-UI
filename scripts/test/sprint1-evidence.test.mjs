@@ -161,6 +161,7 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'apps/www/src/content/docs/zh-cn/demo-matrix-activation.test.ts',
     'apps/www/src/content/docs/zh-cn/site-search-evidence.test.ts',
     'packages/compiler/test/props-update-policy.test.ts',
+    'packages/compiler/test/props-update-analysis.test.ts',
     'packages/prototypes/base/test/select-legacy-slot.test.ts',
     'packages/compiler/test/hook-admission.test.ts',
     'packages/compiler/test/diagnostic-registry.test.ts',
@@ -179,10 +180,12 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'packages/compiler/src/style-plan.test.ts',
     'packages/prototypes/base/test/number-field-capabilities.test.ts',
     'packages/prototypes/base/test/number-field-format.test.ts',
+    'packages/prototypes/base/test/number-field-supersession.test.ts',
+    'packages/prototypes/base/test/range-owner-supersession.test.ts',
   ])
     assert.ok(SPRINT1_UNIT_SUITES.includes(suite));
-  assert.equal(SPRINT1_UNIT_SUITES.length, 38);
-  assert.equal(new Set(SPRINT1_UNIT_SUITES).size, 38);
+  assert.equal(SPRINT1_UNIT_SUITES.length, 44);
+  assert.equal(new Set(SPRINT1_UNIT_SUITES).size, 44);
   assert.equal(steps.find((step) => step.id === 'focused-unit').timeoutMs, 120_000);
   assert.deepEqual(SPRINT1_INTEGRATION_UNIT_SUITES, [
     'packages/modules/anatomy/test/subscriber-fanout.test.ts',
@@ -196,11 +199,16 @@ test('the fixed serial selection preserves the full original criteria and bounde
     'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts',
     'apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts',
     'apps/www/src/components/PrototypePreviewer/passive-shell-composition.test.ts',
+    'packages/adapters/web-component/test/shadow-style-artifact.test.ts',
+    'packages/adapters/web-component/test/shadow-split-effects.test.ts',
+    'packages/modules/positioning/test/floating-ui-host.test.ts',
+    'packages/modules/positioning/test/available-projection-ownership.test.ts',
+    'apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts',
   ]);
   const integration = steps.find((step) => step.id === 'integration-unit');
   assert.equal(integration.timeoutMs, 90_000);
   assert.deepEqual(integration.suites, SPRINT1_INTEGRATION_UNIT_SUITES);
-  assert.deepEqual(integration.args.slice(-11), SPRINT1_INTEGRATION_UNIT_SUITES);
+  assert.deepEqual(integration.args.slice(-16), SPRINT1_INTEGRATION_UNIT_SUITES);
   assert.ok(integration.suites.every((suite) => !SPRINT1_UNIT_SUITES.includes(suite)));
   assert.ok(
     integration.args.every(
@@ -330,11 +338,15 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   assert.equal(workflow.concurrency['cancel-in-progress'], false);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const repair = workflow.jobs['focused-browser'];
-  assert.equal(workflow.on.workflow_dispatch.inputs.sprint3_acceptance.default, false);
-  assert.equal(workflow.on.workflow_dispatch.inputs.sprint3_followup.default, false);
+  for (const input of ['sprint3_acceptance', 'sprint3_followup', 'shader_presentation']) {
+    assert.equal(workflow.on.workflow_dispatch.inputs[input].type, 'boolean');
+    assert.equal(workflow.on.workflow_dispatch.inputs[input].required, false);
+    assert.equal(workflow.on.workflow_dispatch.inputs[input].default, false);
+    assert.equal(workflow.on.workflow_call.inputs[input], undefined);
+  }
   assert.equal(
     repair.if,
-    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+    "${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
   );
   assert.ok(repair.steps.some((step) => step.run === 'test "$EVIDENCE_SCOPE" = repair'));
   const original = repair.steps.find(
@@ -349,7 +361,7 @@ test('the existing repair scope and manual serial Sprint 1 owner retain actual w
   const job = workflow.jobs.sprint1;
   assert.equal(
     job.if,
-    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}"
+    "${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}"
   );
   assert.equal(job['timeout-minutes'], 90);
   assert.equal(job.strategy, undefined, 'Heavy operations run in one serial worker');

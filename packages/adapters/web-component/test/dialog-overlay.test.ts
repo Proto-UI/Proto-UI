@@ -20,6 +20,8 @@ async function waitForDialogInputReady(content: any, ...targets: HTMLElement[]):
   const view = ownerDocument.defaultView!;
   const portalParent = content.parentNode;
   const owner = content.getExposes().getPresentationOwner();
+  const transitionState = content.getExposes().transitionState;
+  expect(transitionState).toBeDefined();
   const lifecycle = { ...contentViewLifecycle };
   expect(lifecycle.epoch).toBeGreaterThan(0);
   expect(isWebComponentPortaled(content)).toBe(true);
@@ -33,6 +35,8 @@ async function waitForDialogInputReady(content: any, ...targets: HTMLElement[]):
   expect(content.isConnected).toBe(true);
   expect(content.ownerDocument).toBe(ownerDocument);
   expect(content.parentNode).toBe(portalParent);
+  expect(content.parentElement).toBe(ownerDocument.body);
+  expect(content.getExposes().transitionState).toBe(transitionState);
   expect(isWebComponentPortaled(content)).toBe(true);
   expect(content.getExposes().getPresentationOwner()).toBe(owner);
   expect(contentViewLifecycle).toEqual(lifecycle);

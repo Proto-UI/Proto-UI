@@ -265,6 +265,22 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   };
   const ownsSelectPopup = (target: Element | null) => ownsSelectPopupForRoot(root, target);
   const nestedEscape = new WeakSet<KeyboardEvent>();
+  /**
+   * A nested control inside the Header owns the Escape while it is expanded.
+   * Its own expanded state is the ownership fact. The presence of its
+   * portaled popup is a presentation fact, and a control that was just
+   * activated does not own a presented popup yet. Without this, the Header
+   * claims that same Escape and closes the navigation the nested control
+   * still owns.
+   */
+  const ownsExpandedNestedControl = (target: Element | null): boolean => {
+    if (!target || !root.contains(target)) return false;
+    const trigger = target.closest<HTMLElement>('[aria-controls][aria-expanded="true"]');
+    if (!trigger || !root.contains(trigger)) return false;
+    // The Header's own disclosure control owns its own Escape. Only a nested
+    // control can take that Escape away from the Header.
+    return !buttons.has(trigger);
+  };
   const captureEscapeOwner = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !open) return;
     // Read ownership before the nested Select handles and closes this sample.
@@ -283,14 +299,20 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
             );
           })
     );
-    if (nestedOpen) nestedEscape.add(event);
+    if (nestedOpen || ownsExpandedNestedControl(event.target)) nestedEscape.add(event);
   };
   const onEscape = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || event.defaultPrevented || !open || nestedEscape.has(event))
       return;
     // A Select or another nested overlay owns its own Escape first.
-    const target = event.target instanceof (window?.Element ?? Element) ? event.target : null;
-    if (ownsSelectPopup(target) || target?.closest('[role="dialog"]')) return;
+    const ElementConstructor = window?.Element ?? Element;
+    const target = event.target instanceof ElementConstructor ? event.target : null;
+    if (
+      ownsSelectPopup(target) ||
+      target?.closest('[role="dialog"]') ||
+      ownsExpandedNestedControl(target)
+    )
+      return;
     event.preventDefault();
     close(true);
   };

@@ -135,6 +135,22 @@ function getPreviewerClass(demoId: string) {
   }
 </section>
 
+<script>
+  import { demoModuleCount, warmDemoModules } from './demo-modules';
+
+  // The Matrix page publishes its own module delivery instead of performing it
+  // on every visit. The browser smoke asks for it while the page is still
+  // loading, so its initialization phase measures previewer initialization and
+  // not the development server's per-module transform cost.
+  type DemoMatrixDelivery = {
+    warmDemoModules: typeof warmDemoModules;
+    demoModuleCount: typeof demoModuleCount;
+  };
+  (
+    globalThis as typeof globalThis & { __protoUiDemoMatrix?: DemoMatrixDelivery }
+  ).__protoUiDemoMatrix = { warmDemoModules, demoModuleCount };
+</script>
+
 <style>
   .demo-matrix {
     display: flex;

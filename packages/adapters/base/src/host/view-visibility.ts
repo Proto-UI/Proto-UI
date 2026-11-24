@@ -1,6 +1,8 @@
 export const PUI_VIEW_PENDING_ATTR = 'data-pui-view-pending';
 export const PUI_VIEW_REVEALING_ATTR = 'data-pui-view-revealing';
 export const PUI_VIEW_DETACHED_ATTR = 'data-pui-view-detached';
+/** Private first-render portal guard shared by its owner and presentation reader. */
+export const PUI_PORTAL_PREPARING_ATTR = 'data-pui-portal-preparing';
 
 const VIEW_VISIBILITY_STYLE_ID = 'proto-ui-view-visibility';
 const RULES_BY_DOCUMENT = new WeakMap<Document, boolean>();

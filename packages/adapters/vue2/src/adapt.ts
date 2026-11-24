@@ -1,3 +1,4 @@
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import {
   collectWebOwnedDecorationTargets,
   createWebOwnedDecorationStage,
@@ -113,6 +114,7 @@ export interface Vue2AdapterOptions<Props extends PropsBaseType> {
   /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   schedule?: (task: () => void) => void;
   getProps?: (props: Vue2AdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -140,6 +142,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
     getMeta: (key: string) => unknown;
     createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
     residentMotion?: WebResidentMotionOptions;
+    shader?: WebShaderHostOptions;
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -311,6 +314,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           ownedDecoration,
           createVisualSink: createVisualSink,
           residentMotion: opt.residentMotion,
+          shader: opt.shader,
           schedule,
           getMeta,
           colorSchemeSource,
@@ -507,6 +511,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             ownedDecoration,
             createVisualSink: createVisualSink,
             residentMotion: opt.residentMotion,
+            shader: opt.shader,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -532,6 +537,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
                 ownedDecoration,
                 createVisualSink: createVisualSink,
                 residentMotion: opt.residentMotion,
+                shader: opt.shader,
                 schedule,
                 getMeta,
                 colorSchemeSource,
@@ -561,6 +567,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             ownedDecoration,
             createVisualSink: createVisualSink,
             residentMotion: opt.residentMotion,
+            shader: opt.shader,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -740,6 +747,7 @@ function initSession<Props extends PropsBaseType>(
     getMeta: (key: string) => unknown;
     createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
     residentMotion?: WebResidentMotionOptions;
+    shader?: WebShaderHostOptions;
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -907,6 +915,7 @@ function initSession<Props extends PropsBaseType>(
     rawPropsSource: state.rawPropsSource,
     effectsPort,
     residentMotion: targetOptions.residentMotion,
+    shader: targetOptions.shader,
     visualFeedbackSink: targetOptions.createVisualSink
       ? createDeferredViewVisualSink(
           () => targetOptions.createVisualSink!(rootEl, effectsPort),
@@ -1072,6 +1081,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
   getMeta: (key: string) => unknown;
   createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;

@@ -185,6 +185,16 @@ implementations:
     path: packages/adapters/base/test/web-presence-adoption.test.ts
     required: true
     consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-DOCUMENT]
+  - id: presence-portal-preparation
+    kind: module-test
+    status: passing
+    path: packages/adapters/web-component/test/portal-presence-preparation.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION
+      - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER
+    notes:
+      - The real portal acquisition and reveal guard are combined with explicitly injected geometry and frame delivery. Controls distinguish first-render preparation from unresolved units, preserve independent settlement and cancellation, and do not replace native Drawer captures or Runtime mount-epoch reentry evidence.
   - id: presence-web-component-adoption
     kind: module-test
     status: passing

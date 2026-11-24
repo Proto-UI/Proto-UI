@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "Reconcile actual merged CI input and duplicate execution regressions",
+  "date": "2026-11-23",
+  "pullRequest": 1713,
+  "parent": "f96babfbeac4f04d8934e112a47762b0b688433f",
+  "red": {
+    "tests": 57,
+    "pass": 50,
+    "fail": 7,
+    "skipped": 0,
+    "source": {
+      "textExit": 0,
+      "fontExit": 1,
+      "parent": "5f19c7b498767db167e945c1ceb200be9cb1be29",
+      "mergeHead": "b87beddcac17ab4fd4dcf5e83342fa7a49821c82",
+      "logs": {
+        "font-controls.log": "a9f0b3b0356cfd7fdf3c46c82d16d28e60877167482e692b1761972f4c7022b4",
+        "text-reset.log": "175b76355d0de59e99a7b2e50523d8495651e76325881dfa0af9c2e8502afa3d"
+      }
+    },
+    "details": [
+      "Six exact-schema controls rejected the newly admitted default-off browser_acceptance reusable input.",
+      "One original native execution control found duplicate identical scroll_pause and scroll_reader steps sharing output log paths."
+    ]
+  },
+  "repair": [
+    "Preserve admitted separate Adapter/browser opt-in inputs, both optional booleans default false; preserve manual-only package-budget/Website evidence boundaries. Add mutations rejecting automatic browser enablement, native coupling, missing source regressions and write permission.",
+    "Remove only the second identical native Scroll pause/reader pair. Retain one complete locked original target each, all original assertions and SDK controls. Add duplicate-step rejection to the original negative controls."
+  ],
+  "green": {
+    "tests": 57,
+    "pass": 57,
+    "fail": 0,
+    "skipped": 0,
+    "terminal": {
+      "controlsExit": 0,
+      "scheduleExit": 0,
+      "logs": {
+        "schedule.log": "8c3ff5efd9f3069701631815f1bd6d9f5bfa67f1bdcd4f210b94202f7bc73a31",
+        "green.log": "cf01d82350bc1bf7472ecd8db7a40362ec89e7d5a8456005be4911e8a4cc6350"
+      }
+    }
+  },
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-ci-boundaries/raw.json.gz",
+    "bytes": 15152,
+    "sha256": "0a748ad6dce8329e7f41ca012daf658e81d5d3c3d23a34dc325e7fa9475bb736"
+  },
+  "scope": "Workflow admission and execution wiring only; no native or browser product pass inferred. Final exact-head CI still required."
+}

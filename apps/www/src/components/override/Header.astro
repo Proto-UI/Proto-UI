@@ -151,11 +151,28 @@ const navigationLabel = siteShellLabels(currentLocale).primaryNavigation;
     document.querySelectorAll<HTMLElement>('[data-docs-site-header]').forEach((root) => {
       const button = root.querySelector<HTMLElement>('[data-site-menu-button]');
       if (!button || button.dataset.siteMenuBound === 'true') return;
-      initSiteControls(root);
+      // The Header's own navigation ownership must not depend on an optional
+      // replaceable view. A control or a projected surface that cannot
+      // enhance keeps its native recovery path; it must not take the
+      // disclosure down with it, because the disclosure is what adopts the
+      // native panel state and gives the Header its ready marker.
+      const enhanceControls = () => {
+        try {
+          initSiteControls(root);
+        } catch (error) {
+          console.error('[SiteHeader] Native controls retained:', error);
+        }
+      };
+      enhanceControls();
       const compact = window.matchMedia('(max-width: 47.999rem)');
-      const syncAppearance = () => initSiteControls(root);
+      const syncAppearance = () => enhanceControls();
       compact.addEventListener('change', syncAppearance);
-      const surface = initDocumentationHeaderSurface(root);
+      let surface: ReturnType<typeof initDocumentationHeaderSurface> | undefined;
+      try {
+        surface = initDocumentationHeaderSurface(root);
+      } catch (error) {
+        console.error('[SiteHeader] Native header surface retained:', error);
+      }
       const disclosure = initSiteHeaderDisclosure(root);
       const unbind = disclosure.bindButton(button);
       const onClick = (event: Event) => {

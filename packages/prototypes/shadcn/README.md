@@ -1,10 +1,10 @@
 # @proto.ui/prototypes-shadcn
 
-shadcn-style Proto UI prototype library for adapter-driven components.
+shadcn-style Proto UI prototype library for adapter-driven components and explicitly exported compiler source inputs.
 
 ## Purpose
 
-Provides a shadcn-style Proto UI prototype library that works with Proto UI adapters.
+Provides Shadcn presentation over Base protocols for Proto UI adapters, with selected authored-source entries available to the experimental compiler.
 
 ## Source Attribution And Status
 
@@ -17,7 +17,7 @@ Provides a shadcn-style Proto UI prototype library that works with Proto UI adap
 
 ## Package Role
 
-Prototype library package intended to be consumed together with Proto UI adapters.
+Prototype library package with ordinary runtime/type exports for adapters and separate, explicit authored-source exports for compiler consumers.
 
 ## Install
 
@@ -58,6 +58,16 @@ import {
 ```
 
 The root package export remains available for compatibility. Shadcn families do not depend on sibling Shadcn families.
+
+### Authored source inputs
+
+The following existing family subpaths also declare a `proto` condition pointing to their package-local `src/<family>/index.ts`:
+
+`button`, `checkbox`, `dialog`, `input`, `select`, `separator`, `switch`, `tabs`, `textarea`, `toggle`, `scroll-area`, `label`, `collapsible`, `drawer`, `toggle-group`, `number-field`, `message-scroller`, and `data-table`.
+
+The compiler source loader uses these explicit entries instead of guessing source paths from JavaScript exports. The public package build and release staging retain their transitive package-local source and type dependencies, including shared presentation helpers. The package's ordinary `types`, `import` and `default` conditions continue to resolve to `dist`; other subpaths and the root do not gain an implicit source condition.
+
+Source reachability and packed source bytes do not establish successful compilation of every family or native interaction, styling, accessibility or application acceptance. Each existing prototype lifecycle and compiler profile remains unchanged. Follow the [compiler source-consumption guide](../../compiler/README.md#source-resolution) and verify the selected family, target and exact compiler revision separately. The release above remains unpublished.
 
 ### Opt-in typography preset (draft)
 

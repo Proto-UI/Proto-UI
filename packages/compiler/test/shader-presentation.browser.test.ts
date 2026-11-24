@@ -8,6 +8,7 @@ import { buildShaderBrowserFixture } from './shader-browser-fixture';
 import type { createShaderBrowserFixture } from './shader-browser-consumer';
 import {
   expectedShaderImagePixels,
+  expectedShaderSceneImagePixels,
   expectedShaderLinearPixels,
   shaderSourcePixels,
 } from './shader-oracle';
@@ -165,20 +166,27 @@ function installShaderProbe() {
 
 let browser: Browser;
 let fixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
+let staticFixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
+let sceneFixture: Awaited<ReturnType<typeof buildShaderBrowserFixture>>;
 beforeAll(async () => {
   fixture = await buildShaderBrowserFixture();
+  staticFixture = await buildShaderBrowserFixture('static-data');
+  sceneFixture = await buildShaderBrowserFixture('scene');
   browser = await chromium.launch({
     executablePath: await chromeExecutable(),
     headless: true,
     chromiumSandbox: true,
   });
   await writeFile(path.join(fixture.evidenceDir, 'browser-version.txt'), browser.version());
+  await writeFile(path.join(staticFixture.evidenceDir, 'browser-version.txt'), browser.version());
+  await writeFile(path.join(sceneFixture.evidenceDir, 'browser-version.txt'), browser.version());
 }, 120_000);
 afterAll(async () => {
   await browser?.close();
 });
 
-async function run(name: string, body: (page: Page) => Promise<void>) {
+async function run(name: string, body: (page: Page) => Promise<void>, selectedFixture = fixture) {
+  const fixture = selectedFixture;
   const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
   page.setDefaultTimeout(5_000);
   const errors: string[] = [],
@@ -249,8 +257,7 @@ function linear(actual: number[], expected: number[]) {
   for (let i = 0; i < expected.length; i++)
     expect(Math.abs(actual[i] - expected[i]), `linear byte ${i}`).toBeLessThanOrEqual(1);
 }
-function image(actual: number[]) {
-  const expected = expectedShaderImagePixels();
+function image(actual: number[], expected = expectedShaderImagePixels()) {
   expect(actual).toHaveLength(expected.length);
   // Canvas readback unpremultiplies quantized RGBA8. Compare its represented
   // premultiplied color, allowing one rounding unit per channel, and alpha.
@@ -266,37 +273,47 @@ function image(actual: number[]) {
   }
 }
 
-const cases = (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
-  (['runtime', 'compiled'] as const).map((execution) => ({ target, execution }))
+const cases = (['inline', 'static-data'] as const).flatMap((variant) =>
+  (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
+    (['runtime', 'compiled'] as const).map((execution) => ({ variant, target, execution }))
+  )
 );
 it.each(cases)(
-  '$target $execution uses real WebGL2, preserves children/input, and retires each view',
+  '$variant $target $execution uses real WebGL2, preserves children/input, and retires each view',
   async (scenario) => {
-    await run(`${scenario.target}-${scenario.execution}`, async (page) => {
-      await page.evaluate(async (value) => {
-        await window.shaderNative.fixture.mount(value.target, value.execution);
-      }, scenario);
-      await ready(page);
-      image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
-      const initial = await page.evaluate(() => window.shaderNative.fixture.read());
-      expect(initial.buttonTexts.some((text) => text.startsWith('ordinary child'))).toBe(true);
-      expect(initial.canvases).toBe(0);
-      await page.getByRole('button', { name: /^ordinary child/ }).click();
-      expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
-        clicks: 1,
-        clickedTag: 'BUTTON',
-      });
-      await page.screenshot({
-        path: path.join(fixture.evidenceDir, `${scenario.target}-${scenario.execution}-paint.png`),
-      });
-      await page.evaluate(() => window.shaderNative.fixture.visible(false));
-      await zero(page);
-      expect(await page.getByRole('button', { name: /^ordinary child/ }).count()).toBe(0);
-      await page.evaluate(() => window.shaderNative.fixture.visible(true));
-      await ready(page);
-      image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
-      expect((await resources(page)).created).toBeGreaterThan(0);
-    });
+    const selectedFixture = scenario.variant === 'inline' ? fixture : staticFixture;
+    await run(
+      `${scenario.target}-${scenario.execution}`,
+      async (page) => {
+        await page.evaluate(async (value) => {
+          await window.shaderNative.fixture.mount(value.target, value.execution);
+        }, scenario);
+        await ready(page);
+        image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
+        const initial = await page.evaluate(() => window.shaderNative.fixture.read());
+        expect(initial.buttonTexts.some((text) => text.startsWith('ordinary child'))).toBe(true);
+        expect(initial.canvases).toBe(0);
+        await page.getByRole('button', { name: /^ordinary child/ }).click();
+        expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
+          clicks: 1,
+          clickedTag: 'BUTTON',
+        });
+        await page.screenshot({
+          path: path.join(
+            selectedFixture.evidenceDir,
+            `${scenario.target}-${scenario.execution}-paint.png`
+          ),
+        });
+        await page.evaluate(() => window.shaderNative.fixture.visible(false));
+        await zero(page);
+        expect(await page.getByRole('button', { name: /^ordinary child/ }).count()).toBe(0);
+        await page.evaluate(() => window.shaderNative.fixture.visible(true));
+        await ready(page);
+        image(await page.evaluate(() => window.shaderNative.fixture.pixels()));
+        expect((await resources(page)).created).toBeGreaterThan(0);
+      },
+      selectedFixture
+    );
   },
   30_000
 );
@@ -573,4 +590,120 @@ it('late decode and release from an overridden capability cannot affect its reac
       (await page.evaluate(() => window.shaderNative.fixture.capabilityRead())).views.at(-1)
     ).toBe(4);
   });
+});
+
+const sceneCases = (['react', 'vue', 'vue2', 'wc'] as const).flatMap((target) =>
+  (['runtime', 'compiled'] as const).map((execution) => ({ target, execution }))
+);
+async function captureScenePaint(
+  page: Page,
+  scenario: string,
+  checkpoint: 'initial-paint' | 'replacement-paint'
+) {
+  const observation = await page.evaluate(async () => ({
+    presentation: window.shaderNative.fixture.read(),
+    source: window.shaderNative.fixture.sceneState(),
+    pixels: await window.shaderNative.fixture.pixels(),
+    resources: window.shaderProbe.read(),
+  }));
+  const name = `${scenario}-${checkpoint}`;
+  await page.screenshot({ path: path.join(sceneFixture.evidenceDir, name + '.png') });
+  await writeFile(
+    path.join(sceneFixture.evidenceDir, name + '.json'),
+    JSON.stringify(
+      {
+        head: sceneFixture.head,
+        buildSha256: sceneFixture.buildSha256,
+        scenario,
+        checkpoint,
+        observation,
+      },
+      null,
+      2
+    ) + '\n'
+  );
+}
+it.each(sceneCases)(
+  '$target $execution borrows an actual app scene across held decode, revoke, replacement and scope retirement',
+  async (scenario) => {
+    const name = `scene-${scenario.target}-${scenario.execution}`;
+    await run(
+      name,
+      async (page) => {
+        await page.evaluate(async (value) => {
+          window.shaderProbe.holdDecode = true;
+          await window.shaderNative.fixture.mount(value.target, value.execution);
+        }, scenario);
+        await page.evaluate(() => window.shaderProbe.waitForHeldDecode());
+        expect(await page.evaluate(() => window.shaderNative.fixture.sceneState())).toMatchObject({
+          subscriptions: 1,
+          borrowedDisposals: 0,
+          sourceAvailable: true,
+        });
+        await page.evaluate(() => window.shaderProbe.releaseDecodes());
+        await ready(page);
+        image(
+          await page.evaluate(() => window.shaderNative.fixture.pixels()),
+          expectedShaderSceneImagePixels()
+        );
+        expect(await page.evaluate(() => window.shaderNative.fixture.read())).toMatchObject({
+          canvases: 0,
+          childText: expect.stringContaining('slot child'),
+        });
+        await captureScenePaint(page, name, 'initial-paint');
+        // A second real source frame is held before decode. Revoke must synchronously
+        // retire its GPU work; completing the old image cannot publish it afterwards.
+        await page.evaluate(() => {
+          window.shaderProbe.holdDecode = true;
+          window.shaderNative.fixture.sceneDraw(false);
+        });
+        await page.evaluate(() => window.shaderProbe.waitForHeldDecode());
+        await page.evaluate(() => window.shaderNative.fixture.sceneRevoke());
+        await zero(page);
+        await page.evaluate(() => window.shaderProbe.releaseDecodes());
+        expect(await page.evaluate(() => window.shaderNative.fixture.ready())).toBe(false);
+        expect(await page.evaluate(() => window.shaderNative.fixture.read().background)).toBe(
+          'none'
+        );
+        await page.evaluate(() => window.shaderNative.fixture.sceneDraw(true));
+        await ready(page);
+        image(
+          await page.evaluate(() => window.shaderNative.fixture.pixels()),
+          expectedShaderSceneImagePixels(true)
+        );
+        await captureScenePaint(page, name, 'replacement-paint');
+        await page.evaluate(() => window.shaderNative.fixture.sceneMove(true));
+        await zero(page);
+        expect(await page.evaluate(() => window.shaderNative.fixture.ready())).toBe(false);
+        await page.evaluate(() => window.shaderNative.fixture.sceneMove(false));
+        await ready(page);
+        await page.evaluate(() => window.shaderNative.fixture.close());
+        expect(await page.evaluate(() => window.shaderNative.fixture.sceneState())).toMatchObject({
+          subscriptions: 0,
+          borrowedDisposals: 0,
+          sourceAvailable: true,
+        });
+      },
+      sceneFixture
+    );
+  },
+  30_000
+);
+it('the unchanged default scene export retains an opaque fallback without a source capability', async () => {
+  await run(
+    'scene-default-unconfigured',
+    async (page) => {
+      await page.evaluate(() => window.shaderNative.fixture.mount('wc', 'compiled', false));
+      expect(await page.evaluate(() => window.shaderNative.fixture.read().background)).toBe('none');
+      expect(await page.evaluate(() => window.shaderNative.fixture.read().fallback)).toBe(
+        'rgb(38, 51, 64)'
+      );
+      expect(await resources(page)).toMatchObject({ attempts: 0, live: 0 });
+      expect(await page.evaluate(() => window.shaderNative.fixture.sceneState())).toMatchObject({
+        subscriptions: 0,
+        borrowedDisposals: 0,
+      });
+    },
+    sceneFixture
+  );
 });

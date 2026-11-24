@@ -56,7 +56,7 @@ fn native_hover_flush(owner:&OwnerRef,window:&mut Window)->bool {
     let kind=if hover{"pointer.enter"}else{"pointer.leave"};
     let mut prevented=dispatch_root_route(owner,kind,event_fields(kind));
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}
-    if !hover{control_label_pointer_cancel(owner);prevented|=pointer_intent(owner,"press.cancel",event_fields("press.cancel"));}
+    if !hover{control_label_cancel(owner);prevented|=pointer_intent(owner,"press.cancel",event_fields("press.cancel"));}
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}
     let kind=if hover{"host:mouseenter"}else{"host:mouseleave"};
     prevented|=dispatch(owner,kind,false,event_fields(kind));
@@ -230,7 +230,12 @@ mod native_hover_tests {
                 owner.borrow_mut().slot=vec![NativeSnapshot::text_value(Value::string(if target{"Target"}else{"Label"}))];
                 Owner::finish(&owner,Value::Undefined);owner
             };
-            LabelHost{label:make(false),target:make(true),focus:cx.focus_handle()}
+            let label=make(false);let target=make(true);
+            // Match the generated constructor's App-scoped input ownership.
+            // The real native up must reach the same production capture route.
+            register_sequential_focus_owner(&label,cx);
+            register_sequential_focus_owner(&target,cx);
+            LabelHost{label,target,focus:cx.focus_handle()}
         });
         window.update(cx,|_,window,_|window.activate_window()).unwrap();frames(window,cx);
         window.update(cx,|host,window,cx| {

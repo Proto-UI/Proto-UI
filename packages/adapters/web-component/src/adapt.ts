@@ -1,3 +1,4 @@
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import {
   claimWebComponentOwnedRelocation,
   isWebComponentOwnedRelocating,
@@ -152,6 +153,7 @@ function assertKebabCase(tag: string) {
 
 export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsBaseType> {
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   /** Draft V2 host provider; one fresh sink per physical view. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   shadow?: boolean | WebComponentShadowSplitOptions;
@@ -1212,6 +1214,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               effectsPort,
               visualFeedbackSink,
               residentMotion: opt.residentMotion,
+              shader: opt.shader,
               subscribeDocumentChange: (listener) => {
                 this._documentChangeListeners.add(listener);
                 if (this._pendingPresentationDocument)

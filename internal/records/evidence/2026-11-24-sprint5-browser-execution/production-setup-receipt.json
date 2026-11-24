@@ -1,0 +1,64 @@
+{
+  "schema": "proto-ui.sprint5.browser-setup-receipt.v1",
+  "createdAt": "2026-11-23T20:32:49.108495+00:00",
+  "head": "0b7b212d3193ea5c7ae219c0501036ee1255e3f2",
+  "outcome": "FAILED_SETUP",
+  "exitCode": 1,
+  "actualPageJourneysExecuted": 0,
+  "browser": "145.0.7632.6",
+  "sandboxEnabled": true,
+  "production": {
+    "candidate": "0b7b212d3193ea5c7ae219c0501036ee1255e3f2",
+    "source": {
+      "head": "0b7b212d3193ea5c7ae219c0501036ee1255e3f2",
+      "tree": "84abbfdb50ec64bfd36f09f906bda10b43752f4b",
+      "worktreeStatus": "",
+      "lockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8"
+    },
+    "build": {
+      "status": "failed",
+      "command": ["corepack", "pnpm@10.32.1", "run", "build"],
+      "cwd": "/tank/shared/projects/proto-ui-agent/sprint5-f7b2/repo/apps/www",
+      "exitCode": null,
+      "signal": "SIGTERM",
+      "stopReason": "resource-deadline",
+      "spawnError": null,
+      "ioError": null,
+      "elapsedMs": 1200515
+    },
+    "productionArtifacts": {
+      "build.log": {
+        "file": "build.log",
+        "bytes": 436717,
+        "sha256": "1376803e8badea92d004d9c838eb6070516740cd9246fd682e0a8caba9b929d2"
+      }
+    }
+  },
+  "environment": {
+    "capturedAt": "2026-11-23T20:30:07Z",
+    "head": "0b7b212d3193ea5c7ae219c0501036ee1255e3f2",
+    "postRunStatus": "",
+    "pane": "browser-tank-0b dead=1 status=1",
+    "node": "24.22.3",
+    "pnpm": "10.32.1",
+    "font": "NotoSansCJK-Regular.ttc: \"Noto Sans CJK SC\" \"Regular\"",
+    "nproc": "32",
+    "loadavg": "23.83 25.24 28.77 14/7234 2975708",
+    "TEMP": "/tank/shared/projects/proto-ui-agent/sprint5-f7b2/t",
+    "classification": "Failed setup at unchanged 20-minute production build deadline. No page journey executed; no conclusion about 250ms cleanup. No relaxed assertion/sandbox/deadline."
+  },
+  "canonicalReceipt": "raw/canonical-baseline/receipt.json",
+  "archive": {
+    "path": "raw.tar.gz",
+    "bytes": 117333,
+    "sha256": "e5db80fc0aa74cdb7c8a4a5a60cf86034920f6dfefd0086a77df7089e28923a6",
+    "members": 14
+  },
+  "observed": "The unchanged 20-minute owned production build reached 1200515 ms and was terminated by its existing resource-deadline. It generated CLI styles and a large part of Astro source assets, ending around Shadcn Data Table source assets. Browser page journeys never began.",
+  "conclusions": [
+    "No 250 ms preview cleanup success or failure was observed.",
+    "No cancel/reopen or production Worker cleanup/integrity success or failure was observed.",
+    "The independent WC SSR owner4 actual-browser pass remains a separate source-bound receipt."
+  ],
+  "nextAction": "After root confirms the public integrated candidate, run the native direction controls and real target owner fixtures. Execute the complete production canonical journey on the separately provisioned hosted lane with the original 250ms contract and unchanged production build gate."
+}

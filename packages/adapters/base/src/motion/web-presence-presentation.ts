@@ -9,6 +9,7 @@ import {
   createDefaultWebPreferenceSource,
   readWebPreference,
 } from '../platform/web-preference-source';
+import { PUI_PORTAL_PREPARING_ATTR } from '../host/view-visibility';
 const zeroOpacityOwners = new WeakMap<Element, () => boolean>();
 
 /** True only while this live presentation lease still owns its zero-opacity write. */
@@ -283,7 +284,12 @@ function createDocumentPresenceSink(
     now: () => win?.performance.now() ?? performance.now(),
     environment() {
       detectLoss();
-      const css = win?.getComputedStyle(el);
+      const tree = ancestors();
+      const preparing = tree.some((node) => node.hasAttribute(PUI_PORTAL_PREPARING_ATTR));
+      // The portal still owns the first-render display barrier. Its temporarily
+      // unavailable box must not be measured or borrowed from an earlier layout;
+      // current preference, visibility and channel ownership remain observable.
+      const css = preparing ? undefined : win?.getComputedStyle(el);
       const dimension = (axis: 'width' | 'height') => {
         let value = px(css?.[axis]);
         if (value === null) return null;
@@ -308,9 +314,10 @@ function createDocumentPresenceSink(
         visible:
           el.isConnected &&
           doc.visibilityState !== 'hidden' &&
-          !ancestors().some((node) =>
+          !tree.some((node) =>
             node.matches('[hidden],[data-pui-view-pending],[data-pui-view-detached]')
           ),
+        preparing,
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
@@ -338,7 +345,12 @@ function createDocumentPresenceSink(
       for (const node of ancestors())
         mutation?.observe(node, {
           attributes: true,
-          attributeFilter: ['hidden', 'data-pui-view-pending', 'data-pui-view-detached'],
+          attributeFilter: [
+            'hidden',
+            'data-pui-view-pending',
+            'data-pui-view-detached',
+            PUI_PORTAL_PREPARING_ATTR,
+          ],
         });
       doc.addEventListener('visibilitychange', callback);
       win?.addEventListener('resize', callback);

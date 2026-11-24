@@ -146,6 +146,23 @@ for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
     name,
     emit(name, readFileSync(path.join(fixture, `${name}.proto.ts`), 'utf8')),
   ]);
+const externalScrollEntry = path.join(fixture, 'external-scroll.proto.ts');
+const externalScroll = await compileFile(externalScrollEntry, {
+  root: repository,
+  profile: 'gpui-source-v1',
+  nativeSdkPath: '../transition/.proto-ui/gpui-native',
+});
+if (!externalScroll.ok)
+  throw new Error(`external_scroll: ${JSON.stringify(externalScroll.diagnostics)}`);
+dependencies.push([
+  'external_scroll',
+  retainModule(
+    'external_scroll',
+    readFileSync(externalScrollEntry, 'utf8'),
+    externalScroll.value.ir,
+    externalScroll.value.output
+  ),
+]);
 dependencies.push([
   'scroll_reader',
   emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),

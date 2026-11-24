@@ -1,0 +1,74 @@
+{
+  "scope": "Existing opt-in diagnostic retention for issue1178; not a Matrix product repair or acceptance",
+  "sourceBase": "81c103bd462b73910f7279122fab5f282d172d56",
+  "capturedAt": "2026-11-23T19:12:06.752653+00:00",
+  "source": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.ts",
+      "beforeSha256": "c40cd2698d310dc813dd2838a1e4d4cfe44cd9377b3314dce308d377bb27ea94",
+      "afterSha256": "e1fde20be1f3120b4d38def28e7872584a4e5f35f6a50fd706318c7eb9be1b81"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+      "beforeSha256": "b3579f18ccf332bc2a77e73f04d2e8e0ad3f439628b75ed7f060bf9544f3730a",
+      "afterSha256": "392fbe341090d054abc67102d47c61ef712c911932143606dbecef5bfd266f70"
+    }
+  ],
+  "unchangedAcceptanceSources": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+      "sha256": "a3c1b08deb78199906a16260ce0c349b6064e797cc46fb5027d24573e77dac95",
+      "unchangedFromBase": true
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
+      "sha256": "4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5",
+      "unchangedFromBase": true
+    }
+  ],
+  "validation": [
+    {
+      "artifact": "chunk-red.json",
+      "tests": 20,
+      "passed": 0,
+      "failed": 1,
+      "pending": 19,
+      "success": false
+    },
+    {
+      "artifact": "chunk-green.json",
+      "tests": 22,
+      "passed": 22,
+      "failed": 0,
+      "pending": 0,
+      "success": true
+    },
+    {
+      "command": "corepack pnpm@10.32.1 exec tsc -p tsconfig.json --pretty false",
+      "configuration": "tsconfig.json in local archive extends unchanged repository strict config and selects the two diagnostic files",
+      "exitCode": 0,
+      "log": "chunk-types.log"
+    }
+  ],
+  "review": {
+    "reviewer": "/root/props_policy",
+    "scope": "Complete helper, caller lifecycle, added held-stop/finish/late-restart controls",
+    "result": "No blocking async ownership/retention issue identified in bounded engineering review",
+    "platformApproval": false,
+    "performanceAcceptance": false
+  },
+  "files": {
+    "original-81c-diagnostic.zip": {
+      "bytes": 31069,
+      "sha256": "9433da819f8d7f87ace3df9ea2d4609ee2aa7ab630280c45ca1c8b39ce0dff90"
+    },
+    "native-readback.json": {
+      "bytes": 5580,
+      "sha256": "717fb375e1dfa8e9a7354b75de0e8507bd4c21c50b16163d16990cd0b22be21c"
+    },
+    "local-verification.zip": {
+      "bytes": 21391,
+      "sha256": "68400c7c5e75d765e1b84977465ae1f65f179a88c3fa857a04e39b9599da702b"
+    }
+  }
+}

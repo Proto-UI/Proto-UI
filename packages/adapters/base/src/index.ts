@@ -45,3 +45,10 @@ export { createWebOwnedDecorationPortalGate } from './platform/web-owned-decorat
 
 export { createWebShaderPresentationSink } from './material/shader-webgl2';
 export { createWebMaterialPaintReservationRef } from './material/paint-reservation';
+
+export { createWebShaderHost } from './material/shader-scene-host';
+export type {
+  WebShaderHostOptions,
+  WebShaderCanvasSceneLease,
+  WebShaderSceneBindings,
+} from './material/shader-scene-host';

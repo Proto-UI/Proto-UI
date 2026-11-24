@@ -128,6 +128,7 @@ internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
 
+# Also retains the frozen source-gate history from 2026-11-24-sprint1-main-integration.
 # Original main 457d27f7 historical records and execution receipts retain their
 # recorded bytes. Maintained compiler, product, tests, scripts and spec stay formatted.
 internal/records/2026-11-23-gpui-authored-input-atoms.md
@@ -149,3 +150,17 @@ internal/records/evidence/2026-11-23-train-package-budget/candidate.json
 
 # Exact Sprint 6 integration receipts and archives; narrative records stay formatted.
 internal/records/evidence/2026-11-24-sprint6-integration/
+# Exact original #1453 analysis reports; the receipt binds their emitted bytes.
+internal/records/2026-11-24-props-update-analysis-evidence/
+
+# Frozen Dialog study inputs and plan retain their byte-bound historical identity.
+# See internal/records/2026-11-24-sprint5-hook-reconciliation.md.
+scripts/analysis/dialog-conformance-study/fixture.ts
+scripts/analysis/dialog-conformance-study/oracle.test.ts
+scripts/analysis/dialog-conformance-study/plan.json
+
+# Preserve original React Portal native receipts, manifests and captures.
+internal/records/evidence/2026-11-24-react-portal-origin-native/
+
+# Preserve original Scroll Reveal source-gate receipts and logs.
+internal/records/evidence/2026-11-24-scroll-reveal-source-gate/

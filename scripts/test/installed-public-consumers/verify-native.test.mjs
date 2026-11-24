@@ -141,6 +141,90 @@ test('terminal served-output proof cannot be empty, failed or detached from prep
   );
 });
 
+// These controls inject host projection ordering at the actual consumer
+// assertion boundary. They do not run React or establish native browser success.
+const selectedRoot = (textValue = 'Vue') => ({
+  getAttribute: async (name) => {
+    assert(['data-value', 'data-text-value'].includes(name));
+    return name === 'data-value' ? 'vue' : textValue;
+  },
+});
+
+test('Select commit waits when semantic state precedes the rendered label', async () => {
+  let label = 'Pick a framework';
+  const observed = [];
+  let queued = false;
+  const value = {
+    textContent: async () => {
+      observed.push(label);
+      if (!queued) {
+        queued = true;
+        // Model the separate host commit as an event-loop task, not a delay.
+        setImmediate(() => {
+          label = 'Vue';
+        });
+      }
+      return label;
+    },
+  };
+  await assertSelectCommit(selectedRoot(), value);
+  assert.equal(observed[0], 'Pick a framework');
+  assert.equal(observed.at(-1), 'Vue');
+  assert(observed.length >= 2);
+});
+
+test('Select commit still rejects an incorrect semantic text value', async () => {
+  await assert.rejects(
+    assertSelectCommit(selectedRoot('React'), { textContent: async () => 'Vue' }),
+    (error) =>
+      error instanceof assert.AssertionError && error.actual === 'React' && error.expected === 'Vue'
+  );
+});
+
+test('Select label that never projects fails at the existing five-second observation deadline', async (t) => {
+  t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 1000 });
+  t.after(() => t.mock.timers.reset());
+  let settled = false;
+  let reads = 0;
+  const pending = assertSelectCommit(selectedRoot(), {
+    textContent: async () => {
+      reads++;
+      return 'Pick a framework';
+    },
+  }).finally(() => {
+    settled = true;
+  });
+  const rejected = assert.rejects(
+    pending,
+    (error) =>
+      error instanceof assert.AssertionError &&
+      error.actual === 'Pick a framework' &&
+      error.expected === 'Vue' &&
+      /rendered Select Value/.test(error.message)
+  );
+  // Drain the actual Promise continuations; setImmediate is not mocked.
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(reads, 1);
+  assert.equal(settled, false, 'an intermediate old label is not an immediate failure');
+  t.mock.timers.tick(5000);
+  await rejected;
+  assert.equal(settled, true);
+});
+
+test('Select retains its exact rendered-text assertion after the observation succeeds', async () => {
+  let reads = 0;
+  await assert.rejects(
+    assertSelectCommit(selectedRoot(), {
+      textContent: async () => (reads++ === 0 ? 'Vue' : 'Pick a framework'),
+    }),
+    (error) =>
+      error instanceof assert.AssertionError &&
+      error.actual === 'Pick a framework' &&
+      error.expected === 'Vue'
+  );
+  assert.equal(reads, 2);
+});
+
 function committedSelect(attributes = {}) {
   const state = {
     'data-value': 'vue',

@@ -1304,14 +1304,29 @@ test('source inventory refresh derives consumer fields while preserving original
   const consumer = data.consumerRows[0];
   consumer['Current owner'] = 'Injected stale copied owner';
   consumer.State = 'injected-stale-state';
+  consumer.issues = [999999];
   const preimage = structuredClone(data);
   const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim();
-  const refreshed = refreshSourceInventory(data, root, { revision });
+  const refreshed = refreshSourceInventory(
+    data,
+    root,
+    { revision },
+    {
+      refreshConsumerIssues: [consumer.ID],
+    }
+  );
   const canonical = consumerLedgerRows(
     fs.readFileSync(path.join(root, consumer.source), 'utf8')
   ).rows.get(consumer.ID);
   for (const [field, value] of Object.entries(canonical))
     assert.equal(refreshed.consumerRows[0][field], value);
+  assert(!refreshed.consumerRows[0].issues.includes(999999));
+  for (const match of Object.values(canonical)
+    .join(' ')
+    .matchAll(/#([1-9]\d*)\b/g))
+    assert(refreshed.consumerRows[0].issues.includes(Number(match[1])));
+  for (let i = 1; i < data.consumerRows.length; i++)
+    assert.deepEqual(refreshed.consumerRows[i].issues, preimage.consumerRows[i].issues);
   assert.deepEqual(data, preimage);
   for (const field of [
     'protoMain',
@@ -1337,6 +1352,18 @@ test('source inventory refresh derives consumer fields while preserving original
 
 test('consumer ID changes require explicit migration instead of silent row loss', () => {
   const data = copy({ currentSource: true });
+  assert.throws(
+    () =>
+      refreshSourceInventory(
+        data,
+        root,
+        { revision: baseline.protoMain },
+        {
+          refreshConsumerIssues: ['harness.not-a-real-row'],
+        }
+      ),
+    /Unknown consumer issue-index row: harness.not-a-real-row/
+  );
   data.consumerRows.shift();
   assert.throws(
     () => refreshSourceInventory(data, root, { revision: baseline.protoMain }),

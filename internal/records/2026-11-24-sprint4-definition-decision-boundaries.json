@@ -1,0 +1,1059 @@
+{
+  "kind": "proto-ui.sprint4-minimum-decision-preparation",
+  "format": 1,
+  "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "scope": "Prepare original #913–915 final binding; do not activate draft entities or claim original-source execution.",
+  "originalManifestSha256": "35110c1036f441828f060d8fbf239965a8587a99699ead6b5689268b226adb69",
+  "originalCompilerSha256": "f2bc1ada0554d37fdf2926dc9f7d16f31fec05dd99a60cf758262215ecf00c8e",
+  "bindings": [
+    {
+      "id": "C-AS-HOOK-PRIVILEGED-0001",
+      "governingSource": "spec/contracts/C-AS-HOOK-PRIVILEGED-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "9efbe3f153f842f1808174beba4a8a7753061e6615d3d2f7337b506efa2b68d4",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured privileged asHooks as restricted module-port capability APIs."
+        },
+        {
+          "version": "0.1.0",
+          "change": "updated",
+          "summary": "Rephrased privileged asHook API obligations around caller shape and returned handles/APIs, and linked the no-arg migration fracture."
+        },
+        {
+          "version": "0.1.1",
+          "change": "clarified",
+          "summary": "Clarified that privileged asHooks still share asHook def syntax rights and should use non-public ports only for capabilities outside prototype syntax."
+        },
+        {
+          "version": "0.1.2",
+          "change": "updated",
+          "summary": "Added the internal privileged asHook define helper as the governed implementation entry for official privileged hooks."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "contracts": ["C-AS-HOOK-0001", "C-AS-HOOK-0008"]
+      },
+      "criteria": [
+        "C-AS-HOOK-PRIVILEGED-0001-A",
+        "C-AS-HOOK-PRIVILEGED-0001-A2",
+        "C-AS-HOOK-PRIVILEGED-0001-A3",
+        "C-AS-HOOK-PRIVILEGED-0001-B",
+        "C-AS-HOOK-PRIVILEGED-0001-C",
+        "C-AS-HOOK-PRIVILEGED-0001-D"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "D-AS-HOOK-PRIVILEGED-DEFINE-0001",
+      "governingSource": "spec/decisions/D-AS-HOOK-PRIVILEGED-DEFINE-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "3b0ad43189bb0e6eec0bab8f9776721c5185fa4ad518bb986860f5782131366e",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Recorded the internal privileged asHook define helper as a governance boundary."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {},
+      "criteria": [],
+      "openQuestions": []
+    },
+    {
+      "id": "C-AS-HOOK-0007",
+      "governingSource": "spec/contracts/C-AS-HOOK-0007.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "f0de1904739cb5ca08931a8a038414d873f59c12d5db3f676ae07d78d8759dd4",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured borrowed state projection for asHook state handles."
+        },
+        {
+          "version": "0.1.1",
+          "change": "clarified",
+          "summary": "Clarified that asHook state projection covers all asHook-introduced state handles, and recorded the state-name versus expose-name naming fracture."
+        },
+        {
+          "version": "0.1.2",
+          "change": "revised",
+          "summary": "Resolved expose-name separation and nested asHook non-flattening as contract requirements."
+        },
+        {
+          "version": "0.1.3",
+          "change": "clarified",
+          "summary": "Clarified that nested state handles are preserved through automatic child asHook entries."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "clarified",
+          "summary": "Clarified capability-preserving capture for already observed handles, consistent with the state-view contracts; owned and borrowed projection, declaration naming, and nested capture remain unchanged."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "contracts": [
+          "C-AS-HOOK-0005",
+          "C-STATE-0002",
+          "C-STATE-0008",
+          "C-STATE-0003",
+          "C-STATE-0009"
+        ]
+      },
+      "criteria": [
+        "C-AS-HOOK-0007-A",
+        "C-AS-HOOK-0007-B",
+        "C-AS-HOOK-0007-C",
+        "C-AS-HOOK-0007-D",
+        "C-AS-HOOK-0007-E",
+        "C-AS-HOOK-0007-F",
+        "C-AS-HOOK-0007-G",
+        "C-AS-HOOK-0007-H"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-CORE-SYNTAX-0007",
+      "governingSource": "spec/contracts/C-CORE-SYNTAX-0007.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "a9c1280b301f7cea647320528585c8d8f78bf1cef45e1a9c0cf29f1ab3331d96",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured the phase boundary for removal functions returned by setup-only APIs."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "a9c1280b301f7cea647320528585c8d8f78bf1cef45e1a9c0cf29f1ab3331d96",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "contracts": ["C-CORE-SYNTAX-0001", "C-LIFECYCLE-0001"]
+      },
+      "criteria": [
+        "C-CORE-SYNTAX-0007-A",
+        "C-CORE-SYNTAX-0007-B",
+        "C-CORE-SYNTAX-0007-C",
+        "C-CORE-SYNTAX-0007-D"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-STATE-0012",
+      "governingSource": "spec/contracts/C-STATE-0012.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "cee5db1a6aff4b0fba31a0ba424ae3b345de36723100aa2aa1f4b989a1942480",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.2.0-rc.7",
+          "change": "revised",
+          "summary": "Bound State resources to instance lifetime across repeatable view epochs and reserved invalidation for terminal disposal."
+        },
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured lifecycle safety for state views and watchers."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "cee5db1a6aff4b0fba31a0ba424ae3b345de36723100aa2aa1f4b989a1942480",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "contracts": ["C-STATE-0004", "C-LIFECYCLE-0004", "C-LIFECYCLE-0006"]
+      },
+      "criteria": [
+        "C-STATE-0012-A",
+        "C-STATE-0012-B",
+        "C-STATE-0012-C",
+        "C-STATE-0012-D",
+        "C-STATE-0012-E"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-RULE-WHEN-0001",
+      "governingSource": "spec/contracts/C-RULE-WHEN-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "0cac436d696d48a9b0c73ebee38604c514ad0629994bd6fa37f62fed1fa93776",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Admit one finite numeric gte predicate with existing dependency identity, no coercion or implicit compiler-profile admission."
+        },
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured the pure expression semantics for Rule `when`."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "contracts": ["C-RULE-0001", "C-RULE-0004"]
+      },
+      "criteria": [
+        "C-RULE-WHEN-0001-A",
+        "C-RULE-WHEN-0001-B",
+        "C-RULE-WHEN-0001-C",
+        "C-RULE-WHEN-0001-D",
+        "C-RULE-WHEN-0001-E",
+        "C-RULE-WHEN-0001-FINITE-GTE"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-STATE-0006",
+      "governingSource": "spec/contracts/C-STATE-0006.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "a3017b6857e1d369780e9dbb65908fa3be34df3e8fc72cb2a5cf1f36c87bb923",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Added draft number.list without closing legacy scalar validation debt."
+        },
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured finite state kinds and JSON-compatible value boundaries."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "a3017b6857e1d369780e9dbb65908fa3be34df3e8fc72cb2a5cf1f36c87bb923",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "contracts": ["C-STATE-0002", "C-CORE-VALUE-0001"]
+      },
+      "criteria": [
+        "C-STATE-0006-A",
+        "C-STATE-0006-B",
+        "C-STATE-0006-C",
+        "C-STATE-0006-D",
+        "C-STATE-0006-E"
+      ],
+      "openQuestions": [
+        {
+          "id": "C-STATE-0006-Q-VALIDATION",
+          "question": {
+            "zh-CN": "v0 是否应强制所有旧 scalar state definition、`setDefault` 与 `set` 调用执行 value-domain validation？",
+            "en": "Should v0 require value-domain validation for every legacy scalar state definition, `setDefault`, and `set` call?"
+          },
+          "context": {
+            "zh-CN": "当前存在 validator helper，但尚未完整接入 state module；旧 scalar validation 仍为 debt；新 number.list 按 C-STATE-NUMBER-LIST-0001 独立要求完整校验。",
+            "en": "Validator helpers exist today, but they are not fully wired into the state module; legacy scalar validation remains debt. The new number.list kind requires complete validation independently under C-STATE-NUMBER-LIST-0001."
+          },
+          "blocks": ["state value validation implementation"]
+        }
+      ]
+    },
+    {
+      "id": "D-STATE-VALIDATION-0001",
+      "governingSource": "spec/decisions/D-STATE-VALIDATION-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "862e997d3d2558ab024394e5fc101988ff3d2f1ef91bb72973168d8f09f875d5",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Recorded the gap between state spec value-domain definitions and fully wired runtime validation."
+        }
+      ],
+      "originalInventoryMember": false,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "supplemental current definition; absent from historical 61 rows",
+      "dependsOn": {},
+      "criteria": [],
+      "openQuestions": []
+    },
+    {
+      "id": "HC-HIT-PARTICIPATION-0001",
+      "governingSource": "spec/host-caps/HC-HIT-PARTICIPATION-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "ccc2ca0aaa53a3825fd23a63acb6b68a1c28bc88354c82706fb8fa0325c891f5",
+      "lifecycle": "draft",
+      "since": "0.3.0-alpha.0",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.0",
+          "change": "introduced",
+          "summary": "Cataloged Hit Participation and approved shared-target ownership with executable evidence."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "clarified",
+          "summary": "Added bounded typed static hit insets with native same-root realization and explicit unactivated consumer evidence."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "contracts": ["C-HIT-PARTICIPATION-0001"]
+      },
+      "criteria": [
+        "HC-HIT-PARTICIPATION-0001-STATIC-INSET",
+        "HC-HIT-PARTICIPATION-0001-STATIC-OWNERSHIP",
+        "HC-HIT-PARTICIPATION-0001-A",
+        "HC-HIT-PARTICIPATION-0001-B"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "M-EXPOSE-STATE-WEB-0001",
+      "governingSource": "spec/modules/M-EXPOSE-STATE-WEB-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "d9196e61cd3c8020beffb854495000eb36d5d07e7617c316cf5241e6f8bcb860",
+      "lifecycle": "draft",
+      "since": "0.3.0-alpha.0",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "revised",
+          "summary": "Added a draft optional read-only current CSS projection witness, preserving the candidate map and existing author facade."
+        },
+        {
+          "version": "0.3.0-alpha.0",
+          "change": "introduced",
+          "summary": "Cataloged existing Web projection with bounded mapping, view binding and four Adapter evidence."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "modules": ["M-EXPOSE-STATE-0001"],
+        "contracts": ["C-LIFECYCLE-0006", "C-LIFECYCLE-0007", "C-HOST-SURFACE-PROJECTION-0001"]
+      },
+      "criteria": [
+        "M-EXPOSE-STATE-WEB-0001-A",
+        "M-EXPOSE-STATE-WEB-0001-B",
+        "M-EXPOSE-STATE-WEB-0001-C",
+        "M-EXPOSE-STATE-WEB-0001-D",
+        "M-EXPOSE-STATE-WEB-0001-E",
+        "M-EXPOSE-STATE-WEB-0001-F",
+        "M-EXPOSE-STATE-WEB-0001-PROJECTION-WITNESS"
+      ],
+      "openQuestions": [
+        {
+          "id": "M-EXPOSE-STATE-WEB-0001-Q-OWNERSHIP",
+          "question": {
+            "en": "How should cross-owner collisions and non-terminal removal/restoration of emitted DOM artifacts be governed?",
+            "zh-CN": "跨 owner 名称冲突及非终止时已输出 DOM artifact 的撤销/恢复应如何治理？"
+          },
+          "context": {
+            "en": "Non-terminal cleanup revokes subscriptions and future writes while retaining snapshots on former targets, detach, changed mappings or changed modes. Terminal disposal now conditionally restores this Module's owned artifacts, including original CSS priority; a consumer overwrite observed before a subsequent Module write becomes the new baseline. Equality-based restoration does not arbitrate indistinguishable same-value writes or cross-owner collisions. Default normalization may collide or produce an empty suffix. Cross-owner arbitration, custom-map validation and transactional projection failures remain open.",
+            "zh-CN": "非终止 cleanup 撤销 subscription 和后续写入，在 target 替换、detach、mapping/mode 变化时保留快照。terminal dispose 现会条件恢复本 Module 拥有的 artifact（含原 CSS priority）；后续 Module 写入前观察到的 consumer 覆盖成为新的 baseline。基于值相等的恢复无法仲裁不可区分的同值写入或跨 owner 冲突。默认归一化仍可能冲突或产生空后缀；跨 owner 仲裁、自定义 map 校验及投影失败事务性继续开放。"
+          }
+        }
+      ]
+    },
+    {
+      "id": "M-TABLE-STRUCTURE-0001",
+      "governingSource": "spec/modules/M-TABLE-STRUCTURE-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "2f08c788d428eb13e083d28db28e17af37c1d03f7a2dcc399fc473ebf4feb755",
+      "lifecycle": "draft",
+      "since": "0.3.0-alpha.1",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "introduced",
+          "summary": "Implemented the approved Checkpoint B host-neutral semantic owner, topology, diagnostics and opaque relationship evidence."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Added bounded Web Component evidence, global authored header order, and fail-closed semantic-role cleanup while retaining three Adapter activation blockers."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "clarified",
+          "summary": "Reconciled the draft rationale with four separately cataloged Web DOM paths and real React 19 evidence; independent Checkpoint C review and explicit admission remain required without claiming assistive-technology or non-Web support."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "modules": ["M-ANATOMY-0001", "M-A11Y-0001", "M-STATE-0001"],
+        "decisions": ["D-BASE-TABLE-STRUCTURE-0001"]
+      },
+      "criteria": [
+        "M-TABLE-STRUCTURE-0001-A",
+        "M-TABLE-STRUCTURE-0001-B",
+        "M-TABLE-STRUCTURE-0001-C",
+        "M-TABLE-STRUCTURE-0001-D",
+        "M-TABLE-STRUCTURE-0001-E"
+      ],
+      "openQuestions": [
+        {
+          "id": "M-TABLE-STRUCTURE-0001-Q-ADAPTER-EVIDENCE",
+          "question": {
+            "en": "Have all four official Web Adapter profiles projected and independently reviewed the bounded Table A11y graph?",
+            "zh-CN": "四个 official Web Adapter profile 是否已投射并独立评审有界 Table A11y graph？"
+          },
+          "blocks": ["activation:M-TABLE-STRUCTURE-0001"]
+        }
+      ]
+    },
+    {
+      "id": "C-MODULE-DECLARATION-0001",
+      "governingSource": "spec/contracts/C-MODULE-DECLARATION-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "7d583321104793f4383476f4f283357213a1133bc5c8e1c1f140ad6cdc2b1a8e",
+      "lifecycle": "draft",
+      "since": "0.2.0-rc.7",
+      "revisions": [
+        {
+          "version": "0.2.0-rc.7",
+          "change": "revised",
+          "summary": "Added authored-asHook publication and explicit caller reuse of pre-render module requirements."
+        },
+        {
+          "version": "0.2.0-rc.7",
+          "change": "introduced",
+          "summary": "Cataloged the typed static declaration substrate used for pre-render host selection."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "7d583321104793f4383476f4f283357213a1133bc5c8e1c1f140ad6cdc2b1a8e",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "contracts": ["C-CORE-SYNTAX-0003"]
+      },
+      "criteria": [
+        "C-MODULE-DECLARATION-0001-A",
+        "C-MODULE-DECLARATION-0001-B",
+        "C-MODULE-DECLARATION-0001-C",
+        "C-MODULE-DECLARATION-0001-D",
+        "C-MODULE-DECLARATION-0001-E",
+        "C-MODULE-DECLARATION-0001-F"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-CONTROL-LABEL-0001",
+      "governingSource": "spec/contracts/C-CONTROL-LABEL-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "42f914d2f05f338df79e094a3b8cd6d9ade90d29f0376953da0c5401e668c32f",
+      "lifecycle": "draft",
+      "since": "0.3.0-alpha.1",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "clarified",
+          "summary": "Defined a separate draft shared-SDK Rust nominal association and exact native pair lease for the private GPUI source profile, without extending the ECMAScript interop ABI or promoting lifecycle status."
+        },
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "clarified",
+          "summary": "Defined same-realm nominal reference and pair interoperability across native output graphs and Runtime Adapters, with target-owned semantic source translation and bounded generated-ID lifetime; retained draft admission and existing Label behavior."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Extend explicit target participation to Button, Toggle and Toggle Group Item while retaining the same naming, activation and lifecycle owners."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Declared the explicit bounded label text-selection policy vocabulary (ControlLabelSelectionPolicy) shared with the content-selection affordance, preserving the activation-derived default and selectable passive content."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "introduced",
+          "summary": "Recorded the bounded independent Label pairing direction, explicit domain, ownership and lowering requirements without stable admission."
+        },
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "clarified",
+          "summary": "Named the Compiler admission boundary for the declared association target set; Toggle Group Item stays a declared target and the Toggle Group Root and Item definitions keep their explicit unsupported diagnostic."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "modules": ["M-ANATOMY-0001"],
+        "contracts": [
+          "C-PROPS-0003",
+          "C-PROPS-0008",
+          "C-A11Y-PART-RELATIONSHIP-0001",
+          "C-LIFECYCLE-0006",
+          "C-LIFECYCLE-0007"
+        ]
+      },
+      "criteria": [
+        "C-CONTROL-LABEL-0001-IDENTITY",
+        "C-CONTROL-LABEL-0001-INTEROP",
+        "C-CONTROL-LABEL-0001-GPUI-IDENTITY",
+        "C-CONTROL-LABEL-0001-GPUI-LEASE",
+        "C-CONTROL-LABEL-0001-DOMAIN",
+        "C-CONTROL-LABEL-0001-UNIQUENESS",
+        "C-CONTROL-LABEL-0001-NAME",
+        "C-CONTROL-LABEL-0001-OWNED-NAME",
+        "C-CONTROL-LABEL-0001-ACTIVATION",
+        "C-CONTROL-LABEL-0001-INPUT",
+        "C-CONTROL-LABEL-0001-FOCUS",
+        "C-CONTROL-LABEL-0001-CONTENT",
+        "C-CONTROL-LABEL-0001-LOWERING",
+        "C-CONTROL-LABEL-0001-WEB",
+        "C-CONTROL-LABEL-0001-NAME-INTEROP",
+        "C-CONTROL-LABEL-0001-BOUNDS",
+        "C-CONTROL-LABEL-0001-GPUI-DIRECT",
+        "C-CONTROL-LABEL-0001-ANATOMY"
+      ],
+      "openQuestions": [
+        {
+          "id": "C-CONTROL-LABEL-0001-Q-EVIDENCE",
+          "question": {
+            "en": "Does the completed slice satisfy paired real input, naming, reentrancy, duplicate binding and remount evidence across all four Web adapters?"
+          },
+          "blocks": ["activation:C-CONTROL-LABEL-0001"]
+        }
+      ]
+    },
+    {
+      "id": "C-TEXT-CONTROL-0001",
+      "governingSource": "spec/contracts/C-TEXT-CONTROL-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "b8063c7fb70616d64bb540121952cc36d8877fac08c1f72635b7393b18d2454c",
+      "lifecycle": "draft",
+      "since": "0.2.0-rc.7",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "clarified",
+          "summary": "Catalog the existing resetValue editing-lease replacement and controlled-authority boundary."
+        },
+        {
+          "version": "0.2.0-rc.7",
+          "change": "revised",
+          "summary": "Required wrapper-backed Text Control profiles to project Root visual intent onto the physical editor surface."
+        },
+        {
+          "version": "0.2.0-rc.7",
+          "change": "revised",
+          "summary": "Replaced the Web target declaration with host-neutral editing requirements and added editing-session preservation."
+        },
+        {
+          "version": "0.2.0-rc.7",
+          "change": "introduced",
+          "summary": "Introduced the focused native multiline Text Control host boundary."
+        },
+        {
+          "version": "0.3.0-alpha.0",
+          "change": "revised",
+          "summary": "Made the Text Control module line-mode-aware (single or multiline), added common inputMode and enterKeyHint hints, and required CR/LF canonicalization at the module boundary. Single-line mode resolves to HTMLInputElement on the Web profile."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "bc8bb4ab39e20c919414b3be54b1e38fae731916c70ee3c45dc822197ae8bc8f",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "decisions": ["D-TEXT-CONTROL-PROJECTION-0001"],
+        "contracts": [
+          "C-HOST-SURFACE-PROJECTION-0001",
+          "C-TEMPLATE-0001",
+          "C-MODULE-DECLARATION-0001",
+          "C-TEMPLATE-0002",
+          "C-EVENT-0002"
+        ]
+      },
+      "criteria": [
+        "C-TEXT-CONTROL-0001-RESET",
+        "C-TEXT-CONTROL-0001-A",
+        "C-TEXT-CONTROL-0001-B",
+        "C-TEXT-CONTROL-0001-C",
+        "C-TEXT-CONTROL-0001-D",
+        "C-TEXT-CONTROL-0001-E",
+        "C-TEXT-CONTROL-0001-F",
+        "C-TEXT-CONTROL-0001-G",
+        "C-TEXT-CONTROL-0001-H",
+        "C-TEXT-CONTROL-0001-I",
+        "C-TEXT-CONTROL-0001-CHANGE-COMMIT"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-PROPS-0001",
+      "governingSource": "spec/contracts/C-PROPS-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "cffc9edd78756abf778a67d85e055dac827e4449cbbc815fc375a985f766251d",
+      "lifecycle": "active",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Captured the top-level channel identity for props."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Corrected the channel endpoint from Prototype to Component and aligned App Maker terminology."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "cffc9edd78756abf778a67d85e055dac827e4449cbbc815fc375a985f766251d",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {},
+      "criteria": [],
+      "openQuestions": []
+    },
+    {
+      "id": "C-PROPS-0013",
+      "governingSource": "spec/contracts/C-PROPS-0013.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "e560a2586cc1e8786b606715ba79bc05b230510effeb1907a0177156993bcc6c",
+      "lifecycle": "active",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Drafted a placeholder for `runtime` `run handle` binding pending runtime boundary review."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Reframed props watcher `run handle` binding as a Props-specific refinement of the core runtime callback binding rule."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "e560a2586cc1e8786b606715ba79bc05b230510effeb1907a0177156993bcc6c",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "contracts": [
+          {
+            "id": "C-CORE-SYNTAX-0002",
+            "anchors": ["C-CORE-SYNTAX-0002-E", "C-CORE-SYNTAX-0002-F"]
+          },
+          "C-PROPS-0011",
+          "C-PROPS-0012"
+        ]
+      },
+      "criteria": [
+        "C-PROPS-0013-A",
+        "C-PROPS-0013-B",
+        "C-PROPS-0013-C",
+        "C-PROPS-0013-D",
+        "C-PROPS-0013-E"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-LIFECYCLE-0002",
+      "governingSource": "spec/contracts/C-LIFECYCLE-0002.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "d40b760f6cd48aa0d4b9dd5e5cb58be94e9da78dfed5e0001c7b754d06346498",
+      "lifecycle": "draft",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Drafted the prototype-visible lifecycle callback ordering contract."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Resolved the `created` protoPhase exposure gap as an implementation follow-up without changing the callback ordering criteria."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Clarified that lifecycle commit ordering is based on host commit completion rather than synchronous function-call completion."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Moved lifecycle API surface syntax ownership to `C-LIFECYCLE-0005` while keeping callback invocation ordering here."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Separated repeatable mount epochs from terminal instance disposal."
+        },
+        {
+          "version": "0.1.0",
+          "change": "revised",
+          "summary": "Defined same-checkpoint authored registration order across direct and once-hook contributions without expanding error or asynchronous semantics."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Defined the accepted acquired-instance synchronous created-failure boundary as criterion J: preserve the initiating thrown value while completing reachable terminal cleanup; broader callback error recovery remains open and draft."
+        },
+        {
+          "version": "0.3.0-alpha.1",
+          "change": "revised",
+          "summary": "Defined the explicitly selected ordinary authored beforeDispose fail-fast boundary as K without suppressing rejection, skipping private resource retirement, widening other callback recovery, or activating the draft lifecycle."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "not separately published; requires original packet",
+      "dependsOn": {
+        "contracts": ["C-LIFECYCLE-0001", "C-LIFECYCLE-0005"]
+      },
+      "criteria": [
+        "C-LIFECYCLE-0002-A",
+        "C-LIFECYCLE-0002-B",
+        "C-LIFECYCLE-0002-C",
+        "C-LIFECYCLE-0002-D",
+        "C-LIFECYCLE-0002-E",
+        "C-LIFECYCLE-0002-F",
+        "C-LIFECYCLE-0002-G",
+        "C-LIFECYCLE-0002-H",
+        "C-LIFECYCLE-0002-I",
+        "C-LIFECYCLE-0002-J",
+        "C-LIFECYCLE-0002-K"
+      ],
+      "openQuestions": [
+        {
+          "id": "C-LIFECYCLE-0002-Q-CALLBACK-ERRORS",
+          "question": {
+            "zh-CN": "除 J 治理的已取得 instance 的同步 `created` 失败与 K 治理的普通 authored `beforeDispose` 序列外，其它 lifecycle callback 抛错后的传播、后续 callback 是否继续执行、以及是否进入 dispose 是否应由本契约定义？",
+            "en": "Beyond the acquired-instance synchronous `created` failure governed by J and the ordinary authored `beforeDispose` sequence governed by K, should this contract define propagation, continuation, and disposal after other lifecycle callback failures?"
+          },
+          "context": {
+            "zh-CN": "J 关闭同步创建失败的原始错误与可达资源清理边界，K 只关闭普通 authored `beforeDispose` 的 fail-fast 与错误可见性；其它 callback 的传播、继续执行与恢复仍是 adapter/runtime 断口，不因此提升 draft lifecycle。",
+            "en": "J closes the initiating-error and reachable-resource boundary for synchronous failed creation, and K closes only ordinary authored `beforeDispose` fail-fast behavior and error visibility. Propagation, continuation, and recovery for other callbacks remain a runtime/adapter gap, without promoting this draft lifecycle."
+          },
+          "blocks": ["C-LIFECYCLE-0002"]
+        }
+      ]
+    },
+    {
+      "id": "C-LIFECYCLE-0008",
+      "governingSource": "spec/contracts/C-LIFECYCLE-0008.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "021ce74e0439481bda5a316982573e06dfd16ea77b0f6c11b36e6077b20549e7",
+      "lifecycle": "active",
+      "since": "0.1.0",
+      "revisions": [
+        {
+          "version": "0.1.0",
+          "change": "introduced",
+          "summary": "Defined the declarative ViewIntent boundary for L1 materialization and detached owner reconciliation."
+        },
+        {
+          "version": "0.1.1",
+          "change": "implemented",
+          "summary": "RuntimeSession and the React, Vue, and Web Component owners now implement initial and repeatable L1 ViewIntent reconciliation."
+        },
+        {
+          "version": "0.1.2",
+          "change": "refined",
+          "summary": "Required a reveal barrier for newly attached roots and visual hiding for retained detached owner shells."
+        }
+      ],
+      "originalInventoryMember": true,
+      "originalIndividualSha256": "021ce74e0439481bda5a316982573e06dfd16ea77b0f6c11b36e6077b20549e7",
+      "originalHashBasis": "inferred from prior public same-byte record; not a fresh original read",
+      "dependsOn": {
+        "contracts": ["C-LIFECYCLE-0005", "C-LIFECYCLE-0006", "C-LIFECYCLE-0007"]
+      },
+      "criteria": [
+        "C-LIFECYCLE-0008-A",
+        "C-LIFECYCLE-0008-B",
+        "C-LIFECYCLE-0008-C",
+        "C-LIFECYCLE-0008-D",
+        "C-LIFECYCLE-0008-E",
+        "C-LIFECYCLE-0008-F",
+        "C-LIFECYCLE-0008-G",
+        "C-LIFECYCLE-0008-H",
+        "C-LIFECYCLE-0008-I",
+        "C-LIFECYCLE-0008-J"
+      ],
+      "openQuestions": []
+    },
+    {
+      "id": "C-LIFECYCLE-REQUEST-0001",
+      "governingSource": "spec/contracts/C-LIFECYCLE-REQUEST-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "cb31255342be4fb85398ff4ac89508d9b5620b126663e1298384241bb239dd9a",
+      "lifecycle": "draft",
+      "since": "0.3.0-alpha.2",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "introduced",
+          "summary": "Selected request-owned zero-view-epoch lifecycle, error precedence, terminal retirement and isolation for private Sprint 5 conformance without admitting public SSR."
+        }
+      ],
+      "originalInventoryMember": false,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "supplemental current definition; absent from historical 61 rows",
+      "dependsOn": {
+        "contracts": ["C-LIFECYCLE-0001", "C-LIFECYCLE-0002", "C-LIFECYCLE-0008"]
+      },
+      "criteria": [
+        "C-LIFECYCLE-REQUEST-0001-A",
+        "C-LIFECYCLE-REQUEST-0001-B",
+        "C-LIFECYCLE-REQUEST-0001-C",
+        "C-LIFECYCLE-REQUEST-0001-D",
+        "C-LIFECYCLE-REQUEST-0001-E",
+        "C-LIFECYCLE-REQUEST-0001-F",
+        "C-LIFECYCLE-REQUEST-0001-G"
+      ],
+      "openQuestions": [
+        {
+          "id": "C-LIFECYCLE-REQUEST-0001-Q-ADMISSION",
+          "question": "Complete independent shared-definition review and target-specific SSR consumer, capability and lifecycle acceptance before stable admission.",
+          "blocks": ["activation:C-LIFECYCLE-REQUEST-0001"]
+        }
+      ]
+    },
+    {
+      "id": "C-LIFECYCLE-OWNER-INITIALIZATION-0001",
+      "governingSource": "spec/contracts/C-LIFECYCLE-OWNER-INITIALIZATION-0001.yaml",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "currentSha256": "015abc6e3fc7f49934a676e1449c9b555860ce5ea79cc934e7c85c1f687d5e56",
+      "lifecycle": "draft",
+      "since": "0.3.0-alpha.2",
+      "revisions": [
+        {
+          "version": "0.3.0-alpha.2",
+          "change": "introduced",
+          "summary": "Selected fresh logical ownership with bounded data initialization, explicit trust and retirement, without changing same-owner L1 or admitting a public SSR profile."
+        }
+      ],
+      "originalInventoryMember": false,
+      "originalIndividualSha256": null,
+      "originalHashBasis": "supplemental current definition; absent from historical 61 rows",
+      "dependsOn": {
+        "contracts": ["C-LIFECYCLE-0001", "C-LIFECYCLE-0002", "C-LIFECYCLE-0008"]
+      },
+      "criteria": [
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-A",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-B",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-C",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-D",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-E",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-F",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-G",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001-H"
+      ],
+      "openQuestions": [
+        {
+          "id": "C-LIFECYCLE-OWNER-INITIALIZATION-0001-Q-ADMISSION",
+          "question": "Independent shared-definition review and full source-bound browser/target evidence remain required. Automatic migration of arbitrary runtime State is not selected by this bounded data-initialization contract.",
+          "blocks": ["activation:C-LIFECYCLE-OWNER-INITIALIZATION-0001"]
+        }
+      ]
+    }
+  ],
+  "implementationBindings": [
+    {
+      "path": "packages/hooks/src/privileged.ts",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "sha256": "37b95b6f1536d07402ecdad9b0e01d89e82bbeb88930f925892c6129d2263f80"
+    },
+    {
+      "path": "packages/core/src/internal.ts",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "sha256": "2b16d692f539b0addc652c8fb9cc03b51064d3eba8424fbf836161b289a9eda7"
+    },
+    {
+      "path": "packages/core/src/prototype.ts",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc"
+    },
+    {
+      "path": "packages/core/src/handles.ts",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "sha256": "da54a619755e23fee1c4d4ab9b23af130f75e78510b27a96125e356896f48f14"
+    },
+    {
+      "path": "packages/compiler/README.md",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "sha256": "3d725b8035ed413fef7eef7a8bf2f3e2bbd3d6cbdb5d3a2fe0ac34652ece007b"
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "revision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+      "sha256": "2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58"
+    }
+  ],
+  "currentAuthorityCanProceed": [
+    {
+      "group": "CORE_INTERNAL_PRIVILEGED_ATOM",
+      "rule": "Use the existing internal privileged helper and setup phase boundary. Do not invent a public Core atom. Original candidate ABI differences need inspection before any new semantic question.",
+      "ids": [
+        "C-AS-HOOK-PRIVILEGED-0001",
+        "D-AS-HOOK-PRIVILEGED-DEFINE-0001",
+        "C-CORE-SYNTAX-0007"
+      ],
+      "dependencies": "shared ABI -> official authored callers -> source-bank producer -> original frontend"
+    },
+    {
+      "group": "PUBLIC_DECLARATION_TYPE_DIFFS",
+      "rule": "Preserve observed read-only authority, borrowed projection, instance lifetime and existing pure/strict Rule semantics; type declarations must match them. These rules need implementation checks, not 61 repeated human approvals.",
+      "ids": ["C-AS-HOOK-0007", "C-STATE-0012", "C-RULE-WHEN-0001"],
+      "dependencies": "Core/State/Rule definitions -> declaration inputs -> source-bank producer -> frontend and consumers"
+    },
+    {
+      "group": "STATIC_DATA_PUBLICATION_SCHEMA",
+      "rule": "Bind actual nominal publications and their owned effects. The current CSS witness is a separately governed draft read-only extension, not inferred from candidate names.",
+      "ids": [
+        "HC-HIT-PARTICIPATION-0001",
+        "M-EXPOSE-STATE-WEB-0001",
+        "M-TABLE-STRUCTURE-0001",
+        "C-MODULE-DECLARATION-0001"
+      ],
+      "dependencies": "schema/publication definitions -> static inputs and official entries -> source-bank producer"
+    },
+    {
+      "group": "OFFICIAL_AUTHORED_SOURCE_AND_PACKAGE_ENTRIES",
+      "rule": "Recover and verify the 22 input/43-entry bytes and exports; compile authored behavior without relocating component protocols into Compiler.",
+      "ids": ["C-AS-HOOK-PRIVILEGED-0001", "C-AS-HOOK-0007", "C-MODULE-DECLARATION-0001"],
+      "dependencies": "accepted ABI -> official callers and entry mapping -> bank -> frontend"
+    },
+    {
+      "group": "EXISTING_PRIMITIVE_AND_NATIVE_BOUNDARIES",
+      "rule": "Apply existing Props ownership, logical lifetime, callback error precedence, host input/Focus/A11y and native resource semantics. Test current ControlLabel/TextControl clarifications on actual migrated source; no lifecycle promotion is implied.",
+      "ids": [
+        "C-PROPS-0001",
+        "C-PROPS-0013",
+        "C-STATE-0012",
+        "C-LIFECYCLE-0002",
+        "C-LIFECYCLE-0008",
+        "C-CONTROL-LABEL-0001",
+        "C-TEXT-CONTROL-0001"
+      ],
+      "dependencies": "shared primitive/host contracts -> frontend -> native realization -> real SDK/application consumer"
+    },
+    {
+      "group": "SSR_REQUEST_AND_BROWSER_ADOPTION",
+      "rule": "Current request-owned zero-view-epoch and fresh-owner bounded-data directions already exist as draft. Use them for bounded private conformance; keep canonical SSR PUI4001. Do not repeat the earlier claim that no definition exists.",
+      "ids": [
+        "C-LIFECYCLE-REQUEST-0001",
+        "C-LIFECYCLE-OWNER-INITIALIZATION-0001",
+        "C-LIFECYCLE-0008"
+      ],
+      "dependencies": "ordinary lifecycle + current draft request/owner definitions -> private source-bound consumer validation -> separate target admission"
+    }
+  ],
+  "conditionalChoices": [
+    {
+      "id": "S4-STATE-VALIDATION-SCOPE",
+      "question": "本次是否新增要求所有旧 scalar definition/setDefault/set 都执行统一 runtime value-domain validation？",
+      "governingIds": ["C-STATE-0006", "D-STATE-VALIDATION-0001"],
+      "openQuestionId": "C-STATE-0006-Q-VALIDATION",
+      "status": "真实现存未决范围；保持当前范围可继续，不是本轮所有迁移的前置人类批准。",
+      "recommended": "A",
+      "options": [
+        {
+          "id": "A",
+          "label": "保留当前规则与明确未完成项",
+          "effect": "保留现有静态非法输入拒绝、有限范围和独立number.list校验，legacy blanket-runtime validation继续独立追踪；不以私有候选顺带创设新保证。"
+        },
+        {
+          "id": "B",
+          "label": "新增统一runtime校验要求",
+          "effect": "先定义拒绝类型、发生时机、原值/错误优先级及兼容策略，再同步Runtime/Compiler；这是新增规范和迁移范围。"
+        }
+      ]
+    },
+    {
+      "id": "S4-PRIVILEGED-ABI-LOCATION",
+      "question": "只有原候选确实依赖不同privileged atom ABI时：沿用当前Hooks内部helper并适配Compiler，还是新增Core atom契约？",
+      "governingIds": [
+        "C-AS-HOOK-PRIVILEGED-0001",
+        "D-AS-HOOK-PRIVILEGED-DEFINE-0001",
+        "C-AS-HOOK-0007",
+        "C-CORE-SYNTAX-0007"
+      ],
+      "status": "目前缺原ABI逐字段差异，不能把旧ledger的UNRESOLVED直接当作现成需要用户签字的问题。先恢复原包比较；A属于按已有定义实施。",
+      "recommended": "A",
+      "options": [
+        {
+          "id": "A",
+          "label": "沿用已定义内部helper边界",
+          "effect": "保留官方Hooks caller/phase/trace/borrowed权限和component-business ownership，通过Compiler绑定适配；需完整差分与真实消费者验证。"
+        },
+        {
+          "id": "B",
+          "label": "提出新的Core atom ABI",
+          "effect": "必须先给准确接口/返回值/phase/identity/ownership差异、旧新caller和拒绝案例；由共享定义owner审查后才公开依赖层。"
+        }
+      ]
+    },
+    {
+      "id": "S4-IR-MIGRATION-COMPATIBILITY",
+      "question": "原IR10采用已有source recompilation＋strict schema refusal方向，还是另外承诺自动转换旧IR5产物？",
+      "governingSources": [
+        "packages/compiler/README.md#artifact-and-sdk-compatibility",
+        "internal/records/2026-11-22-sprint4-ir10-recovery.json#migration"
+      ],
+      "status": "A已有公共兼容说明与原候选提案依据，可继续准备和验证；B才增加尚未承诺的兼容能力。原候选接受需实际执行，不能用选择A代替。",
+      "recommended": "A",
+      "options": [
+        {
+          "id": "A",
+          "label": "源码完整重编与严格拒绝旧IR",
+          "effect": "保留完整旧产物；同批更新producer/validator/emitter/API/cache/CLI/WASM/Worker/bank，精确pin消费者；完整原图与cold rebind验证。"
+        },
+        {
+          "id": "B",
+          "label": "新增IR5→IR10自动转换",
+          "effect": "需独立定义可转换子集、保真、拒绝、未知field、source-bank身份与失效策略；当前没有可直接接受的实现或保证。"
+        }
+      ]
+    }
+  ],
+  "notPermissionQuestions": [
+    {
+      "id": "S4-ORIGINAL-CONTRIBUTION-FACTS",
+      "missing": "Original authors, submission rights and genuine contributor certification tied to the exact captured source inventory.",
+      "reason": "Possession/hash matches/current agent sign-off do not certify other authors. An ordinary approval or waiver cannot replace factual provenance.",
+      "nextAction": "Recover retained provenance record; bind each original contributor and actual certification to source changes. Current agent signs only independently authored new work."
+    },
+    {
+      "id": "S4-PACKET-ACCESS",
+      "missing": "Original authenticated packet and pinned installed-input manifest available to an authorized executor.",
+      "reason": "This is unavailable input, not a product-direction question or permission to bypass a device root.",
+      "nextAction": "Locate inside the permitted device root or obtain an explicitly provided exact copy; verify fixed anchors before materialization. Do not invent node_modules."
+    },
+    {
+      "id": "S4-SSR-ADMISSION",
+      "missing": "Independent source-bound request/owner consumer evidence and target admission under existing drafts.",
+      "reason": "Current request/owner direction is already recorded. A user selecting a direction does not create executed acceptance.",
+      "nextAction": "Coordinate #895/#896 and keep PUI4001 until their real admission evidence is accepted."
+    }
+  ],
+  "readyImmediateHumanProductQuestions": 0,
+  "noBlanket61DefinitionApproval": true
+}

@@ -6,6 +6,22 @@
 export type ShaderRgba = readonly [number, number, number, number];
 export type ShaderOpaqueColor = readonly [number, number, number, 1];
 export type ShaderKernel = 'copy-rgba8-v1' | 'tint-rgba8-v1';
+export type ShaderPresentationSource =
+  | Readonly<{
+      kind: 'owned-pixels';
+      width: number;
+      height: number;
+      /** Dense detached premultiplied RGBA8 bytes, row-major from the top left. */
+      pixels: readonly number[];
+      colorSpace: 'linear-srgb';
+      alpha: 'premultiplied';
+      origin: 'top-left';
+    }>
+  | Readonly<{
+      /** Explicit application scene slot; the whole texture maps to surface UV. */
+      kind: 'owned-scene';
+      slot: string;
+    }>;
 export type ShaderPass = Readonly<{
   id: string;
   kernel: ShaderKernel;
@@ -16,16 +32,7 @@ export type ShaderPass = Readonly<{
 }>;
 export type ShaderPresentationDeclaration = Readonly<{
   version: 1;
-  source: Readonly<{
-    kind: 'owned-pixels';
-    width: number;
-    height: number;
-    /** Dense detached premultiplied RGBA8 bytes, row-major from the top left. */
-    pixels: readonly number[];
-    colorSpace: 'linear-srgb';
-    alpha: 'premultiplied';
-    origin: 'top-left';
-  }>;
+  source: ShaderPresentationSource;
   passes: readonly ShaderPass[];
   /** The final ordered pass. Earlier outputs remain explicit temporary resources. */
   output: string;
@@ -97,34 +104,48 @@ export function snapshotShaderPresentation(
 ): ShaderPresentationDeclaration {
   const declaration = fields(value, ['version', 'source', 'passes', 'output', 'fallback']);
   if (declaration.version !== 1) return fail('unsupported graph version');
-  const source = fields(declaration.source, [
-    'kind',
-    'width',
-    'height',
-    'pixels',
-    'colorSpace',
-    'alpha',
-    'origin',
-  ]);
-  if (
-    source.kind !== 'owned-pixels' ||
-    source.colorSpace !== 'linear-srgb' ||
-    source.alpha !== 'premultiplied' ||
-    source.origin !== 'top-left'
-  )
-    return fail('unsupported source contract');
-  const width = integer(source.width, 1, SHADER_PRESENTATION_LIMITS.maxExtent);
-  const height = integer(source.height, 1, SHADER_PRESENTATION_LIMITS.maxExtent);
-  const texels = width * height;
-  if (texels > SHADER_PRESENTATION_LIMITS.maxTexels) return fail('source texel budget exceeded');
   if (!Array.isArray(declaration.passes)) return fail('ordered passes required');
   const count = integer(declaration.passes.length, 1, SHADER_PRESENTATION_LIMITS.maxPasses);
-  if ((count + 1) * texels * 4 > SHADER_PRESENTATION_LIMITS.maxResourceBytes)
-    return fail('resource byte budget exceeded');
-  const pixels = dense(source.pixels, texels * 4).map((value) => integer(value, 0, 255));
-  for (let offset = 0; offset < pixels.length; offset += 4)
-    if (pixels.slice(offset, offset + 3).some((channel) => channel > pixels[offset + 3]))
-      return fail('source RGB must be premultiplied by alpha');
+  const source = fields(
+    declaration.source,
+    ['kind'],
+    ['slot', 'width', 'height', 'pixels', 'colorSpace', 'alpha', 'origin']
+  );
+  let ownedSource: ShaderPresentationSource;
+  if (source.kind === 'owned-scene') {
+    if (Object.keys(source).length !== 2) return fail('unknown source field');
+    if (typeof source.slot !== 'string' || !/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/.test(source.slot))
+      return fail('finite owned-scene slot required');
+    ownedSource = Object.freeze({ kind: 'owned-scene', slot: source.slot });
+  } else {
+    if (Object.hasOwn(source, 'slot')) return fail('unknown source field');
+    if (
+      source.kind !== 'owned-pixels' ||
+      source.colorSpace !== 'linear-srgb' ||
+      source.alpha !== 'premultiplied' ||
+      source.origin !== 'top-left'
+    )
+      return fail('unsupported source contract');
+    const width = integer(source.width, 1, SHADER_PRESENTATION_LIMITS.maxExtent);
+    const height = integer(source.height, 1, SHADER_PRESENTATION_LIMITS.maxExtent);
+    const texels = width * height;
+    if (texels > SHADER_PRESENTATION_LIMITS.maxTexels) return fail('source texel budget exceeded');
+    if ((count + 1) * texels * 4 > SHADER_PRESENTATION_LIMITS.maxResourceBytes)
+      return fail('resource byte budget exceeded');
+    const pixels = dense(source.pixels, texels * 4).map((value) => integer(value, 0, 255));
+    for (let offset = 0; offset < pixels.length; offset += 4)
+      if (pixels.slice(offset, offset + 3).some((channel) => channel > pixels[offset + 3]))
+        return fail('source RGB must be premultiplied by alpha');
+    ownedSource = Object.freeze({
+      kind: 'owned-pixels',
+      width,
+      height,
+      pixels: Object.freeze(pixels),
+      colorSpace: 'linear-srgb',
+      alpha: 'premultiplied',
+      origin: 'top-left',
+    });
+  }
   const written = new Set(['$source']);
   const passes = dense(declaration.passes, count).map((value) => {
     const pass = fields(value, ['id', 'kernel', 'input'], ['tint']);
@@ -155,15 +176,7 @@ export function snapshotShaderPresentation(
     return fail('output must name the final ordered pass');
   return Object.freeze({
     version: 1,
-    source: Object.freeze({
-      kind: 'owned-pixels',
-      width,
-      height,
-      pixels: Object.freeze(pixels),
-      colorSpace: 'linear-srgb',
-      alpha: 'premultiplied',
-      origin: 'top-left',
-    }),
+    source: ownedSource,
     passes: Object.freeze(passes),
     output: declaration.output as string,
     fallback: color(declaration.fallback, true) as ShaderOpaqueColor,

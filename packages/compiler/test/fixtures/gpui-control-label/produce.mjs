@@ -51,7 +51,10 @@ for (const [stem, source] of sources) {
     ...(stem === 'button' ? {} : { nativeSdkPath: '../button/.proto-ui/gpui-native' }),
     ...(workspace ? { gpuiDependency: 'workspace' } : {}),
   });
-  if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+  if (!result.ok)
+    throw new Error(
+      JSON.stringify({ stem, source: path.relative(root, entry), diagnostics: result.diagnostics })
+    );
   const written = await writeCompilation(result.value, path.join(output, stem));
   if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
   const manifest = await readFile(path.join(output, stem, 'Cargo.toml'), 'utf8');

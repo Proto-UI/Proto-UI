@@ -1,4 +1,5 @@
 import { MATERIAL_PAINT_RESERVATION_CAP } from '@proto.ui/module-feedback';
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
 import { SHADER_PRESENTATION_SINK_CAP } from '@proto.ui/module-feedback';
@@ -309,6 +310,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
   /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
   visualFeedbackSink?: VisualFeedbackSink;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -397,7 +399,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
       [EFFECTS_CAP, effectsPort],
       [
         SHADER_PRESENTATION_SINK_CAP,
-        createWebShaderPresentationSink(args.getCurrentElement, effectsPort),
+        createWebShaderPresentationSink(args.getCurrentElement, effectsPort, args.shader),
       ],
       [PRESENCE_PRESENTATION_SINK_CAP, createWebPresencePresentationSink(args.el, effectsPort)],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],

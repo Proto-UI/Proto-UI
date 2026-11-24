@@ -37,6 +37,7 @@ jobs:
       - name: Verify diagnostic fail-closed controls
         run: |
           corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts \
             apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts \
             apps/www/src/content/docs/zh-cn/demo-matrix-observation.test.ts \
             --maxWorkers=1 --minWorkers=1 --no-file-parallelism
@@ -44,6 +45,7 @@ jobs:
         timeout-minutes: 10
         env:
           PROTO_UI_MATRIX_STARTUP_PROFILE: '1'
+          PROTO_UI_MATRIX_BROWSER_DIAGNOSTIC: '1'
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/demo-matrix-startup
         run: |
           set -euo pipefail

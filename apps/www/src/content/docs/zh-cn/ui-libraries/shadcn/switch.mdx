@@ -16,7 +16,6 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 本页 Rhea 配方的默认Root为2rem × 1.25rem，小号为1.5rem × 1rem，Thumb分别为1rem/0.75rem，使用2px透明边框与家族`radius-2xl`；选中位移为Thumb宽减4px。来源为 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)。独立 [02cad611 New York源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) 仍保留2rem × 1.15rem / 1.5rem × 0.875rem与减2px位移，属于兼容profile；两者不混称跨宿主已视觉等价。
 
-
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
 
 ## 组合与可选拖动能力
@@ -29,13 +28,22 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
 
-<div id="switch-composition-details">Label 命名控件，Description 提供帮助。拖动按住期间只预览位置，释放才请求值；Root 始终是 checked 的唯一 owner。</div>
+<div id="switch-composition-details">
+  Label 命名控件，Description 提供帮助。拖动按住期间只预览位置，释放才请求值；Root 始终是 checked
+  的唯一 owner。
+</div>
 
 ## 安装
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-switch" manager="npm" />
 
 把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+
+### 设置生成的 Web Component 样式
+
+生成的 `ShadcnSwitchElement` 使用 `<proto-ui-shadcn-switch>`，并提供默认 Thumb。使用这个组合时，轨道 CSS 应匹配 `proto-ui-shadcn-switch`。单独导出的原始 Root 使用 `<proto-ui-shadcn-switch-root>`；它的标签选择器不会匹配组合元素。
+
+自定义 Root 尺寸、Thumb 尺寸和选中位移需要配套调整。只修改 Thumb 时，它可能仍在未改变的轨道中移动。[Web Component 样式指南](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) 提供了完整的默认尺寸 LTR 示例。使用家族配方时，仍在 Root 上选择 `styleProfile` 和 `size`，让 Thumb 跟随实际所属的 Root。
 
 ## API
 

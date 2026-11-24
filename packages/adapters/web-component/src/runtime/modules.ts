@@ -1,4 +1,5 @@
 import { MATERIAL_PAINT_RESERVATION_CAP } from '@proto.ui/module-feedback';
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import { subscribeScrollTarget } from './scroll-target';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
@@ -807,6 +808,45 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
   return subjects;
 }
 
+function selectorMayDependOnInputState(selector: string): boolean {
+  for (let index = 0; index < selector.length; index += 1) {
+    const character = selector[index]!;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
+      continue;
+    }
+    // An unresolved nesting selector cannot prove that input is unrelated.
+    if (character === '&') return true;
+    if (character !== ':') continue;
+    const pseudoElement = selector[index + 1] === ':';
+    const start = index + (pseudoElement ? 2 : 1);
+    let end = start;
+    while (/[\w-]/.test(selector[end] ?? '')) end += 1;
+    const name = selector.slice(start, end).toLowerCase();
+    // Attribute/tree changes, focus/modality and URL changes already have
+    // their own observers. Native checkedness, validity, range, placeholder,
+    // dir=auto direction, autofill and unknown pseudo states may change
+    // without a DOM mutation.
+    // Keep those conservative across the stylesheet's whole scope, including
+    // form-associated controls, sibling conditions and nested :has branches.
+    // Known native part names do not themselves test the host's input state.
+    // Continue scanning host/state pseudo-classes and retain unknown names.
+    const independent = pseudoElement
+      ? /^(?:before|after|first-letter|first-line|marker|backdrop|selection|placeholder|part|slotted|file-selector-button|-webkit-(?:details-marker|search-decoration|date-and-time-value|datetime-edit(?:-(?:fields-wrapper|(?:year|month|day|hour|minute|second|millisecond|meridiem)-field))?|calendar-picker-indicator|(?:inner|outer)-spin-button))$/.test(
+          name
+        )
+      : /^(?:is|where|not|has|nth(?:-last)?-(?:child|of-type)|(?:first|last|only)-(?:child|of-type)|root|scope|host|host-context|empty|defined|lang|hover|active|focus(?:-within|-visible)?|link|any-link|visited|target(?:-within)?|enabled|disabled|required|optional|read-only|read-write|before|after|first-letter|first-line)$/.test(
+          name
+        );
+    if (!independent || selector[end] === '\\') return true;
+    // Continue through functional pseudo arguments so e.g. :not(:checked)
+    // and :nth-child(2 of :has(input:invalid)) retain their state dependency.
+    index = end - 1;
+  }
+  return false;
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -815,9 +855,18 @@ function collectEntryStyleDependencies(
   observesResize: boolean,
   observedRoots: ReadonlySet<Node>
 ) {
+  const ScopeRule = (
+    view as unknown as {
+      CSSScopeRule?: new () => CSSGroupingRule & {
+        readonly start: string | null;
+        readonly end: string | null;
+      };
+    }
+  ).CSSScopeRule;
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
   let relational = 0;
+  let inputState = false;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
   const positionParents = new Set<Node>();
@@ -841,11 +890,19 @@ function collectEntryStyleDependencies(
     if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
+    // A scope's start/end selectors can change entry eligibility without an
+    // attribute mutation. Read their native IDL, not a whole grouping cssText
+    // whose media features and nested declarations are not selector preludes.
+    if (!inputState && ScopeRule && rule instanceof ScopeRule)
+      inputState =
+        selectorMayDependOnInputState(rule.start ?? '') ||
+        selectorMayDependOnInputState(rule.end ?? '');
     if (rule.type === 3 || rule.type === 4)
       collectMedia((rule as CSSImportRule | CSSMediaRule).media);
     if (rule.type === 3) {
       const imported = (rule as CSSImportRule).styleSheet;
       if (imported) visitSheet(imported);
+      else inputState = true;
     }
     if (rule.type === 1) {
       let selector = (rule as CSSStyleRule).selectorText;
@@ -854,6 +911,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
+      inputState ||= selectorMayDependOnInputState(selector);
       if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
@@ -944,6 +1002,7 @@ function collectEntryStyleDependencies(
           // Unknown selector syntax is correctness-sensitive: retain a bounded
           // external-chain fallback rather than silently missing a change.
           relational ||= 1;
+          inputState = true;
         }
       }
     }
@@ -959,6 +1018,7 @@ function collectEntryStyleDependencies(
     } catch {
       // Cross-origin sheets remain opaque; their owner media still applies.
       relational ||= 1;
+      inputState = true;
     }
   };
   for (const root of roots)
@@ -971,6 +1031,7 @@ function collectEntryStyleDependencies(
     relationalSubjects,
     positionParents,
     filteredPositionParents,
+    inputState,
   ] as const;
 }
 
@@ -1510,6 +1571,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
   visualFeedbackSink?: VisualFeedbackSink;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   finalStyleSink?: FinalStyleSink;
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
@@ -1685,7 +1747,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         SHADER_PRESENTATION_SINK_CAP,
         createWebShaderPresentationSink(
           () => (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget(),
-          effectsPort
+          effectsPort,
+          args.shader
         ),
       ],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
@@ -1903,6 +1966,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopEntryMotionWatch =
                   null;
               let hasArea = false;
+              let hasSlottedEntryContent = false;
               const radioTrees = new Set<Document | ShadowRoot>();
               const mediaRoots = new Set<Document | ShadowRoot>([target.ownerDocument]);
               const radioNames = new Set<string>();
@@ -1990,6 +2054,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 entryObserver?.observe(root, options);
                 if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
                 hasArea ||= !!root.querySelector('area');
+                // Assigned slot content can have native state dependencies,
+                // including radio peers, outside these physical observed roots.
+                hasSlottedEntryContent ||=
+                  (root.nodeType === 1 && (root as Element).localName === 'slot') ||
+                  !!root.querySelector('slot');
                 // A portal stays logically beneath its origin marker while its
                 // physical projection lives elsewhere (normally document.body).
                 // Follow those markers so eligibility mutations in the moved
@@ -2105,6 +2174,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 relationalSubjects,
                 positionParents,
                 filteredPositionParents,
+                hasInputStateStyleDependency,
               ] = collectEntryStyleDependencies(
                 view!,
                 mediaRoots,
@@ -2209,9 +2279,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   attributes: true,
                 });
               }
-              const stopEntryEnvironmentEvents = listenToEntryEvents(
-                [view!, ...mediaQueries],
-                ['resize', 'change'],
+              const stopEntryResizeEvents = listenToEntryEvents(
+                [view!],
+                ['resize'],
+                projectCurrent
+              );
+              // A form change bubbles through Window too. Only media query
+              // changes are environmental invalidations for every entry.
+              const stopEntryMediaEvents = listenToEntryEvents(
+                mediaQueries,
+                ['change'],
                 projectCurrent
               );
               const onFormReset = (event: Event) => {
@@ -2325,9 +2402,17 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   (event.type === 'focusin' || event.type === 'focusout')
                 )
                   return;
-                if (event.type.startsWith('transition')) {
+                const transition = event.type.startsWith('transition');
+                if (transition) {
                   const propertyName = (event as TransitionEvent).propertyName;
                   if (!propertyAffectsEntryEligibility(propertyName)) return;
+                }
+                if (
+                  transition ||
+                  ((event.type === 'input' || event.type === 'change') &&
+                    !hasInputStateStyleDependency &&
+                    !hasSlottedEntryContent)
+                ) {
                   const path = event.composedPath();
                   const origin = path[0];
                   if (
@@ -2396,7 +2481,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   view!.cancelAnimationFrame(eligibilityAnimationFrame);
                 eligibilityAnimationFrame = 0;
                 eligibilityAnimations.clear();
-                stopEntryEnvironmentEvents();
+                stopEntryResizeEvents();
+                stopEntryMediaEvents();
                 stopFormResetEvents();
                 stopSiblingStateEvents();
                 if (keyboardTraversalTimer) view!.clearTimeout(keyboardTraversalTimer);
