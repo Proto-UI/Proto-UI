@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -36,9 +36,107 @@ beforeAll(async () => {
     executablePath: process.env.CHROME_PATH,
     headless: true,
     chromiumSandbox: true,
+    // Root-gutter transitions must exercise real classic scrollbar geometry.
+    ignoreDefaultArgs: ['--hide-scrollbars'],
   });
 }, 60_000);
 afterAll(async () => browser?.close());
+it.each(['ltr', 'rtl'] as const)(
+  'native selected row follows root scrollbar geometry in %s',
+  async (direction) => {
+    const context = await browser.newContext({ viewport: { width: 900, height: 700 } });
+    try {
+      const page = await context.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      await page.setContent('<!doctype html><html><head></head><body></body></html>');
+      await page.addScriptTag({ content: bundle });
+      await page.evaluate(async (direction) => {
+        document.documentElement.dir = direction;
+        document.documentElement.style.overflowY = 'hidden';
+        document.body.style.minHeight = '1200px';
+        await window.alignmentProof.mountAlignmentProof({ direction });
+        // A real percentage-based anchor moves when the root gutter changes,
+        // without resizing the anchor or emitting a window resize event.
+        document.querySelector<HTMLElement>('.proof-root')!.style.left = '50%';
+      }, direction);
+      await page.locator('[data-demo-ref="trigger"]').click();
+      await page.locator('[data-demo-ref="item-1"]').waitFor({ state: 'visible' });
+      const observations = [];
+      for (const phase of ['initial', 'scrollbar', 'stable-gutters', 'restored'] as const) {
+        await page.evaluate(async (phase) => {
+          const root = document.documentElement;
+          if (phase === 'scrollbar') root.style.overflowY = 'scroll';
+          if (phase === 'stable-gutters') root.style.scrollbarGutter = 'stable both-edges';
+          if (phase === 'restored') {
+            root.style.overflowY = 'hidden';
+            root.style.scrollbarGutter = '';
+          }
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          );
+        }, phase);
+        const facts = await page.evaluate(() => {
+          const row = document.querySelector<HTMLElement>('[data-demo-ref="item-1"]')!;
+          const trigger = document.querySelector<HTMLElement>('[data-demo-ref="trigger"]')!;
+          const r = row.getBoundingClientRect(),
+            t = trigger.getBoundingClientRect();
+          return {
+            row: r.toJSON(),
+            trigger: t.toJSON(),
+            errors: [r.left - t.left, r.right - t.right, r.top - t.top, r.bottom - t.bottom],
+            innerWidth,
+            clientWidth: document.documentElement.clientWidth,
+            root: document.documentElement.getBoundingClientRect().toJSON(),
+            diagnostic: window.alignmentProof.readProofFailure(),
+            transitionState: window.alignmentProof.readProofPhase(),
+            frame: (() => {
+              const frame = document.querySelector<HTMLElement>('[data-demo-ref="frame"]')!;
+              const css = getComputedStyle(frame);
+              return {
+                rect: frame.getBoundingClientRect().toJSON(),
+                offsetLeft: frame.offsetLeft,
+                left: css.left,
+                right: css.right,
+                width: css.width,
+                marginLeft: css.marginLeft,
+                marginRight: css.marginRight,
+              };
+            })(),
+            focused: document.activeElement === row,
+          };
+        });
+        observations.push({ phase, ...facts });
+        const evidence = process.env.PROTO_UI_TARGET_ALIGNMENT_EVIDENCE;
+        if (evidence) {
+          await mkdir(evidence, { recursive: true });
+          await page.screenshot({ path: join(evidence, `root-gutter-${direction}-${phase}.png`) });
+        }
+      }
+      console.info('[target-alignment-root-gutter]', JSON.stringify({ direction, observations }));
+      const evidence = process.env.PROTO_UI_TARGET_ALIGNMENT_EVIDENCE;
+      if (evidence)
+        await writeFile(
+          join(evidence, `root-gutter-${direction}.json`),
+          JSON.stringify({ direction, observations, errors }, null, 2)
+        );
+      expect(errors).toEqual([]);
+      expect(
+        observations[1]!.innerWidth - observations[1]!.clientWidth,
+        'real classic scrollbar'
+      ).toBeGreaterThan(0);
+      for (const observation of observations) {
+        expect(observation.diagnostic, observation.phase).toBeNull();
+        expect(observation.focused, observation.phase).toBe(true);
+        for (const delta of observation.errors)
+          expect(Math.abs(delta), observation.phase).toBeLessThanOrEqual(1);
+      }
+    } finally {
+      await context.close();
+    }
+  },
+  30_000
+);
 it.each(['ltr', 'rtl'] as const)(
   'native cold selected item aligns over trigger in %s',
   async (direction) => {
