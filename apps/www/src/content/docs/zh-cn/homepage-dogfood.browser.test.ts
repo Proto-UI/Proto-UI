@@ -1251,6 +1251,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                   expect(current.connected).toBe(true);
                   expect(current.sameDialog).toBe(true);
                   expect(current.sameSurface).toBe(true);
+                  expect(current.ready).toBe(true);
                   const top = current.top;
                   expect(top).not.toBe(scrolling!.top);
                   expect(direction * (top - scrolling!.top)).toBeGreaterThan(0);
@@ -1267,6 +1268,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               expect(after.connected).toBe(true);
               expect(after.sameDialog).toBe(true);
               expect(after.sameSurface).toBe(true);
+              expect(after.ready).toBe(true);
               expect(after.documentY).toBe(scrolling.documentY);
               expect(
                 after.wheels.some(

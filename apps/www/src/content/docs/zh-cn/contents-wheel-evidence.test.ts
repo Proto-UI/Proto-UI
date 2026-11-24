@@ -100,6 +100,35 @@ describe('Contents wheel observation boundaries', () => {
     }
   });
 
+  it('rejects lost readiness even when the retained current owner has moved', () => {
+    const { host, surface, observer } = fixture();
+    try {
+      const before = observer.read(host);
+      expect(before.ready).toBe(true);
+      surface.scrollTop = 100;
+      surface.style.overflowY = 'hidden';
+      expect(observer.read(host)).toMatchObject({
+        connected: true,
+        sameDialog: true,
+        sameSurface: true,
+        top: 100,
+        ready: false,
+      });
+      surface.style.overflowY = 'auto';
+      vi.mocked(surface.getBoundingClientRect).mockReturnValue(new DOMRect(20, 2000, 300, 400));
+      expect(observer.read(host)).toMatchObject({
+        connected: true,
+        sameDialog: true,
+        sameSurface: true,
+        top: 100,
+        visible: false,
+        ready: false,
+      });
+    } finally {
+      observer.dispose();
+    }
+  });
+
   it('resolves a document hit retargeted to the host of the public shadow surface', () => {
     const { surface, observer } = fixture(true);
     const publicSurfaceObserver = observeContentsWheel(surface);
