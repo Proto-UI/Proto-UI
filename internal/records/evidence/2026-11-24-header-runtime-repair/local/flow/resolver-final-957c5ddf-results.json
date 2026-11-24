@@ -1,0 +1,82 @@
+{
+  "createdAtUtc": "2026-11-24T11:24:31.369688+00:00",
+  "results": [
+    {
+      "name": "failed-to-regression",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/validate-failed.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/regression.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedOutcome": "pui-regression",
+      "log": "/workspace/scratch/080997012d40/flow/resolver-failed-to-regression-957c5ddf.log",
+      "logDigest": "sha256:b0f5e2b7d13683df563378d790420f614f8c699e00f5b015a539202066ab2727"
+    },
+    {
+      "name": "regression-to-validate",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/validate-failed.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedOutcome": "pui-validate",
+      "log": "/workspace/scratch/080997012d40/flow/resolver-regression-to-validate-957c5ddf.log",
+      "logDigest": "sha256:8c974076605adb08214c5d779b58e00dd38121d26741991c332d534b4974cbb9"
+    },
+    {
+      "name": "validate-terminal",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/validate-final-957c5ddf.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedOutcome": null,
+      "log": "/workspace/scratch/080997012d40/flow/resolver-validate-terminal-957c5ddf.log",
+      "logDigest": "sha256:be7c2b7ebd0dd4b798c20167ff4d9e2faef64cef50cf573324675b05ba6c1403"
+    },
+    {
+      "name": "validate-to-review-probe",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/validate-to-review-probe-957c5ddf.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedOutcome": "missing review-input",
+      "log": "/workspace/scratch/080997012d40/flow/resolver-validate-to-review-probe-957c5ddf.log",
+      "logDigest": "sha256:d00eede27e904e23a7f23f492856f7455ad2ea4e16f6d6459fd5611f296e4a9e"
+    }
+  ],
+  "meaning": "Accepted handoff structure/routing is not technical acceptance. The pui-review proposal was rejected because no genuine canonical review-input exists."
+}

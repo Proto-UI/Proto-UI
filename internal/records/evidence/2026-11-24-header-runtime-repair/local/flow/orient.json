@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-orient",
+  "nextSkillId": "pui-trace",
+  "artifacts": [
+    {
+      "type": "request-context",
+      "reference": "/workspace/scratch/080997012d40/flow/request.json"
+    },
+    {
+      "type": "capability-envelope",
+      "reference": "/workspace/scratch/080997012d40/flow/envelope.json"
+    },
+    {
+      "type": "bounded-subject",
+      "reference": "/workspace/scratch/080997012d40/flow/subject.json"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Current user directed bounded repairs; preserve other active lanes; current live main is 248f8270."
+  ]
+}

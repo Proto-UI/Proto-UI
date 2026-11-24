@@ -1,0 +1,7 @@
+Source: https://github.com/Proto-UI/Proto-UI/actions/runs/45314673679/job/138198390013
+Commit: 1dd7afa3ea4ff43c1f28306c9b035e87ed11ea62
+2026-11-24T03:37:26.9078845Z [36;1mtimeout --signal=TERM --kill-after=10s 900s \[0m
+2026-11-24T03:52:26.9286221Z [test:runtime] shared documentation server snapshot: runner received SIGTERM; pid=2902; exitCode=null; signal=null
+2026-11-24T03:52:27.0471519Z [test:runtime] shared documentation server snapshot: Vitest exited: code=null; signal=SIGTERM; pid=2902; exitCode=null; signal=null
+2026-11-24T03:52:27.0955277Z ##[error]Process completed with exit code 124.
+2026-11-24T03:52:31.1001103Z Terminate orphan process: pid (3056) (node (vitest 1))

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-validate",
+  "nextSkillId": null,
+  "outcome": "completed",
+  "binding": {
+    "repositoryId": "github.com:Proto-UI/Proto-UI",
+    "scopeId": "header-test-lifecycle-20261124",
+    "headSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+    "reviewInputDigest": null
+  },
+  "artifacts": [
+    {
+      "type": "request-context",
+      "reference": "/workspace/scratch/080997012d40/flow/request.json",
+      "digest": "sha256:4eff4fe1c00b2e02fe8004b06a2dbb24cced84e511cb1a85846d2592cc472ca1"
+    },
+    {
+      "type": "capability-envelope",
+      "reference": "/workspace/scratch/080997012d40/flow/envelope.json",
+      "digest": "sha256:aacc5283190552f17a384a6607e1aaa00efd2830520fddfcbad2402627da4741"
+    },
+    {
+      "type": "bounded-subject",
+      "reference": "/workspace/scratch/080997012d40/flow/subject.json",
+      "digest": "sha256:3a7937dde7f89195289b3effc723cb6c9edee5f17f867db81bcd973ce15bfd32"
+    },
+    {
+      "type": "authority-map",
+      "reference": "/workspace/scratch/080997012d40/flow/authority.json",
+      "digest": "sha256:46594e45fcc5e99bb0aa1c68ae6e2c2d1c33a95839fc37c5bdae06fc5c4d774b"
+    },
+    {
+      "type": "reproduction",
+      "reference": "/workspace/scratch/080997012d40/flow/reproduction.json",
+      "digest": "sha256:6b3a74dfabaaccbe104acd76c92908943a82d144997ff81a284b34abc3b21029"
+    },
+    {
+      "type": "implementation-authorization",
+      "reference": "/workspace/scratch/080997012d40/flow/authorization.json",
+      "digest": "sha256:fb4008bb2522606166810a221b0446973feff5fc08c0ebea17ef0d706d3bf54d"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate.json",
+      "digest": "sha256:5a42b53bac7b357ddffa596d5c0d14e5c25c8200dd7ff9c01acc2dd35472ba14",
+      "revision": "c554496421759dcafbf0924fbf9777358bb9bba2",
+      "result": "failed"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-production-4a556a37.json",
+      "digest": "sha256:02401cdc6881e74b203a76163de53e26adc8121f48834da6fc70cea1bdd3376d",
+      "revision": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "result": "partial"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-tests-fcc4776c.json",
+      "digest": "sha256:c3e59096db8a1de782a174ff28a3e330bbc56d0b9b70993d4c4f0906ad49a933",
+      "revision": "fcc4776cc0695dc04dad4d058e3858ac0808c759",
+      "result": "passed"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-current-957c5ddf.json",
+      "digest": "sha256:4d68418d0570451e73a0d81bf27f348740fa3f25fca4fc37bd8157822a37c4f9",
+      "revision": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+      "result": "partial"
+    },
+    {
+      "type": "evidence-report",
+      "reference": "/workspace/scratch/080997012d40/flow/production-failure.json",
+      "digest": "sha256:7083077eea57b189461a1dfd504d3a30c780a94b531ca22a82bcb69fb9444c8e",
+      "revision": "c554496421759dcafbf0924fbf9777358bb9bba2",
+      "result": "failed"
+    },
+    {
+      "type": "evidence-report",
+      "reference": "/workspace/scratch/080997012d40/flow/evidence-final-957c5ddf.json",
+      "digest": "sha256:278f435c4a0ea765be2a1176df14da5b9142ee06920f83c574d504cbb0f43c86",
+      "revision": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+      "result": "partial"
+    },
+    {
+      "type": "review-report",
+      "reference": "/workspace/scratch/080997012d40/independent-review-final.json",
+      "digest": "sha256:ddef2d8dc35d0ccb4e8c63b9a9881755885a8a44435beb74a6f44cd4d5d217be",
+      "revision": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "result": "partial"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Official current handoff. Received regression-final-957c5ddf.json is retained as the actual validation predecessor. All received candidate identities, revisions, digests and result fields are unchanged.",
+    "Validation evidence aggregation completed with partial result: production build at 4a passed, scene/cycle regression resolved, local reviewed bytes passed 2170 graph and 60 Retry cases; full graph and browser acceptance remain failed. Current merged 957 has no certified full production run in this flow.",
+    "pui-validate step 10 requires a terminal handoff when the next step lacks a prerequisite. pui-review requires canonical review-input; root confirms none is available. nextSkillId null records this prerequisite blocker, not green acceptance or a user permission request.",
+    "Next Agent action: collect canonical live-PR review-input, verify its head and scope, refresh this current binding if necessary, and route through pui-review using the actual validation predecessor. Do not synthesize a platform review-input or approval.",
+    "The separate validate-to-review-probe file is only a rejected routing diagnostic; it is not an accepted active handoff. No pui-review execution or GitHub approval is claimed.",
+    "Historical c554 production failure remains part of the artifacts. F1-F4 resolution is a bounded technical review conclusion, not whole-CI, merge or release approval."
+  ]
+}

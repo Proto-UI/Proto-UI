@@ -1,0 +1,72 @@
+[
+  {
+    "name": "baseline-checkout",
+    "command": [
+      "git",
+      "switch",
+      "--detach",
+      "06d4f20249d8128575d6e0e13385e9dcf540c84c"
+    ],
+    "exitCode": 0,
+    "durationSeconds": 0.166,
+    "head": "06d4f20249d8128575d6e0e13385e9dcf540c84c"
+  },
+  {
+    "name": "baseline-build",
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "docs:build"
+    ],
+    "exitCode": 0,
+    "durationSeconds": 316.445,
+    "head": "06d4f20249d8128575d6e0e13385e9dcf540c84c"
+  },
+  {
+    "name": "baseline-inspect",
+    "command": [
+      "node",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/inspect-header-graph.mjs",
+      "baseline",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/repo"
+    ],
+    "exitCode": 0,
+    "durationSeconds": 1.222,
+    "head": "06d4f20249d8128575d6e0e13385e9dcf540c84c"
+  },
+  {
+    "name": "baseline-browser",
+    "command": [
+      "node",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/header-production-smoke.mjs",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/repo",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/baseline-browser"
+    ],
+    "exitCode": 1,
+    "durationSeconds": 128.662,
+    "head": "06d4f20249d8128575d6e0e13385e9dcf540c84c"
+  },
+  {
+    "name": "candidate-checkout",
+    "command": [
+      "git",
+      "switch",
+      "--detach",
+      "c554496421759dcafbf0924fbf9777358bb9bba2"
+    ],
+    "exitCode": 0,
+    "durationSeconds": 5.324,
+    "head": "c554496421759dcafbf0924fbf9777358bb9bba2"
+  },
+  {
+    "name": "candidate-build",
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "docs:build"
+    ],
+    "exitCode": 1,
+    "durationSeconds": 270.343,
+    "head": "c554496421759dcafbf0924fbf9777358bb9bba2"
+  }
+]

@@ -193,3 +193,7 @@ internal/records/evidence/2026-11-24-sprint2-compiler-local/manifest.json
 internal/records/evidence/2026-11-24-sprint2-distribution/manifest.json
 internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json
 internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json
+
+# Preserve the exact original Header/runtime repair observations and source hashes.
+# Evidence-only branch: never merge this archive into the product branch.
+internal/records/evidence/2026-11-24-header-runtime-repair/

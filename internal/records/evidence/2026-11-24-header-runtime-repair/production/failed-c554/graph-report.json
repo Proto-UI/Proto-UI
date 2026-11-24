@@ -1,0 +1,809 @@
+{
+  "label": "candidate",
+  "observedAt": "2026-11-24T10:42:05.635Z",
+  "sourceBaseline": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "observedHead": "c554496421759dcafbf0924fbf9777358bb9bba2",
+  "worktreeStatus": "",
+  "node": "v24.22.3",
+  "nodeOptions": null,
+  "graphSha256": "eadfab294cd3a405731c0e9e7ab9b996aa950f3017e3423e95a81b3aff186c37",
+  "sourceHashes": {
+    "apps/www/astro.config.mjs": "e3331ef0b79cdd7d35392ec12c61384b625104c3ead6ca78a6bbb86b76903949",
+    "apps/www/src/components/override/Header.astro": "7457f2de19b85e74d9d0709b618d1330c0264c3490e004d75326930c3ff982a0",
+    "apps/www/src/components/site-shadcn-controls.ts": "6a338d58c8c2bc73e534799170d180ffb48123aaa3248d6ac0d6b16fb0039f6d",
+    "packages/adapters/base/src/index.ts": "1cd2b243710cea0c7d18a77c67a6dd933c44548fd0829394f62d78e781be9a3e",
+    "packages/adapters/base/src/material/shader-scene-host.ts": "606d26b36dedf9c0a44762c3f72b7a852e697b267505b4d14e3ab24caddc5047"
+  },
+  "sourcePath": [
+    "apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts",
+    "apps/www/src/components/site-shadcn-controls.ts",
+    "packages/adapters/web-component/src/index.ts",
+    "packages/adapters/web-component/src/adapt.ts",
+    "packages/adapters/base/src/index.ts",
+    "packages/adapters/base/src/material/shader-scene-host.ts"
+  ],
+  "eagerChunks": [
+    {
+      "fileName": "_astro/Header.astro_astro_type_script_index_0_lang.CH-TJwD3.js",
+      "bytes": 3737,
+      "sha256": "e318c952c819d41b98736d902c1454fbce34008822877073ee50cc98732a6bf9",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/adapter-preference.CEoUNyyz.js",
+      "bytes": 1884,
+      "sha256": "c149211bde800e12f1b7d00a914b5ce3a7c9ebd9218c450c4fa773e00700b4f0",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-accessible.Be5mR8RM.js",
+      "bytes": 244,
+      "sha256": "f61cf47b89002391068fef474acd795a1d39bd233d5d8befbe5a397800bcb835",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-boundary.B7RxsBSo.js",
+      "bytes": 293,
+      "sha256": "c6b26aad6b80a311a25116aa3aa9a2d13447182e28faebb4dae4af0ffd6f32ba",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-collection-item.D-oQxxbT.js",
+      "bytes": 1936,
+      "sha256": "9333e36a0ff6cb6e7c37d7f58cd2f11d0286c1e27e062d495047bc1e0b6a0645",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-collection.CjLlXJY3.js",
+      "bytes": 1177,
+      "sha256": "fe73142ee20cc85649f5368417f2bb3e55961a4d6040ef08a2c012e4bcea5f7a",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-control-label.DDgFbom0.js",
+      "bytes": 222,
+      "sha256": "c9773ecb885e4bffbb683048580c3733b9a1a88c0a103cabea30afc6caf36c10",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-focus-roving.C9Sw6k6O.js",
+      "bytes": 289,
+      "sha256": "9cf02e872c2656a4eafadec0fb02b435e115e6166a8399961492f70ef3f57929",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-focus-scope.DOVdHxZ_.js",
+      "bytes": 285,
+      "sha256": "624a98fca5da846dc3fc75a49afc646068dd46ce3cd1052d6bbc4d9d1022ffce",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-focusable.DlV1Q7Yl.js",
+      "bytes": 291,
+      "sha256": "0858a77a7d201f18a61a2ca38cac8cacb707a9f985cb8132037c6a26fcbda8f3",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-overlay.CFuBQhJs.js",
+      "bytes": 2083,
+      "sha256": "42a748c0f40801b8cff1c27ddd8696597e64205171b7b1769047ac1a1afa8467",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-transition.proto.C6-k7dbG.js",
+      "bytes": 12567,
+      "sha256": "971dfc5dc30559af5966d806f6635098fea9ea4b8a03d66902c44b9ec4eda892",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/as-trigger.CBQ_-66G.js",
+      "bytes": 240,
+      "sha256": "7702e3f292c2cb1c9fc9925993fd1c9927b3cd37d2bf89f84b3ce10f7b8f0cec",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/button.proto.CGjeFz0H.js",
+      "bytes": 2584,
+      "sha256": "b5f9a2c898ad716b67346766e66909a323809cb5db5b38064d292010653b67a5",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/command.CCamXaqk.js",
+      "bytes": 1655,
+      "sha256": "f3b8c0c510b5e103d853e7ea9c18c1e50ea24c40bf7ad26aa803ea616fe42ed4",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/content.proto.CbepSEPd.js",
+      "bytes": 1890,
+      "sha256": "165bba65acddcbac1b591dd8448c1b966f74bcf517d851ebdb562041dda53ff2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/content.proto.DKMK7stR.js",
+      "bytes": 5917,
+      "sha256": "8daa7836285bdec0ee70f21d2c562285787b25f648aaddbc647b587fa09e9ae1",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/content.proto.Do9sZPya.js",
+      "bytes": 17160,
+      "sha256": "94f5e93f7222b684adff478ae8222f50867a8df70313468d6585b41ce56a2182",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/context.DmLMtsXL.js",
+      "bytes": 87,
+      "sha256": "f8245988e25e1db34ee6f1d25c92f4e1373fd4d494dc9b876e60948e6a37405c",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/context.nQDN3f3V.js",
+      "bytes": 362,
+      "sha256": "0137ebab135aeae8a565b4da0e98515b8c3333ed547550c8f6067a95b7c26fa7",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/control-binding.proto.Cxcq11R3.js",
+      "bytes": 3879,
+      "sha256": "8e93e0d97d6eb984228dcad8265f8cec6d72a152e2c53f29af09fd415969f221",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/control-label.DW2UjGUm.js",
+      "bytes": 7345,
+      "sha256": "6c766860c61f3337d1f3cac098b4bcfe121b76f33ae6aad23a3520f36563e6bd",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/demo-modules.Bg3ex0Ni.js",
+      "bytes": 61192,
+      "sha256": "72007f7b405329f03792f68dfbb4e0b20e05a4ba9a826653e8b44de1689d62d0",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/demo-renderer.CpYXR3Lv.js",
+      "bytes": 45868,
+      "sha256": "70bb6197d2648c15db6241c888b9dd769f7b388f22bc0ea627b02c50d14b580b",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/demo-types.CwrvR24I.js",
+      "bytes": 5625,
+      "sha256": "17a7f1f73caeef218041992cd840ae1fc4f0ad4bc3028e2716c0054cb0bb7da2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/docs-header-preparation.LCV-SECR.js",
+      "bytes": 755,
+      "sha256": "076a35834eeb39cf24ba4c75ab4b2c573d11bc3cf8f07d1c77ecdc15c76dca46",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/ids.DpAOumnb.js",
+      "bytes": 114,
+      "sha256": "6e7119569d4cb68e2d3f6097113eecb2f73d3182a78b2a94e2dbe99f1248b710",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/index.B9Vtm_Hl.js",
+      "bytes": 3157,
+      "sha256": "4dc1848cd72c9d80fe38191bdf1c716fd57067a428102e85c0c28a68614513d8",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/index.BMPj1-wn.js",
+      "bytes": 4738,
+      "sha256": "98599bda60d8aa8ead144eb8662e15a09e32f0849bb1f9a2761a72ca6714314f",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/index.kKphyRkI.js",
+      "bytes": 8543,
+      "sha256": "1966bfb006c7f23edf54ae4cab1b55b6f0c8cb50b861a427d233086cfa08a723",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/item-text.proto.CJV5JhEX.js",
+      "bytes": 1401,
+      "sha256": "3756fe866ba56708290e25ed50cc8b5be2a8755fbb14623cc41121cbaf2fbde8",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/item-text.proto.D8Wy81X3.js",
+      "bytes": 3398,
+      "sha256": "539c89dfd270cb69084d46cd56c5bfd0abab1247ee910614ea775152e37337b8",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/item-text.proto.g7HXy10G.js",
+      "bytes": 639,
+      "sha256": "f019a15d6578c8239bd0bb0bce53c990b12c93a4becf322f6d0d456a9fe96b10",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/item.proto.Dc24ckjT.js",
+      "bytes": 2529,
+      "sha256": "b59f42431ccc322f4270a51acdea3e4cc51c8615a4234042a3834571c2582142",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/item.proto.feQJnyPR.js",
+      "bytes": 2403,
+      "sha256": "a24445b0607e2379935dc758ba6ee55ea94dc16c98fce7ad4a3aadb2a007c83b",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/item.proto.lVV8SxXU.js",
+      "bytes": 3688,
+      "sha256": "e5cace2cf0fbb8a79143fef5d947269d1f7f7046c675e86b8a0942c82e1262cd",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/native-content-lease.DyACbWkH.js",
+      "bytes": 2096,
+      "sha256": "1f2db013ae1209b9e1952ae1e6e33c6cb59493c5bfdb9fa6aaba75e0b5cae72c",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/new-york.CLq_nmq0.js",
+      "bytes": 959,
+      "sha256": "d9cefc1cb5008797e85c100976b74b3a6ed267d187ce255d652062fd01781cbd",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/owned-slot.BInDo1uh.js",
+      "bytes": 4227,
+      "sha256": "8a244159679d126493e489fffa9230b3f5b4a69d49b25b94bc03b8a73ebc7ede",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/paint-reservation.1FSefeOs.js",
+      "bytes": 535100,
+      "sha256": "a02014c19b3c422584971c28a09d3841a563c55dd25624be9cc1609f87319425",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/paint.CXOb-AKg.js",
+      "bytes": 535,
+      "sha256": "dd7def8b1d51430f77908721d90fa9d26b63b00dfbe777c46a5a1d1aaefa89f4",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/paint.Dporulws.js",
+      "bytes": 2073,
+      "sha256": "96ec450e0e47caef1bde894f5f5f76e8e247bd0da64087b215db7974400254ef",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/preload-helper.BlTxHScW.js",
+      "bytes": 1110,
+      "sha256": "1a526fef747c3ce4f3c9dd4b3191886606ffb0447dfd46fb875e565f8381108b",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/privileged.D_tf3Hs0.js",
+      "bytes": 609,
+      "sha256": "a32a7854d404d1c60c71cc3818f142404202e282c67531f3e0ec5f7faee0d65c",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/profiles.BnstywgR.js",
+      "bytes": 6559,
+      "sha256": "9df4b56770c7e78fcf60727470fc673c20ce3812010d0917ae7feb4ed7420c09",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/projection-materializer.D_SAwonk.js",
+      "bytes": 90094,
+      "sha256": "8c4b6649dccab5fc5863aee964f494b6e129a64a72d7be6e8c719f63d182df33",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/projection-scope.C38VOVYm.js",
+      "bytes": 7073,
+      "sha256": "abee8889296ec58f03c4d9c288b9fe00f670fae10b9e48698667e5ae458c9327",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/projection-theme.6b7zRpwJ.js",
+      "bytes": 5390,
+      "sha256": "13d5e006b0bb179e62bc1682ccc6a976dad5ddec9f6a22702ee6bf8ef5ad3063",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/prototype-modules.C9YRW38V.js",
+      "bytes": 272398,
+      "sha256": "a9001465a4cfd5ca330649a07a8282ad2288405b886fa3d374aec1c6556e5088",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/recipes.CO6gYycn.js",
+      "bytes": 6782,
+      "sha256": "027e8c1fe969ea4a20bc79c9812332a573ec27b7634c4b8a2cf1121319eae9a5",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/registry.fSOj0saW.js",
+      "bytes": 733,
+      "sha256": "d075b7719c71d0915b9b4eafd87eaa0b39912e93121c3473916ea0f0c2d744de",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/root.proto.BIiIJaiY.js",
+      "bytes": 514,
+      "sha256": "b55c96185d44d65491388aa04969d4df7ef7d06d826cd057ddcce671abeaae70",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/root.proto.Df7vwGMY.js",
+      "bytes": 409,
+      "sha256": "85f7001e7eebe62f2b07fcbfd5045b0a8ef3bbc68179de3e92cbb8a53c0bc7f2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/root.proto.VyzovK6-.js",
+      "bytes": 6178,
+      "sha256": "be5521b1a232cdf7700fed3fac1f92f80dffb471116ae4a15bab0aa2001d5d19",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/selection.BogEvjtf.js",
+      "bytes": 1139,
+      "sha256": "7d8667eeb31dc2d380e5b5b5addee8d8b9ead11c82de827da8b8e7ba08d83da4",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/semantic-merge.Cij06Ecl.js",
+      "bytes": 3122,
+      "sha256": "14a46ed238e4cec4b266fa3284a9ce67f5b43915677d1a522c7d343a89e3422e",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/shared.BZed5k6t.js",
+      "bytes": 3038,
+      "sha256": "2a005f0e6ad519b43030a0f879eec5ca5e1c2749e029de579b4b4299775fc9b5",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/shared.CzeCNa9f.js",
+      "bytes": 2398,
+      "sha256": "3d9926d3f89ac0307dc183ce5c2288d91fccb74f50275ce282e30ba8b90a875c",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-header-control-recipes.BV_i8Xcy.js",
+      "bytes": 927,
+      "sha256": "f5764203c3870b7145de98db1fa626deac4dfc1253a71d454eb654a2e78f8033",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-header-disclosure.9sP6-1yJ.js",
+      "bytes": 12417,
+      "sha256": "7cd0dc527b7773a15842231845ebfe19415ea5b24dc1d4e7a7b4640b3d0a2d46",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-header-surface.DirZnNyk.js",
+      "bytes": 17544,
+      "sha256": "e9945b51d79b9bffa24176f5133098a1662012f0596425ab8fa6c9165c8d5c95",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-library-family.CYqUPgwS.js",
+      "bytes": 1000,
+      "sha256": "5936bdb7f06fe30f61be91a253ccf077b59b3f0102c430bfa7a2cfaaea5c92e4",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-select-dismissal.DQLZorzg.js",
+      "bytes": 227,
+      "sha256": "04c8790178aba7eee27538f64fcb06ae8caec45a1b32229fcde53b2ecb728add",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-shadcn-controls.CCj0CAMT.js",
+      "bytes": 230866,
+      "sha256": "378483fb2cc4dd2d61ff32b47d6af090ad85f69bf07fa23256770315da493343",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/style.ly8XQ2P8.js",
+      "bytes": 565,
+      "sha256": "756b2a3b3409d3c87b5c9c3030ce89a69fefb5341374df2c12d61246503baba0",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/style.t7JBH6yG.js",
+      "bytes": 519,
+      "sha256": "e588f17b9dbd7c0f04cba4edc6bf219616e66f63701b7778d2ccbe7f95b2582c",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/surface-recipes.CfZoi1by.js",
+      "bytes": 267,
+      "sha256": "8590b6adadafda781011b6e8a42163fa2d2fdd1083962fd807db9144c6ec76bf",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/theme.B1Mxp5G5.js",
+      "bytes": 1655,
+      "sha256": "dd3e06763bb23616287dbb6f325ff4db1efff320e12add775a680652d1e0f03f",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/theme.BEziZjgt.js",
+      "bytes": 1328,
+      "sha256": "fcf505e91cd05020917025329974008a8d11696b1490803338a9b6f4a93385be",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/trigger-visual.BP0lHB0o.js",
+      "bytes": 5506,
+      "sha256": "a91b0cc4896069b00c0243aec78472588c4c825895e49d3daa71ba66abf7ebf1",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/trigger-visual.DRPEQDoI.js",
+      "bytes": 494,
+      "sha256": "293979aae40f21b3119557af68d34c1b20b69a0e3a40d1a592e43ef999cfd0ce",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/trigger.proto.Buvo9a-H.js",
+      "bytes": 3694,
+      "sha256": "5ba10ff3ea664981aa53acc2470ca75fce1b010155e90e294b97c0f01b305ef2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/trigger.proto.NitbVhWf.js",
+      "bytes": 2896,
+      "sha256": "1ef0903be8db8d79e62f7f9945489cd93cf11173b17580f5edfaf69c77209069",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/trigger.proto.R4PGkXEG.js",
+      "bytes": 806,
+      "sha256": "48bbe1262eb4fb87be0d385be819b1653f6298d03bcee9f6e2749474b026b81e",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/typography.MzyOPnvg.js",
+      "bytes": 298,
+      "sha256": "d9fcb52ead7ed6aaf73f8466eeec01475cab13a0b34b45924b5953b28b6c42b2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/use-open-state.DDULf-PR.js",
+      "bytes": 1323,
+      "sha256": "99f766cb239a4449750cad10cf24fc5a6f53c409a32a048bf4177e4984734a35",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/use-typeahead-navigation.w6h-hHbs.js",
+      "bytes": 725,
+      "sha256": "f45f4aa2a431fa0808fb85c34d0f947063cdea898e70c931d3390b4fd3ef7529",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/value.proto.4hJQPYrK.js",
+      "bytes": 489,
+      "sha256": "112344bbf13f8a2cdc7b429394e9b696c65ff2a81c28cab8f981cc7bf7d74459",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/value.proto.CCPt0-NW.js",
+      "bytes": 811,
+      "sha256": "47516bbdcc2200af3cc1975a50b5715f3420332dff10ed10c1ee110f0170d934",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/value.proto.DT1jXBeE.js",
+      "bytes": 997,
+      "sha256": "81657ed944d040f7adf190b776474608cac92b830979734c2ca486a5284dac1e",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/visual.B4D0vwqD.js",
+      "bytes": 1706,
+      "sha256": "999ed708529e6ed7ea8d88c3cef17898ca858c0f2b9cbadfe67e80e2b4043cde",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/wc-registry.h1knVgpt.js",
+      "bytes": 11407,
+      "sha256": "102bd502a3542f03ba29998c446b00a4aad447f727907d06de8bc8035b40e2b3",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    }
+  ],
+  "allSceneRecords": [],
+  "staticChunkCycles": [
+    {
+      "signature": "80dd7e82863caea63e3a1b5752aa1a141f8fc91f0a78bd1f0f54774a3dfa7237",
+      "identities": [
+        "facade:apps/www/src/components/override/PageFrame.astro?astro&type=script&index=1&lang.ts",
+        "name:site-concepts"
+      ],
+      "retainedSourceDigest": "509fdafd0d12a571a89cbac48c5804bea883f7acde4eeb71d11df9ed5adb0c98",
+      "retainedSourceCount": 2,
+      "reachableFromHeader": false,
+      "members": [
+        {
+          "fileName": "_astro/site-concepts.tqjg3AqD.js",
+          "name": "site-concepts",
+          "facadeModuleId": null,
+          "importsWithinCycle": [
+            "_astro/PageFrame.astro_astro_type_script_index_1_lang.DaYIiVl6.js"
+          ]
+        },
+        {
+          "fileName": "_astro/PageFrame.astro_astro_type_script_index_1_lang.DaYIiVl6.js",
+          "name": "PageFrame.astro_astro_type_script_index_1_lang",
+          "facadeModuleId": "apps/www/src/components/override/PageFrame.astro?astro&type=script&index=1&lang.ts",
+          "importsWithinCycle": [
+            "_astro/PageFrame.astro_astro_type_script_index_1_lang.DaYIiVl6.js",
+            "_astro/site-concepts.tqjg3AqD.js"
+          ]
+        }
+      ]
+    }
+  ],
+  "cycleComparison": {
+    "available": true,
+    "baselineHead": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+    "baselineGraphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+    "normalization": "exact facade or unique chunk name; ambiguous names use module-set digest",
+    "newStaticChunkCycles": [
+      {
+        "signature": "80dd7e82863caea63e3a1b5752aa1a141f8fc91f0a78bd1f0f54774a3dfa7237",
+        "identities": [
+          "facade:apps/www/src/components/override/PageFrame.astro?astro&type=script&index=1&lang.ts",
+          "name:site-concepts"
+        ],
+        "retainedSourceDigest": "509fdafd0d12a571a89cbac48c5804bea883f7acde4eeb71d11df9ed5adb0c98",
+        "retainedSourceCount": 2,
+        "reachableFromHeader": false,
+        "members": [
+          {
+            "fileName": "_astro/site-concepts.tqjg3AqD.js",
+            "name": "site-concepts",
+            "facadeModuleId": null,
+            "importsWithinCycle": [
+              "_astro/PageFrame.astro_astro_type_script_index_1_lang.DaYIiVl6.js"
+            ]
+          },
+          {
+            "fileName": "_astro/PageFrame.astro_astro_type_script_index_1_lang.DaYIiVl6.js",
+            "name": "PageFrame.astro_astro_type_script_index_1_lang",
+            "facadeModuleId": "apps/www/src/components/override/PageFrame.astro?astro&type=script&index=1&lang.ts",
+            "importsWithinCycle": [
+              "_astro/PageFrame.astro_astro_type_script_index_1_lang.DaYIiVl6.js",
+              "_astro/site-concepts.tqjg3AqD.js"
+            ]
+          }
+        ]
+      }
+    ],
+    "changedRetainedSourceCycles": [],
+    "removedCycleSignatures": []
+  },
+  "completeRenderMetadata": true,
+  "duplicatedRetainedModules": [],
+  "danglingStaticImports": [],
+  "issues": [
+    "Website shell entry `apps/www/src/components/override/AdapterSelect.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/CodeExample.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/CodeFileBrowser.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/CodePanel.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/DocumentationImagePreview.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/InstallCommandCard.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/InstallCommandCard.astro?astro&type=script&index=1&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/LanguageSelect.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS2.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS3.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS4.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS5.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/SocialIcons.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/ThemeToggle.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/UiLibraryGallery.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-header-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/Homepage/homepage-runtime-client.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-search-commands.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-native-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-header-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-search-commands.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-code-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-copy-client.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-copy-command.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its site-control bridge: apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/index.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its site-control bridge: apps/www/src/components/site-code-surface.ts -> packages/adapters/base/src/index.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its site-control bridge: apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts -> packages/adapters/base/src/index.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-typography-client.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts"
+  ]
+}

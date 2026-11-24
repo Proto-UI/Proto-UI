@@ -1,0 +1,34 @@
+{
+  "implementationOwnership": {
+    "website": "Astro bundling + production graph evidence, not shader or prototype semantics",
+    "process": "test orchestration ownership, preserve current selection/assertions/timeouts"
+  },
+  "entities": [
+    {
+      "path": "spec/contracts/C-FEEDBACK-MATERIAL-0001.yaml",
+      "status": "draft",
+      "scope": "Explicit material provider/intent ownership"
+    },
+    {
+      "path": "spec/tests/T-WEB-MATERIAL-PROVIDER-0001.yaml",
+      "status": "draft",
+      "anchors": [
+        "CASE-WIRING",
+        "CASE-LIFETIME"
+      ],
+      "scope": "No eager allocation, bounded physical view provider lease"
+    }
+  ],
+  "operationalSources": [
+    "scripts/coverage-matrices/check-website-production-bundle.mjs",
+    "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+    "internal/agent-operations/testing-method.md",
+    "scripts/test/sprint1-evidence.mjs"
+  ],
+  "conflicts": [],
+  "boundaries": [
+    "Source/module ID reachability does not prove retained implementation or GPU initialization.",
+    "Only owned child processes may be terminated.",
+    "No budget waiver or duplicate threshold edit."
+  ]
+}

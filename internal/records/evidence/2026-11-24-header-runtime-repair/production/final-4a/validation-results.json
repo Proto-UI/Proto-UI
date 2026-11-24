@@ -1,0 +1,55 @@
+[
+  {
+    "name": "final-candidate-build",
+    "command": [
+      "corepack",
+      "pnpm@10.32.1",
+      "docs:build"
+    ],
+    "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "exitCode": 0,
+    "durationSeconds": 264.18,
+    "worktreeStatus": ""
+  },
+  {
+    "name": "final-candidate-inspect",
+    "command": [
+      "node",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/inspect-header-graph.mjs",
+      "candidate",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/repo"
+    ],
+    "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "exitCode": 0,
+    "durationSeconds": 0.766,
+    "worktreeStatus": ""
+  },
+  {
+    "name": "final-candidate-controls",
+    "command": [
+      "node",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/header-production-controls.mjs",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/repo",
+      "/home/ezra/.local/state/proto-ui-header-080997012d40/final-candidate-controls"
+    ],
+    "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "exitCode": 1,
+    "durationSeconds": 67.499,
+    "worktreeStatus": ""
+  },
+  {
+    "name": "final-real-vitest",
+    "command": [
+      "node",
+      "scripts/test/run-runtime-tests.mjs",
+      "packages/adapters/base/test/material-sink-wiring.test.ts",
+      "packages/modules/feedback/test/deferred-view-sink.test.ts",
+      "--maxWorkers=1",
+      "--minWorkers=1"
+    ],
+    "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "exitCode": 0,
+    "durationSeconds": 3.922,
+    "worktreeStatus": ""
+  }
+]

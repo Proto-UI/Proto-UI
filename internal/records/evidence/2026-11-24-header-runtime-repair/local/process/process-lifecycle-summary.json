@@ -1,0 +1,71 @@
+{
+  "baseline": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+  "environment": {
+    "node": "v24.22.3",
+    "platform": "linux",
+    "pnpm": "10.32.1"
+  },
+  "candidateFileSha256": {
+    "package.json": "90b4f05e0f6ebeef03048583390490029607781fc9f244b06b58914fa9dd4ced",
+    "scripts/test/linux-process-ownership.mjs": "4a23c382a207ae2f2a9308572ae0d95009b3699ab30eaade9719c9c09f0b08af",
+    "scripts/test/runtime-process-owner.mjs": "2320d3bf54bf686db82a096cd602fc3192c5dbffe0b6819e131c3874271e943e",
+    "scripts/test/runtime-process-owner.test.mjs": "d29fb089a3666f76efdbe77e97323bd0075ab69334696ae11064d029ee70a633",
+    "scripts/test/run-runtime-tests.mjs": "9ae887a7081d3a7ad1bbdb24f31b953797618522ea9393cefbb30f03f66e2b2a",
+    "scripts/test/run-runtime-tests.test.mjs": "08a48c824c169f03b8812f9a97ce2db65e8914d6403d322888e5aff0b86819ae",
+    "scripts/test/sprint1-evidence.mjs": "6dcba90007e4943d14dcdbcd8c6d3731c59ad7a7632efc42dfac07b6c8862f42"
+  },
+  "validation": [
+    {
+      "name": "unchanged baseline wrapper, controlled command fixtures",
+      "command": "node --test --test-name-pattern=\"PID-only|a readiness failure|normal (nonzero|complete)\" baseline-scripts/runtime-process-owner.test.mjs",
+      "exitCode": 1,
+      "tests": 7,
+      "passed": 0,
+      "failed": 7,
+      "log": "runtime-process-owner-baseline.log"
+    },
+    {
+      "name": "candidate wrapper and owned-process helper",
+      "command": "node --test scripts/test/runtime-process-owner.test.mjs",
+      "exitCode": 0,
+      "tests": 14,
+      "passed": 14,
+      "failed": 0,
+      "log": "runtime-process-owner-fixed.log",
+      "scope": "7 unchanged-wrapper command-fixture integration cases plus 7 helper checks; the Windows check mocks taskkill, and the EPERM check injects denial around a real owned process."
+    },
+    {
+      "name": "existing runtime runner regression",
+      "command": "node --test scripts/test/run-runtime-tests.test.mjs",
+      "exitCode": 0,
+      "tests": 138,
+      "passed": 138,
+      "failed": 0,
+      "log": "runtime-runner-regression.log"
+    },
+    {
+      "name": "existing Sprint 1 ownership regression after helper extraction",
+      "command": "node --test --test-name-pattern=\"bounded process retains|timeout cleans only|an immediate owner exit\" scripts/test/sprint1-evidence.test.mjs",
+      "exitCode": 0,
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "log": "sprint1-process-regression.log"
+    },
+    {
+      "name": "format and whitespace",
+      "exitCode": 0,
+      "checks": [
+        "prettier --check for all seven affected files",
+        "git diff --check"
+      ]
+    }
+  ],
+  "limits": [
+    "Command fixtures execute the actual unchanged/candidate wrapper and real Linux subprocesses; their planning/CI/readiness functions and Astro/Vitest programs are controlled replacements, not a full browser acceptance run.",
+    "Root will run an actual focused Vitest command through the final integrated runner.",
+    "Windows keeps PID-scoped hidden taskkill /T /F; no native Windows execution is claimed, and a parent that exits before taskkill remains a limitation of that existing native mechanism.",
+    "Non-Linux POSIX uses owned process groups, not the Linux /proc inherited-marker recovery.",
+    "The initial fixture/setup iterations and interrupted counterfactual are retained in iterations.txt and runtime-process-owner-baseline-interrupted.log; they are not counted as completed product evidence."
+  ]
+}

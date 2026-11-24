@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-trace",
+  "nextSkillId": "pui-regression",
+  "artifacts": [
+    {
+      "type": "request-context",
+      "reference": "/workspace/scratch/080997012d40/flow/request.json"
+    },
+    {
+      "type": "capability-envelope",
+      "reference": "/workspace/scratch/080997012d40/flow/envelope.json"
+    },
+    {
+      "type": "bounded-subject",
+      "reference": "/workspace/scratch/080997012d40/flow/subject.json"
+    },
+    {
+      "type": "authority-map",
+      "reference": "/workspace/scratch/080997012d40/flow/authority.json"
+    },
+    {
+      "type": "reproduction",
+      "reference": "/workspace/scratch/080997012d40/flow/reproduction.json"
+    },
+    {
+      "type": "implementation-authorization",
+      "reference": "/workspace/scratch/080997012d40/flow/authorization.json"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Bounded operational repairs; preserve failing controls and independent live budget transaction."
+  ]
+}

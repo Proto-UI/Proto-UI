@@ -1,0 +1,6 @@
+{
+  "baseline": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+  "process": "stopServer returns when the server parent is exited; preparation and Vitest lack owned descendant cleanup; signal handler assumes foreground group delivery",
+  "website": "Real Rollup control shows an unused exported scene assigned as a zero-byte module to manual chunk; baseline full docs build pending",
+  "budget": "Canonical S6 matches current main React 179944 vs 173380; existing budget lane active"
+}

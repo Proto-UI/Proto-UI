@@ -1,0 +1,35 @@
+{
+  "scope": "Header chunk ownership and test process lifecycle",
+  "result": "failed",
+  "testedHead": "c554496421759dcafbf0924fbf9777358bb9bba2",
+  "productionBaseline": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "findings": [
+    {
+      "id": "F1",
+      "state": "resolved in source",
+      "description": "Exact Retry config profile was missing; precise new config and four owners preserved."
+    },
+    {
+      "id": "F2",
+      "state": "resolved in source",
+      "description": "Per-child cleanup failure could be blocked behind inherited-pipe EOF; completion is now observed by wrapper and style phase."
+    },
+    {
+      "id": "F3",
+      "state": "open",
+      "description": "Global onlyExplicitManualChunks changes SSR evaluation order; full candidate build fails DEFAULT_BASE_Z_INDEX TDZ, baseline builds."
+    },
+    {
+      "id": "F4",
+      "state": "open",
+      "description": "Client graph introduces PageFrame/script site-concepts cycle when shared concepts data is assigned to entry facade."
+    }
+  ],
+  "browserBaseline": {
+    "result": "partial",
+    "fullControlSequence": "shadcn mobile WC to React, Escape close, desktop WC return passed",
+    "focusRestoration": "failed; body active while React trigger remains connected",
+    "webglContextCalls": 0
+  },
+  "nextAction": "Keep the flag client-only at locked Astro build setup boundary and retain explicit concept-data chunk ownership, then rerun full production build and browser comparison."
+}

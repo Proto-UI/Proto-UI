@@ -1,0 +1,12 @@
+{
+  "base": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "main": "050a155903177dbf2805552ba75e10207c4d1a3c",
+  "candidate": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+  "overlap": [
+    "scripts/coverage-matrices/check-coverage-matrices.mjs",
+    "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+  ],
+  "mergeTreeExitCode": 0,
+  "mergeTreeOutput": "4e975a52bf8b326d0dc4c31091766a4374acbe27\n",
+  "stderr": ""
+}

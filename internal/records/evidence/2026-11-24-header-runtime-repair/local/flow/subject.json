@@ -1,0 +1,14 @@
+{
+  "scopeId": "header-test-lifecycle-20261124",
+  "criteria": [
+    "Header production graph accurately excludes unused scene implementation and blocks real material leakage.",
+    "Runtime runner cleans its owned style/server/Vitest/browser descendants after all termination paths.",
+    "Reconcile reported one-byte React headroom with live canonical results and existing budget repair."
+  ],
+  "baseSha": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+  "ownership": {
+    "header": "header_shader",
+    "process": "process_cleanup",
+    "budget": "read-only coordination with existing fix/main-bundle-budget-20261124 owner"
+  }
+}

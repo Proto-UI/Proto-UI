@@ -1,0 +1,1304 @@
+{
+  "node": "v24.22.3",
+  "rollup": "4.60.1",
+  "configSha256": "10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d",
+  "actualSharedClassifier": "site-shadcn-controls",
+  "records": [
+    {
+      "mode": "unused",
+      "strategy": "baseline",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 290,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPhYmRz5.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPhYmRz5.js';\n\nconst ready=mount();\n\nexport { ready };\n",
+          "sha256": "efa320d591a15f7390cf8acd76c477691308c9cd6e84bfdc976ab2d3bb97afb4",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPhYmRz5.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "9cdc0cf44de9f3c5bdc175c0db1cc73bf35e98154f31a0c139482dcecf364d45",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/material/shader-scene-host.ts": 0,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "unused",
+      "strategy": "global-explicit",
+      "warnings": [
+        {
+          "code": "CIRCULAR_CHUNK",
+          "message": "Circular chunk: Header -> site-shadcn-controls -> Header. Consider disabling the \"output.onlyExplicitManualChunks\" option, as enabling it causes the static dependencies of the manual chunk \"site-shadcn-controls\" to be bundled into the chunk \"Header\"."
+        }
+      ],
+      "eagerCount": 3,
+      "eagerBytes": 481,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-GqUB6InS.js",
+            "Header-s0ZiJwJo.js"
+          ],
+          "dynamicImports": [],
+          "code": "import './site-shadcn-controls-GqUB6InS.js';\nexport { r as ready } from './Header-s0ZiJwJo.js';\n",
+          "sha256": "4c1477b6b235f577e38f69ca9995a0a3e8c9fea24567eb0d4e3b6fdd8aa3ed00",
+          "modules": {}
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-GqUB6InS.js",
+          "eager": true,
+          "imports": [
+            "Header-s0ZiJwJo.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { c as common, p as paint } from './Header-s0ZiJwJo.js';\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "971b1c85f4a211703200de0d9908a5a4d42177d510e6ac012ab0d7149d9eb386",
+          "modules": {
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "Header",
+          "fileName": "Header-s0ZiJwJo.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-GqUB6InS.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-GqUB6InS.js';\n\nfunction common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nconst ready=mount();\n\nexport { common as c, paint as p, ready as r };\n",
+          "sha256": "9e8c39c58159473da73e18cc39fdfd5ae498c3cd76e38052d78a6cd03de6fb36",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        }
+      ]
+    },
+    {
+      "mode": "unused",
+      "strategy": "exact-scene",
+      "warnings": [
+        {
+          "code": "EMPTY_BUNDLE",
+          "message": "Generated an empty chunk: \"site-optional-scene\"."
+        }
+      ],
+      "eagerCount": 2,
+      "eagerBytes": 290,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPhYmRz5.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPhYmRz5.js';\n\nconst ready=mount();\n\nexport { ready };\n",
+          "sha256": "efa320d591a15f7390cf8acd76c477691308c9cd6e84bfdc976ab2d3bb97afb4",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPhYmRz5.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "9cdc0cf44de9f3c5bdc175c0db1cc73bf35e98154f31a0c139482dcecf364d45",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-l0sNRNKZ.js",
+          "eager": false,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "\n",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "unused",
+      "strategy": "exact-scene-strict",
+      "warnings": [
+        {
+          "code": "EMPTY_BUNDLE",
+          "message": "Generated an empty chunk: \"site-optional-scene\"."
+        }
+      ],
+      "eagerCount": 2,
+      "eagerBytes": 290,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPhYmRz5.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPhYmRz5.js';\n\nconst ready=mount();\n\nexport { ready };\n",
+          "sha256": "efa320d591a15f7390cf8acd76c477691308c9cd6e84bfdc976ab2d3bb97afb4",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPhYmRz5.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "9cdc0cf44de9f3c5bdc175c0db1cc73bf35e98154f31a0c139482dcecf364d45",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-l0sNRNKZ.js",
+          "eager": false,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "\n",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "unused",
+      "strategy": "exact-scene-no-hoist",
+      "warnings": [
+        {
+          "code": "EMPTY_BUNDLE",
+          "message": "Generated an empty chunk: \"site-optional-scene\"."
+        }
+      ],
+      "eagerCount": 2,
+      "eagerBytes": 290,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPhYmRz5.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPhYmRz5.js';\n\nconst ready=mount();\n\nexport { ready };\n",
+          "sha256": "efa320d591a15f7390cf8acd76c477691308c9cd6e84bfdc976ab2d3bb97afb4",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPhYmRz5.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "9cdc0cf44de9f3c5bdc175c0db1cc73bf35e98154f31a0c139482dcecf364d45",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-l0sNRNKZ.js",
+          "eager": false,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "\n",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "unused",
+      "strategy": "exact-scene-and-preview",
+      "warnings": [
+        {
+          "code": "EMPTY_BUNDLE",
+          "message": "Generated an empty chunk: \"site-optional-scene\"."
+        }
+      ],
+      "eagerCount": 2,
+      "eagerBytes": 290,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPhYmRz5.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPhYmRz5.js';\n\nconst ready=mount();\n\nexport { ready };\n",
+          "sha256": "efa320d591a15f7390cf8acd76c477691308c9cd6e84bfdc976ab2d3bb97afb4",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPhYmRz5.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "9cdc0cf44de9f3c5bdc175c0db1cc73bf35e98154f31a0c139482dcecf364d45",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-l0sNRNKZ.js",
+          "eager": false,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "\n",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "unused",
+      "strategy": "all-optional",
+      "warnings": [],
+      "eagerCount": 3,
+      "eagerBytes": 454,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-BtnumfnC.js",
+            "site-optional-material-AHMa_VbO.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-BtnumfnC.js';\nimport './site-optional-material-AHMa_VbO.js';\n\nconst ready=mount();\n\nexport { ready };\n",
+          "sha256": "6a7cd4fc99ee487c805ef4693099a76986b49e7e70b2c8bb7b571bbebf4b1712",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 20
+          }
+        },
+        {
+          "name": "site-optional-material",
+          "fileName": "site-optional-material-AHMa_VbO.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nexport { common as c, paint as p };\n",
+          "sha256": "0af9a03d4466de8381bad9f2fd4ee57cc83c517693c2925ec9736541cfadec7f",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-scene-host.ts": 0
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-BtnumfnC.js",
+          "eager": true,
+          "imports": [
+            "site-optional-material-AHMa_VbO.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { c as common, p as paint } from './site-optional-material-AHMa_VbO.js';\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m };\n",
+          "sha256": "4fae7f2f78031ac62bf3b0fc03dfe247536afa89d4ccb4a180acb32cee306a95",
+          "modules": {
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "baseline",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 422,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-B_c3uRDh.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-BpYVm-Wn.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-B_c3uRDh.js';\n\nconst ready=mount();const load=()=>import('./preview-material-scene-BpYVm-Wn.js');\n\nexport { load, ready };\n",
+          "sha256": "7ed30b7b7fba09f63a52b86f634ae1a2e5ad0c1b97e3539bdb1188ee7fa72326",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-B_c3uRDh.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { mount as m, scene as s };\n",
+          "sha256": "f247f0c95b7d775f301b3a37eb0cfcbc13da04332b64ad0b0db108d018519618",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-BpYVm-Wn.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-B_c3uRDh.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { s as scene } from './site-shadcn-controls-B_c3uRDh.js';\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "a36cfaca8625356ad1451f4fb19eec0815de0aa3239fc9c92cb559bb68041f53",
+          "modules": {
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "global-explicit",
+      "warnings": [
+        {
+          "code": "CIRCULAR_CHUNK",
+          "message": "Circular chunk: Header -> site-shadcn-controls -> Header. Consider disabling the \"output.onlyExplicitManualChunks\" option, as enabling it causes the static dependencies of the manual chunk \"site-shadcn-controls\" to be bundled into the chunk \"Header\"."
+        }
+      ],
+      "eagerCount": 3,
+      "eagerBytes": 577,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-Dw1ySBe7.js",
+            "Header-D9SWOFXO.js"
+          ],
+          "dynamicImports": [],
+          "code": "import './site-shadcn-controls-Dw1ySBe7.js';\nexport { l as load, r as ready } from './Header-D9SWOFXO.js';\n",
+          "sha256": "e81c69a69a552a834b25d649448ec886cf0b5ee91b9395d103d6a575d6567e23",
+          "modules": {}
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-Dw1ySBe7.js",
+          "eager": true,
+          "imports": [
+            "Header-D9SWOFXO.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { c as common, p as paint } from './Header-D9SWOFXO.js';\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "ed389c679015b89948520d70893025813006af10c49b16cfc796ceda5c43182c",
+          "modules": {
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "Header",
+          "fileName": "Header-D9SWOFXO.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-Dw1ySBe7.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-GKomwWqe.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-Dw1ySBe7.js';\n\nfunction common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nconst ready=mount();const load=()=>import('./preview-material-scene-GKomwWqe.js');\n\nexport { common as c, load as l, paint as p, ready as r };\n",
+          "sha256": "f220889f8b010577ca02683b9dbad0ec94bcb458cfac19860e79aee21777ef23",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-GKomwWqe.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-Dw1ySBe7.js",
+            "Header-D9SWOFXO.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-Dw1ySBe7.js';\nimport './Header-D9SWOFXO.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "5077d460f9518398706395ade43222931da586a54b5f7c6341343b9809d5db82",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "exact-scene",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 370,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-B_yBRnkV.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\n\nconst ready=mount();const load=()=>import('./preview-material-scene-B_yBRnkV.js');\n\nexport { load, ready };\n",
+          "sha256": "3d560342fd8d3960bc32b83c80f295380c3387fbec050c043a787c7efae11472",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-Z3Q4qXOE.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as s };\n",
+          "sha256": "ca549fe36535c099f7da4f9fd5ee989bf87733e9cf8ff0ea8956018b3c5b2f02",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-B_yBRnkV.js",
+          "eager": false,
+          "imports": [
+            "site-optional-scene-Z3Q4qXOE.js",
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { s as scene } from './site-optional-scene-Z3Q4qXOE.js';\nimport './site-shadcn-controls-CPoScVDJ.js';\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "8f6e0585a0b5b3ffc4351be213e0d156c20a9ecb90f720335b795bc48ecde380",
+          "modules": {
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "exact-scene-strict",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 370,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-B_yBRnkV.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\n\nconst ready=mount();const load=()=>import('./preview-material-scene-B_yBRnkV.js');\n\nexport { load, ready };\n",
+          "sha256": "3d560342fd8d3960bc32b83c80f295380c3387fbec050c043a787c7efae11472",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-Z3Q4qXOE.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as s };\n",
+          "sha256": "ca549fe36535c099f7da4f9fd5ee989bf87733e9cf8ff0ea8956018b3c5b2f02",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-B_yBRnkV.js",
+          "eager": false,
+          "imports": [
+            "site-optional-scene-Z3Q4qXOE.js",
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { s as scene } from './site-optional-scene-Z3Q4qXOE.js';\nimport './site-shadcn-controls-CPoScVDJ.js';\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "8f6e0585a0b5b3ffc4351be213e0d156c20a9ecb90f720335b795bc48ecde380",
+          "modules": {
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "exact-scene-no-hoist",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 370,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-DO8bO31h.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\n\nconst ready=mount();const load=()=>import('./preview-material-scene-DO8bO31h.js');\n\nexport { load, ready };\n",
+          "sha256": "8f554329bd57eb0ede69700609fc89a28b15377d32faae4ffd2c83e962adba7c",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-Z3Q4qXOE.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as s };\n",
+          "sha256": "ca549fe36535c099f7da4f9fd5ee989bf87733e9cf8ff0ea8956018b3c5b2f02",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-DO8bO31h.js",
+          "eager": false,
+          "imports": [
+            "site-optional-scene-Z3Q4qXOE.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { s as scene } from './site-optional-scene-Z3Q4qXOE.js';\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "f69f0c1e3e34e06920a6554096ffd6ef2831ba66ec4021bea046936299e6c25f",
+          "modules": {
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "exact-scene-and-preview",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 367,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [
+            "site-optional-scene-znkBI-5p.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\n\nconst ready=mount();const load=()=>import('./site-optional-scene-znkBI-5p.js');\n\nexport { load, ready };\n",
+          "sha256": "2f86e769da237eda4f31e6b704a81f30111ed7428167cd22d4e342fa71b4fba3",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 79
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-znkBI-5p.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "22f012aa47c01fbb402751ee441f20f1d5ba40dbbf751e71b49e8bd4d2b20727",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "const",
+      "strategy": "all-optional",
+      "warnings": [
+        {
+          "code": "CIRCULAR_CHUNK",
+          "message": "Circular chunk: site-shadcn-controls -> site-optional-material -> site-shadcn-controls. Please adjust the manual chunk logic for these chunks."
+        }
+      ],
+      "eagerCount": 3,
+      "eagerBytes": 664,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-9k3s-lks.js",
+            "site-optional-material-Dva4E_yn.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-DvVGJOHD.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-9k3s-lks.js';\nimport './site-optional-material-Dva4E_yn.js';\n\nconst ready=mount();const load=()=>import('./preview-material-scene-DvVGJOHD.js');\n\nexport { load, ready };\n",
+          "sha256": "dc036721257df32afee917d05a3bc9923a091c9395a33ec4bdd072cd4c34f154",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "site-optional-material",
+          "fileName": "site-optional-material-Dva4E_yn.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-9k3s-lks.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-9k3s-lks.js';\n\nfunction common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { common as c, paint as p, scene as s };\n",
+          "sha256": "344fb03f7a004dc593fd67f6b6cbcaeadd70c0e87adc71ea42adf9b7455f6e80",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-9k3s-lks.js",
+          "eager": true,
+          "imports": [
+            "site-optional-material-Dva4E_yn.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { c as common, p as paint } from './site-optional-material-Dva4E_yn.js';\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "f66163451da5ffa499c16975e705fd86ae42ed29c9e50ff8f94110d02d32f278",
+          "modules": {
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-DvVGJOHD.js",
+          "eager": false,
+          "imports": [
+            "site-optional-material-Dva4E_yn.js",
+            "site-shadcn-controls-9k3s-lks.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { s as scene } from './site-optional-material-Dva4E_yn.js';\nimport './site-shadcn-controls-9k3s-lks.js';\n\nconst render=scene;\n\nexport { render };\n",
+          "sha256": "f5f591b1161fe73da450c2bf94577214335f2aff0b417b73eea8e0b630b6bad0",
+          "modules": {
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 19
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "baseline",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 550,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-B_c3uRDh.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount, s as scene } from './site-shadcn-controls-B_c3uRDh.js';\n\nconst ready=mount();const load=()=>Promise.resolve().then(function () { return previewMaterialScene; });\n\nvar previewMaterialScene = /*#__PURE__*/Object.freeze({\n\t__proto__: null,\n\trender: scene\n});\n\nexport { load, ready };\n",
+          "sha256": "8a9fb23b77bbc910a6ac957f9939729d6829a26b1d62005f261d1da7509e3889",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 104,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-B_c3uRDh.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { mount as m, scene as s };\n",
+          "sha256": "f247f0c95b7d775f301b3a37eb0cfcbc13da04332b64ad0b0db108d018519618",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "global-explicit",
+      "warnings": [
+        {
+          "code": "CIRCULAR_CHUNK",
+          "message": "Circular chunk: Header -> site-shadcn-controls -> Header. Consider disabling the \"output.onlyExplicitManualChunks\" option, as enabling it causes the static dependencies of the manual chunk \"site-shadcn-controls\" to be bundled into the chunk \"Header\"."
+        }
+      ],
+      "eagerCount": 3,
+      "eagerBytes": 577,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-D4F9B9_P.js",
+            "Header-5Nl5ZXP6.js"
+          ],
+          "dynamicImports": [],
+          "code": "import './site-shadcn-controls-D4F9B9_P.js';\nexport { l as load, r as ready } from './Header-5Nl5ZXP6.js';\n",
+          "sha256": "24e975adf6da3ef8433b75b1e126c406038c548985d16b57dde9d49160c6cfe3",
+          "modules": {}
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-D4F9B9_P.js",
+          "eager": true,
+          "imports": [
+            "Header-5Nl5ZXP6.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { c as common, p as paint } from './Header-5Nl5ZXP6.js';\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "b352e5ac050a2b6bba573b66da64d6997da2e1cb76f74407082799c9da4b4be7",
+          "modules": {
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "Header",
+          "fileName": "Header-5Nl5ZXP6.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-D4F9B9_P.js"
+          ],
+          "dynamicImports": [
+            "preview-material-scene-C-_jZxpX.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-D4F9B9_P.js';\n\nfunction common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nconst ready=mount();const load=()=>import('./preview-material-scene-C-_jZxpX.js');\n\nexport { common as c, load as l, paint as p, ready as r };\n",
+          "sha256": "c32d0f6fc85f9b1e3b15c213913c50e2dcdda87e0030179c50d34a0c02b7a721",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "apps/www/src/components/override/Header.astro": 82
+          }
+        },
+        {
+          "name": "preview-material-scene",
+          "fileName": "preview-material-scene-C-_jZxpX.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-D4F9B9_P.js",
+            "Header-5Nl5ZXP6.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-D4F9B9_P.js';\nimport './Header-5Nl5ZXP6.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as render };\n",
+          "sha256": "dd5ebf11c8e6dc63412d93069456ee5eeb47389748784a8bc2b7c528a5f5de71",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "exact-scene",
+      "warnings": [],
+      "eagerCount": 3,
+      "eagerBytes": 691,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js",
+            "site-optional-scene-Z3Q4qXOE.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\nimport { s as scene } from './site-optional-scene-Z3Q4qXOE.js';\n\nconst ready=mount();const load=()=>Promise.resolve().then(function () { return previewMaterialScene; });\n\nvar previewMaterialScene = /*#__PURE__*/Object.freeze({\n\t__proto__: null,\n\trender: scene\n});\n\nexport { load, ready };\n",
+          "sha256": "0d32c52875e7a6b0e101c22ec2a705ab15af3d4408c8536f792789e32be18a06",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 104,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-Z3Q4qXOE.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as s };\n",
+          "sha256": "ca549fe36535c099f7da4f9fd5ee989bf87733e9cf8ff0ea8956018b3c5b2f02",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "exact-scene-strict",
+      "warnings": [],
+      "eagerCount": 3,
+      "eagerBytes": 691,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js",
+            "site-optional-scene-Z3Q4qXOE.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\nimport { s as scene } from './site-optional-scene-Z3Q4qXOE.js';\n\nconst ready=mount();const load=()=>Promise.resolve().then(function () { return previewMaterialScene; });\n\nvar previewMaterialScene = /*#__PURE__*/Object.freeze({\n\t__proto__: null,\n\trender: scene\n});\n\nexport { load, ready };\n",
+          "sha256": "0d32c52875e7a6b0e101c22ec2a705ab15af3d4408c8536f792789e32be18a06",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 104,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-Z3Q4qXOE.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as s };\n",
+          "sha256": "ca549fe36535c099f7da4f9fd5ee989bf87733e9cf8ff0ea8956018b3c5b2f02",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "exact-scene-no-hoist",
+      "warnings": [],
+      "eagerCount": 3,
+      "eagerBytes": 691,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js",
+            "site-optional-scene-Z3Q4qXOE.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\nimport { s as scene } from './site-optional-scene-Z3Q4qXOE.js';\n\nconst ready=mount();const load=()=>Promise.resolve().then(function () { return previewMaterialScene; });\n\nvar previewMaterialScene = /*#__PURE__*/Object.freeze({\n\t__proto__: null,\n\trender: scene\n});\n\nexport { load, ready };\n",
+          "sha256": "0d32c52875e7a6b0e101c22ec2a705ab15af3d4408c8536f792789e32be18a06",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 104,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-Z3Q4qXOE.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as s };\n",
+          "sha256": "ca549fe36535c099f7da4f9fd5ee989bf87733e9cf8ff0ea8956018b3c5b2f02",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "exact-scene-and-preview",
+      "warnings": [],
+      "eagerCount": 2,
+      "eagerBytes": 367,
+      "eagerScene": false,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [
+            "site-optional-scene-O-QVTn7L.js"
+          ],
+          "code": "import { m as mount } from './site-shadcn-controls-CPoScVDJ.js';\n\nconst ready=mount();const load=()=>import('./site-optional-scene-O-QVTn7L.js');\n\nexport { load, ready };\n",
+          "sha256": "045e93d091147cfc5e07a7248dfcdfa04640991894adb91b8ef2aebfaa76730e",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 79
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-CPoScVDJ.js",
+          "eager": true,
+          "imports": [],
+          "dynamicImports": [],
+          "code": "function common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "538935e442d4609f4e584f26c8749272d145c77e265a1037cb1b548ee60af7c7",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-scene",
+          "fileName": "site-optional-scene-O-QVTn7L.js",
+          "eager": false,
+          "imports": [
+            "site-shadcn-controls-CPoScVDJ.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-CPoScVDJ.js';\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { scene as render };\n",
+          "sha256": "1395ff2fca0f3fbf27f061ed6400cfa37f5ad4fd8b4418ee32ecfcf3106bf68d",
+          "modules": {
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        }
+      ]
+    },
+    {
+      "mode": "reexport",
+      "strategy": "all-optional",
+      "warnings": [
+        {
+          "code": "CIRCULAR_CHUNK",
+          "message": "Circular chunk: site-shadcn-controls -> site-optional-material -> site-shadcn-controls. Please adjust the manual chunk logic for these chunks."
+        }
+      ],
+      "eagerCount": 3,
+      "eagerBytes": 800,
+      "eagerScene": true,
+      "chunks": [
+        {
+          "name": "Header",
+          "fileName": "Header.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-9k3s-lks.js",
+            "site-optional-material-Dva4E_yn.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { m as mount } from './site-shadcn-controls-9k3s-lks.js';\nimport { s as scene } from './site-optional-material-Dva4E_yn.js';\n\nconst ready=mount();const load=()=>Promise.resolve().then(function () { return previewMaterialScene; });\n\nvar previewMaterialScene = /*#__PURE__*/Object.freeze({\n\t__proto__: null,\n\trender: scene\n});\n\nexport { load, ready };\n",
+          "sha256": "5dba6e6b2634ad530c5f89ba56740d54b66c24d1379e55a24d8945a4b6a0ff35",
+          "modules": {
+            "apps/www/src/components/override/Header.astro": 104,
+            "apps/www/src/components/PrototypePreviewer/preview-material-scene.ts": 0
+          }
+        },
+        {
+          "name": "site-optional-material",
+          "fileName": "site-optional-material-Dva4E_yn.js",
+          "eager": true,
+          "imports": [
+            "site-shadcn-controls-9k3s-lks.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { w as webgl } from './site-shadcn-controls-9k3s-lks.js';\n\nfunction common(){return \"core\"}\n\nfunction paint(){return common()+'paint'}\n\nfunction scene(){return 'optional-scene-'+webgl()}\n\nexport { common as c, paint as p, scene as s };\n",
+          "sha256": "344fb03f7a004dc593fd67f6b6cbcaeadd70c0e87adc71ea42adf9b7455f6e80",
+          "modules": {
+            "packages/core/src/shared.ts": 32,
+            "packages/adapters/base/src/material/paint-reservation.ts": 41,
+            "packages/adapters/base/src/material/shader-scene-host.ts": 50
+          }
+        },
+        {
+          "name": "site-shadcn-controls",
+          "fileName": "site-shadcn-controls-9k3s-lks.js",
+          "eager": true,
+          "imports": [
+            "site-optional-material-Dva4E_yn.js"
+          ],
+          "dynamicImports": [],
+          "code": "import { c as common, p as paint } from './site-optional-material-Dva4E_yn.js';\n\nfunction webgl(){return common()+'host'}\n\nfunction mount(){return paint()+webgl()}\n\nexport { mount as m, webgl as w };\n",
+          "sha256": "f66163451da5ffa499c16975e705fd86ae42ed29c9e50ff8f94110d02d32f278",
+          "modules": {
+            "packages/adapters/base/src/material/shader-webgl2-host.ts": 40,
+            "packages/adapters/base/src/host/adapter-host.ts": 40,
+            "packages/adapters/base/src/index.ts": 0,
+            "apps/www/src/components/site-shadcn-controls.ts": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,299 @@
+{
+  "label": "baseline",
+  "observedAt": "2026-11-24T10:31:15.234Z",
+  "sourceBaseline": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "observedHead": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "worktreeStatus": "",
+  "node": "v24.22.3",
+  "nodeOptions": "--max-old-space-size=6144",
+  "graphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+  "sourceHashes": {
+    "apps/www/astro.config.mjs": "c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee",
+    "apps/www/src/components/override/Header.astro": "7457f2de19b85e74d9d0709b618d1330c0264c3490e004d75326930c3ff982a0",
+    "apps/www/src/components/site-shadcn-controls.ts": "6a338d58c8c2bc73e534799170d180ffb48123aaa3248d6ac0d6b16fb0039f6d",
+    "packages/adapters/base/src/index.ts": "1cd2b243710cea0c7d18a77c67a6dd933c44548fd0829394f62d78e781be9a3e",
+    "packages/adapters/base/src/material/shader-scene-host.ts": "606d26b36dedf9c0a44762c3f72b7a852e697b267505b4d14e3ab24caddc5047"
+  },
+  "sourcePath": [
+    "apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts",
+    "apps/www/src/components/site-shadcn-controls.ts",
+    "packages/adapters/web-component/src/index.ts",
+    "packages/adapters/web-component/src/adapt.ts",
+    "packages/adapters/base/src/index.ts",
+    "packages/adapters/base/src/material/shader-scene-host.ts"
+  ],
+  "eagerChunks": [
+    {
+      "fileName": "_astro/Header.astro_astro_type_script_index_0_lang.C8FkaDTI.js",
+      "bytes": 1654,
+      "sha256": "39ee64f42130591a4773e61c3094814c0a44357ab66c5570f3d99683cb109eda",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/adapter-preference.Csu9iaUp.js",
+      "bytes": 1829,
+      "sha256": "a7ccf0a18af137df3c26b3f7d8ca1ef81d3def560b734851c3b761d70db8fa84",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/demo-modules.B4GtN3H3.js",
+      "bytes": 60800,
+      "sha256": "a166f5aadf2f1d2558c17bba33750cd738c862e94ba82fef6dc6616ca2a54882",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/demo-renderer.DGMxAPIU.js",
+      "bytes": 42373,
+      "sha256": "1768dc7b6d88e3c33f019fe4f512869cb3d5eb0a617d83b28fff500ca0df5aec",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/demo-types.CwrvR24I.js",
+      "bytes": 5625,
+      "sha256": "17a7f1f73caeef218041992cd840ae1fc4f0ad4bc3028e2716c0054cb0bb7da2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/docs-header-preparation.LCV-SECR.js",
+      "bytes": 755,
+      "sha256": "076a35834eeb39cf24ba4c75ab4b2c573d11bc3cf8f07d1c77ecdc15c76dca46",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/ids.DpAOumnb.js",
+      "bytes": 114,
+      "sha256": "6e7119569d4cb68e2d3f6097113eecb2f73d3182a78b2a94e2dbe99f1248b710",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/native-content-lease.DyACbWkH.js",
+      "bytes": 2096,
+      "sha256": "1f2db013ae1209b9e1952ae1e6e33c6cb59493c5bfdb9fa6aaba75e0b5cae72c",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/preload-helper.BlTxHScW.js",
+      "bytes": 1110,
+      "sha256": "1a526fef747c3ce4f3c9dd4b3191886606ffb0447dfd46fb875e565f8381108b",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/projection-materializer.BFHaNyv9.js",
+      "bytes": 90094,
+      "sha256": "d97ce0062890cc96e0704086c5d43648e59776cf3ce9618f232a5692a9bcd2a5",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/projection-scope.C38VOVYm.js",
+      "bytes": 7073,
+      "sha256": "abee8889296ec58f03c4d9c288b9fe00f670fae10b9e48698667e5ae458c9327",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/projection-theme.6b7zRpwJ.js",
+      "bytes": 5390,
+      "sha256": "13d5e006b0bb179e62bc1682ccc6a976dad5ddec9f6a22702ee6bf8ef5ad3063",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/prototype-modules.C50akWC_.js",
+      "bytes": 233045,
+      "sha256": "50530446a911bf2935cb65899991b08ca04f4b0db19404ee298c5b55c077d08b",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/registry.fSOj0saW.js",
+      "bytes": 733,
+      "sha256": "d075b7719c71d0915b9b4eafd87eaa0b39912e93121c3473916ea0f0c2d744de",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-header-disclosure.Cq8bSh_Y.js",
+      "bytes": 12416,
+      "sha256": "0a346cf682fb9146c89017cfd6427d25bc885462414fa82590e88d86ec6b1af9",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-header-surface.QspuUDRH.js",
+      "bytes": 17492,
+      "sha256": "6966c3d3fb7adf776de133b42df48bb554f0ce2e5413ed13e86515e0b87c540b",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/site-shadcn-controls.r3QN1C-Y.js",
+      "bytes": 914181,
+      "sha256": "c91f622d2e01fe1573efc01d63318043b77fb466315e65bdd6dac5a4347e6b19",
+      "sceneModuleRecord": {
+        "renderedLength": 0,
+        "renderedExports": [],
+        "removedExports": [
+          "createWebShaderHost",
+          "createWebShaderScenePresenter"
+        ]
+      },
+      "sceneModuleListed": true,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/surface-recipes.CfZoi1by.js",
+      "bytes": 267,
+      "sha256": "8590b6adadafda781011b6e8a42163fa2d2fdd1083962fd807db9144c6ec76bf",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/theme.B1Mxp5G5.js",
+      "bytes": 1655,
+      "sha256": "dd3e06763bb23616287dbb6f325ff4db1efff320e12add775a680652d1e0f03f",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/theme.BEziZjgt.js",
+      "bytes": 1328,
+      "sha256": "fcf505e91cd05020917025329974008a8d11696b1490803338a9b6f4a93385be",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/typography.MzyOPnvg.js",
+      "bytes": 298,
+      "sha256": "d9fcb52ead7ed6aaf73f8466eeec01475cab13a0b34b45924b5953b28b6c42b2",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    },
+    {
+      "fileName": "_astro/wc-registry.DNI1y6OE.js",
+      "bytes": 11372,
+      "sha256": "1f76f1be6efab86655004a689921b64fe9e6a8919f2979f02a97a1f3cf970add",
+      "sceneModuleRecord": null,
+      "sceneModuleListed": false,
+      "sceneSpecificImplementationStringPresent": false
+    }
+  ],
+  "allSceneRecords": [
+    {
+      "fileName": "_astro/site-shadcn-controls.r3QN1C-Y.js",
+      "info": {
+        "renderedLength": 0,
+        "renderedExports": [],
+        "removedExports": [
+          "createWebShaderHost",
+          "createWebShaderScenePresenter"
+        ]
+      },
+      "isEntry": false,
+      "isDynamicEntry": true
+    }
+  ],
+  "staticChunkCycles": [],
+  "cycleComparison": {
+    "available": false,
+    "reason": "No baseline comparison requested"
+  },
+  "completeRenderMetadata": true,
+  "duplicatedRetainedModules": [],
+  "danglingStaticImports": [],
+  "issues": [
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/host/synchronous-steps.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/material/border-outline.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/material/paint-reservation.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/material/shader-scene-host.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/motion/web-motion-style-ownership.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-tint-stage-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/host/synchronous-steps.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/material/border-outline.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/material/paint-reservation.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/material/shader-scene-host.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/motion/web-motion-style-ownership.ts",
+    "material diagnostic entry `apps/www/src/pages/en/test/liquid-visible-refraction-diagnostic.astro?astro&type=script&index=0&lang.ts` reaches an unreviewed runtime or Adapter module: packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/AdapterSelect.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/CodeExample.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/CodeFileBrowser.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/CodePanel.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/DocumentationImagePreview.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/InstallCommandCard.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/InstallCommandCard.astro?astro&type=script&index=1&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/LanguageSelect.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/PageFrame.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS2.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS3.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS4.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/ShadowSplitS5.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/SocialIcons.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/override/ThemeToggle.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/UiLibraryGallery.astro?astro&type=script&index=0&lang.ts` statically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts",
+    "Website shell entry `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro?astro&type=script&index=0&lang.ts` dynamically reaches forbidden React/Vue module(s) or Proto UI Adapter module(s): packages/adapters/base/src/events/keyboard-press-owner.ts, packages/adapters/base/src/events/pointer-contact.ts, packages/adapters/base/src/events/pointer-sample.ts, packages/adapters/base/src/events/web-default-action.ts, packages/adapters/base/src/events/web-event-router.ts, packages/adapters/base/src/gate/event-gate.ts, packages/adapters/base/src/gestures/web-axis-input-host.ts, packages/adapters/base/src/gestures/web-move-click-arbitration.ts, packages/adapters/base/src/gestures/web-move-gesture-host.ts, packages/adapters/base/src/host/adapter-host.ts, packages/adapters/base/src/host/exposes.ts, packages/adapters/base/src/host/surface-projection.ts, packages/adapters/base/src/host/synchronous-steps.ts, packages/adapters/base/src/host/view-epoch-owner.ts, packages/adapters/base/src/host/view-visibility.ts, packages/adapters/base/src/index.ts, packages/adapters/base/src/lifecycle/teardown.ts, packages/adapters/base/src/material/border-outline.ts, packages/adapters/base/src/material/paint-reservation.ts, packages/adapters/base/src/material/shader-scene-host.ts, packages/adapters/base/src/material/shader-webgl2-host.ts, packages/adapters/base/src/material/shader-webgl2.ts, packages/adapters/base/src/motion/web-motion-style-ownership.ts, packages/adapters/base/src/motion/web-presence-presentation.ts, packages/adapters/base/src/motion/web-resident-motion.ts, packages/adapters/base/src/platform/focus-entry.ts, packages/adapters/base/src/platform/focus-order.ts, packages/adapters/base/src/platform/instance-tree.ts, packages/adapters/base/src/platform/layout-ready.ts, packages/adapters/base/src/platform/portal-destination.ts, packages/adapters/base/src/platform/portal-direction.ts, packages/adapters/base/src/platform/portal-inline-size.ts, packages/adapters/base/src/platform/web-color-scheme-source.ts, packages/adapters/base/src/platform/web-owned-decoration-portal.ts, packages/adapters/base/src/platform/web-owned-decoration-stage.ts, packages/adapters/base/src/platform/web-owned-decoration.ts, packages/adapters/base/src/platform/web-preference-source.ts, packages/adapters/base/src/platform/web-preferences.ts, packages/adapters/base/src/platform/web-style-support-source.ts, packages/adapters/base/src/platform/web-viewport-source.ts, packages/adapters/base/src/public-types.ts, packages/adapters/base/src/types.ts, packages/adapters/base/src/wiring/caps-builder.ts, packages/adapters/base/src/wiring/host-wiring.ts, packages/adapters/web-component/src/adapt.ts, packages/adapters/web-component/src/color-scheme-source.ts, packages/adapters/web-component/src/commit.ts, packages/adapters/web-component/src/debug/hooks.ts, packages/adapters/web-component/src/feedback-style.ts, packages/adapters/web-component/src/focus-scope-targets.ts, packages/adapters/web-component/src/host-display.ts, packages/adapters/web-component/src/index.ts, packages/adapters/web-component/src/keyed-meta-sources.ts, packages/adapters/web-component/src/material/owned-texture-sink.ts, packages/adapters/web-component/src/native-text-layout.ts, packages/adapters/web-component/src/owned-decoration.ts, packages/adapters/web-component/src/owned-relocation.ts, packages/adapters/web-component/src/platform/instance-tree.ts, packages/adapters/web-component/src/platform/meta.ts, packages/adapters/web-component/src/portal-conceal.ts, packages/adapters/web-component/src/portal-mount.ts, packages/adapters/web-component/src/props.ts, packages/adapters/web-component/src/runtime/effects-port.ts, packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts, packages/adapters/web-component/src/runtime/modules.ts, packages/adapters/web-component/src/runtime/scroll-target.ts, packages/adapters/web-component/src/runtime/session.ts, packages/adapters/web-component/src/shadow-color-scheme-environment.ts, packages/adapters/web-component/src/shadow-inner-surface.ts, packages/adapters/web-component/src/shadow-owner-shell.ts, packages/adapters/web-component/src/shadow-percentage-source.ts, packages/adapters/web-component/src/shadow-profile.ts, packages/adapters/web-component/src/shadow-split-effects.ts, packages/adapters/web-component/src/shadow-split-meta.ts, packages/adapters/web-component/src/shadow-split-resources.ts, packages/adapters/web-component/src/shadow-style-artifact.ts, packages/adapters/web-component/src/shadow-stylesheet-owner.ts, packages/adapters/web-component/src/shadow-text-control-surface.ts, packages/adapters/web-component/src/slot-projector.ts, packages/adapters/web-component/src/style.ts, packages/adapters/web-component/src/types.ts, packages/adapters/web-component/src/visual-surface.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-header-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/Homepage/homepage-runtime-client.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-search-commands.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-native-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-header-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-search-commands.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/override/Search.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-code-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-copy-client.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-copy-command.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its site-control bridge: apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/index.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its site-control bridge: apps/www/src/components/site-code-surface.ts -> packages/adapters/base/src/index.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteCopyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its site-control bridge: apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts -> packages/adapters/base/src/index.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-shadcn-controls.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/site-typography-client.ts -> packages/adapters/base/src/material/paint-reservation.ts",
+    "reviewed Website runtime entry `apps/www/src/components/SiteTypographyBootstrap.astro?astro&type=script&index=0&lang.ts` has an unowned importer edge bypassing its renderer: apps/www/src/components/adapter-preference.ts -> packages/adapters/base/src/material/paint-reservation.ts"
+  ]
+}

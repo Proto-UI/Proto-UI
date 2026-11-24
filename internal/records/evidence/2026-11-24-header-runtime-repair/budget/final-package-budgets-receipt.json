@@ -1,0 +1,14 @@
+{
+  "command": [
+    "node",
+    "scripts/analysis/package-budgets.mjs",
+    "--json",
+    "--require-clean",
+    "--expected-sha",
+    "957c5ddf0f818a3d91014590a4c2d29c051b1018"
+  ],
+  "head": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+  "exitCode": 0,
+  "durationSeconds": 2.323,
+  "sha256": "d10242281c2bbd4d3927b91f47ae4d39b015475891667249b99ace9b26d33bae"
+}

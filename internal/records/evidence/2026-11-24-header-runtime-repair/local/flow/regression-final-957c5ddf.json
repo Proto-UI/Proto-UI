@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-regression",
+  "nextSkillId": "pui-validate",
+  "outcome": "completed",
+  "binding": {
+    "repositoryId": "github.com:Proto-UI/Proto-UI",
+    "scopeId": "header-test-lifecycle-20261124",
+    "headSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+    "reviewInputDigest": null
+  },
+  "artifacts": [
+    {
+      "type": "request-context",
+      "reference": "/workspace/scratch/080997012d40/flow/request.json",
+      "digest": "sha256:4eff4fe1c00b2e02fe8004b06a2dbb24cced84e511cb1a85846d2592cc472ca1"
+    },
+    {
+      "type": "capability-envelope",
+      "reference": "/workspace/scratch/080997012d40/flow/envelope.json",
+      "digest": "sha256:aacc5283190552f17a384a6607e1aaa00efd2830520fddfcbad2402627da4741"
+    },
+    {
+      "type": "bounded-subject",
+      "reference": "/workspace/scratch/080997012d40/flow/subject.json",
+      "digest": "sha256:3a7937dde7f89195289b3effc723cb6c9edee5f17f867db81bcd973ce15bfd32"
+    },
+    {
+      "type": "authority-map",
+      "reference": "/workspace/scratch/080997012d40/flow/authority.json",
+      "digest": "sha256:46594e45fcc5e99bb0aa1c68ae6e2c2d1c33a95839fc37c5bdae06fc5c4d774b"
+    },
+    {
+      "type": "reproduction",
+      "reference": "/workspace/scratch/080997012d40/flow/reproduction.json",
+      "digest": "sha256:6b3a74dfabaaccbe104acd76c92908943a82d144997ff81a284b34abc3b21029"
+    },
+    {
+      "type": "implementation-authorization",
+      "reference": "/workspace/scratch/080997012d40/flow/authorization.json",
+      "digest": "sha256:fb4008bb2522606166810a221b0446973feff5fc08c0ebea17ef0d706d3bf54d"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate.json",
+      "digest": "sha256:5a42b53bac7b357ddffa596d5c0d14e5c25c8200dd7ff9c01acc2dd35472ba14",
+      "revision": "c554496421759dcafbf0924fbf9777358bb9bba2",
+      "result": "failed"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-production-4a556a37.json",
+      "digest": "sha256:02401cdc6881e74b203a76163de53e26adc8121f48834da6fc70cea1bdd3376d",
+      "revision": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "result": "partial"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-tests-fcc4776c.json",
+      "digest": "sha256:c3e59096db8a1de782a174ff28a3e330bbc56d0b9b70993d4c4f0906ad49a933",
+      "revision": "fcc4776cc0695dc04dad4d058e3858ac0808c759",
+      "result": "passed"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-current-957c5ddf.json",
+      "digest": "sha256:4d68418d0570451e73a0d81bf27f348740fa3f25fca4fc37bd8157822a37c4f9",
+      "revision": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+      "result": "partial"
+    },
+    {
+      "type": "evidence-report",
+      "reference": "/workspace/scratch/080997012d40/flow/production-failure.json",
+      "digest": "sha256:7083077eea57b189461a1dfd504d3a30c780a94b531ca22a82bcb69fb9444c8e",
+      "revision": "c554496421759dcafbf0924fbf9777358bb9bba2",
+      "result": "failed"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Continues the actual received validate-failed.json (pui-validate -> pui-regression). The old c554 materials are retained without overwriting them.",
+    "The regression output explicitly migrates v1 to v2 so historical c554, production 4a, test-only fcc and current merged 957 retain separate revisions and results. The following validation transition must preserve these candidate identities and bindings.",
+    "F1-F4 are resolved in the bounded local independent review. Completed means this repair/preparation transition completed; it is not a passing browser, full graph, CI, release or platform approval.",
+    "The capability envelope and original source map remain historical inputs, not newly authenticated platform permission. No external mutation is performed by this flow.",
+    "Production build evidence is 4a; local 2170/60 tests bind the reviewed source/test bytes. Current merged 957 has no full production/browser run certified by this flow. Platform review remains open and no canonical review-input exists."
+  ]
+}

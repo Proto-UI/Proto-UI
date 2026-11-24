@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.skill-handoff",
+  "entrypoint": "development",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "fromId": "pui-validate",
+  "nextSkillId": "pui-regression",
+  "artifacts": [
+    {
+      "type": "request-context",
+      "reference": "/workspace/scratch/080997012d40/flow/request.json"
+    },
+    {
+      "type": "capability-envelope",
+      "reference": "/workspace/scratch/080997012d40/flow/envelope.json"
+    },
+    {
+      "type": "bounded-subject",
+      "reference": "/workspace/scratch/080997012d40/flow/subject.json"
+    },
+    {
+      "type": "authority-map",
+      "reference": "/workspace/scratch/080997012d40/flow/authority.json"
+    },
+    {
+      "type": "reproduction",
+      "reference": "/workspace/scratch/080997012d40/flow/reproduction.json"
+    },
+    {
+      "type": "implementation-authorization",
+      "reference": "/workspace/scratch/080997012d40/flow/authorization.json"
+    },
+    {
+      "type": "candidate-change",
+      "reference": "/workspace/scratch/080997012d40/flow/candidate.json"
+    },
+    {
+      "type": "evidence-report",
+      "reference": "/workspace/scratch/080997012d40/flow/production-failure.json",
+      "digest": "sha256:7083077eea57b189461a1dfd504d3a30c780a94b531ca22a82bcb69fb9444c8e"
+    }
+  ],
+  "humanGates": [],
+  "notes": [
+    "Full production validation identified SSR and client chunk-order regressions; return to authorized regression owner without changing acceptance rules."
+  ]
+}

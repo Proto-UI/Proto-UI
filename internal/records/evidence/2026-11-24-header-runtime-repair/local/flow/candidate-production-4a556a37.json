@@ -1,0 +1,108 @@
+{
+  "documentKind": "proto-ui.local-candidate-material",
+  "createdAt": "2026-11-24T11:20:29.076Z",
+  "headSha": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+  "productionBaseline": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "historicalFailedCandidate": "c554496421759dcafbf0924fbf9777358bb9bba2",
+  "scope": "Header client/SSR chunk ownership and runtime process lifecycle",
+  "result": "partial",
+  "selectedRepair": {
+    "clientOnlyExplicitChunks": true,
+    "serverStrategyPreserved": true,
+    "conceptBootstrapDataCoLocated": true,
+    "exactRetryConfigAndHelperBound": true,
+    "ownedProcessCleanupFailurePropagated": true
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/www/astro.config.mjs",
+      "sha256": "10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d"
+    },
+    {
+      "path": "apps/www/scripts/client-chunk-isolation.mjs",
+      "sha256": "ab1b90b6ab049058595d686ae23b835cdec6d3b96058bd4055982c8a73c57e69"
+    },
+    {
+      "path": "package.json",
+      "sha256": "90b4f05e0f6ebeef03048583390490029607781fc9f244b06b58914fa9dd4ced"
+    },
+    {
+      "path": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "sha256": "64ffe577a8dc1116074a57309549f0544659173ee0e9341b6079f231df142bf2"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "sha256": "9d26213a1c7a7621514796777498b75b6080c61c4b07646bd9c194f05ddec76d"
+    },
+    {
+      "path": "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "sha256": "3cbe27f0c56b72b51f8ed5cca8f8320be18ffc825559d23b6d266b5788475af4"
+    },
+    {
+      "path": "scripts/test/linux-process-ownership.mjs",
+      "sha256": "4a23c382a207ae2f2a9308572ae0d95009b3699ab30eaade9719c9c09f0b08af"
+    },
+    {
+      "path": "scripts/test/run-runtime-tests.mjs",
+      "sha256": "5c9ffb33be379a252762c2ee29fd3ff4ee3d09261bcd9bdf1a7786cd1e50e32f"
+    },
+    {
+      "path": "scripts/test/run-runtime-tests.test.mjs",
+      "sha256": "08a48c824c169f03b8812f9a97ce2db65e8914d6403d322888e5aff0b86819ae"
+    },
+    {
+      "path": "scripts/test/runtime-process-owner.mjs",
+      "sha256": "539fc03b6b5e28986aa33a2ed81b87de780bae4549d6a2e0a3bf77737638fb71"
+    },
+    {
+      "path": "scripts/test/runtime-process-owner.test.mjs",
+      "sha256": "7e916826ea63cc2a7dedc3f62bafc1379d179061eaf7726a3cb1d187ace4f34a"
+    },
+    {
+      "path": "scripts/test/sprint1-evidence.mjs",
+      "sha256": "6dcba90007e4943d14dcdbcd8c6d3731c59ad7a7632efc42dfac07b6c8862f42"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "status": "resolved",
+      "title": "Astro configuration fingerprint was missing from Retry admission"
+    },
+    {
+      "id": "F2",
+      "status": "resolved",
+      "title": "Automatic cleanup failure could leave the wrapper waiting for EOF indefinitely"
+    },
+    {
+      "id": "F3",
+      "status": "resolved",
+      "title": "Global explicit chunk grouping changed SSR initialization and broke prerendering"
+    },
+    {
+      "id": "F4",
+      "status": "resolved",
+      "title": "Explicit client grouping introduced a PageFrame/site-concepts cycle"
+    }
+  ],
+  "validationBoundary": "The full production build and native reports are bound to 4a556a37. Build success does not make all graph/browser/repository acceptance green.",
+  "evidence": [
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/final-validation-results.json",
+      "digest": "sha256:adc1ecf22e547b9ccb8b20b682c5b4c530ca343e497ec4dc509b90e645b9e923"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/header-candidate-graph-report.json",
+      "digest": "sha256:a96a44cabaaed3901b81496ad2196c886e45fe7d8abbc9234a421296ccedfdbc"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/final-candidate-controls/result.json",
+      "digest": "sha256:91eefe85691dda9307c06a74c49609c7174107d916619de02c192b709f1fea97"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/independent-review-final.json",
+      "digest": "sha256:ddef2d8dc35d0ccb4e8c63b9a9881755885a8a44435beb74a6f44cd4d5d217be"
+    }
+  ],
+  "platformApproval": false
+}

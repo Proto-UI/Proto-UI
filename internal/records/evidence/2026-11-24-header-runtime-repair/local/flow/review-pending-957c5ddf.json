@@ -1,0 +1,41 @@
+{
+  "documentKind": "proto-ui.pending-review-observation",
+  "createdAtUtc": "2026-11-24T11:24:16.147048+00:00",
+  "headSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+  "status": "pending",
+  "formalReviewPacket": false,
+  "canonicalReviewInput": null,
+  "platformApproval": false,
+  "officialHandoff": {
+    "reference": "/workspace/scratch/080997012d40/flow/validate-final-957c5ddf.json",
+    "digest": "sha256:1bdfbe27aa85e6e6fbb98114b8f534a3cc12ace1063a1f40d810814b261fe189"
+  },
+  "actualValidationPredecessor": {
+    "reference": "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json",
+    "digest": "sha256:7008fd160050de7383619305ae35bdc8dd9ca87a60226b9b15a00a585d1e6564"
+  },
+  "localIndependentReview": {
+    "reference": "/workspace/scratch/080997012d40/independent-review-final.json",
+    "digest": "sha256:ddef2d8dc35d0ccb4e8c63b9a9881755885a8a44435beb74a6f44cd4d5d217be"
+  },
+  "blocker": {
+    "source": "pui-review requiredArtifacts and pui-validate step 10",
+    "description": "Canonical live-PR review-input has not been collected; do not fabricate it or issue a platform approval."
+  },
+  "nextAction": "Collect canonical review-input from the live PR at its exact current head, refresh the binding if it moved, then resume pui-review with the actual validation predecessor.",
+  "readOnlyIntegrationObservation": {
+    "provenance": "Root remote command report, not independently executed by this flow agent",
+    "mainSha": "050a155903177dbf2805552ba75e10207c4d1a3c",
+    "candidateSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+    "command": "git merge-tree --write-tree origin/main HEAD",
+    "exitCode": 0,
+    "syntheticTree": "4e975a52bf8b326d0dc4c31091766a4374acbe27",
+    "actualMergePerformed": false,
+    "acceptanceClaim": false
+  },
+  "scopeLimitations": [
+    "F1-F4 resolved locally does not clear retained graph/browser failures.",
+    "Remote strict budget receipt is not independently reviewed by this flow agent.",
+    "The successful merge-tree check is not an actual merge or exact merged-tree test."
+  ]
+}

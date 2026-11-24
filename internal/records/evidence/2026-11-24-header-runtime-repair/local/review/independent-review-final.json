@@ -1,0 +1,815 @@
+{
+  "schemaVersion": 1,
+  "documentKind": "local-independent-review-evidence",
+  "createdAtUtc": "2026-11-24T11:12:56.648642+00:00",
+  "title": "Header chunk isolation and runtime process cleanup: final local independent review",
+  "reviewerRole": "/root/independent_review",
+  "executionMode": "human-assisted",
+  "modeSource": "current-user",
+  "repositoryDirectory": "/workspace/scratch/080997012d40/Proto-UI",
+  "scope": {
+    "baselineHead": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+    "historicalFailedCandidateHead": "c554496421759dcafbf0924fbf9777358bb9bba2",
+    "productionValidatedHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "productionValidatedWorktreeStatus": "",
+    "postProductionReviewedDelta": {
+      "repositoryPath": "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "sha256": "c86479ab6d3f56d948dd6cf9405027fe5996c63422ba76fb84891eb76df2cae3",
+      "insertions": 73,
+      "deletions": 1,
+      "description": "Add a positive-length pure scene re-export counterexample with a shared eager host; no production-source change.",
+      "observationBoundary": "This was the only tracked local diff from 4a556a37 at the final independent review. Later budget integration is outside this review."
+    },
+    "included": [
+      "Website client/SSR chunking boundary and optional shader-scene ownership",
+      "Runtime wrapper child/descendant ownership, cleanup, error propagation, output completion and style-stage sequencing",
+      "Linux helper extraction regression evidence",
+      "Exact Retry configuration/helper source admission needed by the revised Astro configuration",
+      "Final production build, graph and native control/concept evidence for the named repair scope"
+    ],
+    "excluded": [
+      "Package-budget transaction and post-merge exact-head nine-entry budget validation",
+      "Full repository CI acceptance",
+      "Native Windows/macOS execution",
+      "Repair of the retained baseline focus/Typography/remaining graph findings"
+    ]
+  },
+  "conclusion": {
+    "localFindings": "F1, F2, F3 and F4 resolved",
+    "newBlockingCodeFindingsInReviewedScope": [],
+    "overallCiOrWebsiteAcceptance": "not fully passing; retain the unclosed gates below",
+    "platformReview": {
+      "submitted": false,
+      "action": null,
+      "isGitHubApproval": false
+    },
+    "authorizationBoundary": "This evidence file is an independent local technical review, not a platform approval, merge receipt, release acceptance or grant of permission."
+  },
+  "sourceFiles": [
+    {
+      "repositoryPath": "apps/www/astro.config.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/apps/www/astro.config.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d",
+      "reviewedSha256": "10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "apps/www/scripts/client-chunk-isolation.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/apps/www/scripts/client-chunk-isolation.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "ab1b90b6ab049058595d686ae23b835cdec6d3b96058bd4055982c8a73c57e69",
+      "reviewedSha256": "ab1b90b6ab049058595d686ae23b835cdec6d3b96058bd4055982c8a73c57e69",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "package.json",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/package.json",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "90b4f05e0f6ebeef03048583390490029607781fc9f244b06b58914fa9dd4ced",
+      "reviewedSha256": "90b4f05e0f6ebeef03048583390490029607781fc9f244b06b58914fa9dd4ced",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/coverage-matrices/check-coverage-matrices.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "64ffe577a8dc1116074a57309549f0544659173ee0e9341b6079f231df142bf2",
+      "reviewedSha256": "64ffe577a8dc1116074a57309549f0544659173ee0e9341b6079f231df142bf2",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "9d26213a1c7a7621514796777498b75b6080c61c4b07646bd9c194f05ddec76d",
+      "reviewedSha256": "9d26213a1c7a7621514796777498b75b6080c61c4b07646bd9c194f05ddec76d",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "3cbe27f0c56b72b51f8ed5cca8f8320be18ffc825559d23b6d266b5788475af4",
+      "reviewedSha256": "c86479ab6d3f56d948dd6cf9405027fe5996c63422ba76fb84891eb76df2cae3",
+      "reviewedContentBasis": "test-only increment reviewed after production validation"
+    },
+    {
+      "repositoryPath": "scripts/test/linux-process-ownership.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/test/linux-process-ownership.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "4a23c382a207ae2f2a9308572ae0d95009b3699ab30eaade9719c9c09f0b08af",
+      "reviewedSha256": "4a23c382a207ae2f2a9308572ae0d95009b3699ab30eaade9719c9c09f0b08af",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/test/run-runtime-tests.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/test/run-runtime-tests.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "5c9ffb33be379a252762c2ee29fd3ff4ee3d09261bcd9bdf1a7786cd1e50e32f",
+      "reviewedSha256": "5c9ffb33be379a252762c2ee29fd3ff4ee3d09261bcd9bdf1a7786cd1e50e32f",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/test/run-runtime-tests.test.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/test/run-runtime-tests.test.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "08a48c824c169f03b8812f9a97ce2db65e8914d6403d322888e5aff0b86819ae",
+      "reviewedSha256": "08a48c824c169f03b8812f9a97ce2db65e8914d6403d322888e5aff0b86819ae",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/test/runtime-process-owner.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/test/runtime-process-owner.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "539fc03b6b5e28986aa33a2ed81b87de780bae4549d6a2e0a3bf77737638fb71",
+      "reviewedSha256": "539fc03b6b5e28986aa33a2ed81b87de780bae4549d6a2e0a3bf77737638fb71",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/test/runtime-process-owner.test.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/test/runtime-process-owner.test.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "7e916826ea63cc2a7dedc3f62bafc1379d179061eaf7726a3cb1d187ace4f34a",
+      "reviewedSha256": "7e916826ea63cc2a7dedc3f62bafc1379d179061eaf7726a3cb1d187ace4f34a",
+      "reviewedContentBasis": "production commit content"
+    },
+    {
+      "repositoryPath": "scripts/test/sprint1-evidence.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/Proto-UI/scripts/test/sprint1-evidence.mjs",
+      "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "productionSha256": "6dcba90007e4943d14dcdbcd8c6d3731c59ad7a7632efc42dfac07b6c8862f42",
+      "reviewedSha256": "6dcba90007e4943d14dcdbcd8c6d3731c59ad7a7632efc42dfac07b6c8862f42",
+      "reviewedContentBasis": "production commit content"
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "P1",
+      "confidence": "high",
+      "status": "resolved",
+      "title": "Astro configuration fingerprint was missing from Retry admission",
+      "locations": [
+        "apps/www/astro.config.mjs",
+        "scripts/coverage-matrices/check-coverage-matrices.mjs",
+        "scripts/coverage-matrices/test/check-coverage-matrices.test.mjs"
+      ],
+      "originalFailure": "The e3331ef0 configuration no longer matched the admitted c0a7f33c profile; an existing exact-profile test independently failed.",
+      "resolution": "Admit the final 10404ebd configuration in the original four-owner Retry branch and bind client-chunk-isolation.mjs to its exact ab1b90b6 hash. Preserve historical profiles, all other helper checks and the rejection of general package promotion.",
+      "independentValidation": "Final factory version: 60/60 focused Retry profile/owner/helper positive and negative controls passed, zero skipped.",
+      "evidenceIds": [
+        "complete-retry-tests",
+        "final-graph"
+      ]
+    },
+    {
+      "id": "F2",
+      "severity": "P2",
+      "confidence": "high",
+      "status": "resolved",
+      "title": "Automatic cleanup failure could leave the wrapper waiting for EOF indefinitely",
+      "locations": [
+        "scripts/test/runtime-process-owner.mjs",
+        "scripts/test/run-runtime-tests.mjs",
+        "scripts/test/runtime-process-owner.test.mjs"
+      ],
+      "originalFailure": "An exited parent left a detached worker holding output pipes; an injected cleanup denial was retained internally but could not interrupt runVitest close waiting. The first signal error also skipped remaining owned siblings/parent.",
+      "resolution": "Expose per-child cleanup completion, await it with normal close/output completion, terminate the failed read path on cleanup rejection, require successful style cleanup before starting later stages, and aggregate signalling errors while attempting all owned PIDs.",
+      "independentValidation": "Five focused real-process cases passed, including the three new failure controls and both normal nonzero/success outcomes. Failure wrappers exited nonzero in about 6.2 seconds within the unchanged 5-second TERM plus 1-second KILL windows.",
+      "counterfactualValidation": "Three new cases failed against frozen c554496 owner/wrapper/helper bytes. Git blob identity of those three frozen sources was independently checked.",
+      "limits": "The EPERM case is a controlled injected failure, not a claim that EPERM caused the historical CI incident. Windows taskkill is mocked; native evidence is Linux-only.",
+      "evidenceIds": [
+        "process-counterfactual",
+        "process-counterfactual-source-binding",
+        "process-regression",
+        "final-real-vitest"
+      ]
+    },
+    {
+      "id": "F3",
+      "severity": "P1",
+      "confidence": "high",
+      "status": "resolved",
+      "title": "Global explicit chunk grouping changed SSR initialization and broke prerendering",
+      "locations": [
+        "apps/www/astro.config.mjs",
+        "apps/www/scripts/client-chunk-isolation.mjs"
+      ],
+      "originalFailure": "c554496 full build failed at /en/start-here/quick-start/ with DEFAULT_BASE_Z_INDEX accessed before initialization; baseline full build succeeded.",
+      "resolution": "Remove onlyExplicitManualChunks from the shared Vite output and apply it only at Astro build setup target=client through the source-bound integration factory.",
+      "independentValidation": "Installed Astro 5.18.1 server/client hook invocation and merge behavior were inspected. The real-hook fixture confirms client injection, unchanged server output and no shared-config contamination.",
+      "productionValidation": "Clean 4a556a37 full docs:build completed with exit code 0 in 264.18 seconds.",
+      "evidenceIds": [
+        "failed-ssr-build",
+        "failed-ssr-validation",
+        "final-validation",
+        "final-graph"
+      ]
+    },
+    {
+      "id": "F4",
+      "severity": "P2",
+      "confidence": "high",
+      "status": "resolved",
+      "title": "Explicit client grouping introduced a PageFrame/site-concepts cycle",
+      "locations": [
+        "apps/www/astro.config.mjs",
+        "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs"
+      ],
+      "originalFailure": "c554496 client output had a new PageFrame/site-concepts SCC and self-import because concepts.ts was placed in the importing entry.",
+      "resolution": "Explicitly group the concept bootstrap and its pure data module into the existing site-concepts chunk.",
+      "independentValidation": "Actual TypeScript sources and Rollup reproduce the cycle when data grouping is removed. Independent controlled ESM evaluation then throws a concepts-before-initialization ReferenceError; current classifier evaluates successfully and completes the simulated element upgrade.",
+      "productionValidation": "Final graph has zero static cycles and zero new cycles; the real /zh-cn/specifications/introduction/ page reports four hydrated concept elements and passes with zero page/console errors.",
+      "evidenceIds": [
+        "failed-ssr-graph",
+        "final-graph",
+        "final-controls",
+        "complete-graph-tests"
+      ]
+    }
+  ],
+  "independentExecutedChecks": [
+    {
+      "name": "Final client/server scope, optional scene and actual concept source cases",
+      "command": "node --test --test-name-pattern='^Astro applies explicit manual chunks|^manual chunks exclude an unreferenced scene|^manual chunks retain a reached optional scene|^client concept chunk keeps its data' scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "Final exact Retry profile and source-bound helper controls",
+      "command": "node --test --test-name-pattern='^current retry virtual boundary:|^retry resolver profile:|^Finf retry dynamic import boundary:' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+      "passed": 60,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "Runtime cleanup failure and normal outcome cases",
+      "command": "node --test --test-name-pattern='one denied child does not stop|a Vitest cleanup failure|failed style cleanup|normal nonzero|normal complete' scripts/test/runtime-process-owner.test.mjs",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "Post-production pure re-export/shared-host regression",
+      "command": "node --test --test-name-pattern='^manual chunks keep a pure scene re-export lazy with a shared eager host$' scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "Sprint 1 helper extraction focused regression",
+      "command": "node --test --test-name-pattern='bounded process retains|timeout cleans only|an immediate owner exit' scripts/test/sprint1-evidence.test.mjs",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "Whitespace validation of reviewed increments",
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "reviewedProducerEvidence": {
+    "distinction": "These runs were executed by the implementation/integration owners and independently reviewed from their saved evidence; they were not rerun remotely by this reviewer.",
+    "completeGraphTests": {
+      "passed": 2170,
+      "failed": 0,
+      "skipped": 0,
+      "evidenceId": "complete-graph-tests"
+    },
+    "completeProcessOwnerTests": {
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "evidenceId": "process-regression"
+    },
+    "finalCommands": [
+      {
+        "name": "final-candidate-build",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "docs:build"
+        ],
+        "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+        "exitCode": 0,
+        "durationSeconds": 264.18,
+        "worktreeStatus": ""
+      },
+      {
+        "name": "final-candidate-inspect",
+        "command": [
+          "node",
+          "/home/ezra/.local/state/proto-ui-header-080997012d40/inspect-header-graph.mjs",
+          "candidate",
+          "/home/ezra/.local/state/proto-ui-header-080997012d40/repo"
+        ],
+        "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+        "exitCode": 0,
+        "durationSeconds": 0.766,
+        "worktreeStatus": ""
+      },
+      {
+        "name": "final-candidate-controls",
+        "command": [
+          "node",
+          "/home/ezra/.local/state/proto-ui-header-080997012d40/header-production-controls.mjs",
+          "/home/ezra/.local/state/proto-ui-header-080997012d40/repo",
+          "/home/ezra/.local/state/proto-ui-header-080997012d40/final-candidate-controls"
+        ],
+        "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+        "exitCode": 1,
+        "durationSeconds": 67.499,
+        "worktreeStatus": ""
+      },
+      {
+        "name": "final-real-vitest",
+        "command": [
+          "node",
+          "scripts/test/run-runtime-tests.mjs",
+          "packages/adapters/base/test/material-sink-wiring.test.ts",
+          "packages/modules/feedback/test/deferred-view-sink.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1"
+        ],
+        "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+        "exitCode": 0,
+        "durationSeconds": 3.922,
+        "worktreeStatus": ""
+      }
+    ],
+    "realVitest": {
+      "filesPassed": 2,
+      "testsPassed": 10,
+      "exitCode": 0,
+      "scope": "Actual executable wrapper smoke; not the full runtime suite or browser suite.",
+      "evidenceId": "final-real-vitest"
+    }
+  },
+  "productionGraph": {
+    "baselineHead": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+    "candidateHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "baselineGraphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+    "candidateGraphSha256": "acd1c73ffa630a1c25f47308512ed0e7d8f1128005ebd19c4596b3f8e494dc5a",
+    "candidateWorktreeStatus": "",
+    "completeRenderMetadata": true,
+    "sceneRecords": 0,
+    "baselineSceneRecord": {
+      "fileName": "_astro/site-shadcn-controls.r3QN1C-Y.js",
+      "info": {
+        "renderedLength": 0,
+        "renderedExports": [],
+        "removedExports": [
+          "createWebShaderHost",
+          "createWebShaderScenePresenter"
+        ]
+      },
+      "isEntry": false,
+      "isDynamicEntry": true
+    },
+    "staticCycleCount": 0,
+    "newStaticCycleCount": 0,
+    "duplicateRetainedModuleCount": 0,
+    "danglingStaticImportCount": 0,
+    "sourceImportPathUnchanged": true,
+    "sourceImportPath": [
+      "apps/www/src/components/override/Header.astro?astro&type=script&index=0&lang.ts",
+      "apps/www/src/components/site-shadcn-controls.ts",
+      "packages/adapters/web-component/src/index.ts",
+      "packages/adapters/web-component/src/adapt.ts",
+      "packages/adapters/base/src/index.ts",
+      "packages/adapters/base/src/material/shader-scene-host.ts"
+    ],
+    "interpretation": "Baseline had an empty scene module record with renderedLength=0; no retained scene implementation or GPU initialization was established by that record. Candidate removes the record while preserving real lazy scene behavior in discriminating Rollup tests."
+  },
+  "measuredCost": {
+    "metric": "Uncompressed emitted JavaScript bytes and distinct chunks in the Header static dependency closure",
+    "baselineBytes": 1411700,
+    "candidateBytes": 1461180,
+    "deltaBytes": 49480,
+    "percentIncrease": 3.5049939788907025,
+    "baselineChunks": 22,
+    "candidateChunks": 82,
+    "deltaChunks": 60,
+    "claimBoundary": "This is an observed +49,480 raw bytes and +60 chunks, not gzip transfer, load-latency or GPU measurement. Do not describe the repair as a performance optimization. This is separate from the React package-entry budget."
+  },
+  "alternativeProbeReview": {
+    "evidenceIds": [
+      "pure-reexport-probe-source",
+      "pure-reexport-probe-result"
+    ],
+    "result": "With a pure scene re-export and shared eager host, implicit grouping and naming only the scene both eagerly retain positive-length scene implementation; strict entry signatures and disabling transitive-import hoisting do not repair that counterexample. The selected explicit grouping retains a real lazy edge.",
+    "newRegression": "Checks positive renderedLength and eager/lazy static closures, not empty module records or a requirement that the scene chunk itself be a dynamic entry.",
+    "limit": "The probe does not prove onlyExplicitManualChunks is the unique or globally optimal strategy. Naming both the scene and preview succeeds in this minimal probe; that is not a production acceptance result."
+  },
+  "nativeBrowserEvidence": {
+    "baseline": {
+      "browser": "156.0.8078.79",
+      "graphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+      "cases": [
+        {
+          "family": "shadcn",
+          "route": "/zh-cn/ui-libraries/shadcn/button/",
+          "stages": [
+            "mobile-header-wc-ready",
+            "mobile-menu-open",
+            "header-react-lazy-runtime-ready",
+            "mobile-menu-closed",
+            "desktop-dock-and-wc-return"
+          ],
+          "controlSequencePassed": true,
+          "fullCasePassed": false,
+          "focusFailures": [
+            {
+              "label": "React",
+              "runtime": "react",
+              "popupId": "pui-select-1-content",
+              "triggerTag": "wc-shadcn-select-trigger",
+              "triggerConnected": true,
+              "triggerFocused": false,
+              "rootValue": "react",
+              "rootOpen": false,
+              "focusTags": [
+                "body"
+              ]
+            }
+          ],
+          "pageErrorCount": 0,
+          "resourceErrorCount": 0,
+          "webglCallCount": 0,
+          "consoleErrorCount": 0,
+          "consoleErrorKinds": {}
+        },
+        {
+          "family": "brutalist",
+          "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+          "stages": [
+            "mobile-header-wc-ready",
+            "mobile-menu-open",
+            "header-react-lazy-runtime-ready",
+            "mobile-menu-closed",
+            "desktop-dock-and-wc-return"
+          ],
+          "controlSequencePassed": true,
+          "fullCasePassed": false,
+          "focusFailures": [
+            {
+              "label": "React",
+              "runtime": "react",
+              "popupId": "pui-select-1-content",
+              "triggerTag": "wc-brutalist-select-trigger",
+              "triggerConnected": true,
+              "triggerFocused": false,
+              "rootValue": "react",
+              "rootOpen": false,
+              "focusTags": [
+                "body"
+              ]
+            }
+          ],
+          "pageErrorCount": 0,
+          "resourceErrorCount": 0,
+          "webglCallCount": 0,
+          "consoleErrorCount": 0,
+          "consoleErrorKinds": {}
+        },
+        {
+          "family": "bootstrap",
+          "route": "/zh-cn/ui-libraries/bootstrap-2-3-2/button/",
+          "stages": [
+            "mobile-header-wc-ready",
+            "mobile-menu-open",
+            "header-react-lazy-runtime-ready",
+            "mobile-menu-closed",
+            "desktop-dock-and-wc-return"
+          ],
+          "controlSequencePassed": true,
+          "fullCasePassed": false,
+          "focusFailures": [
+            {
+              "label": "React",
+              "runtime": "react",
+              "popupId": "pui-select-1-content",
+              "triggerTag": "wc-bootstrap-2-3-2-select-trigger",
+              "triggerConnected": true,
+              "triggerFocused": false,
+              "rootValue": "react",
+              "rootOpen": false,
+              "focusTags": [
+                "body"
+              ]
+            }
+          ],
+          "pageErrorCount": 0,
+          "resourceErrorCount": 0,
+          "webglCallCount": 0,
+          "consoleErrorCount": 200,
+          "consoleErrorKinds": {
+            "[SiteTypography] Retained native documentation text after projection failure. Error: [SiteTypography] Unsupported documentation typography family.": 200
+          }
+        }
+      ],
+      "concept": {
+        "route": "/zh-cn/specifications/introduction/",
+        "pageErrors": [],
+        "consoleErrors": [],
+        "passed": true,
+        "hydratedCount": 4
+      }
+    },
+    "candidate": {
+      "browser": "156.0.8078.79",
+      "graphSha256": "acd1c73ffa630a1c25f47308512ed0e7d8f1128005ebd19c4596b3f8e494dc5a",
+      "cases": [
+        {
+          "family": "shadcn",
+          "route": "/zh-cn/ui-libraries/shadcn/button/",
+          "stages": [
+            "mobile-header-wc-ready",
+            "mobile-menu-open",
+            "header-react-lazy-runtime-ready",
+            "mobile-menu-closed",
+            "desktop-dock-and-wc-return"
+          ],
+          "controlSequencePassed": true,
+          "fullCasePassed": false,
+          "focusFailures": [
+            {
+              "label": "React",
+              "runtime": "react",
+              "popupId": "pui-select-1-content",
+              "triggerTag": "wc-shadcn-select-trigger",
+              "triggerConnected": true,
+              "triggerFocused": false,
+              "rootValue": "react",
+              "rootOpen": false,
+              "focusTags": [
+                "body"
+              ]
+            }
+          ],
+          "pageErrorCount": 0,
+          "resourceErrorCount": 0,
+          "webglCallCount": 0,
+          "consoleErrorCount": 0,
+          "consoleErrorKinds": {}
+        },
+        {
+          "family": "brutalist",
+          "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+          "stages": [
+            "mobile-header-wc-ready",
+            "mobile-menu-open",
+            "header-react-lazy-runtime-ready",
+            "mobile-menu-closed",
+            "desktop-dock-and-wc-return"
+          ],
+          "controlSequencePassed": true,
+          "fullCasePassed": false,
+          "focusFailures": [
+            {
+              "label": "React",
+              "runtime": "react",
+              "popupId": "pui-select-1-content",
+              "triggerTag": "wc-brutalist-select-trigger",
+              "triggerConnected": true,
+              "triggerFocused": false,
+              "rootValue": "react",
+              "rootOpen": false,
+              "focusTags": [
+                "body"
+              ]
+            }
+          ],
+          "pageErrorCount": 0,
+          "resourceErrorCount": 0,
+          "webglCallCount": 0,
+          "consoleErrorCount": 0,
+          "consoleErrorKinds": {}
+        },
+        {
+          "family": "bootstrap",
+          "route": "/zh-cn/ui-libraries/bootstrap-2-3-2/button/",
+          "stages": [
+            "mobile-header-wc-ready",
+            "mobile-menu-open",
+            "header-react-lazy-runtime-ready",
+            "mobile-menu-closed",
+            "desktop-dock-and-wc-return"
+          ],
+          "controlSequencePassed": true,
+          "fullCasePassed": false,
+          "focusFailures": [
+            {
+              "label": "React",
+              "runtime": "react",
+              "popupId": "pui-select-1-content",
+              "triggerTag": "wc-bootstrap-2-3-2-select-trigger",
+              "triggerConnected": true,
+              "triggerFocused": false,
+              "rootValue": "react",
+              "rootOpen": false,
+              "focusTags": [
+                "body"
+              ]
+            }
+          ],
+          "pageErrorCount": 0,
+          "resourceErrorCount": 0,
+          "webglCallCount": 0,
+          "consoleErrorCount": 195,
+          "consoleErrorKinds": {
+            "[SiteTypography] Retained native documentation text after projection failure. Error: [SiteTypography] Unsupported documentation typography family.": 195
+          }
+        }
+      ],
+      "concept": {
+        "route": "/zh-cn/specifications/introduction/",
+        "pageErrors": [],
+        "consoleErrors": [],
+        "passed": true,
+        "hydratedCount": 4
+      }
+    }
+  },
+  "unclosedGates": [
+    {
+      "id": "G-FOCUS-RETURN",
+      "status": "failed",
+      "classification": "retained baseline behavior outside the repair scope",
+      "description": "All three families complete the control sequence but each retains one React-selection focus-restoration failure: closed select, connected but unfocused trigger, focus on body. The same semantic observations occur at baseline and candidate.",
+      "candidateControlsExitCode": 1,
+      "prohibitedClaim": "Do not report the three full browser cases as passing.",
+      "evidenceIds": [
+        "baseline-controls",
+        "final-controls",
+        "final-validation"
+      ]
+    },
+    {
+      "id": "G-BOOTSTRAP-TYPOGRAPHY",
+      "status": "failed",
+      "classification": "retained baseline behavior outside the repair scope",
+      "description": "Bootstrap retains the Unsupported documentation typography family console error category: baseline 200 observations, candidate 195. Every candidate console error belongs to that same category. The count difference is not evidence of repair.",
+      "evidenceIds": [
+        "baseline-controls",
+        "final-controls"
+      ]
+    },
+    {
+      "id": "G-FULL-PRODUCTION-GRAPH",
+      "status": "failed",
+      "classification": "retained graph-admission and ownership findings outside the repaired scene/cycle slice",
+      "baselineIssueCount": 64,
+      "candidateIssueCount": 50,
+      "diagnosticComparison": {
+        "method": "Split comma-separated module lists into individual entry/module diagnostics; retain single-edge diagnostics as individual items.",
+        "baselineItems": 255,
+        "candidateItems": 134,
+        "addedItems": 0,
+        "removedItems": 121
+      },
+      "prohibitedClaim": "Zero cycles and repaired scene isolation do not mean the complete production graph gate passed; 50 reported issues remain.",
+      "evidenceIds": [
+        "baseline-graph",
+        "final-graph"
+      ]
+    },
+    {
+      "id": "G-FULL-CI",
+      "status": "not-certified-by-this-review",
+      "description": "Focused tests, full build and the named native evidence do not establish every repository CI/release gate. No whole-repository acceptance or formal approval is issued."
+    }
+  ],
+  "budgetScope": {
+    "includedInThisIndependentJudgment": false,
+    "separateReviewer": "budget_audit",
+    "note": "The original budget transaction, its later merge and exact-head nine-entry strict report are handled separately. This reviewer did not inspect that raw budget report and makes no independent budget-pass claim."
+  },
+  "evidenceFiles": [
+    {
+      "id": "final-validation",
+      "workspaceRelativePath": "remote-evidence/final-validation-results.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/final-validation-results.json",
+      "sha256": "adc1ecf22e547b9ccb8b20b682c5b4c530ca343e497ec4dc509b90e645b9e923",
+      "bytes": 1549
+    },
+    {
+      "id": "final-graph",
+      "workspaceRelativePath": "remote-evidence/header-candidate-graph-report.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/header-candidate-graph-report.json",
+      "sha256": "a96a44cabaaed3901b81496ad2196c886e45fe7d8abbc9234a421296ccedfdbc",
+      "bytes": 45107
+    },
+    {
+      "id": "baseline-graph",
+      "workspaceRelativePath": "remote-evidence/header-baseline-graph-report.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/header-baseline-graph-report.json",
+      "sha256": "26c20991564c91814491f5256434f5c5172da103ab9b1cf2b8861166c2015abb",
+      "bytes": 37101
+    },
+    {
+      "id": "final-controls",
+      "workspaceRelativePath": "remote-evidence/final-candidate-controls/result.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/final-candidate-controls/result.json",
+      "sha256": "91eefe85691dda9307c06a74c49609c7174107d916619de02c192b709f1fea97",
+      "bytes": 285907
+    },
+    {
+      "id": "baseline-controls",
+      "workspaceRelativePath": "remote-evidence/baseline-controls/result.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/baseline-controls/result.json",
+      "sha256": "c5971de15ebf879808e0a0f4ece1e3bb089b45c1056b3e0b518aa97b12bebfa1",
+      "bytes": 259271
+    },
+    {
+      "id": "failed-ssr-validation",
+      "workspaceRelativePath": "remote-evidence/failed-ssr/validation-results.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/failed-ssr/validation-results.json",
+      "sha256": "d60556123b8391a894824f3afada6f1e96799a73b9c17d4aba69f5e68971c7db",
+      "bytes": 1767
+    },
+    {
+      "id": "failed-ssr-build",
+      "workspaceRelativePath": "remote-evidence/failed-ssr/candidate-build.log",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/failed-ssr/candidate-build.log",
+      "sha256": "6ec34c80b421a1883e2c34206b25ce39d80200927a74ee0ee3b9b04843137e65",
+      "bytes": 465676
+    },
+    {
+      "id": "failed-ssr-graph",
+      "workspaceRelativePath": "remote-evidence/failed-ssr/header-candidate-graph-report.json",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/failed-ssr/header-candidate-graph-report.json",
+      "sha256": "e4e4688062931df7104beb5e2f9b08f516bd0ffef25e819aaf7b8d29b34794e6",
+      "bytes": 47419
+    },
+    {
+      "id": "final-real-vitest",
+      "workspaceRelativePath": "remote-evidence/final-real-vitest.log",
+      "absolutePath": "/workspace/scratch/080997012d40/remote-evidence/final-real-vitest.log",
+      "sha256": "69c06c853faa8d2ba519734c4c1310d1048558547e8457b2ec4088b731776544",
+      "bytes": 145244
+    },
+    {
+      "id": "pure-reexport-probe-source",
+      "workspaceRelativePath": "optional-scene-probe.mjs",
+      "absolutePath": "/workspace/scratch/080997012d40/optional-scene-probe.mjs",
+      "sha256": "018c9e24b273174010de81ccdcc725efc3fd6d52da203853d0e1b15b49662def",
+      "bytes": 5173
+    },
+    {
+      "id": "pure-reexport-probe-result",
+      "workspaceRelativePath": "optional-scene-probe-result.json",
+      "absolutePath": "/workspace/scratch/080997012d40/optional-scene-probe-result.json",
+      "sha256": "86b956162d0aa4b17312f2be485ce49b28e04954a0f73b1bedb18caeb9e97b3c",
+      "bytes": 56956
+    },
+    {
+      "id": "complete-graph-tests",
+      "workspaceRelativePath": "header-pure-reexport-graph-green.log",
+      "absolutePath": "/workspace/scratch/080997012d40/header-pure-reexport-graph-green.log",
+      "sha256": "c19cc1c0a85ce4be017f5f9b5c29b733dd8d55515c16e288d1b64067bdda0c10",
+      "bytes": 302662
+    },
+    {
+      "id": "complete-retry-tests",
+      "workspaceRelativePath": "header-pure-reexport-retry-green.log",
+      "absolutePath": "/workspace/scratch/080997012d40/header-pure-reexport-retry-green.log",
+      "sha256": "280eceb3fa97ae0c2e134af3e9d316b5dfe5262c05b223b7aa2f2aac0c208ddb",
+      "bytes": 5801
+    },
+    {
+      "id": "process-counterfactual",
+      "workspaceRelativePath": "process-evidence/f2-baseline.log",
+      "absolutePath": "/workspace/scratch/080997012d40/process-evidence/f2-baseline.log",
+      "sha256": "bcb337c4bd35a0fcd674a211e559f5344dc57c8b23b2f17436b0b36b092ba05e",
+      "bytes": 2760
+    },
+    {
+      "id": "process-regression",
+      "workspaceRelativePath": "process-evidence/f2-owner-regression.log",
+      "absolutePath": "/workspace/scratch/080997012d40/process-evidence/f2-owner-regression.log",
+      "sha256": "ad886d52f140621aac9e94f1a7b13c81c41b7ff39f3126fe77bbfcb76a590f0a",
+      "bytes": 1675
+    },
+    {
+      "id": "process-counterfactual-source-binding",
+      "workspaceRelativePath": "process-evidence/f2-baseline/source-sha.txt",
+      "absolutePath": "/workspace/scratch/080997012d40/process-evidence/f2-baseline/source-sha.txt",
+      "sha256": "bd4e3b9660dad3faf0636448694b2ba67f6c6a083fc442e3a965a1c5e4321c63",
+      "bytes": 41
+    }
+  ],
+  "reportPreparation": {
+    "repositorySourceModified": false,
+    "checksRerunForWritingThisFile": false,
+    "note": "Only this requested JSON evidence file was created. Source snapshot bytes and existing evidence were read to record paths and content hashes."
+  }
+}

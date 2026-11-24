@@ -1,0 +1,677 @@
+{
+  "documentKind": "proto-ui.local-validation-evidence",
+  "createdAtUtc": "2026-11-24T11:24:16.147048+00:00",
+  "result": "partial",
+  "headSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+  "binding": {
+    "repositoryId": "github.com:Proto-UI/Proto-UI",
+    "scopeId": "header-test-lifecycle-20261124",
+    "headSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+    "reviewInputDigest": null
+  },
+  "scope": "Refresh the existing failed-validation repair chain using actual Header/process production evidence and reviewed test-only bytes; retain unresolved graph/browser/platform gates.",
+  "executionBoundary": {
+    "productionExecutedAt": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "productionBaseline": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+    "testOnlyRevision": "fcc4776cc0695dc04dad4d058e3858ac0808c759",
+    "currentMergedCarrier": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+    "currentTreeRootReported": "dbcc2325fe50ff833b79b4837cdcd0a8a52056fe",
+    "currentHeadProductionRunCertified": false,
+    "newHeavyChecksRunByThisRefresh": false,
+    "commitProvenance": "Production receipts and local evidence were read directly. fcc/957 commit identities and remote clean worktree were supplied by root; those Git objects are not locally available."
+  },
+  "candidateMaterials": [
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-production-4a556a37.json",
+      "digest": "sha256:02401cdc6881e74b203a76163de53e26adc8121f48834da6fc70cea1bdd3376d"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-tests-fcc4776c.json",
+      "digest": "sha256:c3e59096db8a1de782a174ff28a3e330bbc56d0b9b70993d4c4f0906ad49a933"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-current-957c5ddf.json",
+      "digest": "sha256:4d68418d0570451e73a0d81bf27f348740fa3f25fca4fc37bd8157822a37c4f9"
+    }
+  ],
+  "productionCommands": [
+    {
+      "name": "final-candidate-build",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "docs:build"
+      ],
+      "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "exitCode": 0,
+      "durationSeconds": 264.18,
+      "worktreeStatus": ""
+    },
+    {
+      "name": "final-candidate-inspect",
+      "command": [
+        "node",
+        "/home/ezra/.local/state/proto-ui-header-080997012d40/inspect-header-graph.mjs",
+        "candidate",
+        "/home/ezra/.local/state/proto-ui-header-080997012d40/repo"
+      ],
+      "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "exitCode": 0,
+      "durationSeconds": 0.766,
+      "worktreeStatus": ""
+    },
+    {
+      "name": "final-candidate-controls",
+      "command": [
+        "node",
+        "/home/ezra/.local/state/proto-ui-header-080997012d40/header-production-controls.mjs",
+        "/home/ezra/.local/state/proto-ui-header-080997012d40/repo",
+        "/home/ezra/.local/state/proto-ui-header-080997012d40/final-candidate-controls"
+      ],
+      "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "exitCode": 1,
+      "durationSeconds": 67.499,
+      "worktreeStatus": ""
+    },
+    {
+      "name": "final-real-vitest",
+      "command": [
+        "node",
+        "scripts/test/run-runtime-tests.mjs",
+        "packages/adapters/base/test/material-sink-wiring.test.ts",
+        "packages/modules/feedback/test/deferred-view-sink.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1"
+      ],
+      "head": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "exitCode": 0,
+      "durationSeconds": 3.922,
+      "worktreeStatus": ""
+    }
+  ],
+  "productionBuild": {
+    "result": "passed",
+    "exitCode": 0,
+    "headSha": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "pages": 688,
+    "pageCountProvenance": "Root read the actual remote final build log; the locally retained command receipt verifies exit 0 but does not contain a page-count field.",
+    "previousFailure": "Historical c554 SSR DEFAULT_BASE_Z_INDEX initialization failure is retained in production-failure.json and failed-ssr logs."
+  },
+  "graph": {
+    "result": "partial",
+    "fullGraphGate": "failed",
+    "baselineIssueCount": 64,
+    "candidateIssueCount": 50,
+    "baselineGraphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+    "candidateGraphSha256": "acd1c73ffa630a1c25f47308512ed0e7d8f1128005ebd19c4596b3f8e494dc5a",
+    "baselineSceneRecords": [
+      {
+        "fileName": "_astro/site-shadcn-controls.r3QN1C-Y.js",
+        "info": {
+          "renderedLength": 0,
+          "renderedExports": [],
+          "removedExports": [
+            "createWebShaderHost",
+            "createWebShaderScenePresenter"
+          ]
+        },
+        "isEntry": false,
+        "isDynamicEntry": true
+      }
+    ],
+    "candidateSceneRecords": [],
+    "candidateStaticChunkCycles": [],
+    "cycleComparison": {
+      "available": true,
+      "baselineHead": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+      "baselineGraphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+      "normalization": "exact facade or unique chunk name; ambiguous names use module-set digest",
+      "newStaticChunkCycles": [],
+      "changedRetainedSourceCycles": [],
+      "removedCycleSignatures": []
+    },
+    "duplicatedRetainedModuleCount": 0,
+    "danglingStaticImportCount": 0,
+    "completeRenderMetadata": true,
+    "diagnosticComparison": {
+      "method": "Split comma-separated module lists into individual entry/module diagnostics; retain single-edge diagnostics as individual items.",
+      "baselineItems": 255,
+      "candidateItems": 134,
+      "addedItems": 0,
+      "removedItems": 121
+    },
+    "diagnosticComparisonProvenance": "Independent local review normalized comma-separated entry/module diagnostics; this is not a whole-graph pass.",
+    "inspectorExitCodeMeaning": "Inspector exit 0 records successful diagnostic collection, not absence of the 50 reported issues.",
+    "claimBoundary": "The baseline scene module was recorded with renderedLength 0. Source-graph reachability does not establish emitted scene behavior or GPU activity."
+  },
+  "measuredCost": {
+    "metric": "Uncompressed emitted JavaScript bytes and distinct chunks in the Header static dependency closure",
+    "baselineBytes": 1411700,
+    "candidateBytes": 1461180,
+    "deltaBytes": 49480,
+    "percentIncrease": 3.5049939788907025,
+    "baselineChunks": 22,
+    "candidateChunks": 82,
+    "deltaChunks": 60,
+    "claimBoundary": "This is an observed +49,480 raw bytes and +60 chunks, not gzip transfer, load-latency or GPU measurement. Do not describe the repair as a performance optimization. This is separate from the React package-entry budget."
+  },
+  "browser": {
+    "result": "partial",
+    "processExitCode": 1,
+    "productionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+    "observedAt": "2026-11-24T11:00:03.416Z",
+    "node": "v24.22.3",
+    "browser": "156.0.8078.79",
+    "graphSha256": "acd1c73ffa630a1c25f47308512ed0e7d8f1128005ebd19c4596b3f8e494dc5a",
+    "baselineAndCandidate": {
+      "baseline": {
+        "browser": "156.0.8078.79",
+        "graphSha256": "149a42d091f0ce4c66894ae6f6befd45fc62492849726f291ffc424239a95030",
+        "cases": [
+          {
+            "family": "shadcn",
+            "route": "/zh-cn/ui-libraries/shadcn/button/",
+            "stages": [
+              "mobile-header-wc-ready",
+              "mobile-menu-open",
+              "header-react-lazy-runtime-ready",
+              "mobile-menu-closed",
+              "desktop-dock-and-wc-return"
+            ],
+            "controlSequencePassed": true,
+            "fullCasePassed": false,
+            "focusFailures": [
+              {
+                "label": "React",
+                "runtime": "react",
+                "popupId": "pui-select-1-content",
+                "triggerTag": "wc-shadcn-select-trigger",
+                "triggerConnected": true,
+                "triggerFocused": false,
+                "rootValue": "react",
+                "rootOpen": false,
+                "focusTags": [
+                  "body"
+                ]
+              }
+            ],
+            "pageErrorCount": 0,
+            "resourceErrorCount": 0,
+            "webglCallCount": 0,
+            "consoleErrorCount": 0,
+            "consoleErrorKinds": {}
+          },
+          {
+            "family": "brutalist",
+            "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+            "stages": [
+              "mobile-header-wc-ready",
+              "mobile-menu-open",
+              "header-react-lazy-runtime-ready",
+              "mobile-menu-closed",
+              "desktop-dock-and-wc-return"
+            ],
+            "controlSequencePassed": true,
+            "fullCasePassed": false,
+            "focusFailures": [
+              {
+                "label": "React",
+                "runtime": "react",
+                "popupId": "pui-select-1-content",
+                "triggerTag": "wc-brutalist-select-trigger",
+                "triggerConnected": true,
+                "triggerFocused": false,
+                "rootValue": "react",
+                "rootOpen": false,
+                "focusTags": [
+                  "body"
+                ]
+              }
+            ],
+            "pageErrorCount": 0,
+            "resourceErrorCount": 0,
+            "webglCallCount": 0,
+            "consoleErrorCount": 0,
+            "consoleErrorKinds": {}
+          },
+          {
+            "family": "bootstrap",
+            "route": "/zh-cn/ui-libraries/bootstrap-2-3-2/button/",
+            "stages": [
+              "mobile-header-wc-ready",
+              "mobile-menu-open",
+              "header-react-lazy-runtime-ready",
+              "mobile-menu-closed",
+              "desktop-dock-and-wc-return"
+            ],
+            "controlSequencePassed": true,
+            "fullCasePassed": false,
+            "focusFailures": [
+              {
+                "label": "React",
+                "runtime": "react",
+                "popupId": "pui-select-1-content",
+                "triggerTag": "wc-bootstrap-2-3-2-select-trigger",
+                "triggerConnected": true,
+                "triggerFocused": false,
+                "rootValue": "react",
+                "rootOpen": false,
+                "focusTags": [
+                  "body"
+                ]
+              }
+            ],
+            "pageErrorCount": 0,
+            "resourceErrorCount": 0,
+            "webglCallCount": 0,
+            "consoleErrorCount": 200,
+            "consoleErrorKinds": {
+              "[SiteTypography] Retained native documentation text after projection failure. Error: [SiteTypography] Unsupported documentation typography family.": 200
+            }
+          }
+        ],
+        "concept": {
+          "route": "/zh-cn/specifications/introduction/",
+          "pageErrors": [],
+          "consoleErrors": [],
+          "passed": true,
+          "hydratedCount": 4
+        }
+      },
+      "candidate": {
+        "browser": "156.0.8078.79",
+        "graphSha256": "acd1c73ffa630a1c25f47308512ed0e7d8f1128005ebd19c4596b3f8e494dc5a",
+        "cases": [
+          {
+            "family": "shadcn",
+            "route": "/zh-cn/ui-libraries/shadcn/button/",
+            "stages": [
+              "mobile-header-wc-ready",
+              "mobile-menu-open",
+              "header-react-lazy-runtime-ready",
+              "mobile-menu-closed",
+              "desktop-dock-and-wc-return"
+            ],
+            "controlSequencePassed": true,
+            "fullCasePassed": false,
+            "focusFailures": [
+              {
+                "label": "React",
+                "runtime": "react",
+                "popupId": "pui-select-1-content",
+                "triggerTag": "wc-shadcn-select-trigger",
+                "triggerConnected": true,
+                "triggerFocused": false,
+                "rootValue": "react",
+                "rootOpen": false,
+                "focusTags": [
+                  "body"
+                ]
+              }
+            ],
+            "pageErrorCount": 0,
+            "resourceErrorCount": 0,
+            "webglCallCount": 0,
+            "consoleErrorCount": 0,
+            "consoleErrorKinds": {}
+          },
+          {
+            "family": "brutalist",
+            "route": "/zh-cn/ui-libraries/brutalist/components/button/",
+            "stages": [
+              "mobile-header-wc-ready",
+              "mobile-menu-open",
+              "header-react-lazy-runtime-ready",
+              "mobile-menu-closed",
+              "desktop-dock-and-wc-return"
+            ],
+            "controlSequencePassed": true,
+            "fullCasePassed": false,
+            "focusFailures": [
+              {
+                "label": "React",
+                "runtime": "react",
+                "popupId": "pui-select-1-content",
+                "triggerTag": "wc-brutalist-select-trigger",
+                "triggerConnected": true,
+                "triggerFocused": false,
+                "rootValue": "react",
+                "rootOpen": false,
+                "focusTags": [
+                  "body"
+                ]
+              }
+            ],
+            "pageErrorCount": 0,
+            "resourceErrorCount": 0,
+            "webglCallCount": 0,
+            "consoleErrorCount": 0,
+            "consoleErrorKinds": {}
+          },
+          {
+            "family": "bootstrap",
+            "route": "/zh-cn/ui-libraries/bootstrap-2-3-2/button/",
+            "stages": [
+              "mobile-header-wc-ready",
+              "mobile-menu-open",
+              "header-react-lazy-runtime-ready",
+              "mobile-menu-closed",
+              "desktop-dock-and-wc-return"
+            ],
+            "controlSequencePassed": true,
+            "fullCasePassed": false,
+            "focusFailures": [
+              {
+                "label": "React",
+                "runtime": "react",
+                "popupId": "pui-select-1-content",
+                "triggerTag": "wc-bootstrap-2-3-2-select-trigger",
+                "triggerConnected": true,
+                "triggerFocused": false,
+                "rootValue": "react",
+                "rootOpen": false,
+                "focusTags": [
+                  "body"
+                ]
+              }
+            ],
+            "pageErrorCount": 0,
+            "resourceErrorCount": 0,
+            "webglCallCount": 0,
+            "consoleErrorCount": 195,
+            "consoleErrorKinds": {
+              "[SiteTypography] Retained native documentation text after projection failure. Error: [SiteTypography] Unsupported documentation typography family.": 195
+            }
+          }
+        ],
+        "concept": {
+          "route": "/zh-cn/specifications/introduction/",
+          "pageErrors": [],
+          "consoleErrors": [],
+          "passed": true,
+          "hydratedCount": 4
+        }
+      }
+    },
+    "claimBoundary": "Each theme completes the control sequence, but each full case remains failed on focus restoration. Zero observed WebGL calls applies only to these recorded routes and interactions."
+  },
+  "focusedTests": {
+    "graph": {
+      "passed": 2170,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0,
+      "evidence": {
+        "reference": "/workspace/scratch/080997012d40/header-pure-reexport-graph-green.log",
+        "digest": "sha256:c19cc1c0a85ce4be017f5f9b5c29b733dd8d55515c16e288d1b64067bdda0c10"
+      }
+    },
+    "retry": {
+      "passed": 60,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0,
+      "evidence": {
+        "reference": "/workspace/scratch/080997012d40/header-pure-reexport-retry-green.log",
+        "digest": "sha256:280eceb3fa97ae0c2e134af3e9d316b5dfe5262c05b223b7aa2f2aac0c208ddb"
+      }
+    },
+    "byteBinding": {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-tests-fcc4776c.json",
+      "digest": "sha256:c3e59096db8a1de782a174ff28a3e330bbc56d0b9b70993d4c4f0906ad49a933"
+    },
+    "executionBoundary": "These exact reviewed test bytes ran before the fcc test-only commit; no exact-fcc or 957 full production execution is claimed.",
+    "independentExecutedChecks": [
+      {
+        "name": "Final client/server scope, optional scene and actual concept source cases",
+        "command": "node --test --test-name-pattern='^Astro applies explicit manual chunks|^manual chunks exclude an unreferenced scene|^manual chunks retain a reached optional scene|^client concept chunk keeps its data' scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "Final exact Retry profile and source-bound helper controls",
+        "command": "node --test --test-name-pattern='^current retry virtual boundary:|^retry resolver profile:|^Finf retry dynamic import boundary:' scripts/coverage-matrices/test/check-coverage-matrices.test.mjs",
+        "passed": 60,
+        "failed": 0,
+        "skipped": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "Runtime cleanup failure and normal outcome cases",
+        "command": "node --test --test-name-pattern='one denied child does not stop|a Vitest cleanup failure|failed style cleanup|normal nonzero|normal complete' scripts/test/runtime-process-owner.test.mjs",
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "Post-production pure re-export/shared-host regression",
+        "command": "node --test --test-name-pattern='^manual chunks keep a pure scene re-export lazy with a shared eager host$' scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "Sprint 1 helper extraction focused regression",
+        "command": "node --test --test-name-pattern='bounded process retains|timeout cleans only|an immediate owner exit' scripts/test/sprint1-evidence.test.mjs",
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "Whitespace validation of reviewed increments",
+        "command": "git diff --check",
+        "exitCode": 0
+      }
+    ]
+  },
+  "localReview": {
+    "conclusion": {
+      "localFindings": "F1, F2, F3 and F4 resolved",
+      "newBlockingCodeFindingsInReviewedScope": [],
+      "overallCiOrWebsiteAcceptance": "not fully passing; retain the unclosed gates below",
+      "platformReview": {
+        "submitted": false,
+        "action": null,
+        "isGitHubApproval": false
+      },
+      "authorizationBoundary": "This evidence file is an independent local technical review, not a platform approval, merge receipt, release acceptance or grant of permission."
+    },
+    "findings": [
+      {
+        "id": "F1",
+        "status": "resolved",
+        "title": "Astro configuration fingerprint was missing from Retry admission"
+      },
+      {
+        "id": "F2",
+        "status": "resolved",
+        "title": "Automatic cleanup failure could leave the wrapper waiting for EOF indefinitely"
+      },
+      {
+        "id": "F3",
+        "status": "resolved",
+        "title": "Global explicit chunk grouping changed SSR initialization and broke prerendering"
+      },
+      {
+        "id": "F4",
+        "status": "resolved",
+        "title": "Explicit client grouping introduced a PageFrame/site-concepts cycle"
+      }
+    ],
+    "evidence": {
+      "reference": "/workspace/scratch/080997012d40/independent-review-final.json",
+      "digest": "sha256:ddef2d8dc35d0ccb4e8c63b9a9881755885a8a44435beb74a6f44cd4d5d217be"
+    },
+    "platformApproval": false
+  },
+  "unclosedGates": [
+    {
+      "id": "G-FOCUS-RETURN",
+      "status": "failed",
+      "classification": "retained baseline behavior outside the repair scope",
+      "description": "All three families complete the control sequence but each retains one React-selection focus-restoration failure: closed select, connected but unfocused trigger, focus on body. The same semantic observations occur at baseline and candidate.",
+      "candidateControlsExitCode": 1,
+      "prohibitedClaim": "Do not report the three full browser cases as passing.",
+      "evidenceIds": [
+        "baseline-controls",
+        "final-controls",
+        "final-validation"
+      ]
+    },
+    {
+      "id": "G-BOOTSTRAP-TYPOGRAPHY",
+      "status": "failed",
+      "classification": "retained baseline behavior outside the repair scope",
+      "description": "Bootstrap retains the Unsupported documentation typography family console error category: baseline 200 observations, candidate 195. Every candidate console error belongs to that same category. The count difference is not evidence of repair.",
+      "evidenceIds": [
+        "baseline-controls",
+        "final-controls"
+      ]
+    },
+    {
+      "id": "G-FULL-PRODUCTION-GRAPH",
+      "status": "failed",
+      "classification": "retained graph-admission and ownership findings outside the repaired scene/cycle slice",
+      "baselineIssueCount": 64,
+      "candidateIssueCount": 50,
+      "diagnosticComparison": {
+        "method": "Split comma-separated module lists into individual entry/module diagnostics; retain single-edge diagnostics as individual items.",
+        "baselineItems": 255,
+        "candidateItems": 134,
+        "addedItems": 0,
+        "removedItems": 121
+      },
+      "prohibitedClaim": "Zero cycles and repaired scene isolation do not mean the complete production graph gate passed; 50 reported issues remain.",
+      "evidenceIds": [
+        "baseline-graph",
+        "final-graph"
+      ]
+    },
+    {
+      "id": "G-FULL-CI",
+      "status": "not-certified-by-this-review",
+      "description": "Focused tests, full build and the named native evidence do not establish every repository CI/release gate. No whole-repository acceptance or formal approval is issued."
+    }
+  ],
+  "rejectedAlternative": {
+    "description": "An exact optional-scene manual chunk preserved baseline cost in simpler fixtures but pure re-export through a shared eager host made Rollup retain positive scene code in Header static closure. The selected client-only strategy preserves a genuine dynamic import.",
+    "source": {
+      "reference": "/workspace/scratch/080997012d40/optional-scene-probe-result.json",
+      "digest": "sha256:86b956162d0aa4b17312f2be485ce49b28e04954a0f73b1bedb18caeb9e97b3c"
+    },
+    "regression": {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-tests-fcc4776c.json",
+      "digest": "sha256:c3e59096db8a1de782a174ff28a3e330bbc56d0b9b70993d4c4f0906ad49a933"
+    }
+  },
+  "agentEvidence": {
+    "disposition": "partial",
+    "requestParaphrase": "Agent paraphrase: verify and repair the reported Header shader dependency, orphaned runtime-test process cleanup, and tight React budget claims, preserving the project's existing authority boundaries.",
+    "requestSource": "Current user conversation; no public source link is asserted.",
+    "uploadStatus": "Not established by this flow refresh. Local captures are not uploaded evidence; root owns authorized evidence publication and verified URLs.",
+    "freshVisualInspection": {
+      "capture": {
+        "reference": "/workspace/scratch/080997012d40/remote-evidence/final-candidate-controls/shadcn-react-menu.png",
+        "digest": "sha256:d1bde67d4a91c89695b8fb311ec5e83471f801d306c04b8b2fef097a59f5539b"
+      },
+      "revision": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+      "route": "/zh-cn/ui-libraries/shadcn/button/",
+      "locale": "zh-cn",
+      "family": "shadcn",
+      "runtime": "React",
+      "viewportPixels": {
+        "width": 390,
+        "height": 844
+      },
+      "state": "Mobile navigation panel open after React selection",
+      "method": "This agent opened the actual saved final production capture during this refresh.",
+      "region": "Header action row and expanded navigation panel",
+      "observation": "Brand and four action controls remain visible above a readable, aligned navigation panel; the React selection, language control and social actions fit the captured mobile width.",
+      "userConsequence": "The navigation and selected runtime remain visually understandable in this recorded state.",
+      "proposedCorrection": "No additional layout correction identified in this single capture. Focus restoration remains a separate failed functional observation.",
+      "scopeLimitations": "Only this final capture was freshly visually inspected here. Do not infer all-theme visual acceptance, keyboard accessibility, contrast, dark-mode, zoom or current-957 rendered acceptance."
+    },
+    "debt": [
+      {
+        "kind": "publication",
+        "description": "Verified accessible uploaded visual/log URLs and per-commit publication receipts are not established here.",
+        "nextAgentAction": "Root reconciles authorized evidence publication and then recollects canonical review input."
+      },
+      {
+        "kind": "verification",
+        "description": "Full graph, focus-return, Bootstrap typography and whole-repository acceptance remain open as explicitly listed.",
+        "nextAgentAction": "Carry these exact failures into live review and route any requested follow-up to its owner without weakening assertions."
+      },
+      {
+        "kind": "verification",
+        "description": "No production/browser rerun at current merged 957 is certified by this flow.",
+        "nextAgentAction": "Bind any required integration execution to the exact live PR head."
+      }
+    ]
+  },
+  "budgetBoundary": {
+    "independentlyReviewedByThisAgent": false,
+    "disposition": "Separate budget agent owns the raw strict report and its conclusion. Root-reported receipt is preserved only in candidate-current material."
+  },
+  "platformReview": {
+    "status": "open",
+    "canonicalReviewInput": null,
+    "reviewPacketIssued": false,
+    "approvalIssued": false,
+    "nextAction": "Collect canonical review-input from the live PR at its exact current head, refresh the binding if it moved, then resume pui-review with the actual validation predecessor."
+  },
+  "readOnlyIntegrationObservation": {
+    "provenance": "Root remote command report, not independently executed by this flow agent",
+    "mainSha": "050a155903177dbf2805552ba75e10207c4d1a3c",
+    "candidateSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+    "command": "git merge-tree --write-tree origin/main HEAD",
+    "exitCode": 0,
+    "syntheticTree": "4e975a52bf8b326d0dc4c31091766a4374acbe27",
+    "actualMergePerformed": false,
+    "acceptanceClaim": false
+  },
+  "evidence": [
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/final-validation-results.json",
+      "digest": "sha256:adc1ecf22e547b9ccb8b20b682c5b4c530ca343e497ec4dc509b90e645b9e923"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/header-baseline-graph-report.json",
+      "digest": "sha256:26c20991564c91814491f5256434f5c5172da103ab9b1cf2b8861166c2015abb"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/header-candidate-graph-report.json",
+      "digest": "sha256:a96a44cabaaed3901b81496ad2196c886e45fe7d8abbc9234a421296ccedfdbc"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/baseline-controls/result.json",
+      "digest": "sha256:c5971de15ebf879808e0a0f4ece1e3bb089b45c1056b3e0b518aa97b12bebfa1"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/final-candidate-controls/result.json",
+      "digest": "sha256:91eefe85691dda9307c06a74c49609c7174107d916619de02c192b709f1fea97"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/final-real-vitest.log",
+      "digest": "sha256:69c06c853faa8d2ba519734c4c1310d1048558547e8457b2ec4088b731776544"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/remote-evidence/failed-ssr/candidate-build.log",
+      "digest": "sha256:6ec34c80b421a1883e2c34206b25ce39d80200927a74ee0ee3b9b04843137e65"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/production-failure.json",
+      "digest": "sha256:7083077eea57b189461a1dfd504d3a30c780a94b531ca22a82bcb69fb9444c8e"
+    }
+  ],
+  "historicalLimitations": [
+    "The local default-heap build failed with OOM and the 4 GiB attempt was OS-killed; their logs remain historical, followed by the recorded remote build.",
+    "The full coverage checker failed with 157 findings on an earlier configuration. It is not a final-957 execution result.",
+    "No source edits, staging, commits, messages to external recipients or platform mutations were performed by this refresh."
+  ]
+}

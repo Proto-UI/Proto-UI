@@ -1,0 +1,224 @@
+{
+  "documentKind": "proto-ui.local-flow-refresh-manifest",
+  "frozenAtUtc": "2026-11-24T11:25:08.031348+00:00",
+  "headSha": "957c5ddf0f818a3d91014590a4c2d29c051b1018",
+  "result": "partial",
+  "officialCurrentHandoff": {
+    "reference": "/workspace/scratch/080997012d40/flow/validate-final-957c5ddf.json",
+    "digest": "sha256:1bdfbe27aa85e6e6fbb98114b8f534a3cc12ace1063a1f40d810814b261fe189",
+    "nextSkillId": null,
+    "reason": "Canonical live-PR review-input missing; pui-validate step 10 terminal disposition."
+  },
+  "newFiles": [
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-current-957c5ddf.json",
+      "digest": "sha256:4d68418d0570451e73a0d81bf27f348740fa3f25fca4fc37bd8157822a37c4f9"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-production-4a556a37.json",
+      "digest": "sha256:02401cdc6881e74b203a76163de53e26adc8121f48834da6fc70cea1bdd3376d"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate-tests-fcc4776c.json",
+      "digest": "sha256:c3e59096db8a1de782a174ff28a3e330bbc56d0b9b70993d4c4f0906ad49a933"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/evidence-final-957c5ddf.json",
+      "digest": "sha256:278f435c4a0ea765be2a1176df14da5b9142ee06920f83c574d504cbb0f43c86"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json",
+      "digest": "sha256:7008fd160050de7383619305ae35bdc8dd9ca87a60226b9b15a00a585d1e6564"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/resolver-failed-to-regression-957c5ddf.log",
+      "digest": "sha256:b0f5e2b7d13683df563378d790420f614f8c699e00f5b015a539202066ab2727"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/resolver-final-957c5ddf-results.json",
+      "digest": "sha256:5806d7f9b2ac4ea280a8aaa69c1a990c36e8666697d12e29a9ca2cd9af5e5951"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/resolver-regression-final-957c5ddf.log",
+      "digest": "sha256:8c974076605adb08214c5d779b58e00dd38121d26741991c332d534b4974cbb9"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/resolver-regression-to-validate-957c5ddf.log",
+      "digest": "sha256:8c974076605adb08214c5d779b58e00dd38121d26741991c332d534b4974cbb9"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/resolver-validate-terminal-957c5ddf.log",
+      "digest": "sha256:be7c2b7ebd0dd4b798c20167ff4d9e2faef64cef50cf573324675b05ba6c1403"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/resolver-validate-to-review-probe-957c5ddf.log",
+      "digest": "sha256:d00eede27e904e23a7f23f492856f7455ad2ea4e16f6d6459fd5611f296e4a9e"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/review-pending-957c5ddf.json",
+      "digest": "sha256:27fc54e61d958a47946f2245b40e6e5fb2ed188afe88d7a7811a0464d102acc0"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/validate-final-957c5ddf.json",
+      "digest": "sha256:1bdfbe27aa85e6e6fbb98114b8f534a3cc12ace1063a1f40d810814b261fe189"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/validate-to-review-probe-957c5ddf.json",
+      "digest": "sha256:ae00ca11f5e7eaebabd4925dacedcd3f4a504d9b7b56944698d7be23edc22984"
+    }
+  ],
+  "preservedOriginalFiles": [
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/validate-failed.json",
+      "digest": "sha256:b216b38143e3035b10b9a44c704dd8bba7942ed1d01b1e5d04f5964994440da3"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/envelope.json",
+      "digest": "sha256:aacc5283190552f17a384a6607e1aaa00efd2830520fddfcbad2402627da4741"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/orient.json",
+      "digest": "sha256:09e3553a68a799eeae31dc5d6527d522490ce35428552e61d001a4c0021e4905"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/reproduction.json",
+      "digest": "sha256:6b3a74dfabaaccbe104acd76c92908943a82d144997ff81a284b34abc3b21029"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/request.json",
+      "digest": "sha256:4eff4fe1c00b2e02fe8004b06a2dbb24cced84e511cb1a85846d2592cc472ca1"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/trace.json",
+      "digest": "sha256:8d10b3b040698e51de80821d4e2e94e65705763e1a5aa521a18ba7d3e1bf006b"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/regression.json",
+      "digest": "sha256:6f1342c01c4694278428586f3aaa573e48bca7d9e7219e2eb5c0343851e278f8"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/candidate.json",
+      "digest": "sha256:5a42b53bac7b357ddffa596d5c0d14e5c25c8200dd7ff9c01acc2dd35472ba14"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/production-failure.json",
+      "digest": "sha256:7083077eea57b189461a1dfd504d3a30c780a94b531ca22a82bcb69fb9444c8e"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/authority.json",
+      "digest": "sha256:46594e45fcc5e99bb0aa1c68ae6e2c2d1c33a95839fc37c5bdae06fc5c4d774b"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/subject.json",
+      "digest": "sha256:3a7937dde7f89195289b3effc723cb6c9edee5f17f867db81bcd973ce15bfd32"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/flow/authorization.json",
+      "digest": "sha256:fb4008bb2522606166810a221b0446973feff5fc08c0ebea17ef0d706d3bf54d"
+    }
+  ],
+  "actualResolverResults": [
+    {
+      "name": "failed-to-regression",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/validate-failed.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/regression.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedOutcome": "pui-regression",
+      "log": "/workspace/scratch/080997012d40/flow/resolver-failed-to-regression-957c5ddf.log",
+      "logDigest": "sha256:b0f5e2b7d13683df563378d790420f614f8c699e00f5b015a539202066ab2727"
+    },
+    {
+      "name": "regression-to-validate",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/validate-failed.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedOutcome": "pui-validate",
+      "log": "/workspace/scratch/080997012d40/flow/resolver-regression-to-validate-957c5ddf.log",
+      "logDigest": "sha256:8c974076605adb08214c5d779b58e00dd38121d26741991c332d534b4974cbb9"
+    },
+    {
+      "name": "validate-terminal",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/validate-final-957c5ddf.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 0,
+      "expectedExitCode": 0,
+      "expectedOutcome": null,
+      "log": "/workspace/scratch/080997012d40/flow/resolver-validate-terminal-957c5ddf.log",
+      "logDigest": "sha256:be7c2b7ebd0dd4b798c20167ff4d9e2faef64cef50cf573324675b05ba6c1403"
+    },
+    {
+      "name": "validate-to-review-probe",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "agent:skill",
+        "--",
+        "--handoff",
+        "/workspace/scratch/080997012d40/flow/validate-to-review-probe-957c5ddf.json",
+        "--prior-handoff",
+        "/workspace/scratch/080997012d40/flow/regression-final-957c5ddf.json"
+      ],
+      "cwd": "/workspace/scratch/080997012d40/Proto-UI",
+      "exitCode": 1,
+      "expectedExitCode": 1,
+      "expectedOutcome": "missing review-input",
+      "log": "/workspace/scratch/080997012d40/flow/resolver-validate-to-review-probe-957c5ddf.log",
+      "logDigest": "sha256:d00eede27e904e23a7f23f492856f7455ad2ea4e16f6d6459fd5611f296e4a9e"
+    }
+  ],
+  "manualIntegrityChecks": {
+    "allReferencedHandoffArtifactHashesMatch": true,
+    "referencesChecked": 37,
+    "allReceivedArtifactsRetainedExactly": true,
+    "candidateIdentitiesAndExistingFieldsUnchanged": true,
+    "modeAndRepositoryScopeHeadUnchangedWithinValidation": true,
+    "freshCurrentHeadEvidenceDigestDistinct": true,
+    "freshEvidenceResult": "partial",
+    "historicalC554MaterialKnownDigestsUnchanged": true,
+    "canonicalReviewInputInvented": false
+  },
+  "resolverCoverageBoundary": "The terminal handoff is structurally admitted. The intended review route is rejected on its missing required review-input before the validate-to-review freshness validator can run. Manual hash and identity checks are recorded separately, not claimed as platform review or execution certification.",
+  "reviewState": {
+    "canonicalInput": null,
+    "puiReviewExecuted": false,
+    "platformApprovalIssued": false,
+    "status": "open/pending"
+  },
+  "nonClaims": [
+    "No exact-957 full production/browser run is certified.",
+    "Browser control sequences passing do not override the retained focus failures or exit 1.",
+    "50 full graph diagnostics remain; no full graph or CI green is asserted.",
+    "The budget raw report is outside this flow agent independent review.",
+    "Read-only merge-tree output is not an actual merge or test of that synthetic tree."
+  ],
+  "writeBoundary": "Only new flow artifacts were created. No production source edits, stage/commit or external mutation were performed by this refresh."
+}

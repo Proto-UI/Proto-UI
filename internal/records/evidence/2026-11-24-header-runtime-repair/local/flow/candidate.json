@@ -1,0 +1,29 @@
+{
+  "headSha": "c554496421759dcafbf0924fbf9777358bb9bba2",
+  "sourceFixCommit": "36b1d64c3e70455781bafa99e548febbe2a32fea",
+  "integratedMain": "06d4f20249d8128575d6e0e13385e9dcf540c84c",
+  "files": [
+    "apps/www/astro.config.mjs",
+    "package.json",
+    "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+    "scripts/test/linux-process-ownership.mjs",
+    "scripts/test/run-runtime-tests.mjs",
+    "scripts/test/run-runtime-tests.test.mjs",
+    "scripts/test/runtime-process-owner.mjs",
+    "scripts/test/runtime-process-owner.test.mjs",
+    "scripts/test/sprint1-evidence.mjs"
+  ],
+  "passed": [
+    "Graph controls 2167/2167; original config fails precisely two new controls",
+    "Linux process owner 14/14; original wrapper fails 7/7 targeted regressions",
+    "Existing runtime runner 138/138",
+    "Existing Sprint1 process scope 3/3",
+    "Real Vitest wrapper 2 files/10 tests on integrated head"
+  ],
+  "failedOrUnrun": [
+    "Local original production builds exit134 and137; no success claimed",
+    "Local Chromium EPERM before first page",
+    "Full remote production graph/browser pending"
+  ],
+  "budget": "Separate existing owned repair at024bc193c35ca74d1893b4c479b148707a8cdd9a; do not duplicate it."
+}

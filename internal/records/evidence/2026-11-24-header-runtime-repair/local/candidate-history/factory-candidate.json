@@ -1,0 +1,10 @@
+{
+  "candidate": "client-only factory alternative, not selected",
+  "baseHead": "c554496421759dcafbf0924fbf9777358bb9bba2",
+  "patchSha256": "c2d6414acd988d5bfb4361520c6724fe3af5523de33a5b03ac97ed6de8080696",
+  "localTests": {
+    "graph": 2169,
+    "retry": 60
+  },
+  "reason": "Global explicit grouping client graph adds 60 Header static chunks and 49480 bytes. A narrower exact-scene manual chunk passes both Rollup counterfactuals without these changes; production validation pending."
+}

@@ -1,0 +1,49 @@
+{
+  "documentKind": "proto-ui.local-candidate-material",
+  "createdAt": "2026-11-24T11:20:29.079Z",
+  "headSha": "fcc4776cc0695dc04dad4d058e3858ac0808c759",
+  "parentProductionHead": "4a556a37acdda77e2cbbc59bb9f10c259b8b5036",
+  "scope": "Pure scene re-export/shared eager host regression only",
+  "result": "passed",
+  "commitBindingSource": "Root supplied the exact committed test-only revision; that Git object is not present in this local checkout.",
+  "files": [
+    {
+      "path": "scripts/coverage-matrices/test/check-website-production-bundle.test.mjs",
+      "sha256": "c86479ab6d3f56d948dd6cf9405027fe5996c63422ba76fb84891eb76df2cae3"
+    }
+  ],
+  "productionSourceChange": false,
+  "discriminatingControl": "Default implicit grouping and exact named-scene grouping both retain positive scene code in the Header static closure; the selected client-only integration preserves a real dynamic import and lazy consumer closure.",
+  "localResults": {
+    "graph": {
+      "passed": 2170,
+      "failed": 0,
+      "skipped": 0
+    },
+    "retry": {
+      "passed": 60,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "executionBoundary": "Tests ran locally on these exact test bytes before the root committed fcc4776c. This is not an exact-fcc full production/browser run.",
+  "evidence": [
+    {
+      "reference": "/workspace/scratch/080997012d40/header-pure-reexport-graph-green.log",
+      "digest": "sha256:c19cc1c0a85ce4be017f5f9b5c29b733dd8d55515c16e288d1b64067bdda0c10"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/header-pure-reexport-retry-green.log",
+      "digest": "sha256:280eceb3fa97ae0c2e134af3e9d316b5dfe5262c05b223b7aa2f2aac0c208ddb"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/optional-scene-probe-result.json",
+      "digest": "sha256:86b956162d0aa4b17312f2be485ce49b28e04954a0f73b1bedb18caeb9e97b3c"
+    },
+    {
+      "reference": "/workspace/scratch/080997012d40/independent-review-final.json",
+      "digest": "sha256:ddef2d8dc35d0ccb4e8c63b9a9881755885a8a44435beb74a6f44cd4d5d217be"
+    }
+  ],
+  "platformApproval": false
+}

@@ -1,0 +1,21 @@
+{
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "baseSha": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+  "repository": "Proto-UI/Proto-UI",
+  "actor": "cyjin-yl",
+  "permissions": {
+    "maintain": true,
+    "push": true,
+    "admin": false
+  },
+  "permissionSource": "live gh api repos/Proto-UI/Proto-UI via authorized doesvm relay",
+  "assessment": "optional advisory, not performed",
+  "humanGates": [],
+  "unknowns": [
+    "Formal independent platform approval is not available from the author identity."
+  ],
+  "exclusions": [
+    "Do not alter concurrently owned budget threshold lane or unrelated Sprint repairs."
+  ]
+}

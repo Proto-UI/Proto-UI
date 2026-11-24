@@ -1,0 +1,16 @@
+{
+  "source": "current-user",
+  "request": "这是真的吗 修一下",
+  "scope": "header-test-lifecycle-20261124",
+  "allowed": [
+    "bounded local fixes and verification",
+    "signed-off commits with actual agent identity",
+    "owned branch push and reviewable PR",
+    "normal exact-head integration if actual independent review and platform requirements pass"
+  ],
+  "notAuthorized": [
+    "inventing approval",
+    "waiving repository protection",
+    "unrelated release or deployment"
+  ]
+}
