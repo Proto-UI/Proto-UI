@@ -1,6 +1,7 @@
 // packages/core/src/template.ts
 import type { Prototype } from '../prototype';
 import type { OwnedDecorationTarget } from './feedback/style';
+import type { MaterialPaintReservation } from '../material-paint-reservation';
 import { isTemplateStyleHandle, type TemplateStyleHandle } from './feedback/style';
 import { ElementFactory, ReservedFactories } from '../handles';
 import { assertSvgProps, isSvgNodeTag } from './svg-tags';
@@ -99,7 +100,10 @@ export type SvgTemplateTag =
   | 'ellipse'
   | 'polygon';
 
-export type ReservedType = { kind: 'slot' } | { kind: 'decoration'; target: OwnedDecorationTarget };
+export type ReservedType =
+  | { kind: 'slot' }
+  | { kind: 'decoration'; target: OwnedDecorationTarget }
+  | { kind: 'paint-reservation'; target: MaterialPaintReservation };
 
 export interface TemplateNode {
   type: TemplateType;
@@ -364,7 +368,18 @@ export function createRendererPrimitives(opt: RendererPrimitivesOptions = {}) {
       throw new Error('[Template] invalid decoration target');
     return Object.freeze({ type: Object.freeze({ kind: 'decoration' as const, target }) });
   };
-  return { el, slot, r, svg, decoration };
+  const paintReservation = (
+    target: MaterialPaintReservation,
+    children: TemplateChildrenInput
+  ): TemplateNode => {
+    if (!target || typeof target !== 'object')
+      throw new Error('[Template] invalid material paint reservation');
+    return Object.freeze({
+      type: Object.freeze({ kind: 'paint-reservation' as const, target }),
+      children: normalizeChildren(children, normOpt),
+    });
+  };
+  return { el, slot, r, svg, decoration, paintReservation };
 }
 
 export interface PrototypeRef {

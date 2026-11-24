@@ -7,7 +7,12 @@ import {
 } from '../src/portal-mount';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import { getLogicalParent, subscribeLogicalTriggerSurface } from '../src/platform/instance-tree';
-import { dialogRoot, dialogContent, dialogClose } from '../../../prototypes/base/src/dialog';
+import {
+  dialogRoot,
+  dialogContent,
+  dialogClose,
+  asDialogContent,
+} from '../../../prototypes/base/src/dialog';
 import type { TransitionControls } from '../../../prototypes/base/src/transition';
 
 describe('WC portal conceal rendering barrier', () => {
@@ -58,6 +63,9 @@ describe('WC portal conceal rendering barrier', () => {
     const barrier = createPortalConcealBarrier(host);
     const done = vi.fn();
     const wait = barrier.wait()!.then(done);
+    expect(getComputedStyle(host).visibility).toBe('hidden');
+    expect(getComputedStyle(host).opacity).toBe('0');
+    expect(host.hasAttribute('inert')).toBe(true);
     frame();
     await Promise.resolve();
     expect(done).not.toHaveBeenCalled();
@@ -66,6 +74,9 @@ describe('WC portal conceal rendering barrier', () => {
     await wait;
     expect(done).toHaveBeenCalledOnce();
     expect(frames.size).toBe(0);
+    expect(host.style.visibility).toBe('');
+    expect(host.style.opacity).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
     portal.unmount(host);
     expect(isWebComponentPortaled(host)).toBe(false);
   });
@@ -78,18 +89,227 @@ describe('WC portal conceal rendering barrier', () => {
       frame();
       expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
       expect(frames.size).toBe(0);
+      host.style.setProperty('visibility', 'visible', 'important');
+      host.style.setProperty('opacity', '0.6', 'important');
       const barrier = createPortalConcealBarrier(host);
       const done = vi.fn();
       const wait = barrier.wait()!.then(done);
       const stale = [...frames.values()][0]!;
+      expect(host.style.getPropertyValue('visibility')).toBe('hidden');
+      expect(host.style.getPropertyPriority('visibility')).toBe('important');
+      expect(host.style.opacity).toBe('0');
+      expect(host.hasAttribute('inert')).toBe(true);
       if (firstFrame) frame();
       barrier.cancel();
       await wait;
       stale(0);
       expect(done).toHaveBeenCalledOnce();
       expect(frames.size).toBe(0);
+      expect(host.style.visibility).toBe('visible');
+      expect(host.style.getPropertyPriority('visibility')).toBe('important');
+      expect(host.style.opacity).toBe('0.6');
+      expect(host.style.getPropertyPriority('opacity')).toBe('important');
+      expect(host.hasAttribute('inert')).toBe(false);
     }
   );
+  it('preserves a pre-existing inert attribute and a foreign style takeover', async () => {
+    portal.mount(host);
+    frame();
+    frame();
+    host.setAttribute('inert', 'caller');
+    const barrier = createPortalConcealBarrier(host);
+    const wait = barrier.wait()!;
+    const stale = [...frames.values()];
+    host.style.setProperty('visibility', 'collapse');
+    host.style.setProperty('opacity', '0.4');
+    barrier.cancel();
+    await wait;
+    for (const callback of stale) callback(0);
+    expect(host.style.visibility).toBe('collapse');
+    expect(host.style.getPropertyPriority('visibility')).toBe('');
+    expect(host.style.opacity).toBe('0.4');
+    expect(host.style.getPropertyPriority('opacity')).toBe('');
+    expect(host.getAttribute('inert')).toBe('caller');
+    expect(frames.size).toBe(0);
+  });
+  it('does not remove a foreign inert value acquired during concealment', async () => {
+    portal.mount(host);
+    frame();
+    frame();
+    const barrier = createPortalConcealBarrier(host);
+    const wait = barrier.wait()!;
+    host.setAttribute('inert', 'foreign');
+    barrier.cancel();
+    await wait;
+    expect(host.getAttribute('inert')).toBe('foreign');
+    expect(host.style.visibility).toBe('');
+    expect(host.style.opacity).toBe('');
+  });
+  it.each([false, true])(
+    'hands original baselines to synchronous conceal during cancellation (authored=%s)',
+    (authored) => {
+      portal.mount(host);
+      frame();
+      frame();
+      if (authored) {
+        host.style.setProperty('visibility', 'visible', 'important');
+        host.style.setProperty('opacity', '0.6', 'important');
+        host.setAttribute('inert', 'caller');
+      }
+      const barrier = createPortalConcealBarrier(host);
+      expect(barrier.conceal()).toBe(true);
+      if (authored) {
+        const set = host.style.setProperty.bind(host.style);
+        const restore = vi
+          .spyOn(host.style, 'setProperty')
+          .mockImplementation((name, value, priority) => {
+            set(name, value, priority);
+            if (name === 'visibility') {
+              restore.mockRestore();
+              expect(barrier.conceal()).toBe(true);
+            }
+          });
+      } else {
+        const remove = host.style.removeProperty.bind(host.style);
+        const restore = vi.spyOn(host.style, 'removeProperty').mockImplementation((name) => {
+          const result = remove(name);
+          if (name === 'visibility') {
+            restore.mockRestore();
+            expect(barrier.conceal()).toBe(true);
+          }
+          return result;
+        });
+      }
+      expect(barrier.cancel()).toBe(true);
+      // The old release must not revoke the replacement's active concealment.
+      expect(host.style.visibility).toBe('hidden');
+      expect(host.style.getPropertyPriority('visibility')).toBe('important');
+      expect(host.style.opacity).toBe('0');
+      expect(host.hasAttribute('inert')).toBe(true);
+      expect(barrier.cancel()).toBe(true);
+      expect(host.style.visibility).toBe(authored ? 'visible' : '');
+      expect(host.style.getPropertyPriority('visibility')).toBe(authored ? 'important' : '');
+      expect(host.style.opacity).toBe(authored ? '0.6' : '');
+      expect(host.style.getPropertyPriority('opacity')).toBe(authored ? 'important' : '');
+      expect(host.getAttribute('inert')).toBe(authored ? 'caller' : null);
+      expect(barrier.cancel()).toBe(false);
+    }
+  );
+  it.each(['visibility', 'inert'] as const)(
+    'cleans independent claims after a %s read fails and retries the failed claim',
+    (property) => {
+      portal.mount(host);
+      frame();
+      frame();
+      const barrier = createPortalConcealBarrier(host);
+      expect(barrier.conceal()).toBe(true);
+      if (property === 'visibility') {
+        vi.spyOn(host.style, 'getPropertyValue').mockImplementationOnce(() => {
+          throw new Error('transient visibility read failure');
+        });
+      } else {
+        const get = host.getAttribute.bind(host);
+        const read = vi.spyOn(host, 'getAttribute').mockImplementation((name) => {
+          if (name === 'inert') {
+            read.mockRestore();
+            throw new Error('transient inert read failure');
+          }
+          return get(name);
+        });
+      }
+      expect(() => barrier.cancel()).toThrow(`transient ${property} read failure`);
+      expect(host.style.visibility).toBe(property === 'visibility' ? 'hidden' : '');
+      expect(host.style.opacity).toBe('');
+      expect(host.hasAttribute('inert')).toBe(property === 'inert');
+      expect(barrier.cancel()).toBe(true);
+      expect(host.style.visibility).toBe('');
+      expect(host.style.opacity).toBe('');
+      expect(host.hasAttribute('inert')).toBe(false);
+      expect(barrier.cancel()).toBe(false);
+    }
+  );
+  it('does not reclaim a foreign value while retrying a failed cleanup read', () => {
+    portal.mount(host);
+    frame();
+    frame();
+    const barrier = createPortalConcealBarrier(host);
+    expect(barrier.conceal()).toBe(true);
+    vi.spyOn(host.style, 'getPropertyValue').mockImplementationOnce(() => {
+      throw new Error('transient visibility read failure');
+    });
+    expect(() => barrier.cancel()).toThrow('transient visibility read failure');
+    host.style.setProperty('visibility', 'collapse');
+    expect(barrier.cancel()).toBe(true);
+    expect(host.style.visibility).toBe('collapse');
+    expect(host.style.getPropertyPriority('visibility')).toBe('');
+    expect(host.style.opacity).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
+    expect(barrier.cancel()).toBe(false);
+  });
+  it('retains a refused cleanup write until it can actually restore its baseline', () => {
+    portal.mount(host);
+    frame();
+    frame();
+    const barrier = createPortalConcealBarrier(host);
+    expect(barrier.conceal()).toBe(true);
+    const remove = host.style.removeProperty.bind(host.style);
+    const restore = vi
+      .spyOn(host.style, 'removeProperty')
+      .mockImplementation((name) =>
+        name === 'visibility' ? host.style.getPropertyValue(name) : remove(name)
+      );
+    expect(() => barrier.cancel()).toThrow('Failed to restore visibility');
+    expect(host.style.visibility).toBe('hidden');
+    expect(host.style.opacity).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
+    restore.mockRestore();
+    expect(barrier.cancel()).toBe(true);
+    expect(host.style.visibility).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
+    expect(barrier.cancel()).toBe(false);
+  });
+  it('does not add a frame wait when the host refuses the conceal write', () => {
+    portal.mount(host);
+    frame();
+    frame();
+    const set = host.style.setProperty.bind(host.style);
+    vi.spyOn(host.style, 'setProperty').mockImplementation((name, value, priority) => {
+      if (name !== 'visibility') set(name, value, priority);
+    });
+    const barrier = createPortalConcealBarrier(host);
+    expect(barrier.wait()).toBeNull();
+    expect(host.style.visibility).toBe('');
+    expect(host.style.opacity).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
+    expect(frames.size).toBe(0);
+  });
+  it('releases a pre-acquired lease when queued concealment has lost ownership', () => {
+    portal.mount(host);
+    frame();
+    frame();
+    const barrier = createPortalConcealBarrier(host);
+    expect(barrier.conceal()).toBe(true);
+    host.style.setProperty('visibility', 'collapse');
+    expect(barrier.wait()).toBeNull();
+    expect(host.style.visibility).toBe('collapse');
+    expect(host.style.opacity).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
+    expect(frames.size).toBe(0);
+  });
+  it('restores conceal ownership if frame scheduling fails', async () => {
+    portal.mount(host);
+    frame();
+    frame();
+    vi.mocked(window.requestAnimationFrame).mockImplementationOnce(() => {
+      throw new Error('frame scheduler unavailable');
+    });
+    const barrier = createPortalConcealBarrier(host);
+    await barrier.wait();
+    expect(host.style.visibility).toBe('');
+    expect(host.style.opacity).toBe('');
+    expect(host.hasAttribute('inert')).toBe(false);
+    expect(frames.size).toBe(0);
+  });
   it('releases a pending barrier when the document becomes non-visible', async () => {
     portal.mount(host);
     const barrier = createPortalConcealBarrier(host);
@@ -163,6 +383,9 @@ describe('WC portal conceal rendering barrier', () => {
     const wait = barrier.wait()!.then(() => {
       settled = true;
     });
+    expect(owner.style.visibility).toBe('hidden');
+    expect(owner.style.opacity).toBe('0');
+    expect(owner.hasAttribute('inert')).toBe(true);
     const nextDocument = document.implementation.createHTMLDocument('adopted');
 
     (owner as any).adoptedCallback(document, nextDocument);
@@ -170,8 +393,171 @@ describe('WC portal conceal rendering barrier', () => {
 
     expect(settled).toBe(true);
     await wait;
+    expect(owner.style.visibility).toBe('');
+    expect(owner.style.opacity).toBe('');
+    expect(owner.hasAttribute('inert')).toBe(false);
     ownerPortal.unmount(owner);
     owner.remove();
+  });
+  it('stops old-view events synchronously while concealment retains the epoch', async () => {
+    let presses = 0;
+    const Root = AdaptToWebComponent(dialogRoot, { registerAs: 'conceal-gate-dialog-root' });
+    const Content = AdaptToWebComponent({
+      name: 'conceal-gate-dialog-content',
+      modules: asDialogContent.modules,
+      setup(def) {
+        asDialogContent();
+        def.event.on('press.commit', () => {
+          presses++;
+        });
+      },
+    });
+    const root = new Root(),
+      content = new Content();
+    root.append(content);
+    setElementProps(root, { open: true, a11yLabel: 'Conceal event gate' });
+    document.body.append(root);
+    const flush = async () => {
+      for (let i = 0; i < 20; i++) await Promise.resolve();
+    };
+    await flush();
+    const controls = content.getExposes().controls as TransitionControls;
+    controls.complete();
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(isWebComponentPortaled(content)).toBe(true);
+    const press = () => content.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    press();
+    expect(presses).toBe(1);
+    setElementProps(root, { open: false, a11yLabel: 'Conceal event gate' });
+    await flush();
+    controls.complete();
+    expect(content.hasAttribute('inert')).toBe(true);
+    expect(getComputedStyle(content).visibility).toBe('hidden');
+    press();
+    expect(presses).toBe(1);
+    await flush();
+    frame();
+    await flush();
+    press();
+    expect(presses).toBe(1);
+    setElementProps(root, { open: true, a11yLabel: 'Conceal event gate' });
+    await flush();
+    expect(content.hasAttribute('inert')).toBe(false);
+    expect(content.style.visibility).toBe('');
+    expect(content.style.opacity).toBe('');
+    press();
+    expect(presses).toBe(2);
+    root.remove();
+    await flush();
+    frame();
+    frame();
+    await flush();
+  });
+
+  it('retains the reopened event gate after native detached attribute reentry', async () => {
+    let presses = 0;
+    let armed = false;
+    let reentries = 0;
+    const calls = { mounted: 0, unmounted: 0, disposed: 0 };
+    const Root = AdaptToWebComponent(dialogRoot, {
+      registerAs: 'conceal-native-reentry-dialog-root',
+      schedule: (task) => task(),
+    });
+    const root = new Root();
+    const Content = AdaptToWebComponent(
+      {
+        name: 'conceal-native-reentry-dialog-content',
+        modules: asDialogContent.modules,
+        setup(def) {
+          asDialogContent();
+          def.event.on('press.commit', () => {
+            presses++;
+          });
+        },
+      },
+      {
+        register: false,
+        shadow: false,
+        schedule: (task) => task(),
+        diagnostics: {
+          onLifecycleEvent(event) {
+            if (event.type === 'mount.mounted') calls.mounted++;
+            if (event.type === 'unmount.done') calls.unmounted++;
+            if (event.type === 'instance.dispose.done') calls.disposed++;
+          },
+        },
+      }
+    );
+    const observed: unknown = Reflect.get(Content, 'observedAttributes');
+    const onAdapterAttribute: unknown = Reflect.get(Content.prototype, 'attributeChangedCallback');
+    if (
+      !Array.isArray(observed) ||
+      !observed.every((name): name is string => typeof name === 'string') ||
+      typeof onAdapterAttribute !== 'function'
+    )
+      throw new TypeError('The actual Custom Element attribute contract is required.');
+    const adapterObservedAttributes = observed;
+    const adapterAttributeChanged = onAdapterAttribute;
+    class ReentrantContent extends Content {
+      static get observedAttributes() {
+        return [...adapterObservedAttributes, 'data-pui-view-detached'];
+      }
+      attributeChangedCallback(name: string, previous: string | null, next: string | null) {
+        if (name !== 'data-pui-view-detached') {
+          adapterAttributeChanged.call(this, name, previous, next);
+          return;
+        }
+        if (!armed || next === null) return;
+        armed = false;
+        reentries++;
+        // An actual Custom Element reaction drives the real public Props path.
+        // Runtime view intent and the synchronous configured host scheduler
+        // reopen the retained epoch before the older attribute call returns.
+        setElementProps(root, { open: true, a11yLabel: 'Native attribute reentry' });
+      }
+    }
+    customElements.define('conceal-native-reentry-dialog-content', ReentrantContent);
+    const content = new ReentrantContent();
+    root.append(content);
+    setElementProps(root, { open: true, a11yLabel: 'Native attribute reentry' });
+    document.body.append(root);
+    const flush = async () => {
+      for (let i = 0; i < 20; i++) await Promise.resolve();
+    };
+    await flush();
+    const controls = content.getExposes().controls as TransitionControls;
+    controls.complete();
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(isWebComponentPortaled(content)).toBe(true);
+    const press = () => content.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    press();
+    expect(presses).toBe(1);
+    armed = true;
+    setElementProps(root, { open: false, a11yLabel: 'Native attribute reentry' });
+    await flush();
+    controls.complete();
+    expect(reentries).toBe(1);
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(content.hasAttribute('inert')).toBe(false);
+    expect(content.style.visibility).toBe('');
+    expect(content.style.opacity).toBe('');
+    expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
+    press();
+    expect(presses).toBe(2);
+    root.remove();
+    // Portal origin removal is observed through actual MutationObserver delivery.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    await flush();
+    frame();
+    frame();
+    await flush();
+    expect(calls).toEqual({ mounted: 1, unmounted: 1, disposed: 1 });
   });
 
   it('revokes a projection when renderer replacement removes its origin marker', async () => {
@@ -367,6 +753,10 @@ describe('WC portal conceal rendering barrier', () => {
       throw new TypeError('Dialog Content must expose a readable transitionState.');
     expect(transitionState.get()).toBe('closed');
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(getComputedStyle(content).display).toBe('none');
+    expect(getComputedStyle(content).visibility).toBe('hidden');
+    expect(getComputedStyle(content).opacity).toBe('0');
+    expect(content.hasAttribute('inert')).toBe(true);
     expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
 
     setElementProps(root, { open: true });
@@ -375,6 +765,9 @@ describe('WC portal conceal rendering barrier', () => {
     frame();
     await flush();
     expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(content.style.visibility).toBe('');
+    expect(content.style.opacity).toBe('');
+    expect(content.hasAttribute('inert')).toBe(false);
     expect(calls).toEqual({ mounted: 1, unmounted: 0, disposed: 0 });
 
     setElementProps(root, { open: false });
@@ -386,6 +779,9 @@ describe('WC portal conceal rendering barrier', () => {
     frame();
     await flush();
     expect(content.isConnected).toBe(false);
+    expect(content.style.visibility).toBe('');
+    expect(content.style.opacity).toBe('');
+    expect(content.hasAttribute('inert')).toBe(false);
     expect(calls).toEqual({ mounted: 1, unmounted: 1, disposed: 1 });
     expect(isWebComponentPortaled(content)).toBe(false);
     expect(frames.size).toBe(0);

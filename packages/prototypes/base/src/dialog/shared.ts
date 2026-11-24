@@ -36,21 +36,27 @@ export function requestDialogOpen(
   run: any,
   nextOpen: boolean,
   reason: string,
-  focusReason: DialogOpenFocusReason | null
+  focusReason: DialogOpenFocusReason | null,
+  expectedRootId?: string
 ): boolean {
   // P-BASE-DIALOG-OPEN-CHANGE, P-BASE-DIALOG-CONTROLLED-OWNER
   try {
-    run.context.update(DIALOG_CONTEXT, (prev: DialogContextValue) => ({
-      ...prev,
-      open: prev.controlled ? prev.open : nextOpen,
-      openFocusReason: nextOpen ? focusReason : null,
-      returnFocusReason: nextOpen ? null : focusReason,
-      requestedOpen: nextOpen,
-      requestReason: reason,
-      requestFocusReason: focusReason,
-      requestVersion: prev.requestVersion + 1,
-    }));
-    return true;
+    let requested = false;
+    run.context.update(DIALOG_CONTEXT, (prev: DialogContextValue) => {
+      if (expectedRootId !== undefined && prev.rootId !== expectedRootId) return prev;
+      requested = true;
+      return {
+        ...prev,
+        open: prev.controlled ? prev.open : nextOpen,
+        openFocusReason: nextOpen ? focusReason : null,
+        returnFocusReason: nextOpen ? null : focusReason,
+        requestedOpen: nextOpen,
+        requestReason: reason,
+        requestFocusReason: focusReason,
+        requestVersion: prev.requestVersion + 1,
+      };
+    });
+    return requested;
   } catch (error) {
     if ((error as { code?: string })?.code === 'CONTEXT_DISCONNECTED') return false;
     throw error;

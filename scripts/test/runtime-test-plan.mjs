@@ -206,6 +206,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts',
+  'packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts',
+  'packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
@@ -249,6 +251,10 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
   'apps/www/src/content/docs/zh-cn/bootstrap-navbar.browser.test.ts':
     '.github/workflows/bootstrap-state-controls-evidence.yml',
   'apps/www/src/content/docs/zh-cn/bootstrap-button-motion.browser.test.ts':
+    '.github/workflows/bootstrap-state-controls-evidence.yml',
+  'packages/prototypes/bootstrap-2-3-2/test/modal-presence.browser.test.ts':
+    '.github/workflows/bootstrap-state-controls-evidence.yml',
+  'packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts':
     '.github/workflows/bootstrap-state-controls-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-state-controls.browser.test.ts':
     '.github/workflows/liquid-material-evidence.yml',

@@ -1,4 +1,5 @@
 import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
+import { MATERIAL_PAINT_RESERVATION_CAP } from '@proto.ui/module-feedback';
 import { subscribeScrollTarget } from './scroll-target';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import { createWebShaderPresentationSink } from '@proto.ui/adapter-base';
@@ -1501,6 +1502,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     // Eligibility is an owner capability available during setup; physical
     // bindings are still acquired only after the complete first view stages.
     .use('feedback', [
+      [MATERIAL_PAINT_RESERVATION_CAP, true],
       ...((!el.shadowRoot || args.splitSurface) &&
       !args.textControlTarget &&
       !args.imageViewTarget &&
@@ -1733,6 +1735,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     subscribeControlLabelSurface
   )
     .use('feedback', [
+      [MATERIAL_PAINT_RESERVATION_CAP, true],
       ...((!el.shadowRoot || args.splitSurface) &&
       !args.textControlTarget &&
       !args.imageViewTarget &&

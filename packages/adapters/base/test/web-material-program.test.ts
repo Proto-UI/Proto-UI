@@ -2183,7 +2183,7 @@ describe('readback CPU optimization equivalence and lifetime (no GPU evidence)',
     }
   });
 
-  it('reuses only one current-size readback buffer and releases it on clear', () => {
+  it('reuses the active readback view and releases its backing storage on clear', () => {
     const f = fixture();
     const buffers: Uint8Array[] = [];
     f.gl.readPixels = (...args: unknown[]) => {
@@ -2203,6 +2203,109 @@ describe('readback CPU optimization equivalence and lifetime (no GPU evidence)',
       f.program.clear();
       f.program.render(larger);
       expect(buffers[4]).not.toBe(buffers[3]);
+      expect(f.program.inspect().readbackAllocations).toBe(3);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('reuses readback capacity across alternating output sizes without widening the active view', () => {
+    const f = fixture();
+    const buffers: Uint8Array[] = [];
+    f.gl.readPixels = (...args: unknown[]) => {
+      const pixels = args[6] as Uint8Array;
+      expect(pixels.byteLength).toBe((args[2] as number) * (args[3] as number) * 4);
+      expect(pixels.byteOffset).toBe(0);
+      buffers.push(pixels);
+      pixels.fill(255);
+    };
+    try {
+      const larger = { ...f.frame, geometry: { ...f.frame.geometry, width: 3 } };
+      f.program.render(larger);
+      for (let cycle = 0; cycle < 20; cycle++) {
+        f.program.render(f.frame);
+        f.program.render(larger);
+      }
+      expect(new Set(buffers.map((pixels) => pixels.buffer)).size).toBe(1);
+      expect(buffers.every((pixels) => pixels.buffer.byteLength === 24)).toBe(true);
+      expect(f.program.inspect().readbackAllocations).toBe(1);
+      expect(f.canvas.toDataURL).toHaveBeenCalledTimes(41);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('excludes old readback tail pixels from a smaller frame but scans the full grown frame', () => {
+    const f = fixture();
+    const buffers: Uint8Array[] = [];
+    f.gl.readPixels = (...args: unknown[]) => {
+      const pixels = args[6] as Uint8Array;
+      buffers.push(pixels);
+      if (buffers.length === 1) pixels.fill(255);
+      else {
+        pixels.fill(0);
+        for (let at = 3; at < pixels.length; at += 4) pixels[at] = 255;
+        if (buffers.length === 3) pixels.set([255, 255, 255, 255], pixels.length - 4);
+      }
+    };
+    try {
+      const larger = { ...f.frame, geometry: { ...f.frame.geometry, width: 3 } };
+      f.program.render(larger);
+      const dark = {
+        ...f.frame,
+        fill: [0, 0, 0, 1] as const,
+        foreground: [1, 1, 1, 1] as const,
+      };
+      // The retained white tail is unsafe for this white foreground, while
+      // every pixel of the current smaller black image remains readable.
+      expect(() => f.program.render(dark)).not.toThrow();
+      expect(buffers[1].buffer === buffers[0].buffer).toBe(true);
+      expect(buffers[1].byteLength).toBe(16);
+      expect([...new Uint8Array(buffers[1].buffer, 16)]).toEqual(Array(8).fill(255));
+      // Growing the active view again must inspect its final pixel; retaining
+      // capacity cannot freeze the previous smaller scan length or its result.
+      expect(() => f.program.render({ ...dark, geometry: larger.geometry })).toThrow(
+        'rendered-contrast-unsafe'
+      );
+      expect(buffers[2].byteLength).toBe(24);
+      expect(f.program.inspect().readbackAllocations).toBe(1);
+      expect(f.canvas.toDataURL).toHaveBeenCalledTimes(2);
+    } finally {
+      f.program.dispose();
+    }
+  });
+
+  it('bounds retained readback capacity by original output admission and retires it on context loss', () => {
+    const f = fixture();
+    const buffers: Uint8Array[] = [];
+    f.gl.readPixels = (...args: unknown[]) => {
+      const pixels = args[6] as Uint8Array;
+      buffers.push(pixels);
+      pixels.fill(255);
+    };
+    try {
+      f.program.render(f.frame);
+      const maximum = {
+        ...f.frame,
+        geometry: { ...f.frame.geometry, width: 1024, height: 1024 },
+      };
+      f.program.render(maximum);
+      f.program.render(f.frame);
+      expect(buffers[1].byteLength).toBe(4 * 1024 * 1024);
+      expect(buffers[2].byteLength).toBe(16);
+      expect(buffers[2].buffer === buffers[1].buffer).toBe(true);
+      expect(f.program.inspect().readbackAllocations).toBe(2);
+      expect(() =>
+        f.program.render({ ...maximum, geometry: { ...maximum.geometry, height: 1025 } })
+      ).toThrow('optical-geometry-budget');
+      expect(buffers).toHaveLength(3);
+      expect(f.program.inspect().readbackAllocations).toBe(2);
+      f.gl.isContextLost.mockReturnValue(true);
+      expect(() => f.program.render(f.frame)).toThrow('webgl-unavailable');
+      f.gl.isContextLost.mockReturnValue(false);
+      f.program.render(f.frame);
+      expect(buffers[3].buffer === buffers[2].buffer).toBe(false);
+      expect(buffers[3].buffer.byteLength).toBe(16);
       expect(f.program.inspect().readbackAllocations).toBe(3);
     } finally {
       f.program.dispose();

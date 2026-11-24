@@ -87,6 +87,8 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
   const open = def.state.bool('open', false);
   def.expose.state('open', open);
 
+  // Semantic dismissal belongs to the retained instance, not its physical view.
+  let logicalRun: import('@proto.ui/core').RunHandle<DialogContentProps> | null = null;
   let mountedRun: any = null;
   let currentContext: DialogContextValue | null = null;
   let warnedMissingAlertDescription = false;
@@ -142,6 +144,8 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     options?: { focusReason?: DialogOpenFocusReason | null }
   ) => {
     // P-BASE-DIALOG-CONTENT-PRESENCE, P-BASE-DIALOG-CONTENT-FOCUS
+    const closingRun = logicalRun;
+    const closingRootId = currentContext?.rootId;
     const prevOpen = open.get();
     open.set(nextOpen, reason ?? 'reason: dialog content sync => open');
     if (nextOpen) {
@@ -149,23 +153,33 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     } else {
       overlay.close(reason ?? 'dialog.close');
     }
-    // Context remains live while the L1 view is detached. Structural intent
-    // is driven by Transition below, but overlay/focus effects require a
-    // mounted view and must not be consumed early by the retained instance.
+    // Accepted close retires the logical focus scope even when zero-duration
+    // Presence has already detached its view. Reentry may have replaced the
+    // Root, disposed this instance or opened it again while Overlay closed.
+    if (!nextOpen) {
+      if (
+        prevOpen &&
+        closingRun &&
+        logicalRun === closingRun &&
+        currentContext?.rootId === closingRootId &&
+        currentContext?.open === false &&
+        !open.get() &&
+        !overlay.isOpen()
+      )
+        focusScope.deactivate({ reason: options?.focusReason ?? 'programmatic' });
+      return;
+    }
+    // Entry still needs the mounted physical view; do not consume it early.
     if (!mountedRun) return;
-    if (nextOpen) {
-      if (!prevOpen || !focusScope.isActive()) {
-        // P-BASE-DIALOG-CONTENT-ENTRY-POLICY: read only for this activation.
-        // Prop changes while active do not configure or reactivate the scope.
-        const focusReason = options?.focusReason ?? 'programmatic';
-        if (mountedRun.props.get().focusEntry === 'manual') {
-          focusScope.activate({ reason: focusReason, entry: 'manual' });
-        } else {
-          focusScope.activate({ reason: focusReason });
-        }
+    if (!prevOpen || !focusScope.isActive()) {
+      // P-BASE-DIALOG-CONTENT-ENTRY-POLICY: read only for this activation.
+      // Prop changes while active do not configure or reactivate the scope.
+      const focusReason = options?.focusReason ?? 'programmatic';
+      if (mountedRun.props.get().focusEntry === 'manual') {
+        focusScope.activate({ reason: focusReason, entry: 'manual' });
+      } else {
+        focusScope.activate({ reason: focusReason });
       }
-    } else {
-      if (prevOpen) focusScope.deactivate({ reason: options?.focusReason ?? 'programmatic' });
     }
   };
 
@@ -192,6 +206,7 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
   });
 
   def.lifecycle.onCreated((run) => {
+    logicalRun = run;
     const ctx = run.context.read(DIALOG_CONTEXT);
     currentContext = ctx;
     syncIdentity(ctx);
@@ -216,21 +231,36 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
 
   def.lifecycle.onUnmounted(() => {
     mountedRun = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    logicalRun = null;
     currentContext = null;
   });
+  const readLiveContext = (run: import('@proto.ui/core').RunHandle<DialogContentProps>) => {
+    try {
+      return run.context.read(DIALOG_CONTEXT);
+    } catch (error) {
+      if ((error as { code?: string })?.code === 'CONTEXT_DISCONNECTED') return null;
+      throw error;
+    }
+  };
 
   overlay.open.watch((_ctx, event) => {
     // P-BASE-DIALOG-CONTENT-DISMISS, P-BASE-DIALOG-CONTENT-CONTROLLED
     if (event.type !== 'next' || event.next || event.reason !== 'escape') return;
-    const run = mountedRun;
-    if (!run) return;
-    const ctx = currentContext;
-    if (!ctx) return;
-    if (!ctx.open) return;
-    requestDialogOpen(run, false, 'escape', 'keyboard');
-    // Request delivery may synchronously replace the owner's open input.
-    // Restore only a still-open controlled fact, never the pre-request snapshot.
-    if (currentContext?.controlled && currentContext.open) overlay.openOverlay('controlled.sync');
+    // Presence may have synchronously detached the view before this watcher.
+    // A newer open, disposal or Context rebind must not consume the old close.
+    const run = logicalRun;
+    const expectedRootId = currentContext?.rootId;
+    if (!run || !expectedRootId || !open.get() || overlay.isOpen()) return;
+    const ctx = readLiveContext(run);
+    if (!ctx?.open || ctx.rootId !== expectedRootId) return;
+    if (!requestDialogOpen(run, false, 'escape', 'keyboard', expectedRootId)) return;
+    // Request delivery may synchronously replace the owner or its open input.
+    if (logicalRun !== run) return;
+    const current = readLiveContext(run);
+    if (current?.rootId === expectedRootId && current.controlled && current.open && open.get())
+      overlay.openOverlay('controlled.sync');
   });
 
   boundary.subscribeOutside(() => {

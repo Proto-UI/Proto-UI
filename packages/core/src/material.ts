@@ -20,6 +20,8 @@ export type MaterialSlot = Readonly<{
   shape: Readonly<{ kind: 'rounded-rect'; geometry: 'style' }>;
   source: MaterialSourceRequest;
   fallback: Readonly<{ fill: 'style'; foreground: 'style' }>;
+  /** Draft: optical admission additionally requires this target's current owned reservation. */
+  paintReservation?: 'required';
 }>;
 
 export type MaterialIntentFrame = Readonly<{
@@ -97,7 +99,7 @@ export function snapshotMaterialCandidate(value: unknown): MaterialCandidate {
 }
 
 export function snapshotMaterialSlot(value: unknown): MaterialSlot {
-  const slot = record(value, ['version', 'shape', 'source', 'fallback']);
+  const slot = record(value, ['version', 'shape', 'source', 'fallback'], ['paintReservation']);
   const shape = record(slot?.shape, ['kind', 'geometry']);
   const fallback = record(slot?.fallback, ['fill', 'foreground']);
   if (
@@ -105,7 +107,8 @@ export function snapshotMaterialSlot(value: unknown): MaterialSlot {
     shape?.kind !== 'rounded-rect' ||
     shape.geometry !== 'style' ||
     fallback?.fill !== 'style' ||
-    fallback.foreground !== 'style'
+    fallback.foreground !== 'style' ||
+    (slot && Object.hasOwn(slot, 'paintReservation') && slot.paintReservation !== 'required')
   )
     throw new Error('Invalid material slot');
   const source = record(slot.source, ['kind'], ['slot']);
@@ -128,5 +131,6 @@ export function snapshotMaterialSlot(value: unknown): MaterialSlot {
     shape: Object.freeze({ kind: 'rounded-rect', geometry: 'style' }),
     source: copy,
     fallback: Object.freeze({ fill: 'style', foreground: 'style' }),
+    ...(slot.paintReservation === 'required' ? { paintReservation: 'required' as const } : {}),
   });
 }

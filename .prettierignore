@@ -110,16 +110,6 @@ scripts/analysis/declarative-agent-ui/upstream/LICENSE
 
 # Frozen Sprint 7 source and review records imported from main b715b8a6 retain
 # their exact accepted bytes. Maintained scripts remain subject to formatting.
-internal/records/2026-11-22-sprint-7-history-sources/timeline.index.json
-internal/records/evidence/2026-11-22-sprint7-history-continuation/README.md
-internal/records/evidence/2026-11-22-sprint7-history-continuation/source-preservation.json
-internal/records/evidence/2026-11-22-sprint7-history-source-binding/independent-checkpoint-review.json
-internal/records/evidence/2026-11-22-sprint7-history-source-binding/original-manual-decisions.json
-internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent-review.json
-internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/independent/protocol-build-revision-independent-tests.json
-internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/validation.json
-internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/README.md
-internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/source-preservation.json
 
 # Exact original Sprint 7 terminal observations; retained hashes bind these bytes.
 internal/records/evidence/2026-11-23-s7-declarative-types/summary.json
@@ -132,6 +122,14 @@ internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
 
+# Also retains the frozen source-gate history from 2026-11-24-sprint1-main-integration.
+# Original main 457d27f7 historical records and execution receipts retain their
+# recorded bytes. Maintained compiler, product, tests, scripts and spec stay formatted.
+internal/records/2026-11-23-gpui-authored-input-atoms.md
+internal/records/2026-11-23-gpui-direct-control-label.md
+internal/records/2026-11-23-gpui-native-consumer-composition.md
+internal/records/2026-11-23-shadow-s4-paint-partial.md
+internal/records/2026-11-23-train-package-budget.json
 # Exact Sprint 2 regression, distribution and complete-inventory receipts.
 # These byte-bound artifacts are verified against their retained manifests.
 internal/records/evidence/2026-11-23-sprint2-compiler-inventory/
@@ -152,13 +150,20 @@ internal/records/evidence/2026-11-24-sprint2-compiler-convergence/
 # See internal/records/2026-11-24-sprint1-main-integration.md.
 internal/records/evidence/2026-11-23-liquid-view-operation/strict-project.json
 internal/records/evidence/2026-11-23-s3-intrinsic-full-width/frozen-css.json
+internal/records/evidence/2026-11-23-s3-intrinsic-full-width/s2-complete-gate-restored.json
 internal/records/evidence/2026-11-23-s3-intrinsic-full-width/transport-driver.mjs
+# Original main 457d27f7 historical records and execution receipts retain their
+# recorded bytes. Maintained compiler, product, tests, scripts and spec stay formatted.
+internal/records/evidence/2026-11-23-shadow-percentage-native/consumer-strict.json
+internal/records/evidence/2026-11-23-shadow-percentage-native/prepare-02-0-receipt.json
 internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-enhanced-group-hover.json
 internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-en-light-brutalist-failed-scripts-group-hover.json
 internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-enhanced.json
 internal/records/evidence/2026-11-23-sidebar-family-radius/sidebar-mobile-en-brutalist-no-js.json
 internal/records/evidence/2026-11-23-train-package-budget/candidate.json
 
+# Exact Sprint 6 integration receipts and archives; narrative records stay formatted.
+internal/records/evidence/2026-11-24-sprint6-integration/
 # Exact original #1453 analysis reports; the receipt binds their emitted bytes.
 internal/records/2026-11-24-props-update-analysis-evidence/
 
@@ -174,5 +179,17 @@ internal/records/evidence/2026-11-24-react-portal-origin-native/
 # Preserve original Scroll Reveal source-gate receipts and logs.
 internal/records/evidence/2026-11-24-scroll-reveal-source-gate/
 
+# Exact original Sprint 5 browser and native-direction receipts; manifests bind these bytes.
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
+internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
 # Preserve original Tooltip view-readiness receipts, probes and captures.
 internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/
+# Exact Sprint 6 integration receipts and archives; narrative records stay formatted.
+
+# Exact original Sprint 2 manifests and execution receipts retain their bound bytes.
+internal/records/evidence/2026-11-24-sprint2-compiler-local/manifest.json
+internal/records/evidence/2026-11-24-sprint2-distribution/manifest.json
+internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json
+internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json

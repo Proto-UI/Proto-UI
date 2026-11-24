@@ -6,7 +6,7 @@ since: 0.2.0-rc.0
 summary: Setup declarations select typed style channels; a shared sampler projects persistent-view target changes without owning component state or presence.
 statement:
   en: >-
-    def.feedback.style.transition declares a bounded set of translate or background-color channels, durationMs and cubic-bezier easing. Existing style contributions and runtime patch determine the sole final target. Motion is presentation only and must never write State, presence, target style, material source or contact acquisition. Hosts resolve governed typed units and palette roles, never recover intent by parsing computed CSS or dispatching on component identity.
+    def.feedback.style.transition declares a bounded set of translate, background-color or width channels, durationMs and cubic-bezier easing. Existing style contributions and runtime patch determine the sole final target. Motion is presentation only and must never write State, presence, target style, material source or contact acquisition. Hosts resolve governed typed units and palette roles, never recover intent by parsing computed CSS or dispatching on component identity.
 
 
 criteria:
@@ -43,6 +43,12 @@ criteria:
   - id: C-FEEDBACK-RESIDENT-MOTION-0001-COLOR-LEASE
     text:
       en: Color presentation explicitly distinguishes active and settled channels. Web owns an inline color lease only while active. On endpoint, reduced or unknown preference, hidden settlement or unresolved source it releases only its own latest write and restores that lease's baseline; a newer external inline write is preserved. The retained target token owns settled paint and idle theme updates. A later active transition captures a new baseline. While a lease is active, an external change to its exact inline value or priority suspends that channel for the remainder of the physical view, preserves the external value, and reports a named ownership diagnostic. Recovery requires a new view/sink binding. The comparison establishes ownership only and must not parse CSS into a typed anchor. Ordinary theme or semantic target changes that do not steal the inline lease remain animatable in the same view. Numeric settled samples remain available to non-Web hosts.
+  - id: C-FEEDBACK-RESIDENT-MOTION-0001-WIDTH
+    text:
+      en: Width is a nonnegative typed length with px, root-font rem and containing-block percentage terms. It never uses the element's own width as the percentage basis. Finite unqualified width utilities and calc(var(--pui-KEY)*1%) are eligible final targets. The latter reads only the finite numeric State exposed at that exact canonical lowercase-hyphen key, with the identical State semantic, and registered to the same instance, after final Rule/patch/suppress resolution; it never reads a CSS custom property or an arbitrary exposed object's getter. Source updates invalidate presentation without changing State or the retained token. Missing, foreign, disconnected, nonnumeric, accessor-backed or nonfinite sources settle with a diagnostic. A removed or suppressed source target unsubscribes. Incompatible layout constraints, unavailable containing-block measurements and selector-dependent widths settle instead of guessing. The shared sampler preserves acknowledged continuity on target and basis changes. Native and Compiler implementations require their own evidence.
+  - id: C-FEEDBACK-RESIDENT-MOTION-0001-WIDTH-LEASE
+    text:
+      en: Width samples distinguish active from settled. Source Web supports horizontal in-flow or floated boxes whose nearest composed box-generating parent is block or flow-root and supplies the content-box percentage basis, skipping display-contents hosts and slots, excluding flex/grid sizing, absolute/fixed positioning and min/max clamps. An active width uses a view-owned inline lease and leaves the final semantic width token intact. Settlement or unresolved input restores only the lease's own baseline; an external inline value or priority change permanently suspends width for that view and is preserved. A pre-existing inline width prevents admission rather than being overridden. Host geometry and layout eligibility are observations, not recovered target intent. Reparenting retires the old measurement and requires the new parent's measurement before another typed sample is acknowledged.
 lifecycleRationale:
   en: This new bounded contract remains draft pending independent review, typed palette integration, Compiler coverage and real Web/native host evidence. Model and DOM tests alone do not establish physical animation support.
 dependsOn:
@@ -58,6 +64,9 @@ verifies:
   tests:
     - T-FEEDBACK-RESIDENT-MOTION-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: expanded
+    summary: Define typed containing-block width targets and exact exposed numeric State inputs, with a bounded source-Web layout profile and active-only width leases.
   - version: 0.3.0-alpha.1
     change: expanded
     summary: Define bounded signed safe-integer fraction targets against the own reference box, independently of role and physical recipe admission.

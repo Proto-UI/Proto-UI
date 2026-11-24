@@ -128,6 +128,9 @@ const colorVars = new Set([
 const staticUtilities: Record<string, string[]> = {
   // Source-bound projection vocabulary; these are ordinary layout/paint
   // properties, not inferred component structure or host behavior.
+  'container-type-inline-size': ['container-type: inline-size;'],
+  'self-center': ['align-self: center;'],
+  'mx-auto': ['margin-inline: auto;'],
   '-mb-4': ['margin-bottom: -1rem;'],
   '-mx-4': ['margin-inline: -1rem;'],
   'max-w-max': ['max-width: max-content;'],

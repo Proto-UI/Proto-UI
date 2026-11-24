@@ -35,6 +35,21 @@ cases:
         C-FEEDBACK-RESIDENT-MOTION-0001-COLOR-LEASE,
       ]
     expectation: shared-host-projection-with-explicit-missing-inputs
+  - id: T-FEEDBACK-RESIDENT-MOTION-0001-CASE-WIDTH
+    title: Width follows exact numeric State and the containing block through interruption and lease loss
+    covers:
+      - C-FEEDBACK-RESIDENT-MOTION-0001-WIDTH
+      - C-FEEDBACK-RESIDENT-MOTION-0001-WIDTH-LEASE
+      - C-FEEDBACK-RESIDENT-MOTION-0001-B
+      - C-FEEDBACK-RESIDENT-MOTION-0001-C
+      - C-FEEDBACK-RESIDENT-MOTION-0001-E
+      - C-FEEDBACK-RESIDENT-MOTION-0001-H
+    expectation: numeric-source-and-containing-block-width-preserve-owner
+  - id: T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROGRESS-WIDTH
+    title: Bootstrap Progress consumes the shared width declaration through its actual Base owner
+    covers:
+      - P-BOOTSTRAP-2-3-2-PROGRESS-WIDTH
+    expectation: source-family-owner-to-width-projection
 implementations:
   - id: resident-model
     kind: module-test
@@ -55,6 +70,42 @@ implementations:
     path: packages/adapters/base/test/web-resident-motion.test.ts
     required: true
     consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROJECT]
+  - id: resident-width-model
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/resident-width.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-WIDTH]
+  - id: resident-width-cssom
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-resident-width.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-WIDTH]
+  - id: resident-width-adoption
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-resident-width-adoption.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-WIDTH]
+    notes:
+      - Exact canonical CSS declarations and lease identity preserve foreign writes and synchronous release/reentry; computed-value tolerance never decides declaration ownership.
+  - id: resident-width-runtime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/resident-width.contract.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-WIDTH]
+  - id: bootstrap-progress-width-source
+    kind: workspace-check
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/progress-width-motion.browser.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROGRESS-WIDTH]
+exercises:
+  prototypes:
+    - id: P-BOOTSTRAP-2-3-2-PROGRESS
+      since: 0.3.0-alpha.2
 verifies:
   contracts:
     - C-FEEDBACK-RESIDENT-MOTION-0001
@@ -63,6 +114,9 @@ sources:
   - path: packages/core/test/feedback/semantic-merge.test.ts
   - path: packages/prototypes/shadcn/test/switch.test.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: expanded
+    summary: Add typed width, exact numeric State, containing-block measurement, lease and Bootstrap consumer cases; record new implementations as planned until their candidate is actually validated.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added bounded motion evidence with explicit physical and compiler evidence debt.

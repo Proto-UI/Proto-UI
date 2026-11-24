@@ -209,10 +209,10 @@ function mockedCase(
 }
 
 describe('Finf representative evidence harness, no native browser', () => {
-  it('registers the existing suite with one official owner and five representative groups plus separately owned suites', () => {
+  it('registers the existing suite with one official owner and the original five representative groups plus four reservation cases and separately owned suites', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
-    expect(manifest.cases).toHaveLength(38);
-    expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(38);
+    expect(manifest.cases).toHaveLength(42);
+    expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(42);
     expect(
       manifest.cases.filter((entry) => entry.group === 'calendar').map(({ id }) => id)
     ).toEqual([
@@ -238,6 +238,7 @@ describe('Finf representative evidence harness, no native browser', () => {
       'disclosure-overlays': 8,
       'modal-overlays': 5,
       'runtime-tabs': 4,
+      'liquid-reservation': 4,
       slider: 0, // Separate suites register their own runtime cases.
       'drawer-command-density': 0,
       'drawer-intrinsic': 0,
