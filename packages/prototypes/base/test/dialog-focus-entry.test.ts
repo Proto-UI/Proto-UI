@@ -71,7 +71,15 @@ async function fixture(
   await flush();
   trigger.focus();
   expect(document.activeElement).toBe(trigger);
-  return { ...parts, readContentOwner: () => readContentOwner?.() };
+  return {
+    root,
+    trigger,
+    mask,
+    content,
+    close,
+    second,
+    readContentOwner: () => readContentOwner?.(),
+  };
 }
 async function finish(parts: Record<string, any>) {
   for (const part of [parts.mask, parts.content]) {
