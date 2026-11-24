@@ -30,6 +30,7 @@ pub struct ControlLabelModule {
     naming: bool,
     activation: bool,
     generation: u64,
+    committed_view: Option<ControlLabelView>,
     pointer: Option<ControlLabelPointer>,
     opaque_pointer_origin: bool,
     diagnostics: Vec<&'static str>,
@@ -38,7 +39,8 @@ pub struct ControlLabelModule {
 impl Default for ControlLabelModule {
     fn default() -> Self {
         Self { association: None, kind: None, callback: Value::Undefined, naming: true, activation: false,
-            generation: 0, pointer: None, opaque_pointer_origin: false, diagnostics: Vec::new(), last_diagnostic: None }
+            generation: 0, committed_view: None, pointer: None, opaque_pointer_origin: false,
+            diagnostics: Vec::new(), last_diagnostic: None }
     }
 }
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -302,6 +304,34 @@ pub fn control_label_pointer_capture(owner: &OwnerRef) {
     let mut owner = owner.borrow_mut();
     owner.modules.control_label.pointer = None;
     owner.modules.control_label.opaque_pointer_origin = false;
+}
+pub fn control_label_commit(owner: &OwnerRef) {
+    // The committed view receipt is the frame and node the current pairing was
+    // built from. A new view invalidates that pairing, so the members are
+    // notified and the pending pointer work is retired with it.
+    let view = control_label_view(owner);
+    let reference = {
+        let mut owner = owner.borrow_mut();
+        let state = &mut owner.modules.control_label;
+        if state.committed_view == view { return; }
+        state.committed_view = view;
+        state.association.clone()
+    };
+    if let Some(reference) = reference { control_label_changed(&reference); }
+}
+pub fn control_label_pointer_move(owner: &OwnerRef, event: &gpui::MouseMoveEvent) {
+    // A pending pointer that leaves the 6px origin, or that no longer holds
+    // the left button, is retired. The sample path re-establishes a pending
+    // pointer from the next move.
+    let cancel = {
+        let owner = owner.borrow();
+        owner.modules.control_label.pointer.as_ref().is_some_and(|pointer| {
+            let delta = event.position - pointer.origin;
+            f32::from(delta.x).abs() > 6. || f32::from(delta.y).abs() > 6.
+                || event.pressed_button != Some(gpui::MouseButton::Left)
+        })
+    };
+    if cancel { control_label_cancel(owner); }
 }
 pub fn control_label_down(owner: &OwnerRef, event: &gpui::MouseDownEvent, eligible: bool, window: &Window) {
     if !control_label_is_label(owner) { return; }
