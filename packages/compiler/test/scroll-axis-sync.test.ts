@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
 import { emitGpuiSource } from '../src/gpui-source';
+import { compilePrototype } from '../src/compile';
 
 const source = (body: string) => `import {definePrototype} from '@proto.ui/core';
 import {asScrollSurface} from '@proto.ui/hooks';
@@ -26,6 +27,27 @@ describe('C-SCROLL-AXIS-SYNC-0001 callback-only axis updates', () => {
       if (emitted.ok) expect(emitted.value.code).toContain('scroll_sync(');
     }
   );
+  it.each([
+    'react-dom-source-v1',
+    'vue-source-v1',
+    'vue2-source-v1',
+    'web-component-source-v1',
+  ] as const)('keeps scroll.sync outside the %s source profile', (profile) => {
+    const compiled = compilePrototype(
+      source("def.expose.method('sync',()=>scroll.sync({axes:'horizontal'}));"),
+      { profile }
+    );
+    expect(compiled.ok, JSON.stringify(compiled)).toBe(false);
+    if (compiled.ok) return;
+    const diagnostic = compiled.diagnostics.find(
+      (entry) =>
+        entry.code === 'PUI4003' &&
+        entry.category === 'unsupported-input' &&
+        entry.message.includes('scroll.sync')
+    );
+    expect(diagnostic).toBeDefined();
+    expect(diagnostic?.message).toContain(profile);
+  });
   it.each(["{axes:'diagonal'}", '{axes:1}'])(
     'rejects values outside the bounded runtime axis contract: %s',
     (patch) => {

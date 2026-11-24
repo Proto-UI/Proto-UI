@@ -806,6 +806,25 @@ function potentialEntryPositionSubjects(selector: string, candidates: readonly E
   return subjects;
 }
 
+function hasInputStateSelector(selector: string): boolean {
+  // A control can change selector matching without mutating an attribute.
+  // Decode CSS escapes before checking pseudo-classes, including state
+  // predicates nested in :has(), :not() and filtered sibling selectors.
+  const decoded = selector.replace(
+    /\\(?:([0-9a-f]{1,6})(?:\r\n|[ \t\n\r\f])?|([^\n\r\f]))/gi,
+    (_escape, hexadecimal: string | undefined, character: string | undefined) => {
+      if (!hexadecimal) return character ?? '';
+      const codePoint = Number.parseInt(hexadecimal, 16);
+      return codePoint > 0 && codePoint <= 0x10ffff && !(codePoint >= 0xd800 && codePoint <= 0xdfff)
+        ? String.fromCodePoint(codePoint)
+        : '\uFFFD';
+    }
+  );
+  return /:(?:-webkit-|-moz-)?(?:autofill|blank|checked|dir|indeterminate|in-range|open|out-of-range|placeholder-shown|state|(?:user-|ui-|submit-)?(?:valid|invalid))(?=[^\w-]|$)/i.test(
+    decoded
+  );
+}
+
 function collectEntryStyleDependencies(
   view: Window & typeof globalThis,
   roots: Iterable<Document | ShadowRoot>,
@@ -816,6 +835,7 @@ function collectEntryStyleDependencies(
 ) {
   const queries = new Set<string>();
   const visitedSheets = new Set<CSSStyleSheet>();
+  let hasExternalInputStateDependency = false;
   let relational = 0;
   const siblingSubjects = new Set<Element>();
   const relationalSubjects = new Set<Element>();
@@ -840,6 +860,28 @@ function collectEntryStyleDependencies(
     if (query) queries.add(query);
   };
   const visitRule = (rule: CSSRule) => {
+    if (!hasExternalInputStateDependency && rule.type !== 1 && 'cssRules' in rule) {
+      // Group conditions such as @scope can carry state selectors outside a
+      // CSSStyleRule's selectorText. Stop before declarations, respecting CSS
+      // literals rather than treating a value such as cursor:default as a selector.
+      const text = rule.cssText;
+      if (typeof text !== 'string') hasExternalInputStateDependency = true;
+      else {
+        let end = text.length;
+        for (let index = 0; index < text.length; index += 1) {
+          const literalEnd = skipSelectorLiteral(text, index, text[index]!);
+          if (literalEnd !== null) {
+            index = literalEnd;
+            continue;
+          }
+          if (text[index] === '{') {
+            end = index;
+            break;
+          }
+        }
+        hasExternalInputStateDependency = hasInputStateSelector(text.slice(0, end));
+      }
+    }
     if (rule.type === 3 || rule.type === 4)
       collectMedia((rule as CSSImportRule | CSSMediaRule).media);
     if (rule.type === 3) {
@@ -853,6 +895,7 @@ function collectEntryStyleDependencies(
           '&',
           `:is(${(rule.parentRule as CSSStyleRule).selectorText})`
         );
+      hasExternalInputStateDependency ||= hasInputStateSelector(selector);
       if (/[+~](?!=)/.test(selector) && styleRuleCanAffectEntryEligibility(rule as CSSStyleRule))
         for (const subject of collectSiblingDependencySubjects(
           selector,
@@ -958,6 +1001,7 @@ function collectEntryStyleDependencies(
     } catch {
       // Cross-origin sheets remain opaque; their owner media still applies.
       relational ||= 1;
+      hasExternalInputStateDependency = true;
     }
   };
   for (const root of roots)
@@ -970,6 +1014,7 @@ function collectEntryStyleDependencies(
     relationalSubjects,
     positionParents,
     filteredPositionParents,
+    hasExternalInputStateDependency,
   ] as const;
 }
 
@@ -1900,6 +1945,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 stopEntryMotionWatch =
                   null;
               let hasArea = false;
+              let hasSlottedEntryContent = false;
               const radioTrees = new Set<Document | ShadowRoot>();
               const mediaRoots = new Set<Document | ShadowRoot>([target.ownerDocument]);
               const radioNames = new Set<string>();
@@ -1987,6 +2033,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 entryObserver?.observe(root, options);
                 if (root.nodeType === 1) entryResizeObserver?.observe(root as HTMLElement);
                 hasArea ||= !!root.querySelector('area');
+                // Assigned slot content can have native state dependencies,
+                // including radio peers, outside these physical observed roots.
+                hasSlottedEntryContent ||=
+                  (root.nodeType === 1 && (root as Element).localName === 'slot') ||
+                  !!root.querySelector('slot');
                 // A portal stays logically beneath its origin marker while its
                 // physical projection lives elsewhere (normally document.body).
                 // Follow those markers so eligibility mutations in the moved
@@ -2102,6 +2153,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 relationalSubjects,
                 positionParents,
                 filteredPositionParents,
+                hasExternalInputStateDependency,
               ] = collectEntryStyleDependencies(
                 view!,
                 mediaRoots,
@@ -2206,10 +2258,26 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   attributes: true,
                 });
               }
+              const shouldProjectInputEvent = (event: Event) => {
+                if (
+                  !event.isTrusted ||
+                  hasExternalStyleInputs ||
+                  hasSlottedEntryContent ||
+                  hasExternalInputStateDependency
+                )
+                  return true;
+                const origin = event.composedPath()[0];
+                // Media-query changes and unknown origins remain conservative.
+                // Owned portals are in observedRoots; slot assignment takes
+                // the conservative path above.
+                return !(origin instanceof view!.Node) || belongsToObservedEntryTree(origin);
+              };
               const stopEntryEnvironmentEvents = listenToEntryEvents(
                 [view!, ...mediaQueries],
                 ['resize', 'change'],
-                projectCurrent
+                (event) => {
+                  if (event.type !== 'change' || shouldProjectInputEvent(event)) projectCurrent();
+                }
               );
               const onFormReset = (event: Event) => {
                 const form = event.composedPath()[0];
@@ -2314,6 +2382,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   );
               };
               const onProjectionEvent = (event: Event) => {
+                if (
+                  (event.type === 'input' || event.type === 'change') &&
+                  !shouldProjectInputEvent(event)
+                )
+                  return;
                 // Keep the substituted fallback stable while the browser is
                 // consuming the same Tab default action. The subsequent task
                 // resamples after focus-visible/focus state settles.

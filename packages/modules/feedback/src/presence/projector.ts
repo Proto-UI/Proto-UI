@@ -14,6 +14,8 @@ export type PresenceSample = Readonly<{ translate?: readonly [number, number]; o
 export type PresenceEnvironment = Readonly<{
   preference: 'reduce' | 'no-preference' | 'unknown';
   visible: boolean;
+  /** The host's current first-render preparation has not admitted its box. */
+  preparing?: boolean;
   width: number | null;
   height: number | null;
   rootFontPx: number | null;
@@ -246,6 +248,10 @@ export function createPresencePresentationProjector(
       settle('invalid-policy');
       return;
     }
+    const animated =
+      candidate.owner.completion === 'presentation' &&
+      !!candidate.owner.attempt &&
+      (candidate.owner.phase === 'entering' || candidate.owner.phase === 'leaving');
     const env = host.environment();
     if (!current(candidate, token)) return;
     if (env.preference !== 'no-preference') {
@@ -264,6 +270,11 @@ export function createPresencePresentationProjector(
       settle('missing-capability');
       return;
     }
+    // Preparation withholds only interpolation inputs and acknowledgements.
+    // Existing preference, visibility and capability fallback stays immediate;
+    // settle() also bypasses this barrier, preserving the independent deadline.
+    // Readiness belongs to this same host snapshot, not a second phase owner.
+    if (animated && !completed && candidate.owner.durationMs > 0 && env.preparing) return;
     const endpoint =
       candidate.owner.phase === 'leaving' || candidate.owner.phase === 'closed'
         ? candidate.closed
@@ -274,10 +285,6 @@ export function createPresencePresentationProjector(
       settle('unresolved-units');
       return;
     }
-    const animated =
-      candidate.owner.completion === 'presentation' &&
-      !!candidate.owner.attempt &&
-      (candidate.owner.phase === 'entering' || candidate.owner.phase === 'leaving');
     if (!animated || completed) {
       const accepted = render(candidate, next, token);
       if (!current(candidate, token)) return;

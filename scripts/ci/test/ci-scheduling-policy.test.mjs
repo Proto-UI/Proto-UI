@@ -447,49 +447,31 @@ test('GPUI source consumers run once per full cycle with retained, exact-source 
 });
 
 function assertReusableCompilerInputBoundary(workflow) {
-  // Only Adapter is reusable. Browser evidence remains an explicit manual opt-in.
+  // The reusable cycle retains its default-off Adapter input. Browser,
+  // package-budget and Website evidence remain separate manual opt-ins.
   assert.deepEqual(workflow.on.workflow_call, {
     inputs: {
       adapter_acceptance: { type: 'boolean', required: false, default: false },
     },
   });
-  const browser = workflow.on.workflow_dispatch?.inputs?.browser_acceptance;
-  assert.ok(browser, 'the manual browser entry must remain available');
-  assert.equal(browser.type, 'boolean');
-  assert.equal(browser.required, false);
-  assert.equal(browser.default, false);
-  const job = workflow.jobs['browser-compiler'];
-  assert.equal(job.if, '${{ inputs.browser_acceptance }}');
-  assert.equal(job.uses, './.github/workflows/compiler-browser-acceptance.yml');
-  assert.deepEqual(job.with, { source_regressions: true, production_build: true });
+  assert.deepEqual(workflow.on.workflow_dispatch.inputs.browser_acceptance, {
+    description: 'Run the separate browser compiler and source regression lanes',
+    type: 'boolean',
+    required: false,
+    default: false,
+  });
+  const browser = workflow.jobs['browser-compiler'];
+  assert.equal(browser.if, '${{ inputs.browser_acceptance }}');
+  assert.equal(browser.uses, './.github/workflows/compiler-browser-acceptance.yml');
+  assert.equal(browser.needs, undefined);
+  assert.deepEqual(browser.with, { source_regressions: true, production_build: true });
+  assert.deepEqual(browser.permissions, { contents: 'read' });
 }
 
-test('compiler inputs preserve the reusable Adapter and manual-only browser boundaries', () => {
+test('compiler inputs preserve the reusable Adapter and manual browser boundaries', () => {
   const original = readWorkflows()['compiler-gpui-source-consumers.yml'];
   assertReusableCompilerInputBoundary(original);
   const mutations = [
-    (workflow) => {
-      workflow.on.workflow_call.inputs.browser_acceptance = {
-        type: 'boolean',
-        required: false,
-        default: false,
-      };
-    },
-    (workflow) => {
-      workflow.jobs['browser-compiler'].if = 'true';
-    },
-    (workflow) => {
-      workflow.jobs['browser-compiler'].if = '${{ inputs.adapter_acceptance }}';
-    },
-    (workflow) => {
-      workflow.jobs['browser-compiler'].uses = './.github/workflows/unreviewed.yml';
-    },
-    (workflow) => {
-      workflow.jobs['browser-compiler'].with.source_regressions = false;
-    },
-    (workflow) => {
-      workflow.jobs['browser-compiler'].with.production_build = false;
-    },
     (workflow) => {
       workflow.on.workflow_call = null;
     },
@@ -520,6 +502,34 @@ test('compiler inputs preserve the reusable Adapter and manual-only browser boun
         required: false,
         default: false,
       };
+    },
+    (workflow) => {
+      workflow.on.workflow_call.inputs.browser_acceptance = {
+        type: 'boolean',
+        required: false,
+        default: false,
+      };
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = 'true';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].if = '${{ inputs.adapter_acceptance }}';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].uses = './.github/workflows/unreviewed.yml';
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].needs = ['native-consumer'];
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.source_regressions = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].with.production_build = false;
+    },
+    (workflow) => {
+      workflow.jobs['browser-compiler'].permissions.contents = 'write';
     },
     (workflow) => {
       workflow.on.workflow_call.inputs.package_budget_evidence = {
@@ -610,12 +620,12 @@ test('native Scroll evidence rejects missing, duplicate, filtered, optional or s
       steps.push(structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause '))));
     },
     (workflow) => {
-      workflow.jobs['native-consumer'].steps.push(structuredClone(targetStep(workflow)));
-    },
-    (workflow) => {
       workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
         (step) => !step.run?.includes('--test scroll_pause ')
       );
+    },
+    (workflow) => {
+      workflow.jobs['native-consumer'].steps.push(structuredClone(targetStep(workflow)));
     },
     (workflow) => {
       targetStep(workflow).if = 'false';

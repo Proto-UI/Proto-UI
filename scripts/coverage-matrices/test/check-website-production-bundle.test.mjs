@@ -502,6 +502,7 @@ test('accepted Shadow resources stay limited to the exact WC bridge chunk', () =
     'packages/adapters/web-component/src/shadow-profile.ts',
     'packages/adapters/web-component/src/shadow-split-effects.ts',
     'packages/adapters/web-component/src/color-scheme-source.ts',
+    'packages/adapters/web-component/src/shadow-percentage-source.ts',
   ]) {
     const graph = graphFixture();
     const bridge = graph.chunks.find(
@@ -1426,23 +1427,28 @@ for (const diagnostic of ['liquid-tint-stage-diagnostic', 'liquid-visible-refrac
   test(`Sprint 6 fixture classification retains static Adapter rejection for ${diagnostic}`, () => {
     const graph = graphFixture();
     const facade = `apps/www/src/pages/en/test/${diagnostic}.astro?astro&type=script&index=0&lang.ts`;
+    const producer = `apps/www/src/content/docs/zh-cn/${diagnostic}.ts`;
+    const program = 'packages/adapters/base/src/material/program.ts';
     graph.chunks.push(
       chunk(`_astro/${diagnostic}.js`, {
         isEntry: true,
         facadeModuleId: facade,
-        moduleIds: [
-          `apps/www/src/pages/en/test/${diagnostic}.astro`,
-          'packages/adapters/base/src/material/program.ts',
-        ],
+        moduleIds: [facade, producer, program],
       })
     );
+    graph.modules = [
+      { id: facade, imports: [producer], dynamicImports: [] },
+      { id: producer, imports: [program], dynamicImports: [] },
+      { id: program, imports: [], dynamicImports: [] },
+    ];
+    // Complete owner provenance makes this a material bypass control, rather
+    // than an incidental rejection of missing module metadata.
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    graph.modules[0].imports.push(program);
     const issues = collectWebsiteProductionBundleIssues({ graph });
-    assert.ok(
-      issues.some(
-        (issue) => issue.includes(facade) && issue.includes('statically reaches forbidden')
-      ),
-      issues.join('\n')
-    );
+    assert.deepEqual(issues, [
+      `material diagnostic entry \`${facade}\` bypasses its exact producer: ${program}`,
+    ]);
   });
 }
 
@@ -1651,12 +1657,14 @@ test('Liquid Card producer requires its exact route facade and stays outside ord
 });
 
 // These are source-edge graph controls, not rendered GPU acceptance evidence.
+const diagnosticSourceTone = 'packages/adapters/base/src/material/style-tint-source.ts';
 const diagnosticMaterialModules = [
   'contact-profile.ts',
   'liquidgl-kernel.generated.ts',
   'program-inputs.ts',
   'program.ts',
   'style-tint-profile.ts',
+  'style-tint-source.ts',
   'style.ts',
 ].map((name) => `packages/adapters/base/src/material/${name}`);
 function materialDiagnosticGraph(kind, dynamic = false) {
@@ -1680,18 +1688,244 @@ function materialDiagnosticGraph(kind, dynamic = false) {
     { id: facade, imports: [producer], dynamicImports: [] },
     {
       id: producer,
-      imports: dynamic ? [] : [...diagnosticMaterialModules],
-      dynamicImports: dynamic ? [...diagnosticMaterialModules] : [],
+      imports: dynamic ? [] : diagnosticMaterialModules.filter((id) => id !== diagnosticSourceTone),
+      dynamicImports: dynamic
+        ? diagnosticMaterialModules.filter((id) => id !== diagnosticSourceTone)
+        : [],
     },
-    ...diagnosticMaterialModules.map((id) => ({ id, imports: [], dynamicImports: [] })),
+    ...diagnosticMaterialModules.map((id) => ({
+      id,
+      imports:
+        id === 'packages/adapters/base/src/material/program.ts' ? [diagnosticSourceTone] : [],
+      dynamicImports: [],
+    })),
   ];
   return { graph, entry, facade, producer };
+}
+// A shared static bridge retains its finite shell permission. Co-location never
+// authorizes source imports by the material diagnostic itself.
+function materialDiagnosticWithStaticBridge(kind) {
+  const result = materialDiagnosticGraph(kind);
+  const bridge = result.graph.chunks.find(
+    (entry) => entry.fileName === '_astro/site-shadcn-controls.js'
+  );
+  const api = 'apps/www/src/components/site-shadcn-controls.ts';
+  const wc = 'packages/adapters/web-component/src/index.ts';
+  bridge.moduleIds.push(wc);
+  result.entry.imports.push(bridge.fileName);
+  result.graph.modules.push(
+    { id: api, imports: [wc], dynamicImports: [] },
+    { id: wc, imports: [], dynamicImports: [] }
+  );
+  return { ...result, bridge, api, wc };
+}
+
+const shadowPercentageSource = 'packages/adapters/web-component/src/shadow-percentage-source.ts';
+function materialDiagnosticWithPercentageBridge(kind) {
+  const fixture = materialDiagnosticWithStaticBridge(kind);
+  const adapt = 'packages/adapters/web-component/src/adapt.ts';
+  const exposeState = 'packages/modules/expose-state/src/index.ts';
+  fixture.graph.modules.find((entry) => entry.id === fixture.wc).imports.push(adapt);
+  fixture.graph.modules.push(
+    { id: adapt, imports: [shadowPercentageSource], dynamicImports: [] },
+    { id: shadowPercentageSource, imports: [exposeState], dynamicImports: [] },
+    { id: exposeState, imports: [], dynamicImports: [] }
+  );
+  fixture.bridge.moduleIds.push(adapt, shadowPercentageSource, exposeState);
+  return fixture;
+}
+
+for (const kind of ['tint-stage', 'visible-refraction']) {
+  test(`shadow percentage source ${kind} remains owned by the existing static WC bridge`, () => {
+    const { graph } = materialDiagnosticWithPercentageBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  });
+  for (const origin of ['route', 'producer']) {
+    for (const field of ['imports', 'dynamicImports']) {
+      test(`shadow percentage source ${kind} refuses ${origin} ${field} bypass into the bridge`, () => {
+        const { graph, facade, producer } = materialDiagnosticWithPercentageBridge(kind);
+        assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+        graph.modules
+          .find((entry) => entry.id === (origin === 'route' ? facade : producer))
+          [field].push(shadowPercentageSource);
+        assert.ok(
+          collectWebsiteProductionBundleIssues({ graph }).some(
+            (issue) =>
+              issue.includes('outside its producer boundary') &&
+              issue.includes(shadowPercentageSource)
+          )
+        );
+      });
+    }
+  }
+  test(`shadow percentage source ${kind} cannot borrow bridge identity without its source edge`, () => {
+    const { graph, wc } = materialDiagnosticWithPercentageBridge(kind);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    graph.modules.find((entry) => entry.id === wc).imports = [];
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) =>
+          issue.includes('unreviewed runtime or Adapter module') &&
+          issue.includes(shadowPercentageSource)
+      )
+    );
+  });
+}
+
+for (const kind of ['tint-stage', 'visible-refraction']) {
+  test(
+    'material diagnostic ' + kind + ' retains only the existing owned static bridge placement',
+    () => {
+      const { graph } = materialDiagnosticWithStaticBridge(kind);
+      assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    }
+  );
+  for (const origin of ['route', 'producer']) {
+    for (const field of ['imports', 'dynamicImports']) {
+      test(
+        'material diagnostic ' +
+          kind +
+          ' forbids ' +
+          origin +
+          ' ' +
+          field +
+          ' into a permitted bridge module',
+        () => {
+          const { graph, wc } = materialDiagnosticWithStaticBridge(kind);
+          graph.modules[origin === 'route' ? 0 : 1][field].push(wc);
+          assert.ok(
+            collectWebsiteProductionBundleIssues({ graph }).some(
+              (issue) =>
+                issue.includes('material diagnostic entry') &&
+                issue.includes('outside its producer boundary') &&
+                issue.includes(wc)
+            )
+          );
+        }
+      );
+    }
+  }
+  test(
+    'material diagnostic ' +
+      kind +
+      ' rejects bridge co-location without actual bridge API ownership',
+    () => {
+      const { graph, api, wc } = materialDiagnosticWithStaticBridge(kind);
+      graph.modules.find((entry) => entry.id === api).imports = [];
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('unreviewed runtime or Adapter module') && issue.includes(wc)
+        )
+      );
+    }
+  );
+  test(
+    'material diagnostic ' + kind + ' rejects an owned bridge reachable only dynamically',
+    () => {
+      const { graph, entry, bridge, wc } = materialDiagnosticWithStaticBridge(kind);
+      entry.imports = entry.imports.filter((id) => id !== bridge.fileName);
+      entry.dynamicImports.push(bridge.fileName);
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('unreviewed runtime or Adapter module') && issue.includes(wc)
+        )
+      );
+    }
+  );
+  test(
+    'material diagnostic ' + kind + ' rejects the same bridge module emitted in an unrelated chunk',
+    () => {
+      const { graph, entry, wc } = materialDiagnosticWithStaticBridge(kind);
+      graph.chunks.push(chunk('_astro/copied-bridge-module.js', { moduleIds: [wc] }));
+      entry.imports.push('_astro/copied-bridge-module.js');
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('unreviewed runtime or Adapter module') && issue.includes(wc)
+        )
+      );
+    }
+  );
+  for (const id of [
+    'node_modules/react/index.js',
+    'node_modules/vue/dist/vue.runtime.esm.js',
+    'packages/adapters/base/src/material/unreviewed.ts',
+  ]) {
+    test('material diagnostic ' + kind + ' does not widen the static bridge to ' + id, () => {
+      const { graph, bridge, api } = materialDiagnosticWithStaticBridge(kind);
+      bridge.moduleIds.push(id);
+      graph.modules.push({ id, imports: [], dynamicImports: [] });
+      graph.modules.find((entry) => entry.id === api).imports.push(id);
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('unreviewed runtime or Adapter module') && issue.includes(id)
+        )
+      );
+    });
+  }
+  for (const broken of ['duplicate', 'dangling', 'missing', 'duplicate-bridge']) {
+    test(
+      'material diagnostic ' +
+        kind +
+        ' keeps complete provenance with ' +
+        broken +
+        ' static bridge evidence',
+      () => {
+        const { graph, entry, bridge, api, wc } = materialDiagnosticWithStaticBridge(kind);
+        if (broken === 'duplicate')
+          graph.modules.push({ id: api, imports: [], dynamicImports: [] });
+        if (broken === 'dangling')
+          graph.modules.find((entry) => entry.id === api).imports.push('missing-bridge-source.ts');
+        if (broken === 'missing') graph.modules = graph.modules.filter((entry) => entry.id !== wc);
+        if (broken === 'duplicate-bridge') {
+          graph.chunks.push({ ...bridge, fileName: '_astro/duplicate-static-bridge.js' });
+          entry.imports.push('_astro/duplicate-static-bridge.js');
+        }
+        assert.ok(
+          collectWebsiteProductionBundleIssues({ graph }).some(
+            (issue) =>
+              issue.includes('material diagnostic entry') &&
+              (issue.includes('provenance') || issue.includes('unreviewed runtime'))
+          )
+        );
+      }
+    );
+  }
 }
 for (const kind of ['tint-stage', 'visible-refraction']) {
   for (const dynamic of [false, true]) {
     test(`material diagnostic admits only its exact ${kind} producer with ${dynamic ? 'dynamic' : 'static'} edges`, () => {
       const { graph } = materialDiagnosticGraph(kind, dynamic);
       assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    });
+  }
+  test(`material diagnostic ${kind} rejects emitted source tone without its program edge`, () => {
+    const { graph } = materialDiagnosticGraph(kind);
+    graph.modules.find(
+      (entry) => entry.id === 'packages/adapters/base/src/material/program.ts'
+    ).imports = [];
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+        issue.includes('emits material outside its producer boundary: ' + diagnosticSourceTone)
+      )
+    );
+  });
+  for (const via of ['direct', 'intermediate']) {
+    test(`material diagnostic ${kind} rejects ${via} bypass to the source tone helper`, () => {
+      const { graph } = materialDiagnosticGraph(kind);
+      if (via === 'direct') graph.modules[0].imports.push(diagnosticSourceTone);
+      else {
+        graph.modules[0].dynamicImports.push('unreviewed-source-tone-importer.ts');
+        graph.modules.push({
+          id: 'unreviewed-source-tone-importer.ts',
+          imports: [diagnosticSourceTone],
+          dynamicImports: [],
+        });
+      }
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+          issue.includes('bypasses its exact producer: ' + diagnosticSourceTone)
+        )
+      );
     });
   }
   for (const mutation of [

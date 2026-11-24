@@ -65,14 +65,14 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           test -n "$CHROME"
           printf 'CHROME_PATH=%s\n' "$CHROME" >> "$GITHUB_ENV"
+          export FONT_EVIDENCE_DIR="$SPRINT3_FOLLOWUP_EVIDENCE_DIR/font-preparation"
           {
             node --version &&
             corepack pnpm@10.32.1 --version &&
             "$CHROME" --version &&
             test -f apps/www/node_modules/playwright-core/cli.js &&
             node apps/www/node_modules/playwright-core/cli.js install ffmpeg &&
-            sudo apt-get update -qq -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
-            sudo apt-get install -y --no-install-recommends fonts-noto-cjk fontconfig -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 -o Acquire::Retries=2 &&
+            timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh &&
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig &&
             for CJK_LANGUAGE in zh-cn ja ko; do
               case "$CJK_LANGUAGE" in

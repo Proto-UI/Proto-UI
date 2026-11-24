@@ -60,6 +60,147 @@ async function capture(page: Page, name: string) {
   );
   await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: false });
 }
+async function startWhitepaperWheelObservation(
+  page: Page,
+  before: { x: number; y: number; maxX: number; maxY: number }
+) {
+  await page.locator('[data-docs-image-viewport]').evaluate((viewport, before) => {
+    const probe = {
+      before,
+      viewport,
+      events: [] as Record<string, unknown>[],
+      wheelSamples: [] as { event: WheelEvent; sample: Record<string, unknown> }[],
+      dropped: 0,
+      describe(target: EventTarget | null) {
+        return target instanceof Element
+          ? {
+              tag: target.localName,
+              id: target.id,
+              role: target.getAttribute('role'),
+              prototype: target.getAttribute('data-docs-preview-prototype'),
+              viewport: target === viewport,
+            }
+          : { tag: target === window ? 'window' : target === document ? 'document' : null };
+      },
+      handleEvent(event: Event) {
+        if (this.events.length >= 96) {
+          this.dropped++;
+          return;
+        }
+        const sample: Record<string, unknown> = {
+          type: event.type,
+          at: performance.now(),
+          phase: event.eventPhase,
+          currentTarget: this.describe(event.currentTarget),
+          target: this.describe(event.target),
+          path: event.composedPath().map((target) => this.describe(target)),
+          trusted: event.isTrusted,
+          currentViewport: viewport === document.querySelector('[data-docs-image-viewport]'),
+          connected: viewport.isConnected,
+        };
+        if (event instanceof WheelEvent) {
+          Object.assign(sample, {
+            deltaX: event.deltaX,
+            deltaY: event.deltaY,
+            deltaMode: event.deltaMode,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            cancelable: event.cancelable,
+            defaultPrevented: event.defaultPrevented,
+          });
+          this.wheelSamples.push({ event, sample });
+        } else if (event.type === 'scroll') {
+          const target =
+            event.target instanceof Element
+              ? event.target
+              : event.target === document
+                ? document.scrollingElement
+                : null;
+          sample.position = target ? { x: target.scrollLeft, y: target.scrollTop } : null;
+        }
+        this.events.push(sample);
+      },
+      stop() {
+        window.removeEventListener('wheel', this, true);
+        viewport.removeEventListener('wheel', this);
+        window.removeEventListener('scroll', this, true);
+      },
+    };
+    (window as any).__docsWhitepaperWheelObservation = probe;
+    window.addEventListener('wheel', probe, { capture: true, passive: true });
+    viewport.addEventListener('wheel', probe, { passive: true });
+    window.addEventListener('scroll', probe, { capture: true, passive: true });
+  }, before);
+}
+async function finishWhitepaperWheelObservation(page: Page, name: string) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      (async () => {
+        const observation = await page.evaluate(() => {
+          const probe = (window as any).__docsWhitepaperWheelObservation;
+          if (!probe) return { installed: false };
+          probe.stop();
+          for (const { event, sample } of probe.wheelSamples)
+            sample.defaultPreventedAfterPoll = event.defaultPrevented;
+          delete (window as any).__docsWhitepaperWheelObservation;
+          const viewport = probe.viewport as HTMLElement;
+          const style = getComputedStyle(viewport);
+          const box = viewport.getBoundingClientRect();
+          const wheel = probe.events.find((event: any) => event.type === 'wheel');
+          return {
+            installed: true,
+            before: probe.before,
+            events: probe.events,
+            dropped: probe.dropped,
+            // Geometry is read only after the original poll has settled or failed.
+            afterPoll: {
+              currentViewport: viewport === document.querySelector('[data-docs-image-viewport]'),
+              connected: viewport.isConnected,
+              active: viewport === document.activeElement,
+              x: viewport.scrollLeft,
+              y: viewport.scrollTop,
+              maxX: viewport.scrollWidth - viewport.clientWidth,
+              maxY: viewport.scrollHeight - viewport.clientHeight,
+              projection: viewport.getAttribute('data-pui-scroll-projection'),
+              overflowX: style.overflowX,
+              overflowY: style.overflowY,
+              overscrollBehaviorX: style.overscrollBehaviorX,
+              scrollBehavior: style.scrollBehavior,
+              direction: style.direction,
+              box: { x: box.x, y: box.y, width: box.width, height: box.height },
+              hitAtWheelPoint: wheel
+                ? document.elementsFromPoint(wheel.clientX, wheel.clientY).map((el) => ({
+                    tag: el.localName,
+                    id: el.id,
+                    viewport: el === viewport,
+                  }))
+                : [],
+              background: { x: scrollX, y: scrollY },
+            },
+          };
+        });
+        records.push({ wheelObservation: name, ...observation });
+        if (evidence) {
+          await mkdir(evidence, { recursive: true });
+          await writeFile(
+            path.join(evidence, `${name}-wheel-observation.json`),
+            JSON.stringify(observation, null, 2),
+            { flag: 'wx' }
+          );
+        }
+      })(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Wheel observation exceeded 2000ms')), 2_000);
+      }),
+    ]);
+  } catch (error) {
+    // Diagnostic failure never replaces the original wheel assertion.
+    records.push({ wheelObservation: name, diagnosticError: String(error) });
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
 async function entered(page: Page) {
   // PUI's logical phase and the browser's first painted transition frame have
   // distinct clocks. Observe both; do not treat a phase label as settled pixels.
@@ -994,9 +1135,22 @@ describe('automatic documentation image preview in real Chromium', () => {
         const wheelBefore = await readPosition();
         const background = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
         if (wheelBefore.maxX > wheelBefore.x + 1) {
-          await viewport.hover();
-          await page.mouse.wheel(wheelBefore.maxX * 2, 0);
-          await expect.poll(async () => (await readPosition()).x).toBeGreaterThan(wheelBefore.x);
+          const observeWheel = process.env.IMAGE_PREVIEW_WHEEL_DIAGNOSTICS === '1';
+          if (observeWheel)
+            await startWhitepaperWheelObservation(page, wheelBefore).catch((error) => {
+              records.push({ wheelObservation: 'setup', diagnosticError: String(error) });
+            });
+          try {
+            await viewport.hover();
+            await page.mouse.wheel(wheelBefore.maxX * 2, 0);
+            await expect.poll(async () => (await readPosition()).x).toBeGreaterThan(wheelBefore.x);
+          } finally {
+            if (observeWheel)
+              await finishWhitepaperWheelObservation(
+                page,
+                `whitepaper-${locale}-${width}-${colorScheme}`
+              );
+          }
         }
         expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(background);
         const readingPosition = await readPosition();
