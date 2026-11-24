@@ -12456,7 +12456,6 @@ test('documentation media allowances remain bound to exact reviewed sources and 
     '@proto.ui/prototypes-brutalist/dialog',
     '@proto.ui/prototypes-brutalist/theme',
   ];
-  allowed.push('@proto.ui/prototypes-base/scroll-area');
   const bridgeSource = fs.readFileSync(new URL(`../../../${bridge}`, import.meta.url), 'utf8');
   for (const [relative, source] of [
     [bridge, bridgeSource],
@@ -12472,10 +12471,18 @@ test('documentation media allowances remain bound to exact reviewed sources and 
     assert.ok(message.includes(`raw Proto UI import \`${specifier}\` in \`${copied}\``));
   }
   assert.ok(message.includes(`raw Proto UI import \`@proto.ui/core\` in \`${presentation}\``));
-  fs.appendFileSync(path.join(root, bridge), "\nimport '@proto.ui/runtime';");
+  fs.appendFileSync(
+    path.join(root, bridge),
+    "\nimport '@proto.ui/runtime';\nimport '@proto.ui/prototypes-base/scroll-area';"
+  );
   fs.appendFileSync(path.join(root, presentation), "\nimport '@proto.ui/adapter-react';");
   message = validationMessage(root);
   assert.ok(message.includes(`raw Proto UI import \`@proto.ui/runtime\` in \`${bridge}\``));
+  assert.ok(
+    message.includes(
+      `raw Proto UI import \`@proto.ui/prototypes-base/scroll-area\` in \`${bridge}\``
+    )
+  );
   assert.ok(
     message.includes(`raw Proto UI import \`@proto.ui/adapter-react\` in \`${presentation}\``)
   );
@@ -19933,13 +19940,32 @@ for (const variant of [
   'missing bridge companion',
   'changed source with unrelated import',
 ]) {
-  test(`documentation reading viewport import boundary: ${variant}`, () => {
+  test(`retired documentation reading viewport has no import exception: ${variant}`, () => {
     const root = createRoot();
     writeValidMatrices(root);
     const viewport = 'apps/www/src/components/documentation-image-reading-viewport.proto.ts';
     const bridge = 'apps/www/src/components/documentation-image-controls.ts';
-    const exactViewport = fs.readFileSync(new URL(`../../../${viewport}`, import.meta.url), 'utf8');
-    const exactBridge = fs.readFileSync(new URL(`../../../${bridge}`, import.meta.url), 'utf8');
+    // Historical reproduction only: these are the complete source bytes from
+    // be2f4a9a04b3d3f9992b81fbd9c9fb65ebc6063c. The retired exception required
+    // both hashes, so pairing this viewport with today's bridge would reject
+    // even if the old allowance were accidentally retained. Recreate its
+    // qualifying source AND companion before requiring every import to fail.
+    const exactViewport = fs.readFileSync(
+      new URL('./fixtures/documentation-image-reading-viewport-be2f4a9.txt', import.meta.url),
+      'utf8'
+    );
+    const exactBridge = fs.readFileSync(
+      new URL('./fixtures/documentation-image-controls-be2f4a9.txt', import.meta.url),
+      'utf8'
+    );
+    assert.equal(
+      createHash('sha256').update(exactViewport).digest('hex'),
+      '38c40b79ba99dc444a43376052de3c39798f99db7eb965eb990eadc4d6cc77ec'
+    );
+    assert.equal(
+      createHash('sha256').update(exactBridge).digest('hex'),
+      'ad4fe9ae91198b871eb6a78cd05682e92a105f6d044d3a31547f8080f7c1aa07'
+    );
     const relative =
       variant === 'foreign viewport owner'
         ? 'apps/www/src/components/copied-reading-viewport.proto.ts'
@@ -19967,7 +19993,7 @@ for (const variant of [
       '@proto.ui/prototypes-base/scroll-area',
     ]) {
       const rejected = message.includes(`raw Proto UI import \`${specifier}\` in \`${relative}\``);
-      assert.equal(rejected, variant !== 'exact source and bridge', message);
+      assert.equal(rejected, true, message);
     }
     if (variant === 'changed source with unrelated import') {
       assert.ok(

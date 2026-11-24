@@ -10,6 +10,11 @@ import {
 
 export const diagramSha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
+export const diagramContainLimitations = Object.freeze([
+  'Contain is a whole-image overview. Tall diagrams may have small text; measured font sizes do not establish reading-size or text-legibility acceptance.',
+  'This capture uses reduced motion. Source-to-contain and return animation frames require separate native motion evidence.',
+]);
+
 // Shared by the actual SVG probe and receipt readback. A passing outcome label
 // cannot replace the measured font families, authored roles or loaded faces.
 export function verifyDiagramFonts(profile, evidence, locale) {
@@ -230,6 +235,78 @@ function verifyReadingPreview(reading, viewport, minimumFontSize, selected) {
   );
 }
 
+function verifyContainedPreview(contained, viewport, minimumFontSize, selected) {
+  assert.equal(contained.outcome, 'passed');
+  assert.equal(contained.presentation, 'source-contain');
+  const { source, image, dialog, dismissal } = contained;
+  assert.ok(source && image && dialog && dismissal, 'Complete contain observations are required');
+  for (const [label, rect] of Object.entries({ source, image, dialog })) {
+    for (const key of ['x', 'y', 'width', 'height'])
+      assert.ok(Number.isFinite(rect[key]), `Finite ${label} ${key}`);
+    assert.ok(rect.width > 0 && rect.height > 0, `Positive ${label} dimensions`);
+  }
+  assert.ok(
+    source.x + source.width > 0 &&
+      source.y + source.height > 0 &&
+      source.x < viewport.width &&
+      source.y < viewport.height,
+    'The actual opening source must intersect the viewport'
+  );
+  assert.ok(
+    image.x >= -1 &&
+      image.y >= -1 &&
+      image.x + image.width <= viewport.width + 1 &&
+      image.y + image.height <= viewport.height + 1,
+    'Contain must show the complete image inside the window'
+  );
+  for (const key of ['x', 'y', 'width', 'height'])
+    assert.ok(Math.abs(image[key] - dialog[key]) <= 1, 'The image has no surrounding frame');
+  for (const measurement of [source, image, dismissal.source]) {
+    assert.ok(
+      Math.abs(measurement.width / measurement.height - selected.width / selected.height) < 0.01,
+      'Contain preserves the selected image aspect ratio'
+    );
+    const actualFontSize = (minimumFontSize * measurement.width) / selected.width;
+    assert.ok(
+      Number.isFinite(measurement.minimumRenderedFontSize) &&
+        Math.abs(measurement.minimumRenderedFontSize - actualFontSize) < 0.001,
+      'Contain records the actual scaled font size without claiming a reading-size pass'
+    );
+  }
+  assert.equal(image.src, source.src);
+  assert.equal(image.alt, source.alt);
+  assert.equal(dialog.role, 'dialog');
+  assert.equal(dialog.modal, 'true');
+  assert.equal(dialog.phase, 'entered');
+  assert.equal(dialog.returnMode, 'origin');
+  assert.equal(dialog.toolbarCount, 0);
+  assert.equal(dialog.zoomControlCount, 0);
+  assert.equal(dialog.readingViewportCount, 0);
+  assert.equal(dialog.closeCount, 1);
+  assert.equal(dialog.closeClip, 'inset(50%)');
+  assert.deepEqual(dialog.style, {
+    border: '0px',
+    padding: '0px',
+    radius: '0px',
+    shadow: 'none',
+    background: 'rgba(0, 0, 0, 0)',
+  });
+  for (const key of ['x', 'y', 'maxX', 'maxY'])
+    assert.ok(Number.isFinite(dialog.scroll?.[key]), `Finite contain scroll ${key}`);
+  assert.ok(Math.abs(dialog.scroll.x) <= 1 && Math.abs(dialog.scroll.y) <= 1);
+  assert.ok(
+    Math.abs(dialog.scroll.maxX) <= 1 && Math.abs(dialog.scroll.maxY) <= 1,
+    'No hidden outer scroll range'
+  );
+  assert.equal(dismissal.input, 'Escape');
+  assert.equal(dismissal.closed, true);
+  assert.equal(dismissal.focusReturned, true);
+  assert.equal(dismissal.originHidden, false);
+  assert.equal(dismissal.sourceOpacity, 1);
+  assert.equal(dismissal.source.src, source.src);
+  assert.equal(dismissal.source.alt, source.alt);
+}
+
 // This checks the completeness and byte bindings of a real capture. It does not
 // authenticate a report author, approve a diagram or establish full Issue closure.
 export async function verifyDiagramReport(
@@ -237,7 +314,14 @@ export async function verifyDiagramReport(
   report,
   { revision, provenance, build, readSource, readScreenshot }
 ) {
-  assert.equal(report.schemaVersion, 1);
+  assert.ok([1, 2].includes(report.schemaVersion), 'Known diagram capture schema is required');
+  const sourceContain = report.schemaVersion === 2;
+  if (sourceContain) {
+    assert.equal(report.presentation, 'source-contain');
+    assert.equal(report.readingAcceptance, 'not-assessed');
+    assert.equal(report.motionMode, 'reduced');
+    assert.deepEqual(report.limitations, diagramContainLimitations);
+  }
   assert.equal(report.kind, 'proto-ui.whitepaper-diagram-capture');
   assert.match(revision, /^[a-f0-9]{40}$/);
   assert.equal(report.revision, revision, 'Capture the current candidate revision');
@@ -363,28 +447,61 @@ export async function verifyDiagramReport(
           phases,
           'Required repeated-open and history phases must remain complete'
         );
-        assert.ok(
-          Array.isArray(entry.readingPreviews),
-          'Actual reading viewport evidence is required'
-        );
-        assert.equal(
-          entry.readingPreviews.length,
-          phases.length + 1,
-          'Every open must exercise reading and fit'
-        );
         const font = fonts.get(`${locale}/${theme}/${selected.name}`);
-        for (const reading of entry.readingPreviews)
-          verifyReadingPreview(reading, capture.viewport, font.minimumFontSize, selected);
-        assert.deepEqual(entry.preview, entry.readingPreviews[0].fit);
+        let previewMeasurements;
+        if (sourceContain) {
+          for (const key of [
+            'readingPreviews',
+            'readingObservations',
+            'readingCapture',
+            'readingEndCapture',
+          ])
+            assert.equal(entry[key], undefined, 'Contain cannot relabel reading evidence');
+          assert.ok(
+            Array.isArray(entry.containedPreviews),
+            'Actual contain observations are required'
+          );
+          assert.equal(entry.containedPreviews.length, phases.length + 1);
+          for (const contained of entry.containedPreviews)
+            verifyContainedPreview(contained, capture.viewport, font.minimumFontSize, selected);
+          assert.deepEqual(entry.preview, entry.containedPreviews[0].image);
+          previewMeasurements = entry.containedPreviews.flatMap((contained) => [
+            contained.source,
+            contained.image,
+            contained.dismissal.source,
+          ]);
+        } else {
+          assert.ok(
+            Array.isArray(entry.readingPreviews),
+            'Actual reading viewport evidence is required'
+          );
+          assert.equal(
+            entry.readingPreviews.length,
+            phases.length + 1,
+            'Every open must exercise reading and fit'
+          );
+          for (const reading of entry.readingPreviews)
+            verifyReadingPreview(reading, capture.viewport, font.minimumFontSize, selected);
+          assert.deepEqual(entry.preview, entry.readingPreviews[0].fit);
+          previewMeasurements = entry.readingPreviews.flatMap((reading) => [
+            reading.image,
+            reading.fit,
+          ]);
+        }
         for (const [index, interaction] of (entry.interactions ?? []).entries()) {
           assert.equal(interaction.dismissed, true);
-          assert.deepEqual(interaction.preview, entry.readingPreviews[index + 1].fit);
+          assert.deepEqual(
+            interaction.preview,
+            sourceContain
+              ? entry.containedPreviews[index + 1].image
+              : entry.readingPreviews[index + 1].fit
+          );
         }
         for (const measurement of [
           entry.image,
           entry.preview,
           entry.figureCapture?.source,
-          ...entry.readingPreviews.flatMap((reading) => [reading.image, reading.fit]),
+          ...previewMeasurements,
         ]) {
           assert.ok(measurement, 'Article, figure and preview measurements are required');
           assert.equal(measurement.asset, selected.asset);
@@ -416,20 +533,29 @@ export async function verifyDiagramReport(
         assert.ok(['viewport-region', 'document-region'].includes(entry.figureCapture.kind));
         assert.deepEqual(entry.articleCapture.source, entry.image);
         assert.deepEqual(entry.previewCapture.source, entry.preview);
-        assert.deepEqual(entry.readingCapture?.source, entry.readingPreviews[0].image);
+        if (sourceContain)
+          assert.deepEqual(
+            entry.previewCapture.after,
+            entry.previewCapture.source,
+            'The contain image must remain unchanged across its PNG capture'
+          );
         assert.deepEqual(entry.articleCapture.dimensions, capture.viewport);
         assert.deepEqual(entry.previewCapture.dimensions, capture.viewport);
-        assert.deepEqual(entry.readingCapture.dimensions, capture.viewport);
         assert.deepEqual(entry.figureCapture.dimensions, {
           width: entry.figureCapture.clip.width,
           height: entry.figureCapture.clip.height,
         });
-        const panned = entry.readingPreviews[0].wheel.length > 0;
-        assert.equal(
-          Boolean(entry.readingEndCapture),
-          panned,
-          'A scrollable reading viewport needs its own far-edge capture'
-        );
+        let panned = false;
+        if (!sourceContain) {
+          assert.deepEqual(entry.readingCapture?.source, entry.readingPreviews[0].image);
+          assert.deepEqual(entry.readingCapture.dimensions, capture.viewport);
+          panned = entry.readingPreviews[0].wheel.length > 0;
+          assert.equal(
+            Boolean(entry.readingEndCapture),
+            panned,
+            'A scrollable reading viewport needs its own far-edge capture'
+          );
+        }
         if (panned) {
           assert.deepEqual(entry.readingEndCapture.dimensions, capture.viewport);
           const end = entry.readingEndCapture.source;
@@ -450,7 +576,7 @@ export async function verifyDiagramReport(
         const captures = [
           entry.articleCapture,
           entry.figureCapture,
-          entry.readingCapture,
+          ...(!sourceContain ? [entry.readingCapture] : []),
           ...(panned ? [entry.readingEndCapture] : []),
           entry.previewCapture,
         ];
@@ -466,6 +592,15 @@ export async function verifyDiagramReport(
   assert.equal(fonts.size, expectedFonts, 'Unexpected font probes');
   assert.equal(cases.size, expectedCases, 'Unexpected capture cases');
   return {
+    ...(sourceContain
+      ? {
+          schemaVersion: 2,
+          presentation: 'source-contain',
+          readingAcceptance: 'not-assessed',
+          motionMode: 'reduced',
+          limitations: [...diagramContainLimitations],
+        }
+      : {}),
     figure: profile.figure,
     revision,
     cases: expectedCases,

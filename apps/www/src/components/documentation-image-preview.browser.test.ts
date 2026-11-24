@@ -60,147 +60,6 @@ async function capture(page: Page, name: string) {
   );
   await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: false });
 }
-async function startWhitepaperWheelObservation(
-  page: Page,
-  before: { x: number; y: number; maxX: number; maxY: number }
-) {
-  await page.locator('[data-docs-image-viewport]').evaluate((viewport, before) => {
-    const probe = {
-      before,
-      viewport,
-      events: [] as Record<string, unknown>[],
-      wheelSamples: [] as { event: WheelEvent; sample: Record<string, unknown> }[],
-      dropped: 0,
-      describe(target: EventTarget | null) {
-        return target instanceof Element
-          ? {
-              tag: target.localName,
-              id: target.id,
-              role: target.getAttribute('role'),
-              prototype: target.getAttribute('data-docs-preview-prototype'),
-              viewport: target === viewport,
-            }
-          : { tag: target === window ? 'window' : target === document ? 'document' : null };
-      },
-      handleEvent(event: Event) {
-        if (this.events.length >= 96) {
-          this.dropped++;
-          return;
-        }
-        const sample: Record<string, unknown> = {
-          type: event.type,
-          at: performance.now(),
-          phase: event.eventPhase,
-          currentTarget: this.describe(event.currentTarget),
-          target: this.describe(event.target),
-          path: event.composedPath().map((target) => this.describe(target)),
-          trusted: event.isTrusted,
-          currentViewport: viewport === document.querySelector('[data-docs-image-viewport]'),
-          connected: viewport.isConnected,
-        };
-        if (event instanceof WheelEvent) {
-          Object.assign(sample, {
-            deltaX: event.deltaX,
-            deltaY: event.deltaY,
-            deltaMode: event.deltaMode,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            cancelable: event.cancelable,
-            defaultPrevented: event.defaultPrevented,
-          });
-          this.wheelSamples.push({ event, sample });
-        } else if (event.type === 'scroll') {
-          const target =
-            event.target instanceof Element
-              ? event.target
-              : event.target === document
-                ? document.scrollingElement
-                : null;
-          sample.position = target ? { x: target.scrollLeft, y: target.scrollTop } : null;
-        }
-        this.events.push(sample);
-      },
-      stop() {
-        window.removeEventListener('wheel', this, true);
-        viewport.removeEventListener('wheel', this);
-        window.removeEventListener('scroll', this, true);
-      },
-    };
-    (window as any).__docsWhitepaperWheelObservation = probe;
-    window.addEventListener('wheel', probe, { capture: true, passive: true });
-    viewport.addEventListener('wheel', probe, { passive: true });
-    window.addEventListener('scroll', probe, { capture: true, passive: true });
-  }, before);
-}
-async function finishWhitepaperWheelObservation(page: Page, name: string) {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    await Promise.race([
-      (async () => {
-        const observation = await page.evaluate(() => {
-          const probe = (window as any).__docsWhitepaperWheelObservation;
-          if (!probe) return { installed: false };
-          probe.stop();
-          for (const { event, sample } of probe.wheelSamples)
-            sample.defaultPreventedAfterPoll = event.defaultPrevented;
-          delete (window as any).__docsWhitepaperWheelObservation;
-          const viewport = probe.viewport as HTMLElement;
-          const style = getComputedStyle(viewport);
-          const box = viewport.getBoundingClientRect();
-          const wheel = probe.events.find((event: any) => event.type === 'wheel');
-          return {
-            installed: true,
-            before: probe.before,
-            events: probe.events,
-            dropped: probe.dropped,
-            // Geometry is read only after the original poll has settled or failed.
-            afterPoll: {
-              currentViewport: viewport === document.querySelector('[data-docs-image-viewport]'),
-              connected: viewport.isConnected,
-              active: viewport === document.activeElement,
-              x: viewport.scrollLeft,
-              y: viewport.scrollTop,
-              maxX: viewport.scrollWidth - viewport.clientWidth,
-              maxY: viewport.scrollHeight - viewport.clientHeight,
-              projection: viewport.getAttribute('data-pui-scroll-projection'),
-              overflowX: style.overflowX,
-              overflowY: style.overflowY,
-              overscrollBehaviorX: style.overscrollBehaviorX,
-              scrollBehavior: style.scrollBehavior,
-              direction: style.direction,
-              box: { x: box.x, y: box.y, width: box.width, height: box.height },
-              hitAtWheelPoint: wheel
-                ? document.elementsFromPoint(wheel.clientX, wheel.clientY).map((el) => ({
-                    tag: el.localName,
-                    id: el.id,
-                    viewport: el === viewport,
-                  }))
-                : [],
-              background: { x: scrollX, y: scrollY },
-            },
-          };
-        });
-        records.push({ wheelObservation: name, ...observation });
-        if (evidence) {
-          await mkdir(evidence, { recursive: true });
-          await writeFile(
-            path.join(evidence, `${name}-wheel-observation.json`),
-            JSON.stringify(observation, null, 2),
-            { flag: 'wx' }
-          );
-        }
-      })(),
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error('Wheel observation exceeded 2000ms')), 2_000);
-      }),
-    ]);
-  } catch (error) {
-    // Diagnostic failure never replaces the original wheel assertion.
-    records.push({ wheelObservation: name, diagnosticError: String(error) });
-  } finally {
-    if (timer !== undefined) clearTimeout(timer);
-  }
-}
 async function entered(page: Page) {
   // PUI's logical phase and the browser's first painted transition frame have
   // distinct clocks. Observe both; do not treat a phase label as settled pixels.
@@ -243,96 +102,131 @@ async function open(page: Page, alt: string) {
   });
   return trigger;
 }
-async function readingFocusPaint(page: Page) {
-  await page.waitForFunction(() => {
-    const viewport = document.querySelector<
-      HTMLElement & {
-        getExposes?: () => { focusVisible?: { get?: () => boolean } };
-      }
-    >('[data-docs-image-viewport]');
-    return (
-      viewport === document.activeElement && viewport?.getExposes?.().focusVisible?.get?.() === true
-    );
-  });
-  const paint = await page.locator('[data-docs-image-viewport]').evaluate((node) => {
-    const style = getComputedStyle(node);
-    const viewport = node.getBoundingClientRect();
-    const content = node.closest<HTMLElement>('[data-docs-image-content]')!;
-    const clip = content.getBoundingClientRect();
-    const reach = parseFloat(style.outlineWidth) + Math.max(0, parseFloat(style.outlineOffset));
+type MediaBox = { x: number; y: number; width: number; height: number };
+async function containedWhitepaper(page: Page) {
+  await page.locator('.docs-image-full').evaluate((node) => (node as HTMLImageElement).decode());
+  const facts = await page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>('[data-docs-image-content]')!;
+    const image = document.querySelector<HTMLImageElement>('.docs-image-full')!;
+    const canvas = document.querySelector<HTMLElement>('[data-docs-image-canvas]')!;
+    const rect = (node: Element) => {
+      const { x, y, width, height } = node.getBoundingClientRect();
+      return { x, y, width, height };
+    };
+    const style = getComputedStyle(content);
+    const canvasStyle = getComputedStyle(canvas);
+    const viewport = window.visualViewport;
     return {
+      image: rect(image),
+      content: rect(content),
+      viewport: {
+        x: viewport?.offsetLeft ?? 0,
+        y: viewport?.offsetTop ?? 0,
+        width: viewport?.width ?? window.innerWidth,
+        height: viewport?.height ?? window.innerHeight,
+      },
+      src: image.src,
+      alt: image.alt,
+      natural: { width: image.naturalWidth, height: image.naturalHeight },
+      returnMode: content.dataset.docsImageReturn,
+      style: {
+        animation: style.animationName,
+        duration: style.transitionDuration,
+        easing: style.transitionTimingFunction,
+        border: style.borderWidth,
+        padding: style.padding,
+        radius: style.borderRadius,
+        shadow: style.boxShadow,
+        background: style.backgroundColor,
+      },
+      canvas: {
+        background: canvasStyle.backgroundColor,
+        padding: canvasStyle.padding,
+        border: canvasStyle.borderTopWidth,
+        shadow: canvasStyle.boxShadow,
+      },
+      scroll: {
+        x: content.scrollLeft,
+        y: content.scrollTop,
+        maxX: content.scrollWidth - content.clientWidth,
+        maxY: content.scrollHeight - content.clientHeight,
+      },
+      closeClip: getComputedStyle(content.querySelector('[data-docs-image-close]')!).clipPath,
+    };
+  });
+  expect(
+    await page
+      .locator(
+        '.docs-image-toolbar, [data-docs-image-zoom], [data-docs-image-zoom-in], [data-docs-image-zoom-out], [data-docs-image-viewport]'
+      )
+      .count()
+  ).toBe(0);
+  expect(await page.locator('[data-docs-image-content] header').count()).toBe(0);
+  expect(facts.natural.width).toBeGreaterThan(0);
+  expect(facts.natural.height).toBeGreaterThan(0);
+  expect(facts.returnMode).toBe('origin');
+  expect(facts.style.animation).toBe('none');
+  expect(facts.style.duration.split(',').map((value) => value.trim())).toContain('0.22s');
+  expect(facts.style.easing.split(',').every((value) => value.trim() === 'linear')).toBe(true);
+  expect(facts.style.border).toBe('0px');
+  expect(facts.style.padding).toBe('0px');
+  expect(facts.style.radius).toBe('0px');
+  expect(facts.style.shadow).toBe('none');
+  expect(facts.style.background).toBe('rgba(0, 0, 0, 0)');
+  expect(facts.canvas.background).not.toBe('rgba(0, 0, 0, 0)');
+  expect(facts.canvas.padding).toBe('0px');
+  expect(facts.canvas.border).toBe('0px');
+  expect(facts.canvas.shadow).toBe('none');
+  expect(facts.image.width).toBeGreaterThan(0);
+  expect(facts.image.height).toBeGreaterThan(0);
+  expect(facts.image.x).toBeGreaterThanOrEqual(facts.viewport.x - 1);
+  expect(facts.image.y).toBeGreaterThanOrEqual(facts.viewport.y - 1);
+  expect(facts.image.x + facts.image.width).toBeLessThanOrEqual(
+    facts.viewport.x + facts.viewport.width + 1
+  );
+  expect(facts.image.y + facts.image.height).toBeLessThanOrEqual(
+    facts.viewport.y + facts.viewport.height + 1
+  );
+  for (const key of ['x', 'y', 'width', 'height'] as const)
+    expect(Math.abs(facts.image[key] - facts.content[key])).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(facts.image.width * facts.natural.height - facts.image.height * facts.natural.width) /
+      Math.max(facts.natural.width, facts.natural.height)
+  ).toBeLessThanOrEqual(1);
+  expect(facts.scroll.x).toBe(0);
+  expect(facts.scroll.y).toBe(0);
+  expect(facts.scroll.maxX).toBeLessThanOrEqual(1);
+  expect(facts.scroll.maxY).toBeLessThanOrEqual(1);
+  return facts;
+}
+async function keyboardCloseFocus(page: Page) {
+  await page.keyboard.press('Tab');
+  const close = page.locator('[data-docs-image-close]');
+  expect(await close.evaluate((node) => node === document.activeElement)).toBe(true);
+  expect(await close.getAttribute('data-focus-visible')).not.toBeNull();
+  const facts = await close.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const box = node.getBoundingClientRect();
+    const content = node.closest('[data-docs-image-content]')!.getBoundingClientRect();
+    return {
+      clip: style.clipPath,
+      box: { x: box.x, y: box.y, width: box.width, height: box.height },
+      fitsContent:
+        box.left >= content.left &&
+        box.top >= content.top &&
+        box.right <= content.right &&
+        box.bottom <= content.bottom,
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
       outlineColor: style.outlineColor,
-      outlineOffset: style.outlineOffset,
       boxShadow: style.boxShadow,
-      tokens: node.getAttribute('data-pui-style'),
-      outlineFitsDialog:
-        viewport.x - reach >= clip.x &&
-        viewport.y - reach >= clip.y &&
-        viewport.right + reach <= clip.x + content.clientWidth &&
-        viewport.bottom + reach <= clip.y + content.clientHeight,
-      outerScroll: { x: content.scrollLeft, y: content.scrollTop },
-      controls: Array.from(content.querySelectorAll<HTMLElement>('.docs-image-toolbar > *')).map(
-        (button) => {
-          const box = button.getBoundingClientRect();
-          const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
-          return {
-            fitsDialog:
-              box.x >= clip.x &&
-              box.y >= clip.y &&
-              box.right <= clip.x + content.clientWidth &&
-              box.bottom <= clip.y + content.clientHeight,
-            hit: hit === button || (hit !== null && button.contains(hit)),
-          };
-        }
-      ),
     };
   });
-  // Computed feedback is necessary; the retained real screenshot also needs
-  // visual inspection for clipping or paint occlusion by the actual image.
-  expect(paint.outlineStyle).toBe('solid');
-  expect(parseFloat(paint.outlineWidth)).toBeGreaterThanOrEqual(2);
-  expect(paint.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
-  expect(paint.outlineColor).not.toBe('transparent');
-  expect(paint.outlineFitsDialog).toBe(true);
-  expect(paint.outerScroll).toEqual({ x: 0, y: 0 });
-  expect(paint.controls).toHaveLength(3);
-  for (const button of paint.controls) expect(button).toEqual({ fitsDialog: true, hit: true });
-  return paint;
-}
-async function fittedReadingViewport(page: Page) {
-  await page.waitForFunction(() => {
-    const port = document.querySelector<HTMLElement>('[data-docs-image-viewport]');
-    return (
-      port?.dataset.docsImageScale === 'fit' &&
-      port.tabIndex === -1 &&
-      Math.abs(port.scrollWidth - port.clientWidth) <= 1 &&
-      Math.abs(port.scrollHeight - port.clientHeight) <= 1
-    );
-  });
-  const fit = await page.locator('[data-docs-image-viewport]').evaluate((node) => {
-    const viewport = node.getBoundingClientRect();
-    const image = node.querySelector('img')!.getBoundingClientRect();
-    return {
-      x: viewport.x,
-      y: viewport.y,
-      width: node.clientWidth,
-      height: node.clientHeight,
-      scrollLeft: node.scrollLeft,
-      scrollTop: node.scrollTop,
-      image: { x: image.x, y: image.y, width: image.width, height: image.height },
-    };
-  });
-  expect(fit.width).toBeGreaterThan(0);
-  expect(fit.height).toBeGreaterThan(0);
-  expect(Math.abs(fit.scrollLeft)).toBeLessThanOrEqual(1);
-  expect(Math.abs(fit.scrollTop)).toBeLessThanOrEqual(1);
-  expect(fit.image.x).toBeGreaterThanOrEqual(fit.x - 1);
-  expect(fit.image.y).toBeGreaterThanOrEqual(fit.y - 1);
-  expect(fit.image.x + fit.image.width).toBeLessThanOrEqual(fit.x + fit.width + 1);
-  expect(fit.image.y + fit.image.height).toBeLessThanOrEqual(fit.y + fit.height + 1);
-  return fit;
+  expect(facts.clip).toBe('none');
+  expect(facts.box.width).toBeGreaterThan(1);
+  expect(facts.box.height).toBeGreaterThan(1);
+  expect(facts.fitsContent).toBe(true);
+  return facts;
 }
 type MotionFrame = {
   time: number;
@@ -344,50 +238,55 @@ type MotionFrame = {
   opacity: number;
   sourceOpacity: number | null;
 };
-async function recordNextMotion(page: Page, input: 'pointerdown' | 'keydown') {
+async function recordNextMotion(
+  page: Page,
+  input: 'pointerdown' | 'keydown',
+  sourceSelector = '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
+) {
   // Instrumentation records real frames after the next native input. It neither
   // changes application state nor slows the requested 220ms motion.
-  await page.evaluate((input) => {
-    const record = { frames: [] as MotionFrame[], done: false };
-    (window as any).__docsImageMotion = record;
-    window.addEventListener(
-      input,
-      () => {
-        let start = -1;
-        const sample = (time: number) => {
-          if (start < 0) start = time;
-          const content = document.querySelector<HTMLElement>('[data-docs-image-content]');
-          const mask = document.querySelector<HTMLElement>('[data-docs-image-mask]');
-          if (content && mask && !content.hasAttribute('data-pui-view-detached')) {
-            const rect = content.getBoundingClientRect();
-            const source = document.querySelector(
-              '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
-            );
-            record.frames.push({
-              time: time - start,
-              phase: content.getAttribute('data-transition-state'),
-              x: rect.x,
-              y: rect.y,
-              width: rect.width,
-              height: rect.height,
-              opacity: Number(
-                getComputedStyle(mask.querySelector('[data-docs-image-scrim]')!).opacity
-              ),
-              sourceOpacity: source
-                ? Number(
-                    getComputedStyle(source.closest('[data-docs-image-source-surface]')!).opacity
-                  )
-                : null,
-            });
-          }
-          if (time - start < 550) requestAnimationFrame(sample);
-          else record.done = true;
-        };
-        requestAnimationFrame(sample);
-      },
-      { once: true, capture: true }
-    );
-  }, input);
+  await page.evaluate(
+    ({ input, sourceSelector }) => {
+      const record = { frames: [] as MotionFrame[], done: false };
+      (window as any).__docsImageMotion = record;
+      window.addEventListener(
+        input,
+        () => {
+          let start = -1;
+          const sample = (time: number) => {
+            if (start < 0) start = time;
+            const content = document.querySelector<HTMLElement>('[data-docs-image-content]');
+            const mask = document.querySelector<HTMLElement>('[data-docs-image-mask]');
+            if (content && mask && !content.hasAttribute('data-pui-view-detached')) {
+              const rect = content.getBoundingClientRect();
+              const source = document.querySelector(sourceSelector);
+              record.frames.push({
+                time: time - start,
+                phase: content.getAttribute('data-transition-state'),
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                opacity: Number(
+                  getComputedStyle(mask.querySelector('[data-docs-image-scrim]')!).opacity
+                ),
+                sourceOpacity: source
+                  ? Number(
+                      getComputedStyle(source.closest('[data-docs-image-source-surface]')!).opacity
+                    )
+                  : null,
+              });
+            }
+            if (time - start < 550) requestAnimationFrame(sample);
+            else record.done = true;
+          };
+          requestAnimationFrame(sample);
+        },
+        { once: true, capture: true }
+      );
+    },
+    { input, sourceSelector }
+  );
 }
 async function motionFrames(page: Page, name: string): Promise<MotionFrame[]> {
   await page.waitForFunction(() => (window as any).__docsImageMotion?.done);
@@ -397,6 +296,33 @@ async function motionFrames(page: Page, name: string): Promise<MotionFrame[]> {
   if (evidence)
     await writeFile(path.join(evidence, `${name}-frames.json`), JSON.stringify(frames, null, 2));
   return frames;
+}
+function expectLinearImageMotion(
+  frames: MotionFrame[],
+  origin: MediaBox,
+  target: MediaBox,
+  direction: 'opening' | 'closing'
+) {
+  const phase = direction === 'opening' ? 'entering' : 'leaving';
+  const moving = frames.filter((frame) => frame.phase === phase);
+  expect(moving.length, `${direction}: actual transition frames`).toBeGreaterThanOrEqual(2);
+  expect(moving.every((frame) => frame.sourceOpacity === 0)).toBe(true);
+  const middle = moving.filter((frame) => frame.opacity > 0.1 && frame.opacity < 0.9);
+  expect(middle.length, `${direction}: actual intermediate frames`).toBeGreaterThanOrEqual(2);
+  for (const frame of middle)
+    for (const key of ['x', 'y', 'width', 'height'] as const)
+      expect(
+        Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
+      ).toBeLessThan(4);
+  const sign = direction === 'opening' ? 1 : -1;
+  for (let i = 1; i < middle.length; i++)
+    expect(
+      Math.abs(
+        middle[i].opacity -
+          middle[i - 1].opacity -
+          (sign * (middle[i].time - middle[i - 1].time)) / 220
+      )
+    ).toBeLessThan(0.025);
 }
 describe('automatic documentation image preview in real Chromium', () => {
   beforeAll(async () => {
@@ -1077,15 +1003,25 @@ describe('automatic documentation image preview in real Chromium', () => {
       await context.close();
     }
   }, 90_000);
+  // Restore #796 for whitepaper figures too. The withdrawn reading/fit
+  // toolbar is not an alternative acceptance path for this presentation.
   for (const [locale, width, colorScheme] of [
     ['zh-cn', 1280, 'light'],
     ['zh-cn', 390, 'dark'],
+    ['zh-cn', 320, 'light'],
     ['en', 1280, 'dark'],
     ['en', 390, 'light'],
+    ['en', 320, 'dark'],
   ] as const) {
     it(`migrates the actual ${locale} whitepaper viewer at ${width}px ${colorScheme}`, async () => {
-      const context = await browser.newContext({ viewport: { width, height: 900 }, colorScheme });
+      const height = width < 640 ? 844 : 900;
+      const context = await browser.newContext({
+        viewport: { width, height },
+        colorScheme,
+        hasTouch: width < 640,
+      });
       const page = track(await context.newPage());
+      const name = `whitepaper-${locale}-${width}-${colorScheme}`;
       try {
         await page.goto(`${baseUrl}/${locale}/whitepaper/6-consistency-boundary/`, {
           waitUntil: 'networkidle',
@@ -1094,112 +1030,132 @@ describe('automatic documentation image preview in real Chromium', () => {
           document.documentElement.dataset.theme = scheme;
         }, colorScheme);
         const trigger = page.locator('.whitepaper-figure [data-docs-image-trigger]').first();
-        await trigger.click();
-        await entered(page);
-        await page.waitForFunction(() => {
-          const image = document.querySelector<HTMLImageElement>('.docs-image-full');
-          return Boolean(image?.complete && image.naturalWidth);
-        });
-        expect(await page.locator('button[data-diagram-open]').count()).toBe(0);
-        expect(await page.locator('.docs-image-full').getAttribute('src')).toContain(
+        const source = trigger.locator('img');
+        const sourceSelector = '.whitepaper-figure [data-docs-image-trigger] img';
+        const readSource = () =>
+          source.evaluate((node) => {
+            const image = node as HTMLImageElement;
+            return {
+              src: image.getAttribute('src'),
+              currentSrc: image.currentSrc,
+              alt: image.alt,
+              width: image.getAttribute('width'),
+              height: image.getAttribute('height'),
+              picture: image.closest('picture')?.querySelector('source')?.outerHTML ?? null,
+              caption: image.closest('figure')?.querySelector('figcaption')?.textContent?.trim(),
+            };
+          });
+        await trigger.scrollIntoViewIfNeeded();
+        await source.evaluate((node) => (node as HTMLImageElement).decode());
+        const original = await readSource();
+        expect(original.currentSrc).toContain(
           `whitepaper-conditional-consistency${width < 640 ? '.mobile' : ''}.${locale}.svg`
         );
-        const viewport = page.locator('[data-docs-image-viewport]');
-        const zoom = page.locator('[data-docs-image-zoom]');
-        const zoomIn = page.locator('[data-docs-image-zoom-in]');
-        const zoomOut = page.locator('[data-docs-image-zoom-out]');
-        const readPosition = () =>
-          viewport.evaluate((node) => ({
-            x: node.scrollLeft,
-            y: node.scrollTop,
-            maxX: node.scrollWidth - node.clientWidth,
-            maxY: node.scrollHeight - node.clientHeight,
-          }));
-        expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
-        const readingWidth = (await page.locator('.docs-image-full').boundingBox())!.width;
-        expect(readingWidth).toBeGreaterThan((await trigger.locator('img').boundingBox())!.width);
-        await zoomIn.click();
-        const enlargedWidth = (await page.locator('.docs-image-full').boundingBox())!.width;
-        expect(enlargedWidth).toBeGreaterThan(readingWidth);
-        // PUI Button owns keyboard activation; native focus then reaches the
-        // browser scroll region rather than a second application key handler.
-        await page.keyboard.press('Tab');
-        expect(await viewport.evaluate((node) => node === document.activeElement)).toBe(true);
-        const keyboardFocus = await readingFocusPaint(page);
-        await capture(page, `whitepaper-${locale}-${width}-${colorScheme}-reading-keyboard-focus`);
-        const keyBefore = await readPosition();
-        if (keyBefore.maxY > keyBefore.y + 1) {
-          await page.keyboard.press('PageDown');
-          await expect.poll(async () => (await readPosition()).y).toBeGreaterThan(keyBefore.y);
-        }
-        const wheelBefore = await readPosition();
+        expect(original.alt.length).toBeGreaterThan(0);
+        const origin = (await source.boundingBox())!;
+        await capture(page, `${name}-source`);
+        await recordNextMotion(page, 'pointerdown', sourceSelector);
+        if (width < 640) await trigger.tap();
+        else await trigger.click();
+        await entered(page);
+        const fit = await containedWhitepaper(page);
+        expect(fit.src).toBe(original.currentSrc);
+        expect(fit.alt).toBe(original.alt);
+        expect(fit.closeClip).toBe('inset(50%)');
+        expect(await page.locator('button[data-diagram-open]').count()).toBe(0);
+        if (original.caption)
+          expect(
+            (await page.locator('.docs-image-accessible-description').textContent())?.replace(
+              /\s+/g,
+              ' '
+            )
+          ).toContain(original.caption.replace(/\s+/g, ' '));
+        const opening = await motionFrames(page, `${name}-opening`);
+        expectLinearImageMotion(opening, origin, fit.content, 'opening');
+        await capture(page, `${name}-contained`);
+        await page.locator('.docs-image-full').click();
+        expect(
+          await page.locator('[data-docs-image-content]').getAttribute('data-transition-state')
+        ).toBe('entered');
         const background = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
-        if (wheelBefore.maxX > wheelBefore.x + 1) {
-          const observeWheel = process.env.IMAGE_PREVIEW_WHEEL_DIAGNOSTICS === '1';
-          if (observeWheel)
-            await startWhitepaperWheelObservation(page, wheelBefore).catch((error) => {
-              records.push({ wheelObservation: 'setup', diagnosticError: String(error) });
-            });
-          try {
-            await viewport.hover();
-            await page.mouse.wheel(wheelBefore.maxX * 2, 0);
-            await expect.poll(async () => (await readPosition()).x).toBeGreaterThan(wheelBefore.x);
-          } finally {
-            if (observeWheel)
-              await finishWhitepaperWheelObservation(
-                page,
-                `whitepaper-${locale}-${width}-${colorScheme}`
-              );
-          }
-        }
-        expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(background);
-        const readingPosition = await readPosition();
-        await capture(page, `whitepaper-${locale}-${width}-${colorScheme}-reading`);
-        await zoomOut.click();
-        expect((await page.locator('.docs-image-full').boundingBox())!.width).toBeCloseTo(
-          readingWidth,
-          1
-        );
-        await zoom.click();
-        expect(await viewport.getAttribute('data-docs-image-scale')).toBe('fit');
-        const fitViewport = await fittedReadingViewport(page);
-        const fit = (await page.locator('.docs-image-full').boundingBox())!;
-        expect(fit.x).toBeGreaterThanOrEqual(0);
-        expect(fit.y).toBeGreaterThanOrEqual(0);
-        expect(fit.x + fit.width).toBeLessThanOrEqual(width + 1);
-        expect(fit.y + fit.height).toBeLessThanOrEqual(901);
-        const canvas = await page.locator('[data-docs-image-canvas]').evaluate((el) => ({
-          background: getComputedStyle(el).backgroundColor,
-          padding: getComputedStyle(el).padding,
-          border: getComputedStyle(el).borderTopWidth,
-          shadow: getComputedStyle(el).boxShadow,
-        }));
-        expect(canvas.background).not.toBe('rgba(0, 0, 0, 0)');
-        expect(canvas.padding).toBe('0px');
-        expect(canvas.border).toBe('0px');
-        expect(canvas.shadow).toBe('none');
+        await page.mouse.wheel(120, 240);
+        const afterWheel = await page.evaluate(async () => {
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          return { x: scrollX, y: scrollY };
+        });
+        expect(afterWheel).toEqual(background);
+        const keyboardFocus = await keyboardCloseFocus(page);
+        await capture(page, `${name}-keyboard-close`);
+        const returnOrigin = (await source.boundingBox())!;
+        await recordNextMotion(page, 'keydown', sourceSelector);
+        await page.keyboard.press('Escape');
+        const closing = await motionFrames(page, `${name}-closing`);
+        expectLinearImageMotion(closing, returnOrigin, fit.content, 'closing');
+        await closed(page);
+        expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
+        expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
+        expect(
+          await source.evaluate(
+            (node) => getComputedStyle(node.closest('[data-docs-image-source-surface]')!).opacity
+          )
+        ).toBe('1');
+        expect(await trigger.getAttribute('data-docs-image-origin-hidden')).toBeNull();
+        expect(await trigger.getAttribute('data-docs-image-source-instant')).toBeNull();
+        await capture(page, `${name}-returned`);
+
+        // Keyboard activation may reveal Close; it remains a real PUI action.
+        await page.keyboard.press('Enter');
+        await entered(page);
+        const reopened = await containedWhitepaper(page);
+        const reopenedKeyboardFocus = await keyboardCloseFocus(page);
+        await page.keyboard.press('Enter');
+        await closed(page);
+        expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
+        if (width < 640) await trigger.tap();
+        else await trigger.click();
+        await entered(page);
+        const pointerFit = await containedWhitepaper(page);
+        const pointerOrigin = (await source.boundingBox())!;
+        await recordNextMotion(page, 'pointerdown', sourceSelector);
+        if (width < 640) await page.touchscreen.tap(1, 1);
+        else await page.mouse.click(1, 1);
+        const backgroundClosing = await motionFrames(page, `${name}-background-closing`);
+        expectLinearImageMotion(backgroundClosing, pointerOrigin, pointerFit.content, 'closing');
+        await closed(page);
+        expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
+        expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
+        const restored = await readSource();
+        expect(restored).toEqual(original);
+        expect(failuresByPage.get(page)).toEqual([]);
         records.push({
           whitepaper: locale,
           width,
+          height,
           colorScheme,
-          canvas,
-          readingWidth,
-          enlargedWidth,
-          keyBefore,
-          wheelBefore,
-          readingPosition,
-          keyboardFocus,
+          original,
+          origin,
           fit,
-          fitViewport,
+          opening,
+          returnOrigin,
+          closing,
+          background,
+          afterWheel,
+          keyboardFocus,
+          reopened,
+          reopenedKeyboardFocus,
+          pointerOrigin,
+          pointerFit,
+          backgroundClosing,
+          restored,
+          presentation: 'contain, no persistent toolbar; not a reading-size acceptance claim',
+          imageScaleAgainstArticle: {
+            width: fit.image.width / origin.width,
+            height: fit.image.height / origin.height,
+          },
         });
-        await capture(page, `whitepaper-${locale}-${width}-${colorScheme}`);
-        await page.keyboard.press('Enter');
-        expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
-        await page.keyboard.press('Escape');
-        await closed(page);
-        expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
       } finally {
-        await capture(page, `whitepaper-${locale}-${width}-${colorScheme}-last-observed`);
+        await capture(page, `${name}-last-observed`);
         await context.close();
       }
     }, 90_000);
@@ -1249,10 +1205,11 @@ describe('automatic documentation image preview in real Chromium', () => {
       }
     }, 90_000);
     for (const figure of ['lifecycle', 'translation'] as const) {
-      it(`reads the unchanged authored ${locale} ${figure} drawing through the mobile viewport`, async () => {
+      it(`preserves the authored ${locale} ${figure} drawing in borderless mobile contain`, async () => {
         const context = await browser.newContext({
           viewport: { width: 390, height: 844 },
           colorScheme: locale === 'zh-cn' ? 'light' : 'dark',
+          hasTouch: true,
         });
         const page = track(await context.newPage());
         try {
@@ -1267,52 +1224,58 @@ describe('automatic documentation image preview in real Chromium', () => {
           });
           const authored = page.locator(`img[src="/diagrams/${asset}"]`).first();
           const trigger = page.locator('[data-docs-image-trigger]').filter({ has: authored });
-          await trigger.click();
+          await trigger.scrollIntoViewIfNeeded();
+          await authored.evaluate((node) => (node as HTMLImageElement).decode());
+          const source = await authored.evaluate((node) => {
+            const image = node as HTMLImageElement;
+            const box = image.getBoundingClientRect();
+            return {
+              src: image.currentSrc,
+              alt: image.alt,
+              width: image.getAttribute('width'),
+              height: image.getAttribute('height'),
+              rect: { x: box.x, y: box.y, width: box.width, height: box.height },
+            };
+          });
+          expect(source.src).toContain(`/diagrams/${asset}`);
+          expect(source.alt.length).toBeGreaterThan(0);
+          await capture(page, `authored-${locale}-${figure}-source`);
+          await trigger.tap();
           await entered(page);
-          const image = page.locator('.docs-image-full');
-          await image.evaluate((node) => (node as HTMLImageElement).decode());
-          expect(await image.getAttribute('src')).toContain(`/diagrams/${asset}`);
-          const viewport = page.locator('[data-docs-image-viewport]');
-          expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
-          const start = await viewport.evaluate((node) => ({
-            x: node.scrollLeft,
-            y: node.scrollTop,
-            maxX: node.scrollWidth - node.clientWidth,
-            maxY: node.scrollHeight - node.clientHeight,
-          }));
-          expect(start.maxX).toBeGreaterThan(0);
-          await capture(page, `authored-${locale}-${figure}-reading`);
-          await viewport.hover();
-          await page.mouse.wheel(start.maxX * 2, start.maxY * 2);
-          await expect
-            .poll(async () => viewport.evaluate((node) => node.scrollLeft))
-            .toBeGreaterThan(start.x);
-          const end = await viewport.evaluate((node) => ({
-            x: node.scrollLeft,
-            y: node.scrollTop,
-          }));
-          await capture(page, `authored-${locale}-${figure}-reading-end`);
-          await page.locator('[data-docs-image-zoom]').click();
-          expect(await viewport.getAttribute('data-docs-image-scale')).toBe('fit');
-          const fitViewport = await fittedReadingViewport(page);
-          const fit = (await image.boundingBox())!;
-          expect(fit.x).toBeGreaterThanOrEqual(0);
-          expect(fit.y).toBeGreaterThanOrEqual(0);
-          expect(fit.x + fit.width).toBeLessThanOrEqual(391);
-          expect(fit.y + fit.height).toBeLessThanOrEqual(845);
-          records.push({ authored: asset, locale, start, end, fit, fitViewport });
-          await capture(page, `authored-${locale}-${figure}-fit`);
+          const fit = await containedWhitepaper(page);
+          expect(fit.src).toBe(source.src);
+          expect(fit.alt).toBe(source.alt);
+          expect(fit.closeClip).toBe('inset(50%)');
+          await capture(page, `authored-${locale}-${figure}-contained`);
           await page.keyboard.press('Escape');
           await closed(page);
           expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+          expect(await authored.getAttribute('alt')).toBe(source.alt);
+          expect(await authored.getAttribute('width')).toBe(source.width);
+          expect(await authored.getAttribute('height')).toBe(source.height);
           await page.keyboard.press('Enter');
           await entered(page);
-          expect(await viewport.getAttribute('data-docs-image-scale')).toBe('reading');
-          expect(
-            await viewport.evaluate((node) => ({ x: node.scrollLeft, y: node.scrollTop }))
-          ).toEqual({ x: 0, y: 0 });
-          await page.keyboard.press('Escape');
+          const reopened = await containedWhitepaper(page);
+          expect(reopened.image).toEqual(fit.image);
+          expect(reopened.src).toBe(source.src);
+          await page.touchscreen.tap(1, 1);
           await closed(page);
+          expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+          expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
+          records.push({
+            authored: asset,
+            locale,
+            source,
+            fit,
+            reopened,
+            imageScaleAgainstArticle: {
+              width: fit.image.width / source.rect.width,
+              height: fit.image.height / source.rect.height,
+            },
+            presentation:
+              'Whole authored image contained without a toolbar; inspect text in these captures. This does not claim the retired reading-size or pan acceptance.',
+          });
+          expect(failuresByPage.get(page)).toEqual([]);
         } finally {
           await capture(page, `authored-${locale}-${figure}-last-observed`);
           await context.close();
@@ -1320,9 +1283,11 @@ describe('automatic documentation image preview in real Chromium', () => {
       }, 90_000);
     }
   }
-
+  // The old retained diagram-button callback test belonged to the removed
+  // reading/fit controls. Keep a distinct negative lifecycle probe for the
+  // actual media and Dialog that still exist; do not report the old test green.
   for (const family of ['shadcn', 'brutalist'] as const) {
-    it(`rejects stale ${family} diagram actions during close and after a new presentation`, async () => {
+    it(`ignores retired ${family} whitepaper image events after close and reopen`, async () => {
       const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
       const page = track(await context.newPage());
       try {
@@ -1341,81 +1306,85 @@ describe('automatic documentation image preview in real Chromium', () => {
         const trigger = page.locator('.whitepaper-figure [data-docs-image-trigger]').first();
         await trigger.click();
         await entered(page);
-        await page
-          .locator('.docs-image-full')
-          .evaluate((node) => (node as HTMLImageElement).decode());
-        const oldButtons = await page
-          .locator('[data-docs-image-zoom-out], [data-docs-image-zoom], [data-docs-image-zoom-in]')
-          .elementHandles();
-        expect(oldButtons.length).toBe(3);
+        await containedWhitepaper(page);
+        const oldImage = await page.locator('.docs-image-full').elementHandle();
+        const content = await page.locator('[data-docs-image-content]').elementHandle();
+        expect(oldImage).not.toBeNull();
+        expect(content).not.toBeNull();
         try {
-          const probeStaleActions = async (closeCurrent: boolean) =>
-            page.evaluate(
-              ({ oldButtons, closeCurrent }) => {
-                const root = document.querySelector<
-                  HTMLElement & {
-                    getExposes?: () => {
-                      close?: (reason: string) => void;
-                      open?: { get?: () => boolean };
-                    };
-                  }
-                >('[data-docs-image-dialog]');
-                if (closeCurrent) root?.getExposes?.().close?.('test.stale-diagram-action');
-                const snapshot = () => {
-                  const viewport = document.querySelector<HTMLElement>(
-                    '[data-docs-image-viewport]'
-                  );
-                  const image = document.querySelector<HTMLImageElement>('.docs-image-full');
-                  return {
-                    mode: viewport?.dataset.docsImageScale,
-                    width: image?.style.width,
-                    height: image?.style.height,
-                    x: viewport?.scrollLeft,
-                    y: viewport?.scrollTop,
-                  };
-                };
-                const before = snapshot();
-                // Retain obsolete public event producers deliberately. These
-                // synthetic negative controls are separate from native input.
-                const afterEach = oldButtons.map((button) => {
-                  button.dispatchEvent(new CustomEvent('click'));
-                  return snapshot();
-                });
-                return {
-                  open: root?.getExposes?.().open?.get?.(),
-                  oldConnected: oldButtons.map((button) => button.isConnected),
-                  before,
-                  afterEach,
-                };
-              },
-              { oldButtons, closeCurrent }
-            );
-          const leaving = await probeStaleActions(true);
-          expect(leaving.open).toBe(false);
-          expect(leaving.oldConnected).toEqual([true, true, true]);
-          for (const after of leaving.afterEach) expect(after).toEqual(leaving.before);
-          await closed(page);
-          await trigger.click();
-          await entered(page);
-          await page
-            .locator('.docs-image-full')
-            .evaluate((node) => (node as HTMLImageElement).decode());
-          const replaced = await probeStaleActions(false);
-          expect(replaced.open).toBe(true);
-          expect(replaced.oldConnected).toEqual([false, false, false]);
-          expect(replaced.before.mode).toBe('reading');
-          for (const after of replaced.afterEach) expect(after).toEqual(replaced.before);
-          const beforeZoom = (await page.locator('.docs-image-full').boundingBox())!.width;
-          await page.locator('[data-docs-image-zoom-in]').click();
-          expect((await page.locator('.docs-image-full').boundingBox())!.width).toBeGreaterThan(
-            beforeZoom
-          );
-          records.push({ staleDiagramActions: family, leaving, replaced });
-          await capture(page, `diagram-stale-actions-${family}`);
           await page.keyboard.press('Escape');
           await closed(page);
+          expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+          await trigger.click();
+          await entered(page);
+          const fit = await containedWhitepaper(page);
+          const probe = await page.evaluate(
+            ({ oldImage, content }) => {
+              const root = document.querySelector<
+                HTMLElement & {
+                  getExposes?: () => { open?: { get?: () => boolean } };
+                }
+              >('[data-docs-image-dialog]');
+              const snapshot = () => {
+                const image = document.querySelector<HTMLImageElement>('.docs-image-full')!;
+                const panel = document.querySelector<HTMLElement>('[data-docs-image-content]')!;
+                const status = document.querySelector<HTMLElement>('.docs-image-status')!;
+                const { x, y, width, height } = image.getBoundingClientRect();
+                return {
+                  open: root?.getExposes?.().open?.get?.(),
+                  src: image.src,
+                  alt: image.alt,
+                  hidden: image.hidden,
+                  statusHidden: status.hidden,
+                  phase: panel.getAttribute('data-transition-state'),
+                  returnMode: panel.dataset.docsImageReturn,
+                  originHidden: document
+                    .querySelector('.whitepaper-figure [data-docs-image-trigger]')
+                    ?.hasAttribute('data-docs-image-origin-hidden'),
+                  image: { x, y, width, height },
+                };
+              };
+              const before = snapshot();
+              const afterEach = [];
+              // Deliberately synthetic events on a retained retired image are
+              // negative controls, separate from the native open/close inputs.
+              oldImage!.dispatchEvent(new Event('error'));
+              afterEach.push(snapshot());
+              oldImage!.dispatchEvent(new Event('load'));
+              afterEach.push(snapshot());
+              content!.dispatchEvent(new CustomEvent('afterLeave'));
+              afterEach.push(snapshot());
+              return {
+                oldConnected: oldImage!.isConnected,
+                replaced: oldImage !== document.querySelector('.docs-image-full'),
+                before,
+                afterEach,
+              };
+            },
+            { oldImage, content }
+          );
+          expect(probe.oldConnected).toBe(false);
+          expect(probe.replaced).toBe(true);
+          expect(probe.before).toMatchObject({
+            open: true,
+            src: fit.src,
+            alt: fit.alt,
+            hidden: false,
+            statusHidden: true,
+            phase: 'entered',
+            returnMode: 'origin',
+            originHidden: true,
+          });
+          for (const after of probe.afterEach) expect(after).toEqual(probe.before);
+          records.push({ retiredWhitepaperMedia: family, probe });
+          await capture(page, `whitepaper-retired-media-${family}`);
+          await page.keyboard.press('Escape');
+          await closed(page);
+          expect(await trigger.evaluate((node) => node === document.activeElement)).toBe(true);
+          expect(failuresByPage.get(page)).toEqual([]);
         } finally {
-          await Promise.all(oldButtons.map((button) => button.dispose()));
+          await oldImage?.dispose();
+          await content?.dispose();
         }
       } finally {
         await context.close();
@@ -1553,13 +1522,18 @@ describe('automatic documentation image preview in real Chromium', () => {
       await page
         .locator('.docs-image-full')
         .evaluate((node) => (node as HTMLImageElement).decode());
-      await page.locator('[data-docs-image-zoom-in]').click();
-      await page.keyboard.press('Tab');
-      const readingFocus = await readingFocusPaint(page);
-      records.push({ forcedColorsReadingFocus: readingFocus });
-      await capture(page, 'forced-colors-reading-keyboard-focus');
-      await page.keyboard.press('Escape');
+      expect(await page.locator('.docs-image-toolbar, [data-docs-image-zoom]').count()).toBe(0);
+      const whitepaperCloseFocus = await keyboardCloseFocus(page);
+      records.push({ forcedColorsWhitepaperCloseFocus: whitepaperCloseFocus });
+      await capture(page, 'forced-colors-whitepaper-keyboard-close');
+      await page.keyboard.press('Enter');
       await closed(page);
+      expect(
+        await page
+          .locator('.whitepaper-figure [data-docs-image-trigger]')
+          .first()
+          .evaluate((node) => node === document.activeElement)
+      ).toBe(true);
     } finally {
       await context.close();
     }

@@ -11,9 +11,8 @@ afterEach(() => {
 async function settle() {
   for (let i = 0; i < 12; i++) await Promise.resolve();
 }
-async function fixture() {
-  document.body.innerHTML =
-    '<div data-doc-flow><figure><img src="/image.png" width="400" height="200" alt="Diagram"><figcaption>Diagram caption</figcaption></figure></div><div id="viewer"></div>';
+async function fixture(mediaClass = '') {
+  document.body.innerHTML = `<div data-doc-flow><figure><img class="${mediaClass}" src="/image.png" width="400" height="200" alt="Diagram"><figcaption>Diagram caption</figcaption></figure></div><div id="viewer"></div>`;
   dispose = mountDocumentationImagePreview(document.querySelector('#viewer')!);
   await settle();
   const trigger = document.querySelector<PreviewControl>('[data-docs-image-trigger]')!;
@@ -54,6 +53,43 @@ describe('borderless image presentation / maintainer request #796', () => {
     expect(content.querySelector('.docs-image-accessible-description')?.textContent).toContain(
       'Diagram caption'
     );
+  });
+  it('keeps whitepaper images in the same source-to-contain presentation without a toolbar', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      () => new DOMRect(20, 40, 400, 200)
+    );
+    const ordinary = await fixture();
+    const geometry = (content: HTMLElement) =>
+      Object.fromEntries(
+        ['left', 'top', 'width', 'height', 'origin-transform'].map((name) => [
+          name,
+          content.style.getPropertyValue(`--docs-image-${name}`),
+        ])
+      );
+    const ordinaryGeometry = geometry(ordinary.content);
+    expect(ordinary.content.dataset.docsImageReturn).toBe('origin');
+    dispose?.();
+    dispose = undefined;
+
+    // #796 applies to the actual whitepaper marker as well as ordinary media.
+    // The source dimensions and rectangle are identical, so presentation must
+    // not acquire a toolbar, a separate scroll frame or a fade-only exception.
+    const { trigger, content } = await fixture('whitepaper-diagram');
+    expect(
+      content.querySelector(
+        '.docs-image-toolbar, [data-docs-image-zoom], [data-docs-image-zoom-in], [data-docs-image-zoom-out]'
+      )
+    ).toBeNull();
+    expect(content.querySelector('[data-docs-image-viewport]')).toBeNull();
+    expect(content.dataset.docsImageReturn).toBe('origin');
+    expect(geometry(content)).toEqual(ordinaryGeometry);
+    expect(content.querySelector('[data-docs-image-close]')).not.toBeNull();
+    expect(content.querySelector<HTMLImageElement>('.docs-image-full')?.alt).toBe('Diagram');
+    expect(content.querySelector('.docs-image-accessible-description')?.textContent).toContain(
+      'Diagram caption'
+    );
+    expect(trigger.querySelector('img.whitepaper-diagram')).not.toBeNull();
+    expect(trigger.hasAttribute('data-docs-image-origin-hidden')).toBe(true);
   });
   it('keeps the source in place but suppresses its duplicate while present, then restores it', async () => {
     const { trigger, root, content } = await fixture();
