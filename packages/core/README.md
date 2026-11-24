@@ -43,6 +43,7 @@ npm install @proto.ui/core@0.3.0-alpha.2
 - `src/index.ts`
 - `src/internal.ts`
 - `src/material-contact.ts`
+- `src/material-paint-reservation.ts`
 - `src/material.ts`
 - `src/module/`
 - `src/move.ts`
@@ -53,6 +54,7 @@ npm install @proto.ui/core@0.3.0-alpha.2
 - `src/prototype.ts`
 - `src/resident-motion.ts`
 - `src/scroll.ts`
+- `src/shader-presentation.ts`
 - `src/spec/`
 - `src/state.ts`
 - `src/text-control.ts`

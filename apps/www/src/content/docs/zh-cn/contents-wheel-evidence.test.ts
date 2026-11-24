@@ -155,6 +155,8 @@ describe('Contents wheel observation boundaries', () => {
       {
         trusted: false,
         deltaY: 500,
+        clientX: null,
+        clientY: null,
         surfaceInPath: true,
         contentInPath: true,
         defaultPrevented: true,
@@ -238,4 +240,132 @@ describe('Contents wheel observation boundaries', () => {
       observer.dispose();
     }
   });
+
+  it('distinguishes nested scroll progress and reset from an unchanged outer surface', () => {
+    const { host, surface, observer } = fixture();
+    const nested = document.createElement('div');
+    nested.style.overflowY = 'auto';
+    nested.style.overscrollBehaviorY = 'contain';
+    Object.defineProperties(nested, {
+      clientHeight: { value: 100 },
+      scrollHeight: { value: 500 },
+    });
+    host.append(nested);
+    vi.mocked(document.elementFromPoint).mockReturnValue(nested);
+    try {
+      const before = observer.read();
+      const nestedId = before.hitPath[0].node;
+      expect(before.hitPath[0]).toMatchObject({
+        isSurface: false,
+        scrollTop: 0,
+        overflowY: 'auto',
+        overscrollY: 'contain',
+        clientHeight: 100,
+        scrollHeight: 500,
+      });
+      // Controlled offset changes and synthetic events test retained evidence,
+      // not the browser's wheel-to-scroll default action.
+      nested.scrollTop = 120;
+      nested.dispatchEvent(new Event('scroll'));
+      nested.scrollTop = 0;
+      nested.dispatchEvent(new Event('scroll'));
+      const after = observer.read();
+      expect(surface.scrollTop).toBe(0);
+      expect(after.scrolls.map(({ node, top, trusted }) => ({ node, top, trusted }))).toEqual([
+        { node: nestedId, top: 120, trusted: false },
+        { node: nestedId, top: 0, trusted: false },
+      ]);
+      expect(after.scrolls[0].current.scrollTop).toBe(0);
+      expect(after.hitPath[0].node).toBe(nestedId);
+    } finally {
+      observer.dispose();
+    }
+  });
+
+  it('records a noncomposed shadow scroll once and does not reacquire listeners after disposal', () => {
+    const { host, surface, observer } = fixture(true);
+    try {
+      observer.read();
+      surface.scrollTop = 90;
+      surface.dispatchEvent(new Event('scroll', { bubbles: false, composed: false }));
+      expect(observer.read().scrolls).toHaveLength(1);
+      expect(observer.read().scrolls[0]).toMatchObject({ top: 90, trusted: false });
+      const add = vi.spyOn(host.shadowRoot!, 'addEventListener');
+      const remove = vi.spyOn(host.shadowRoot!, 'removeEventListener');
+      observer.dispose();
+      expect(remove).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+      observer.read();
+      expect(add).not.toHaveBeenCalled();
+      surface.scrollTop = 100;
+      surface.dispatchEvent(new Event('scroll', { bubbles: false, composed: false }));
+      expect(observer.read().scrolls).toHaveLength(1);
+    } finally {
+      observer.dispose();
+    }
+  });
+
+  it('retains wheel dispatch identities when the current hit has been replaced', () => {
+    const { host, observer } = fixture();
+    const original = document.createElement('summary');
+    host.append(original);
+    vi.mocked(document.elementFromPoint).mockReturnValue(original);
+    try {
+      const originalId = observer.read().hitPath[0].node;
+      original.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 500 }));
+      const replacement = document.createElement('button');
+      original.replaceWith(replacement);
+      vi.mocked(document.elementFromPoint).mockReturnValue(replacement);
+      const after = observer.read();
+      expect(after.hitPath[0].node).not.toBe(originalId);
+      expect(after.wheelPaths[0][0]).toMatchObject({
+        node: originalId,
+        tag: 'summary',
+        connected: false,
+      });
+      expect(after.wheels[0]).toMatchObject({ surfaceInPath: true, contentInPath: true });
+    } finally {
+      observer.dispose();
+    }
+  });
+
+  it('reports the event coordinates separately from the planned surface center', () => {
+    const { surface, observer } = fixture();
+    try {
+      const before = observer.read();
+      expect([before.x, before.y]).toEqual([170, 260]);
+      const event = new WheelEvent('wheel', { bubbles: true, deltaY: 500 });
+      // This Happy DOM WheelEvent lacks MouseEvent coordinates. Supply only
+      // those observed input facts; native coordinate delivery is a browser control.
+      Object.defineProperties(event, { clientX: { value: 93 }, clientY: { value: 117 } });
+      surface.dispatchEvent(event);
+      expect(observer.read().wheels[0]).toMatchObject({
+        trusted: false,
+        clientX: 93,
+        clientY: 117,
+      });
+      expect(surface.scrollTop).toBe(0);
+    } finally {
+      observer.dispose();
+    }
+  });
+});
+
+it('merge control: deduplicates propagation but records a reused Event on each dispatch', () => {
+  const { surface, observer } = fixture(true);
+  try {
+    observer.read();
+    const event = new Event('scroll', { bubbles: false, composed: true });
+    surface.scrollTop = 25;
+    surface.dispatchEvent(event);
+    surface.scrollTop = 0;
+    surface.dispatchEvent(event);
+    expect(observer.read().scrolls.map(({ top }) => top)).toEqual([25, 0]);
+    expect(observer.inspect().scrolls.map(({ top, target }) => [top, target.isSurface])).toEqual([
+      [25, true],
+      [0, true],
+    ]);
+    expect(observer.inspect().droppedScrolls).toBe(0);
+  } finally {
+    observer.dispose();
+  }
 });

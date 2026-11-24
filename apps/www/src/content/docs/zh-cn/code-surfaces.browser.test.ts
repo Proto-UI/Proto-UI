@@ -331,6 +331,11 @@ async function expectCopyControls(
     );
     expect(facts.radius).toBe(facts.expectedRadius);
     expect(facts.opacity).toBe('1');
+    await expect
+      .poll(() => control.evaluate((element) => getComputedStyle(element).borderTopColor), {
+        timeout: 2_000,
+      })
+      .toBe('rgba(0, 0, 0, 0)');
     expect(facts.tokens).toContain(
       inCodeExample ? 'rounded-md' : 'rounded-[var(--pui-radius-2xl)]'
     );
@@ -349,50 +354,26 @@ async function expectCopyControls(
     expect(focused.focused).toBe(true);
     expect(focused.shadow).not.toBe(facts.shadow);
   }
-  const ecPaint = await ec.evaluate((element) => {
-    const expected = document.createElement('div');
-    // Fixed Rhea outline is background-colored in light and transparent in dark.
-    expected.style.backgroundColor =
-      document.documentElement.dataset.theme === 'dark' ? 'transparent' : 'var(--pui-background)';
-    element.append(expected);
-    const facts = {
-      actual: getComputedStyle(element).backgroundColor,
-      expected: getComputedStyle(expected).backgroundColor,
-    };
-    expected.remove();
-    return facts;
-  });
-  await expect
-    .poll(() => ec.evaluate((element) => getComputedStyle(element).backgroundColor), {
-      timeout: 2_000,
-    })
-    .toBe(ecPaint.expected);
-  const ecBackground = ecPaint.expected;
-  const previewBackground = await preview.evaluate(
-    (element) => getComputedStyle(element).backgroundColor
-  );
-  if (codeExample) {
-    // CodeExample intentionally follows upstream docs' ghost Copy. Ordinary
-    // Expressive Code and Previewer Copy retain the existing outline recipe.
+  // Every Shadcn Copy uses the public ghost recipe. A separately rounded
+  // opaque Surface must not leave a white rim or corners behind the Button.
+  for (const control of [ec, preview]) {
+    expect(await control.getAttribute('data-pui-style')).toContain('bg-transparent');
+    await expect
+      .poll(() => control.evaluate((element) => getComputedStyle(element).backgroundColor), {
+        timeout: 2_000,
+      })
+      .toBe('rgba(0, 0, 0, 0)');
     expect(
-      await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))
-    ).toBe(true);
-    expect(await preview.getAttribute('data-pui-style')).toContain('bg-transparent');
-    expect(previewBackground).toBe('rgba(0, 0, 0, 0)');
-    expect(
-      await preview.evaluate(
+      await control.evaluate(
         (element) =>
           element.closest('[data-site-copy]')?.querySelector('[data-demo-ref="copy-backplate"]') !==
           null
       )
     ).toBe(false);
-    // Outline remains independently source-bound above; dark Rhea is also transparent.
-  } else {
-    expect(
-      await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))
-    ).toBe(false);
-    expect(previewBackground).toBe(ecBackground);
   }
+  expect(await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))).toBe(
+    codeExample
+  );
 }
 
 // Compare actual EC output against the same source rendered by the Previewer's

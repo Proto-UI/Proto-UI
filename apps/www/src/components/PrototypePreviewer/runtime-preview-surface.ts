@@ -329,7 +329,7 @@ export function createRuntimePreviewSurface(
         theme: currentTheme,
         prototypeId: (next) => surfacePrototypeId(next as ProjectionFamilyId),
         props: (next) => {
-          const props = panelSurfaceProps('canvas');
+          const props = { ...panelSurfaceProps('canvas') };
           if (next !== 'liquid-glass') return props;
           // An enclosing material scene already owns the visible canvas. Keep
           // the passive shell for slot/layout ownership, without a second frame.

@@ -60,7 +60,7 @@ export function createCopyCommandDemo(
     root.closest('[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]')
   );
   const buttonProps = {
-    variant: family === 'brutalist' ? 'surface' : codeExample ? 'ghost' : 'outline',
+    variant: family === 'brutalist' ? 'surface' : 'ghost',
     size: codeExample && family === 'shadcn' ? 'icon-compact' : 'icon',
   };
   const copyButton: DemoNode = {
@@ -98,21 +98,7 @@ export function createCopyCommandDemo(
       kind: 'box',
       className: 'site-copy-command',
       children: [
-        family === 'shadcn' && !codeExample
-          ? {
-              kind: 'proto',
-              prototypeId: `${family}-surface-root`,
-              ref: 'copy-backplate',
-              props: {
-                variant: 'outline',
-                radius: family === 'shadcn' ? 'lg' : 'default',
-                border: 'none',
-                elevation: 'none',
-              },
-              surfaceStyle: { display: 'inline-flex', minWidth: '0', padding: '0' },
-              children: [copyButton],
-            }
-          : copyButton,
+        copyButton,
         {
           kind: 'proto',
           prototypeId: 'base-live-region-root',
@@ -240,11 +226,6 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
       async materialize(request) {
         const runtime = request.selection.runtimeId as RuntimeId;
         const family = request.selection.projectionFamilyId as SiteLibraryFamily;
-        const hasBackplate =
-          family === 'shadcn' &&
-          !root.closest(
-            '[data-code-example], [data-code-file-browser], [data-code-presentation="docs"]'
-          );
         let candidate: MaterializedProjectionCandidate | null = null;
         const demo = createCopyCommandDemo(
           root,
@@ -277,9 +258,8 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
             demo,
             recipe: {
               id: 'website-copy-command',
-              rootPrototypeId: hasBackplate ? 'shadcn-surface-root' : `${family}-button`,
+              rootPrototypeId: `${family}-button`,
               prototypeIds: [
-                ...(hasBackplate ? ['shadcn-surface-root'] : []),
                 `${family}-button`,
                 ...Object.values(COPY_GLYPHS).map((icon) => `lucide-${icon}-icon`),
                 'base-live-region-root',

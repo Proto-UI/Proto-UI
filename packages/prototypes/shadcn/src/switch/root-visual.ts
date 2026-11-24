@@ -185,15 +185,14 @@ export function setupSwitchRootVisual(
     when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
     intent: (i) => i.feedback.style.use(tw('transition-none')),
   });
-  // Match the physical origin to the existing direction policy only for
-  // the explicit drag enhancement; ordinary upstream toggle paint is unchanged.
-  // Explicit direction also prevents inherited document direction reversing it twice.
+  // Ordinary and draggable paint share the Base Root's canonical direction.
+  // Fix the flex origin explicitly so document direction cannot reverse it again.
   def.rule({
-    when: (w) => w.all(w.state(state.draggable).eq(true), w.state(state.direction).eq('ltr')),
+    when: (w) => w.state(state.direction).eq('ltr'),
     intent: (i) => i.feedback.style.use(tw('direction-ltr')),
   });
   def.rule({
-    when: (w) => w.all(w.state(state.draggable).eq(true), w.state(state.direction).eq('rtl')),
+    when: (w) => w.state(state.direction).eq('rtl'),
     intent: (i) => i.feedback.style.use(tw('direction-rtl')),
   });
   for (const profile of SWITCH_PROJECTED_STYLES) {

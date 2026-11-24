@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createAnatomyFamily } from '@proto.ui/core';
-import type { AnatomyRootTargetGetter } from '../src/caps';
+import type { AnatomyParentGetter, AnatomyRootTargetGetter } from '../src/caps';
 import { AnatomyModuleImpl } from '../src/impl';
 import { makeCaps } from './utils/fake-caps';
 
@@ -19,11 +19,11 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
   });
   const rootToken = {};
   const getParent = (instance: unknown) => (instance === rootToken ? null : rootToken);
-  const make = (role?: 'root' | 'item') => {
+  const make = (role?: 'root' | 'item', parentGetter: AnatomyParentGetter = getParent) => {
     const token = role === 'root' ? rootToken : {};
     const caps = makeCaps({
       instance: token,
-      getParent,
+      getParent: parentGetter,
       getPrototype: () => ({ name: 'fanout-owner', setup() {} }),
       getRootTarget,
     });
@@ -42,6 +42,74 @@ function fixture(getRootTarget?: AnatomyRootTargetGetter) {
 }
 
 describe('Anatomy family subscriber notification', () => {
+  it('does not reuse a former comparator result after another bridge replaces and restores it', () => {
+    let reverseOrder = false;
+    const forward = (): number => (reverseOrder ? 4 : 2);
+    const equivalent = () => 2;
+    const itemTarget = { compareDocumentPosition: forward };
+    const rootTarget = { compareDocumentPosition: () => 4 };
+    let rootInstance: unknown;
+    let armed = false;
+    let itemReads = 0;
+    const f = fixture((instance) => {
+      if (instance === rootInstance) return rootTarget;
+      if (armed) {
+        itemReads++;
+        if (itemReads === 2) itemTarget.compareDocumentPosition = equivalent;
+        if (itemReads === 3) {
+          itemTarget.compareDocumentPosition = forward;
+          reverseOrder = true;
+        }
+      }
+      return itemTarget;
+    });
+    rootInstance = f.root.port.resolveSelfInstance();
+    f.make('item');
+    const first = vi.fn();
+    const intervening = vi.fn();
+    const later = vi.fn();
+    f.make().port.subscribeOrder(f.family, first);
+    // A separate valid logical bridge has its own domain-read array, while
+    // both bridges compare the same actual current host targets.
+    f.make(undefined, (instance) =>
+      instance === rootInstance ? null : rootInstance
+    ).port.subscribeOrder(f.family, intervening);
+    f.make().port.subscribeOrder(f.family, later);
+
+    armed = true;
+    f.notify();
+
+    expect(first).not.toHaveBeenCalled();
+    expect(intervening).not.toHaveBeenCalled();
+    expect(later).toHaveBeenCalledOnce();
+    expect(itemReads).toBe(3);
+  });
+
+  it('still samples live host order when the mounting owner was already in the primed domain', () => {
+    type Target = { rank: number; compareDocumentPosition(other: unknown): number };
+    const targets = new Map<unknown, Target>();
+    const f = fixture((instance) => targets.get(instance) ?? null);
+    const items = [f.make('item'), f.make('item')];
+    for (const [rank, owner] of [f.root, ...items].entries()) {
+      targets.set(owner.port.resolveSelfInstance(), {
+        rank,
+        compareDocumentPosition(other) {
+          return this.rank < (other as Target).rank ? 4 : 2;
+        },
+      });
+    }
+    const listener = vi.fn();
+    items[0]!.port.subscribeOrder(f.family, listener);
+    targets.get(items[1]!.port.resolveSelfInstance())!.rank = -1;
+
+    f.root.onProtoPhase('mounted');
+
+    expect(listener).toHaveBeenCalledOnce();
+    expect(
+      items[0]!.port.order.partsOf(f.family, 'item')!.map(items[0]!.port.resolvePartInstance)
+    ).toEqual(items.map((owner) => owner.port.resolveSelfInstance()).reverse());
+  });
+
   it('publishes versions before reentry and keeps a restored order silent for later recipients', () => {
     const targets = new Map<
       unknown,

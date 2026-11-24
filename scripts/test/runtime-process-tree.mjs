@@ -1,8 +1,35 @@
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import { promisify } from 'node:util';
 import { setTimeout as delay } from 'node:timers/promises';
+import { liveOwned, observeChildren, processFact } from './linux-process-ownership.mjs';
 
 const execFileAsync = promisify(execFile);
+const OWNER_ENV = 'PROTO_UI_RUNTIME_PROCESS_OWNER';
+const linuxOwners = new WeakMap();
+const LINUX_ROOT_IDENTITY_GAP =
+  'Live producer has no verified Linux ownership identity; refusing signals until its inherited marker, UID and start time are bound.';
+
+// Bind the inherited marker before exec. A detached descendant may already
+// have lost its parent by the next process-table sample.
+export function spawnOwnedProcess(command, args, options = {}) {
+  if (process.platform !== 'linux') return spawn(command, args, options);
+  const marker = randomUUID();
+  const child = spawn(command, args, {
+    ...options,
+    env: { ...(options.env ?? process.env), [OWNER_ENV]: marker },
+  });
+  linuxOwners.set(child, {
+    owned: new Map(),
+    ownership: {
+      uid: process.geteuid(),
+      started: null,
+      unmarked: new Set(),
+      match: Buffer.from(`\0${OWNER_ENV}=${marker}\0`),
+    },
+  });
+  return child;
+}
 
 // Read identities as well as PIDs: a sampled descendant must not give us
 // permission to kill a later, unrelated process that reuses its PID.
@@ -40,6 +67,7 @@ export function ownProcessTree(
   { label, graceMs = 5_000, killWaitMs = 2_000, sampleMs = 500 } = {}
 ) {
   const pid = child.pid;
+  const linuxOwner = linuxOwners.get(child);
   const observed = new Map();
   let known = new Map();
   let rootBound = false;
@@ -55,40 +83,73 @@ export function ownProcessTree(
     if (process.platform === 'win32' || !pid) return Promise.resolve([]);
     inFlight ??= readProcessTable()
       .then((table) => {
-        const owned = new Map(
+        let owned = new Map(
           table
             .filter((row) => known.get(row.pid)?.started === row.started)
             .map((row) => [row.pid, row])
         );
-        // Bind the root while its direct ChildProcess handle still owns the
-        // live PID. A number that reappears after exit is not a new grant.
-        if (!rootBound && child.exitCode === null && child.signalCode === null) {
-          const root = table.find((row) => row.pid === pid && row.pgid === pid);
-          if (root) {
-            rootBound = true;
-            groupContinuous = true;
-            owned.set(root.pid, root);
-          }
-        }
-        if (!rootBound && table.some((row) => row.pgid === pid))
-          identityErrors.add(
-            'Cannot bind the exited producer to this process-group identity; refusing signals.'
+        if (linuxOwner) {
+          observeChildren(pid, linuxOwner.owned, linuxOwner.ownership);
+          const byPid = new Map(table.map((row) => [row.pid, row]));
+          owned = new Map(
+            liveOwned(linuxOwner.owned).map((fact) => {
+              const sample = byPid.get(fact.pid);
+              return [
+                fact.pid,
+                {
+                  ...sample,
+                  pid: fact.pid,
+                  ppid: fact.parent,
+                  pgid: sample?.pgid ?? null,
+                  state: fact.state,
+                  rssKiB: sample?.rssKiB ?? 0,
+                  started: sample?.started ?? null,
+                  startTicks: fact.started,
+                  command: sample?.command ?? 'unobserved',
+                },
+              ];
+            })
           );
-        // Membership is useful only while at least one previously owned
-        // identity anchors that group. A vanished group cannot be reacquired
-        // by its numeric PGID, even if an unrelated leader uses the same PID.
-        groupContinuous &&= [...owned.values()].some((row) => row.pgid === pid);
-        if (groupContinuous) for (const row of table) if (row.pgid === pid) owned.set(row.pid, row);
-        let changed;
-        do {
-          changed = false;
-          for (const row of table) {
-            if (!owned.has(row.pid) && owned.has(row.ppid)) {
-              owned.set(row.pid, row);
-              changed = true;
+          if (owned.has(pid)) {
+            rootBound = true;
+            identityErrors.delete(LINUX_ROOT_IDENTITY_GAP);
+          } else if (!rootBound && child.exitCode === null && child.signalCode === null) {
+            const root = processFact(pid);
+            if (root && !['Z', 'X'].includes(root.state))
+              identityErrors.add(LINUX_ROOT_IDENTITY_GAP);
+          }
+        } else {
+          // Bind the root while its direct ChildProcess handle still owns the
+          // live PID. A number that reappears after exit is not a new grant.
+          if (!rootBound && child.exitCode === null && child.signalCode === null) {
+            const root = table.find((row) => row.pid === pid && row.pgid === pid);
+            if (root) {
+              rootBound = true;
+              groupContinuous = true;
+              owned.set(root.pid, root);
             }
           }
-        } while (changed);
+          if (!rootBound && table.some((row) => row.pgid === pid))
+            identityErrors.add(
+              'Cannot bind the exited producer to this process-group identity; refusing signals.'
+            );
+          // Membership is useful only while at least one previously owned
+          // identity anchors that group. A vanished group cannot be reacquired
+          // by its numeric PGID, even if an unrelated leader uses the same PID.
+          groupContinuous &&= [...owned.values()].some((row) => row.pgid === pid);
+          if (groupContinuous)
+            for (const row of table) if (row.pgid === pid) owned.set(row.pid, row);
+          let changed;
+          do {
+            changed = false;
+            for (const row of table) {
+              if (!owned.has(row.pid) && owned.has(row.ppid)) {
+                owned.set(row.pid, row);
+                changed = true;
+              }
+            }
+          } while (changed);
+        }
         known = owned;
         for (const row of owned.values()) observed.set(row.pid, row);
         // Zombies have already stopped executing and cannot hold browser sockets
@@ -128,7 +189,9 @@ export function ownProcessTree(
         signals: [],
         errors: [],
         verified: false,
-        verificationScope: 'continuously anchored private group and observed descendant identities',
+        verificationScope: linuxOwner
+          ? 'inherited Linux marker, UID and PID/start-time identities'
+          : 'continuously anchored private group and observed descendant identities',
         remaining: [],
       };
       if (!pid) {
@@ -154,9 +217,19 @@ export function ownProcessTree(
           // Only this child's private group may receive a negative-PID signal.
           // Descendants that moved groups receive identity-checked PID signals.
           const targets = new Set(
-            rows.map((row) => (groupContinuous && row.pgid === pid ? -pid : row.pid))
+            rows.map((row) => (!linuxOwner && groupContinuous && row.pgid === pid ? -pid : row.pid))
           );
           for (const target of targets) {
+            if (linuxOwner) {
+              const sampled = rows.find((row) => row.pid === target);
+              const current = processFact(target);
+              if (
+                !current ||
+                current.started !== sampled?.startTicks ||
+                ['Z', 'X'].includes(current.state)
+              )
+                continue;
+            }
             try {
               process.kill(target, name);
               receipt.signals.push({ signal: name, target });
