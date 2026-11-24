@@ -111,6 +111,8 @@ describe('Contents wheel observer / native event controls', () => {
           receipt.dispatch = await dispatch.jsonValue();
           expect(after.wheels[0]).toMatchObject({
             trusted: true,
+            clientX: before.x,
+            clientY: before.y,
             surfaceInPath: true,
             contentInPath: true,
             defaultPrevented: cancel,
