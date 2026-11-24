@@ -1004,6 +1004,7 @@ const reviewedWcHelpers = [
   'packages/adapters/base/src/host/synchronous-steps.ts',
   'packages/adapters/base/src/motion/web-motion-style-ownership.ts',
   'packages/adapters/base/src/platform/web-owned-decoration-stage.ts',
+  'packages/adapters/base/src/platform/web-material-paint-reservation.ts',
   'packages/adapters/base/src/events/keyboard-press-owner.ts',
   'packages/adapters/base/src/events/pointer-sample.ts',
   'packages/adapters/base/src/platform/portal-direction.ts',
@@ -1077,6 +1078,47 @@ test('the three reconciled WC leaves retain their exact existing source owners',
     visit(source);
     assert.deepEqual(dynamicImports, [], `${leaf} admits no lazy provider`);
   }
+});
+
+test('the public material reservation ref reaches one synchronous owner without optical geometry', () => {
+  const base = fileURLToPath(new URL('../../../packages/adapters/base/src/', import.meta.url));
+  const parse = (file) =>
+    ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true);
+  const index = parse(path.join(base, 'index.ts'));
+  const owner = './platform/web-material-paint-reservation';
+  const refExport = index.statements.find(
+    (node) =>
+      ts.isExportDeclaration(node) &&
+      node.exportClause &&
+      ts.isNamedExports(node.exportClause) &&
+      node.exportClause.elements.some(
+        (item) => item.name.text === 'createWebMaterialPaintReservationRef'
+      )
+  );
+  assert.equal(refExport?.moduleSpecifier?.text, owner);
+  const source = parse(path.join(base, `${owner}.ts`));
+  const valueImports = source.statements.filter(
+    (node) =>
+      ts.isImportDeclaration(node) &&
+      !node.importClause?.isTypeOnly &&
+      ts.isStringLiteral(node.moduleSpecifier)
+  );
+  assert.deepEqual(
+    valueImports.map((node) => node.moduleSpecifier.text),
+    ['@proto.ui/module-feedback']
+  );
+  assert.deepEqual(
+    valueImports[0].importClause.namedBindings.elements.map((node) => node.name.text),
+    ['prepareMaterialPaintReservationPart']
+  );
+  const legacy = parse(path.join(base, 'material/paint-reservation.ts'));
+  const dependency = legacy.statements.find(
+    (node) =>
+      ts.isImportDeclaration(node) &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      node.moduleSpecifier.text === '../platform/web-material-paint-reservation'
+  );
+  assert.ok(dependency, 'lazy geometry must read the same physical owner');
 });
 
 const siteOwners = [

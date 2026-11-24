@@ -234,6 +234,9 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/platform/web-owned-decoration.ts',
   // Physical first-view staging imported by that exact decoration entry.
   'packages/adapters/base/src/platform/web-owned-decoration-stage.ts',
+  // Synchronous public-template ref/lease ownership. Material geometry stays
+  // in its separate, unadmitted material/paint-reservation.ts implementation.
+  'packages/adapters/base/src/platform/web-material-paint-reservation.ts',
   'packages/adapters/base/src/platform/web-viewport-source.ts',
   'packages/adapters/web-component/src/native-text-layout.ts',
   'packages/adapters/web-component/src/owned-decoration.ts',
