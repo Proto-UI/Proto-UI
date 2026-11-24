@@ -390,7 +390,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `c2096d99a4c81aecafbd92607e797bef66ece8b93bf01d465f66a7f8fb2320a9` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
 | `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher` | `faa8fc22e5006ee49d3dd6e2085989023aff7d2ab1d6d82d2ae0a5681ca6b572` |
-| `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `5787970b7cb00c1e66b0574cc4a7550524e3bf1a638c02a900136974b8f1afec` |
+| `apps/www/src/components/site-search-composition.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `50828c387006e09d4440ae2027c0824750db76f5f896bc46d056f93fc42cdcd3` |
 | `apps/www/src/components/site-search-owner.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `aa4d3cc13174e2e9d62b557d81a8cf192483b669217af733332d22d42842f580` |
 | `apps/www/src/components/site-search-session.ts` | `www.search.dialog`, `www.search.input-results`, `www.search.loading-failure` | `7e3aea951b4d101f80a560ea482df9082f82289dd8b7f47840eb18c78ce55a4f` |
 | `apps/www/src/components/site-search-data.ts` | `www.search.input-results`, `www.search.loading-failure`, `www.search.pagefind-engine` | `bef47a9111cce57e1c19c062be60b5c11178eb8c516ee7cb8a33d684aeb286eb` |
