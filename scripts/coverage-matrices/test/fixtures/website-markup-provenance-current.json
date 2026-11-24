@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "c250f47e877d5dff343da66c065d9f87b2fc8a7d",
+  "revision": "d8dfeab34f594c5173b8b5d38b30e9fa69552080",
   "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash.",
   "sourceAdmission": "unverified",
   "sources": [
