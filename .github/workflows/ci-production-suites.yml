@@ -75,8 +75,13 @@ jobs:
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/select-item-sizing-evidence.yml
 
-  bootstrap-state-controls:
+  carousel-preview:
     needs: select-item-sizing
+    if: ${{ !cancelled() }}
+    uses: ./.github/workflows/carousel-preview-evidence.yml
+
+  bootstrap-state-controls:
+    needs: carousel-preview
     if: ${{ !cancelled() }}
     uses: ./.github/workflows/bootstrap-state-controls-evidence.yml
   compiler-browser:

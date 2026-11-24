@@ -395,7 +395,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/site-code-surface.ts` | `www.docs.code-surface`, `www.docs.note-surface` | `97a44d91efc560c3e2fa9fcbed26c4b07ebe14eeca80315b93fd5294d28d6b98` |
 | `apps/www/src/components/site-contents-command.ts` | `www.shell.mobile-menu-toggle` | `b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799` |
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
-| `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `75e31bef21c8e6cd2db3647f201b42403836fe3de530529d994b553c85bd604d` |
+| `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b` |
 | `apps/www/src/components/site-copy-controller.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `1a39475db2f52b420beec1b26d853d38e05f82d51864e8f50996c769861e59ba` |
 | `apps/www/src/components/site-header-disclosure.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `0d5ded18075c11f5a478d08c2af4346ff2bfc051de7e4e545172494eb0dce904` |
 | `apps/www/src/components/site-header-surface.ts` | `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `b1f90dcad071dc4f4bea5b6e47834c2f5464179ee8a8476653907cc11d72716a` |
