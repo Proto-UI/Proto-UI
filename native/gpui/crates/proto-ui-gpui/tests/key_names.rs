@@ -117,6 +117,21 @@ fn context_menu_key_reaches_the_focused_native_subject(cx: &mut TestAppContext) 
 }
 
 #[gpui::test]
+fn every_function_key_reaches_a_prototype_with_its_web_spelling(cx: &mut TestAppContext) {
+    let harness = Harness::open(cx);
+    for index in 1..=35 {
+        let gpui_name = format!("f{index}");
+        let event = harness.press(cx, &gpui_name);
+        assert_eq!(web_key(&event), format!("F{index}"), "GPUI `{gpui_name}`");
+    }
+
+    let event = harness.press(cx, "shift-f10");
+    let fields = from_key_down(&event).expect("F10 has a portable key");
+    assert_eq!(fields.key, "F10");
+    assert!(fields.modifiers.shift);
+}
+
+#[gpui::test]
 fn enter_tab_and_space_are_named_although_gpui_fills_a_typed_character(cx: &mut TestAppContext) {
     // The trap, observed rather than assumed: GPUI's simulated input fills
     // `key_char` for these three. A translation that preferred the typed
@@ -265,6 +280,28 @@ fn an_unknown_multi_character_key_is_reported_not_guessed() {
     assert_eq!(portable_key(&keystroke), None);
 }
 
+// The source-scan test must invert the supported function-key rule as well
+// as NAMED_KEYS. This only chooses input for Harness::press; the real window
+// dispatch above verifies the resulting portable spelling independently.
+fn gpui_function_key_input(web_key: &str) -> Option<String> {
+    let number = web_key.strip_prefix('F')?;
+    let index = number.parse::<u8>().ok()?;
+    ((1..=35).contains(&index) && number == index.to_string()).then(|| format!("f{index}"))
+}
+
+#[test]
+fn source_scan_function_key_inputs_are_canonical_and_bounded() {
+    for index in 1..=35 {
+        assert_eq!(
+            gpui_function_key_input(&format!("F{index}")),
+            Some(format!("f{index}"))
+        );
+    }
+    for key in ["F0", "F36", "F01", "F", "F256", "F+1", "F-1", "f10"] {
+        assert_eq!(gpui_function_key_input(key), None, "`{key}`");
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EventFixture {
@@ -284,10 +321,19 @@ const NOT_A_KEYBOARD_KEY: &[(&str, &str)] = &[(
 /// Keys whose consumers are known, so a scan that misses them is broken.
 ///
 /// The scan is a superset check, and a superset check passes vacuously when it
-/// finds too little. These are read by focus traversal, activation, dismissal
-/// and roving navigation respectively; the first scan written for this test
-/// missed `Enter` because it looked in the wrong directory.
-const MUST_BE_FOUND: &[&str] = &["Tab", "Enter", " ", "Escape", "ArrowDown", "Home", "End"];
+/// finds too little. These are read by focus traversal, activation, dismissal,
+/// roving navigation and the context-menu input host; the first scan written
+/// for this test missed `Enter` because it looked in the wrong directory.
+const MUST_BE_FOUND: &[&str] = &[
+    "Tab",
+    "Enter",
+    " ",
+    "Escape",
+    "ArrowDown",
+    "Home",
+    "End",
+    "F10",
+];
 
 fn compared_keys() -> Vec<String> {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/event-types.json");
@@ -323,11 +369,12 @@ fn every_key_a_prototype_compares_against_is_delivered_with_that_spelling(cx: &m
             .iter()
             .find(|(_, web)| web == key)
             .map(|(gpui, _)| (*gpui).to_string())
+            .or_else(|| gpui_function_key_input(key))
             .or_else(|| (key.chars().count() == 1).then(|| key.clone()))
             .unwrap_or_else(|| {
                 panic!(
-                    "`{key}` is compared by a Prototype but no GPUI key produces it; \
-                     add it to the table or to NOT_A_KEYBOARD_KEY with a reason"
+                    "`{key}` is compared by a Prototype but has no verified GPUI input spelling; \
+                     add a supported input mapping or classify a non-key comparison with a reason"
                 )
             });
         let event = harness.press(cx, &gpui_name);

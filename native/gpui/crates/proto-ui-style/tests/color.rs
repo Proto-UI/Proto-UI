@@ -165,9 +165,9 @@ fn treats_a_transparent_mix_as_alpha_attenuation() {
 
 #[test]
 fn reports_rather_than_approximates_what_it_cannot_do() {
-    // A mix against a second colour is a real interpolation this does not do.
+    // Other interpolation spaces remain outside the recorded vocabulary.
     assert!(matches!(
-        parse("color-mix(in oklab, #fff 50%, #000)"),
+        parse("color-mix(in lch, #fff 50%, #000)"),
         Err(ColorError::Unsupported(_))
     ));
     // A colour space it has never seen.
