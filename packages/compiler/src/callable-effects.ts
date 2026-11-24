@@ -617,6 +617,43 @@ function analyzeCallableFlow(
     );
     return choices.size === 1 ? [...choices][0] : undefined;
   }
+
+  /** Coalescing selects the non-nullish left value or evaluates the fallback.
+   * Refine only untracked data facts; retained records and capabilities keep
+   * their identity and complete contents, including fields hidden by a view. */
+  function nullishChoice(values: Known): { present: Known; fallback: boolean } {
+    let fallback = false;
+    const present = merge(
+      values.map((value): Known => {
+        const known = truth([value], true);
+        if (known === false) {
+          fallback = true;
+          return [];
+        }
+        if (known === true) return [value];
+        if (value.kind !== 'unknown' || !value.data) {
+          fallback = true;
+          return [value];
+        }
+        const alternatives = valueAlternatives(value.data);
+        const retained = alternatives.filter((type) => {
+          if (
+            type === 'void' ||
+            type === 'null' ||
+            (typeof type !== 'string' && type.kind === 'literal' && type.value === null)
+          ) {
+            fallback = true;
+            return false;
+          }
+          if (type === 'unknown') fallback = true;
+          return true;
+        });
+        return retained.length === alternatives.length ? [value] : merge(retained.map(dataFact));
+      })
+    );
+    return { present, fallback };
+  }
+
   function branches(actions: readonly (() => Known)[]): Known {
     const before = snapshot(),
       results: Known[] = [],
@@ -1493,8 +1530,15 @@ function analyzeCallableFlow(
       case 'binary': {
         const left = expression(value.left, scope, execution);
         if (!reachable) return [];
-        if (['&&', '||', '??'].includes(value.operator)) {
-          const condition = truth(left, value.operator === '??');
+        if (value.operator === '??') {
+          const choice = nullishChoice(left);
+          return branches([
+            ...(choice.present.length ? [() => choice.present] : []),
+            ...(choice.fallback ? [() => expression(value.right, scope, execution)] : []),
+          ]);
+        }
+        if (['&&', '||'].includes(value.operator)) {
+          const condition = truth(left);
           const useRight =
             value.operator === '&&' ? condition : condition === undefined ? undefined : !condition;
           return branches([
