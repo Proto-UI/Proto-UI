@@ -1,0 +1,43 @@
+# Sprint 5: preserved public integration and actual commit receipts
+
+This record closes the local integration packet for [PR #1738](https://github.com/Proto-UI/Proto-UI/pull/1738). It records source, verification and ordinary commit events that actually occurred. It is not a GitHub approval, PR merge, release decision or claim that queued formal checks have passed.
+
+## Integrated sources and scope
+
+The source integration is `36105b4b4eb28946e99961dfac2c13b7e8ad778e` (tree `638a37ac5f926766b604c5a9c8c119fba43b5ae0`). Its ancestry preserves our independently verified native diagnostic fix `d0c069ccb7add9b544db7b4e53db53358d2d05fe`, the earlier pure evidence commit `b8586113bb0922a0bd13efa48c79e7af4bc16ca4`, the ordinary diagnostic merge `669a6d938d159178ceadabbb4f05a4d2f969b6a2`, and the public concurrent head `f6bdadf1bf1791bab8a66d7c9a6c25993fc5c1f4`. Main `0fbb52ef832cc27c78e24c28c59a55a16f51d7fe` is retained. No force push or replacement of the public history was used.
+
+The concurrent changes include actual JSON backing-value provenance, generated Vue owner retirement, the WC observer's input-origin filtering, the disposing guard for native Scroll leases, and the ordinary native producer's source-resolving `external_scroll` entry. The new public producer is retained byte-for-byte at SHA-256 `c76ee6adab6ae7db487a984d6289c080d72b9f9788124a6cfcf3ce0458160521`: there is exactly one external-scroll dependency and one scroll-reader dependency. The GPUI `scroll.sync` admission likewise remains exactly one. The immutable native diagnostic queue fix remains SHA-256 `f7290b713dfe98b38feafce0c894f3c16c4711e7018fc0f134d16e040291278d`.
+
+The native workflow's consumer continuation conditions preserve the mandatory successful SDK prerequisite and cancellation check. An earlier consumer failure still fails the job. No `continue-on-error`, original timeout, profile admission or browser sandbox was weakened. The existing manual source selection retains its original 37 paths and adds JSON provenance, executing getter consumers, Vue hydration, and WC input-origin controls for 41 paths. Actual new formal test counts must come from the new report, not from arithmetic on historical totals.
+
+## Verification completed on the local union
+
+Six focused source files executed: **72/72**, with zero failed, pending or todo tests. They cover the four newly registered suites and both prior capture getter/host own-presence suites. The original CI scheduling-policy suite and scheduler checks passed. The official authoring check against actual main `0fbb52ef832cc27c78e24c28c59a55a16f51d7fe` checked **three** changed catalog inputs successfully. These results retain their exact source hashes and raw commands.
+
+The first formatting gate found one existing formatting issue in `shadow-closeout.browser.test.ts`; it did not report a behavior failure. Its original bytes, original failed formatter output, the official formatter output and the resulting diff are retained. The changed file's TypeScript syntax structure and literal payloads have the identical structural hash `a2215d3a317cfaedd2e2720e05bea37858fb622514a5b6ef49f267f3abc6b287`. This comparison supports the formatting-only classification and is not a browser execution. The final full staged-text formatting and diff checks passed. The successful source tests were not rerun merely to conceal the original formatter failure.
+
+The final workflow candidate additionally registers only the two existing Shadow native `dir=auto` input/textarea cases in the established Chromium job. Their assertions, original launcher and timeouts are unchanged. Its receipt check requires each exact original title once, both passed, and records all other file cases as filtered or skipped. This is registration and receipt validation at preparation time, not a claim that those browser cases have run on the new head.
+
+## Native diagnostic evidence remains independently bound
+
+The earlier e470 union produced SDK **62/62**, 18 selected source files **343/343**, ordinary consumers **74/74**, and numeric consumers **9/9**, then reached the same official ControlLabel refusal-diagnostic assertion seen on both hosted operating systems. The official suite was **8/9**. The original complete Linux and macOS logs and their source-bound readbacks are preserved in the diagnostic packet.
+
+Root's controlled regression added assertions to the same source test without deleting the original official assertions. The old queue implementation produced **61 pass / one fail**, specifically the fresh identical refusal after the diagnostic buffer had been taken. The minimal queue change then produced **62/62**. Its focused follow-up produced official **9/9**, ordinary ControlLabel **14/14**, three source files **106/106**, and Adapter **19 projection + two accessibility-state + one accessibility-flags** controls. The 294-source snapshot and both generated-output snapshots remained stable. These are the original d0c-candidate executions; subsequent parser, Vue, WC and Scroll integration is why new formal native/browser/source/production execution is still required. Overlapping test selections are not summed into a larger acceptance number.
+
+## Historical formal evidence is not relabelled
+
+The verified artifacts from run [45259712127](https://github.com/Proto-UI/Proto-UI/actions/runs/45259712127) remain bound to head `2df421b1fc55cc0649be6675c0ee46a69ad9316f`. They contain the canonical production browser run without added diagnostic observer instrumentation, **20/20**, an independent rebuild with eight delivery rows, source **659/659**, full workspace/documentation types for **1,330 files with zero errors, zero warnings and 47 hints**, and the real **684-page** production build with **2,150/2,150** bundle controls. Flutter and the native GPUI Adapter job also succeeded at that head. The overall run failed because its Linux and macOS official Input/ControlLabel consumers each produced **8/9**. Skipped package-budget and shader jobs remain skipped.
+
+Earlier observed 250 ms cleanup failures, including preserved hosted and diagnostic runs, remain historical failures. The observed 17/19 result belongs to its specific diagnostic run. The later successful production run does not establish why those earlier timing failures did not recur. It does not change the original timeout, prove an OS/assistive-technology boundary, or make source/DOM tests equivalent to physical browser or native-application delivery.
+
+## Ordinary commit and provenance receipts
+
+The attached raw packet retains the actual post-commit statuses, Git trace events and logs for b858, d0c, 669a and the final public merge. The prepared and committed trees matched, the working trees were clean, and the normal pre-commit hooks actually ran successfully for those events. No `HUSKY=0` or hook bypass was used. The earlier isolated 2d339a commit's missing Husky wrapper remains a separate recorded environment limitation; its plain signed-off commit and explicit formatting result are not retrospectively described as hook execution.
+
+The root f6bd runtime/emitter/workflow review and the independent callable/data-provenance review are retained as source reviews. They are not GitHub APPROVED reviews or execution receipts. The original f6bd authorship and signatures, all previous records, failures and compressed raw artifacts remain in the history. The archive manifest records each raw byte length and SHA-256, gzip byte length and SHA-256, and the source map. Every archived gzip was decompressed and compared with its original bytes before staging.
+
+This packet contains **81 raw files**, **3,121,609 raw bytes**, compressed into **380,000 bytes**. The subsequent commit adds this record and packet plus the bounded native-direction workflow step. It does not alter the validated product or test source; the final workflow SHA is included in the manifest.
+
+## Remaining final-head gate at preparation time
+
+The PR remains Draft until the final published source's applicable checks are read back. The next authorized workflow invocation enables `browser_acceptance=true`, including the existing source and production jobs, alongside mandatory Linux/macOS native consumers and Flutter. The prior Adapter result is cited only with its original head and unchanged Adapter input mapping. Source execution, full types, browser, production, current CI/DCO and platform results must be reported at their actual heads and terminal states. No Issue umbrella, canonical public SSR profile, shared-definition maturity, release criterion or physical accessibility acceptance is silently marked complete by this bounded repair.

@@ -1,0 +1,19 @@
+{
+  "head": "7902a47f8bd2ba33745840d9248548b2309c9a6a",
+  "name": "ci-controls",
+  "command": [
+    "node",
+    "--test",
+    "--test-reporter=tap",
+    "scripts/ci/test/ci-scheduling-policy.test.mjs",
+    "scripts/ci/test/cycle-job-inventory.test.mjs",
+    "scripts/ci/test/cycle-report.test.mjs"
+  ],
+  "startedAt": "2026-11-24T04:01:09.135786+00:00",
+  "elapsedMs": 4199,
+  "exitCode": 0,
+  "timedOut": false,
+  "outerTimeoutSeconds": 180,
+  "headAfter": "7902a47f8bd2ba33745840d9248548b2309c9a6a",
+  "trackedStatusAfter": ""
+}

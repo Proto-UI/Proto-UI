@@ -51,6 +51,7 @@ fn the_recorded_button_is_a_button_named_by_its_content() {
             label: None,
             name_from_content: true,
             disabled: false,
+            read_only: None,
             toggled: None,
             selected: None,
             orientation: None,
@@ -107,16 +108,62 @@ fn the_recorded_checkbox_is_a_checkbox_unchecked_checked_or_mixed() {
     let checkbox = |session: &str| {
         let (projection, issues) = project(&recorded("base-checkbox-session.json", session));
         assert!(issues.is_empty(), "{session}: {issues:?}");
-        projection.expect("a projection")
+        let projection = projection.expect("a projection");
+        assert_eq!(projection.read_only, Some(false));
+        projection
     };
     let unchecked = checkbox("root");
     assert_eq!(unchecked.role, Role::CheckBox);
     assert_eq!(unchecked.toggled, Some(Toggled::False));
+    assert_eq!(unchecked.read_only, Some(false));
     // AccessKit names a checkbox from its content itself.
     assert!(unchecked.name_from_content);
     assert!(names_from_descendants(Role::CheckBox));
     assert_eq!(checkbox("checked").toggled, Some(Toggled::True));
     assert_eq!(checkbox("mixed").toggled, Some(Toggled::Mixed));
+}
+
+#[test]
+fn readonly_preserves_boolean_facts_without_changing_actions_or_check_state() {
+    for value in [true, false] {
+        let (projection, issues) = project(&snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": { "readOnly": value, "checked": "mixed", "disabled": false },
+            "actions": { "activate": { "event": "click" } },
+            "relations": {},
+        })));
+        let projection = projection.expect("the checkbox projects");
+        assert!(issues.is_empty(), "{issues:?}");
+        assert_eq!(projection.read_only, Some(value));
+        assert_eq!(projection.toggled, Some(Toggled::Mixed));
+        assert!(!projection.disabled);
+        // The Prototype retains control of whether the action changes state.
+        assert!(projection.activatable);
+    }
+}
+
+#[test]
+fn readonly_absence_and_invalid_values_do_not_invent_a_boolean_fact() {
+    for value in [None, Some(json!("false")), Some(Value::Null), Some(json!(0))] {
+        let mut snapshot = snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": {},
+            "actions": {},
+            "relations": {},
+        }));
+        if let Some(value) = &value {
+            snapshot.states.insert("readOnly".into(), value.clone());
+        }
+        let (projection, issues) = project(&snapshot);
+        assert_eq!(projection.expect("the checkbox still projects").read_only, None);
+        let expected: Vec<_> = value
+            .into_iter()
+            .map(|value| A11yIssue::State { name: "readOnly".into(), value })
+            .collect();
+        assert_eq!(issues, expected);
+    }
 }
 
 #[test]
@@ -295,6 +342,88 @@ fn facts_outside_the_mapping_are_named_and_the_rest_still_projects() {
             // `describedBy: null` is the absence of a relation.
             A11yIssue::Relation("controls".into()),
             A11yIssue::Level(2),
+        ]
+    );
+}
+
+#[test]
+fn boolean_read_only_preserves_checked_state_and_activation() {
+    for read_only in [false, true] {
+        for (checked, toggled) in [
+            (json!(false), Toggled::False),
+            (json!(true), Toggled::True),
+            (json!("mixed"), Toggled::Mixed),
+        ] {
+            let (projection, issues) = project(&snapshot(json!({
+                "semanticObjectId": "checkbox",
+                "role": "checkbox",
+                "states": { "readOnly": read_only, "checked": checked },
+                "actions": { "activate": { "event": "click" } },
+                "relations": {},
+            })));
+            assert!(issues.is_empty(), "{issues:?}");
+            let projection = projection.expect("a checkbox projection");
+            assert_eq!(projection.role, Role::CheckBox);
+            assert_eq!(projection.read_only, Some(read_only));
+            assert_eq!(projection.toggled, Some(toggled));
+            assert!(!projection.disabled);
+            assert!(projection.activatable);
+        }
+    }
+}
+
+#[test]
+fn non_boolean_read_only_is_reported_without_coercion() {
+    for value in [
+        Value::Null,
+        json!(0),
+        json!(1),
+        json!("false"),
+        json!("true"),
+        json!([]),
+        json!({}),
+    ] {
+        let (projection, issues) = project(&snapshot(json!({
+            "semanticObjectId": "checkbox",
+            "role": "checkbox",
+            "states": { "readOnly": value.clone(), "checked": "mixed" },
+            "actions": {},
+            "relations": {},
+        })));
+        let projection = projection.expect("the checkbox still projects");
+        assert_eq!(projection.read_only, None);
+        assert_eq!(projection.toggled, Some(Toggled::Mixed));
+        assert_eq!(
+            issues,
+            [A11yIssue::State {
+                name: "readOnly".into(),
+                value,
+            }]
+        );
+    }
+}
+
+#[test]
+fn read_only_does_not_suppress_unmapped_facts() {
+    let (projection, issues) = project(&snapshot(json!({
+        "semanticObjectId": "checkbox",
+        "role": "checkbox",
+        "states": { "readOnly": true, "readonly": false },
+        "actions": { "activate": { "event": "click" }, "expand": {} },
+        "relations": { "controls": "other" },
+    })));
+    let projection = projection.expect("the checkbox still projects");
+    assert_eq!(projection.read_only, Some(true));
+    assert!(projection.activatable);
+    assert_eq!(
+        issues,
+        [
+            A11yIssue::State {
+                name: "readonly".into(),
+                value: json!(false),
+            },
+            A11yIssue::Action("expand".into()),
+            A11yIssue::Relation("controls".into()),
         ]
     );
 }

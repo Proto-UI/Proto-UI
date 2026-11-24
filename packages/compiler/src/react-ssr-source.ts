@@ -236,21 +236,39 @@ export function hydrateGeneratedRoot(container: Element | Document, props: Gener
     ${p}React.createElement(${component}, { ...next, ref }));
   const originalRoot = container.querySelector('[data-pui-root]');
   let adoptionConfirmed = false;
+  let terminal = false, retired = false, retirementScheduled = false;
+  const retire = () => {
+    terminal = true;
+    if (retired) return;
+    retired = true;
+    root.unmount();
+  };
+  const rejectAdoption = () => {
+    terminal = true;
+    if (retirementScheduled || retired) return;
+    retirementScheduled = true;
+    // React reports recoverable hydration failures during commit. Retire the
+    // actual native tree after that stack, while refusing new work immediately.
+    queueMicrotask(retire);
+  };
   const root = ${p}HydrateRoot(container, render(props), { ...options, identifierPrefix: carrier.identifierPrefix,
-    onRecoverableError(error, info) { diagnostics.push(error); options.onRecoverableError?.(error, info); if (!options.onRecoverableError) console.error('[Hydration] diagnosed React recovery, not successful adoption:', error); },
+    onRecoverableError(error, info) { diagnostics.push(error); rejectAdoption(); options.onRecoverableError?.(error, info); if (!options.onRecoverableError) console.error('[Hydration] diagnosed React recovery, not successful adoption:', error); },
   });
   return { root, diagnostics,
     getHandle() {
-      if (diagnostics.length || !adoptionConfirmed && originalRoot && container.querySelector('[data-pui-root]') !== originalRoot)
+      if (diagnostics.length || !adoptionConfirmed && originalRoot && container.querySelector('[data-pui-root]') !== originalRoot) {
+        rejectAdoption();
         throw new Error('[Hydration] mismatch recovery replaced/rejected the server view; adoption did not succeed.');
+      }
+      if (terminal) throw new Error('[Hydration] owner is disposed.');
       if (session.pending.size) throw new Error('[Hydration] initial component adoption is not complete.');
       if (!ref.current) throw new Error('[Hydration] owner is not ready before accepted commit.');
       ref.current.getExposes();
       adoptionConfirmed = true;
       return ref.current;
     },
-    render(next) { root.render(render(next)); },
-    unmount() { root.unmount(); },
+    render(next) { if (terminal) throw new Error('[Hydration] rejected or disposed owner cannot render.'); root.render(render(next)); },
+    unmount() { retire(); },
   };
 }
 `;

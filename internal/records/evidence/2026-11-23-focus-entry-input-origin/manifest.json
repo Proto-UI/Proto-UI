@@ -1,0 +1,163 @@
+{
+  "kind": "wc-focus-entry-native-input-sampling-source-evidence-v1",
+  "base": "1709cd31b1d44775cd9e441e8f217e37a40a526c",
+  "node": "v24.22.3",
+  "pnpm": "10.32.1",
+  "sourceFiles": {
+    "packages/adapters/web-component/src/runtime/modules.ts": "f099df3b83d6ef59599cfbc389c6a720a76674805fabd842039a080cfbb193b3",
+    "packages/adapters/web-component/test/focus-entry-input-origin.test.ts": "d282bc5fc68e069a3631636cde4fdee485ed4598759089db90237c581c2e8072"
+  },
+  "baselineModuleSha256": "ec43e4865990e14482fc4e379ae9b731175d2f01e9266aebfae1edf469862803",
+  "baseline": {
+    "receipt": "baseline-exact-controls.json",
+    "total": 16,
+    "passed": 12,
+    "failed": 4,
+    "skipped": 0,
+    "entryRootReadsPerUnrelatedInput": [2, 2, 2, 2, 2, 2, 2, 2],
+    "entryRootReadsPerUnrelatedChange": [3, 3, 3, 3, 3, 3, 3, 3]
+  },
+  "candidate": {
+    "receipt": "green-final.json",
+    "files": 4,
+    "total": 94,
+    "passed": 94,
+    "failed": 0,
+    "skipped": 0
+  },
+  "types": {
+    "receipt": "types.json",
+    "typescriptVersion": "5.9.3",
+    "strict": true,
+    "sourceFiles": 639,
+    "diagnostics": 0
+  },
+  "scope": "Happy DOM controls using the actual WC module, explicit trusted-event branch selection and documented computed-style/slot/opaque-sheet host facts. No native browser deadline, canonical Worker, four-host, physical-input or application acceptance is claimed.",
+  "preservedAttempts": "The initial fixture attempts and the 92/93 candidate attempt are retained. Final controls correct Happy DOM tabindex reflection, accessor spying, HTMLStyleElement.sheet constructor mismatch, and deleteRule leaving undefined array slots. No product timeout or assertion was loosened.",
+  "archive": {
+    "file": "raw.tar.gz",
+    "bytes": 235715,
+    "sha256": "b14f3cebe86d9d5eb676241fff39de50c673b3ac14af25b0d286e2519873a316",
+    "files": {
+      "baseline-controls.test.ts": {
+        "bytes": 10114,
+        "sha256": "3809bf6e51a9f7b0afba7340fedbe7fbe787fe5cc495a98ad28a03fe83ba34c0"
+      },
+      "baseline-corrected.json": {
+        "bytes": 13726,
+        "sha256": "d52bb7d25100a17e8c436b4f628bf2e15abf0e6018c8387be1f5724446c54ac1"
+      },
+      "baseline-corrected.log": {
+        "bytes": 132556,
+        "sha256": "a9fb491a559c295539e90439ce6e85a5357c2bfd749b06c7cc14d11ba46a622a"
+      },
+      "baseline-exact-controls.json": {
+        "bytes": 13036,
+        "sha256": "0c1ec2753d32f6e8787aab7f090701bd6374efc5804e5a69d314924ea276d3df"
+      },
+      "baseline-exact-controls.log": {
+        "bytes": 132561,
+        "sha256": "c47b1a3a7d7f6e49c4c2ea5b6357bb939dcaeb3478c6b0d04c5a64a84c2a5f46"
+      },
+      "baseline-final.json": {
+        "bytes": 10871,
+        "sha256": "18013bbd31f0c4a8c596e7cf3061a37680c45e242a3d7627466bf27e442f2b12"
+      },
+      "baseline-final.log": {
+        "bytes": 132552,
+        "sha256": "6f6a5e8bd742e941be3d8cddec0a097b1e590d0cd8c65dc136a46ef72a15ad9b"
+      },
+      "baseline-modules.ts": {
+        "bytes": 110725,
+        "sha256": "ec43e4865990e14482fc4e379ae9b731175d2f01e9266aebfae1edf469862803"
+      },
+      "baseline.json": {
+        "bytes": 15756,
+        "sha256": "33bfb07e7ce856ff4b8893d190c1c473ae2ff0291a4f1690dc3fdc1103b9a12e"
+      },
+      "baseline.log": {
+        "bytes": 132546,
+        "sha256": "76215cd2323b25d73b4d6f262e1fcd747709830408cc41e612c1f6f3cc8e47cb"
+      },
+      "candidate-modules.ts": {
+        "bytes": 113439,
+        "sha256": "f099df3b83d6ef59599cfbc389c6a720a76674805fabd842039a080cfbb193b3"
+      },
+      "commands.json": {
+        "bytes": 1235,
+        "sha256": "968e1e9b9fe84ff30a6dc169645829ea9ff0032723a356d019f6840b2faa0df0"
+      },
+      "corrected-controls.test.ts": {
+        "bytes": 10356,
+        "sha256": "b976d30679d1540fa43ef21a107c319df14e7948d022c0eb32d483f1da5ff2e3"
+      },
+      "cssom-diagnostic-controls.test.ts": {
+        "bytes": 11225,
+        "sha256": "e1fb83e0ea78e4d42b65901f474989ea4e30b08868eb95dcd0e04e66796fab33"
+      },
+      "cssom-diagnostic-queue.log": {
+        "bytes": 134115,
+        "sha256": "68b06330aafc875adea8d8f03449afa08214ca634da72c95f5e5e6cb2f10b4cb"
+      },
+      "cssom-diagnostic.log": {
+        "bytes": 134075,
+        "sha256": "138713f544d37a978c398b3e6960bcb20f5783b40810bd334a57ddb899b2aaf7"
+      },
+      "cssom-isolated.json": {
+        "bytes": 6843,
+        "sha256": "77ab25fdd89b2af6ef5eaa930e44495ace093286199626d481af33b1a0da3b67"
+      },
+      "cssom-isolated.log": {
+        "bytes": 132552,
+        "sha256": "b4f9d31e1dd245308542847bb81ff1adec06f8e0405cc55f65c44f03fd252e4e"
+      },
+      "final-baseline-controls.test.ts": {
+        "bytes": 10606,
+        "sha256": "161a3888b3907e8d123deac76f77e8393348b20237e51ceb6b51c923290197f4"
+      },
+      "final-controls.test.ts": {
+        "bytes": 12018,
+        "sha256": "d282bc5fc68e069a3631636cde4fdee485ed4598759089db90237c581c2e8072"
+      },
+      "green-constructed.json": {
+        "bytes": 7628,
+        "sha256": "0ebe915214ce73ac9441f5c7cfdc2f62140ed260ee162545e75cc650fbd1c22d"
+      },
+      "green-constructed.log": {
+        "bytes": 132555,
+        "sha256": "79dead112c488b5a371703bb6408fbd8413d2b76eea2349ffb2ff0927bb3e0d3"
+      },
+      "green-final.json": {
+        "bytes": 32757,
+        "sha256": "654d71099bb836bc33864c8070403a0bfebaa4b12c2afdda5499d9bd7c5f7ae4"
+      },
+      "green-final.log": {
+        "bytes": 156507,
+        "sha256": "cc91d2768d20a73cc3342259b9d179c86654b695a1221124b2e09b792af32778"
+      },
+      "green-initial.json": {
+        "bytes": 34166,
+        "sha256": "3736bff4cd310dc6a61331e770eedbf6249b6eacaa5568e820fd1510ea184cb9"
+      },
+      "green-initial.log": {
+        "bytes": 156509,
+        "sha256": "768583457a6913f922d9904d941e99136928c40592820cbc2d7d4559df867a54"
+      },
+      "types.json": {
+        "bytes": 252,
+        "sha256": "a6fb2fbe0c8d98e421004d1941ed16a6efef9e05440e24d8c47df5eb8bd12a68"
+      },
+      "types.log": {
+        "bytes": 252,
+        "sha256": "a6fb2fbe0c8d98e421004d1941ed16a6efef9e05440e24d8c47df5eb8bd12a68"
+      }
+    }
+  },
+  "commands": {
+    "baseline": "corepack pnpm@10.32.1 exec vitest run packages/adapters/web-component/test/focus-entry-input-origin.test.ts --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=<evidence>/baseline-exact-controls.json",
+    "candidate": "corepack pnpm@10.32.1 exec vitest run packages/adapters/web-component/test/focus-entry-input-origin.test.ts packages/adapters/web-component/test/focus-entry-motion-origin.test.ts packages/adapters/web-component/test/focus-entry-observer.test.ts packages/adapters/web-component/test/focus-entry-refresh-coalescing.test.ts --maxWorkers=1 --minWorkers=1 --reporter=json --outputFile=<evidence>/green-final.json",
+    "types": "TypeScript createProgram with the repository config, strict:true and noEmit:true; roots are modules.ts and focus-entry-input-origin.test.ts. See types.json for the exact roots and all diagnostics.",
+    "format": "corepack pnpm@10.32.1 exec prettier --write packages/adapters/web-component/src/runtime/modules.ts packages/adapters/web-component/test/focus-entry-input-origin.test.ts",
+    "sourceRestoration": "The exact final controls were rerun with baseline-modules.ts temporarily restored; an EXIT trap restored candidate-modules.ts before any candidate work resumed."
+  }
+}

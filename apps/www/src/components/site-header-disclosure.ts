@@ -305,7 +305,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (event.key !== 'Escape' || event.defaultPrevented || !open || nestedEscape.has(event))
       return;
     // A Select or another nested overlay owns its own Escape first.
-    const target = event.target instanceof (window?.Element ?? Element) ? event.target : null;
+    const ElementConstructor = window?.Element ?? Element;
+    const target = event.target instanceof ElementConstructor ? event.target : null;
     if (
       ownsSelectPopup(target) ||
       target?.closest('[role="dialog"]') ||
