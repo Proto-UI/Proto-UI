@@ -1,86 +1,86 @@
 ---
 title: 'Writing a Compound Prototype'
-description: 'Model anatomy, ownership, context, and part responsibilities inside a governed or candidate boundary.'
+description: 'Model Anatomy roles, state ownership, Context sharing, and multi-part boundaries for compound Prototypes.'
 ---
 
-A compound Prototype is not a large component split into more files. It begins as a governed or explicitly draft set of protocol subjects, owners, and structural relations; source organization follows.
+Designing a compound Prototype is about modeling ownership and structural relationships first, then organizing source files around those boundaries—not splitting a large component into files by visual region.
 
-> This guide explains compound modeling. Existing governed families continue directly. For a new Base family, research, candidate anatomy, draft P/T entities, implementation probes, and tests can establish the model before admission; only the decision to admit the new independent Base identities remains unresolved. Continue with [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/).
+Existing compound families build directly on their `P-*` and `T-*` specs. For a brand-new Base family, start with `draft` entities, candidate anatomy, probes, and tests, then follow [Implementing a Governed Base Semantic Slice](/en/build/prototypes/implementing-an-approved-base-slice/) for full delivery.
 
-## Read the P/T graph before splitting DOM
+## Read the spec graph before splitting parts
 
-Tabs is a representative current example. Inspect at least:
+`Tabs` is a clear reference family in this repository. Start by inspecting:
 
 - `P-BASE-TABS` and its Root-owned selection criteria;
 - `P-BASE-TABS-LIST`, `P-BASE-TABS-TRIGGER`, `P-BASE-TABS-CONTENT`, and `P-BASE-TABS-INDICATOR`;
-- the corresponding `T-BASE-TABS-*` entities and executable mappings;
-- [shared.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/shared.ts) and the `*.proto.ts` implementations; and
+- the matching `T-BASE-TABS-*` test entities and executable paths;
+- [shared.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/tabs/shared.ts) and each part's `*.proto.ts`; and
 - `packages/prototypes/base/test/tabs.test.ts`.
 
-These P entities are currently `draft`, so the example describes the current cataloged direction—not a stable guarantee created automatically by the 0.2.0 package version.
+> Note: These Tabs spec entities are currently `draft`; refer to the spec files for their latest definitions.
 
-## Tabs anatomy currently has five roles
+## Five roles in Tabs Anatomy
 
-The canonical anatomy in `P-BASE-TABS` defines:
+`P-BASE-TABS` defines five cooperating roles:
 
-| Role | Cardinality | Current responsibility |
+| Role | Cardinality | Responsibility |
 | --- | --- | --- |
-| `root` | `1..1` | selected-value owner, context provider, and anatomy-domain anchor |
-| `list` | `0..1` | trigger collection and roving-focus owner |
-| `trigger` | `0..*` | requests selection using its own value |
-| `content` | `0..*` | projects tabpanel visibility and presence from its value |
-| `indicator` | `0..*` | context-driven visual consumer with no selection, focus, or event ownership |
+| `root` | `1..1` | Owns selected value, provides Context, and anchors the Anatomy domain |
+| `list` | `0..1` | Manages trigger ordering and roving focus |
+| `trigger` | `0..*` | Requests selection using its own `value` |
+| `content` | `0..*` | Controls tabpanel active state, visibility, and mounting by `value` |
+| `indicator` | `0..*` | Reads Context for visual positioning without owning selection, focus, or events |
 
-The former four-part list omitted Indicator and no longer represents the current family.
-
-Anatomy declares roles, cardinality, and `contains` relations. It does not create parts or inject behavior. Each concrete Prototype claims its role through `def.anatomy.claim()`.
+`Anatomy` declares roles, cardinality, and `contains` relations—it does not instantiate child nodes or inject behavior. Each concrete Prototype declares its role during setup with `def.anatomy.claim()`.
 
 ## Split ownership by responsibility
 
-A sound compound boundary answers who owns each information path rather than following DOM regions:
+A clean compound boundary assigns each data flow to a single owner instead of slicing along DOM wrappers:
 
-- Root owns selected value, controlled/uncontrolled coordination, and context publication.
-- List owns collection ordering and roving focus.
-- Trigger reads shared context and issues selection requests.
-- Content derives current, hidden, and presence behavior from protocol value.
-- Indicator consumes context facts without becoming a second selection owner.
+- **Root** owns the selected value, controlled/uncontrolled coordination, and Context publication.
+- **List** owns collection ordering and keyboard roving focus.
+- **Trigger** reads shared Context and sends selection requests.
+- **Content** derives `current`, `hidden`, and presence state from the active value.
+- **Indicator** consumes shared Context for presentation while keeping Root as the single source of truth.
 
-Return to modeling if all state remains in Root while Parts are only named visual shells, or if a Part without an independent responsibility becomes a new P identity.
+Revisit the model if a part has no distinct responsibility beyond wrapping styles, or if Root owns everything while parts lack clear protocol boundaries.
 
-## Context carries shared protocol facts only
+## Keep Context focused on shared protocol facts
 
-`TABS_CONTEXT` currently includes root identity, selected and active value, orientation, activation mode, the controlled fact, and request/validation coordination. It serves family collaboration, not arbitrary transport for:
+`TABS_CONTEXT` carries only what parts need to coordinate: root identity, selected/active value, orientation, activation mode, controlled flag, and request/validation state.
 
-- host DOM or framework objects;
-- private visual tokens;
-- page business state; or
-- Form, layout, or announcement responsibilities outside Tabs.
+Keep Context host-neutral and lean by leaving out:
 
-Applicable P criteria and tests must constrain context fields and owners; convenience alone is not enough.
+- host DOM elements or framework-specific objects;
+- theme-private visual tokens;
+- application or page business state; and
+- unrelated form, layout, or announcement concerns.
 
-## Compound does not mean prototype-level template composition
+Constrain Context fields and write ownership through the applicable `P-*` criteria and tests.
 
-`K-PROTOTYPE-COMPOSITION-0001` states that core templates describe structure inside one Root Node and do not directly nest another Prototype. Component composition belongs to the host, framework, or compiler layer.
+## Anatomy families vs. component composition
 
-An anatomy family, context coordination, and application-level component composition are therefore different concerns. Do not collapse them into one “compound component syntax.”
+Per `K-PROTOTYPE-COMPOSITION-0001`, core templates describe structure inside one Root node and do not directly nest another Prototype. Higher-level component composition belongs in the host framework or compiler layer.
 
-## Close implementation and evidence together
+Keep these three concerns distinct: **Anatomy families** (structural roles), **Context** (cross-part state sharing), and **application-level composition**.
 
-Every new or changed role or criterion should form this chain:
+## Close implementation and tests together
+
+For every new or updated role or criterion, follow the full loop:
 
 ```text
-P criterion
-→ anchored T case
-→ owner or part implementation
-→ focused family test
-→ Adapter and accessibility evidence
-→ exports, CLI, docs, demo
+P-* criterion
+→ Anchored T-* test case
+→ Root / Part implementation
+→ Focused family tests
+→ Adapter and accessibility checks
+→ Exports, CLI, docs, and demo
 ```
 
-Typical boundaries include controlled requests, disabled items, empty or duplicate values, structural churn, presence, focus, accessibility relationships, and teardown. The applicable graph and accumulating evidence refine the exact scope through review.
+Make sure tests cover common edge cases: controlled request handling, disabled items, empty or duplicate values, dynamic insertion/removal, mounting and teardown, keyboard focus, and ARIA relationships.
 
-## Next
+## Next steps
 
-- To add a design language over an existing Base family, read [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
-- To follow entities and evidence into source, read [How to Read Reference Implementations](/en/build/prototypes/reference-patterns/)
-- Before opening a pull request, use the [Prototype Author Checklist](/en/build/prototypes/checklist/)
+- Layer a design language onto a Base family: [Building a Styled Library on Top of Base](/en/build/prototypes/building-a-styled-library-on-top-of-base/)
+- Navigate reference code from specs: [How to Read Reference Implementations](/en/build/prototypes/reference-patterns/)
+- Review before opening a PR: [Prototype Author Checklist](/en/build/prototypes/checklist/)

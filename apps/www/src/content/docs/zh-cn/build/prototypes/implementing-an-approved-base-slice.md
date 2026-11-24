@@ -1,128 +1,124 @@
 ---
 title: '实现受治理的 Base Semantic Slice'
-description: '把受治理或明确标记为 draft 的 Base P/T 边界实现成最小、完整、可验证的垂直切片。'
+description: '把已准入或处于 draft 阶段的 Base 协议边界落成最小、完整且可验证的垂直切片。'
 ---
 
-实现 Base Prototype 通常是高级贡献。已有受治理 subject 从当前协议图直接继续。真正全新的 subject 可以在准入前积累 research、candidate graph、draft entity、实现探针和 executable evidence；唯一未决语义决定是 Proto UI 是否把这个独立 subject 准入为 Base identity。
+实现 Base 原型属于面向底层交互协议的进阶贡献。对于已经纳入 Base 体系的主题，可以直接沿着现有的 `P-*` / `T-*` 规范推进；如果是全新的 Base 身份，可以先以 `draft` 状态沉淀调研、候选规范、原型探针与可执行测试，再决定是否正式准入。
 
-## Admission 与受治理方向
+## 准入前先理清协议模型
 
-在把真正全新的 Base identity 表述为已受治理前，应记录“这个独立 protocol subject 是否进入 Base”的 admission 决定。下面这些内容可以也应该随着证据演进，在该决定前后由 candidate 工作持续明确：
+无论是已准入还是仍在 `draft` 候选阶段，随着实现与测试推进，都应把以下要素明确记录下来：
 
-- 独立协议主体及 Base admission 结论；
-- input facts、owner、observable outputs 和同步规则；
-- negative boundary；
-- Root/Part/anatomy identity；
-- exact props、states、events、methods 和 absence assertions；
-- P entity、T entity 和 executable evidence 计划；
-- 必要的 Module、Host Capability 与跨 Adapter 验证范围；
-- 本 slice 不包含的后续风格化投射和组合能力。
+- 独立的协议主题及其在 Base 中的定位；
+- 输入事实、状态归属（owner）、对外可观察输出与同步规则；
+- 明确的负向边界（哪些职责不由本协议承担）；
+- Root、Part 与 `Anatomy` 角色身份；
+- 精确的 props、states、events、methods 与排除断言；
+- 对应的 `P-*` 规范、`T-*` 用例与可执行测试计划；
+- 所需的 Module、Host Capability 与跨 Adapter 验证范围；
+- 留给后续独立 PR 的风格化组件与组合能力。
 
-目录名、草稿代码、讨论共识或“参考某个组件库”本身都不是 Base-admission 证据。未决 admission 标记会让 identity 保持 candidate/draft，但不会阻止 research、graph authoring、实现探针或测试。Identity 一旦进入治理，implementation 与 projection 默认继续并接受独立 review。
+## Base 准入自检
 
-## Base admission 自检
+一个成熟的 Base 协议切片通常满足六个条件：
 
-受治理或候选 slice 应证明：
+1. **独立主题**：存在独立的交互职责，而不只是为了给某个风格库提供继承入口。
+2. **清晰的信息通路**：每条核心规则都有明确的输入、状态归属、输出与同步机制。
+3. **跨宿主稳定**：协议语义不依赖 React、Vue 或特定 DOM 技巧。
+4. **不可替代的职责**：现有 Base 协议或应用层组合无法无损表达。
+5. **清晰的负向边界**：明确把样式、业务、布局、表单或播报等外部职责留在协议之外。
+6. **可执行验证**：每条保留的准则都能映射到具体的 `T-*` 用例与自动化测试。
 
-1. **Independent subject**：不是为了风格库继承或 package 对称而存在。
-2. **Explicit information path**：每条核心保证都有 input fact、owner、output 和规则。
-3. **Cross-host stability**：协议意义不依赖 React、Vue 或 DOM 技巧。
-4. **Distinct responsibility**：现有 Base 或组合不能无损表达。
-5. **Negative boundary**：明确不拥有的视觉、业务、focus、layout、form 或 announcement 责任。
-6. **Executable evidence**：每个保留 criterion 都能映射到 substantive T case 和真实测试。
-
-如果实现过程中发现其中一项无法成立，应修改 candidate/governed graph 并记录证据，不要用空 `asHook`、host escape hatch 或特殊分支把代码勉强跑通。只有证据改变 Base-identity admission 结论时才升级。
+如果在实现中发现某条条件无法成立，请及时调整规范与设计，避免通过空 `asHook`、宿主原生后门或临时特判强行拼凑。
 
 ## 实现工作流
 
-### 1. 把 criteria 转成实施清单
+### 1. 把 `P-*` 准则转成实施清单
 
-为每个 P criterion 列出：
+为每条 `P-*` 准则梳理对应关系：
 
-- owner；
-- 允许的输入；
-- observable output；
-- controlled/uncontrolled 或 lifecycle 规则；
-- negative assertion；
-- T case；
-- implementation path；
-- 需要验证的 Adapter/host profile。
+- 状态归属（owner）；
+- 允许的输入与边界值；
+- 对外可观察输出；
+- 受控/非受控与生命周期规则；
+- 负向断言（哪些能力必须保持缺席）；
+- 对应的 `T-*` 用例与测试路径；
+- 目标 Adapter 与宿主验证范围。
 
-这张映射是 PR 评审的主线，不要按文件数量组织完成度。
+按准则闭环来组织评审主线，比单纯按文件数量拆分更清晰。
 
-### 2. 先实现最小 owner
+### 2. 先实现最小状态归属
 
-- state 只由已声明的 owner 持有；
-- Part 通过 context、relationship 或已有共享能力消费 owner；
-- 不把风格库 variant、宿主 raw object 或未来组合能力引入 Base；
-- direct prototype 和 authored `asHook` 描述同一协议时，应共享实现而不是分叉；
-- setup、runtime、view epoch 和 terminal disposal 遵守现有 lifecycle 边界。
+- 交互状态只由声明的 owner 持有；
+- 其他部件通过 `Context`、Anatomy 关系或已有共享能力与 owner 协作；
+- 保持 Base 纯净，不混入风格库 `variant`、宿主原生对象或应用层组合逻辑；
+- 当直接原型与 `asHook` 表达同一协议时，共享同一份核心 setup 实现；
+- 严格遵守 `setup`、运行时更新与销毁清理（teardown）边界。
 
-### 3. 建立 P/T 和 focused tests
+### 3. 建立 `P-*` / `T-*` 与聚焦测试
 
-- P criteria 必须可单独引用；
-- T cases 通过 anchors 指向具体 criteria；
-- executable tests 验证结果和 absence；
-- controlled 请求不得静默修改 final state；
-- disabled、empty、duplicate、structural churn、teardown 等已声明边界都有覆盖；
-- 三个 Web Adapter 的测试只证明一个 Web host profile，不要夸大为多宿主 conformance。
+- 每条 `P-*` 准则保持独立可引用；
+- `T-*` 测试用例明确锚定对应准则；
+- 自动化测试同时覆盖正向行为与排除断言；
+- 受控模式下，用户交互只发出变更请求，由外部受控属性决定最终状态；
+- 覆盖禁用、空值、重复值、子节点动态增删与卸载清理等常见边界；
+- 在 Web Component、React 与 Vue 三个 Adapter 下验证交互一致性。
 
-### 4. 完成 package 与消费面
+### 4. 完成包导出与官网交付面
 
-每个新增公开 Base identity 或 anatomy family 都必须在同一 PR 中进入官网可访问页面；governing criteria 与 evidence 决定页面展示哪些状态，预览面始终属于交付范围。PR 必须记录本地预览路由。
+每个新增的公开 Base 身份或复合家族，都在同一 PR 中提供官网可访问页面与本地预览路由。
 
-完整消费面包括：
+完整交付面包含：
 
-- family source、shared types 和 public subpath；
-- exact root exports；
-- CLI registry 与 facade generation；
-- Base docs、API notes 和真实 Demo；
-- Web Component、React、Vue preview；
-- spec workspace 和 Agent projection。
+- 家族源码、共享类型与公开子路径导出；
+- 根入口导出；
+- CLI 注册表与 facade 生成；
+- Base 中英文文档、API 说明与真实包导出 Demo；
+- Web Component、React 与 Vue 预览；
+- 通过 generator 更新的 workspace 与派生文档数据。
 
-后续 Shadcn、Brutalist 或其他设计语言投射应作为独立贡献，不要和 Base semantic slice 混在一起。
+后续的 Shadcn、Brutalist 等设计语言组件作为独立 PR 推进，与 Base 协议实现解耦。
 
-#### 官网 Demo 应验证真实消费方式
+#### 让官网 Demo 展示真实使用方式
 
-Demo 应从公开 package subpath 消费 Base，并优先通过 Base 自己的 anatomy、trigger、state、event 和 defaults 完成可见交互。它不能依赖不会随 package 安装的页面控制逻辑来伪装自治能力。
+官网 Demo 应直接从公开子路径导入 Base 原型，并依靠组件自身的 Anatomy、Trigger、状态、事件与默认行为完成交互：
 
-例如，Dialog Demo 应使用 `dialog-trigger` 请求 Root open；用无关 Button callback 调用 Dialog expose 会绕开已经编目的 anatomy 信息通路。只有 Base 按设计没有自然 trigger，或公开 controls 本身就是被演示的协议时，才允许最小外部 orchestration，例如 Toast-style invocation 或直接驱动 Transition。
+- 例如 Dialog Demo 使用 `dialog-trigger` 请求打开 Root，而不是靠无关按钮的回调手动调用暴露方法。
+- 只有在 Base 按设计没有自然触发器（如 Toast 调用）或专门演示外部控制 API（如直接驱动 Transition）时，才在组件外部保留最小化的公开 API 调用，并在 Demo 源码与 PR 说明中标注需由消费者自行编写的胶水代码。
 
-任何例外都必须位于 Prototype 外、只使用公开 API，并在 Demo source 与 PR 中明确说明必要性和消费者需要自行实现的部分。它不得掩盖缺失 anatomy、owner 错位、未编目能力或 Adapter drift。内部 Demo Matrix 只能补充三 Adapter 证据，不能替代官网页面。
+### 5. 在实现循环中收敛设计问题
 
-### 5. 让设计断口继续进入实现循环
+遇到以下情况时，将发现同步反馈到规范、测试与新一轮评审中，而不是只在源码里悄悄扩张范围：
 
-下面情况都作为下一轮 graph、implementation、evidence 与 fresh review 的输入：
+- 某条准则无法对应唯一的状态 owner；
+- 实现需要规范中尚未声明的新公开 API；
+- 现有 Module 或 Host Capability 无法支撑所需行为；
+- 不同 Adapter 暴露出不一致的协议语义；
+- 需要依赖宿主原生事件或原生对象；
+- 负向边界与预期交互发生冲突；
+- 已有规范实体之间存在矛盾。
 
-- criterion 无法对应唯一 owner；
-- 需要当前 graph 尚未列出的公开 API；
-- 现有 Module/Host Capability 无法承接必须行为；
-- 三 Adapter 暴露出不同协议语义；
-- 需要宿主 raw event、target 或对象 escape hatch；
-- 负向边界使预期行为无法成立；
-- 现有实体之间出现真实矛盾。
-
-同步更新 exact criterion、实现证据和备选方案，不要只在源码或 PR 中静默扩大 scope。唯一需要升级的语义决定是是否准入一个真正全新的独立 Base identity，或新证据已经推翻先前 admission 结论；未决期间让该 identity 保持 draft，其余可逆 remediation 继续接受独立 review。
+如果新发现涉及准入另一个全新 Base 身份，在决定前保持其 `draft` 状态即可。
 
 ## PR 组织建议
 
-一个可评审的 Base slice 应让 reviewer 能按下面顺序阅读：
+按以下顺序组织改动与 PR 说明，便于评审快速跟进：
 
 ```text
-governed identity or candidate draft
-→ P criteria and relations
-→ T cases and executable paths
-→ owner implementation
-→ focused Base tests
-→ required Adapter evidence
-→ exports, CLI, docs, and demo
+规范身份（已准入或 draft 候选）
+→ P-* 准则与关系
+→ T-* 用例与可执行测试路径
+→ 核心 owner 实现
+→ Base 聚焦单元测试
+→ 必要的 Adapter 验证
+→ 包导出、CLI、文档与 Demo
 ```
 
-如果整个 slice 太大，可以使用 stacked/draft PR 辅助评审，但不能把会造成已知规范 drift 的半个公共保证单独合并。每个真正合并的部分必须独立一致且有价值。
+体量较大的切片可以拆分为多个衔接的 PR 辅助评审，同时确保每个合并到主干的单元自身逻辑完整、文档与测试一致。
 
-## 验证
+## 本地检查
 
-先运行 Issue 指定的 focused tests，然后至少运行：
+先运行本次任务相关的聚焦测试，再运行以下检查：
 
 ```sh
 corepack pnpm@10.32.1 check:prototype-catalog
@@ -133,13 +129,13 @@ corepack pnpm@10.32.1 test
 corepack pnpm@10.32.1 docs:build
 ```
 
-如果修改 public package graph，还要运行 package manifests、build、budget 和相应 consumer smoke。PR 必须记录哪些命令实际执行、哪些不适用，以及所有剩余不确定性。
+如果改动了公开包导出或依赖关系，同时运行包 manifest、构建与体积检查，并在 PR 中如实记录执行结果。
 
 ## 提交前最后确认
 
-- 公共 API 变化明确进入 governed/candidate graph，而不是通过实现类比暗中引入；
-- 没有为风格库需求制造空 Base identity；
-- 没有把单一 Web Adapter 事实写成跨宿主语义；
-- P criteria、T evidence、实现和公开投影一致；
-- 后续 styled projection 和组合能力可以作为独立 coherent contribution 继续；
-- DCO、来源和 AI 辅助披露已经完成。
+- 所有公开 API 变化都已明确写入规范实体；
+- 没有为风格库需求制造空壳 Base 身份；
+- 协议语义保持跨宿主中立；
+- `P-*` 准则、`T-*` 测试、实现与文档 Demo 保持一致；
+- 后续风格化组件与组合能力可作为独立 PR 顺畅接入；
+- DCO 签名与来源说明完整。
