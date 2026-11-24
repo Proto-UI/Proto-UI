@@ -1,0 +1,944 @@
+{
+  "checkedAt": "2026-11-24T03:04:57.196388+00:00",
+  "original": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+  "base": "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+  "sourceMergeCommit": "b69f195e706af286c162dbd808d56fa5c076a7e9",
+  "sourceMergeParents": [
+    "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+    "4e5e50e159573a627d5e75037b23513ad8f5f164"
+  ],
+  "sourceMergeTree": "acba1d91555093786477c61049e7011ee015c187",
+  "checkedChangedPaths": 116,
+  "mismatches": [],
+  "method": "Compare every original changed Git mode and blob with the committed two-parent source merge, after the ordinary hook and the exact-range lint-staged replay. Frozen evidence bytes were not normalized.",
+  "paths": [
+    {
+      "path": ".prettierignore",
+      "originalMode": "100644",
+      "originalBlob": "d933c941a6364858b7067764a5790fdcd4f0707b",
+      "recoveredMode": "100644",
+      "recoveredBlob": "d933c941a6364858b7067764a5790fdcd4f0707b",
+      "same": true
+    },
+    {
+      "path": "benchmarks/interaction/knowledge-consumer/knowledge.md",
+      "originalMode": "100644",
+      "originalBlob": "8726c504d1632de027a20f81ac081fc1eefc86cf",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8726c504d1632de027a20f81ac081fc1eefc86cf",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-button-projection-comparison.md",
+      "originalMode": "100644",
+      "originalBlob": "f9682d7e16816489f164d106a5b92cc067e1a74c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f9682d7e16816489f164d106a5b92cc067e1a74c",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-generated-button-consumption.md",
+      "originalMode": "100644",
+      "originalBlob": "ca3883d735a08c1dd5f658cecdb5fcbeda9af2c1",
+      "recoveredMode": "100644",
+      "recoveredBlob": "ca3883d735a08c1dd5f658cecdb5fcbeda9af2c1",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-sprint7-dcbot-production-readback.md",
+      "originalMode": "100644",
+      "originalBlob": "87f6b52fc7cf55269c769b99ead90b7beadd4ec7",
+      "recoveredMode": "100644",
+      "recoveredBlob": "87f6b52fc7cf55269c769b99ead90b7beadd4ec7",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-sprint7-execution-delivery.md",
+      "originalMode": "100644",
+      "originalBlob": "0bafbdd7bde5cc5ecf7fefdb5d4b98f1bad29060",
+      "recoveredMode": "100644",
+      "recoveredBlob": "0bafbdd7bde5cc5ecf7fefdb5d4b98f1bad29060",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-sprint7-idle-batch-review.md",
+      "originalMode": "100644",
+      "originalBlob": "8c192dae6661b692999993289e15b66f6d911a7a",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8c192dae6661b692999993289e15b66f6d911a7a",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-sprint7-knowledge-comparison.md",
+      "originalMode": "100644",
+      "originalBlob": "6fb2211324ddba6af93a15661304dae91c1c4083",
+      "recoveredMode": "100644",
+      "recoveredBlob": "6fb2211324ddba6af93a15661304dae91c1c4083",
+      "same": true
+    },
+    {
+      "path": "internal/records/2026-11-24-sprint7-zero-marginal-cost-study.md",
+      "originalMode": "100644",
+      "originalBlob": "f4190f321af00bd5881439758db89efca1ebc01a",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f4190f321af00bd5881439758db89efca1ebc01a",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/archive-recompression.json",
+      "originalMode": "100644",
+      "originalBlob": "3292f05194fd2e3c5138fffbc33c8328859dcb7d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3292f05194fd2e3c5138fffbc33c8328859dcb7d",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/freeze.json",
+      "originalMode": "100644",
+      "originalBlob": "4739e575407ed40cacb2c5745f8341f8d045c801",
+      "recoveredMode": "100644",
+      "recoveredBlob": "4739e575407ed40cacb2c5745f8341f8d045c801",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/frozen-oracle.mjs",
+      "originalMode": "100644",
+      "originalBlob": "a1705b52943fe85799e92123d0212dcd03d121ea",
+      "recoveredMode": "100644",
+      "recoveredBlob": "a1705b52943fe85799e92123d0212dcd03d121ea",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/metrics.json",
+      "originalMode": "100644",
+      "originalBlob": "2142f9b84ae454b9331cce1f0c12c8e2aa1e71b3",
+      "recoveredMode": "100644",
+      "recoveredBlob": "2142f9b84ae454b9331cce1f0c12c8e2aa1e71b3",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-calibration.tar.gz",
+      "originalMode": "100644",
+      "originalBlob": "73cfcabb792b32f9beeb0b452597d3b5dc832fd9",
+      "recoveredMode": "100644",
+      "recoveredBlob": "73cfcabb792b32f9beeb0b452597d3b5dc832fd9",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/calibration-verification.json",
+      "originalMode": "100644",
+      "originalBlob": "3ad6437232200a5eef5f249695973c5acd40e206",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3ad6437232200a5eef5f249695973c5acd40e206",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/final-calibration-addendum.json",
+      "originalMode": "100644",
+      "originalBlob": "f326c797315161cf5ca70a2f345b78fa6bca6428",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f326c797315161cf5ca70a2f345b78fa6bca6428",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/final-calibration-addendum.md",
+      "originalMode": "100644",
+      "originalBlob": "e6840735c2855e38a9af493bd150bd3bcf9e5ff8",
+      "recoveredMode": "100644",
+      "recoveredBlob": "e6840735c2855e38a9af493bd150bd3bcf9e5ff8",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/focus-branch-addendum.json",
+      "originalMode": "100644",
+      "originalBlob": "783c6847c2515cada8be1b78e5daf58a32a8bfbc",
+      "recoveredMode": "100644",
+      "recoveredBlob": "783c6847c2515cada8be1b78e5daf58a32a8bfbc",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/focus-branch-addendum.md",
+      "originalMode": "100644",
+      "originalBlob": "8da2a3eb1665b56901e5fafe8878d26d0ac2c578",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8da2a3eb1665b56901e5fafe8878d26d0ac2c578",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/review.json",
+      "originalMode": "100644",
+      "originalBlob": "f4074ed0c971c175f3aa4dcc61c190c92874fd37",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f4074ed0c971c175f3aa4dcc61c190c92874fd37",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-review/review.md",
+      "originalMode": "100644",
+      "originalBlob": "b9cf31405bce9cf6728808c147b01f1de697281a",
+      "recoveredMode": "100644",
+      "recoveredBlob": "b9cf31405bce9cf6728808c147b01f1de697281a",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/prepared-packets.json",
+      "originalMode": "100644",
+      "originalBlob": "87cb5a57deadef59b77d5cca4465bb65f443dead",
+      "recoveredMode": "100644",
+      "recoveredBlob": "87cb5a57deadef59b77d5cca4465bb65f443dead",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-freeze-v2.json",
+      "originalMode": "100644",
+      "originalBlob": "3853ccdca4771cdca478d02cec8736aaf5f4627d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3853ccdca4771cdca478d02cec8736aaf5f4627d",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-input-manifest.json",
+      "originalMode": "100644",
+      "originalBlob": "d2c009089622717429b7ba1ac92c5fa818e860d7",
+      "recoveredMode": "100644",
+      "recoveredBlob": "d2c009089622717429b7ba1ac92c5fa818e860d7",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-native-evidence.tar.gz",
+      "originalMode": "100644",
+      "originalBlob": "c32640410c429405d0d463862bea0d2dba38cdbe",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c32640410c429405d0d463862bea0d2dba38cdbe",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-results.json",
+      "originalMode": "100644",
+      "originalBlob": "c334794980bf51ac9c5bbef9b08d9f25bec40666",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c334794980bf51ac9c5bbef9b08d9f25bec40666",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/results-review/fixed-revision-verification.json",
+      "originalMode": "100644",
+      "originalBlob": "b9c21f048eee94ec09229555b5b544b5265ce0ee",
+      "recoveredMode": "100644",
+      "recoveredBlob": "b9c21f048eee94ec09229555b5b544b5265ce0ee",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/results-review/review.json",
+      "originalMode": "100644",
+      "originalBlob": "3a61776db239d6a0375b39223ed0f8bd610b757b",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3a61776db239d6a0375b39223ed0f8bd610b757b",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/results-review/review.md",
+      "originalMode": "100644",
+      "originalBlob": "956e3bc0d89d74177a2baa8c21d39a9d7327790d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "956e3bc0d89d74177a2baa8c21d39a9d7327790d",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification-initial-path-assumption.json",
+      "originalMode": "100644",
+      "originalBlob": "4f50c875ed5838deca3d72c66f16b6c456ca5f7c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "4f50c875ed5838deca3d72c66f16b6c456ca5f7c",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "originalMode": "100644",
+      "originalBlob": "ce02573848637c81705457dbd1da917e8d2bbbde",
+      "recoveredMode": "100644",
+      "recoveredBlob": "ce02573848637c81705457dbd1da917e8d2bbbde",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verify_retained_evidence.py",
+      "originalMode": "100644",
+      "originalBlob": "380c1945fbbc46b56ab2149769d1de47b0e78722",
+      "recoveredMode": "100644",
+      "recoveredBlob": "380c1945fbbc46b56ab2149769d1de47b0e78722",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/source-and-command-evidence.tar.xz",
+      "originalMode": "100644",
+      "originalBlob": "abd17b1c765850844f67cfe0ebc660b768c2e7c3",
+      "recoveredMode": "100644",
+      "recoveredBlob": "abd17b1c765850844f67cfe0ebc660b768c2e7c3",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/source-and-command-manifest.json",
+      "originalMode": "100644",
+      "originalBlob": "dddedb39836ee0852246e9cd17db2c5981a26851",
+      "recoveredMode": "100644",
+      "recoveredBlob": "dddedb39836ee0852246e9cd17db2c5981a26851",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/archive.json",
+      "originalMode": "100644",
+      "originalBlob": "a9d1ea4ebc074674c4e9aa8639fd387e9ea851c3",
+      "recoveredMode": "100644",
+      "recoveredBlob": "a9d1ea4ebc074674c4e9aa8639fd387e9ea851c3",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/collector-result.json",
+      "originalMode": "100644",
+      "originalBlob": "e712a85071cc61d0e533018b89da1403fe4abb7e",
+      "recoveredMode": "100644",
+      "recoveredBlob": "e712a85071cc61d0e533018b89da1403fe4abb7e",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/consumer-01-disposition.json",
+      "originalMode": "100644",
+      "originalBlob": "fbfff19154211da573fe4e51c59fae34f8827ef9",
+      "recoveredMode": "100644",
+      "recoveredBlob": "fbfff19154211da573fe4e51c59fae34f8827ef9",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/consumer-02-clock.json",
+      "originalMode": "100644",
+      "originalBlob": "8d8d401fc7fcc7a9f5aeb3ab5275a875e463025f",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8d8d401fc7fcc7a9f5aeb3ab5275a875e463025f",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/consumer-02-native-result.json",
+      "originalMode": "100644",
+      "originalBlob": "4cc295cfa59adff316812cc03098e3fbc49e60fd",
+      "recoveredMode": "100644",
+      "recoveredBlob": "4cc295cfa59adff316812cc03098e3fbc49e60fd",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/consumer-02-report.md",
+      "originalMode": "100644",
+      "originalBlob": "cb7827d720169511a616660fc4d7d46b9517b32d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "cb7827d720169511a616660fc4d7d46b9517b32d",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/independent-review/collector-result.json",
+      "originalMode": "100644",
+      "originalBlob": "e712a85071cc61d0e533018b89da1403fe4abb7e",
+      "recoveredMode": "100644",
+      "recoveredBlob": "e712a85071cc61d0e533018b89da1403fe4abb7e",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/independent-review/hash-audit.json",
+      "originalMode": "100644",
+      "originalBlob": "1aeb6883486facfa3d04cc9d17429320a4770db6",
+      "recoveredMode": "100644",
+      "recoveredBlob": "1aeb6883486facfa3d04cc9d17429320a4770db6",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/independent-review/review.json",
+      "originalMode": "100644",
+      "originalBlob": "965b7061f0e13a6336b504e3b0cfaae819844379",
+      "recoveredMode": "100644",
+      "recoveredBlob": "965b7061f0e13a6336b504e3b0cfaae819844379",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/independent-review/review.md",
+      "originalMode": "100644",
+      "originalBlob": "8929f89640c82aca03189baba49a2dfd31b0de4f",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8929f89640c82aca03189baba49a2dfd31b0de4f",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/inventory.json",
+      "originalMode": "100644",
+      "originalBlob": "2cf1c636cf3f667864e0809af4f0897726943221",
+      "recoveredMode": "100644",
+      "recoveredBlob": "2cf1c636cf3f667864e0809af4f0897726943221",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/packet.json",
+      "originalMode": "100644",
+      "originalBlob": "a9aa03a42f140593076ce563183b4863c29cb265",
+      "recoveredMode": "100644",
+      "recoveredBlob": "a9aa03a42f140593076ce563183b4863c29cb265",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/seal.json",
+      "originalMode": "100644",
+      "originalBlob": "8437fb786bdefcd5ac7741934e804daeec587bd3",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8437fb786bdefcd5ac7741934e804daeec587bd3",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/sealed-study.tar.xz",
+      "originalMode": "100644",
+      "originalBlob": "3889c37935255fe686404d651ffb01a0319cb442",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3889c37935255fe686404d651ffb01a0319cb442",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/archive-recompression.json",
+      "originalMode": "100644",
+      "originalBlob": "f1a48834a4e5b7a3307c922f0b874f64d12eb4c2",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f1a48834a4e5b7a3307c922f0b874f64d12eb4c2",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/calibration-environment.json",
+      "originalMode": "100644",
+      "originalBlob": "03067d231c3187514033fc91c0dd7e747bc63f2c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "03067d231c3187514033fc91c0dd7e747bc63f2c",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/calibration-summary.json",
+      "originalMode": "100644",
+      "originalBlob": "7dda5568995973e5c2545359717b2590cb94577e",
+      "recoveredMode": "100644",
+      "recoveredBlob": "7dda5568995973e5c2545359717b2590cb94577e",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/captures/knowledge-maintenance.png",
+      "originalMode": "100644",
+      "originalBlob": "726f10922e45b0c32c80701d09a2f86955090123",
+      "recoveredMode": "100644",
+      "recoveredBlob": "726f10922e45b0c32c80701d09a2f86955090123",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/captures/library-maintenance.png",
+      "originalMode": "100644",
+      "originalBlob": "4dce01f2e92ce4bf05272167610b0a3ee0c9370a",
+      "recoveredMode": "100644",
+      "recoveredBlob": "4dce01f2e92ce4bf05272167610b0a3ee0c9370a",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/captures/unassisted-maintenance-after-removal.png",
+      "originalMode": "100644",
+      "originalBlob": "c1fa3d2f7c71beb2dd768aaf61898e4435d281a1",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c1fa3d2f7c71beb2dd768aaf61898e4435d281a1",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/freeze.json",
+      "originalMode": "100644",
+      "originalBlob": "48149f122a9ef8bcfd3dddd9f020180139d21e3b",
+      "recoveredMode": "100644",
+      "recoveredBlob": "48149f122a9ef8bcfd3dddd9f020180139d21e3b",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/frozen-evaluator.mjs",
+      "originalMode": "100644",
+      "originalBlob": "841762de7c644c7d1aa82c55d66acd16cab11972",
+      "recoveredMode": "100644",
+      "recoveredBlob": "841762de7c644c7d1aa82c55d66acd16cab11972",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/independent-audit.json",
+      "originalMode": "100644",
+      "originalBlob": "f042913e748972d6e69043a6615b2f22b0d5ee90",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f042913e748972d6e69043a6615b2f22b0d5ee90",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/knowledge-reference-correction.json",
+      "originalMode": "100644",
+      "originalBlob": "a05d121b81bb4857f7c30ccb81400f8e9fbffb22",
+      "recoveredMode": "100644",
+      "recoveredBlob": "a05d121b81bb4857f7c30ccb81400f8e9fbffb22",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/knowledge-reference-correction.patch",
+      "originalMode": "100644",
+      "originalBlob": "e8d7895b45361bd86bc58d6b643cfd76034972db",
+      "recoveredMode": "100644",
+      "recoveredBlob": "e8d7895b45361bd86bc58d6b643cfd76034972db",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/packets.json",
+      "originalMode": "100644",
+      "originalBlob": "b61e982e0903b1241b26698b31c838e16a628288",
+      "recoveredMode": "100644",
+      "recoveredBlob": "b61e982e0903b1241b26698b31c838e16a628288",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz",
+      "originalMode": "100644",
+      "originalBlob": "787eaf060e47398c83dc83e70cafd804344ead12",
+      "recoveredMode": "100644",
+      "recoveredBlob": "787eaf060e47398c83dc83e70cafd804344ead12",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz",
+      "originalMode": "100644",
+      "originalBlob": "1ca6126c5cb4d7ceb493edc1d6fa0b130e9707eb",
+      "recoveredMode": "100644",
+      "recoveredBlob": "1ca6126c5cb4d7ceb493edc1d6fa0b130e9707eb",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/results.json",
+      "originalMode": "100644",
+      "originalBlob": "545f0638dd5d009704bc3829066840ca4909cf4c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "545f0638dd5d009704bc3829066840ca4909cf4c",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-dcbot/production-readback.json",
+      "originalMode": "100644",
+      "originalBlob": "8fd42c03f86e42e740195d2cfd280cca6631e2e8",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8fd42c03f86e42e740195d2cfd280cca6631e2e8",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/1147.json",
+      "originalMode": "100644",
+      "originalBlob": "c30ecc4b7c69876fbbca639a3ade2aeb305ec8a5",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c30ecc4b7c69876fbbca639a3ade2aeb305ec8a5",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/1150.json",
+      "originalMode": "100644",
+      "originalBlob": "6eda7c7367866ed2130ae9bb59e9a0e07e12c970",
+      "recoveredMode": "100644",
+      "recoveredBlob": "6eda7c7367866ed2130ae9bb59e9a0e07e12c970",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/1151.json",
+      "originalMode": "100644",
+      "originalBlob": "06d8ebc3052387dc98a872e02ec44e315f68135c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "06d8ebc3052387dc98a872e02ec44e315f68135c",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/734.json",
+      "originalMode": "100644",
+      "originalBlob": "98efac675bf7ecc5d68e3d7873585b7a43a722f1",
+      "recoveredMode": "100644",
+      "recoveredBlob": "98efac675bf7ecc5d68e3d7873585b7a43a722f1",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/745.json",
+      "originalMode": "100644",
+      "originalBlob": "61414371c9922b63a48a8e9d1428f048a1a736c4",
+      "recoveredMode": "100644",
+      "recoveredBlob": "61414371c9922b63a48a8e9d1428f048a1a736c4",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/746.json",
+      "originalMode": "100644",
+      "originalBlob": "5fc6c3a05ed60b5387c788e9ec26f48ab523ed4a",
+      "recoveredMode": "100644",
+      "recoveredBlob": "5fc6c3a05ed60b5387c788e9ec26f48ab523ed4a",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/749.json",
+      "originalMode": "100644",
+      "originalBlob": "06161f2c4765ae68a9620d76b0bdf874ca49a018",
+      "recoveredMode": "100644",
+      "recoveredBlob": "06161f2c4765ae68a9620d76b0bdf874ca49a018",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/750.json",
+      "originalMode": "100644",
+      "originalBlob": "90ddcf1c636423709a405afd10449490a2722ab6",
+      "recoveredMode": "100644",
+      "recoveredBlob": "90ddcf1c636423709a405afd10449490a2722ab6",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/751.json",
+      "originalMode": "100644",
+      "originalBlob": "49f412d3becf45882d80b3b783a1c9a1cf9d9926",
+      "recoveredMode": "100644",
+      "recoveredBlob": "49f412d3becf45882d80b3b783a1c9a1cf9d9926",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/754.json",
+      "originalMode": "100644",
+      "originalBlob": "9833ae87b8638df1eedcd284a9fc5b24bd0fc2cc",
+      "recoveredMode": "100644",
+      "recoveredBlob": "9833ae87b8638df1eedcd284a9fc5b24bd0fc2cc",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/pr-1757.json",
+      "originalMode": "100644",
+      "originalBlob": "6dfebb547d35aa6afbbad49608a4a6133d7fdd3a",
+      "recoveredMode": "100644",
+      "recoveredBlob": "6dfebb547d35aa6afbbad49608a4a6133d7fdd3a",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/source-pr-0.json",
+      "originalMode": "100644",
+      "originalBlob": "d18ecff6e561e0b70dfe05177d57422309209260",
+      "recoveredMode": "100644",
+      "recoveredBlob": "d18ecff6e561e0b70dfe05177d57422309209260",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/source-pr-1.json",
+      "originalMode": "100644",
+      "originalBlob": "fcfa9fb2419ba0a2420a816b86e32dc87035b518",
+      "recoveredMode": "100644",
+      "recoveredBlob": "fcfa9fb2419ba0a2420a816b86e32dc87035b518",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/source-pr-2.json",
+      "originalMode": "100644",
+      "originalBlob": "14ddddae1d41283b0c0bcaec99efa718b6492787",
+      "recoveredMode": "100644",
+      "recoveredBlob": "14ddddae1d41283b0c0bcaec99efa718b6492787",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/source-pr-3.json",
+      "originalMode": "100644",
+      "originalBlob": "18059e17822c1bad358dc232049f0cb600da6778",
+      "recoveredMode": "100644",
+      "recoveredBlob": "18059e17822c1bad358dc232049f0cb600da6778",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/source-pr-4.json",
+      "originalMode": "100644",
+      "originalBlob": "8c78cc3594b80f2294425eb421b5efb619cfb4ff",
+      "recoveredMode": "100644",
+      "recoveredBlob": "8c78cc3594b80f2294425eb421b5efb619cfb4ff",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/connector/source-pr-5.json",
+      "originalMode": "100644",
+      "originalBlob": "f4567b4ad44db0276b6308a7ff692d38cd2dbd3c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "f4567b4ad44db0276b6308a7ff692d38cd2dbd3c",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/local-evidence-inspection.json",
+      "originalMode": "100644",
+      "originalBlob": "fa2891c0dcfc8e58d0bc7b0a4c488838ee38c575",
+      "recoveredMode": "100644",
+      "recoveredBlob": "fa2891c0dcfc8e58d0bc7b0a4c488838ee38c575",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/loop-ledger.json",
+      "originalMode": "100644",
+      "originalBlob": "90d70f344fa413cdede57613a92482e1e7c7c6c4",
+      "recoveredMode": "100644",
+      "recoveredBlob": "90d70f344fa413cdede57613a92482e1e7c7c6c4",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/manifest.json",
+      "originalMode": "100644",
+      "originalBlob": "0eee5cbd78fca7a5827907a03a20e00b35ddbcfd",
+      "recoveredMode": "100644",
+      "recoveredBlob": "0eee5cbd78fca7a5827907a03a20e00b35ddbcfd",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/native-compact.json",
+      "originalMode": "100644",
+      "originalBlob": "cddc712c7158fac0104b6ac972e16b6b66fe8a2f",
+      "recoveredMode": "100644",
+      "recoveredBlob": "cddc712c7158fac0104b6ac972e16b6b66fe8a2f",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-idle-batch/screening.json",
+      "originalMode": "100644",
+      "originalBlob": "5c6ada337631f2363270e632ad0d5225ecada745",
+      "recoveredMode": "100644",
+      "recoveredBlob": "5c6ada337631f2363270e632ad0d5225ecada745",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/future-packet-preparation/after.json",
+      "originalMode": "100644",
+      "originalBlob": "c7a5283e816f4cfcde6cc083dcafe5e63eb5bd26",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c7a5283e816f4cfcde6cc083dcafe5e63eb5bd26",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/future-packet-preparation/before.json",
+      "originalMode": "100644",
+      "originalBlob": "079e875f1af88c3977b46a07e16b71b4b1fd6755",
+      "recoveredMode": "100644",
+      "recoveredBlob": "079e875f1af88c3977b46a07e16b71b4b1fd6755",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/future-packet-preparation/generated-control-packets.tar.gz",
+      "originalMode": "100644",
+      "originalBlob": "a100e38971d3d5d1e77afb2b881d90ecd7a1d708",
+      "recoveredMode": "100644",
+      "recoveredBlob": "a100e38971d3d5d1e77afb2b881d90ecd7a1d708",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/future-packet-preparation/packets.json",
+      "originalMode": "100644",
+      "originalBlob": "35f042d20c64c187d8994602de0c530fd7806c76",
+      "recoveredMode": "100644",
+      "recoveredBlob": "35f042d20c64c187d8994602de0c530fd7806c76",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/maintained-script-formatting-originals.tar.gz",
+      "originalMode": "100644",
+      "originalBlob": "5306cee2d851c7e7695001ee7ebd31243ada3145",
+      "recoveredMode": "100644",
+      "recoveredBlob": "5306cee2d851c7e7695001ee7ebd31243ada3145",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/maintained-script-formatting.json",
+      "originalMode": "100644",
+      "originalBlob": "3f6f4c637bb41d5b5c5bb8c8adbf61b0e356de23",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3f6f4c637bb41d5b5c5bb8c8adbf61b0e356de23",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/maintenance-control-archives.json",
+      "originalMode": "100644",
+      "originalBlob": "3f2af466bfde2bc5a02e749e1690d4cb3c1db55e",
+      "recoveredMode": "100644",
+      "recoveredBlob": "3f2af466bfde2bc5a02e749e1690d4cb3c1db55e",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-comment-execution.json",
+      "originalMode": "100644",
+      "originalBlob": "12f3f32a2894c5066c738d8bfbeacb6097901b1b",
+      "recoveredMode": "100644",
+      "recoveredBlob": "12f3f32a2894c5066c738d8bfbeacb6097901b1b",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-comment-receipt.json",
+      "originalMode": "100644",
+      "originalBlob": "cff5dc9613f7daa2a082cca3d69ed68bdd1e4fe4",
+      "recoveredMode": "100644",
+      "recoveredBlob": "cff5dc9613f7daa2a082cca3d69ed68bdd1e4fe4",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-matrix-execution.json",
+      "originalMode": "100644",
+      "originalBlob": "b228d6ca7f073ec2ce90dcea8fbe214a4c8bcd40",
+      "recoveredMode": "100644",
+      "recoveredBlob": "b228d6ca7f073ec2ce90dcea8fbe214a4c8bcd40",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-matrix-source-preflight.json",
+      "originalMode": "100644",
+      "originalBlob": "53090f5bed45524b9342b8d61529db523886fba3",
+      "recoveredMode": "100644",
+      "recoveredBlob": "53090f5bed45524b9342b8d61529db523886fba3",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-matrix-state.json",
+      "originalMode": "100644",
+      "originalBlob": "278ce7e9ac9fb5f9abc825422476530675a8554f",
+      "recoveredMode": "100644",
+      "recoveredBlob": "278ce7e9ac9fb5f9abc825422476530675a8554f",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-review-publication-package.json",
+      "originalMode": "100644",
+      "originalBlob": "06b5cac9348ebe3e12782f2160e6637d2f897930",
+      "recoveredMode": "100644",
+      "recoveredBlob": "06b5cac9348ebe3e12782f2160e6637d2f897930",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-review-publication-package.tar.gz",
+      "originalMode": "100644",
+      "originalBlob": "ba32750128c9caaf146063d5e44e5746a322ce7d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "ba32750128c9caaf146063d5e44e5746a322ce7d",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-agent-doc.json",
+      "originalMode": "100644",
+      "originalBlob": "6bb3d7e5d88fd09a8d03525a3172505efb8f77b2",
+      "recoveredMode": "100644",
+      "recoveredBlob": "6bb3d7e5d88fd09a8d03525a3172505efb8f77b2",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-agent-doc.stderr.log",
+      "originalMode": "100644",
+      "originalBlob": "d86c2a14cc1d4871cf9cf6e5cae05f185b748886",
+      "recoveredMode": "100644",
+      "recoveredBlob": "d86c2a14cc1d4871cf9cf6e5cae05f185b748886",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-agent-doc.stdout.log",
+      "originalMode": "100644",
+      "originalBlob": "47339d90b54d630903431ff122330490bb9a48c0",
+      "recoveredMode": "100644",
+      "recoveredBlob": "47339d90b54d630903431ff122330490bb9a48c0",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-agent-operations.stderr.log",
+      "originalMode": "100644",
+      "originalBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "recoveredMode": "100644",
+      "recoveredBlob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-agent-operations.stdout.log",
+      "originalMode": "100644",
+      "originalBlob": "853bf2181dd04344b92d33b957474f6eed292a95",
+      "recoveredMode": "100644",
+      "recoveredBlob": "853bf2181dd04344b92d33b957474f6eed292a95",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-public-docs.json",
+      "originalMode": "100644",
+      "originalBlob": "06650e7bcdce393d5132cf357980b913ec2a72f8",
+      "recoveredMode": "100644",
+      "recoveredBlob": "06650e7bcdce393d5132cf357980b913ec2a72f8",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-public-docs.stderr.log",
+      "originalMode": "100644",
+      "originalBlob": "c949dc7413b4207e92e23244e3351aadc5af0204",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c949dc7413b4207e92e23244e3351aadc5af0204",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/check-public-docs.stdout.log",
+      "originalMode": "100644",
+      "originalBlob": "6d6211bdf627f27d8df65489051a3cf733a32f46",
+      "recoveredMode": "100644",
+      "recoveredBlob": "6d6211bdf627f27d8df65489051a3cf733a32f46",
+      "same": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/validation/local-dispositions.json",
+      "originalMode": "100644",
+      "originalBlob": "586a1c7142dae78d2e57a862d51b5bf32ac177e4",
+      "recoveredMode": "100644",
+      "recoveredBlob": "586a1c7142dae78d2e57a862d51b5bf32ac177e4",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/button-projection-study/observe.mjs",
+      "originalMode": "100644",
+      "originalBlob": "c4c78eea978915c29ab04cb164ecde399a54ab4c",
+      "recoveredMode": "100644",
+      "recoveredBlob": "c4c78eea978915c29ab04cb164ecde399a54ab4c",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+      "originalMode": "100644",
+      "originalBlob": "abe60a0351200ad9cfc306590fdf60fe5d636f5b",
+      "recoveredMode": "100644",
+      "recoveredBlob": "abe60a0351200ad9cfc306590fdf60fe5d636f5b",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/README.md",
+      "originalMode": "100644",
+      "originalBlob": "b5f26832ae22e8d865d80a7d53e444dca3c5c263",
+      "recoveredMode": "100644",
+      "recoveredBlob": "b5f26832ae22e8d865d80a7d53e444dca3c5c263",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/durable-recorder.py",
+      "originalMode": "100644",
+      "originalBlob": "925fee7fc6c956dfdc231e63e98b7c9ad20e21c7",
+      "recoveredMode": "100644",
+      "recoveredBlob": "925fee7fc6c956dfdc231e63e98b7c9ad20e21c7",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/observe-preference-study.mjs",
+      "originalMode": "100644",
+      "originalBlob": "2e769df668737a4cf975f2a220bc633e9986507d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "2e769df668737a4cf975f2a220bc633e9986507d",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+      "originalMode": "100644",
+      "originalBlob": "558c990ef916f10f97e7d7a2afd0c9d499d3295d",
+      "recoveredMode": "100644",
+      "recoveredBlob": "558c990ef916f10f97e7d7a2afd0c9d499d3295d",
+      "same": true
+    },
+    {
+      "path": "scripts/analysis/knowledge-value-study/prepare.mjs",
+      "originalMode": "100644",
+      "originalBlob": "81d2a707a5b9e8afb1ea44818198384083f9d990",
+      "recoveredMode": "100644",
+      "recoveredBlob": "81d2a707a5b9e8afb1ea44818198384083f9d990",
+      "same": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "agent-operations",
+  "command": ["corepack", "pnpm@10.32.1", "check:agent-operations"],
+  "cwd": "/tmp/proto-ui-s7-recovery-456f",
+  "startedAt": "2026-11-24T02:32:09.869053+00:00",
+  "finishedAt": "2026-11-24T02:39:08.391003+00:00",
+  "elapsedSeconds": 418.5219567480017,
+  "exitCode": 1,
+  "error": null,
+  "sourceBase": "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+  "candidateTree": "acba1d91555093786477c61049e7011ee015c187",
+  "inputCommit": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+  "logs": [
+    {
+      "path": "agent-operations.stdout.log",
+      "bytes": 99732,
+      "sha256": "4f815ddf54f0b795562ac84b65ade71a7e7694fbe555b9d60e666f6923d341f4"
+    },
+    {
+      "path": "agent-operations.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
