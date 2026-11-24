@@ -366,7 +366,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6` |
 | `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16` |
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
-| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `d89dc89aaae69a0f6e9f1f4b23ce77f171edc62c7e2fba36bdb10244a2af60c2` |
+| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `60e953a2d1d3826c8c7c3d357fea269f25934c680c216bdd5bdd624561742b5d` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `3176c5c92408e9428283b428c130f818c33ab2fd53666fd255e6d6a99b2a31ca` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f` |
 | `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3` |
