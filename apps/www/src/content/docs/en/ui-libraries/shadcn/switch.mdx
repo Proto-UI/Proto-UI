@@ -16,7 +16,6 @@ Set `size="sm"` on the Root for the small recipe; omit `size` or use `size="defa
 
 The selected Rhea recipe uses a 2rem × 1.25rem default Root, a 1.5rem × 1rem small Root, 1rem/0.75rem Thumbs, a 2px transparent border and family `radius-2xl`; checked travel is Thumb width minus 4px. See the [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css). The separate [02cad611 New York source](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) retains its 2rem × 1.15rem / 1.5rem × 0.875rem dimensions and minus-2px travel as the compatibility profile. These are distinct profiles, not a claim of cross-target rendered parity.
 
-
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
 
 ## Compositions and optional drag
@@ -29,13 +28,22 @@ The upstream [Choice Card anatomy](https://github.com/shadcn-ui/ui/blob/96da9cc7
 
 <PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
 
-<div id="switch-composition-details">The label names the control; the description supplies help. Drag previews a position while held and requests a value only on release. The root remains the sole checked-value owner.</div>
+<div id="switch-composition-details">
+  The label names the control; the description supplies help. Drag previews a position while held
+  and requests a value only on release. The root remains the sole checked-value owner.
+</div>
 
 ## Install
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-switch" manager="npm" />
 
 Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
+
+### Style the generated Web Component
+
+The generated `ShadcnSwitchElement` uses `<proto-ui-shadcn-switch>` and supplies its default Thumb. Apply track CSS to `proto-ui-shadcn-switch` when using that composition. The separately exported raw Root uses `<proto-ui-shadcn-switch-root>`; its tag selector does not match the composed element.
+
+Keep custom Root dimensions, Thumb dimensions and checked travel consistent. Changing only the Thumb can leave it moving inside the unchanged track. The [Web Component styling guide](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) includes a complete default-size LTR example. For the family recipes, continue to select `styleProfile` and `size` on Root so Thumb follows its actual owner.
 
 ## API
 
