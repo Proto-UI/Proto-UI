@@ -19217,11 +19217,16 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, source);
     };
-    for (const name of ['program-pool.ts', 'contact-carrier.ts'])
+    // Admission binds the real importer and its exact shared host companion.
+    for (const name of [
+      'program-pool.ts',
+      'contact-carrier.ts',
+      'source.ts',
+      '../host/synchronous-steps.ts',
+    ])
       write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
     write('program.ts', "import './contact-profile'; import './source'; export {};");
     write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
-    write('source.ts', "import './contact-carrier'; export {};");
     for (const name of ['image-prepare.ts', 'liquidgl-kernel.generated.ts', 'paint-mutations.ts'])
       write(name, 'export {};');
     const entryPath = 'apps/www/src/pages/en/test/liquid-glass-material.astro';
