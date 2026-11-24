@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-24T09:43:52.026048+00:00",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+  "parent": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+  "purpose": "Repair the four real TypeScript diagnostics in the Portal acquisition fixture without changing its object-identity observation, assertions or deadlines.",
+  "failure": {
+    "workflowRun": 45365822387,
+    "job": 138347165630,
+    "artifact": 14906936987,
+    "workspaceTypesExit": 2,
+    "totalDiagnostics": 18,
+    "portalGenericComparisonDiagnostics": 4,
+    "mainInheritedCliDiagnostics": 14,
+    "source": "Clean exact 041; inherited scanner and both CLI tests are byte-identical to integrated main88fc."
+  },
+  "change": {
+    "file": "packages/adapters/web-component/test/portal-presence-preparation.test.ts",
+    "before": "if (node === host)",
+    "after": "if (Object.is(node, host))",
+    "sha256": "5d2e32688cfadf82a3e006ec4fc482e54e77459dbec67e53f1e1b60dc0b13947",
+    "semantics": "Both operands are Node objects. Object.is preserves exact reference identity and avoids the erroneous generic intersection narrowing; append ordering, T result, both preparation assertions and cleanup are unchanged."
+  },
+  "validation": {
+    "portalOriginalCases": {
+      "passed": 15,
+      "failed": 0,
+      "pending": 0,
+      "exitCode": 0
+    },
+    "firstWorkspaceTypes": {
+      "exitCode": 2,
+      "diagnostics": 16,
+      "boundary": "Four Portal diagnostics removed. Two missing generated Shadow companions remained alongside the fourteen inherited CLI errors; this is not a workspace pass."
+    },
+    "officialPrerequisites": [
+      {
+        "label": "portal-types-cli-build",
+        "command": ["node", "scripts/build/public-packages.mjs", "--package", "@proto.ui/cli"],
+        "startedAt": "2026-11-24T09:41:17.637708+00:00",
+        "endedAt": "2026-11-24T09:41:20.893864+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "portal-types-website-generate",
+        "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+        "startedAt": "2026-11-24T09:41:20.894193+00:00",
+        "endedAt": "2026-11-24T09:42:25.744593+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "portal-types-with-companions",
+        "command": [
+          "node",
+          "--max-old-space-size=6144",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.workspace.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-24T09:42:25.744937+00:00",
+        "endedAt": "2026-11-24T09:43:10.697045+00:00",
+        "exitCode": 2
+      }
+    ],
+    "afterGeneratedCompanions": {
+      "exitCode": 2,
+      "diagnostics": 14,
+      "allRemainingInInheritedCliTests": true,
+      "portalDiagnostics": 0,
+      "interpretation": "The one-line repair is typed, but the whole workspace remains failed until the genuine CLI site API is restored."
+    }
+  },
+  "independentReview": {
+    "reviewer": "Separate Codex source reviewer s6_final_union_review",
+    "scope": "Exact one-line Portal diff; checked original call/return/identity/preparation/cleanup assertions and all fifteen unchanged cases. No tests were executed by reviewer.",
+    "findings": [],
+    "githubApproval": false
+  },
+  "rawEvidence": {
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/portal-fixture-types.tar.gz",
+    "sha256": "bb112f9deb79c64b0e453a4a037f4a308f0c53789df198cad1a69370b6184ef2",
+    "bytes": 20683,
+    "members": 14
+  },
+  "unchanged": [
+    "All runtime product code",
+    "All package budget literals and policy",
+    "Original Portal assertions and deadlines",
+    "Original main CLI tests and scanner in this commit",
+    "Historical failed receipts"
+  ]
+}
