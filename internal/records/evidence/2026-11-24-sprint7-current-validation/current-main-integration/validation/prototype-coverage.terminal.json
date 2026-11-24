@@ -1,0 +1,23 @@
+{
+  "head": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "name": "prototype-coverage",
+  "command": [
+    "node",
+    "scripts/coverage-matrices/prototype-coverage.mjs"
+  ],
+  "startedAt": "2026-11-24T04:55:29.131960+00:00",
+  "exitCode": 0,
+  "timedOut": false,
+  "outerTimeoutSeconds": 180,
+  "elapsedMs": 5400,
+  "cpuAffinity": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "nodeOptions": "--max-old-space-size=1536",
+  "browserOptIn": true,
+  "headAfter": "9b5db82aedd836b49f2f19d255bfb2a9a8eaf09a",
+  "trackedStatusAfter": ""
+}

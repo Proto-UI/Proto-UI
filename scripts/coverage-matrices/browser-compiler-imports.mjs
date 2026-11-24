@@ -3,6 +3,8 @@
 // it is not a claim that a browser preview hosts GPUI/Qt/Flutter components.
 // Every entry binds its full source and the reviewed browser compiler owner.
 // No path prefixes, import categories or surrounding UI exemptions are admitted.
+// Current-main renewal binds eleven changed importer bodies. Their exact
+// import strings and reviewed browser compiler companion remain unchanged.
 // See internal/records/2026-11-23-seven-sprint-website-source-inventory.md.
 // Owner review renewal 2026-11-24: the reviewed owner body now retires its
 // compiler session asynchronously before a new Worker or session starts. The

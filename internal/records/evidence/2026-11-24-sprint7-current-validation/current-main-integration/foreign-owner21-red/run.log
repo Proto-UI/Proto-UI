@@ -1,0 +1,52 @@
+✔ compiler browser source binding: exact (359.080073ms)
+✖ compiler browser source binding: foreign-owner (107.741045ms)
+✔ compiler browser source binding: unlisted-compiler-source (94.764842ms)
+✔ browser compiler host source binding: client.ts exact (82.935089ms)
+✔ browser compiler host source binding: client.ts wrong-owner (84.288269ms)
+✔ browser compiler host source binding: client.ts extra-owner (62.664158ms)
+✔ browser compiler host source binding: client.ts changed-bytes (63.006585ms)
+✔ browser compiler host source binding: client.ts renewed-fingerprint (71.042422ms)
+✔ browser compiler host source binding: client.ts adjacent-path (64.594198ms)
+✔ browser compiler host source binding: client.ts symlink (83.582743ms)
+✔ browser compiler host source binding: client.ts ancestor-symlink (62.69307ms)
+✔ browser compiler host source binding: client.ts missing (60.278555ms)
+✔ browser compiler host source binding: worker.ts exact (62.437097ms)
+✔ browser compiler host source binding: worker.ts wrong-owner (54.166728ms)
+✔ browser compiler host source binding: worker.ts extra-owner (63.903013ms)
+✔ browser compiler host source binding: worker.ts changed-bytes (57.88171ms)
+✔ browser compiler host source binding: worker.ts renewed-fingerprint (58.386747ms)
+✔ browser compiler host source binding: worker.ts adjacent-path (57.384285ms)
+✔ browser compiler host source binding: worker.ts symlink (57.536972ms)
+✔ browser compiler host source binding: worker.ts ancestor-symlink (61.976532ms)
+✔ browser compiler host source binding: worker.ts missing (54.905386ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 20
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3326.708255
+
+✖ failing tests:
+
+test at scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:100:3
+✖ compiler browser source binding: foreign-owner (107.741045ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/. Input:
+  
+  'internal/website/self-hosting-coverage-matrix.md:97: exact browser compiler host source, digest and runtime owner remain unverified'
+  
+      at TestContext.<anonymous> (file:///var/tmp/proto-ui-s7-current-456f/scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:136:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'internal/website/self-hosting-coverage-matrix.md:97: exact browser compiler host source, digest and runtime owner remain unverified',
+    expected: /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/,
+    operator: 'match',
+    diff: 'simple'
+  }

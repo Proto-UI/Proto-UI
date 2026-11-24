@@ -27,6 +27,10 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
     sourceSha256: '6ad0b1c37967d3ac6aff3de80fc9492f99b727887fd1987e0f013e819931f2fe',
+    companionSource: Object.freeze({
+      path: 'packages/adapters/base/src/host/synchronous-steps.ts',
+      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+    }),
     specifiers: Object.freeze([
       '../host/synchronous-steps',
       './initial-paint-bridge',
@@ -61,6 +65,10 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   // The two new helpers preserve bounded canvas admission and all-step cleanup.
   'packages/adapters/base/src/material/source.ts': Object.freeze({
     sourceSha256: '6ff1e20429691dcfcff2be4685ceb685321df7e0156e6c8dada2c4c1d05aed1d',
+    companionSource: Object.freeze({
+      path: 'packages/adapters/base/src/host/synchronous-steps.ts',
+      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+    }),
     specifiers: Object.freeze([
       '../host/synchronous-steps',
       './border-outline',

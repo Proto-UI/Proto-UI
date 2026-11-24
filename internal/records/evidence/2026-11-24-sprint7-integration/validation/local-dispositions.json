@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-23T21:22:37.387999+00:00",
+  "type": "observed-local-validation-disposition",
+  "sourceRevision": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "dirtyTaskWorktree": true,
+  "observations": [
+    {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:public-docs"
+      ],
+      "exitCode": 1,
+      "cause": "Sparse checkout omits 27 unchanged tracked historical documentation files; 39 missing-file/link observations retained. No source path was removed by this task.",
+      "receipt": "check-public-docs.json"
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:agent-doc"
+      ],
+      "exitCode": 1,
+      "cause": "tsx CLI IPC socket listen EPERM in local environment.",
+      "receipt": "check-agent-doc.json"
+    },
+    {
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "scripts/spec/generate-agent-project-understanding.mjs",
+        "--check"
+      ],
+      "exitCode": 0,
+      "stdout": "Agent project understanding is renderable; local projection is absent as expected: internal/agent/PROJECT-UNDERSTANDING.zh-CN.md",
+      "timeReceipt": "Tool invocation actual result retained in current task; no precise start/end timestamps were captured for this direct invocation."
+    },
+    {
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:agent-operations"
+      ],
+      "exitCode": null,
+      "termination": "Python subprocess.TimeoutExpired after 179.9999918880021 seconds",
+      "originalOutputPreserved": true,
+      "conclusion": "Not a complete suite pass. No failure assertion was printed before the local timeout."
+    },
+    {
+      "commandPurpose": "Materialize unchanged sparse checkout document paths with git show HEAD:path",
+      "exitCode": 130,
+      "operatorInterrupted": true,
+      "reason": "Partial-clone missing-object read did not finish; use complete authenticated device checkout for final validation.",
+      "partialOutput": "No materialization summary was produced."
+    }
+  ],
+  "logs": [
+    {
+      "path": "check-agent-doc.stderr.log",
+      "bytes": 886,
+      "sha256": "59d02e3d60cb46a7bd81dd1e749057ba99edfd9fc2fe595c27ce0d7216f220b8"
+    },
+    {
+      "path": "check-agent-doc.stdout.log",
+      "bytes": 192,
+      "sha256": "351ef891a7441d88a4e5c10349d9d31f5f2b116dd1b1ea2fd420137aeea17b38"
+    },
+    {
+      "path": "check-agent-operations.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "check-agent-operations.stdout.log",
+      "bytes": 53428,
+      "sha256": "50812ae532f4f9196552b3a5a5ac33cab10f870576ef2b00db81298dec0ae0e6"
+    },
+    {
+      "path": "check-public-docs.stderr.log",
+      "bytes": 5108,
+      "sha256": "1e4789c34e1d54287998ebd39de2e996d1ab12fc5159e5ada9405e60428876de"
+    },
+    {
+      "path": "check-public-docs.stdout.log",
+      "bytes": 168,
+      "sha256": "9089a30c74bc2f7d794fe0b0a003f797b78ec95272c075c61a6e8df3d0fdbfd3"
+    }
+  ]
+}

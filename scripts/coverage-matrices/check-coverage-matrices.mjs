@@ -12939,6 +12939,17 @@ function validateWebsiteSourceBindings(
         continue;
       }
     }
+    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
+      // The compiler browser sources are not derived from a Website Path cell,
+      // so their reviewed owner is asserted here instead of by the grouped
+      // binding rule. Keep the exact host validation below independent so
+      // a wrong owner retains both diagnostics without bypassing source checks.
+      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
+        issues.push(
+          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
+        );
+      }
+    }
     if (Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath)) {
       const expected = BROWSER_COMPILER_INTERACTIVE_SOURCES[sourcePath];
       try {
@@ -12992,17 +13003,6 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact optical host source, digest and owner remain unverified`
-        );
-        continue;
-      }
-    }
-    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
-      // The compiler browser sources are not derived from a Website Path cell,
-      // so their reviewed owner is asserted here instead of by the grouped
-      // binding rule.
-      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
-        issues.push(
-          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
         );
         continue;
       }

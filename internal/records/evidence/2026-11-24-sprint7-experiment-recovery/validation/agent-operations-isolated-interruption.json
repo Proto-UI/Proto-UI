@@ -1,0 +1,45 @@
+{
+  "name": "agent-operations-isolated-interruption",
+  "observedAt": "2026-11-24T03:01:32.274503+00:00",
+  "command": [
+    "node",
+    "--test",
+    "--test-concurrency=1",
+    "--test-reporter=tap",
+    "scripts/agent-operations/test/connector-review.test.mjs",
+    "scripts/agent-operations/test/review-delta.test.mjs",
+    "scripts/agent-operations/test/review-pagination.test.mjs"
+  ],
+  "cwd": "/tmp/proto-ui-s7-recovery-456f",
+  "candidateTree": "acba1d91555093786477c61049e7011ee015c187",
+  "toolSessionId": 75101,
+  "status": "interrupted-terminal-unavailable",
+  "exitCode": null,
+  "testsExecuted": null,
+  "testsPassed": null,
+  "configuredSubprocessTimeoutSeconds": 600,
+  "configuredTimeoutObservedToFire": null,
+  "receiptProduced": false,
+  "resumeResult": "write_stdin failed: Unknown process id 75101",
+  "independentProcessObservation": {
+    "reviewer": "/root/s2_consumer",
+    "reportedAt": null,
+    "scope": "No argv matching the three selected test files was observed in /proc; no process was killed by that inspection. This is not a reconstructed exit status.",
+    "timestampLimitation": "Peer message arrived during this recovery; the process enumeration itself did not retain a precise timestamp."
+  },
+  "interpretation": "The retained stream contains only a TAP header. No terminal result or individual assertion outcome can be claimed. The original complete canonical 1051/1054 result is retained separately; this interrupted diagnostic does not replace it.",
+  "logs": [
+    {
+      "path": "agent-operations-isolated.stdout.log",
+      "bytes": 15,
+      "sha256": "7cb03ab03edf5190a8aa546c78285344395fad3d42d4011cd224f934aef96b3f",
+      "mtimeObservedAt": "2026-11-24T02:40:16.270422+00:00"
+    },
+    {
+      "path": "agent-operations-isolated.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mtimeObservedAt": "2026-11-24T02:40:16.198420+00:00"
+    }
+  ]
+}

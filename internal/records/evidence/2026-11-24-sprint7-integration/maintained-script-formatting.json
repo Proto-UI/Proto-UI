@@ -1,0 +1,790 @@
+{
+  "schemaVersion": 1,
+  "kind": "maintained-script-formatting",
+  "operator": "/root/s7_button_results_review",
+  "finalVerificationStartedAt": "2026-11-23T21:23:42.440117+00:00",
+  "result": "passed-formatting-only",
+  "scope": [
+    "scripts/analysis/button-projection-study/observe.mjs",
+    "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+    "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+    "scripts/analysis/knowledge-value-study/prepare.mjs",
+    "scripts/analysis/invisible-consumption/observe-preference-study.mjs"
+  ],
+  "backupDirectory": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before",
+  "nativeBrowserRuns": 0,
+  "externalWrites": false,
+  "gitCommits": false,
+  "commands": [
+    {
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:42.478243+00:00",
+      "purpose": "Actual final verification tool version",
+      "finishedAt": "2026-11-23T21:23:42.483048+00:00",
+      "exitCode": 0,
+      "stdout": "v24.22.3\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--version"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:42.483314+00:00",
+      "purpose": "Resolve fixed repository formatter",
+      "finishedAt": "2026-11-23T21:23:42.908337+00:00",
+      "exitCode": 0,
+      "stdout": "3.8.1\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "--stdin-filepath",
+        "scripts/analysis/button-projection-study/observe.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:42.908770+00:00",
+      "purpose": "Check immutable original backup using original repository filepath/config after the single formatting operation",
+      "stdinSha256": "91d6604b33732c7596e33a36af6c0996ac0dc8cb27c00b27d3e91bd9db615937",
+      "finishedAt": "2026-11-23T21:23:43.484906+00:00",
+      "exitCode": 1,
+      "stdout": "(stdin)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "scripts/analysis/button-projection-study/observe.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:43.485278+00:00",
+      "purpose": "Final syntax-only check of maintained file",
+      "finishedAt": "2026-11-23T21:23:43.549590+00:00",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "--stdin-filepath",
+        "scripts/analysis/button-projection-study/prepare-calibration.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:43.550062+00:00",
+      "purpose": "Check immutable original backup using original repository filepath/config after the single formatting operation",
+      "stdinSha256": "0a51d0d25b8092eeb4e318d729de18a5cde365e1fae867665e5b74020f33fb4f",
+      "finishedAt": "2026-11-23T21:23:44.165401+00:00",
+      "exitCode": 1,
+      "stdout": "(stdin)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "scripts/analysis/button-projection-study/prepare-calibration.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:44.165811+00:00",
+      "purpose": "Final syntax-only check of maintained file",
+      "finishedAt": "2026-11-23T21:23:44.231525+00:00",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "--stdin-filepath",
+        "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:44.232011+00:00",
+      "purpose": "Check immutable original backup using original repository filepath/config after the single formatting operation",
+      "stdinSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "finishedAt": "2026-11-23T21:23:44.790282+00:00",
+      "exitCode": 1,
+      "stdout": "(stdin)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:44.790757+00:00",
+      "purpose": "Final syntax-only check of maintained file",
+      "finishedAt": "2026-11-23T21:23:44.845095+00:00",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "--stdin-filepath",
+        "scripts/analysis/knowledge-value-study/prepare.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:44.845573+00:00",
+      "purpose": "Check immutable original backup using original repository filepath/config after the single formatting operation",
+      "stdinSha256": "b10651a8fdb1a283a0f9980706cb5380e5845a80901ca41a8b947d8fe7ed88b6",
+      "finishedAt": "2026-11-23T21:23:45.317854+00:00",
+      "exitCode": 1,
+      "stdout": "(stdin)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "scripts/analysis/knowledge-value-study/prepare.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:45.318293+00:00",
+      "purpose": "Final syntax-only check of maintained file",
+      "finishedAt": "2026-11-23T21:23:45.374638+00:00",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "--stdin-filepath",
+        "scripts/analysis/invisible-consumption/observe-preference-study.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:45.375414+00:00",
+      "purpose": "Check immutable original backup using original repository filepath/config after the single formatting operation",
+      "stdinSha256": "da1e77034412e1dcb698999c4efd807762d5d1d93138b08d6729e7df3811dadb",
+      "finishedAt": "2026-11-23T21:23:45.925166+00:00",
+      "exitCode": 1,
+      "stdout": "(stdin)\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "--check",
+        "scripts/analysis/invisible-consumption/observe-preference-study.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:45.925569+00:00",
+      "purpose": "Final syntax-only check of maintained file",
+      "finishedAt": "2026-11-23T21:23:45.989824+00:00",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "node",
+        "--input-type=module",
+        "-",
+        "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+        "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before",
+        "scripts/analysis/button-projection-study/observe.mjs",
+        "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+        "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+        "scripts/analysis/knowledge-value-study/prepare.mjs",
+        "scripts/analysis/invisible-consumption/observe-preference-study.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:45.990286+00:00",
+      "purpose": "Canonical named-field AST and parser-bound comment equivalence; no code execution",
+      "stdinSha256": "c2a6085e5722a0b3a89da4bb81a48000b08bf9274368e1587c7d3d1d1421f0f7",
+      "finishedAt": "2026-11-23T21:23:46.426365+00:00",
+      "exitCode": 0,
+      "stdout": "{\n  \"typescriptVersion\": \"5.9.3\",\n  \"passed\": true,\n  \"files\": [\n    {\n      \"path\": \"scripts/analysis/button-projection-study/observe.mjs\",\n      \"parseDiagnosticsBefore\": [],\n      \"parseDiagnosticsAfter\": [],\n      \"canonicalASTSha256Before\": \"04c3a268d57dd417bc324a9f985e75dc6ad4c903054d12084ea29881c3c5aac3\",\n      \"canonicalASTSha256After\": \"04c3a268d57dd417bc324a9f985e75dc6ad4c903054d12084ea29881c3c5aac3\",\n      \"canonicalASTEqual\": true,\n      \"commentCountBefore\": 7,\n      \"commentCountAfter\": 7,\n      \"commentsSha256Before\": \"dea09dc87d163ee4b7c59a59e6cc7a2030da5aa6b651f2662aa83b50f3a6a298\",\n      \"commentsSha256After\": \"dea09dc87d163ee4b7c59a59e6cc7a2030da5aa6b651f2662aa83b50f3a6a298\",\n      \"actualCommentsEqual\": true\n    },\n    {\n      \"path\": \"scripts/analysis/button-projection-study/prepare-calibration.mjs\",\n      \"parseDiagnosticsBefore\": [],\n      \"parseDiagnosticsAfter\": [],\n      \"canonicalASTSha256Before\": \"e7203c5dedc7d54b889d8cc2bcf07fe14831aa61a52745ba57a58eb2a4d5fcb1\",\n      \"canonicalASTSha256After\": \"e7203c5dedc7d54b889d8cc2bcf07fe14831aa61a52745ba57a58eb2a4d5fcb1\",\n      \"canonicalASTEqual\": true,\n      \"commentCountBefore\": 1,\n      \"commentCountAfter\": 1,\n      \"commentsSha256Before\": \"ec1ab7bf4b2e37e4f763f33d5e2be7a87769a5d83bf2cd57a9041b1856b4e326\",\n      \"commentsSha256After\": \"ec1ab7bf4b2e37e4f763f33d5e2be7a87769a5d83bf2cd57a9041b1856b4e326\",\n      \"actualCommentsEqual\": true\n    },\n    {\n      \"path\": \"scripts/analysis/knowledge-value-study/evaluate-tabs.mjs\",\n      \"parseDiagnosticsBefore\": [],\n      \"parseDiagnosticsAfter\": [],\n      \"canonicalASTSha256Before\": \"4e99712512406ac427c9157f8bd9b72f877b2940ba305a2de3a4bc3eab3faea7\",\n      \"canonicalASTSha256After\": \"4e99712512406ac427c9157f8bd9b72f877b2940ba305a2de3a4bc3eab3faea7\",\n      \"canonicalASTEqual\": true,\n      \"commentCountBefore\": 14,\n      \"commentCountAfter\": 14,\n      \"commentsSha256Before\": \"2b85c82ecffe1a66c9377726817de86daceacbc57dac5c5ed271c43a1d9463b5\",\n      \"commentsSha256After\": \"2b85c82ecffe1a66c9377726817de86daceacbc57dac5c5ed271c43a1d9463b5\",\n      \"actualCommentsEqual\": true\n    },\n    {\n      \"path\": \"scripts/analysis/knowledge-value-study/prepare.mjs\",\n      \"parseDiagnosticsBefore\": [],\n      \"parseDiagnosticsAfter\": [],\n      \"canonicalASTSha256Before\": \"0f41062da29e1ec3dd51c0d3ba49f00d466b216300274f2ce95e1b117fa19785\",\n      \"canonicalASTSha256After\": \"0f41062da29e1ec3dd51c0d3ba49f00d466b216300274f2ce95e1b117fa19785\",\n      \"canonicalASTEqual\": true,\n      \"commentCountBefore\": 2,\n      \"commentCountAfter\": 2,\n      \"commentsSha256Before\": \"e412aca60babebe7ea4953f7caa4d6d2c4473fe11e548de297a4998ab8199a4a\",\n      \"commentsSha256After\": \"e412aca60babebe7ea4953f7caa4d6d2c4473fe11e548de297a4998ab8199a4a\",\n      \"actualCommentsEqual\": true\n    },\n    {\n      \"path\": \"scripts/analysis/invisible-consumption/observe-preference-study.mjs\",\n      \"parseDiagnosticsBefore\": [],\n      \"parseDiagnosticsAfter\": [],\n      \"canonicalASTSha256Before\": \"877a9ea44d612abf0b68e1d54e5107dacc503f94faa4c7057a8a4a3c0045d9bb\",\n      \"canonicalASTSha256After\": \"877a9ea44d612abf0b68e1d54e5107dacc503f94faa4c7057a8a4a3c0045d9bb\",\n      \"canonicalASTEqual\": true,\n      \"commentCountBefore\": 3,\n      \"commentCountAfter\": 3,\n      \"commentsSha256Before\": \"c2a2c14ae415229aaf27bd6d03fc3f36ba92daacb011c002c97d3e0b82db0318\",\n      \"commentsSha256After\": \"c2a2c14ae415229aaf27bd6d03fc3f36ba92daacb011c002c97d3e0b82db0318\",\n      \"actualCommentsEqual\": true\n    }\n  ]\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "prettier",
+        "--check",
+        "scripts/analysis/button-projection-study/observe.mjs",
+        "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+        "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+        "scripts/analysis/knowledge-value-study/prepare.mjs",
+        "scripts/analysis/invisible-consumption/observe-preference-study.mjs"
+      ],
+      "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+      "startedAt": "2026-11-23T21:23:46.426822+00:00",
+      "purpose": "Final maintained-source formatter gate",
+      "finishedAt": "2026-11-23T21:23:47.096895+00:00",
+      "exitCode": 0,
+      "stdout": "Checking formatting...\nAll matched files use Prettier code style!\n",
+      "stderr": ""
+    }
+  ],
+  "files": [
+    {
+      "path": "scripts/analysis/button-projection-study/observe.mjs",
+      "backupPath": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before/scripts/analysis/button-projection-study/observe.mjs",
+      "beforeSha256": "91d6604b33732c7596e33a36af6c0996ac0dc8cb27c00b27d3e91bd9db615937",
+      "afterSha256": "ba6f5803aa55de91643fea5bee26fd52da2d00412590c4af994378e17cdf3a9d",
+      "beforeBytes": 13110,
+      "afterBytes": 13429,
+      "changed": true
+    },
+    {
+      "path": "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+      "backupPath": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before/scripts/analysis/button-projection-study/prepare-calibration.mjs",
+      "beforeSha256": "0a51d0d25b8092eeb4e318d729de18a5cde365e1fae867665e5b74020f33fb4f",
+      "afterSha256": "6478e3b881a5526483e2db690f0c72e6b776e8cb094dc09cacdecf1e4e9d5d41",
+      "beforeBytes": 3912,
+      "afterBytes": 4069,
+      "changed": true
+    },
+    {
+      "path": "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+      "backupPath": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before/scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+      "beforeSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "afterSha256": "2a5f44ce2b48a6767b21e78caecc44d8e3b5d2900769f2b20c76ae0df231f6ab",
+      "beforeBytes": 23582,
+      "afterBytes": 24354,
+      "changed": true
+    },
+    {
+      "path": "scripts/analysis/knowledge-value-study/prepare.mjs",
+      "backupPath": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before/scripts/analysis/knowledge-value-study/prepare.mjs",
+      "beforeSha256": "b10651a8fdb1a283a0f9980706cb5380e5845a80901ca41a8b947d8fe7ed88b6",
+      "afterSha256": "39dff9077b1a4ef6b3cd45f48f14ededf302a1766614438db67f9c9cff2c3814",
+      "beforeBytes": 5824,
+      "afterBytes": 6081,
+      "changed": true
+    },
+    {
+      "path": "scripts/analysis/invisible-consumption/observe-preference-study.mjs",
+      "backupPath": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before/scripts/analysis/invisible-consumption/observe-preference-study.mjs",
+      "beforeSha256": "da1e77034412e1dcb698999c4efd807762d5d1d93138b08d6729e7df3811dadb",
+      "afterSha256": "f910a09d82ade9727c368921a514c518c23a26a7c427cdbca2a2a5a01f46b7ce",
+      "beforeBytes": 9199,
+      "afterBytes": 9455,
+      "changed": true
+    }
+  ],
+  "initialFormattingCommand": {
+    "argv": [
+      "corepack",
+      "pnpm@10.32.1",
+      "exec",
+      "prettier",
+      "--write",
+      "scripts/analysis/button-projection-study/observe.mjs",
+      "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+      "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+      "scripts/analysis/knowledge-value-study/prepare.mjs",
+      "scripts/analysis/invisible-consumption/observe-preference-study.mjs"
+    ],
+    "cwd": "/workspace/scratch/0d7d81e85daf/proto-ui-s7",
+    "exitCode": 0,
+    "stdout": null,
+    "stderr": null,
+    "timing": null,
+    "missingReceiptReason": "The initial driver completed backup, formatter and all five node --check commands, then stopped at a false-positive optional comment scanner. Its in-memory command stdout/timestamps were not persisted. The command is not rerun or relabeled; final checks below have actual captured receipts."
+  },
+  "initialVerifierFailure": {
+    "classification": "reviewer-checker-false-positive",
+    "productFailure": false,
+    "allFiveCanonicalASTsEqual": true,
+    "allBeforeAfterParseDiagnostics": 0,
+    "reason": "Context-free TypeScript scanner treated the escaped slash at the end of the /^clean-consumer\\/dist\\// regular expression as the start of a line comment; formatting changed the remaining source line and triggered a false comment mismatch.",
+    "falseBeforeComment": "//, ''), file.sha256])",
+    "falseAfterComment": "//, ''),",
+    "correction": "Collect real leading/trailing comment ranges at parsed syntax-tree token boundaries. No production script or frozen evidence was changed to address the checker."
+  },
+  "immutableEvidenceBaseline": "Original digests from existing frozen results, independent review, manifests and archive receipts; also capture start/end digests for this final read-only verification. The initial driver pre-format snapshot was in memory and is not falsely reconstructed as a retained receipt.",
+  "repositoryLockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+  "nodeVersion": "v24.22.3",
+  "formatter": {
+    "name": "prettier",
+    "version": "3.8.1",
+    "packageManager": "pnpm@10.32.1",
+    "source": "repository installed formatter resolved via pnpm exec and repository lock"
+  },
+  "semanticEquivalence": {
+    "method": "Same TypeScript JS parser for both byte sets. Compare canonical AST preserving named child roles, literal cooked/raw text, operators, declaration flags, optional-chain flags, directive eligibility and semantic scalar fields; omit positions/trivia/cache and unwrap ordinary ParenthesizedExpression nodes. Separately compare actual parser-bound comments.",
+    "validatorSource": "\nimport fs from 'node:fs';\nimport path from 'node:path';\nimport crypto from 'node:crypto';\nimport ts from 'typescript';\nconst [repo, backup, ...files] = process.argv.slice(2);\nconst hash = value => crypto.createHash('sha256').update(value).digest('hex');\nconst relevantFlags = ts.NodeFlags.Let | ts.NodeFlags.Const | ts.NodeFlags.Using | ts.NodeFlags.AwaitUsing | ts.NodeFlags.OptionalChain;\nfunction canonical(node) {\n  if (ts.isParenthesizedExpression(node)) return canonical(node.expression);\n  const result = { kind: ts.SyntaxKind[node.kind] };\n  const flags = node.flags & relevantFlags;\n  if (flags) result.semanticFlags = flags;\n  if (ts.isExpressionStatement(node)) result.directiveEligible = ts.isStringLiteral(node.expression);\n  for (const key of ['text', 'escapedText', 'rawText', 'operator', 'keywordToken', 'isTypeOnly', 'isExportEquals', 'templateFlags']) {\n    if (key === 'text' && ts.isSourceFile(node)) continue;\n    if (node[key] !== undefined) result[key] = node[key];\n  }\n  for (const key of Object.keys(node).sort()) {\n    if (['parent', 'original', 'emitNode', 'jsDoc'].includes(key)) continue;\n    const value = node[key];\n    if (value && typeof value === 'object' && typeof value.kind === 'number' && typeof value.pos === 'number') result[key] = canonical(value);\n    else if (Array.isArray(value) && value.some(child => child && typeof child.kind === 'number')) result[key] = value.map(child => canonical(child));\n  }\n  return result;\n}\nfunction comments(source) {\n  const ranges = new Map();\n  function walk(node) {\n    for (const range of [...(ts.getLeadingCommentRanges(source.text, node.pos) || []), ...(ts.getTrailingCommentRanges(source.text, node.end) || [])]) ranges.set(range.pos + ':' + range.end, range);\n    for (const child of node.getChildren(source)) walk(child);\n  }\n  walk(source);\n  return [...ranges.values()].sort((a, b) => a.pos - b.pos).map(range => ({ kind: ts.SyntaxKind[range.kind], text: source.text.slice(range.pos, range.end).replace(/\\s+/g, ' ').trim() }));\n}\nconst rows = files.map(file => {\n  const a = ts.createSourceFile(file, fs.readFileSync(path.join(backup, file), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);\n  const b = ts.createSourceFile(file, fs.readFileSync(path.join(repo, file), 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);\n  const aa = JSON.stringify(canonical(a)), bb = JSON.stringify(canonical(b));\n  const ac = JSON.stringify(comments(a)), bc = JSON.stringify(comments(b));\n  return { path: file, parseDiagnosticsBefore: a.parseDiagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\\n')), parseDiagnosticsAfter: b.parseDiagnostics.map(d => ts.flattenDiagnosticMessageText(d.messageText, '\\n')), canonicalASTSha256Before: hash(aa), canonicalASTSha256After: hash(bb), canonicalASTEqual: aa === bb, commentCountBefore: comments(a).length, commentCountAfter: comments(b).length, commentsSha256Before: hash(ac), commentsSha256After: hash(bc), actualCommentsEqual: ac === bc };\n});\nconst passed = rows.every(row => !row.parseDiagnosticsBefore.length && !row.parseDiagnosticsAfter.length && row.canonicalASTEqual && row.actualCommentsEqual);\nprocess.stdout.write(JSON.stringify({ typescriptVersion: ts.version, passed, files: rows }, null, 2) + '\\n');\nprocess.exitCode = passed ? 0 : 1;\n",
+    "result": {
+      "typescriptVersion": "5.9.3",
+      "passed": true,
+      "files": [
+        {
+          "path": "scripts/analysis/button-projection-study/observe.mjs",
+          "parseDiagnosticsBefore": [],
+          "parseDiagnosticsAfter": [],
+          "canonicalASTSha256Before": "04c3a268d57dd417bc324a9f985e75dc6ad4c903054d12084ea29881c3c5aac3",
+          "canonicalASTSha256After": "04c3a268d57dd417bc324a9f985e75dc6ad4c903054d12084ea29881c3c5aac3",
+          "canonicalASTEqual": true,
+          "commentCountBefore": 7,
+          "commentCountAfter": 7,
+          "commentsSha256Before": "dea09dc87d163ee4b7c59a59e6cc7a2030da5aa6b651f2662aa83b50f3a6a298",
+          "commentsSha256After": "dea09dc87d163ee4b7c59a59e6cc7a2030da5aa6b651f2662aa83b50f3a6a298",
+          "actualCommentsEqual": true
+        },
+        {
+          "path": "scripts/analysis/button-projection-study/prepare-calibration.mjs",
+          "parseDiagnosticsBefore": [],
+          "parseDiagnosticsAfter": [],
+          "canonicalASTSha256Before": "e7203c5dedc7d54b889d8cc2bcf07fe14831aa61a52745ba57a58eb2a4d5fcb1",
+          "canonicalASTSha256After": "e7203c5dedc7d54b889d8cc2bcf07fe14831aa61a52745ba57a58eb2a4d5fcb1",
+          "canonicalASTEqual": true,
+          "commentCountBefore": 1,
+          "commentCountAfter": 1,
+          "commentsSha256Before": "ec1ab7bf4b2e37e4f763f33d5e2be7a87769a5d83bf2cd57a9041b1856b4e326",
+          "commentsSha256After": "ec1ab7bf4b2e37e4f763f33d5e2be7a87769a5d83bf2cd57a9041b1856b4e326",
+          "actualCommentsEqual": true
+        },
+        {
+          "path": "scripts/analysis/knowledge-value-study/evaluate-tabs.mjs",
+          "parseDiagnosticsBefore": [],
+          "parseDiagnosticsAfter": [],
+          "canonicalASTSha256Before": "4e99712512406ac427c9157f8bd9b72f877b2940ba305a2de3a4bc3eab3faea7",
+          "canonicalASTSha256After": "4e99712512406ac427c9157f8bd9b72f877b2940ba305a2de3a4bc3eab3faea7",
+          "canonicalASTEqual": true,
+          "commentCountBefore": 14,
+          "commentCountAfter": 14,
+          "commentsSha256Before": "2b85c82ecffe1a66c9377726817de86daceacbc57dac5c5ed271c43a1d9463b5",
+          "commentsSha256After": "2b85c82ecffe1a66c9377726817de86daceacbc57dac5c5ed271c43a1d9463b5",
+          "actualCommentsEqual": true
+        },
+        {
+          "path": "scripts/analysis/knowledge-value-study/prepare.mjs",
+          "parseDiagnosticsBefore": [],
+          "parseDiagnosticsAfter": [],
+          "canonicalASTSha256Before": "0f41062da29e1ec3dd51c0d3ba49f00d466b216300274f2ce95e1b117fa19785",
+          "canonicalASTSha256After": "0f41062da29e1ec3dd51c0d3ba49f00d466b216300274f2ce95e1b117fa19785",
+          "canonicalASTEqual": true,
+          "commentCountBefore": 2,
+          "commentCountAfter": 2,
+          "commentsSha256Before": "e412aca60babebe7ea4953f7caa4d6d2c4473fe11e548de297a4998ab8199a4a",
+          "commentsSha256After": "e412aca60babebe7ea4953f7caa4d6d2c4473fe11e548de297a4998ab8199a4a",
+          "actualCommentsEqual": true
+        },
+        {
+          "path": "scripts/analysis/invisible-consumption/observe-preference-study.mjs",
+          "parseDiagnosticsBefore": [],
+          "parseDiagnosticsAfter": [],
+          "canonicalASTSha256Before": "877a9ea44d612abf0b68e1d54e5107dacc503f94faa4c7057a8a4a3c0045d9bb",
+          "canonicalASTSha256After": "877a9ea44d612abf0b68e1d54e5107dacc503f94faa4c7057a8a4a3c0045d9bb",
+          "canonicalASTEqual": true,
+          "commentCountBefore": 3,
+          "commentCountAfter": 3,
+          "commentsSha256Before": "c2a2c14ae415229aaf27bd6d03fc3f36ba92daacb011c002c97d3e0b82db0318",
+          "commentsSha256After": "c2a2c14ae415229aaf27bd6d03fc3f36ba92daacb011c002c97d3e0b82db0318",
+          "actualCommentsEqual": true
+        }
+      ]
+    }
+  },
+  "immutableEvidence": [
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/freeze.json",
+      "originalRecordedSha256": "927ce4d21096892f11c3b11971f788e4f0b3b6b17f755b983b01be3f48080335",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "verificationStartSha256": "927ce4d21096892f11c3b11971f788e4f0b3b6b17f755b983b01be3f48080335",
+      "afterSha256": "927ce4d21096892f11c3b11971f788e4f0b3b6b17f755b983b01be3f48080335",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/frozen-oracle.mjs",
+      "originalRecordedSha256": "91d6604b33732c7596e33a36af6c0996ac0dc8cb27c00b27d3e91bd9db615937",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "verificationStartSha256": "91d6604b33732c7596e33a36af6c0996ac0dc8cb27c00b27d3e91bd9db615937",
+      "afterSha256": "91d6604b33732c7596e33a36af6c0996ac0dc8cb27c00b27d3e91bd9db615937",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-calibration.tar.gz",
+      "originalRecordedSha256": "6f5831aa14bc2446504e4d36594a3347e1378c2d4b6e130320fad1e422b53a36",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "verificationStartSha256": "6f5831aa14bc2446504e4d36594a3347e1378c2d4b6e130320fad1e422b53a36",
+      "afterSha256": "6f5831aa14bc2446504e4d36594a3347e1378c2d4b6e130320fad1e422b53a36",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-freeze-v2.json",
+      "originalRecordedSha256": "eda8ab6d22db447eb82483e4560c15a1ef7d280941551a1150148cd910303299",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "verificationStartSha256": "eda8ab6d22db447eb82483e4560c15a1ef7d280941551a1150148cd910303299",
+      "afterSha256": "eda8ab6d22db447eb82483e4560c15a1ef7d280941551a1150148cd910303299",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-native-evidence.tar.gz",
+      "originalRecordedSha256": "80b784725d25d7e9f716019a7f8ff0b8101796cb599293dad774b5c8e568a8db",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "verificationStartSha256": "80b784725d25d7e9f716019a7f8ff0b8101796cb599293dad774b5c8e568a8db",
+      "afterSha256": "80b784725d25d7e9f716019a7f8ff0b8101796cb599293dad774b5c8e568a8db",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/source-and-command-evidence.tar.xz",
+      "originalRecordedSha256": "31bb475589d39bf39f43befcf3ad282276e8193c4b62930cdcc79c4cfa431106",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-button-projection-study/results-review/verification.json",
+      "verificationStartSha256": "31bb475589d39bf39f43befcf3ad282276e8193c4b62930cdcc79c4cfa431106",
+      "afterSha256": "31bb475589d39bf39f43befcf3ad282276e8193c4b62930cdcc79c4cfa431106",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/compiler-boundary-final-green.log.gz",
+      "originalRecordedSha256": "cd4b48f85eca5d5ee9835fc7b3970471875f98e9c6018a9f8925947f3500b3f8",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "cd4b48f85eca5d5ee9835fc7b3970471875f98e9c6018a9f8925947f3500b3f8",
+      "afterSha256": "cd4b48f85eca5d5ee9835fc7b3970471875f98e9c6018a9f8925947f3500b3f8",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/compiler-boundary-intermediate-red.log.gz",
+      "originalRecordedSha256": "1ae314bf7e1311fe0ef1966a784d6634db511e9d7d9323d36c9f4d0f59ff8830",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "1ae314bf7e1311fe0ef1966a784d6634db511e9d7d9323d36c9f4d0f59ff8830",
+      "afterSha256": "1ae314bf7e1311fe0ef1966a784d6634db511e9d7d9323d36c9f4d0f59ff8830",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/compiler-boundary-original-red.log.gz",
+      "originalRecordedSha256": "c0bd7eb4602acfcd66fe1dc6c56d6c1be13b4cf1bd13a6c83d7cbd8d18812526",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "c0bd7eb4602acfcd66fe1dc6c56d6c1be13b4cf1bd13a6c83d7cbd8d18812526",
+      "afterSha256": "c0bd7eb4602acfcd66fe1dc6c56d6c1be13b4cf1bd13a6c83d7cbd8d18812526",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/compiler-final-diff-check.log.gz",
+      "originalRecordedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "afterSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/compiler-final-format.log.gz",
+      "originalRecordedSha256": "0cec04b1723406a5a611b8dcf60a5a874ddf09f25df90ed367907402f3a29297",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "0cec04b1723406a5a611b8dcf60a5a874ddf09f25df90ed367907402f3a29297",
+      "afterSha256": "0cec04b1723406a5a611b8dcf60a5a874ddf09f25df90ed367907402f3a29297",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/compiler-final-schedule.log.gz",
+      "originalRecordedSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "afterSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/hosted-d995-ci-config-audit.log.gz",
+      "originalRecordedSha256": "c2d12320e4da7675df4a9611674451d9accbd61382d60b191abbad408dd083d8",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-dispatch-boundary/manifest.json",
+      "verificationStartSha256": "c2d12320e4da7675df4a9611674451d9accbd61382d60b191abbad408dd083d8",
+      "afterSha256": "c2d12320e4da7675df4a9611674451d9accbd61382d60b191abbad408dd083d8",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/fresh-main-sprint1-wiring.log.gz",
+      "originalRecordedSha256": "8d5e9a544438c643f9ba61d613026273eb6aa3cbc1385a63dd06ec296ec6ccc0",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "8d5e9a544438c643f9ba61d613026273eb6aa3cbc1385a63dd06ec296ec6ccc0",
+      "afterSha256": "8d5e9a544438c643f9ba61d613026273eb6aa3cbc1385a63dd06ec296ec6ccc0",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/fresh-main-sprint3-controls-short-tmp.log.gz",
+      "originalRecordedSha256": "fda2f3b09e44a0e68989f06d77548ba3a76ee8e02d71c0de428c291cf92f7ba4",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "fda2f3b09e44a0e68989f06d77548ba3a76ee8e02d71c0de428c291cf92f7ba4",
+      "afterSha256": "fda2f3b09e44a0e68989f06d77548ba3a76ee8e02d71c0de428c291cf92f7ba4",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/fresh-main-sprint3-controls.log.gz",
+      "originalRecordedSha256": "2c293bbbe5b72f9ba2fee9addc6b95629fa93a26f144876853f9d38085d127fc",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "2c293bbbe5b72f9ba2fee9addc6b95629fa93a26f144876853f9d38085d127fc",
+      "afterSha256": "2c293bbbe5b72f9ba2fee9addc6b95629fa93a26f144876853f9d38085d127fc",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/hosted-5b-synthetic-audit.log.gz",
+      "originalRecordedSha256": "f0193aa8c04246619bffa286d2536ca6339a07c41dfdd63616b96c9b258e1619",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "f0193aa8c04246619bffa286d2536ca6339a07c41dfdd63616b96c9b258e1619",
+      "afterSha256": "f0193aa8c04246619bffa286d2536ca6339a07c41dfdd63616b96c9b258e1619",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-boundary-fetch.log.gz",
+      "originalRecordedSha256": "eea23834fbe9805c6ff9c944ee948ce3e7621e9509939b515fbd0e75bca5807b",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "eea23834fbe9805c6ff9c944ee948ce3e7621e9509939b515fbd0e75bca5807b",
+      "afterSha256": "eea23834fbe9805c6ff9c944ee948ce3e7621e9509939b515fbd0e75bca5807b",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-boundary-merge.log.gz",
+      "originalRecordedSha256": "1d04d66a6bf846045ccfa3b5bd7519e93d19ff5b7556c73a5effda130ec75860",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "1d04d66a6bf846045ccfa3b5bd7519e93d19ff5b7556c73a5effda130ec75860",
+      "afterSha256": "1d04d66a6bf846045ccfa3b5bd7519e93d19ff5b7556c73a5effda130ec75860",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-cycle-controls.log.gz",
+      "originalRecordedSha256": "b095d302037d7d4e8762fad1985cc90d5b63b25e56d5a889700b4916dbd6984d",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "b095d302037d7d4e8762fad1985cc90d5b63b25e56d5a889700b4916dbd6984d",
+      "afterSha256": "b095d302037d7d4e8762fad1985cc90d5b63b25e56d5a889700b4916dbd6984d",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-diff.log.gz",
+      "originalRecordedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "afterSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-final-green.log.gz",
+      "originalRecordedSha256": "0a6492587d5bdd41c8eccf94c225adfe167b80801dbab4ac3bbf211923404a89",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "0a6492587d5bdd41c8eccf94c225adfe167b80801dbab4ac3bbf211923404a89",
+      "afterSha256": "0a6492587d5bdd41c8eccf94c225adfe167b80801dbab4ac3bbf211923404a89",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-format.log.gz",
+      "originalRecordedSha256": "c2b535ee4946c74f9822806781fbc582bc007340764c66e801762e1ac919af11",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "c2b535ee4946c74f9822806781fbc582bc007340764c66e801762e1ac919af11",
+      "afterSha256": "c2b535ee4946c74f9822806781fbc582bc007340764c66e801762e1ac919af11",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-ledger-controls-private-tmp.log.gz",
+      "originalRecordedSha256": "b7150d491c82bb784af9f269be3e076dac0e7c05adb687c84e272e5040e116fb",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "b7150d491c82bb784af9f269be3e076dac0e7c05adb687c84e272e5040e116fb",
+      "afterSha256": "b7150d491c82bb784af9f269be3e076dac0e7c05adb687c84e272e5040e116fb",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-ledger-controls.log.gz",
+      "originalRecordedSha256": "3ac90f92242981a67d11e58568583afed478dc52769fc3681fd59d38f661dacb",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "3ac90f92242981a67d11e58568583afed478dc52769fc3681fd59d38f661dacb",
+      "afterSha256": "3ac90f92242981a67d11e58568583afed478dc52769fc3681fd59d38f661dacb",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-original-red.log.gz",
+      "originalRecordedSha256": "74c003cd272f348ea83411ed63d1b47b0fb1f5d493073b6d9be49d9f8331d986",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "74c003cd272f348ea83411ed63d1b47b0fb1f5d493073b6d9be49d9f8331d986",
+      "afterSha256": "74c003cd272f348ea83411ed63d1b47b0fb1f5d493073b6d9be49d9f8331d986",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manual-browser-schedule.log.gz",
+      "originalRecordedSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-compiler-manual-browser-boundary/manifest.json",
+      "verificationStartSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "afterSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/sealed-study.tar.xz",
+      "originalRecordedSha256": "09dc202c6f07fc737c47317c034573d51351cc8d7b467e62c93dc6f6b3c4a86f",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-generated-button-consumption/archive.json",
+      "verificationStartSha256": "09dc202c6f07fc737c47317c034573d51351cc8d7b467e62c93dc6f6b3c4a86f",
+      "afterSha256": "09dc202c6f07fc737c47317c034573d51351cc8d7b467e62c93dc6f6b3c4a86f",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/freeze.json",
+      "originalRecordedSha256": "0d4829578a9086a7429c5de4c728837693ba25916fcfaf79d077cf71e68e9da8",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-knowledge-value-study/results.json",
+      "verificationStartSha256": "0d4829578a9086a7429c5de4c728837693ba25916fcfaf79d077cf71e68e9da8",
+      "afterSha256": "0d4829578a9086a7429c5de4c728837693ba25916fcfaf79d077cf71e68e9da8",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/frozen-evaluator.mjs",
+      "originalRecordedSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-knowledge-value-study/freeze.json",
+      "verificationStartSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "afterSha256": "cc7161a66a30f87eeedaa18e28f759c31583e1e7309da6b01ed400d94f71710b",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz",
+      "originalRecordedSha256": "34240aafc47d636233281b2885179a5a674bedd89d31e29a8772f2e3d01b4d84",
+      "originalDigestSource": "internal/records/2026-11-24-sprint7-knowledge-comparison.md",
+      "verificationStartSha256": "34240aafc47d636233281b2885179a5a674bedd89d31e29a8772f2e3d01b4d84",
+      "afterSha256": "34240aafc47d636233281b2885179a5a674bedd89d31e29a8772f2e3d01b4d84",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz",
+      "originalRecordedSha256": "18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-knowledge-value-study/archive-recompression.json",
+      "verificationStartSha256": "18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2",
+      "afterSha256": "18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/adjacent-workflow-controls.log.gz",
+      "originalRecordedSha256": "c0dc0015b6633d97566e2be8c31da94934c4c9c3aae16b1c8b6d37dacab62862",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "c0dc0015b6633d97566e2be8c31da94934c4c9c3aae16b1c8b6d37dacab62862",
+      "afterSha256": "c0dc0015b6633d97566e2be8c31da94934c4c9c3aae16b1c8b6d37dacab62862",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/diff-check.log.gz",
+      "originalRecordedSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "afterSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/format.log.gz",
+      "originalRecordedSha256": "cf25d96be48b865c73433fa52351565ce7c85c5f03f8471ccb0888b05194571f",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "cf25d96be48b865c73433fa52351565ce7c85c5f03f8471ccb0888b05194571f",
+      "afterSha256": "cf25d96be48b865c73433fa52351565ce7c85c5f03f8471ccb0888b05194571f",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/install-frozen.log.gz",
+      "originalRecordedSha256": "8db9b30e0dcfe29e80c410e47ad5b191fe707dd849adcff86117a24b57693d73",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "8db9b30e0dcfe29e80c410e47ad5b191fe707dd849adcff86117a24b57693d73",
+      "afterSha256": "8db9b30e0dcfe29e80c410e47ad5b191fe707dd849adcff86117a24b57693d73",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/original-wiring-red.log.gz",
+      "originalRecordedSha256": "b752975dea11c555299110ded55296eb64030f457f0985a98fb44b0c99966d1a",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "b752975dea11c555299110ded55296eb64030f457f0985a98fb44b0c99966d1a",
+      "afterSha256": "b752975dea11c555299110ded55296eb64030f457f0985a98fb44b0c99966d1a",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/schedule.log.gz",
+      "originalRecordedSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "afterSha256": "dfb746b9a8e94368b7305bc9d4c53e946222796113b9dc65aa238f34477a4d52",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/wiring-green.log.gz",
+      "originalRecordedSha256": "421d6ca27ab2ab3d845bdadc92e61ea6919ef078dcf8334039e8a064d9db095e",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint1-dispatch-wiring/manifest.json",
+      "verificationStartSha256": "421d6ca27ab2ab3d845bdadc92e61ea6919ef078dcf8334039e8a064d9db095e",
+      "afterSha256": "421d6ca27ab2ab3d845bdadc92e61ea6919ef078dcf8334039e8a064d9db095e",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-review-publication-package.tar.gz",
+      "originalRecordedSha256": "6888b05e9ee53192d52d1cd0e1c5238da782df5d348981fb1da8cc6673903385",
+      "originalDigestSource": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-review-publication-package.json",
+      "verificationStartSha256": "6888b05e9ee53192d52d1cd0e1c5238da782df5d348981fb1da8cc6673903385",
+      "afterSha256": "6888b05e9ee53192d52d1cd0e1c5238da782df5d348981fb1da8cc6673903385",
+      "matchesOriginal": true,
+      "unchangedDuringFinalVerification": true
+    }
+  ],
+  "allImmutableEvidenceOriginal": true,
+  "finishedAt": "2026-11-23T21:23:47.120639+00:00",
+  "repositoryHeadAtFormattingVerification": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "repositoryBranchAtFormattingVerification": "work/sprint7-experiments-20261124-0d7d",
+  "stageBoundary": {
+    "kind": "formatting-only-before-separate-maintenance-fix",
+    "binding": "This record accepts exactly the five afterSha256 byte sets in files; the worktree stage may not yet be committed.",
+    "subsequentChange": "Owner identified a separate future-use issue: knowledge-value-study/prepare.mjs still asserts the historical knowledge.md digest although the maintained knowledge source was corrected. Updating that assertion and validating generated packets is a distinct semantic maintenance change, to be recorded separately. It is not covered by this formatting-only equivalence result.",
+    "originalExperimentReplay": "Replay historical experiments using their archived frozen packet/oracle bytes, not a later maintained entrypoint."
+  }
+}

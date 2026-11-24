@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-11-23T21:04:30.856905+00:00",
+  "operation": "Lossless tar container recompression; each regular member path/bytes/SHA256 unchanged",
+  "original": {
+    "name": "source-and-command-evidence.tar.gz",
+    "sha256": "fec1e6d60afa8febe4188bfda73a57d9d99915d33c35090e6c146d54c8a67eaf",
+    "bytes": 8017198
+  },
+  "published": {
+    "name": "source-and-command-evidence.tar.xz",
+    "sha256": "31bb475589d39bf39f43befcf3ad282276e8193c4b62930cdcc79c4cfa431106",
+    "bytes": 951340
+  },
+  "verifiedFiles": 1693,
+  "mismatches": []
+}

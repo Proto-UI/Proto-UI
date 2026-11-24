@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "kind": "independent-production-preference-task-observation",
+  "startedAt": "2026-11-23T20:46:26.281Z",
+  "project": "/tank/shared/projects/proto-ui-agent/s7-browser-20261124-0d7d/consumer-02-observation/consumer-02/project",
+  "url": "http://127.0.0.1:19750/",
+  "observerSha256": "da1e77034412e1dcb698999c4efd807762d5d1d93138b08d6729e7df3811dadb",
+  "selectors": {
+    "action": ".preference-save",
+    "savedName": ".saved-preference strong",
+    "busy": "main > div[aria-busy]"
+  },
+  "selectorConfigSha256": "772d7c1abec92b22b235488c7b93ac27c2de2ca1b3b0d75799d5c2be146d748c",
+  "node": "v24.22.3",
+  "scope": "Original supplied preference task; no AT, other-host or released-package claim",
+  "checkpoints": [
+    {
+      "id": "initial",
+      "at": "2026-11-23T20:46:26.786Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(52, 76, 196)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [],
+      "screenshot": "01-initial.png"
+    },
+    {
+      "id": "pending-disabled",
+      "at": "2026-11-23T20:46:26.934Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "true",
+      "focused": false,
+      "background": "rgb(220, 225, 238)",
+      "color": "rgb(86, 98, 122)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [],
+      "screenshot": "02-pending-disabled.png"
+    },
+    {
+      "id": "pointer-and-duplicate",
+      "at": "2026-11-23T20:46:27.550Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [
+        {
+          "atMs": 891.3999999761581,
+          "value": "{\"displayName\":\"Pointer preference\"}"
+        }
+      ],
+      "screenshot": "03-pointer-and-duplicate.png",
+      "duplicateAtMs": 388.0999999642372
+    },
+    {
+      "id": "keyboard-focus",
+      "at": "2026-11-23T20:46:27.658Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": true,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [
+        {
+          "atMs": 891.3999999761581,
+          "value": "{\"displayName\":\"Pointer preference\"}"
+        }
+      ],
+      "screenshot": "04-keyboard-focus.png"
+    },
+    {
+      "id": "enter-save",
+      "at": "2026-11-23T20:46:28.361Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [
+        {
+          "atMs": 891.3999999761581,
+          "value": "{\"displayName\":\"Pointer preference\"}"
+        },
+        {
+          "atMs": 1711.5,
+          "value": "{\"displayName\":\"Enter preference\"}"
+        }
+      ],
+      "screenshot": "05-enter-save.png"
+    },
+    {
+      "id": "space-save",
+      "at": "2026-11-23T20:46:29.103Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [
+        {
+          "atMs": 891.3999999761581,
+          "value": "{\"displayName\":\"Pointer preference\"}"
+        },
+        {
+          "atMs": 1711.5,
+          "value": "{\"displayName\":\"Enter preference\"}"
+        },
+        {
+          "atMs": 2441.300000011921,
+          "value": "{\"displayName\":\"Space preference\"}"
+        }
+      ],
+      "screenshot": "06-space-save.png"
+    },
+    {
+      "id": "error-and-reenable",
+      "at": "2026-11-23T20:46:30.061Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [
+        {
+          "atMs": 891.3999999761581,
+          "value": "{\"displayName\":\"Pointer preference\"}"
+        },
+        {
+          "atMs": 1711.5,
+          "value": "{\"displayName\":\"Enter preference\"}"
+        },
+        {
+          "atMs": 2441.300000011921,
+          "value": "{\"displayName\":\"Space preference\"}"
+        }
+      ],
+      "screenshot": "07-error-and-reenable.png"
+    },
+    {
+      "id": "successful-retry",
+      "at": "2026-11-23T20:46:30.837Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [
+        {
+          "atMs": 891.3999999761581,
+          "value": "{\"displayName\":\"Pointer preference\"}"
+        },
+        {
+          "atMs": 1711.5,
+          "value": "{\"displayName\":\"Enter preference\"}"
+        },
+        {
+          "atMs": 2441.300000011921,
+          "value": "{\"displayName\":\"Space preference\"}"
+        },
+        {
+          "atMs": 4179.699999988079,
+          "value": "{\"displayName\":\"Recovered preference\"}"
+        }
+      ],
+      "screenshot": "08-successful-retry.png"
+    },
+    {
+      "id": "persisted-after-reload",
+      "at": "2026-11-23T20:46:31.009Z",
+      "name": "Save preferences",
+      "role": "button",
+      "disabled": "false",
+      "focused": false,
+      "background": "rgb(41, 61, 165)",
+      "color": "rgb(255, 255, 255)",
+      "opacity": "1",
+      "outlineStyle": "none",
+      "outlineWidth": "0px",
+      "geometry": {
+        "x": 315,
+        "y": 402.734375,
+        "width": 172,
+        "height": 46.765625
+      },
+      "writes": [],
+      "screenshot": "09-persisted-after-reload.png"
+    }
+  ],
+  "assets": [
+    {
+      "path": "assets/index-BGeIfS-9.css",
+      "status": 200,
+      "diskSha256": "96af948338a8fdf1aa7f11ef7e2ff845e83db4279be93f83ab5f5f9ab6bace6d",
+      "servedSha256": "96af948338a8fdf1aa7f11ef7e2ff845e83db4279be93f83ab5f5f9ab6bace6d"
+    },
+    {
+      "path": "assets/index-Bwp5Kn_n.js",
+      "status": 200,
+      "diskSha256": "efacd610995cb08425dcac54f3dd4a37e6a68a7631b8781bb8bd43cce4095b16",
+      "servedSha256": "efacd610995cb08425dcac54f3dd4a37e6a68a7631b8781bb8bd43cce4095b16"
+    },
+    {
+      "path": "assets/index-Bwp5Kn_n.js",
+      "status": 200,
+      "diskSha256": "efacd610995cb08425dcac54f3dd4a37e6a68a7631b8781bb8bd43cce4095b16",
+      "servedSha256": "efacd610995cb08425dcac54f3dd4a37e6a68a7631b8781bb8bd43cce4095b16"
+    },
+    {
+      "path": "assets/index-BGeIfS-9.css",
+      "status": 200,
+      "diskSha256": "96af948338a8fdf1aa7f11ef7e2ff845e83db4279be93f83ab5f5f9ab6bace6d",
+      "servedSha256": "96af948338a8fdf1aa7f11ef7e2ff845e83db4279be93f83ab5f5f9ab6bace6d"
+    }
+  ],
+  "errors": [],
+  "status": "passed",
+  "browser": "145.0.7632.6",
+  "writesBeforeReload": [
+    {
+      "atMs": 891.3999999761581,
+      "value": "{\"displayName\":\"Pointer preference\"}"
+    },
+    {
+      "atMs": 1711.5,
+      "value": "{\"displayName\":\"Enter preference\"}"
+    },
+    {
+      "atMs": 2441.300000011921,
+      "value": "{\"displayName\":\"Space preference\"}"
+    },
+    {
+      "atMs": 4179.699999988079,
+      "value": "{\"displayName\":\"Recovered preference\"}"
+    }
+  ],
+  "finishedAt": "2026-11-23T20:46:32.555Z"
+}

@@ -124,6 +124,7 @@ for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
     writeValidMatrices(root, {}, {}, { websiteBindings: [[boundSource, boundOwners]] });
     const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
     if (scenario === 'exact') {
+      assert.equal(message, '');
       assert.doesNotMatch(message, /source binding must name exactly one/);
       assert.doesNotMatch(message, /is missing a reviewed Source-scan binding/);
       assert.doesNotMatch(message, /is not bound to a matrix row/);
@@ -19233,7 +19234,13 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
       fs.mkdirSync(path.dirname(target), { recursive: true });
       fs.writeFileSync(target, source);
     };
-    for (const name of ['program-pool.ts', 'contact-carrier.ts', 'source.ts'])
+    // Admission binds the real importer and its exact shared host companion.
+    for (const name of [
+      'program-pool.ts',
+      'contact-carrier.ts',
+      'source.ts',
+      '../host/synchronous-steps.ts',
+    ])
       write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
     write('program.ts', "import './contact-profile'; import './source'; export {};");
     write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
@@ -19385,6 +19392,16 @@ for (const [relative, allowed] of [
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     const bytes = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const helper = 'packages/adapters/base/src/host/synchronous-steps.ts';
+    const companion =
+      relative === 'packages/adapters/base/src/material/sink.ts' ||
+      relative === 'packages/adapters/base/src/material/source.ts'
+        ? path.join(root, helper)
+        : null;
+    if (companion) {
+      fs.mkdirSync(path.dirname(companion), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+    }
     const importer = path.join(root, 'apps/www/src/components/CardImportProbe.ts');
     fs.mkdirSync(path.dirname(importer), { recursive: true });
     fs.writeFileSync(
@@ -19394,6 +19411,15 @@ for (const [relative, allowed] of [
     fs.writeFileSync(target, bytes);
     const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
     assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    if (companion) {
+      const helperIssue = 'raw Proto UI import `../host/synchronous-steps` in `' + relative + '`';
+      assert.ok(!validationMessage(root).includes(helperIssue), 'exact helper remains admitted');
+      fs.appendFileSync(companion, '\n// unreviewed helper bytes\n');
+      assert.ok(validationMessage(root).includes(helperIssue), 'changed helper is rejected');
+      fs.unlinkSync(companion);
+      assert.ok(validationMessage(root).includes(helperIssue), 'missing helper is rejected');
+      fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+    }
     fs.writeFileSync(target, bytes + '\n// unreviewed bytes\n');
     assert.ok(collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
     fs.writeFileSync(target, bytes + "\nimport '@proto.ui/adapter-react';\n");

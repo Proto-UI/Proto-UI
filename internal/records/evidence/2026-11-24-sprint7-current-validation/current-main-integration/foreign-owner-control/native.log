@@ -1,0 +1,34 @@
+✔ compiler browser source binding: exact (344.040921ms)
+✖ compiler browser source binding: foreign-owner (121.211645ms)
+✔ compiler browser source binding: unlisted-compiler-source (122.053008ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 2
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2337.046579
+
+✖ failing tests:
+
+test at scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:100:3
+✖ compiler browser source binding: foreign-owner (121.211645ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/. Input:
+  
+  'internal/website/self-hosting-coverage-matrix.md:97: exact browser compiler host source, digest and runtime owner remain unverified'
+  
+      at TestContext.<anonymous> (file:///var/tmp/proto-ui-s7-current-456f/scripts/coverage-matrices/test/check-coverage-matrices.test.mjs:136:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'internal/website/self-hosting-coverage-matrix.md:97: exact browser compiler host source, digest and runtime owner remain unverified',
+    expected: /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/,
+    operator: 'match',
+    diff: 'simple'
+  }
