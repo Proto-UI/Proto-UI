@@ -65,11 +65,7 @@ const ruleModulePaths = async (files: readonly string[]): Promise<Set<string>> =
 };
 
 /** Whether a file imports a module that registers a rule. */
-const importsRuleModule = (
-  file: string,
-  text: string,
-  modules: ReadonlySet<string>
-): boolean => {
+const importsRuleModule = (file: string, text: string, modules: ReadonlySet<string>): boolean => {
   const directory = path.posix.dirname(file);
   for (const match of text.matchAll(/from\s+['"](\.\.?\/[^'"]+)['"]/g)) {
     const specifier = match[1] ?? '';
@@ -5476,6 +5472,181 @@ describe('lowered hook coverage', () => {
     );
   });
 
+  describe('helper call-site isolation', () => {
+    it.each([
+      ['field/textarea.proto.ts', 'textarea/root.proto.ts'],
+      ['textarea/root.proto.ts', 'field/textarea.proto.ts'],
+    ])('keeps both authored producers when scanning %s before %s', async (first, second) => {
+      const summary = createHookSourceSummaryContext();
+      const owner = path.join(PROTOTYPE_PACKAGES, 'brutalist/src/textarea/visual.ts');
+      for (const relative of [first, second]) {
+        const absolute = path.join(PROTOTYPE_PACKAGES, 'brutalist/src', relative);
+        const scan = scanRuleStateReads(await readFile(absolute, 'utf8'), absolute, summary);
+        const hook = relative.startsWith('field/') ? 'asFieldTextarea' : 'asTextareaRoot';
+        expect(scan.usages).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ hook, state: 'focusVisible' }),
+            expect.objectContaining({ hook, state: 'disabled' }),
+          ])
+        );
+        for (const usage of scan.usages) {
+          expect(usage.file).toBe(owner);
+          expect(usage.provenance).toBeDefined();
+        }
+      }
+      const declaration = scanRuleStateReads(await readFile(owner, 'utf8'), owner, summary);
+      expect(declaration.usages).toEqual([]);
+      expect(pendingHelperRuleReads(summary)).toEqual([]);
+    });
+
+    it('does not replay unrelated declarations in an imported helper module', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state) {',
+            rule('w.state(state.checked).eq(true)'),
+            '}',
+            'export function unrelated(def) {',
+            rule('w.state(foreign.unknown).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const state = asCheckboxRoot().stateHandles;',
+          'selected(def, state);',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved).toEqual([]);
+        }
+      );
+    });
+
+    it('retains an unknown later invocation after a proven invocation', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state) {',
+            rule('w.state(state.checked).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const state = asCheckboxRoot().stateHandles;',
+          'selected(def, state);',
+          'selected(def, foreign);',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved).toEqual([{ expression: 'state.checked', reason: 'subject' }]);
+        }
+      );
+    });
+
+    it('binds member expressions independently for every call', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state) {',
+            rule('w.state(state.disabled).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const checkbox = asCheckboxRoot();',
+          'const textarea = asTextareaRoot();',
+          'selected(def, checkbox.stateHandles);',
+          'selected(def, textarea.stateHandles);',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([
+            { hook: 'asCheckboxRoot', state: 'disabled' },
+            { hook: 'asTextareaRoot', state: 'disabled' },
+          ]);
+          expect(scan.unresolved).toEqual([]);
+        }
+      );
+    });
+
+    it.each([
+      ['', false],
+      [', undefined', false],
+      [', void 0', false],
+      ['', true],
+      [', undefined', true],
+      [', void 0', true],
+    ] as const)(
+      'evaluates a missing or undefined argument (%s) with default %s in the helper scope',
+      async (argument, enabled) => {
+        await withLoopFixture(
+          {
+            'visual.ts': [
+              `export function selected(def, state, enabled = ${enabled}) {`,
+              'if (enabled) {',
+              rule('w.state(state.checked).eq(true)'),
+              '}',
+              '}',
+            ].join('\n'),
+          },
+          [
+            "import { selected } from './visual';",
+            'const state = asCheckboxRoot().stateHandles;',
+            `selected(def, state${argument});`,
+          ].join('\n'),
+          (scan) => {
+            expect(scan.usages).toEqual(
+              enabled ? [{ hook: 'asCheckboxRoot', state: 'checked' }] : []
+            );
+            expect(scan.unresolved).toEqual([]);
+          }
+        );
+      }
+    );
+
+    it('does not bind an entire destructured default to a missing member', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, { input } = asCheckboxRoot().stateHandles) {',
+            rule('w.state(input.checked).eq(true)'),
+            '}',
+          ].join('\n'),
+        },
+        ["import { selected } from './visual';", 'selected(def);'].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([]);
+          expect(scan.unresolved).toEqual([{ expression: 'input.checked', reason: 'subject' }]);
+        }
+      );
+    });
+
+    it('keeps a rule guarded by an unsupported destructured member default', async () => {
+      await withLoopFixture(
+        {
+          'visual.ts': [
+            'export function selected(def, state, { enabled = true } = {}) {',
+            'if (enabled) {',
+            rule('w.state(state.checked).eq(true)'),
+            '}',
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { selected } from './visual';",
+          'const state = asCheckboxRoot().stateHandles;',
+          'selected(def, state, {});',
+        ].join('\n'),
+        (scan) => {
+          expect(scan.usages).toEqual([{ hook: 'asCheckboxRoot', state: 'checked' }]);
+          expect(scan.unresolved).toEqual([]);
+        }
+      );
+    });
+  });
+
   it('resolves every hook state a shipped rule condition reads', async () => {
     const found: Array<{
       file: string;
@@ -5497,9 +5668,7 @@ describe('lowered hook coverage', () => {
       const scan = scanRuleStateReads(text, absolute, sourceSummary);
       for (const usage of scan.usages)
         found.push({
-          file: usage.file
-            ? path.relative(REPO_ROOT, usage.file).split(path.sep).join('/')
-            : file,
+          file: usage.file ? path.relative(REPO_ROOT, usage.file).split(path.sep).join('/') : file,
           hook: usage.hook,
           state: usage.state,
           provenance: usage.provenance,
@@ -5537,10 +5706,9 @@ describe('lowered hook coverage', () => {
 
     // A rule whose subject is a parameter only the call site binds waits for
     // the replay of that call. A read that no call site replays stays here.
-    expect(
-      pendingHelperRuleReads(sourceSummary),
-      'rule states that no call site replays'
-    ).toEqual([]);
+    expect(pendingHelperRuleReads(sourceSummary), 'rule states that no call site replays').toEqual(
+      []
+    );
 
     const missing = found.filter(({ provenance }) => !provenance);
 
