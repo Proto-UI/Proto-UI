@@ -279,8 +279,9 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     description.textContent = labels.hint;
     description.className = 'docs-image-accessible docs-image-accessible-description';
     const close = makePreviewControl(family, 'dialogClose');
+    close.className = 'docs-image-close';
     const closeButton = makePreviewControl(family, 'button', {
-      variant: family === 'brutalist' ? 'surface' : 'ghost',
+      variant: family === 'brutalist' ? 'surface' : 'secondary',
       size: 'sm',
     });
     closeButton.textContent = labels.close;

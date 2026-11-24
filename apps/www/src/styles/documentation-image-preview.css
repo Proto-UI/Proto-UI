@@ -40,8 +40,7 @@ documentation-image-preview,
   display: none;
 }
 .docs-image-accessible,
-.docs-image-trigger-label,
-.docs-image-keyboard-close:not([data-focus-visible]) {
+.docs-image-trigger-label {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -49,15 +48,28 @@ documentation-image-preview,
   clip-path: inset(50%);
   white-space: nowrap;
 }
-/* Keep the clipped control inside the image canvas so its bordered box cannot
- * create an outer scroll range or shift the source during focus restoration. */
-.docs-image-keyboard-close:not([data-focus-visible]) {
+/* The unstyled public DialogClose wrapper owns hidden geometry. Keep the inner
+ * family Button at its natural size so its public transition-all cannot animate
+ * a 1px hiding box through (and clip) the label when keyboard focus arrives. */
+.docs-image-close {
+  position: absolute;
   top: 0;
   left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
-.docs-image-keyboard-close[data-focus-visible] {
-  position: absolute;
+.docs-image-keyboard-close:not([data-focus-visible]) {
+  clip-path: inset(50%);
+}
+.docs-image-close:has([data-focus-visible]) {
   top: 0.5rem;
   right: 0.5rem;
+  left: auto;
+  width: max-content;
+  height: max-content;
+  overflow: visible;
+  clip-path: none;
   z-index: 1;
 }

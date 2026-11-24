@@ -6,7 +6,11 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from '../content/docs/zh-cn/browser-harness';
-import { sharedImageHitPoint } from './documentation-image-preview.test-utils';
+import {
+  keyboardClosePaintFailures,
+  sharedImageHitPoint,
+  type KeyboardClosePaint,
+} from './documentation-image-preview.test-utils';
 const MD = '/en/test/image-preview-markdown/';
 const MDX = '/en/test/image-preview-mdx/';
 let browser: Browser;
@@ -252,6 +256,19 @@ async function collectKeyboardCloseReadability(page: Page, name: string) {
   expect(result.input?.trusted).toBe(true);
   expect(result.frames.length).toBeGreaterThan(1);
   return result;
+}
+function expectReadableKeyboardClose(result: {
+  before: KeyboardClosePaint;
+  frames: KeyboardClosePaint[];
+  terminal: KeyboardClosePaint;
+}) {
+  const focused = result.frames.filter((frame) => frame.active);
+  expect(focused.length).toBeGreaterThan(1);
+  for (const frame of [...focused, result.terminal])
+    expect(keyboardClosePaintFailures(frame)).toEqual([]);
+  expect(result.frames.map((frame) => [frame.viewport.scrollX, frame.viewport.scrollY])).toEqual(
+    result.frames.map(() => [result.before.viewport.scrollX, result.before.viewport.scrollY])
+  );
 }
 async function observePreviewFocus(page: Page, sourceSelector: string) {
   await page.evaluate((selector) => {
@@ -918,6 +935,7 @@ describe('automatic documentation image preview in real Chromium', () => {
               repeatedFocus,
               closeReveal,
             });
+            expectReadableKeyboardClose(closeReveal);
           } finally {
             await capture(page, `${width}-${colorScheme}-${family}-last-observed`);
             await context.close();
@@ -1999,7 +2017,10 @@ describe('automatic documentation image preview in real Chromium', () => {
         forcedColorsVectorCloseReveal: vectorCloseReveal,
       });
       await capture(page, 'forced-colors-whitepaper-keyboard-close');
-      await collectKeyboardCloseReadability(page, 'forced-colors-whitepaper');
+      const whitepaperCloseReveal = await collectKeyboardCloseReadability(
+        page,
+        'forced-colors-whitepaper'
+      );
       await page.keyboard.press('Enter');
       await closed(page);
       expect(
@@ -2008,6 +2029,8 @@ describe('automatic documentation image preview in real Chromium', () => {
           .first()
           .evaluate((node) => node === document.activeElement)
       ).toBe(true);
+      expectReadableKeyboardClose(vectorCloseReveal);
+      expectReadableKeyboardClose(whitepaperCloseReveal);
     } finally {
       await context.close();
     }
