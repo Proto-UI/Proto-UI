@@ -164,3 +164,9 @@ internal/records/evidence/2026-11-24-react-portal-origin-native/
 
 # Preserve original Scroll Reveal source-gate receipts and logs.
 internal/records/evidence/2026-11-24-scroll-reveal-source-gate/
+
+# Exact original Sprint 5 browser and native-direction receipts; manifests bind these bytes.
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json
+internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
+internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
+internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md

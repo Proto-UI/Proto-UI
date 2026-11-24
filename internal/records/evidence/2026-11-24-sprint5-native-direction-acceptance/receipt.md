@@ -6,11 +6,11 @@ The exact source is `f6bdadf1bf1791bab8a66d7c9a6c25993fc5c1f4` (tree `d2a1b19639
 
 ## Actual execution history
 
-| Run                  | Input                | Textarea             | Other cases unselected |
-| -------------------- | -------------------- | -------------------- | ---------------------- |
-| original             | failed (5003.923 ms) | passed (1058.070 ms) | 190                    |
-| unchanged-diagnostic | failed (5006.744 ms) | passed (1016.922 ms) | 190                    |
-| prepared             | passed (1425.118 ms) | passed (168.451 ms)  | 190                    |
+| Run | Input | Textarea | Other cases unselected |
+|---|---|---|---|
+| original | failed (5003.923 ms) | passed (1058.070 ms) | 190 |
+| unchanged-diagnostic | failed (5006.744 ms) | passed (1016.922 ms) | 190 |
+| prepared | passed (1425.118 ms) | passed (168.451 ms) | 190 |
 
 Both original input timeouts remain failures. The unchanged diagnostic API trace showed its first trusted fill beginning 4.929 seconds after case start; cold page creation and script/style preparation consumed most of the five-second budget. This justified moving preparation, not changing the semantic deadline.
 
