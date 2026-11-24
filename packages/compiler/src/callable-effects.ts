@@ -616,8 +616,25 @@ function analyzeCallableFlow(
   }
   function truth(values: Known, nullish = false): boolean | undefined {
     const choices = new Set(
-      values.map((value) =>
-        value.kind === 'undefined' || value.kind === 'absent'
+      values.map((value) => {
+        // Unknown scalar contents can still have a known non-nullish domain.
+        // Use the value's own fact, never a narrowed expression view or the
+        // contents of a tracked record. Empty facts establish no such proof.
+        if (nullish && value.kind === 'unknown' && value.data !== undefined) {
+          const alternatives = valueAlternatives(value.data);
+          if (
+            alternatives.length > 0 &&
+            alternatives.every((part) =>
+              typeof part === 'string'
+                ? ['boolean', 'number', 'string'].includes(part)
+                : part.kind === 'literal'
+                  ? part.value !== null
+                  : ['record', 'array', 'object', 'value-array', 'set'].includes(part.kind)
+            )
+          )
+            return true;
+        }
+        return value.kind === 'undefined' || value.kind === 'absent'
           ? false
           : value.kind === 'literal'
             ? nullish
@@ -625,8 +642,8 @@ function analyzeCallableFlow(
               : !!value.value
             : value.kind === 'unknown' || value.kind === 'uninitialized'
               ? undefined
-              : true
-      )
+              : true;
+      })
     );
     return choices.size === 1 ? [...choices][0] : undefined;
   }
