@@ -1,15 +1,15 @@
 ---
 title: 'Transition'
-description: 'Transparent phase-machine presence over authored content, with no invented motion.'
+description: 'A phase-machine presence container for coordinating enter and leave transitions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Transition drives a transparent enter/leave phase machine (`closed → preparing → entering → entered → leaving`) around your children, letting your application or `Surface` control the visual animation styles. The examples on this page use the **Shadcn Rhea** style preset.
 
-Transparent phase-machine presence over authored content, with no invented motion.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-transition"
@@ -18,17 +18,20 @@ Transparent phase-machine presence over authored content, with no invented motio
   codePanel={false}
 />
 
-The projection is transparent: the authored slot's presence is governed by the exact Base phase machine (`closed → preparing → entering → entered → leaving`), phases are observable through the `transitionState` expose and `isPresent`, and `beforeEnter`/`afterEnter`/`beforeLeave`/`afterLeave` events mark the boundaries. `enter`/`leave`/`complete` commands (also reachable as `controls`) drive the machine; `complete` advances `entering → entered` or `leaving → closed`. `open` (controlled) or `defaultOpen: false` starts the presence; `appear` (default `false`) enables an entry on first mount; `enterDuration` (default 300), `leaveDuration` (default 200) and `interrupt: 'reverse' | 'wait' | 'immediate'` (default `reverse`) shape the attempt. The projection adds no host animation engine or Shadcn motion paint — visual motion stays an application concern.
+## Installation
 
-Parts: Transition.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Full real transition traces, reduced-motion behavior and complete native/GPUI, compiler and independent acceptance evidence remain open.
+## Usage
 
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
+- Control visibility with `open` (controlled) or `defaultOpen` (uncontrolled); set `appear={true}` to run the enter transition on initial mount.
+- Configure timings and interruption behavior with `enterDuration` (default `300ms`), `leaveDuration` (default `200ms`), and `interrupt` (`'reverse' | 'wait' | 'immediate'`, default `'reverse'`).
+- Read `transitionState` and `isPresent`, and listen to `beforeEnter`, `afterEnter`, `beforeLeave`, and `afterLeave` lifecycle events.
+- Drive transitions imperatively via `enter`, `leave`, and `complete` (also exposed on `controls`), where `complete` advances `entering` to `entered` or `leaving` to `closed`.
 
 ## API
 
-Passing `open` selects controlled mode.
+The following props belong to `Transition` (pass `open` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,8 +44,6 @@ Passing `open` selects controlled mode.
     { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
   ]}
 />
-
-The phase machine is `closed → preparing → entering → entered → leaving`. `complete` advances `entering` to `entered`, or `leaving` to `closed`.
 
 ## References
 

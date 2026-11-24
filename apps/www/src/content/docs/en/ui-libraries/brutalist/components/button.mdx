@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Button'
-description: 'Square Neo-Brutalist Button projection over Base Button'
+description: 'A Neo-Brutalist button with crisp black borders, hard offset shadows, and flat accent tones.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -11,13 +11,15 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-The Button projection inherits Base Button semantics and adds only the Neo-Brutalist visual delta: 5px rounded geometry, hard borders, hard offset shadows, and flat fills.
+Brutalist Button pairs Base Button interaction and accessibility with Neo-Brutalist styling: 5px rounded corners, 2px black borders, hard offset shadows, and tactile press feedback.
+
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-button" initialRuntime="wc" />
 </div>
 
-## Install
+## Installation
 
 <div data-adapter-panel="wc">
   <InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-button" manager="npm" />
@@ -33,7 +35,7 @@ The Button projection inherits Base Button semantics and adds only the Neo-Bruta
 
 ## Usage
 
-The Brutalist Button carries the Neo-Brutalist visual language: hard borders, offset shadows, and flat fills. The examples below use the family palette tokens (`mint`, `lavender`, `coral`, `sky`) to show the supported color range.
+Brutalist Button supports `solid`, `surface`, and `destructive` variants alongside the `default`, `mint`, `lavender`, `coral`, and `sky` accent palette. The examples below cover variants, icon sizing, and disabled states.
 
 ### Solid
 

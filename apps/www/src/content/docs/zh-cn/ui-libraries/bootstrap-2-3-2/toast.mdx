@@ -1,11 +1,13 @@
 ---
 title: 'Toast'
-description: '可暂停、关闭并发出明确操作意图的限时实时通知。'
+description: '支持定时自动关闭、悬停或聚焦暂停以及操作按钮的 Bootstrap 2.3.2 实时通知组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-可暂停、关闭并发出明确操作意图的限时实时通知。
+Toast 用于展示简短的非阻塞通知，支持自动倒计时关闭、鼠标悬停或焦点进入时自动暂停计时，以及明确的操作与关闭按钮。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toast"
@@ -14,8 +16,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/Close 焦点会暂停剩余时长。受控 open 只发出一次超时关闭请求，等待调用方更新。Close、有焦点时的 Escape、Action 请求关闭；实际副作用归应用处理。Viewport 提供 F8 聚焦快捷键；不包含全局队列或系统通知传输。
+## 安装
 
-组成: Root, Viewport, Title, Description, Action, Close.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` 组成：
+
+- **定时与暂停**：`Root` 默认显示 `5000ms` 后请求关闭；设置 `duration={0}` 可保持常驻显示。鼠标悬停在通知上，或焦点位于 `Action` / `Close` 上时，自动暂停剩余倒计时。
+- **操作与关闭**：点击 `Close`、聚焦通知时按 `Escape` 或点击 `Action` 都会请求关闭通知；`Action` 对应的业务逻辑由应用监听处理。受控 `open` 模式下，超时后仅发出一次关闭请求并等待父组件更新。
+- **快捷聚焦**：`Viewport` 支持按 `F8` 快速将焦点移至通知区域。全局队列编排由应用层自行管理。
+
+## API
+
+| 部件                    | 属性       | 默认值 | 说明                                          |
+| ----------------------- | ---------- | ------ | --------------------------------------------- |
+| `Root`                  | `open`     | —      | 受控显示状态                                  |
+| `Root`                  | `duration` | `5000` | 自动关闭延时（毫秒）；设为 `0` 常驻不自动关闭 |
+| `Viewport`              | —          | —      | 通知展示区域，支持 `F8` 快捷键聚焦            |
+| `Title` / `Description` | —          | —      | 通知标题与正文说明                            |
+| `Action` / `Close`      | —          | —      | 操作按钮与关闭按钮                            |

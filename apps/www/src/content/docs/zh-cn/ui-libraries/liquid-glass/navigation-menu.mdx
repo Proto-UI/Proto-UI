@@ -1,11 +1,13 @@
 ---
-title: 'NavigationMenu'
-description: '具有原生目的地链接的命名导航展开面板。'
+title: 'Navigation Menu'
+description: '结合原生锚点链接与命名展开面板的 Liquid Glass 导航菜单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-具有原生目的地链接的命名导航展开面板。
+Liquid Glass Navigation Menu 提供带 `navigation` 地标语义的导航栏、可展开的命名面板以及真实原生 `<a>` 链接，完整保留浏览器原生的 URL 预览、Enter 激活与中键/修饰键新标签页浏览体验。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-navigation-menu"
@@ -14,12 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 是 navigation 地标，Trigger 是展开按钮，Content 是有名称的 region。Root.value 标识唯一展开面板。Item 发出命令；Link 投影带 href、target、rel 与当前页语义的真实锚点。URL 预览、Enter、修饰键/中键浏览及导航由浏览器持有，不合成 Space 激活或应用路由。
+## 安装
 
-组成: Root, Trigger, Content, Item, Link.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-Link 在原生激活之后发出只读 navigate 观察，字段为 href、target、rel、modified；它不是可取消的路由请求。普通当前窗口激活会关闭面板，closeOnSelect=false 可保留；修饰键/中键及 \_blank 激活保留当前页面板。禁用 Link 会移除目标并阻止激活。current=true 通过 aria-current 标识当前页。
+- **部件组成**：`Root`、`Trigger`、`Content`、`Item`、`Link`。
+- **面板与命令**：`Root.value` 标识当前唯一展开的命名 `region` 面板；`Trigger` 控制面板开关；`Item` 发出应用命令。
+- **原生链接行为**：`Link` 在 React / Vue / Vue 2 中渲染为原生锚点根元素（Web Components 中托管于局部锚点内），支持 `href`、`target`、`rel` 与 `current`（自动映射 `aria-current`）。禁用 `Link` 会移除跳转目标并阻止激活。
+- **导航观察与关闭**：原生链接激活后会发出只读 `navigate` 事件（包含 `href`、`target`、`rel`、`modified` 字段）。普通的当前窗口跳转默认自动关闭面板（设 `closeOnSelect={false}` 可保持打开）；按住修饰键、中键点击或 `_blank` 打开新窗口时保持当前面板展开。
 
-React/Vue/Vue2 使用原生锚点根节点；Web Components 把调用方内容保留在其持有的局部锚点内，焦点、样式与无障碍投影跟随真实物理表面。演示使用同文档目标，仅观察浏览器导航。源码运行时检查之外的真实浏览器、打包、编译器与 native 验收仍待完成。
+## API
+
+| 部件 | 属性 / 事件 | 说明 |
+| --- | --- | --- |
+| Root | `value` / `closeOnSelect` | 当前展开面板标识 / 普通同窗链接激活后是否自动关闭面板 |
+| Trigger / Content | — | 展开按钮与命名导航面板（`region`） |
+| Item | — | 可触发应用命令的菜单项 |
+| Link | `href` / `target` / `rel` / `current` / `disabled` | 原生导航链接属性与当前页标记；激活后发出只读 `navigate` 事件 |

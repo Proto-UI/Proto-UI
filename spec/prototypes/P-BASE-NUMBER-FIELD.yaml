@@ -21,12 +21,16 @@ criteria:
       zh-CN: 可选 locale 与标准 decimal/currency/percent formatOptions 决定显示和严格本地化解析，支持分组、本地数字、符号和格式前后缀。格式化不改变规范数值精度。省略 locale/options 保留原有无分组十进制表示。非法格式配置暴露 formatInvalid 并回退原十进制语法，非法输入不得通过任意删字符变成另一个数。空白、未完成与非法草稿区分；语言切换保留正在进行的 IME，并使用组合开始时的语法解析最终草稿。
   - id: P-BASE-NUMBER-FIELD-OWNER
     text:
-      en: Controlled proposals never optimistically replace canonical owner values. Blur/Enter canonicalize from accepted state, and valueCommit reports accepted state. Composition prevents parsing, committing and stepping until it ends. Unrelated props preserve drafts. Actual owner/bounds changes reconcile the draft; disabled/readOnly, reset and retirement cancel editing/scrub sessions without allowing stale terminal input to commit.
-      zh-CN: 受控提案不乐观覆盖作者值，失焦/Enter 从已接受状态恢复规范文本，valueCommit 报告已接受状态。组合期间不解析、提交或步进。无关属性保留草稿，作者值或边界变化同步草稿；disabled/readOnly、复位与退役取消编辑/拖擦，过期终止输入不得提交。
+      en: Controlled proposals never optimistically replace canonical owner values. Blur/Enter canonicalize from accepted state, and valueCommit reports accepted state. Composition prevents parsing, committing and stepping until it ends. Unrelated props preserve drafts. Omitted min/max retain 0/100 defaults; explicit null removes the corresponding bound and withdraws its accessibility fact. Home/End preserve native editor movement when that bound is absent. snapToStep defaults to true; false preserves finite initial and edited values while step still controls increments. Snapping without a minimum uses the zero grid. Actual owner/bounds/snap-policy changes reconcile the draft; disabled/readOnly, reset and retirement cancel editing/scrub sessions without allowing stale terminal input to commit.
+      zh-CN: 受控提案不乐观覆盖作者值，失焦/Enter 从已接受状态恢复规范文本，valueCommit 报告已接受状态。组合期间不解析、提交或步进。无关属性保留草稿，省略 min/max 保留 0/100 默认值；显式 null 移除对应边界及其辅助功能事实，无该边界时 Home/End 保留原生编辑移动。snapToStep 默认 true，false 保留有限初值和编辑数值，同时 step 仍控制步进；无最小值时对齐零点网格。作者值、边界或对齐策略变化同步草稿；disabled/readOnly、复位与退役取消编辑/拖擦，过期终止输入不得提交。
   - id: P-BASE-NUMBER-FIELD-SCRUB
     text:
       en: Root scrub defaults to false. When enabled, Label is the only scrub surface and uses neutral horizontal AxisInput with direction. One initial Label extent maps to scrubSteps times step (scrubSteps defaults to 100). Root owns start-relative quantization, bounds, continuous valueChange and exactly one accepted-state valueCommit at a changed successful end. Pointer cancellation restores the uncontrolled starting value, preserves controlled ownership and never commits. Changed policy, independent owner updates or teardown invalidate the session. Input remains a normal text editor; no page or host owns scrub policy.
       zh-CN: scrub 默认 false。启用后只有 Label 是拖擦表面，使用带 direction 的通用横向 AxisInput。初始 Label 一个跨度对应 scrubSteps×step（scrubSteps 默认100）。Root 负责相对起点量化、边界、连续 valueChange 和成功且变化的终点一次已接受状态 valueCommit。取消恢复非受控起值，保留受控所有权且不提交。策略变化、独立作者更新或卸载使事务失效。Input 仍是文本编辑器，页面和宿主不得拥有拖擦策略。
+  - id: P-BASE-NUMBER-FIELD-REQUIRED
+    text:
+      en: Root required defaults to false and combines with any enclosing Field requirement. Input and Control expose the resolved required state and project that same fact to TextControl's native required attribute and accessibility. Changing the requirement does not coerce a nullable value, commit a draft or replace Field/Form validation ownership.
+      zh-CN: Root 的 required 默认 false，并与祖先 Field 的必填要求合并。Input 与 Control 暴露最终 required 状态，将同一事实投影到 TextControl 原生 required 属性和辅助功能。必填要求变化不强制转换空值、不提交草稿，也不接管 Field/Form 的校验职责。
   - id: P-BASE-NUMBER-FIELD-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -49,6 +53,12 @@ openQuestions:
     blocks:
       - activation:P-BASE-NUMBER-FIELD
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Preserve standalone and inherited required facts through public Root props, native text editing and accessibility without changing value ownership.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Preserve unbounded consumer values through explicit nullable bounds and optional snapping; keep default bounded behavior and draft lifecycle.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base numberField family as draft.

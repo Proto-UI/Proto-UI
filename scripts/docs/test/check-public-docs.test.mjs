@@ -8,6 +8,7 @@ import {
   checkLibraryInventory,
   checkLocalizedRoutes,
   checkScaffolding,
+  checkUiLibraryProse,
   extractSidebarSlugs,
   findStaleReleaseClaims,
   runPublicDocsCheck,
@@ -373,4 +374,198 @@ test('both general Feedback references explain the bounded selection exception',
     assert.match(source, /tw\('selection:bg-primary'\)/);
     assert.match(source, /tw\('selection:hover:bg-primary'\)/);
   }
+});
+
+test('checkUiLibraryProse passes clean bilingual ui-libraries docs and ignores fenced code blocks', () => {
+  const errors = checkUiLibraryProse({
+    documents: [
+      {
+        locale: 'zh-cn',
+        file: 'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx',
+        text: [
+          '---',
+          'title: Button',
+          'description: Shadcn 风格的按钮组件。',
+          '---',
+          '',
+          '本页示例使用 **Shadcn Rhea** 风格。',
+          '',
+          '```ts',
+          '// Finf synthetic-DOM socket EPERM 不宣称 验收缺口',
+          'const sha = "3d98900e9b73c45f035f8109e9d41ba6a51685e7";',
+          '```',
+          '',
+          '~~~txt',
+          'does not claim visual parity or rendered parity',
+          '~~~',
+        ].join('\n'),
+      },
+      {
+        locale: 'en',
+        file: 'apps/www/src/content/docs/en/ui-libraries/shadcn/button.mdx',
+        text: [
+          '---',
+          'title: Button',
+          'description: Shadcn styled button component.',
+          '---',
+          '',
+          'The examples on this page use the **Shadcn Rhea** style preset.',
+        ].join('\n'),
+      },
+      {
+        locale: 'zh-cn',
+        file: 'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/badge.mdx',
+        text: ['---', 'title: Badge', '---', '', '简约标签组件。'].join('\n'),
+      },
+    ],
+  });
+
+  assert.deepEqual(errors, []);
+});
+
+test('checkUiLibraryProse flags audit boilerplate and defensive hedging with accurate line numbers', () => {
+  const errors = checkUiLibraryProse({
+    documents: [
+      {
+        locale: 'zh-cn',
+        file: 'apps/www/src/content/docs/zh-cn/ui-libraries/base/switch.mdx',
+        text: [
+          '---',
+          'title: Switch',
+          'description: 开关组件。',
+          '---',
+          '```sh',
+          'echo "Finf ignored inside fence"',
+          '```',
+          '当前为 Finf 草案，本地启动被 socket EPERM 阻止，不伪报通过。',
+          '当前 synthetic-DOM 与 synthetic DOM 测试存在验收缺口。',
+          '不宣称全部对齐，两者不混称，也不代表浏览器与原生宿主验收已完成。',
+        ].join('\n'),
+      },
+      {
+        locale: 'en',
+        file: 'apps/www/src/content/docs/en/ui-libraries/base/switch.mdx',
+        text: [
+          '---',
+          'title: Switch',
+          'description: Toggle switch.',
+          '---',
+          'This page does not claim full browser parity.',
+          'It is not a claim of rendered parity or visual parity.',
+          'This prototype does not claim acceptance or completion.',
+        ].join('\n'),
+      },
+    ],
+  });
+
+  assert.ok(
+    errors.some((e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:8:') && e.includes('Finf'))
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:8:') && e.includes('socket EPERM')
+    )
+  );
+  assert.ok(
+    errors.some((e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:8:') && e.includes('不伪报'))
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:9:') && e.includes('synthetic-DOM')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:9:') && e.includes('synthetic DOM')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:9:') && e.includes('验收缺口')
+    )
+  );
+  assert.ok(
+    errors.some((e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:10:') && e.includes('不宣称'))
+  );
+  assert.ok(
+    errors.some((e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:10:') && e.includes('不混称'))
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('zh-cn/ui-libraries/base/switch.mdx:10:') && e.includes('不代表…验收')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('en/ui-libraries/base/switch.mdx:5:') && e.includes('does not claim')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('en/ui-libraries/base/switch.mdx:6:') && e.includes('not a claim of')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('en/ui-libraries/base/switch.mdx:6:') && e.includes('rendered parity')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('en/ui-libraries/base/switch.mdx:6:') && e.includes('visual parity')
+    )
+  );
+  assert.ok(
+    errors.some(
+      (e) => e.includes('en/ui-libraries/base/switch.mdx:7:') && e.includes('does not claim')
+    )
+  );
+});
+
+test('checkUiLibraryProse flags 40-char commit SHAs except in design-contract.mdx', () => {
+  const sha = '3306a802724874a85f93079702b2795370a279d4';
+  const errors = checkUiLibraryProse({
+    documents: [
+      {
+        locale: 'en',
+        file: 'apps/www/src/content/docs/en/ui-libraries/brutalist/design-contract.mdx',
+        text: `---\ntitle: Design Contract\n---\nPinned reference ${sha}.\n`,
+      },
+      {
+        locale: 'zh-cn',
+        file: 'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/design-contract.mdx',
+        text: `---\ntitle: 设计契约\ndescription: 设计参考说明。\n---\n固定提交 ${sha}。\n`,
+      },
+      {
+        locale: 'en',
+        file: 'apps/www/src/content/docs/en/ui-libraries/shadcn/card.mdx',
+        text: `---\ntitle: Card\n---\nReference commit ${sha}.\n`,
+      },
+    ],
+  });
+
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /shadcn\/card\.mdx:4:.*40-char commit SHA/);
+});
+
+test('checkUiLibraryProse flags zh-cn ui-libraries frontmatter descriptions without Chinese characters', () => {
+  const errors = checkUiLibraryProse({
+    documents: [
+      {
+        locale: 'zh-cn',
+        file: 'apps/www/src/content/docs/zh-cn/ui-libraries/base/field.mdx',
+        text: [
+          '---',
+          'title: Field',
+          'description: Atomic Field labeling and validation.',
+          '---',
+          '',
+          '用于表单字段组合。',
+        ].join('\n'),
+      },
+    ],
+  });
+
+  assert.equal(errors.length, 1);
+  assert.match(errors[0], /zh-cn\/ui-libraries\/base\/field\.mdx:3:.*must contain Chinese text/);
 });

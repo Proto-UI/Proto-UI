@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Toggle'
-description: 'A Bootstrap 2.3.2 design-language extension over Base Toggle.'
+description: 'A Bootstrap 2.3.2 design-language extension toggle button built over Base Toggle.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-This Toggle is a design-language extension, not an original Bootstrap 2.3.2 component or a port of its jQuery button plugin. It combines the archived button appearance with the independent Base Toggle protocol.
+Bootstrap 2.3.2 Toggle is a design-language extension, not an original Bootstrap 2.3.2 component. It pairs the archived button appearance with Base Toggle's pressed-state protocol while keeping the classic light palette in dark hosts.
 
-Base Toggle owns persistent `active` state, controlled and uncontrolled ownership, activation, disabled behavior, focus, and pressed accessibility. The visual layer does not maintain another active state or reinterpret this control as a Switch or Checkbox.
+## Preview
 
-Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2. Bold starts inactive, Italic starts active, and the disabled example cannot toggle.
+Bold starts inactive, Italic starts active, and the disabled toggle cannot be activated.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toggle"
@@ -22,10 +22,19 @@ Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2
   codePanel={false}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+
+## Usage
+
+- Supports controlled `active` and uncontrolled `defaultActive`, pointer/keyboard activation, disabled state, and pressed accessibility semantics.
+- For coordinated sets of toggle buttons, use [ToggleGroup](/en/ui-libraries/bootstrap-2-3-2/toggle-group/).
+
 ## API
 
-- `active` / `defaultActive`: controlled or initial active state
-- `disabled`: inherited disabled behavior
-- `activeChange`: inherited outward signal
-
-This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).
+| Prop / Event               | Description                           |
+| -------------------------- | ------------------------------------- |
+| `active` / `defaultActive` | Controlled or initial pressed state   |
+| `disabled`                 | Prevents interaction when enabled     |
+| `activeChange`             | Emitted when the active state changes |

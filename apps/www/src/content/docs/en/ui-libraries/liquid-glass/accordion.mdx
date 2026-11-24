@@ -1,11 +1,13 @@
 ---
-title: LiquidGlass Accordion
-description: Five atomic Accordion parts with canonical group ownership, natural Tab order and explicit content lifetime.
+title: 'Accordion'
+description: 'A five-part Liquid Glass accordion with single or multiple expansion, natural Tab order, and explicit content lifecycle.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-This is a draft workspace family. The current source and synthetic-DOM tests do not establish browser/native, assistive-technology, material or GPUI completion.
+Liquid Glass Accordion composes five parts—Root, Item, Heading, Trigger, and Content—built on Base Accordion semantics with Liquid Glass styling on the interactive trigger.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-accordion"
@@ -15,54 +17,51 @@ This is a draft workspace family. The current source and synthetic-DOM tests do 
   codePanel={false}
 />
 
-Use the preview toolbar’s real family Select to choose WC, React, Vue or Vue 2. The page header preference remains available and synchronizes the selected runtime.
+Use the preview toolbar’s real family Select to switch among WC, React, Vue, and Vue 2. The page header runtime preference remains synchronized.
 
-## Anatomy and ownership
+## Installation
 
-Compose Root → Item → Heading → Trigger, with Content beside Heading. Each Item needs a unique, stable, non-empty value. Root owns the selected key set; Item, Trigger and Content derive their facts. Nested Roots establish independent domains. Heading must contain only its controlling Trigger; place persistent secondary actions beside it.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `accordionRoot`, `accordionItem`, `accordionHeading`, `accordionTrigger`, and `accordionContent` from `@proto.ui/prototypes-liquid-glass/accordion`.
 
-The style projection consumes the corresponding Base atom. It does not create a private accordion, switch open state on focus, or inherit another Base protocol hook. APG and design systems are design references, not implementation upstreams.
+## Usage
 
-## JSON Props
+### Composition and state
 
-| Part | Props | Defaults and boundaries |
+Compose `Root → Item → Heading → Trigger` with `Content` beside `Heading`. Give every `Item` a unique, stable, non-empty `value`. Root manages the expanded key set and nested Roots stay independent. Keep only the controlling `Trigger` inside `Heading` and place persistent secondary actions alongside it.
+
+- Duplicate input keys are deduplicated, and duplicate `Item` registrations are ignored. In `single` mode, the first unique key is used.
+- Unknown keys stay dormant to support progressive mounting; requests targeting missing keys are ignored.
+- In controlled mode, interactions emit `openChange` without mutating state optimistically; pass the updated `openItems` back to Root to accept the change.
+
+### Keyboard and accessibility
+
+- Enabled headers and focusable elements inside your children stay in the natural Tab order. Enter and Space toggle the focused item.
+- Up/Down (vertical) or Left/Right (horizontal, reversed in RTL), plus Home/End, move focus across enabled headers without changing open items.
+- Disabled headers are skipped. When `allowEmpty={false}`, the last remaining open header stays focusable with `aria-disabled` preventing collapse.
+- `Heading` sets the heading level and `Trigger` wires button semantics, expanded state, and item-scoped `aria-controls`. Opt into a landmark on `Content` with `region={true}` when appropriate.
+
+### Content lifecycle and material
+
+- Closed Content unmounts when closed by default (set `keepMounted={true}` to keep a hidden node mounted). Accordion does not relocate focus or add a delayed-close timer.
+- Only `Trigger` declares `liquid-glass` optical intent and press deformation; other parts stay opaque and readable. Hosts without optical support use the declared opaque fallback.
+
+## API
+
+| Part | Props | Defaults and notes |
 | --- | --- | --- |
-| Root | mode | single; multiple permits independent open items |
-| Root | openItems, defaultOpenItems | string arrays; supplying openItems is controlled; default initializes once |
-| Root | allowEmpty | true; false prevents closing the final selected key |
-| Root | disabled | false; suppresses activation without rewriting owner input |
-| Root | orientation, direction, loop | vertical, ltr, true; affect header navigation only |
-| Item | value, disabled | required non-empty stable value; disabled defaults false |
-| Heading | level | integer 1–6, default 3; choose the page hierarchy |
-| Trigger | none | derives state from Item and Root |
-| Content | keepMounted, region | both false; explicit hidden-view retention and optional landmark |
+| Root | `mode` | `'single'`; `'multiple'` allows independent open items |
+| Root | `openItems`, `defaultOpenItems` | String arrays; supplying `openItems` enables controlled mode, `defaultOpenItems` initializes once |
+| Root | `allowEmpty` | `true`; `false` prevents closing the last open item |
+| Root | `disabled` | `false`; suppresses activation without modifying controlled input |
+| Root | `orientation`, `direction`, `loop` | `'vertical'`, `'ltr'`, `true`; governs header arrow navigation |
+| Item | `value`, `disabled` | Required non-empty stable `value`; `disabled` defaults to `false` |
+| Heading | `level` | Integer `1–6`, default `3` |
+| Trigger | — | Derives state from Item and Root |
+| Content | `keepMounted`, `region` | Both `false`; keeps hidden node mounted / opts into landmark role |
 
-Input duplicates normalize; duplicate registered Item identities are rejected. Single mode takes the first supplied unique key. Unknown owner/default keys remain dormant for progressively mounted Items. Requests to missing keys are rejected. Uncontrolled keys retire after a previously registered Item disappears; changing value is removal/addition. In an empty group, allowEmpty=false cannot invent content. Controlled empty input remains the owner's choice.
+### Events and methods
 
-## Exposes and controlled usage
-
-Root exposes getOpenItems(), openCount, requestOpen(value, open, reason?) and the openChange signal with JSON payload `{ openItems, value, open, reason }`. getOpenItems returns a copy; openCount includes dormant canonical keys. reason is pointer, keyboard or programmatic. Repeated no-op or disabled requests emit nothing.
-
-A controlled request does not optimistically update any part. Accept it by supplying its openItems to Root. Adapter callbacks are the host projection of expose signals, not callback-valued Proto UI Props. Initialization, controlled sync, structural fallback and later default changes emit no openChange. Newer synchronous owner acceptance, including item removal during a request, wins over old notifications.
-
-## Keyboard and accessibility
-
-Every enabled header remains in the natural Tab sequence, along with authored focusable content. Enter/Space toggles once. Vertical Up/Down or horizontal Left/Right navigate enabled headers; RTL reverses horizontal navigation. Home/End go to the first/last header. Navigation never changes openItems. loop=false keeps focus at the ends. Disabled headers are skipped; a required last-open header remains focusable while aria-disabled prevents collapse.
-
-Heading declares heading/level. Trigger declares button, its content name, expanded, disabled and exact item-scoped controls. Content is labelled by its Trigger; region=true opts into a landmark. Use landmarks selectively, especially for large multiple-open groups. Native focus, assistive-technology output and platform fidelity still require their own evidence.
-
-## Presence, motion and safe layout
-
-Closed Content uses repeatable L1 detach by default. Logical instance identity persists; host child state and native view retention are not promised. keepMounted preserves a complete but hidden view. Content creates no autofocus, focus return or Tab stop. Closing while focus is inside authored content follows the host's normal removal behavior; Accordion does not relocate it.
-
-No delayed-close or transition timing API is introduced. Consumer-authored animation must preserve canonical open/hidden ownership. Style atoms wrap long labels, shrink within their container and contain horizontal content overflow. Page safe-area padding belongs to the containing layout. Actual narrow, 200% text, focus-outline and overflow screenshots remain a separate acceptance requirement.
-
-## Consumption and status
-
-Import accordionRoot, accordionItem, accordionHeading, accordionTrigger and accordionContent from @proto.ui/prototypes-liquid-glass/accordion. Base also exports the matching asAccordion\* authoring entries. All five atoms use the same API across Web Component, React, Vue and Vue 2.
-
-Bootstrap 2.3.2 and LiquidGlass packages remain private workspace source. This page is not an npm publication claim. Generate their facades only with the explicitly selected workspace-source route.
-
-Trigger declares the shared explicit liquid-glass optical intent with its own Base pressed/rest state. Only this interactive header requests material; the other atoms remain opaque/readable. A host without the shared visual sink retains the declared opaque fill/foreground fallback and reports material-host-unavailable. Adaptive system blur is a separate intent and never substitutes for this request. Actual host optical rendering and GPUI paint acceptance remain open.
-
-[APG design reference](https://www.w3.org/WAI/ARIA/apg/patterns/accordion/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/accordion)
+- `getOpenItems()`: returns a copy of the current open key array.
+- `openCount`: number of open keys (including dormant keys).
+- `requestOpen(value, open, reason?)`: proposes opening or closing an item (`reason` is `'pointer' | 'keyboard' | 'programmatic'`).
+- `openChange`: payload `{ openItems, value, open, reason }`. Initialization, controlled sync, and no-op requests do not emit.

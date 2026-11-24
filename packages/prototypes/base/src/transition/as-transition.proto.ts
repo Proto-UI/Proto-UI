@@ -82,6 +82,9 @@ export const asTransition = defineAsHook<
 
     let initialOpenSource: Readonly<{ context: ContextKey<JsonObject>; field: string }> | null =
       null;
+    let openContextSource: Readonly<{ context: ContextKey<JsonObject>; field: string }> | null =
+      null;
+    const closedViewRetained = def.state.bool('transitionClosedViewRetained', false);
     const bindInitialOpen: TransitionInitialOpenBinding = (source) => {
       // Match configure's setup-only default guard, before even an idempotent return.
       appearDefault.setDefault(appearDefault.get());
@@ -123,6 +126,10 @@ export const asTransition = defineAsHook<
       completion = policy;
     });
     let currentRun: RunHandle<TransitionProps> | null = null;
+    // Last input from the phase owner, not a physical mount or readiness fact.
+    // It stays true while cold materialization is pending and until afterLeave
+    // has returned, even when the perceptual State is already closed.
+    let phaseViewRequested = false;
     const getProps = () => currentRun?.props.get();
 
     const driver: TransitionMachineDriver = {
@@ -169,7 +176,8 @@ export const asTransition = defineAsHook<
         if (!currentRun) {
           throw new Error('[asTransition] runtime lifecycle handle is not available.');
         }
-        currentRun.lifecycle.setPresent(present);
+        phaseViewRequested = present;
+        currentRun.lifecycle.setPresent(phaseViewRequested || closedViewRetained.get());
       },
       emit(event) {
         currentRun?.expose.emit(event);
@@ -186,8 +194,16 @@ export const asTransition = defineAsHook<
     });
 
     const controls: TransitionControls = {
-      enter: () => machine.enter(),
-      leave: () => machine.leave(),
+      enter: () => {
+        if (openContextSource) {
+          if (currentRun) machine.setTarget(contextOpen(currentRun, openContextSource));
+        } else machine.enter();
+      },
+      leave: () => {
+        if (openContextSource) {
+          if (currentRun) machine.setTarget(contextOpen(currentRun, openContextSource));
+        } else machine.leave();
+      },
       complete: () => machine.complete(),
       capturePreparation: () => {
         if (!currentRun)
@@ -195,13 +211,57 @@ export const asTransition = defineAsHook<
         return machine.capturePreparation();
       },
     };
+    const contextOpen = (
+      run: RunHandle<TransitionProps>,
+      source: NonNullable<typeof openContextSource>
+    ) => {
+      const value = run.context.read(source.context);
+      const target = value[source.field];
+      if (!Object.hasOwn(value, source.field) || typeof target !== 'boolean')
+        throw new Error('[asTransition] open context field must be a required boolean.');
+      return target;
+    };
+    const bindOpenContext: TransitionInitialOpenBinding = (source) => {
+      appearDefault.setDefault(appearDefault.get());
+      if (
+        !source ||
+        typeof source.field !== 'string' ||
+        !source.field ||
+        !source.context ||
+        source.context.__brand !== 'ContextKey'
+      )
+        throw new Error(
+          '[asTransition] open context source requires a ContextKey and direct field.'
+        );
+      if (openContextSource) {
+        if (
+          openContextSource.context === source.context &&
+          openContextSource.field === source.field
+        )
+          return;
+        throw new Error('[asTransition] open context source is already bound.');
+      }
+      openContextSource = Object.freeze({ context: source.context, field: source.field });
+      def.context.subscribe(source.context, (run) => {
+        currentRun = run;
+        machine.setTarget(contextOpen(run, openContextSource!));
+      });
+    };
+    def.expose.method('bindOpenContext', bindOpenContext);
+    def.expose.method('retainClosedView', (retained: boolean) => {
+      closedViewRetained.set(!!retained, 'reason: transition closed-view retention policy');
+      if (!currentRun) return;
+      currentRun.lifecycle.setPresent(phaseViewRequested || closedViewRetained.get());
+    });
 
     def.lifecycle.onCreated((run) => {
       currentRun = run;
       const props = run.props.get();
       const controlled = run.props.isProvided('open');
       let open = controlled ? !!props.open : !!props.defaultOpen;
-      if (!controlled && !run.props.isProvided('defaultOpen') && initialOpenSource) {
+      if (openContextSource) {
+        open = contextOpen(run, openContextSource);
+      } else if (!controlled && !run.props.isProvided('defaultOpen') && initialOpenSource) {
         const value = run.context.read(initialOpenSource.context);
         const initialOpen = value[initialOpenSource.field];
         if (!Object.hasOwn(value, initialOpenSource.field) || typeof initialOpen !== 'boolean') {
@@ -230,7 +290,7 @@ export const asTransition = defineAsHook<
 
     def.props.watch(['open', 'interrupt', 'enterDuration', 'leaveDuration'], (run, next) => {
       currentRun = run;
-      if (!run.props.isProvided('open')) return;
+      if (openContextSource || !run.props.isProvided('open')) return;
       machine.setTarget(!!next.open);
     });
 
@@ -337,12 +397,22 @@ export const asTransition = defineAsHook<
       result.getMethod?.('bindInitialOpen') as TransitionInitialOpenBinding | undefined,
       'bindInitialOpen'
     );
+    const bindOpenContext = requireProjectedHandle(
+      result.getMethod?.('bindOpenContext') as TransitionInitialOpenBinding | undefined,
+      'bindOpenContext'
+    );
+    const retainClosedView = requireProjectedHandle(
+      result.getMethod?.('retainClosedView') as ((retained: boolean) => void) | undefined,
+      'retainClosedView'
+    );
     return {
       transitionState,
       isPresent,
       controls,
       configure,
       bindInitialOpen,
+      bindOpenContext,
+      retainClosedView,
       presentationOwner: getPresentationOwner(),
     };
   },

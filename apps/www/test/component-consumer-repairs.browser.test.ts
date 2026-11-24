@@ -207,6 +207,7 @@ it.each(tooltipCases)(
       expect(await active(page)).toBe('button');
       await page.waitForFunction(() => window.repairFixture.exposes('root').open.get());
       expect(await page.getByRole('button', { name: 'Save', exact: true }).count()).toBe(1);
+      await node(page, 'content').waitFor({ state: 'visible' });
       const contentId = await node(page, 'content').getAttribute('id');
       expect(contentId).toBeTruthy();
       expect(await node(page, 'button').getAttribute('aria-describedby')).toBe(contentId);

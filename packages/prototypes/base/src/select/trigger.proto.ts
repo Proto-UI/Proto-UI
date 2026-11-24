@@ -1,7 +1,14 @@
+import type { RunHandle } from '@proto.ui/core';
 import { asOptionalFieldControl } from '../field/control-binding.proto';
 import { FIELD_LABEL_PAIR } from '../field/shared';
 import { asAccessible, asControlLabel } from '@proto.ui/hooks';
-import { defineAsHook, definePrototype, delay, type DefHandle } from '@proto.ui/core';
+import {
+  defineAsHook,
+  definePrototype,
+  delay,
+  type DefHandle,
+  type DelayTask,
+} from '@proto.ui/core';
 import { setupSelectCommand } from './command';
 import {
   createSelectContentId,
@@ -43,9 +50,9 @@ export function setupSelectTrigger(
   accessible.relation('controls', { target: controls });
   accessible.action('activate', { event: 'click' });
 
-  let currentRun: any = null;
+  let currentRun: RunHandle<SelectTriggerProps> | null = null;
   let viewEpoch = 0;
-  const reportTasks = new Set<{ cancel(): void }>();
+  const reportTasks = new Set<DelayTask>();
   const report = (reason: 'sync' | 'change' | 'blur' = 'sync') => {
     if (!binding || !currentRun) return;
     binding.report({
@@ -78,8 +85,13 @@ export function setupSelectTrigger(
     command.focused.watch((_, event) => {
       if (event.type === 'next') report(event.next ? 'sync' : 'blur');
     });
+  } else {
+    asControlLabel().target((_, request) => {
+      if (!command.disabled.get() && request.isCurrent())
+        command.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    });
   }
-  const sync = (run: any, ctx: SelectContextValue) => {
+  const sync = (run: RunHandle<SelectTriggerProps>, ctx: SelectContextValue) => {
     currentRun = run;
     accessibleLabel.set(run.props.get().accessibleLabel ?? '', 'reason: select author label');
     const epoch = viewEpoch;

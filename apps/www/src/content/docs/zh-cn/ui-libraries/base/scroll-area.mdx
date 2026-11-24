@@ -1,13 +1,15 @@
 ---
 title: 'Scroll Area'
-description: 'Base Scroll Area 的 host-projected scrolling domain、anatomy、证据与边界。'
+description: '提供统一滚动状态、自定义滚动条与可选末尾跟随策略的滚动区域组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Scroll Area 建模一个 logical scrolling domain，而不是包装 Web DOM scrollbar。Viewport 拥有 surface，并通过特权 capability 接入 host scrolling；Root 与 composed controls 只作为 layout/projection parts。
+以统一逻辑滚动模型封装宿主滚动能力，同时支持系统原生滚动条与自定义组合滚动条。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-scroll-area"
@@ -16,58 +18,37 @@ Base Scroll Area 建模一个 logical scrolling domain，而不是包装 Web DOM
   codePanel={false}
 />
 
-## Family 与 host ownership
+## 安装
 
-Canonical family 包含：
+0.2.0 稳定版包已导出 `@proto.ui/prototypes-base/scroll-area`，可直接按子路径导入使用。如需开箱即用的 CLI 风格组件，可使用 [Brutalist Scroll Area](/zh-cn/ui-libraries/brutalist/components/scroll-area/)（`brutalist-scroll-area`）。
 
-- Root `1..1`：只拥有 anatomy 与 JSON-only family scope，不拥有 offset、geometry、focus、event 或 default size；
-- Viewport `1..1`：唯一 logical scroll-surface owner；
-- Scrollbar `0..2`：horizontal/vertical composed-control route；
-- Thumb `0..2`：Scrollbar 内的 feedback-only hit subregion。
+## 用法
 
-Viewport expose normalized axes、position、visible ratio、direction availability、scrolling state 与 resolved projection。Raw DOM node、pixel、widget、physics 与 input recognizer 仍由 host 负责。
+### 组件结构
 
-`system` 与 `composed` 是同一 protocol 的投射策略。默认值由 Host Adapter 和 design-language preference 共同解析；它们不是两个 Base Prototype。composed mode 中，host 把 normalized facts 映射为 Thumb geometry，并通过现有 scroll engine 路由 movement。Thumb 不拥有独立 offset state、focus target、`scrollbar` role 或 Drag and Drop 语义。
+- **Root**（1 个）：组织区域结构与范围，不管理滚动偏移或尺寸。
+- **Viewport**（1 个）：管理逻辑滚动表面，暴露归一化后的滚动轴、位置、可见比例、可滚动方向、滚动中状态与当前滚动条策略，并将像素、物理惯性与输入识别交给宿主处理。
+- **Scrollbar**（0–2 个）：水平或垂直自定义滚动条容器。
+- **Thumb**（0–2 个）：`Scrollbar` 内的滑块交互区域，由宿主根据归一化状态计算几何位置并将拖拽动作交回滚动引擎处理。
 
-## Composition-level end-follow
+`system`（系统滚动条）与 `composed`（自定义滚动条）共享同一套协议，默认策略由宿主与主题配置共同决定。
 
-Scroll domain 为 append-only surface 提供独立 opt-in 的 `endFollow` policy。声明自有 privileged `asScrollSurface()` 的 composition 可以配置 `{ mode: 'while-at-end', axis: 'vertical' }`，观察每轴 `atEnd` 以及 `endFollow.state`、`endFollow.requestStatus`，并让 accessible jump control 发送 `{ kind: 'to-end', axis: 'vertical' }`。
+### 组合式末尾跟随（`endFollow`）
 
-Host 只在 lease active 时跟随 layout growth；reader 离开末端后 pause，rapid append 会被 coalesce，自然到达末端或 semantic request 会恢复 follow。该能力不移动 focus、不接管 Live Region，也不强制 smooth motion。Raw offset、extent、target 与 pixel threshold 始终留在 host-local boundary。
+面向追加流场景（如日志或聊天记录），在自定义组合中通过 `asScrollSurface()` 可显式开启 `endFollow` 策略：配置 `{ mode: 'while-at-end', axis: 'vertical' }` 后，可读取各轴的 `atEnd`、`endFollow.state` 与 `endFollow.requestStatus`，并通过无障碍跳转按钮发送 `{ kind: 'to-end', axis: 'vertical' }` 回到末尾。
 
-Base Scroll Area Viewport 默认保持该 policy 为 off。Message label、unread count、history-prepend visual anchoring 与 virtualized collection 仍分别属于 application 或其他 capability。
-
-## 0.2 交付与证据
-
-稳定版 0.2.0 package 导出了 `@proto.ui/prototypes-base/scroll-area`。与本组另外六个 family 不同，当前 CLI registry 没有 `base-scroll-area` component facade；它提供的是完整的 `brutalist-scroll-area` projection。Base library author 可以直接消费 public subpath，而面向 App 的 generated usage 当前从风格化投射进入。
-
-`T-BASE-SCROLL-AREA-0001`、`T-SCROLL-END-FOLLOW-0001` 及相关 Scroll/Move tests 把 host boundary 映射到 focused module、real-browser 与 cross-adapter Web conformance。本页 Preview 通过三个 Web Adapter 渲染同一个 Base logical family；由于 Base Viewport 不 opt in，end-follow 使用独立 source-bundled Chromium journey。
-
-## Lifecycle 与当前限制
-
-Root、Viewport、Scrollbar 与 Thumb entities 当前都是 **draft**。现有证据覆盖 system/composed projection、normalized facts/requests、host cleanup、composed Thumb movement 与独立 opt-in end-follow lease。Track-page press、完整 keyboard scrollbar semantics、RTL/writing-mode normalization、velocity、visual-anchor preservation、virtualization 与通用 Drag and Drop 仍不在 guarantee 内。
-
-## 参考
-
-- [P-BASE-SCROLL-AREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA.yaml)
-- Parts：[Viewport](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-VIEWPORT.yaml)、[Scrollbar](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-SCROLLBAR.yaml)、[Thumb](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-SCROLL-AREA-THUMB.yaml)
-- [Scroll Area source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/scroll-area)
-- [Scroll Area evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/scroll-area.test.ts)
-- [End-follow contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml) 与 [evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SCROLL-END-FOLLOW-0001.yaml)
-- 风格化投射：[Brutalist Scroll Area](/zh-cn/ui-libraries/brutalist/components/scroll-area/)
+开启后，当用户停留在末尾时会自动跟随内容增长，离开末尾后暂停，高频追加会自动合并，自然回到底部或发送跳转请求后恢复跟随（不会移动焦点或干扰实时区域播报）。Base `Viewport` 默认关闭该策略，按需在自定义组合中启用即可。
 
 ## API
 
-Scroll Area 是工作区源码，没有公开的 `proto-ui add` 目标。Root 没有属性。
+### Scrollbar
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
-  rows={[
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' },
-  ]}
+  rows={[{ name: 'orientation', type: "'horizontal' | 'vertical'", default: 'vertical' }]}
 />
 
-这个属性属于 Scrollbar。Viewport 与 Thumb 没有属性。
+`Root`、`Viewport` 与 `Thumb` 无额外属性。
 
 ## 参考
 

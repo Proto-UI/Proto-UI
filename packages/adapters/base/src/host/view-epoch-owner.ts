@@ -1,3 +1,4 @@
+import { runAllSteps } from './synchronous-steps';
 import type { PropsBaseType } from '@proto.ui/types';
 import type { ViewOperation } from '@proto.ui/core';
 import type { ViewIntentSnapshot } from '@proto.ui/runtime';
@@ -196,7 +197,7 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
       const version = viewVersion;
       let result = Promise.resolve();
       try {
-        completeCleanup([
+        runAllSteps([
           () => {
             result = session?.unmount() ?? result;
           },
@@ -224,7 +225,7 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
       unsubscribeIntent = null;
       let result = Promise.resolve();
       try {
-        completeCleanup([
+        runAllSteps([
           () => {
             unsubscribe?.();
           },
@@ -246,23 +247,6 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
       return result;
     },
   };
-}
-
-// Finish every release while preserving the original synchronous failure.
-function completeCleanup(steps: Array<() => void>) {
-  let failed = false;
-  let firstError: unknown;
-  for (const step of steps) {
-    try {
-      step();
-    } catch (error) {
-      if (!failed) {
-        failed = true;
-        firstError = error;
-      }
-    }
-  }
-  if (failed) throw firstError;
 }
 
 export function createDeferredOwnerDisposal(dispose: () => void | Promise<void>) {

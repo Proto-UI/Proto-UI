@@ -1,12 +1,14 @@
 ---
 title: 'Toolbar'
-description: '带可访问名称、分隔线及键盘游走操作的工具栏。'
+description: '带有可访问名称、交叉轴分隔线与键盘漫游焦点的 Brutalist 风格工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-带可访问名称、分隔线及键盘游走操作的工具栏。
+Toolbar 将一组相关操作按钮组织为单个键盘漫游焦点区域，支持水平或垂直排列以及交叉轴分隔线。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-toolbar"
@@ -15,15 +17,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-Root 管理 disabled、orientation、loop、a11yLabel。Button 激活时发出带 value 的 action。仅一个启用命令参与 Tab；箭头在工具栏内移动。Separator 沿交叉轴显示。
+## 安装
 
-组成: Root, Button, Separator.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/toolbar` 导入组件原型并使用对应宿主 Adapter 适配。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+### 组件结构
+
+Toolbar 由 `Root`、`Button` 和 `Separator` 三个部分组成：
+
+- `Root`：统一管理整体禁用状态、主轴方向（`orientation`）、循环导航（`loop`）与工具栏无障碍名称（`a11yLabel`）。
+- `Button`：工具栏内的操作按钮，启用状态下激活时会发出携带 `value` 的 `action` 事件。
+- `Separator`：自动沿工具栏交叉轴方向显示的分隔线。
+
+### 键盘导航
+
+- 工具栏整体仅保留一个启用命令作为 `Tab` 停靠点，避免长工具栏占用过多 Tab 步数。
+- 使用方向键在工具栏内依次移动焦点；设置 `loop={true}`（默认）可在首尾之间循环。
 
 ## API
 
-Toolbar 是工作区源码，没有公开的 `proto-ui add` 目标。Separator 没有属性。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -35,5 +50,7 @@ Toolbar 是工作区源码，没有公开的 `proto-ui add` 目标。Separator �
   ]}
 />
 
-这些属性属于 Root。Button 的 `disabled` 默认 `false`，`value` 默认 `''`。
+其余子部件：
 
+- **Button**：`disabled` 默认 `false`，`value` 默认 `''`。
+- **Separator**：无属性。

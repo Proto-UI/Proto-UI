@@ -1,9 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: 'Grouped action-menu composition.'
+description: 'A Bootstrap 2.3.2 dropdown action menu with groups, labels, separators, and shortcut hints.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Dropdown Menu displays a menu of grouped actions triggered from a button, with accessible group labels, separators, and keyboard shortcut hints.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-dropdown-menu"
@@ -12,6 +16,21 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-## Grouped action composition (draft)
+## Installation
 
-Group and Label provide a live accessible naming relationship; Separator and Shortcut are real passive parts. Shortcut only displays a hint and does not register a global binding. Decorative parts do not enter the action collection or add a press owner. The demo uses a 160px menu, grouped account/resources actions and a disabled API action. The real Invite users submenu is a separately pending protocol slice, not a simulated demo box. Checkbox/radio variants and complete native/GPUI, compiler, packed, visual and independent acceptance remain open.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Grouping and decoration**: Pair `Group` with `Label` to name related actions for assistive technologies. Use `Separator` to divide sections and `Shortcut` to show shortcut labels.
+- **Passive presentation**: `Separator` and `Shortcut` stay outside keyboard navigation; `Shortcut` is display-only and does not register global keybindings.
+- The demo illustrates a `160px` menu with Account and Resources groups plus a disabled API item.
+
+## API
+
+| Part        | Description                                                |
+| ----------- | ---------------------------------------------------------- |
+| `Group`     | Groups related menu items and associates them with a label |
+| `Label`     | Passive heading for a menu group                           |
+| `Separator` | Visual divider between menu sections                       |
+| `Shortcut`  | Trailing display hint for keyboard shortcuts               |

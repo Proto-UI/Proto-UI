@@ -1,15 +1,17 @@
 ---
 title: 'Image'
-description: '宿主自有图片呈现，带显式无障碍语义与加载状态。'
+description: '内置无障碍语义模式、缩放适配与实时加载状态报告的图片组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+提供统一无障碍语义（信息性或装饰性）、内容填充模式与实时加载状态监听的图片组件。本页示例采用 **Shadcn Rhea** 风格。
 
-宿主自有图片呈现，带显式无障碍语义与加载状态。
+## 预览
+
+下方示例可切换正常图片、替换地址、损坏地址与清空来源，实时观察加载状态变化：
 
 <PrototypePreviewer
   demoId="demo-shadcn-image"
@@ -18,13 +20,15 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 声明一个宿主自有图片目标。`source` 指向资源，`a11yMode` 选择 `informative`（默认，消费 `alternativeText`）或 `decorative`（含义由文本承载），`fit` 选择 `contain`（默认）、`cover` 或 `fill`。当前加载状态通过 `loadingStatus`（`idle`、`loading`、`loaded`、`error`）暴露，并经由 `loadingStatusChange` 事件携带前后状态。演示通过加载、替换、损坏和清除真实来源观察这些转换；控件与日志属于演示，不属于原型。Web 投射为每个实例渲染一个物理 `<img>`。
+## 用法
 
-组成: Root.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。Image View 保持中性——这不是 Shadcn Avatar，也不添加图片加载器。native/GPUI、编译器与完整独立验收证据仍未完成。
+`Image` 由单一 `Root` 部件组成（在 Web 环境下渲染为原生 `<img>`）：
 
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+- **图片地址与缩放**：通过 `source` 指定资源地址，`fit` 选择 `'contain'`（默认）、`'cover'` 或 `'fill'`。
+- **无障碍模式**：`a11yMode="informative"`（默认）使用 `alternativeText` 作为替代文本；当图片仅作装饰且含义已由周围文本表达时，设为 `a11yMode="decorative"`。
+- **加载状态追踪**：实时暴露 `loadingStatus`（`'idle'`、`'loading'`、`'loaded'`、`'error'`），状态切换时通过 `loadingStatusChange` 发出前后状态，方便应用层自行渲染占位或错误回退界面。
 
 ## API
 
@@ -38,11 +42,8 @@ Root 声明一个宿主自有图片目标。`source` 指向资源，`a11yMode` �
   ]}
 />
 
-Root 暴露 `source`、`fit` 和 `loadingStatus`（`idle`、`loading`、`loaded`、`error`），并通过 `loadingStatusChange` 发出前后状态。
+`Root` 暴露 `source`、`fit` 与 `loadingStatus`（`'idle'`、`'loading'`、`'loaded'`、`'error'`），并通过 `loadingStatusChange` 事件报告前后状态变化。
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-IMAGE.yaml', 'P-BASE-IMAGE.yaml']} />

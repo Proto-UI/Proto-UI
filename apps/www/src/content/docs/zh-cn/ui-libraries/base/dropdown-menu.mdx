@@ -1,13 +1,15 @@
 ---
 title: 'Dropdown Menu'
-description: 'Base Dropdown Menu 的 action-menu ownership、anatomy、证据与边界。'
+description: '由触发按钮展开的下拉操作菜单，支持浮层定位、键盘导航、首字跳转以及分组和快捷键提示。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Dropdown Menu 是由 Trigger 打开的 compound action-menu。Root 拥有 visibility、request arbitration、collection order、entry policy 与 shared facts；瞬时 active navigation 永远不会变成 persistent selection。
+Base Dropdown Menu 是由按钮触发的复合操作菜单。`Root` 统一管理开关状态、菜单项顺序与进入焦点策略，`Content` 负责浮层定位、过渡动画、键盘导航与首字跳转。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-dropdown-menu"
@@ -16,47 +18,34 @@ Base Dropdown Menu 是由 Trigger 打开的 compound action-menu。Root 拥有 v
   codePanel={false}
 />
 
-## Family 与 request ownership
+## 安装
 
-Canonical family 包含一个 Root、至多一个 Trigger 和 Content，以及最多 100 个 Items。所有 visibility 变化——methods、Trigger activation、dismissal 与 Item commit——都进入 Root 的 `openChange` request channel。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。包入口为 `@proto.ui/prototypes-base/dropdown`；工作区 CLI 目标 `base-dropdown` 可生成 `Root`、`Trigger`、`Content` 和 `Item`，`Group`、`Label`、`Separator` 和 `Shortcut` 可直接从包中导入。
 
-Root 接受 `open`、`defaultOpen`、`disabled`、`closeOnItemCommit`、`openEntry` 与 `openEntryValue`。它 expose open state、collection facts，以及 `openDropdown()`、`close()`、`toggle()`、`requestOpen()`。受控模式在新 input 到达前保持 owner 提供的 `open`。
+## 用法
 
-Content 组合 overlay、transition、collection navigation、typeahead 与 anchor positioning。Item 接受 `value`、`textValue`、`disabled`、`closeOnCommit`，expose active/interaction facts，并发出 `select`。关闭会清空瞬时 active state，因此重新打开时服从新的 entry policy，而不会恢复虚假的“selection”。
+### 组合结构
 
-## Accessibility 边界
+- **`Root`**：管理展开状态与菜单项集合，暴露 `openDropdown()`、`close()`、`toggle()`、`requestOpen()` 方法以及 `openChange` 事件。受控模式下由调用方传入 `open` 决定最终显示状态。
+- **`Trigger`**：打开或切换菜单的触发按钮。
+- **`Content`**：承载菜单浮层、定位、过渡、键盘导航和文字跳转。
+- **`Item`**：单个可执行动作项，激活时发出 `select` 事件。关闭菜单时会自动清除瞬时高亮状态，避免下次打开误保留旧焦点。
+- **`Group`、`Label`、`Separator`、`Shortcut`**：用于为菜单项提供分组无障碍命名、分隔线和静态快捷键提示文本（`Shortcut` 仅用于显示提示，不注册全局快捷键）。
 
-这个 family 表示由按钮打开的一组 action/function。它不得把普通导航、任意 form 或 persistent selection 伪装成 menu。Group、Label、Separator 与 Shortcut 是下述有界草稿扩展。Checkbox Item、Radio Item 与 Submenu 不在本片交付范围。
+### 使用建议
 
-## 包入口与生成的 facade
-
-包入口是 `@proto.ui/prototypes-base/dropdown`。当前源码 CLI 注册了 `base-dropdown`，为所选宿主生成 Root、Trigger、Content 与 Item。Group、Label、Separator 与 Shortcut 是额外的包导出；这个 CLI 目标不会生成它们的 facade。
-
-`T-BASE-DROPDOWN-MENU-0001` 把 family criteria 映射到 `packages/prototypes/base/test/dropdown.test.ts`。Preview 声明支持 Web Component、React 与 Vue；该声明不代表新 head 已运行，也不代表打包消费者验收。
-
-## Lifecycle
-
-`P-BASE-DROPDOWN-MENU` 及其 Trigger、Content、Item entities 当前都是 **draft**。Package 可用性不会把它们提升为 active guarantees。
-
-## 参考
-
-- [P-BASE-DROPDOWN-MENU](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU.yaml)
-- Parts：[Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-TRIGGER.yaml)、[Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-CONTENT.yaml)、[Item](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-DROPDOWN-MENU-ITEM.yaml)
-- [Dropdown source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/dropdown)
-- [Dropdown evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/dropdown.test.ts)
-- 风格化投射：[Brutalist Dropdown Menu](/zh-cn/ui-libraries/brutalist/components/dropdown-menu/)
-
-## 分组动作组成（草稿）
-
-Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+Dropdown Menu 适用于展示一组由按钮唤起的命令操作；如需带预设样式的菜单，请参阅 [Brutalist Dropdown Menu](/zh-cn/ui-libraries/brutalist/components/dropdown-menu/)。
 
 ## API
+
+### Root Props
 
 传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
@@ -65,7 +54,13 @@ Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut �
   ]}
 />
 
-这些属性属于 Root。Trigger 没有属性。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`，`excludeAnchorTranslation` 默认 `false`。Item 的 `disabled`、`value` 与 `textValue` 默认 `false`、`''` 与 `''`；`closeOnCommit` 没有默认值，回退到 Root 策略。Group 的 `a11yLabel` 默认 `''`。Label、Separator 与 Shortcut 没有属性。
+### 其他组件属性
+
+- **Trigger**：无额外属性。
+- **Content**：支持 Transition 属性；`side` 默认 `'bottom'`，`align` 默认 `'center'`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`，`excludeAnchorTranslation` 默认 `false`。
+- **Item**：`disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；可选 `closeOnCommit`，未设置时回退到 `Root` 的 `closeOnItemCommit`。
+- **Group**：`a11yLabel` 默认 `''`。
+- **Label、Separator、Shortcut**：无额外属性。
 
 ## 参考
 

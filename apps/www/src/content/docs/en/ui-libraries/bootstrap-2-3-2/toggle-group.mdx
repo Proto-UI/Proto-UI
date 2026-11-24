@@ -1,11 +1,13 @@
 ---
 title: 'ToggleGroup'
-description: 'Independent single or multiple pressed-value selection with roving focus.'
+description: 'A Bootstrap 2.3.2 group of toggle buttons supporting single or multiple selection with roving focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Independent single or multiple pressed-value selection with roving focus.
+ToggleGroup coordinates a set of two-state toggle buttons with single or multiple selection and roving keyboard focus.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toggle-group"
@@ -14,8 +16,23 @@ Independent single or multiple pressed-value selection with roving focus.
   codePanel={false}
 />
 
-value/defaultValue are arrays. multiple=false keeps at most one value; clicking it again clears selection. Controlled valueChange requests never mutate the owner. Disabled, readOnly and duplicate-valued items do not commit. Arrow navigation changes focus without selecting.
+## Installation
 
-Parts: Root, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Compose `Root` and `Item`:
+
+- **Single and multiple selection**: `value` and `defaultValue` are string arrays. When `multiple={false}`, at most one item stays pressed and clicking it again clears the selection; when `multiple={true}`, multiple items can stay pressed simultaneously.
+- **Controlled state and keyboard**: Controlled usage emits `valueChange` without mutating caller state. Arrow keys move focus without toggling selection; disabled, read-only, and duplicate-valued items cannot commit.
+
+## API
+
+| Part   | Props / Events           | Description                                  |
+| ------ | ------------------------ | -------------------------------------------- |
+| `Root` | `value` / `defaultValue` | `string[]` of active item values             |
+| `Root` | `multiple`               | `boolean` enabling multi-selection           |
+| `Root` | `disabled` / `readOnly`  | Group disabled or read-only flags            |
+| `Root` | `valueChange`            | Emitted when selection changes are requested |
+| `Item` | `value` / `disabled`     | Unique item value and per-item disabled flag |

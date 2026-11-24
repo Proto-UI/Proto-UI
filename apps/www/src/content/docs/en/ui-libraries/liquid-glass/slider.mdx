@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Slider
-description: Draft portable input atoms.
+title: 'Slider'
+description: 'A Liquid Glass single-thumb slider with pointer/touch dragging, keyboard stepping, and Field/Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Slider provides single-thumb numeric selection over a continuous or stepped track, supporting pointer/touch dragging and keyboard stepping.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-slider"
@@ -12,10 +16,24 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root owns value/defaultValue, min/max/step, disabled/readOnly, orientation and direction. Track uses shared normalized AxisInput for real pointer/touch drag. Thumb is one focusable slider: arrows, Shift×10, PageUp/PageDown, Home/End; horizontal RTL reverses lateral arrows. Values clamp and snap from min. Controlled requests emit valueChange while retaining owner values; valueCommit marks completion, cancel restores an uncontrolled drag start. Label names Thumb; Value and Indicator are passive. Single-thumb behavior is implemented; multi-thumb constraints remain open.
+## Installation
 
-Use FieldThumb instead of Thumb inside Field/FormField to bridge FieldLabel activation, canonical numeric validation, policy, Form serialization and reset. Standalone Thumb continues to use SliderLabel.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: root, label, track, indicator, thumb, field-thumb, value. All four styled families inherit Base behavior.
+## Usage
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+- **Parts**: `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, `Value`.
+- **Dragging and keyboard**: `Track` handles pointer and touch dragging, while `Thumb` provides a focusable slider supporting arrow keys (mirrored in horizontal RTL), `Shift` ×10 stepping, `PageUp`/`PageDown`, and `Home`/`End`. Values snap from `min` by `step` and clamp to `[min, max]`.
+- **Controlled state**: pass `value` and handle `valueChange` for controlled mode; `valueCommit` fires when an interaction finishes, and cancelling an uncontrolled drag restores its starting value.
+- **Field and Form integration**: replace `Thumb` with `FieldThumb` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to bridge `FieldLabel`, numeric validation, serialization, and reset.
+
+## API
+
+| Part | Prop / Event | Description |
+| --- | --- | --- |
+| Root | `value`, `defaultValue` | Controlled / uncontrolled numeric value |
+| Root | `min`, `max`, `step` | Numeric bounds and step increment |
+| Root | `disabled`, `readOnly`, `orientation`, `direction` | Interaction state, axis, and reading direction |
+| Root | `valueChange`, `valueCommit` | Live change proposal / interaction completion event |
+| Track / Indicator / Label / Value | — | Interactive track, filled range, label, and passive readout |
+| Thumb / FieldThumb | — | Standalone focusable thumb / Field- and Form-integrated thumb |

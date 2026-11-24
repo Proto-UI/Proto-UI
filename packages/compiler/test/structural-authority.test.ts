@@ -68,7 +68,7 @@ describe('contiguous assertions retain an already proven capability', () => {
     'const view=({} as unknown) as DefHandle;',
     'const view=def as unknown as RunHandle;',
     'const view=def as unknown as RunHandle as unknown as DefHandle;',
-    'const recover=(value:BorrowedStateHandle<number>)=>value as unknown as State<number>;',
+    'const recover=(value:BorrowedStateHandle<number>)=>value as unknown as State<number>;recover(def.state.number("count",0));',
   ])('rejects unproven or substituted capability authority: %s', (body) => {
     expect(parsePrototype(source(body, types))).toMatchObject({
       ok: false,
@@ -79,6 +79,13 @@ describe('contiguous assertions retain an already proven capability', () => {
         },
       ],
     });
+  });
+
+  it('keeps an uncalled authority-assertion helper dormant through portable IR', () => {
+    checked(
+      'const recover=(value:BorrowedStateHandle<number>)=>value as unknown as State<number>;',
+      types
+    );
   });
 
   it.each(['unknown', 'run'] as const)(

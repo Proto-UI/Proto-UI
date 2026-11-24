@@ -1,13 +1,15 @@
 ---
-title: shadcn Number Field
-description: Draft portable input atoms.
+title: 'Number Field'
+description: 'A numeric input with stepping buttons, localized formatting, and label scrubbing.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Number Field provides a `spinbutton` numeric input supporting increment/decrement buttons, keyboard stepping, locale-aware formatting, nullable values, and drag-to-scrub on its label. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-number-field"
@@ -16,34 +18,59 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Root owns `number | null` value/defaultValue, min/max (0/100), positive step (1), disabled/readOnly, name and ariaLabel. Input uses one TextControl editor with spinbutton semantics. Incomplete drafts can remain while editing; blur/Enter commits a valid number or restores accepted canonical state. Increment/Decrement and ArrowUp/ArrowDown share stepping, Shift multiplies by ten, and Home/End reach bounds. Controlled proposals never replace owner values optimistically.
+## Installation
 
-`locale` and `formatOptions` support standard decimal, currency and percent presentation with matching decimal/group separators, localized digits and signs. Display rounding does not change canonical precision, including a commit without edits. Invalid configuration sets `formatInvalid` and falls back to ungrouped decimals; invalid drafts restore accepted text on commit. Omitting formatting props retains the previous decimal representation. IME composition blocks parsing, commits, stepping and scrub initiation; changing locale preserves the ongoing composition text.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Explicit `null` represents emptiness, and `value={null}` remains controlled. `allowEmpty` defaults to `false`; enable it to request `null` by clearing and committing the editor. Root and Input/Control expose `getValue(): number | null` and `empty`. The compatibility numeric `value` readout represents a canonical number only when `empty` is false; while empty it retains its last finite value. Events and Field/Form reports always carry actual null. The first step from null initializes snapped zero within the bounds.
+## Usage
 
-Enable `scrub` to continuously adjust the number by dragging Label. `scrubSteps` (default100) is the number of steps per initial Label width; `direction="rtl"` reverses horizontal movement. A changed successful release commits once. Cancellation restores the uncontrolled starting value, and controlled values always remain owner-owned. The input retains normal text selection. Wheel adjustment remains unimplemented.
+Number Field consists of `Root`, `Label`, `Input`, `Control`, `Increment`, and `Decrement`:
 
-Use Control instead of Input inside Field/FormField: FieldLabel names and activates the actual editor; Field policy, canonical numeric validation, IME cancellation, Form serialization and reset are bridged. Standalone Input continues to use NumberFieldLabel.
+- `Root` manages the `number | null` value, bounds (`min`/`max`, defaulting to `0`/`100`), positive `step` (`1`), and disabled/read-only state.
+- Use `Input` with `NumberFieldLabel` for standalone fields; inside `Field` or `FormField`, use `Control` instead so `FieldLabel`, validation, IME cancellation, serialization, and form reset connect automatically.
+- `Increment` and `Decrement` share the same stepping logic as keyboard arrow keys.
 
-Parts: root, label, input, control, increment, decrement. All four styled families inherit Base behavior.
+### Editing and keyboard stepping
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+- Incomplete drafts stay intact while typing; pressing `Enter` or blurring commits a valid number or restores the last accepted value.
+- `ArrowUp` / `ArrowDown` step by `step`, holding `Shift` multiplies by 10, and `Home` / `End` jump to `min` / `max`.
+- Pass `value` to enter controlled mode—user interactions emit update requests without overwriting the controlled value directly.
+- During IME composition, parsing, commits, stepping, and scrubbing pause automatically; changing `locale` preserves ongoing composition text.
+
+### Localized formatting
+
+Use `locale` and `formatOptions` for decimal, currency, and percent formatting as well as parsing localized digits, separators, and signs. Display rounding never mutates underlying numeric precision, including commits without edits. Invalid format options set `formatInvalid` and fall back to ungrouped decimals.
+
+### Empty values
+
+- Explicit `null` represents an empty field, and `value={null}` remains controlled.
+- `allowEmpty` defaults to `false`; enable it to allow clearing the input and committing `null`.
+- `getValue()` on `Root`, `Input`, and `Control` returns `number | null`, while `empty` flags emptiness. The compatibility numeric `value` getter holds the last finite number while empty; events and Field/Form integrations always receive actual `null`.
+- The first step from `null` initializes to snapped `0` within bounds.
+
+### Label scrubbing
+
+Enable `scrub` to adjust the value continuously by dragging across `Label`:
+
+- `scrubSteps` (default `100`) defines how many steps correspond to dragging across one initial label width; `direction="rtl"` reverses horizontal movement.
+- Releasing after a change commits once; canceling restores the starting value in uncontrolled mode. Text selection inside the input remains unaffected.
 
 ## API
 
-Number Field is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Label, Input, Control, Increment, and Decrement add no props of their own.
+The following props belong to `Root` (`Label`, `Input`, `Control`, `Increment`, and `Decrement` add no props; pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'value', type: 'number | null', default: '—' },
     { name: 'defaultValue', type: 'number | null', default: '0' },
-    { name: 'min', type: 'number', default: '0' },
-    { name: 'max', type: 'number', default: '100' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
     { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'name', type: 'string', default: "''" },
     { name: 'allowEmpty', type: 'boolean', default: 'false' },
@@ -54,8 +81,6 @@ Number Field is workspace source. There is no public `proto-ui add` target. Pass
     { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
   ]}
 />
-
-These props belong to Root.
 
 ## References
 

@@ -734,6 +734,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/input');
     registerPrototype('base-input-root', mod.inputRoot);
   },
+  'base-selectable-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/selectable-row');
+    registerPrototype('base-selectable-row', mod.selectableRow);
+  },
   'base-image-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/image');
     registerPrototype('base-image-root', mod.imageRoot);

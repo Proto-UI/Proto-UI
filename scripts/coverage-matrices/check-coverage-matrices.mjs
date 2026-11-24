@@ -192,6 +192,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Post-admission body drift is invisible to this gate and stays source-review
   // debt under #420; the affected sources and their owning rows are enumerated
   // in internal/website/self-hosting-coverage-matrix.md.
+  // Exact native-input Adapter demonstration. Its file-name status and file
+  // option bridge remain a blocked authored composition, not runtime infrastructure.
+  'apps/www/src/components/native-file-input-preview.ts': Object.freeze({
+    sourceSha256: '55496ad2bc9c90579b5017c271f3f0b60653c698dd1f12833e188410db1b0cf8',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-react',
+      '@proto.ui/prototypes-base/native-file-input',
+    ]),
+  }),
   // Exact legacy runtime-selection composition; its owning row stays blocked.
   'apps/www/src/components/PrototypePreviewer/runtime-tabs.ts': Object.freeze({
     sourceSha256: 'f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178',
@@ -8921,6 +8930,7 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
@@ -9787,6 +9797,10 @@ const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
 // combines both sprints' module-graph changes on top of the train.
 const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
   'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
+// Sprint 2 adds only the draft Native File Input and Selectable Row sidebar
+// entries to that merged configuration. Retry/Worker imports and owners match.
+const WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256 =
+  '26e4307893b07f9f17e5c22c38842d0992391d68603c1c9db506f07a556c668d';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',

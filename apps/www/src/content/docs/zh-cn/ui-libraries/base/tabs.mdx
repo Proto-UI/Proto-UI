@@ -1,13 +1,15 @@
 ---
 title: 'Tabs'
-description: 'Base Tabs 的 selection、anatomy、focus ownership、证据与当前边界。'
+description: '提供漫游焦点、自动或手动激活与面板显隐管理的选项卡组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Tabs 是 compound single-selection protocol。Root 拥有 selected value；List 拥有 roving focus；Trigger 请求 selection；Content 投射当前 panel；Indicator 只反映 context，供下游添加视觉处理。
+用于在一组关联面板之间切换展示内容的无样式选项卡组件，内置 `tablist` / `tab` / `tabpanel` 无障碍语义、方向键漫游焦点与面板卸载管理。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-tabs"
@@ -16,45 +18,28 @@ Base Tabs 是 compound single-selection protocol。Root 拥有 selected value；
   codePanel={false}
 />
 
-## Family 与 ownership
+## 安装
 
-Canonical family 是：
+0.2.0 稳定版包已从 `@proto.ui/prototypes-base/tabs` 导出全部五个部件，CLI 目标为 `base-tabs`（生成 `Root`、`List`、`Trigger` 与 `Content`；`Indicator` 可直接从包导入）。如需带样式的版本，可使用 [Shadcn Tabs](/zh-cn/ui-libraries/shadcn/tabs/) 或 [Brutalist Tabs](/zh-cn/ui-libraries/brutalist/components/tabs/)。
 
-- Root `1..1`
-- List `0..1`
-- Trigger `0..*`
-- Content `0..*`
-- Indicator `0..*`
+## 用法
 
-Root 接受 `value`、`defaultValue`、`orientation`、`activationMode`，并发出 `valueChange`。受控 Root 把 selection 作为 request，直到 owner 提供新 value。List 增加 `loop`、可选 `a11yLabel`、orientation-aware arrow navigation、Home/End 与 focus methods。Trigger 拥有自身 `value`、disabled gate、交互事实、focus request、selected projection 与 tab accessibility。Content 匹配自身 `value`，expose `current`/`hidden`，并可用 `keepMounted` 保留 inactive host view。
+### 组件结构
 
-Indicator 是 presentational context consumer。它 expose 当前 value、active value 与 orientation，但不拥有 selection、event route、focus target、measurement、positioning 或视觉 variant。
+- **Root**（1 个）：统一管理选中值（`value` / `defaultValue`）、方向（`orientation`）与激活模式（`activationMode`），变更时发出 `valueChange`。传入 `value` 进入受控模式。
+- **List**（0–1 个）：管理漫游焦点，提供按方向自适应的箭头导航、`Home`/`End`、循环焦点（`loop`）与可选 `a11yLabel`。
+- **Trigger**（多个）：声明自身 `value` 与 `disabled`，处理点击和键盘选中并发起切换请求。
+- **Content**（多个）：按精确 `value` 与 `Trigger` 配对（如 `a+b` 与 `a b` 保持区分），暴露 `current` / `hidden` 状态。关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点，同时对辅助技术不可见）。
+- **Indicator**（可选）：纯视觉指示部件，读取当前选中值、活动值与方向供样式层实现滑动指示条。
 
-## Accessibility 与 presence
+### 激活模式与无障碍关联
 
-Web profile 投射 tablist、tab 与 tabpanel relations。disabled Trigger 不参与 selection。automatic activation 会随 focus 移动选择；manual activation 将 focus navigation 与 selection 分开。inactive Content 默认 detach；`keepMounted` 会保留完整 host view，同时在 accessibility tree 中隐藏。
-
-在 0.3 实现中，Trigger 与 Content 在同一 Anatomy domain 内按精确 `value` 配对，`a+b` 与 `a b` 等 key 保持区别。缺失或重复 counterpart 时，对应关系不投影。Web Adapter 拥有宿主 ID，保留作者 ID 与独立的 IDREF token；任一端 detach 时撤销该关系，重新物化时恢复有效的 identity reservation。应用应使用 protocol value，不应依赖生成 ID 的格式。
-
-## 0.2 交付与证据
-
-稳定版 0.2.0 package 从 `@proto.ui/prototypes-base/tabs` 导出全部五个 authoring surfaces。当前 `base-tabs` CLI facade 生成 Root、List、Trigger 与 Content；Indicator 是 public package authoring surface，但尚未进入该 generated facade。映射的 `T-BASE-TABS-*` entities 覆盖 `packages/prototypes/base/test/tabs.test.ts`，本页 Preview 通过三个 Web Adapter 运行整个 family。
-
-## Lifecycle
-
-五个 `P-BASE-TABS*` entities 当前都是 **draft**。当前实现与证据是可审查的工作表面，不是冻结的兼容性承诺。
-
-## 参考
-
-- [P-BASE-TABS](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS.yaml)
-- Parts：[List](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-LIST.yaml)、[Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-TRIGGER.yaml)、[Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-CONTENT.yaml)、[Indicator](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TABS-INDICATOR.yaml)
-- [Tabs source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/tabs)
-- [Tabs evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/tabs.test.ts)
-- 风格化投射：[Shadcn Tabs](/zh-cn/ui-libraries/shadcn/tabs/) 与 [Brutalist Tabs](/zh-cn/ui-libraries/brutalist/components/tabs/)
+- `activationMode="automatic"`（默认）下，方向键移动焦点时自动切换选中面板；`activationMode="manual"` 将焦点移动与确认选择分离。禁用的 `Trigger` 不参与选择。
+- 组件自动维护 `tablist`、`tab` 与 `tabpanel` 之间的无障碍关联并在卸载时清理，保留调用方自定义的宿主 ID；应用逻辑应以 `value` 标识选项卡，无需依赖生成的 DOM ID。
 
 ## API
 
-Tabs 是工作区源码。当前工作区 CLI 目标为 `base-tabs`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `value` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -65,7 +50,14 @@ Tabs 是工作区源码。当前工作区 CLI 目标为 `base-tabs`。CLI 与依
   ]}
 />
 
-这些属性属于 Root。List 的 `orientation` 默认 `horizontal`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 默认 `''`，`keepMounted` 默认 `false`。Indicator 没有属性。
+传入 `value` 可受控管理当前选中值；状态变更时发出 `valueChange`。
+
+### 其他部件属性
+
+- **List**：`orientation`（默认 `'horizontal'`）、`loop`（默认 `false`）、`a11yLabel`（默认 `''`）。
+- **Trigger**：`value`（默认 `''`）、`disabled`（默认 `false`）。
+- **Content**：`value`（默认 `''`）、`keepMounted`（默认 `false`）。
+- **Indicator**：无额外属性。
 
 ## 参考
 

@@ -1,15 +1,15 @@
 ---
 title: 'Toast'
-description: '可暂停、关闭并发出明确操作意图的限时实时通知。'
+description: '支持定时自动消失、悬停暂停与快捷操作按钮的实时通知组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Toast 用于以非打断方式展示限时实时通知，支持悬停或聚焦时暂停倒计时、键盘快捷键定位以及可选操作按钮。本页示例使用 **Shadcn Rhea** 风格。
 
-可暂停、关闭并发出明确操作意图的限时实时通知。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-toast"
@@ -18,13 +18,19 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/Close 焦点会暂停剩余时长。受控 open 只发出一次超时关闭请求，等待调用方更新。Close、有焦点时的 Escape、Action 请求关闭；实际副作用归应用处理。Viewport 提供 F8 聚焦快捷键；不包含全局队列或系统通知传输。
+## 安装
 
-组成: Root, Viewport, Title, Description, Action, Close.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
 
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` 六个部件组成：
+
+- `Root` 默认持续显示 `5000ms` 后自动请求关闭；将 `duration` 设为 `0` 可保持常驻不自动关闭。
+- 指针悬停在通知上，或键盘焦点位于 `Action` / `Close` 上时，剩余倒计时会自动暂停，离开后继续计时。
+- 点击 `Close`、在获得焦点时按下 `Escape` 或激活 `Action` 都会发出关闭请求，实际业务副作用由应用事件回调处理。
+- 受控模式下（传入 `open`），超时后只会发出一次关闭请求并等待外部状态更新。
+- `Viewport` 提供无障碍区域命名（默认 `Notifications`）以及 `F8` 快捷键快速聚焦通知区域。多条通知的排队管理由应用层控制。
 
 ## API
 
@@ -41,11 +47,12 @@ Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/C
   ]}
 />
 
-`defaultOpen`、`duration`、`paused`、`politeness` 属于 Root。`duration` 为 `0` 时保持打开。`a11yLabel` 与 `hotkey` 属于 Viewport。`disabled` 属于 Action 与 Close。
+属性归属说明：
+
+- `defaultOpen`、`duration`（设为 `0` 时常驻）、`paused`、`politeness` 属于 `Root`（传入 `open` 进入受控模式）。
+- `a11yLabel`、`hotkey` 属于 `Viewport`。
+- `disabled` 属于 `Action` 与 `Close`。
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-TOAST.yaml', 'P-BASE-TOAST.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TOAST.yaml', 'P-BASE-TOAST.yaml']} />

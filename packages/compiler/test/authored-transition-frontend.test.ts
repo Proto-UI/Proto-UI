@@ -44,6 +44,7 @@ describe('unchanged authored Transition source', () => {
       'transitionEnterDurationDefault',
       'transitionLeaveDurationDefault',
       'transitionInterruptDefault',
+      'transitionClosedViewRetained',
     ]);
     expect(ir.hooks[0].capture?.methods.map((method) => method.name)).toContain(
       'capturePreparation'

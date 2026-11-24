@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Switch'
-description: '机械式 Switch 状态与交互合约'
+description: '胶囊轨道、2px 黑边与机械式滑块行程的 Brutalist 风格开关组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,27 +9,34 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-# Switch
+Switch 用于在开启与关闭两种状态之间切换。Brutalist 风格采用 2px 黑边的胶囊轨道与白色圆形滑块，无外侧阴影，强调清晰的机械式状态切换。
 
-[参考 Switch 源码](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/switch.tsx) 使用胶囊轨道与白色圆形 thumb，两者均为 2px 黑边、无阴影。根字号为 16px 时，轨道为 24×48px，thumb 为 16px。
-
-- 关闭时为中性轨道，开启时为 main 蓝色；thumb 始终保持白色
-- 只有 thumb 移动，行程为 1.25rem（根字号为 16px 时为 20px，两端外侧留白对称为 6px）
-- transform/颜色过渡为 150ms；reduced motion 下 Thumb 位置立即切换
-- press 不闪珊瑚色、不移动轨道，也不增加阴影
-- 键盘 focus 保留 offset ring；disabled 保持形状并阻止 activation
-
-Prototype 使用物理 left/right 定位，确保 RTL 父级下同样的几何仍居中且不越界；这不代表镜像 RTL switch 语义。可见 caption 位于 Switch Root 内，Base 在四种 Web runtime 中从同一文本推导 accessible name。点击 caption 走同一 activation 路径；disabled 示例保持不可操作。DM Sans 字体由 prototype 拥有，不支持的字形使用宿主 fallback。
-
-拖动暂不支持：`draggable` 仅接受 `false` 或省略；原始输入 `true` 会回退为 `false`。点击与键盘激活仍可使用。后续拖动扩展需要让输入和 thumb 跟手显示使用同一份端点声明，并保持这些参考尺寸。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
 </div>
 
+## 安装
+
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-switch` 添加，或从 `@proto.ui/prototypes-brutalist/switch` 导入。
+
+## 用法
+
+### 外观与动效
+
+- **几何与配色**：在 16px 根字号下，轨道尺寸为 `24×48px`，白色圆形滑块为 `16px`。关闭时轨道呈中性底色，开启时切换为主色蓝；滑块保持白色，仅沿水平轴移动 `1.25rem`（20px，两端各留白 6px）。
+- **状态反馈**：过渡时长为 `150ms`，开启 `prefers-reduced-motion: reduce` 后立即切换位置；按下时轨道不位移、不增加阴影；键盘聚焦时显示外偏移焦点环；禁用状态下保持外观并阻止激活。
+- **文字与方向**：可见标签文本放在 Switch `Root` 内即可作为无障碍名称并支持点击切换，默认采用 DM Sans 字体（缺省字形回退到宿主字体）。滑块使用物理左右定位，在 RTL 父容器中同样保持居中且不越界。
+
+### 交互说明
+
+- 点击与键盘激活均可正常切换状态；传入 `checked` 可进入受控模式。
+- 当前版本暂未启用滑动手势拖动，`draggable` 默认为 `false`（传入 `true` 会自动回退为 `false`）。
+
 ## API
 
-Switch 是工作区源码。当前工作区 CLI 目标为 `brutalist-switch`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `checked` 进入受控模式。
+以下属性属于 `Root`（传入 `checked` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,4 +48,6 @@ Switch 是工作区源码。当前工作区 CLI 目标为 `brutalist-switch`。C
   ]}
 />
 
-这些属性属于 Root。Thumb 没有属性。
+其余子部件：
+
+- **Thumb**：无属性。

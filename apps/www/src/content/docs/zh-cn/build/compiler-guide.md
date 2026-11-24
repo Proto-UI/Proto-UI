@@ -189,6 +189,15 @@ Source resolver 只读取已声明的作者源码闭包，不执行源码，也�
 
 输出父目录是 **caller prerequisite**，artifact root 自身采用 exclusive creation。父目录缺失时失败且不创建祖先目录；已存在 root、symlink、artifact 冲突与并发竞争仍按既有 create-only 契约拒绝。`diff` 不写用户编辑，`watch` 生成不可变 session/revision 目录。Compiler build 保持不可变，用户编辑属于生成源码。编辑后原 compiler map 是历史记录；普通 target 重建为当前 executable-to-edited-source 提供新 map。
 
+从同一 source checkout 核对干净安装时，显式选择已构建的 compiler 和 registry 模式：
+
+```sh
+NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/release-family-smoke.mjs
+NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/pinned-cli-smoke.mjs
+```
+
+每个 consumer 从没有已安装包的目录开始，仅用自身 manifest 中的精确依赖生成新 lockfile，再以独立 cache 运行 `npm ci --ignore-scripts`。第一条在四个 Web source profile 中构建完整 Base/Shadcn/Brutalist Button 作者源码，并在 Happy DOM 实际挂载；第二条验证可编辑 CLI 旅程及非覆盖边界。复制既有安装 payload 仍是单独标记的离线模式。Watch 保留首次 session 目录的身份；路径被另一个真实目录或 symlink 替换时，报告 output conflict 并终止，不把替换目录接纳为新 owner。这些检查不代替真实浏览器、硬件、读屏或完整应用验收。
+
 ### 已执行证据与成本测量
 
 私有验证在四个 Web source profile 的独立物理 consumer 中编译、挂载三 component/Context assembly，type-check 生成的 TypeScript/helper，重建并执行 consumer-owned template edit，拒绝引入的 syntax error，并验证物理 dependency tree 与 artifact hash；这些 Web consumer 测量不执行 GPUI。Vue 2 的 JavaScript component body 不执行 `checkJs`。另有 offline private-package rehearsal，在普通 Node 中执行打包 Compiler 的 JavaScript API，并记录 tarball integrity、实际 bundled compile-time input、dependency、BOM 和 license；这不等于 official package 或 public declaration-file release。

@@ -1,6 +1,6 @@
 ---
 title: Shadcn Field
-description: Atomic Field labeling, value reporting and controlled or consumer-validated errors.
+description: 将标签、输入控件、辅助说明与校验错误组合在一起的字段组件，支持同步与异步校验。
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,11 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+用于组合单个输入控件及其标签、帮助文本与错误信息的字段容器，自动维护无障碍关联，并支持内置约束、受控校验与消费者驱动的异步校验。本页示例采用 **Shadcn Rhea** 风格。
 
-Draft workspace family。六个 atoms 共享一个 Base 协议；native/AT/material/GPUI 完成门槛尚未全部通过。
-
-Compact rounded controls, restrained spacing, muted help and explicit error text.
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-field"
@@ -21,92 +19,106 @@ Compact rounded controls, restrained spacing, muted help and explicit error text
   codePanel={false}
 />
 
-## Anatomy 与所有权
-
-Root 下恰有一个 Control，可含一个 Label、Description、Error 及多个被动 Validity。嵌套 Root 建立独立域；名称、帮助和当前错误由 Anatomy/A11y 解析，不要求手写 DOM ID。重复唯一角色 fail closed。渐进挂载可暂缺 Control，但此时不能校验或接受旧结果。
-
-Root 拥有 validity、touched、dirty；Control 拥有值及物理编辑器。默认 Control 直接复用 TextControl/Focus 模块。asFieldControl 是通用登记、状态及关联桥：其他控件作者必须报告 canonical 值，并消费 disabled/readOnly/required，不从 DOM 或无关 expose 猜测值。asFieldTextControl 是可直接使用的单行编辑器入口。通用控件同时通过 asControlLabel().target(自身操作, FIELD_LABEL_PAIR) 声明 setup-only 配对，复用原生输入、physical scope 和 isCurrent 守卫；回调/引用不进入 Props。
-
-## JSON Props
-
-| Part | Props | 语义 |
-| --- | --- | --- |
-| Root | invalid, errors | 提供 invalid 即受控；errors 为 owner 的错误说明 |
-| Root | defaultInvalid, defaultErrors | 仅初始化非受控状态一次 |
-| Root | disabled, readOnly, required | 默认 false；与 Control 本地策略叠加 |
-| Root | minLength, maxLength | 默认 -1 不限；否则按 UTF-16 code units 计数，并投射默认编辑器 |
-| Root | validationMode | 默认 onBlur，可选 onChange/manual |
-| Root | externalValidation | 默认 false；true 在内置约束通过后发版本化请求 |
-| Control | value, defaultValue | TextControl 初始化时固定受控/非受控值所有权 |
-| Control | disabled, readOnly, required | 本地策略不能解除 Root 约束 |
-| Control | placeholder, name, autoComplete, inputMode, enterKeyHint, ariaLabel | 有限编辑提示，不透传任意原生属性 |
-| Label | activation | 默认 true；指针激活请求聚焦同一 enabled Control |
-| Description | 无 | 作者提供的被动、可选择帮助内容 |
-| Error | message, keepMounted | 本地化文本覆盖；keepMounted 默认 false |
-| Validity | 无 | 被动状态及 getValidity() 快照 |
-
-Props 只含 JSON-compatible 数据。框架 onValueChange/onValidationRequest/onValidityChange 是 Adapter 对 expose event 的投射，不是 Proto UI callback Props。没有 DOM ref、validate/render callback、Form 对象或字符串 ID 关联 Props。
-
-## 校验与受控结果
-
-Root 提供 validate(reason?)、resolveValidation(requestId, result)、cancelValidation()、resetValidation()、focusControl(options?)、getValidity()，以及 invalid/pending/dirty/touched/filled/focused/disabled/readOnly/required 状态。完成的检查发 validityChange，含 status、flags、errors 及状态快照。受控模式下这是提案，canonical invalid 在 owner 更新前不变；同步重入的新 owner 输入优先。快照及其数组均为防御性副本。
-
-required 把 null、false、空字符串、空数组视为空。0 和空白字符串有效，不隐式 trim；含空字符串的非空数组仍是 filled。通用桥只接受有限数值、boolean、string、string[]、null。可选空字符串跳过长度检查。长度按 UTF-16 code units 而非用户感知字符计数。内置 flags 是 valueMissing、tooShort、tooLong；外部错误使用 customError。
-
-除显式 default/owner validity 外，初始状态为 unvalidated；pending 不代表 valid。缺少当前 Control 时，即使受控 invalid=false 也保持 unvalidated。dirty 比较 canonical 值与 Control 初始基线，受控拒绝的编辑不置 dirty。blur 置 touched。resetValidation 仅清校验/touched，不改值/dirty 基线，也不是 form reset。
-
-## 消费者拥有的异步检查
-
-externalValidation=true 时，内置约束通过后发 validationRequest `{requestId,value,reason}`。消费者执行请求，再调用 `resolveValidation(requestId, {invalid,errors})`。只有当前 Root、Control lease 与值/策略修订接受该结果一次。值变化、新请求、替换/移除/detach、disabled/readOnly 切换、composition 开始、策略修改、cancel/reset 都使旧结果失效。畸形或跨 Root 结果被拒绝，不清除合法 pending 请求。
-
-onChange 等到 compositionend。readOnly 阻止编辑但保留焦点与显式校验；disabled 阻止编辑、焦点与校验，不改 owner 值。演示中的 timer 仅通过公开事件/方法模拟消费者请求，不在页面自建 Field 协议。
-
-## 无障碍、生命周期与边界
-
-唯一物理编辑器 labelledBy Label、describedBy Description；仅 canonical invalid=true 时以 aria-errormessage 关联 Error。Web 同步 aria-required/invalid/busy/readonly。Label/Root 不增加 Tab stop；键盘编辑与选择由现有编辑器拥有。Label 复用真实 ControlLabel 守卫，拒绝 drag/cancel、修改键/次要按钮、嵌套交互内容及已取消输入；只聚焦同一 Control。
-
-Error 优先显示显式 message，否则 errors，否则有限的内置英文提示；本地化由作者提供覆盖或外部错误文本。它不自动成为 alert/live region。默认关闭 Error 使用可重复 L1 detach，keepMounted 才保留隐藏视图。IDREF 随实际 lease 撤销/恢复。需要播报时，应用明确选择现有 LiveRegion。Description 保持被动可选择；只关联一个汇总 Error，不暗定多 Error 排序。
-
-通过 family 的 field subpath 导入 fieldRoot/Label/Control/Description/Error/Validity。Base 提供对应 authoring entries、通用 asFieldControl 桥和类型。CLI 为 React/Vue/Vue2/WC 提供全部六个 workspace-source parts，不声称 npm 已发布。
-
-这不是 Fieldset/Form：submission、hidden fields、form 序列化/reset、debounce、原生 validity forwarding、服务器请求实现均不在契约内。四种视觉投影使用同一完整 Field 语义。
-
-当前本地证据为 24 个 Base 测试及每个 Web Adapter 20 个测试（共 104），实际执行 Base 和四种风格 family。它们使用 synthetic DOM，不代替 native 键盘/绘制、AT、窄屏/大字号、光学材质或 GPUI。native-browser journey 已准备精确 source 的截图及真实指针/键盘路径；本地 Chromium 启动被 socket EPERM 阻止，不伪报通过。
-
-GPUI peer 尚无物理 TextControl host；required/invalid/busy/readOnly 与 describedBy/errorMessage 原生映射仍未建立。Liquid Glass 仅声明静态编辑表面的光学意图和 opaque fallback；token/JS transport 不能证明实际光学或原生渲染。
-
-[Base UI Field 比较](https://base-ui.com/react/components/field) · [shadcn Field 比较](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 表单参考](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple Text Fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
-
-这些仅是独立设计比较。Base UI 的 render/validate callback 和 Form submission 模式、shadcn 布局 API、Bootstrap DOM/classes、Apple 系统编辑 chrome 都不是继承 API 或 Proto UI 规范权威。
-
 ## 安装
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-field" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。
+
+也可以直接从 `@proto.ui/prototypes-shadcn/field` 导入 `fieldRoot`、`fieldLabel`、`fieldControl`、`fieldDescription`、`fieldError` 与 `fieldValidity`。
+
+## 用法
+
+### 部件结构
+
+每个 `Root` 内放置一个 `Control`，并按需组合 `Label`、`Description`、`Error` 以及一个或多个只读的 `Validity`（嵌套 `Root` 拥有独立作用域，重复的唯一角色会被忽略）：
+
+- **Root**：统一管理字段校验状态（`invalid`、`pending`、`dirty`、`touched`、`filled`、`focused`）以及 `disabled`、`readOnly`、`required` 策略。
+- **Control**：默认提供单行文本输入控件；若接入自定义值控件（如复选框、单选组等），可通过 `asFieldControl` 桥接上报字段值，并通过 `asControlLabel().target(..., FIELD_LABEL_PAIR)` 接入标签点击聚焦。
+- **Label**：自动命名同字段下的 `Control`，点击时默认聚焦控件（可通过 `activation={false}` 关闭）。
+- **Description**：自动关联 `aria-describedby` 的可选帮助文本。
+- **Error**：仅在字段处于无效状态时通过 `aria-errormessage` 关联到控件；关闭时默认卸载内容节点（设置 `keepMounted` 可保留隐藏节点），自动维护 `aria-describedby` / `aria-errormessage` 关联并在卸载时清理。如需自动向屏幕阅读器播报错误，可搭配 [Live Region](../live-region/) 使用。
+- **Validity**：只读状态展示部件，可通过 `getValidity()` 读取当前校验快照。
+
+### 同步与异步校验
+
+- **内置规则**：`required` 将 `null`、`false`、`''` 与 `[]` 视为空值（`0` 与空白字符视为有效）；`minLength` / `maxLength` 按 UTF-16 码元计数，非必填的空字符串会跳过长度检查。内置标记为 `valueMissing`、`tooShort`、`tooLong`，外部错误使用 `customError`。
+- **触发时机**：`validationMode` 支持 `'onBlur'`（默认）、`'onChange'`（等待输入法组合结束后触发）与 `'manual'`。
+- **异步校验**：设置 `externalValidation={true}` 后，内置规则通过时会发出 `validationRequest`（负载为 `{ requestId, value, reason }`）。应用层完成请求后调用 `resolveValidation(requestId, { invalid, errors })` 提交结果；若请求期间值发生变化、状态切换或调用了 `cancelValidation()` / `resetValidation()`，过期结果会被自动丢弃。
+- **受控校验**：传入 `invalid` 与 `errors` 将校验结果交由外部状态控制，校验完成时通过 `validityChange` 提出更新建议。
+- **与表单协作**：`resetValidation()` 仅清除校验状态与 `touched`，不重置控件值。若需要多字段提交、序列化与整表重置，请配合 [Form](../form/) 与 [Fieldset](../fieldset/) 使用。
 
 ## API
 
+### Root 属性
+
+传入 `invalid` 进入受控校验模式（`invalid` 与 `errors` 无默认值）。
+
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'required', type: 'boolean', default: 'false' },
-    { name: 'minLength', type: 'number', default: '-1' },
-    { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'defaultInvalid', type: 'boolean', default: 'false' },
-    { name: 'defaultErrors', type: 'string[]', default: '[]' },
-    { name: 'validationMode', type: "'onBlur' | 'onChange' | 'manual'", default: 'onBlur' },
-    { name: 'externalValidation', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', description: '受控的无效状态' },
+    { name: 'errors', type: 'string[]', description: '受控错误消息列表' },
+    {
+      name: 'defaultInvalid',
+      type: 'boolean',
+      default: 'false',
+      description: '非受控初始无效状态',
+    },
+    { name: 'defaultErrors', type: 'string[]', default: '[]', description: '非受控初始错误消息' },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用字段与控件，与 Control 本地状态叠加',
+    },
+    {
+      name: 'readOnly',
+      type: 'boolean',
+      default: 'false',
+      description: '只读模式：禁止编辑但保留焦点与手动校验',
+    },
+    { name: 'required', type: 'boolean', default: 'false', description: '声明必填约束' },
+    {
+      name: 'minLength',
+      type: 'number',
+      default: '-1',
+      description: '最小长度（UTF-16 码元，-1 表示不限）',
+    },
+    {
+      name: 'maxLength',
+      type: 'number',
+      default: '-1',
+      description: '最大长度（UTF-16 码元，-1 表示不限）',
+    },
+    {
+      name: 'validationMode',
+      type: "'onBlur' | 'onChange' | 'manual'",
+      default: 'onBlur',
+      description: '校验触发时机',
+    },
+    {
+      name: 'externalValidation',
+      type: 'boolean',
+      default: 'false',
+      description: '内置规则通过后是否发出异步校验请求',
+    },
   ]}
 />
 
-这些属性属于 Root。`invalid` 与 `errors` 可选，Root 没有默认值。
+### 其他部件属性
+
+- **Control**：`value` / `defaultValue`、`disabled`、`readOnly`、`required`、`placeholder`、`name`、`autoComplete`、`inputMode`、`enterKeyHint`、`ariaLabel`（本地策略不能覆盖 `Root` 已启用的约束）。
+- **Label**：`activation?: boolean`（默认 `true`，控制点击是否聚焦控件）。
+- **Description**：无额外属性。
+- **Error**：`message?: string`（显式本地化覆盖文案）、`keepMounted?: boolean`（默认 `false`）。
+- **Validity**：无额外属性。
+
+### 方法与事件（Root）
+
+- **方法**：`validate(reason?)`、`resolveValidation(requestId, result)`、`cancelValidation()`、`resetValidation()`、`focusControl(options?)`、`getValidity()`。
+- **事件**：`validityChange`（校验结果快照）、`validationRequest`（异步校验请求，负载 `{ requestId, value, reason }`）。
 
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-FIELD.yaml', 'P-BASE-FIELD.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-FIELD.yaml', 'P-BASE-FIELD.yaml']} />

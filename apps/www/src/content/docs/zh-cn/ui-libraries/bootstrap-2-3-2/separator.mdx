@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Separator'
-description: 'Bootstrap 2.3.2 分隔线外观与 Base 分隔语义。'
+description: '沿用归档 Bootstrap 2.3.2 分隔线风格的水平与竖向分隔组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Separator 使用归档分隔线的视觉语言，方向与装饰性语义由 Base 拥有。`orientation` 默认 `horizontal`，`decorative` 默认 `true`。
+Bootstrap 2.3.2 Separator 提供水平与竖向视觉分隔线，由 Base Separator 统一管理方向与装饰性无障碍语义，并在深色宿主中保持经典的归档浅色配色。
 
-装饰性分隔线不暴露角色，并隐藏于无障碍树。设置 `decorative={false}` 后暴露 `separator` 角色及对应 `aria-orientation`。竖向外观是归档水平分隔线的设计语言适配。
+## 预览
 
-该原型不渲染子内容且完全被动，没有焦点、tab stop、事件、激活或可变值。长度与间距由周围 composition 决定。通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。
+示例依次展示了水平、竖向及语义分隔线。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-separator"
@@ -22,10 +22,18 @@ Separator 使用归档分隔线的视觉语言，方向与装饰性语义由 Bas
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+
+## 用法
+
+- **装饰性与语义模式**：默认 `decorative={true}`，分隔线仅用于视觉区分并对无障碍树隐藏；当分隔线代表真实内容区块边界时，设置 `decorative={false}` 以暴露 `separator` 角色及对应的 `aria-orientation`。
+- **尺寸与布局**：组件为纯被动元素，不占用焦点顺序，其长度与外边距由所在布局容器决定；竖向样式基于归档水平分隔线风格适配。
+
 ## API
 
-- `orientation`：`horizontal` / `vertical`
-- `decorative`：默认 `true`，语义分隔设置为 `false`
-- 示例包含水平、竖向及语义分隔线
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
+| 属性 | 可选值 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `orientation` | `'horizontal'` \| `'vertical'` | `'horizontal'` | 分隔线方向 |
+| `decorative` | `boolean` | `true` | 设为 `false` 时暴露语义 `separator` 角色与方向 |

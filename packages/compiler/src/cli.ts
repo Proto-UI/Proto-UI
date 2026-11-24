@@ -320,7 +320,7 @@ async function runWatch(
   let queue = Promise.resolve();
   let restart: Options | undefined;
   let reportedFatal = false;
-  const reservedSessions = new Set<string>();
+  const reservedSessions = new Map<string, { dev: number; ino: number; birthtimeMs: number }>();
   async function reserveSession(output: string): Promise<void> {
     const absolute = path.resolve(cwd, output);
     let current = path.parse(absolute).root;
@@ -337,13 +337,26 @@ async function runWatch(
         throw new Error(`Watch output parent is not a real directory: ${current}`);
     }
     const sessionDirectory = path.join(absolute, session);
-    if (!reservedSessions.has(sessionDirectory)) {
-      await mkdir(sessionDirectory);
-      reservedSessions.add(sessionDirectory);
-    }
+    const reserved = reservedSessions.get(sessionDirectory);
+    if (!reserved) await mkdir(sessionDirectory);
     const stat = await lstat(sessionDirectory);
-    if (!stat.isDirectory() || stat.isSymbolicLink())
+    if (
+      !stat.isDirectory() ||
+      stat.isSymbolicLink() ||
+      (reserved &&
+        (stat.dev !== reserved.dev ||
+          stat.ino !== reserved.ino ||
+          stat.birthtimeMs !== reserved.birthtimeMs))
+    )
       throw new Error(`Watch session was replaced: ${sessionDirectory}`);
+    // A path may now name another real directory. Only the original reservation
+    // owns future revisions; do not adopt a replacement merely because it is not a symlink.
+    if (!reserved)
+      reservedSessions.set(sessionDirectory, {
+        dev: stat.dev,
+        ino: stat.ino,
+        birthtimeMs: stat.birthtimeMs,
+      });
   }
   function stop(code: number): void {
     stopping = true;

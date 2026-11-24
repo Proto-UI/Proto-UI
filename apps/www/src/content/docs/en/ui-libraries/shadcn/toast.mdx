@@ -1,15 +1,15 @@
 ---
 title: 'Toast'
-description: 'Timed live notifications with pause, dismiss and explicit action intent.'
+description: 'Timed live notifications with hover/focus pause, keyboard shortcuts, and explicit actions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Toast displays brief, non-blocking notifications with auto-dismiss timers that pause on hover or focus, keyboard navigation shortcuts, and optional action buttons. The examples on this page use the **Shadcn Rhea** style preset.
 
-Timed live notifications with pause, dismiss and explicit action intent.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-toast"
@@ -18,13 +18,19 @@ Timed live notifications with pause, dismiss and explicit action intent.
   codePanel={false}
 />
 
-Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast Action/Close pause the remaining duration. Controlled open emits one timeout request until the owner changes state. Close, focused Escape and Action request dismissal; action side effects belong to the app. Viewport provides the F8 focus shortcut. No global queue or external notification transport is implied.
+## Installation
 
-Parts: Root, Viewport, Title, Description, Action, Close.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
 
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
+Toast consists of `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
+
+- `Root` stays open for `5000ms` by default before requesting dismissal; set `duration={0}` to keep a notification open until explicitly dismissed.
+- Hovering over the toast or focusing `Action` or `Close` pauses the remaining timer until the pointer or focus leaves.
+- Clicking `Close`, pressing `Escape` while focused, or activating `Action` requests dismissal; your application handles the action's side effects.
+- In controlled mode (`open` supplied), reaching the timeout emits a single dismissal request until your state updates.
+- `Viewport` labels the notification region (default `Notifications`) and provides the `F8` shortcut to jump focus directly to the viewport. Managing a queue of multiple toasts stays in your application state.
 
 ## API
 
@@ -41,11 +47,12 @@ This entry is workspace source. It is not a public `proto-ui add` catalog id.
   ]}
 />
 
-`defaultOpen`, `duration`, `paused`, and `politeness` belong to Root. `duration` `0` stays open. `a11yLabel` and `hotkey` belong to Viewport. `disabled` belongs to Action and Close.
+Prop ownership:
+
+- `defaultOpen`, `duration` (`0` keeps the toast open), `paused`, and `politeness` belong to `Root` (pass `open` for controlled mode).
+- `a11yLabel` and `hotkey` belong to `Viewport`.
+- `disabled` belongs to `Action` and `Close`.
 
 ## References
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-TOAST.yaml', 'P-BASE-TOAST.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TOAST.yaml', 'P-BASE-TOAST.yaml']} />

@@ -1,4 +1,4 @@
-import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
+import { defineAsHook, definePrototype, tw, type DefHandle, type RunHandle } from '@proto.ui/core';
 import {
   asAccessible,
   asBoundary,
@@ -102,7 +102,7 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
 
   def.props.define({ side: { type: 'string', empty: 'fallback' } });
   def.props.setDefaults({ side: 'bottom' });
-  const side = def.state.string('drawerSide', 'bottom', {
+  const side = def.state.enum('drawerSide', 'bottom', {
     options: ['top', 'right', 'bottom', 'left'],
   });
   // Initial model admission precedes this Content's open/focus lifecycle callbacks.
@@ -134,11 +134,14 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
 
   // Semantic dismissal belongs to the retained instance, not its physical view.
   let logicalRun: import('@proto.ui/core').RunHandle<DrawerContentProps> | null = null;
-  let mountedRun: any = null;
+  let mountedRun: RunHandle<DrawerContentProps> | null = null;
   let currentContext: DrawerContextValue | null = null;
   let warnedMissingAlertDescription = false;
 
-  const hasLivePart = (run: any, role: 'title' | 'description'): boolean => {
+  const hasLivePart = (
+    run: RunHandle<DrawerContentProps>,
+    role: 'title' | 'description'
+  ): boolean => {
     try {
       return run.anatomy.has(DRAWER_FAMILY, role);
     } catch (error) {
@@ -147,7 +150,7 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     }
   };
 
-  const syncA11yRelations = (run: any, ctx: DrawerContextValue) => {
+  const syncA11yRelations = (run: RunHandle<DrawerContentProps>, ctx: DrawerContextValue) => {
     const hasTitle = hasLivePart(run, 'title');
     const hasDescription = hasLivePart(run, 'description');
     labelledBy.set(

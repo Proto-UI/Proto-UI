@@ -31,6 +31,14 @@ verifies:
 exercises:
   prototypes: [P-BASE-TREE]
 implementations:
+  - id: controlled-owner-and-deferred-group
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/tree-controlled-owner.test.ts
+    required: true
+    consumesCases: [T-TREE-HIERARCHY-0001-CASE-STATE, T-TREE-HIERARCHY-0001-CASE-RELATIONSHIPS]
+    notes:
+      - Retains unknown controlled keys, controlled refusal and exit, synchronous owner supersession, and exact keyed Group materialization. Happy-dom adapter evidence does not claim native input or assistive technology acceptance.
   - id: source-conformance
     kind: runtime-test
     status: passing

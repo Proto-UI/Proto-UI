@@ -15,6 +15,7 @@ import { nativeHostAtomPlan, emitNativeHostAtom, type NativeHostAtomPlan } from 
 import {
   nativeAuthoredHooksArtifact,
   emitAuthoredHookDefinition,
+  emitUnreachedAuthoredHookCall,
   emitPrivilegedHookCall,
 } from './native-authored-hooks';
 import {
@@ -23,7 +24,9 @@ import {
   emitJavaScriptMember,
   emitJavaScriptRecord,
   emitJavaScriptValue,
+  emitJavaScriptBinary,
   emitJavaScriptParameters,
+  emitJavaScriptSignatureParameters,
   emitUninvokedJavaScriptFunction,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -263,7 +266,10 @@ export function emitVue2Source(
       else if (statement.kind === 'effect') inspect(statement.expression);
       else if (statement.kind === 'return' && statement.value) inspect(statement.value);
       else if (statement.kind === 'throw') inspect(statement.value);
-      else if (statement.kind === 'try') {
+      else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        inspect(statement.kind === 'while' ? statement.condition : statement.iterable);
+        inspectBody(statement.body);
+      } else if (statement.kind === 'try') {
         inspectBody(statement.body);
         if (statement.catch) inspectBody(statement.catch.body);
         if (statement.finally) inspectBody(statement.finally);
@@ -328,6 +334,7 @@ export function emitVue2Source(
     prefix,
     admitted.value.ruleMetaKeys,
     admitted.value.shaderKernels,
+    false,
     admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
@@ -364,6 +371,8 @@ export function emitVue2Source(
     if (type === 'props') return `${prefix}ResolvedProps`;
     if (type === 'def') return `${prefix}Owner['def']`;
     if (type === 'run') return `${prefix}Run`;
+    if (type === 'run-lifecycle') return `${prefix}Run['lifecycle']`;
+    if (type === 'style-handle') return `${prefix}NativeStyleHandle`;
     if (type === 'render' && !options.ssr) return `${prefix}NativeRenderer`;
     if (type.startsWith('state:')) return `${prefix}OwnedState<${type.slice(6)}>`;
     if (type.startsWith('state-event:')) return `${prefix}StateEvent<${type.slice(12)}>`;
@@ -384,18 +393,13 @@ export function emitVue2Source(
       type === 'control-label' ||
       type === 'control-label-handle' ||
       type === 'control-label-request' ||
-      (usesInteraction && (type === 'anatomy-family' || type === 'anatomy-part'))
+      (usesInteraction && ['anatomy-family', 'anatomy-part', 'focus-entry'].includes(type))
     )
       return `import(${JSON.stringify('./' + supportPlan.modulesPath.slice(0, -3))}).NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`;
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values
-      .map(
-        (parameter) =>
-          `${parameter.name}${parameter.optional && !parameter.default ? '?' : ''}: ${typeName(parameter.type)}${parameter.default ? ` = ${expression(parameter.default, 0)}` : ''}`
-      )
-      .join(', ');
+    return emitJavaScriptSignatureParameters(values, typeName);
   }
   function fn(value: FunctionIR, depth: number): string {
     if (!reachedFunctions.has(value)) return emitUninvokedJavaScriptFunction(value, false);
@@ -475,6 +479,7 @@ export function emitVue2Source(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, false, {
           plan: callBoundaries,
           wrap: `${prefix}WrapPublic`,
@@ -500,8 +505,10 @@ export function emitVue2Source(
       }
       case 'context-key':
         return contextNames.get(value.keyId)!;
-      case 'style-handle':
-        return emitNativeStyleHandle(value.handle, false);
+      case 'style-handle': {
+        const handle = emitNativeStyleHandle(value.handle, false);
+        return usesStyle ? `(/** @type {${prefix}NativeStyleHandle} */ (${handle}))` : handle;
+      }
       case 'rule':
         return emitNativeRule(
           value,
@@ -521,7 +528,7 @@ export function emitVue2Source(
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
-        return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
+        return emitJavaScriptBinary(value, (item) => expression(item, depth), false);
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
@@ -529,9 +536,16 @@ export function emitVue2Source(
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
-        return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        return `${value.name}(${value.arguments.map((item, index) => `${value.spread?.[index] ? '...' : ''}${expression(item, depth)}`).join(', ')})`;
       case 'authored-hook':
-        return `${aliases.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
+        return reachedHooks.has(value.hookId)
+          ? `${aliases.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`
+          : emitUnreachedAuthoredHookCall(
+              value,
+              (item) => expression(item, depth),
+              typeName,
+              false
+            );
       case 'static-capability':
         return staticNames.get(value.declarationId)!;
       case 'operation': {
@@ -576,6 +590,14 @@ export function emitVue2Source(
           return nativeTemplate.element(value, depth);
         if (nativeTemplate && value.operation === 'render.slot')
           return nativeTemplate.slot(value, depth);
+        if (
+          (value.operation === 'context.subscribe' || value.operation === 'context.trySubscribe') &&
+          value.arguments[1]
+        )
+          // Source and cold IR bind the callback to this key's value schema.
+          // Only the host transport is unknown-typed. Keep the original
+          // callback expression, identity and evaluation position.
+          return `${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}(${expression(value.arguments[0], depth)}, /** @type {(run: ${prefix}Run, next: unknown, previous: unknown) => void} */ (${expression(value.arguments[1], depth)}))`;
         const argumentsCode = value.arguments.map((item) => expression(item, depth)).join(', ');
         if (value.operation === 'state.get')
           return `/** @type {${typeName(value.type)}} */ (${expression(value.receiver!, depth)}.get())`;
@@ -599,7 +621,7 @@ export function emitVue2Source(
     for (const statement of statements) {
       const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        output += `${origin}${['lexical-cell', 'record', 'object-spread'].includes(statement.value.kind) ? `${indent}/** @type {${typeName(statement.value.type)}} */\n` : ''}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
+        output += `${origin}${['lexical-cell', 'record', 'object-spread', 'array', 'array-spread'].includes(statement.value.kind) ? `${indent}/** @type {${typeName(statement.value.type)}} */\n` : ''}${indent}${statement.value.kind === 'lexical-cell' ? 'let' : 'const'} ${statement.name} = ${expression(statement.value, depth)};\n`;
         nativeScope = nativeScope.bind(statement.name, statement.value);
       } else if (statement.kind === 'effect') {
         output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
@@ -609,6 +631,21 @@ export function emitVue2Source(
       } else if (statement.kind === 'throw') {
         output += `${origin}${indent}throw ${expression(statement.value, depth)};\n`;
         break;
+      } else if (statement.kind === 'while' || statement.kind === 'for-of') {
+        const saved = nativeScope;
+        const input = expression(
+          statement.kind === 'while' ? statement.condition : statement.iterable,
+          depth
+        );
+        let nested: string;
+        try {
+          if (statement.kind === 'for-of')
+            nativeScope = nativeScope.parameter(statement.name, undefined, nativeScope, null);
+          nested = body(statement.body, depth + 1, new Set(deadBindings));
+        } finally {
+          nativeScope = saved;
+        }
+        output += `${origin}${indent}${statement.kind === 'while' ? `while (${input})` : `for (const ${statement.name} of ${input})`} {\n${nested}${indent}}\n`;
       } else if (statement.kind === 'try') {
         const branch = (items: readonly StatementIR[], name?: string) => {
           const saved = nativeScope;
@@ -709,9 +746,9 @@ ${
   const contextCode = contextArtifacts
     ? `
   /** @type {Map<object, (value: unknown) => boolean>} */
-  const contextChecks = new Map([
+  const contextChecks = new Map(/** @type {Array<[object, (value: unknown) => boolean]>} */ ([
 ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (/** @param {unknown} value */ (value) => ${prefix}AcceptsContextValue(${JSON.stringify(key.type)}, value))],`).join('\n')}
-  ]);
+  ]));
   const contextScope = ${prefix}CreateContextScope({
     getParent: () => vm[${JSON.stringify(`${prefix}ParentScope`)}] || null,
     isAlive: () => !disposed,
@@ -812,13 +849,13 @@ ${atoms.shader ? `  const ${prefix}Shader = ${prefix}Owner.shader;` : ''}${atoms
 ${hooks}
   ${
     ir.setup.returnType === 'void'
-      ? `(${fn(ir.setup, 1)})(${prefix}Owner.def); return;`
+      ? `(${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${prefix}Owner.def` : ''}); return;`
       : nativeTemplate
         ? `/** @type {((renderer: ${prefix}NativeRenderer) => ${nativeTemplate.resultType}) | void} */
-  const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
+  const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${prefix}Owner.def` : ''});
   if (typeof ${prefix}AuthoredRenderer !== 'function') return ${prefix}AuthoredRenderer;
   return (/** @param {${prefix}NativeRenderer} ${prefix}Renderer */ (${prefix}Renderer) => ${nativeTemplate.publication(`${prefix}AuthoredRenderer(${prefix}Renderer)`)});`
-        : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`
+        : `return (${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${prefix}Owner.def` : ''});`
   }
 }
 
@@ -915,6 +952,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
                 version: 2 as const,
                 id: supportPlan.id,
                 features: [...supportPlan.features],
+                ...(supportPlan.inputs.length ? { inputs: [...supportPlan.inputs] } : {}),
               },
             }
           : {}),
@@ -974,7 +1012,7 @@ ${
     : ''
 }/** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: PUIDataType } | { kind: 'union', members: readonly PUIDataType[] } | { kind: 'record', fields: readonly { name: string, type: PUIDataType, optional?: boolean }[] }} PUIDataType */
 /** @typedef {Readonly<Record<string, unknown>>} PUIRawProps */
-/** @typedef {{ type: 'boolean' | 'number' | 'string' | 'object' | 'any' | 'enum', empty?: 'accept' | 'fallback' | 'error', default?: unknown, options?: readonly string[], range?: { min?: number, max?: number } }} PUIPropSpec */
+/** @typedef {{ type: 'boolean' | 'number' | 'string' | 'object' | 'any' | 'enum', empty?: 'accept' | 'fallback' | 'error', default?: unknown, options?: readonly string[], range?: { min?: number, max?: number }, validator?: (value: never) => boolean }} PUIPropSpec */
 /** @typedef {{ options?: readonly (boolean | string | number)[], min?: unknown, max?: unknown, step?: unknown, clamp?: boolean } & Record<string, unknown>} PUIStateConfiguration */
 /** @typedef {'bool' | 'string' | 'enum' | 'number.discrete' | 'number.range'} PUIStateKind */
 /** @typedef {ReturnType<typeof PUICreateOwner>} PUIOwner */
@@ -1115,6 +1153,13 @@ ${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = 
   const exposed = Object.create(null);
   /** @type {Record<string, unknown>} */
   const eventDeclarations = Object.create(null);
+  /** @param {string} key @param {unknown} value */
+  const declareExpose = (key, value) => {
+    setupOnly();
+    if (typeof key !== 'string' || !key || PUIOwn(exposed, key))
+      throw new Error('[Expose] empty or duplicate declaration: ' + key);
+    exposed[key] = value;
+  };
   /** @type {Record<PUILifecycleKind, Array<PUILifecycleCallback<typeof run>>>} */
   const lifecycle = { ${lifecycleKeys.map((key) => `${JSON.stringify(key)}: []`).join(', ')} };
 ${stateful ? '  /** @type {Array<() => void>} */\n  const notifications = [];\n' : ''}  ${
@@ -1219,7 +1264,9 @@ ${
     const spec = specs[key];
     if (!PUIJson(value) || !PUIAccepts(types[key], value)) return false;
     if (spec.type === 'enum' && (typeof value !== 'string' || !spec.options?.includes(value))) return false;
-    return !spec.range || typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity);
+    if (spec.range && !(typeof value === 'number' && value >= (spec.range.min ?? -Infinity) && value <= (spec.range.max ?? Infinity))) return false;
+    try { return spec.validator ? !!spec.validator(/** @type {never} */ (value)) : true; }
+    catch { return false; }
   };
   /** @param {PUIRawProps} input @param {boolean} strict */
   const resolveProps = (input, strict) => {
@@ -1338,6 +1385,7 @@ ${controlLabel ? '    interaction.refresh();' : emitUndeclaredInstanceAssociatio
   const setPresent = (next) => {
     callback();
     if (terminal) throw new Error('[Vue2 native] presence is locked for terminal disposal.');
+    if (typeof next !== 'boolean') throw new TypeError('[Vue2 native] presence must be boolean.');
     if (present === next) return;
     present = next; ++epoch; pending = null; renderedCommit = null; queued = false;
     const requestedEpoch = epoch, failures = [];
@@ -1407,7 +1455,7 @@ ${
     invoke: (fn) => invoke(fn), getRun: () => run,
     getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
     identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
-    getExposes: () => exposed,
+    getExposes: () => terminal ? {} : exposed,
     requestHostUpdate: force,
   });`
         : `/** @type {PUINativeInteraction<typeof run>} */
@@ -1426,12 +1474,11 @@ ${controlLabel ? '    getAssociations: () => PUINormalizeAssociations(vm.instanc
     getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
     identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
     declarations: ${declarations}, tableFamily: ${tableFamily},
-    getExposes: () => exposed,
+    getExposes: () => terminal ? {} : exposed,
     registerExpose: (key, value) => {
-      setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration: ' + key);
-      if (value !== null && typeof value === 'object' && observedExternals.has(value)) exposed[key] = observedExternals.get(value);
-      else if (typeof value === 'function') exposed[key] = (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => value(...args)); });
-      else exposed[key] = value;
+      if (value !== null && typeof value === 'object' && observedExternals.has(value)) declareExpose(key, observedExternals.get(value));
+      else if (typeof value === 'function') declareExpose(key, (/** @param {unknown[]} args */ (...args) => { publicAlive(); return invoke(() => value(...args)); }));
+      else declareExpose(key, value);
     },
     createOwnedState: (name, value, spec) => createState(spec?.kind ?? (typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string'), name, value, spec),
     watchState: (state, fn) => { setupOnly(); return externalState(state).subscribe(event => invoke(() => fn(run, event))); },
@@ -1556,6 +1603,7 @@ ${
       if (PUIOwn(spec, 'default') && !PUIJson(spec.default)) throw new Error('[Vue2 native] non-JSON prop default: ' + key);
       const prior = next[key];
       if (prior) {
+        if (prior.validator && prior.validator !== spec.validator) throw new Error('[Vue2 native] validator replacement or removal is disallowed: ' + key);
         if (prior.type !== spec.type || PUIOwn(spec, 'empty') && spec.empty !== undefined && rank[spec.empty] > rank[prior.empty ?? 'fallback']) throw new Error('[Vue2 native] conflicting prop declaration: ' + key);
         if (prior.options && !prior.options.every((value) => spec.options && spec.options.includes(value))) throw new Error('[Vue2 native] prop options cannot narrow: ' + key);
         if (prior.range && spec.range && ((spec.range.min ?? -Infinity) > (prior.range.min ?? -Infinity) || (spec.range.max ?? Infinity) < (prior.range.max ?? Infinity))) throw new Error('[Vue2 native] prop range cannot narrow: ' + key);
@@ -1615,13 +1663,13 @@ ${
     : ''
 }    expose: {
       /** @param {string} key @param {unknown} value */
-      value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
+      value: declareExpose,
       /** @template T @param {string} key @param {${interactive ? '{get(): T}' : '{ external: PUIExternalState<T> }'}} handle */
-      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'externalState(handle)' : 'handle.external'}; ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
+      state: (key, handle) => { declareExpose(key, ${interactive ? 'externalState(handle)' : 'handle.external'}); ${hasAuthoredHooks ? 'PUIAuthored.introduceObserved(handle);' : ''} },
       /** @template {unknown[]} Args @template Result @param {string} key @param {(...args: Args) => Result} fn @param {(value: Result) => Result} [project] */
-      method: (key, fn, project) => { setupOnly();  exposed[key] = (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; }); },
+      method: (key, fn, project) => { declareExpose(key, (/** @param {Args} args */ (...args) => { publicAlive(); const result = invoke(() => fn(...args)); return project ? project(result) : result; })); },
       /** @param {string} key @param {unknown} [spec] */
-      event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
+      event: (key, spec) => { declareExpose(key, Object.freeze({kind:'event'})); eventDeclarations[key] = spec; },
     },
     lifecycle: Object.fromEntries(lifecycleKeys.map((key) => {
       /** @type {[string, (fn: PUILifecycleCallback<typeof run>) => void]} */

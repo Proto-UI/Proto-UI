@@ -1,15 +1,15 @@
 ---
-title: 'NavigationMenu'
-description: '具有原生目的地链接的命名导航展开面板。'
+title: 'Navigation Menu'
+description: '结合展开面板与原生导航链接的站点导航栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Navigation Menu 用于构建包含可展开内容区和原生目标链接的导航栏。本页示例使用 **Shadcn Rhea** 风格。
 
-具有原生目的地链接的命名导航展开面板。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-navigation-menu"
@@ -18,19 +18,30 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 是 navigation 地标，Trigger 是展开按钮，Content 是有名称的 region。Root.value 标识唯一展开面板。Item 发出命令；Link 投影带 href、target、rel 与当前页语义的真实锚点。URL 预览、Enter、修饰键/中键浏览及导航由浏览器持有，不合成 Space 激活或应用路由。
+## 安装
 
-组成: Root, Trigger, Content, Item, Link.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-Link 在原生激活之后发出只读 navigate 观察，字段为 href、target、rel、modified；它不是可取消的路由请求。普通当前窗口激活会关闭面板，closeOnSelect=false 可保留；修饰键/中键及 \_blank 激活保留当前页面板。禁用 Link 会移除目标并阻止激活。current=true 通过 aria-current 标识当前页。
+Navigation Menu 由 `Root`、`Trigger`、`Content`、`Item` 和 `Link` 组成：
 
-React/Vue/Vue2 使用原生锚点根节点；Web Components 把调用方内容保留在其持有的局部锚点内，焦点、样式与无障碍投影跟随真实物理表面。演示使用同文档目标，仅观察浏览器导航。源码运行时检查之外的真实浏览器、打包、编译器与 native 验收仍待完成。
+- `Root` 提供 `navigation` 地标语义，并由 `Root.value` 统一管理当前展开的面板。
+- `Trigger` 作为展开按钮，`Content` 作为带名称的展开区域。
+- `Item` 用于触发面板内的操作命令。
+- `Link` 渲染带有 `href`、`target`、`rel` 和当前页语义（`current` -> `aria-current`）的原生锚点链接。
+
+### 原生链接与导航事件
+
+- 悬停 URL 预览、`Enter` 激活、修饰键或中键打开新标签页等行为完全由浏览器原生处理。
+- 在原生激活完成后，`Link` 会发出只读的 `navigate` 事件，携带 `{ href, target, rel, modified }` 字段，适合用于观察与埋点统计。
+- 普通当前窗口点击默认关闭展开面板（可通过 `closeOnSelect={false}` 保持打开）；使用修饰键、中键或 `target="_blank"` 打开时，当前页面的面板保持展开。
+- 禁用 `Link` 会移除跳转目标并阻止激活。
+- 在 React、Vue 和 Vue 2 中，`Link` 直接使用原生 `<a>` 作为根节点；在 Web Components 中，传入的子元素会保留在组件内部的锚点元素中，焦点、样式与无障碍属性随之保持一致。
 
 ## API
 
-Navigation Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。它复用共享菜单家族的 Root 属性。
+以下属性属于 `Root`（传入 `value` 可进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -42,7 +53,12 @@ Navigation Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `disabled` 默认 `false`。Content 的 `sideOffset` 默认 `4`。Item 的 `closeOnSelect` 默认 `true`。Link 的 `href` 与 `rel` 默认 `''`，`current` 默认 `false`，`target` 默认 `_self`。
+其他部件的默认属性：
+
+- `Trigger`：`disabled` 默认 `false`。
+- `Content`：`sideOffset` 默认 `4`。
+- `Item`：`closeOnSelect` 默认 `true`。
+- `Link`：`href` 和 `rel` 默认 `''`，`current` 默认 `false`，`target` 默认 `'_self'`。
 
 ## 参考
 

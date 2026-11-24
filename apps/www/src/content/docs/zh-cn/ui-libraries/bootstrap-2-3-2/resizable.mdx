@@ -1,15 +1,15 @@
 ---
-title: 'Resizable (WIP)'
-description: 'resizable functional composition and current verification limits.'
+title: 'Resizable'
+description: '支持多比例面板拖拽、折叠停靠、嵌套布局与键盘调整的 Bootstrap 2.3.2 可调整分栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Resizable 支持两个或多个比例面板及逐个编号的分隔柄。每个柄连续调整相邻两个面板；嵌套 Root 独立管理自己的比例和方向。指针、方向键、Home/End、Shift 加速与折叠走同一条约束请求路径。
+Resizable 将两个或多个按百分比分配的面板与可拖拽分隔柄组合起来，支持指针拖动、方向键、`Shift` 加速、`Home` / `End` 与面板折叠，并可自由嵌套不同方向的面板组。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+## 预览
 
-Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读取 --pui-size 的静态 flex-basis 规则，不再依赖运行时动态百分比 token。
+示例展示了三个水平面板，以及嵌入其中的两个垂直面板组。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-resizable"
@@ -17,14 +17,23 @@ Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **多面板编号**：`N` 个 `Panel` 依次使用 `index: 0..N-1`，`N - 1` 个 `Handle` 使用 `index: 0..N-2`（每个 `Handle` 调整其前后相邻的两个面板，保持其余面板比例不变，默认无障碍名称为 `Resize panels`）。
+- **约束与折叠**：通过 `constraints` 按面板索引配置 `min`、`max`、`collapsible` 与 `collapsedSize`（默认 `0`、`100`、`false`、`0`）。总比例自动归一化为 `100`；非法或不可行约束会保持上次有效布局。折叠是离散停靠点，若相邻面板已达 `max` 则阻止继续折叠。
+- **受控与嵌套**：传入 `sizes` 进入受控模式，通过 `sizesChange` 与 `sizesCommit`（载荷为 `{ sizes }`）接收实时与最终比例；取消拖拽不触发 `sizesCommit`。嵌套 `Root` 各自独立管理比例、约束与方向。Web 样式通过 `--pui-size` 映射静态 `flex-basis` 规则，拖拽计算自动扣除固定分隔柄宽度。
+
 ## API
 
-Root 的 `sizes` / `defaultSizes` 表示完整百分比数组。N 个 Panel 使用 `index: 0..N-1`，N−1 个 Handle 使用 `index: 0..N-2`；Handle 的 index 指向其前一个面板，无障碍名称仍是 `Resize panels`。原有 `value` / `defaultValue` 双面板 API 保留；显式提供 `sizes` 时以数组为准。
-
-### 多面板所有权
-
-`constraints` 逐面板提供 `min`、`max`、`collapsible`、`collapsedSize`，默认分别为 0、100、false、0。比例归一化为总计 100；不可行布局保留上一个有效状态并拒绝调整。分隔柄保留相邻两面板的总量和其他面板的大小。折叠是离散停点，相邻面板的上限可能阻止折叠。
-
-读取 `sizes`，或调用 `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)`。`sizesChange`、`sizesCommit` 的载荷为 `{ sizes }`。传入 `sizes` 进入受控模式，父级回传提议表示接受，保持原值表示拒绝；面板与 ARIA 始终跟随已提交值。取消手势不发 commit。
-
-嵌套 Root 独立管理所有权、约束和几何。示例包含三个水平面板，以及内部两个垂直面板；拖动按面板实际总长度归一化，不把固定分隔柄宽度计入分母。
+| 部件 | 属性 / 方法 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `sizes` / `defaultSizes` | 完整面板百分比数组（同时兼容旧双面板 `value` / `defaultValue`，传入 `sizes` 时优先） |
+| `Root` | `constraints` | 逐面板约束对象数组：`min`、`max`、`collapsible`、`collapsedSize` |
+| `Root` | `requestResize(index, nextSize, commit)` / `requestSizes(nextSizes, commit)` | 编程式发起单面板或整组尺寸调整 |
+| `Root` | `sizesChange` / `sizesCommit` | 拖拽中与提交时的比例变更事件，载荷为 `{ sizes }` |
+| `Panel` | `index` | `0..N-1` 面板编号，通过 `--pui-size` 应用当前百分比宽度/高度 |
+| `Handle` | `index` | `0..N-2` 分隔柄编号，支持指针与键盘调整相邻面板 |

@@ -229,8 +229,11 @@ describe('prototypes/brutalist: checkbox', () => {
       'pressed',
       // P-BASE-FIELD-CHOICES-POLICY/RESET also govern the ordinary Root.
       'readOnly',
+      'required',
       'resetValue',
     ]);
+    // P-BASE-CHECKBOX-REQUIRED belongs to the same Root, never the Indicator.
+    expect(root.getExposes().required.get()).toBe(false);
     expect(indicator.hasAttribute('role')).toBe(false);
     expect(indicator.hasAttribute('aria-checked')).toBe(false);
     expect(root.getAttribute('role')).toBe('checkbox');

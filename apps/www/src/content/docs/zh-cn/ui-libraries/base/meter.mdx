@@ -1,11 +1,15 @@
 ---
-title: base Meter
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Meter'
+description: '用于展示已知区间内标量数值与状态分级的计量指示器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+用于展示处于已知上下界内的数值及其最优区间状态的被动计量组件。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-meter"
@@ -14,17 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。low、high、optimum 将测量值划分为 optimal、suboptimal、critical，不改变数值本身。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-base/meter` 导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator` 和 `meterValue`。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+## 用法
 
-包入口统一注册后，可从 meter 子路径导入 meterRoot、meterLabel、meterTrack、meterIndicator、meterValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+由 `Root`、`Label`、`Track`、`Indicator` 和 `Value` 组成：
+
+- **职责划分**：状态由 `Root` 统一管理；`Label` 提供名称，`Track` 容纳 `Indicator`，`Value` 显示 `valueText` 或规范化后的数值。
+- **范围与区间分级**：`value` 会限制在 `[min, max]` 内（上下界相等时比例为 `0`）。设置 `low`、`high` 和 `optimum` 可将当前测量值归类为 `optimal`、`suboptimal` 或 `critical`，但不改变数值本身。
+- **被动展示与状态暴露**：组件为纯展示控件，不引入键盘焦点停靠点或编辑事件；更新属性后会同步所有部件。`Root` 及各部件暴露 `value`、`percentage`、`indeterminate` 和 `status`。
 
 ## API
 
-Meter 是工作区源码，没有公开的 `proto-ui add` 目标。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -40,7 +48,7 @@ Meter 是工作区源码，没有公开的 `proto-ui add` 目标。
   ]}
 />
 
-这些属性属于 Root。Label、Track、Indicator 与 Value 没有属性。
+`Label`、`Track`、`Indicator` 与 `Value` 无额外属性。
 
 ## 参考
 

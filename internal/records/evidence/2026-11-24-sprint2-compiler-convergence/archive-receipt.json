@@ -1,0 +1,8 @@
+{
+  "archive": "/tank/shared/projects/proto-ui-agent/s2-completion-20261124-b202/transfer/s2-compiler-convergence-6b-01/raw-evidence.tar.gz",
+  "bytes": 1803320,
+  "sha256": "3ea35a28c10833c58e3fd9d5e4a8a8450465c1304c06084a2f2a930dcad23fd1",
+  "manifestSha256": "dba2175a46c315ff25c62cb21b91b3b284835d5b9b6f32eb8994aec9c3ea15f3",
+  "verifiedFiles": 232,
+  "readback": "Every archived payload and manifest was read back and matched by path, byte length and SHA-256."
+}

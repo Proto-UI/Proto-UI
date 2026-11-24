@@ -1,0 +1,23 @@
+{
+  "started": "2026-11-23T21:11:58.890666+00:00",
+  "intervalSeconds": 2,
+  "jobs": [
+    "full-compiler-general-0-5cb80",
+    "full-compiler-general-1-5cb80",
+    "full-compiler-browser-5cb80",
+    "library-profile-0-5cb80",
+    "library-profile-1-5cb80"
+  ],
+  "scope": "Sampled sum of RSS for launcher and all current descendants; shared pages may be counted more than once. These are sampled peaks only, not kernel lifetime peaks, and earlier execution before this monitor began is not reconstructed.",
+  "ended": "2026-11-23T21:54:25.354844+00:00",
+  "samples": 1207,
+  "sampledPeakRssKiB": {
+    "full-compiler-general-0-5cb80": 1214728,
+    "full-compiler-general-1-5cb80": 1374356,
+    "full-compiler-browser-5cb80": 1742988,
+    "library-profile-0-5cb80": 1073008,
+    "library-profile-1-5cb80": 1306296
+  },
+  "allJobsTerminal": true,
+  "interruptedSignal": null
+}

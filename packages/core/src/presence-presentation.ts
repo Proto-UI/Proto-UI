@@ -13,8 +13,10 @@ export type FiniteSelection<T> = Readonly<{
 export type PresenceEndpoint = Readonly<{
   translate?: Translation | FiniteSelection<Translation>;
   opacity?: number;
+  /** Named draft extension; intrinsic is measured from the current semantic layout. */
+  blockSize?: number | 'intrinsic';
 }>;
-export type PresentationChannel = 'translate' | 'opacity';
+export type PresentationChannel = 'translate' | 'opacity' | 'blockSize';
 export type PresentationOutcome =
   | 'finished'
   | 'reduced-motion'
@@ -166,15 +168,23 @@ function selectedTranslation(value: unknown): Translation | FiniteSelection<Tran
   return Object.freeze({ source, cases: Object.freeze(cases) });
 }
 function endpoint(value: unknown): PresenceEndpoint {
-  const v = shape(value, ['translate', 'opacity'], []);
+  const v = shape(value, ['translate', 'opacity', 'blockSize'], []);
   const keys = Reflect.ownKeys(v);
   if (!keys.length) return fail();
-  const result: { translate?: Translation | FiniteSelection<Translation>; opacity?: number } = {};
+  const result: {
+    translate?: Translation | FiniteSelection<Translation>;
+    opacity?: number;
+    blockSize?: number | 'intrinsic';
+  } = {};
   if (keys.includes('translate')) result.translate = selectedTranslation(field(v, 'translate'));
   if (keys.includes('opacity')) {
     const opacity = finite(field(v, 'opacity'));
     if (opacity < 0 || opacity > 1) return fail();
     result.opacity = opacity;
+  }
+  if (keys.includes('blockSize')) {
+    const size = field(v, 'blockSize');
+    result.blockSize = size === 'intrinsic' ? size : nonnegative(size);
   }
   return Object.freeze(result);
 }

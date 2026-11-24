@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Select'
-description: '基于 Base Select 的默认扁平圆角选择器投影'
+description: '提供扁平与立体触发器外观、键盘导航与弹出定位的 Brutalist 风格下拉选择器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,19 +9,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Select 在 Neo-Brutalist 表面语言下保留 Base 的 value-class presentation 与选择语义。
+Select 用于从下拉选项列表中选择单一值，采用 5px 圆角与 2px 黑色硬边边框的 Brutalist 视觉风格，并提供完整的键盘、鼠标与触摸交互支持。
+
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-select" initialRuntime="wc" />
 </div>
 
-## Trigger 外观
+## 安装
 
-默认 Trigger 遵循上游 Select：5px 圆角、2px 黑边、DM Sans 500，保持扁平。`appearance="elevated"` 是显式 Proto UI 扩展，供与有硬影命令同组的 Trigger 使用，例如 Header 的 Runtime 与 Style 控件。静止态为向右/下 4px 黑色硬影；hover 或 press 将 Trigger 向右/下移动 4px 并去除硬影，press 不叠加第二次位移。
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-select` 添加，或从 `@proto.ui/prototypes-brutalist/select` 导入。
 
-此 prop 设置在 `brutalist-select-trigger`，不设在 Root 或 Content。`appearance="flat"`、缺省或移除 prop 都恢复扁平默认值。`size="sm" | "default"`、配对 fill/ink、焦点 ring、键盘选择及 disabled 行为不变；两种外观的 Content 都保持扁平。页面 CSS 不应另外补影。
+## 用法
 
-## 鼠标、键盘与触摸所有权
+### Trigger 外观
+
+默认的 `Trigger` 保持扁平样式（5px 圆角、2px 黑边、DM Sans 500）。当选择器与带硬影的按钮并排放置（例如页头工具条中的 Runtime / Style 切换控件）时，可在 `brutalist-select-trigger` 上设置 `appearance="elevated"`：
+
+- 静止状态下呈现向右/下 4px 的黑色硬影；悬停或按下时向右下位移 4px 并收起阴影，按下不会叠加第二次位移。
+- 设置 `appearance="flat"`、省略或移除该属性可恢复扁平外观。两种外观下 `size`、配色、焦点环、键盘选择与禁用行为保持一致，弹层 `Content` 始终保持扁平，无需通过额外 CSS 补影。
+
+### 指针、键盘与触摸交互
 
 <PrototypePreviewer
   demoId="demo-brutalist-select-input"
@@ -30,11 +39,12 @@ Select 在 Neo-Brutalist 表面语言下保留 Base 的 value-class presentation
   codePanel={false}
 />
 
-这个可滚动的公开配方区分焦点与已提交选择。已知、无按住按钮的鼠标移动可导航；触摸、笔与拖动不借用该 hover 路径。受控拒绝开关显示提案，同时由 owner 保留当前值。弹层采用公开 popper 定位，触摸滚动与捕获由浏览器负责。
+- 下拉列表区分当前高亮焦点项与已提交选中值；未按住鼠标键的指针移动可更新高亮项，触摸、手写笔滚动与拖拽则交由浏览器原生滚动与捕获处理。
+- 在受控模式下，传入 `open` 或 `value` 即可接管对应状态；即使拒绝选中提议，当前已提交值依然保持稳定。弹层默认采用 popper 定位并支持碰撞避让。
 
 ## API
 
-Select 是工作区源码。当前工作区 CLI 目标为 `brutalist-select`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 或 `value` 会使对应事实进入受控模式。
+以下前五个属性（`defaultOpen`、`defaultValue`、`disabled`、`readOnly`、`closeOnSelect`）属于 `Root`（传入 `open` 或 `value` 进入受控模式），`size` 与 `appearance` 属于 `Trigger`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -49,4 +59,10 @@ Select 是工作区源码。当前工作区 CLI 目标为 `brutalist-select`。C
   ]}
 />
 
-前五个属性属于 Root。`size` 与 `appearance` 属于 Trigger，Trigger 的 `accessibleLabel` 默认 `''`。Value 的 `placeholder` 默认 `''`。Content 接受 Transition 属性，`position` 默认 `popper`，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `10`。Item 的 `disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；`closeOnSelect` 没有默认值，回退到 Root 策略。Group、Label、Surface、ItemText、Viewport 与 Separator 没有属性。
+其余子部件属性默认值：
+
+- **Trigger**：另支持 `accessibleLabel`（默认 `''`）。
+- **Value**：`placeholder` 默认 `''`。
+- **Content**：支持 Transition 属性；`position` 默认 `'popper'`，`side` 默认 `'bottom'`，`align` 默认 `'center'`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`avoidCollisions` 默认 `true`，`collisionPadding` 默认 `10`。
+- **Item**：`disabled` 默认 `false`，`value` 与 `textValue` 默认 `''`；`closeOnSelect` 未设置时继承 `Root` 配置。
+- **Group**、**Label**、**Surface**、**ItemText**、**Viewport**、**Separator**：无属性。

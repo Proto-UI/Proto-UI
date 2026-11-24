@@ -256,6 +256,78 @@ function runNpm(evidence, name, args, consumer) {
   );
 }
 
+/** Install only the consumer manifest through an isolated npm lock/ci journey. */
+export function installRegistryClosure(
+  consumer,
+  dependencies,
+  devDependencies,
+  evidence = consumer
+) {
+  assert.equal(
+    existsSync(path.join(consumer, 'node_modules')),
+    false,
+    'Start with no installed packages'
+  );
+  const manifest = json(path.join(consumer, 'package.json'));
+  assert.deepEqual(manifest.dependencies, dependencies);
+  assert.deepEqual(manifest.devDependencies, devDependencies);
+  for (const [name, version] of Object.entries({ ...dependencies, ...devDependencies })) {
+    packageName(name);
+    assert.match(version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/);
+  }
+  const registry = 'https://registry.npmjs.org/';
+  const config = path.join(consumer, '.npmrc');
+  writeFileSync(config, `registry=${registry}\naudit=false\nfund=false\n`);
+  const options = [
+    '--ignore-scripts',
+    '--no-audit',
+    '--no-fund',
+    '--global=false',
+    '--workspaces=false',
+    '--registry',
+    registry,
+    '--cache',
+    path.join(consumer, '.npm-cache'),
+    '--userconfig',
+    config,
+  ];
+  runNpm(evidence, 'registry-lock', ['install', '--package-lock-only', ...options], consumer);
+  assert.equal(
+    existsSync(path.join(consumer, 'node_modules')),
+    false,
+    'Lock generation must not install packages'
+  );
+  runNpm(evidence, 'registry-ci', ['ci', ...options], consumer);
+  runNpm(
+    evidence,
+    'installed-tree',
+    ['ls', '--all', '--json', '--global=false', '--workspaces=false'],
+    consumer
+  );
+  // Validate actual payload paths and package identities as well as npm's logical tree.
+  filesUnder(path.join(consumer, 'node_modules'));
+  const lock = json(path.join(consumer, 'package-lock.json'));
+  const packages = installedPackages(consumer, lock);
+  for (const [name, version] of Object.entries({ ...dependencies, ...devDependencies })) {
+    assert.equal(
+      packages.find((entry) => entry.location === `node_modules/${name}`)?.version,
+      version,
+      `Clean installation changed the declared version of ${name}`
+    );
+  }
+  return {
+    mode: 'exact-registry-install',
+    registry,
+    direct: dependencies,
+    tooling: devDependencies,
+    installScripts: false,
+    lockCommand: 'npm install --package-lock-only',
+    installCommand: 'npm ci',
+    lockSha256: sha(readFileSync(path.join(consumer, 'package-lock.json'))),
+    packages,
+  };
+}
+
 /** Copy real package payloads and reproduce Node's reachable dependency/peer graph. */
 export function copyInstalledClosure(consumer, dependencies, devDependencies, installedRoot) {
   const roots = [
@@ -1276,35 +1348,7 @@ async function main() {
       let delivery;
       if (mode === 'copy')
         delivery = copyInstalledClosure(consumer, dependencies, devDependencies, installedRoot);
-      else {
-        writeFileSync(
-          path.join(consumer, '.npmrc'),
-          'registry=https://registry.npmjs.org/\naudit=false\nfund=false\n'
-        );
-        runNpm(
-          evidence,
-          'install',
-          [
-            'install',
-            '--ignore-scripts',
-            '--no-audit',
-            '--no-fund',
-            '--cache',
-            path.join(consumer, '.npm-cache'),
-            '--userconfig',
-            path.join(consumer, '.npmrc'),
-          ],
-          consumer
-        );
-        runNpm(evidence, 'installed-tree', ['ls', '--all', '--json'], consumer);
-        delivery = {
-          mode: 'exact-registry-install',
-          registry: 'https://registry.npmjs.org/',
-          direct: dependencies,
-          tooling: toolVersions,
-          installScripts: false,
-        };
-      }
+      else delivery = installRegistryClosure(consumer, dependencies, devDependencies, evidence);
       save(path.join(evidence, 'dependency-delivery.json'), delivery);
       const costs = await checkAndMeasure(consumer, evidence, profile, delivery);
       writeFileSync(path.join(consumer, 'build.mjs'), buildProgram);

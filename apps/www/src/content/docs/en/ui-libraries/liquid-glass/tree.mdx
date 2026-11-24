@@ -1,16 +1,35 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: 'A Liquid Glass hierarchical tree view with single selection, node expansion, and full keyboard navigation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Tree owns single selection and expansion of a complete authored hierarchy. nodeKey is unique, parentKey identifies its parent, and invalid cycles or missing parents fail closed. Arrow keys, Home/End and first-letter navigation move focus; Left/Right collapse, expand or navigate to parent/child. Controlled value and expandedKeys are request-only.
+Liquid Glass Tree manages an explicitly keyed hierarchy with single selection, node expansion, and standard arrow-key and typeahead navigation.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-tree"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Explicit hierarchy**: identify each node with a unique `nodeKey` and reference its parent via `parentKey`; duplicate keys, missing parents, and cycles are ignored safely.
+- **Keyboard navigation**: Up/Down, `Home`/`End`, and first-letter typing move focus across visible nodes; Left/Right collapse or move to the parent, and expand or move to the first child.
+- **Controlled state**: `value` (selected node) and `expandedKeys` (expanded node keys) both support controlled request mode.
+
+## API
+
+| Prop           | Description                                  |
+| -------------- | -------------------------------------------- |
+| `value`        | Controlled `nodeKey` of the selected node    |
+| `expandedKeys` | Controlled list of expanded node keys        |
+| `nodeKey`      | Unique identifier for a node within the tree |
+| `parentKey`    | `nodeKey` of the parent node                 |

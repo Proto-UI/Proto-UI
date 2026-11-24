@@ -46,6 +46,7 @@ type Scope = {
   ): () => void;
   read(key: object): { value: number };
   tryRead(key: object): { value: number } | null;
+  tryReadAncestor(key: object): { value: number } | null;
   update(key: object, value: unknown): void;
   tryUpdate(key: object, value: unknown): boolean;
   dispose(): void;
@@ -163,6 +164,64 @@ function mount() {
 }
 
 describe('native React Context scope ownership', () => {
+  it('preserves independent strict-ancestor intent, self ownership and stale delivery cancellation', async () => {
+    const { helpers } = await loadProject({ Provider: provider });
+    const key = {};
+    const deferred: (() => unknown)[] = [];
+    let parent: Scope | null = null;
+    const create = (getParent: () => Scope | null, defer = false): Scope =>
+      helpers.createContextScope({
+        getParent,
+        isAlive: () => true,
+        invoke: (callback) => {
+          if (defer) {
+            deferred.push(callback);
+            return undefined as never;
+          }
+          return callback();
+        },
+        validate: () => true,
+      });
+    const outer = create(() => null);
+    outer.provide(key, { value: 1 });
+    const other = create(() => null);
+    other.provide(key, { value: 8 });
+    parent = outer;
+    const inner = create(() => parent, true);
+    inner.provide(key, { value: 5 });
+    const seen: number[] = [];
+    const subscribeAncestor = inner.subscribe as (
+      key: object,
+      mode: 'optional',
+      callback: (next: { value: number } | null) => void,
+      origin: 'ancestor'
+    ) => () => void;
+    const off = subscribeAncestor(key, 'optional', (next) => seen.push(next!.value), 'ancestor');
+    expect(inner.tryReadAncestor(key)).toEqual({ value: 1 });
+    expect(() => inner.tryRead(key)).toThrow(/subscription/);
+    inner.update(key, { value: 6 });
+    expect(deferred).toHaveLength(0);
+    outer.update(key, { value: 2 });
+    expect(deferred).toHaveLength(1);
+    parent = other;
+    deferred.splice(0).forEach((callback) => callback());
+    expect(seen).toEqual([]);
+    expect(inner.tryReadAncestor(key)).toEqual({ value: 8 });
+    other.update(key, { value: 9 });
+    off();
+    deferred.splice(0).forEach((callback) => callback());
+    expect(seen).toEqual([]);
+    expect(inner.tryReadAncestor(key)).toEqual({ value: 9 });
+    const readOnly = create(() => other);
+    (readOnly.subscribe as typeof subscribeAncestor)(key, 'optional', () => {}, 'ancestor');
+    expect(() => readOnly.update(key, { value: 10 })).toThrow(/subscription/);
+    expect(() => readOnly.tryUpdate(key, { value: 10 })).toThrow(/subscription/);
+    inner.dispose();
+    readOnly.dispose();
+    outer.dispose();
+    other.dispose();
+    expect(() => inner.tryReadAncestor(key)).toThrow(/disposal/);
+  });
   it('preserves a missing-provider startup error without a secondary null-owner connection failure', async () => {
     const {
       components: { Consumer },

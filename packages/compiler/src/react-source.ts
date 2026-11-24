@@ -9,9 +9,17 @@ import {
   emitPublicMethodProjection,
 } from './native-public-values';
 import { nativeHostAtomPlan, emitNativeHostAtom } from './native-async';
+import { webPresenceSourceInputs } from './native-support/web-presence';
+import {
+  webViewVisibilityArtifact,
+  webViewVisibilitySourceInputs,
+} from './native-support/web-host-primitives';
+import { webDecorationArtifacts, webDecorationSourceInputs } from './native-support/web-decoration';
+import { reactSvgFactories } from './svg-templates';
 import {
   nativeAuthoredHooksArtifact,
   emitAuthoredHookDefinition,
+  emitUnreachedAuthoredHookCall,
   emitPrivilegedHookCall,
 } from './native-authored-hooks';
 import {
@@ -20,7 +28,9 @@ import {
   emitJavaScriptMember,
   emitJavaScriptRecord,
   emitJavaScriptValue,
+  emitJavaScriptBinary,
   emitJavaScriptParameters,
+  emitJavaScriptSignatureParameters,
   emitUninvokedJavaScriptFunction,
   formatJavaScriptValueType,
   emitOptionalOperation,
@@ -36,6 +46,7 @@ import { checkTargetOperations, resolveTargetProfile } from './targets';
 import { isDataValueType, isPublicValueType } from './ir';
 import { buildNativeContextArtifacts, emitNativeContextValidation } from './native-context';
 import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './native-style';
+import { collectNativeRuleMeta, nativeRuleMetaArtifacts } from './native-rule-meta';
 import { nativeSupportArtifacts, planNativeSupport } from './native-interaction';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitReactSSRSupport, reactSSRTransportArtifact } from './react-ssr-source';
@@ -53,14 +64,63 @@ import type {
   ValueType,
 } from './ir';
 
+function uniqueNativeFiles(files: NonNullable<GeneratedModule['supportingFiles']>) {
+  const unique = new Map<string, (typeof files)[number]>();
+  for (const file of files) {
+    const previous = unique.get(file.path);
+    if (previous && (previous.kind !== file.kind || previous.contents !== file.contents))
+      throw new Error(`Conflicting native support asset ${file.path}.`);
+    if (!previous) unique.set(file.path, file);
+  }
+  return [...unique.values()];
+}
+
 /** Native DOM lowering. The generated program executes checked functions, never an IR interpreter. */
 export function emitReactSource(
   input: PrototypeIR,
-  options: { componentName?: string; ssr?: boolean; propsUpdatePolicy?: PropsUpdatePolicy } = {}
+  options: {
+    componentName?: string;
+    ssr?: boolean;
+    propsUpdatePolicy?: PropsUpdatePolicy;
+    rootTag?: string;
+  } = {}
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = pruneDeadValues(validated.value);
+  if (options.rootTag !== undefined && !/^[a-z][a-z0-9-]*$/.test(options.rootTag)) {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI3001',
+          category: 'invalid-input',
+          message: 'rootTag must be a native lower-case element name.',
+          span: ir.setup.span,
+        },
+      ],
+    };
+  }
+  const physicalRoots = ir.moduleDeclarations.flatMap((declaration) => {
+    if (declaration.id === '@proto.ui/text-control/declaration')
+      return [declaration.config.lineMode === 'single' ? 'input' : 'textarea'];
+    if (declaration.id === '@proto.ui/image-view/declaration') return ['img'];
+    if (declaration.id === '@proto.ui/native-link/declaration') return ['a'];
+    return [];
+  });
+  if (options.rootTag && physicalRoots.some((tag) => tag !== options.rootTag)) {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message: 'Explicit rootTag conflicts with the authored physical control root.',
+          span: ir.setup.span,
+        },
+      ],
+    };
+  }
   const readValue = createJavaScriptValueReader(ir, typeName);
   const callBoundaries = planJavaScriptCallBoundaries(ir);
   const moduleParts = partitionModuleBindings(
@@ -102,7 +162,37 @@ export function emitReactSource(
     };
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const reachedFunctions = new Set(admitted.value.functions);
+  const reachedHooks = new Set(admitted.value.authoredHooks);
   const interaction = supportPlan.features.length > 0;
+  const overlayHost = !ssr && supportPlan.features.includes('overlay');
+  const decorations = admitted.value.operations.includes('feedback.style.declareDecoration');
+  const svg = admitted.value.operations.some((operation) => operation.startsWith('render.svg.'));
+  if (ssr && (decorations || admitted.value.operations.includes('feedback.style.presence')))
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message:
+            'Owned decoration and presentation sinks require the implemented live React DOM source profile.',
+          span: ir.setup.span,
+        },
+      ],
+    };
+  if (decorations && physicalRoots.length)
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message:
+            'Owned decoration requires an ordinary root, not a native text, image or link root.',
+          span: ir.setup.span,
+        },
+      ],
+    };
   // Demand is derived from reached operations/expressions, never component identity.
   let usesStyle = admitted.value.operations.some((operation) =>
     /^(style\.|rule\.|feedback\.style\.|feedback\.material\.shader$)/.test(operation)
@@ -222,7 +312,11 @@ export function emitReactSource(
     p,
     admitted.value.ruleMetaKeys,
     admitted.value.shaderKernels,
+    true,
     admitted.value.shaderScenes
+  );
+  const ruleMetaKeys = collectNativeRuleMeta(ir).filter(
+    (key) => key !== 'colorScheme' && !key.startsWith('preference.')
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -268,6 +362,8 @@ export function emitReactSource(
     if (type === 'context-key')
       return "{readonly __brand: 'ContextKey'; readonly debugName?: string}";
     if (type === 'exception') return 'unknown';
+    if (type === 'public-expose') return 'unknown';
+    if (type === 'public-method') return '(...args: unknown[]) => unknown';
     if (typeof type !== 'string') return formatJavaScriptValueType(type, typeName);
     if (isDataValueType(type))
       return interaction && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
@@ -291,6 +387,7 @@ export function emitReactSource(
     if (type === 'state-disconnect') return `{type:'disconnect';reason:'unmount'}`;
     if (type === 'def') return `typeof ${p}Def`;
     if (type === 'run') return `${p}Run`;
+    if (type === 'run-lifecycle') return `${p}Run['lifecycle']`;
     if (type === 'render') return `typeof ${p}Renderer`;
     if (type === 'props') return `${p}ResolvedProps`;
     if (type === 'focus') return `${p}NativeFocus`;
@@ -306,6 +403,8 @@ export function emitReactSource(
     if (type === 'record') return 'Readonly<Record<string, unknown>>';
     if (type === 'template') return `${p}React.ReactNode`;
     if (type === 'style-handle') return `${p}NativeStyleHandle`;
+    if (type === 'decoration-target') return 'Readonly<object>';
+    if (type === 'decoration-style') return `Pick<${p}NativeStyle, 'use'>`;
     if (type === 'template-props') return `{ readonly style?: ${p}NativeStyleHandle }`;
     if (type === 'rule-handle') return `${p}NativeRuleHandle`;
     if (type === 'style-disposer') return '() => void';
@@ -313,7 +412,7 @@ export function emitReactSource(
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return emitJavaScriptParameters(values, (value) => expression(value, 0), typeName);
+    return emitJavaScriptSignatureParameters(values, typeName);
   }
 
   function fn(value: FunctionIR, depth: number): string {
@@ -354,6 +453,7 @@ export function emitReactSource(
       case 'call':
       case 'intrinsic':
       case 'object-spread':
+      case 'array-spread':
         return emitJavaScriptValue(value, (item) => expression(item, depth), typeName, true, {
           plan: callBoundaries,
           wrap: `${p}WrapPublic`,
@@ -396,7 +496,7 @@ export function emitReactSource(
       case 'unary':
         return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary':
-        return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
+        return emitJavaScriptBinary(value, (item) => expression(item, depth));
       case 'array':
         return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
       case 'record':
@@ -404,9 +504,11 @@ export function emitReactSource(
       case 'function':
         return fn(value.function, depth);
       case 'helper-call':
-        return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        return `${value.name}(${value.arguments.map((item, index) => `${value.spread?.[index] ? '...' : ''}${expression(item, depth)}`).join(', ')})`;
       case 'authored-hook':
-        return `${hooks.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`;
+        return reachedHooks.has(value.hookId)
+          ? `${hooks.get(value.hookId)}(${(value.arguments ?? []).map((item) => expression(item, depth)).join(', ')})`
+          : emitUnreachedAuthoredHookCall(value, (item) => expression(item, depth), typeName);
       case 'operation': {
         const optional = emitOptionalOperation(
           value,
@@ -453,6 +555,7 @@ export function emitReactSource(
         const type = [
           'context.read',
           'context.tryRead',
+          'context.tryReadAncestor',
           'render.read.context.read',
           'render.read.context.tryRead',
         ].includes(value.operation)
@@ -474,7 +577,7 @@ export function emitReactSource(
         const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
         switch (value.kind) {
           case 'const':
-            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread', 'array'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
+            return `${origin}${indent}${value.value.kind === 'lexical-cell' ? 'let' : 'const'} ${value.name}${['lexical-cell', 'record', 'object-spread', 'array', 'array-spread'].includes(value.value.kind) ? `: ${typeName(value.value.type)}` : ''} = ${expression(value.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expression(value.expression, depth)};\n`;
           case 'return':
@@ -483,6 +586,10 @@ export function emitReactSource(
             return `${origin}${indent}throw ${expression(value.value, depth)};\n`;
           case 'try':
             return `${origin}${indent}try {\n${statements(value.body, depth + 1)}${indent}}${value.catch ? ` catch${value.catch.name ? ` (${value.catch.name})` : ''} {\n${statements(value.catch.body, depth + 1)}${indent}}` : ''}${value.finally ? ` finally {\n${statements(value.finally, depth + 1)}${indent}}` : ''}\n`;
+          case 'while':
+            return `${origin}${indent}while (${expression(value.condition, depth)}) {\n${statements(value.body, depth + 1)}${indent}}\n`;
+          case 'for-of':
+            return `${origin}${indent}for (const ${value.name} of ${expression(value.iterable, depth)}) {\n${statements(value.body, depth + 1)}${indent}}\n`;
           case 'if':
             return `${origin}${indent}if (${expression(value.condition, depth)}) {\n${statements(value.then, depth + 1)}${indent}}${value.otherwise.length ? ` else {\n${statements(value.otherwise, depth + 1)}${indent}}` : ''}\n`;
         }
@@ -544,7 +651,7 @@ export function emitReactSource(
   const hookDefinitions =
     statements(moduleParts.owned, 1) +
     ir.hooks
-      .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
+      .filter((hook) => reachedHooks.has(hook.id))
       .map(
         (hook) =>
           '  ' +
@@ -568,6 +675,7 @@ ${publicCalls ? `import { createNativePublicCalls as ${p}CreatePublicCalls } fro
 ${callBoundaries.authored.size ? `import { markNativeAuthoredCallable as ${p}MarkAuthoredCallable, isNativeAuthoredCallable as ${p}IsAuthoredCallable } from './.proto-ui/owner/authored-callables-v1';` : ''}
 ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${p}CreateAuthored } from './.proto-ui/owner/authored-hooks-v1';` : ''}
 ${interaction ? `import { createPortal as ${p}CreatePortal } from 'react-dom';` : ''}
+${overlayHost ? `import { installViewVisibilityRule as ${p}InstallViewVisibility, PUI_VIEW_DETACHED_ATTR as ${p}DetachedAttribute } from './.proto-ui/host-web/view-visibility-v1';` : ''}
 ${
   ssr
     ? `import { renderToString as ${p}RenderToString } from 'react-dom/server';
@@ -579,6 +687,8 @@ import { createContextScope as ${p}CreateContextScope, acceptsContextValue as ${
 import type { ContextScope as ${p}ContextScope } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import { ContextTransport as ${p}ContextTransport } from './.proto-ui/context/react-v1';
 ${usesStyle ? `import { createNativeStyle as ${p}CreateNativeStyle, templateStyleTokens as ${p}TemplateStyleTokens, type NativeStyle as ${p}NativeStyle, type NativeStyleHandle as ${p}NativeStyleHandle, type NativeRuleHandle as ${p}NativeRuleHandle } from './.proto-ui/style/native-v1';` : ''}
+${decorations ? `import { createWebOwnedDecorationStage as ${p}CreateDecorationStage } from './.proto-ui/style/owned-decoration-stage-v1';` : ''}
+${ruleMetaKeys.length ? `import { createNativeRuleMeta as ${p}CreateRuleMeta } from './.proto-ui/meta/web-rule-source-v1';` : ''}
 ${interaction ? `import { createNativeInteraction as ${p}CreateNativeInteraction, type NativeInteraction as ${p}NativeInteraction, type NativeFocus as ${p}NativeFocus, type NativeAccessible as ${p}NativeAccessible, type NativeObservedState as ${p}NativeObservedState, type NativeInput as ${p}NativeInput, type NativeFocusOptions as ${p}NativeFocusOptions } from './${supportPlan.interactionPath.slice(0, -3)}';` : ''}
 ${interaction ? `import type { NativeModuleCapability as ${p}NativeModuleCapability } from './${supportPlan.modulesPath.slice(0, -3)}';` : ''}
 ${contextImports}
@@ -591,14 +701,25 @@ ${props}
 export type GeneratedExposes = {
 ${exposed}
 };
-export type GeneratedComponentProps = GeneratedProps & {
+export type GeneratedComponentProps = GeneratedProps & Omit<${p}React.HTMLAttributes<HTMLElement>, keyof GeneratedProps | 'dangerouslySetInnerHTML' | ${
+    ir.exposes
+      .filter((entry) => entry.kind === 'event')
+      .map((entry) =>
+        JSON.stringify('on' + entry.name.charAt(0).toUpperCase() + entry.name.slice(1))
+      )
+      .join(' | ') || 'never'
+  }> & {
   children?: ${p}React.ReactNode;
+  /** The physical element is a target affordance, never a portable Proto expose. */
+  hostRef?: ${p}React.Ref<HTMLElement>;
+  hostProps?: Omit<${p}React.AllHTMLAttributes<HTMLElement> & ${p}React.AnchorHTMLAttributes<HTMLElement>, 'children' | 'dangerouslySetInnerHTML'>;
   instanceAssociations?: Readonly<{ controlLabel?: object | null }>;
 ${eventProps}
   [event: \`on\${string}\`]: unknown;
 };
 export interface GeneratedHandle {
   update(): void;
+  getElement(): HTMLElement | null;
   getExposes(): GeneratedExposes;
   invokeInCallbackScope<T>(callback: () => T): T;
 }
@@ -613,7 +734,7 @@ type ${p}ExternalState<T> = {
 type ${p}State<T> = { get(): T; setDefault(value: T): void; set(value: T, reason?: unknown): void };
 type ${p}StateSpec = { kind: 'bool' | 'enum' | 'string' | 'number.discrete' | 'number.range'; options?: readonly (string | number)[]; min?: number; max?: number; step?: number; clamp?: boolean };
 type ${p}DataSchema = string | { kind: string; fields?: readonly { name: string; type: ${p}DataSchema; optional?: boolean }[]; element?: ${p}DataSchema; members?: readonly ${p}DataSchema[]; value?: unknown };
-type ${p}PropSpec = { type: ${p}DataSchema; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; options?: readonly string[]; range?: { min?: number; max?: number } };
+type ${p}PropSpec = { type: ${p}DataSchema; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; options?: readonly string[]; range?: { min?: number; max?: number }; validator?: (value: never) => boolean };
 type ${p}Run = {
   update(): void;
 ${usesStyle ? `  feedback: { style: Pick<${p}NativeStyle, 'patch' | 'suppress' | 'clearPatch'> };` : ''}
@@ -621,6 +742,7 @@ ${usesStyle ? `  feedback: { style: Pick<${p}NativeStyle, 'patch' | 'suppress' |
   context: {
     read<T>(key: object): T;
     tryRead<T>(key: object): T | null;
+    tryReadAncestor<T>(key: object): T | null;
     update<T>(key: object, next: T | ((prev: T) => T)): void;
     tryUpdate<T>(key: object, next: T | ((prev: T) => T)): boolean;
   };
@@ -631,10 +753,10 @@ type ${p}Frame = { revision: number; epoch: number; kind: 'mount' | 'update' | '
 type ${p}Owner = {
   handle: GeneratedHandle;
   scope: ${p}ContextScope;
-  getHostProjection(): { tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; portalTarget: HTMLElement | null };
+  getHostProjection(): { tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; portalTarget: HTMLElement | null${overlayHost ? '; viewPolicy: Readonly<{ retainWhenDetached: boolean; portal: boolean }>' : ''} };
   bindRoot(root: HTMLElement | null): void;
   connect(): void;
-${interaction ? '  connectView(): void;\n  disconnectView(): void;\n' : ''}  start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}): void;
+${interaction ? '  connectView(): void;\n  disconnectView(): void;\n  commitHost(): void;\n' : ''}  start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}): void;
   applyProps(props: GeneratedComponentProps): void;
   accept(frame: ${p}Frame): boolean;
   disconnect(): void;
@@ -648,6 +770,24 @@ ${
 };
 
 const ${p}Slots = new WeakSet<object>();
+const ${p}PortablePropNames = new Set<string>(${JSON.stringify(ir.props.map((entry) => entry.name))});
+const ${p}OutwardEventNames = new Set<string>(${JSON.stringify(ir.exposes.filter((entry) => entry.kind === 'event').map((entry) => 'on' + entry.name.charAt(0).toUpperCase() + entry.name.slice(1)))});
+function ${p}HostProperties(props: GeneratedComponentProps): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...props.hostProps };
+  for (const [key, value] of Object.entries(props)) {
+    if (${p}PortablePropNames.has(key) || ${p}OutwardEventNames.has(key)
+      || ['children', 'hostRef', 'hostProps', 'instanceAssociations', 'key', 'ref', 'dangerouslySetInnerHTML'].includes(key)) continue;
+    result[key] = value;
+  }
+  // Explicit native host fields cannot create a second subscriber to an outward
+  // Proto signal, replace the slot tree, or steal the compiler's physical ref.
+  for (const key of [...${p}OutwardEventNames, 'children', 'ref', 'key', 'dangerouslySetInnerHTML']) delete result[key];
+  return result;
+}
+function ${p}AssignHostRef(ref: ${p}React.Ref<HTMLElement> | undefined, element: HTMLElement | null): void {
+  if (typeof ref === 'function') ref(element);
+  else if (ref) (ref as ${p}React.MutableRefObject<HTMLElement | null>).current = element;
+}
 function ${p}BindSlots(node: ${p}React.ReactNode, slot: ${p}React.ReactNode): ${p}React.ReactNode {
   if (Array.isArray(node)) {
     let result: ${p}React.ReactNode[] | null = null;
@@ -663,11 +803,12 @@ function ${p}BindSlots(node: ${p}React.ReactNode, slot: ${p}React.ReactNode): ${
   const previous = element.props.children, next = ${p}BindSlots(previous, slot);
   return previous === next ? node : ${p}React.cloneElement(element, undefined, next);
 }
-function ${p}RootProperties(properties: Readonly<Record<string, unknown>>): Record<string, unknown> {
+function ${p}RootProperties(properties: Readonly<Record<string, unknown>>, initial = false): Record<string, unknown> {
   const result: Record<string, unknown> = { ...properties };
-  // Native TextControl owns subsequent value writes and IME restoration. React
-  // supplies only the initial value, avoiding a competing controlled writer.
-  if (Object.hasOwn(result, 'value')) { result.defaultValue = result.value; delete result.value; }
+  // Only server/initial hydration markup projects the canonical value through
+  // defaultValue. A live native TextControl owns editing and its reset default;
+  // its commit hook restores those fields after React's host reconciliation.
+  if (Object.hasOwn(result, 'value')) { result.defaultValue = initial ? result.value : undefined; delete result.value; }
   if (typeof result.style === 'string') {
     const style: Record<string, string> = {};
     for (const declaration of result.style.split(';')) {
@@ -688,7 +829,7 @@ function ${p}HasRootContent(node: ${p}React.ReactNode): boolean {
   return true;
 }
 function ${p}RenderRoot(tag: string, attributes: Record<string, unknown>, children: ${p}React.ReactNode): ${p}React.ReactElement {
-  if (tag === 'input' || tag === 'textarea' || tag === 'img') {
+  if (['input', 'textarea', 'img', 'area', 'base', 'br', 'col', 'embed', 'hr', 'link', 'meta', 'param', 'source', 'track', 'wbr'].includes(tag)) {
     if (${p}HasRootContent(children)) throw new TypeError('[Template] this physical control Root cannot contain semantic children.');
     return ${p}React.createElement(tag, attributes);
   }
@@ -708,9 +849,14 @@ function ${p}ResolveProps(
     const provided = Object.hasOwn(raw, key);
     const value = raw[key];
     const empty = value === null || value === undefined;
-    const valid = (candidate: unknown) => ${p}Accepts(spec.type, candidate)
-      && (!spec.range || typeof candidate === 'number'
-        && candidate >= (spec.range.min ?? -Infinity) && candidate <= (spec.range.max ?? Infinity));
+    const valid = (candidate: unknown) => {
+      if (!${p}Accepts(spec.type, candidate) || spec.range && !(typeof candidate === 'number'
+        && candidate >= (spec.range.min ?? -Infinity) && candidate <= (spec.range.max ?? Infinity))) return false;
+      // The checked schema establishes the validator's declared argument domain.
+      // A throwing validator rejects this candidate, as in ordinary Props.
+      try { return spec.validator ? !!spec.validator(candidate as never) : true; }
+      catch { return false; }
+    };
     if (provided && !empty && valid(value)) {
       next[key] = value;
       previousValid[key] = value;
@@ -738,7 +884,13 @@ function ${p}ResolveProps(
   return Object.freeze(next) as ${p}ResolvedProps;
 }
 
-function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${ssr ? ', server = false' : ''}${atoms.shaderScenes ? ', shaderHost?: WebShaderHostOptions' : ''}): ${p}Owner {
+function ${p}CompleteSteps(steps: readonly (() => void)[]): void {
+  let failure: { error: unknown } | undefined;
+  for (const step of steps) { try { step(); } catch (error) { failure ??= { error }; } }
+  if (failure) throw failure.error;
+}
+
+function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${overlayHost ? ', releaseHost: () => void' : ''}${ssr ? ', server = false' : ''}${atoms.shaderScenes ? ', shaderHost?: WebShaderHostOptions' : ''}): ${p}Owner {
   let phase: 'setup' | 'callback' | 'render' | 'idle' = 'setup';
   let lifetime: 'alive' | 'disposing' | 'disposed' = 'alive';
   let connected = true;
@@ -763,6 +915,73 @@ ${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | nu
   let elementSequence = 0;
   let hostProps = initial;
   let root: HTMLElement | null = null;
+  let rootGeneration = 0;
+  let rootBinding: 'retiring' | 'binding' | null = null;
+  let pendingRoot: { value: HTMLElement | null } | undefined;
+  function consumePendingRoot(): { value: HTMLElement | null } | undefined {
+    const request = pendingRoot; pendingRoot = undefined; return request;
+  }
+${
+  decorations
+    ? `  const decorationNodes = new WeakMap<object, object>();
+  const decorationRefs = new Map<object, (node: HTMLElement | null) => void>();
+  const decorationPhysical = new Map<object, HTMLElement>();
+  let decorationTargets: readonly object[] = [];
+  let decorationStage: ReturnType<typeof ${p}CreateDecorationStage> | null = null;
+  let decorationBound = false;
+  let decorationSignature: readonly unknown[] | null = null;
+  let decorationTemplate: ${p}React.ReactNode = null;
+  function releaseDecorations() {
+    const stage = decorationStage; decorationStage = null; decorationBound = false;
+    decorationPhysical.clear();
+    ${p}CompleteSteps([() => stage?.retire(), () => ${p}Style.releaseDecorations()]);
+  }
+  function bindDecorations() {
+    if (!root || !decorationStage || decorationBound) return;
+    decorationStage.bind(root, bindings => ${p}Style.bindDecorations(bindings));
+    decorationBound = true;
+  }
+  function decorationRef(target: object) {
+    let callback = decorationRefs.get(target);
+    if (!callback) {
+      callback = node => {
+        if (node === null) {
+          decorationStage?.ref(target)(null); decorationPhysical.delete(target);
+          if (!decorationPhysical.size) releaseDecorations();
+          return;
+        }
+        if (lifetime !== 'alive' || !connected) return;
+        decorationStage ??= ${p}CreateDecorationStage(decorationTargets, targets => ${p}Style.validateDecorations(targets));
+        decorationStage.ref(target)(node); decorationPhysical.set(target, node);
+      };
+      decorationRefs.set(target, callback);
+    }
+    return callback;
+  }
+  function prepareDecorationTemplate(node: ${p}React.ReactNode, kind: 'mount' | 'update') {
+    const targets: object[] = [], signature: unknown[] = [];
+    const inspect = (value: ${p}React.ReactNode): void => {
+      if (Array.isArray(value)) { signature.push('['); value.forEach(inspect); signature.push(']'); return; }
+      if (!${p}React.isValidElement(value)) { signature.push(value); return; }
+      if (${p}Slots.has(value)) { signature.push('slot', value.key); return; }
+      const target = decorationNodes.get(value);
+      if (target) { targets.push(target); signature.push('decoration', target, value.key); return; }
+      const props = value.props as { children?: ${p}React.ReactNode; 'data-pui-style'?: string };
+      signature.push(value.type, value.key, props['data-pui-style']); inspect(props.children);
+    };
+    inspect(node); ${p}Style.validateDecorations(targets);
+    if (kind === 'update' && decorationSignature) {
+      if (signature.length !== decorationSignature.length || signature.some((value, index) => !Object.is(value, decorationSignature![index])))
+        throw new Error('[Decoration] structural replacement within a live view is unsupported');
+      if (root && decorationBound) decorationStage!.assertReusable(root);
+      return decorationTemplate;
+    }
+    releaseDecorations(); decorationTargets = Object.freeze(targets); decorationSignature = Object.freeze(signature);
+    decorationTemplate = node; return node;
+  }
+`
+    : ''
+}
   let raw: Readonly<Record<string, unknown>> = Object.freeze({});
   let resolved: ${p}ResolvedProps;
   let hydrated = false;
@@ -816,13 +1035,16 @@ ${propSchemas}
     try { return callback(); }
     finally { phase = previous; --callbackDepth; if (!callbackDepth) schedule(); }
   }
-  ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run`, root: 'root', prepare: usesStyle ? `${p}Style.refresh();` : '' })}
+  ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: "ensurePhase('setup')", runtime: "ensurePhase('callback')", alive: "lifetime !== 'disposed'", invoke: 'invoke(callback)', invokeRun: `invoke(() => callback(${p}RunHandle))`, document: "root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)", run: `${p}Run`, root: 'root', prepare: usesStyle ? `${p}Style.refresh();` : '', tokens: `${p}Style.tokens()`, project: 'projectStyle(tokens)', watch: `const external = externalStates.get(source) as ${p}ExternalState<unknown> | undefined; if (!external) throw new Error('[Presence] foreign State source'); return external.subscribe(() => callback());` })}
 ${
   hasAuthoredHooks
     ? `  const ${p}Authored = ${p}CreateAuthored({setup: () => ensurePhase('setup'), borrow(value) {
-    const state = value as ${p}State<unknown>, external = externalStates.get(state) as ${p}ExternalState<unknown>;
+    const state = value as ${p}State<unknown>, external = externalStates.get(state) as ${p}ExternalState<unknown> | undefined;
+    if (!external) throw new Error('[State] borrowed state must belong to this instance.');
     const borrowed = Object.freeze({ get: () => state.get(), setDefault: (value: unknown) => state.setDefault(value), set: (value: unknown, reason?: unknown) => state.set(value, reason), watch(callback: (run: ${p}Run, event: ${p}StateEvent<unknown>) => void) { ensurePhase('setup'); const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event))); authorStateWatchCleanups.push(off); return off; } });
-    ${atoms.registerSource('borrowed')}
+    // A capture borrows the same owner State; native modules must retain its provenance.
+    externalStates.set(borrowed, external);
+${atoms.presentation ? `    ${p}Presence.registerSource(borrowed);` : ''}
     return borrowed;
   } });`
     : ''
@@ -843,26 +1065,40 @@ ${
     ensureSetup: () => ensurePhase('setup'),
     ensureRuntime: () => ensurePhase('callback'),
     isAlive: () => lifetime !== 'disposed',
-    project: projectStyle,
+    project: tokens => { projectStyle(tokens); ${atoms.presentation ? `${p}Presence.refresh();` : ''} },
     ${atoms.ruleMeta("root?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)")}
-  });
+${ruleMetaKeys.length ? `    meta: ${p}CreateRuleMeta(() => root?.ownerDocument, ${JSON.stringify(ruleMetaKeys)}),\n` : ''}  });
 `
     : ''
 }  function dispatch(list: readonly ((run: ${p}Run) => void)[]) {
-    if (list === callbacks.unmounted) { ${atoms.detach} }
-    try { invoke(() => { for (const callback of list) callback(${p}RunHandle); }); }
-    finally { if (list === callbacks.unmounted) { ${atoms.detach} } }
+${
+  atoms.detach
+    ? `    if (list === callbacks.unmounted) {
+      ${p}CompleteSteps([() => { ${atoms.detach} },
+        () => invoke(() => { for (const callback of list) callback(${p}RunHandle); }),
+        () => { ${atoms.detach} }]);
+      return;
+    }
+`
+    : ''
+}    invoke(() => { for (const callback of list) callback(${p}RunHandle); });
+  }
+  function detachView() {
+    const wasMounted = mounted; mounted = false;
+    ${p}CompleteSteps([
+${decorations ? '      () => releaseDecorations(),\n' : ''}${interaction ? `      () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? `      () => ${p}Style.unmount(),\n` : ''}      () => { if (wasMounted) dispatch(callbacks.unmounted);${atoms.detach ? ` else { ${atoms.detach} }` : ''} },
+    ]);
   }
   function schedule() {
 ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !connected || lifetime !== 'alive') return;
-    if (!updateQueued && desiredPresent === mounted && !(!desiredPresent && root) && !(latest && latest.revision > acceptedRevision)) return;
+    if (!updateQueued && desiredPresent === mounted && !(!desiredPresent && root${overlayHost ? ` && (!${p}Interaction.viewPolicy().retainWhenDetached || latest && latest.kind !== 'detach')` : ''}) && !(latest && latest.revision > acceptedRevision)) return;
     scheduled = true;
     queueMicrotask(() => {
       scheduled = false;
       if (!connected || lifetime !== 'alive') return;
       if (latest && latest.revision > acceptedRevision) return;
       if (!desiredPresent) {
-        if (mounted || root) deliver('detach');
+        if (mounted || root${overlayHost ? ` && (!${p}Interaction.viewPolicy().retainWhenDetached || latest && latest.kind !== 'detach')` : ''}) deliver('detach');
         else { dirty = dirty || updateQueued; updateQueued = false; }
       } else if (!mounted) deliver('mount');
       else if (updateQueued) deliver('update');
@@ -876,7 +1112,7 @@ ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !
       slotUsed = false;
       elementSequence = 0;
       phase = 'render';
-      try { node = normalize(render(${p}Renderer)); }
+      try { node = normalize(render(${p}Renderer)); ${decorations ? `node = prepareDecorationTemplate(node, kind);` : ''} }
       finally { phase = 'idle'; }
       dirty = false;
     }
@@ -932,6 +1168,17 @@ ${
       }),
     }),
     el: ${p}Element,
+${svg ? reactSvgFactories(p) : ''}
+${
+  decorations
+    ? `    decoration: (target: object) => {
+      ensurePhase('render');
+      const leaf = ${p}React.createElement('span', { key: elementSequence++, ref: decorationRef(target), 'aria-hidden': true, inert: true });
+      decorationNodes.set(leaf, target); return leaf;
+    },
+`
+    : ''
+}
     slot: () => {
       ensurePhase('render');
       if (slotUsed) throw new Error('[Template] multiple anonymous slots are not supported.');
@@ -1045,7 +1292,7 @@ ${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' 
     getLogicalParent: getParent,
     declarations: ${JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config })))},
     tableFamily: ${staticCapabilities.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'},
-    getExposes: () => exposes,
+    getExposes: () => connected && lifetime === 'alive' ? exposes : {},
     registerExpose(key, value) {
       const state = value && typeof value === 'object' ? externalStates.get(value) : undefined;
       if (state) registerExpose(key, state);
@@ -1071,8 +1318,7 @@ ${controlLabel ? '    getAssociations: () => hostProps.instanceAssociations,\n' 
     emit: key => ${p}RunHandle.expose.emit(key),
   });
   function disposeInteraction() {
-    try { ${p}Interaction.dispose(); }
-    finally { for (const off of observedStateCleanups.splice(0)) off(); for (const off of authorStateWatchCleanups.splice(0)) off(); }
+    ${p}CompleteSteps([() => ${p}Interaction.dispose(), ...observedStateCleanups.splice(0), ...authorStateWatchCleanups.splice(0)]);
   }
 `
     : ''
@@ -1093,6 +1339,7 @@ ${usesStyle ? `    feedback: { style: ${p}Style },` : ''}
     context: Object.freeze({
       read<T>(key: object): T { ensurePhase('callback'); return context.read<T>(key); },
       tryRead<T>(key: object): T | null { ensurePhase('callback'); return context.tryRead<T>(key); },
+      tryReadAncestor<T>(key: object): T | null { ensurePhase('callback'); return context.tryReadAncestor<T>(key); },
       update<T>(key: object, next: T | ((prev: T) => T)) { ensurePhase('callback'); context.update(key, next); },
       tryUpdate<T>(key: object, next: T | ((prev: T) => T)) { ensurePhase('callback'); return context.tryUpdate(key, next); },
     }),
@@ -1119,7 +1366,7 @@ ${usesStyle ? `    feedback: { style: ${p}Style },` : ''}
     exposes[key] = value;
   }
   const ${p}Def = {
-${supportPlan.features.includes('event') ? `    event: ${p}Interaction.event,\n` : ''}${usesStyle ? `    feedback: { style: { use: ${p}Style.use } },` : ''}
+${supportPlan.features.includes('event') ? `    event: ${p}Interaction.event,\n` : ''}${usesStyle ? `    feedback: { style: { use: ${p}Style.use, declareDecoration: ${p}Style.declareDecoration, to: ${p}Style.to${atoms.presentation ? `, presence: ${p}Presence.declare` : ''} } },` : ''}
     context: Object.freeze({
       provide<T>(key: object, value: T) { ensurePhase('setup'); context.provide(key, value); },
       subscribe<T>(key: object, callback?: (run: ${p}Run, next: T, prev: T) => void) {
@@ -1129,6 +1376,10 @@ ${supportPlan.features.includes('event') ? `    event: ${p}Interaction.event,\n`
       trySubscribe<T>(key: object, callback?: (run: ${p}Run, next: T | null, prev: T | null) => void) {
         ensurePhase('setup');
         return context.subscribe<T>(key, 'optional', callback ? (next, prev) => callback(${p}RunHandle, next, prev) : undefined);
+      },
+      trySubscribeAncestor<T>(key: object, callback?: (run: ${p}Run, next: T | null, prev: T | null) => void) {
+        ensurePhase('setup');
+        return context.subscribe<T>(key, 'optional', callback ? (next, prev) => callback(${p}RunHandle, next, prev) : undefined, 'ancestor');
       },
     }),
     props: {
@@ -1141,6 +1392,8 @@ ${supportPlan.features.includes('event') ? `    event: ${p}Interaction.event,\n`
           const spec: ${p}PropSpec = { ...authored, type: schema };
           const previous = specs[key];
           if (!previous) { next[key] = { ...spec }; continue; }
+          if (previous.validator && previous.validator !== spec.validator)
+            throw new Error('[Props] validator replacement or removal is disallowed: ' + key);
           const rank = (empty: ${p}PropSpec['empty']) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
           if (JSON.stringify(previous.type) !== JSON.stringify(spec.type) || Object.hasOwn(spec, 'empty') && rank(spec.empty) > rank(previous.empty)
             || previous.range && spec.range && ((spec.range.min ?? -Infinity) > (previous.range.min ?? -Infinity)
@@ -1230,9 +1483,9 @@ ${hasAuthoredHooks ? `        ${p}Authored.introduceObserved(state);` : ''}
 ${hookDefinitions}
   let render: (renderer: typeof ${p}Renderer) => unknown;
   try {
-    render = (${fn(ir.setup, 1)})(${p}Def) ?? (() => ${p}Renderer.slot());
+    render = (${fn(ir.setup, 1)})(${ir.setup.parameters.length ? `${p}Def` : ''}) ?? (() => ${p}Renderer.slot());
     if (typeof render !== 'function') throw new Error('[Prototype] setup must return a render function or void.');
-  } catch (error) { for (const off of authorStateWatchCleanups.splice(0)) off(); ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} throw error; }
+  } catch (error) { try { disposeNow(false, false); } catch {} throw error; }
   phase = 'idle';
   function applyProps(nextHost: GeneratedComponentProps) {
     ensureAlive();
@@ -1240,7 +1493,7 @@ ${hookDefinitions}
 ${controlLabel ? `    ${p}Interaction.refresh();` : emitUndeclaredInstanceAssociations('nextHost.instanceAssociations', `${p}Associations`)}
     const nextRaw: Record<string, unknown> = Object.create(null);
     for (const [key, value] of Object.entries(nextHost)) {
-      if (key === 'children' || key === 'instanceAssociations' || !Object.hasOwn(specs, key) && (['class', 'className', 'hostClass', 'surfaceClass', 'style', 'hostStyle', 'surfaceStyle'].includes(key) || /^on[A-Z]/.test(key) && typeof value === 'function')) continue;
+      if (key === 'children' || key === 'instanceAssociations' || key === 'hostRef' || key === 'hostProps' || !Object.hasOwn(specs, key) && (['class', 'className', 'hostClass', 'surfaceClass', 'style', 'hostStyle', 'surfaceStyle'].includes(key) || /^on[A-Z]/.test(key) && typeof value === 'function')) continue;
       nextRaw[key] = value;
     }
     if (hydrated && Object.keys(raw).length === Object.keys(nextRaw).length
@@ -1278,40 +1531,35 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
   }
   const handle: GeneratedHandle = Object.freeze({
     update() { ensureExternal(); invoke(() => ${p}RunHandle.update()); },
+    getElement() { return lifetime === 'alive' && connected ? root : null; },
     getExposes() { ensureExternal(); return { ...exposes } as GeneratedExposes; },
     invokeInCallbackScope<T>(callback: () => T): T { ensureExternal(); return invoke(callback); },
   });
-${
-  ssr
-    ? `  function disposeNow(exhaustive = false) {
+  function disposeNow(exhaustive = false, authored = true) {
     if (lifetime !== 'alive') return;
-    lifetime = 'disposing'; phase = 'callback';
-    let failure: { error: unknown } | undefined;
-    for (const off of authorStateWatchCleanups.splice(0)) try { off(); } catch (error) { failure ??= { error }; }
-    try {
-      if (exhaustive) {
-        for (const callback of callbacks.beforeDispose) {
-          try { invoke(() => callback(${p}RunHandle)); } catch (error) { failure ??= { error }; }
-        }
-      } else dispatch(callbacks.beforeDispose);
-    } catch (error) { failure ??= { error }; }
-    finally {
-${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= { error }; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= { error }; }` : ''}
-      try { context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} } catch (error) { failure ??= { error }; }
-      lifetime = 'disposed'; phase = 'idle'; connected = false;
-      for (const subscribers of stateSubscribers) subscribers.clear();
-      pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
-      for (const list of Object.values(callbacks)) list.length = 0;
-      for (const key of Object.keys(exposes)) delete exposes[key];
-    }
-    if (failure) throw failure.error;
+    lifetime = 'disposing'; connected = false; ++cleanupVersion; ++rootGeneration; phase = 'callback';
+    ${p}CompleteSteps([
+      ...authorStateWatchCleanups.splice(0),
+      () => detachView(),
+      () => {
+        if (!authored) return;
+        if (exhaustive) ${p}CompleteSteps(callbacks.beforeDispose.map(callback => () => invoke(() => callback(${p}RunHandle))));
+        else dispatch(callbacks.beforeDispose);
+      },
+${interaction ? '      () => disposeInteraction(),\n' : ''}${usesStyle ? "      () => root?.removeAttribute('data-pui-style'),\n" : ''}${decorations ? '      () => releaseDecorations(),\n' : ''}${usesStyle ? `      () => ${p}Style.dispose(),\n` : ''}      () => context.dispose(),
+${atoms.dispose ? `      () => { ${atoms.dispose} },\n` : ''}${hasAuthoredHooks ? `      () => ${p}Authored.dispose(),\n` : ''}${overlayHost ? '      () => releaseHost(),\n' : ''}      () => {
+        root = null; lifetime = 'disposed'; phase = 'idle';
+${decorations ? '        decorationRefs.clear(); decorationSignature = null; decorationTemplate = null;\n' : ''}        for (const subscribers of stateSubscribers) subscribers.clear();
+        pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
+        for (const list of Object.values(callbacks)) list.length = 0;
+        for (const key of Object.keys(exposes)) delete exposes[key];
+      },
+    ]);
   }
-`
-    : ''
-}  return {
+  return {
     handle,
     scope: context,
-    getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? 'div'` : "'div'"}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'} }; },
+    getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? ${JSON.stringify(options.rootTag ?? 'div')}` : JSON.stringify(options.rootTag ?? 'div')}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'}${overlayHost ? `, viewPolicy: ${p}Interaction.viewPolicy()` : ''} }; },
 ${
   ssr
     ? `    disposeNow,
@@ -1336,13 +1584,38 @@ ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}   
     : ''
 }
     bindRoot(nextRoot) {
+      if (lifetime !== 'alive') return;
+      if (rootBinding) {
+        if (rootBinding === 'binding' && root === nextRoot && !pendingRoot) return;
+        pendingRoot = { value: nextRoot }; ++rootGeneration;
+        return;
+      }
       if (root === nextRoot) return;
-      ${atoms.physicalPresentation ? atoms.detach : ''}
-${interaction ? `      ${p}Interaction.unmount();\n` : ''}      ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
-      root = nextRoot;
-${usesStyle ? `      if (mounted) projectStyle(${p}Style.tokens());` : ''}
-      ${atoms.physicalPresentation ? `if (mounted && desiredPresent) { ${atoms.mount} }` : ''}
-${interaction ? `      if (mounted && desiredPresent && viewConnected) ${p}Interaction.mount();\n` : ''}    },
+      let next = nextRoot;
+      let failure: { error: unknown } | undefined;
+      try {
+        for (;;) {
+          // Cleanup owns the previous Root and all of its reached resources.
+          // Reentrant requests coalesce until that complete transaction returns.
+          rootBinding = 'retiring'; ++rootGeneration;
+          const previousRoot = root;
+          try { ${p}CompleteSteps([
+${atoms.physicalPresentation ? `            () => { ${atoms.detach} },\n` : ''}${decorations ? '            () => { if (previousRoot) releaseDecorations(); },\n' : ''}${interaction ? `            () => ${p}Interaction.unmount(),\n` : ''}${usesStyle ? "            () => previousRoot?.removeAttribute('data-pui-style'),\n" : ''}          ]); } catch (error) { failure ??= { error }; }
+          if (lifetime !== 'alive') break;
+          const replacement = consumePendingRoot();
+          if (replacement) next = replacement.value;
+          root = next; rootBinding = 'binding';
+          const generation = ++rootGeneration;
+          const current = () => generation === rootGeneration && lifetime === 'alive';
+          try { ${p}CompleteSteps([
+${usesStyle ? `            () => { if (current() && mounted) projectStyle(${p}Style.tokens()); },\n` : ''}${decorations ? '            () => { if (current() && mounted && desiredPresent) bindDecorations(); },\n' : ''}${atoms.physicalPresentation ? `            () => { if (current() && mounted && desiredPresent && root) { ${atoms.mount} } },\n` : ''}${interaction ? `            () => { if (current() && mounted && desiredPresent && viewConnected) ${p}Interaction.mount(); },\n` : ''}          ]); } catch (error) { failure ??= { error }; }
+          const queued = consumePendingRoot();
+          if (lifetime !== 'alive' || !queued) break;
+          next = queued.value;
+        }
+      } finally { rootBinding = null; pendingRoot = undefined; }
+      if (failure) throw failure.error;
+    },
     connect() { connected = true; ++cleanupVersion; },
 ${
   interaction
@@ -1359,6 +1632,7 @@ ${
 }      if (mounted && desiredPresent) ${p}Interaction.mount();
     },
     disconnectView() { viewConnected = false; ${p}Interaction.unmount(); },
+    commitHost() { if (connected && mounted && viewConnected && desiredPresent && lifetime === 'alive') ${p}Interaction.commitHost(); },
 `
     : ''
 }    start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}) {
@@ -1378,15 +1652,14 @@ ${
     : ''
 }        schedule();
       }
-      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''} lifetime = 'disposed'; connected = false;`} throw error; }
+      catch (error) { try { disposeNow(true); } catch {} throw error; }
     },
     applyProps,
     accept(frame: ${p}Frame) {
       if (!connected || lifetime !== 'alive' || frame.revision <= acceptedRevision || frame !== latest) return false;
       acceptedRevision = frame.revision;
       if (frame.kind === 'detach') {
-${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `        ${p}Style.unmount();` : ''}
-        if (mounted) { mounted = false; dispatch(callbacks.unmounted); }
+        try { detachView(); } finally { schedule(); }
       } else if (!desiredPresent) {
         // Physical materialization is not a published mount. Remove the obsolete
         // Root without manufacturing mounted/unmounted for a never-mounted epoch.
@@ -1394,13 +1667,14 @@ ${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `     
         return false;
       } else if (frame.kind === 'mount') {
         mounted = true;
+${decorations ? `        bindDecorations();` : ''}
         // The published mount may predate an explicit update intent. Only
         // after its acknowledgement may that dirty intent enter update flow.
         if (dirty) updateQueued = true;
 ${usesStyle ? `        ${p}Style.mount();` : ''}
         ${atoms.mount}
 ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callbacks.mounted);
-      } else if (mounted && frame.epoch === epoch) dispatch(callbacks.updated);
+      } else if (mounted && frame.epoch === epoch) { ${decorations ? `bindDecorations();` : ''} ${atoms.presentation ? `${p}Presence.refresh();` : ''} dispatch(callbacks.updated); }
       schedule();
       return true;
     },
@@ -1409,39 +1683,7 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
       const version = ++cleanupVersion;
       queueMicrotask(() => {
         if (connected || cleanupVersion !== version || lifetime !== 'alive') return;
-        lifetime = 'disposing';
-        for (const off of authorStateWatchCleanups.splice(0)) off();
-        phase = 'callback';
-        let failure: { error: unknown } | undefined;
-${
-  interaction
-    ? `        try { ${p}Interaction.unmount(); }
-        catch (error) { failure = { error }; }
-`
-    : ''
-}        try { if (mounted) { mounted = false; ${usesStyle ? `${p}Style.unmount(); ` : ''}dispatch(callbacks.unmounted); } }
-        catch (error) { failure ??= { error }; }
-        try { dispatch(callbacks.beforeDispose); }
-        catch (error) { failure ??= { error }; }
-        finally {
-${
-  interaction
-    ? `          try { disposeInteraction(); } catch (error) { failure ??= { error }; }
-`
-    : ''
-}          ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
-          root = null;
-${usesStyle ? `          ${p}Style.dispose();` : ''}
-          context.dispose(); ${atoms.dispose}${hasAuthoredHooks ? `${p}Authored.dispose();` : ''}
-          lifetime = 'disposed'; phase = 'idle';
-          for (const subscribers of stateSubscribers) subscribers.clear();
-          pendingStateEvents.length = 0;
-          watchers.length = 0;
-          rawWatchers.length = 0; rawAllWatchers.length = 0;
-          for (const list of Object.values(callbacks)) list.length = 0;
-          for (const key of Object.keys(exposes)) delete exposes[key];
-        }
-        if (failure) throw failure.error;
+        disposeNow();
       });
     },
   };
@@ -1454,6 +1696,39 @@ ${atoms.shaderScenes ? 'export function createComponent(shaderHost?: WebShaderHo
   const parentRef = ${p}React.useRef<${p}ContextScope | null>(null);
   const [frame, setFrame] = ${p}React.useState<${p}Frame | null>(null);
   const [, publishHost] = ${p}React.useReducer((version: number) => version + 1, 0);
+  const rootRef = ${p}React.useRef<HTMLElement | null>(null);
+${
+  overlayHost
+    ? `  const portalOriginRef = ${p}React.useRef<HTMLSpanElement | null>(null);
+  const portalMountRef = ${p}React.useRef<HTMLDivElement | null>(null);
+  const [portalMount, setPortalMount] = ${p}React.useState<HTMLDivElement | null>(null);
+  const retainedFrameRef = ${p}React.useRef<${p}Frame | null>(null);
+  // Terminal owner disposal owns this host container. Layout disconnection and
+  // same-turn StrictMode replay leave its identity intact.
+  const releaseHost = ${p}React.useCallback(() => {
+    const mount = portalMountRef.current;
+    portalMountRef.current = null;
+    mount?.remove();
+  }, []);
+`
+    : ''
+}
+  const pendingHostRef = ${p}React.useRef(props.hostRef);
+  pendingHostRef.current = props.hostRef;
+  const boundHostRef = ${p}React.useRef<${p}React.Ref<HTMLElement> | undefined>(undefined);
+  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => {
+    if (boundHostRef.current !== pendingHostRef.current) ${p}AssignHostRef(boundHostRef.current, null);
+    boundHostRef.current = pendingHostRef.current;
+    rootRef.current = root;
+${overlayHost ? `    if (root) ${p}InstallViewVisibility(root.ownerDocument);\n` : ''}    ownerRef.current?.bindRoot(root);
+    ${p}AssignHostRef(boundHostRef.current, root);
+  }, []);
+  ${p}React.useLayoutEffect(() => {
+    if (boundHostRef.current === props.hostRef) return;
+    ${p}AssignHostRef(boundHostRef.current, null);
+    boundHostRef.current = props.hostRef;
+    ${p}AssignHostRef(boundHostRef.current, rootRef.current);
+  }, [props.hostRef]);
 ${
   ssr
     ? `  const shellId = ${p}React.useId();
@@ -1470,11 +1745,8 @@ ${
       throw new Error('[Hydration] missing/mismatched source-bound component projection.');
     return initial;
   });
-  const rootRef = ${p}React.useRef<HTMLElement | null>(null);
-  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { rootRef.current = root; ownerRef.current?.bindRoot(root); }, []);
 `
-    : `  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { ownerRef.current?.bindRoot(root); }, []);
-`
+    : ''
 }  // All irreversible work begins after an accepted shell commit, never during React render.
   ${p}React.useLayoutEffect(() => {
 ${
@@ -1503,10 +1775,11 @@ ${
         setFrame(next);
       }, () => parentRef.current, publishHost${atoms.shaderScenes ? ', false, shaderHost' : ''});
 `
-    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost${atoms.shaderScenes ? ', shaderHost' : ''});
+    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost${overlayHost ? ', releaseHost' : ''}${atoms.shaderScenes ? ', shaderHost' : ''});
 `
 }      ownerRef.current = owner;
       owner.start(${ssr ? 'projection' : ''});
+${overlayHost ? '      // Closed bound Overlays have no render frame, but their logical child\n      // owners must receive the newly committed scope and retained host policy.\n      publishHost();\n' : ''}
 ${
   ssr
     ? `      owner.bindRoot(rootRef.current);
@@ -1532,17 +1805,66 @@ ${
     return () => { owner.disconnect(); };
   }, [${ssr ? 'parentReady' : ''}]);
   ${p}React.useLayoutEffect(() => { ${ssr ? 'if (projection && (!started || projection.present && !frame)) return; ' : ''}const owner = ownerRef.current; ${options.propsUpdatePolicy === 'host' ? 'if (owner?.applyProps(props)) owner.handle.update();' : 'owner?.applyProps(props);'} }, [props${ssr ? ', parentReady, started, !!frame' : ''}]);
-  ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);
+${
+  overlayHost
+    ? `  ${p}React.useLayoutEffect(() => {
+    const host = ownerRef.current?.getHostProjection(), origin = portalOriginRef.current;
+    if (!host?.viewPolicy.portal) {
+      if (portalMountRef.current) { releaseHost(); setPortalMount(null); }
+      return;
+    }
+    if (!origin) return;
+    const document = origin.ownerDocument;
+    let mount = portalMountRef.current;
+    if (!mount || mount.ownerDocument !== document) {
+      mount?.remove();
+      mount = document.createElement('div');
+      mount.setAttribute('data-pui-portal-mount', '');
+      mount.style.display = 'contents';
+      portalMountRef.current = mount;
+    }
+    ${p}InstallViewVisibility(document);
+    if (frame && frame.kind !== 'detach') {
+      const destination = document.body ?? document.documentElement;
+      if (mount.parentNode !== destination) destination.appendChild(mount);
+    } else if (origin.parentNode && origin.nextSibling !== mount) {
+      // Detach revokes global projection without replacing retained children.
+      // React owns the Root; only this host-owned container is relocated.
+      origin.parentNode.insertBefore(mount, origin.nextSibling);
+    }
+    if (portalMount !== mount) setPortalMount(mount);
+  });
+  ${p}React.useLayoutEffect(() => {
+    // A portal origin can commit before its container. A frame is acknowledged
+    // only after its physical Root exists, including initially-open Overlays.
+    if (!frame || frame.kind !== 'detach' && !rootRef.current) return;
+    if (ownerRef.current!.accept(frame) && frame.kind !== 'detach') retainedFrameRef.current = frame;
+  }, [frame, portalMount]);
+`
+    : `  ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);`
+}
+${interaction ? `  ${p}React.useLayoutEffect(() => { ownerRef.current?.commitHost(); });\n` : ''}
   ${p}React.useImperativeHandle(ref, () => ${
     ssr
       ? `({
     update() { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); ownerRef.current.handle.update(); },
+    getElement() { return ownerRef.current?.handle.getElement() ?? null; },
     getExposes() { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); return ownerRef.current.handle.getExposes(); },
     invokeInCallbackScope<T>(callback: () => T): T { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); return ownerRef.current.handle.invokeInCallbackScope(callback); },
   })`
       : 'ownerRef.current!.handle'
   }, []);
-  const template = ${p}React.useMemo(() => ${p}BindSlots(frame?.node, props.children), [frame?.node, props.children]);
+${
+  overlayHost
+    ? `  const retainedFrame = frame && frame.kind !== 'detach' ? frame : retainedFrameRef.current;
+  const template = ${p}React.useMemo(() => retainedFrame
+    ? ${p}BindSlots(retainedFrame.node, props.children)
+    // The default authored slot has key zero. Keep that same reconciliation
+    // layer before the first published render, without invoking author render.
+    : ${p}React.createElement(${p}React.Fragment, { key: 0 }, props.children),
+    [retainedFrame?.node, !!retainedFrame, props.children]);`
+    : `  const template = ${p}React.useMemo(() => ${p}BindSlots(frame?.node, props.children), [frame?.node, props.children]);`
+}
 ${
   ssr
     ? `  if (serverRequest) {
@@ -1557,14 +1879,24 @@ ${
 `
     : ''
 }  const host = ownerRef.current?.getHostProjection();
-  const rootView = frame && frame.kind !== 'detach'
-    ? ${p}RenderRoot(host!.tag, { ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ref: bindRoot }, template)${
+${overlayHost ? "  const detached = !frame || frame.kind === 'detach';\n" : ''}  const rootView = ${overlayHost ? 'host && (!detached || host.viewPolicy.retainWhenDetached)' : "frame && frame.kind !== 'detach'"}
+    ? ${p}RenderRoot(host!.tag, { ...${p}HostProperties(props), ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ${overlayHost ? `[${p}DetachedAttribute]: detached ? '' : undefined, ` : ''}ref: bindRoot }, template)${
       ssr
         ? ` : !frame && projection?.present
       ? ${p}RenderRoot(projection.rootTag, { ...${p}RootAttributes(projection), ref: bindRoot }, ${p}DecodeTemplate(projection.template, props.children))`
         : ''
     } : null;
-  const view = ${interaction ? `rootView && host?.portalTarget ? ${p}CreatePortal(rootView, host.portalTarget) : rootView` : 'rootView'};
+  const view = ${
+    overlayHost
+      ? `host?.viewPolicy.portal
+    ? ${p}React.createElement(${p}React.Fragment, null,
+      ${p}React.createElement('span', { key: 'pui-portal-origin', ref: portalOriginRef, hidden: true, 'aria-hidden': true, 'data-pui-portal-origin': '' }),
+      portalMount && rootView ? ${p}CreatePortal(rootView, portalMount, 'pui-portal-content') : null)
+    : rootView`
+      : interaction
+        ? `rootView && host?.portalTarget ? ${p}CreatePortal(rootView, host.portalTarget) : rootView`
+        : 'rootView'
+  };
 ${
   ssr
     ? `  return ${p}React.createElement(${p}OwnerReady.Provider, { value: started },
@@ -1582,14 +1914,17 @@ ${atoms.shaderScenes ? `return ${componentName};\n}\nexport const ${componentNam
     value: {
       code,
       profile,
-      supportingFiles: [
+      supportingFiles: uniqueNativeFiles([
         ...atoms.files,
+        ...(ruleMetaKeys.length ? nativeRuleMetaArtifacts : []),
         ...(publicCalls ? [nativePublicCallsArtifact] : []),
         ...(callBoundaries.authored.size ? [nativeAuthoredCallablesArtifact] : []),
         ...(hasAuthoredHooks ? [nativeAuthoredHooksArtifact] : []),
         ...contextArtifacts.files,
         ...staticArtifacts.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
+        ...(decorations ? webDecorationArtifacts() : []),
+        ...(overlayHost ? [webViewVisibilityArtifact()] : []),
         ...(interaction ? nativeSupportArtifacts(supportPlan) : []),
         ...(ssr ? [reactSSRTransportArtifact] : []),
         {
@@ -1597,7 +1932,7 @@ ${atoms.shaderScenes ? `return ${componentName};\n}\nexport const ${componentNam
           kind: 'source',
           contents: `import { createContext } from 'react';\nimport type { ContextScope } from './scope-v1';\nexport const ContextTransport = createContext<ContextScope | null>(null);\n`,
         },
-      ],
+      ]),
       dependencies: selected.value.dependencies
         .filter(
           (dependency) =>
@@ -1609,12 +1944,26 @@ ${atoms.shaderScenes ? `return ${componentName};\n}\nexport const ${componentNam
         irVersion: ir.schemaVersion,
         backend: profile,
         observableSemantics: observableSemantics('react', 'source', options.propsUpdatePolicy),
-        ...(interaction
+        ...(interaction || atoms.presentation || decorations
           ? {
               nativeSupport: {
                 version: 2 as const,
                 id: supportPlan.id,
                 features: [...supportPlan.features],
+                ...(supportPlan.inputs.length || atoms.presentation || decorations || overlayHost
+                  ? {
+                      inputs: [
+                        ...new Map(
+                          [
+                            ...supportPlan.inputs,
+                            ...(atoms.presentation ? webPresenceSourceInputs() : []),
+                            ...(decorations ? webDecorationSourceInputs() : []),
+                            ...(overlayHost ? webViewVisibilitySourceInputs() : []),
+                          ].map((input) => [input.file, input])
+                        ).values(),
+                      ].sort((a, b) => a.file.localeCompare(b.file)),
+                    }
+                  : {}),
               },
             }
           : {}),

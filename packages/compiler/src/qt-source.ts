@@ -1,4 +1,5 @@
 import { pruneDeadValues } from './demand-pruning';
+import { unsupportedLifecycleModules } from './lifecycle-module-admission';
 import {
   emitJavaScriptValue,
   emitJavaScriptParameters,
@@ -10,6 +11,7 @@ import {
   unsupportedControlLabel,
   unsupportedJavaScriptIntrinsics,
   unsupportedNumericAccessibility,
+  unsupportedPropsValidators,
   unsupportedPointerFacts,
 } from './pointer-facts-admission';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -26,7 +28,8 @@ import { qtPresentationSource } from './qt-native-presentation';
 import { qtTableProjectionSource } from './qt-native-table';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import type { DataType } from './data-types';
-import { isDataValueType, isPublicValueType } from './ir';
+import { isPublicValueType } from './ir';
+import { serializableDataType } from './value-types';
 import { partitionModuleBindings } from './source-module-bindings';
 import type {
   CompileResult,
@@ -48,6 +51,10 @@ export function emitQtSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = pruneDeadValues(checked.value);
+  const lifecycleDiagnostics = unsupportedLifecycleModules(ir, 'qt-source');
+  if (lifecycleDiagnostics.length) return { ok: false, diagnostics: lifecycleDiagnostics };
+  const validatorDiagnostics = unsupportedPropsValidators(ir, 'qt-source');
+  if (validatorDiagnostics.length) return { ok: false, diagnostics: validatorDiagnostics };
   const numericDiagnostics = unsupportedNumericAccessibility(ir, 'qt-source');
   if (numericDiagnostics.length) return { ok: false, diagnostics: numericDiagnostics };
   const moduleParts = partitionModuleBindings(ir);
@@ -152,7 +159,8 @@ export function emitQtSource(
     if (node.kind === 'style-handle') handles(node, node.handle.tokens);
     if (node.kind === 'rule')
       for (const operation of node.declaration.intent.ops)
-        for (const handle of operation.handles) handles(node, handle.tokens);
+        for (const handle of operation.handles)
+          if (handle.kind === 'tw') handles(node, handle.tokens);
     if (node.kind === 'operation' && node.operation === 'style.tw') {
       const argument = node.arguments[0];
       if (argument?.kind === 'literal' && typeof argument.value === 'string')
@@ -217,6 +225,8 @@ export function emitQtSource(
       case 'intrinsic':
       case 'object-spread':
         return emitJavaScriptValue(node, (item) => expression(item, depth))!;
+      case 'array-spread':
+        throw new Error('Target admission must reject unsupported iterable spread.');
       case 'undefined':
         return '(void 0)';
       case 'literal':
@@ -260,17 +270,27 @@ export function emitQtSource(
         const bound = new Map(node.states.map((state) => [state.id, state.value]));
         const condition = (value: RuleCondition): string => {
           if (value.type === 'true' || value.type === 'false') return value.type;
-          if (value.type === 'eq') {
+          if (value.type === 'eq' || value.type === 'gte') {
             if (value.left.type === 'meta')
-              throw new Error('Rule Meta must fail Qt target admission.');
-            return `(${value.left.type === 'prop' ? `${p}Owner.getProps()[${JSON.stringify(value.left.key)}]` : `${expression(bound.get(value.left.id)!, depth)}.get()`} === ${JSON.stringify(value.right)})`;
+              throw new Error('Target admission must reject unsupported Rule meta sources.');
+            const signal =
+              value.left.type === 'prop'
+                ? `${p}Owner.getProps()[${JSON.stringify(value.left.key)}]`
+                : `${expression(bound.get(value.left.id)!, depth)}.get()`;
+            if (value.type === 'gte')
+              return `(function(value) { return typeof value === 'number' && isFinite(value) && value >= ${value.right}; })(${signal})`;
+            return `(${signal} === ${JSON.stringify(value.right)})`;
           }
           if (value.type === 'not') return `!(${condition(value.expr)})`;
           return `(${value.exprs.map(condition).join(value.type === 'all' ? ' && ' : ' || ') || (value.type === 'all' ? 'true' : 'false')})`;
         };
         return `${p}Owner.style.rule(function() { return ${condition(node.declaration.when)}; }, [${node.declaration.intent.ops
           .flatMap((op) => op.handles)
-          .map(emitQtStyleHandle)
+          .map((handle) => {
+            if (handle.kind !== 'tw')
+              throw new Error('Target admission must reject first-class Rule style handles.');
+            return emitQtStyleHandle(handle);
+          })
           .join(', ')}])`;
       }
       case 'member': {
@@ -378,10 +398,12 @@ export function emitQtSource(
         `[${JSON.stringify(entry.name)}]: function(value) { return ${predicate('value', entry.payload)}; }`
     )
     .join(', ')}}`;
-  const publicPredicate = (value: string, type: ValueType): string =>
-    isDataValueType(type)
-      ? predicate(value, type)
+  const publicPredicate = (value: string, type: ValueType): string => {
+    const schema = serializableDataType(type);
+    return schema !== undefined
+      ? predicate(value, schema)
       : `${typeof type === 'string' && type.startsWith('nullable:') ? `${value} === null || ` : ''}${typeof type === 'string' && type.startsWith('optional:') ? `${value} === undefined || ` : ''}(${value} !== null && typeof ${value} === 'object')`;
+  };
   const methodChecks = `{${ir.exposes
     .filter((entry) => entry.kind === 'method')
     .map(

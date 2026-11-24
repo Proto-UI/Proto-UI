@@ -3,7 +3,7 @@ type: contract
 title: Bounded live layout viewport width
 status: draft
 since: 0.3.0-alpha.1
-lifecycleRationale: Experimental width-only geometry source for shared family responsive policy; independent admission and native-browser evidence remain open, with compiler and native providers excluded.
+lifecycleRationale: Experimental width-only geometry source for shared family responsive policy, including bounded React DOM source lowering. Independent admission and native-browser evidence remain open; other compiler and native providers are excluded.
 summary: One getter-paired CSS-pixel width fact supports prototype-owned numeric conditions.
 statement:
   en: Rule Meta owns a mounted source lease for viewport.width only. Its value is a finite nonnegative number in CSS pixels or unknown. Prototype Rule data owns thresholds; the host supplies geometry, never family breakpoints.
@@ -16,7 +16,7 @@ criteria:
   - id: C-RULE-VIEWPORT-WIDTH-0001-C
     text: Source/getter replacement, loss, unmount and disposal retire existing leases before reevaluation. Remount samples even unchanged values. Web Component Document adoption rebinds the source to the new realm. Custom getMeta never silently acquires a default source. Width changes recompute style without recreating the prototype, editor or public state.
   - id: C-RULE-VIEWPORT-WIDTH-0001-D
-    text: This draft source does not admit compiler positive lowering, native providers, a complete responsive family or browser raster parity. Unsupported profiles retain explicit diagnostics; SSR and missing-host reads stay unknown. The separately defined finite gte condition owns comparison semantics.
+    text: React DOM source lowering may emit a direct finite gte predicate with a getter-paired mounted default-web source, shared per generated support module and Document. It does not admit other compiler providers, SSR, a complete responsive family or browser raster parity. Unsupported profiles retain explicit diagnostics; missing-host reads stay unknown. The separately defined finite gte condition owns comparison semantics.
 verifies:
   tests: [T-RULE-VIEWPORT-WIDTH-0001]
 relates:
@@ -29,7 +29,11 @@ openQuestions:
 sources:
   - path: packages/modules/rule-meta/src/caps.ts
   - path: packages/adapters/base/src/platform/web-viewport-source.ts
+  - path: packages/compiler/src/native-rule-meta.ts
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Adds bounded React DOM source lowering with mounted default-web geometry and direct numeric predicates; retains all other unsupported-profile and draft boundaries.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Adds width-only mounted geometry without a public Meta subscription bus or adapter breakpoint.

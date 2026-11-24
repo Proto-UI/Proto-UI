@@ -1,15 +1,15 @@
 ---
 title: 'Live Region'
-description: '无交互的受治 ARIA live region 语义。'
+description: '向屏幕阅读器自动播报动态内容更新的纯语义 ARIA 实时区域组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+用于向辅助技术播报状态更新或紧急提示的 ARIA live region 组件，根据 `politeness` 与 `atomic` 自动配置无障碍角色与播报级别。本页示例采用 **Shadcn Rhea** 风格。
 
-无交互的受治 ARIA live region 语义。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-live-region"
@@ -18,13 +18,17 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-区域由两个 prop 推导 `role`、`aria-live` 与 `aria-atomic`：`politeness: 'polite'`（默认）投射 `role=status` 与 `aria-live=polite`，`politeness: 'assertive'` 投射 `role=alert` 与 `aria-live=assertive`；`atomic`（默认 `true`）投射 `aria-atomic`。作者子内容即公告负载——修改它是投递更新的方式。区域本身不声明焦点、事件、命令、选择或 accessible name 覆盖通道，exposes 表面为空；也没有隐式队列或通知传输。
+## 用法
 
-组成: Root.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。真实读屏送达以及完整的 native/GPUI、编译器与独立验收证据仍未完成。
+`Live Region` 由单一 `Root` 部件组成，传入的子元素文本即为播报内容——更新子元素即可触发播报：
 
-本条目是工作区源码，不在公开的 `proto-ui add` 目录里。
+- `politeness="polite"`（默认）：设置 `role="status"` 与 `aria-live="polite"`，适用于非打断性的状态提示。
+- `politeness="assertive"`：设置 `role="alert"` 与 `aria-live="assertive"`，适用于需要立即播报的重要提醒。
+- `atomic={true}`（默认）：设置 `aria-atomic="true"`，使内容变化时整段播报而非仅播报差异部分。
+
+组件保持纯语义展示，不增加焦点、事件或额外暴露方法，常与 [Async Region](../async-region/) 或表单校验错误搭配使用。
 
 ## API
 
@@ -36,7 +40,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   ]}
 />
 
-`polite` 投射 `role="status"` 与 `aria-live="polite"`。`assertive` 投射 `role="alert"` 与 `aria-live="assertive"`。exposes 表面为空。
+`Root` 无额外暴露状态或事件。
 
 ## 参考
 

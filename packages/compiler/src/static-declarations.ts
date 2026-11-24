@@ -24,10 +24,15 @@ export const STATIC_PACKAGE_CAPABILITIES: Readonly<Record<string, readonly strin
 export const STATIC_MODULE_FACTORIES: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   '@proto.ui/module-text-control': { declareTextControl: '@proto.ui/text-control/declaration' },
   '@proto.ui/module-image-view': { declareImageView: '@proto.ui/image-view/declaration' },
+  '@proto.ui/module-native-link': { declareNativeLink: '@proto.ui/native-link/declaration' },
 };
 
 /** Decode checked syntax only. This never imports or calls an author factory. */
-export function staticValue(module: SourceModule, input: ts.Expression): StaticValue {
+export function staticValue(
+  module: SourceModule,
+  input: ts.Expression,
+  bindings: ReadonlyMap<string, StaticValue> = new Map()
+): StaticValue {
   let node = input;
   while (
     ts.isParenthesizedExpression(node) ||
@@ -39,6 +44,7 @@ export function staticValue(module: SourceModule, input: ts.Expression): StaticV
   if (node.kind === ts.SyntaxKind.TrueKeyword) return true;
   if (node.kind === ts.SyntaxKind.FalseKeyword) return false;
   if (node.kind === ts.SyntaxKind.NullKeyword) return null;
+  if (ts.isIdentifier(node) && bindings.has(node.text)) return bindings.get(node.text)!;
   if (ts.isNumericLiteral(node)) {
     const value = Number(node.text);
     if (Number.isFinite(value)) return value;
@@ -52,12 +58,45 @@ export function staticValue(module: SourceModule, input: ts.Expression): StaticV
     if (Number.isFinite(value)) return value;
   }
   if (ts.isArrayLiteralExpression(node))
-    return node.elements.map((element) => staticValue(module, element));
+    return node.elements.map((element) => staticValue(module, element, bindings));
+  if (
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    node.expression.name.text === 'map' &&
+    node.arguments.length === 1 &&
+    (ts.isArrowFunction(node.arguments[0]) || ts.isFunctionExpression(node.arguments[0]))
+  ) {
+    const values = staticValue(module, node.expression.expression, bindings),
+      callback = node.arguments[0];
+    if (
+      !Array.isArray(values) ||
+      !callback.body ||
+      ts.isBlock(callback.body) ||
+      callback.parameters.length > 3 ||
+      callback.parameters.some(
+        (parameter) =>
+          !ts.isIdentifier(parameter.name) || parameter.initializer || parameter.dotDotDotToken
+      )
+    )
+      rejectNode(
+        node,
+        'PUI1025',
+        'A static map requires a finite literal list and an expression-only value mapper.'
+      );
+    return values.map((value, index) => {
+      const local = new Map(bindings),
+        args: StaticValue[] = [value, index, values];
+      callback.parameters.forEach((parameter, i) =>
+        local.set((parameter.name as ts.Identifier).text, args[i])
+      );
+      return staticValue(module, callback.body as ts.Expression, local);
+    });
+  }
   if (ts.isObjectLiteralExpression(node)) {
     const result: Record<string, StaticValue> = Object.create(null);
     for (const property of node.properties) {
       if (
-        !ts.isPropertyAssignment(property) ||
+        (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property)) ||
         !(ts.isIdentifier(property.name) || ts.isStringLiteral(property.name))
       )
         rejectNode(
@@ -68,7 +107,11 @@ export function staticValue(module: SourceModule, input: ts.Expression): StaticV
       const name = property.name.text;
       if (Object.hasOwn(result, name))
         rejectNode(property, 'PUI1025', `Duplicate static declaration field ${name}.`);
-      result[name] = staticValue(module, property.initializer);
+      result[name] = staticValue(
+        module,
+        ts.isShorthandPropertyAssignment(property) ? property.name : property.initializer,
+        bindings
+      );
     }
     return result;
   }
@@ -186,6 +229,11 @@ export function extractModuleDeclaration(
   if (factory.module !== null) return undefined;
   const id = STATIC_MODULE_FACTORIES[factory.imported.module]?.[factory.name];
   if (!id) return undefined;
+  if (id === '@proto.ui/native-link/declaration') {
+    if (node.arguments.length !== 0)
+      rejectNode(node, 'PUI1025', 'Native Link declaration takes no configuration arguments.');
+    return { id, config: { navigation: 'native' }, span: sourceSpan(node) };
+  }
   if (node.arguments.length !== 1)
     rejectNode(
       node,

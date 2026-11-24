@@ -62,6 +62,33 @@ const DEFAULT_CONFIG: OverlayConfig = Object.freeze({
   layerOffset: 0,
 });
 
+const CONFIG_PATCH_FIELDS = [
+  'defaultOpen',
+  'closeOnEscape',
+  'closeOnOutsidePress',
+  'closeOnFocusOutside',
+  'closeOnAnchorPress',
+  'closeOnTriggerPress',
+  'placement',
+  'align',
+  'sideOffset',
+  'alignOffset',
+  'anchored',
+  'availableSpace',
+  'availableLayout',
+  'strategy',
+  'avoidCollisions',
+  'collisionBoundary',
+  'collisionPadding',
+  'excludeAnchorTranslation',
+  'entry',
+  'restore',
+  'portal',
+  'modal',
+  'layerRole',
+  'layerOffset',
+] as const;
+
 function createObservedHandle<T>(initialValue: T) {
   let value = initialValue;
   const watchers = new Set<(run: any, e: StateEvent<T>) => void>();
@@ -813,30 +840,10 @@ export class OverlayModuleImpl extends ModuleBase {
       this.availableSpace.bindLayout(patch.availableLayout);
     }
 
-    this.patchValue('defaultOpen', patch.defaultOpen);
-    this.patchValue('closeOnEscape', patch.closeOnEscape);
-    this.patchValue('closeOnOutsidePress', patch.closeOnOutsidePress);
-    this.patchValue('closeOnFocusOutside', patch.closeOnFocusOutside);
-    this.patchValue('closeOnAnchorPress', patch.closeOnAnchorPress);
-    this.patchValue('closeOnTriggerPress', patch.closeOnTriggerPress);
-    this.patchValue('placement', patch.placement);
-    this.patchValue('align', patch.align);
-    this.patchValue('sideOffset', patch.sideOffset);
-    this.patchValue('alignOffset', patch.alignOffset);
-    this.patchValue('anchored', patch.anchored);
-    this.patchValue('availableSpace', patch.availableSpace);
-    this.patchValue('availableLayout', patch.availableLayout);
-    this.patchValue('strategy', patch.strategy);
-    this.patchValue('avoidCollisions', patch.avoidCollisions);
-    this.patchValue('collisionBoundary', patch.collisionBoundary);
-    this.patchValue('collisionPadding', patch.collisionPadding);
-    this.patchValue('excludeAnchorTranslation', patch.excludeAnchorTranslation);
-    this.patchValue('entry', patch.entry);
-    this.patchValue('restore', patch.restore);
-    this.patchValue('portal', patch.portal);
-    this.patchValue('modal', patch.modal);
-    this.patchValue('layerRole', patch.layerRole);
-    this.patchValue('layerOffset', patch.layerOffset);
+    for (let index = 0; index < CONFIG_PATCH_FIELDS.length; index++) {
+      const field = CONFIG_PATCH_FIELDS[index]!;
+      this.patchValue(field, patch[field]);
+    }
 
     if (typeof patch.meta !== 'undefined') {
       this.config = Object.freeze({

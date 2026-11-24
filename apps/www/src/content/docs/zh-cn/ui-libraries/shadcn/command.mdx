@@ -1,15 +1,15 @@
 ---
 title: 'Command'
-description: '可搜索并发出操作意图的内联命令列表。'
+description: '支持实时搜索过滤并触发命令执行的内联命令面板。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+内联展开的可搜索命令列表，按 `Enter` 或点击命令项即可发出执行意图。本页示例采用 **Shadcn Rhea** 风格。
 
-可搜索并发出操作意图的内联命令列表。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-command"
@@ -18,17 +18,27 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-列表保持内联显示。Enter 或指针激活发出带选项的 execute；实际操作归应用处理，输入搜索不会执行操作。
+## 用法
 
-宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Input, Content, Item, Empty.
+### 部件结构
 
-草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+由 `Root`、`Input`、`Content`、`Item` 与 `Empty` 组合而成（内联展示，无 `Trigger`）：
+
+- 列表默认保持展开（`defaultOpen={true}`），输入查询词只会过滤列表而不会自动执行命令。
+- 点击或按 `Enter` 激活命令项时，组件触发携带选中项的 `execute` 事件，由应用层执行具体动作。
+
+### 过滤与交互行为
+
+- **内置过滤**：依据 `textValue` 与 `keywords` 过滤，忽略大小写及重音；设置 `filter={false}` 可由外部自行提供过滤后的子项。
+- **空状态与禁用项**：`Empty` 根据实际匹配数量显隐；禁用项与重复 `value` 的项不可执行。
+- **键盘与输入法**：方向键移动高亮项时焦点保持在单行输入框中，IME 组合输入期间不触发执行。
+- **受控模式**：`open`、`value` 与 `inputValue` 各自独立支持受控。
 
 ## API
 
-Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。它复用共享搜索家族的属性。列表保持内联，所以 `defaultOpen` 为 `true`。Command 没有 Trigger。
+传入 `value`、`inputValue` 或 `open` 会使对应状态进入受控模式。由于命令列表默认内联展示，`defaultOpen` 默认为 `true`。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -44,7 +54,11 @@ Command 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `val
   ]}
 />
 
-这些属性属于 Root。Input 的 `placeholder`、`a11yLabel`、`name` 默认 `''`。Content 默认 `side="bottom"`、`align="start"`、`sideOffset` `4`、`collisionPadding` `8`。Item 的 `value`、`textValue`、`keywords` 默认 `''`，`disabled` 默认 `false`。
+以上属性属于 `Root`。其他部件属性默认值：
+
+- **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
+- **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
+- **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
 
 ## 参考
 

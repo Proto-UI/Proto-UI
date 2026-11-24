@@ -234,7 +234,21 @@ export function pruneDeadValues(input: PrototypeIR): PrototypeIR {
             then: rewriteBlock(statement.then, available),
             otherwise: rewriteBlock(statement.otherwise, available),
           });
-        else
+        else if (statement.kind === 'while')
+          result.push({
+            ...statement,
+            condition: rewriteValue(statement.condition),
+            body: rewriteBlock(statement.body, available),
+          });
+        else if (statement.kind === 'for-of') {
+          const loop = new Set(available);
+          loop.add(identity(statement));
+          result.push({
+            ...statement,
+            iterable: rewriteValue(statement.iterable),
+            body: rewriteBlock(statement.body, loop),
+          });
+        } else
           result.push({
             ...statement,
             body: rewriteBlock(statement.body, available),

@@ -1,9 +1,13 @@
 ---
-title: bootstrap-2-3-2 Input Otp
-description: Draft portable input atoms.
+title: 'Bootstrap 2.3.2 Input OTP'
+description: 'A Bootstrap 2.3.2 one-time passcode input with single-editor paste, caret slot highlighting, and Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Input OTP pairs one real text input with passive visual slots, preserving native paste, selection, deletion, and browser `one-time-code` autofill.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-input-otp"
@@ -12,10 +16,25 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root owns value/defaultValue, length (1–32, default 6), numeric/alphanumeric filtering, disabled/readOnly, name and ariaLabel. One real Input preserves selection, paste, deletion and composition through TextControl; it requests one-time-code autocomplete. Input commits after composition, strips disallowed characters and bounds length. Slots are passive indexed, aria-hidden readouts; they never create additional editors or tab stops. A focused, editable Input projects its actual TextControl caret or selected range to active slots. Unknown selection, blur, disabled and readOnly have no active slot; the value length is never a substitute for a caret. valueChange is a request; completed emits once for each accepted complete code, not an authentication action. Server verification, SMS retrieval and per-cell focus are outside this implementation.
+## Installation
 
-Use Control instead of Input inside Field/FormField to bridge FieldLabel, canonical string validation, IME cancellation, Form serialization and reset. Standalone Input retains its existing naming. OTP Control validates an accepted canonical change after owner callbacks. A rejected controlled candidate or a normalized no-op does not start automatic change validation; manual and configured blur validation still work. Same-turn accepted edits validate the latest snapshot once, and reset, policy interruption or unmount cancels queued work.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: root, input, control, slot, separator. All four styled families inherit Base behavior.
+## Usage
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+Compose `Root`, `Input` (or `Control` inside `Field` / `FormField`), `Slot`, and optional `Separator`:
+
+- **Single editor, visual slots**: Editing, selection, paste, and IME composition happen in one real input. After composition ends, disallowed characters are stripped (numeric or alphanumeric) and clamped to `length` (`1`–`32`, default `6`). Each `Slot` is decorative (`aria-hidden`) and highlights based on the real caret or selection while focused and editable.
+- **Completion**: Controlled inputs emit `valueChange` proposals; `completed` fires once for each accepted full-length code so your application can trigger verification.
+- **Form integration**: Replace `Input` with `Control` inside `Field` or `FormField` to bridge `FieldLabel`, validation, IME handling, `Form` serialization, and reset.
+
+## API
+
+| Part | Props / Events | Description |
+| --- | --- | --- |
+| `Root` | `value` / `defaultValue` | Controlled or initial OTP string |
+| `Root` | `length` | Number of characters, `1`–`32` (default `6`) |
+| `Root` | `disabled` / `readOnly` / `name` / `ariaLabel` | State flags, field name, and accessible name |
+| `Root` | `valueChange` / `completed` | Value change proposal and full-code completion event |
+| `Input` / `Control` | — | Real text editor (use `Control` inside `Field`/`FormField`) |
+| `Slot` / `Separator` | — | Passive character slots and optional visual divider |

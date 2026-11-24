@@ -14,6 +14,104 @@ afterEach(async () => {
   sessions.length = 0;
 });
 
+describe('Transition canonical context target and closed-view retention', () => {
+  it('does not detach inside a closed-state observer before the phase owner completes exit', async () => {
+    const observed: boolean[] = [];
+    let intent = () => false;
+    const f = fixture({
+      bind(handle, key) {
+        handle.bindOpenContext({ context: key, field: 'open' });
+        handle.isPresent.watch((_run, event) => {
+          if (event.type !== 'next' || handle.isPresent.get()) return;
+          handle.retainClosedView(false);
+          observed.push(intent());
+        });
+      },
+    });
+    intent = () => f.session.viewIntent.getSnapshot().present;
+    await f.session.mount();
+    f.session.invokeInCallbackScope(() => f.handle.retainClosedView(true));
+    f.provider.invokeInCallbackScope(() =>
+      f.providerRun.context.update(f.key, { open: false, other: false, label: 'closed' })
+    );
+    f.session.invokeInCallbackScope(() => f.handle.controls.complete());
+    expect(observed).toEqual([true]);
+    expect(intent()).toBe(false);
+  });
+  it('cannot withdraw the pending cold materialization when retention changes before mounted', async () => {
+    const f = fixture({
+      value: { open: false, other: false, label: 'closed' },
+      bind: (handle, key) => handle.bindOpenContext({ context: key, field: 'open' }),
+    });
+    f.provider.invokeInCallbackScope(() =>
+      f.providerRun.context.update(f.key, { open: true, other: false, label: 'opening' })
+    );
+    expect(f.handle.transitionState.get()).toBe('closed');
+    expect(f.session.viewIntent.getSnapshot().present).toBe(true);
+    f.session.invokeInCallbackScope(() => f.handle.retainClosedView(false));
+    expect(f.session.viewIntent.getSnapshot().present).toBe(true);
+    await f.session.mount();
+    expect(f.handle.transitionState.get()).toBe('entering');
+  });
+  it('keeps context authoritative over standalone props and retained imperative commands', async () => {
+    const f = fixture({
+      props: { open: false },
+      bind: (handle, key) => handle.bindOpenContext({ context: key, field: 'open' }),
+    });
+    expect(f.events).toEqual(['entered']);
+    await f.session.mount();
+    f.session.invokeInCallbackScope(() => f.handle.controls.leave());
+    expect(f.handle.transitionState.get()).toBe('entered');
+    f.provider.invokeInCallbackScope(() =>
+      f.providerRun.context.update(f.key, { open: false, other: false, label: 'closed' })
+    );
+    expect(f.handle.transitionState.get()).toBe('leaving');
+    f.session.invokeInCallbackScope(() => f.handle.controls.complete());
+    expect(f.handle.transitionState.get()).toBe('closed');
+    f.session.controller.applyRawProps({ open: true });
+    f.session.invokeInCallbackScope(() => f.handle.controls.enter());
+    expect(f.handle.transitionState.get()).toBe('closed');
+    expect(f.session.viewIntent.getSnapshot().present).toBe(false);
+  });
+  it('retains only the view at closed, then detaches when retention is withdrawn', async () => {
+    const f = fixture({
+      bind: (handle, key) => handle.bindOpenContext({ context: key, field: 'open' }),
+    });
+    await f.session.mount();
+    f.session.invokeInCallbackScope(() => f.handle.retainClosedView(true));
+    f.provider.invokeInCallbackScope(() =>
+      f.providerRun.context.update(f.key, { open: false, other: false, label: 'closed' })
+    );
+    f.session.invokeInCallbackScope(() => f.handle.controls.complete());
+    expect(f.handle.transitionState.get()).toBe('closed');
+    expect(f.handle.isPresent.get()).toBe(false);
+    expect(f.session.viewIntent.getSnapshot().present).toBe(true);
+    f.session.invokeInCallbackScope(() => f.handle.retainClosedView(false));
+    expect(f.session.viewIntent.getSnapshot().present).toBe(false);
+    expect(f.handle.transitionState.get()).toBe('closed');
+  });
+  it('copies and guards the canonical context binding while rejecting a second owner', () => {
+    const f = fixture({
+      bind(handle, key) {
+        const source: { context: typeof key; field: 'open' | 'other' } = {
+          context: key,
+          field: 'open',
+        };
+        handle.bindOpenContext(source);
+        source.field = 'other';
+        handle.bindOpenContext({ context: key, field: 'open' });
+        expect(() => handle.bindOpenContext(source)).toThrow(/already bound/);
+      },
+    });
+    expect(f.events).toEqual(['entered']);
+    expect(() =>
+      f.session.invokeInCallbackScope(() =>
+        f.handle.bindOpenContext({ context: f.key, field: 'open' })
+      )
+    ).toThrow(/phase/i);
+  });
+});
+
 function fixture(
   options: {
     props?: TransitionProps;

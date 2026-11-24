@@ -25,6 +25,7 @@ export function partitionModuleBindings(
       const node = value as Record<string, unknown>;
       if (
         node.kind === 'authored-hook' ||
+        node.kind === 'rule' ||
         (node.kind === 'operation' && operationUsesOwner(node.operation as Operation)) ||
         expressionUsesOwner(node as unknown as ExpressionIR)
       )

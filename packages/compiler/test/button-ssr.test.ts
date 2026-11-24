@@ -101,14 +101,18 @@ describe('experimental source-generated Button SSR', () => {
   });
 
   it('keeps all public SSR targets rejected, including this real source', async () => {
-    const input = await readFile(path.join(repositoryRoot, baseButtonPath), 'utf8');
     for (const profile of [
       'react-dom-ssr-v1',
       'vue-ssr-v1',
       'vue2-ssr-v1',
       'web-component-ssr-v1',
     ]) {
-      const result = compilePrototype(input, { profile });
+      // Resolve the real source's erased type dependencies as well as runtime
+      // imports before checking the public target availability boundary.
+      const result = await compileFile(path.join(repositoryRoot, baseButtonPath), {
+        root: repositoryRoot,
+        profile,
+      });
       expect(result.ok).toBe(false);
       if (!result.ok) expect(result.diagnostics[0].code).toBe('PUI4001');
     }

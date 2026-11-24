@@ -1,17 +1,15 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: 'A scrollable message container with end-following and optional stable-key reading restoration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller composes the existing Scroll Surface end-follow policy. Appends follow only while the reader is at the end; a reader who leaves the end can explicitly resume with Jump to latest. newContentCount is supplied by the application, never inferred as unread truth. Jumping does not request focus.
+A scrollable message container that follows appended messages while at the tail, lets readers explicitly jump back to the latest item, and supports optional stable-key reading position restoration.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Set a11yLabel on Root to name the scrollable region; the default is Messages.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-message-scroller"
@@ -19,9 +17,36 @@ Set a11yLabel on Root to name the scrollable region; the default is Messages.
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+Compose `Root`, `Viewport`, and `Jump`:
+
+- **End-following**: Appended messages stay in view while the reader is at the bottom. After scrolling away, use `Jump` to return to the latest message without taking focus.
+- **Unread count and naming**: Pass `newContentCount` directly from your application state. Set `a11yLabel` on `Root` to name the scrollable region (defaults to `'Messages'`).
+
+### Stable-key reading composition
+
+`asMessageScrollerReading` is an opt-in Hook exported from `@proto.ui/prototypes-base/message-scroller`. Compose it **after** a Base or Shadcn `Viewport` in your prototype so it shares the same Scroll Surface and disables generic `preserve-visible`, keeping stable-key restoration under one controller.
+
+Configuration options:
+
+- `readingCapture`: Anchor selection mode — `'first-crossing'` (default, picks the first item whose end extends past the inset) or `'visible-preferred'` (prefers the first visible `primary` item, falling back to the first visible item).
+- `readingInset`: Inset offset used during capture (default `0`).
+- `readingPredecessor`: Whether to fall back to the saved predecessor when an exact key is missing (default `true`).
+
+The host supplies `MessageReadingFrame` with mount `epoch`, `scrollOffset`, `viewportSize`, and ordered viewport-relative entries `{ key, start, end, primary }`. Anchors have the shape `{ key, previousKey, index, offset, scrollOffset }`. Restoration tries an exact `key` match first, then the saved predecessor (when enabled), then the saved absolute offset—never using `index` as a substitute identity. Scroll adjustments emit `Scroll.request({ kind: 'by', ... })`, leaving clamping and execution timing to the host.
+
+An initial restore hint remains live across empty content, late arrivals, missing-key fallbacks, and zero-height exact matches until explicit reader input retires it. For selection restoration, the host supplies selection identity, offsets, length, endpoint availability, and prefix equality; the Hook skips modified text, existing non-collapsed selections, and duplicate replays, and prevents programmatic `selectionchange` events from pausing follow mode. DOM measurement, `Range` operations, fingerprinting, and persistence storage remain in your application.
+
+The pure helpers `captureMessageReadingAnchor`, `resolveMessageReadingAnchor`, `planMessageReadingRestore`, and `messageSelectionRestoreEligible` expose the same policy outside the Hook.
+
 ## API
 
-Message Scroller is workspace source. There is no public `proto-ui add` target. Viewport has no props. Jump accepts the Button props.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -31,7 +56,20 @@ Message Scroller is workspace source. There is no public `proto-ui add` target. 
   ]}
 />
 
-These props belong to Root.
+`Viewport` takes no props. `Jump` accepts the same props as `Button`.
+
+### `asMessageScrollerReading` Methods and State
+
+| Public method / state | Responsibility |
+| --- | --- |
+| `beginReading(following, anchor)` | Initializes the reading session and optional restoration hint once. |
+| `syncReadingFollowing(following)`, `resumeReading()` | Syncs an external reading-mode change or explicitly resumes tail following. `Jump` calls `resumeReading` when this Hook is composed. |
+| `readingInput(input, frame)` | Handles pointer/key/wheel, content focus, selection, or backfill facts to pause following and retire active hints. |
+| `captureReading(frame)`, `observeReadingScroll(frame)` | Captures the current reading anchor and processes scroll reports without overwriting an active initial hint. |
+| `restoreReading(frame)`, `commitReadingRestore(ticket, actualFrame)` | Issues a restore request and commits the actual offset; ticket and mount epoch reject stale acknowledgments and duplicate async captures. |
+| `readingAnchorForPersistence(frame)` | Returns a serializable anchor only when historical reading should replace the saved hint. |
+| `planSelectionRestore(facts)`, `commitSelectionRestore(ticket)` | Determines selection restore eligibility and deduplicates completed host `Range` operations. |
+| `readingMode`, `restoringReading`, `getReadingEpoch()` | Exposes the current reading mode, restore state, and measurement epoch. |
 
 ## References
 

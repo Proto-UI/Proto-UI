@@ -57,6 +57,10 @@ sources:
     sections:
       - defineAsHook
       - normalizeAsHookRender
+  - path: packages/compiler/src/parser-module.ts
+    sections:
+      - static defineAsHook forwarding to an admitted definePrototype source descriptor
+      - inherited Module declarations and original setup source ownership
   - path: packages/runtime/test/contract/as-hook.v0.contract.test.ts
     sections:
       - AS-HOOK-0500
@@ -74,6 +78,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Captured prototype-compatible asHook definition and render return boundary.
+  - version: 0.1.1
+    change: refined
+    summary: Recorded Compiler source forwarding of actual imported Prototype definitions with their original setup scope and Module requirements; dynamic descriptors and Hook caller objects remain unsupported.
 tags:
   - as-hook
   - define

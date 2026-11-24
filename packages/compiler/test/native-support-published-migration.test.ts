@@ -205,7 +205,7 @@ describe('fixed published CLI support migration', () => {
       output,
       '--json',
     ]);
-    expect(command).toMatchObject({ code: 0, stderr: '' });
+    expect(command, command.stdout).toMatchObject({ code: 0, stderr: '' });
     for (const id of ids)
       for (const filename of ['Component.js', 'Component.js.map'])
         expect(await readFile(path.join(output, id, filename))).toEqual(

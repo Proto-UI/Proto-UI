@@ -1,15 +1,15 @@
 ---
 title: 'Combobox'
-description: 'Editable search with committed option identity.'
+description: 'A searchable dropdown that keeps committed option values distinct from the search query.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A searchable dropdown that separates the committed option key (`value`) from the editable query string (`inputValue`). The examples on this page use the **Shadcn Rhea** style preset.
 
-Editable search with committed option identity.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-combobox"
@@ -18,17 +18,27 @@ Editable search with committed option identity.
   codePanel={false}
 />
 
-Root.value is a selected item key. inputValue is independent editable text. Unmatched text is never silently accepted as an option.
+## Usage
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+### Anatomy
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+Compose `Combobox` from `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
+
+- `Root`'s `value` stores the selected option key, while `inputValue` tracks the live search text. Unmatched input text is never silently accepted as an option.
+- If you want users to submit arbitrary free text, use [Autocomplete](../autocomplete/) instead.
+
+### Filtering and interaction
+
+- **Built-in filtering**: Matches case- and diacritic-insensitively against `textValue` and `keywords`. Set `filter={false}` to supply your own pre-filtered items.
+- **Empty and disabled states**: `Empty` reflects the real match count; disabled items and duplicate-valued options cannot be committed.
+- **Keyboard and IME**: Focus stays in the single-line input during arrow-key navigation, and IME composition never selects an option.
+- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently with their corresponding change events.
 
 ## API
 
-Combobox is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact. It reuses the shared search-family props. `defaultOpen` is `false`.
+Passing `value`, `inputValue`, or `open` enables controlled mode for that state.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -44,7 +54,12 @@ Combobox is workspace source. There is no public `proto-ui add` target. Passing 
   ]}
 />
 
-These props belong to Root. Input defaults `placeholder`, `a11yLabel`, and `name` to `''`. Content defaults to `side="bottom"`, `align="start"`, `sideOffset` `4`, and `collisionPadding` `8`. Item defaults `value`, `textValue`, and `keywords` to `''`, and `disabled` to `false`. Trigger defaults `disabled` to `false`.
+These props belong to `Root`. Other part defaults:
+
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Trigger**: `disabled` defaults to `false`.
 
 ## References
 

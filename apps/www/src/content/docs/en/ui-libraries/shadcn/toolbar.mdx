@@ -1,15 +1,15 @@
 ---
 title: 'Toolbar'
-description: 'Keyboard-roving commands with an accessible toolbar name and separator.'
+description: 'An accessible toolbar grouping command buttons and separators with roving keyboard focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Toolbar groups related action buttons and dividers into a single accessible container with one `Tab` entry point and arrow-key navigation. The examples on this page use the **Shadcn Rhea** style preset.
 
-Keyboard-roving commands with an accessible toolbar name and separator.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-toolbar"
@@ -18,15 +18,22 @@ Keyboard-roving commands with an accessible toolbar name and separator.
   codePanel={false}
 />
 
-Root owns disabled, orientation, loop and a11yLabel. Button emits action with its value on enabled activation. Only one enabled command participates in Tab; arrows move within the toolbar. Separator follows the cross axis.
+## Installation
 
-Parts: Root, Button, Separator.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Toolbar consists of `Root`, `Button`, and `Separator`:
+
+- `Root` manages `disabled`, `orientation`, `loop`, and the toolbar's accessible name (`a11yLabel`).
+- Only one enabled button participates in the page `Tab` sequence at a time; arrow keys move focus across buttons within the toolbar.
+- Activating an enabled `Button` emits an `action` event carrying its `value`.
+- `Separator` renders along the toolbar's cross axis automatically.
 
 ## API
 
-Toolbar is workspace source. There is no public `proto-ui add` target. Separator has no props.
+The following props belong to `Root` (`Separator` adds no props):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,7 +45,7 @@ Toolbar is workspace source. There is no public `proto-ui add` target. Separator
   ]}
 />
 
-These props belong to Root. Button defaults `disabled` to `false` and `value` to `''`.
+`Button` defaults `disabled` to `false` and `value` to `''`.
 
 ## References
 

@@ -1,0 +1,60 @@
+{
+  "sourceRevision": "5cb80eb937f20982dd7dc8cbc93a90e91d665c31",
+  "universeFingerprint": "4d364cc526bfc712994596a9f6c886a848271cdbca4e1a7d1ef5665115919ce5",
+  "counts": {
+    "entries": 1015,
+    "families": {
+      "base": 184,
+      "bootstrap-2-3-2": 205,
+      "brutalist": 206,
+      "liquid-glass": 201,
+      "lucide": 1,
+      "shadcn": 218
+    },
+    "profiles": 12,
+    "implementedProfiles": 6,
+    "rows": 12180,
+    "statuses": {
+      "PASS": 1782,
+      "FAIL": 21,
+      "UNSUPPORTED": 4281,
+      "UNIMPLEMENTED": 6090,
+      "UNTESTED": 6
+    },
+    "compilerDefects": 1
+  },
+  "admissionCoverageComplete": false,
+  "allImplementedEntriesAdmitted": false,
+  "mergeExitCode": 2,
+  "strictGateExitCode": 1,
+  "failedAttempts": 2,
+  "recordedAttempts": 1016,
+  "missingProcessReceipts": [],
+  "failureGroups": 3,
+  "untested": [
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "profile": "gpui-source-v1"
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "profile": "react-dom-source-v1"
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "profile": "react-runtime-v1"
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "profile": "vue-source-v1"
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "profile": "vue2-source-v1"
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "profile": "web-component-source-v1"
+    }
+  ]
+}

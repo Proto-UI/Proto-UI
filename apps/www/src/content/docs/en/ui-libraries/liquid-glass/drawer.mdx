@@ -1,11 +1,15 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached modal panel with four placement choices.'
+description: 'An edge-attached Liquid Glass modal drawer supporting content-fit sizing, scrolling content, and explicit snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-An edge-attached modal panel with four placement choices.
+Liquid Glass Drawer is an edge-attached modal panel with four placement sides, supporting content-fit sizing, scrollable content, and multi-stop drag snapping.
+
+## Preview
+
+### Default drawer
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer"
@@ -14,19 +18,7 @@ An edge-attached modal panel with four placement choices.
   codePanel={false}
 />
 
-Top/bottom Content fits its content by default. Its maximum is the available height, always bounded by the safe available region. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right retain the existing capped 20rem presentation in this vertical-only draft.
-
-The project composes Content as an overflow-y-auto scrollport. This differs from the fixed Shadcn/Neo reference wrappers' overflow-hidden Content with an explicitly authored scrolling body. The long example keeps Close inside the same scrollport.
-
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
-
-Omitted, null or empty snapPoints selects content-fit mode. A nonempty valid array selects explicit snaps: positive fractions up to one, sorted and deduplicated. snapPoint alone does not enable snapping. Explicit snap fractions use the full capped extent, not an implicit 85% multiplier. defaultSnapPoint is local; snapPoint with snapPointChange is owner-controlled. Invalid vertical point arrays or length records are rejected, not converted to full height.
-
-In content-fit mode Handle is a pointer-only, aria-hidden drag affordance, without keyboard resizing or an Enter/Space close action. Explicit snaps retain the named separator, arrows, Home/End and range values. Content.dragDismissible=false prevents drag dismissal; independent Close, Escape and outside dismissal retain their existing protocol. Interrupted gestures and rejected controlled requests restore the accepted presentation.
-
-Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is rejected before presentation: Root keeps its logical open value, while Mask waits for one valid Content declaration. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
-
-### Long content
+### Long scrollable content
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer-scroll"
@@ -35,9 +27,7 @@ Runtime invalid extent updates expose extentValid=false, cancel Handle input and
   codePanel={false}
 />
 
-### Explicit half/full snaps
-
-This example retains the explicit resizing interaction and announces committed changes.
+### Explicit half/full snap points
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-drawer-snap"
@@ -45,3 +35,25 @@ This example retains the explicit resizing interaction and announces committed c
   runtimes={['wc', 'react', 'vue', 'vue2']}
   codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Sizing and scrolling**: top and bottom drawers fit their content height by default up to the safe available region; left and right drawers use a capped `20rem` width. `Content` renders as an `overflow-y-auto` scroll container so long content and the close control stay accessible.
+- **Extent bounds**: `Content.minExtent` and `maxExtent` accept neutral length objects (`unit`: `'logical' | 'root-text' | 'available' | 'available-minus-root-text'` and a non-negative finite `value`). Minimums above the safe cap clamp to the cap; invalid runtime updates expose `extentValid={false}` and retain the last valid extent.
+- **Snap points (`snapPoints`)**: omit, pass `null`, or pass `[]` for content-fit mode; pass a non-empty array of fractions in `(0, 1]` (sorted and deduplicated against the full safe cap) for explicit snapping. In snap mode, `Handle` exposes a named `separator` with arrow-key and Home/End resizing; in content-fit mode, `Handle` is a pointer-only `aria-hidden` drag handle.
+- **Controlled state and dismissal**: `Root` supports controlled `open` or uncontrolled `defaultOpen`, plus controlled `snapPoint` / `snapPointChange` and uncontrolled `defaultSnapPoint`. Set `Content.dragDismissible={false}` to disable drag-to-close while keeping Close, Escape, and outside dismissal. Interrupted gestures and rejected controlled requests restore the committed state.
+
+## API
+
+| Part | Prop | Description |
+| --- | --- | --- |
+| Root | `open`, `defaultOpen` | Controlled / uncontrolled visibility |
+| Root | `snapPoints` | Non-empty array of `(0, 1]` fractions; omit or pass `[]` for content-fit mode |
+| Root | `snapPoint`, `defaultSnapPoint` | Controlled / uncontrolled snap stop; pairs with `snapPointChange` |
+| Content | `minExtent`, `maxExtent` | Neutral length bounds (`unit` + non-negative finite `value`) |
+| Content | `dragDismissible` | Set to `false` to prevent closing via drag |
+| Content (exposed) | `extentValid` | Indicates whether the active extent constraints are valid |

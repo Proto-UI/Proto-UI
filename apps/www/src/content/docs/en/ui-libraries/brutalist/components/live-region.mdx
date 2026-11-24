@@ -1,6 +1,6 @@
 ---
 title: 'Live Region'
-description: 'Draft Brutalist Live Region presentation over the Base Live Region protocol.'
+description: 'An accessible Brutalist live region for polite or assertive screen-reader status announcements.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,28 +9,30 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-This draft family contains a single Root. Base Live Region owns the governed ARIA live-region semantics: `politeness: 'polite'` (the default) projects `role=status` with `aria-live=polite`, and `politeness: 'assertive'` projects `role=alert` with `aria-live=assertive`; `atomic` (default `true`) projects `aria-atomic`. The authored child content is the announcement payload — mutating it is how updates are delivered. The region declares no focus, event, command, selection, or accessible-name override channel, its exposes surface is empty, and there is no implicit queue or notification transport.
+Brutalist Live Region is a single-part accessible announcement container that relays dynamic text updates to screen readers with clean, unboxed typography.
 
-The Brutalist layer is presentation-only and semantic-first: it consumes `asLiveRegionRoot()` once, preserves every inherited owner, and adds only the restrained family surface `min-w-0 max-w-full text-foreground` so payload text stays readable and bounded. There is no upstream Neo live-region component to pin; no border, shadow, or interaction chrome is invented here.
-
-Import the Root from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/live-region` anatomy subpath. This family intentionally has no `proto-ui add brutalist-live-region` registry entry and creates no separate publication or release promise.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-live-region" initialRuntime="wc" />
 </div>
 
-## Suggested acceptance path
+## Installation
 
-1. Push a polite update and confirm the polite region keeps `role=status` and `aria-live=polite` while its authored payload text changes.
-2. Push an assertive update and confirm the assertive region keeps `role=alert` and `aria-live=assertive` across repeated toggles.
-3. Confirm both regions keep `aria-atomic="true"`, stay out of the tab order, and expose no interaction or command surface.
-4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-The related catalog entities are `draft`; this page records the current direction rather than a stable Live Region guarantee.
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-live-region`
+- **Package exports**: import `Root` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/live-region`
+
+## Usage
+
+- **Politeness level**: `politeness="polite"` (default) sets `role="status"` and `aria-live="polite"` for routine status updates; `politeness="assertive"` sets `role="alert"` and `aria-live="assertive"` for urgent alerts.
+- **Atomic updates**: `atomic` (default `true`) sets `aria-atomic` so the full announcement is read together. Update your children directly to deliver a new announcement.
+- The container stays out of the keyboard tab order and applies only `min-w-0 max-w-full text-foreground` so text remains readable in light and dark modes.
 
 ## API
 
-Live Region is workspace source. For this workspace version, the CLI target is `brutalist-live-region`. Use matching CLI and package versions; check the chosen release's availability before installing.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -39,5 +41,3 @@ Live Region is workspace source. For this workspace version, the CLI target is `
     { name: 'atomic', type: 'boolean', default: 'true' },
   ]}
 />
-
-These props belong to Root.

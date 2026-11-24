@@ -173,7 +173,8 @@ describe('Compiler Scroll current-view and reveal host closure', () => {
 
   it('resumes on actual composed wheel arrival while preserving pause for public and clamped movement', () => {
     // The independent reviewer supplied the failing composed-wheel case.
-    const f = fixture({ mount: false });
+    const frame = frames(),
+      f = fixture({ mount: false });
     f.scroll.configure({ projection: 'composed' });
     f.scroll.bindComposedChrome({
       anatomy: f.family,
@@ -192,6 +193,13 @@ describe('Compiler Scroll current-view and reveal host closure', () => {
     f.surface.dispatchEvent(new WheelEvent('wheel', { deltaY: 1000 }));
     f.surface.dispatchEvent(new Event('scroll'));
     expect(f.surface.scrollTop).toBe(300);
+    expect(f.scroll.endFollow.state.get()).toBe('following');
+    // Arrival must also resume growth in the same input window, rather than
+    // classify the new extent as a second reader departure.
+    f.grow();
+    expect(frame.pending.size).toBe(1);
+    frame.flush();
+    expect(f.surface.scrollTop).toBe(400);
     expect(f.scroll.endFollow.state.get()).toBe('following');
   });
 
@@ -607,6 +615,8 @@ describe('Compiler Scroll current-view and reveal host closure', () => {
   it('cancels pending end work during its own status notification before a frame is registered', () => {
     const clock = frames(),
       f = fixture({ atEnd: true });
+    // Complete the mount-owned end frame before observing the later growth request.
+    clock.flush();
     let outcome: unknown;
     f.scroll.endFollow.requestStatus.watch((_run: unknown, event: { next: string }) => {
       if (event.next === 'pending') outcome = f.reveal();

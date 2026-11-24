@@ -1,6 +1,7 @@
 import {
   definePrototype,
   delay,
+  type DelayTask,
   type RendererHandle,
   type StateWatchCallback,
   tw,
@@ -62,7 +63,7 @@ const checkboxIndicator = definePrototype<
     // P-SHADCN-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(tw(INDICATOR_TOKENS));
 
-    let renderTask: { cancel(): void } | null = null;
+    let renderTask: DelayTask | null = null;
     // P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION
     const requestGlyphUpdate: StateWatchCallback<boolean, ShadcnCheckboxIndicatorProps> = (
       run,

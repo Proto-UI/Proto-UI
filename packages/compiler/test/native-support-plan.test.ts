@@ -335,7 +335,10 @@ describe('initialization, registration and cleanup evidence', () => {
       fixture.instance.mount();
       expect(fixture.counts).toEqual({ observed: 0, owned: 0 });
       expect(listeners.added).toContain(feature === 'text' ? 'input' : 'pointerdown');
-      expect(listeners.added).not.toContain('keydown');
+      // Boundary tracks when the shared pointer intent ends; this keydown
+      // listener does not claim keyboard navigation or allocate focus state.
+      if (feature === 'boundary') expect(listeners.added).toContain('keydown');
+      else expect(listeners.added).not.toContain('keydown');
       expect(listeners.added).not.toContain('focusin');
       fixture.instance.unmount();
       expect(listeners.live.size).toBe(0);

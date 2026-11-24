@@ -7,6 +7,10 @@ import { traceCallableDemand } from './callable-effects';
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
 import { declaredSetValueEvent } from './a11y-event-types';
+import { nativeRuleMetaKeys } from './native-rule-meta';
+import { isEcmaIntrinsic } from './ecmascript-values';
+import { hasPropsValidatorDeclaration } from './pointer-facts-admission';
+import { arrayElementType, serializableDataType } from './value-types';
 import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import {
   GPUI_UNAVAILABLE_OPERATIONS,
@@ -28,6 +32,7 @@ import type {
   PrototypeIR,
   SourceSpan,
   StatementIR,
+  ValueType,
 } from './ir';
 
 export type FrameworkId = 'react' | 'vue' | 'vue2' | 'web-component' | 'gpui' | 'qt' | 'flutter';
@@ -108,6 +113,11 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'rule.declare',
   'rule.dispose',
   'feedback.style.use',
+  'feedback.style.declareDecoration',
+  'feedback.style.to',
+  'decoration.style.use',
+  'feedback.style.presence',
+  'render.decoration',
   'feedback.style.release',
   'feedback.style.patch',
   'feedback.style.suppress',
@@ -352,15 +362,21 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
   });
 }
 
-const VUE2_DEFERRED_OPERATIONS: ReadonlySet<Operation> = new Set([
-  'props.watchAll',
-  'props.watchRawAll',
-] as Operation[]);
-
 const webOperations: readonly Operation[] = Object.freeze([
   ...nativeOperations,
+  'lifecycle.setPresentFromModule',
   'feedback.style.presence',
   'feedback.material.shader',
+  'anatomy.descendantsOf',
+  'hitParticipation.registerSelfRegion',
+  'textControl.resetValue',
+  'overlay.registerTargetAlignment',
+  'hook.asAxisInput',
+  'axisInput.configure',
+  'axisInput.on',
+  'axisInput.sync',
+  'context.trySubscribeAncestor',
+  'context.tryReadAncestor',
   'accessible.part',
   'eventControl.requestDefaultActionPrevention',
   'hook.asControlLabel',
@@ -389,26 +405,26 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     ],
     dependencies: [
       ...reactDependencies,
-      { name: '@proto.ui/core', version: '0.3.0-alpha.1', role: 'semantic-runtime' },
-      { name: '@proto.ui/hooks', version: '0.3.0-alpha.1', role: 'semantic-runtime' },
-      { name: '@proto.ui/adapter-react', version: '0.3.0-alpha.1', role: 'host-bridge' },
+      { name: '@proto.ui/core', version: '0.3.0-alpha.2', role: 'semantic-runtime' },
+      { name: '@proto.ui/hooks', version: '0.3.0-alpha.2', role: 'semantic-runtime' },
+      { name: '@proto.ui/adapter-react', version: '0.3.0-alpha.2', role: 'host-bridge' },
     ],
     helpers: [
       {
         name: '@proto.ui/core',
-        version: '0.3.0-alpha.1',
+        version: '0.3.0-alpha.2',
         classification: 'semantic-runtime',
         delivery: 'dependency',
       },
       {
         name: '@proto.ui/hooks',
-        version: '0.3.0-alpha.1',
+        version: '0.3.0-alpha.2',
         classification: 'semantic-runtime',
         delivery: 'dependency',
       },
       {
         name: '@proto.ui/adapter-react',
-        version: '0.3.0-alpha.1',
+        version: '0.3.0-alpha.2',
         classification: 'host-bridge',
         delivery: 'dependency',
       },
@@ -420,7 +436,16 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '19.2.6',
     mode: 'source',
     implemented: true,
-    operations: [...webOperations, 'props.watchRaw'],
+    operations: [
+      ...webOperations,
+      'props.watchRaw',
+      'hook.asNativeLink',
+      'nativeLink.on',
+      'nativeLink.sync',
+      'nativeLink.snapshot',
+      'render.svg.root',
+      'render.svg.path',
+    ],
     hostCapabilities: nativeHostCapabilities,
     dependencies: [...reactDependencies, ...floatingUiDependency],
     helpers: [
@@ -451,9 +476,8 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
     version: '2.6.14',
     mode: 'source',
     implemented: true,
-    // Vue2 keeps its explicit rejection control for all-key props watchers.
-    // Keyed raw watch is accepted by the full Shadcn and raw-props consumers.
-    operations: webOperations.filter((operation) => !VUE2_DEFERRED_OPERATIONS.has(operation)),
+    // All-key and keyed props watchers share the checked snapshot dispatcher.
+    operations: webOperations,
     hostCapabilities: nativeHostCapabilities,
     dependencies: [{ name: 'vue', version: '2.6.14', role: 'target' }, ...floatingUiDependency],
     helpers: [
@@ -715,9 +739,32 @@ export function checkTargetOperations(
   function diagnostic(code: string, message: string, span: SourceSpan) {
     diagnostics.push({ code, category: 'unsupported-input', message, span });
   }
+  for (const declaration of ir.moduleDeclarations) {
+    if (
+      declaration.id === '@proto.ui/native-link/declaration' &&
+      selected.id !== 'react-dom-source-v1' &&
+      selected.id !== 'react-runtime-v1'
+    ) {
+      diagnostic(
+        'PUI4003',
+        `Native Link physical roots are not implemented by ${selected.id}.`,
+        declaration.span
+      );
+    }
+  }
   function operation(value: Operation, span: SourceSpan) {
     operations.add(value);
     sites.push({ operation: value, span });
+    if (
+      [
+        'feedback.style.declareDecoration',
+        'feedback.style.to',
+        'decoration.style.use',
+        'render.decoration',
+      ].includes(value) &&
+      selected.id !== 'react-dom-source-v1'
+    )
+      diagnostic('PUI4003', `Owned decoration is not lowered by ${selected.id}.`, span);
     if (!allowed.has(value)) {
       if (selected.id === 'gpui-source-v1' && GPUI_UNAVAILABLE_OPERATIONS.has(value))
         diagnostic('PUI_GPUI_SDK_CAPABILITY', `${value}: ${GPUI_MISSING_FOCUS_TREE}`, span);
@@ -747,8 +794,95 @@ export function checkTargetOperations(
       !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
     )
       diagnostic('PUI4003', `Record getters are not implemented by ${selected.id}.`, value.span);
+    const javascript = ['react', 'vue', 'vue2', 'web-component'].includes(selected.framework);
+    if (!javascript && value.kind === 'member' && value.type === 'run-lifecycle')
+      diagnostic(
+        'PUI4003',
+        `First-class lifecycle modules are not lowered by ${selected.id}.`,
+        value.span
+      );
+    const containers = (type: ValueType): boolean => {
+      if (typeof type === 'string') return false;
+      if (type.kind === 'value-array') return serializableDataType(type) === undefined;
+      if (type.kind === 'set' || type.kind === 'map') return true;
+      if (type.kind === 'cell') return containers(type.value);
+      if (type.kind === 'union' || type.kind === 'value-union')
+        return type.members.some(containers);
+      if (type.kind === 'object' || type.kind === 'record')
+        return (
+          type.fields.some((field) => containers(field.type)) ||
+          (type.kind === 'object' && type.index !== undefined && containers(type.index))
+        );
+      if (type.kind === 'callable')
+        return (
+          type.parameters.some((parameter) => containers(parameter.type)) ||
+          containers(type.returnType)
+        );
+      return false;
+    };
+    if (!javascript && (value.kind === 'array-spread' || containers(value.type)))
+      diagnostic(
+        'PUI4003',
+        `Ordinary semantic-handle collections or iterable spread are not lowered by ${selected.id}.`,
+        value.span
+      );
+    if (
+      !javascript &&
+      value.kind === 'member-write' &&
+      arrayElementType(value.object.type) !== undefined
+    )
+      diagnostic(
+        'PUI4003',
+        `Ordinary array mutation is not lowered by ${selected.id}.`,
+        value.span
+      );
+    if (!javascript && value.kind === 'binary' && value.operator === 'in')
+      diagnostic(
+        'PUI4003',
+        `Checked native property membership is not lowered by ${selected.id}.`,
+        value.span
+      );
+    if (
+      !javascript &&
+      (value.kind === 'call' || value.kind === 'helper-call') &&
+      value.spread?.some(Boolean)
+    )
+      diagnostic(
+        'PUI4003',
+        `Checked rest argument spread is not lowered by ${selected.id}.`,
+        value.span
+      );
     switch (value.kind) {
       case 'operation':
+        if (!javascript && hasPropsValidatorDeclaration(value))
+          diagnostic(
+            'PUI4003',
+            `Authored Props validators are not lowered by ${selected.id}.`,
+            value.span
+          );
+        if (!javascript && value.operation === 'hook.asHitParticipation' && value.arguments.length)
+          diagnostic(
+            'PUI4003',
+            `HitParticipation initial configuration is not lowered by ${selected.id}.`,
+            value.span
+          );
+        if (!javascript && value.operation === 'boundary.observe') {
+          const observation = value.arguments[0];
+          if (
+            !(observation?.kind === 'literal' && observation.value === 'pointer.press') &&
+            !(
+              observation &&
+              typeof observation.type !== 'string' &&
+              observation.type.kind === 'literal' &&
+              observation.type.value === 'pointer.press'
+            )
+          )
+            diagnostic(
+              'PUI4003',
+              `Boundary current-focus observation is not lowered by ${selected.id}.`,
+              value.span
+            );
+        }
         operation(value.operation, value.span);
         if (
           selected.mode === 'source' &&
@@ -799,28 +933,69 @@ export function checkTargetOperations(
         break;
       case 'rule':
         operation('rule.declare', value.span);
-        for (const dependency of value.declaration.deps)
-          if (dependency.kind === 'meta') {
-            ruleMetaKeys.add(dependency.key);
-            if (
-              ![
-                'react-runtime-v1',
+        if (value.targets?.length && selected.id !== 'react-dom-source-v1')
+          diagnostic(
+            'PUI4003',
+            `Owned decoration Rule targets are not lowered by ${selected.id}.`,
+            value.span
+          );
+        if (
+          value.styles?.length &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+        )
+          diagnostic(
+            'PUI4003',
+            `First-class Rule style handles are not lowered by ${selected.id}.`,
+            value.span
+          );
+        for (const dependency of value.declaration.deps) {
+          if (dependency.kind !== 'meta') continue;
+          ruleMetaKeys.add(dependency.key);
+          const sharedWeb =
+            dependency.key === 'colorScheme' || dependency.key.startsWith('preference.');
+          const allowedMeta =
+            selected.id === 'react-runtime-v1' ||
+            (sharedWeb &&
+              [
                 'react-dom-source-v1',
                 'vue-source-v1',
                 'vue2-source-v1',
                 'web-component-source-v1',
-              ].includes(selected.id)
-            )
-              diagnostic(
-                'PUI4003',
-                `Live Rule Meta ${dependency.key} is not implemented by ${selected.id}.`,
-                dependency.span
-              );
-          }
+              ].includes(selected.id)) ||
+            (selected.id === 'react-dom-source-v1' && nativeRuleMetaKeys.has(dependency.key));
+          if (!allowedMeta)
+            diagnostic(
+              'PUI4003',
+              `Live Rule Meta ${dependency.key} is not implemented by ${selected.id}.`,
+              dependency.span
+            );
+        }
         break;
       case 'intrinsic':
         if (
-          selected.id === 'gpui-source-v1' &&
+          !javascript &&
+          (value.name.startsWith('set.') ||
+            value.name.startsWith('map.') ||
+            (value.name.startsWith('array.') &&
+              !['array.every', 'array.includes'].includes(value.name)))
+        )
+          diagnostic(
+            'PUI4003',
+            `Ordinary collection operation ${value.name} is not lowered by ${selected.id}.`,
+            value.span
+          );
+        if (
+          isEcmaIntrinsic(value.name) &&
+          value.name !== 'number.isFinite' &&
+          !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value)) &&
+          !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)
+        )
+          diagnostic(
+            'PUI4003',
+            `${value.name} has no ordinary ECMAScript value lowering in ${selected.id}.`,
+            value.span
+          );
+        if (
           value.name === 'string' &&
           !['react', 'vue', 'vue2', 'web-component'].includes(selected.framework) &&
           !(selected.framework === 'gpui' && gpuiIntrinsicSupported(value))
@@ -937,6 +1112,28 @@ export function checkTargetOperations(
       retain(item.projectHandle);
       retain(item.configure);
     });
+  }
+  if (!['react', 'vue', 'vue2', 'web-component'].includes(selected.framework)) {
+    const inspectLoops = (body: readonly StatementIR[]): void => {
+      for (const statement of body) {
+        if (statement.kind === 'while' || statement.kind === 'for-of') {
+          diagnostic(
+            'PUI4003',
+            `Dynamic ${statement.kind} loops are not lowered by ${selected.id}.`,
+            statement.span
+          );
+          inspectLoops(statement.body);
+        } else if (statement.kind === 'if') {
+          inspectLoops(statement.then);
+          inspectLoops(statement.otherwise);
+        } else if (statement.kind === 'try') {
+          inspectLoops(statement.body);
+          inspectLoops(statement.catch?.body ?? []);
+          inspectLoops(statement.finally ?? []);
+        }
+      }
+    };
+    for (const fn of reachedFunctions) inspectLoops(fn.body);
   }
   if (selected.mode === 'source') {
     diagnostics.push(...validateNativeInteraction(ir, reachedFunctions));

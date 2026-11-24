@@ -1,0 +1,3578 @@
+{
+  "original": {
+    "revision": "35195a6e6f1ba6a7d800da0029f2683013abd18b",
+    "families": {
+      "base": 178,
+      "shadcn": 216
+    },
+    "profiles": [
+      "react-dom-source-v1",
+      "react-runtime-v1",
+      "vue-source-v1",
+      "web-component-source-v1"
+    ],
+    "reportedPasses": [
+      "packages/prototypes/base/src/button/button.proto.ts",
+      "packages/prototypes/base/src/scroll-area/thumb.proto.ts",
+      "packages/prototypes/base/src/table/caption.proto.ts",
+      "packages/prototypes/base/src/table/root.proto.ts",
+      "packages/prototypes/base/src/table/row.proto.ts"
+    ],
+    "entries": 394,
+    "profilePairs": 1576,
+    "scope": "Original user-reported 5/394 for each named profile; not independently replayed here.",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/732"
+  },
+  "recovered": true,
+  "tree": "de698a62e9ecf41db438e039830eacf5e71cf5aa",
+  "membersSha256": "8ff2977a9c5d101beba1975b999cd87d7a257f4470fa97a86643e58278a7b8f8",
+  "members": [
+    {
+      "entry": "packages/prototypes/base/src/accordion/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "635e5152070429a24f4bb6b3846d0754f570fe2a",
+      "family": "base",
+      "sha256": "e6d4f703587a54bfa535281b9ec38b6ac3a9dce6a40ca4fef3b50b0e394b86c3",
+      "bytes": 2414
+    },
+    {
+      "entry": "packages/prototypes/base/src/accordion/heading.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e0607a87c0993db0dc2ddedc322932b791e6bbcd",
+      "family": "base",
+      "sha256": "c0e1586cb46e07568eab644482fe1eb2b68e641433b5bbcda2c4fc64f91d19dd",
+      "bytes": 1473
+    },
+    {
+      "entry": "packages/prototypes/base/src/accordion/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7c3a958491ec69c49a6a38155a05e0bf1e373946",
+      "family": "base",
+      "sha256": "98055f6c0d0c34572dd8c2aceb8586bdf0634cf4837ff420dfe51aaa2dc528dd",
+      "bytes": 3369
+    },
+    {
+      "entry": "packages/prototypes/base/src/accordion/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1219b99de84bfddb1ec22bb46d9a8ec86fab8ca0",
+      "family": "base",
+      "sha256": "5176dbc3c1a9ed075cce4b4eb5ff35feaa4ef1d4caa448637e43b4b8beea4a7b",
+      "bytes": 6951
+    },
+    {
+      "entry": "packages/prototypes/base/src/accordion/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f5fbf9d3a390ae97bccb2d6a8a47061a50c2707d",
+      "family": "base",
+      "sha256": "c032b210cbbdbd0ad4dbff51ec7f4185b5fb4e339539e400ee3985d7205e9308",
+      "bytes": 5807
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/action.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d64bd409d5727dcc8457e15fa5b01c2a59015e16",
+      "family": "base",
+      "sha256": "65ed244a6e010c8b4d7a60044952663fc2d58d3d355152d0e402c7364da8a4d1",
+      "bytes": 1823
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/cancel.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e618bbfa70413f52b951a020dea845d9bf200a15",
+      "family": "base",
+      "sha256": "91efb337c07c8e855524e2723c0c8800af95d6a54ad627b9e72bedce05fb9d69",
+      "bytes": 1713
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "16e6e0036d7a38b41fcd41c61a5b29574f6d54b8",
+      "family": "base",
+      "sha256": "baa54d9e8c28b20e01cf5e195e2ba04923cc24d2c2c5ea596930753a195ba437",
+      "bytes": 9378
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4cf34a2489ece71bedd4e18b7786ef1ff8c75556",
+      "family": "base",
+      "sha256": "c44ddcdc607631c33c84706382a40a0e0eeff22be1b3f4aec1bb6a857827550a",
+      "bytes": 1499
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/overlay.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0e1bcab527e55f117fa6a9adcddf83c45daaec21",
+      "family": "base",
+      "sha256": "b91922d5550bea8c2ec8e838e90cc6f21205680f5f2b0f70c4491da8f38a0f9e",
+      "bytes": 5045
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "91bcd3a6e06ec5438a122077bc9629f5fc682394",
+      "family": "base",
+      "sha256": "bb657a55bf1ece6ed1e862e609925337035f3d894ee248900d1a34ded527d407",
+      "bytes": 4628
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cebd59d8fb2242c6691804c3dada0a84a7a650e5",
+      "family": "base",
+      "sha256": "4b2c5bff5483056b994b91a520fa0b42bb95634ec0537cc12b2febd6fc5a8770",
+      "bytes": 1381
+    },
+    {
+      "entry": "packages/prototypes/base/src/alert-dialog/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1f97f9ea8102d3a7a4acce8e09bf4c1dfe56a84a",
+      "family": "base",
+      "sha256": "6bb42aebb5e618b335b8aa56a210d1ff22e56cf44a76a88677de19f1f53d40ab",
+      "bytes": 2622
+    },
+    {
+      "entry": "packages/prototypes/base/src/async-region/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f1e137bd94b29e9e4a3b9615989f0d22ff6103bf",
+      "family": "base",
+      "sha256": "5b3455a2b7f57495233ff91990077251d298807d86112cd47bf02089451d90bd",
+      "bytes": 1734
+    },
+    {
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7cf17b251d79bba5e38fefc17e7a7a1a182ef85f",
+      "family": "base",
+      "sha256": "eabb382e77b7fd9f55ab6e3c4bcab6f2c1505e029094aa1f295e292a51e23f79",
+      "bytes": 6120
+    },
+    {
+      "entry": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9d05dd58f673a8b70223835733112fcb8ad82ca3",
+      "family": "base",
+      "sha256": "e759154d231b9615b0290e4162505c3dc8fb9eb893d8bbc749fdc5385bfbda5f",
+      "bytes": 25353
+    },
+    {
+      "entry": "packages/prototypes/base/src/carousel/carousel.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "64c3a44e6ec021f2415dded0d3edaedc2ae9b5ae",
+      "family": "base",
+      "sha256": "f3717c3125f64db2353c9dd5d6c98dfa386f7eb71081f7fe5c362613c7c7940c",
+      "bytes": 11070
+    },
+    {
+      "entry": "packages/prototypes/base/src/checkbox-group/all.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "48e6bb220fb9c2f1e98458ccb38091992108b823",
+      "family": "base",
+      "sha256": "e2a249a62a30594c114fca6d1eb9473fe14dd28bb141ee47fd88d8d3150a4791",
+      "bytes": 634
+    },
+    {
+      "entry": "packages/prototypes/base/src/checkbox-group/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b2206c041488c7a5195eb8052a376cd5512d5659",
+      "family": "base",
+      "sha256": "07c5375c46a8c336a0653ad139c933f62d87cadad6b326eda56c8526f80b5839",
+      "bytes": 638
+    },
+    {
+      "entry": "packages/prototypes/base/src/checkbox-group/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f6a36f32bb7fabf6d90c3e9a50fa812c42e650c8",
+      "family": "base",
+      "sha256": "5676be7fd397f214e2b577aa8a3a2c82fd2349963837529b2b927adbe23bba32",
+      "bytes": 8150
+    },
+    {
+      "entry": "packages/prototypes/base/src/checkbox/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "26a73516a76908ededbf0bbd9fb3498b86a5a6c6",
+      "family": "base",
+      "sha256": "71a0ae5f435740ec1e9a801db9f0475087c68fe6ad636880d133d25e9be311b6",
+      "bytes": 3358
+    },
+    {
+      "entry": "packages/prototypes/base/src/checkbox/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "81c7a68352435388f2eea719447332d8893c41b5",
+      "family": "base",
+      "sha256": "1b357a5dec07322187b3603098bf6be024bf4e25c908d2ceb65d933f871a0896",
+      "bytes": 11130
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "140c93f36ea873e6d73351952c55d918aef98c7e",
+      "family": "base",
+      "sha256": "a24c33ab7e7314976503185aa906ed307f275a8d9fcd5b3a5f9220e0a56bbc98",
+      "bytes": 2423
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0898d15d8da4c8dce8ad7306de533109a8fd14be",
+      "family": "base",
+      "sha256": "25228470f66a41f7aa3e3886d36c8c85a85084f9cc25c60f9ff7c20e52b937f9",
+      "bytes": 4946
+    },
+    {
+      "entry": "packages/prototypes/base/src/collapsible/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "805d09f7d390ff307f5bf579209926ca275f20aa",
+      "family": "base",
+      "sha256": "58b796dbcf0367cfd23129c8a33c6b0f122a4ef9d20bf2cc92f1f3f1e8fa3af9",
+      "bytes": 4816
+    },
+    {
+      "entry": "packages/prototypes/base/src/context-menu/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "51ddbfb3f048b2b842620419b1fa3cdd80be4343",
+      "family": "base",
+      "sha256": "b20292b9c1aeee7daf6b3b3e39e58ca7678b9f47cea530fd56536e72718ffce3",
+      "bytes": 11821
+    },
+    {
+      "entry": "packages/prototypes/base/src/context-menu/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "90ba4c51b3b10f10118ade0ddc1a15767980716c",
+      "family": "base",
+      "sha256": "fd2a88154b37594375fff1b8ea071b2a19fe236111744cd7008c5de3fdcdd1eb",
+      "bytes": 4512
+    },
+    {
+      "entry": "packages/prototypes/base/src/context-menu/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "bbea2bcc219daa17aa26d3fc45f313d35dce524e",
+      "family": "base",
+      "sha256": "ce6ccf47c1d527cec5844f5e404f8737a6d024cb2e99bfe37f69889885dda2df",
+      "bytes": 6181
+    },
+    {
+      "entry": "packages/prototypes/base/src/context-menu/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e5e1aa7d14d14c568252c9b428dc2a3f8f3826ab",
+      "family": "base",
+      "sha256": "9759e80f3cdfd8782ffaef4c42bcda58937a63fa85a1f28579917dc40ee4cb4d",
+      "bytes": 3087
+    },
+    {
+      "entry": "packages/prototypes/base/src/data-table/data-table.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "438297fd8bbd1ef6713acdf958e5a5bcd3553db7",
+      "family": "base",
+      "sha256": "736586503ba4f741f7e2a7e0e1d4c44733f59470b065abab308cbb1c6a8d3bc6",
+      "bytes": 16368
+    },
+    {
+      "entry": "packages/prototypes/base/src/data-table/header-row.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d25367d63aae8743e5b1b8299176bd2d80916906",
+      "family": "base",
+      "sha256": "c0e9e11298a49b7822b64763f03d1d8804dbaa752f7be8cb01d402e9ef829a0b",
+      "bytes": 951
+    },
+    {
+      "entry": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "056259c695395a899e9e46d582297033049141e7",
+      "family": "base",
+      "sha256": "4a6737d3622c2d5564b233d133af7a52760db83d61d7e129786b01e0ce354556",
+      "bytes": 4199
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a907afd6e836756f2f4badfce40fe96c2202c239",
+      "family": "base",
+      "sha256": "504209d2ef97436fea60ad77dd4113dacacdf8dd4ac5858304818a13993714d8",
+      "bytes": 1735
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "97c26e0466362b0c16219bf1a38d2291953ab076",
+      "family": "base",
+      "sha256": "8c58eeba11413db5b9381f103b97fd12e20c0b0f6d58e0fe73c24710db484c67",
+      "bytes": 9978
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9f926e7f53519bdcf284c5568134ff184a32e35d",
+      "family": "base",
+      "sha256": "344bd7c05705fd5d35a20d2b51c8661486b7c916501a434af99645fd9eec54c5",
+      "bytes": 1425
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/overlay.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7126c8daea726dd3dbc53dab636c83f13d420d23",
+      "family": "base",
+      "sha256": "a67a5feb32cfae9f0118d0f552b0ec88b96018b2d42348b69d1c69f87e1b9457",
+      "bytes": 5224
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f938aaa903c80eb4b490e3137f02018eafa08156",
+      "family": "base",
+      "sha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378",
+      "bytes": 5087
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "123637852dcdee11f1f56c91aa2fa291e89cb03e",
+      "family": "base",
+      "sha256": "8a4844415f7d9752eb5de641c8949ee09c2a95cd9e6951123cff82fb315facd9",
+      "bytes": 1407
+    },
+    {
+      "entry": "packages/prototypes/base/src/dialog/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3517c91f87b2bb8878b9114a1b96f6330709c69d",
+      "family": "base",
+      "sha256": "1c10e2ffb932b2b7fc121b0254f7d57317e54c332c6ec91fbcd3304fc087e24e",
+      "bytes": 2668
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/accepted-side.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c180079d9efab0e938d90f54748636d01220092d",
+      "family": "base",
+      "sha256": "391002b699ea2991df7f8773a6cb155335e98df514a2b2da689dd89dea4f49ea",
+      "bytes": 1868
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e6b96f85271cbcf01f5c78882a549b52b4be37a6",
+      "family": "base",
+      "sha256": "04da288ded4e79a92ff5ef6c14ecb4832a92d98556215ccb80de13af544e199e",
+      "bytes": 1518
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "367c60535ed78f464dc0e37b815310282fd481f7",
+      "family": "base",
+      "sha256": "5a8375e861ef480ffd41651e725843cf1075181c36ae121cb9e16d5065093dd6",
+      "bytes": 13108
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c15a7fd76f35060a352d8de01b2c9b2887153bd9",
+      "family": "base",
+      "sha256": "5bba4b81ea467f03f5c2a534831431534ae53a9ec9f817971735e72c6d03d742",
+      "bytes": 1339
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/footer.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "97a2b3f25233c14a0a339ec2b835776a32601a4b",
+      "family": "base",
+      "sha256": "d1a996281886021235e91f03c61bf8b97449d17b4d3bb414cff731d788884480",
+      "bytes": 753
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/handle.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d6d99514360c791f3c114d9be62f1f884a07f7d6",
+      "family": "base",
+      "sha256": "062b41663a88d2387d630bfa196f3bf368c97cf32e6ba838f99335a360d2fa7f",
+      "bytes": 8154
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/header.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cf8cfcee587aa224795975b9c5a062d15884d3d2",
+      "family": "base",
+      "sha256": "f6cbec5f24680270b5b328ef408f2c3351afb06af4be832af5fe85aa206c52c4",
+      "bytes": 753
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/overlay.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1f723a626d1c22e170bff1a5a464106755e3b8df",
+      "family": "base",
+      "sha256": "532d380959e880b911a7f31175b8260cf33ec431571202e001baa995a6db3acb",
+      "bytes": 4870
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "be669db484a912aa423d73c8367ffe35789006e0",
+      "family": "base",
+      "sha256": "8bddad79de2f2b5f09632c2842c11ec3b54b8d5ba0edad61aca0aa3d41e81557",
+      "bytes": 6176
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "00d13d80a348fa6773724f64677a677a0ffb3483",
+      "family": "base",
+      "sha256": "dac0be44194a0a77e69538a959980d07878bb3350d8ae4152a202a68f87dba63",
+      "bytes": 1228
+    },
+    {
+      "entry": "packages/prototypes/base/src/drawer/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "934a99dff37c6c44843c9081ba4658e9339f3d45",
+      "family": "base",
+      "sha256": "a5456bd081a3f77870001e1aa9df6ab9013f2c6e4fe1fa37a6fc692b0369bb6c",
+      "bytes": 2404
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b3c9b171d842944e07c2313132480559d3a77509",
+      "family": "base",
+      "sha256": "bfc236c62e4935bcef935c382aa3ce85e7f93ecd8c933f0be6234597f30da737",
+      "bytes": 11473
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/group.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7cb9b9ad9da7d3273ccc956161d35639eef31e82",
+      "family": "base",
+      "sha256": "6075843d2ab78e4f92e48a59850446b78c1edc7b37949bbb023cd1d2a37f390e",
+      "bytes": 1703
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1b5bdb2dd2c916416bbdae75ea581c16475a92f8",
+      "family": "base",
+      "sha256": "157556b78ddd154ab515e8c77b08531443a5282289f94d40bac301cf160f1ea6",
+      "bytes": 6259
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1faae9e76715b2eec0b9127e4785bf642bb4d697",
+      "family": "base",
+      "sha256": "004a4ef62e0528ee8f80ed38f94f1d0939b518988c3e9a3c54c9277c840bd05c",
+      "bytes": 1018
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "01cb2dd825b58f8ab7bb978747af18a1714635df",
+      "family": "base",
+      "sha256": "adf48e814977899f952776438f1173a167576cf716e24010b7dc61b8445fe310",
+      "bytes": 5194
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "772c3e82289fc2b3a0186c3f381290f4228d3c50",
+      "family": "base",
+      "sha256": "234b612958220d0b99b87e30fe9be2b988ea0dd42e2945839463839b528f6f51",
+      "bytes": 770
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/shortcut.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2b30ed6b20be93861ea4229a32ca942b336ed01d",
+      "family": "base",
+      "sha256": "7c42bd1574df88106af21a8952097db787a22ed105855b094d5aa71847b0f5d3",
+      "bytes": 991
+    },
+    {
+      "entry": "packages/prototypes/base/src/dropdown/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1bbd0d5ff2dfd03d1daf8bb353997af5e192c3e3",
+      "family": "base",
+      "sha256": "b54a16783a2b1efa0eaf8630c73a1942b6b12adfce92c81d75f7eedab46969e6",
+      "bytes": 3819
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/control-binding.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1da016626a7adc6e32d9e6631c7de2427426f5cb",
+      "family": "base",
+      "sha256": "7e16df45942c7228e1746423c46c7c70b52943ca3ab6c260d2e3eeff869a5839",
+      "bytes": 8660
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fea23009cd10a964ad41415b4ba342f719e9929f",
+      "family": "base",
+      "sha256": "a39428853bb52207bf3b4c5fae681b9bda1524713e553ba75f8b793901c84c1b",
+      "bytes": 10450
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2f27a6752b2145efb307273b0bbb43ab512afed0",
+      "family": "base",
+      "sha256": "b7756587c482e8073d637787f7fec911144428b785c1330bb288cbf5c7f2aba0",
+      "bytes": 843
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/error.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "172400d1b678c5377b8ee1daa83568f87c98550a",
+      "family": "base",
+      "sha256": "cca74b51ff18953ff063d3fce0f955597bebdc4bf2477bcb367fe735b05d3bf6",
+      "bytes": 2337
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0a14d1b90bbdc9283325fa7369178f3fb9387589",
+      "family": "base",
+      "sha256": "ff2e62caafecd5bba6dbca467e9d4b22142b7c21aa1f86554d82853575285733",
+      "bytes": 1745
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6e6598baf4bc843541baf1efa4f9491713c77bac",
+      "family": "base",
+      "sha256": "559a1ae28ea2affe750c938edcee17ea1aa507976388dec4d95f6dadd8f6ec05",
+      "bytes": 14104
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/select-trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fd1fd2bb91512818eeb65df295f718a5765b5c4e",
+      "family": "base",
+      "sha256": "6772cac8829a7c34eb715175cb1a78b0e392b008bb858fa720a799c28a328104",
+      "bytes": 1257
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/switch.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "488a14887e31244e2f2abe2561f171731358a3c6",
+      "family": "base",
+      "sha256": "d6ff4a75a34208948cdf9589fd3e9a71c8ae8d476b8cd8d9634150ef46140b0a",
+      "bytes": 1128
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/textarea.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a12c275931b65541e2b79927c92901281f99661b",
+      "family": "base",
+      "sha256": "ca4e6df96234033ba22626c693872a386c6835219c8c803bb089ff3f9ff2b371",
+      "bytes": 1329
+    },
+    {
+      "entry": "packages/prototypes/base/src/field/validity.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "38f5c42b250d5770ef2e23ae616685f90bcc86e6",
+      "family": "base",
+      "sha256": "a293d009c25e10881e1efd9c21d163b9b505b41e6c7ce9a6bc0c9ddca8e59984",
+      "bytes": 1686
+    },
+    {
+      "entry": "packages/prototypes/base/src/fieldset/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6186fc5d836f70c5045c791f6d9e17f39a6d2397",
+      "family": "base",
+      "sha256": "7f52e47ad508f6b179ba682035b79a1b3ea26e9c6f589ba814141b826b8e9e00",
+      "bytes": 1152
+    },
+    {
+      "entry": "packages/prototypes/base/src/fieldset/legend.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "851ce28cc0746dafa0a810bb0de7842eed61393f",
+      "family": "base",
+      "sha256": "9c5605aec09bd06ad675201b564b5ba111767f9377059194f17ac7f6c2322799",
+      "bytes": 1127
+    },
+    {
+      "entry": "packages/prototypes/base/src/fieldset/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ec4e7144444e8d1d6db01202b22700d355d4618c",
+      "family": "base",
+      "sha256": "b98a3d5c70c5b98663daa840690f44e49b850898892bc0dbe52b2f61f0586c38",
+      "bytes": 2045
+    },
+    {
+      "entry": "packages/prototypes/base/src/form/field.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "48607ce01666f4947161842e488e571ca9c82272",
+      "family": "base",
+      "sha256": "f4659c2a837da35d6eb37258175fff6d7dd8b741306cb56f3da75e99094aa937",
+      "bytes": 2611
+    },
+    {
+      "entry": "packages/prototypes/base/src/form/reset.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3178cce6f1be8df43b4932d3799a5e0b8d8430f3",
+      "family": "base",
+      "sha256": "637eb468e6ef83e6b0d7d9558c56af2e9e24c1f9bee9a0d22b204434f4a37a85",
+      "bytes": 578
+    },
+    {
+      "entry": "packages/prototypes/base/src/form/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "eeb14735082c1f03c6efe7e18040281588c2fb72",
+      "family": "base",
+      "sha256": "6ddc1d42afc9d8443dd94d1d0c843e66a9d354835c4fc4ade9844558b9c9c988",
+      "bytes": 8420
+    },
+    {
+      "entry": "packages/prototypes/base/src/form/submit.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5ce581880af6c79e5bb1b1fa3787515853f3bc16",
+      "family": "base",
+      "sha256": "9b36be83252d3f90b06d57f8afa3e43dfd55a76d202d2b15f0ebf1d13e88330f",
+      "bytes": 584
+    },
+    {
+      "entry": "packages/prototypes/base/src/hover-card/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ecfcca503473eb08d4a057a4603c9d3d9f0b8155",
+      "family": "base",
+      "sha256": "a6ddbc42ac5846c6c8897d7171bd0f39929fa44d083f066fb6de91aadc13af5e",
+      "bytes": 6066
+    },
+    {
+      "entry": "packages/prototypes/base/src/hover-card/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f3b26f273a8a25d33463c48a505898e7a293e521",
+      "family": "base",
+      "sha256": "14b5c37c70aba5dff41e9e264d854216272044be3148d021e46ee8be8406f3d5",
+      "bytes": 8457
+    },
+    {
+      "entry": "packages/prototypes/base/src/hover-card/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5ed82a72f25a2223a25584fa727627f9d2a3425b",
+      "family": "base",
+      "sha256": "1860385b829c3054df68f49256a4a66cbd90272cbd6680c9fd22939e7d153932",
+      "bytes": 4507
+    },
+    {
+      "entry": "packages/prototypes/base/src/image/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d982ab04394bdd3e407c9e1aba27e919d3a79cd9",
+      "family": "base",
+      "sha256": "da5c148a7969c15d9350d0a3330493fa6cbe36865ed498f27a8a97c3828aad21",
+      "bytes": 2864
+    },
+    {
+      "entry": "packages/prototypes/base/src/input-otp/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "01aaab57a096f49ef01dd3b20aa31214ef206cdd",
+      "family": "base",
+      "sha256": "fb358e342db0702dae2c3a695e0fe9b56ec3514b598f822f45c5f16d290c2762",
+      "bytes": 1052
+    },
+    {
+      "entry": "packages/prototypes/base/src/input-otp/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a411f1be5fa54eea1da5ee260ddeabd990d73c1b",
+      "family": "base",
+      "sha256": "7ac3605671b69a591fc8f6c3cba6dd5c025de8cffa4157ac8e72909b7134ba35",
+      "bytes": 5046
+    },
+    {
+      "entry": "packages/prototypes/base/src/input-otp/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6ea71d0e37c9fa971712f4e8cb6b2893261f67b1",
+      "family": "base",
+      "sha256": "af55478de25bb51d928db14591c6585059f567e8df7830611d514d0cef4c378e",
+      "bytes": 6206
+    },
+    {
+      "entry": "packages/prototypes/base/src/input-otp/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "683683c305805931af841a991e618d3b26cfbeb8",
+      "family": "base",
+      "sha256": "c0ee92209d49d5507cfbb77092ab1812c6e8c9d5c67f95ce5cc0d7c6c0c2f315",
+      "bytes": 679
+    },
+    {
+      "entry": "packages/prototypes/base/src/input-otp/slot.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8dd58872771bfa30842415e8e9a96d56b118e03d",
+      "family": "base",
+      "sha256": "028ec4cca36c037af96cf1c1d3a4c7b97756fccf1d88065d2e5144c982b22146",
+      "bytes": 1888
+    },
+    {
+      "entry": "packages/prototypes/base/src/input/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "bffd7fdaf9465ea591f6f0746efb2f24ff775a2a",
+      "family": "base",
+      "sha256": "ae98f695623732691c1e87c83c69bd14cd0754af41b51fff872f042be7689583",
+      "bytes": 7415
+    },
+    {
+      "entry": "packages/prototypes/base/src/label/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ab85620d48a091ebb2bd29b8bc894242bc3aa823",
+      "family": "base",
+      "sha256": "f3c22ec4a9c8c7ad3bc73e135c60dc9d025ca9166eef9f6a1be95e905bdbec6d",
+      "bytes": 1969
+    },
+    {
+      "entry": "packages/prototypes/base/src/live-region/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f1266c8ad34dd8b6fae6683a45d2395d95e1a3d9",
+      "family": "base",
+      "sha256": "65088810128839b07a2c69c630f8f3135bafb06aa1880f0877fd76d17a8bc96d",
+      "bytes": 2237
+    },
+    {
+      "entry": "packages/prototypes/base/src/message-scroller/message-scroller.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "26cedca704587d759a09139769edeec6539ca368",
+      "family": "base",
+      "sha256": "2bf77937a9ea2d2fd1d532d05ead9da9ed166b1bbde72458c9e555f81464e390",
+      "bytes": 5653
+    },
+    {
+      "entry": "packages/prototypes/base/src/meter/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "542fdb047384526367c7759d0270dbfdf3d9a5b8",
+      "family": "base",
+      "sha256": "c410c04669457fbdb5423c1b42d1a52dd6ba5ec34e5efa76f5b014129c233fde",
+      "bytes": 1559
+    },
+    {
+      "entry": "packages/prototypes/base/src/meter/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "40afbae72670fd6efe3b373b3eb2662ab8389da6",
+      "family": "base",
+      "sha256": "0a1d68b68a7fd73fb872b6da53745c218b2ba91b6079a2e2b7a66fd1d75f9116",
+      "bytes": 1553
+    },
+    {
+      "entry": "packages/prototypes/base/src/meter/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3ccdd793422ab69dd2397c56065c22bb014fcf0f",
+      "family": "base",
+      "sha256": "574ca9db69ecf0b5d8e0b4c1806d9efdf6bc639d1a45d7e4156d2412548a135f",
+      "bytes": 3924
+    },
+    {
+      "entry": "packages/prototypes/base/src/meter/track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d07378cad9c6a52872fa1a80d0c007fc7c8c6e89",
+      "family": "base",
+      "sha256": "c129ede756add5d7567c0fed59bcdf104a942a00a426ce59592566a217ba70f9",
+      "bytes": 1539
+    },
+    {
+      "entry": "packages/prototypes/base/src/meter/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "44eefec51ad229f31769dff90ebe378c3e2792bb",
+      "family": "base",
+      "sha256": "94ebf8394e8f719f0e79d1d9000f353ce03487d387907b4ca4839d033ebb12f8",
+      "bytes": 1535
+    },
+    {
+      "entry": "packages/prototypes/base/src/number-field/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6d58148d69611ab4b8bcedbd0bf50efed909681b",
+      "family": "base",
+      "sha256": "2f09cfa90d57038fa97d524a89982080e32fdb06a935bd020acdd3fd261456a7",
+      "bytes": 1217
+    },
+    {
+      "entry": "packages/prototypes/base/src/number-field/decrement.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "311b614b2b06146e3717965592e0de3fd5b92586",
+      "family": "base",
+      "sha256": "6a09f8b3c80db0edf9d8bb1db339a2d97918c30650bf521c5f70391a0009a973",
+      "bytes": 2188
+    },
+    {
+      "entry": "packages/prototypes/base/src/number-field/increment.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "58c9912aeb118409330db3570bcbda1e2328d06d",
+      "family": "base",
+      "sha256": "3223bfc211e961b6b2bf07011b170880562cf6c493853f0c4d2e9a76e4cfd60d",
+      "bytes": 2187
+    },
+    {
+      "entry": "packages/prototypes/base/src/number-field/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "40e64b5f6f21128ea0db0dd72424e0705f89ebc0",
+      "family": "base",
+      "sha256": "c1df4e4659d372a352004d77c80242e36ebdc0158e553865f5f479095de4e123",
+      "bytes": 6890
+    },
+    {
+      "entry": "packages/prototypes/base/src/number-field/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "993e7d4378519fcc43bdba4ebe4f197e4c080194",
+      "family": "base",
+      "sha256": "0f5ac325ccaeeb40ee0cf0a02476f6a06f93d723873e860f6e40864d17f068bb",
+      "bytes": 785
+    },
+    {
+      "entry": "packages/prototypes/base/src/number-field/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d6e35bdc817b290b780bcff0bd55cf5b49f8fa91",
+      "family": "base",
+      "sha256": "05e67c05dc46df2cc6d7bc9fec35e46d99b4325e372f9dc8d4738c4a3fff349f",
+      "bytes": 7992
+    },
+    {
+      "entry": "packages/prototypes/base/src/popover/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "69cbc10e6555dc42996959ff7ff3729d1a318c10",
+      "family": "base",
+      "sha256": "8fd5d78d783977b80ab2eb94b4e367209467d8da53bb0cbc70063dd5b25b4b48",
+      "bytes": 1547
+    },
+    {
+      "entry": "packages/prototypes/base/src/popover/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "00b7f108e4b5e5e98fdd24f34cfcf90a11ed0df2",
+      "family": "base",
+      "sha256": "2eb8491f7d609f33286713827178050eb35ca64488fc4097ceb0532e0f348314",
+      "bytes": 13153
+    },
+    {
+      "entry": "packages/prototypes/base/src/popover/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2c66fea4968a591587b618f8e4834b7f4b9490c7",
+      "family": "base",
+      "sha256": "73094e95e71b5a0b9311ff82d52b33f94bba4760bbd4dfe0b266c74c80a13a1a",
+      "bytes": 1366
+    },
+    {
+      "entry": "packages/prototypes/base/src/popover/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "af8d1867b7dd3ce9a050503e8f69e35306ceed7f",
+      "family": "base",
+      "sha256": "c0cdf82266f048ce9321bfc9c260b5c5a2a39c0ef5167de3378454a74dbb3a47",
+      "bytes": 4472
+    },
+    {
+      "entry": "packages/prototypes/base/src/popover/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "100e84b2b6f66aa4f8416a3f8f52c1da1e439f0d",
+      "family": "base",
+      "sha256": "482236adfaa34f4a71734d579856a802f4b55af3a502f433149d2d48c6855a63",
+      "bytes": 1255
+    },
+    {
+      "entry": "packages/prototypes/base/src/popover/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "595a70849b644daafe8c2d231613a98107516d25",
+      "family": "base",
+      "sha256": "9649b7d89776db75016f5dfb7f408b7cf13b4503056861af8aa798eee7479437",
+      "bytes": 2441
+    },
+    {
+      "entry": "packages/prototypes/base/src/progress/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d025efcb2fb361c7c7d5f351ee1f38760b2db1ef",
+      "family": "base",
+      "sha256": "6b893a2d0abd6e0b4d83c51a8d728bf41c697bd1ef437e516b70bff9e2e22992",
+      "bytes": 1613
+    },
+    {
+      "entry": "packages/prototypes/base/src/progress/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e5b3ab80b9cead86b1dc880b318693d16f3e605d",
+      "family": "base",
+      "sha256": "047de611b5a018f1bc317452c672c99f2acba4736d12652e736b5aa1780e4494",
+      "bytes": 1614
+    },
+    {
+      "entry": "packages/prototypes/base/src/progress/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f31ea450e009673131364095eda9f2fc446e4c5f",
+      "family": "base",
+      "sha256": "f31e0fc1eb0590b1c26fbe35471c46b73019ad4d77c795af9beef040b5530edc",
+      "bytes": 3545
+    },
+    {
+      "entry": "packages/prototypes/base/src/progress/track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a8c2bcfeefa8d2751ca65110bace62aa75dbf448",
+      "family": "base",
+      "sha256": "f8fbc9dc4c7af7a996a6d45cc16bb80cced8f5a25de486b5a973b7f9412a1a10",
+      "bytes": 1597
+    },
+    {
+      "entry": "packages/prototypes/base/src/progress/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "662f05ba8298a3822bde278eb012a245bf49ad53",
+      "family": "base",
+      "sha256": "81f2ec699f35e3ca02fcf0cc4e8618e169bcc706f02d80cefdd580bed8a9c4d1",
+      "bytes": 1593
+    },
+    {
+      "entry": "packages/prototypes/base/src/radio-group/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fd9c2ec9ae83ace154cd9affd6c0da2679099343",
+      "family": "base",
+      "sha256": "ec5aa6112d2006ffac3206a2b21e5a68f01f54a1af70f7b10a995c7eb0645e5d",
+      "bytes": 1592
+    },
+    {
+      "entry": "packages/prototypes/base/src/radio-group/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "088b8dbb3613b76bdc75105e6a46622707f39da2",
+      "family": "base",
+      "sha256": "d1d46e117230059371b6b42b2cb657e5909d554cefdc19288a665c708ff0c002",
+      "bytes": 7537
+    },
+    {
+      "entry": "packages/prototypes/base/src/radio-group/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e9e5436e3736c6365d679d99e9866093c5fba3c7",
+      "family": "base",
+      "sha256": "d7bb875378fced91ab099b2adf9ad1ca54ff15fcbf204d980b7b5a0f17808576",
+      "bytes": 7165
+    },
+    {
+      "entry": "packages/prototypes/base/src/resizable/resizable.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7f3e24d0dd1e1fe80a2e5749bf3fef5e4dd7d73a",
+      "family": "base",
+      "sha256": "2e4d31d96722c4fc2182239eb95e0470026a03d11e661b892d2035047018e88b",
+      "bytes": 11083
+    },
+    {
+      "entry": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2377e55c2a97b0110a8a950d15274b29cdbafea2",
+      "family": "base",
+      "sha256": "5afd5f3183173e0afee9bc7e1c201c0a85aeea22efbc92e4aeb527ac3d87be00",
+      "bytes": 944
+    },
+    {
+      "entry": "packages/prototypes/base/src/scroll-area/scrollbar.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2a2bd967ca92149fdda04f1684dbd72fb7ca7685",
+      "family": "base",
+      "sha256": "4b137b5d5b29aa4b0d585dc4a72de04ca72a37a3645c1c88967c4960bc835486",
+      "bytes": 1469
+    },
+    {
+      "entry": "packages/prototypes/base/src/scroll-area/thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6074140c769a283286fc0ddd385e2a312b9bd0b9",
+      "family": "base",
+      "sha256": "9b1d821b02d07245d52dfd86de9923e1fc9dd90415a2614bd0d87949c40bf8a5",
+      "bytes": 865
+    },
+    {
+      "entry": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ecf297485f65d1476b22f7f81cd399abe9662028",
+      "family": "base",
+      "sha256": "dffdd42415e2adc09b22bb248038b45dbd947cf1ac2bd8ee4a8c5d8c839723e6",
+      "bytes": 3260
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6971c7a520ea566efa490f03dc87aa653f6c5bf9",
+      "family": "base",
+      "sha256": "851e6cd915f8263872bb9a654d6fe0dc31d183aa53c998da4b49c5d8bec74f35",
+      "bytes": 19202
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/group.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9a87368677a4f2bd8c737f1a7c901deae56c6dc9",
+      "family": "base",
+      "sha256": "0661668c7e685121d41910136984bc4d5600ca2ab679b5d12d3ca323e55c9e48",
+      "bytes": 970
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/item-text.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "60b56c8991c15fd435484e478d4789072883545c",
+      "family": "base",
+      "sha256": "9925f9f930f5980be0da13f0295e3b09d744a29f75beae741f2ed7abf8ae9290",
+      "bytes": 518
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c36b21b3fa962e12b4f80e487954297bd25fc157",
+      "family": "base",
+      "sha256": "c2b36678b54559fb39e72e9ae246f8d996f02fef7f138b514d165ab0d97a56ea",
+      "bytes": 6905
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d24a4b9c16b306742dfe7d7a758ba34d40b6d827",
+      "family": "base",
+      "sha256": "b49d2d0ec92d6e9b049c46ff395ede1be253bd0815eb4050bd4e5817195ea246",
+      "bytes": 836
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9471799f20dee993ab5e7e075f2f6400f306918f",
+      "family": "base",
+      "sha256": "973ac2b743d8c107b5a2052dbfe585653e2e690973d096392dbeb635d6702076",
+      "bytes": 14396
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4be2f0591bf4465a43cfea8ccf51bb23c0aeb57d",
+      "family": "base",
+      "sha256": "682d74e1149e85b6799e52bebe1ddbc997fdca0c62a6567bbe8ce72f34d54f78",
+      "bytes": 765
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/surface.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8bd492dcaf678d25c59007a2159d7aa65267d9be",
+      "family": "base",
+      "sha256": "568f162c4482ec1a038cff1ca4ea0f94b89fc9d52077000d6f64507caaf245a7",
+      "bytes": 508
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e8862ab2b5b09304d087ef9bce443e8d564dd590",
+      "family": "base",
+      "sha256": "a9c0c047f0ddbbd088f28c59f364598cb51ec41be4fdd44141465b5f7e2cd4d6",
+      "bytes": 6460
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8bc76221b4623d80c874aec23e59eff4e4bc3e82",
+      "family": "base",
+      "sha256": "db7a062fe30d89a2f4298c767681e2512987d4ebf4608be673f124747f9d322d",
+      "bytes": 2355
+    },
+    {
+      "entry": "packages/prototypes/base/src/select/viewport.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6e78e70771fc5d7c8845f73c4928f87d449e1b8c",
+      "family": "base",
+      "sha256": "805ff33139fe305f6c0659d33aacf0b7bf0903e329983c03050fa07756f53c53",
+      "bytes": 515
+    },
+    {
+      "entry": "packages/prototypes/base/src/separator/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1b957d24540b03e405d2023f40854b0d7f6811de",
+      "family": "base",
+      "sha256": "4e8c5bcab788ea8d618a4c2a39269baad4220b968d0d69dcbfd33812c9330c3d",
+      "bytes": 2786
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/field-thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b6fc983717b1593be8fe9a09b0df82f12bd71190",
+      "family": "base",
+      "sha256": "27810b0300c85e3de635e2bf0462565470495b8f9d960b0bce05827b97af7eee",
+      "bytes": 1120
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "91758719fd1e3ebd0759e2135140122179045421",
+      "family": "base",
+      "sha256": "321dc0ea719d8bc3c785e49710da72650f0a0899aeebe06c5d312d496a0b0c74",
+      "bytes": 861
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2af234bab31a3893de15ade9dbaaeb6e7194ea67",
+      "family": "base",
+      "sha256": "71f2f5684b2e56d0625978262dece3c3f72259cd11ff4d9d34a561a69b287114",
+      "bytes": 845
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d9a7f18462f229e20d2ba4fbdad11613fb158a27",
+      "family": "base",
+      "sha256": "9e00bc93d71e0a05af1e72ded8f25c9c3fb2f1d8bf38c5636f8ccd103dbf4b0e",
+      "bytes": 10635
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "44eb66678ebb5030081b8a630e466c486dc663b3",
+      "family": "base",
+      "sha256": "0c3a0441554680a2dc75d73be2227012a99d59b82b2cca0bb694a65ea7f4d480",
+      "bytes": 998
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "398a68bd19003fc8966c8c3a1a424200715f9425",
+      "family": "base",
+      "sha256": "7efa25762677b907eb4f9f72b90002ea8e4a0be9cda197cbc07f74ae863bdf0d",
+      "bytes": 4240
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "57041dfb72e9d5519b8b489ee62e0153a004cf1c",
+      "family": "base",
+      "sha256": "d7f69a0349cbbcccad47467438b2e8bb9495eba62a3ef443e40774e6f1f4d218",
+      "bytes": 845
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/values-indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9899d99adf1af54104b93d84be4a14f690e4fafa",
+      "family": "base",
+      "sha256": "80e7fd9323e9fe5855068e15cdb50712e21449966b04e2acffa704d49d27f2a3",
+      "bytes": 681
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/values-label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "983e015ac9ded166f2746902de9f20dcb22c4f36",
+      "family": "base",
+      "sha256": "4f24e25460aef9a1008cd432c60fbcb809e2edde726ffcd08831211297486c44",
+      "bytes": 665
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/values-root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7f974c32f20d6546def842a81c3a71558c87d3cc",
+      "family": "base",
+      "sha256": "c28f034f076f49f242faa9046eeb10a59201da3865fc2ff9921b7dc19d90fbd5",
+      "bytes": 22289
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/values-thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9c586d5ecba1f82d634024d442e940a67112ec0e",
+      "family": "base",
+      "sha256": "24a447a4ffcb904b7a8832d8e83717e1b8cf9d4c5e0559d4b07c8e5dc36f6dad",
+      "bytes": 675
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/values-track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "48818328084ceb5c3c2d8cd42df1f00fb1d5d00a",
+      "family": "base",
+      "sha256": "cd95639523ebb8a5d4b45a727c17dd51e77cff064e69674c82926574458d7b37",
+      "bytes": 665
+    },
+    {
+      "entry": "packages/prototypes/base/src/slider/values-value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b4b64db61f1374b639be99f198a96fb6918fba24",
+      "family": "base",
+      "sha256": "c2643e9bbe6121f8c309c4bb99ae44a53388b7197aa82251772d2a77601b025b",
+      "bytes": 665
+    },
+    {
+      "entry": "packages/prototypes/base/src/surface/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a6519a74e4386b0a17293d807a4d0c1f052be358",
+      "family": "base",
+      "sha256": "be5b9e5539026e71aabb00c8c8ddab25ffb172f5c73edbe6d9b117d3ca8ecad7",
+      "bytes": 1921
+    },
+    {
+      "entry": "packages/prototypes/base/src/switch/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "929a8251d409c077576ac061e347b73aae286a7c",
+      "family": "base",
+      "sha256": "693ba3c8a1818a0fb4c27ded63ce897e9abc393fca8bc06a8e3550ae14ef2f50",
+      "bytes": 15514
+    },
+    {
+      "entry": "packages/prototypes/base/src/switch/thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c7d1db1ce8956ab6cb4f121f64c30e868d145dd8",
+      "family": "base",
+      "sha256": "7bbad7cd275b37160d26847af98d0f56e8a11cb6ea964148b0952503806e81ce",
+      "bytes": 3317
+    },
+    {
+      "entry": "packages/prototypes/base/src/table/caption.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "45ba9c2433983cf27ea90dc416231a5ffc1d680e",
+      "family": "base",
+      "sha256": "62949d8950d3ac8f36bab4d228007705c578a5be3a084a576e3df44cae604032",
+      "bytes": 688
+    },
+    {
+      "entry": "packages/prototypes/base/src/table/cell.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7dee0f6e9ede20c68d87462e80eb5f757c1e3c22",
+      "family": "base",
+      "sha256": "465882c74f7c75f4b5c4e631fcea4a42974ddf3ca40573fda4d966ce06574933",
+      "bytes": 1584
+    },
+    {
+      "entry": "packages/prototypes/base/src/table/header-cell.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f6a3ded4734e4d9a0ffeaa59fd2f4482e61ccb21",
+      "family": "base",
+      "sha256": "1aad0553e6a2a2a87822a05af105a90adb128124043cb4813533be0962659a72",
+      "bytes": 2029
+    },
+    {
+      "entry": "packages/prototypes/base/src/table/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1b4bc97016c21bee96c0e2b5d32830059c72a859",
+      "family": "base",
+      "sha256": "02ddab4ea87a2ee0c49f665cad9ae0f037ef1e13abdea4dec88c50d767b0b4c1",
+      "bytes": 844
+    },
+    {
+      "entry": "packages/prototypes/base/src/table/row.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "535b82387c4b6935f298ffbcdc062e180f418b51",
+      "family": "base",
+      "sha256": "ba0c06fe326383d7e6e0ec5f70a67b7f9b372f0485b472ef851de03372728b1f",
+      "bytes": 700
+    },
+    {
+      "entry": "packages/prototypes/base/src/tabs/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fc4b1bd360bec77652e38d521893340000f02c5b",
+      "family": "base",
+      "sha256": "0d5ca5a50ac36b4ca0ae10f9cdbb03d0f68db0bdb23729a4dd0b942964a143e7",
+      "bytes": 4431
+    },
+    {
+      "entry": "packages/prototypes/base/src/tabs/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3bc5d71523e95371896cc1ab74197ce356952bbc",
+      "family": "base",
+      "sha256": "14050bc87b1cbf8e2f64bffaa6a822aef74bb17ec4196ef166ea261bed8f7f1b",
+      "bytes": 2891
+    },
+    {
+      "entry": "packages/prototypes/base/src/tabs/list.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a7d2d9fddbdb59b1e01760934fc41157ea85f0f7",
+      "family": "base",
+      "sha256": "5aa062b0bf19f7e8899b0ebd9ea899f81d5545bc4597387f043f9b6d7a76930b",
+      "bytes": 3253
+    },
+    {
+      "entry": "packages/prototypes/base/src/tabs/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7e8a28e60bb729b7c2b611907bd318f341d5581d",
+      "family": "base",
+      "sha256": "8f28713071ec7eecb2cc29940c43d833cfe4a412f651c97f632dda3eeff5a091",
+      "bytes": 8615
+    },
+    {
+      "entry": "packages/prototypes/base/src/tabs/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "dd9c9c37f8c89f446ee0ea6c3e02c467eab69a12",
+      "family": "base",
+      "sha256": "3ebaffb5c9603ba4c3690572d28b82d40f03a367d2d45babf62428730fedd0f4",
+      "bytes": 11155
+    },
+    {
+      "entry": "packages/prototypes/base/src/text/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9f5cf27b6bd9452edd826c3724742e442d35133e",
+      "family": "base",
+      "sha256": "6a2eaee970d3c0cf516c5d889f28afb2e1388c77310a2a438128156098b9e304",
+      "bytes": 1842
+    },
+    {
+      "entry": "packages/prototypes/base/src/textarea/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8d4721a1d25a37c86e4aa1ea17efdc70cb11d543",
+      "family": "base",
+      "sha256": "eec78540c68a9c20c7cb304f17baa7d3db0ce03c761953279484ef88dfe0994e",
+      "bytes": 10300
+    },
+    {
+      "entry": "packages/prototypes/base/src/toast/action.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ed344a40502398ea7d496ffb6f9eb83bde85910e",
+      "family": "base",
+      "sha256": "8681f14f162248903e052c7f0bf43f1f8192d983131c71394def8a783d10cf73",
+      "bytes": 3014
+    },
+    {
+      "entry": "packages/prototypes/base/src/toast/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5c142a742e7c1ec2ae65e41a1c4cc32934462987",
+      "family": "base",
+      "sha256": "94b680ff6b43f32e1d517f2d71242cff7e3a0c6ff670cdbb96c18782cc7f290e",
+      "bytes": 2467
+    },
+    {
+      "entry": "packages/prototypes/base/src/toast/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7f14435574e8cc91eb7083d2ca0a6ba5f79a69d5",
+      "family": "base",
+      "sha256": "483e9372aa4cb6a7bc48496eefad23629d009cc1b76a6e6fd47625b2bee624b6",
+      "bytes": 1020
+    },
+    {
+      "entry": "packages/prototypes/base/src/toast/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "962ea3d61c2b5e90eb2696ae97cf3610274933f8",
+      "family": "base",
+      "sha256": "de3f767364c82794d34ed84e0f68a72482e5589546bb99476c039b52ab8d999c",
+      "bytes": 7666
+    },
+    {
+      "entry": "packages/prototypes/base/src/toast/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "976879a63a75650e2ff810751d904070879cc91f",
+      "family": "base",
+      "sha256": "c58a23fadcb6eb3ba2884c6b6498e44ebee9d707c32e5b31d88a62dee809d064",
+      "bytes": 929
+    },
+    {
+      "entry": "packages/prototypes/base/src/toast/viewport.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cfb20865ce73d064db05f764c0229af3f8c3e1c1",
+      "family": "base",
+      "sha256": "79899aed45ea105e689aa668cea510e398c0294178458ef9de5c0b74cc1d3984",
+      "bytes": 1547
+    },
+    {
+      "entry": "packages/prototypes/base/src/toggle-group/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4774ce60adac3b819cbf86c90a4c173078152b70",
+      "family": "base",
+      "sha256": "2514b3f4db84554acc02adcce4384571ed6acaf6ceca8899e102d5b4895969a4",
+      "bytes": 3493
+    },
+    {
+      "entry": "packages/prototypes/base/src/toggle-group/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d5a6f1c6337652fb1a7ae64c28c7fcc8175f0d33",
+      "family": "base",
+      "sha256": "aa9164d9f93a81b3499b49d3cc0ff4a63d20fe845fa06dc7e73f33176bc20f0e",
+      "bytes": 5598
+    },
+    {
+      "entry": "packages/prototypes/base/src/toggle/toggle.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "eed857f4da08fc3181f0048c9a8f5959cb43a156",
+      "family": "base",
+      "sha256": "7a0d9cf15bc4060174164b62bd4b58a4fd39ba8839648b9e8beb2514e23f8a4a",
+      "bytes": 6969
+    },
+    {
+      "entry": "packages/prototypes/base/src/toolbar/button.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "eeea282ee05a85b866e20d7d289c35a4dfe98b26",
+      "family": "base",
+      "sha256": "154cdc2e38aed1eb1c2da1a76b2670585eb446da7ab8fc9b62df3745b1c15d0a",
+      "bytes": 3301
+    },
+    {
+      "entry": "packages/prototypes/base/src/toolbar/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "edc7ef8f1843b5c314be48e38ebee3b4e093c618",
+      "family": "base",
+      "sha256": "5120b5661004cef8d3b0944c9c0dab76887d30e2aabafba475123391f15b87a8",
+      "bytes": 3514
+    },
+    {
+      "entry": "packages/prototypes/base/src/toolbar/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7e37e9a2c3578b440d794cfa4746d467fb959715",
+      "family": "base",
+      "sha256": "df2276f27a7ca0d4aa3bf43f5ea26b4fca210fcd4452382c77f369b0721c276d",
+      "bytes": 1503
+    },
+    {
+      "entry": "packages/prototypes/base/src/tooltip/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "627c4db7fa37b6075385221e336e0d92bde4cb6d",
+      "family": "base",
+      "sha256": "ee64e274570866274e156d8449978ac70f10469d06e0a93aa786df30201a78f1",
+      "bytes": 6798
+    },
+    {
+      "entry": "packages/prototypes/base/src/tooltip/group.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5f9668340da8d4996b6cebe4edc1770c56fd232e",
+      "family": "base",
+      "sha256": "2769f35dc0e683269884e5a695a43b9021474fc3f74cf2edb28138e831f9892b",
+      "bytes": 4255
+    },
+    {
+      "entry": "packages/prototypes/base/src/tooltip/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2eb7fc93530f4bf658808371be691aa55a51d978",
+      "family": "base",
+      "sha256": "cbcdd96d3f28343f0619ed66109444ec74376367b3df77e80c41c1b006650d30",
+      "bytes": 9073
+    },
+    {
+      "entry": "packages/prototypes/base/src/tooltip/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8e0c8214fb277f2b6050ed0394d54f8abffc0736",
+      "family": "base",
+      "sha256": "3ec7947508b81f3e5bcfca3f54599809a5afbfdcd52ff776446bab49c23262d6",
+      "bytes": 3794
+    },
+    {
+      "entry": "packages/prototypes/base/src/transition/as-transition.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "336b2f0fd1e6ef4333a7c86062dbc1b8e3d88121",
+      "family": "base",
+      "sha256": "614da28fe4d3f796d814c4d7032ba529f39964d9d940832d643c8594cc79fe9d",
+      "bytes": 13530
+    },
+    {
+      "entry": "packages/prototypes/base/src/transition/transition.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b8a1068ba906141daea03caaf200bfb54658584c",
+      "family": "base",
+      "sha256": "acdaf3a51c188cf7585e7dfa1a6a77a046741899a88a3313d585c225fd92cf5f",
+      "bytes": 946
+    },
+    {
+      "entry": "packages/prototypes/base/src/tree/tree.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a170cb5cee0e0cb0a726e0ba83c62f3ab953ea0f",
+      "family": "base",
+      "sha256": "97cdede5f2ff0d8c2c056b3f0d62a1c024dd3d5b2267b5ec165e0b9677663bec",
+      "bytes": 15297
+    },
+    {
+      "entry": "packages/prototypes/base/src/virtual-list/virtual-list.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "029f1eead61a3d1a3db43f23e3288cee07e54728",
+      "family": "base",
+      "sha256": "7ad89ba7722a5509b984d174fb4bfb5bea8f83efacf37244ce1bd021f8480bce",
+      "bytes": 3641
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/accordion/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "41f246f1d10f94f5da05f752c1487d32bad03a77",
+      "family": "shadcn",
+      "sha256": "6124563ad43e00c2da9215cc88c3ff2e8963a9f2d26a0c9ac82f70d18559b3bf",
+      "bytes": 1026
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/accordion/heading.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "46bf8030e74313c84f31a2827111bbde9a9fbeb1",
+      "family": "shadcn",
+      "sha256": "0677199a31fb70df02ae6884f3fb90884ad4b86c906c0a86244585d0240d4817",
+      "bytes": 612
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/accordion/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2bc868bcb72e1856ad5640252398b8034b85c08a",
+      "family": "shadcn",
+      "sha256": "7baaaf636db16b1e562ca8b519894c949768cecf63fa4b40311cb2291dfad335",
+      "bytes": 1698
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/accordion/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "62861c52210252b36291eea46694635fc28190af",
+      "family": "shadcn",
+      "sha256": "b2c433ea20a954b5ced918a32ffd0e6fa61ab582ee3e4d405f1440f5b13c7ea5",
+      "bytes": 1165
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/accordion/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "dfa1460943e1a4cb04f2b7be54e77f09057660f4",
+      "family": "shadcn",
+      "sha256": "a86d0c3369ac26f7e95c669534a3d43545d1cfe35d3dc7b3db33ec8b1d3d9ff5",
+      "bytes": 5919
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/action.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6f941738c18def5eba2bf4277cb3410ee1536759",
+      "family": "shadcn",
+      "sha256": "d03e9a92cb68791f73a4a19a937df65b7db5ee9a67bea7b4c54f52186923df35",
+      "bytes": 1004
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/cancel.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "594c6ae7ecc130117062874e966ad29d5a6a0a6d",
+      "family": "shadcn",
+      "sha256": "901f8107799cd7c24e91f2df037357e6016308f6d7ab598317b4132e4068f942",
+      "bytes": 1004
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "43799cddce21663150ea0f41885b6267d5105262",
+      "family": "shadcn",
+      "sha256": "95ff09ad07c23ca445ce322e9c4e022158fb421cb88b9d70495e15e2f8b4618e",
+      "bytes": 1987
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "95f5af814e908d4399c6008b8b7f99cfbc63d97a",
+      "family": "shadcn",
+      "sha256": "0279057fe63a20a41a88521bf8ac565c66c568a127d066fa60daab9c8fb07c72",
+      "bytes": 591
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/footer.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ea1a17cf1c9033335dd2c843ac07866eb05ef419",
+      "family": "shadcn",
+      "sha256": "89e0e7c02697a461a6c7d5b421ec3b4d2390876e443aec8a8fab096430277b22",
+      "bytes": 797
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/header.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "18c8f7c447e5df772df61c81800429ac1cfb5b66",
+      "family": "shadcn",
+      "sha256": "20e857c5042689c4e5191c7e4ce63067a8434e58a06d941ae00d7a9ad328ed3e",
+      "bytes": 754
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/mask.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ebbd350ab344ce6c60b4ba20fd6df7be41777f06",
+      "family": "shadcn",
+      "sha256": "585961d1555df70723322e2806084e819a7199d55b18ce731ddd106cec2d3dad",
+      "bytes": 1036
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "eff513bbb73e043253e0f5276711d5021e291c64",
+      "family": "shadcn",
+      "sha256": "0793abe5b7d35d6fd031befbb53958edeff10d0cd97f9dee6bfe0dbdcb2a53b8",
+      "bytes": 551
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5d9b55bfc00c470fac13ca452f363f9f11ebf7db",
+      "family": "shadcn",
+      "sha256": "fe8dbbb8246b41e3b26df48afe134e9649fda1f9abf84c5a6308dba72854321d",
+      "bytes": 537
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/alert-dialog/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "be1a1f1c6f81ccc0a2d1935f084613b772c93382",
+      "family": "shadcn",
+      "sha256": "06c132829edfbe6c4d44552f1848c2f0f2d02359a4c57ff3f7191da55897d86e",
+      "bytes": 1429
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/async-region/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "90c2d678e94ff02a9aac7e4d587aedb81d3b19de",
+      "family": "shadcn",
+      "sha256": "39bd2afea62024f80548df44acdaf96e8d86eb703ce0f0a86c2dbaae85f7ed48",
+      "bytes": 535
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/autocomplete/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "082c9cabeb3b37c8f988a05f39dd34fc43f9813c",
+      "family": "shadcn",
+      "sha256": "b45691e288009e456d4e6c041de1d7dd187b3c067be11f10299291274683f1c5",
+      "bytes": 578
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/autocomplete/empty.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "be94f3c42957883025b818ca1f370620c5150026",
+      "family": "shadcn",
+      "sha256": "6b852aea597c9a098048e03d5d27c621f48c251526e901d96db837c300d5a801",
+      "bytes": 561
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/autocomplete/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fedb2bf34b73fee117ebe4b655456470a928e437",
+      "family": "shadcn",
+      "sha256": "20fbdc9b915e736f50ba367ca6deb1a9e00041ef81c09874fc40e92dbb7ac26a",
+      "bytes": 667
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/autocomplete/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5542fc87769915fc71bc8e4ceab379bd1eb9cc2b",
+      "family": "shadcn",
+      "sha256": "47e7d4f252a09ad05e52f9bc26973f90a723d6fdcaf5fe170f51610e38ac04a7",
+      "bytes": 622
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/autocomplete/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0bad7914d6339d9dbd957f4183543127ffec1a21",
+      "family": "shadcn",
+      "sha256": "7d0dff368aab26600fd4e70e1443e5cb3e5c850324b6e6771f559f2ef4a5b1e3",
+      "bytes": 673
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/autocomplete/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "381eb4d480a969e3f4f231c77811f4cdf254d094",
+      "family": "shadcn",
+      "sha256": "3db6b0fb63730325450340cb52349fcfa7b40568f42315f5272d1ac73e1d9fca",
+      "bytes": 664
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/button/button.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9d4abb6596705758e204898ab35339d4de17c650",
+      "family": "shadcn",
+      "sha256": "209134c984c54e56b4de343c2349e209a4441ca1ee37a607b9d32525a2ead34e",
+      "bytes": 14921
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/calendar/calendar.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ae58a60cdfb58bec0eacd7022eaf85183ecbd15e",
+      "family": "shadcn",
+      "sha256": "005d5077dea4c6aaca830d9e29524331d9560203289e04839986d72589a3e843",
+      "bytes": 8159
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/card/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cb6da7f6803e9af0acb2e25712bedc4de14fac62",
+      "family": "shadcn",
+      "sha256": "c215825e4fe3ae57a76a3650c1c615c886446b86bc56284272a74abc82cb83f3",
+      "bytes": 448
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/card/footer.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9f2abf9b4cee7a3348828d23509b1a85d3aa4044",
+      "family": "shadcn",
+      "sha256": "218bdd4a7ae3d1c2708da5478369c27443b6cd04b40f32f5d25e3634f5e39f56",
+      "bytes": 1525
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/card/header.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "57f292d8f73149629370fe7f217cc7aef8978336",
+      "family": "shadcn",
+      "sha256": "834856e84cec6fc56f2cb78eb0a01aed62e0e9fb114c312791bc21824e07c9eb",
+      "bytes": 1707
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/card/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e317e541dba48dd8e9871df8f080123496485060",
+      "family": "shadcn",
+      "sha256": "008f3f9779b2b230072d4fdbab2049b7e1a691b57dc11842e18290429624bad8",
+      "bytes": 1575
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/carousel/carousel.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8dcccb1774b004b3231ef025908ca7638c1ad18a",
+      "family": "shadcn",
+      "sha256": "fe377d191f2bdd573a05a3477a7c583dd277ffae36093dab6a5a440b9c9e5f5f",
+      "bytes": 4319
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/checkbox-group/all.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "21d1e422fc23fcebe2b242bbab54f1cbd769caea",
+      "family": "shadcn",
+      "sha256": "03b9eab574b40380f60a794686f6fbfc2f9682be3f3366bd22dd9b1d89008e66",
+      "bytes": 1357
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/checkbox-group/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a1dacfb714efd9a86dd35e5a140035a6c73f59dc",
+      "family": "shadcn",
+      "sha256": "fedea511ffe86092c579e4bc5dfcd893c540bfe8eb9fa4039ae21b662249ffa4",
+      "bytes": 1360
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/checkbox-group/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b476d2890f79f6e8fe8f03675209edb018b73afd",
+      "family": "shadcn",
+      "sha256": "b4dbfabb145fd62f9e565730b5908065bdbfdbea6b74a04ee6bf8cf6b8c95eb3",
+      "bytes": 684
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/checkbox/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "88171378fe82092718512833d132b6534c3cd47d",
+      "family": "shadcn",
+      "sha256": "54a34d84d3597ac9772cdc7633b831d3d10137e8cc089d9a69afd099fac330b3",
+      "bytes": 2968
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/checkbox/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d82ae5f48597cd3200f76efc077616f7bf22a570",
+      "family": "shadcn",
+      "sha256": "75079cd1a84b42fba3f0c95e836f9f3c56081cc2ff2e0397426e2f66eaf27cf4",
+      "bytes": 4714
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5ab0d5b4589e19e8a3e403e11cfd6437c3d3a6e5",
+      "family": "shadcn",
+      "sha256": "ff6b2bec65e860a91727edd63245f18c574c533f2a16690e1f46874318c835e4",
+      "bytes": 1113
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/collapsible/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b04de0879b338f3c101e307ce983b16cbb92a049",
+      "family": "shadcn",
+      "sha256": "d869e465dd6a596024d2503ca329a343c0add968a8831b7f0fb79dd713f83ae6",
+      "bytes": 1184
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/collapsible/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2c1461403140072b75a71ff14399e7ade9aa9828",
+      "family": "shadcn",
+      "sha256": "20383b3cfd4a23c24694e879f38165af8bfab8f8dd5624d862498d03aa0bfec8",
+      "bytes": 2169
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/combobox/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9440e82921355bb38fe112b2a51abed1fd0d57b5",
+      "family": "shadcn",
+      "sha256": "cbbfbd129774b2878f31ea7b2338e76f43cbc5eb5fd9256c6e7901ca2528f1da",
+      "bytes": 532
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/combobox/empty.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4ca9fa8d793adb97a5b1749d3b2199cc75af40dd",
+      "family": "shadcn",
+      "sha256": "924ea6793f6fa776a0f2c3caedfcac0e46a5fc2ee00a4408369dbcfe95445256",
+      "bytes": 515
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/combobox/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "64853fd62c81399c9291da7d7329ac9bf4c8dc06",
+      "family": "shadcn",
+      "sha256": "1e3969388200e32eb4553673947c33f2680fe1abc25dda2bbbcf9d50db9c2845",
+      "bytes": 621
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/combobox/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a40181617e7b14f6bccf1ff1c0655325f605285c",
+      "family": "shadcn",
+      "sha256": "a22699ab6f1b218ec142f23fd1e7e6196dfb800c81d22edd987aa536a95be488",
+      "bytes": 576
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/combobox/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "825e4a587a4d3b96c7ccf6b184c091bad58e0044",
+      "family": "shadcn",
+      "sha256": "89e0a45a0387119da1af76c8802dbdda1eef8010392b68dc1ba5ecf59ee3c31e",
+      "bytes": 557
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/combobox/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5238d97695750f47f5ccede4295a5abb7b16d132",
+      "family": "shadcn",
+      "sha256": "970453b163d87fe4d5eeb7a4b7bf04115de557357de5efe616d8ecb256d0dadd",
+      "bytes": 618
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "67de662eaff4be7e77a7ffbd05ed6ed224e755fe",
+      "family": "shadcn",
+      "sha256": "6ae4df23e17f9bd5925e91881e572292daeded81d03135dc77bf9c411a2e86ac",
+      "bytes": 582
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/dialog-content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b72b98f5a098e208425548c6dbb58e81be61c3cc",
+      "family": "shadcn",
+      "sha256": "1b0ce0e0fedfdbd365dd452bf6faac24a0c6801c323910fa2e4ea867f38caa62",
+      "bytes": 4853
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/dialog-mask.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "23aac86e8c6184519db6237d2bdfd34d18dd07be",
+      "family": "shadcn",
+      "sha256": "eac38eef410308f8c5c330e5e5ded9aa97b2fbbb4d239a3d058dd62376dbe64c",
+      "bytes": 1062
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/empty.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5d923224e3f75e09618aab6e609bb6b4c58499de",
+      "family": "shadcn",
+      "sha256": "e2edb07008492a62b166aee0eadc2d9f813af05e4b2eaf4e888b80ec359cfa46",
+      "bytes": 657
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/input-wrapper.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7f174749d835a54dbd5641af83f07181498f6dcb",
+      "family": "shadcn",
+      "sha256": "6bbb30cfe774b68290849f65524a04e9bb0f999e0fe8f528e6dc4c99bae2e6d5",
+      "bytes": 1446
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "744f1d9fc445a00c76f7888298af033c40e591e2",
+      "family": "shadcn",
+      "sha256": "6c3bf5174001c67486e2efb7abe557ca15a95eee622354083deefac3f426eeae",
+      "bytes": 2272
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "126e2cffd8a647e710aa37373c26ae2f541cd4ca",
+      "family": "shadcn",
+      "sha256": "63dffcb02e8e18d7d3bed612d25fd4e93ae6f6ca36d84f35449cd976449d67ee",
+      "bytes": 1638
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/command/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "67aa05523e8ab5e7626bbec77279b4c139d5282d",
+      "family": "shadcn",
+      "sha256": "992d69fc740e3b0f822c7291e3439731bce99dc66ae80846305ad61fd4172a42",
+      "bytes": 831
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/context-menu/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ab33a04b35ce44d9249ebfda0f86a37de6df6eeb",
+      "family": "shadcn",
+      "sha256": "bb1000e1c280ec44569a01fa64136bc567f941e514345995f9d8915736837065",
+      "bytes": 627
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/context-menu/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "264bf2cdd403723540ea6a767acf21c27ba2f60f",
+      "family": "shadcn",
+      "sha256": "1151222456f59c8a7c8102cc7e9811ec7772d208d1f85560713423f9c9f5431d",
+      "bytes": 718
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/context-menu/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "57553e20d970f27e49e83e7049ef92e83558d00d",
+      "family": "shadcn",
+      "sha256": "5cc768777fd96474efb0d7346bc70c365db8bce2baf815495194c44ac673b685",
+      "bytes": 493
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/context-menu/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5acfac25424709db8a524567ee1a8947589e56d1",
+      "family": "shadcn",
+      "sha256": "b83e3c2fbd54cf4c76938159861c4f274494f86b35058e5b72e0e2b0998c3a08",
+      "bytes": 821
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/data-table/data-table.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "46dbbb7ae27fe0c148754a585d789b1c14a07e48",
+      "family": "shadcn",
+      "sha256": "c1fb433b489623bdac3cf7b8fdb98f59108c885414eb1bad236ab5f4b2dc861d",
+      "bytes": 5732
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/data-table/header-row.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6b29bf3e286af06fd8101f2f1d8fda721ba2f742",
+      "family": "shadcn",
+      "sha256": "d7cf486afc8d8be162d73e02a657cb7716e352749c4aebfc13ddd6dddf37ec50",
+      "bytes": 633
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/date-picker/date-picker.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f25dd10ae75a6ea508aca8cd63482c15993f3dbb",
+      "family": "shadcn",
+      "sha256": "54c6e823b4e3fdccdfa5e889ce2f1836cbb3b0f2aaf6ee0d226ee72f1f02da04",
+      "bytes": 8038
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/close-icon.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "25c0004ca323db24c67bb011cf1077d835c3a4db",
+      "family": "shadcn",
+      "sha256": "b38782e8af4eaff0723672658d06392a4b294e540c33fa9e03a279ac8b3cfa2c",
+      "bytes": 2920
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a757a2a1efb25c545a47477ee2f9fdf8b9d41781",
+      "family": "shadcn",
+      "sha256": "b3f040b7f0db675e770381a6c968156a44718dcb8ba04afe3a1bf396fbedf2b2",
+      "bytes": 745
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e0e15fe211fec9368e406400a2d08a3f998aac79",
+      "family": "shadcn",
+      "sha256": "b3d79845b536f9123b0d31c7007d94c034c72392961911c0516b4b1fd817f63f",
+      "bytes": 1752
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "718b8dbb7bbedf99a64369db894290d61685552c",
+      "family": "shadcn",
+      "sha256": "daa3f3158764d6b6b12d13b9d4656aa07e0ddb3b741f9b4ab5b9faa8b3515a22",
+      "bytes": 824
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/footer.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7ee8414485daae3e75dbd7c9d2bcae6ac90f8b73",
+      "family": "shadcn",
+      "sha256": "04894aff248c8a223690c13ecca8267afd04de53912e6fe437cd00e70b7dea7e",
+      "bytes": 644
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/header.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "90c57e31a74e0dc1811212be4f47bc4b6c0ffc52",
+      "family": "shadcn",
+      "sha256": "b3fba870775bbb0fc702782d0c30959cb0c748a7742c91f76d96ac642bdc9794",
+      "bytes": 610
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/overlay.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ae70ae2f33b59b51af27815af30089df74c6b9f6",
+      "family": "shadcn",
+      "sha256": "32f453685c2b94ce6e885f56fc77f8312842676fe16bb9c2962a9172aaa3e5d5",
+      "bytes": 1341
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "dc9717aee7196a174547636ba19302b0899cceaa",
+      "family": "shadcn",
+      "sha256": "c99e1445c1d39270fc5144ea9ea026d8d5bc9aa6ec804882d35d9372534cdcdb",
+      "bytes": 766
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "eb2071a8f7993a6a5abd67a58b6255cd98694ec9",
+      "family": "shadcn",
+      "sha256": "76cf96fad394382cea317497b8296a974d6322871ad376bc0031437bda88feab",
+      "bytes": 728
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dialog/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "59eb19c9fe5c11e73c01cddaf53ffd0b41a6860b",
+      "family": "shadcn",
+      "sha256": "7b48c10a5bb636192da7fc4df314af03cb40188790f478b2ad8e57a4a5d8efe9",
+      "bytes": 740
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4c74d5fedca11a4a058e1fb95a3a87daad8a15dc",
+      "family": "shadcn",
+      "sha256": "415cbc102fb4fdee24e1401de82abf315fe86d1ebd51599d42d1d76a1d26c015",
+      "bytes": 610
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e7ba4749b808dd88ddee99a551078534a9c24e6f",
+      "family": "shadcn",
+      "sha256": "4f1976064d1d76c163b254f7b633adff7dc52a91274b8f88b167afbfc84413fc",
+      "bytes": 3538
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c8007d92b915244d4db60ea1e97a3ed2d92ac5d1",
+      "family": "shadcn",
+      "sha256": "97126b291d12d541b60812380d3516dd48e47b3c7c3af418d7f45237310a763f",
+      "bytes": 551
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/footer.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "422990150dd046a1c5d521d39c7837baa5c84fc9",
+      "family": "shadcn",
+      "sha256": "3430bd837be3925da05b3f171839f6077e99f04cd0d660bc35b81ab7172a71b3",
+      "bytes": 636
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/handle.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4072a96b247bea94c5e68e024bd52e211ecf81b1",
+      "family": "shadcn",
+      "sha256": "b0732e03a31339a69213a0b6dd15984e3fc9da2d477bdfec3e14c3c94860ea9c",
+      "bytes": 1330
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/header.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "77989a5adde2676727aaa7a1b10e2667ca2f1a34",
+      "family": "shadcn",
+      "sha256": "2558371e8f750c9712d4c841a4a382d13f573f3958092972944b554f64837249",
+      "bytes": 1049
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/mask.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0fa78e4a44dd95bbde4a1ec3af7ba329fd7967cb",
+      "family": "shadcn",
+      "sha256": "d56fd81d64da39fbe465582df769190615c68d29785d624a1a49e43b92756535",
+      "bytes": 777
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f98b198f37da408d722520c4ade942d12f3fc554",
+      "family": "shadcn",
+      "sha256": "6ab2e7ff6b15e961e981c358db86e32a1413261a4e9941fd8198aa2f852aa747",
+      "bytes": 504
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "922e7346e90cbe6047f6bfe6703d1f6af2924b5a",
+      "family": "shadcn",
+      "sha256": "5a29eb268112d11a138e5f292f10774f3f8f4d10997468ee827da3627577a251",
+      "bytes": 475
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/drawer/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "81307573c9e536c853d780662a071fec1614fffe",
+      "family": "shadcn",
+      "sha256": "0ac6b0d98c753932c07cca14a41d0278ea6bb019391a5670ead2fb9f0b455cb3",
+      "bytes": 624
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c5710869cf9111550022807d2593b2369e803e9c",
+      "family": "shadcn",
+      "sha256": "45c627a2b4ffa972b2094d3d3eebc57a8a28c66862f91cb530961ef0d7d2ccca",
+      "bytes": 1048
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/group.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "88bc21c3d545b7e11e5b2e9de55423aab6f35dbe",
+      "family": "shadcn",
+      "sha256": "e8ccfcc3b013d86463a29371a8473c05ec0beb0a3849d211411b911a100fe8c8",
+      "bytes": 444
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "bc0e739c091beeef51d13d8f7d47ff5020eef490",
+      "family": "shadcn",
+      "sha256": "caca1aaa7f701056d85487c634103ab0b2a9d18a147c2d37b70653d5f63b86c0",
+      "bytes": 808
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3cfbc7c57bc470fea5534e935750ad667d368403",
+      "family": "shadcn",
+      "sha256": "27deeb709abfb7ea6f5392253e231960795e947ab1758ef0d32c7fc178947768",
+      "bytes": 1385
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "392155b86f244db38aa970084bb75c5478416a0c",
+      "family": "shadcn",
+      "sha256": "215c88baf8e5aa04b1c5243d7066823680d2a14ba45655db685994a7b6101fc7",
+      "bytes": 893
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "afbdfeb8f50e770ba5a191deb577487a3b68869b",
+      "family": "shadcn",
+      "sha256": "7d5580b17fa19defad5c4d88765483b22ccb6e4b18619956888aebda9c42e884",
+      "bytes": 778
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/shortcut.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cb571821e2e4f6c524a6e63a150495b7b39a5eab",
+      "family": "shadcn",
+      "sha256": "22e074ae092aca4eef802d52c77117d5a51a157c84961f5bd86a321d0c933064",
+      "bytes": 1101
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/dropdown/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "616ecd2316003a04617e802b71b27d83ecfd5c27",
+      "family": "shadcn",
+      "sha256": "52e62953c6fb16f39b3ce890c8eaffedd3bac502c5c8b5eea166e9a55a06d379",
+      "bytes": 5505
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "10079e76bbbeb68a0e68f7737eb57a8854950895",
+      "family": "shadcn",
+      "sha256": "8bdc44ac0ee12f97ebb3f43db813f203805999f2438e4f0c83bafad2b02a919a",
+      "bytes": 786
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d4e6d9bd0b91aa6330c63fa990efc77adb1a2b91",
+      "family": "shadcn",
+      "sha256": "b18c8f949c9053931425bf00a7a0fc003a44dc55ccfab176cc43504f5c1d8de4",
+      "bytes": 564
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/error.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "04aed65bdd37bb1d5315b1b68f7f3b65abe97ea0",
+      "family": "shadcn",
+      "sha256": "899491c6a8d209921a390060048d134fc1d706b746b8203606a694bf508c263a",
+      "bytes": 510
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c7c988b1fd0382e56583f7d6dc3a49d9ebae1845",
+      "family": "shadcn",
+      "sha256": "bd27103a0ec884de99dc78d43f9cc09da3bc3c5558f10812bd1c7269710a4050",
+      "bytes": 544
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2f42f3b8533b59429910b94ffb3d4aa740747f1c",
+      "family": "shadcn",
+      "sha256": "e6b770e7dddd65028967976109579429dc3ef0dbd560d15c10d34e1e1c8b0d1c",
+      "bytes": 526
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/select-trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "073d46f726de32c61e7324617c7a2557bcab8927",
+      "family": "shadcn",
+      "sha256": "7b6de2f5c75ae5cc6abeba169857910daf7ee80bd2814e27a2df3344f9e6f5f5",
+      "bytes": 1129
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/switch.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7160c214f785d13b06e4b721b1581d66c561f9cc",
+      "family": "shadcn",
+      "sha256": "7d7d55665be7be218654850243e2c76f1eefc005c0bcf47657add71f3b2be103",
+      "bytes": 988
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/textarea.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b2bb938e7e5f0c0f6af0f0d6a00b721081e3d952",
+      "family": "shadcn",
+      "sha256": "951fb896415a0a5548e6b95bf294d7fd20d80ab3fe34a0ae2dd98b58b18e7e5f",
+      "bytes": 1039
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/field/validity.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a81e9ab90143fb4a774a96cc2fbf04f24c34e612",
+      "family": "shadcn",
+      "sha256": "574f610907acbdf962b500b2d8f06b1f60f7112feac5fc7c6aa77a37fd894a95",
+      "bytes": 537
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/fieldset/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8ec64d74856df6b89b9121577b3841dd0561a238",
+      "family": "shadcn",
+      "sha256": "0c9e8d0baf94ef222191b12f3e2a7bc2fd11ea1ac6061ee01ba87a4b9d48b3af",
+      "bytes": 623
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/fieldset/legend.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "33298114c62fea4508a19053ce5d5b5a3751cc1f",
+      "family": "shadcn",
+      "sha256": "869656ea205addfeb012d4eef8f4e261c167008d842feed58dad84ae93183289",
+      "bytes": 2295
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/fieldset/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "43e35300ad1caeb480e8da76d1d0b79e4872b57e",
+      "family": "shadcn",
+      "sha256": "4db539c0590f7570b464bf6f43805f447d0230c06b73d39ef813f14edfed6d28",
+      "bytes": 1008
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/form/field.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7441e3a4035831dc4daf250be7898540f517083d",
+      "family": "shadcn",
+      "sha256": "93a840629da2c3c37e41921a3998d581e8409bf331c5f86a325a424e50c7fc20",
+      "bytes": 722
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/form/reset.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "90672aa281e806da278c5b5d7e28063f03eec509",
+      "family": "shadcn",
+      "sha256": "ea3c2a8078af92adb26ddf3534a2426e8b39cc3e66c0a85bfa7f23998ee3fcd4",
+      "bytes": 540
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/form/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "44383bc0b260bb486bd1041189c621721b5e1e80",
+      "family": "shadcn",
+      "sha256": "9f580c370457b12fa1d3af48bc7a363d516fce7a00cc244e6462dc4363c1374e",
+      "bytes": 725
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/form/submit.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "532ade148221c6ce1a8dfde4c6fffc641d4303e2",
+      "family": "shadcn",
+      "sha256": "ecbe8859fb11af77f7bfd5645ef101a604ad9798c7e93c62bec232fa8a8296c6",
+      "bytes": 545
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/hover-card/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f4d022f547d029782149bba0f6e87e55ad378f94",
+      "family": "shadcn",
+      "sha256": "b6f29a5b4fd8a25454c082db91cb724061f2cb592a00ec2fd609c80aadc83589",
+      "bytes": 1392
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/hover-card/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f1dc6642a92cbd41dcc76291e67baae845d8c108",
+      "family": "shadcn",
+      "sha256": "92cb7c0738cb41c543f3a010237a13be253bb89cadd77563f008c1afeb404775",
+      "bytes": 825
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/hover-card/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "42490cbbfd415a042b961ae9f6f947cf13b99234",
+      "family": "shadcn",
+      "sha256": "15db2b7debd56f552c77f506ebfcda458689f679999169c23acb7b3f910f4f03",
+      "bytes": 2056
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/image/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fae6d55eb81051d1b0b452a1ca25910a5ef6631c",
+      "family": "shadcn",
+      "sha256": "63a297167866cc8a0f5cb5254482faffc9c992345ef3294b16f8c8480daa95f6",
+      "bytes": 548
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-otp/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6d0903854e2160253df00b37558175dae75695f2",
+      "family": "shadcn",
+      "sha256": "2caecb358d65ff44e99761860fe3f53764f477e64a82cd9a3f94a4f1795901e4",
+      "bytes": 919
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-otp/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4e54c3f9647610102f544b182ebcefd4e939115b",
+      "family": "shadcn",
+      "sha256": "6d7a78cb87c5c5694ea18b043a537619e355cc8f1e40c63f11d3e9cd0a31242e",
+      "bytes": 786
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-otp/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e6a98ddaf61e4c9ade32108b3900d073de6bacec",
+      "family": "shadcn",
+      "sha256": "f26bd2d4f228c9fb3862ec476a146ada44291c15dd19f310504404ee7b221644",
+      "bytes": 1355
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-otp/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b25c2c0eb01c7fd9002fc88e39488d859ebc8324",
+      "family": "shadcn",
+      "sha256": "948a659108cb773639c5dc0962793fce919441cae2b1ef1e2ee24fac26e54df1",
+      "bytes": 794
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-otp/slot.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a8f5c949c30eb48af54e2674186ca4199726b99c",
+      "family": "shadcn",
+      "sha256": "a34648729c1aad226ee419c577c4db4ab1563691546f96258eef215cb71b5bf3",
+      "bytes": 4797
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-shell/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "fb7674afd7bbc0a2b08214747ab121c8ff18754d",
+      "family": "shadcn",
+      "sha256": "6c38220bd5272a9735f8953e1e0e6ae246347d9daca6925e271441d68354b29e",
+      "bytes": 767
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input-shell/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6c10e9499021e1a53a7f54021bbc07850b184d31",
+      "family": "shadcn",
+      "sha256": "5cd6f3783d1cddb92e1ff1c3283ab6966a7f6bcfd84b1cf8f6127e290689d06a",
+      "bytes": 863
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/input/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2929ccfb7fd2f44f74747f371ebd4856db9eca88",
+      "family": "shadcn",
+      "sha256": "3d443f5c855ed0e4af59323910a63765339658ed4d6a0c62356a2ad2b4728235",
+      "bytes": 890
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/label/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "542b496c4ebff0809e1d079b7f111674245c538f",
+      "family": "shadcn",
+      "sha256": "b81ca8d75830bcc2c6a591d1d7a5ffafed16b3b311900b0b32fb552a76bbc3c2",
+      "bytes": 1711
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/live-region/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4cd2b0ee823da2b0483032dd542ed023394fa36c",
+      "family": "shadcn",
+      "sha256": "867fc10268bf0c5a378a64b3cb9097746fad5531d8dcbefaeec3506b6352b1a4",
+      "bytes": 523
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/menubar/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f6f6fa71cf6aba826989c434acc017e1bcc770d9",
+      "family": "shadcn",
+      "sha256": "6918c24ad3a2c56db1d03f93e2d1d64634d26d9ee632b25355fe26f060c2a119",
+      "bytes": 586
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/menubar/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "21ec7ccdcf2b7917e3b8e471ec0d0f4736ed125b",
+      "family": "shadcn",
+      "sha256": "2877f6ad2ec55b00efe0d0dfb10cdcee93cee74c2fd61cc2c4ed0fbd159bb5af",
+      "bytes": 675
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/menubar/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2e8ede8c26b60d2d08b718ab635830c0de027e04",
+      "family": "shadcn",
+      "sha256": "e4d92562b6005874e8d39c9b73a4fa38e7b75e6a88c8412239015ad7345d2aee",
+      "bytes": 449
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/menubar/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "aac389e2801c8d095b1c4e3ef03ac5d822080277",
+      "family": "shadcn",
+      "sha256": "a6bfa98ca5543827fac5dfb54d49c0af2d5a95ca15c1a984b0434afbce6bbe3e",
+      "bytes": 707
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/message-scroller/message-scroller.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d4c0c21c0c52647a05109eecf551d14abef45e11",
+      "family": "shadcn",
+      "sha256": "c05ae76fff6943de6349f7e374a6ccbf0c4aacaeaddca32987f76709560f6988",
+      "bytes": 3364
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/meter/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6f2aa320fc307fc917d53e3baee8c799334c3f0f",
+      "family": "shadcn",
+      "sha256": "5ac4386038ae72302d7c28435b0f2c2a1d8dadee472d4abcad7edf950a823cf1",
+      "bytes": 791
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/meter/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1df1e325f28d55a042935919f108da9aefd80cba",
+      "family": "shadcn",
+      "sha256": "1b0f7c48e5efa3104a0b50a22c76df2c8b64b610957ed5eed93fdb57136dda4e",
+      "bytes": 497
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/meter/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a337aedd27a5f4c73834576f6154ad0ef92e541c",
+      "family": "shadcn",
+      "sha256": "e0704d28b3cf96bceba3c3f019a2ff602f85c63b1eb5f58ae9f93cf9940d1ea4",
+      "bytes": 591
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/meter/track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "109a81f94e020dbe499d9ab8ac41364fc208b8ce",
+      "family": "shadcn",
+      "sha256": "54ea545502ad2d96c2fa488cf6415488019e4fbb8477b17c7e63e1d364d1913b",
+      "bytes": 497
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/meter/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "156930135dbb32b6d5eeb17b986e45e29dc11be5",
+      "family": "shadcn",
+      "sha256": "42c451cd3a298c447bbd0b0c776e8acdd172a9299d29b2c2c7c8b24b97ea40e1",
+      "bytes": 497
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/navigation-menu/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ff5778c67a2d0845b4b9deca76bf8f8ec567c05e",
+      "family": "shadcn",
+      "sha256": "aaed634a4946922846d9c45dbbcb3a903e56243ba7d784288f3206f309519479",
+      "bytes": 646
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/navigation-menu/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0cff14624a57e4ffc305df8b291b3715372f94e6",
+      "family": "shadcn",
+      "sha256": "f35c13f9e2385cf0ba38b47d49ee79f079a55b69d4d56b8cc001f8ac7c4d6434",
+      "bytes": 897
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/navigation-menu/link.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1fee896b66fbe5b3df91db899e20ffd719166619",
+      "family": "shadcn",
+      "sha256": "00f02df2d0e6a470623fb028400f226f12f13a78b57392bb77afb613e07dbb57",
+      "bytes": 743
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/navigation-menu/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8daeaa89c0add1ff2d884c426e32ff82e3a4a06e",
+      "family": "shadcn",
+      "sha256": "e040226909ede57620b4ec21e88bc7c83d2e338b7da49b6f57edb6f82efff772",
+      "bytes": 742
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/navigation-menu/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0645b99a03096cd824520e87105cedd9dbaf7159",
+      "family": "shadcn",
+      "sha256": "c3b5369732bd4310a63d89bf42396be64cf9df5fe4cb507e23ba7f8f25306620",
+      "bytes": 821
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/number-field/control.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cc4529ff7263ccca2bf1ae0b445d9c1c90ea159d",
+      "family": "shadcn",
+      "sha256": "3561a616b03e356dc32f5c4854e90abbeb15f6622178fe0e332443882084f951",
+      "bytes": 950
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/number-field/decrement.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9d0348bbb887b2c756657720b8a07c601d95581a",
+      "family": "shadcn",
+      "sha256": "02e2fdf2d1ac5357f61a6d5472022e193535d5afc2bfb84666ad8dca80d976d3",
+      "bytes": 669
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/number-field/increment.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d3847942568a3e67bf6e6f05bc0686a6d7ab1bb0",
+      "family": "shadcn",
+      "sha256": "26feba0396dc03ca03b0ba18427ac9ba9e9bbb9c4e93411bbff65213d939a578",
+      "bytes": 669
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/number-field/input.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1eed95842d3af62839b4f30e3d86208cfc7b015d",
+      "family": "shadcn",
+      "sha256": "7ea186e344a7ba724d4a38e2e28878b4395ae4bcaa68e3cd9b8e973381b4a007",
+      "bytes": 816
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/number-field/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9bee7f3132a3b78adcd5900d6574d7977f4c9b4e",
+      "family": "shadcn",
+      "sha256": "f3eb7d8d4af5b424b1c796d95d6b85d663d23b18913442adefa11195b5305136",
+      "bytes": 628
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/number-field/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d37a8b265fb3e3ad8957a0a914f4d76cdf680b65",
+      "family": "shadcn",
+      "sha256": "ec73c466425f6cc9c89d2dd5430b18383e0b6b1353e5ad21143e14a3074e297a",
+      "bytes": 814
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/popover/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "dafb33a1eba929e7d937c4ea92fa40588a8a1b7d",
+      "family": "shadcn",
+      "sha256": "b35e76a02c61ec3315ade31b06b2c87bf77d2e3431c98e1ffd1789bfdf6bdfd2",
+      "bytes": 696
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/popover/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cc0739388baadb0bac9dd02dd16ab5c379f4029a",
+      "family": "shadcn",
+      "sha256": "1059943d2cd69cd0654533b733a0c9933d54a006fbd67614803bfa8689332e8d",
+      "bytes": 3927
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/popover/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "81f67076ee211605a24510e2263a914b31db785b",
+      "family": "shadcn",
+      "sha256": "8cc20f0c00823e13fa21c49b27a08b85f37a14987601ed6e4c4065237f4f989c",
+      "bytes": 569
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/popover/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f5a0e09e8ff70cbdb47ee45e978a5711197320a7",
+      "family": "shadcn",
+      "sha256": "0d0d88e991a9feaac5319c996a790a513ab2f33b104bcffeaba5f537cd93b010",
+      "bytes": 512
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/popover/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e70a81026866d3301618f51a9af09a8699fde6fc",
+      "family": "shadcn",
+      "sha256": "1df3444f1dcdf1838147652a23f2330c030d40e4295dca18404888b57a7eb081",
+      "bytes": 510
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/popover/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "32f164a147e807ab1869f3b5f0c90952822bbb99",
+      "family": "shadcn",
+      "sha256": "41fff87e49f8467047673efb9f58ee48b6530a737ac5cd91e497c422f195bbfd",
+      "bytes": 1419
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/progress/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f9b93e7571e40149520d03e6009510853c2e8a63",
+      "family": "shadcn",
+      "sha256": "7593fb2172bc1ca8ac3dfbe9c18c8a09a7924b319069dc0ad5dfa9fbdbcaf240",
+      "bytes": 816
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/progress/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cc8d46f8baacfc47d9d9146e9bffd731fc20576f",
+      "family": "shadcn",
+      "sha256": "46d596672c3a5bb361d646e974046efd53449de01d6f775b4bf62587dfa3860b",
+      "bytes": 530
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/progress/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2f8aee549462f4747f20d2b4e85e96b75f86a22e",
+      "family": "shadcn",
+      "sha256": "cecbf5e3148e5d3f2e4a16cfc74fa5c14ba33b96c7208037837221f3977b70bc",
+      "bytes": 619
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/progress/track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8f94c7fbce73635d8757ce093516224ec5ed35c9",
+      "family": "shadcn",
+      "sha256": "b57ddf408b1d4e95f2c47c85f8007ee1b573861c6eede249a44033d38bfebf79",
+      "bytes": 530
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/progress/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "cad09a73ea82cac8a5a15ad5b8939f262129778a",
+      "family": "shadcn",
+      "sha256": "245748139401b983bec9d8bae19f1b4a38105ca27f402b07928120b1d2b9d8f9",
+      "bytes": 530
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/radio-group/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f0bef486b53d293e70d6ca256038f80f6041ad91",
+      "family": "shadcn",
+      "sha256": "cce7bc70623700fb9eaf64e595bb84a39496e6367f905f8c4f83a92cb002968a",
+      "bytes": 3629
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/radio-group/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "37038578b3c08195230b95cc662f66f53ec04c90",
+      "family": "shadcn",
+      "sha256": "e64c5afddf30814a14be092a79fa3e3fe8ad727738a76d0f3f64d46ba3d77427",
+      "bytes": 4945
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/radio-group/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4bbb452781f4e9f8b81a32a4498700b921a18c8b",
+      "family": "shadcn",
+      "sha256": "fb53c9d08e05069352e7b6a277c0141345f1b9769793801286846dc4333108f1",
+      "bytes": 1733
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/resizable/resizable.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4e1813d7f72eed6cdea58f08d4087d0e033e5f47",
+      "family": "shadcn",
+      "sha256": "47828a60461fa9d49ad3e5a22a6deb69e7dacbe024a0c94aa3c133adc579f449",
+      "bytes": 6996
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/scroll-area/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0d264bc2aa7426f066fb9dd3688ccd881bc6e4e6",
+      "family": "shadcn",
+      "sha256": "93ca6c9a0d87bd0e3655cfcef5c4726cf8bea1ac43b4b72dc446ea16d0e76b63",
+      "bytes": 660
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d266b513adba1914d955301e26e1fbc10a561e36",
+      "family": "shadcn",
+      "sha256": "b74951b4288a01309ea9e4796e74b5f56bbc187ff7e33a555708b73b5a424b26",
+      "bytes": 1831
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/scroll-area/thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8aa455bbe41b003f849589f36af6316d8732ccf1",
+      "family": "shadcn",
+      "sha256": "4ca0eef15b6b3245c5783caebe554d38599a04c59d95e5b6540cd2ba5a58fea3",
+      "bytes": 1047
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/scroll-area/viewport.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ebabd71319c4d9474f243cf18b9bc7074eeb7b7f",
+      "family": "shadcn",
+      "sha256": "f7a0e57aefc329b6113e54e029ff5f5975a460c56bdb506ce51b53b209f4af05",
+      "bytes": 1307
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "428d75cdf3e004966e6059face56ef5fbe2455c0",
+      "family": "shadcn",
+      "sha256": "af381bbd4ed800f55597c16671f2ec90aaef836760cfeeb85a2934338355c3fb",
+      "bytes": 6119
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/group.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "2c08f79c167f64ec60485c9eeb880c11046b4255",
+      "family": "shadcn",
+      "sha256": "36288492b98e6b1c9bf745fa94a0706691b052e186b1f3df83b8454223d101e1",
+      "bytes": 723
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/item-text.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "ee367504cd3e3cf5420887826881c404bc3f821c",
+      "family": "shadcn",
+      "sha256": "4d67ea92540db6c7ade3ee57e01bafda13ee941f18311d928da183977dbc0c66",
+      "bytes": 656
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "aad047aa4b586d1c63d7a5902b12a6b42d7174e4",
+      "family": "shadcn",
+      "sha256": "f6c7929d24c159ecb8a6842eca118595d4ca1f23bacce2cf2b9b543a8c444f21",
+      "bytes": 4879
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "08c1e38a972c0f8f03b04dd5e30870b518e7e4a1",
+      "family": "shadcn",
+      "sha256": "1995db113b24645a5a7acaaa2dc096b59641309d6af21cbf45a775ca7fffccbc",
+      "bytes": 891
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "c12479fae46e007bfe4e943174485ba90a786f74",
+      "family": "shadcn",
+      "sha256": "789995dfe5af793b012c922d5785e2315482c2889e70fd0fa52b2b21866f2f0b",
+      "bytes": 631
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0a59df7da36dec89e93b688fd2844a9b148ad3b3",
+      "family": "shadcn",
+      "sha256": "d212993ac97eba1f03f11cf37a18bd2d6fc7b7d7b4572216c72062c6d976275a",
+      "bytes": 1005
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/surface.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "08412aad88b37b221e3045015eb356f06cc3ae18",
+      "family": "shadcn",
+      "sha256": "05985572ad8e2d94dabddbf8baced416df17d22e6c12b9a16d74698128447f44",
+      "bytes": 587
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4963713b2e84f0687c81ae9a0bf09de54f18d4e0",
+      "family": "shadcn",
+      "sha256": "057c754a6c72e54a34646716673e18fc18676c5b24b4c84cb0f485564258a62c",
+      "bytes": 594
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "6ccd465fe3588b233972b577994c6a387d2102e8",
+      "family": "shadcn",
+      "sha256": "6a004be5a769f27801ceb06c8827bf1e5d01680ee120a894077d3a2bc0f7eafa",
+      "bytes": 1347
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/select/viewport.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7074ff9737529723ad89d01fd58d512f40fc9663",
+      "family": "shadcn",
+      "sha256": "162d96c8a299737a0fbb11f1a2e916585b8d552fcc4934c35459595109d7025f",
+      "bytes": 1648
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/separator/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "08dd973c220e7d0ddad7f5d9dfcc236100f11f0e",
+      "family": "shadcn",
+      "sha256": "6bf356b670e54fb1949d1151d3a38bf1be398b25979310ab57dfaf476b50eade",
+      "bytes": 2321
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/field-thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "8fd4e4171ff58f2adaf8da6a2411fde49e9523e9",
+      "family": "shadcn",
+      "sha256": "eb7ca9d288189a5762d1b3f2617b75462feb3884a5c756bbae34d5adcab327db",
+      "bytes": 2505
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b46c011422c33771482175e8f363550406e02753",
+      "family": "shadcn",
+      "sha256": "b7a0ffc9216a747975a0df7006efe2a9045a29569def223cc040bdf4e17ea3e9",
+      "bytes": 1987
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4af14e2d06a16018aed5a47fdee6bd968cbec477",
+      "family": "shadcn",
+      "sha256": "867b569219c0ba0b0c4fc4f878a66e9002eca9573d8a1f6b40ffe193907d6714",
+      "bytes": 1331
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1aab7abb54c2449c0cee113de304ff3de2b61488",
+      "family": "shadcn",
+      "sha256": "81b9b6387d871fceb597abb8d4b038f8d5fde40a80455c74a749a82d20e06f58",
+      "bytes": 1426
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "633228395ee0a91d96f8d52be12ffd39a863add1",
+      "family": "shadcn",
+      "sha256": "68d7cde9547ed29ed8a759896659a2a9c5d1942d637b5ae00c5224a782237a05",
+      "bytes": 2474
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e69394cee07e1d70eaae0494a31bb065587e07c1",
+      "family": "shadcn",
+      "sha256": "d7beed3cfcee36abdbdb788d49625fb23bc8c1d6feeee9d4511681b461e8a519",
+      "bytes": 3525
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4b4ad6af054affa1fe0f13e0e4da060df07f5aaf",
+      "family": "shadcn",
+      "sha256": "92e6f3f0f93500ee5532d801be26034d32ab03cf1d18a9af0e2a75b034fc598c",
+      "bytes": 1094
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/values-indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d1ec30a130d4486fb69558fb40102e5d8de63f72",
+      "family": "shadcn",
+      "sha256": "c7997f72549b0ef43b1e1659511a69790ce12a2c24dc92a2423a5f31501c0572",
+      "bytes": 1887
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/values-label.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9431060cb8e3c729ccfc4d8905bc4df92701f273",
+      "family": "shadcn",
+      "sha256": "ee2c5d053b79f3433f01235b1316ed7802f0d6ba20484bafb02b503766374f71",
+      "bytes": 555
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/values-root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3ab139895e995abeebcfa73bc2de2d9b58743b14",
+      "family": "shadcn",
+      "sha256": "46e8de3c2958179e97bfb663f1f450628dd31c91bed592de671d73fb0ddafbf7",
+      "bytes": 708
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/values-thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "e105054aa2ce510a96555bdeb7fc60d579f4850e",
+      "family": "shadcn",
+      "sha256": "14973e66f059616b19dfaef226764f9bc4c45f5276d10e0ffe6511fd045b3ff9",
+      "bytes": 3928
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/values-track.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "dc2f00cd02badbffeb55b34d4e4ca8b684d7827b",
+      "family": "shadcn",
+      "sha256": "924285db4bc3d7a0cec877daefdafc048cabd235cb5e61a82a29d57f1ecaa506",
+      "bytes": 2029
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/slider/values-value.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "526abc16a5d7274e305b6265d8a6336ccd892f8a",
+      "family": "shadcn",
+      "sha256": "84976b1a4af26c670e79bafb62e1127cabbda5002a4cca65753ed26fa3695415",
+      "bytes": 560
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/style-scope/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "385e118ab5f06aca2629b74604e37ade542e9686",
+      "family": "shadcn",
+      "sha256": "f14cca8b42c76796036123fde621e1d0ca3f0e333c17d8506ff578c243dad4ea",
+      "bytes": 378
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/surface/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "28a05372226ded46e198034397df1c11a7cce655",
+      "family": "shadcn",
+      "sha256": "355f1e15d0fa9e13555b4045b92385db05804a23d7ac691d3dbd9fbc9f9ae7d0",
+      "bytes": 7722
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/switch/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5aa456bb8d58f909eaef66e98bf2d7212a270e83",
+      "family": "shadcn",
+      "sha256": "f30ab851474d4e2beb2d3c5adbfd217ab6acfb368449b5b74ae95a7e969d3775",
+      "bytes": 648
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/switch/thumb.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9aaeca75f70736d271116010113e5134f474e820",
+      "family": "shadcn",
+      "sha256": "9109bdf1cf3d1970bea3f65aedd50fbbfcbd95638fea9fe8cd3cf1ce84324980",
+      "bytes": 9532
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/table/caption.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "84924163c19a955613bbb3f8bf5f538c21942aec",
+      "family": "shadcn",
+      "sha256": "d8346ce60f623f96e5b39ad70273a4539beedca04b3b39fe796f32f70f09d25e",
+      "bytes": 764
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/table/cell.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "634f007b274c98a297e4515957e4fe92f063a541",
+      "family": "shadcn",
+      "sha256": "8e446b4b4d1cb17a11bb291166f7662f94eecee17a7a8d1f790024d934b58157",
+      "bytes": 652
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/table/header-cell.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "d9488ed9b1ad3744cd8f23a07ad2354767abc378",
+      "family": "shadcn",
+      "sha256": "92b2ec0c18440578c34ef3a5f777718a26567876d06fa971d8a9a898757beef2",
+      "bytes": 761
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/table/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "def980b1d069c18a88f8e3b7cd8f0cbf5aa5149e",
+      "family": "shadcn",
+      "sha256": "0504d8e5381af1f362886c0daf0152bc6d42b058fc26e832befbbfb48e702a07",
+      "bytes": 1039
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/table/row.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9b4cdde84136694e9e337d77d936c8e350001bab",
+      "family": "shadcn",
+      "sha256": "63ad97d2c0e62f83dbf739e1a3633df02e6b8a5ddc5f663cc1e718257c2300e0",
+      "bytes": 2792
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tabs/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0fad3863b8af903b3ca39a355fe59397319cd744",
+      "family": "shadcn",
+      "sha256": "836ea7d939b8a5c1a2e07e165a80fd97c922d0febd0f78602ed1343374bff90e",
+      "bytes": 1055
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tabs/indicator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "aa4827caa86ce7235f502b0128b86c03a91f6be9",
+      "family": "shadcn",
+      "sha256": "f649940785ac78dc026b1b3a1a4d2c65df90a139afc65c65f678cd5454428a87",
+      "bytes": 997
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tabs/list.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "1d1f3a119f8116291ff253a6c421b5026e939de8",
+      "family": "shadcn",
+      "sha256": "5116b5ea3430ec0499b34734fdb2ea340eadb29e6695083d6ce2c36fdb176636",
+      "bytes": 4753
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tabs/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "3ed8d3bd3b067c536a1c11b79fa536ffad086d30",
+      "family": "shadcn",
+      "sha256": "66420b8797b7a775b6166de5dfd70ed1834f5705895962c86ef519c8b5274fc5",
+      "bytes": 975
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tabs/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "325f4b1a710737e95b084353b4137a575cd44180",
+      "family": "shadcn",
+      "sha256": "e79ce2475609ae35cacb37493ab73aafcd017cb04f8fa32f05b9a282d8911757",
+      "bytes": 8601
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/text/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "00448f150bf64e44c341c58620683fa575e22acb",
+      "family": "shadcn",
+      "sha256": "2fa6be35b09c9687b4556ef8a3e9d5058fe845bd0504f79c99b8a32bd0a9469d",
+      "bytes": 6892
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/textarea/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "0654a0d83657429aff222db75570b4e3aca38bf9",
+      "family": "shadcn",
+      "sha256": "7486c96cc4772beaccce662575cd08559525300411f490b54a4fb6522611efde",
+      "bytes": 696
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toast/action.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "462b632345f89dcec18dfb63db36a625ff5edf5e",
+      "family": "shadcn",
+      "sha256": "17d22a9f410afbde012aa16dea5507165143864f42a55cfd05d0e2f838278567",
+      "bytes": 1009
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toast/close.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5d2e9249e67c1fb7c069ee4fb9344e59b0cf3bcf",
+      "family": "shadcn",
+      "sha256": "51c33f9631b9ee3c0b4471448a7e9ef1dddf1680c38d6b690bbdca6dff3b345a",
+      "bytes": 912
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toast/description.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b42f84771f2b454bdb2ce1d0e9aa00afd4e26961",
+      "family": "shadcn",
+      "sha256": "ee191137ad91608c4c6e9c660068884fe55c44dff3db5274bd8b8ca98102df7f",
+      "bytes": 626
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toast/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4e425322ab661990020b3e08f0a2e141a8583fa7",
+      "family": "shadcn",
+      "sha256": "7acea8eab04d72ab7aa9141a377d5a4f2b83c4f1aae0126e61dd61084d85c894",
+      "bytes": 2210
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toast/title.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b5af23f976f4b8e1f44e716eb144c1f64e29f1bf",
+      "family": "shadcn",
+      "sha256": "499839996fec7a444e3d5ee5081cbe53900ffdd892f9d747eae700e81d59efb3",
+      "bytes": 568
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toast/viewport.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "4f7457eb7bc21298a51aa596175a5dc85cc63294",
+      "family": "shadcn",
+      "sha256": "2f061f4ebfad61e7da2a6c09de03d1461f68d78437a4728bc6180e956198d956",
+      "bytes": 725
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toggle-group/item.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "bdb58d5b17779225dcdaebe3c0d938ad66f8a3c1",
+      "family": "shadcn",
+      "sha256": "bc54c9feafe133d11a190d9daf4c971f043d271d1ce197ab8095c161006b6be0",
+      "bytes": 6438
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toggle-group/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "bb814889c6e040af335f4fabe91bab27910b0db3",
+      "family": "shadcn",
+      "sha256": "cb301dca02d96f45c1a540591dade827eca5495415827e0dee19d1e255d82824",
+      "bytes": 2789
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toggle/toggle.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "5cc3b876992dd3904bf40f99ce84ffa54eb80e8c",
+      "family": "shadcn",
+      "sha256": "0ff35cdb8228ead7c2e43845016c49fe94682d816ea87324d0ec530586fbf87f",
+      "bytes": 4480
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toolbar/button.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "93ed23994cdd94dc38de8f860b6cafb7a20f4a5f",
+      "family": "shadcn",
+      "sha256": "a9e3f79d12c59ec60daa2b50af6bcfe4d5935c52f75dee085aa01b04004adbca",
+      "bytes": 690
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toolbar/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "36ed8b1027970bdb87f69854ad1349c77b644aba",
+      "family": "shadcn",
+      "sha256": "e42b594282979767dab2260790f0517674e045b0eb5b99367daf717c5d1c76e4",
+      "bytes": 1275
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/toolbar/separator.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "7610aae72b14e9cacba4d74221d0657914a7e0ed",
+      "family": "shadcn",
+      "sha256": "15fab00a59771f4ac616cfa87f16f3b1694a483788b86264c18bf3721c6e395b",
+      "bytes": 1066
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tooltip/content.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "68210843f86140163dc6af9a2ebc0c816e1cf14e",
+      "family": "shadcn",
+      "sha256": "0d03e9e249be39839712cad455a456fda2c4e05a7c54539e6e3cd3ff75a82647",
+      "bytes": 854
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tooltip/group.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "057789bee465d3d9697909b2797e69be00fb9ac5",
+      "family": "shadcn",
+      "sha256": "9d55b7b4ca6426de0b5eca4e4cdd224125f001383a56c819f925940c9cb6e36b",
+      "bytes": 540
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tooltip/root.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "57e5cee03284dc141474bf29035d2a151f94f73c",
+      "family": "shadcn",
+      "sha256": "38711c3dc77087cbf4f32dbf6e6fa807c212e8ba0424a099b2e9f08ee74a9ac5",
+      "bytes": 480
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tooltip/trigger.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "b3b3ed472672de9ac18c2c0865bd1f3b7ddc6183",
+      "family": "shadcn",
+      "sha256": "64bcf96f7f1a84dbcaf4b9b5aef69e96bbd174a1b70b51c0e6fa560f289787f5",
+      "bytes": 1576
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/transition/transition.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "f7bb96e34132949cad95407c3ffef0b116a9b538",
+      "family": "shadcn",
+      "sha256": "5848a6699da8ed72f832ae697c4d655f226fcd7d40a54c0a927789998147f013",
+      "bytes": 593
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/tree/tree.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "a7f3d96cd3c324f51a2cc611964ee0d8ae357138",
+      "family": "shadcn",
+      "sha256": "6071c9124161a4b3319fc8c4bec12119effb548951e60fab88bb86e2b93b25de",
+      "bytes": 8363
+    },
+    {
+      "entry": "packages/prototypes/shadcn/src/virtual-list/virtual-list.proto.ts",
+      "mode": "100644",
+      "type": "blob",
+      "blob": "9f7eab8cabfef0ba42c1160286d542c0a7af720c",
+      "family": "shadcn",
+      "sha256": "ac09194cf673f52b093f6189d2d4a285a786f56094382d7c029f9a659309144b",
+      "bytes": 2874
+    }
+  ],
+  "executionReplayed": false
+}

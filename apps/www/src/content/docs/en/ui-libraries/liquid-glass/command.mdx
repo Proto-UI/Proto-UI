@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: 'An inline searchable list of executable commands.'
+description: 'An inline searchable Liquid Glass command list that emits explicit execute events.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-An inline searchable list of executable commands.
+Liquid Glass Command renders an always-open searchable command list. Typing filters commands without running side effects; pressing Enter or clicking an enabled item emits `execute` for your application to handle.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-command"
@@ -14,10 +16,22 @@ An inline searchable list of executable commands.
   codePanel={false}
 />
 
-The list stays inline and open. Enter or pointer activation emits execute with the selected command. The application owns the action; query state does not execute anything.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+- **Parts**: `Root`, `Input`, `Content`, `Item`, `Empty`.
+- **Filtering and keyboard**: matches `textValue` and `keywords` case- and diacritic-insensitively, or set `filter={false}` for caller-filtered lists. Arrow navigation keeps focus in `Input`, and IME composition never executes a command.
+- **Controlled state**: `open`, `value`, and `inputValue` can each be controlled independently. `Empty` reflects actual matches; disabled or duplicate-valued items cannot execute.
+
+## API
+
+| Part | Prop / Event | Description |
+| --- | --- | --- |
+| Root | `value`, `inputValue`, `open` | Independently controllable command and query state |
+| Root | `filter` | Set to `false` to provide pre-filtered items |
+| Root / Item | `execute` | Emitted when an enabled command is activated |
+| Item | `textValue`, `keywords`, `disabled` | Command text, search keywords, and disabled flag |
+| Empty | — | Displayed when no commands match |

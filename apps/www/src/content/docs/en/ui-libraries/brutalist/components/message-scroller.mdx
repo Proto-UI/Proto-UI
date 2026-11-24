@@ -1,16 +1,14 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: 'A Brutalist-styled message feed container with automatic end-follow and a jump-to-latest control.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Message Scroller composes the existing Scroll Surface end-follow policy. Appends follow only while the reader is at the end; a reader who leaves the end can explicitly resume with Jump to latest. newContentCount is supplied by the application, never inferred as unread truth. Jumping does not request focus.
+Message Scroller builds on Scroll Surface's end-follow behavior for chat logs and live feeds. It automatically follows appended items while the reader stays at the end, and lets readers who scroll up jump back to the latest messages on demand.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Set a11yLabel on Root to name the scrollable region; the default is Messages.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-message-scroller"
@@ -18,9 +16,30 @@ Set a11yLabel on Root to name the scrollable region; the default is Messages.
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/message-scroller` and adapt them for your target runtime.
+
+## Usage
+
+### Anatomy
+
+Message Scroller is composed of `Root`, `Viewport`, and `Jump`:
+
+- `Root`: Coordinates end-follow state, the new-content count, and the scroll region's accessible name.
+- `Viewport`: Renders the scrollable message list container.
+- `Jump`: Action control that jumps back to the latest messages when the reader leaves the end (accepts Button props).
+
+### Behavior Notes
+
+- **End-follow policy**: New messages auto-scroll into view only while the reader is already at the end. Scrolling up pauses auto-follow until the reader returns or clicks `Jump`.
+- **Application-owned count**: Pass `newContentCount` from your application state to reflect new arrivals; the component does not infer unread business logic.
+- **Focus preservation**: Activating `Jump` scrolls to the end without stealing or requesting focus.
+- **Accessible naming**: Set `a11yLabel` on `Root` to name the scrollable region (defaults to `'Messages'`).
+
 ## API
 
-Message Scroller is workspace source. There is no public `proto-ui add` target. Viewport has no props. Jump accepts the Button props.
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -30,5 +49,7 @@ Message Scroller is workspace source. There is no public `proto-ui add` target. 
   ]}
 />
 
-These props belong to Root.
+Other parts:
 
+- **Viewport**: No props.
+- **Jump**: Accepts Button props.

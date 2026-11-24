@@ -214,8 +214,13 @@ describe('fresh-target own-data Object.assign', () => {
     'Object.assign({__proto__:{value:1}},{});',
     'Object.assign?.({},{value:1});',
     'Object?.assign({},{value:1});',
-  ])('keeps unsupported source inputs explicit: %s', (body) => {
-    expect(parsePrototype(program(body)).ok).toBe(false);
+  ])('enforces the fresh source input boundary: %s', (body) => {
+    // A checked constant property key now contributes the same finite own-data
+    // field as a literal property. Every other original boundary stays rejected.
+    const finiteComputed = body === "const key='value';Object.assign({},{[key]:1});";
+    const parsed = parsePrototype(program(body));
+    expect(parsed.ok).toBe(finiteComputed);
+    if (parsed.ok) expect(validateIR(JSON.parse(JSON.stringify(parsed.value))).ok).toBe(true);
   });
 
   it('does not infer data or capability authority from an enriched exception', () => {

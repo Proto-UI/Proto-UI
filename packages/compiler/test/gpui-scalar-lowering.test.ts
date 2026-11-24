@@ -58,8 +58,16 @@ describe('checked GPUI scalar representation', () => {
     expect(gpuiNumberLiteral(value as number)).toBe(expected);
   });
 
-  it('keeps string relations on lossless UTF-16 values even inside native boolean callables', () => {
+  it('keeps string relations on lossless UTF-16 values after a closed predicate is inlined', () => {
     const code = generated(`function compare(left:string,right:string){return left<right;}
+      def.expose.method('run',()=>compare('𐀀',''));`);
+    expect(code).toContain('string_units().cmp(&relational_right.string_units())');
+    expect(code).not.toContain('.text().encode_utf16()');
+  });
+
+  it('keeps string relations on lossless UTF-16 values in a first-class native boolean callable', () => {
+    const code = generated(`function compare(left:string,right:string){return left<right;}
+      def.expose.method('compare',compare);
       def.expose.method('run',()=>compare('𐀀',''));`);
     expect(code).toContain('Rc<dyn Fn(Value, Value)->bool>');
     expect(code).toContain('string_units().cmp(&relational_right.string_units())');

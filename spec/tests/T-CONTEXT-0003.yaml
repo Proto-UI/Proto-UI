@@ -117,7 +117,15 @@ implementations:
     required: true
     consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
     notes:
-      - Existing Compiler profiles reject both ancestor operations as unsupported source operations. This negative evidence does not implement them in Compiler/GPUI/Qt/Flutter.
+      - Historical implementation ID retained. Web source profiles now admit strict-ancestor operations; GPUI, Qt and Flutter continue to reject missing native implementations explicitly.
+  - id: context-ancestor-compiler-web-consumer
+    kind: fixture
+    status: passing
+    path: packages/compiler/test/react-context-source.test.ts
+    required: true
+    consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
+    notes:
+      - Actual generated React owners distinguish self and strict-ancestor providers, reject stale deliveries after rebinding, retain write authority and clean up subscriptions. Happy DOM evidence does not establish native-browser geometry or non-Web conformance.
   - id: context-module-catalog
     kind: module-test
     status: passing
@@ -240,6 +248,9 @@ verifies:
         - C-CONTEXT-0012-B
         - C-CONTEXT-0012-C
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added Web compiler strict-ancestor admission and generated React owner evidence while preserving non-Web refusal and draft status.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added strict-ancestor module, real Web Runtime and explicit Compiler refusal evidence without activating the draft slice.

@@ -1,16 +1,30 @@
 ---
-title: 'Virtual-List (WIP)'
-description: 'virtual-list composition and explicit implementation boundary.'
+title: 'Virtual List'
+description: 'A Liquid Glass virtualized list that renders variable-size items only within the visible viewport and overscan window.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Virtual List separates a complete stable logical key sequence from physical views. Item-count overscan, maximum materialized count, revisions and generation-bound commits live in a host-neutral model. The explicit virtual-list/web entry measures variable item extents, owns spacers and Web nodes, preserves keyed views, scrolls to a key and disposes listeners. This demo uses that Web host boundary; it is not native GPUI or Compiler conformance. App-owned content is created only for the bounded visible range.
+Liquid Glass Virtual List separates a stable logical key sequence from physical views so your application only instantiates items inside the bounded visible range and overscan buffer.
 
-WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-virtual-list"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Host-neutral model and Web helper**: item-count overscan, maximum materialized count, revisions, and generation-bound commits live in the host-neutral model. On Web, the explicit `virtual-list/web` entry measures variable item sizes, manages spacers and DOM nodes, preserves keyed views, supports scrolling to a key, and cleans up listeners on teardown.
+- **Bounded rendering**: application content is created only for the active visible window while keeping keyed view instances stable across scrolls.
+
+## API
+
+- **Core model**: stable logical key sequence, item-count overscan, maximum materialized item cap, and revision tracking.
+- **Web host entry (`virtual-list/web`)**: variable-extent measurement, spacer management, keyed view reuse, scroll-to-key navigation, and listener cleanup.

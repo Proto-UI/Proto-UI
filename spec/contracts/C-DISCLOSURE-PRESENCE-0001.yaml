@@ -1,0 +1,33 @@
+id: C-DISCLOSURE-PRESENCE-0001
+type: contract
+title: Opt-in disclosure content borrows Transition presence
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Bootstrap's requested retained Collapse presentation is an opt-in extension. Default Base, Shadcn and Brutalist disclosure behavior and existing active lifecycle guarantees remain unchanged. Full family, physical input and assistive technology acceptance remain separate.
+summary: Canonical disclosure open remains with its Root; one Transition retains the current Content view until an accepted exit finishes.
+criteria:
+  - id: C-DISCLOSURE-PRESENCE-0001-BINDING
+    text:
+      en: Content's setup-only bindPresence accepts an existing Transition handle once. It binds that Transition's target to the same Root or Item boolean context field and its closed-view retention to the Content keepMounted policy through retainClosedView. Context binding is authoritative over Transition's standalone open/defaultOpen props and imperative enter/leave requests; retention changes never rewrite the target. The runtime retention command remains valid before Transition's created callback and must not depend on hook installation order. Setup-only binding cannot be replaced at runtime. Content without a binding keeps its original immediate open/hidden/ViewIntent behavior.
+  - id: C-DISCLOSURE-PRESENCE-0001-PRESENCE
+    text:
+      en: Root alone accepts or refuses disclosure requests. A refused controlled request starts no presentation attempt. Bound Content exposes canonical open separately from perceptual hidden, stays visible and materialized while leaving, and becomes hidden at closed. keepMounted retains the complete closed view while hidden; disabling retention detaches it only when perceptually closed. Transition is the sole ViewIntent writer for the bound path. Initial closed never flashes; initial open with appear false uses natural layout directly. No autofocus, overlay, portal or separate open owner is added.
+  - id: C-DISCLOSURE-PRESENCE-0001-BOOTSTRAP
+    text:
+      en: Bootstrap 2.3.2 Collapsible and Accordion use 350ms cubic-bezier(0.25,0.1,0.25,1), corresponding to upstream height .35s ease, between zero and the actual intrinsic block size. The styled inner content carries the historical padding and border; the outer Content carries the clipped layout animation. Dynamic content, close/open reversal, removal and keepMounted changes preserve node identity and current canonical ownership. Reduced motion settles without sustained interpolation. Other families do not inherit this height recipe.
+dependsOn:
+  contracts: [C-AS-TRANSITION-0001, C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001, C-LIFECYCLE-0008]
+sources:
+  - path: packages/prototypes/base/src/transition/as-transition.proto.ts
+  - path: packages/prototypes/base/src/collapsible/content.proto.ts
+  - path: packages/prototypes/base/src/accordion/content.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/collapsible/content.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/accordion/content.proto.ts
+verifies:
+  tests: [T-DISCLOSURE-PRESENCE-0001]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define optional canonical-context Transition binding and retained Bootstrap Collapse presentation without changing default disclosure policy.
+tags: [collapsible, accordion, transition, bootstrap]

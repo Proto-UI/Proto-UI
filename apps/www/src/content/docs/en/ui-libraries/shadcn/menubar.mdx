@@ -7,9 +7,9 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Menubar organizes multiple independent command panels into a single horizontal bar with coordinated keyboard navigation. The examples on this page use the **Shadcn Rhea** style preset.
 
-A keyboard-coordinated bar of independent command panels.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-menubar"
@@ -18,25 +18,35 @@ A keyboard-coordinated bar of independent command panels.
   codePanel={false}
 />
 
-Root.value identifies one open panel. Trigger.value and Content.value pair a panel. The bar uses one roving tab stop, left/right movement, ArrowDown/Up entry, vertical command navigation and typeahead. Escape restores the matching trigger; outside press and command selection dismiss. Controlled value emits requests without changing the owner.
+## Installation
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
 
-## Source-bound appearance / 固定来源呈现
+Menubar consists of four parts: `Root`, `Trigger`, `Content`, and `Item`:
 
-The demo explicitly selects `styleProfile="rhea"`. Root and the existing Trigger/Content/Item consume the shared Shadcn style scope; `new-york-v4` (alias `new-york`) remains separate. The draft projection also supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma` and `sera`; unknown profiles fail closed. Profile support is not stable admission or complete visual parity. Style changes retain the Base value, events and logical parts.
+- `Root` manages the currently open panel identifier (`value`).
+- `Trigger` and `Content` pair via matching `value` props.
+- `Item` represents an actionable command inside a panel and supports `inset` alignment as well as `variant="destructive"` styling.
 
-New York: [02cad611 menubar.tsx](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/menubar.tsx). Rhea: [3d98900 radix wrapper](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/radix/ui/menubar.tsx) and [style-rhea.css](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css#L933-L986). These are distinct source identities, not a universal latest-style claim.
+### Controlled and uncontrolled
 
-Existing Base expanded/focused/focus-visible/disabled facts drive paint. The shared Content/Item helpers also provide draft `inset` and `variant="destructive"` paint without introducing another behavior owner. This does **not** complete Menubar: Rhea hover still needs a neutral Base fact; group/checkbox/radio/submenu parts, exact alignment policy, translucent content and full placement/presence motion remain tracked in #907. Existing open-fact animation paint is not complete motion or native acceptance. Four-Web native input, AT, narrow/font-scaled geometry and independent exact-head evidence are still required. No DOM selector or page-only behavior substitutes for those missing capabilities.
+Pass `value` to control the open panel externally and respond to change requests, or use `defaultValue` for uncontrolled state.
 
-Rhea retains the existing keyboard focus ring while closed, plus a forced-colors outline. Exact upstream focus/hover and `outline-hidden` projection still require closure; expanded paint alone is not a focus affordance.
+### Keyboard and accessibility
+
+- The bar exposes a single roving `Tab` stop; use `ArrowLeft` and `ArrowRight` to move between triggers.
+- Press `ArrowDown` or `ArrowUp` to open a panel and navigate items vertically, or type characters for typeahead jump.
+- Press `Escape` to close the open panel and return focus to its trigger; outside clicks and command selection also dismiss the panel.
+
+### Style presets
+
+Switch visual presets with `styleProfile`: `rhea`, `new-york-v4` (alias `new-york`), `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, and `sera`. Unknown presets are ignored so the active configuration remains intact, and changing presets preserves value, events, and behavior.
 
 ## API
 
-Menubar is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Menubar reuses the shared menu-family Root props.
+The following props belong to `Root` (pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -48,7 +58,11 @@ Menubar is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-These props belong to Root. Trigger defaults `disabled` to `false`. Content defaults `sideOffset` to `4`. Item defaults `closeOnSelect` to `true`.
+Other part defaults:
+
+- `Trigger`: `disabled` defaults to `false`.
+- `Content`: `sideOffset` defaults to `4`.
+- `Item`: `closeOnSelect` defaults to `true`.
 
 ## References
 

@@ -90,8 +90,8 @@ criteria:
       en: An A11y relation may reference a string target, state handle, one opaque semantic-object ref, an ordered ref list, or a structured part target governed by C-A11Y-PART-RELATIONSHIP-0001; refs remain independent of protocol match keys and host ids, and host adapters project them to host-expressible relationship mechanisms.
   - id: C-A11Y-0001-I
     text:
-      zh-CN: a11y name 与 description 可以引用字符串或 state handle；当引用 state handle 时，adapter 投射必须随 state 值变化更新。
-      en: A11y name and description may reference a string or a state handle; when they reference a state handle, adapter projection must update as the state value changes.
+      zh-CN: a11y name 与 description 可以引用字符串或 state handle；当引用 state handle 时，adapter 投射必须随 state 值变化更新。内容命名保留宿主显式名称参与正常名称优先级；Web 的 content-name 声明不贡献 aria-label scalar，切换到内容命名按既有所有权规则撤回该对象先前的显式名称贡献。显式空文本名称仍保留 text-name scalar 的清空语义，与内容命名不同。
+      en: A11y name and description may reference a string or a state handle; when they reference a state handle, adapter projection must update as the state value changes. Content naming leaves explicit host names available to the host's normal name precedence; a Web content-name declaration contributes no aria-label scalar, and switching to content naming withdraws this object's previous explicit-name contribution under existing ownership rules. An explicit empty text name retains the text-name scalar's clearing semantics and is distinct from content naming.
   - id: C-A11Y-0001-J
     text:
       zh-CN: a11y role 可以引用静态字符串或 state handle；当交互对象的 role 由受治理状态切换时，adapter 投射必须随 state 更新。
@@ -166,6 +166,9 @@ verifies:
   tests:
     - T-A11Y-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: clarified
+    summary: Clarified content-derived naming as withdrawal of the object's text-name contribution while preserving explicit host names, distinct from an explicit empty text name.
   - version: 0.3.0-alpha.2
     change: clarified
     summary: Required compatible Web projections to retain generated physical IDs until all live owners release their receipts while preserving consumer replacements and independent semantic registries.

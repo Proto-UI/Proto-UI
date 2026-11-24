@@ -1,13 +1,15 @@
 ---
-title: shadcn Checkbox Group
-description: Draft portable checkbox-group atoms.
+title: 'Checkbox Group'
+description: 'A grouped checkbox control with array value management, select-all support, and form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Manages a related set of checkboxes as a string array, with a built-in select-all/indeterminate control and direct `Field`/`Form` integration. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-checkbox-group"
@@ -16,17 +18,27 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Root owns string-array value/defaultValue, disabled/readOnly and ariaLabel. Item has value/disabled; All toggles enabled registered items and derives checked/mixed while preserving disabled selections. Each item has a Tab stop and Space activation; Enter does not toggle. Controlled requests emit valueChange without overwriting owner state. getValue returns a copy; duplicate item values reject ambiguous toggles. Inside Field/FormField, Root reports the canonical array, group focus and local policy, supports label activation, required validation, Form serialization and reset. Native hidden HTML entries are not created.
+## Usage
 
-All four visual families inherit Base behavior. Parts: root, item, all.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Styled Item/All include an aria-hidden decorative indicator: check for checked, dash for mixed, and an empty outline for unchecked. Color is not the only state signal. The SVG is passive and adds no role, tab stop or interaction owner.
+### Anatomy
 
-Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
+Compose `Checkbox Group` from `Root`, `Item`, and `All`:
+
+- **Root**: Manages the selected `string[]` value (`value` / `defaultValue`), `disabled`, `readOnly`, and `ariaLabel`.
+- **Item**: Individual option with `value` and `disabled`. Each item has its own `Tab` stop and toggles on `Space` (`Enter` does not toggle).
+- **All**: Summarizes enabled items as checked, mixed, or unchecked, and toggles all enabled items while preserving disabled selections.
+
+### Controlled state and form integration
+
+- Pass `value` to control the selection externally: user changes emit `valueChange` without mutating external state. `getValue()` returns a copy of the array, and duplicate item values are rejected.
+- Inside a `Field` or `FormField`, `Root` automatically connects to label activation, required validation, form serialization, and reset.
+- Styled `Item` and `All` render decorative `aria-hidden` state icons (checkmark, dash for mixed, or empty box) so state is never conveyed by color alone.
 
 ## API
 
-Checkbox Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+Passing `value` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,7 +50,7 @@ Checkbox Group is workspace source. There is no public `proto-ui add` target. Pa
   ]}
 />
 
-These props belong to Root. Item accepts `value` and `disabled`.
+These props belong to `Root`. `Item` accepts `value` and `disabled`.
 
 ## References
 

@@ -1,11 +1,15 @@
 ---
-title: base Progress
-description: A bounded numerical completion indicator with shared Base semantics.
+title: 'Progress'
+description: 'A passive indicator for determinate or indeterminate task progress.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Displays task completion within a bounded range or indicates an indeterminate loading state.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-progress"
@@ -14,17 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. Omitted value or indeterminate=true represents unknown progress and withholds the current accessible value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from `@proto.ui/prototypes-base/progress`.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+## Usage
 
-Import progressRoot, progressLabel, progressTrack, progressIndicator and progressValue from the progress subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`:
+
+- **Composition roles**: `Root` manages the numeric range; `Label` names the progress bar, `Track` holds `Indicator`, and `Value` displays `valueText` or the formatted number.
+- **Determinate and indeterminate modes**: `value` clamps to ordered finite `[min, max]` bounds (equal bounds yield `0` percentage). Omitting `value` or setting `indeterminate={true}` marks progress as unknown and withholds an accessible numeric value.
+- **Passive readout**: Progress is display-only with no keyboard tab stop or editing events. Updating props synchronizes every part. `Root` and its parts expose `value`, `percentage`, `indeterminate`, and `status`.
 
 ## API
 
-Progress is workspace source. There is no public `proto-ui add` target. Parts do not add props of their own.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -38,7 +46,7 @@ Progress is workspace source. There is no public `proto-ui add` target. Parts do
   ]}
 />
 
-These props belong to Root.
+`Label`, `Track`, `Indicator`, and `Value` take no props.
 
 ## References
 

@@ -17,16 +17,18 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     empty = def.state.bool('empty', false),
     valueNow = def.state.string('valueNow', '0'),
     valueText = def.state.string('valueText', '0'),
-    min = def.state.numberDiscrete('min', 0),
-    max = def.state.numberDiscrete('max', 100),
+    min = def.state.string('min', '0'),
+    max = def.state.string('max', '100'),
     disabled = def.state.bool('disabled', false),
     readOnly = def.state.bool('readOnly', false),
+    required = def.state.bool('required', false),
     label = def.state.string('label', '');
   for (const [key, s] of Object.entries({
     value,
     empty,
     disabled,
     readOnly,
+    required,
     focused: focus.focused,
     focusVisible: focus.focusVisible,
   }))
@@ -40,6 +42,11 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
       if (!disabled.get() && request.isCurrent())
         focus.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
     }, FIELD_LABEL_PAIR);
+  else
+    asControlLabel().target((_run, request) => {
+      if (!disabled.get() && request.isCurrent())
+        focus.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    });
   const a = asAccessible();
   a.role('spinbutton');
   a.name(label);
@@ -49,6 +56,7 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
   a.state('valueMax', max);
   a.state('disabled', disabled);
   a.state('readOnly', readOnly);
+  if (!field) a.state('required', required);
   if (!field)
     a.relation('labelledBy', {
       target: { kind: 'part', family: NUMBER_FIELD_FAMILY, role: 'label', key: 'label' },
@@ -58,15 +66,23 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
   let retiredComposition = false;
   const sync = (run: RunHandle<NumberFieldPartProps>) => {
     const c = run.context.read(NUMBER_FIELD_CONTEXT);
-    binding?.setPolicy({ disabled: c.controlDisabled, readOnly: c.controlReadOnly });
+    binding?.setPolicy({
+      disabled: c.controlDisabled,
+      readOnly: c.controlReadOnly,
+      required: c.controlRequired,
+    });
     if (c.value !== null) value.set(c.value, 'reason: number input value');
     empty.set(c.value === null, 'reason: number input empty');
     valueNow.set(c.value === null ? '' : String(c.value), 'reason: number input range value');
     valueText.set(c.formatted, 'reason: number input formatted value');
-    min.set(c.min, 'reason: number input bound');
-    max.set(c.max, 'reason: number input bound');
+    min.set(c.min === null ? '' : String(c.min), 'reason: number input bound');
+    max.set(c.max === null ? '' : String(c.max), 'reason: number input bound');
     disabled.set(c.disabled, 'reason: number input policy');
     readOnly.set(c.readOnly, 'reason: number input policy');
+    required.set(
+      binding?.state.fieldRequired.get() ?? c.required,
+      'reason: number input requirement'
+    );
     label.set(c.label, 'reason: number input label');
     focus.setDisabled(c.disabled);
     binding?.report({
@@ -82,7 +98,7 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
       readOnly: c.readOnly,
       inputMode: 'decimal',
       name: c.name,
-      required: binding?.state.fieldRequired.get() ?? false,
+      required: required.get(),
     });
     if (editRevision !== c.editRevision) {
       editRevision = c.editRevision;
@@ -92,18 +108,24 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
     }
   };
   let currentRun: RunHandle<NumberFieldPartProps> | null = null;
+  let viewEpoch = 0;
   def.lifecycle.onMounted((run) => {
+    viewEpoch++;
     currentRun = run;
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
     currentRun = null;
     compositionActive = false;
     retiredComposition = false;
   });
   def.expose.method('resetValue', () => {
-    if (!currentRun) return false;
+    const run = currentRun,
+      epoch = viewEpoch;
+    if (!run) return false;
     control.resetValue();
-    return numberFieldMethod(currentRun, 'resetValue');
+    if (currentRun !== run || viewEpoch !== epoch) return false;
+    return numberFieldMethod(run, 'resetValue') === true;
   });
   def.expose.method('__fieldInput', () => {
     if (currentRun)
@@ -189,11 +211,13 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
       });
       numberFieldMethod(run, 'stepBy', (e.key === 'ArrowUp' ? 1 : -1) * (e.shiftKey ? 10 : 1));
     } else if (e.key === 'Home' || e.key === 'End') {
+      const bound = e.key === 'Home' ? c.min : c.max;
+      if (bound === null) return;
       e.control.requestDefaultActionPrevention({
         reason: 'number-field.bound',
         source: 'base-number-field-input',
       });
-      numberFieldMethod(run, 'requestValue', e.key === 'Home' ? c.min : c.max);
+      numberFieldMethod(run, 'requestValue', bound);
       numberFieldMethod(run, 'commitValue');
     } else if (e.key === 'Enter') numberFieldMethod(run, 'commitValue');
   });
@@ -209,6 +233,7 @@ export const asNumberFieldInput = defineAsHook<
       value: State<number>;
       empty: State<boolean>;
       readOnly: State<boolean>;
+      required: State<boolean>;
       focused: ObservedStateHandle<boolean, NumberFieldPartProps>;
     };
   }

@@ -1,146 +1,129 @@
 ---
 title: 'Projecting Base into a Design Language'
-description: 'Deliver a design-language P entity, implementation, tests, exports, and demos without redefining Base semantics.'
+description: 'Deliver a styled Prototype—spec entity, implementation, tests, exports, CLI facade, and demos—on top of an existing Base protocol.'
 ---
 
-Design-language projection is the clearest complete path for Prototype authors during the 0.3 phase. Its prerequisite is not merely that a component exists in a design system. Base must already own a reusable protocol, while the derived Prototype owns presentation and cataloged differences only.
+Layering a design language onto an existing Base protocol is the most common end-to-end path for Prototype authors. Base handles the underlying interaction model, while the styled layer owns visual presentation, design-language APIs, and documented compatibility deltas.
 
-## Preconditions
+## Prerequisites
 
-- The corresponding Base `P-*` entity and `T-*` evidence exist.
-- The issue names the Base owner, derived identity, and lifecycle status.
-- Base ownership of state, events, focus, accessibility, context, positioning, and host capabilities is explicit.
-- Allowed design-language props, tokens, rules, anatomy, and compatibility scope are explicit.
-- The governed Base subject and the intended derived delta are explicit; any genuinely new Base identity is kept as a candidate until its admission decision.
+Before starting, confirm that:
 
-If any condition is missing, improve the issue and candidate graph while collecting focused evidence instead of inferring a boundary by copying another styled library. Existing governed projections continue while that evidence is refined.
+- the corresponding Base `P-*` entity and `T-*` tests already exist;
+- the issue identifies the Base owner, target styled identity, and lifecycle status;
+- Base responsibilities (state, events, focus, accessibility, Context, positioning, host capabilities) are clear; and
+- the intended design-language props, tokens, `Rule`s, visual anatomy, and compatibility scope are defined.
 
-## Base projection versus styled-only
+If a genuinely new Base interaction protocol is needed first, keep the new Base identity in `draft` mode with focused probes and tests instead of guessing boundaries by copying another styled library.
 
-### Base projection
+## Base inheritance vs. styled-only
 
-When the design-language subject needs an existing Base information path, the derived P inherits Base through `inherits.prototypes` and the corresponding `asHook`. It may add presentation but must not create a competing owner.
+### Base inheritance
+
+When a styled component builds on an existing Base interaction path, connect its spec via `inherits.prototypes` and call the Base `asHook` in code. The styled layer adds presentation without creating a competing state owner.
 
 ### Styled-only
 
-A subject that owns only design-language props, visual rules, a content model, or visual anatomy may still be a formal styled-only P without a Base counterpart. Never create an empty Base entity merely to obtain an inheritance hook.
+When a component consists only of design-language props, visual rules, content layout, or visual anatomy—with no independent cross-host interaction protocol—author it directly as a formal `styled-only` Prototype. Never create an empty Base entity just to provide an inheritance hook.
 
-Base admission requires an independent, cross-host, testable input-fact-to-observable-output path. A directory, anatomy name, or empty `asHook` is not evidence.
+## Delivery steps
 
-## Delivery sequence
+### 1. Document provenance and compatibility
 
-### 1. Pin provenance and compatibility
+When adapting Shadcn, Lucide, or another third-party design system, record:
 
-For Shadcn, Lucide, or another third-party design language, record:
+- the exact upstream repository and file path;
+- the pinned revision, tag, or release;
+- license and attribution notices;
+- which APIs, tokens, assets, or visual patterns are adapted or referenced; and
+- which upstream APIs are intentionally omitted or behave differently.
 
-- exact upstream repository and path;
-- revision, release, or commit;
-- license and required notice;
-- APIs, tokens, assets, or visual behavior copied, adapted, or used only for comparison; and
-- upstream APIs explicitly unsupported or incompatible.
+For an original design language, briefly document its scope and intent.
 
-For an original design language, state that it is not an official integration, clone, or certified implementation of an unrelated system.
+### 2. Author the derived `P-*` entity
 
-### 2. Author the derived P entity
+Focus the derived `P-*` spec on its delta:
 
-The P entity should:
+- link to Base through `inherits.prototypes`;
+- write criteria for the styled layer only;
+- document any setup-time negative patch and the replacement behavior;
+- specify design-language props, variants, tokens, visual anatomy, and compatibility scope; and
+- map real `T-*` test cases and source file paths.
 
-- point to the Base identity through `inherits.prototypes`;
-- define criteria for the derived surface only;
-- explicitly declare any setup-time negative patch and the Base capability it abandons or replaces;
-- record design-language props, variants, tokens, visual anatomy, and compatibility boundaries; and
-- map substantive `T-*` evidence and real source paths.
+Avoid copying Base criteria into the derived spec or listing unimplemented upstream APIs.
 
-Do not copy every Base criterion into the derived P or promise unimplemented upstream APIs.
+### 3. Implement on top of the Base `asHook`
 
-### 3. Build from the Base `asHook`
-
-Implementation normally calls the Base `asHook` first, then adds:
+Call the owning Base `asHook` first, then layer on:
 
 - design-language props;
 - `feedback.style` tokens;
-- rules based on Base states or meta;
-- necessary cataloged visual anatomy; and
-- derived-library types and public entries.
+- style `Rule`s keyed to Base states or metadata;
+- cataloged visual anatomy; and
+- library-specific types and public exports.
 
-If implementation begins to own Base value, event requests, focus, accessibility, dismissal, or positioning again, treat it as ownership drift: update the governing or candidate entities and tests, correct the implementation, and continue through fresh review. Escalate only if the evidence requires admitting a genuinely new Base identity.
+If the styled implementation starts tracking its own copy of Base values, event requests, focus, accessibility, dismissal, or positioning, realign the code and spec so Base remains the single source of truth.
 
-### 4. Verify positive and absence guarantees
+### 4. Test both positive and negative guarantees
 
-Focused tests should cover:
+Focused tests should verify:
 
-- consumption of the correct Base entry;
+- the styled entry invokes the right Base entry;
 - design-language props and defaults;
-- token and rule output in important states;
-- continued absence of unsupported variants, events, parts, and compatibility APIs;
-- absence of a second value, event, focus, activation, or accessibility owner; and
-- exact package and root exports.
+- token and `Rule` outputs across key interaction states;
+- explicitly unsupported variants, events, parts, or upstream APIs remain absent;
+- Base remains the sole owner of interaction state, focus, activation, and accessibility; and
+- package subpath and root exports match the spec.
 
-Screenshots or class-name assertions alone do not prove correct protocol inheritance.
+### 5. Complete the public delivery surface
 
-### 5. Complete the delivery surface
+Every new public Prototype or compound family ships with a reachable website page connected to library navigation in the same PR, along with its local preview route for reviewers.
 
-Every new public Prototype identity or anatomy family must appear on a reachable website page in the same pull request. This projection is not optional at issue discretion. Connect the page to the appropriate library documentation entry and record its local route so reviewers can inspect it interactively.
+The complete delivery surface typically includes:
 
-The complete delivery surface includes:
-
-- anatomy-family package subpaths;
+- family package subpath exports;
 - root compatibility exports;
-- CLI registry and facade generation;
-- component-preset and token closure;
+- CLI registry entries and facade generation;
+- component presets and style-token closure (for libraries using presets);
 - English and Chinese docs;
-- a real public-package demo;
+- an interactive demo importing the real public package export;
 - Web Component, React, and Vue previews; and
-- generated workspace and Agent projections.
+- regenerated workspace/derived files via their generators.
 
-Update generated files through their generators.
+#### Keep the website demo faithful to installed usage
 
-#### Make the website demo match installed usage
+Demos should import from the public package subpath and rely on the component's own anatomy, triggers, states, events, and defaults:
 
-The website demo must consume the real public package export and use, as far as possible, only the anatomy, triggers, state, events, props, and defaults available after installing that Prototype. Do not rebuild a control flow at page level merely to make the component appear functional.
+- Open a Dialog through its own Trigger rather than calling an exposed method from an unrelated button.
+- Avoid creating extra page-level state or event owners for autonomous components.
+- Avoid page-private CSS, scripts, or fixtures that paper over Prototype or Adapter issues.
 
-- A Dialog should request opening through its own Trigger, not through an unrelated Button callback that calls a Dialog expose.
-- An autonomous Prototype should not gain an extra state or event owner for the demo.
-- Page-private CSS, scripts, or fixtures must not hide a Prototype, Base-inheritance, or Adapter problem.
-- The internal Demo Matrix supplements validation; it does not replace the website page.
+Only add minimal external glue using public APIs when the Prototype has no natural trigger by design (such as Toast invocation) or when demonstrating imperative controls directly (such as Transition). Document that external code in the demo source and PR so consumers know what is not bundled with the package.
 
-Minimal external orchestration is allowed only when the Prototype has no natural trigger by design, or when its public controls are themselves the subject of the demo. Toast-style invocation and directly controlled Transition demos are typical exceptions. Keep the exception outside the Prototype, use public APIs only, and state in the demo source and pull request why it is unavoidable and which code consumers must recreate because it is not installed with the package.
+## Collaboration scope during review
 
-## What continues through implementation and review?
+For an existing Base subject, contributors and reviewers can iterate directly on:
 
-For an existing governed Base subject, contributors and Agents can continue deciding reversible projection details while keeping the P/T graph, implementation, evidence, and public surface coherent:
+- source file layout and internal token/rule sharing;
+- focused test fixtures and demo structure;
+- adding or adjusting public props, events, states, anatomy, or negative patches;
+- compatibility scope or `styled-only` classification adjustments; and
+- new dependency decisions.
 
-- source-file organization;
-- internal token and rule reuse;
-- focused-test fixtures;
-- how the demo communicates governed states; and
-- local refactoring that preserves public semantics.
+Only introducing a brand-new independent Base identity requires a separate Base-admission decision. While that decision is open, keep the candidate marked `draft` while continuing reversible implementation and tests.
 
-The same evidence-bound review loop handles:
+## Reference implementations
 
-- adding or removing public props, events, states, or anatomy identities;
-- changing Base ownership;
-- introducing a negative patch;
-- widening a third-party compatibility claim;
-- changing between projection and styled-only classification; or
-- adding a dependency.
+Read these examples in order to see ownership and test structure in practice:
 
-These are governed changes, not blanket human checkpoints. The one semantic decision to escalate is admission of a genuinely new independent Base identity. While that admission is unresolved, its research, candidate graph, draft entities, projection probes, and tests can continue without presenting it as an admitted guarantee.
-
-## References
-
-Read in this order:
-
-1. the corresponding Base P/T entities and package source;
+1. the target component's Base `P-*`/`T-*` entities and source;
 2. `packages/prototypes/shadcn/src/button/` and its tests;
 3. `packages/prototypes/shadcn/src/switch/` and its tests; and
-4. `packages/prototypes/brutalist/src/separator/` and its tests, to see the same Base protocol enter another design language.
+4. `packages/prototypes/brutalist/src/separator/` and its tests (to see the same Base protocol styled for a different design language).
 
-Learn the ownership and evidence structure rather than copying files mechanically.
+## Local checks
 
-## Validation
-
-Run focused Base and derived tests first, then:
+Run focused Base and styled-layer tests first, then run:
 
 ```sh
 corepack pnpm@10.32.1 check:styles:preset
@@ -150,6 +133,6 @@ corepack pnpm@10.32.1 check:types
 corepack pnpm@10.32.1 docs:build
 ```
 
-Not every design library uses component presets. State which checks apply. Changes to the public package graph also need package build, manifest, and consumer smoke coverage.
+Not every styled library uses component presets—run the checks that apply to your library. If you touched package exports or dependencies, run package builds and manifest checks as well.
 
-Next: use the [Prototype Author Checklist](/en/build/prototypes/checklist/) before opening a pull request.
+Next: run through the [Prototype Author Checklist](/en/build/prototypes/checklist/) before opening your pull request.

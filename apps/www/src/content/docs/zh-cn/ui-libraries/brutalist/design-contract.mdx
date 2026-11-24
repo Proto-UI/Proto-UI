@@ -1,82 +1,73 @@
 ---
 title: 'Brutalist 设计契约'
-description: '对齐官方来源的新粗野主义字体、圆角、层级与交互视觉'
+description: 'Brutalist 组件库的字体、圆角、层级动效、配色与无障碍视觉规范。'
 ---
 
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-# Brutalist 设计契约
-
-当前 draft 视觉系统向 [neobrutalism.dev](https://www.neobrutalism.dev/) 对齐，参考固定为 [neobrutalism-components 3306a802](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4)。Proto UI 维护自己的语义实现，并以 Base 为基础；这不意味着上游认证或组件 API 兼容承诺。
+Brutalist 的视觉系统参考 [neobrutalism.dev](https://www.neobrutalism.dev/)，并以 [neobrutalism-components (`3306a802724874a85f93079702b2795370a279d4`)](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4) 的 MIT 许可样式方案为基础；Proto UI 在此之上维护基于 Base 的独立语义实现。
 
 ## 字体
 
-参考站默认使用 DM Sans，不是全部等宽或全部大写。字体角色由真实 prototype 的生成式样式 token 拥有：
+参考设计默认使用 DM Sans，而非全站等宽或全大写排版。各组件通过生成的样式 token 绑定字体角色：
 
-- 普通控件、菜单项、描述与内容：`font-sans font-medium`，DM Sans 500
-- Dialog 标题、Tabs Trigger 与 Toggle：`font-heading font-bold`，DM Sans 700
-- 默认标签 14px/20px；Badge 12px/16px；Dialog 标题 18px、line-height 1 与紧凑 tracking
-- 保留作者写入的大小写；代码与键盘标记可以拥有独立的 mono 角色
+- 普通控件、菜单项、说明与正文：`font-sans font-medium`（DM Sans 500）
+- Dialog 标题、Tabs Trigger 与 Toggle：`font-heading font-bold`（DM Sans 700）
+- 常用字号：默认标签 14px/20px，Badge 12px/16px，Dialog 标题 18px（紧凑行高与字距）
+- 大小写保留开发者传入的原文；代码与快捷键标签可使用独立的等宽字体
 
-包内主题通过 `--pui-font-sans` 与 `--pui-font-heading` 声明 `"DM Sans", ui-sans-serif, system-ui, sans-serif`。文档应用自托管未经修改的 DM Sans variable font，并保留 SIL OFL 1.1 许可。其他应用负责自己的字体加载；prototype 不发起网络字体请求。字体缺失时使用系统 sans fallback。中文字符由宿主 CJK fallback 渲染，因此只检查拉丁 font-family 声明不能证明所有字符实际使用了同一种字体。
+主题通过 `--pui-font-sans` 与 `--pui-font-heading` 声明 `"DM Sans", ui-sans-serif, system-ui, sans-serif`。文档站自托管未经修改的 DM Sans 可变字体（保留 [DM Sans 版权与 SIL OFL 1.1 许可](/fonts/dm-sans-OFL.txt)）。组件本身不发起网络字体请求；业务应用可自行加载 DM Sans，未加载时回退到系统无衬线字体，中文字符使用系统 CJK 字体渲染。
 
 ## 几何与嵌套表面
 
-- 普通控件与面板：5px `rounded-base`、2px 黑色结构边框
-- Switch track/Thumb 与 Scroll Area Thumb：完整胶囊或圆形；Checkbox 保持方形
-- Tabs List 与内层 Trigger 分别拥有自己的圆角，由内缩间距分隔
-- Card Header/Content/Footer 与 Tabs Content 不强制产生嵌套边框
-- Scroll Area Root 拥有圆角 overflow clipping；Viewport 保持方形，宿主仍拥有 track/Thumb 几何
-- Spinner 保留居中的圆形开口 ring
+- 普通控件与面板：5px 圆角（`rounded-base`）搭配 2px 黑色边框
+- Switch 轨道/滑块与 Scroll Area 滑块：完整胶囊形或圆形；Checkbox 保持方形
+- Tabs List 与内层 Trigger 各自保持圆角，通过内边距分隔
+- Card 的 Header、Content、Footer 以及 Tabs Content 默认不叠加额外内框
+- Scroll Area Root 负责圆角裁切溢出，Viewport 保持直角，滚动条几何由宿主处理
+- Spinner 保留居中的圆形开口环
 
-圆角本来就是这套设计语言的一部分。不要全局强制直角，也不要把每个内部区域都变成另一个带边框的面板。
+圆角属于这套视觉语言的基础特征，无需全局改成直角，也无需给每个内部区块重复套边框。
 
-## 层级与交互
+## 层级与动效
 
-层级与交互 motion 遵循 `D-BRUTALIST-DEPTH-MOTION-GRAMMAR-0001` 拥有的 typed category grammar，而不是一条统一的阴影/lift/sink 规则。下表每行命名其 category 并可追溯到所属 P 实体；exception 有限并列于该 decision。
+Brutalist 按组件类别定义静止阴影与交互反馈，而不是套用单一的悬停或按压规则：
 
-| Category（所属 P 实体） | 静止层级 | hover / 瞬时 press |
+| 类别（包含组件） | 静止阴影 | 悬停 / 按压反馈 |
 | --- | --- | --- |
-| Elevated action control — Button、raised Surface、Dialog/Dropdown/Select/Collapsible Trigger、Accordion Item | 4px 4px 零模糊黑影 | 沿阴影轴 +4px,+4px 下沉并移除外影；不叠加额外 hover-only lift |
-| Raised panel — Card、Dialog/Alert Dialog/Command Dialog/Drawer Content、Calendar | 4px 4px 硬黑影 | 不虚构 control state 或 motion |
-| Anchored content panel — Dropdown/Context/Menubar/Navigation Menu Content、Autocomplete/Combobox/Select/Hover Card Content、Popover | 3px 3px 零模糊 foreground 阴影 | 无交互 motion；由所属 prototype 或 Adapter 定位 |
-| Flat selection control — Toggle、Tabs Trigger | 无阴影、无位移 | Toggle hover/press 保持 `border-black`；仅未选中且未 pressed 的 Tabs Trigger 获得 hover 填色与边框；selected Trigger 保留色对且无 elevation；Toggle active 的 2px inset frame 在 press 中持续 |
-| Binary capsule control — Switch | Root 与 Thumb 均无阴影 | 无 hover 视觉；press 保持填色与几何；只有 Thumb 以 150ms transition 移动 20px |
-| Editable surface — Input、Textarea、Number Field、Input OTP | Input/Textarea 无阴影；Number Field/Input OTP 小控件为 2px 2px border 色阴影 | 无 hover lift 或 press sink；保留现有 focus ring 与色对状态 |
-| Passive label — Badge、Text、Label、Kbd | 无阴影 | 无交互 motion |
-| Loading placeholder — Skeleton | 无阴影 | 保持静态；不引入 pulse animation |
-| Scroll chrome 与 Separator — Scroll Area Root/Viewport/Scrollbar/Thumb、Separator | 无阴影 | 无交互 motion；Root 保留圆角 overflow clip |
-| Flat overlay — Dialog Mask | 无阴影 | 仅有受治理的 150ms 打开/关闭 fade |
-| Flat interactive item — Dropdown/Context/Menubar/Select Item | 无阴影 | 仅背景变化，无 lift 或 press 层级 |
+| 抬起型操作控件 — Button、raised Surface、Dialog / Dropdown / Select / Collapsible Trigger、Accordion Item | 4px 4px 零模糊黑影 | 按压时沿阴影方向位移 `+4px, +4px` 并收起外影，无额外悬停抬升 |
+| 抬起型面板 — Card、Dialog / Alert Dialog / Command Dialog / Drawer Content、Calendar | 4px 4px 零模糊黑影 | 保持静止，不添加按压位移 |
+| 浮层内容面板 — Dropdown / Context / Menubar / Navigation Menu Content、Autocomplete / Combobox / Select / Hover Card Content、Popover | 3px 3px 零模糊前景影 | 无悬停或按压位移，由浮层定位决定位置 |
+| 扁平选择控件 — Toggle、Tabs Trigger | 无阴影、无位移 | Toggle 悬停与按压保持 `border-black`，激活态 2px 内框在按压期间持续显示；未选中 Tabs Trigger 在悬停时显示填充与边框，选中项保持配色不变 |
+| 二态胶囊开关 — Switch | Root 与 Thumb 均无阴影 | 悬停与按压保持几何不变，仅 Thumb 以 150ms 过渡滑动 20px |
+| 可编辑表面 — Input、Textarea、Number Field、Input OTP | Input / Textarea 无阴影；Number Field / Input OTP 辅控为 2px 2px 边框色阴影 | 无位移反馈，聚焦时显示 focus ring |
+| 被动标签 — Badge、Text、Label、Kbd | 无阴影 | 无交互动效 |
+| 加载占位 — Skeleton | 无阴影 | 保持静态，不启用闪烁脉冲动画 |
+| 滚动装饰与分隔线 — Scroll Area 各部件、Separator | 无阴影 | 无交互动效，Root 保持圆角溢出裁切 |
+| 扁平遮罩 — Dialog Mask | 无阴影 | 打开与关闭时执行 150ms 淡入淡出 |
+| 扁平交互项 — Dropdown / Context / Menubar / Select Item | 无阴影 | 仅切换背景色，无位移或阴影变化 |
 
-分组 surface（Toolbar Root、Toggle Group Root、Toast Root）作为 passive 容器保留 3px 3px foreground 阴影，不套用控件位移。未经修订该 decision，不准入其他 rest-depth、hover-depth 或 press-depth exception。
+分组容器（Toolbar Root、Toggle Group Root、Toast Root）作为被动表面保留 3px 3px 前景阴影，不应用控件按压位移。
 
-上游 reverse Button 是独立 variant，当前 PUI API 不声称提供它。Toggle 在 press 中保留 2px inset active marker，作为 PUI 的非颜色状态扩展。Base 继续拥有 active 与 pressed 的区分、selection、键盘、ARIA 与 command wiring。保留已有 popup transition 与 Spinner reduced-motion 行为；Skeleton 仍为静态。
+按钮类控件默认采用即时落位（instant snap）反馈；Switch 的滑块单独使用 150ms 平滑位移。Toggle 在按压期间持续显示 2px 内框，确保激活状态不仅依赖颜色区分。
 
-## 调色与暗色模式
+## 配色与暗色模式
 
-默认对齐参考站蓝色 palette：main `#5294ff`、浅蓝背景 `#dcebfe`、白色中性表面、黑色文本与结构。PUI 现有 canary、mint、lavender、coral、sky 色对仍可用，accent ink 保持黑色。颜色补充标签、位置与持续状态信号。
+默认沿用参考设计的蓝色调色板：主色 `#5294ff`、浅蓝背景 `#dcebfe`、白色中性表面与黑色文字边框。内置的 `canary`、`mint`、`lavender`、`coral`、`sky` 强调色对同样可用，并统一搭配黑色前景文字。
 
-本次检查的上游 style registry 没有 dark palette。Proto UI 的暗色 paper/panel、浅色正文、可读 destructive ink 与随主题变化的 focus ring 是明确的项目扩展。已挂载组件直接通过主题变量重绘；不得脱离 fill 单独覆盖配对 foreground。
+由于上游参考样式表未包含暗色方案，Proto UI 额外维护了一套配套的暗色主题（暗色画布、浅色正文、高可读性 destructive 文本色及随主题自适应的 focus ring）。组件全部通过主题 CSS 变量动态重绘，自定义主题时请成对调整背景色与前景色。
 
-## 交付与无障碍
+## 主题交付与无障碍
 
-`BRUTALIST_THEME` 是 Light/Dark 值、字体角色与 radius 的包内单一来源。CLI 与文档 scope 消费完整 manifest 的生成投射。使用 `proto-ui init --prototypes brutalist` 创建项目；config v1 只允许一个已启用的 style preset。`--no-styles` 消费者自行提供所需 semantic token 与字体加载。
-
-Focus 保留可见 offset ring，与相邻背景至少 3:1 对比。Tabs Content 保留原生 fallback focus indication。Disabled 保留几何与 Base gate；portal 表面保留 theme/font 变量。PUI 使用参考的 24×48px Switch frame 与唯一 20px Thumb movement、Checkbox mixed-state precedence，以及由父级拥有的 loading 语义。
-
-改编的组件 recipe 保留 Samuel Breznjak 的 MIT 版权与许可；分发的 DM Sans 保留 SIL OFL 许可。当前 styled criteria 仍为 draft；视觉对齐不扩展 native-host 支持，也不引入新的 Base 主体。
-
-Select 蓝色 main fill 上的 placeholder 保留配对黑色 ink，不使用中性 muted ink：后者在 Light 仅 2.62:1、Dark 仅 2.01:1。这是明确的可读性适配；两种主题的文本对比度都必须至少 4.5:1。
-
-本站字体产物同时提供完整 [DM Sans 版权与 OFL 许可](/fonts/dm-sans-OFL.txt)。Textarea 保留 theme-foreground 边框，使编辑区域边界与两侧相邻表面均至少有 3:1 对比，包括 Dark。
-
-Button-like 控件目前保留 PUI 的即时 snap，不声称已对齐参考站的 150ms transition-all；Switch 的 150ms Thumb transition 单独定义与验证。
+- **主题来源**：`BRUTALIST_THEME` 是包内 Light/Dark 配色、字体角色与圆角变量的统一定义。使用 `proto-ui init --prototypes brutalist` 初始化项目即可引入；若启用 `--no-styles`，则由应用自行提供对应的语义变量与字体。
+- **焦点与对比度**：交互控件提供高可见度的外偏焦点环（相邻对比度不低于 3:1）；Tabs Content 保留原生焦点提示；Portal 渲染的浮层自动继承主题与字体变量。
+- **可读性细节**：Select 主色填充上的占位符使用黑色前景文字（保证亮暗模式下对比度均不低于 4.5:1）；Textarea 使用主题前景色边框，确保编辑边界在亮暗模式下与相邻表面均保持至少 3:1 的对比度。
+- **许可署名**：改编的视觉样式配方保留 Samuel Breznjak 的 MIT 版权声明与许可；分发的 DM Sans 字体保留 SIL OFL 1.1 许可。
 
 ## API
 
-Brutalist 设计契约是 family 级文档，没有 `proto-ui add` 目标，也没有 Prototype 部件，不声明自身属性。
+Brutalist 设计契约属于家族级样式规范文档，没有对应的 `proto-ui add` 目标，也不声明组件属性。
 
 <ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
 
