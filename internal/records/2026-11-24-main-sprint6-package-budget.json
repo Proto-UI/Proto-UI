@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded numeric package-budget transaction",
+  "date": "2026-11-24",
+  "scope": "Five whole-entry ceilings for Sprint 6 capabilities already integrated into main by PR #1712. No source implementation, measurement, externalization or policy change.",
+  "acceptedCapability": {
+    "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+    "mergeSha": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+    "canonicalCapabilitySha": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "capabilities": [
+      "Owned material paint reservation, Anatomy target association and exact host cleanup",
+      "Resident width and numeric motion sources with current-view/generation admission",
+      "Presence top/channel sampling, restoration and portal-conceal ownership"
+    ],
+    "lifecycle": "C-MATERIAL-PAINT-RESERVATION-0001, C-FEEDBACK-RESIDENT-MOTION-0001 and C-FEEDBACK-PRESENCE-PRESENTATION-0001 remain draft. Integration and this cost transaction do not promote them or settle independent product/native acceptance."
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "canonicalBefore": {
+    "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45350394271",
+    "run": 45350394271,
+    "job": 138295094772,
+    "head": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+    "artifact": 14899589101,
+    "artifactDigest": "sha256:2c61096f37d3a4f164e1c39beab7a4e9ddc4ade6a6212c877ce400975139f87c",
+    "reportSha256": "7260777668efe6d4c124abd054e52103ad576fbbbbf749a4114e16f23840df85",
+    "result": "8/9 strict passed; Vue exceeded by 78 B; React 1 B and WC 29 B headroom. Exit 1, preserved unchanged."
+  },
+  "canonicalCapability": {
+    "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/45365822387",
+    "run": 45365822387,
+    "job": 138347165668,
+    "head": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "artifact": 14906683210,
+    "artifactDigest": "sha256:432680e32280c842dadc1b031196c5d089fa12fd50023a19a1f8629e2864f6f3",
+    "reportSha256": "5057530f47d74d1eecb7769a1b72beaa72aa0e0346116a7196f7cf559b2b132a",
+    "result": "4/9 strict passed; five exceeded. Exit 1, preserved unchanged. All 47 public packages and manifests built; 28 budget-policy and 10 execution controls passed.",
+    "evidenceBoundary": "The public build/strict-cost facet is canonical evidence of measured bytes. It is not a claim that all source, browser or release checks passed."
+  },
+  "mainBridge": {
+    "source": {
+      "head": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+      "tree": "4bc695e9399dd6d3607b4b2b3e3bf44d66d8e814",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7972,
+      "fingerprintSha256": "46d7bfcd4d5061196e722a989dc16d06d48546bfeb071f4c80278c6e74a84e25",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "248f8270dd3458d1fcbc507e618337f98b9fde96"
+    },
+    "reportSha256": "edaca09a9de17d639ffa9734204cf4821e191ec263c51a92998030a90de8fb50",
+    "command": "node scripts/analysis/package-budgets.mjs --json --require-clean --expected-sha 248f8270dd3458d1fcbc507e618337f98b9fde96",
+    "exitCode": 1,
+    "comparison": "Environment, complete measurement settings, source fingerprint, all 9 whole-entry minified hashes and both diagnostic minified hashes are identical to canonical 041. This clean-main local readback confirms the integrated combination; it does not rename the canonical run to another commit.",
+    "outputs": [
+      {
+        "name": "lucide/icons/x",
+        "minifiedBytes": 4765,
+        "minifiedSha256": "05a98e24767b887f96f4893381f5cfbdbe2c2ddd48c2ff3f730a662392c6ab1d",
+        "gzipBytes": 1797
+      },
+      {
+        "name": "lucide root",
+        "minifiedBytes": 4083517,
+        "minifiedSha256": "dfe25b297b6499626de01289b35b82a9a9837a1285f683dbaed78d2e5e2275bd",
+        "gzipBytes": 635846
+      },
+      {
+        "name": "core root",
+        "minifiedBytes": 40953,
+        "minifiedSha256": "d2bbd2ef4c8b0a087b78392b16ded9e51d6751f5f224f78160483bccae1868ae",
+        "gzipBytes": 12967
+      },
+      {
+        "name": "runtime root",
+        "minifiedBytes": 410164,
+        "minifiedSha256": "7c7d6af71e857ea4194d7311e400d93c2046a852eb5d61b0050522f951b95a60",
+        "gzipBytes": 106822
+      },
+      {
+        "name": "adapter-react root",
+        "minifiedBytes": 628699,
+        "minifiedSha256": "63dc398a6f6b96ee0cbc180226c216a5cf31c4dc107de63a1f7bd3c689353071",
+        "gzipBytes": 179944
+      },
+      {
+        "name": "adapter-vue root",
+        "minifiedBytes": 624091,
+        "minifiedSha256": "036cbd5491ea401fb389046d4e10f3ac02d1aa7223cb0997c5ba5e4bdfc2f43f",
+        "gzipBytes": 178760
+      },
+      {
+        "name": "adapter-web-component root",
+        "minifiedBytes": 736254,
+        "minifiedSha256": "0a7580af154585dc81de20e5deb711ebd6f70c0c4021a2b99f65094d14b6f9b7",
+        "gzipBytes": 216252
+      },
+      {
+        "name": "prototypes-base/button",
+        "minifiedBytes": 14562,
+        "minifiedSha256": "2c2fdb311431ebe0d3c7b1bc9c83d99e3fed254029d193c2f22e226710a088a9",
+        "gzipBytes": 4311
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "minifiedBytes": 30590,
+        "minifiedSha256": "356c6524a67aad21c48f5ff11e09271c6ef647cba4221019f0d3a51fccec9974",
+        "gzipBytes": 6739
+      },
+      {
+        "name": "consumer light-dom button",
+        "minifiedBytes": 766307,
+        "minifiedSha256": "4286c6303a36df95d182d62d2caa6ee45a11492043e31d94b117327ecf37f70e",
+        "gzipBytes": 222452
+      },
+      {
+        "name": "consumer direct-shadow button",
+        "minifiedBytes": 766318,
+        "minifiedSha256": "b06ff335682926e75e11c68a072f8011b238f5f7c68f1b4e39d716a75b6eff8b",
+        "gzipBytes": 222456
+      }
+    ]
+  },
+  "entries": [
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "oldCeiling": 12800,
+      "newCeiling": 13100,
+      "canonicalBeforeGzipBytes": 12710,
+      "canonicalGzipBytes": 12967,
+      "gzipGrowthBytes": 257,
+      "inheritedOverrunBytes": 0,
+      "oldOverrunBytes": 167,
+      "headroomBytes": 133,
+      "headroomPercent": 1.0257,
+      "minifiedBytes": 40953,
+      "minifiedSha256": "d2bbd2ef4c8b0a087b78392b16ded9e51d6751f5f224f78160483bccae1868ae",
+      "sourceGrowthAttribution": [
+        {
+          "path": "packages/core/src/presence-presentation.ts",
+          "beforeRetainedBytes": 2969,
+          "afterRetainedBytes": 3464,
+          "delta": 495,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/spec/owned-template-blueprint.ts",
+          "beforeRetainedBytes": 4532,
+          "afterRetainedBytes": 4919,
+          "delta": 387,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/spec/template.ts",
+          "beforeRetainedBytes": 2397,
+          "afterRetainedBytes": 2610,
+          "delta": 213,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/material.ts",
+          "beforeRetainedBytes": 2581,
+          "afterRetainedBytes": 2743,
+          "delta": 162,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/resident-motion.ts",
+          "beforeRetainedBytes": 682,
+          "afterRetainedBytes": 695,
+          "delta": 13,
+          "sourceChanged": true
+        }
+      ],
+      "closureAudit": {
+        "unexpectedInputs": [],
+        "runtimeInputsBefore": 0,
+        "runtimeInputsAfter": 0,
+        "runtimePathSetUnchanged": true,
+        "note": "Retained minified bytes explain source contribution; they are not additive gzip costs."
+      }
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "oldCeiling": 104300,
+      "newCeiling": 107400,
+      "canonicalBeforeGzipBytes": 104125,
+      "canonicalGzipBytes": 106822,
+      "gzipGrowthBytes": 2697,
+      "inheritedOverrunBytes": 0,
+      "oldOverrunBytes": 2522,
+      "headroomBytes": 578,
+      "headroomPercent": 0.5411,
+      "minifiedBytes": 410164,
+      "minifiedSha256": "7c7d6af71e857ea4194d7311e400d93c2046a852eb5d61b0050522f951b95a60",
+      "sourceGrowthAttribution": [
+        {
+          "path": "packages/modules/feedback/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 5201,
+          "delta": 5201,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "beforeRetainedBytes": 17761,
+          "afterRetainedBytes": 19367,
+          "delta": 1606,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/motion/numeric-sources.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1246,
+          "delta": 1246,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/presence-presentation.ts",
+          "beforeRetainedBytes": 2844,
+          "afterRetainedBytes": 3319,
+          "delta": 475,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/spec/owned-template-blueprint.ts",
+          "beforeRetainedBytes": 4045,
+          "afterRetainedBytes": 4402,
+          "delta": 357,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/runtime/src/kernel/kernel.ts",
+          "beforeRetainedBytes": 3094,
+          "afterRetainedBytes": 3402,
+          "delta": 308,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/spec/template.ts",
+          "beforeRetainedBytes": 2254,
+          "afterRetainedBytes": 2468,
+          "delta": 214,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/core/src/material.ts",
+          "beforeRetainedBytes": 2590,
+          "afterRetainedBytes": 2752,
+          "delta": 162,
+          "sourceChanged": true
+        }
+      ],
+      "closureAudit": {
+        "unexpectedInputs": [],
+        "runtimeInputsBefore": 29,
+        "runtimeInputsAfter": 29,
+        "runtimePathSetUnchanged": true,
+        "note": "Retained minified bytes explain source contribution; they are not additive gzip costs."
+      }
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "oldCeiling": 173380,
+      "newCeiling": 180900,
+      "canonicalBeforeGzipBytes": 173379,
+      "canonicalGzipBytes": 179944,
+      "gzipGrowthBytes": 6565,
+      "inheritedOverrunBytes": 0,
+      "oldOverrunBytes": 6564,
+      "headroomBytes": 956,
+      "headroomPercent": 0.5313,
+      "minifiedBytes": 628699,
+      "minifiedSha256": "63dc398a6f6b96ee0cbc180226c216a5cf31c4dc107de63a1f7bd3c689353071",
+      "sourceGrowthAttribution": [
+        {
+          "path": "packages/modules/feedback/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 6076,
+          "delta": 6076,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+          "beforeRetainedBytes": 2283,
+          "afterRetainedBytes": 5385,
+          "delta": 3102,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1912,
+          "delta": 1912,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "beforeRetainedBytes": 17767,
+          "afterRetainedBytes": 19373,
+          "delta": 1606,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/presence/top-target.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1517,
+          "delta": 1517,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+          "beforeRetainedBytes": 4833,
+          "afterRetainedBytes": 6264,
+          "delta": 1431,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/presence/projector.ts",
+          "beforeRetainedBytes": 6106,
+          "afterRetainedBytes": 7527,
+          "delta": 1421,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/motion/numeric-sources.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1246,
+          "delta": 1246,
+          "sourceChanged": true
+        }
+      ],
+      "closureAudit": {
+        "unexpectedInputs": [],
+        "runtimeInputsBefore": 29,
+        "runtimeInputsAfter": 29,
+        "runtimePathSetUnchanged": true,
+        "note": "Retained minified bytes explain source contribution; they are not additive gzip costs."
+      }
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "oldCeiling": 172180,
+      "newCeiling": 179700,
+      "canonicalBeforeGzipBytes": 172258,
+      "canonicalGzipBytes": 178760,
+      "gzipGrowthBytes": 6502,
+      "inheritedOverrunBytes": 78,
+      "oldOverrunBytes": 6580,
+      "headroomBytes": 940,
+      "headroomPercent": 0.5258,
+      "minifiedBytes": 624091,
+      "minifiedSha256": "036cbd5491ea401fb389046d4e10f3ac02d1aa7223cb0997c5ba5e4bdfc2f43f",
+      "sourceGrowthAttribution": [
+        {
+          "path": "packages/modules/feedback/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 6076,
+          "delta": 6076,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+          "beforeRetainedBytes": 2283,
+          "afterRetainedBytes": 5385,
+          "delta": 3102,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1912,
+          "delta": 1912,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "beforeRetainedBytes": 17767,
+          "afterRetainedBytes": 19373,
+          "delta": 1606,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/presence/top-target.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1517,
+          "delta": 1517,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+          "beforeRetainedBytes": 4835,
+          "afterRetainedBytes": 6264,
+          "delta": 1429,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/presence/projector.ts",
+          "beforeRetainedBytes": 6090,
+          "afterRetainedBytes": 7518,
+          "delta": 1428,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/motion/numeric-sources.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1246,
+          "delta": 1246,
+          "sourceChanged": true
+        }
+      ],
+      "closureAudit": {
+        "unexpectedInputs": [],
+        "runtimeInputsBefore": 29,
+        "runtimeInputsAfter": 29,
+        "runtimePathSetUnchanged": true,
+        "note": "Retained minified bytes explain source contribution; they are not additive gzip costs."
+      }
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "oldCeiling": 208740,
+      "newCeiling": 217400,
+      "canonicalBeforeGzipBytes": 208711,
+      "canonicalGzipBytes": 216252,
+      "gzipGrowthBytes": 7541,
+      "inheritedOverrunBytes": 0,
+      "oldOverrunBytes": 7512,
+      "headroomBytes": 1148,
+      "headroomPercent": 0.5309,
+      "minifiedBytes": 736254,
+      "minifiedSha256": "0a7580af154585dc81de20e5deb711ebd6f70c0c4021a2b99f65094d14b6f9b7",
+      "sourceGrowthAttribution": [
+        {
+          "path": "packages/modules/feedback/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 6076,
+          "delta": 6076,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/motion/web-resident-motion.ts",
+          "beforeRetainedBytes": 2283,
+          "afterRetainedBytes": 5369,
+          "delta": 3086,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/web-component/src/portal-conceal.ts",
+          "beforeRetainedBytes": 517,
+          "afterRetainedBytes": 2957,
+          "delta": 2440,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/material/paint-reservation.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1912,
+          "delta": 1912,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/create.ts",
+          "beforeRetainedBytes": 17767,
+          "afterRetainedBytes": 19373,
+          "delta": 1606,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/presence/top-target.ts",
+          "beforeRetainedBytes": 0,
+          "afterRetainedBytes": 1517,
+          "delta": 1517,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/adapters/base/src/motion/web-presence-presentation.ts",
+          "beforeRetainedBytes": 4873,
+          "afterRetainedBytes": 6302,
+          "delta": 1429,
+          "sourceChanged": true
+        },
+        {
+          "path": "packages/modules/feedback/src/presence/projector.ts",
+          "beforeRetainedBytes": 6087,
+          "afterRetainedBytes": 7505,
+          "delta": 1418,
+          "sourceChanged": true
+        }
+      ],
+      "closureAudit": {
+        "unexpectedInputs": [],
+        "runtimeInputsBefore": 29,
+        "runtimeInputsAfter": 29,
+        "runtimePathSetUnchanged": true,
+        "note": "Retained minified bytes explain source contribution; they are not additive gzip costs."
+      }
+    }
+  ],
+  "unchangedCeilingEntries": [
+    {
+      "name": "lucide/icons/x",
+      "ceiling": 3000,
+      "canonicalGzipBytes": 1797
+    },
+    {
+      "name": "lucide root",
+      "ceiling": 700000,
+      "canonicalGzipBytes": 635846
+    },
+    {
+      "name": "prototypes-base/button",
+      "ceiling": 6000,
+      "canonicalGzipBytes": 4311
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "ceiling": 7900,
+      "canonicalGzipBytes": 6739
+    }
+  ],
+  "headroomRationale": "Each changed ceiling is ceil(canonicalGzipBytes*1.005/100)*100. The 0.5% bounded integration margin plus 100 B rounding leaves 133 / 578 / 956 / 940 / 1,148 B, avoiding the prior 1 B / 29 B remaining margin. At the larger entries this is about 0.53-0.54%; core rounds to 1.03%. The accepted source costs are measured as one integrated combination, not a sum of feature deltas. This margin accommodates small same-closure integration and minifier/compression variation; it does not pre-accept a new feature or waive future increases. Canonical toolchain and measurement are unchanged.",
+  "attributionConclusion": "Dominant retained growth is material reservation, resident-width/numeric host realization and presence-channel sampling/restoration. The Runtime source path set is unchanged (29 in each Runtime-bearing root), and no test, example, prototype, dist or node_modules copy enters these five roots. Zero-retained inputs remain in raw reports; no code was made eager or external merely to change the result. Removing accepted ownership/cleanup behavior to recover these bytes would change semantics and is outside this numeric transaction.",
+  "preservedGate": "Default strict whole-entry entrypoints, bundle/minify/treeShaking/ESM/browser/es2020 parameters, gzip 9, external list, clean-source/expected-SHA requirements, original failed results and exit behavior are unchanged. The separate Finf-development opt-in and all other ceilings are unchanged.",
+  "rawEvidence": [
+    {
+      "path": "internal/records/evidence/2026-11-24-main-sprint6-package-budget/canonical-before-b939.json.gz",
+      "storedSha256": "35bd0edbc93237b252af698f74aae2fe19459bc1ec1b823662aedfa40227d402",
+      "originalSha256": "7260777668efe6d4c124abd054e52103ad576fbbbbf749a4114e16f23840df85",
+      "originalBytes": 1556202,
+      "storedBytes": 313187,
+      "compression": "gzip level 9 mtime 0; decoded bytes unchanged"
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-main-sprint6-package-budget/canonical-capability-041.json.gz",
+      "storedSha256": "9eae71609f44a36cf0f7acd2c2b4f618c5bf708d6a98178849017f9af6c006db",
+      "originalSha256": "5057530f47d74d1eecb7769a1b72beaa72aa0e0346116a7196f7cf559b2b132a",
+      "originalBytes": 1568075,
+      "storedBytes": 315706,
+      "compression": "gzip level 9 mtime 0; decoded bytes unchanged"
+    }
+  ],
+  "artifactVerification": "Both original ZIP SHA256 digests matched freshly read GitHub artifact metadata; CRC checks passed and retained raw report bytes matched their ZIP members. Compressed copies decode to original canonical reports.",
+  "validationAtPreparation": {
+    "controls": "28/28 package-budget policy/evidence controls passed locally before the numeric edit.",
+    "finalCandidate": "Pending a clean exact-head strict run after this separately reviewable numeric commit; parent integration must rerun the final combined canonical gate.",
+    "independentReview": "Not claimed by this record. Fresh independent review, trusted CI/DCO and exact-head integration remain separate conditions."
+  },
+  "rollback": "Revert this transaction commit to restore the five old literal ceilings and old strict failures; no implementation depends on the new numbers."
+}
