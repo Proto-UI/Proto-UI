@@ -1,0 +1,23 @@
+{
+  "baseHead": "6be3babcac8bc11fd43679b446a486c93642fb74",
+  "workflowSha256": "2761aa28999067c560442d294f66ea282d12e47768ebfa29e6c5acb223045dd5",
+  "scope": "Only move two runner temporary paths from job.env into the first step shell and GITHUB_ENV",
+  "yamlAndAllShellNodeSyntax": "passed",
+  "structuralDiffBounded": true,
+  "firstStepWithAbsentPathVariables": "passed",
+  "laterStepEnvironmentPropagation": "passed",
+  "pathWithSpaces": "passed",
+  "nodeMetadataSourceMatches": true,
+  "dirtyRecorded": true,
+  "hostedAcceptance": "not claimed; prior platform 422 and zero created runs retained by root",
+  "actionlint": "not installed",
+  "originalSelectionAndTimeoutsUnchanged": true,
+  "existingChecks": {
+    "command": "node --test scripts/test/browser-suite-repair-toolbar.test.mjs scripts/ci/test/ci-scheduling-policy.test.mjs",
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0,
+    "provenance": "Observed exec session 73777 final chunk 15ce3b; no separate contemporaneous terminal JSON was produced."
+  },
+  "formatAndDiffCheck": "passed"
+}

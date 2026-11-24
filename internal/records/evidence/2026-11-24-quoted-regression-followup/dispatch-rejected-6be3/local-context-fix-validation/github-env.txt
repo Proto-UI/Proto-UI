@@ -1,0 +1,2 @@
+CONTENTS_WHEEL_EVIDENCE_DIR=/tmp/contents-wheel-context-fix-validation/runner temp/contents-wheel
+PROTO_UI_RUNTIME_EVIDENCE_DIR=/tmp/contents-wheel-context-fix-validation/runner temp/contents-wheel/runtime
