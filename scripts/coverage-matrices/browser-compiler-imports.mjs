@@ -104,7 +104,8 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
-    sourceSha256: 'c2dc909977e3968f884cf170bf491e7d961b37f5b13ae9ad975a143f52c85e1c',
+    // The 0.3.0 release stamp updates the six React runtime dependency and helper versions.
+    sourceSha256: 'f008f1b302f0d45adeedeeb8c4163b18c92c89057302f773e237c4c247be6843',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
