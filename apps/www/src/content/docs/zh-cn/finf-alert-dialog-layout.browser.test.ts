@@ -14,6 +14,7 @@ import type * as DemoTypes from '../../../components/PrototypePreviewer/demo-typ
 import type * as PrototypeModules from '../../../components/PrototypePreviewer/prototype-modules';
 import type * as ProjectionTheme from '../../../components/PrototypePreviewer/projection-theme';
 import type * as RuntimePreviewSurface from '../../../components/PrototypePreviewer/runtime-preview-surface';
+import type * as SiteLibraryFamily from '../../../components/site-library-family';
 import {
   COLOR_SCHEMES,
   RUNTIMES,
@@ -239,9 +240,12 @@ async function mountNewYork(page: Page, runtime: (typeof RUNTIMES)[number]): Pro
     const { default: original } = (await browserImport('/src/content/docs/demo-shadcn-alert-dialog.demo.ts')) as {
       default: DemoSpec;
     };
-    const { createRuntimePreviewSurface, runtimePreviewFamily } = (await browserImport(
+    const { createRuntimePreviewSurface } = (await browserImport(
       '/src/components/PrototypePreviewer/runtime-preview-surface.ts'
     )) as typeof RuntimePreviewSurface;
+    const { runtimePreviewFamily } = (await browserImport(
+      '/src/components/site-library-family.ts'
+    )) as typeof SiteLibraryFamily;
     const { resolveProjectionThemeSurfaceStyle } = (await browserImport(
       '/src/components/PrototypePreviewer/projection-theme.ts'
     )) as typeof ProjectionTheme;

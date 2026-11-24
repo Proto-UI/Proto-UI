@@ -457,9 +457,12 @@ async function mountLongLabel(
         ...contentRoot.attrs,
         style: 'padding: 0; min-width: 0; width: 100%',
       };
-      const { createRuntimePreviewSurface, runtimePreviewFamily } = (await browserImport(
+      const { createRuntimePreviewSurface } = (await browserImport(
         '/src/components/PrototypePreviewer/runtime-preview-surface.ts'
       )) as typeof import('../../../components/PrototypePreviewer/runtime-preview-surface');
+      const { runtimePreviewFamily } = (await browserImport(
+        '/src/components/site-library-family.ts'
+      )) as typeof import('../../../components/site-library-family');
       const { resolveProjectionThemeSurfaceStyle } = (await browserImport(
         '/src/components/PrototypePreviewer/projection-theme.ts'
       )) as typeof import('../../../components/PrototypePreviewer/projection-theme');
