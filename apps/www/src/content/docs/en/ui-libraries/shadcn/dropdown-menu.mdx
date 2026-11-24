@@ -35,9 +35,11 @@ Use **Toggle inset** in the demo and reopen the menu to compare both states.
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dropdown" manager="npm" />
+This command uses the stable 0.2.0 CLI. Vue 2.6 requires a matching prerelease or workspace CLI, adapter and prototype build. The preview uses the workspace version.
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your framework. Note that the CLI registry ID is `shadcn-dropdown`.
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dropdown" manager="npm" />
+
+Replace `wc` with `react` or `vue` to generate the facade for your framework. Note that the CLI registry ID is `shadcn-dropdown`.
 
 The CLI target generates facades for `Root`, `Trigger`, `Content`, and `Item`. Import `Group`, `Label`, `Separator`, and `Shortcut` directly from `@proto.ui/prototypes-shadcn/dropdown`.
 

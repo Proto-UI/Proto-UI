@@ -22,10 +22,12 @@ Text 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的八项独立排版属
 
 先[初始化你的应用](/zh-cn/start-here/quick-start/)，再添加 `shadcn-text` 组件（当前草案能力在工作区源码中提供）：
 
+此组件由工作区源码提供。请在应用中安装同一工作区提交构建的 CLI、Shadcn 原型包与目标适配器，用该 CLI 初始化项目，再运行本地命令生成组件封装。
+
 <InstallCommandCard
   commands={{
-    npm: 'npx @proto.ui/cli@latest add wc shadcn-text',
-    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-text',
+    npm: 'npm exec -- proto-ui add wc shadcn-text',
+    pnpm: 'pnpm exec proto-ui add wc shadcn-text',
   }}
   manager="npm"
 />
