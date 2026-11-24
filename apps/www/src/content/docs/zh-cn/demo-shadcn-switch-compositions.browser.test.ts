@@ -5,19 +5,36 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import type { Browser, BrowserContext, Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RUNTIMES, launchBrowser, openRoute, selectRuntime, startServer, stopServer } from './browser-harness';
+import {
+  RUNTIMES,
+  launchBrowser,
+  openRoute,
+  selectRuntime,
+  startServer,
+  stopServer,
+} from './browser-harness';
 
 const route = '/en/ui-libraries/shadcn/switch/';
-let browser: Browser, baseUrl = '';
+let browser: Browser,
+  baseUrl = '';
 const ref = (previewer: Locator, id: string) => previewer.locator(`.host [data-demo-ref="${id}"]`);
-const checked = (previewer: Locator, id: string) => ref(previewer, `${id}-control`).getAttribute('aria-checked');
-const requests = (previewer: Locator, id: string) => ref(previewer, `${id}-requests`).getAttribute('data-request-count');
-const paint = (previewer: Locator, id: string) => ref(previewer, `${id}-card`).evaluate((el) => {
-  const style = getComputedStyle(el);
-  return { background: style.backgroundColor, border: style.borderTopColor };
-});
+const checked = (previewer: Locator, id: string) =>
+  ref(previewer, `${id}-control`).getAttribute('aria-checked');
+const requests = (previewer: Locator, id: string) =>
+  ref(previewer, `${id}-requests`).getAttribute('data-request-count');
+const paint = (previewer: Locator, id: string) =>
+  ref(previewer, `${id}-card`).evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { background: style.backgroundColor, border: style.borderTopColor };
+  });
 
-async function capture(previewer: Locator, runtime: string, phase: string, outcome: 'observation' | 'assertions-passed' | 'failed' = 'observation', failure?: string) {
+async function capture(
+  previewer: Locator,
+  runtime: string,
+  phase: string,
+  outcome: 'observation' | 'assertions-passed' | 'failed' = 'observation',
+  failure?: string
+) {
   const directory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
   if (!directory) return;
   const root = path.join(directory, 'switch-public-compositions');
@@ -27,56 +44,120 @@ async function capture(previewer: Locator, runtime: string, phase: string, outco
   const dirty = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
   const name = `${sourceSha.slice(0, 12)}-${runtime}-${phase}`;
   // Viewport capture must not scroll the tall previewer while a native pointer is held.
-  const png = await previewer.page().screenshot({ path: path.join(root, name + '.png'), style: 'astro-dev-toolbar { visibility: hidden; }' });
-  await writeFile(path.join(root, name + '.json'), JSON.stringify({
-    sourceSha, tree, dirtyWorktree: !!dirty, runtime, phase, route, outcome, failure,
-    pngSha256: createHash('sha256').update(png).digest('hex'),
-    observedAt: new Date().toISOString(),
-    controls: await previewer.locator('.host [role="switch"]').evaluateAll((nodes) => nodes.map((el) => ({
-      ref: el.getAttribute('data-demo-ref'), checked: el.getAttribute('aria-checked'),
-      labelledBy: el.getAttribute('aria-labelledby'), describedBy: el.getAttribute('aria-describedby'),
-      rect: el.getBoundingClientRect().toJSON(),
-    }))),
-    input: await previewer.page().evaluate(() => (window as any).__switchCompositionInput ?? []),
-  }, null, 2));
+  const png = await previewer.page().screenshot({
+    path: path.join(root, name + '.png'),
+    style: 'astro-dev-toolbar { visibility: hidden; }',
+  });
+  await writeFile(
+    path.join(root, name + '.json'),
+    JSON.stringify(
+      {
+        sourceSha,
+        tree,
+        dirtyWorktree: !!dirty,
+        runtime,
+        phase,
+        route,
+        outcome,
+        failure,
+        pngSha256: createHash('sha256').update(png).digest('hex'),
+        observedAt: new Date().toISOString(),
+        controls: await previewer.locator('.host [role="switch"]').evaluateAll((nodes) =>
+          nodes.map((el) => ({
+            ref: el.getAttribute('data-demo-ref'),
+            checked: el.getAttribute('aria-checked'),
+            labelledBy: el.getAttribute('aria-labelledby'),
+            describedBy: el.getAttribute('aria-describedby'),
+            rect: el.getBoundingClientRect().toJSON(),
+          }))
+        ),
+        input: await previewer
+          .page()
+          .evaluate(() => (window as any).__switchCompositionInput ?? []),
+      },
+      null,
+      2
+    )
+  );
 }
 
 // Always close the context, retain the primary assertion, and fail on cleanup-only errors.
-async function finish(previewer: Locator, runtime: string, phase: string, context: BrowserContext,
-  failure: { error: unknown } | undefined, release?: () => Promise<void>) {
+async function finish(
+  previewer: Locator,
+  runtime: string,
+  phase: string,
+  context: BrowserContext,
+  failure: { error: unknown } | undefined,
+  release?: () => Promise<void>
+) {
   const cleanupErrors: unknown[] = [];
-  try { await release?.(); } catch (error) { cleanupErrors.push(error); }
   try {
-    await capture(previewer, runtime, phase, failure || cleanupErrors.length ? 'failed' : 'assertions-passed',
-      failure ? String(failure.error) : cleanupErrors.length ? cleanupErrors.map(String).join('\n') : undefined);
-  } catch (error) { cleanupErrors.push(error); }
-  finally { try { await context.close(); } catch (error) { cleanupErrors.push(error); } }
+    await release?.();
+  } catch (error) {
+    cleanupErrors.push(error);
+  }
+  try {
+    await capture(
+      previewer,
+      runtime,
+      phase,
+      failure || cleanupErrors.length ? 'failed' : 'assertions-passed',
+      failure
+        ? String(failure.error)
+        : cleanupErrors.length
+          ? cleanupErrors.map(String).join('\n')
+          : undefined
+    );
+  } catch (error) {
+    cleanupErrors.push(error);
+  } finally {
+    try {
+      await context.close();
+    } catch (error) {
+      cleanupErrors.push(error);
+    }
+  }
   if (failure) {
-    if (cleanupErrors.length) console.error('Switch evidence/cleanup errors; primary assertion preserved:', cleanupErrors);
+    if (cleanupErrors.length)
+      console.error('Switch evidence/cleanup errors; primary assertion preserved:', cleanupErrors);
     throw failure.error;
   }
-  if (cleanupErrors.length) throw new AggregateError(cleanupErrors, 'Switch evidence/cleanup failed');
+  if (cleanupErrors.length)
+    throw new AggregateError(cleanupErrors, 'Switch evidence/cleanup failed');
 }
 
-async function open(runtime: typeof RUNTIMES[number]) {
+async function open(runtime: (typeof RUNTIMES)[number]) {
   const opened = await openRoute(browser, baseUrl, route, { width: 1100, height: 1000 });
   try {
-  const previewer = opened.page.locator('[data-demo-id="demo-shadcn-switch-compositions"]');
-  await selectRuntime(opened.page, previewer, runtime, '[role="switch"]', 9);
-  await opened.page.evaluate(() => {
-    (window as any).__switchCompositionInput = [];
-    for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'click', 'keydown']) {
-      document.addEventListener(type, (event) => {
-        const elements = event.composedPath().filter((node): node is Element => node instanceof Element);
-        if (!elements.some((el) => el.getAttribute('data-demo-id') === 'demo-shadcn-switch-compositions')) return;
-        (window as any).__switchCompositionInput.push({
-          type, trusted: event.isTrusted, key: (event as KeyboardEvent).key,
-          refs: elements.map((el) => el.getAttribute('data-demo-ref')).filter(Boolean),
-        });
-      }, true);
-    }
-  });
-  return { ...opened, previewer };
+    const previewer = opened.page.locator('[data-demo-id="demo-shadcn-switch-compositions"]');
+    await selectRuntime(opened.page, previewer, runtime, '[role="switch"]', 9);
+    await opened.page.evaluate(() => {
+      (window as any).__switchCompositionInput = [];
+      for (const type of ['pointerdown', 'pointerup', 'pointercancel', 'click', 'keydown']) {
+        document.addEventListener(
+          type,
+          (event) => {
+            const elements = event
+              .composedPath()
+              .filter((node): node is Element => node instanceof Element);
+            if (
+              !elements.some(
+                (el) => el.getAttribute('data-demo-id') === 'demo-shadcn-switch-compositions'
+              )
+            )
+              return;
+            (window as any).__switchCompositionInput.push({
+              type,
+              trusted: event.isTrusted,
+              key: (event as KeyboardEvent).key,
+              refs: elements.map((el) => el.getAttribute('data-demo-ref')).filter(Boolean),
+            });
+          },
+          true
+        );
+      }
+    });
+    return { ...opened, previewer };
   } catch (error) {
     console.error(`[switch-public-compositions] ${runtime} setup failed:`, error);
     try {
@@ -87,35 +168,157 @@ async function open(runtime: typeof RUNTIMES[number]) {
         const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
         const name = `${sourceSha.slice(0, 12)}-${runtime}-setup-failure-${Date.now()}`;
         const png = await opened.page.screenshot({ path: path.join(destination, name + '.png') });
-        await writeFile(path.join(destination, name + '.json'), JSON.stringify({
-          sourceSha, runtime, route, outcome: 'setup-failed', failure: String(error),
-          pngSha256: createHash('sha256').update(png).digest('hex'),
-          previewers: await opened.page.locator('[data-previewer-id]').evaluateAll((elements) => elements.map((el) => ({
-            id: el.getAttribute('data-previewer-id'), demo: el.getAttribute('data-demo-id'),
-            projection: el.getAttribute('data-projection-mode'),
-            switches: el.querySelectorAll('.host [role="switch"]').length,
-            html: el.outerHTML.slice(0, 30000),
-          }))),
-        }, null, 2));
+        await writeFile(
+          path.join(destination, name + '.json'),
+          JSON.stringify(
+            {
+              sourceSha,
+              runtime,
+              route,
+              outcome: 'setup-failed',
+              failure: String(error),
+              pngSha256: createHash('sha256').update(png).digest('hex'),
+              previewers: await opened.page.locator('[data-previewer-id]').evaluateAll((elements) =>
+                elements.map((el) => ({
+                  id: el.getAttribute('data-previewer-id'),
+                  demo: el.getAttribute('data-demo-id'),
+                  projection: el.getAttribute('data-projection-mode'),
+                  switches: el.querySelectorAll('.host [role="switch"]').length,
+                  html: el.outerHTML.slice(0, 30000),
+                }))
+              ),
+            },
+            null,
+            2
+          )
+        );
       }
-    } catch (captureError) { console.error('Switch setup diagnostic capture failed:', captureError); }
-    try { await opened.context.close(); } catch (cleanupError) { console.error('Switch setup cleanup failed:', cleanupError); }
+    } catch (captureError) {
+      console.error('Switch setup diagnostic capture failed:', captureError);
+    }
+    try {
+      await opened.context.close();
+    } catch (cleanupError) {
+      console.error('Switch setup cleanup failed:', cleanupError);
+    }
     throw error;
   }
 }
 
-beforeAll(async () => { baseUrl = await startServer(route); browser = await launchBrowser(); }, 120000);
-afterAll(async () => { await Promise.all([browser?.close(), stopServer()]); });
+beforeAll(async () => {
+  baseUrl = await startServer(route);
+  browser = await launchBrowser();
+}, 120000);
+afterAll(async () => {
+  await Promise.all([browser?.close(), stopServer()]);
+});
 
 describe('real public Switch page compositions', () => {
   for (const runtime of RUNTIMES) {
+    it(`${runtime} settled LTR and RTL thumbs remain inside the track after click and Space`, async () => {
+      const { page, context, previewer } = await open(runtime);
+      let failure: { error: unknown } | undefined;
+      try {
+        for (const [id, direction, initialChecked] of [
+          ['description', 'ltr', false],
+          ['rtl', 'rtl', true],
+        ] as const) {
+          const control = ref(previewer, `${id}-control`),
+            thumb = ref(previewer, `${id}-thumb`);
+          await control.scrollIntoViewIfNeeded();
+          const geometry = async () => {
+            const [track, indicator] = await Promise.all([
+              control.evaluate((el) => {
+                const rect = el.getBoundingClientRect(),
+                  style = getComputedStyle(el);
+                return {
+                  left: rect.left,
+                  right: rect.right,
+                  width: rect.width,
+                  borderLeft: parseFloat(style.borderLeftWidth),
+                  borderRight: parseFloat(style.borderRightWidth),
+                };
+              }),
+              thumb.evaluate((el) => {
+                const rect = el.getBoundingClientRect();
+                return { left: rect.left, right: rect.right, width: rect.width };
+              }),
+            ]);
+            return {
+              leftGap: indicator.left - track.left,
+              rightGap: track.right - indicator.right,
+              trackWidth: track.width,
+              thumbWidth: indicator.width,
+              borderLeft: track.borderLeft,
+              borderRight: track.borderRight,
+            };
+          };
+          const endpoint = async (value: boolean, phase: string) => {
+            await expect.poll(() => checked(previewer, id)).toBe(String(value));
+            // P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW: observe painted endpoints,
+            // including the source border inset, rather than tokens or aria alone.
+            const onRight = value === (direction === 'ltr');
+            console.info('[switch-settled-endpoint]', runtime, id, phase, await geometry());
+            await expect
+              .poll(async () => {
+                const measured = await geometry();
+                return Math.abs(
+                  onRight
+                    ? measured.rightGap - measured.borderRight
+                    : measured.leftGap - measured.borderLeft
+                );
+              })
+              .toBeLessThan(0.75);
+            const measured = await geometry();
+            expect(measured.trackWidth).toBeGreaterThan(measured.thumbWidth);
+            expect(measured.thumbWidth).toBeGreaterThan(0);
+            expect(measured.leftGap).toBeGreaterThanOrEqual(-0.5);
+            expect(measured.rightGap).toBeGreaterThanOrEqual(-0.5);
+            await capture(previewer, runtime, `${id}-${phase}`);
+            return measured.leftGap;
+          };
+          const initial = await endpoint(initialChecked, 'settled-initial');
+          expect(await requests(previewer, id)).toBe('0');
+          await control.click();
+          const clicked = await endpoint(!initialChecked, 'settled-click');
+          expect(await requests(previewer, id)).toBe('1');
+          const clickSign = (direction === 'rtl' ? -1 : 1) * (initialChecked ? -1 : 1);
+          expect(clickSign * (clicked - initial)).toBeGreaterThan(6);
+          await expect.poll(() => control.evaluate((el) => el.matches(':focus'))).toBe(true);
+          await page.keyboard.press('Space');
+          const keyboard = await endpoint(initialChecked, 'settled-space');
+          expect(await requests(previewer, id)).toBe('2');
+          expect(Math.abs(keyboard - initial)).toBeLessThan(0.75);
+          expect(clickSign * (clicked - keyboard)).toBeGreaterThan(6);
+        }
+      } catch (error) {
+        failure = { error };
+      } finally {
+        await finish(previewer, runtime, 'settled-endpoints-result', context, failure);
+      }
+    }, 120000);
+
     it(`${runtime} card, label, description, link, disabled and controlled ownership`, async () => {
       const { page, context, previewer } = await open(runtime);
       let failure: { error: unknown } | undefined;
       try {
-        for (const id of ['description', 'choice', 'selected', 'disabled', 'controlled', 'readonly', 'rtl', 'drag', 'drag-rtl']) {
-          expect(await ref(previewer, `${id}-control`).getAttribute('aria-labelledby')).toBe(await ref(previewer, `${id}-label`).getAttribute('id'));
-          expect(await ref(previewer, `${id}-control`).getAttribute('aria-describedby')).toBe(await ref(previewer, `${id}-description`).getAttribute('id'));
+        for (const id of [
+          'description',
+          'choice',
+          'selected',
+          'disabled',
+          'controlled',
+          'readonly',
+          'rtl',
+          'drag',
+          'drag-rtl',
+        ]) {
+          expect(await ref(previewer, `${id}-control`).getAttribute('aria-labelledby')).toBe(
+            await ref(previewer, `${id}-label`).getAttribute('id')
+          );
+          expect(await ref(previewer, `${id}-control`).getAttribute('aria-describedby')).toBe(
+            await ref(previewer, `${id}-description`).getAttribute('id')
+          );
           expect(await ref(previewer, `${id}-label`).getAttribute('id')).toBeTruthy();
           expect(await ref(previewer, `${id}-description`).getAttribute('id')).toBeTruthy();
         }
@@ -133,7 +336,9 @@ describe('real public Switch page compositions', () => {
         await ref(previewer, 'choice-label').click();
         await expect.poll(() => checked(previewer, 'choice')).toBe('false');
         expect(await requests(previewer, 'choice')).toBe('2');
-        await expect.poll(() => ref(previewer, 'choice-control').evaluate((el) => el.matches(':focus'))).toBe(true);
+        await expect
+          .poll(() => ref(previewer, 'choice-control').evaluate((el) => el.matches(':focus')))
+          .toBe(true);
         await page.keyboard.press('Space');
         await expect.poll(() => checked(previewer, 'choice')).toBe('true');
         expect(await requests(previewer, 'choice')).toBe('3');
@@ -159,50 +364,78 @@ describe('real public Switch page compositions', () => {
         expect(await checked(previewer, 'controlled')).toBe('false');
         expect(await paint(previewer, 'controlled')).toEqual(rejectedPaint);
         const trusted = await page.evaluate(() => (window as any).__switchCompositionInput);
-        expect(trusted.some((event: any) => event.type === 'pointerdown' && event.trusted)).toBe(true);
-        expect(trusted.some((event: any) => event.type === 'keydown' && event.trusted && event.key === ' ')).toBe(true);
-      } catch (error) { failure = { error }; }
-      finally { await finish(previewer, runtime, 'card-result', context, failure); }
+        expect(trusted.some((event: any) => event.type === 'pointerdown' && event.trusted)).toBe(
+          true
+        );
+        expect(
+          trusted.some(
+            (event: any) => event.type === 'keydown' && event.trusted && event.key === ' '
+          )
+        ).toBe(true);
+      } catch (error) {
+        failure = { error };
+      } finally {
+        await finish(previewer, runtime, 'card-result', context, failure);
+      }
     }, 120000);
 
     it(`${runtime} opt-in LTR and RTL thumb moves while held, before one release request`, async () => {
       const { page, context, previewer } = await open(runtime);
       let failure: { error: unknown } | undefined;
       try {
-        const plain = ref(previewer, 'description-control'), plainThumb = ref(previewer, 'description-thumb');
+        const plain = ref(previewer, 'description-control'),
+          plainThumb = ref(previewer, 'description-thumb');
         await plain.scrollIntoViewIfNeeded();
         const plainStart = (await plainThumb.boundingBox())!;
-        await page.mouse.move(plainStart.x + plainStart.width / 2, plainStart.y + plainStart.height / 2);
+        await page.mouse.move(
+          plainStart.x + plainStart.width / 2,
+          plainStart.y + plainStart.height / 2
+        );
         await page.mouse.down();
-        await page.mouse.move(plainStart.x + plainStart.width / 2 + 9, plainStart.y + plainStart.height / 2, { steps: 6 });
+        await page.mouse.move(
+          plainStart.x + plainStart.width / 2 + 9,
+          plainStart.y + plainStart.height / 2,
+          { steps: 6 }
+        );
         expect(Math.abs((await plainThumb.boundingBox())!.x - plainStart.x)).toBeLessThan(1);
         expect(await checked(previewer, 'description')).toBe('false');
         expect(await requests(previewer, 'description')).toBe('0');
         await page.mouse.up();
-        for (const [id, sign] of [['drag', 1], ['drag-rtl', -1]] as const) {
-          const control = ref(previewer, `${id}-control`), thumb = ref(previewer, `${id}-thumb`);
+        for (const [id, sign] of [
+          ['drag', 1],
+          ['drag-rtl', -1],
+        ] as const) {
+          const control = ref(previewer, `${id}-control`),
+            thumb = ref(previewer, `${id}-thumb`);
           await control.scrollIntoViewIfNeeded();
           // Observe stable painted geometry, not a fixed sleep or an author-supplied extent.
           await control.evaluate(async (element) => {
-            let previous = '', stable = 0;
+            let previous = '',
+              stable = 0;
             for (let i = 0; i < 120; i++) {
               await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
               const r = element.getBoundingClientRect();
               const next = `${r.x}:${r.y}:${r.width}:${r.height}`;
-              stable = next === previous ? stable + 1 : 0; previous = next;
+              stable = next === previous ? stable + 1 : 0;
+              previous = next;
               if (stable >= 3) return;
             }
             throw new Error('Public Switch geometry never stabilized');
           });
-          const rootBox = (await control.boundingBox())!, start = (await thumb.boundingBox())!;
+          const rootBox = (await control.boundingBox())!,
+            start = (await thumb.boundingBox())!;
           const travel = rootBox.width - start.width - 2;
           expect(travel).toBeGreaterThan(8);
           if (sign === 1) expect(start.x).toBeLessThan(rootBox.x + rootBox.width / 2);
           else expect(start.x).toBeGreaterThan(rootBox.x + rootBox.width / 3);
-          const x = start.x + start.width / 2, y = start.y + start.height / 2;
-          await page.mouse.move(x, y); await page.mouse.down();
+          const x = start.x + start.width / 2,
+            y = start.y + start.height / 2;
+          await page.mouse.move(x, y);
+          await page.mouse.down();
           await page.mouse.move(x + sign * travel * 0.65, y, { steps: 6 });
-          await expect.poll(async () => sign * ((await thumb.boundingBox())!.x - start.x)).toBeGreaterThan(2);
+          await expect
+            .poll(async () => sign * ((await thumb.boundingBox())!.x - start.x))
+            .toBeGreaterThan(2);
           const held = (await thumb.boundingBox())!;
           expect(sign * (held.x - start.x)).toBeLessThan(travel - 1);
           expect(await checked(previewer, id)).toBe('false');
@@ -213,8 +446,11 @@ describe('real public Switch page compositions', () => {
           await expect.poll(() => checked(previewer, id)).toBe('true');
           expect(await requests(previewer, id)).toBe('1');
         }
-      } catch (error) { failure = { error }; }
-      finally { await finish(previewer, runtime, 'drag-result', context, failure, () => page.mouse.up()); }
+      } catch (error) {
+        failure = { error };
+      } finally {
+        await finish(previewer, runtime, 'drag-result', context, failure, () => page.mouse.up());
+      }
     }, 120000);
   }
 });
