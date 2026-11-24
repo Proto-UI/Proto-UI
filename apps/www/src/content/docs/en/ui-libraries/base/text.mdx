@@ -1,13 +1,15 @@
 ---
 title: 'Text'
-description: 'Base passive text content and reusable typography inputs.'
+description: 'A passive typography primitive with standardized size, tone, weight, font, leading, and tracking props.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-text-root` is a draft reusable Text atom. Base owns normalized presentation inputs and one passive content slot. It remains visually neutral: the typography choices become visible through the Shadcn or Brutalist projection, rather than importing a default design language into Base.
+A passive text container that standardizes typographic props—size, tone, weight, font family, line height, tracking, emphasis, and decoration—while styled components provide the visual typography scale.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-text"
@@ -15,9 +17,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The examples are actual package prototypes. Their outer stack supplies only demonstration layout; each Text instance owns its content and its applicable presentation. The examples add no click handlers or editing state.
+## Installation
 
-## Use Text
+Currently available from workspace source; not yet included in the 0.2.0 stable release (workspace CLI target: `base-text`). Import `textRoot` (along with `asTextRoot`, `TextRootProps`, and `TextRootExposes`) from `@proto.ui/prototypes-base/text` or the package root.
+
+## Usage
 
 ```tsx
 import * as React from 'react';
@@ -37,40 +41,15 @@ export function SectionTitle() {
 }
 ```
 
-This Base example preserves the native heading and normalizes inputs; choose a styled Text export to realize those axes as family-owned typography. `asTextRoot`, `TextRootProps`, and `TextRootExposes` are also exported from the same subpath and package root.
+### Semantic wrappers and typography rules
 
-`rootTag: 'span'` is Web Adapter configuration, not a Text prop. The surrounding native `h1`, `p`, `label` or `a` remains the document or interaction owner. For a label, keep `htmlFor`/`for` on the native label; for a link, keep `href`, target and download behavior on the native anchor. Text does not create a second focus stop or synthesize activation.
-
-## Inputs
-
-| Prop         | Values                                                     | Default   |
-| ------------ | ---------------------------------------------------------- | --------- |
-| `size`       | `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` | `base`    |
-| `tone`       | `default`, `muted`, `inherit`                              | `default` |
-| `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
-| `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
-| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
-| `emphasis`   | `normal`, `italic`                                         | `normal`  |
-| `decoration` | `none`, `underline`, `line-through`                        | `none`    |
-
-`tone="inherit"` keeps the enclosing semantic or Surface owner's foreground, which is useful for contrast on solid or accent surfaces. Removing a prop restores its default. The single anonymous slot preserves authored text and children. There are no exposed states, methods or events. No page role, copy, heading level, `asChild`, `tag`, `href`, `for`, content parser, editor, or automatic responsive breakpoint is part of this API.
-
-`leading="size"` keeps the line box built into the selected size instead of adding a leading override. Shadcn and Brutalist map `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, and `5xl` to line heights of `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively. For example, `size="base"` uses 16/24 and `size="lg"` uses 18/28 at a 16px root size. Omitting size restores `base`. An initially invalid size also falls back to `base`; a provided empty or invalid size after a valid value retains that previous value under the existing Props contract. `leading="tighter"` selects `1.1`; `tracking="tighter"` selects `-0.05em`. The existing `normal` defaults are unchanged. These options are finite visual semantics, not numeric or arbitrary-CSS inputs. Base only normalizes them; this density extension is verified for Shadcn and Brutalist, not every family or native target.
-
-## Adapter and Compiler boundary
-
-The implemented Web profile is exercised through Web Components, React, Vue 3 and Vue 2, including property changes/removal, retained content and native-owner composition. Web compiler source-closure and generated-facade checks are separate from that Adapter evidence; they do not establish arbitrary Prototype AOT or native parity.
-
-The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping still omits `font-style`, `letter-spacing` and `text-decoration-line`; those omissions are diagnostic limits, not an equivalent rendering. `tone="inherit"` currently reports `UnsupportedValue(color, inherit)` on GPUI. Unknown style tokens report `Unsupported Proto UI style tokens` rather than silently succeeding. Real-browser visual acceptance and each target's execution evidence remain distinct from source and DOM tests.
-
-## Authority
-
-`P-BASE-TEXT` and `T-TEXT-0001` govern this slice. The source is `packages/prototypes/base/src/text/`. Catalog lifecycle remains draft.
+- **Keep native document semantics**: `rootTag: 'span'` is a Web Adapter option. Keep headings (`<h1>`), paragraphs (`<p>`), labels (`<label htmlFor>`), and links (`<a href>`) on native host elements; `Text` adds no focus stop or activation handler.
+- **Foreground inheritance**: Set `tone="inherit"` on styled `Text` inside `solid` or `accent` `Surface` containers so it inherits the enclosing foreground color.
+- **Size and line height**: Removing a prop restores its default. An initially invalid `size` falls back to `'base'`, while an invalid update after a valid value retains the previous value. `leading="size"` keeps the size's built-in line box (in Shadcn and Brutalist, `xs` through `5xl` map to `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1`); `leading="tighter"` selects `1.1` and `tracking="tighter"` selects `-0.05em`.
 
 ## API
 
-Text is workspace source. For this workspace version, the CLI target is `base-text`. Use matching CLI and package versions; check the chosen release's availability before installing.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -94,7 +73,7 @@ Text is workspace source. For this workspace version, the CLI target is `base-te
   ]}
 />
 
-These props belong to Root.
+Exposes no extra state, methods, or events and renders your children in the default slot.
 
 ## References
 

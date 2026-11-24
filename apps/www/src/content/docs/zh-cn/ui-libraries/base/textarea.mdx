@@ -1,14 +1,15 @@
 ---
 title: 'Textarea'
-desp: 'Textarea 基础原型'
-description: '无内容渲染的宿主协同多行文本控件原型'
+description: '基于原生多行文本编辑器的无样式多行输入组件，支持受控输入法与表单集成。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-textarea-root` 是一个无内容渲染的 Base 原型。它静态声明 `plain-text`、`multiline` 与 host-owned editing requirement，由 adapter 选择一个物理宿主 editor。当前 Web profile 将该 requirement 解析为原生 `<textarea>`；Web Component、React 与 Vue 的演示是同一 Web host 上的 cross-adapter evidence，不代表已经完成多宿主 conformance。
+围绕原生多行文本编辑器构建的无样式多行输入组件，提供稳定的受控/非受控值管理、IME 组合输入保护、归一化事件与无障碍属性映射。
+
+## 预览
 
 <div>
   <PrototypePreviewer
@@ -18,51 +19,33 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   />
 </div>
 
-## 所有权与事件
+## 安装
 
-实例创建时会确定 value 所有权模式，并在整个实例生命周期内保持稳定：
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版（工作区 CLI 目标为 `base-textarea`）。
 
-- 使用 `defaultValue` 时，Root 为非受控模式。它只用默认值初始化一次，随后接纳用户输入；其他 props 更新不会重置已经编辑过的值。
-- 使用 `value` 时，Root 为受控模式。用户编辑只构成提案：Root 会将其发出，但 owner 必须把接纳后的 `value` 传回，该值才会成为权威事实。
+## 用法
 
-对外事件携带归一化数据，不泄漏原生事件对象：
+### 受控、非受控与 IME 组合输入
 
-- `valueChange` 跟随原生 `input`，发出 `{ value, composing, data, inputType }`。
-- `change` 跟随原生 change 边界，发出 `{ value }`。
-- `compositionStart`、`compositionUpdate` 与 `compositionEnd` 分别发出 `{ value, data }`，供应用观察 IME 过程。
+值模式在实例创建时确定并在生命周期内保持一致：
 
-在受控 IME 会话期间，物理 textarea 会保留正在输入的候选文本。`compositionEnd` 后，如果 owner 没有接纳候选值，控件才恢复为当前受控 `value`；恢复不会打断组合输入。
+- **非受控模式**：传入 `defaultValue` 初始化一次，后续直接接纳用户输入，无关属性更新不会重置已编辑内容。
+- **受控模式**：传入 `value`，用户输入以提案形式通过事件发出，由外部回传新 `value` 后生效。在 IME 组合输入期间会保留候选文本，直到 `compositionEnd` 后若外部未接纳新值才恢复为当前受控 `value`，不打断输入法。
+- 仅更新无关属性或值未变化时，会保留当前光标位置与选区；长按选区、系统剪贴板菜单与软键盘行为由宿主原生编辑器负责。
 
-普通 property update 或未改变 value 的同步会保留当前 cursor/selection。长按选择、selection handles、软件键盘与系统复制/剪切/粘贴菜单属于宿主 editing session；Base Textarea 不另外定义 touch-only 原型，也不替换系统 editing chrome。
+### 原生属性、焦点与自定义封装
 
-## 原生控件投影
+- `disabled`、`readOnly`、`required`、`name`、`placeholder`、`autoComplete`、`minLength`、`maxLength`、`rows` 和 `wrap` 会直接映射到原生 `<textarea>`，同时保留 `textbox` 角色并映射 `ariaLabel`、`labelledBy` 与 `describedBy`。
+- 控件本身不包含子节点插槽，请在外部包裹标签与样式。基于 `asTextareaRoot()` 封装风格组件时，需在原型定义上复用 `asTextareaRoot.modules`。
 
-Root 将这些 props 投影到同一个物理 textarea：`disabled`、`readOnly`、`required`、`name`、`placeholder`、`autoComplete`、`minLength`、`maxLength`、`rows` 与 `wrap`。`value` 和 `defaultValue` 遵循上述所有权规则，不会创建第二个控件。
+### 复位与表单组合
 
-Expose surface 提供 `focusSelf()`、`blurSelf()`，以及 `value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing` state。无障碍投影保留 textarea 的 textbox role，将 disabled/read-only state 镜像为 `aria-disabled`/`aria-readonly`，并将 `ariaLabel`、`labelledBy`、`describedBy` 映射为该物理目标上的 `aria-label`、`aria-labelledby`、`aria-describedby`。
-
-Base 不提供 child renderer，也不提供视觉样式。应用作者应在这个 contentless 协议边界之外为原生控件添加样式与标签，而不是在 Root 内放入 authored content 或 rich text。
-
-`asTextareaRoot.modules` 公开该 authored asHook 的冻结 pre-render module requirements。使用 `asTextareaRoot()` 创建 styled prototype 时，调用者必须在自己的 prototype definition 上复用这个 surface；setup-time 调用不会事后改变 adapter 已完成的 target selection。
-
-## 当前边界
-
-`base-textarea-root` 不拥有 form submission、hidden field、form-data 协作、validation message、auto-resize、rich-text editing、status/live-region announcement、系统 selection/edit-menu chrome，也不拥有单一物理 editor 之外的组合能力。Web 表单相关 props 可以被投影，但这不会让原型成为表单工作流的 owner。
-
-## 参考
-
-- 原型：[P-BASE-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TEXTAREA.yaml)
-- 契约：[C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
-- 源码：[packages/prototypes/base/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/textarea)
-- 测试：[textarea.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/textarea.test.ts)
-
-## 复位与 Field 组合
-
-当前 0.3 源码公开 `resetValue()`：非受控编辑器恢复实例创建时的值，受控编辑器提出该值并等待 owner。显式复位在 readOnly 或 disabled 下仍可用，并退役组合输入。通过 `@proto.ui/prototypes-base/field` 的 `fieldTextarea` 获取同一个多行编辑器的 Field 命名、描述、错误与校验组合；见[版本化 Form 配方](../form/)。
+- 调用 `resetValue()` 可将非受控编辑器恢复为初始值（或在受控模式下发出初始值提案），在 `readOnly` / `disabled` 状态下也可用，并结束进行中的组合输入。
+- 如需接入标签、描述、错误提示与表单校验，请从 `@proto.ui/prototypes-base/field` 导入 `fieldTextarea`（参考 [Form 示例](../form/)）。
 
 ## API
 
-Textarea 是工作区源码。当前工作区 CLI 目标为 `base-textarea`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `value` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -84,7 +67,14 @@ Textarea 是工作区源码。当前工作区 CLI 目标为 `base-textarea`。CL
   ]}
 />
 
-这些属性属于 Root。
+传入 `value` 可受控管理文本内容。
+
+- **暴露状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`。
+- **暴露方法**：`focusSelf()`、`blurSelf()`、`resetValue()`。
+- **事件**：
+  - `valueChange`：随原生 `input` 触发，载荷为 `{ value, composing, data, inputType }`。
+  - `change`：随原生 `change` 触发，载荷为 `{ value }`。
+  - `compositionStart`、`compositionUpdate`、`compositionEnd`：载荷均为 `{ value, data }`。
 
 ## 参考
 

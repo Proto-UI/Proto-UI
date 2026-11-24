@@ -1,13 +1,17 @@
 ---
 title: 'Surface'
-description: 'Base 被动视觉表面，语义与交互事实由消费者拥有。'
+description: '提供统一视觉层级、圆角、边框与状态反馈词汇的被动容器组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-surface-root` 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Base 规范化输入词汇并保持视觉中立，由家族投射拥有填充、边框、圆角、抬升与状态反馈。
+用于包裹内容的被动视觉表面容器，统一规范背景层级、圆角、边框、抬升与交互视觉状态词汇，具体样式由各风格组件实现。
+
+## 预览
+
+示例将显式视觉状态传入原型，仅用于展示表面外观，不附加按钮或焦点交互。
 
 <PrototypePreviewer
   demoId="demo-base-surface"
@@ -15,9 +19,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-Demo 将明确的被动状态传给真实包原型。focus、press 样本是视觉事实，不是可点击或可聚焦的控件。外层间距与内部内容 padding 属于示例，不通过添加事件处理把 Surface 冒充 Button。
+## 安装
 
-## 使用 Surface
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版（工作区 CLI 目标为 `base-surface`）。可从 `@proto.ui/prototypes-base/surface` 或包根导入 `surfaceRoot`（以及 `SurfaceRootProps`、`SurfaceRootExposes`、`asSurfaceRoot`、`SurfaceRootAsHookContract`）。
+
+## 用法
 
 ```tsx
 import * as React from 'react';
@@ -35,46 +41,21 @@ export function Summary() {
 }
 ```
 
-`/surface` subpath 与包根导出 `surfaceRoot`；`SurfaceRootProps`、`SurfaceRootExposes` 描述共用契约。Base 还导出用于家族编写的 `asSurfaceRoot` 和 `SurfaceRootAsHookContract`。不要在交互 owner 内加入 Surface 后，再给它另一份 role、tab stop 或激活处理。使用原生 anchor 时，导航、键盘行为、target、download 仍归该 anchor。
+### 被动视觉状态
 
-## 输入
+- `hovered`、`focusVisible`、`pressed` 与 `current` 均由外层交互组件传入，`Surface` 本身不监听指针/键盘事件，也不附加无障碍角色、焦点停靠点或点击行为。
+- 移除某个属性时会恢复默认值；布局与内边距由调用方控制。当带样式的 `Text` 位于 `Surface` 内部且需要继承前景色时，可设置 `tone="inherit"`。
+- 当需要真实按钮或链接交互时，应使用 `Button` 或原生 `<a>` 元素，而不是在 `Surface` 上添加交互事件。
 
-| Prop | Values | Default |
-| --- | --- | --- |
-| `variant` | `transparent`, `outline`, `secondary`, `muted`, `accent`, `solid`, `scrim` | `outline` |
-| `radius` | `default`, `none`, `sm`, `md`, `lg`, `xl`, `full` | `default` |
-| `border` | `all`, `bottom`, `none` | `all` |
-| `elevation` | `none`, `raised` | `none` |
-| `transitionState` | `closed`, `entering`, `entered`, `leaving` | `entered` |
-| `fade` | boolean | `false` |
-| `hovered` | boolean | `false` |
-| `focusVisible` | boolean | `false` |
-| `pressed` | boolean | `false` |
-| `current` | boolean | `false` |
+### 联动 Transition 淡入淡出
 
-`hovered`、`focusVisible`、`pressed`、`current` 都是现有语义 owner 提供的事实；Surface 不自行检测指针、焦点、键盘、选择或导航状态。它没有 exposed state、event、method、无障碍 role 或 native property。`current` 是呈现输入，不是 `aria-current` 实现；需要真实 Button 时应组合受治理的 Button 协议。
-
-移除输入后恢复默认值。Base 规范化 `secondary` 而不绘制；各风格投射独立于 elevation 选择次级表面。默认圆角和绘制由各家族决定，共用 prop 词汇不等于外观一致。内容与布局继续归消费者；当带风格的 Text 子项需要保留外层 Surface 前景时，使用 `tone="inherit"`。
-
-## 观察已有 Transition
-
-`fade` 显式启用家族拥有的 opacity 呈现。在带风格投射中，`fade=true` 时 `closed`、`leaving` 对应 opacity 0，`entering`、`entered` 对应 opacity 1。`transitionState` 是既有 [Transition owner](/zh-cn/ui-libraries/base/transition/) 提供的事实；Surface 不创建第二个时钟、调度策略、阶段事件或完成信号。`fade=false` 时，阶段输入不会启用这组 opacity 映射。
-
-Web 的 `surface-fade` token 消费 `--pui-surface-transition-duration`，默认 `0ms`。Web composition 可通过该变量传入既有 owner 解析后的 duration，并负责验证毫秒数有限且非负。不存在通用 220ms 默认值，也没有 Surface duration prop。reduced-motion 与起始 opacity 属于有界 Web 样式行为，不证明原生目标支持动态 CSS 变量。
-
-`scrim` 选择家族的常规遮暗绘制，不增加材质采样、模糊或折射。opacity 0 不代表禁用、inert、卸载或移除语义 owner：交互门控、presence 与焦点仍归既有 Dialog/Transition 等语义 owner，Surface 不接管这些责任。
-
-## Host 与 Compiler 边界
-
-Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符合性 slice 覆盖 Web Components、React、Vue 3、Vue 2。从源码构建的 CLI 为这四种 facade target 注册 `<family>-surface`，Web 样式编译器消费真实家族 token；`gpui` facade 生成为明确不支持。其 Web Adapter 与 compiler 证据应分别阅读：显示 Web 投射不等于完整原生支持或任意 Prototype AOT。Surface 不隐藏宿主特定材质后端、截图捕获、导航服务或代码 renderer。不支持的目标或样式诊断应明确保留，不能当成等价输出。
-
-## 依据
-
-`P-BASE-SURFACE`与 `T-SURFACE-0001` 治理此 draft slice。源码：`packages/prototypes/base/src/surface/`.
+- 设置 `fade={true}` 后，风格组件会根据传入的 `transitionState`（来自 [Transition](/zh-cn/ui-libraries/base/transition/)）映射透明度：`closed` 与 `leaving` 为 `0`，`entering` 与 `entered` 为 `1`。
+- Web 端可通过 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`）同步既有过渡时长。
+- `scrim` 变体用于常规遮罩层着色；透明度为 `0` 仅影响视觉显示，禁用、隐藏与焦点隔离仍由外层 `Dialog` 或 `Transition` 控制。
 
 ## API
 
-Surface 是工作区源码。当前工作区 CLI 目标为 `base-surface`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -103,8 +84,6 @@ Surface 是工作区源码。当前工作区 CLI 目标为 `base-surface`。CLI 
     { name: 'current', type: 'boolean', default: 'false' },
   ]}
 />
-
-这些属性属于 Root。
 
 ## 参考
 

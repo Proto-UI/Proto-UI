@@ -1,11 +1,15 @@
 ---
-title: base Meter
-description: A bounded numerical measurement with shared Base semantics.
+title: 'Meter'
+description: 'A passive gauge for displaying a scalar measurement within a known range.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Displays a scalar measurement within a known numeric range along with optional threshold classification.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-meter"
@@ -14,17 +18,21 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. low/high/optimum classify the measured value as optimal, suboptimal or critical; they do not change the numerical value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from `@proto.ui/prototypes-base/meter`.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+## Usage
 
-Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`:
+
+- **Composition roles**: `Root` manages the numeric range; `Label` names the meter, `Track` contains `Indicator`, and `Value` displays `valueText` or the formatted numeric value.
+- **Clamping and thresholds**: `value` clamps to ordered finite `[min, max]` bounds (an equal `min` and `max` yields `0` percentage). Optional `low`, `high`, and `optimum` classify `status` as `optimal`, `suboptimal`, or `critical` without altering the underlying number.
+- **Passive readout**: Meter is display-only with no keyboard tab stop or editing events. Updating props synchronizes every part. `Root` and its parts expose `value`, `percentage`, `indeterminate`, and `status`.
 
 ## API
 
-Meter is workspace source. There is no public `proto-ui add` target.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -40,7 +48,7 @@ Meter is workspace source. There is no public `proto-ui add` target.
   ]}
 />
 
-These props belong to Root. Label, Track, Indicator and Value have no props.
+`Label`, `Track`, `Indicator`, and `Value` take no props.
 
 ## References
 

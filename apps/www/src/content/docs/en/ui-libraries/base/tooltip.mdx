@@ -1,7 +1,6 @@
 ---
 title: 'Tooltip'
-desp: 'Tooltip'
-description: 'Tooltip and Tooltip Group base prototypes'
+description: 'An unstyled tooltip and tooltip group supporting hover delays, instant keyboard open, and warm-window coordination.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -10,17 +9,9 @@ import CodeExample from '@/components/CodeExample.astro';
 import { baseTooltipFiles } from '@/content/docs/demo_components/tooltip-usage';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Base Tooltip consists of Root, Trigger, and Content. Tooltip Group is an adjacent protocol in the same family and shares delay defaults, the warm window, and active-owner coordination across Roots.
+Displays a concise floating label on hover or keyboard focus, with optional `TooltipGroup` coordination for shared default delays and instant sibling handoff.
 
-- Initial pointer hover opens after `openDelay`, while reverse movement cancels the pending task.
-- Keyboard focus opens immediately without waiting for the pointer delay.
-- `closeDelay` lets the pointer move from Trigger into Content; Content itself must contain no focusable interaction.
-- Trigger additively references the `role="tooltip"` Content through `aria-describedby` only while open.
-- Escape enters Root's unified close request channel.
-- Moving to a sibling during the Group warm window opens it immediately; the previous uncontrolled Tooltip ends perceptual presence without a visible exit overlap, and initial delay returns after `skipDelay`.
-- Draft lifetime rule: when the current active Root unmounts or is disposed, its Group immediately returns to cold delay. Ordinary closure keeps the `skipDelay` window. A retained open Root registers again on remount; cleanup never clears a newer active Root, and a controlled Root that refused closure is not automatically reselected.
-
-Portal is currently owned by Content's Overlay and renderer projection rather than a separate Base Portal prototype. Arrow remains outside the current Base guarantee until a governed geometry and positioning channel exists.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-tooltip"
@@ -29,35 +20,35 @@ Portal is currently owned by Content's Overlay and renderer projection rather th
   hasCode={true}
 />
 
-## Suggested acceptance path
+## Installation
 
-1. Hover `Account` and confirm Tooltip appears after about 500ms; leaving early must not flash it.
-2. With the first Tooltip open, move quickly to `Notifications`; the warm sibling should open immediately and the previous Tooltip should disappear with no visible overlap.
-3. Let both remain closed for more than 700ms, then hover again and confirm the 500ms delay returns.
-4. Use Tab to focus a Trigger and confirm immediate opening; Escape should close it while retaining Trigger focus.
-5. Switch among Web Components, React, Vue, and Vue 2 in the toolbar and repeat the interaction.
+Currently available from workspace source; not yet included in the 0.2.0 stable release (see [Quick Start](/en/start-here/quick-start/) for published versions). Base Tooltip is exported directly from `@proto.ui/prototypes-base/tooltip` and has no `proto-ui add` CLI target.
 
-## Current-source installation and Usage
+Install `@proto.ui/cli`, `@proto.ui/prototypes-base`, and your host Adapter (`@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue`, or `@proto.ui/adapter-vue2`; Vue 2 requires Vue `>=2.6.0 <2.7`) from the same source revision. For a local source checkout, use the repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) and [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs).
 
-These files target the current 0.3 source packages, including the Vue 2.6 Adapter. They do not claim that the workspace version is published to npm. Start with an existing host application and install the CLI, `@proto.ui/prototypes-base` and that host's Adapter from **the same reviewed source revision**. The repository's [pack-only flow](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/publish.mjs) produces local tarballs; its [clean consumer installation](https://github.com/Proto-UI/Proto-UI/blob/main/scripts/release/consumer-smoke-cli.mjs) installs the complete declared `@proto.ui/*` dependency closure from those tarballs. The [stable Quick Start](/en/start-here/quick-start/) remains a separate published-version route.
-
-Use `@proto.ui/adapter-web-component`, `@proto.ui/adapter-react`, `@proto.ui/adapter-vue` or `@proto.ui/adapter-vue2` for the selected host. React and Vue keep their existing application mount entry. The React example passes `createPortal` from `react-dom` into the Adapter so Content uses the renderer-owned portal. Vue 2 requires Vue `>=2.6.0 <2.7`; replacing the CLI version with `@latest` does not make a source preview reproducible.
-
-After installing the matching packages, run the local CLI in the application directory. Keep the generated CSS: Base presence and positioning also need its structural rules. The small `tooltip-demo.css` below belongs to the application and does not replace those rules.
+After installing, run the local CLI to generate the structural stylesheet `proto-ui-style.css` (keep a single import if your app already loads it):
 
 ```sh
 node node_modules/@proto.ui/cli/bin/proto-ui.js init --yes --no-interactive --prototypes shadcn
 ```
 
-Base Tooltip has public `@proto.ui/prototypes-base/tooltip` exports but **no `proto-ui add` target**. These files adapt those exports directly; the WC example registers its own `app-base-tooltip-*` tags with the public Adapter and sets inputs through `setElementProps`. The Shadcn preset supplies structural CSS here, while the example's own stylesheet supplies Base paint. It does not turn Base into the Shadcn Tooltip family.
-
-Copy the files for one host. Add the WC HTML to your existing document and load `src/main.ts` once; for React or Vue, keep the app's usual mount entry and use the provided `App` component. Import `proto-ui-style.css` once if the application already loads it. One Group owns two uncontrolled Roots, and each Root has one standalone Trigger and one non-interactive Content.
+The React example passes `createPortal` from `react-dom` into `createReactAdapter` for overlay portalling; Web Components configure custom element inputs via `setElementProps`.
 
 <CodeExample files={baseTooltipFiles} initialHost="wc" label="Base Tooltip complete host Usage" />
 
-## Tooltip on a Button
+## Usage
 
-A focusable command and Tooltip should share one subject. Compose the draft `useTooltipTrigger()` authored hook with the command behavior, adapt the resulting prototype, and place that component directly inside Tooltip Root alongside Content. Do not wrap a separately focusable Button in the standalone Trigger: that creates two Tab stops.
+### Interaction and group coordination
+
+Compose `Root`, `Trigger`, `Content`, and an optional `Group`:
+
+- **Hover and keyboard focus**: Initial pointer hover opens after `openDelay` (moving away cancels the pending timer), while keyboard focus opens immediately.
+- **Close delay and accessibility**: `closeDelay` lets the pointer move from `Trigger` to `Content` (keep `Content` non-interactive). While open, `Trigger` automatically links and cleans up `aria-describedby` referencing `Content` (`role="tooltip"`). Pressing `Escape` dismisses the tooltip while keeping focus on `Trigger`.
+- **Warm-window handoff**: Moving to a sibling tooltip within `Group`'s `skipDelay` window opens it immediately and closes the previous uncontrolled tooltip with no overlap; after `skipDelay` expires, initial delay resumes. Unmounting or disposing the active `Root` immediately resets the group to cold delay.
+
+### Attaching Tooltip to a Button
+
+Share one focusable element between a button and tooltip trigger by composing `useTooltipTrigger()` with `asButton()` instead of nesting a focusable button inside a separate `Trigger` (which creates two tab stops):
 
 ```ts
 import { definePrototype } from '@proto.ui/core';
@@ -73,15 +64,13 @@ export const tooltipButton = definePrototype<ButtonProps, ButtonExposes>({
 });
 ```
 
-Button retains its role, name, click signal, disabled state and single focus owner. Tooltip adds hover/focus intent and the owned `aria-describedby` relation. Disabling Tooltip Root suppresses Tooltip while leaving the command available; disabling the command suppresses both. `useTooltipTrigger` takes no options and adds no outward exposes. It requires an existing focusable subject. Standalone `asTooltipTrigger` retains its original focus behavior and exposes.
+`Button` keeps its role, click behavior, disabled state, and single focus stop, while `useTooltipTrigger()` adds hover/focus intent and `aria-describedby`. Disabling the Tooltip `Root` suppresses only the tooltip while keeping the button usable; disabling the button suppresses both. To wrap an existing styled prototype, preserve its static `modules` declaration, call its `setup(def)`, call `useTooltipTrigger()`, and return its captured render function.
 
-For an existing styled prototype, use the same setup composition while preserving its render function: call the styled prototype's `setup(def)`, then `useTooltipTrigger()`, and return the captured render function from your `definePrototype`. Keep the styled prototype's static `modules` declaration. This shares one host and preserves the family's Button presentation; it is separate from the passive action-body styling used by the standalone demo below.
+### Using inside a `ShadowRoot`
 
-## ShadowRoot
+When the trigger lives inside a `ShadowRoot`, mount `Content` in the same shadow tree—an `aria-describedby` reference across a shadow boundary does not resolve to an accessible description.
 
-When the command lives inside a real `ShadowRoot`, keep Tooltip Content in that same tree. The Web Adapters normally project overlays into `document.body`. An `aria-describedby` string that names Content outside the command's shadow tree does not produce its accessible description, even when the IDs match and the tooltip is visible.
-
-Register an application-owned scene and a distinct overlay destination before mounting the adapted Tooltip components. `registerWebPortalDestination` is an exported Web host policy from `@proto.ui/adapter-base`; it is not a Tooltip prop. This helper supplies a mount point for React, Vue, Vue 2 or Web Components:
+Register an application-owned scene and overlay target via `registerWebPortalDestination` from `@proto.ui/adapter-base` before mounting (keep `overlays` inside `scene` and outside `Content`):
 
 ```ts
 import { registerWebPortalDestination } from '@proto.ui/adapter-base';
@@ -109,13 +98,11 @@ export function createTooltipScene(container: HTMLElement) {
 }
 ```
 
-Mount Root, the same-subject command and Content through your chosen Adapter inside `appMount`, and install the family's generated CSS inside `shadow`. Keep `overlays` connected for that owner's lifetime. When leaving the scene, await `dispose` with the framework's unmount/destroy function so the component owner retires before its portal registration is released. The destination must stay inside the scene and outside the projected Content itself.
-
-The native consumer regression covers this composition for Base, Shadcn and Brutalist in all four Web hosts, including Tab order, the browser's computed accessible description, Escape, command remount and cleanup. Its negative control retains the default body destination and observes an empty computed description despite matching ID strings. This is a Web/browser accessibility boundary; native assistive-technology acceptance remains separate.
+Mount `Root`, the combined trigger button, and `Content` inside `appMount`, and load the generated CSS inside `shadow`. Call `dispose` on teardown so components unmount before releasing the portal registration.
 
 ## API
 
-Base Tooltip is documented against the current source package exports above; there is no public `proto-ui add` target. Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -127,7 +114,13 @@ Base Tooltip is documented against the current source package exports above; the
   ]}
 />
 
-These props belong to Root. Trigger defaults `disabled` to `false`. Content accepts the Transition props and defaults `side` to `top`, `align` to `center`, `sideOffset` to `4`, `alignOffset` and `collisionPadding` to `0` and `avoidCollisions` to `true`. Group defaults `openDelay` to `700`, `closeDelay` to `100` and `skipDelay` to `300`.
+Pass `open` to control open state.
+
+### Part Props
+
+- **Trigger**: `disabled` (default `false`).
+- **Content**: Accepts `Transition` props plus `side` (default `'top'`), `align` (default `'center'`), `sideOffset` (default `4`), `alignOffset` (default `0`), `collisionPadding` (default `0`), and `avoidCollisions` (default `true`).
+- **Group**: `openDelay` (default `700`), `closeDelay` (default `100`), `skipDelay` (default `300`).
 
 ## References
 
