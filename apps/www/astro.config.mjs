@@ -16,6 +16,7 @@ import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs'
 import { runtimeRetryUrlsPlugin } from './scripts/runtime-retry-urls.mjs';
 import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';
 import { accordionActivationProbePlugin } from './scripts/accordion-activation-probe.mjs';
+import { websiteClientChunkIsolation } from './scripts/client-chunk-isolation.mjs';
 import { siteCopyPlugin } from './src/utils/expressive-code-copy.mjs';
 import { createProtoUiSourcePlugin } from './src/utils/proto-ui-source.mjs';
 
@@ -40,8 +41,13 @@ function normalizedBundleModuleId(id) {
 function websiteManualChunk(id) {
   const normalizedId = normalizedBundleModuleId(id);
   const modulePath = normalizedId?.split('?', 1)[0];
-  // Share the concept bootstrap instead of inlining it on every documentation page.
-  if (modulePath === 'apps/www/src/scripts/proto-concept.ts') return 'site-concepts';
+  // Share the bootstrap and its data together. Leaving the data in the importing
+  // PageFrame entry would create a circular chunk dependency in the client build.
+  if (
+    modulePath === 'apps/www/src/scripts/proto-concept.ts' ||
+    modulePath === 'apps/www/src/data/concepts.ts'
+  )
+    return 'site-concepts';
   // Only the lazy React/Vue/Vue2 adapters use this reserved-input helper.
   // Do not pull it into every WC site shell through the broad Base grouping.
   if (modulePath === 'packages/adapters/base/src/host/instance-associations.ts') return;
@@ -183,6 +189,7 @@ export default defineConfig({
     ...whitepaperRedirects,
   },
   integrations: [
+    websiteClientChunkIsolation(),
     whitepaperRedirectFragments(whitepaperRedirects),
     starlight({
       title: 'Proto UI',
@@ -2221,9 +2228,6 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: websiteManualChunk,
-          // Keep excluded providers outside eager control chunks even when a
-          // grouped public barrel re-exports them. Preserve their lazy owners.
-          onlyExplicitManualChunks: true,
         },
       },
     },

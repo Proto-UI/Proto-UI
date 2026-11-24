@@ -863,12 +863,13 @@ function writeCurrentRetryConfig(root) {
   );
   assert.equal(
     createHash('sha256').update(config).digest('hex'),
-    'c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee'
+    '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d'
   );
   writeReviewedPromotionConfig(root, config);
   for (const relative of [
     'apps/www/src/utils/proto-ui-source.mjs',
     'apps/www/scripts/accordion-activation-probe.mjs',
+    'apps/www/scripts/client-chunk-isolation.mjs',
   ]) {
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
@@ -18711,6 +18712,7 @@ for (const relative of [
   'apps/www/scripts/contrast-provenance.mjs',
   'apps/www/src/utils/proto-ui-source.mjs',
   'apps/www/scripts/accordion-activation-probe.mjs',
+  'apps/www/scripts/client-chunk-isolation.mjs',
 ]) {
   for (const defect of ['missing', 'changed', 'symlink', 'parent-symlink', 'directory']) {
     test(`current retry virtual boundary: rejects ${defect} ${relative}`, () => {

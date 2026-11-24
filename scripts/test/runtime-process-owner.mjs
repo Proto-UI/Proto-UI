@@ -35,13 +35,17 @@ export function createRuntimeProcessOwner({
     return liveOwned(entry.owned);
   };
   const signalLinux = (entry, signal) => {
+    const errors = [];
     for (const fact of observe(entry).reverse()) {
       try {
         kill(fact.pid, signal);
       } catch (error) {
-        if (error.code !== 'ESRCH') throw error;
+        // One inaccessible process must not prevent attempts on the remaining
+        // confirmed descendants or their parent.
+        if (error.code !== 'ESRCH') errors.push(error);
       }
     }
+    return errors;
   };
   async function waitUntilGone(alive, timeoutMs) {
     const deadline = Date.now() + timeoutMs;
@@ -83,13 +87,20 @@ export function createRuntimeProcessOwner({
           });
         });
       } else if (platform === 'linux') {
-        signalLinux(entry, 'SIGTERM');
+        const errors = signalLinux(entry, 'SIGTERM');
         const alive = () => observe(entry).length > 0;
         if (!(await waitUntilGone(alive, graceMs))) {
-          signalLinux(entry, 'SIGKILL');
+          errors.push(...signalLinux(entry, 'SIGKILL'));
           if (!(await waitUntilGone(alive, killMs)))
-            throw new Error(`Owned runtime descendants remain after SIGKILL: ${entry.child.pid}`);
+            errors.push(
+              new Error(`Owned runtime descendants remain after SIGKILL: ${entry.child.pid}`)
+            );
         }
+        if (errors.length)
+          throw new AggregateError(
+            errors,
+            `Owned runtime process cleanup failed: ${entry.child.pid}`
+          );
       } else {
         if (!groupSignal(entry, 'SIGTERM')) return;
         const alive = () => groupSignal(entry, 0);
@@ -102,9 +113,12 @@ export function createRuntimeProcessOwner({
         }
       }
     });
-    // Retain asynchronous cleanup failures for the terminal owner. A command
-    // success must not silently hide a failed cleanup or become an unhandled rejection.
-    entry.stopped.catch((error) => failures.push(error));
+    // Wake the individual command even when surviving descendants keep its
+    // pipes open. The wrapper must not wait for EOF before learning of failure.
+    entry.stopped.then(entry.resolveCompleted, (error) => {
+      failures.push(error);
+      entry.rejectCompleted(error);
+    });
     return entry.stopped;
   }
 
@@ -118,8 +132,18 @@ export function createRuntimeProcessOwner({
         detached: platform !== 'win32',
         windowsHide: true,
       });
+      let resolveCompleted, rejectCompleted;
+      const completed = new Promise((resolve, reject) => {
+        resolveCompleted = resolve;
+        rejectCompleted = reject;
+      });
+      // Long-lived server owners may observe failures only at stopAll().
+      completed.catch(() => {});
       const entry = {
         child,
+        completed,
+        resolveCompleted,
+        rejectCompleted,
         owned: new Map(),
         ownership: {
           uid: process.geteuid?.(),
@@ -141,6 +165,11 @@ export function createRuntimeProcessOwner({
       child.once('exit', () => void stop(entry));
       child.once('error', () => void stop(entry));
       return child;
+    },
+    completed(child) {
+      const entry = children.get(child);
+      if (!entry) throw new Error('Command does not belong to this runtime process owner');
+      return entry.completed;
     },
     stopAll() {
       if (stopped) return stopped;

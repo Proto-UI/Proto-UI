@@ -143,7 +143,7 @@ async function waitForServer(url) {
 }
 
 async function generateProtoUiStyle() {
-  styleGeneration ??= new Promise((resolve, reject) => {
+  styleGeneration ??= (async () => {
     const appsWwwRoot = path.join(root, 'apps', 'www');
     // The parent command requires Corepack on PATH. process.execPath may point
     // at an unrelated distro Node binary, so do not derive Corepack from it.
@@ -154,13 +154,14 @@ async function generateProtoUiStyle() {
       shell: corepack.shell,
       stdio: 'inherit',
     });
-    child.on('error', reject);
-    child.on('close', (code, signal) => {
-      if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
-      else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
-      else resolve();
+    const closed = new Promise((resolve, reject) => {
+      child.once('error', reject);
+      child.once('close', (code, signal) => resolve({ code, signal }));
     });
-  });
+    const [{ code, signal }] = await Promise.all([closed, processes.completed(child)]);
+    if (signal) throw new Error(`Proto UI style generation exited on ${signal}.`);
+    if (code !== 0) throw new Error(`Proto UI style generation exited with code ${code}.`);
+  })();
   return styleGeneration;
 }
 
@@ -201,69 +202,82 @@ async function stopChildren() {
 }
 
 async function runVitest(args, baseUrl) {
-  return new Promise((resolve, reject) => {
-    // Windows cannot execute a `.cmd` shim through spawn() without a shell.
-    // Invoke Vitest's ESM entry with the current Node executable instead so
-    // forwarded test arguments remain an argv array on every platform.
-    const vitestBin = path.join(root, 'node_modules', 'vitest', 'vitest.mjs');
-    const env = {
-      ...process.env,
-      ...(baseUrl ? { PROTO_UI_BROWSER_BASE_URL: baseUrl } : {}),
-      ...(selection
-        ? {
-            PROTO_UI_RUNTIME_ROOT: root,
-            PROTO_UI_RUNTIME_PROGRESS_FILE: progressPath,
-            PROTO_UI_RUNTIME_SELECTION_FILE: path.join(
-              evidenceDirectory,
-              `selection-${evidenceId}.json`
-            ),
-          }
-        : {}),
-    };
-    const reportArgs = reportPath
-      ? [
-          '--reporter=default',
-          '--reporter=json',
-          '--reporter=./scripts/test/runtime-progress-reporter.mjs',
-          `--outputFile=${reportPath}`,
-        ]
-      : [];
-    const child = spawn(process.execPath, [vitestBin, 'run', ...args, ...reportArgs], {
-      cwd: root,
-      env,
-      shell: false,
-      stdio: ['inherit', 'pipe', 'pipe'],
-    });
-    const inspect = observeReadinessFailures(() =>
-      reportServerSnapshot('browser readiness failed while the server wrapper may still be running')
-    );
-    child.stdout.on('data', (chunk) => {
-      process.stdout.write(chunk);
-      inspect(chunk);
-    });
-    child.stderr.on('data', (chunk) => {
-      process.stderr.write(chunk);
-      inspect(chunk);
-    });
-    child.on('error', reject);
-    child.on('close', async (code, signal) => {
-      if (signal || code !== 0)
-        reportServerSnapshot(`Vitest exited: code=${code}; signal=${signal}`);
-      // Wait for both captured pipes and their forwarded writes before the
-      // runner can exit, so its diagnostic tap cannot truncate Vitest output.
-      await Promise.all([
-        new Promise((done) => process.stdout.write('', done)),
-        new Promise((done) => process.stderr.write('', done)),
-      ]);
-      resolve({ exitCode: code, signal });
-    });
+  // Windows cannot execute a `.cmd` shim through spawn() without a shell.
+  // Invoke Vitest's ESM entry with the current Node executable instead so
+  // forwarded test arguments remain an argv array on every platform.
+  const vitestBin = path.join(root, 'node_modules', 'vitest', 'vitest.mjs');
+  const env = {
+    ...process.env,
+    ...(baseUrl ? { PROTO_UI_BROWSER_BASE_URL: baseUrl } : {}),
+    ...(selection
+      ? {
+          PROTO_UI_RUNTIME_ROOT: root,
+          PROTO_UI_RUNTIME_PROGRESS_FILE: progressPath,
+          PROTO_UI_RUNTIME_SELECTION_FILE: path.join(
+            evidenceDirectory,
+            `selection-${evidenceId}.json`
+          ),
+        }
+      : {}),
+  };
+  const reportArgs = reportPath
+    ? [
+        '--reporter=default',
+        '--reporter=json',
+        '--reporter=./scripts/test/runtime-progress-reporter.mjs',
+        `--outputFile=${reportPath}`,
+      ]
+    : [];
+  const child = spawn(process.execPath, [vitestBin, 'run', ...args, ...reportArgs], {
+    cwd: root,
+    env,
+    shell: false,
+    stdio: ['inherit', 'pipe', 'pipe'],
   });
+  const closed = new Promise((resolve, reject) => {
+    child.once('error', reject);
+    child.once('close', (code, signal) => resolve({ exitCode: code, signal }));
+  });
+  const inspect = observeReadinessFailures(() =>
+    reportServerSnapshot('browser readiness failed while the server wrapper may still be running')
+  );
+  child.stdout.on('data', (chunk) => {
+    process.stdout.write(chunk);
+    inspect(chunk);
+  });
+  child.stderr.on('data', (chunk) => {
+    process.stderr.write(chunk);
+    inspect(chunk);
+  });
+  try {
+    const [termination] = await Promise.all([closed, processes.completed(child)]);
+    if (termination.signal || termination.exitCode !== 0)
+      reportServerSnapshot(
+        `Vitest exited: code=${termination.exitCode}; signal=${termination.signal}`
+      );
+    return termination;
+  } catch (error) {
+    // A cleanup failure gives no EOF guarantee. Close our read handles and
+    // retain the bytes already forwarded instead of hanging behind an orphan.
+    child.stdout.destroy();
+    child.stderr.destroy();
+    throw error;
+  } finally {
+    await flushOutput();
+  }
+}
+
+function flushOutput() {
+  return Promise.all([
+    new Promise((done) => process.stdout.write('', done)),
+    new Promise((done) => process.stderr.write('', done)),
+  ]);
 }
 
 const signalExitCode = (signal) => ({ SIGHUP: 129, SIGINT: 130, SIGTERM: 143 })[signal];
 function reportCleanupError(error) {
   console.error(`[test:runtime] ${error.message}`);
-  for (const cause of error.errors ?? []) console.error(`[test:runtime] ${cause.message}`);
+  for (const cause of error.errors ?? []) reportCleanupError(cause);
 }
 
 // Do not assume shell/runner signal forwarding. Stop Vitest, preparation,
@@ -280,7 +294,10 @@ for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
     }
     void stopChildren()
       .catch(reportCleanupError)
-      .finally(() => process.exit(signalExitCode(signal)));
+      .finally(async () => {
+        await flushOutput();
+        process.exit(signalExitCode(signal));
+      });
   });
 }
 
@@ -317,4 +334,5 @@ try {
     exitCode = 1;
   }
 }
+await flushOutput();
 process.exit(interruptedSignal ? signalExitCode(interruptedSignal) : exitCode);

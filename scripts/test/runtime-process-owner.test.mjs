@@ -51,6 +51,11 @@ function childExit(child) {
     child.once('exit', (code, signal) => resolve({ code, signal }));
   });
 }
+function containsErrorCode(error, code) {
+  return (
+    error?.code === code || (error?.errors ?? []).some((cause) => containsErrorCode(cause, code))
+  );
+}
 
 test(
   'termination owns detached descendants and leaves an unrelated process alive',
@@ -156,9 +161,48 @@ test('a signalling failure cannot be reported as successful cleanup', linux, asy
   await until(() => existsSync(ready), 'owned child starts');
   await assert.rejects(
     owner.stopAll(),
-    (error) => error instanceof AggregateError && error.errors[0].code === 'EPERM'
+    (error) => error instanceof AggregateError && containsErrorCode(error, 'EPERM')
   );
 });
+
+test(
+  'one denied child does not stop cleanup of its owned siblings and parent',
+  linux,
+  async (t) => {
+    const folder = temporary(t);
+    let deniedPid;
+    const owner = createRuntimeProcessOwner({
+      graceMs: 50,
+      killMs: 100,
+      kill(pid, signal) {
+        if (pid === deniedPid)
+          throw Object.assign(new Error('fixture permission denied'), { code: 'EPERM' });
+        process.kill(pid, signal);
+      },
+    });
+    const worker = `require('node:fs').writeFileSync(process.argv[1],JSON.stringify({pid:process.pid}));setInterval(() => {},1000);`;
+    const first = path.join(folder, 'first.json');
+    const second = path.join(folder, 'second.json');
+    const child = owner.spawn(
+      process.execPath,
+      [
+        '-e',
+        `const {spawn}=require('node:child_process');for(const file of ${JSON.stringify([first, second])}) { const child=spawn(process.execPath,['-e',${JSON.stringify(worker)},file],{detached:true,stdio:'ignore'});child.unref(); } setInterval(() => {},1000);`,
+      ],
+      { stdio: 'ignore' }
+    );
+    t.after(() => killIfRunning(child.pid));
+    await until(() => existsSync(first) && existsSync(second), 'both owned workers start');
+    const peer = JSON.parse(readFileSync(first)).pid;
+    deniedPid = JSON.parse(readFileSync(second)).pid;
+    t.after(() => killIfRunning(peer));
+    t.after(() => killIfRunning(deniedPid));
+    await assert.rejects(owner.stopAll(), (error) => containsErrorCode(error, 'EPERM'));
+    assert.ok(running(deniedPid), 'The injected permission failure remains a real failure');
+    assert.ok(!running(peer), 'An earlier signal failure must not skip an owned sibling');
+    assert.ok(!running(child.pid), 'An earlier signal failure must not skip the owned parent');
+  }
+);
 
 test('a spawn error leaves a stoppable owner and preserves the original error', async () => {
   const owner = createRuntimeProcessOwner();
@@ -202,7 +246,7 @@ test('Windows cancellation scopes hidden taskkill to the owned PID and its tree'
 
 // Exercise the unmodified executable wrapper with tiny controlled commands.
 // Planning/CI are inert fixtures; no actual browser acceptance is claimed.
-function runnerFixture(t, mode) {
+function runnerFixture(t, mode, { denyCleanup = null } = {}) {
   // Keep PID receipts until after the cleanup hook: the failing-baseline
   // control also has to retire the very descendants it demonstrates leaking.
   const folder = mkdtempSync(path.join(tmpdir(), 'pui-runtime-wrapper-'));
@@ -224,7 +268,7 @@ function runnerFixture(t, mode) {
     `
     export const READY_ROUTES = ['/'];
     export const corepackInvocation = () => ({ executable: process.env.FIXTURE_DIR + '/corepack.mjs', shell: false });
-    export const createRuntimeTestPlan = () => [{ needsServer: ['style', 'readiness-failure', 'complete'].includes(process.env.FIXTURE_MODE), args: [] }];
+    export const createRuntimeTestPlan = () => [{ needsServer: ['style', 'readiness-failure', 'complete', 'style-cleanup-failure'].includes(process.env.FIXTURE_MODE), args: [] }];
   `
   );
   writeFileSync(
@@ -263,12 +307,16 @@ function runnerFixture(t, mode) {
     const role = ${JSON.stringify(role)};
     const directory = process.env.FIXTURE_DIR;
     writeFileSync(path.join(directory, role + '.json'), JSON.stringify({pid:process.pid}));
-    if (role === 'style' && process.env.FIXTURE_MODE !== 'style') process.exit(0);
+    if (role === 'style' && !['style', 'style-cleanup-failure'].includes(process.env.FIXTURE_MODE)) process.exit(0);
     const workerFile = path.join(directory, role + '-worker.json');
     const worker = spawn(process.execPath, ['-e', "require('node:fs').writeFileSync(" + JSON.stringify(workerFile) + ",JSON.stringify({pid:process.pid}));setInterval(()=>{},1000)"], { detached: true, stdio: ['ignore', 'inherit', 'inherit'] });
     worker.unref();
     while (!existsSync(workerFile)) await new Promise(r => setTimeout(r, 10));
-    if (role === 'vitest' && ['nonzero', 'complete'].includes(process.env.FIXTURE_MODE)) {
+    if (role === 'style' && process.env.FIXTURE_MODE === 'style-cleanup-failure') {
+      console.log('fixture style output retained');
+      process.exit(0);
+    }
+    if (role === 'vitest' && ['nonzero', 'complete', 'vitest-cleanup-failure', 'style-cleanup-failure'].includes(process.env.FIXTURE_MODE)) {
       console.log('fixture Vitest output retained');
       process.exit(process.env.FIXTURE_MODE === 'nonzero' ? 7 : 0);
     }
@@ -279,6 +327,25 @@ function runnerFixture(t, mode) {
   chmodSync(corepack, 0o755);
   writeFileSync(path.join(www, 'node_modules/astro/astro.js'), program('astro'));
   writeFileSync(path.join(folder, 'node_modules/vitest/vitest.mjs'), program('vitest'));
+  const nodeArgs = [];
+  if (denyCleanup) {
+    const preload = path.join(folder, 'deny-cleanup.cjs');
+    writeFileSync(
+      preload,
+      `
+      const fs = require('node:fs');
+      const nativeKill = process.kill.bind(process);
+      process.kill = (pid, signal) => {
+        const file = ${JSON.stringify(path.join(folder, `${denyCleanup}-worker.json`))};
+        if (fs.existsSync(file) && pid === JSON.parse(fs.readFileSync(file)).pid && ['SIGTERM', 'SIGKILL'].includes(signal))
+          throw Object.assign(new Error('fixture cleanup denied'), { code: 'EPERM' });
+        return nativeKill(pid, signal);
+      };
+    `
+    );
+    nodeArgs.push('--require', preload);
+  }
+  nodeArgs.push(path.join(scripts, 'run-runtime-tests.mjs'));
   const env = {
     ...process.env,
     PATH: path.dirname(process.execPath) + path.delimiter + process.env.PATH,
@@ -291,7 +358,7 @@ function runnerFixture(t, mode) {
     'PROTO_UI_RUNTIME_EVIDENCE_DIR',
   ])
     delete env[key];
-  const child = spawn(process.execPath, [path.join(scripts, 'run-runtime-tests.mjs')], {
+  const child = spawn(process.execPath, nodeArgs, {
     cwd: folder,
     env,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -320,6 +387,7 @@ function runnerFixture(t, mode) {
   return {
     child,
     pids,
+    started: (role) => existsSync(path.join(folder, role + '.json')),
     output: () => output,
     ready: (role) =>
       until(
@@ -384,3 +452,27 @@ for (const [mode, code] of [
     }
   );
 }
+
+test(
+  'a Vitest cleanup failure with inherited output pipes exits nonzero without waiting for EOF',
+  linux,
+  async (t) => {
+    const fixture = runnerFixture(t, 'vitest-cleanup-failure', { denyCleanup: 'vitest' });
+    assert.deepEqual(await fixture.result(), { code: 1, signal: null });
+    assert.match(fixture.output(), /fixture Vitest output retained/);
+    assert.match(fixture.output(), /fixture cleanup denied/);
+  }
+);
+
+test(
+  'failed style cleanup prevents the Astro and Vitest stages from starting',
+  linux,
+  async (t) => {
+    const fixture = runnerFixture(t, 'style-cleanup-failure', { denyCleanup: 'style' });
+    assert.deepEqual(await fixture.result(), { code: 1, signal: null });
+    assert.match(fixture.output(), /fixture style output retained/);
+    assert.match(fixture.output(), /fixture cleanup denied/);
+    assert.equal(fixture.started('astro'), false);
+    assert.equal(fixture.started('vitest'), false);
+  }
+);
