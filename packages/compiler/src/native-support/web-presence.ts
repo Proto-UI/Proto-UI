@@ -20,6 +20,7 @@ const files = {
   web: 'packages/adapters/base/src/motion/web-presence-presentation.ts',
   styleOwnership: 'packages/adapters/base/src/motion/web-motion-style-ownership.ts',
   steps: 'packages/adapters/base/src/host/synchronous-steps.ts',
+  visibility: 'packages/adapters/base/src/host/view-visibility.ts',
   preference: 'packages/adapters/base/src/platform/web-preference-source.ts',
 } as const;
 const sources = new Map<string, { file: string; sha256: string; contents: string }>(
@@ -51,6 +52,7 @@ const paths = new Map([
   ['../platform/web-preference-source', './preferences-v1'],
   ['./web-motion-style-ownership', './motion-style-ownership-v1'],
   ['../host/synchronous-steps', './synchronous-steps-v1'],
+  ['../host/view-visibility', './view-visibility-v1'],
 ]);
 function retarget(contents: string) {
   const parsed = parseSupportTemplate(mapSupportImports(contents, paths));
@@ -165,6 +167,7 @@ export function webPresenceArtifacts() {
     canonical('web', files.web),
     canonical('motion-style-ownership', files.styleOwnership),
     canonical('synchronous-steps', files.steps),
+    canonical('view-visibility', files.visibility),
     canonical('preferences', files.preference),
   ];
 }

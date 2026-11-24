@@ -277,7 +277,8 @@ function createDocumentPresenceSink(
         width: dimension('width'),
         height: dimension('height'),
         rootFontPx: px(win?.getComputedStyle(doc.documentElement).fontSize),
-        intrinsicBlockSize: channels.includes('blockSize') ? intrinsicBlockSize() : null,
+        intrinsicBlockSize:
+          !preparing && channels.includes('blockSize') ? intrinsicBlockSize() : null,
         supported: (['translate', 'opacity', 'blockSize'] as const).filter(
           (name) =>
             !lost.has(name) &&
