@@ -1,0 +1,84 @@
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+▲ [WARNING] Unrecognized target environment "ES2024" [tsconfig.json]
+
+    tsconfig.json:61:14:
+      61 │     "target": "ES2024",
+         ╵               ~~~~~~~~
+
+
+ RUN  v2.1.9 /var/tmp/proto-ui-cli-fix-456f
+
+12:23:52 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+   |                                                 ^
+2  |  import { tmpdir } from 'node:os';
+3  |  import path from 'node:path';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/test/hook-source-props-initialization.test.ts
+12:23:53 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import ts from 'typescript';
+2  |  import {
+3  |    createHookSourceModuleContext,
+   |           ^
+4  |    type HookSourceModule as Module,
+5  |    type HookSourceSymbol as SymbolRef,
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/hook-source-summary.ts
+12:23:53 [vite] warning: Unrecognized target environment "ES2024"
+1  |  import { readFileSync, realpathSync, statSync } from 'node:fs';
+   |                                                 ^
+2  |  import path from 'node:path';
+3  |  import ts from 'typescript';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/hook-source-module.ts
+12:23:53 [vite] warning: Unrecognized target environment "ES2024"
+1  |  // @ts-nocheck
+2  |  // Recursive ts.Node AST walking extracted from the legacy CLI so source-token
+   |                                  ^
+3  |  // collection is shared by both user commands and generated preset manifests.
+4  |  import fs from 'node:fs/promises';
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/services/prototype-style-tokens.ts
+12:23:54 [vite] warning: Unrecognized target environment "ES2024"
+1  |  /**
+2  |   * Generated from scripts/styles/lowered-variant-order.canonical.ts by
+   |                                             ^
+3  |   * scripts/styles/generate-lowered-variant-order.ts.
+4  |   * Do not edit by hand.
+
+  Plugin: vite:esbuild
+  File: /var/tmp/proto-ui-cli-fix-456f/packages/cli/src/generated/lowered-variant-order.ts
+ ❯ packages/cli/test/hook-source-props-initialization.test.ts (13 tests | 1 failed) 1250ms
+   × native Props initialization before authored hook capture > withholds capture when shared Props defaults invoke an existing validator 61ms
+     → expected [ 'bg-accent', …(1) ] to not include 'data-[selected]:bg-accent'
+   ✓ native Props initialization before authored hook capture > retains the actual Shadcn Tabs selected and focus rule tokens 906ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/cli/test/hook-source-props-initialization.test.ts > native Props initialization before authored hook capture > withholds capture when shared Props defaults invoke an existing validator
+AssertionError: expected [ 'bg-accent', …(1) ] to not include 'data-[selected]:bg-accent'
+ ❯ packages/cli/test/hook-source-props-initialization.test.ts:120:24
+    118|     const tokens = await collectProtoStyleTokensFromFiles([entry]);
+    119|     expect(tokens).toContain('bg-accent');
+    120|     expect(tokens).not.toContain('data-[selected]:bg-accent');
+       |                        ^
+    121|   });
+    122| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  12:23:51
+   Duration  3.69s (transform 833ms, setup 0ms, collect 1.29s, tests 1.25s, environment 386ms, prepare 227ms)
+
+JSON report written to /var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/shared-validator13.json

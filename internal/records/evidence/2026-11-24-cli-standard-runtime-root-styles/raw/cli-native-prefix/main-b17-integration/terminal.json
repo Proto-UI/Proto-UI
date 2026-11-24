@@ -1,0 +1,27 @@
+{
+  "name": "cli",
+  "parent": "9bcd3748d0f7df95450bdc2e2dbc0cdefd6b1784",
+  "main": "b17c4f88ea4a333da042fd778bf10d657c39f772",
+  "reviewedTreeBeforeHook": "571f5e69007653e7457d0fe5633d1a1af48dea81",
+  "head": "af14e17f3fa2b7de79e8fb4eca370212f4d89ac7",
+  "exitCode": 0,
+  "elapsedMs": 6044,
+  "hookChangedPaths": [],
+  "protectedBefore": {
+    "internal/records/2026-11-24-sprint5-native-direction-acceptance.md": "100644 blob 1c8412313a758188a39f2c76eaed8f808c36404d\tinternal/records/2026-11-24-sprint5-native-direction-acceptance.md",
+    "internal/records/2026-11-24-sprint5-native-integration.md": "100644 blob 1dcc35f631c2b7fb0d996b1c452820c30e4efd24\tinternal/records/2026-11-24-sprint5-native-integration.md",
+    "internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json": "100644 blob de8d9d6eb7b839116c02f99b102346d185fa97fa\tinternal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json",
+    "internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md": "100644 blob 2c2bf51f469237d0ac9f986cf2ac046c2fcd417a\tinternal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md",
+    "internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json": "100644 blob 4d1ee58342004d1b99fefe93874f92310e32a3b1\tinternal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json",
+    "internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md": "100644 blob 2c2c25c05ccd88a840615b3e4a160edd80da41f9\tinternal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md"
+  },
+  "protectedAfter": {
+    "internal/records/2026-11-24-sprint5-native-direction-acceptance.md": "100644 blob 1c8412313a758188a39f2c76eaed8f808c36404d\tinternal/records/2026-11-24-sprint5-native-direction-acceptance.md",
+    "internal/records/2026-11-24-sprint5-native-integration.md": "100644 blob 1dcc35f631c2b7fb0d996b1c452820c30e4efd24\tinternal/records/2026-11-24-sprint5-native-integration.md",
+    "internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json": "100644 blob de8d9d6eb7b839116c02f99b102346d185fa97fa\tinternal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.json",
+    "internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md": "100644 blob 2c2bf51f469237d0ac9f986cf2ac046c2fcd417a\tinternal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md",
+    "internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json": "100644 blob 4d1ee58342004d1b99fefe93874f92310e32a3b1\tinternal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json",
+    "internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md": "100644 blob 2c2c25c05ccd88a840615b3e4a160edd80da41f9\tinternal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md"
+  },
+  "status": ""
+}

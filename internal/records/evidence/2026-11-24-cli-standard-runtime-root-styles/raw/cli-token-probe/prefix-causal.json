@@ -1,0 +1,55 @@
+{
+  "kind": "virtual-source causal probe; not candidate mutation or acceptance",
+  "results": [
+    {
+      "label": "actual",
+      "matched": true,
+      "kind": "unknown",
+      "reason": "unproved registration result",
+      "stateNames": null
+    },
+    {
+      "label": "no_props_prefix",
+      "matched": true,
+      "kind": "result",
+      "producerName": "as-tabs-trigger",
+      "stateNames": [
+        "selected",
+        "disabled",
+        "hovered",
+        "pressed",
+        "relationshipKey",
+        "focused",
+        "focusVisible"
+      ]
+    },
+    {
+      "label": "define_only",
+      "matched": true,
+      "kind": "unknown",
+      "reason": "unproved registration result",
+      "stateNames": null
+    },
+    {
+      "label": "defaults_only",
+      "matched": true,
+      "kind": "unknown",
+      "reason": "unproved registration result",
+      "stateNames": null
+    },
+    {
+      "label": "empty_define",
+      "matched": true,
+      "kind": "unknown",
+      "reason": "unproved registration result",
+      "stateNames": null
+    },
+    {
+      "label": "unknown_call",
+      "matched": true,
+      "kind": "unknown",
+      "reason": "unproved registration result",
+      "stateNames": null
+    }
+  ]
+}

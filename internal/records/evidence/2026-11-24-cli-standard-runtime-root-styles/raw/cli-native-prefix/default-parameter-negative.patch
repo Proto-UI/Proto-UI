@@ -1,0 +1,24 @@
+diff --git a/packages/cli/test/hook-source-props-initialization.test.ts b/packages/cli/test/hook-source-props-initialization.test.ts
+--- a/packages/cli/test/hook-source-props-initialization.test.ts
++++ b/packages/cli/test/hook-source-props-initialization.test.ts
+@@ -82,6 +82,20 @@
+     expect(tokens).not.toContain('data-[selected]:bg-accent');
+   });
+ 
++  it('withholds capture when a later setup parameter initializer registers a competing hook', async () => {
++    const entry = path.join(directory, 'entry.proto.ts');
++    await writeFile(
++      entry,
++      sourceFor('def.props.define({});').replace(
++        'setup(def) {',
++        'setup(def, unused = asReplacement()) {'
++      )
++    );
++    const tokens = await collectProtoStyleTokensFromFiles([entry]);
++    expect(tokens).toContain('bg-accent');
++    expect(tokens).not.toContain('data-[selected]:bg-accent');
++  });
++
+   it('keeps same-path SourceFile snapshots independent', async () => {
+     const file = path.join(directory, 'entry.proto.ts');
+     const safe = 'def.props.define({});';

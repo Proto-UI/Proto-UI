@@ -1,0 +1,183 @@
+{
+  "final-280-validation/check-types.terminal.json": {
+    "sha256": "622fa37331960a4faa46e48cbd8ec723f48572e824652057500a14d4743dad80",
+    "bytes": 470,
+    "content": {
+      "head": "28037549e478bc76f95a7192d7ff643330044a03",
+      "name": "check-types",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "check:types"
+      ],
+      "startedAt": "2026-11-24T05:57:38.578013+00:00",
+      "exitCode": 0,
+      "timedOut": false,
+      "outerTimeoutSeconds": 1200,
+      "elapsedMs": 400925,
+      "headAfter": "28037549e478bc76f95a7192d7ff643330044a03",
+      "statusBefore": "",
+      "statusAfter": "",
+      "nodeOptions": "--max-old-space-size=4096",
+      "cpuAffinity": null
+    }
+  },
+  "final-280-validation/check-types.log": {
+    "sha256": "8a5fd5bad6bb6af22ddb523dd54fbf5cf8232028c50002c40b4a1cb27997f088",
+    "bytes": 18595,
+    "tail": " this expression.\n\n\u001b[7m152\u001b[0m       browser: await browser.version(),\n\u001b[7m   \u001b[0m \u001b[93m               ~~~~~~~~~~~~~~~~~~~~~~~\u001b[0m\n\nResult (1335 files): \n- 0 errors\n- 0 warnings\n- 47 hints\n\n"
+  },
+  "final-280-validation/current-finf-file.terminal.json": {
+    "sha256": "f57d84ff74b474ee32244ec0a737df842f94a27397ad40862e1acbfb4a989510",
+    "bytes": 918,
+    "content": {
+      "head": "28037549e478bc76f95a7192d7ff643330044a03",
+      "name": "current-finf-file",
+      "command": [
+        "corepack",
+        "pnpm@10.32.1",
+        "exec",
+        "vitest",
+        "run",
+        "packages/cli/test/finf-components.test.ts",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/final-280-validation/current-finf-file.json"
+      ],
+      "startedAt": "2026-11-24T05:57:31.349814+00:00",
+      "exitCode": 0,
+      "timedOut": false,
+      "outerTimeoutSeconds": 240,
+      "elapsedMs": 7111,
+      "headAfter": "28037549e478bc76f95a7192d7ff643330044a03",
+      "statusBefore": "",
+      "statusAfter": "",
+      "nodeOptions": "--max-old-space-size=4096",
+      "cpuAffinity": null,
+      "report": {
+        "success": true,
+        "numTotalTests": 191,
+        "numPassedTests": 191,
+        "numFailedTests": 0,
+        "numPendingTests": 0
+      },
+      "failed": []
+    }
+  },
+  "final-280-validation/terminal.json": {
+    "sha256": "2fe34d394259774a6b97ed5002046f3b31d820f401df3008105613a17add6ce9",
+    "bytes": 1648,
+    "content": {
+      "jobs": [
+        {
+          "head": "28037549e478bc76f95a7192d7ff643330044a03",
+          "name": "current-finf-file",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "exec",
+            "vitest",
+            "run",
+            "packages/cli/test/finf-components.test.ts",
+            "--maxWorkers=1",
+            "--minWorkers=1",
+            "--reporter=default",
+            "--reporter=json",
+            "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/cli-native-prefix/final-280-validation/current-finf-file.json"
+          ],
+          "startedAt": "2026-11-24T05:57:31.349814+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 240,
+          "elapsedMs": 7111,
+          "headAfter": "28037549e478bc76f95a7192d7ff643330044a03",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=4096",
+          "cpuAffinity": null,
+          "report": {
+            "success": true,
+            "numTotalTests": 191,
+            "numPassedTests": 191,
+            "numFailedTests": 0,
+            "numPendingTests": 0
+          },
+          "failed": []
+        },
+        {
+          "head": "28037549e478bc76f95a7192d7ff643330044a03",
+          "name": "check-types",
+          "command": [
+            "corepack",
+            "pnpm@10.32.1",
+            "check:types"
+          ],
+          "startedAt": "2026-11-24T05:57:38.578013+00:00",
+          "exitCode": 0,
+          "timedOut": false,
+          "outerTimeoutSeconds": 1200,
+          "elapsedMs": 400925,
+          "headAfter": "28037549e478bc76f95a7192d7ff643330044a03",
+          "statusBefore": "",
+          "statusAfter": "",
+          "nodeOptions": "--max-old-space-size=4096",
+          "cpuAffinity": null
+        }
+      ],
+      "allExitZero": true
+    }
+  },
+  "current-main-delivery/terminal.json": {
+    "sha256": "470a3ffb00913a53726d432cdc803c0e45f12cac8328dc2ae785d6d75f18eb24",
+    "bytes": 1231,
+    "content": {
+      "head": "28037549e478bc76f95a7192d7ff643330044a03",
+      "parents": [
+        "6dd674545c8d388c6f5cc54ec868c88ec0d60cce",
+        "ed64f150d2db1180bf9defc543b6a955b9d4cc18"
+      ],
+      "tree": "b669ddc5e85e136bf2fc554e8e21946d2e960515",
+      "reviewedTree": "b669ddc5e85e136bf2fc554e8e21946d2e960515",
+      "exitCode": 0,
+      "elapsedMs": 7730,
+      "hookChangedPaths": [],
+      "changedPathsAgainstCurrentMain": [
+        ".prettierignore",
+        "packages/cli/README.md",
+        "packages/cli/src/generated/brutalist-style-tokens.ts",
+        "packages/cli/src/generated/draft-family-style-tokens.ts",
+        "packages/cli/src/generated/shadcn-style-tokens.ts",
+        "packages/cli/src/services/hook-source-summary.ts",
+        "packages/cli/src/services/prototype-style-tokens.ts",
+        "packages/cli/test/hook-source-props-initialization.test.ts"
+      ],
+      "allSevenCliProductPathsExactlyMatchEd64": true,
+      "inputEvidenceSourceExactlyMatchesCurrentMain": true,
+      "status": "",
+      "previousDiagnosticMergePreserved": "80b48039ede5938e9a956ffe0032a8dc35956b5b retains the normal-hook reformat observation; it is not part of this delivery ancestry. A normal topic branch based on current main merges the tested CLI branch without touching already accepted upstream helper bytes."
+    }
+  },
+  "current-main-delivery/source-closure-delta.json": {
+    "sha256": "cdc3751afe75214855c60ff5db98740a643a6b1515d474ed9e1f924f52d6a5b6",
+    "bytes": 731,
+    "content": {
+      "before": "ed64f150d2db1180bf9defc543b6a955b9d4cc18",
+      "after": "28037549e478bc76f95a7192d7ff643330044a03",
+      "roots": [
+        "packages",
+        "scripts/build",
+        "scripts/styles",
+        "tsconfig.json",
+        "tsconfig.workspace.json",
+        "pnpm-lock.yaml",
+        "package.json"
+      ],
+      "changedPaths": [
+        "packages/cli/test/finf-components.test.ts"
+      ],
+      "scope": "The previously tested CLI20 files, all seven modified CLI payload paths, package sources, build and preset generators and workspace configs are unchanged. The sole incoming package change is this full Finf test file, selected anew; whole website types are rerun after the already-merged Header repair. Historical results keep their actual ed64 source binding."
+    }
+  }
+}

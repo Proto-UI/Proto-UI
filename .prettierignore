@@ -186,6 +186,9 @@ internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-
 internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
 # Preserve original Tooltip view-readiness receipts, probes and captures.
 internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/
+
+# Preserve the exact incoming Sprint 5 observations and receipt hashes.
+
 # Exact Sprint 7 experiment records, frozen inputs and independently reviewed
 # evidence are hash-bound; maintained analysis scripts remain formatted.
 internal/records/2026-11-24-button-projection-comparison.md
@@ -207,6 +210,9 @@ internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.jso
 internal/records/evidence/2026-11-24-sprint5-browser-execution/owner-receipt.md
 internal/records/evidence/2026-11-24-sprint5-browser-execution/production-setup-receipt.json
 internal/records/evidence/2026-11-24-sprint5-native-direction-acceptance/receipt.md
+
+# Preserve captured CLI source-analysis evidence bytes.
+internal/records/evidence/2026-11-24-cli-standard-runtime-root-styles/**
 
 # Preserve exact Sprint 7 validation receipts, logs, manifests, and browser archives.
 internal/records/evidence/2026-11-24-sprint7-current-validation/
