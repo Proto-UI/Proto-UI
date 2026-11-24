@@ -5816,6 +5816,109 @@ describe('lowered hook coverage', () => {
     });
   });
 
+  describe('imported helper proven record transport', () => {
+    const producers = [
+      "import { defineAsHook } from '@proto.ui/core';",
+      "export const asA = defineAsHook({ name: 'record-a', setup(def) {",
+      "  def.state.bool('alpha', false);",
+      '}, projectHandle: result => ({ ready: result.stateHandles.alpha }) });',
+      "export const asB = defineAsHook({ name: 'record-b', setup(def) {",
+      "  def.state.bool('beta', false);",
+      '}, projectHandle: result => ({ ready: result.stateHandles.beta }) });',
+    ].join('\n');
+
+    const observe = async (
+      setup: string,
+      run: (scan: RuleStateScan) => void,
+      subject = 'facts.ready'
+    ): Promise<void> => {
+      await withLoopFixture(
+        {
+          'producer.ts': producers,
+          'visual.ts': [
+            "import { tw } from '@proto.ui/core';",
+            'export function paint(def, facts, ignored) {',
+            rule(`w.state(${subject}).eq(true)`),
+            '}',
+          ].join('\n'),
+        },
+        [
+          "import { definePrototype } from '@proto.ui/core';",
+          "import { asA, asB } from './producer';",
+          "import { paint } from './visual';",
+          "export default definePrototype({ name: 'record-consumer', setup(def) {",
+          setup,
+          '} });',
+        ].join('\n'),
+        run
+      );
+    };
+
+    const expectStates = (scan: RuleStateScan, names: string[]): void => {
+      expect(scan.unresolved).toEqual([]);
+      expect(scan.usages.map(({ state }) => state)).toEqual(names);
+      for (const usage of scan.usages) {
+        expect(usage.provenance?.declaredName).toBe(usage.state);
+        expect(usage.provenance?.declaration.file).toMatch(/[/\\]producer\.ts$/);
+        expect(usage.file).toMatch(/[/\\]visual\.ts$/);
+      }
+    };
+
+    it.each([
+      [
+        'a copied member',
+        'const facts = asA(); paint(def, { ready: facts.ready });',
+        'facts.ready',
+      ],
+      ['a shorthand member', 'const ready = asA().ready; paint(def, { ready });', 'facts.ready'],
+      [
+        'a nested record',
+        'const facts = asA(); paint(def, { nested: { ready: facts.ready } });',
+        'facts.nested.ready',
+      ],
+    ])('transports %s with its actual source declaration', async (_name, setup, subject) => {
+      await observe(setup, (scan) => expectStates(scan, ['alpha']), subject);
+    });
+
+    it.each([
+      ['asA', 'asB', ['alpha', 'beta']],
+      ['asB', 'asA', ['beta', 'alpha']],
+    ] as const)('keeps %s then %s record arguments call-local', async (first, second, names) => {
+      await observe(
+        `const first = ${first}(); const second = ${second}();
+         paint(def, { ready: first.ready }); paint(def, { ready: second.ready });`,
+        (scan) => expectStates(scan, [...names])
+      );
+    });
+
+    it('retains a copied State before a later argument writes its original container', async () => {
+      await observe(
+        'const facts = asA(); paint(def, { ready: facts.ready }, Object.assign(facts, asB()));',
+        (scan) => expectStates(scan, ['alpha'])
+      );
+    });
+
+    it('refreshes a nested borrowed container after a later argument writes it', async () => {
+      await observe(
+        'const facts = asA(); paint(def, { nested: facts }, Object.assign(facts, asB()));',
+        (scan) => expectStates(scan, ['beta']),
+        'facts.nested.ready'
+      );
+    });
+
+    it.each([
+      ['an unknown member beside a proven one', '{ ready: foreign, other: facts.ready }'],
+      ['an unproved same-spelling accessor', '{ ready: getState("alpha"), other: facts.ready }'],
+      ['a getter member', '{ get ready() { return facts.ready; } }'],
+      ['an effectful member read', '{ ready: (Object.assign(facts, asB()), facts.ready) }'],
+    ])('refuses %s without inventing declaration provenance', async (_name, argument) => {
+      await observe(`const facts = asA(); paint(def, ${argument});`, (scan) => {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved).toEqual([{ reason: 'subject', expression: 'facts.ready' }]);
+      });
+    });
+  });
+
   it('resolves every hook state a shipped rule condition reads', async () => {
     const found: Array<{
       file: string;

@@ -667,6 +667,7 @@ function scanRuleStateSource(
     : new Set<ts.FunctionDeclaration>();
   const closedHelperNames = new Set([...closedHelpers].map((helper) => helper.name!.text));
   const helperScopes = new Map<ts.FunctionDeclaration, Scope>();
+  const pendingHelperParameters = new Set<Scope>();
   const invocations: Array<RuleStateSiteVisit['invocations'][number]> = [];
   let invocationOrdinal = 0;
   let visitOrdinal = 0;
@@ -2011,7 +2012,14 @@ function scanRuleStateSource(
       binding: Binding;
       sourceValue: HookSourceValue;
     }[] = [];
-    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+    const owners = new Set<Scope>();
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) owners.add(owner);
+    // Earlier arguments can hold newly allocated wrappers around borrowed
+    // containers. Their temporary parameter scopes are not caller ancestors,
+    // but later argument writes must still rewrite those containing paths.
+    for (const parameters of pendingHelperParameters)
+      if (parameters.versions === scope.versions) owners.add(parameters);
+    for (const owner of owners) {
       for (const [name, binding] of owner.bindings) {
         if (!sourceBinding(binding) || !('sourceValue' in binding) || !binding.sourceValue)
           continue;
@@ -4573,6 +4581,34 @@ function scanRuleStateSource(
       : (candidates.flat() as ts.Expression[]);
   };
 
+  // A caller-created data container is a token map for ordinary declarations,
+  // but a helper parameter must retain any actual source-backed members. Both
+  // local and imported invocations capture this value before visiting later
+  // argument effects; the shared version tracker refreshes borrowed containers.
+  const bindHelperArgument = (
+    parameter: ts.ParameterDeclaration,
+    argument: ts.Expression,
+    parameters: Scope,
+    caller: Scope
+  ): void => {
+    pendingHelperParameters.add(parameters);
+    declareValue(parameter.name, argument, parameters, caller);
+    const resolved = sourceResolve(argument, caller);
+    if (
+      ts.isIdentifier(parameter.name) &&
+      resolved.matched &&
+      resolved.value.kind === 'object' &&
+      sourceValueHasProvenance(resolved.value)
+    )
+      parameters.bindings.set(parameter.name.text, {
+        kind: 'handleBag',
+        hook: sourceHookLabel(argument, caller) ?? '<source-hook>',
+        sourceValue: resolved.value,
+        sourceAuthority: true,
+        bindingNode: parameter,
+      });
+  };
+
   const declarationReads: Array<{
     helper: ts.FunctionLikeDeclaration;
     usages: HookStateUsage[];
@@ -5148,23 +5184,7 @@ function scanRuleStateSource(
               sourceAuthority: true,
               bindingNode: parameter,
             });
-          } else {
-            declareValue(parameter.name, assigned, helperParameters, current);
-            const resolved = sourceResolve(assigned, current);
-            if (
-              ts.isIdentifier(parameter.name) &&
-              resolved.matched &&
-              resolved.value.kind === 'object' &&
-              sourceValueHasProvenance(resolved.value)
-            )
-              helperParameters.bindings.set(parameter.name.text, {
-                kind: 'handleBag',
-                hook: sourceHookLabel(assigned, current) ?? '<source-hook>',
-                sourceValue: resolved.value,
-                sourceAuthority: true,
-                bindingNode: parameter,
-              });
-          }
+          } else bindHelperArgument(parameter, assigned, helperParameters, current);
         }
         const parameter = importedHelper?.parameters[captured.length];
         if (parameter && !parameter.dotDotDotToken) {
@@ -5192,7 +5212,7 @@ function scanRuleStateSource(
           const isUndefined = closed?.length && closed.every((value) => ts.isVoidExpression(value));
           if (!isUndefined) {
             provided.add(captured.length);
-            if (assigned) declareValue(parameter.name, assigned, parameterScope, current);
+            if (assigned) bindHelperArgument(parameter, assigned, parameterScope, current);
             else shadowBindingPattern(parameterScope, parameter.name);
             for (const [name, binding] of parameterScope.bindings) {
               if (binding.kind !== 'token') continue;
@@ -5225,6 +5245,8 @@ function scanRuleStateSource(
         );
         visit(argument, current);
       }
+      if (helperParameters) pendingHelperParameters.delete(helperParameters);
+      pendingHelperParameters.delete(parameterScope);
       for (const bindings of [helperParameters?.bindings, parameterScope.bindings]) {
         if (!bindings) continue;
         for (const [name, binding] of bindings) {
