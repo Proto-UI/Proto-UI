@@ -88,6 +88,11 @@ export default definePrototype<TextRootProps, TextRootExposes>({
       when: (w) => w.prop('font').eq('mono'),
       intent: (i) => i.feedback.style.use(tw('font-mono')),
     });
+    // leading=size keeps the selected size token's line box without an override.
+    def.rule({
+      when: (w) => w.prop('leading').eq('tighter'),
+      intent: (i) => i.feedback.style.use(tw('leading-[1.1]')),
+    });
     def.rule({
       when: (w) => w.prop('leading').eq('tight'),
       intent: (i) => i.feedback.style.use(tw('leading-tight')),
@@ -111,6 +116,10 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     def.rule({
       when: (w) => w.prop('tracking').eq('tight'),
       intent: (i) => i.feedback.style.use(tw('tracking-tight')),
+    });
+    def.rule({
+      when: (w) => w.prop('tracking').eq('tighter'),
+      intent: (i) => i.feedback.style.use(tw('tracking-tighter')),
     });
     def.rule({
       when: (w) => w.prop('emphasis').eq('normal'),

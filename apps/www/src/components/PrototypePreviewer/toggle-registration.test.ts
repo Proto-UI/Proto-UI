@@ -66,12 +66,7 @@ const TOGGLE_FAMILIES = [
   {
     family: 'liquid-glass',
     mdxPath: 'toggle.mdx',
-    runtimes: [
-      "runtimes={['wc']}",
-      "runtimes={['react']}",
-      "runtimes={['vue']}",
-      "runtimes={['vue2']}",
-    ],
+    runtimes: ["runtimes={['wc', 'react', 'vue', 'vue2']}"],
     sidebarSlug: 'ui-libraries/liquid-glass/toggle',
     manifestBound: true,
     expectedIds: null,

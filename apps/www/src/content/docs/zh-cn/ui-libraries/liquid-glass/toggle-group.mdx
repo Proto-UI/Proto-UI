@@ -1,11 +1,13 @@
 ---
 title: 'Toggle Group'
-description: '支持单选/多选按下状态与游走键盘焦点的 Liquid Glass 切换按钮组。'
+description: '采用单层浮空玻璃容器、同心圆角与高对比回退策略的 Liquid Glass 切换按钮组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Toggle Group 将一组相关的双态切换按钮组合为统一的游走焦点容器，支持单选（可清空）或多选模式。
+Liquid Glass Toggle Group 将光学玻璃材质仅声明在浮空 `Root` 容器上，内部 `Item` 以无边框分段胶囊呈现，避免玻璃叠玻璃，并在水平与垂直布局中保持同心圆角几何。
 
 ## 预览
 
@@ -13,24 +15,116 @@ Liquid Glass Toggle Group 将一组相关的双态切换按钮组合为统一的
   demoId="demo-liquid-glass-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-liquid-glass/toggle-group` 导入组件原型并通过对应宿主 Adapter 适配。
 
 ## 用法
 
-- **部件组成**：`Root`、`Item`。
-- **单选与多选**：`value` 与 `defaultValue` 均为字符串数组。当 `multiple={false}` 时最多保留一个选中值，再次点击已选中项可清空选择。受控模式下交互仅发出 `valueChange` 请求，不会直接改写调用方状态。
-- **键盘与边界**：方向键仅在选项间移动游走焦点而不改变选中状态；禁用、只读以及重复值的选项不会提交变更。
+```tsx
+import {
+  LiquidGlassToggleGroupItem,
+  LiquidGlassToggleGroupRoot,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassToggleGroupRoot defaultValue={['week']} a11yLabel="Calendar range">
+      <LiquidGlassToggleGroupItem value="day">Day</LiquidGlassToggleGroupItem>
+      <LiquidGlassToggleGroupItem value="week">Week</LiquidGlassToggleGroupItem>
+      <LiquidGlassToggleGroupItem value="month">Month</LiquidGlassToggleGroupItem>
+    </LiquidGlassToggleGroupRoot>
+  );
+}
+```
+
+### 材质层次与无障碍
+
+- **单层玻璃原则**：仅 `Root` 声明 v2 `liquid-glass` 材质与高光边缘；内部 `Item` 为无边框分段，避免在玻璃容器内再次叠加玻璃材质。
+- **同心圆角**：水平排列时容器与分段均使用胶囊圆角（`rounded-full`）；垂直排列时容器为 `rounded-2xl`（16px）配 `p-1.5`（6px）内边距，内部项自动切换为同心 `rounded-[10px]`（16px − 6px）。
+- **回退与减弱动效**：设置 `material="opaque"` 或系统开启减少透明度、强制颜色模式时，保持清晰高对比的不透明表面；禁用态采用无透明衰减的高可读样式；开启减弱动态效果时自动关闭颜色过渡。
+
+## 示例
+
+### 常规与强调层级（Regular & Prominent）
+
+使用 `variant="regular"`（默认）呈现常规浮空分段控件，或用 `variant="prominent"` 突出主操作层级。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-single"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 尺寸（Size）
+
+支持 `sm`、`default` 与 `lg` 三档胶囊尺寸。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直排列（Vertical）
+
+设置 `orientation="vertical"` 时，容器与分段项自动切换为同心圆角矩形并启用上下方向键漫游。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不透明回退与禁用（Opaque & Disabled）
+
+展示 `material="opaque"` 显式回退以及禁用态下保持文字可读性的外观。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| Root | `value` / `defaultValue` | 受控 / 非受控选中值字符串数组 |
-| Root | `multiple` | 是否允许多选；`false` 时为单选且支持再次点击清空 |
-| Root | `disabled` / `readOnly` / `valueChange` | 禁用、只读与选中变更请求事件 |
-| Item | `value` / `disabled` | 选项唯一值与单项禁用状态 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'readonly string[]', default: '—（受控）' },
+    { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
+    { name: 'multiple', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''（组内唯一）" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: '继承 Root' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: '继承 Root' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TOGGLE-GROUP.yaml', 'P-BASE-TOGGLE-GROUP.yaml']}
+/>

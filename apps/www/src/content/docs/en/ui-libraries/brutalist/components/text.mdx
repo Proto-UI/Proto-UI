@@ -1,12 +1,14 @@
 ---
 title: 'Text'
-description: 'A Brutalist-styled typography primitive providing consistent scale, weight, leading, tracking, and ink tokens.'
+description: 'Brutalist typography primitive using DM Sans font roles, crisp ink tokens, and all eight Base Text axes.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Text realizes [Base Text](/en/ui-libraries/base/text/) with Brutalist typography and ink tokens, giving you a consistent vocabulary for text scale, font family, weight, line height, tracking, and tone.
+Brutalist Text realizes [Base Text](/en/ui-libraries/base/text/) with DM Sans font roles (`500` body, `700` heading) and high-contrast Brutalist ink tokens while remaining passive, shadowless, and free of extra motion per the Brutalist design contract.
 
 ## Preview
 
@@ -18,58 +20,133 @@ Text realizes [Base Text](/en/ui-libraries/base/text/) with Brutalist typography
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `brutalistTextRoot` (also aliased as `textRoot` and `BrutalistTextRoot`) from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/text` (workspace CLI target: `brutalist-text`).
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Generate local facades with the `brutalist-text` CLI target or import `brutalistTextRoot` (aliased as `textRoot` and `BrutalistTextRoot`) from `@proto.ui/prototypes-brutalist/text`:
+
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-text',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-text',
+  }}
+  manager="npm"
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` for your target framework.
 
 ## Usage
 
-### Basic Example
-
 ```tsx
-import * as React from 'react';
-import { createReactAdapter } from '@proto.ui/adapter-react';
-import { brutalistTextRoot } from '@proto.ui/prototypes-brutalist/text';
-
-const Text = createReactAdapter(React)(brutalistTextRoot, { rootTag: 'span' });
+import { BrutalistTextRoot } from '../proto-ui/components/react';
 
 export function SectionTitle() {
   return (
     <h1>
-      <Text size="4xl" font="heading" weight="semibold" leading="tight" tracking="tight">
+      <BrutalistTextRoot size="4xl" font="heading" weight="bold" leading="tight" tracking="tight">
         Account settings
-      </Text>
+      </BrutalistTextRoot>
     </h1>
   );
 }
 ```
 
-### Semantic Composition & Typography Rules
+### Semantics and design contract rules
 
-- **Keep native document semantics outside**: `rootTag: 'span'` is a Web Adapter option. Keep headings (`h1`–`h6`), paragraphs (`p`), labels (`label` with `htmlFor`/`for`), and links (`a` with `href`/`target`/`download`) on native outer elements—Text stays passive and adds no focus stop or activation handler.
-- **Foreground inheritance & defaults**: Set `tone="inherit"` when placing Text inside a solid or accent `Surface` so it inherits the enclosing ink color. Removing any prop restores its default; an invalid initial `size` falls back to `'base'`, while an invalid update after a valid value retains the previous valid value.
-- **Scale-matched leading & tight tracking**: Setting `leading="size"` keeps each size's built-in line height (`xs` through `5xl` map to `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively). `leading="tighter"` maps to `1.1` and `tracking="tighter"` maps to `-0.05em`.
+- **DM Sans hierarchy**: Pair `font="body" weight="medium"` (DM Sans 500) for prose and control labels with `font="heading" weight="bold"` (DM Sans 700) for headings. Passive text never carries hard borders or offset shadows.
+- **Native semantic wrappers**: Keep `h1`–`h6`, `p`, `label` (`htmlFor`/`for`), and `a` (`href`, `target`, `download`) on enclosing native elements. Text never adds tab stops or activation handlers.
+- **Leading, tracking, and defaults**: `leading="size"` retains each size token's built-in line height (`xs` `1rem` through `5xl` `1`); `leading="tighter"` maps to `1.1`, and `tracking="tighter"` maps to `-0.05em`. Removing a prop restores its default; invalid initial `size` falls back to `base`, while invalid updates keep the previous valid value.
+
+## Examples
+
+### DM Sans scale and weight hierarchy
+
+Showcases poster headlines (`5xl` bold with `leading="tighter"` and `tracking="tighter"`), card headings, body copy, and compact control captions.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Editorial blocks and inline styles
+
+Lead copy, italic pull quotes, inline monospace tokens, underlined links, and strikethrough text.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Accent surfaces and foreground inheritance
+
+Pair `tone="inherit"` with raised Brutalist `Surface` containers (`#5294ff` main blue or secondary cards) so ink contrast stays sharp in both light and dark themes.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-text-surfaces"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+The following props belong to `Root` (`BrutalistTextRoot`):
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
     {
       name: 'size',
       type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
       default: 'base',
+      description: 'Font size scale',
     },
-    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
-    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
-    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: 'Ink tone; set to inherit inside solid or accent surfaces',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: 'Font weight (medium for body/controls, bold for headings)',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: 'Font family role (DM Sans body/heading or monospace)',
+    },
     {
       name: 'leading',
       type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
       default: 'normal',
+      description: 'Line height; size keeps built-in line boxes and tighter maps to 1.1',
     },
-    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
-    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
-    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: 'Letter spacing; tight maps to -0.025em and tighter maps to -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: 'Normal or italic font style',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: 'Text decoration line',
+    },
   ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TEXT.yaml', 'P-BASE-TEXT.yaml']}
 />

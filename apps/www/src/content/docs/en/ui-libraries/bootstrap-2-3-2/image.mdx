@@ -1,0 +1,137 @@
+---
+title: 'Image'
+description: 'A Bootstrap 2.3.2 image component providing classic default, rounded, polaroid, and circle treatments over Base Image.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Image preserves the archived `.img-rounded`, `.img-polaroid`, and `.img-circle` image treatments while delegating source management, object-fit sizing, accessibility modes, and live loading status events to Base Image.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `imageRoot` (aliased as `bootstrap232ImageRoot`) and `Bootstrap232ImageRootProps` directly from `@proto.ui/prototypes-bootstrap-2-3-2/image`.
+
+## Usage
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { bootstrap232ImageRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/image';
+
+const BootstrapImage = createReactAdapter(React)(bootstrap232ImageRoot);
+
+export function FramedPortrait() {
+  return (
+    <BootstrapImage
+      source="/images/base-image/portrait.svg"
+      a11yMode="informative"
+      alternativeText="Portrait framed with Bootstrap 2.3.2 polaroid trim"
+      fit="cover"
+      appearance="polaroid"
+      surfaceStyle={{ width: '160px', height: '160px' }}
+    />
+  );
+}
+```
+
+- **Appearances (`appearance`)**:
+  - `default`: Responsive borderless image (`max-w-full h-auto align-middle border-0`).
+  - `rounded`: Classic `6px` rounded corners (`.img-rounded`).
+  - `polaroid`: `4px` white frame padding, `1px rgba(0, 0, 0, 0.2)` border, and subtle drop shadow (`.img-polaroid`).
+  - `circle`: Historical `500px` radius (`.img-circle`); pair with a 1:1 square container for a true circular crop.
+- **Accessibility and loading**: `a11yMode`, `alternativeText`, `fit`, `loadingStatus`, and `loadingStatusChange` are inherited directly from [Base Image](/en/ui-libraries/base/image/).
+
+## Examples
+
+### Fit Modes
+
+Compare `contain`, `cover`, and `fill` using `appearance="rounded"`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image-fit"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Accessibility
+
+Compare an informative polaroid figure against a 1:1 circular decorative thumbnail.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image-a11y"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loading & Fallback
+
+Switch sources with Bootstrap 2.3.2 buttons and render an application-owned fallback card with retry when loading fails or clears.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-image-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
+    { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
+    { name: 'alternativeText', type: 'string', default: "''" },
+    { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
+    {
+      name: 'appearance',
+      type: "'default' | 'rounded' | 'polaroid' | 'circle'",
+      default: 'default',
+    },
+  ]}
+/>
+
+### Exposes & Events
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Type', default: 'Description' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: 'Active image source URI' },
+    {
+      name: 'fit',
+      type: "ExposeState<'contain' | 'cover' | 'fill'>",
+      default: 'Current object-fit mode',
+    },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: 'Current image load lifecycle state',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: 'Emitted on status transitions (bind via onLoadingStatusChange in React/Vue)',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
+/>

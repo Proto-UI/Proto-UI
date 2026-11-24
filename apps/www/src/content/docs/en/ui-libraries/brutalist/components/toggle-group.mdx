@@ -1,12 +1,13 @@
 ---
-title: 'ToggleGroup'
-description: 'A Brutalist-styled group of toggle buttons supporting single or multiple selection and roving focus.'
+title: 'Toggle Group'
+description: 'A Brutalist-styled group of toggle buttons with variants, sizes, joined spacing, and roving keyboard focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-ToggleGroup groups a set of two-state toggle buttons with single or multiple selection and roving keyboard navigation.
+Brutalist Toggle Group pairs `rounded-base` corners, crisp 2px black borders, bold DM Sans headings, and a persistent 2px active inset frame with single- or multi-select roving focus.
 
 ## Preview
 
@@ -14,7 +15,6 @@ ToggleGroup groups a set of two-state toggle buttons with single or multiple sel
   demoId="demo-brutalist-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -23,36 +23,120 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Anatomy
+```tsx
+import { BrutalistToggleGroupItem, BrutalistToggleGroupRoot } from '../proto-ui/components/react';
 
-ToggleGroup is composed of `Root` and `Item`:
+export function Example() {
+  return (
+    <BrutalistToggleGroupRoot multiple defaultValue={['a']}>
+      <BrutalistToggleGroupItem value="a">A</BrutalistToggleGroupItem>
+      <BrutalistToggleGroupItem value="b">B</BrutalistToggleGroupItem>
+      <BrutalistToggleGroupItem value="c">C</BrutalistToggleGroupItem>
+    </BrutalistToggleGroupRoot>
+  );
+}
+```
 
-- `Root`: Manages the active value array, single/multiple mode, orientation, and roving focus.
-- `Item`: Renders each toggle button identified by a unique `value`.
+### Composition
 
-### Selection & Keyboard Navigation
+```text
+ToggleGroupRoot
+├── ToggleGroupItem
+└── ToggleGroupItem
+```
 
-- Both `value` and `defaultValue` are string arrays (`readonly string[]`). With `multiple={false}` (default), at most one item stays active and clicking it again clears the selection; set `multiple={true}` to allow multiple active items.
-- Arrow keys move roving focus between items without toggling selection; press `Enter` or `Space` to toggle the focused item.
-- Disabled items, `readOnly` groups, and items with duplicate values do not commit changes. Pass `value` for controlled mode and listen to `valueChange` to decide when to update state.
+- **Visual contract**: The group surface retains a 3px foreground offset shadow with no press translation; items follow Brutalist's flat toggle grammar with black hover/active borders and a persistent 2px inset frame when active.
+- **Selection & keyboard**: Both `value` and `defaultValue` are string arrays. Arrow keys move roving focus without toggling; `Space` or `Enter` commits a toggle. Pass `value` for controlled mode and listen to `valueChange`.
+
+## Examples
+
+### Outline
+
+Use `variant="outline"` for bordered items in a single-select group.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toggle-group-outline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Size
+
+Choose `sm` (36px), `default` (40px), or `lg` (44px) to match Brutalist Toggle sizing.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Spacing
+
+Control the gap between items with `spacing`, or set `spacing={0}` to join items into a single segmented bar.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toggle-group-spacing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+Set `orientation="vertical"` to stack items vertically with up/down roving focus.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Set `disabled` on `Root` or individual `Item` elements to block interaction.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'readonly string[]', default: '— (controlled)' },
     { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
     { name: 'multiple', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'spacing', type: '0 | 1 | 2', default: '1' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
   ]}
 />
 
-Other parts:
+### Item
 
-- **Item**: `value` defaults to `''`; `disabled` defaults to `false`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "'' (unique in group)" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: 'inherits Root' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'inherits Root' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TOGGLE-GROUP.yaml', 'P-BASE-TOGGLE-GROUP.yaml']}
+/>

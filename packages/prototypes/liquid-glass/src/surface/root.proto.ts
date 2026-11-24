@@ -5,6 +5,7 @@ import {
   type SurfaceRootProps as BaseSurfaceRootProps,
   type SurfaceRootExposes,
 } from '@proto.ui/prototypes-base/surface';
+import { COMMAND_HOVER, COMMAND_PRESS } from '../interactive-surface';
 export type SurfaceRootProps = BaseSurfaceRootProps & {
   /** Explicitly request the existing material capability; ordinary paint is the default. */
   material?: 'auto' | 'opaque';
@@ -22,6 +23,24 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
       shape: { kind: 'rounded-rect', geometry: 'style' },
       source: { kind: 'in-app-backdrop' },
       fallback: { fill: 'style', foreground: 'style' },
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.any(w.prop('elevation').eq('raised'), w.prop('material').eq('auto')),
+          w.prop('fade').eq(false),
+          w.meta('preference.reducedMotion').eq('no-preference')
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-colors')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.any(w.prop('elevation').eq('raised'), w.prop('material').eq('auto')),
+          w.prop('fade').eq(false),
+          w.not(w.meta('preference.reducedMotion').eq('no-preference'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
     def.rule({
       when: (w) =>
@@ -47,7 +66,11 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
       when: (w) =>
         w.all(
           w.prop('fade').eq(true),
-          w.any(w.prop('transitionState').eq('closed'), w.prop('transitionState').eq('leaving'))
+          w.any(
+            w.prop('transitionState').eq('closed'),
+            w.prop('transitionState').eq('preparing'),
+            w.prop('transitionState').eq('leaving')
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('opacity-0')),
     });
@@ -61,7 +84,7 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
     });
     def.rule({
       when: (w) => w.prop('radius').eq('default'),
-      intent: (i) => i.feedback.style.use(tw('rounded-none')),
+      intent: (i) => i.feedback.style.use(tw('rounded-xl')),
     });
     def.rule({
       when: (w) => w.prop('radius').eq('none'),
@@ -128,6 +151,34 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
       intent: (i) => i.feedback.style.use(tw('shadow-sm')),
     });
     def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('material').eq('auto'),
+          w.any(
+            w.prop('variant').eq('outline'),
+            w.prop('variant').eq('secondary'),
+            w.prop('variant').eq('muted')
+          ),
+          w.any(w.prop('hovered').eq(true), w.prop('current').eq(true)),
+          w.prop('focusVisible').eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_HOVER)),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('material').eq('auto'),
+          w.any(
+            w.prop('variant').eq('outline'),
+            w.prop('variant').eq('secondary'),
+            w.prop('variant').eq('muted')
+          ),
+          w.any(w.prop('hovered').eq(true), w.prop('current').eq(true)),
+          w.prop('focusVisible').eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw('shadow-md')),
+    });
+    def.rule({
       when: (w) => w.prop('focusVisible').eq(true),
       intent: (i) =>
         i.feedback.style.use(
@@ -139,16 +190,39 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
       intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
     });
     def.rule({
-      when: (w) => w.prop('pressed').eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px shadow-none')),
+      when: (w) =>
+        w.all(
+          w.prop('material').eq('opaque'),
+          w.any(
+            w.prop('variant').eq('outline'),
+            w.prop('variant').eq('secondary'),
+            w.prop('variant').eq('transparent')
+          ),
+          w.any(w.prop('hovered').eq(true), w.prop('current').eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('material').eq('auto'), w.prop('pressed').eq(true)),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_PRESS)),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.any(w.prop('variant').eq('outline'), w.prop('variant').eq('transparent')),
-          w.any(w.prop('hovered').eq(true), w.prop('current').eq(true))
+          w.prop('material').eq('opaque'),
+          w.prop('pressed').eq(true),
+          w.meta('preference.reducedMotion').eq('no-preference')
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
+      intent: (i) => i.feedback.style.use(tw('translate-y-px', COMMAND_PRESS)),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('material').eq('opaque'),
+          w.prop('pressed').eq(true),
+          w.not(w.meta('preference.reducedMotion').eq('no-preference'))
+        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_PRESS)),
     });
     return inherited.render;
   },

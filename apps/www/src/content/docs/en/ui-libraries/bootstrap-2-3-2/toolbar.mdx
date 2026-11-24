@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: 'A Bootstrap 2.3.2 command toolbar with roving keyboard focus, accessible naming, and cross-axis separators.'
+description: 'A Bootstrap 2.3.2 command toolbar with classic gradient button variants, sizes, roving keyboard focus, and cross-axis separators.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toolbar groups related action buttons and dividers inside a single roving-focus container for compact editing and control bars.
+Bootstrap 2.3.2 Toolbar preserves classic gradient button surfaces, pixel-accurate borders, and inset press shadows inside a single-Tab roving-focus container.
 
 ## Preview
 
@@ -13,24 +15,155 @@ Toolbar groups related action buttons and dividers inside a single roving-focus 
   demoId="demo-bootstrap-2-3-2-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-bootstrap-2-3-2/toolbar` and adapt them for your target framework:
+
+```ts
+import {
+  toolbarRoot,
+  toolbarButton,
+  toolbarSeparator,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/toolbar';
+```
 
 ## Usage
 
+```tsx
+import {
+  BootstrapToolbarRoot,
+  BootstrapToolbarButton,
+  BootstrapToolbarSeparator,
+} from '../proto-ui/components/react';
+
+export function EditorToolbar() {
+  return (
+    <BootstrapToolbarRoot a11yLabel="Document actions">
+      <BootstrapToolbarButton value="undo">Undo</BootstrapToolbarButton>
+      <BootstrapToolbarButton value="redo">Redo</BootstrapToolbarButton>
+      <BootstrapToolbarSeparator />
+      <BootstrapToolbarButton value="save" variant="primary">
+        Save
+      </BootstrapToolbarButton>
+    </BootstrapToolbarRoot>
+  );
+}
+```
+
 Compose `Root`, `Button`, and `Separator`:
 
-- **Roving focus**: Only one enabled button participates in the page Tab order; arrow keys move focus across commands, wrapping when `loop` is enabled.
-- **Actions and dividers**: Activating an enabled `Button` emits `action` with its `value`. `Separator` automatically aligns perpendicular to the toolbar orientation.
+- **Classic Bootstrap surface**: `Button` keeps the v2.3.2 top-to-bottom gradients, hover background shift, and inset pressed shadow while suppressing duplicate focus outlines with a single clear focus ring.
+- **Roving keyboard focus**: Only one enabled button participates in the page `Tab` order; arrow keys navigate commands and wrap when `loop` is enabled (default).
+- **Cross-axis dividers**: `Separator` automatically switches between a 1px vertical or horizontal divider based on `Root`'s orientation.
+
+## Examples
+
+### Classic Variants and Sizes
+
+Supports Bootstrap 2.3.2's `default`, `primary`, `success`, `info`, `warning`, `danger`, and `inverse` button palettes along with `default`, `small`, and `mini` sizing.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toolbar-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical Orientation
+
+Setting `orientation="vertical"` stretches buttons into a stacked column with horizontal 1px dividers and Up/Down arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Non-Looping Navigation
+
+Disable the entire bar via `Root.disabled={true}`, or set `loop={false}` for bounded arrow-key navigation that skips disabled commands.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `disabled` / `orientation` / `loop` / `a11yLabel` | Disabled flag, orientation, focus wrap, and accessible toolbar name |
-| `Button` | `value` / `action` | Command value and activation event |
-| `Separator` | — | Divider aligned along the toolbar's cross axis |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables all command buttons in the toolbar',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Layout direction and arrow-key navigation axis',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps arrow-key focus between the first and last enabled commands',
+    },
+    {
+      name: 'a11yLabel',
+      type: 'string',
+      default: "''",
+      description: 'Accessible name applied to the toolbar container',
+    },
+  ]}
+/>
+
+### Button
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+      description: 'Classic Bootstrap 2.3.2 button color recipe',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'small' | 'mini'",
+      default: "'default'",
+      description: 'Pixel-accurate Bootstrap 2.3.2 button size',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: 'Command identifier emitted in the action event detail',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables this command with flat dimmed styling',
+    },
+  ]}
+/>
+
+### Separator and Events
+
+- **Separator**: Takes no additional props and renders a 1px cross-axis divider automatically.
+- **Events and exposes**: `Button` emits `action` (`{ value: string }`) on activation. `Root` exposes `disabled`, `focusFirst()`, `focusLast()`, and `setCurrent(id)`; `Button` exposes `disabled`, `focused`, `focusVisible`, and `focusSelf(options)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

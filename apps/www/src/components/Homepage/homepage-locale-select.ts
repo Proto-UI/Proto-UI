@@ -72,7 +72,11 @@ export function createHomepageLocaleSelect(
   const content = proto(
     parts.content,
     parts.surface && parts.viewport
-      ? [proto(parts.surface, [proto(parts.viewport, items)])]
+      ? [
+          proto(parts.surface, [
+            proto(parts.viewport, parts.group ? [proto(parts.group, items)] : items),
+          ]),
+        ]
       : items,
     parts.surface ? {} : { position: 'popper', align: 'end' }
   );

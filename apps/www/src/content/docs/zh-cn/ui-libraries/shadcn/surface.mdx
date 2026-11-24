@@ -8,11 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Surface 是一个纯视觉表面容器，继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的输入约定，根据外部传入的视觉变体与交互状态渲染背景、边框、圆角与阴影，同时保持语义和交互控制权归外层组件所有。本页示例使用 **Shadcn Rhea** 风格。
+Surface 是一个纯视觉表面容器，继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的输入约定，根据外层组件传入的变体、圆角、边框与交互状态渲染视觉外观，同时将语义与事件所有权完全留给调用方。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
-
-下方示例展示了不同的变体与状态外观；其中的聚焦和按压样本均为静态状态演示，不附带额外交互行为。
 
 <PrototypePreviewer
   demoId="demo-shadcn-surface"
@@ -40,23 +38,69 @@ const Surface = createReactAdapter(React)(surfaceRoot);
 export function Summary() {
   return (
     <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+      <div className="p-4">Saved locally</div>
     </Surface>
   );
 }
 ```
 
-### 视觉状态与组合原则
+### 组合与被动边界
 
-- `hovered`、`focusVisible`、`pressed` 和 `current` 均由外层交互组件或语义容器传入，Surface 自身不监听指针、焦点或键盘事件，也不添加无障碍角色。需要可交互按钮或原生链接时，请直接使用 Button 组件或原生 `<a>` 元素。
-- 内部内容与布局间距由调用方控制。当内部嵌套的 `Text` 需要继承外层 Surface（如 `solid` 或 `accent`）的前景色时，请在 `Text` 上设置 `tone="inherit"`。
-- 当 `actionProfile` 保持默认 `'none'` 时，`pressed` 不会产生位移动画；显式配置 `rhea` 或 `luma` 操作外观时，按压状态会呈现 1px 按下位移。
+- `hovered`、`focusVisible`、`pressed` 和 `current` 均由外层交互控件传入；Surface 自身不监听指针、焦点或键盘事件，也不附加无障碍角色。需要可交互按钮或原生链接时，请直接使用 `Button` 或原生 `<a>`。
+- 布局与内边距由调用方负责。当内部嵌套的 `Text` 需要继承 `solid` 或 `accent` 表面的前景色时，在 `Text` 上传入 `tone="inherit"`。
+- 开启 `fade` 后，Surface 会将来自 [Base Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 映射为透明度（`closed` / `leaving` 为 `0`，`entering` / `entered` 为 `1`），并在 Web 端读取 `--pui-surface-transition-duration`（默认 `0ms`）。
 
-### 配合 Transition 使用淡入淡出
+## 示例
 
-- 开启 `fade` 后，Surface 会响应来自 [Base Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState`：`closed` 和 `leaving` 映射为透明（opacity `0`），`entering` 和 `entered` 映射为不透明（opacity `1`）。
-- 在 Web 端，淡入淡出时长读取 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`），可由外层组件传入合法的非负毫秒值。
-- `scrim` 变体提供常规半透明遮罩底色。透明度为 `0` 仅影响视觉呈现，禁用、卸载和焦点管理仍由外层 Dialog 或 Transition 控制。
+### 变体
+
+支持全部 7 种表面变体，涵盖常规卡片、次级填充、柔和分组、强调色块与 80% 黑色遮罩层（`scrim`）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 圆角、边框与层级
+
+通过 `radius`、`border` 与 `elevation` 组合不同几何轮廓与阴影层次。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-geometry"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 外部视觉状态与文本继承
+
+演示外部传入的 `hovered`、`current`、`focusVisible`、`pressed`（配合 `actionProfile="rhea"` 呈现 1px 按压位移）以及 `Text tone="inherit"` 的对比度继承。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action Profile 预设
+
+通过显式指定 `actionProfile` 复用 Shadcn 各风格预设的按钮圆角、边框与焦点环外观（现代预设同时启用 1px 按压位移，而 `new-york-v4` 保持静止），同时保持原生语义元素不变。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-action-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 配合 Transition 淡入淡出
+
+结合 `fade`、`transitionState` 与 `--pui-surface-transition-duration` 驱动遮罩层的平滑显隐；透明度变化仅作用于视觉层，挂载与焦点管理仍由外层控制。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-surface-fade"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -78,8 +122,13 @@ export function Summary() {
     { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
     { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
     {
+      name: 'actionProfile',
+      type: "'none' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: 'none',
+    },
+    {
       name: 'transitionState',
-      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
       default: 'entered',
     },
     { name: 'fade', type: 'boolean', default: 'false' },
@@ -90,7 +139,7 @@ export function Summary() {
   ]}
 />
 
-`@proto.ui/prototypes-shadcn/surface` 同时导出 `SurfaceRootProps` 与 `SurfaceRootExposes` 类型定义。
+`@proto.ui/prototypes-shadcn/surface` 同时导出 `ShadcnSurfaceRootProps`、`SurfaceRootProps`、`SurfaceRootExposes`，以及用于原生链接/操作标签组合的 Web 辅助配方 `shadcnActionAppearance` 与 `ShadcnActionAppearanceOptions`。
 
 ## 参考
 

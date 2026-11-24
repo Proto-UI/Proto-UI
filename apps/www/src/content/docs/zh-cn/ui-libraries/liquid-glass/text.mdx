@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: '采用 Liquid Glass 字体与色阶的被动排版文本组件。'
+description: '采用系统光学字体与高对比度色阶的 Liquid Glass 被动排版文本组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/)（通过 `asTextRoot()`），提供完整的八个独立排版控制轴与默认内容槽。它仅负责排版样式，不引入标题层级、链接、标签、按钮或编辑交互。
+Liquid Glass Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/) 提供全部八项独立排版控制轴，采用系统无衬线与等宽字体栈及清晰的前景层次，仅负责排版展示而不承载玻璃材质或交互语义。
 
 ## 预览
 
@@ -17,30 +19,130 @@ Liquid Glass Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/)（通过 `a
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-```ts
-import { textRoot, LiquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
-```
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/text` 导入 `textRoot`（同时导出 `liquidGlassTextRoot` 与 `LiquidGlassTextRoot` 别名），或在工作区模式下通过 CLI 目标 `liquid-glass-text` 生成四框架封装。
 
 ## 用法
 
-- 显式传入的 `leading` 优先于 `size` 自带的默认行高；移除任意属性即可恢复默认值。
-- 当文本嵌套在带前景色的容器（如 Surface）中时，设置 `tone="inherit"` 可自动继承外层文字颜色。
-- Text 不覆盖 `user-select`：普通文档内容保持自然可选，交互控件内的文字遵循所在控件的选择策略。
-- 需要语义元素时，请在外部组合原生的 `h1`、`p`、`label`、`a` 或 `button`。
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { liquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
 
-Liquid Glass 主题内置 `body`、`heading` 与 `mono` 系统字体栈以及 `default`/`muted` 文本色，不额外捆绑第三方字体文件。
+const Text = createReactAdapter(React)(liquidGlassTextRoot, { rootTag: 'span' });
+
+export function SheetHeading() {
+  return (
+    <h2>
+      <Text size="2xl" font="heading" weight="semibold" leading="tight" tracking="tight">
+        Display &amp; Clarity
+      </Text>
+    </h2>
+  );
+}
+```
+
+### Liquid Glass 材质层次与可读性规范
+
+参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 与 [Typography](https://developer.apple.com/design/human-interface-guidelines/typography) 指南：
+
+- **文字不叠加玻璃**：长正文和内容标题应落在清晰的不透明内容画布上；位于悬浮 Liquid Glass 控件或工具栏内的标签通过 `tone="inherit"` 继承外层前景色，切勿给 Text 自身套用玻璃材质或在玻璃表面内再次叠加玻璃（避免 glass-on-glass）。
+- **常规与强调层级**：常规透明控件（`material="auto"`）内部适合使用高对比度主色文字搭配弱化副标题（`tone="muted"`）；强调染色表面（`solid` / `prominent`）内部应使用 `tone="inherit"` 保持白色前景可读性。
+- **减弱透明度与高对比度回退**：当用户开启减少透明度、增强对比度或外层容器切换为 `material="opaque"` 时，依靠主题语义前景色与 `tone="inherit"` 即可平滑保持清晰对比度，无需依赖半透明降暗。
+- **行高、字距与选择策略**：`leading="size"` 保留字号内建行高，`leading="tighter"` 为 `1.1`，`tracking="tighter"` 为 `-0.05em`；Text 不覆盖 `user-select`，正文保持自然可选，标题与链接语义仍由外层原生 `h1`、`p`、`label`、`a` 或 `button` 负责。
+
+## 示例
+
+### 系统字号与紧凑刻度
+
+展示 `4xl` 至 `xs` 的系统字体层级，以及 `leading="tighter"`、`leading="size"` 与 `tracking="tighter"` 的效果。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 内容画布与行内排版
+
+展示内容层的导语、引文、等宽代码、下划线链接与删除线组合。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 透明玻璃层、强调染色与不透明画布对比
+
+在彩色渐变背景上并列对比单层常规玻璃（`material="auto"`）、强调染色表面（`solid`）与不透明内容画布（`material="opaque"`）中的文字清晰度与 `tone="inherit"` 继承效果。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text-surfaces"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `size` | `'xs' \| 'sm' \| 'base' \| 'lg' \| 'xl' \| '2xl' \| '3xl' \| '4xl' \| '5xl'` | `'base'` | 字号规格 |
-| `tone` | `'default' \| 'muted' \| 'inherit'` | `'default'` | 文本颜色语义 |
-| `weight` | `'normal' \| 'medium' \| 'semibold' \| 'bold'` | `'normal'` | 字重 |
-| `font` | `'body' \| 'heading' \| 'mono'` | `'body'` | 字体族 |
-| `leading` | `'tight' \| 'snug' \| 'normal' \| 'relaxed'` | `'normal'` | 行高，显式设置时优先于字号默认行高 |
-| `tracking` | `'normal' \| 'tight'` | `'normal'` | 字距 |
-| `emphasis` | `'normal' \| 'italic'` | `'normal'` | 倾斜样式 |
-| `decoration` | `'none' \| 'underline' \| 'line-through'` | `'none'` | 文本装饰线 |
+以下属性属于 `Root`（`LiquidGlassTextRoot`）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+      description: '字号规格',
+    },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: '文本颜色语义；位于玻璃或染色控件内时使用 inherit',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: '字重',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: '系统字体栈（不额外捆绑第三方字体文件）',
+    },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+      description: '行高；size 保留字号默认行高，tighter 为 1.1',
+    },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: '字距；tight 为 -0.025em，tighter 为 -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: '正体或斜体样式',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: '文本装饰线',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TEXT.yaml', 'P-BASE-TEXT.yaml']}
+/>

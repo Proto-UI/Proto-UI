@@ -28,7 +28,8 @@ const toggle = definePrototype<ShadcnToggleProps, ShadcnToggleExposes>({
     });
 
     // No second selection, activation, focus or disabled owner.
-    const toggleState = asToggle().stateHandles;
+    const inherited = asToggle();
+    const toggleState = inherited.stateHandles;
     if (!toggleState) {
       throw new Error('[shadcn-toggle] asToggle must project Toggle state handles.');
     }
@@ -99,9 +100,18 @@ const toggle = definePrototype<ShadcnToggleProps, ShadcnToggleExposes>({
       });
     }
     def.rule({
+      when: (w) => w.state(focusVisible).eq(true),
+      intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
+    def.rule({
       when: (w) => w.state(disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
     });
+    return inherited.render;
   },
 });
 

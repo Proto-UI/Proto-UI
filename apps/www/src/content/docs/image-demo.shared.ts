@@ -6,190 +6,409 @@ import type {
 
 // Website demos stay behind the #420 consumer wall: the status-change payload
 // is typed structurally here instead of importing a raw Proto UI package.
-type ImageViewStatusChange = Readonly<{
-  status: 'idle' | 'loading' | 'loaded' | 'error';
-  previousStatus: 'idle' | 'loading' | 'loaded' | 'error';
+export type ImageViewStatus = 'idle' | 'loading' | 'loaded' | 'error';
+export type ImageViewStatusChange = Readonly<{
+  status: ImageViewStatus;
+  previousStatus: ImageViewStatus;
   source: string;
 }>;
 
-const landscape = '/images/base-image/landscape.svg';
-const portrait = '/images/base-image/portrait.svg';
-const unavailable = 'data:image/png;base64,invalid';
+export const IMAGE_ASSETS = {
+  landscape: '/images/base-image/landscape.svg',
+  portrait: '/images/base-image/portrait.svg',
+  unavailable: 'data:image/png;base64,invalid',
+} as const;
 
-function image(
+export function imageNode(
   family: string,
   ref: string,
   props: Record<string, unknown>,
-  height: string
+  surfaceStyle?: Record<string, string>
 ): DemoNode {
   return {
     kind: 'proto',
     prototypeId: `${family}-image-root`,
     ref,
     props,
-    surfaceStyle: {
-      display: 'block',
-      width: '100%',
-      height,
-      borderRadius: '8px',
-    },
+    ...(surfaceStyle ? { surfaceStyle } : {}),
   };
 }
 
-function action(family: string, ref: string, label: string): DemoNode {
+export function actionButton(
+  family: string,
+  ref: string,
+  label: string,
+  props: Record<string, unknown> = {}
+): DemoNode {
   return {
     kind: 'proto',
     prototypeId: `${family}-button`,
     ref,
-    props: {},
+    props,
     children: [label],
   };
 }
 
-const resourceProps = {
-  source: '',
-  a11yMode: 'informative',
-  alternativeText: 'Selected illustration · 所选插图',
-  fit: 'contain',
-} as const;
+/**
+ * Shared Fit Modes comparison grid (`contain`, `cover`, `fill`) without inline
+ * border-radius overrides so each family's own framing shines through.
+ */
+export function createImageFitDemo(
+  family: string,
+  options: {
+    imageProps?: Record<string, unknown>;
+    frameClassName?: string;
+    containerClassName?: string;
+  } = {}
+): DemoSpec {
+  const frameClass =
+    options.frameClassName ?? 'overflow-hidden rounded-xl border border-border bg-muted/60 p-1.5';
+  const containerClass =
+    options.containerClassName ?? 'grid w-full max-w-2xl grid-cols-1 gap-4 p-4 sm:grid-cols-3';
+
+  return {
+    type: 'demo',
+    root: {
+      kind: 'box',
+      className: containerClass,
+      children: (['contain', 'cover', 'fill'] as const).map((fit) => ({
+        kind: 'box',
+        className: 'flex min-w-0 flex-col gap-2',
+        children: [
+          {
+            kind: 'box',
+            className: frameClass,
+            children: [
+              imageNode(
+                family,
+                `fit-${fit}`,
+                {
+                  source: IMAGE_ASSETS.landscape,
+                  a11yMode: 'informative',
+                  alternativeText: `Mountain ridge illustration (${fit} fit)`,
+                  fit,
+                  ...options.imageProps,
+                },
+                { width: '100%', height: '120px' }
+              ),
+            ],
+          },
+          {
+            kind: 'box',
+            className: 'text-center font-mono text-xs text-muted-foreground',
+            children: [`fit="${fit}"`],
+          },
+        ],
+      })),
+    },
+  } satisfies DemoSpec;
+}
 
 /**
- * The family projections keep the host-owned Image View module: source, fit,
- * a11yMode/alternativeText, loadingStatus exposes and the loadingStatusChange
- * event. The demo uses only real checked-in assets plus a genuinely broken
- * data URI, and observes status through the governed callback/expose path.
- * bootstrap-2-3-2 additionally supplies its source-pinned appearance variants.
+ * Shared Informative vs Decorative accessibility demo showing proper semantic
+ * pairing for meaningful figures and decorative thumbnails.
  */
-export function createImageDemo(family: string): DemoSpec {
-  const fitCells = (['contain', 'cover', 'fill'] as const).map((fit) => ({
-    kind: 'box' as const,
-    className: 'flex min-w-0 flex-col gap-2',
-    children: [
-      image(
-        family,
-        `fit-${fit}`,
+export function createImageA11yDemo(
+  family: string,
+  options: {
+    informativeProps?: Record<string, unknown>;
+    decorativeProps?: Record<string, unknown>;
+    decorativeSize?: string;
+    cardClassName?: string;
+    containerClassName?: string;
+  } = {}
+): DemoSpec {
+  const cardClass =
+    options.cardClassName ?? 'rounded-xl border border-border bg-background p-4 shadow-xs';
+  const containerClass = options.containerClassName ?? 'flex w-full max-w-xl flex-col gap-4 p-4';
+  const decorativeSize = options.decorativeSize ?? '56px';
+
+  return {
+    type: 'demo',
+    root: {
+      kind: 'box',
+      className: containerClass,
+      children: [
         {
-          source: landscape,
-          a11yMode: 'informative',
-          alternativeText: `Mountains and a sun (${fit}) · 山与太阳（${fit}）`,
-          fit,
-        },
-        '112px'
-      ),
-      { kind: 'box' as const, className: 'text-center font-mono text-xs', children: [fit] },
-    ],
-  }));
-  const appearanceCells =
-    family === 'bootstrap-2-3-2'
-      ? (['default', 'rounded', 'polaroid', 'circle'] as const).map((appearance) => ({
-          kind: 'box' as const,
-          className: 'flex min-w-0 flex-col gap-2',
+          kind: 'box',
+          className: `${cardClass} flex flex-col gap-3`,
           children: [
-            image(
+            imageNode(
               family,
-              `appearance-${appearance}`,
+              'informative-photo',
               {
-                source: portrait,
+                source: IMAGE_ASSETS.landscape,
                 a11yMode: 'informative',
-                alternativeText: `Portrait illustration (${appearance}) · 竖幅插图（${appearance}）`,
+                alternativeText: 'Sunlit mountain ridge overlooking a calm alpine valley',
                 fit: 'cover',
-                appearance,
+                ...options.informativeProps,
               },
-              '112px'
+              { width: '100%', height: '160px' }
             ),
             {
-              kind: 'box' as const,
-              className: 'text-center font-mono text-xs',
-              children: [appearance],
+              kind: 'box',
+              className: 'flex flex-col gap-0.5',
+              children: [
+                {
+                  kind: 'box',
+                  className: 'text-sm font-medium text-foreground',
+                  children: ['Informative figure'],
+                },
+                {
+                  kind: 'box',
+                  className: 'text-xs text-muted-foreground',
+                  children: [
+                    'Uses a11yMode="informative" with descriptive alternativeText for screen readers.',
+                  ],
+                },
+              ],
             },
           ],
-        }))
-      : [];
+        },
+        {
+          kind: 'box',
+          className: `${cardClass} flex items-center gap-3.5`,
+          children: [
+            {
+              kind: 'box',
+              className: 'shrink-0',
+              children: [
+                imageNode(
+                  family,
+                  'decorative-thumb',
+                  {
+                    source: IMAGE_ASSETS.portrait,
+                    a11yMode: 'decorative',
+                    fit: 'cover',
+                    ...options.decorativeProps,
+                  },
+                  { width: decorativeSize, height: decorativeSize }
+                ),
+              ],
+            },
+            {
+              kind: 'box',
+              className: 'flex min-w-0 flex-col gap-0.5',
+              children: [
+                {
+                  kind: 'box',
+                  className: 'text-sm font-medium text-foreground',
+                  children: ['Alpine Field Notes'],
+                },
+                {
+                  kind: 'box',
+                  className: 'text-xs text-muted-foreground',
+                  children: [
+                    'Decorative accent (a11yMode="decorative") — surrounding text conveys the full meaning.',
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  } satisfies DemoSpec;
+}
+
+/**
+ * Shared interactive Loading & Error Fallback demo: starts loaded, responds to
+ * `loadingStatusChange`, and renders real placeholder / error-recovery UI.
+ */
+export function createImageLoadingDemo(
+  family: string,
+  options: {
+    imageProps?: Record<string, unknown>;
+    primaryButtonProps?: Record<string, unknown>;
+    secondaryButtonProps?: Record<string, unknown>;
+    destructiveButtonProps?: Record<string, unknown>;
+    containerClassName?: string;
+    stageClassName?: string;
+    overlayClassName?: string;
+  } = {}
+): DemoSpec {
+  const initialProps = {
+    source: IMAGE_ASSETS.landscape,
+    a11yMode: 'informative',
+    alternativeText: 'Selected landscape scene',
+    fit: 'cover',
+    ...options.imageProps,
+  };
+
   return {
     type: 'demo',
     setup({ refs, api }: DemoSetupContext) {
-      const history: string[] = [];
-      const renderStatus = () => {
-        if (refs.status)
-          refs.status.textContent = String(api.call('resource', 'loadingStatus.get') ?? 'idle');
+      const updateUi = (status: ImageViewStatus) => {
+        if (refs.statusBadge) {
+          const labels: Record<ImageViewStatus, string> = {
+            loaded: 'Status: Loaded',
+            loading: 'Status: Loading…',
+            error: 'Status: Error',
+            idle: 'Status: Idle',
+          };
+          refs.statusBadge.textContent = labels[status];
+        }
+        if (!refs.fallbackOverlay) return;
+        if (status === 'loaded') {
+          refs.fallbackOverlay.style.display = 'none';
+          refs.fallbackOverlay.setAttribute('aria-hidden', 'true');
+          return;
+        }
+        refs.fallbackOverlay.style.display = 'flex';
+        refs.fallbackOverlay.setAttribute('aria-hidden', 'false');
+        if (refs.fallbackTitle && refs.fallbackDetail) {
+          if (status === 'loading') {
+            refs.fallbackTitle.textContent = 'Loading image…';
+            refs.fallbackDetail.textContent = 'Preparing the selected asset.';
+          } else if (status === 'error') {
+            refs.fallbackTitle.textContent = 'Unable to load image';
+            refs.fallbackDetail.textContent =
+              'The requested source could not be decoded. Retry or switch assets.';
+          } else {
+            refs.fallbackTitle.textContent = 'No image selected';
+            refs.fallbackDetail.textContent = 'Choose a sample asset below to load the frame.';
+          }
+        }
+        if (refs.retryWrap) {
+          refs.retryWrap.style.display = status === 'error' ? 'flex' : 'none';
+        }
       };
-      const record = (event: ImageViewStatusChange) => {
-        history.push(event.status);
-        if (refs.transitions) refs.transitions.textContent = history.slice(-8).join(' → ');
-        renderStatus();
+
+      const onStatusChange = (event: ImageViewStatusChange) => {
+        updateUi(event.status);
       };
-      const setSource = (source: string) =>
-        api.setProps('resource', { ...resourceProps, source, onLoadingStatusChange: record });
-      setSource('');
-      const actions = {
-        loadImage: () => setSource(`${landscape}?resource`),
-        replaceImage: () => setSource(`${portrait}?resource`),
-        failImage: () => setSource(unavailable),
-        clearImage: () => setSource(''),
+
+      const loadSource = (source: string, alternativeText: string) => {
+        api.setProps('resource', {
+          ...initialProps,
+          source,
+          alternativeText,
+          onLoadingStatusChange: onStatusChange,
+        });
       };
-      for (const [ref, activate] of Object.entries(actions)) {
-        api.setProps(ref, { onClick: activate });
-      }
-      const frame = requestAnimationFrame(renderStatus);
+
+      // Subscribe on initial mounted resource without blanking the preview.
+      loadSource(IMAGE_ASSETS.landscape, 'Selected landscape scene');
+
+      api.setProps('loadLandscape', {
+        ...(options.primaryButtonProps ?? {}),
+        onClick: () => loadSource(`${IMAGE_ASSETS.landscape}?scene=1`, 'Mountain ridge landscape'),
+      });
+      api.setProps('loadPortrait', {
+        ...(options.secondaryButtonProps ?? {}),
+        onClick: () =>
+          loadSource(`${IMAGE_ASSETS.portrait}?scene=2`, 'Vertical botanical portrait'),
+      });
+      api.setProps('loadBroken', {
+        ...(options.destructiveButtonProps ?? options.secondaryButtonProps ?? {}),
+        onClick: () => loadSource(IMAGE_ASSETS.unavailable, 'Unavailable photo source'),
+      });
+      api.setProps('clearSource', {
+        ...(options.secondaryButtonProps ?? {}),
+        onClick: () => loadSource('', 'Empty image frame'),
+      });
+      api.setProps('retryLoad', {
+        ...(options.primaryButtonProps ?? {}),
+        onClick: () => loadSource(`${IMAGE_ASSETS.landscape}?retry=1`, 'Recovered landscape scene'),
+      });
+
+      const frame = requestAnimationFrame(() => {
+        const current = (api.call('resource', 'loadingStatus.get') ?? 'idle') as ImageViewStatus;
+        updateUi(current);
+      });
+
       return () => {
         cancelAnimationFrame(frame);
       };
     },
     root: {
       kind: 'box',
-      className: 'flex w-full min-w-0 max-w-full flex-col gap-4 p-4',
+      className: options.containerClassName ?? 'flex w-full max-w-lg flex-col gap-4 p-4',
       children: [
         {
           kind: 'box',
-          className: 'grid grid-cols-3 gap-3',
-          children: fitCells,
+          className:
+            options.stageClassName ??
+            'relative overflow-hidden rounded-xl border border-border bg-muted',
+          children: [
+            imageNode(family, 'resource', initialProps, { width: '100%', height: '200px' }),
+            {
+              kind: 'box',
+              ref: 'fallbackOverlay',
+              attrs: { 'aria-hidden': 'true' },
+              className:
+                options.overlayClassName ??
+                'hidden absolute inset-0 flex-col items-center justify-center gap-2 bg-muted/95 p-4 text-center',
+              children: [
+                {
+                  kind: 'box',
+                  ref: 'fallbackTitle',
+                  className: 'text-sm font-medium text-foreground',
+                  children: ['Loading image…'],
+                },
+                {
+                  kind: 'box',
+                  ref: 'fallbackDetail',
+                  className: 'max-w-xs text-xs text-muted-foreground',
+                  children: ['Preparing the selected asset.'],
+                },
+                {
+                  kind: 'box',
+                  ref: 'retryWrap',
+                  className: 'hidden pt-1',
+                  children: [
+                    actionButton(family, 'retryLoad', 'Retry', options.primaryButtonProps ?? {}),
+                  ],
+                },
+              ],
+            },
+          ],
         },
-        ...(appearanceCells.length > 0
-          ? [
-              {
-                kind: 'box' as const,
-                className: 'grid grid-cols-4 gap-3',
-                children: appearanceCells,
-              },
-            ]
-          : []),
         {
           kind: 'box',
-          className: 'flex items-center gap-3 text-sm text-muted-foreground',
+          className: 'flex flex-wrap items-center justify-between gap-2',
           children: [
             {
               kind: 'box',
-              className: 'w-12 shrink-0',
+              className: 'flex flex-wrap gap-2',
               children: [
-                image(family, 'decorative', { source: portrait, a11yMode: 'decorative' }, '48px'),
+                actionButton(
+                  family,
+                  'loadLandscape',
+                  'Landscape',
+                  options.primaryButtonProps ?? {}
+                ),
+                actionButton(
+                  family,
+                  'loadPortrait',
+                  'Portrait',
+                  options.secondaryButtonProps ?? {}
+                ),
+                actionButton(
+                  family,
+                  'loadBroken',
+                  'Broken URL',
+                  options.destructiveButtonProps ?? options.secondaryButtonProps ?? {}
+                ),
+                actionButton(family, 'clearSource', 'Clear', options.secondaryButtonProps ?? {}),
               ],
             },
-            'Decorative image · the text carries the meaning. · 装饰图像，含义由文本承载。',
+            {
+              kind: 'box',
+              ref: 'statusBadge',
+              attrs: { role: 'status', 'aria-live': 'polite' },
+              className:
+                'rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground',
+              children: ['Status: Loaded'],
+            },
           ],
-        },
-        image(family, 'resource', { ...resourceProps }, '160px'),
-        {
-          kind: 'box',
-          className: 'flex flex-wrap gap-2',
-          children: [
-            action(family, 'loadImage', 'Load landscape · 加载横幅'),
-            action(family, 'replaceImage', 'Replace source · 替换来源'),
-            action(family, 'failImage', 'Broken source · 损坏来源'),
-            action(family, 'clearImage', 'Clear source · 清除来源'),
-          ],
-        },
-        {
-          kind: 'box',
-          className: 'flex flex-wrap gap-2 font-mono text-xs text-muted-foreground',
-          children: ['loadingStatus:', { kind: 'box', ref: 'status', children: ['idle'] }],
-        },
-        {
-          kind: 'box',
-          ref: 'transitions',
-          className: 'min-h-5 break-words font-mono text-xs text-muted-foreground',
-          children: ['Choose a source to inspect its status transitions. · 选择来源查看状态转换。'],
         },
       ],
     },
   } satisfies DemoSpec;
+}
+
+/** Backwards-compatible entry point returning the clean interactive hero demo. */
+export function createImageDemo(family: string): DemoSpec {
+  return createImageLoadingDemo(family);
 }

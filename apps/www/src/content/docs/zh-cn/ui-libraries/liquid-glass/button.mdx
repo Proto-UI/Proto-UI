@@ -1,58 +1,24 @@
 ---
 title: 'Liquid Glass Button'
-description: '用透明层次呈现常规操作，以克制的染色突出主要操作。'
+description: '遵循层次化透明材质与克制主操作染色的 Liquid Glass 胶囊按钮组件。'
 ---
 
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Liquid Glass Button 用柔和的边缘高光与背景折射，将操作控件与内容区分开。常规按钮适合返回等次要操作；强调按钮通过染色突出当前主要操作，两者保持相同尺寸。
+Liquid Glass Button 以胶囊几何、边缘高光与可选的光学材质层次将操作控件与内容区分开：`regular` 用于日常操作，`prominent` 以克制染色突出单一主操作，`destructive` 标识破坏性动作，交互与无障碍行为由 Base Button 统一提供。
 
 ## 预览
 
-预览背景保持静止，便于观察按钮的悬停、按下和键盘焦点反馈。点击 Back 可查看激活次数，也可通过页面顶部的运行时选择器切换 Web Components、React、Vue 3 与 Vue 2。
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={true}
-    runtimes={['wc']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={true}
-    runtimes={['react']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={true}
-    runtimes={['vue']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={true}
-    runtimes={['vue2']}
-    codePanel={false}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -66,316 +32,125 @@ Liquid Glass Button 用柔和的边缘高光与背景折射，将操作控件与
 
 ## 用法
 
-同一组操作通常只突出一个主要按钮，其余使用常规样式。以下示例展示常规、强调和禁用状态。
-
-### 常规
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-  <wc-liquid-glass-button>Back</wc-liquid-glass-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
+```tsx
 import { LiquidGlassButton } from '../proto-ui/components/react';
 
-export function Demo() {
+export function Example() {
   return (
-    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
-      <LiquidGlassButton>Back</LiquidGlassButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton>Back</LiquidGlassButton>
-  </div>
-</template>
-
-<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
-
-    `}
-
-/>
-
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton>Back</LiquidGlassButton>
-  </div>
-</template>
-
-<script>
-import Vue from 'vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
-import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
-
-const adapt = createVue2Adapter({
-  extend: Vue.extend.bind(Vue),
-  nextTick: Vue.nextTick.bind(Vue),
-  set: Vue.set.bind(Vue),
-  delete: Vue.delete.bind(Vue),
-});
-const LiquidGlassButton = adapt(liquidGlassButton);
-
-export default {
-  components: { LiquidGlassButton },
-};
-</script>
-
-    `}
-
-/>
-
-</div>
-
-### 强调
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-  <wc-liquid-glass-button variant="prominent">Continue</wc-liquid-glass-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { LiquidGlassButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
+    <div className="flex items-center gap-4">
+      <LiquidGlassButton>Cancel</LiquidGlassButton>
       <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
     </div>
   );
 }
-    `}
-  />
-</div>
+```
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
-  </div>
-</template>
+### 材质层次与无障碍（Apple Liquid Glass HIG）
 
-<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
+设计取舍参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)、[Color](https://developer.apple.com/design/human-interface-guidelines/color) 与 [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) 指南：
 
-    `}
+- **层级与克制染色**：同一组操作中只使用一个 `variant="prominent"` 突出主操作，其余操作保持 `regular`；避免在玻璃容器内再叠加玻璃按钮（不堆叠 glass-on-glass）。
+- **材质回退**：`material="auto"` 在宿主支持且具备可见背景源时提交 V2 光学材质意图并响应按压形变；设为 `material="opaque"` 或处于普通 DOM 背景时，保持高对比度不透明表面。
+- **系统偏好适配**：系统开启减弱动态效果时关闭过渡与按压形变并保留静态材质；开启减少透明度、增强对比度或强制颜色模式时自动回退至可读的不透明配色。禁用态保持前景与轮廓可读（不降低整体不透明度），同时拦截所有激活事件。
 
+## 示例
+
+### 常规（Regular）
+
+常规玻璃胶囊适用于返回、详情与分享等次要或并列操作。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-regular"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-</div>
+### 强调主操作（Prominent）
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
-  </div>
-</template>
+在一组操作中仅为主操作设置 `variant="prominent"`，与常规按钮保持一致的胶囊尺寸，通过染色建立视觉层级。
 
-<script>
-import Vue from 'vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
-import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
-
-const adapt = createVue2Adapter({
-  extend: Vue.extend.bind(Vue),
-  nextTick: Vue.nextTick.bind(Vue),
-  set: Vue.set.bind(Vue),
-  delete: Vue.delete.bind(Vue),
-});
-const LiquidGlassButton = adapt(liquidGlassButton);
-
-export default {
-  components: { LiquidGlassButton },
-};
-</script>
-
-    `}
-
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-prominent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-</div>
+### 危险操作（Destructive）
 
-### 禁用
+`variant="destructive"` 用于删除或不可逆操作，并与常规取消按钮并列呈现。
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-  <wc-liquid-glass-button disabled>Unavailable</wc-liquid-glass-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { LiquidGlassButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
-      <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
-  </div>
-</template>
-
-<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
-
-    `}
-
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-</div>
+### 尺寸（Sizes）
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
-  </div>
-</template>
+支持 `sm`、`default`、`lg` 三种文本胶囊尺寸以及正圆 `icon` 图标按钮。
 
-<script>
-import Vue from 'vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
-import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
-
-const adapt = createVue2Adapter({
-  extend: Vue.extend.bind(Vue),
-  nextTick: Vue.nextTick.bind(Vue),
-  set: Vue.set.bind(Vue),
-  delete: Vue.delete.bind(Vue),
-});
-const LiquidGlassButton = adapt(liquidGlassButton);
-
-export default {
-  components: { LiquidGlassButton },
-};
-</script>
-
-    `}
-
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-</div>
+### 材质模式（Auto vs Opaque）
 
-## 材质与无障碍
+默认 `material="auto"` 在可用时启用光学材质；设置 `material="opaque"` 可显式退出光学折射，使用稳定的不透明表面。
 
-默认的 `regular` 材质用于常规操作控件；`variant="prominent"` 适合突出一组操作中的主要按钮，避免在玻璃容器内再叠加玻璃按钮。设计取舍参考 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials)、[Color](https://developer.apple.com/design/human-interface-guidelines/color) 与 [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) 指南。
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- `material="auto"` 在宿主支持且存在可见 canvas 背景源时启用光学折射；当背景为普通 DOM、存在遮挡或设为 `material="opaque"` 时，按钮保持高对比度的不透明样式。
-- 系统开启减弱动态效果时，会关闭弹性按压形变并保留静态材质；开启减少透明度、增强对比度或强制颜色模式时，自动切换为可读的不透明回退。
-- 禁用态保留文字与轮廓，不响应激活事件。
+### 禁用（Disabled）
+
+禁用状态撤回光学候选并阻止激活，同时保留清晰的文字与边界而不对整个按钮施加半透明淡出。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `variant` | `'regular' \| 'prominent'` | `'regular'` | 常规玻璃或强调染色样式 |
-| `material` | `'auto' \| 'opaque'` | `'auto'` | 设为 `'opaque'` 时关闭光学效果，使用不透明表面 |
-| `disabled` | `boolean` | `false` | 禁用按钮交互 |
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: 'regular',
+    },
+    {
+      name: 'size',
+      type: "'sm' | 'default' | 'lg' | 'icon'",
+      default: 'default',
+    },
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: 'auto',
+    },
+    {
+      name: 'wrap',
+      type: 'boolean',
+      default: 'false',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+    },
+  ]}
+/>
 
-激活、焦点、键盘与禁用语义均由 [Base Button](/zh-cn/ui-libraries/base/button/) 统一管理。
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-BUTTON.yaml', 'P-BASE-BUTTON.yaml']}
+/>

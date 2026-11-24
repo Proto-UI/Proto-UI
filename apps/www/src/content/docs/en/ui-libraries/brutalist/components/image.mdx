@@ -1,45 +1,136 @@
 ---
 title: 'Image'
-description: 'A framed Brutalist image component with fit modes, accessible text modes, and loading lifecycle tracking.'
+description: 'A framed Brutalist image component with a 2px border, 4px hard offset shadow, fit modes, accessible text modes, and loading lifecycle tracking.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Image displays images inside a `rounded-base` frame with a `2px` black border and 4px hard offset shadow, supporting fit modes, informative/decorative accessibility, and loading status events.
+Brutalist Image displays images inside a `rounded-base` frame with a `2px` solid border and 4px hard offset shadow (automatically adapting to theme foreground tokens on dark canvases), supporting fit modes, informative/decorative accessibility, and loading status events.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-image" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-image"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-image`
-- **Package exports**: import `Root` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/image`
+Currently available from workspace source; not yet included in the 0.2.0 stable release. `Image` is not registered as a `proto-ui add` CLI target; import `BrutalistImageRoot` (aliased as `brutalistImageRoot`) directly from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/image`.
 
 ## Usage
 
-- **Fit and sizing**: Choose `'contain'` (default), `'cover'`, or `'fill'` via `fit`. `block max-w-full h-auto` keeps the frame responsive while your layout controls dimensions.
-- **Accessibility**: Keep `a11yMode="informative"` with `alternativeText` for meaningful images, or set `a11yMode="decorative"` when neighboring text carries the meaning.
-- **Loading lifecycle**: Updating `source` starts a new load generation and reports `'idle'`, `'loading'`, `'loaded'`, or `'error'` via `loadingStatus` and `loadingStatusChange`. The outer frame remains intact on error so your app can render its own fallback UI.
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { BrutalistImageRoot } from '@proto.ui/prototypes-brutalist/image';
+
+const BrutalistImage = createReactAdapter(React)(BrutalistImageRoot);
+
+export function FramedPhoto() {
+  return (
+    <BrutalistImage
+      source="/images/base-image/landscape.svg"
+      a11yMode="informative"
+      alternativeText="Mountain ridge bathed in daylight"
+      fit="cover"
+      surfaceStyle={{ width: '100%', height: '200px' }}
+    />
+  );
+}
+```
+
+- **Frame and sizing**: Applies `block max-w-full h-auto`, 5px `rounded-base` corners, a `2px` border, and a static `4px 4px` offset shadow (with no hover lift or press displacement). Dimensions remain consumer-owned.
+- **Fit and accessibility**: Switch between `'contain'` (default), `'cover'`, and `'fill'` via `fit`. Keep `a11yMode="informative"` with descriptive `alternativeText` for meaningful images, or set `a11yMode="decorative"` when surrounding text carries the meaning.
+- **Loading lifecycle**: Updating `source` begins a new load generation and reports `'idle'`, `'loading'`, `'loaded'`, or `'error'` through `loadingStatus` and `loadingStatusChange`. The frame stays intact on error so your app can render its own fallback UI.
+
+## Examples
+
+### Fit Modes
+
+Compare `contain`, `cover`, and `fill` inside equal-height Brutalist frames.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-image-fit"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Framed Card & Decorative Mode
+
+Pair a framed informative image with a caption bar alongside a decorative thumbnail.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-image-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Loading & Fallback
+
+Switch sources interactively to see an application-owned fallback panel and retry button driven by `loadingStatusChange`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-image-loading"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-### Root
+### Root Props
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'source', type: 'string', default: 'undefined' },
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
     { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
     { name: 'alternativeText', type: 'string', default: "''" },
     { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
   ]}
+/>
+
+### Exposes & Events
+
+<ApiPropsTable
+  headers={{ name: 'Name', type: 'Type', default: 'Description' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: 'Active image source URI' },
+    {
+      name: 'fit',
+      type: "ExposeState<'contain' | 'cover' | 'fill'>",
+      default: 'Current object-fit mode',
+    },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: 'Current image load lifecycle state',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: 'Emitted on status transitions with previous and next states',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
 />

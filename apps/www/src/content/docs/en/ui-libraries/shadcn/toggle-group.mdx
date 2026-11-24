@@ -1,13 +1,13 @@
 ---
 title: 'Toggle Group'
-description: 'Single- or multi-select toggle buttons with roving keyboard focus.'
+description: 'A set of two-state toggle buttons with roving keyboard focus, variants, sizes, and spacing controls.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toggle Group organizes a set of toggle buttons into a keyboard-navigable group supporting either single or multiple active values. The examples on this page use the **Shadcn Rhea** style preset.
+Toggle Group organizes a set of two-state buttons into a keyboard-navigable group supporting single or multiple active values. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,37 +15,136 @@ Toggle Group organizes a set of toggle buttons into a keyboard-navigable group s
   demoId="demo-shadcn-toggle-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/toggle-group` and adapt them for your target runtime.
 
 ## Usage
 
-Toggle Group consists of `Root` and `Item`:
+```tsx
+import { ShadcnToggleGroupItem, ShadcnToggleGroupRoot } from '../proto-ui/components/react';
 
-- Both `value` and `defaultValue` are string arrays (`readonly string[]`).
-- With `multiple={false}` (default), at most one item stays active, and pressing the active item again clears selection. Set `multiple={true}` to allow multiple active items.
-- Pass `value` for controlled mode—interactions emit `valueChange` requests without mutating your state directly.
-- Disabled, read-only, and duplicate-valued items do not commit changes.
-- Arrow keys move roving focus across items without toggling them; `Space` or `Enter` toggles the focused item.
+export function Example() {
+  return (
+    <ShadcnToggleGroupRoot variant="outline" defaultValue={['a']}>
+      <ShadcnToggleGroupItem value="a">A</ShadcnToggleGroupItem>
+      <ShadcnToggleGroupItem value="b">B</ShadcnToggleGroupItem>
+      <ShadcnToggleGroupItem value="c">C</ShadcnToggleGroupItem>
+    </ShadcnToggleGroupRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+ToggleGroupRoot
+├── ToggleGroupItem
+└── ToggleGroupItem
+```
+
+- **Selection mode**: Both `value` and `defaultValue` are string arrays (`readonly string[]`). With `multiple={false}` (default), at most one item stays active and pressing the active item again clears selection. Set `multiple={true}` to allow multiple active items.
+- **Controlled updates**: Pass `value` for controlled mode; interactions emit `valueChange` (`{ value: readonly string[] }`) without mutating external state directly.
+- **Keyboard & accessibility**: Arrow keys move roving focus along the active `orientation` without toggling selection; press `Space` or `Enter` to toggle the focused item. Icon-only items should include visually hidden text (such as `sr-only`) for an accessible label.
+- **Style presets**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` via `styleProfile` or an enclosing [Style Scope](../style-scope/).
+
+## Examples
+
+### Outline
+
+Use `variant="outline"` for a bordered style. In single-select mode, activating the selected item again clears the selection.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-outline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Size
+
+Use the `size` prop (`sm`, `default`, `lg`) on `Root` to scale all items together, or override individual items.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Spacing
+
+Use `spacing` to control item gaps. Modern presets default to `2`; set `spacing={0}` to join items into a continuous bar with collapsed interior borders and profile-matched outer corners.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-spacing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical
+
+Set `orientation="vertical"` to stack items vertically and switch roving focus to the vertical arrow keys.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Set `disabled` on `Root` to disable the entire group, or on an individual `Item`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom
+
+Compose `ToggleGroup` with [Field](../field/), controlled `value`, and `valueChange` to build a custom font weight selector.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group-custom"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode; each `Item` requires a unique `value`):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'readonly string[]', default: '— (controlled)' },
     { name: 'defaultValue', type: 'readonly string[]', default: '[]' },
     { name: 'multiple', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'spacing', type: '0 | 1 | 2', default: '2 (modern); 0 (new-york-v4)' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: "'horizontal'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit' → scope → 'nova'" },
+    { name: 'valueChange', type: 'Event<{ value: readonly string[] }>', default: '—' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "'' (unique in group)" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'outline'", default: 'inherits Root' },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'inherits Root' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: "'inherit' → scope → 'nova'" },
   ]}
 />
 

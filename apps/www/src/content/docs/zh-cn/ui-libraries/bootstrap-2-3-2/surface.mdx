@@ -4,12 +4,12 @@ description: '由调用方传入语义与交互状态的 Bootstrap 2.3.2 被动�
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Surface 是纯视觉展示表面组件，基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 提供 Bootstrap 2.3.2 风格的边框、背景、圆角与层级样式。它不承担按钮、链接或导航等交互逻辑，所有交互与语义状态均由外层或原生控件提供。
+Surface 是纯视觉展示表面组件，基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 提供 Bootstrap 2.3.2 风格的 4px 圆角、缩略图边框、经典渐变按钮外观与蓝色导航栏上下文适配，所有交互与语义状态均由外层控件负责。
 
 ## 预览
-
-示例通过传入静态状态展示不同变体以及聚焦/按压外观，包含用于顶部蓝色导航栏的 `colorContext="navbar"` 与按钮外观 `actionProfile="button"` 对比。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-surface"
@@ -19,7 +19,9 @@ Surface 是纯视觉展示表面组件，基于 [Base Surface](/zh-cn/ui-librari
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前通过源码工作区包 `@proto.ui/prototypes-bootstrap-2-3-2/surface`（或包根）提供，暂未发布到公共 CLI 目录。
+
+## 用法
 
 ```tsx
 import * as React from 'react';
@@ -30,31 +32,91 @@ const Surface = createReactAdapter(React)(surfaceRoot);
 
 export function Summary() {
   return (
-    <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+    <Surface variant="outline" elevation="raised">
+      <div className="p-4">Saved locally</div>
     </Surface>
   );
 }
 ```
 
-## 用法
+### 外观属性与组合原则
 
-- **被动展示边界**：`hovered`、`focusVisible`、`pressed` 与 `current` 均作为视觉输入由外部传入，Surface 本身不监听事件，也不设置 ARIA 角色或 Tab 焦点。需要真实交互控件时，请使用 `Button` 或原生 `<a>` 等语义元素包裹或组合。内部嵌套 `Text` 时可设置 `tone="inherit"` 继承外层文字色。
-- **Bootstrap 2.3.2 专属外观属性**：
-  - `actionProfile="button"`：切换为静态按钮视觉样式（交互仍由外层语义控件处理）。
-  - `colorContext="navbar"`：在 `variant="transparent"` 且 `actionProfile="none"` 时，为蓝色导航栏上的透明项提供白色文字与白色焦点环；普通面板或按钮外观会自动忽略此项。
-- **配合 Transition 淡入淡出**：设置 `fade={true}` 并传入来自 [Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 时，`closed` / `leaving` 映射为透明，`entering` / `entered` 映射为不透明。可通过 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`）传递过渡时长。透明度为 `0` 仅影响视觉，显示隐藏与焦点管理仍由外层组件控制。
+- `hovered`、`focusVisible`、`pressed` 与 `current` 均由外层交互控件传入；Surface 不注册事件监听或无障碍角色。内部嵌套 `Text` 时可设置 `tone="inherit"` 继承文字色。
+- `actionProfile="button"` 启用被动 `.btn` / `.btn-primary` 渐变外观（`solid` 对应主色按钮，其余非透明变体对应默认按钮）。
+- `colorContext="navbar"` 仅在 `variant="transparent"` 且 `actionProfile="none"` 时生效，为蓝色导航栏提供白色文字、半透明悬停/按下反馈与白色焦点环。
+- 开启 `fade` 后，Surface 会将来自 [Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 映射为透明度（`closed` / `leaving` 为 `0`，`entering` / `entered` 为 `1`），读取 `--pui-surface-transition-duration`（默认 `0ms`）。
+
+## 示例
+
+### 变体与缩略图抬升
+
+展示常规边框、缩略图（`outline` + `raised`）、柔和面板、信息提示底色、主色渐变与遮罩层。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 蓝色导航栏上下文
+
+在蓝色导航条中使用 `colorContext="navbar"` 展示静止、悬停、当前项、按压与键盘聚焦状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-surface-navbar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 被动按钮外观与淡入淡出
+
+对比 `actionProfile="button"` 在默认与主色按钮各状态下的表现，并演示配合 `fade` 的平滑显隐。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-surface-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 可选值 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `variant` | `transparent` \| `outline` \| `secondary` \| `muted` \| `accent` \| `solid` \| `scrim` | `outline` | 背景与前景色变体 |
-| `radius` | `default` \| `none` \| `sm` \| `md` \| `lg` \| `xl` \| `full` | `default` | 圆角档位 |
-| `border` | `all` \| `bottom` \| `none` | `all` | 边框样式 |
-| `elevation` | `none` \| `raised` | `none` | 阴影层级 |
-| `transitionState` | `closed` \| `entering` \| `entered` \| `leaving` | `entered` | 来自外层 Transition 的阶段状态 |
-| `fade` | `boolean` | `false` | 启用基于 `transitionState` 的透明度切换 |
-| `hovered` / `focusVisible` / `pressed` / `current` | `boolean` | `false` | 外部传入的视觉状态 |
-| `actionProfile` | `none` \| `button` | `none` | Bootstrap 2.3.2 专属：启用被动按钮外观 |
-| `colorContext` | `default` \| `navbar` | `default` | Bootstrap 2.3.2 专属：适配蓝色导航栏的白色文字与焦点环 |
+以下属性属于 `Root`（移除属性时恢复默认值）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
+    { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
+    { name: 'actionProfile', type: "'none' | 'button'", default: 'none' },
+    { name: 'colorContext', type: "'default' | 'navbar'", default: 'default' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
+    { name: 'fade', type: 'boolean', default: 'false' },
+    { name: 'hovered', type: 'boolean', default: 'false' },
+    { name: 'focusVisible', type: 'boolean', default: 'false' },
+    { name: 'pressed', type: 'boolean', default: 'false' },
+    { name: 'current', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`@proto.ui/prototypes-bootstrap-2-3-2/surface` 同时导出 `Bootstrap232SurfaceRootProps`、`SurfaceRootProps`、`SurfaceRootExposes`，以及被动按钮外观辅助函数 `bootstrap232ActionAppearance` 与 `Bootstrap232ActionAppearanceOptions`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-SURFACE.yaml', 'P-BASE-SURFACE.yaml']}
+/>

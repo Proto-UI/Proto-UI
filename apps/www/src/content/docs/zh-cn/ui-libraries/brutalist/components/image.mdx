@@ -1,45 +1,132 @@
 ---
 title: 'Image'
-description: '带 2px 黑色外框、硬偏移阴影与加载状态追踪的 Brutalist 图像组件。'
+description: '带 2px 实线外框、4px 硬偏移阴影与加载状态追踪的 Brutalist 图像组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Image 为图像展示提供统一的 `rounded-base`、`2px` 黑色边框与 4px 偏移硬阴影画框，并支持适应方式、无障碍替代文本与加载生命周期事件。
+Brutalist Image 为图像展示提供统一的 `rounded-base`、`2px` 实线画框与 4px 偏移硬阴影（在暗色画布下自动切换为主题前景色边框与阴影），并保留完整的缩放适配、无障碍模式与加载生命周期事件。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-image" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-image"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-image`
-- **包导出**：从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/image` 导入 `Root`
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。`Image` 不通过 `proto-ui add` CLI 注册；请直接从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/image` 导入 `BrutalistImageRoot`（别名 `brutalistImageRoot`）。
 
 ## 用法
 
-- **适应模式与响应式**：通过 `fit` 在 `'contain'`（默认）、`'cover'` 与 `'fill'` 之间切换；组件默认应用 `block max-w-full h-auto` 以适应容器宽度，具体尺寸由外层布局或消费者指定。
-- **无障碍模式**：信息型图像使用 `a11yMode="informative"` 并提供 `alternativeText`；装饰性图像设为 `a11yMode="decorative"` 以对辅助技术隐藏。
-- **加载状态**：每次更换 `source` 会开启新的加载周期，通过 `loadingStatus`（`'idle' | 'loading' | 'loaded' | 'error'`）与 `loadingStatusChange` 事件追踪加载结果；加载失败时画框保持完整，应用可按需在外层叠加占位或错误提示。
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { BrutalistImageRoot } from '@proto.ui/prototypes-brutalist/image';
+
+const BrutalistImage = createReactAdapter(React)(BrutalistImageRoot);
+
+export function FramedPhoto() {
+  return (
+    <BrutalistImage
+      source="/images/base-image/landscape.svg"
+      a11yMode="informative"
+      alternativeText="日光下的山脊"
+      fit="cover"
+      surfaceStyle={{ width: '100%', height: '200px' }}
+    />
+  );
+}
+```
+
+- **画框与尺寸边界**：组件默认提供 `block max-w-full h-auto`、5px `rounded-base`、`2px` 边框与静止 `4px 4px` 硬偏移阴影，属于被动抬起型表面（无悬停抬升或按压位移）；宽高由外层容器或消费者决定。
+- **适应模式与无障碍**：通过 `fit` 在 `'contain'`（默认）、`'cover'` 与 `'fill'` 之间切换；信息型图像使用 `a11yMode="informative"` 与非空 `alternativeText`，装饰性图像设为 `a11yMode="decorative"`。
+- **加载状态追踪**：每次更新 `source` 会创建新的加载周期，通过 `loadingStatus` 与 `loadingStatusChange` 报告状态；加载失败时画框保持完整，由应用按需叠加回退提示或重试操作。
+
+## 示例
+
+### 缩放模式
+
+在等高画框中对比 `contain`、`cover` 与 `fill`。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-image-fit"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 画框卡片与装饰图像
+
+将画框图像与说明栏组合，并对比装饰性缩略图的无障碍配置。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-image-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 加载与错误回退
+
+切换不同图片源并观察基于 `loadingStatusChange` 构建的回退面板与重试按钮。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-image-loading"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-### Root
+### Root Props
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'source', type: 'string', default: 'undefined' },
+    { name: 'source', type: 'string | undefined', default: 'undefined' },
     { name: 'a11yMode', type: "'informative' | 'decorative'", default: 'informative' },
     { name: 'alternativeText', type: 'string', default: "''" },
     { name: 'fit', type: "'contain' | 'cover' | 'fill'", default: 'contain' },
   ]}
+/>
+
+### 暴露状态与事件
+
+<ApiPropsTable
+  headers={{ name: '名称', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'source', type: 'ExposeState<string>', default: '当前生效的图片源 URI' },
+    { name: 'fit', type: "ExposeState<'contain' | 'cover' | 'fill'>", default: '当前缩放填充模式' },
+    {
+      name: 'loadingStatus',
+      type: "ExposeState<'idle' | 'loading' | 'loaded' | 'error'>",
+      default: '当前加载生命周期状态',
+    },
+    {
+      name: 'loadingStatusChange',
+      type: 'ExposeEvent<{ status, previousStatus, source }>',
+      default: '加载状态切换时发出前后状态与当前 source',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-IMAGE.yaml', 'P-BASE-IMAGE.yaml']}
 />

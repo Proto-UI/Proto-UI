@@ -46,7 +46,7 @@ it('retains observable non-Shadcn action Surface outputs', async () => {
     ['base', null],
     ['brutalist', 'var(--pui-radius)'],
     ['bootstrap-2-3-2', '4px'],
-    ['liquid-glass', '0'],
+    ['liquid-glass', 'var(--pui-radius-xl)'],
   ] as const) {
     const action = libraryActionAppearanceForFamily(family);
     const tokens = await snapshotLibraryPart(`${family}-surface`, { ...action.surface });

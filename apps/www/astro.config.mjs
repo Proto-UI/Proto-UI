@@ -1503,6 +1503,12 @@ export default defineConfig({
                   slug: 'ui-libraries/bootstrap-2-3-2/text',
                 },
                 {
+                  label: 'Image',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Image', 'zh-CN': 'Image' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/image',
+                },
+                {
                   label: 'Field',
                   badge: earlyDraftBadge,
                   translations: { en: 'Field', 'zh-CN': 'Field' },
@@ -1715,6 +1721,12 @@ export default defineConfig({
                   slug: 'ui-libraries/liquid-glass/label',
                 },
                 {
+                  label: 'Separator',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/liquid-glass/separator',
+                },
+                {
                   label: 'Select',
                   translations: { en: 'Select', 'zh-CN': 'Select' },
                   slug: 'ui-libraries/liquid-glass/select',
@@ -1723,6 +1735,12 @@ export default defineConfig({
                   label: 'Text',
                   translations: { en: 'Text', 'zh-CN': 'Text' },
                   slug: 'ui-libraries/liquid-glass/text',
+                },
+                {
+                  label: 'Image',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Image', 'zh-CN': 'Image' },
+                  slug: 'ui-libraries/liquid-glass/image',
                 },
                 {
                   label: 'Field',

@@ -4,8 +4,12 @@ description: 'A Bootstrap 2.3.2 label providing independent accessible naming an
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Label pairs with a target control through an explicit reference, letting you toggle accessible naming and pointer activation independently across Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle, and Toggle Group Item.
+Bootstrap 2.3.2 `Label` preserves classic `14px / 20px` Helvetica Neue regular typography while pairing accessible naming (`naming`) and pointer activation (`activation`) with target controls through an explicit reference.
+
+> For form fields, use the [Field](../field/) component for automatic `FieldLabel`, `FieldDescription`, and `FieldError` associations and validation.
 
 ## Preview
 
@@ -17,7 +21,7 @@ Bootstrap 2.3.2 Label pairs with a target control through an explicit reference,
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import directly from the workspace package:
 
 ```ts
 import { labelRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/label';
@@ -25,28 +29,122 @@ import { labelRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/label';
 
 ## Usage
 
-### Explicit pairing
+Create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core` and pass it through the adapter association channel:
 
-Instead of guessing nearby DOM nodes or requiring string IDs, create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core`:
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  BootstrapCheckboxIndicator,
+  BootstrapCheckboxRoot,
+  BootstrapLabelRoot,
+} from '../proto-ui/components/react';
 
-- **React / Vue / Vue 2**: Pass `instanceAssociations: { controlLabel: ref }` to both the Label and its target control.
-- **Web Components**: Call `setElementAssociations(target, { controlLabel: ref })` from `@proto.ui/adapter-web-component` on both elements.
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-Each reference pairs one live Label with one live target in the same document and tree root; missing or duplicate endpoints ignore invalid configuration and stay inactive.
+  return (
+    <div className="flex items-center gap-2">
+      <BootstrapCheckboxRoot instanceAssociations={{ controlLabel: termsRef }}>
+        <BootstrapCheckboxIndicator />
+      </BootstrapCheckboxRoot>
+      <BootstrapLabelRoot instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </BootstrapLabelRoot>
+    </div>
+  );
+}
+```
 
-### Independent naming and activation
+In Web Components, bind both elements with `setElementAssociations()` from `@proto.ui/adapter-web-component`:
 
-- **`naming` (default `true`)**: Links the target control to the rendered Label as its accessible name. If the control already sets a non-empty `ariaLabel` or `labelledBy`, keep that name and set `naming={false}` on the Label for activation-only pairing.
-- **`activation` (default `true`)**: Clicking a paired Label triggers the target's existing operation (toggling Checkbox/Switch, selecting Radio Item, or focusing Input/Textarea). Set `activation={false}` for a passive naming-only label.
-- **Selection and interaction safety**: Label adds no Tab stop and ignores nested interactive elements, drags, cancelled pointers, and modified clicks. Use `selection="policy"` to prevent accidental text selection on short actionable labels, or `selection="text"` to keep text copyable.
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
+
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### Naming, activation, and layout
+
+- **`naming` (default `true`)**: Links the target control to the rendered `Label` as its accessible name. If the control already sets a non-empty `ariaLabel` or `labelledBy`, set `naming={false}` for activation-only pairing.
+- **`activation` (default `true`)**: Clicking a paired `Label` invokes the target's existing operation (toggling `Checkbox`/`Switch`, selecting a `Radio Group Item`, or focusing `Input`/`Textarea`). Set `activation={false}` for a passive naming-only label.
+- **`selection` (default `'policy'`)**: Prevents accidental text selection on actionable labels by default; use `'text'`, `'auto'`, or `'none'` to override explicitly.
+- **Alignment and safety**: Uses `inline-flex` without an unconditional bottom margin so inline choice rows stay vertically centered while stacked layouts remain controlled by their container. Adds no extra `Tab` stop and ignores nested links/buttons, modified clicks, and drags.
+
+## Examples
+
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label in Field
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Naming, Activation, and Selection
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-modes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-label-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop / Helper | Default | Description |
-| --- | --- | --- |
-| `naming` | `true` | Supplies the paired control's accessible name |
-| `activation` | `true` | Forwards eligible clicks to the paired control's default action |
-| `selection` | `'policy'` | `'policy'` (prevents accidental selection) or `'text'` (copyable) |
-| `createControlLabelRef()` | — | Imported from `@proto.ui/core` to create a stable pair reference |
-| `instanceAssociations` | — | Adapter prop accepting `{ controlLabel: ref }` in React, Vue, and Vue 2 |
-| `setElementAssociations()` | — | Imported from `@proto.ui/adapter-web-component` for Web Components |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: 'Supplies the paired control accessible name',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: 'Forwards eligible clicks to the paired control default action',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: 'Text-selection policy; default suppresses selection only while actionable',
+    },
+  ]}
+/>
+
+### Association helpers
+
+- `createControlLabelRef()`: Imported from `@proto.ui/core` to create a stable one-to-one pair reference.
+- `instanceAssociations`: Adapter prop accepting `{ controlLabel: ref }` in React, Vue, and Vue 2.
+- `setElementAssociations(element, { controlLabel: ref })`: Imported from `@proto.ui/adapter-web-component` for Web Components.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>

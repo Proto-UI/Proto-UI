@@ -1,39 +1,108 @@
 ---
 title: 'Bootstrap 2.3.2 Separator'
-description: '沿用归档 Bootstrap 2.3.2 分隔线风格的水平与竖向分隔组件。'
+description: '沿用归档 Bootstrap 2.3.2 双边凹刻分隔线风格的水平与垂直分隔组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Separator 提供水平与竖向视觉分隔线，由 Base Separator 统一管理方向与装饰性无障碍语义，并在深色宿主中保持经典的归档浅色配色。
+Bootstrap 2.3.2 Separator 还原归档版本的双边凹刻分隔线（`#eeeeee` 暗边搭配 `#ffffff` 亮边），由 Base Separator 统一管理水平/垂直方向与装饰性无障碍语义。
 
 ## 预览
-
-示例依次展示了水平、竖向及语义分隔线。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-separator"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-bootstrap-2-3-2/separator` 导入 `separatorRoot`。[查看已实现的子集](../)。
+
+```ts
+import { separatorRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/separator';
+```
 
 ## 用法
 
-- **装饰性与语义模式**：默认 `decorative={true}`，分隔线仅用于视觉区分并对无障碍树隐藏；当分隔线代表真实内容区块边界时，设置 `decorative={false}` 以暴露 `separator` 角色及对应的 `aria-orientation`。
-- **尺寸与布局**：组件为纯被动元素，不占用焦点顺序，其长度与外边距由所在布局容器决定；竖向样式基于归档水平分隔线风格适配。
+```tsx
+import { BootstrapSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<BootstrapSeparatorRoot />
+```
+
+- **经典凹刻样式**：水平方向渲染 `1px #eeeeee` 顶边与 `1px #ffffff` 底边，垂直方向渲染对应的左右双边凹刻线并沿弹性容器交叉轴自动拉伸（`self-stretch`）。
+- **装饰性与语义模式**：默认 `decorative={true}` 对辅助技术隐藏；当分隔线代表真实内容区块边界时，设置 `decorative={false}` 暴露 `role="separator"` 与 `aria-orientation`。
+- **尺寸与布局**：组件无子内容且不占用焦点顺序，不内置外边距，长度与间距由外层容器控制。
+
+## 示例
+
+### 垂直方向
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 菜单项
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 列表与语义分隔
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 可选值 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `orientation` | `'horizontal'` \| `'vertical'` | `'horizontal'` | 分隔线方向 |
-| `decorative` | `boolean` | `true` | 设为 `false` 时暴露语义 `separator` 角色与方向 |
+以下属性属于 `Root`：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '分隔线方向',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description: '设为 false 时暴露语义 role="separator" 与 aria-orientation',
+    },
+  ]}
+/>
+
+暴露只读状态 `orientation` 与 `decorative`，不声明焦点或交互事件。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
+/>

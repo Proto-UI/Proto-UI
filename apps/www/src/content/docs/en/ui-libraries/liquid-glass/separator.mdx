@@ -1,0 +1,126 @@
+---
+title: 'Liquid Glass Separator'
+description: 'A subtle translucent hairline divider for content grouping in the Liquid Glass family.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Separator renders a restrained 1px hairline for separating content regions and internal groups over [Base Separator](/en/ui-libraries/base/separator/). Following Liquid Glass layering guidance, separators belong to content rather than functional glass chrome and never stack glass on top of glass.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `separatorRoot` from `@proto.ui/prototypes-liquid-glass/separator`.
+
+```ts
+import { separatorRoot } from '@proto.ui/prototypes-liquid-glass/separator';
+```
+
+## Usage
+
+```tsx
+import { LiquidGlassSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassSeparatorRoot />
+```
+
+- **Layered vibrancy without glass-on-glass**: Separator never declares an optical glass surface of its own. By default (`material="auto"`), it draws a translucent foreground-tinted hairline that stays legible over both light/dark content and translucent sheets.
+- **Reduced transparency and increased contrast**: Passing `material="opaque"` or enabling Reduce Transparency (`prefers-reduced-transparency: reduce`) falls back cleanly to a solid opaque border stroke. Increase Contrast (`prefers-contrast: more`) and forced-colors modes step up stroke contrast automatically.
+- **Orientation and semantics**: Supports `'horizontal'` and `'vertical'` (with `self-stretch` sizing inside flex rows). Pass `decorative={false}` to expose `role="separator"` and `aria-orientation` to assistive technologies.
+
+## Examples
+
+### Vertical
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Menu
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### List
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Opaque fallback
+
+Set `material="opaque"` to force a solid opaque separator independent of OS transparency settings.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+The following props belong to `Root`:
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Divider orientation',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description:
+        'Hides the divider from assistive technologies when true; exposes role="separator" and aria-orientation when false',
+    },
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+      description:
+        'Uses a translucent adaptive hairline by default; set to opaque for a solid separator stroke',
+    },
+  ]}
+/>
+
+Exposes read-only `orientation` and `decorative` states with no focus, interaction channel, or optical material slot.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
+/>

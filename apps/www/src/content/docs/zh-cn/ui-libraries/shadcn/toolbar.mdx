@@ -1,13 +1,13 @@
 ---
 title: 'Toolbar'
-description: '包含命令按钮、分隔线与键盘漫游焦点的工具栏容器组件。'
+description: '包含命令按钮、变体尺寸、交叉轴分隔线与键盘漫游焦点的 Shadcn 工具栏组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toolbar 将一组相关操作按钮和分隔线组织在一个无障碍工具栏容器中，通过单一 `Tab` 入口和方向键提供流畅的键盘操作。本页示例使用 **Shadcn Rhea** 风格。
+Toolbar 将一组相关操作按钮和分隔线组织在一个无障碍工具栏容器中，通过单一 `Tab` 入口与方向键提供流畅的键盘操作。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,37 +15,194 @@ Toolbar 将一组相关操作按钮和分隔线组织在一个无障碍工具栏
   demoId="demo-shadcn-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/toolbar` 导入原型并适配到 Web Components、React、Vue 3 或 Vue 2：
+
+```ts
+import { toolbarRoot, toolbarButton, toolbarSeparator } from '@proto.ui/prototypes-shadcn/toolbar';
+```
 
 ## 用法
 
+```tsx
+import {
+  ShadcnToolbarRoot,
+  ShadcnToolbarButton,
+  ShadcnToolbarSeparator,
+} from '../proto-ui/components/react';
+
+export function EditorToolbar() {
+  return (
+    <ShadcnToolbarRoot styleProfile="rhea" a11yLabel="Document actions">
+      <ShadcnToolbarButton value="undo">Undo</ShadcnToolbarButton>
+      <ShadcnToolbarButton value="redo">Redo</ShadcnToolbarButton>
+      <ShadcnToolbarSeparator />
+      <ShadcnToolbarButton value="save" variant="default">
+        Save
+      </ShadcnToolbarButton>
+    </ShadcnToolbarRoot>
+  );
+}
+```
+
 Toolbar 由 `Root`、`Button` 和 `Separator` 三个部件组成：
 
-- `Root` 统一管理禁用状态、排列方向（`orientation`）、是否循环导航（`loop`）及工具栏的无障碍名称（`a11yLabel`）。
-- 同一时刻仅有一个启用的命令按钮位于 `Tab` 序列中，使用方向键在工具栏内移动焦点。
-- `Button` 在启用状态下激活时会发出携带其 `value` 的 `action` 事件。
-- `Separator` 自动沿工具栏的交叉轴方向绘制分隔线。
+- **焦点与键盘导航**：同一时刻仅有一个启用的 `Button` 参与页面 `Tab` 序列；水平布局下使用左右方向键、垂直布局下使用上下方向键在可用命令间移动，`loop={true}`（默认）时会在首尾循环。
+- **命令触发**：激活启用状态的 `Button` 时会发出 `action` 事件，载荷为 `{ value: string }`。
+- **分隔线**：`Separator` 会自动根据 `Root` 的 `orientation` 切换到交叉轴方向绘制。
+
+### 风格预设（`styleProfile`）
+
+`Root`、`Button` 与 `Separator` 均支持全部 9 种 Shadcn 风格预设（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`，`new-york` 作为兼容别名）。省略或设为 `inherit` 时优先继承最近的 `StyleScope` 或 `Root`，否则回退到 `rhea`。
+
+## 示例
+
+### 按钮变体
+
+`Button` 支持 `ghost`（默认）、`outline`、`secondary`、`default` 与 `destructive` 五种视觉变体，可在工具栏中区分普通操作、主要提交与危险操作。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 尺寸与纯图标按钮
+
+支持 `sm`、`default`、`lg` 与正方形 `icon` 尺寸。纯图标按钮应像下方示例一样配合 `aria-hidden="true"` 图标和 `sr-only` 可访问名称。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+将 `orientation` 设为 `'vertical'` 后，容器自动切换为纵向排列，`Separator` 自动转为水平分隔线，方向键切换为上下键导航。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与边界导航
+
+设置 `Root` 的 `disabled={true}` 会统一禁用整条工具栏；将 `loop` 设为 `false` 可让方向键在首尾命令处停止，并自动跳过单项禁用的按钮。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（`Separator` 无额外属性）：
+### Root
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'loop', type: 'boolean', default: 'true' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → 最近 scope → rhea',
+      description: '选择工具栏的 Shadcn 风格预设并向下传递作用域',
+    },
+    {
+      name: 'variant',
+      type: "'default' | 'ghost'",
+      default: "'default'",
+      description: '带边框背景表面或无边框透明布局容器',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '统一禁用所有工具栏命令按钮',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '工具栏排列方向及方向键导航轴向',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: '方向键导航是否在首尾命令间循环',
+    },
+    {
+      name: 'a11yLabel',
+      type: 'string',
+      default: "''",
+      description: '工具栏的无障碍名称（aria-label）',
+    },
   ]}
 />
 
-`Button` 的默认属性：`disabled` 为 `false`，`value` 为 `''`。
+### Button
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → Root / scope → rhea',
+      description: '覆盖或继承外层风格预设',
+    },
+    {
+      name: 'variant',
+      type: "'ghost' | 'outline' | 'secondary' | 'default' | 'destructive'",
+      default: "'ghost'",
+      description: '命令按钮的视觉变体',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'lg' | 'icon'",
+      default: "'default'",
+      description: '按钮尺寸与内边距规格',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: '激活时通过 action 事件回传的命令标识',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: '禁用当前命令并移出漫游焦点序列',
+    },
+  ]}
+/>
+
+### Separator
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'styleProfile',
+      type: 'ShadcnStyleChoice',
+      default: 'inherit → Root / scope → rhea',
+      description: '同步紧凑/常规预设下的分隔线间距',
+    },
+  ]}
+/>
+
+### 事件与暴露接口
+
+- **Button `action` 事件**：启用状态激活时触发，载荷为 `{ value: string }`。
+- **Root 暴露**：`disabled` 状态以及 `focusFirst()`、`focusLast()`、`setCurrent(id)` 方法。
+- **Button 暴露**：`disabled`、`focused`、`focusVisible` 状态以及 `focusSelf(options)` 方法。
 
 ## 参考
 

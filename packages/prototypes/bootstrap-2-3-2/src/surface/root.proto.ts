@@ -32,22 +32,19 @@ export const Bootstrap232SurfaceRoot = definePrototype<
       colorContext: { type: 'enum', options: ['default', 'navbar'], empty: 'fallback' },
     });
     def.props.setDefaults({ actionProfile: 'none', colorContext: 'default' });
-    // Presentation context is opt-in and applies only to transparent navigation.
+    // Fade stays independent of actionProfile so any passive surface can follow Transition.
     def.rule({
-      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('scrim')),
-      intent: (i) => i.feedback.style.use(tw('bg-black/80')),
-    });
-    def.rule({
-      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('fade').eq(true)),
+      when: (w) => w.prop('fade').eq(true),
       intent: (i) => i.feedback.style.use(tw('surface-fade')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.prop('actionProfile').eq('none'),
-          w.all(
-            w.prop('fade').eq(true),
-            w.any(w.prop('transitionState').eq('closed'), w.prop('transitionState').eq('leaving'))
+          w.prop('fade').eq(true),
+          w.any(
+            w.prop('transitionState').eq('closed'),
+            w.prop('transitionState').eq('preparing'),
+            w.prop('transitionState').eq('leaving')
           )
         ),
       intent: (i) => i.feedback.style.use(tw('opacity-0')),
@@ -55,13 +52,15 @@ export const Bootstrap232SurfaceRoot = definePrototype<
     def.rule({
       when: (w) =>
         w.all(
-          w.prop('actionProfile').eq('none'),
-          w.all(
-            w.prop('fade').eq(true),
-            w.any(w.prop('transitionState').eq('entering'), w.prop('transitionState').eq('entered'))
-          )
+          w.prop('fade').eq(true),
+          w.any(w.prop('transitionState').eq('entering'), w.prop('transitionState').eq('entered'))
         ),
       intent: (i) => i.feedback.style.use(tw('opacity-100')),
+    });
+    // Presentation context is opt-in and applies only to transparent navigation.
+    def.rule({
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('variant').eq('scrim')),
+      intent: (i) => i.feedback.style.use(tw('bg-black/80')),
     });
     def.rule({
       when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('default')),
@@ -300,6 +299,15 @@ export const Bootstrap232SurfaceRoot = definePrototype<
           w.not(w.all(w.prop('variant').eq('transparent'), w.prop('colorContext').eq('navbar')))
         ),
       intent: (i) => i.feedback.style.use(tw('translate-y-px shadow-none')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
+          w.prop('variant').eq('secondary'),
+          w.prop('hovered').eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
       when: (w) =>

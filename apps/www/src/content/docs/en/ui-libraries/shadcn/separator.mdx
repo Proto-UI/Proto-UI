@@ -1,6 +1,6 @@
 ---
 title: 'Separator'
-description: 'A horizontal or vertical hairline divider for visual or semantic separation.'
+description: 'Visually or semantically separates content.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,43 +8,116 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Separator renders a 1px horizontal or vertical divider to separate content visually or semantically. The examples on this page use the **Shadcn Rhea** style preset.
+Separator renders a 1px horizontal or vertical hairline to visually or semantically separate adjacent content. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
-
-The preview below shows a horizontal divider, a row of vertical dividers, and a non-decorative horizontal divider (`decorative={false}`).
 
 <PrototypePreviewer
   demoId="demo-shadcn-separator"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-separator" manager="npm" />
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-separator',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-separator',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-separator',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-separator',
+  }}
+/>
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the component facade for your target framework.
 
 ## Usage
 
-- `orientation` defaults to `'horizontal'`; set it to `'vertical'` for a vertical rule. Length is determined by the surrounding layout container, and spacing is controlled by your composition.
-- `decorative` defaults to `true`, hiding the divider from assistive technologies. Set `decorative={false}` to expose `role="separator"` and the matching `aria-orientation`.
-- Separator is contentless—it takes no children and does not participate in focus or events.
+```tsx
+import { ShadcnSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnSeparatorRoot styleProfile="rhea" />
+```
+
+- `orientation` defaults to `'horizontal'`; pass `'vertical'` for a vertical rule. Modern presets (such as `rhea` and `nova`) stretch automatically along flex cross-axes (`self-stretch`), while `new-york-v4` retains `h-full`.
+- `decorative` defaults to `true`, hiding the divider from assistive technologies. Pass `decorative={false}` to expose `role="separator"` and the matching `aria-orientation`.
+- Separator is contentless and non-interactive—it accepts no children, takes no focus stop, and delegates spacing to the surrounding layout.
+
+## Examples
+
+### Vertical
+
+Use `orientation="vertical"` for a vertical divider inside inline rows or toolbars.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Menu
+
+Vertical separators between multi-line items with descriptions, including responsive hiding at smaller viewports.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### List
+
+Horizontal separators between key-value rows. Pass `decorative={false}` when dividers convey meaningful section boundaries to assistive technology.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Separator adapts cleanly inside right-to-left (`dir="rtl"`) layouts.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-separator-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 The following props belong to `Root`:
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
-    { name: 'decorative', type: 'boolean', default: 'true' },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Divider orientation',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description:
+        'Hides the rule from assistive technology when true; exposes role="separator" and aria-orientation when false',
+    },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
+      default: "'inherit'",
+      description: 'Visual preset; falls back to new-york-v4 outside a Style Scope',
+    },
   ]}
 />
+
+Exposes read-only `orientation` and `decorative` states with no interaction events or focus methods.
 
 ## References
 

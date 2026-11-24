@@ -1,54 +1,170 @@
 ---
 title: 'Label'
-description: 'Accessible control naming and click activation via explicit Proto UI instance associations.'
+description: 'Accessible Brutalist control naming and click activation via explicit Proto UI instance associations.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
-Brutalist Label pairs explicitly with `Checkbox`, `Switch`, `Radio Group Item`, `Input`, `Textarea`, `Button`, `Toggle`, and `Toggle Group Item` to provide accessible naming and pointer activation without manual DOM IDs.
+<BrutalistPageStyle />
+
+Brutalist `Label` inherits the Base Label protocol with passive Brutalist typography from the [Brutalist Design Contract](../../design-contract/) (DM Sans 500, no shadow, no motion), pairing accessible naming and click activation with controls through an explicit reference.
+
+> For form fields, use the [Field](../../field/) component for automatic `FieldLabel`, `FieldDescription`, and `FieldError` wiring and validation.
 
 ## Preview
 
-<PrototypePreviewer
-  demoId="demo-brutalist-label"
-  initialRuntime="wc"
-  runtimes={['wc', 'react', 'vue', 'vue2']}
-/>
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-label',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-label',
+  }}
+  manager="npm"
+/>
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-label`
-- **Package exports**: import from `@proto.ui/prototypes-brutalist/label`
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework, or import `labelRoot` directly from `@proto.ui/prototypes-brutalist/label`.
 
 ## Usage
 
-### Independent naming and activation
+Create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core` and pass it through the adapter association channel:
 
-- **`naming` (default `true`)**: Links the rendered `Label` as the target control's accessible name without duplicating hidden text.
-- **`activation` (default `true`)**: Once paired, eligible clicks activate the target control in the same click turn—`Checkbox` and `Switch` follow their controlled/disabled rules, `Radio Item` delegates selection to its group, and `Input` / `Textarea` focus the editor (read-only editors still focus; disabled controls keep their name while ignoring activation). Set `activation={false}` for a naming-only label.
-- **`selection` (default `'policy'`)**: Actionable labels suppress accidental text selection by default; set `selection="text"` if the label should remain copyable. Nested links/buttons, modified clicks, and drags are ignored, and unpaired labels never bind implicitly to nearby controls.
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  BrutalistCheckboxIndicator,
+  BrutalistCheckboxRoot,
+  BrutalistLabelRoot,
+} from '../proto-ui/components/react';
 
-### Wiring an explicit association
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-Create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core` (one live `Label` and one live target in the same document/shadow root):
+  return (
+    <div className="flex items-center gap-2">
+      <BrutalistCheckboxRoot instanceAssociations={{ controlLabel: termsRef }}>
+        <BrutalistCheckboxIndicator />
+      </BrutalistCheckboxRoot>
+      <BrutalistLabelRoot instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </BrutalistLabelRoot>
+    </div>
+  );
+}
+```
 
-- **React / Vue / Vue 2**: Pass `instanceAssociations: { controlLabel: ref }` to both components (handled at the adapter layer, outside ordinary JSON props).
-- **Web Components**: Call `setElementAssociations(element, { controlLabel: ref })` from `@proto.ui/adapter-web-component` on both the target control and the `Label`.
+In Web Components, bind both elements with `setElementAssociations()` from `@proto.ui/adapter-web-component`:
 
-If the target already declares a non-empty `ariaLabel` or `labelledBy`, that name takes precedence; set `naming={false}` when you only want pointer activation.
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
+
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### Naming, activation, and accessibility
+
+- **`naming` (default `true`)**: Links the rendered `Label` as the target control's accessible name. If the target already sets a non-empty `ariaLabel` or `labelledBy`, set `naming={false}` for activation-only pairing.
+- **`activation` (default `true`)**: Eligible clicks invoke the paired control's default operation (toggling `Checkbox`/`Switch`, selecting a `Radio Group Item`, or focusing `Input`/`Textarea`). Set `activation={false}` for a naming-only label.
+- **`selection` (default `'policy'`)**: Actionable labels suppress accidental text selection by default; set `selection="text"` to keep copyable text.
+- **Interaction boundaries**: `Label` adds no extra `Tab` stop, ignores nested interactive descendants, modified clicks, and drags, and remains a flat passive label without shadow or translation.
+
+## Examples
+
+### Basic
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-basic"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Label in Field
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-field"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Naming, Activation, and Selection
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-modes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### RTL
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-label-rtl"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
 ### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
   rows={[
-    { name: 'naming', type: 'boolean', default: 'true' },
-    { name: 'activation', type: 'boolean', default: 'true' },
-    { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: 'Associates this rendered label as the paired target accessible name',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: 'Requests the paired target default action when the label is clicked',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: 'Text-selection policy; default suppresses selection only while actionable',
+    },
   ]}
 />
+
+### Association helpers
+
+- `createControlLabelRef()`: Imported from `@proto.ui/core` to create a stable one-to-one opaque reference.
+- `instanceAssociations`: Adapter prop accepting `{ controlLabel: ref }` in React, Vue, and Vue 2.
+- `setElementAssociations(element, { controlLabel: ref })`: Imported from `@proto.ui/adapter-web-component` for Web Components.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>
+
+- [neobrutalism.dev Label](https://www.neobrutalism.dev/docs/label)

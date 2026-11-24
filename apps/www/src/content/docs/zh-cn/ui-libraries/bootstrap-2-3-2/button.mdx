@@ -1,95 +1,149 @@
 ---
 title: 'Bootstrap 2.3.2 Button'
-description: '沿用归档 Bootstrap 2.3.2 渐变、边框与内阴影风格的按钮组件。'
+description: '沿用归档 Bootstrap 2.3.2 渐变、固定像素尺寸、边框与内阴影风格的按钮组件。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Button 保留归档版本的渐变背景、边框与内阴影样式，交互、键盘激活、焦点与禁用状态由 Base Button 统一提供。
+Bootstrap 2.3.2 Button 保留归档版本的线性渐变、文字阴影、边框与固定像素尺寸，同时由 Base Button 统一提供键盘激活、焦点与禁用语义。
 
 ## 预览
-
-下面的示例展示了全部变体、四种尺寸以及禁用状态，可切换 Web Components、React、Vue 3 与 Vue 2 体验同一原型。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-button"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前以 Proto UI 工作区源码提供：
 
 <InstallCommandCard
-  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button"
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc bootstrap-2-3-2-button',
+  }}
   manager="npm"
 />
 
-将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件代码。
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
 
 ## 用法
-
-Web Components：
-
-```html
-<wc-bootstrap-2-3-2-button variant="primary">继续</wc-bootstrap-2-3-2-button>
-<wc-bootstrap-2-3-2-button disabled>不可用</wc-bootstrap-2-3-2-button>
-```
-
-React：
 
 ```tsx
 import { BootstrapButton } from '../proto-ui/components/react';
 
 export function Example() {
-  return <BootstrapButton variant="primary">继续</BootstrapButton>;
+  return <BootstrapButton variant="primary">Continue</BootstrapButton>;
 }
 ```
 
-Vue 3：
+- **固定像素尺寸与配色**：完整沿用 Bootstrap 2.3.2 的像素内边距、字号与圆角，不随根字号缩放，并在深色宿主中保持经典浅色按钮调色板。
+- **悬停渐变与无障碍**：悬停或聚焦进入时执行经典的 100ms 线性背景位移动画（离开立即复位，减弱动态偏好下自动关闭）；键盘激活、焦点环与禁用语义继承自 [Base Button](../base/button/)。
 
-```vue
-<template>
-  <BootstrapButton variant="primary">继续</BootstrapButton>
-</template>
+## 示例
 
-<script setup>
-import { BootstrapButton } from '../proto-ui/components/vue';
-</script>
-```
+### 变体（Variants）
 
-Vue 2：
+涵盖全部七种经典 Bootstrap 2.3.2 语义配色：`default`、`primary`、`info`、`success`、`warning`、`danger` 与 `inverse`。
 
-```vue
-<template>
-  <BootstrapButton variant="primary">继续</BootstrapButton>
-</template>
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-<script>
-import { BootstrapButton } from '../proto-ui/components/vue2';
+### 尺寸（Sizes）
 
-export default {
-  components: { BootstrapButton },
-};
-</script>
-```
+提供 `large`、`default`、`small` 与 `mini` 四种经典尺寸，每种尺寸保持 20px 行高与原版像素规格。
 
-### 样式与无障碍
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- 归档样式采用固定像素尺寸，不会随文档根字号缩放，并在深色宿主中保持经典的浅色配色。
-- 按钮的可访问名称来自其子内容，键盘激活、焦点管理与禁用拦截均继承自 Base Button。
+### 导航栏上下文（Navbar Context）
+
+设置 `colorContext="navbar"` 可在蓝色或深色导航栏中呈现透明底色、白色文字与半透明悬停/按压反馈。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-navbar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 带图标（With Icon）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-with-icon"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多行换行（Wrap）
+
+开启 `wrap` 后，较长标签会在窄容器内自动换行而不会溢出裁切。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-wrap"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用（Disabled）
+
+禁用状态展平渐变、降低不透明度至 `0.65` 并阻止点击与键盘触发。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 可选值 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `variant` | `default` \| `primary` \| `warning` \| `danger` \| `success` \| `info` \| `inverse` | `default` | 按钮语义配色 |
-| `size` | `default` \| `large` \| `small` \| `mini` | `default` | 按钮尺寸 |
-| `disabled` | `boolean` | `false` | 禁用后不再响应点击与键盘激活 |
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: 'default',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'large' | 'small' | 'mini'",
+      default: 'default',
+    },
+    {
+      name: 'colorContext',
+      type: "'default' | 'navbar'",
+      default: 'default',
+    },
+    {
+      name: 'wrap',
+      type: 'boolean',
+      default: 'false',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-BUTTON.yaml', 'P-BASE-BUTTON.yaml']}
+/>

@@ -2,11 +2,12 @@ import type { DemoNode, DemoSpec } from '../../../components/PrototypePreviewer/
 
 const landscape = '/images/base-image/landscape.svg';
 const portrait = '/images/base-image/portrait.svg';
-const unavailable = 'data:image/png;base64,invalid';
 
-// Dimensions stay consumer-owned on purpose: the family projects the framed
-// surface while each usage fixes its own box through surfaceStyle.
-function image(
+// Dimensions stay consumer-owned on purpose: brutalist-image-root projects the
+// framed surface (rounded-base, 2px border, 4px hard offset shadow) while each
+// usage sets its own box size. Keep prototype closure exact to
+// `['brutalist-image-root']` per PROJECTION_FAMILY_MANIFESTS.brutalist.image.
+function framedImage(
   ref: string,
   props: Record<string, unknown>,
   surfaceStyle: Record<string, string>
@@ -16,7 +17,7 @@ function image(
     prototypeId: 'brutalist-image-root',
     ref,
     props,
-    surfaceStyle: { display: 'block', width: '100%', ...surfaceStyle },
+    surfaceStyle: { width: '100%', ...surfaceStyle },
   };
 }
 
@@ -24,57 +25,86 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex w-full max-w-xl flex-col gap-4',
+    className: 'flex w-full max-w-xl flex-col gap-5 p-4',
     children: [
       {
         kind: 'box',
-        className: 'grid grid-cols-3 gap-3',
-        children: (['contain', 'cover', 'fill'] as const).map((fit) => ({
-          kind: 'box',
-          className: 'flex min-w-0 flex-col gap-2',
-          children: [
-            image(
-              `fit-${fit}`,
-              {
-                source: landscape,
-                a11yMode: 'informative',
-                alternativeText: `Mountains and a sun (${fit})`,
-                fit,
-              },
-              { height: '112px' }
-            ),
-            { kind: 'box', className: 'text-center font-mono text-xs', children: [fit] },
-          ],
-        })),
+        className: 'flex flex-col gap-2',
+        children: [
+          framedImage(
+            'hero-frame',
+            {
+              source: landscape,
+              a11yMode: 'informative',
+              alternativeText: 'Sunlit mountain ridge illustration',
+              fit: 'cover',
+            },
+            { height: '200px' }
+          ),
+          {
+            kind: 'box',
+            className: 'flex items-center justify-between text-xs text-muted-foreground',
+            children: ['Mountain Ridge', 'fit="cover"'],
+          },
+        ],
       },
       {
         kind: 'box',
-        className: 'flex items-center gap-3 text-sm',
+        className: 'grid grid-cols-3 gap-4',
         children: [
           {
             kind: 'box',
-            className: 'w-16 shrink-0',
+            className: 'flex min-w-0 flex-col gap-2',
             children: [
-              image(
-                'decorative',
-                { source: portrait, a11yMode: 'decorative', fit: 'contain' },
-                { height: '64px' }
+              framedImage(
+                'fit-contain',
+                {
+                  source: landscape,
+                  a11yMode: 'informative',
+                  alternativeText: 'Mountain ridge in contain mode',
+                  fit: 'contain',
+                },
+                { height: '96px' }
               ),
+              { kind: 'box', className: 'text-center font-mono text-xs', children: ['contain'] },
             ],
           },
-          'Decorative image · the text carries the meaning.',
+          {
+            kind: 'box',
+            className: 'flex min-w-0 flex-col gap-2',
+            children: [
+              framedImage(
+                'fit-cover',
+                {
+                  source: portrait,
+                  a11yMode: 'informative',
+                  alternativeText: 'Alpine study in cover mode',
+                  fit: 'cover',
+                },
+                { height: '96px' }
+              ),
+              { kind: 'box', className: 'text-center font-mono text-xs', children: ['cover'] },
+            ],
+          },
+          {
+            kind: 'box',
+            className: 'flex min-w-0 flex-col gap-2',
+            children: [
+              framedImage(
+                'fit-fill',
+                {
+                  source: landscape,
+                  a11yMode: 'informative',
+                  alternativeText: 'Mountain ridge in fill mode',
+                  fit: 'fill',
+                },
+                { height: '96px' }
+              ),
+              { kind: 'box', className: 'text-center font-mono text-xs', children: ['fill'] },
+            ],
+          },
         ],
       },
-      image(
-        'error',
-        {
-          source: unavailable,
-          a11yMode: 'informative',
-          alternativeText: 'Broken source stays framed while loadingStatus reports error',
-          fit: 'contain',
-        },
-        { height: '96px' }
-      ),
     ],
   },
 } satisfies DemoSpec;

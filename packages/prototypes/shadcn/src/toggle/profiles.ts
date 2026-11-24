@@ -10,7 +10,7 @@ import type { ShadcnStyleId } from '../style-scope';
  * See THIRD_PARTY_NOTICES.md for the MIT copyright and permission notice.
  */
 export const TOGGLE_COMMON =
-  'inline-flex items-center justify-center whitespace-nowrap select-none outline-none';
+  'inline-flex shrink-0 items-center justify-center whitespace-nowrap select-none outline-none';
 export const TOGGLE_PROFILE = {
   vega: 'gap-1 rounded-md text-sm font-medium transition-[color,box-shadow]',
   nova: 'gap-1 rounded-lg text-sm font-medium transition-all',
@@ -50,7 +50,7 @@ export const TOGGLE_SIZE = {
   'vega-sm': 'h-8 min-w-8 px-2.5',
   'vega-lg': 'h-10 min-w-10 px-2.5',
   'nova-default': 'h-8 min-w-8 px-2.5',
-  'nova-sm': 'h-7 min-w-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem]',
+  'nova-sm': 'h-7 min-w-7 rounded-[min(var(--pui-radius-md),12px)] px-2.5 text-[0.8rem]',
   'nova-lg': 'h-9 min-w-9 px-2.5',
   'maia-default': 'h-9 min-w-9 px-3',
   'maia-sm': 'h-8 min-w-8 px-3',
@@ -59,7 +59,7 @@ export const TOGGLE_SIZE = {
   'lyra-sm': 'h-7 min-w-7 px-2.5',
   'lyra-lg': 'h-9 min-w-9 px-2.5',
   'mira-default': 'h-7 min-w-7 px-2',
-  'mira-sm': 'h-6 min-w-6 rounded-[min(var(--radius-md),8px)] px-2 text-[0.625rem]',
+  'mira-sm': 'h-6 min-w-6 rounded-[min(var(--pui-radius-md),8px)] px-2 text-[0.625rem]',
   'mira-lg': 'h-8 min-w-8 px-2.5',
   'luma-default': 'h-9 min-w-9 px-3',
   'luma-sm': 'h-8 min-w-8 px-3',

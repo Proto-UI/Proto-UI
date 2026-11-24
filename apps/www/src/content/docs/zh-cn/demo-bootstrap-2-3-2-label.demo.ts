@@ -1,2 +1,3 @@
-import { createControlLabelDemo } from '../../../components/PrototypePreviewer/control-label-demo';
-export default createControlLabelDemo('bootstrap-2-3-2-label-root', 'bootstrap-2-3-2');
+import { createStyledControlLabelDemo } from '../demo_components/label/label-examples.shared';
+
+export default createStyledControlLabelDemo('bootstrap-2-3-2');

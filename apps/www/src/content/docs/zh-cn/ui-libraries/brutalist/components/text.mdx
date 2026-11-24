@@ -1,12 +1,14 @@
 ---
 title: 'Text'
-description: '提供统一字号、字重、行高与色彩语义的 Brutalist 风格排版文本组件。'
+description: '采用 DM Sans 字体与高对比度色阶的 Brutalist 排版文本组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Text 是基于 [Base Text](/zh-cn/ui-libraries/base/text/) 的 Brutalist 风格排版组件，通过统一的语义化排版属性管理字号、字体族、行高、字距与文字色调。
+Brutalist Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/) 提供全部八项独立排版属性，使用 DM Sans 字体族（正文 `500`、标题 `700`）与高对比度前景色，并遵循 Brutalist 设计契约保持纯被动、无阴影与无多余动效。
 
 ## 预览
 
@@ -18,58 +20,133 @@ Text 是基于 [Base Text](/zh-cn/ui-libraries/base/text/) 的 Brutalist 风格�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/text` 导入 `brutalistTextRoot`（同时提供 `textRoot` 与 `BrutalistTextRoot` 别名；当前工作区 CLI 目标为 `brutalist-text`）。
+当前在源码工作区提供，尚未进入 0.2.0 稳定版。可使用工作区 CLI 目标 `brutalist-text` 生成本地封装，或直接从 `@proto.ui/prototypes-brutalist/text` 导入 `brutalistTextRoot`（同时提供 `textRoot` 与 `BrutalistTextRoot` 别名）：
+
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-text',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-text',
+  }}
+  manager="npm"
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的封装。
 
 ## 用法
 
-### 基础示例
-
 ```tsx
-import * as React from 'react';
-import { createReactAdapter } from '@proto.ui/adapter-react';
-import { brutalistTextRoot } from '@proto.ui/prototypes-brutalist/text';
-
-const Text = createReactAdapter(React)(brutalistTextRoot, { rootTag: 'span' });
+import { BrutalistTextRoot } from '../proto-ui/components/react';
 
 export function SectionTitle() {
   return (
     <h1>
-      <Text size="4xl" font="heading" weight="semibold" leading="tight" tracking="tight">
+      <BrutalistTextRoot size="4xl" font="heading" weight="bold" leading="tight" tracking="tight">
         Account settings
-      </Text>
+      </BrutalistTextRoot>
     </h1>
   );
 }
 ```
 
-### 语义包裹与排版规则
+### 语义包裹与设计契约
 
-- **保留外层原生语义**：`rootTag: 'span'` 属于 Web Adapter 配置项。请将标题层级（`h1`–`h6`）、段落（`p`）、表单标签（`label` 及 `htmlFor`/`for`）或链接（`a` 及 `href`/`target`/`download`）保留在原生外层元素上；Text 本身不创建焦点停靠点或事件处理器。
-- **前景色继承**：在深色或强调色 `Surface` 内使用时，可设置 `tone="inherit"` 沿用外层前景色以确保对比度。移除任意属性将恢复默认值；初始传入非法 `size` 会回退为 `'base'`，若已有合法值后传入空值或非法值则保持上一个合法值。
-- **字号与行高**：设置 `leading="size"` 可直接使用所选字号自带的行高（`xs` 至 `5xl` 依次对应 `1rem`、`1.25rem`、`1.5rem`、`1.75rem`、`1.75rem`、`2rem`、`2.25rem`、`2.5rem`、`1`）；`leading="tighter"` 对应 `1.1`，`tracking="tighter"` 对应 `-0.05em`。
+- **DM Sans 层级规范**：常规正文与控件标签推荐 `font="body" weight="medium"`（DM Sans 500），标题与突出标签推荐 `font="heading" weight="bold"`（DM Sans 700）；Text 自身不添加硬边框或阴影。
+- **外层原生语义**：标题层级（`h1`–`h6`）、段落（`p`）、表单标签（`label`）与链接（`a`）由外层原生元素负责，Text 保持自然可选且不添加焦点停靠点。
+- **字号行高与默认值**：`leading="size"` 保留字号内建行高（`xs` `1rem` 至 `5xl` `1`）；`leading="tighter"` 对应 `1.1`，`tracking="tighter"` 对应 `-0.05em`。移除属性会恢复默认值；初始非法 `size` 回退为 `base`，已有合法值后更新非法值则保留上一个有效值。
+
+## 示例
+
+### DM Sans 字号与字重刻度
+
+展示从 `5xl` 海报标题到 `xs` 紧凑标注的 DM Sans 700 / 500 层级。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 导语、引文与行内样式
+
+展示导语、引文块、行内等宽标签、下划线链接与删除线等常用排版组合。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 强调色表面与前景色继承
+
+在 `#5294ff` 主色或强调色 `Surface` 上搭配 `tone="inherit"`，确保黑色前景墨水在亮暗模式下都清晰可读。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-text-surfaces"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+以下属性属于 `Root`（`BrutalistTextRoot`）：
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
   rows={[
     {
       name: 'size',
       type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
       default: 'base',
+      description: '字号刻度',
     },
-    { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
-    { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
-    { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: '前景色语义；在强调色 Surface 内设为 inherit',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: '字重（正文推荐 medium，标题推荐 bold）',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: '字体族（DM Sans 正文/标题或等宽字体）',
+    },
     {
       name: 'leading',
       type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
       default: 'normal',
+      description: '行高；size 保留字号内建行高，tighter 为 1.1',
     },
-    { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
-    { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
-    { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: '字距；tight 为 -0.025em，tighter 为 -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: '正体或斜体样式',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: '文本装饰线',
+    },
   ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TEXT.yaml', 'P-BASE-TEXT.yaml']}
 />

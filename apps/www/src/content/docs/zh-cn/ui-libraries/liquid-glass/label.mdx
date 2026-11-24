@@ -1,13 +1,19 @@
 ---
 title: 'Label'
-description: '通过显式关联为控件提供可访问名称与点击激活的 Liquid Glass 标签组件。'
+description: '属于内容层、通过显式关联为 Liquid Glass 控件提供可访问名称与点击激活的标签组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Label 继承 Base Label 协议，通过显式关联把“提供可访问名称”与“转发点击激活”拆分为两个可独立控制的开关，适用于复选框、开关、单选框、输入框、按钮及切换控件。
+Liquid Glass `Label` 继承 Base Label 协议，作为内容层文字与透光控件配对，通过显式引用独立控制可访问名称（`naming`）与点击激活（`activation`），并提供 `primary` / `secondary` 前景色层级。
+
+> 表单输入字段请优先使用 [Field](../field/) 组件，内置 `FieldLabel`、`FieldDescription` 与 `FieldError` 自动关联与校验支持。
 
 ## 预览
+
+下方示例在渐变背景上将 Liquid Glass `Label` 与同家族的 `Checkbox`、`Switch`、`Radio Group Item`、`Input` 和 `Textarea` 控件配对，展示常规、只读、禁用、受控与仅命名场景：
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-label"
@@ -15,36 +21,140 @@ Liquid Glass Label 继承 Base Label 协议，通过显式关联把“提供可�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-示例将 Liquid Glass Label 与视觉中性的 Base 控件配对演示关联机制，状态文字直接订阅各控件的公开状态。
-
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/label` 导入。
+当前仅在源码工作区提供，可直接从工作区包导入：
+
+```ts
+import { labelRoot } from '@proto.ui/prototypes-liquid-glass/label';
+```
 
 ## 用法
 
-### 独立控制命名与激活
+通过 `@proto.ui/core` 的 `createControlLabelRef()` 为每对标签与控件创建稳定引用，并通过适配器通道传入：
 
-- **`naming`**（默认 `true`）：让目标控件通过无障碍关系直接引用已渲染的 Label，无需额外放置隐藏文案。若目标控件已显式设置非空 `ariaLabel` 或 `labelledBy`，则会保留其原有命名并在冲突时给出诊断；此时可将 Label 设为仅激活。
-- **`activation`**（默认 `true`）：完成配对后，点击或可信的非指针激活会触发目标控件的默认操作（Checkbox / Switch 遵循自身受控与禁用规则，Radio Group Item 向 Group 请求选值，Input / Textarea 请求聚焦而不修改内容或选区）。设为 `false` 可保留命名并关闭点击激活；未配对的 Label 不会隐式查找相邻控件。
-- Label 不会增加额外的按钮角色或 Tab 停靠点，键盘交互留在目标控件上；嵌套链接/按钮、带修饰键的点击、拖拽和已取消的点击事件不会被转发。
-- 仅用于命名的标签与长说明保持自然可选中；可点击标签在 `selection="policy"` 下会避免误选文字，如需允许复制可设为 `selection="text"`。
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  LiquidGlassCheckboxIndicator,
+  LiquidGlassCheckboxRoot,
+  LiquidGlassLabelRoot,
+} from '../proto-ui/components/react';
 
-### 通过显式引用建立关联
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-控件与标签的配对不通过普通 JSON Props 或 DOM ID 传递，而是由 `@proto.ui/core` 的 `createControlLabelRef()` 为每组控件/标签创建一个稳定引用：
+  return (
+    <div className="flex items-center gap-2">
+      <LiquidGlassCheckboxRoot instanceAssociations={{ controlLabel: termsRef }}>
+        <LiquidGlassCheckboxIndicator />
+      </LiquidGlassCheckboxRoot>
+      <LiquidGlassLabelRoot instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </LiquidGlassLabelRoot>
+    </div>
+  );
+}
+```
 
-- **React / Vue / Vue 2**：向双方同时传入适配器专属的 `instanceAssociations: { controlLabel: ref }`。该字段会在解析组件 Props 之前由适配器剥离。
-- **Web Components**：通过 `@proto.ui/adapter-web-component` 的 `setElementAssociations(el, { controlLabel: ref })` 分别绑定目标控件与 Label。
+Web Components 通过 `@proto.ui/adapter-web-component` 的 `setElementAssociations()` 绑定同一引用：
 
-每个引用严格对应一个活动中的 Label 与一个活动中的目标控件（Web 端需位于同一 Document 与根节点树内）；引用缺失、重复或失效时会忽略关联，不会按 DOM 顺序猜测目标。
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
 
-支持配对的控件包括：Checkbox、Switch、Radio Group Item、Input、Textarea、Button、Toggle 与 Toggle Group Item（纯图标按钮也可通过该机制关联独立标签）。
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### 内容层材质与无障碍原则
+
+- **避免玻璃叠玻璃**：遵循 Apple Liquid Glass 人机界面指南，`Label` 属于内容层文本，不附加玻璃底板，避免与相邻的透光控件形成多层玻璃叠加。
+- **前景层级（`tone`）**：默认 `tone="primary"` 使用主前景色（`text-foreground`），`tone="secondary"` 使用次要前景色（`text-muted-foreground`），在开启减少透明度、增强对比度或强制颜色模式时保持高可读性。
+- **独立控制命名、激活与选择**：`naming`（默认 `true`）、`activation`（默认 `true`）与 `selection`（默认 `'policy'`）均可按需独立调整；`Label` 不增加额外 `Tab` 停靠点，并忽略嵌套链接/按钮、修饰键点击与拖拽手势。
+
+## 示例
+
+### 基础用法
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 在 Field 中使用
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 命名、激活、文本选择与前景层级
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-modes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `naming` | `boolean` | `true` | 是否为已配对目标提供可访问名称 |
-| `activation` | `boolean` | `true` | 点击标签时是否触发已配对目标的默认操作 |
-| `selection` | `'policy' \| 'text'` | `'policy'` | 文本选择策略；设为 `'text'` 可让可激活标签支持自由复制 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: '是否为已配对目标提供可访问名称',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: '点击标签时是否触发已配对目标的默认操作',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: '文本选择策略；默认仅在可激活状态下抑制误选',
+    },
+    {
+      name: 'tone',
+      type: "'primary' | 'secondary'",
+      default: "'primary'",
+      description: '内容层前景色层级；次要标签使用 secondary',
+    },
+  ]}
+/>
+
+### 关联辅助接口
+
+- `createControlLabelRef()`：从 `@proto.ui/core` 导入，创建一对一不透明引用。
+- `instanceAssociations`：React / Vue / Vue 2 传入 `{ controlLabel: ref }` 的适配器关联通道。
+- `setElementAssociations(element, { controlLabel: ref })`：从 `@proto.ui/adapter-web-component` 导入，用于 Web Components 绑定。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>
+
+- [Apple HIG: Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
+- [Apple HIG: Typography](https://developer.apple.com/design/human-interface-guidelines/typography)

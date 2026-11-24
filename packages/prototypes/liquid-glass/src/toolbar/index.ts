@@ -2,6 +2,12 @@ export { default as toolbarRoot } from './root.proto';
 export { default as toolbarButton } from './button.proto';
 export { default as toolbarSeparator } from './separator.proto';
 export { default } from './root.proto';
+export type { LiquidGlassToolbarRootProps } from './root.proto';
+export type {
+  LiquidGlassToolbarButtonProps,
+  LiquidGlassToolbarButtonVariant,
+  LiquidGlassToolbarButtonSize,
+} from './button.proto';
 export type {
   ToolbarRootProps,
   ToolbarRootExposes,

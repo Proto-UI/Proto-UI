@@ -7,11 +7,13 @@ export const BrutalistSeparatorRoot = definePrototype<
   BrutalistSeparatorRootExposes
 >({
   name: 'brutalist-separator-root',
+  modules: asSeparatorRoot.modules,
   setup(def) {
     // P-BRUTALIST-SEPARATOR-BASE-INHERITANCE
     // Keep Base orientation, decorative, and accessibility semantics, then style
     // from the same canonical state exposed to the web projection.
-    const separatorState = asSeparatorRoot().stateHandles;
+    const inherited = asSeparatorRoot();
+    const separatorState = inherited.stateHandles;
     if (!separatorState) {
       throw new Error('[brutalist-separator] asSeparatorRoot must project state handles.');
     }
@@ -25,10 +27,10 @@ export const BrutalistSeparatorRoot = definePrototype<
     });
     def.rule({
       when: (w) => w.state(orientation).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('h-full w-[2px]')),
+      intent: (i) => i.feedback.style.use(tw('w-[2px] self-stretch')),
     });
-    // P-BASE-SEPARATOR-CONTENTLESS: hook composition does not install the
-    // caller's renderer, so this projection must discard authored descendants.
-    return () => null;
+    // P-BASE-SEPARATOR-CONTENTLESS: forward Base's contentless renderer so
+    // authored descendants can never be hidden by decorative semantics.
+    return inherited.render;
   },
 });

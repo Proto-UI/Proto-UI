@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: 'Passive Liquid Glass typography primitive covering all eight Base text axes.'
+description: 'Passive Liquid Glass typography primitive pairing optical system font stacks with all eight Base Text axes.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Text builds on [Base Text](/en/ui-libraries/base/text/) (via `asTextRoot()`) with all eight independent typography axes and a content slot. It handles typography presentation only, leaving heading levels, links, labels, buttons, and editing semantics to native elements or interactive controls.
+Liquid Glass Text realizes [Base Text](/en/ui-libraries/base/text/) across all eight independent typography axes using system sans and monospace font stacks and crisp foreground tokens, staying purely typographic with no glass material or interaction ownership of its own.
 
 ## Preview
 
@@ -17,30 +19,130 @@ Liquid Glass Text builds on [Base Text](/en/ui-libraries/base/text/) (via `asTex
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-```ts
-import { textRoot, LiquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
-```
+Currently available from workspace source only; not yet included in the 0.2.0 stable release. Import `textRoot` (also exported as `liquidGlassTextRoot` and `LiquidGlassTextRoot`) from `@proto.ui/prototypes-liquid-glass/text`, or generate workspace facades with the `liquid-glass-text` CLI target.
 
 ## Usage
 
-- An explicit `leading` prop takes precedence over the composite line-height implied by `size`; removing any prop restores its default.
-- Set `tone="inherit"` when placing Text inside a surface or control whose foreground color you want to preserve.
-- Text never overrides `user-select`: document prose stays naturally selectable, while text inside interactive controls inherits the control's selection behavior.
-- Wrap or pair with native `h1`, `p`, `label`, `a`, or `button` elements when semantic roles or navigation are needed.
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { liquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
 
-The Liquid Glass theme defines `body`, `heading`, and `mono` font stacks along with `default` and `muted` ink colors without bundling third-party font files.
+const Text = createReactAdapter(React)(liquidGlassTextRoot, { rootTag: 'span' });
+
+export function SheetHeading() {
+  return (
+    <h2>
+      <Text size="2xl" font="heading" weight="semibold" leading="tight" tracking="tight">
+        Display &amp; Clarity
+      </Text>
+    </h2>
+  );
+}
+```
+
+### Liquid Glass layering and legibility guidelines
+
+Following Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) and [Typography](https://developer.apple.com/design/human-interface-guidelines/typography) guidelines:
+
+- **Keep text off stacked glass**: Long-form reading and page headings belong on the opaque content canvas. Labels inside a floating Liquid Glass control or bar use `tone="inherit"` to pick up crisp foreground ink—never turn Text itself into a glass surface or stack glass on glass.
+- **Regular vs. prominent contrast**: Inside a regular translucent surface (`material="auto"`), pair inherited primary ink with `tone="muted"` captions; inside a prominent tinted surface (`solid`), use `tone="inherit"` so primary white ink remains legible.
+- **Reduced transparency and increased contrast**: When users enable reduced transparency or increased contrast—or when a host opts into `material="opaque"`—semantic foreground variables paired with `tone="inherit"` preserve strong legibility without opacity washout.
+- **Leading, tracking, and selection**: `leading="size"` keeps each size token's built-in line box, `leading="tighter"` maps to `1.1`, and `tracking="tighter"` maps to `-0.05em`. Text never overrides `user-select`; wrap with native `h1`, `p`, `label`, `a`, or `button` elements for document or interactive semantics.
+
+## Examples
+
+### Optical scale and tighter steps
+
+Demonstrates `4xl` through `xs` with `leading="tighter"`, `leading="size"`, and `tracking="tighter"`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Content-canvas editorial patterns
+
+Lead copy, italic pull quotes, inline monospace tokens, underlined links, and strikethrough text on the content layer.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Translucent glass, prominent tint, and opaque canvas
+
+Compares crisp text over a single regular glass surface (`material="auto"`), a prominent tinted surface (`solid`), and an opaque canvas fallback (`material="opaque"`) over a colorful backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text-surfaces"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `size` | `'xs' \| 'sm' \| 'base' \| 'lg' \| 'xl' \| '2xl' \| '3xl' \| '4xl' \| '5xl'` | `'base'` | Font size scale |
-| `tone` | `'default' \| 'muted' \| 'inherit'` | `'default'` | Text color tone |
-| `weight` | `'normal' \| 'medium' \| 'semibold' \| 'bold'` | `'normal'` | Font weight |
-| `font` | `'body' \| 'heading' \| 'mono'` | `'body'` | Font family stack |
-| `leading` | `'tight' \| 'snug' \| 'normal' \| 'relaxed'` | `'normal'` | Line height; overrides the composite size line-height when set |
-| `tracking` | `'normal' \| 'tight'` | `'normal'` | Letter spacing |
-| `emphasis` | `'normal' \| 'italic'` | `'normal'` | Font style |
-| `decoration` | `'none' \| 'underline' \| 'line-through'` | `'none'` | Text decoration |
+The following props belong to `Root` (`LiquidGlassTextRoot`):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+      description: 'Font size scale',
+    },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: 'Ink tone; use inherit inside glass or tinted surfaces',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: 'Font weight',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: 'System font family stack (no third-party font files bundled)',
+    },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+      description: 'Line height; size keeps built-in line boxes and tighter maps to 1.1',
+    },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: 'Letter spacing; tight maps to -0.025em and tighter maps to -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: 'Normal or italic font style',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: 'Text decoration line',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TEXT.yaml', 'P-BASE-TEXT.yaml']}
+/>

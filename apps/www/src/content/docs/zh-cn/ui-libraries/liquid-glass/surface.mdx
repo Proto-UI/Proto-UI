@@ -1,11 +1,13 @@
 ---
 title: 'Surface'
-description: 'Liquid Glass 风格的被动视觉表面容器，用于承载内容与受控视觉状态。'
+description: 'Liquid Glass 风格的被动视觉表面容器，支持同心圆角、显式玻璃材质与受控视觉状态。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Surface 基于 [Base Surface](/zh-cn/ui-libraries/base/surface/)（通过 `asSurfaceRoot()`），提供一个带单个内容槽的被动视觉容器。它负责呈现圆角、边框、阴影层次、可选材质与过渡透明度，不包含交互逻辑或无障碍角色；交互状态与语义继续由外层控件管理。
+Liquid Glass Surface 基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 提供被动视觉容器，默认使用 `12px` 同心圆角（`rounded-xl`）与高可读性不透明绘制，并允许功能外壳通过 `material="auto"` 显式请求玻璃材质。交互逻辑与无障碍语义继续由外层控件负责。
 
 ## 预览
 
@@ -15,11 +17,9 @@ Liquid Glass Surface 基于 [Base Surface](/zh-cn/ui-libraries/base/surface/)（
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-预览中的焦点与按压样本仅展示视觉外观。容器外边距和内容内边距由应用自行控制。
-
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/surface`（或包根）导入 `surfaceRoot`。
+当前通过源码工作区包 `@proto.ui/prototypes-liquid-glass/surface`（或包根）提供，暂未发布到公共 CLI 目录。
 
 ## 用法
 
@@ -30,44 +30,96 @@ import { surfaceRoot } from '@proto.ui/prototypes-liquid-glass/surface';
 
 const Surface = createReactAdapter(React)(surfaceRoot);
 
-export function Summary() {
+export function FloatingPanel() {
   return (
-    <Surface variant="muted" radius="md" border="none">
-      <div style={{ padding: '1rem' }}>Saved locally</div>
+    <Surface variant="outline" material="auto" elevation="raised">
+      <div className="p-1">
+        <Surface variant="secondary" material="opaque" radius="lg" border="none">
+          <div className="p-3">Opaque content nested with concentric corners</div>
+        </Surface>
+      </div>
     </Surface>
   );
 }
 ```
 
-### 显式启用玻璃材质
+### 玻璃材质与层级原则
 
-Surface 默认以普通不透明表面渲染（`material="opaque"`）。对于合适的功能或导航外壳，可以显式传入 `material="auto"` 请求 `regular` 玻璃材质：
+- Surface 默认采用不透明绘制（`material="opaque"`）；仅对适合悬浮的功能或导航外壳显式设置 `material="auto"`，不要将玻璃材质直接叠加在另一层玻璃之上。
+- 仅 `outline`、`secondary`、`muted` 三种变体参与 `regular` 玻璃材质请求；`transparent`、`accent`、`solid` 与 `scrim` 始终保持常规绘制。当系统开启减少透明度或高对比度时，自动回退为可读的不透明样式。
+- 同心圆角建议遵循 `外层圆角 = 内层圆角 + 内边距`（例如外层 `radius="xl"` 12px 配合 `p-1` 4px 与内层 `radius="lg"` 8px）。
+- 开启 `fade` 后，Surface 会将来自 [Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 映射为透明度（`closed` / `leaving` 为 `0`，`entering` / `entered` 为 `1`），读取 `--pui-surface-transition-duration`（默认 `0ms`）。
 
-- 仅 `outline`、`secondary`、`muted` 三种变体参与材质请求；`transparent`、`accent`、`solid`、`scrim` 始终保持普通绘制。
-- 当宿主不支持材质、缺少可见画布源、对比度不足或系统开启减少透明度/高对比度时，会自动保持可读的不透明样式，并将 `material` 切回 `"opaque"` 或移除该属性即可随时退回普通样式。
-- 若内部包含带样式的 Text 子项且希望继承当前 Surface 前景色，可为 Text 设置 `tone="inherit"`。
-- 需要交互能力时，请直接组合 Button 或原生 `<a>` 等真实交互元素，不要把事件或角色附加在 Surface 上。
+## 示例
 
-### 联动 Transition 透明度
+### 显式玻璃材质与同心嵌套
 
-将外层 [Transition](/zh-cn/ui-libraries/base/transition/) 的阶段传入 `transitionState` 并开启 `fade={true}` 时，`closed` 与 `leaving` 映射为不透明度 `0`，`entering` 与 `entered` 映射为 `1`。Web 端可通过 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`）传递非负有限毫秒时长。
+在彩色渐变背景上对比 `material="auto"`（`outline` / `secondary` / `muted`）与默认 `material="opaque"`，并演示玻璃外壳包裹不透明内容的同心圆角层次。
 
-`fade` 仅控制透明度表现，不改变交互门控、挂载状态或焦点行为；`scrim` 变体使用常规半透明遮暗绘制，不启用模糊或折射。
+<PrototypePreviewer
+  demoId="demo-liquid-glass-surface-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 变体与圆角档位
+
+展示常规不透明变体、内部 `Text tone="inherit"` 的对比度继承以及各档位圆角。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-surface-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 视觉状态与 Transition 淡入淡出
+
+展示玻璃表面的高光悬停边缘、按压阴影收敛、键盘焦点环，以及受控 `scrim` 淡入淡出。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-surface-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `variant` | `'transparent' \| 'outline' \| 'secondary' \| 'muted' \| 'accent' \| 'solid' \| 'scrim'` | `'outline'` | 表面视觉变体 |
-| `radius` | `'default' \| 'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full'` | `'default'` | 圆角尺寸 |
-| `border` | `'all' \| 'bottom' \| 'none'` | `'all'` | 边框范围 |
-| `elevation` | `'none' \| 'raised'` | `'none'` | 阴影层级 |
-| `material` | `'auto' \| 'opaque'` | `'opaque'` | 设为 `'auto'` 时在适用变体上请求玻璃材质 |
-| `transitionState` | `'closed' \| 'entering' \| 'entered' \| 'leaving'` | `'entered'` | 来自外部 Transition 的当前阶段 |
-| `fade` | `boolean` | `false` | 是否随 `transitionState` 切换不透明度 |
-| `hovered` | `boolean` | `false` | 外部传入的悬停视觉态 |
-| `focusVisible` | `boolean` | `false` | 外部传入的键盘焦点视觉态 |
-| `pressed` | `boolean` | `false` | 外部传入的按压视觉态 |
-| `current` | `boolean` | `false` | 外部传入的当前项视觉态（仅影响外观，不设置 `aria-current`） |
+以下属性属于 `Root`（移除属性时恢复默认值）：
 
-移除任意属性后会恢复其默认值。Surface 不暴露额外状态、事件或方法。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
+      default: 'outline',
+    },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
+    { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
+    { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
+    { name: 'material', type: "'auto' | 'opaque'", default: 'opaque' },
+    {
+      name: 'transitionState',
+      type: "'closed' | 'entering' | 'entered' | 'leaving'",
+      default: 'entered',
+    },
+    { name: 'fade', type: 'boolean', default: 'false' },
+    { name: 'hovered', type: 'boolean', default: 'false' },
+    { name: 'focusVisible', type: 'boolean', default: 'false' },
+    { name: 'pressed', type: 'boolean', default: 'false' },
+    { name: 'current', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`@proto.ui/prototypes-liquid-glass/surface` 同时导出 `SurfaceRootProps` 与 `SurfaceRootExposes` 类型定义。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-SURFACE.yaml', 'P-BASE-SURFACE.yaml']}
+/>

@@ -1,0 +1,124 @@
+---
+title: 'Liquid Glass Separator'
+description: '面向内容分层与半透明表面内部分组的 Liquid Glass 细线分隔组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Separator 以克制的 1px 半透明细线划分内容与分组区域，基于 [Base Separator](/zh-cn/ui-libraries/base/separator/) 管理方向与装饰性无障碍语义。分隔线属于内容层级而非功能玻璃控件，不会在玻璃容器上叠加第二层玻璃材质。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/separator` 导入 `separatorRoot`。
+
+```ts
+import { separatorRoot } from '@proto.ui/prototypes-liquid-glass/separator';
+```
+
+## 用法
+
+```tsx
+import { LiquidGlassSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassSeparatorRoot />
+```
+
+- **层次与材质克制**：分隔线自身不启用光学玻璃折射，避免出现玻璃叠玻璃（glass-on-glass）；默认 `material="auto"` 使用随背景自适应的半透明细线，在亮暗主题与半透明内容卡片内均可自然融合。
+- **减少透明度与高对比度回退**：当显式设置 `material="opaque"` 或系统开启“减少透明度”（`prefers-reduced-transparency: reduce`）时，自动回退为不透明实线（`bg-border`）；开启“增强对比度”（`prefers-contrast: more`）或强制颜色模式时，自动提升线条对比度。
+- **方向与语义**：支持 `'horizontal'` 与 `'vertical'`（垂直方向使用 `self-stretch` 自适应弹性容器高度）；设置 `decorative={false}` 可向辅助技术暴露 `role="separator"` 与 `aria-orientation`。
+
+## 示例
+
+### 垂直方向
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 菜单项
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 列表与语义分隔
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不透明回退
+
+将 `material` 设为 `'opaque'` 可在不依赖系统偏好的情况下使用实色分隔线，与减少透明度模式的表现保持一致。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-separator-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+以下属性属于 `Root`：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: '分隔线方向',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description: '为 true 时对辅助技术隐藏；为 false 时暴露 role="separator" 与 aria-orientation',
+    },
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+      description: '默认使用半透明自适应细线；设为 opaque 时强制使用不透明实线',
+    },
+  ]}
+/>
+
+暴露只读状态 `orientation` 与 `decorative`，不声明焦点、交互事件或玻璃材质槽位。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
+/>

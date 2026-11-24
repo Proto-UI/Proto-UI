@@ -1,13 +1,19 @@
 ---
 title: 'Label'
-description: 'A Liquid Glass label primitive that separates accessible naming from click activation via explicit associations.'
+description: 'A content-layer Liquid Glass label pairing accessible naming and click activation via explicit control associations.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Label inherits the Base Label protocol, separating accessible naming and click-to-activate into two independent controls linked through an explicit reference rather than DOM IDs.
+Liquid Glass `Label` inherits the Base Label protocol as content-layer typography paired with translucent Liquid Glass controls, separating accessible naming (`naming`) from click activation (`activation`) with `primary` and `secondary` ink hierarchy.
+
+> For form fields, use the [Field](../field/) component for automatic `FieldLabel`, `FieldDescription`, and `FieldError` associations and validation.
 
 ## Preview
+
+The preview pairs Liquid Glass `Label` with Liquid Glass `Checkbox`, `Switch`, `Radio Group Item`, `Input`, and `Textarea` controls over a tinted backdrop, covering standard, read-only, disabled, controlled, and naming-only cases:
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-label"
@@ -15,36 +21,140 @@ Liquid Glass Label inherits the Base Label protocol, separating accessible namin
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The preview pairs Liquid Glass Label with neutral Base controls to isolate the association protocol; each status readout subscribes directly to the control's public state.
-
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import from `@proto.ui/prototypes-liquid-glass/label`.
+Currently available from workspace source. Import directly from the workspace package:
+
+```ts
+import { labelRoot } from '@proto.ui/prototypes-liquid-glass/label';
+```
 
 ## Usage
 
-### Independent naming and activation
+Create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core` and pass it through the adapter association channel:
 
-- **`naming`** (default `true`): links the target control to the rendered Label through an accessibility relationship without duplicating hidden text. If the target already declares a non-empty `ariaLabel` or `labelledBy`, that explicit name keeps ownership and a conflict is diagnosed; set `naming={false}` when you only want activation.
-- **`activation`** (default `true`): once paired, an eligible click or trusted non-pointer activation invokes the target's existing operation (Checkbox and Switch keep their controlled/disabled rules; Radio Group Item delegates to its Group; Input and Textarea request focus without altering text or selection). Set `activation={false}` for a passive naming-only label. Unpaired labels never search for nearby controls.
-- Label adds no button role or Tab stop, leaving keyboard interaction on the control. Nested links/buttons, modified clicks, drags, and cancelled click events are never forwarded.
-- Naming-only labels and long descriptions remain copyable. With `selection="policy"`, actionable labels avoid accidental text selection; set `selection="text"` when an actionable label should also be copyable.
+```tsx
+import { useMemo } from 'react';
+import { createControlLabelRef } from '@proto.ui/core';
+import {
+  LiquidGlassCheckboxIndicator,
+  LiquidGlassCheckboxRoot,
+  LiquidGlassLabelRoot,
+} from '../proto-ui/components/react';
 
-### Pairing with an explicit reference
+export function TermsCheckbox() {
+  const termsRef = useMemo(() => createControlLabelRef(), []);
 
-Create one stable reference per label/control pair with `createControlLabelRef()` from `@proto.ui/core`:
+  return (
+    <div className="flex items-center gap-2">
+      <LiquidGlassCheckboxRoot instanceAssociations={{ controlLabel: termsRef }}>
+        <LiquidGlassCheckboxIndicator />
+      </LiquidGlassCheckboxRoot>
+      <LiquidGlassLabelRoot instanceAssociations={{ controlLabel: termsRef }}>
+        Accept terms and conditions
+      </LiquidGlassLabelRoot>
+    </div>
+  );
+}
+```
 
-- **React / Vue / Vue 2**: pass `instanceAssociations: { controlLabel: ref }` to both components. The adapter strips this field before resolving ordinary component Props.
-- **Web Components**: call `setElementAssociations(el, { controlLabel: ref })` from `@proto.ui/adapter-web-component` on both the target and the Label.
+In Web Components, bind both elements with `setElementAssociations()` from `@proto.ui/adapter-web-component`:
 
-Each reference supports one live Label and one live target within the same Document and tree root on Web; missing, duplicate, or stale endpoints are ignored rather than guessing by DOM order.
+```ts
+import { createControlLabelRef } from '@proto.ui/core';
+import { setElementAssociations } from '@proto.ui/adapter-web-component';
 
-Supported targets: Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle, and Toggle Group Item (including icon-only commands).
+const termsRef = createControlLabelRef();
+setElementAssociations(checkboxEl, { controlLabel: termsRef });
+setElementAssociations(labelEl, { controlLabel: termsRef });
+```
+
+### Content-layer material and accessibility
+
+- **Never stack glass on glass**: Following Apple Liquid Glass HIG, plain control labels live in the content layer and never render a Liquid Glass plate next to translucent controls.
+- **Foreground hierarchy (`tone`)**: Defaults to `tone="primary"` (`text-foreground`) with `tone="secondary"` (`text-muted-foreground`) for quieter labels, maintaining legible opaque ink under Reduce Transparency, Increase Contrast, and Forced Colors.
+- **Independent naming, activation, and selection**: Configure `naming` (default `true`), `activation` (default `true`), and `selection` (default `'policy'`) independently. `Label` adds no extra `Tab` stop and ignores nested links/buttons, modified clicks, and drags.
+
+## Examples
+
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label in Field
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Naming, Activation, Selection, and Tone
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-modes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-label-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `naming` | `boolean` | `true` | Provides the accessible name for the paired target |
-| `activation` | `boolean` | `true` | Forwards eligible clicks to the paired target's default action |
-| `selection` | `'policy' \| 'text'` | `'policy'` | Text-selection behavior; set `'text'` to keep actionable labels copyable |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'naming',
+      type: 'boolean',
+      default: 'true',
+      description: 'Provides the accessible name for the paired target',
+    },
+    {
+      name: 'activation',
+      type: 'boolean',
+      default: 'true',
+      description: 'Forwards eligible clicks to the paired target default action',
+    },
+    {
+      name: 'selection',
+      type: "'policy' | 'auto' | 'text' | 'none'",
+      default: "'policy'",
+      description: 'Text-selection policy; default suppresses selection only while actionable',
+    },
+    {
+      name: 'tone',
+      type: "'primary' | 'secondary'",
+      default: "'primary'",
+      description: 'Content-layer foreground ink hierarchy over translucent surfaces',
+    },
+  ]}
+/>
+
+### Association helpers
+
+- `createControlLabelRef()`: Imported from `@proto.ui/core` to create a stable one-to-one opaque reference.
+- `instanceAssociations`: Adapter prop accepting `{ controlLabel: ref }` in React, Vue, and Vue 2.
+- `setElementAssociations(element, { controlLabel: ref })`: Imported from `@proto.ui/adapter-web-component` for Web Components.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-LABEL.yaml', 'P-BASE-LABEL.yaml']}
+/>
+
+- [Apple HIG: Materials](https://developer.apple.com/design/human-interface-guidelines/materials)
+- [Apple HIG: Typography](https://developer.apple.com/design/human-interface-guidelines/typography)

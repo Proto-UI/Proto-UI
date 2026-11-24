@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: '提供八项独立排版属性的 Bootstrap 2.3.2 纯展示排版文本组件。'
+description: '保留经典字号比例与 20/14 行高节奏的 Bootstrap 2.3.2 纯展示排版文本组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/) 提供完整的排版属性与 Bootstrap 2.3.2 字体栈（正文、标题与等宽）及默认/弱化文字色。
+Bootstrap 2.3.2 Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/) 提供全部八项独立排版属性，使用经典的 Helvetica Neue / Arial 正文与 Monaco / Menlo 等宽字体栈，并保留归档版本的 `2xl` 标题刻度与 `20/14` 正文行高比例。
 
 ## 预览
 
@@ -17,27 +19,128 @@ Bootstrap 2.3.2 Text 基于 [Base Text](/zh-cn/ui-libraries/base/text/) 提供�
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-```ts
-import { textRoot, Bootstrap232TextRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/text';
-```
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-bootstrap-2-3-2/text` 导入 `textRoot`（也导出 `bootstrap232TextRoot` 与 `Bootstrap232TextRoot` 别名），或在工作区模式下通过 CLI 目标 `bootstrap-2-3-2-text` 生成四框架封装。
 
 ## 用法
 
-- **排版组合**：显式传入 `leading` 时会覆盖 `size` 的默认行高；移除属性即可恢复默认值。
-- **颜色继承与文本选择**：在深色或彩色容器（如 `Surface`）内使用时，设置 `tone="inherit"` 即可跟随外层前景色。Text 不强制修改 `user-select`，文档正文保持自然可选中，控件内的标签则遵循对应控件的选择策略。
-- **语义元素**：Text 仅负责排版样式，标题、段落、链接和按钮语义仍由原生 `h1`、`p`、`a`、`button` 等元素承担。
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import { bootstrap232TextRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/text';
+
+const Text = createReactAdapter(React)(bootstrap232TextRoot, { rootTag: 'span' });
+
+export function PageHeading() {
+  return (
+    <h2>
+      <Text size="2xl" font="heading" weight="bold" leading="relaxed">
+        Overview
+      </Text>
+    </h2>
+  );
+}
+```
+
+### Bootstrap 2.3.2 排版指标与语义边界
+
+- **归档刻度保留**：`size="2xl"` 对应 `1.53125rem`（16px 根字号下为 `24.5px`）；`leading="normal"` 采用经典的 `20/14`（约 `1.4286`）正文行高比例；同时设置 `size="2xl"` 与 `leading="relaxed"` 时对应 `2.5rem`（`40px`）经典标题行高。所有尺寸均以 `rem` 缩放。
+- **行高覆盖与默认恢复**：显式传入 `leading`（除 `size` 外）会覆盖 `size` 的默认行高；`leading="size"` 保留所选字号自带行高，`leading="tighter"` 为 `1.1`，`tracking="tighter"` 为 `-0.05em`。移除任意属性即可恢复默认值。
+- **前景色继承与文本选择**：在深色或彩色 `Surface` 内使用 `tone="inherit"` 可沿用外层前景色与文字阴影；Text 不强制改写 `user-select`，正文保持自然可选，控件标签遵循所属控件的选择策略。
+- **原生语义**：标题（`h1`–`h6`）、段落（`p`）、表单标签（`label`）与链接（`a`）仍由外层原生元素负责。
+
+## 示例
+
+### 经典字号刻度与 20/14 行高
+
+展示 `4xl`、`3xl`、归档 `2xl`（`24.5px` / `40px`）、`xl`、`base`（`20/14` 行高）、`sm` 与 `xs` 的完整层级。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text-scale"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 导语、引文与行内代码
+
+展示导语段落、斜体引文、等宽代码片段、下划线链接与删除线样式。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text-editorial"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 彩色表面与前景色继承
+
+展示经典蓝色渐变主表面（`solid`）、浅蓝信息表面（`accent`）与白色卡片（`outline`）上的 `tone="inherit"`、`default` 与 `muted` 对比效果。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text-tones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 属性 | 可选值 | 默认值 |
-| --- | --- | --- |
-| `size` | `xs` \| `sm` \| `base` \| `lg` \| `xl` \| `2xl` \| `3xl` \| `4xl` \| `5xl` | `base` |
-| `tone` | `default` \| `muted` \| `inherit` | `default` |
-| `weight` | `normal` \| `medium` \| `semibold` \| `bold` | `normal` |
-| `font` | `body` \| `heading` \| `mono` | `body` |
-| `leading` | `tight` \| `snug` \| `normal` \| `relaxed` | `normal` |
-| `tracking` | `normal` \| `tight` | `normal` |
-| `emphasis` | `normal` \| `italic` | `normal` |
-| `decoration` | `none` \| `underline` \| `line-through` | `none` |
+以下属性属于 `Root`（`Bootstrap232TextRoot`）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+      description: '字号刻度；2xl 保留归档的 1.53125rem（24.5px）刻度',
+    },
+    {
+      name: 'tone',
+      type: "'default' | 'muted' | 'inherit'",
+      default: 'default',
+      description: '文字颜色语义；在彩色表面或按钮内设为 inherit',
+    },
+    {
+      name: 'weight',
+      type: "'normal' | 'medium' | 'semibold' | 'bold'",
+      default: 'normal',
+      description: '字重',
+    },
+    {
+      name: 'font',
+      type: "'body' | 'heading' | 'mono'",
+      default: 'body',
+      description: '字体栈（Helvetica Neue / Arial 或 Monaco / Menlo 等宽）',
+    },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+      description: '行高；normal 采用 20/14 比例，2xl + relaxed 为 2.5rem（40px），tighter 为 1.1',
+    },
+    {
+      name: 'tracking',
+      type: "'normal' | 'tight' | 'tighter'",
+      default: 'normal',
+      description: '字距；tight 为 -0.025em，tighter 为 -0.05em',
+    },
+    {
+      name: 'emphasis',
+      type: "'normal' | 'italic'",
+      default: 'normal',
+      description: '正体或斜体样式',
+    },
+    {
+      name: 'decoration',
+      type: "'none' | 'underline' | 'line-through'",
+      default: 'none',
+      description: '文本装饰线',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TEXT.yaml', 'P-BASE-TEXT.yaml']}
+/>

@@ -1,49 +1,41 @@
 ---
 title: 'Bootstrap 2.3.2 Button'
-description: 'A button styled with archived Bootstrap 2.3.2 gradients, borders, and inset shadows over Base Button.'
+description: 'A button styled with archived Bootstrap 2.3.2 gradients, pixel metrics, borders, and inset shadows.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Button applies the archived gradient, border, and inset-shadow styling while Base Button handles activation, keyboard input, focus, and disabled behavior.
+Bootstrap 2.3.2 Button preserves the archived linear gradients, text shadows, borders, and fixed pixel metrics while inheriting activation, keyboard handling, focus, and disabled behavior from Base Button.
 
 ## Preview
-
-Explore the supported variants, four sizes, and disabled state across Web Components, React, Vue 3, and Vue 2.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-button"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source:
 
 <InstallCommandCard
-  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button"
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc bootstrap-2-3-2-button',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc bootstrap-2-3-2-button',
+  }}
   manager="npm"
 />
 
 Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your framework.
 
 ## Usage
-
-Web Components:
-
-```html
-<wc-bootstrap-2-3-2-button variant="primary">Continue</wc-bootstrap-2-3-2-button>
-<wc-bootstrap-2-3-2-button disabled>Unavailable</wc-bootstrap-2-3-2-button>
-```
-
-React:
 
 ```tsx
 import { BootstrapButton } from '../proto-ui/components/react';
@@ -53,43 +45,105 @@ export function Example() {
 }
 ```
 
-Vue 3:
+- **Fixed pixel metrics & palette**: Preserves Bootstrap 2.3.2 pixel padding, font sizes, and border radii independent of root font scaling, keeping its classic light palette even in dark hosts.
+- **Hover motion & accessibility**: Applies the classic 100ms linear `background-position` entry transition on hover or focus (resetting immediately on leave and respecting reduced motion). Keyboard activation, focus-visible rings, and disabled semantics come from [Base Button](../base/button/).
 
-```vue
-<template>
-  <BootstrapButton variant="primary">Continue</BootstrapButton>
-</template>
+## Examples
 
-<script setup>
-import { BootstrapButton } from '../proto-ui/components/vue';
-</script>
-```
+### Variants
 
-Vue 2:
+All seven classic Bootstrap 2.3.2 variants: `default`, `primary`, `info`, `success`, `warning`, `danger`, and `inverse`.
 
-```vue
-<template>
-  <BootstrapButton variant="primary">Continue</BootstrapButton>
-</template>
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-<script>
-import { BootstrapButton } from '../proto-ui/components/vue2';
+### Sizes
 
-export default {
-  components: { BootstrapButton },
-};
-</script>
-```
+Four fixed-pixel sizes (`large`, `default`, `small`, and `mini`), each retaining the 20px line height from v2.3.2.
 
-### Styling and accessibility
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- The archived style uses fixed pixel dimensions rather than scaling with root font size, and keeps its classic light palette even in dark hosts.
-- Accessible naming comes from the button's children; keyboard activation, focus handling, and disabled suppression are inherited from Base Button.
+### Navbar context
+
+Set `colorContext="navbar"` for transparent resting commands over a blue or dark navbar surface with translucent hover/press fills and a white focus ring.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-navbar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With icon
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-with-icon"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiline wrap
+
+Enable `wrap` so long labels grow vertically within narrow containers instead of clipping on one line.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-wrap"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled buttons flatten the gradient, drop opacity to `0.65`, and suppress pointer and keyboard activation.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Values | Default | Description |
-| --- | --- | --- | --- |
-| `variant` | `default` \| `primary` \| `warning` \| `danger` \| `success` \| `info` \| `inverse` | `default` | Button color variant |
-| `size` | `default` \| `large` \| `small` \| `mini` | `default` | Button size |
-| `disabled` | `boolean` | `false` | Prevents pointer and keyboard activation when enabled |
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: 'default',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'large' | 'small' | 'mini'",
+      default: 'default',
+    },
+    {
+      name: 'colorContext',
+      type: "'default' | 'navbar'",
+      default: 'default',
+    },
+    {
+      name: 'wrap',
+      type: 'boolean',
+      default: 'false',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-BUTTON.yaml', 'P-BASE-BUTTON.yaml']}
+/>

@@ -27,6 +27,7 @@ export function siteControlTags(family: SiteLibraryFamily) {
     SelectItem: `wc-${family}-select-item`,
     SelectSurface: `wc-${family}-select-surface`,
     SelectViewport: `wc-${family}-select-viewport`,
+    SelectGroup: `wc-${family}-select-group`,
     SelectItemText: `wc-${family}-select-item-text`,
   } as const;
 }

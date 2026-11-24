@@ -8,6 +8,12 @@ import { definePrototype, tw, delay } from '@proto.ui/core';
 import { asToggle } from '@proto.ui/prototypes-base/toggle';
 import type { ToggleProjectionProps, ToggleExposes } from './types';
 
+const SIZE_TOKENS = {
+  sm: 'px-2 py-1.5 text-xs',
+  default: 'px-2 py-2 text-sm',
+  lg: 'px-3 py-2.5 text-base',
+} as const;
+
 // Proto design-language extension, not an Apple component or shader equivalence.
 // Active selection and transient pressing remain separate Base-owned facts.
 export default definePrototype<ToggleProjectionProps, ToggleExposes>({
@@ -15,16 +21,23 @@ export default definePrototype<ToggleProjectionProps, ToggleExposes>({
   setup(def) {
     def.props.define({
       material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+      size: { type: 'enum', options: ['sm', 'default', 'lg'], empty: 'fallback' },
     });
-    def.props.setDefaults({ material: 'auto' });
+    def.props.setDefaults({ material: 'auto', size: 'default' });
     const state = asToggle().stateHandles;
     if (!state) throw new Error('[liquid-glass-toggle] Base Toggle states are required.');
     const { active, pressed, hovered, focusVisible, disabled } = state;
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground'
+        'inline-flex shrink-0 items-center justify-center gap-2 rounded-full border font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground'
       )
     );
+    (Object.keys(SIZE_TOKENS) as Array<keyof typeof SIZE_TOKENS>).forEach((size) => {
+      def.rule({
+        when: (w) => w.prop('size').eq(size),
+        intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
+      });
+    });
     // Selection never changes border width or material geometry. A reserved
     // decorative glyph below distinguishes selection without color or text decoration.
     def.rule({

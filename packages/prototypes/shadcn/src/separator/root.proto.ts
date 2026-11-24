@@ -3,7 +3,7 @@ import { asSeparatorRoot } from '@proto.ui/prototypes-base/separator';
 import { setupShadcnStyleSelection } from '../style-scope';
 import type { ShadcnSeparatorRootExposes, ShadcnSeparatorRootProps } from './types';
 
-const ROOT_BASE_TOKENS = ['shrink-0', 'bg-border'].join(' ');
+const ROOT_BASE_TOKENS = ['block', 'shrink-0', 'bg-border'].join(' ');
 
 const separatorRoot = definePrototype<ShadcnSeparatorRootProps, ShadcnSeparatorRootExposes>({
   name: 'shadcn-separator-root',

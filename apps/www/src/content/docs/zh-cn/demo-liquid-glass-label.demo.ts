@@ -1,2 +1,3 @@
-import { createControlLabelDemo } from '../../../components/PrototypePreviewer/control-label-demo';
-export default createControlLabelDemo('liquid-glass-label-root', 'liquid-glass');
+import { createStyledControlLabelDemo } from '../demo_components/label/label-examples.shared';
+
+export default createStyledControlLabelDemo('liquid-glass');

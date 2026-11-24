@@ -1,30 +1,109 @@
 ---
 title: 'Brutalist Toggle'
-description: 'A Brutalist-styled two-state toggle button with a persistent inset ink frame for active states.'
+description: 'A Brutalist two-state toggle button with default and outline variants, three sizes, and a persistent inset ink frame.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Toggle is a two-state button with `aria-pressed` semantics. Its Brutalist presentation marks the active state with a persistent inset ink frame as a clear non-color cue, while pressing keeps a flat geometry without shifting position.
+Brutalist Toggle inherits Base Toggle's `aria-pressed` semantics with a 5px rounded frame, 2px black border, and flat displacement-free geometry. When active, it switches to the paired main surface and displays a persistent 2px inset ink frame as a non-color cue.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-toggle`, or import directly from `@proto.ui/prototypes-brutalist/toggle`.
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-toggle',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-toggle',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc brutalist-toggle',
+    bun: 'bunx @proto.ui/cli@latest add wc brutalist-toggle',
+  }}
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate a framework wrapper, or import directly from `@proto.ui/prototypes-brutalist/toggle`.
 
 ## Usage
 
-- **Sizes**: Choose `'sm'` (36px, `0.8rem` text), `'default'` (40px), or `'lg'` (44px, `text-sm`).
-- **Controlled vs. uncontrolled**: Use `defaultActive` for uncontrolled initialization, or pass `active` to control the state externally. Set `disabled` to block activation.
+```tsx
+import { BrutalistToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<BrutalistToggle variant="outline">Toggle</BrutalistToggle>
+```
+
+- **Variants & sizes**: Choose `'default'` (filled neutral surface) or `'outline'` (transparent resting surface) via `variant`, and `'sm'` (36px), `'default'` (40px), or `'lg'` (44px) via `size`.
+- **Flat interaction grammar**: Hover highlights with a muted neutral fill, press and active states co-select the main fill and ink pair, and active keeps its 2px inset frame without shifting position or casting an outer shadow.
+- **Controlled & uncontrolled**: Use `defaultActive` for uncontrolled initialization, or pass `active` and listen to `activeChange` for controlled updates. Set `disabled` to block activation.
+
+## Examples
+
+### Outline
+
+Use `variant="outline"` for a transparent resting toggle framed by a 2px black border.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-outline"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
+
+### With Text
+
+Combine an icon and text label inside the default toggle surface.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-with-text"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
+
+### Size
+
+Use `size` to compare `sm`, `default`, and `lg` dimensions.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-sizes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
+
+### Disabled
+
+Disabled toggles suppress pointer and keyboard activation while keeping their active state and inset cue intact.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
 
 ## API
 
@@ -33,8 +112,21 @@ The following props belong to `Root` (pass `active` for controlled mode):
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'active', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultActive', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
   ]}
+/>
+
+- **Events**: `activeChange` (payload `{ active: boolean }`).
+- **Methods**: `focusSelf(options?)` (no-op while disabled).
+- **Exposed states**: `active`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
 />

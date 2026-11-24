@@ -1,6 +1,6 @@
 ---
 title: 'Toggle'
-description: 'A two-state toggle button with default and outline variants across three sizes.'
+description: 'A two-state button that can be either on or off, with default and outline variants across three sizes.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -8,31 +8,119 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Toggle is a two-state button that switches between active (pressed) and inactive states, commonly used in formatting bars and option strips. The examples on this page use the **Shadcn Rhea** style preset.
+A two-state button that can be either on or off, suited for formatting bars, pinning, and compact option switches. Examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
-
-The preview below shows a default icon toggle, an active `outline` toggle, a small toggle, a disabled active toggle, a large text toggle, and an `outline` toggle (icon-only toggles include visually hidden accessible names).
 
 <PrototypePreviewer
   demoId="demo-shadcn-toggle"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
   toolbar={false}
-  codePanel={false}
 />
 
 ## Installation
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-toggle" manager="npm" />
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-toggle',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-toggle',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc shadcn-toggle',
+    bun: 'bunx @proto.ui/cli@latest add wc shadcn-toggle',
+  }}
+/>
 
-Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local wrapper for your target framework.
 
 ## Usage
 
-- Choose `'default'` or `'outline'` via `variant`, and `'default'`, `'sm'`, or `'lg'` via `size`.
-- Under the **Shadcn Rhea** preset, `default`, `sm`, and `lg` heights are `2rem`, `1.75rem`, and `2.25rem`, with shadowless `outline` borders and muted hover/pressed surfaces. Under `new-york-v4`, heights are `36px` / `32px` / `40px` with accent active styling.
-- Pass `active` and listen to `activeChange` for controlled state, or use `defaultActive` for uncontrolled state.
+```tsx
+import { ShadcnToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnToggle variant="outline">Toggle</ShadcnToggle>
+```
+
+- **Variants & sizes**: Choose `'default'` or `'outline'` with `variant`, and `'sm'`, `'default'`, or `'lg'` with `size`.
+- **Style presets (`styleProfile`)**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (inherits the nearest [Style Scope](../style-scope/) when omitted).
+- **Controlled & uncontrolled**: Pass `active` and handle `activeChange` for controlled state, or use `defaultActive` for uncontrolled initialization.
+- **Keyboard & accessibility**: Activates with click, `Enter`, or `Space` and reflects persistent state through `aria-pressed`. Icon-only toggles should include a visually hidden text label for screen readers. For coordinated sets of toggles, use [Toggle Group](../toggle-group/).
+
+## Examples
+
+### Outline
+
+Use `variant="outline"` for a bordered toggle style.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-outline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### With Text
+
+Combine an icon and visible text label inside the toggle.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-with-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### Size
+
+Use the `size` prop to switch between `sm`, `default`, and `lg`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### Disabled
+
+Set `disabled` to block pointer and keyboard activation while preserving the current `active` state.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### Controlled
+
+Drive the active state externally with `active` and `activeChange`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
+
+### RTL
+
+Inside a `dir="rtl"` container, icon and label flow naturally from right to left.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  lazy={true}
+/>
 
 ## API
 
@@ -44,12 +132,19 @@ The following props belong to `Root` (pass `active` for controlled mode):
     { name: 'active', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultActive', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'variant', type: "'default' | 'outline'", default: 'default' },
-    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'inherit' → nearest scope → 'new-york-v4'",
+    },
   ]}
 />
 
-`Root` exposes `active`, `disabled`, `hovered`, `focused`, `focusVisible`, and `pressed`, and emits `activeChange`.
+- **Events**: `activeChange` (payload `{ active: boolean }`).
+- **Methods**: `focusSelf(options?)` (no-op while disabled).
+- **Exposed states**: `active`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`.
 
 ## References
 

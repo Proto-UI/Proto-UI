@@ -86,20 +86,36 @@ export const codeMap: Record<RuntimeId, Record<string, string>> = {
 </script>
     `),
     'demo-button-sizes': formatCode(`
-<div id="button-sizes-demo" class="flex flex-wrap items-center justify-center gap-3">
-  <proto-ui-shadcn-button>Small</proto-ui-shadcn-button>
-  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
-  <proto-ui-shadcn-button>Large</proto-ui-shadcn-button>
-  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
-  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
+<div id="button-sizes-demo" class="flex flex-wrap items-center justify-center gap-4">
+  <div class="flex items-center gap-2">
+    <proto-ui-shadcn-button>Extra Small</proto-ui-shadcn-button>
+    <proto-ui-shadcn-button><proto-ui-lucide-arrow-right-icon size="12"></proto-ui-lucide-arrow-right-icon><span class="sr-only">Extra small icon</span></proto-ui-shadcn-button>
+  </div>
+  <div class="flex items-center gap-2">
+    <proto-ui-shadcn-button>Small</proto-ui-shadcn-button>
+    <proto-ui-shadcn-button><proto-ui-lucide-arrow-right-icon size="14"></proto-ui-lucide-arrow-right-icon><span class="sr-only">Small icon</span></proto-ui-shadcn-button>
+  </div>
+  <div class="flex items-center gap-2">
+    <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
+    <proto-ui-shadcn-button><proto-ui-lucide-arrow-right-icon size="16"></proto-ui-lucide-arrow-right-icon><span class="sr-only">Default icon</span></proto-ui-shadcn-button>
+  </div>
+  <div class="flex items-center gap-2">
+    <proto-ui-shadcn-button>Large</proto-ui-shadcn-button>
+    <proto-ui-shadcn-button><proto-ui-lucide-arrow-right-icon size="18"></proto-ui-lucide-arrow-right-icon><span class="sr-only">Large icon</span></proto-ui-shadcn-button>
+  </div>
+  <proto-ui-shadcn-button><proto-ui-lucide-arrow-right-icon size="14"></proto-ui-lucide-arrow-right-icon><span class="sr-only">Compact icon</span></proto-ui-shadcn-button>
 </div>
 <script type="module">
   import { setElementProps } from '@proto.ui/adapter-web-component';
   const props = [
-    { styleProfile: 'rhea', size: 'sm' },
-    { styleProfile: 'rhea', size: 'default' },
-    { styleProfile: 'rhea', size: 'lg' },
+    { styleProfile: 'rhea', size: 'xs', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'icon-xs', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'sm', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'icon-sm', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'default', variant: 'outline' },
     { styleProfile: 'rhea', size: 'icon', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'lg', variant: 'outline' },
+    { styleProfile: 'rhea', size: 'icon-lg', variant: 'outline' },
     { styleProfile: 'rhea', size: 'icon-compact', variant: 'outline' },
   ];
   document.querySelectorAll('#button-sizes-demo proto-ui-shadcn-button').forEach((button, index) => {
@@ -156,24 +172,18 @@ export const codeMap: Record<RuntimeId, Record<string, string>> = {
     `),
     'demo-button': formatCode(`
 <div id="button-demo" class="flex flex-wrap items-center justify-center gap-3">
-  <proto-ui-shadcn-button>Default</proto-ui-shadcn-button>
-  <div>
-    <proto-ui-shadcn-button>Default2</proto-ui-shadcn-button>
-  </div>
-  <proto-ui-shadcn-button>Outline</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Button</proto-ui-shadcn-button>
+  <proto-ui-shadcn-button><proto-ui-lucide-arrow-right-icon size="16"></proto-ui-lucide-arrow-right-icon><span class="sr-only">Submit</span></proto-ui-shadcn-button>
+  <proto-ui-shadcn-button>Primary</proto-ui-shadcn-button>
   <proto-ui-shadcn-button>Destructive</proto-ui-shadcn-button>
-  <proto-ui-shadcn-button><span aria-hidden="true">+</span><span class="sr-only">Add</span></proto-ui-shadcn-button>
-  <proto-ui-shadcn-button>Disabled</proto-ui-shadcn-button>
 </div>
 <script type="module">
   import { setElementProps } from '@proto.ui/adapter-web-component';
   const props = [
-    { styleProfile: 'rhea' },
-    { styleProfile: 'rhea' },
     { styleProfile: 'rhea', variant: 'outline' },
+    { styleProfile: 'rhea', variant: 'outline', size: 'icon' },
+    { styleProfile: 'rhea' },
     { styleProfile: 'rhea', variant: 'destructive' },
-    { styleProfile: 'rhea', variant: 'ghost', size: 'icon' },
-    { styleProfile: 'rhea', disabled: true },
   ];
   document.querySelectorAll('#button-demo proto-ui-shadcn-button').forEach((button, index) => {
     if (!(button instanceof HTMLElement)) throw new Error('Missing example Button');
@@ -274,19 +284,42 @@ export function DemoButtonSecondaryDemo() {
 }
     `),
     'demo-button-sizes': formatCode(`
-import { ShadcnButton } from '../proto-ui/components/react';
+import { ShadcnButton, LucideArrowRightIcon } from '../proto-ui/components/react';
 
 export function DemoButtonSizesDemo() {
   return (
-    <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
-      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
-      <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
-      <ShadcnButton styleProfile="rhea" size="icon" variant="outline">
-        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
-      </ShadcnButton>
+    <div className="flex flex-wrap items-center justify-center gap-4">
+      <div className="flex items-center gap-2">
+        <ShadcnButton styleProfile="rhea" size="xs" variant="outline">Extra Small</ShadcnButton>
+        <ShadcnButton styleProfile="rhea" size="icon-xs" variant="outline">
+          <LucideArrowRightIcon size={12} />
+          <span className="sr-only">Extra small icon</span>
+        </ShadcnButton>
+      </div>
+      <div className="flex items-center gap-2">
+        <ShadcnButton styleProfile="rhea" size="sm" variant="outline">Small</ShadcnButton>
+        <ShadcnButton styleProfile="rhea" size="icon-sm" variant="outline">
+          <LucideArrowRightIcon size={14} />
+          <span className="sr-only">Small icon</span>
+        </ShadcnButton>
+      </div>
+      <div className="flex items-center gap-2">
+        <ShadcnButton styleProfile="rhea" variant="outline">Default</ShadcnButton>
+        <ShadcnButton styleProfile="rhea" size="icon" variant="outline">
+          <LucideArrowRightIcon size={16} />
+          <span className="sr-only">Default icon</span>
+        </ShadcnButton>
+      </div>
+      <div className="flex items-center gap-2">
+        <ShadcnButton styleProfile="rhea" size="lg" variant="outline">Large</ShadcnButton>
+        <ShadcnButton styleProfile="rhea" size="icon-lg" variant="outline">
+          <LucideArrowRightIcon size={18} />
+          <span className="sr-only">Large icon</span>
+        </ShadcnButton>
+      </div>
       <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline">
-        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
+        <LucideArrowRightIcon size={14} />
+        <span className="sr-only">Compact icon</span>
       </ShadcnButton>
     </div>
   );
@@ -327,21 +360,18 @@ export function DemoButtonVariantsDemo() {
 }
     `),
     'demo-button': formatCode(`
-import { ShadcnButton } from '../proto-ui/components/react';
+import { ShadcnButton, LucideArrowRightIcon } from '../proto-ui/components/react';
 
 export function DemoButtonDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-3">
-      <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
-      <div>
-        <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
-      </div>
-      <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
-      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
-      <ShadcnButton styleProfile="rhea" variant="ghost" size="icon">
-        <span aria-hidden="true">+</span><span className="sr-only">Add</span>
+      <ShadcnButton styleProfile="rhea" variant="outline">Button</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="outline" size="icon">
+        <LucideArrowRightIcon size={16} />
+        <span className="sr-only">Submit</span>
       </ShadcnButton>
-      <ShadcnButton styleProfile="rhea" disabled>Disabled</ShadcnButton>
+      <ShadcnButton styleProfile="rhea">Primary</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
     </div>
   );
 }
@@ -434,16 +464,28 @@ import { ShadcnButton } from '../proto-ui/components/vue';
     `),
     'demo-button-sizes': formatCode(`
 <script setup lang="ts">
-import { ShadcnButton } from '../proto-ui/components/vue';
+import { ShadcnButton, LucideArrowRightIcon } from '../proto-ui/components/vue';
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
-    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
-    <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
-    <ShadcnButton styleProfile="rhea" size="icon" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
-    <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+  <div class="flex flex-wrap items-center justify-center gap-4">
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" size="xs" variant="outline">Extra Small</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-xs" variant="outline"><LucideArrowRightIcon :size="12" /><span class="sr-only">Extra small icon</span></ShadcnButton>
+    </div>
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" size="sm" variant="outline">Small</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-sm" variant="outline"><LucideArrowRightIcon :size="14" /><span class="sr-only">Small icon</span></ShadcnButton>
+    </div>
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" variant="outline">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon" variant="outline"><LucideArrowRightIcon :size="16" /><span class="sr-only">Default icon</span></ShadcnButton>
+    </div>
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" size="lg" variant="outline">Large</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-lg" variant="outline"><LucideArrowRightIcon :size="18" /><span class="sr-only">Large icon</span></ShadcnButton>
+    </div>
+    <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline"><LucideArrowRightIcon :size="14" /><span class="sr-only">Compact icon</span></ShadcnButton>
   </div>
 </template>
     `),
@@ -479,19 +521,15 @@ import { ShadcnButton } from '../proto-ui/components/vue';
     `),
     'demo-button': formatCode(`
 <script setup lang="ts">
-import { ShadcnButton } from '../proto-ui/components/vue';
+import { ShadcnButton, LucideArrowRightIcon } from '../proto-ui/components/vue';
 </script>
 
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
-    <div>
-      <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
-    </div>
-    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Button</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline" size="icon"><LucideArrowRightIcon :size="16" /><span class="sr-only">Submit</span></ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Primary</ShadcnButton>
     <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
-    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
-    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
   </div>
 </template>
     `),
@@ -614,21 +652,34 @@ export default {
     `),
     'demo-button-sizes': formatCode(`
 <template>
-  <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton styleProfile="rhea" size="sm">Small</ShadcnButton>
-    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
-    <ShadcnButton styleProfile="rhea" size="lg">Large</ShadcnButton>
-    <ShadcnButton styleProfile="rhea" size="icon" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
-    <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
+  <div class="flex flex-wrap items-center justify-center gap-4">
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" size="xs" variant="outline">Extra Small</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-xs" variant="outline"><LucideArrowRightIcon :size="12" /><span class="sr-only">Extra small icon</span></ShadcnButton>
+    </div>
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" size="sm" variant="outline">Small</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-sm" variant="outline"><LucideArrowRightIcon :size="14" /><span class="sr-only">Small icon</span></ShadcnButton>
+    </div>
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" variant="outline">Default</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon" variant="outline"><LucideArrowRightIcon :size="16" /><span class="sr-only">Default icon</span></ShadcnButton>
+    </div>
+    <div class="flex items-center gap-2">
+      <ShadcnButton styleProfile="rhea" size="lg" variant="outline">Large</ShadcnButton>
+      <ShadcnButton styleProfile="rhea" size="icon-lg" variant="outline"><LucideArrowRightIcon :size="18" /><span class="sr-only">Large icon</span></ShadcnButton>
+    </div>
+    <ShadcnButton styleProfile="rhea" size="icon-compact" variant="outline"><LucideArrowRightIcon :size="14" /><span class="sr-only">Compact icon</span></ShadcnButton>
   </div>
 </template>
 
 <script>
-import { ShadcnButton } from '../proto-ui/components/vue2';
+import { ShadcnButton, LucideArrowRightIcon } from '../proto-ui/components/vue2';
 
 export default {
   components: {
     ShadcnButton,
+    LucideArrowRightIcon,
   },
 };
 </script>
@@ -678,23 +729,20 @@ export default {
     'demo-button': formatCode(`
 <template>
   <div class="flex flex-wrap items-center justify-center gap-3">
-    <ShadcnButton styleProfile="rhea">Default</ShadcnButton>
-    <div>
-      <ShadcnButton styleProfile="rhea">Default2</ShadcnButton>
-    </div>
-    <ShadcnButton styleProfile="rhea" variant="outline">Outline</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline">Button</ShadcnButton>
+    <ShadcnButton styleProfile="rhea" variant="outline" size="icon"><LucideArrowRightIcon :size="16" /><span class="sr-only">Submit</span></ShadcnButton>
+    <ShadcnButton styleProfile="rhea">Primary</ShadcnButton>
     <ShadcnButton styleProfile="rhea" variant="destructive">Destructive</ShadcnButton>
-    <ShadcnButton styleProfile="rhea" variant="ghost" size="icon"><span aria-hidden="true">+</span><span class="sr-only">Add</span></ShadcnButton>
-    <ShadcnButton styleProfile="rhea" :disabled="true">Disabled</ShadcnButton>
   </div>
 </template>
 
 <script>
-import { ShadcnButton } from '../proto-ui/components/vue2';
+import { ShadcnButton, LucideArrowRightIcon } from '../proto-ui/components/vue2';
 
 export default {
   components: {
     ShadcnButton,
+    LucideArrowRightIcon,
   },
 };
 </script>

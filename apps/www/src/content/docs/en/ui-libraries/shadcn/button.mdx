@@ -1,30 +1,23 @@
 ---
 title: 'Button'
 desp: 'Prototype: Button'
-description: 'A Shadcn-styled action button with variants, sizes, and workspace previews for four Web frameworks.'
+description: 'A Shadcn-styled button with variants, full size scale, and style profiles across four Web frameworks.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import CodeExample from '@/components/CodeExample.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
-import { getButtonExampleFiles as exampleFiles } from '@/content/docs/demo_components/button/button-usage';
 
-Shadcn Button adds visual variants and sizes to Base Button. The examples on this page use the **Shadcn Rhea** style preset.
+Shadcn Button inherits activation, keyboard handling, focus, and disabled semantics from Base Button while adding six variants, a complete size scale, and selectable style profiles. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
-
-`P-SHADCN-BUTTON` and `P-BASE-BUTTON` are **early draft**: the protocol is still evolving. The previews use workspace source for Web Components, React, Vue 3, and Vue 2.6; choose the matching package and host version in the installation section. [Base behavior coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml) and [Shadcn visual coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SHADCN-BUTTON-0001.yaml) record their respective results and remaining browser work.
 
 <PrototypePreviewer
   demoId="demo-button"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Button overview code" files={exampleFiles('demo-button')} />
 
 ## Installation
 
@@ -32,40 +25,49 @@ First [initialize your application](/en/start-here/quick-start/), then add the b
 
 <InstallCommandCard
   commands={{
-    npm: 'npx @proto.ui/cli@0.2.0 add wc shadcn-button',
-    pnpm: 'pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-button',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-button',
   }}
   manager="npm"
 />
 
-Replace `wc` with `react` or `vue` for those hosts. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`), the named `styleProfile` presets, the `icon-compact` size, and the `wrap` prop shown below require matching workspace CLI, adapter, and prototype source. The published 0.2.0 CLI supports `wc`, `react`, and `vue`.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages alongside the generated styles.
 
 ## Usage
 
-Each code example includes component registration or imports plus minimal example styles. Import the generated `proto-ui-style.css` once in your application entry point — no extra Tailwind configuration is required:
+Import the generated `proto-ui-style.css` once at your application entry point, then render the button:
 
-- **Web Components**: Render the generated `proto-ui-shadcn-button` custom element.
-- **React**: Import and render the generated component directly.
-- **Vue**: Use the generated single-file component.
+```tsx
+import { ShadcnButton } from '../proto-ui/components/react';
 
-### Style presets (`styleProfile`)
+export function Example() {
+  return <ShadcnButton variant="outline">Button</ShadcnButton>;
+}
+```
 
-The examples on this page explicitly set `styleProfile="rhea"`. Supported presets are `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` is accepted as an alias). When omitted or set to `inherit`, the button reads the nearest [Style Scope](../style-scope/) and falls back to `rhea`.
+- **Keyboard & accessibility**: Inherited from [Base Button](../../base/button/), supporting `Enter` and `Space` activation, focus-visible rings, and disabled suppression. For icon-only buttons, include a visually hidden label (`sr-only`) so assistive technology announces a clear name.
+- **Cursor**: Following Tailwind v4's convention, buttons do not force `cursor: pointer` by default. To opt into pointer cursors across enabled buttons, add the following rule to your global stylesheet:
+
+```css
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+```
 
 ## Examples
 
 ### Variant matrix
 
-All six variants side by side. `link` applies link-style visual presentation to an action button; use a native `<a>` element for navigation.
+All six variants side by side. `link` applies link-like presentation to an action button; use a native `<a>` element for page navigation.
 
 <PrototypePreviewer
   demoId="demo-button-variants"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="All Button variants code" files={exampleFiles('demo-button-variants')} />
 
 ### Default
 
@@ -73,10 +75,7 @@ All six variants side by side. `link` applies link-style visual presentation to 
   demoId="demo-button-default"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Default button code" files={exampleFiles('demo-button-default')} />
 
 ### Secondary
 
@@ -84,10 +83,7 @@ All six variants side by side. `link` applies link-style visual presentation to 
   demoId="demo-button-secondary"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Secondary button code" files={exampleFiles('demo-button-secondary')} />
 
 ### Outline
 
@@ -95,10 +91,7 @@ All six variants side by side. `link` applies link-style visual presentation to 
   demoId="demo-button-outline"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Outline button code" files={exampleFiles('demo-button-outline')} />
 
 ### Ghost
 
@@ -106,10 +99,7 @@ All six variants side by side. `link` applies link-style visual presentation to 
   demoId="demo-button-ghost"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Ghost button code" files={exampleFiles('demo-button-ghost')} />
 
 ### Destructive
 
@@ -117,58 +107,111 @@ All six variants side by side. `link` applies link-style visual presentation to 
   demoId="demo-button-destructive"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Destructive button code" files={exampleFiles('demo-button-destructive')} />
+
+### Link
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-link"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Sizes
 
-Choose from `sm`, `default`, `lg`, `icon`, or `icon-compact` (a fixed `1.75rem` square, even when `wrap` is enabled).
-
-For icon-only buttons, include a visually hidden text label (such as “Add”) and hide the decorative icon from the accessibility tree so assistive technologies announce a meaningful name.
+Use `size` to pick text sizes (`xs`, `sm`, `default`, `lg`) or matching square icon sizes (`icon-xs`, `icon-sm`, `icon`, `icon-lg`, plus Proto UI's compact `icon-compact` at `1.75rem`).
 
 <PrototypePreviewer
   demoId="demo-button-sizes"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Button sizes code" files={exampleFiles('demo-button-sizes')} />
+
+### Icon
+
+For icon-only buttons, include a visually hidden label (`sr-only`) so screen readers announce the action clearly.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-icon"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With icon
+
+Place an icon before or after the label; built-in button gap tokens keep icons and text aligned.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-with-icon"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Loading
+
+Pair a spinning icon with `disabled` while asynchronous work runs to prevent duplicate submissions while keeping a clear status label. Combine with [Async Region](../async-region/) or [Live Region](../live-region/) when announcing progress.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Multiline wrap
+
+Enable `wrap` to allow long labels to wrap cleanly within narrow containers while keeping each size's minimum height. Square icon sizes remain fixed.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-wrap"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Style profiles
+
+Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` accepted as an alias). When omitted or set to `inherit`, the button reads the nearest [Style Scope](../style-scope/) and falls back to `rhea`. Select a preset below to switch the preview scope live:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-style-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Inside a `dir="rtl"` container, button layout adapts automatically and directional icons mirror with `rtl:rotate-180`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Disabled
 
-Disabled buttons suppress activation and preserve consistent disabled semantics across hosts.
+Disabled buttons suppress pointer and keyboard activation consistently across every framework.
 
 <PrototypePreviewer
   demoId="demo-button-disabled"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="Disabled button code" files={exampleFiles('demo-button-disabled')} />
 
 ## Common patterns
 
-- **Navigation**: Use a native `<a>` element with a real URL and descriptive text, such as [Read Quick Start](/en/start-here/quick-start/):
-
-```html
-<a href="/en/start-here/quick-start/">Read Quick Start</a>
-```
-
-- **Asynchronous actions**: Track pending state in your application, drive `disabled` while work is in progress, and keep a clear accessible label. Pair with [Async Region](../async-region/) or [Live Region](../live-region/) when announcing progress.
-- **Grouping actions**: Use standard layout containers for independent actions, or [Toolbar](../toolbar/) when you want roving arrow-key navigation.
+- **Navigation**: Render a native `<a>` element with a real `href` for links so semantic link roles and browser navigation behavior are preserved.
+- **Grouping actions**: Use standard flex containers for independent buttons, or [Toolbar](../toolbar/) when roving arrow-key navigation is needed.
 
 ## API
+
+### Props
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     {
       name: 'styleProfile',
-      type: 'ShadcnStyleChoice (see Usage)',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
       default: 'inherit → nearest scope → rhea',
     },
     {
@@ -176,9 +219,31 @@ Disabled buttons suppress activation and preserve consistent disabled semantics 
       type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
       default: 'default',
     },
-    { name: 'size', type: "'default' | 'sm' | 'lg' | 'icon' | 'icon-compact'", default: 'default' },
+    {
+      name: 'size',
+      type: "'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg' | 'icon-compact'",
+      default: 'default',
+    },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'wrap', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events & methods
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Type', default: 'Description' }}
+  rows={[
+    {
+      name: 'click',
+      type: 'Event<void>',
+      default: 'Emitted on pointer click or Enter / Space activation when enabled',
+    },
+    {
+      name: 'focusSelf(options?)',
+      type: 'Method',
+      default: 'Focuses the button when enabled',
+    },
   ]}
 />
 

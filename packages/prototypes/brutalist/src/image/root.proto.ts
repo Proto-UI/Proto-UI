@@ -7,11 +7,12 @@ import type { BrutalistImageRootExposes, BrutalistImageRootProps } from './types
 // framed image surface, wearing `rounded-base border-2 border-border ...
 // shadow-shadow`. This layer projects that framed-photo grammar onto the
 // host-owned image target under the family's Card physical mapping
-// (border-black, 4px/4px solid offset shadow). Sizing stays consumer-owned:
-// `block max-w-full h-auto` mirrors the sibling family framing while width,
-// height and fit remain author inputs. The image is passive — it paints no
-// interaction, loading or error chrome of its own; loadingStatus stays a
-// Base-exposed fact for consumers.
+// (border-black, 4px/4px solid offset shadow in light mode, and theme
+// foreground border/shadow in dark mode so the frame remains crisp on dark
+// canvases). Sizing stays consumer-owned: `block max-w-full h-auto` mirrors
+// sibling family framing while width, height and fit remain author inputs.
+// The image is passive — it paints no interaction, loading or error chrome of
+// its own; loadingStatus stays a Base-exposed fact for consumers.
 const IMAGE_SURFACE_TOKENS = [
   'block',
   'max-w-full',
@@ -30,6 +31,12 @@ const imageRoot = definePrototype<BrutalistImageRootProps, BrutalistImageRootExp
   setup(def) {
     const behavior = asImageRoot();
     def.feedback.style.use(tw(IMAGE_SURFACE_TOKENS));
+    // Preserve high-contrast 2px frame and 4px offset shadow on dark canvases.
+    def.rule({
+      when: (w) => w.meta('colorScheme').eq('dark'),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-foreground shadow-[4px_4px_0_0_var(--pui-foreground)]')),
+    });
     // Base owns source/a11yMode/alternativeText/fit projection, loadingStatus
     // exposes and the loadingStatusChange event; preserve its contentless
     // render without fabricating a slot or a second image owner.

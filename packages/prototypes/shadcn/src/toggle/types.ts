@@ -6,9 +6,12 @@ import type {
 } from '@proto.ui/prototypes-base/toggle';
 import type { ShadcnStyleProps } from '../style-scope';
 
+export type ShadcnToggleVariant = 'default' | 'outline';
+export type ShadcnToggleSize = 'default' | 'sm' | 'lg';
+
 export interface ShadcnToggleProps extends ToggleProps, ShadcnStyleProps {
-  variant?: 'default' | 'outline';
-  size?: 'default' | 'sm' | 'lg';
+  variant?: ShadcnToggleVariant;
+  size?: ShadcnToggleSize;
 }
 
 export type ShadcnToggleExposes = ToggleExposes;

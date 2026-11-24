@@ -1,25 +1,23 @@
 ---
 title: 'Bootstrap 2.3.2 Toggle'
-description: 'A Bootstrap 2.3.2 design-language extension toggle button built over Base Toggle.'
+description: 'A Bootstrap 2.3.2 toggle button built over Base Toggle with classic gradients, inset active styling, variants, and pixel sizes.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Toggle is a design-language extension, not an original Bootstrap 2.3.2 component. It pairs the archived button appearance with Base Toggle's pressed-state protocol while keeping the classic light palette in dark hosts.
+Bootstrap 2.3.2 Toggle pairs the classic Bootstrap 2.3.2 button gradient and inset pressed paint with Base Toggle's two-state protocol, keeping its archived palette readable across light and dark hosts.
 
 ## Preview
-
-Bold starts inactive, Italic starts active, and the disabled toggle cannot be activated.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-toggle"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
@@ -28,13 +26,92 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-- Supports controlled `active` and uncontrolled `defaultActive`, pointer/keyboard activation, disabled state, and pressed accessibility semantics.
-- For coordinated sets of toggle buttons, use [ToggleGroup](/en/ui-libraries/bootstrap-2-3-2/toggle-group/).
+```tsx
+import { BootstrapToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<BootstrapToggle variant="primary" defaultActive>
+  Bold
+</BootstrapToggle>
+```
+
+- **Classic variants & sizes**: Supports all seven Bootstrap 2.3.2 color variants (`default`, `primary`, `success`, `info`, `warning`, `danger`, `inverse`) and four classic pixel sizes (`mini`, `small`, `default`, `large`).
+- **Controlled & uncontrolled**: Supports controlled `active` and uncontrolled `defaultActive`, pointer and `Enter` / `Space` activation, disabled suppression, and `aria-pressed` semantics.
+- **Grouped toggles**: For coordinated sets of toggle buttons, use [Toggle Group](/en/ui-libraries/bootstrap-2-3-2/toggle-group/).
+
+## Examples
+
+### Variants
+
+Compare all seven classic Bootstrap 2.3.2 button color variants as toggle controls.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### With Text
+
+Combine icons and text labels with classic 4px button spacing.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-with-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### Sizes
+
+Switch between `mini`, `small`, `default`, and `large` pixel sizes.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### Disabled
+
+Disabled toggles flatten the gradient, drop elevation, and block activation while preserving any active state.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
 
 ## API
 
-| Prop / Event               | Description                           |
-| -------------------------- | ------------------------------------- |
-| `active` / `defaultActive` | Controlled or initial pressed state   |
-| `disabled`                 | Prevents interaction when enabled     |
-| `activeChange`             | Emitted when the active state changes |
+The following props belong to `Root` (pass `active` for controlled mode):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'active', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'",
+      default: "'default'",
+    },
+    { name: 'size', type: "'default' | 'large' | 'small' | 'mini'", default: "'default'" },
+  ]}
+/>
+
+- **Events**: `activeChange` (payload `{ active: boolean }`).
+- **Methods**: `focusSelf(options?)` (no-op while disabled).
+- **Exposed states**: `active`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
+/>

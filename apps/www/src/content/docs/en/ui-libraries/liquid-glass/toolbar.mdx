@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: 'A Liquid Glass command toolbar with roving keyboard focus, accessible naming, and cross-axis separators.'
+description: 'A floating Liquid Glass toolbar with concentric pill geometry, prominence hierarchy, roving focus, and opaque accessibility fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Toolbar groups action buttons and visual dividers under a single roving Tab stop with arrow-key navigation.
+Liquid Glass Toolbar applies translucent glass strictly to the floating `Root` layer and hosts borderless concentric pill buttons inside—avoiding glass-on-glass stacking while providing single-Tab roving focus and arrow-key navigation.
 
 ## Preview
 
@@ -13,22 +15,163 @@ Liquid Glass Toolbar groups action buttons and visual dividers under a single ro
   demoId="demo-liquid-glass-toolbar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-liquid-glass/toolbar` and adapt them for your target framework:
+
+```ts
+import {
+  toolbarRoot,
+  toolbarButton,
+  toolbarSeparator,
+} from '@proto.ui/prototypes-liquid-glass/toolbar';
+```
 
 ## Usage
 
-- **Parts**: `Root`, `Button`, `Separator`.
-- **Navigation and actions**: only one enabled command participates in Tab order while arrow keys navigate across enabled commands (configured by `orientation` and `loop`). Activating an enabled `Button` emits `action` with its `value`. `Separator` aligns along the cross axis.
+```tsx
+import {
+  LiquidGlassToolbarRoot,
+  LiquidGlassToolbarButton,
+  LiquidGlassToolbarSeparator,
+} from '../proto-ui/components/react';
+
+export function FloatingToolbar() {
+  return (
+    <LiquidGlassToolbarRoot a11yLabel="Document actions">
+      <LiquidGlassToolbarButton value="undo">Undo</LiquidGlassToolbarButton>
+      <LiquidGlassToolbarButton value="redo">Redo</LiquidGlassToolbarButton>
+      <LiquidGlassToolbarSeparator />
+      <LiquidGlassToolbarButton value="publish" variant="prominent">
+        Publish
+      </LiquidGlassToolbarButton>
+    </LiquidGlassToolbarRoot>
+  );
+}
+```
+
+### Material Hierarchy and Accessibility
+
+- **No glass-on-glass stacking**: Only `Root` declares the `liquid-glass` material surface (opt out anytime via `material="opaque"`). Child `Button` and `Separator` parts stay optically neutral so foreground labels remain legible.
+- **Concentric geometry and prominence**: Horizontal toolbars pair a capsule (`rounded-full`) container with concentric pill controls, while vertical toolbars use `rounded-2xl`. Reserve `variant="prominent"` for the primary action and use borderless `regular` pills for secondary commands.
+- **System preference fallbacks**: Reduced transparency and forced-colors preferences switch to crisp opaque surfaces with visible focus outlines; reduced motion disables transitions; disabled buttons preserve readable contrast without washing out fallback text via opacity fading.
+
+## Examples
+
+### Prominence Hierarchy and Opaque Mode
+
+Compare `regular`, `prominent`, and `destructive` actions on the translucent toolbar against an explicit `material="opaque"` surface below.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toolbar-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Vertical Floating Rail
+
+Setting `orientation="vertical"` builds a vertical floating tool rail with horizontal cross-axis dividers and Up/Down arrow navigation.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toolbar-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Non-Looping Navigation
+
+Disabled controls maintain legible contrast on opaque fallback surfaces and are skipped by roving focus. Set `loop={false}` to stop arrow navigation at the ends.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toolbar-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `disabled`, `orientation`, `loop`, `a11yLabel` | Toolbar disable state, axis, focus looping, and accessible name |
-| Button | `value`, `action` | Command identifier and activation event |
-| Separator | — | Passive divider rendered along the cross axis |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: "'auto'",
+      description:
+        'Enables optical glass when supported and allowed, or forces an opaque fallback surface',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables every button inside the toolbar',
+    },
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Toolbar layout axis and arrow-key navigation axis',
+    },
+    {
+      name: 'loop',
+      type: 'boolean',
+      default: 'true',
+      description: 'Wraps arrow-key navigation between the first and last enabled buttons',
+    },
+    {
+      name: 'a11yLabel',
+      type: 'string',
+      default: "''",
+      description: 'Accessible name applied to the toolbar landmark',
+    },
+  ]}
+/>
+
+### Button
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'regular'",
+      description:
+        'Borderless regular pill, tinted prominent primary action, or destructive action',
+    },
+    {
+      name: 'size',
+      type: "'default' | 'sm' | 'icon'",
+      default: "'default'",
+      description: 'Button height and padding scale',
+    },
+    {
+      name: 'value',
+      type: 'string',
+      default: "''",
+      description: 'Command identifier emitted in the action event detail',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables this button with readable muted fallback styling',
+    },
+  ]}
+/>
+
+### Separator and Events
+
+- **Separator**: Takes no additional props, aligns along the cross axis automatically, and never declares nested glass material.
+- **Events and exposes**: `Button` emits `action` (`{ value: string }`) on activation. `Root` exposes `disabled`, `focusFirst()`, `focusLast()`, and `setCurrent(id)`; `Button` exposes `disabled`, `focused`, `focusVisible`, and `focusSelf(options)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TOOLBAR.yaml', 'P-BASE-TOOLBAR.yaml']}
+/>

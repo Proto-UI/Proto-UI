@@ -1,39 +1,108 @@
 ---
 title: 'Bootstrap 2.3.2 Separator'
-description: 'A horizontal or vertical divider styled with archived Bootstrap 2.3.2 rules over Base Separator.'
+description: 'A horizontal or vertical etched divider styled after archived Bootstrap 2.3.2 rules over Base Separator.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Separator renders horizontal and vertical dividers using the archived Bootstrap 2.3.2 light palette while Base Separator manages orientation and decorative accessibility semantics.
+Bootstrap 2.3.2 Separator reproduces the archived two-edge etched rule (`#eeeeee` recessed edge paired with `#ffffff` highlight) for both horizontal and vertical dividers while Base Separator manages orientation and decorative accessibility semantics.
 
 ## Preview
-
-Inspect horizontal, vertical, and semantic separators across Web Components, React, Vue 3, and Vue 2.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-separator"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `separatorRoot` from `@proto.ui/prototypes-bootstrap-2-3-2/separator`. [Browse the implemented subset](../).
+
+```ts
+import { separatorRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/separator';
+```
 
 ## Usage
 
-- **Decorative vs. semantic**: Decorative separators (`decorative={true}`, the default) are hidden from the accessibility tree. Set `decorative={false}` to expose the `separator` role and matching `aria-orientation`.
-- **Layout**: Separator is passive with no Tab stop or children; its length and spacing come from your surrounding layout. Vertical styling adapts the archived horizontal rule.
+```tsx
+import { BootstrapSeparatorRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<BootstrapSeparatorRoot />
+```
+
+- **Etched bevel rule**: Horizontal rules render a `1px #eeeeee` top edge and `1px #ffffff` bottom edge; vertical rules pair left/right bevel edges and stretch automatically across flex containers (`self-stretch`).
+- **Decorative vs. semantic**: Decorative separators (`decorative={true}`, default) stay hidden from the accessibility tree. Pass `decorative={false}` to expose `role="separator"` and `aria-orientation`.
+- **Layout**: Separator is contentless and passive with no built-in margin; length and spacing belong to the surrounding container.
+
+## Examples
+
+### Vertical
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Menu
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### List
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-separator-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Prop | Values | Default | Description |
-| --- | --- | --- | --- |
-| `orientation` | `'horizontal'` \| `'vertical'` | `'horizontal'` | Divider orientation |
-| `decorative` | `boolean` | `true` | Set `false` to expose semantic `separator` accessibility |
+The following props belong to `Root`:
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'horizontal' | 'vertical'",
+      default: "'horizontal'",
+      description: 'Divider orientation',
+    },
+    {
+      name: 'decorative',
+      type: 'boolean',
+      default: 'true',
+      description: 'Set false to expose semantic role="separator" and aria-orientation',
+    },
+  ]}
+/>
+
+Exposes read-only `orientation` and `decorative` states with no focus or interaction channel.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-SEPARATOR.yaml', 'P-BASE-SEPARATOR.yaml']}
+/>

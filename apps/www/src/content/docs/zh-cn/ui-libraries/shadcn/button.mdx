@@ -1,30 +1,23 @@
 ---
 title: 'Button'
 desp: '原型：Button'
-description: '提供多种视觉变体与尺寸的 Shadcn 风格按钮，附四种 Web 框架的工作区预览。'
+description: '提供多种视觉变体、完整尺寸阶梯与风格预设的 Shadcn 按钮组件，支持四种 Web 框架。'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import CodeExample from '@/components/CodeExample.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
-import { getButtonExampleFiles as exampleFiles } from '@/content/docs/demo_components/button/button-usage';
 
-Shadcn Button 在 Base Button 的基础上提供视觉变体与尺寸。本页示例采用 **Shadcn Rhea** 风格。
+Shadcn Button 继承 Base Button 的激活、键盘交互、焦点与禁用语义，并提供六种变体、完整尺寸阶梯与多种风格预设。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
-
-`P-SHADCN-BUTTON` 与 `P-BASE-BUTTON` 仍处于 **early draft**，协议仍在演进。预览使用 Web Components、React、Vue 3 与 Vue 2.6 的工作区源码；接入应用时，请按安装部分选择匹配的包和宿主版本。[Base 行为测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml)与 [Shadcn 视觉测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SHADCN-BUTTON-0001.yaml)分别记录了各自的结果与待完成的浏览器验证。
 
 <PrototypePreviewer
   demoId="demo-button"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="按钮总览代码" files={exampleFiles('demo-button')} />
 
 ## 安装
 
@@ -32,143 +25,193 @@ Shadcn Button 在 Base Button 的基础上提供视觉变体与尺寸。本页�
 
 <InstallCommandCard
   commands={{
-    npm: 'npx @proto.ui/cli@0.2.0 add wc shadcn-button',
-    pnpm: 'pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button',
+    npm: 'npx @proto.ui/cli@latest add wc shadcn-button',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc shadcn-button',
   }}
   manager="npm"
 />
 
-将 `wc` 替换为 `react` 或 `vue` 可生成对应宿主的组件。CLI 会安装匹配的 `@proto.ui/prototypes-shadcn` 与适配器包，并生成本地组件入口。Vue 2.6（`>=2.6.0 <2.7`）、下方的 `styleProfile` 预设、`icon-compact` 尺寸与 `wrap` 属性需要匹配的工作区 CLI、适配器和原型源码；已发布的 0.2.0 CLI 支持 `wc`、`react` 和 `vue`。
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 可生成对应框架的组件入口。CLI 会安装匹配的 `@proto.ui/prototypes-shadcn` 与适配器包，并生成样式表与本地封装。
 
 ## 用法
 
-每个代码示例都包含组件注册或导入代码以及示例样式。在应用入口处导入一次生成的 `proto-ui-style.css` 即可，无需额外配置 Tailwind：
+在应用入口导入一次生成的 `proto-ui-style.css` 后即可直接渲染按钮：
 
-- **Web Components**：使用生成的 `proto-ui-shadcn-button` 标签。
-- **React**：直接渲染导出的组件。
-- **Vue**：以单文件组件形式导入使用。
+```tsx
+import { ShadcnButton } from '../proto-ui/components/react';
 
-### 风格预设（`styleProfile`）
+export function Example() {
+  return <ShadcnButton variant="outline">Button</ShadcnButton>;
+}
+```
 
-本页示例显式设置了 `styleProfile="rhea"`。当前支持的预设包括 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（`new-york` 作为兼容别名）。省略或设为 `inherit` 时，会优先继承最近的 [Style Scope](../style-scope/)，否则回退到 `rhea`。
+- **键盘与无障碍**：继承自 [Base Button](../../base/button/)，支持 `Enter` 与 `Space` 激活、焦点环与禁用拦截。纯图标按钮请使用视觉隐藏文本（如 `sr-only`）提供可访问名称。
+- **光标行为（Cursor）**：默认遵循 Tailwind v4 的按钮光标规范，不在基础样式中强制指定 `cursor: pointer`。若应用希望所有可用按钮统一使用手形光标，可在全局 CSS 中按需设置：
+
+```css
+@layer base {
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+```
 
 ## 示例
 
 ### Variant 矩阵
 
-下面展示全部六种 `variant`。其中 `link` 仅提供链接风格的按钮外观，用于触发命令操作而非页面跳转。
+全部六种 `variant` 并列展示。`link` 提供链接外观用于命令触发；页面导航请直接使用原生 `<a>` 元素。
 
 <PrototypePreviewer
   demoId="demo-button-variants"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="全部按钮 variant 代码" files={exampleFiles('demo-button-variants')} />
 
-### 默认
+### 默认（Default）
 
 <PrototypePreviewer
   demoId="demo-button-default"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="默认按钮代码" files={exampleFiles('demo-button-default')} />
 
-### 次要
+### 次要（Secondary）
 
 <PrototypePreviewer
   demoId="demo-button-secondary"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="次要按钮代码" files={exampleFiles('demo-button-secondary')} />
 
-### 描边
+### 描边（Outline）
 
 <PrototypePreviewer
   demoId="demo-button-outline"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="描边按钮代码" files={exampleFiles('demo-button-outline')} />
 
-### 幽灵
+### 幽灵（Ghost）
 
 <PrototypePreviewer
   demoId="demo-button-ghost"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="幽灵按钮代码" files={exampleFiles('demo-button-ghost')} />
 
-### 危险操作
+### 危险操作（Destructive）
 
 <PrototypePreviewer
   demoId="demo-button-destructive"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="危险按钮代码" files={exampleFiles('demo-button-destructive')} />
 
-### 尺寸
+### 链接外观（Link）
 
-支持 `sm`、`default`、`lg`、`icon` 与紧凑正方形 `icon-compact`（固定为 `1.75rem`，开启 `wrap` 时也保持正方形）。
+<PrototypePreviewer
+  demoId="demo-shadcn-button-link"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-使用纯图标按钮时，请像下面示例一样提供视觉隐藏的文本标签（如“Add”），并将装饰性图标从可访问树中隐藏，确保屏幕阅读器能够读出按钮名称。
+### 尺寸（Size）
+
+使用 `size` 切换按钮尺寸。文本按钮支持 `xs`、`sm`、`default` 与 `lg`；图标按钮对应提供 `icon-xs`、`icon-sm`、`icon`、`icon-lg` 以及紧凑正方形 `icon-compact`（固定 `1.75rem`）。
 
 <PrototypePreviewer
   demoId="demo-button-sizes"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="按钮尺寸代码" files={exampleFiles('demo-button-sizes')} />
 
-### 禁用
+### 纯图标（Icon）
 
-禁用状态下会阻止点击与键盘触发，并在所有框架中保持一致的禁用语义。
+使用纯图标按钮时，请提供视觉隐藏文本标签，确保屏幕阅读器能够播报清晰的操作名称。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-icon"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 带图标（With Icon）
+
+在标签前后放置图标组件，按钮内置的间距规则会自动对齐图文。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-with-icon"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 加载中（Loading）
+
+在异步请求进行时组合旋转图标与 `disabled`，阻止重复激活并保持清晰的状态文本。需要向辅助技术播报进度时，可配合 [Async Region](../async-region/) 或 [Live Region](../live-region/)。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-loading"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多行换行（Wrap）
+
+开启 `wrap` 后，较长标签会在容器可用宽度内自动换行，同时保持对应尺寸的最小高度；图标尺寸保持正方形不变。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-wrap"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 风格预设（Style Profile）
+
+支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（兼容别名 `new-york`）。省略或设为 `inherit` 时优先继承最近的 [Style Scope](../style-scope/)，否则回退到 `rhea`。点击下方预设按钮实时切换预览区域的风格：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-style-profiles"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+在 `dir="rtl"` 容器中，按钮内边距与图标排列自动适配阅读方向，方向性箭头可通过 `rtl:rotate-180` 镜像翻转。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-button-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用（Disabled）
+
+禁用状态下阻止指针与键盘激活，并在所有框架中保持一致的无障碍状态。
 
 <PrototypePreviewer
   demoId="demo-button-disabled"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
-<CodeExample label="禁用按钮代码" files={exampleFiles('demo-button-disabled')} />
 
 ## 常见组合模式
 
-- **页面导航**：需要跳转链接时请直接使用原生 `<a>` 元素，保留真实 URL 与完整链接文本，例如 [阅读快速开始](/zh-cn/start-here/quick-start/)：
-
-```html
-<a href="/zh-cn/start-here/quick-start/">阅读快速开始</a>
-```
-
-- **异步加载状态**：在应用层管理请求中的状态，驱动 `disabled` 并保留有意义的按钮名称；需要向辅助技术播报进度时，可搭配 [Async Region](../async-region/) 或 [Live Region](../live-region/) 使用。
-- **按钮分组**：普通操作按钮可直接用常规容器排版；需要工具栏方向键导航时，请使用 [Toolbar](../toolbar/)。
+- **页面导航**：需要跳转 URL 时请直接使用原生 `<a>` 元素，保留语义链接角色与浏览器导航能力，不要用按钮模拟链接。
+- **工具栏分组**：独立操作可直接放在弹性布局容器中；需要方向键 roving focus 时，请使用 [Toolbar](../toolbar/)。
 
 ## API
+
+### 属性（Props）
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     {
       name: 'styleProfile',
-      type: 'ShadcnStyleChoice（见用法）',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4' | 'new-york'",
       default: 'inherit → 最近 scope → rhea',
     },
     {
@@ -176,9 +219,27 @@ Shadcn Button 在 Base Button 的基础上提供视觉变体与尺寸。本页�
       type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'",
       default: 'default',
     },
-    { name: 'size', type: "'default' | 'sm' | 'lg' | 'icon' | 'icon-compact'", default: 'default' },
+    {
+      name: 'size',
+      type: "'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg' | 'icon-compact'",
+      default: 'default',
+    },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'wrap', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件与方法
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '类型', default: '说明' }}
+  rows={[
+    {
+      name: 'click',
+      type: 'Event<void>',
+      default: '指针点击或键盘 Enter / Space 激活时触发（禁用态不触发）',
+    },
+    { name: 'focusSelf(options?)', type: 'Method', default: '将焦点移动到当前按钮（禁用态忽略）' },
   ]}
 />
 

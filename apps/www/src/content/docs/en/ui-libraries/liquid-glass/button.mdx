@@ -1,58 +1,24 @@
 ---
 title: 'Liquid Glass Button'
-description: 'Layered glass for everyday actions, with selective tint for the primary action.'
+description: 'A layered capsule button with selective prominent tint, optical material intent, and accessible opaque fallbacks.'
 ---
 
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Liquid Glass Button uses soft edge highlights and background refraction to distinguish controls from content. Use the regular style for secondary actions such as Back, and the prominent tint for the primary action. Both styles keep the same size.
+Liquid Glass Button distinguishes floating controls from content using capsule geometry, edge contrast, and V2 optical material intent: `regular` for everyday actions, `prominent` for a single selective primary action, and `destructive` for irreversible actions, with interaction and accessibility owned by Base Button.
 
 ## Preview
 
-The preview background stays still so you can focus on hover, press, and keyboard focus feedback. Click Back to observe its activation count, or use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2.
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={true}
-    runtimes={['wc']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={true}
-    runtimes={['react']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={true}
-    runtimes={['vue']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={true}
-    runtimes={['vue2']}
-    codePanel={false}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -69,316 +35,125 @@ The preview background stays still so you can focus on hover, press, and keyboar
 
 ## Usage
 
-Usually, highlight one primary button in a group and use the regular style for the remaining actions. These examples show regular, prominent and disabled states.
-
-### Regular
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-  <wc-liquid-glass-button>Back</wc-liquid-glass-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
+```tsx
 import { LiquidGlassButton } from '../proto-ui/components/react';
 
-export function Demo() {
+export function Example() {
   return (
-    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
-      <LiquidGlassButton>Back</LiquidGlassButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton>Back</LiquidGlassButton>
-  </div>
-</template>
-
-<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
-
-    `}
-
-/>
-
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton>Back</LiquidGlassButton>
-  </div>
-</template>
-
-<script>
-import Vue from 'vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
-import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
-
-const adapt = createVue2Adapter({
-  extend: Vue.extend.bind(Vue),
-  nextTick: Vue.nextTick.bind(Vue),
-  set: Vue.set.bind(Vue),
-  delete: Vue.delete.bind(Vue),
-});
-const LiquidGlassButton = adapt(liquidGlassButton);
-
-export default {
-  components: { LiquidGlassButton },
-};
-</script>
-
-    `}
-
-/>
-
-</div>
-
-### Prominent
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-  <wc-liquid-glass-button variant="prominent">Continue</wc-liquid-glass-button>
-</div>
-    `}
-  />
-</div>
-
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { LiquidGlassButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
+    <div className="flex items-center gap-4">
+      <LiquidGlassButton>Cancel</LiquidGlassButton>
       <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
     </div>
   );
 }
-    `}
-  />
-</div>
+```
 
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
-  </div>
-</template>
+### Material hierarchy & accessibility (Apple Liquid Glass HIG)
 
-<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
+Design choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Color](https://developer.apple.com/design/human-interface-guidelines/color), and [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) guidance:
 
-    `}
+- **Prominence hierarchy**: Reserve `variant="prominent"` for one primary action per group and keep remaining controls `regular`. Never stack glass buttons directly on top of another glass surface.
+- **Optical intent & opt-out**: `material="auto"` submits V2 liquid-glass optical intent with press deformation when the host supports a visible backdrop; `material="opaque"` explicitly opts into the high-contrast opaque surface.
+- **Accessibility preferences**: Reduced motion disables transitions and elastic press deformation while keeping static material. Reduced transparency, increased contrast, and forced colors fall back to readable opaque surfaces. Disabled buttons preserve full label and border legibility without fading the whole host.
 
+## Examples
+
+### Regular
+
+Regular glass capsules suit secondary and everyday actions such as Back, Details, and Share.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-regular"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-</div>
+### Prominent
 
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton variant="prominent">Continue</LiquidGlassButton>
-  </div>
-</template>
+Highlight one primary action in a group with `variant="prominent"` while keeping identical capsule dimensions alongside regular actions.
 
-<script>
-import Vue from 'vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
-import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
-
-const adapt = createVue2Adapter({
-  extend: Vue.extend.bind(Vue),
-  nextTick: Vue.nextTick.bind(Vue),
-  set: Vue.set.bind(Vue),
-  delete: Vue.delete.bind(Vue),
-});
-const LiquidGlassButton = adapt(liquidGlassButton);
-
-export default {
-  components: { LiquidGlassButton },
-};
-</script>
-
-    `}
-
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-prominent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-</div>
+### Destructive
+
+Use `variant="destructive"` for irreversible actions paired with a regular cancel option.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sizes
+
+Choose from `sm`, `default`, `lg`, and circular `icon` button sizes.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material (Auto vs Opaque)
+
+Compare default `material="auto"` against explicit `material="opaque"` for surfaces where translucency is undesirable.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Disabled
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    hasCode={true}
-    code={`
-<div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-  <wc-liquid-glass-button disabled>Unavailable</wc-liquid-glass-button>
-</div>
-    `}
-  />
-</div>
+Disabled buttons withdraw optical candidates and suppress activation while retaining clear text and border contrast without whole-host opacity fade.
 
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    hasCode={true}
-    code={`
-import { LiquidGlassButton } from '../proto-ui/components/react';
-
-export function Demo() {
-  return (
-    <div className="flex flex-wrap items-center gap-6 liquid-functional-demo">
-      <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
-    </div>
-  );
-}
-    `}
-  />
-</div>
-
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
-  </div>
-</template>
-
-<script setup>import {LiquidGlassButton} from '../proto-ui/components/vue';</script>
-
-    `}
-
+<PrototypePreviewer
+  demoId="demo-liquid-glass-button-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
-
-</div>
-
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    hasCode={true}
-    code={`
-<template>
-  <div class="flex flex-wrap items-center gap-6 liquid-functional-demo">
-    <LiquidGlassButton disabled>Unavailable</LiquidGlassButton>
-  </div>
-</template>
-
-<script>
-import Vue from 'vue';
-import { createVue2Adapter } from '@proto.ui/adapter-vue2';
-import { liquidGlassButton } from '@proto.ui/prototypes-liquid-glass/button';
-
-const adapt = createVue2Adapter({
-  extend: Vue.extend.bind(Vue),
-  nextTick: Vue.nextTick.bind(Vue),
-  set: Vue.set.bind(Vue),
-  delete: Vue.delete.bind(Vue),
-});
-const LiquidGlassButton = adapt(liquidGlassButton);
-
-export default {
-  components: { LiquidGlassButton },
-};
-</script>
-
-    `}
-
-/>
-
-</div>
-
-## Material and accessibility
-
-The default `regular` material suits everyday actions; reserve `variant="prominent"` for the primary action in a group, and avoid stacking glass buttons on top of glass containers. Design choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials), [Color](https://developer.apple.com/design/human-interface-guidelines/color), and [Buttons](https://developer.apple.com/design/human-interface-guidelines/buttons) guidance.
-
-- `material="auto"` enables optical refraction when the host supports it over a visible canvas backdrop; over ordinary DOM backgrounds, intervening content, or with `material="opaque"`, the button retains a readable opaque surface.
-- Reduced motion disables elastic deformation while keeping static material. Reduced transparency, increased contrast, and forced colors use an accessible opaque fallback.
-- Disabled buttons keep their label and outline without accepting activation.
 
 ## API
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `variant` | `'regular' \| 'prominent'` | `'regular'` | Regular glass or prominent tinted style |
-| `material` | `'auto' \| 'opaque'` | `'auto'` | Set to `'opaque'` to use an opaque surface instead of optics |
-| `disabled` | `boolean` | `false` | Disables button activation |
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    {
+      name: 'variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: 'regular',
+    },
+    {
+      name: 'size',
+      type: "'sm' | 'default' | 'lg' | 'icon'",
+      default: 'default',
+    },
+    {
+      name: 'material',
+      type: "'auto' | 'opaque'",
+      default: 'auto',
+    },
+    {
+      name: 'wrap',
+      type: 'boolean',
+      default: 'false',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+    },
+  ]}
+/>
 
-Activation, focus, keyboard, and disabled behavior are managed by [Base Button](/en/ui-libraries/base/button/).
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-BUTTON.yaml', 'P-BASE-BUTTON.yaml']}
+/>

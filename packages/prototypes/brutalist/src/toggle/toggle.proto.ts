@@ -11,13 +11,15 @@ const TOGGLE_BASE_TOKENS = [
   'bg-secondary-background',
   'text-foreground',
   'inline-flex',
+  'shrink-0',
   'items-center',
   'justify-center',
-  'gap-1',
+  'gap-2',
   'font-heading',
   'font-bold',
   'whitespace-nowrap',
   'select-none',
+  'cursor-pointer',
 ].join(' ');
 
 const SIZE_TOKENS: Record<BrutalistToggleSize, string> = {
@@ -35,16 +37,23 @@ const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
   setup(def) {
     // P-BRUTALIST-TOGGLE-SIZE-PROP
     def.props.define({
+      variant: { type: 'enum', empty: 'fallback', options: ['default', 'outline'] },
       size: { type: 'enum', empty: 'fallback', options: ['default', 'sm', 'lg'] },
       active: { type: 'boolean', empty: 'fallback' },
       defaultActive: { type: 'boolean', empty: 'fallback' },
       disabled: { type: 'boolean', empty: 'fallback' },
     });
     // P-BRUTALIST-TOGGLE-DEFAULTS
-    def.props.setDefaults({ size: 'default', defaultActive: false, disabled: false });
+    def.props.setDefaults({
+      variant: 'default',
+      size: 'default',
+      defaultActive: false,
+      disabled: false,
+    });
 
     // P-BRUTALIST-TOGGLE-BASE-INHERITANCE
-    const toggleState = asToggle().stateHandles;
+    const inherited = asToggle();
+    const toggleState = inherited.stateHandles;
     if (!toggleState) {
       throw new Error('[brutalist-toggle] asToggle must project Toggle state handles.');
     }
@@ -52,6 +61,11 @@ const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
 
     // P-BRUTALIST-TOGGLE-VISUAL-GRAMMAR
     def.feedback.style.use(tw(TOGGLE_BASE_TOKENS));
+
+    def.rule({
+      when: (w) => w.all(w.prop('variant').eq('outline'), w.state(active).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-transparent')),
+    });
 
     (Object.keys(SIZE_TOKENS) as BrutalistToggleSize[]).forEach((size) => {
       def.rule({
@@ -74,17 +88,17 @@ const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
     def.rule({
       when: (w) =>
         w.all(w.state(hovered).eq(true), w.state(active).eq(false), w.state(pressed).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('border-black')),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground border-black')),
     });
-    // P-BRUTALIST-TOGGLE-INTERACTION — press
+    // P-BRUTALIST-TOGGLE-INTERACTION — press (non-active)
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-black')),
+      when: (w) => w.all(w.state(pressed).eq(true), w.state(active).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
     });
-    // Keep the active inset marker while pressed; only the outer elevation collapses.
+    // Keep the active inset marker and paired fill while pressed; no outer elevation applies.
     def.rule({
       when: (w) => w.all(w.state(active).eq(true), w.state(pressed).eq(true)),
-      intent: (i) => i.feedback.style.use(tw(ACTIVE_PRESSED_FRAME_TOKENS)),
+      intent: (i) => i.feedback.style.use(tw('border-black', ACTIVE_PRESSED_FRAME_TOKENS)),
     });
     // P-BRUTALIST-TOGGLE-INTERACTION — focus-visible
     def.rule({
@@ -96,6 +110,7 @@ const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
       when: (w) => w.state(disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw(BRUTALIST_DISABLED_TOKENS)),
     });
+    return inherited.render;
   },
 });
 

@@ -9,6 +9,7 @@ const {
   SelectItem,
   SelectSurface,
   SelectViewport,
+  SelectGroup,
   SelectItemText,
 } = siteControlTags(family);
 interface Props {
@@ -58,11 +59,13 @@ const options = [
         family !== 'brutalist' ? (
           <SelectSurface>
             <SelectViewport>
-              {options.map((opt) => (
-                <SelectItem data-value={opt.value} data-text-value={opt.label}>
-                  <SelectItemText>{opt.label}</SelectItemText>
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {options.map((opt) => (
+                  <SelectItem data-value={opt.value} data-text-value={opt.label}>
+                    <SelectItemText>{opt.label}</SelectItemText>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectViewport>
           </SelectSurface>
         ) : (

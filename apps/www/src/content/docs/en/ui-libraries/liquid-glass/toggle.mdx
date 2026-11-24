@@ -1,60 +1,24 @@
 ---
 title: 'Liquid Glass Toggle'
-description: 'A two-state Liquid Glass toggle button with persistent active semantics and readable fallback.'
+description: 'A two-state Liquid Glass toggle button with three pill sizes, persistent active tint, and readable opaque fallback.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Liquid Glass Toggle inherits persistent selection semantics and keyboard behavior from [Base Toggle](/en/ui-libraries/base/toggle/). Inactive buttons use neutral `regular` glass (`secondary` fill and foreground), while active buttons switch to a tinted glass treatment driven by `primary` and `primary-foreground`.
-
-A small decorative `currentColor` check mark uses symmetric reserved space in both states so labels and icons stay centered, outer geometry remains stable, and active selection stays recognizable without relying on color or optics alone. Transient press deformation stays independent of the persistent `active` state.
+Liquid Glass Toggle inherits persistent selection semantics from [Base Toggle](/en/ui-libraries/base/toggle/). Inactive toggles render neutral `regular` glass, while active toggles switch to a primary-tinted glass treatment with a symmetrically reserved `currentColor` check mark that keeps labels centered and pill geometry stable.
 
 ## Preview
 
-Use the page runtime selector to switch between Web Components, React, Vue 3, and Vue 2. Bold starts inactive, Italic starts active, and Unavailable stays active while disabled. Click, Space, or Enter requests an `activeChange`.
-
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="wc"
-    toolbar={true}
-    runtimes={['wc']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="react"
-    toolbar={true}
-    runtimes={['react']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="vue"
-    toolbar={true}
-    runtimes={['vue']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-liquid-glass-toggle"
-    initialRuntime="vue2"
-    toolbar={true}
-    runtimes={['vue2']}
-    codePanel={false}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -62,24 +26,89 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Material and accessibility
+```tsx
+import { LiquidGlassToggle } from '../proto-ui/components/react';
+```
 
-- The shared Web material provider samples only the explicit visible canvas supplied by the application, never arbitrary DOM.
-- When the backdrop source is unavailable or overlapping, when the button is disabled or uses `material="opaque"`, or when reduced transparency, increased contrast, or forced colors are active, the toggle falls back cleanly to its opaque color pair (`primary`/`primary-foreground` when active, `secondary`/`secondary-foreground` when inactive) while keeping the check mark visible.
-- Reduced motion disables elastic press deformation while preserving static optics.
-- Leave space between adjacent glass controls for expanded optical paint (the preview uses a `32px` gap; wider controls may need more) so surfaces do not overlap.
-- Provide an explicit accessible name (such as `aria-labelledby`) for icon-only toggles. Design choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) and [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/) guidance.
+```tsx
+<LiquidGlassToggle defaultActive>Italic</LiquidGlassToggle>
+```
+
+### Material and Accessibility
+
+- **Glass & opaque fallback**: `material="auto"` requests optical refraction when the host provides a valid backdrop source; `material="opaque"`, disabled state, reduced transparency, increased contrast, and forced colors fall back to high-contrast opaque color pairs without lowering whole-control opacity.
+- **Reduced motion**: Disables elastic press deformation while keeping static optics intact.
+- **Avoid glass-on-glass**: Do not nest glass toggles inside another glass surface, and keep spacing between adjacent glass controls so expanded optical paint never overlaps.
+- **Accessible naming**: Supply an explicit accessible name (such as a visually hidden label or `aria-labelledby`) for icon-only toggles. Design choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) and [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/) guidance.
+
+## Examples
+
+### With Text
+
+Combine an icon and text label inside a capsule toggle without shifting content geometry on selection.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-with-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### Sizes
+
+Use `size` to switch between `sm`, `default`, and `lg` capsule proportions.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### Material Modes
+
+Compare `material="auto"` with explicit `material="opaque"` across resting and active states.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
+
+### Disabled
+
+Disabled toggles withdraw optical candidates while preserving opaque contrast, the active check mark, and blocked activation.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toggle-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  lazy={true}
+/>
 
 ## API
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `active` | `boolean` | — | Controlled selection state; `activeChange` proposes updates for the caller to apply |
-| `defaultActive` | `boolean` | `false` | Initial uncontrolled selection state |
-| `disabled` | `boolean` | `false` | Suppresses activation, clears transient press state, and preserves `active` |
-| `material` | `'auto' \| 'opaque'` | `'auto'` | Set to `'opaque'` to opt out of optical enhancement |
+The following props belong to `Root` (pass `active` for controlled mode):
 
-### Events and states
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'active', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultActive', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'size', type: "'sm' | 'default' | 'lg'", default: "'default'" },
+  ]}
+/>
 
-- `activeChange`: payload `{ active: boolean }`. In host adapters, listen via `onActiveChange`.
-- Accessibility and exposed state: `role="button"` and `aria-pressed` reflect persistent `active`, while exposed `pressed` tracks transient pointer press. Focus and keyboard handling come from Base Toggle.
+- **Events**: `activeChange` (payload `{ active: boolean }`; listen via `onActiveChange` in host adapters).
+- **Methods**: `focusSelf(options?)` (no-op while disabled).
+- **Exposed states**: `active`, `disabled`, `hovered`, `focused`, `focusVisible`, `pressed`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
+/>

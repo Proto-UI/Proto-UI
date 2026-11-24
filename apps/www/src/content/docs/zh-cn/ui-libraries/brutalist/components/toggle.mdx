@@ -1,30 +1,109 @@
 ---
 title: 'Brutalist Toggle'
-description: '带有持久内嵌墨黑边框激活提示与三档尺寸的 Brutalist 风格二态切换按钮。'
+description: '支持默认与描边变体、三档尺寸及持久内嵌黑框激活提示的 Brutalist 双态切换按钮。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Toggle 是一个可在激活与未激活之间切换的双态按钮，内置 `aria-pressed` 语义。Brutalist 风格在激活态添加持久的内嵌墨黑边框作为非颜色视觉提示，按下时保持扁平几何且不发生位移。
+Brutalist Toggle 继承 Base Toggle 的 `aria-pressed` 开关语义，以 5px 圆角、2px 黑色边框与扁平无位移几何呈现。激活态同时切换为主色配对表面并保留 2px 持久内嵌黑框，确保不依赖颜色也能清晰辨识。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-toggle` 添加，或从 `@proto.ui/prototypes-brutalist/toggle` 导入。
+<InstallCommandCard
+  manager="npm"
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-toggle',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-toggle',
+    yarn: 'yarn dlx @proto.ui/cli@latest add wc brutalist-toggle',
+    bun: 'bunx @proto.ui/cli@latest add wc brutalist-toggle',
+  }}
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架封装，或直接从 `@proto.ui/prototypes-brutalist/toggle` 导入。
 
 ## 用法
 
-- **尺寸档位**：`size` 支持 `'sm'`（36px、`0.8rem` 字号）、`'default'`（40px）与 `'lg'`（44px、`text-sm`）。
-- **受控与非受控**：使用 `defaultActive` 设置初始状态，或传入 `active` 进入受控模式；设置 `disabled` 可阻止交互。
+```tsx
+import { BrutalistToggle } from '../proto-ui/components/react';
+```
+
+```tsx
+<BrutalistToggle variant="outline">Toggle</BrutalistToggle>
+```
+
+- **变体与尺寸**：通过 `variant` 选择 `'default'`（中性表面填充）或 `'outline'`（透明背景）；通过 `size` 选择 `'sm'`（36px）、`'default'`（40px）或 `'lg'`（44px）。
+- **扁平交互反馈**：悬停时呈现中性高对比表面，按压与激活态切换为主色配对，激活态持久保留 2px 内嵌边框且不产生外影或位移。
+- **受控与非受控**：使用 `defaultActive` 初始化非受控状态，或传入 `active` 并监听 `activeChange` 进行外部受控管理；设置 `disabled` 阻止激活。
+
+## 示例
+
+### 描边
+
+使用 `variant="outline"` 在未激活时保持透明背景，仅保留 2px 黑色轮廓。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-outline"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
+
+### 图标与文本
+
+在默认变体中组合图标与文本标签。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-with-text"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
+
+### 尺寸
+
+使用 `size` 在 `sm`、`default` 与 `lg` 三档尺寸间切换。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-sizes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
+
+### 禁用
+
+禁用态阻止点击与键盘触发，并保留原有激活状态与内嵌标记。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-toggle-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    lazy={true}
+  />
+</div>
 
 ## API
 
@@ -33,8 +112,21 @@ Toggle 是一个可在激活与未激活之间切换的双态按钮，内置 `ar
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'active', type: 'boolean | undefined', default: '非受控' },
     { name: 'defaultActive', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'size', type: "'default' | 'sm' | 'lg'", default: 'default' },
+    { name: 'variant', type: "'default' | 'outline'", default: "'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
   ]}
+/>
+
+- **事件**：`activeChange`（载荷 `{ active: boolean }`）。
+- **方法**：`focusSelf(options?)`（禁用态忽略）。
+- **暴露状态**：`active`、`disabled`、`hovered`、`focused`、`focusVisible`、`pressed`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TOGGLE.yaml', 'P-BASE-TOGGLE.yaml']}
 />
