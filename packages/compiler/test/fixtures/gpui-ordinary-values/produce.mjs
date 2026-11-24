@@ -46,6 +46,8 @@ function emit(name, source, files = {}, exportName = 'default', options = {}) {
   return retainModule(name, source, parsed.value, module.value);
 }
 function retainModule(name, source, ir, module) {
+  if (receipt.modules.some((entry) => entry.name === name))
+    throw new Error(`Duplicate native consumer module: ${name}`);
   const directory = path.join(output, name);
   const artifacts = [
     { path: 'Component.rs', contents: module.code },
@@ -170,10 +172,6 @@ dependencies.push([
 dependencies.push([
   'public_mutation',
   emit('public_mutation', readFileSync(path.join(fixture, 'public-mutation.proto.ts'), 'utf8')),
-]);
-dependencies.push([
-  'external_scroll',
-  emit('external_scroll', readFileSync(path.join(fixture, 'external-scroll.proto.ts'), 'utf8')),
 ]);
 const hookOnceSource = readFileSync(path.join(fixture, 'hook-once.proto.ts'), 'utf8');
 for (const [name, exportName] of [
