@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { revealHeaderPreferences } from './site-header-browser';
+import { observeContentsWheel } from './contents-wheel-evidence';
 import {
   prepareUtilityFamilyReadObservation,
   settleFamilyQueryBatch,
@@ -913,6 +914,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           'components/override/Sidebar.astro',
           'components/override/PageFrame.astro',
           'styles/site-contents-command.css',
+          'content/docs/zh-cn/contents-wheel-evidence.ts',
         ].map((file) => [
           file,
           createHash('sha256')
@@ -1208,41 +1210,103 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                 return false;
               })
             ).toBe(true);
-            const beforeScroll = await page.evaluate(() => scrollY);
-            const scrolling = await dialog.evaluate((element) => {
-              const surface =
-                element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
-                element;
-              const box = element.getBoundingClientRect();
-              return {
-                top: surface.scrollTop,
-                max: surface.scrollHeight - surface.clientHeight,
-                x: box.left + box.width / 2,
-                y: box.top + box.height / 2,
-              };
-            });
-            expect(scrolling.max).toBeGreaterThan(0);
-            await page.mouse.move(scrolling.x, scrolling.y);
-            await page.mouse.wheel(0, scrolling.top < scrolling.max / 2 ? 500 : -500);
-            await vi.waitFor(
-              async () => {
-                const top = await dialog.evaluate((element) => {
-                  const surface =
-                    element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ??
-                    element;
-                  return surface.scrollTop;
-                });
-                expect(top).not.toBe(scrolling.top);
-              },
-              { timeout: 1000 }
-            );
-            await page.evaluate(
-              () =>
-                new Promise<void>((resolve) =>
-                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            const wheel = await dialog.evaluateHandle(observeContentsWheel);
+            let initialGeometry: ReturnType<
+              ReturnType<typeof observeContentsWheel>['read']
+            > | null = null;
+            let scrolling: ReturnType<ReturnType<typeof observeContentsWheel>['read']> | null =
+              null;
+            let wheelError: unknown;
+            const wheelCompletionErrors: unknown[] = [];
+            try {
+              initialGeometry = await wheel.evaluate((probe) => probe.read());
+              // Visible slotted navigation and a positive scroll range do not
+              // establish that Content has acquired its positioned viewport:
+              // clientHeight=0 also makes scrollHeight-clientHeight positive.
+              // Observe the existing public available-space commit before input.
+              await expect.poll(() => wheel.evaluate((probe) => probe.read().ready)).toBe(true);
+              scrolling = await wheel.evaluate((probe) => probe.read());
+              expect(scrolling.hitInContent).toBe(true);
+              expect(scrolling.max).toBeGreaterThan(0);
+              await page.mouse.move(scrolling.x, scrolling.y);
+              const direction = scrolling.top < scrolling.max / 2 ? 1 : -1;
+              await page.mouse.wheel(0, direction * 500);
+              await vi.waitFor(
+                async () => {
+                  const current = await wheel.evaluate((probe) => probe.read());
+                  expect(current.sameSurface).toBe(true);
+                  const top = current.top;
+                  expect(top).not.toBe(scrolling!.top);
+                  expect(direction * (top - scrolling!.top)).toBeGreaterThan(0);
+                },
+                { timeout: 1000 }
+              );
+              await page.evaluate(
+                () =>
+                  new Promise<void>((resolve) =>
+                    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+                  )
+              );
+              const after = await wheel.evaluate((probe) => probe.read());
+              expect(after.documentY).toBe(scrolling.documentY);
+              expect(
+                after.wheels.some(
+                  (event) =>
+                    event.trusted &&
+                    event.surfaceInPath &&
+                    event.contentInPath &&
+                    !event.defaultPrevented &&
+                    direction * event.deltaY > 0
                 )
-            );
-            expect(await page.evaluate(() => scrollY)).toBe(beforeScroll);
+              ).toBe(true);
+            } catch (error) {
+              wheelError = error;
+            } finally {
+              try {
+                await writeFile(
+                  path.join(directory, `${family}-${runtime}-${action}-wheel.json`),
+                  JSON.stringify(
+                    {
+                      source,
+                      family,
+                      runtime,
+                      action,
+                      input: 'native mouse wheel',
+                      originalDeadlineMs: 1000,
+                      initialGeometry,
+                      before: scrolling,
+                      after: await wheel.evaluate((probe) => probe.read()),
+                      error: wheelError ? String(wheelError) : null,
+                    },
+                    null,
+                    2
+                  )
+                );
+                if (wheelError)
+                  await page.screenshot({
+                    path: path.join(directory, `${family}-${runtime}-${action}-wheel-failure.png`),
+                  });
+              } catch (error) {
+                wheelCompletionErrors.push(error);
+              }
+              try {
+                await wheel.evaluate((probe) => probe.dispose());
+              } catch (error) {
+                wheelCompletionErrors.push(error);
+              }
+              try {
+                await wheel.dispose();
+              } catch (error) {
+                wheelCompletionErrors.push(error);
+              }
+            }
+            if (wheelError) {
+              if (wheelCompletionErrors.length)
+                console.error('[Contents wheel evidence]', wheelCompletionErrors);
+              throw wheelError;
+            }
+            if (wheelCompletionErrors.length)
+              throw new AggregateError(wheelCompletionErrors, 'Contents wheel evidence failed');
             if (action === 'click') {
               const id = `${family}-${runtime}-public-popover-open`;
               const metrics = await dialog.evaluate((element) => {
