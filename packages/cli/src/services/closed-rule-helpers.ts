@@ -14,6 +14,38 @@ const unwrap = (node: ts.Node): ts.Node =>
     ? unwrap(node.expression)
     : node;
 
+const ruleRegistrationCache = new WeakMap<ts.FunctionLikeDeclaration, boolean>();
+
+/**
+ * Whether a function registers a rule. Only such a function carries rule
+ * conditions, so only such a function is worth reading at its call sites.
+ *
+ * The answer is syntax, not proof: it says the body names the rule API, not
+ * that the registration runs.
+ */
+export function registersRule(fn: ts.FunctionLikeDeclaration): boolean {
+  const cached = ruleRegistrationCache.get(fn);
+  if (cached !== undefined) return cached;
+  let found = false;
+  const contains = (node: ts.Node): boolean => {
+    if (ts.isTypeNode(node)) return false;
+    if (ts.isCallExpression(node)) {
+      const target = unwrap(node.expression);
+      if (
+        (ts.isPropertyAccessExpression(target) && target.name.text === 'rule') ||
+        (ts.isElementAccessExpression(target) &&
+          ts.isStringLiteralLike(target.argumentExpression) &&
+          target.argumentExpression.text === 'rule')
+      )
+        return true;
+    }
+    return ts.forEachChild(node, contains) === true;
+  };
+  found = contains(fn.body ?? fn);
+  ruleRegistrationCache.set(fn, found);
+  return found;
+}
+
 /** The scanner captures an argument before visiting its effects. Only this
  * bounded data-expression slice can be read at that point: a nested write or
  * opaque call may change a later member read within the very same argument.
