@@ -41,6 +41,14 @@ Both current wheel callbacks narrow the sole returned node with `instanceof Elem
 
 The complete original local `check:types` command on `b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8` ran from 12:07:18Z to 12:10:09Z. Website style generation completed; the Workspace checker then exhausted its explicit 2,048 MiB V8 heap and exited 134. The log explicitly says heap out of memory. This is an interrupted type result, not a remaining type diagnostic or a full-chain success. Generated coverage records were being refreshed, but production and type source files did not change during that attempt. A final complete type check remains required with sufficient resources.
 
+### Complete controlled retry
+
+The original full `corepack pnpm@10.32.1 -s check:types` command then passed with an explicit 6,144 MiB heap, from 12:15:09Z to 12:20:51Z. Workspace TypeScript passed and Astro checked 1,346 files with zero errors, zero warnings and 48 hints. The 2 GiB failure above remains a separate retained observation.
+
+The retry began at `337be07287ba4770e1020d300d7d25b4792d06de` and finished at `4294c6dd1c06d9bc1573b748eab593403c85d092`. Only records and coverage ledgers changed between those commits. The measured 9,859 package/website/type/config source files retained SHA-256 `0229425947fa39b9221612a47ea24a1395f482047c44d285f624c401e4c234e5` before and after the command. This is a full successful source-stable type check, not a claim that the entire repository stayed at one commit during execution.
+
+The [original retry log and receipt](evidence/2026-11-24-release-followup/complete-types-6144.tar.gz) are 3,888 bytes, SHA-256 `2daf1cb20857abce90e15afc30af476e148aea81205c3a894990d9bf5bcfbaf4`. Further production-source integration needs its affected checks; this receipt does not cover later main `9c8b8b07070dad92f19f3242a812414200ea2c03` CLI changes.
+
 ## Retention and open acceptance
 
 A different reviewer independently checked the F10 oracle repair and Accordion renewal. The [ten-member review archive](evidence/2026-11-24-release-followup/2026-11-24-f10-accordion-independent-review.tar.gz) is 13,727 bytes, SHA-256 `ee9c46e51da8f8715dedcc1458318bf3de0275954a4a18c1e5536bb900349598`. The F10 review preserves the full compared-key scan and sole non-key exception; it does not claim a Cargo or GPUI window run. Its independent Accordion control also checks an unknown-family guard, equality of the Liquid tree after removing only the four new wrappers, and 63 unique refs with separate empty overlays. Both reviews report no blocking finding within these exact source boundaries.
