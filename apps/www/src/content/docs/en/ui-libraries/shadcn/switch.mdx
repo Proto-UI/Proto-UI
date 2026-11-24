@@ -1,6 +1,6 @@
 ---
 title: 'Switch'
-description: 'Shadcn switch reconstructed on Proto UI.'
+description: 'A two-state toggle switch supporting size variants, field cards, and optional dragging.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,46 +8,46 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Switch toggles a setting between on and off with keyboard support, size presets, choice-card compositions, and optional pointer dragging. The examples on this page use the **Shadcn Rhea** style preset.
 
-This entry shows the current `shadcn` switch implementation in Proto UI.
-
-Set `size="sm"` on the Root for the small recipe; omit `size` or use `size="default"` for the default recipe. The Thumb derives size from its actual logical Switch Root and has no size prop. Changing size does not change the checked value or emit `checkedChange`.
-
-The selected Rhea recipe uses a 2rem × 1.25rem default Root, a 1.5rem × 1rem small Root, 1rem/0.75rem Thumbs, a 2px transparent border and family `radius-2xl`; checked travel is Thumb width minus 4px. See the [Rhea style source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css). The separate [02cad611 New York source](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) retains its 2rem × 1.15rem / 1.5rem × 0.875rem dimensions and minus-2px travel as the compatibility profile. These are distinct profiles, not a claim of cross-target rendered parity.
+## Preview
 
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
 
-## Compositions and optional drag
+## Installation
 
-Default Switch compositions remain click/Space controls. Drag is an explicit enhancement (`draggable: true`), not a change to upstream defaults. In the size example above only “Email alerts” opts in; the two dedicated examples below make LTR and RTL drag visible separately.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-switch" manager="npm" />
 
-The following public composition uses the existing Field label, description and Switch owners. Choice Cards make the blank card area clickable without creating another button or forwarding a click; the nested “Learn more” link retains its own action. Selected paint follows the accepted checked value, including when a controlled owner rejects a request. Disabled and read-only examples must not request a change.
+Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your target framework.
 
-The upstream [Choice Card anatomy](https://github.com/shadcn-ui/ui/blob/96da9cc7f1aa10580a3741664e2a77c721206c00/apps/v4/examples/base/switch-choice-card.tsx) wraps Field inside FieldLabel. Proto keeps its existing Field anatomy and separate accessible description rather than importing that framework or changing the current style profile. This composition is not a Liquid Glass Switch implementation.
+## Usage
+
+### Sizes and presets
+
+- Set `size="sm"` on `Root` for the compact switch, or omit `size` / pass `size="default"` for the standard size. `Thumb` derives its dimensions automatically from its `Root` and takes no `size` prop.
+- Changing `size` updates visuals only and does not alter `checked` or emit `checkedChange`.
+- Under the **Shadcn Rhea** preset, the default switch measures `2rem × 1.25rem` (`1rem` thumb) and the small switch measures `1.5rem × 1rem` (`0.75rem` thumb). The `new-york-v4` preset uses `2rem × 1.15rem` and `1.5rem × 0.875rem`.
+
+### Compositions and optional drag
+
+Switches toggle via click or `Space` by default; pass `draggable={true}` to opt into pointer dragging (supporting both `ltr` and `rtl` directions). The example below pairs Switch with Field `Label`, `Description`, and Choice Cards: clicking the open area of a card toggles the switch while nested links such as “Learn more” keep their own navigation. Highlight styling follows the committed `checked` state, and `disabled` / `readOnly` switches ignore toggle attempts.
 
 <PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
 
 <div id="switch-composition-details">
-  The label names the control; the description supplies help. Drag previews a position while held
-  and requests a value only on release. The root remains the sole checked-value owner.
+  The label names the switch and the description provides helper text. Dragging previews thumb
+  position while pressed and requests a state change on release; Root manages the checked state.
 </div>
 
-## Install
+### Styling the generated Web Component
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-switch" manager="npm" />
-
-Replace `wc` with `react`, `vue` or `vue2` to generate the facade for that host.
-
-### Style the generated Web Component
-
-The generated `ShadcnSwitchElement` uses `<proto-ui-shadcn-switch>` and supplies its default Thumb. Apply track CSS to `proto-ui-shadcn-switch` when using that composition. The separately exported raw Root uses `<proto-ui-shadcn-switch-root>`; its tag selector does not match the composed element.
-
-Keep custom Root dimensions, Thumb dimensions and checked travel consistent. Changing only the Thumb can leave it moving inside the unchanged track. The [Web Component styling guide](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) includes a complete default-size LTR example. For the family recipes, continue to select `styleProfile` and `size` on Root so Thumb follows its actual owner.
+- The generated `ShadcnSwitchElement` registers as `<proto-ui-shadcn-switch>` and includes its default `Thumb`. Target `proto-ui-shadcn-switch` in CSS when styling the composed track.
+- The separately exported raw `Root` registers as `<proto-ui-shadcn-switch-root>`, so selectors targeting that tag will not match the composed element.
+- When customizing dimensions, keep Root size, Thumb size, and checked travel distance in sync; see the [Web Component styling guide](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) for a full LTR example. When using built-in presets, set `styleProfile` and `size` on `Root` so `Thumb` stays aligned automatically.
 
 ## API
 
-Passing `checked` selects controlled mode.
+The following props belong to `Root` (pass `checked` for controlled mode; `Thumb` has no props):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -60,8 +60,6 @@ Passing `checked` selects controlled mode.
     { name: 'size', type: "'default' | 'sm'", default: 'default' },
   ]}
 />
-
-`size` is the Shadcn presentation prop. Thumb has no props. Root remains the only checked-value owner.
 
 ## References
 

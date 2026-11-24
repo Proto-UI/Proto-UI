@@ -1,6 +1,6 @@
 ---
 title: Card
-description: Draft passive Shadcn Card on Proto UI.
+description: 由头部、主体与底部组成的 Shadcn 风格卡片容器组件。
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,20 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式选择 **Shadcn Rhea** 外观配置；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+用于组织关联内容的纯展示卡片容器，提供 `Root`、`Header`、`Content` 与 `Footer` 四个结构部件。本页示例采用 **Shadcn Rhea** 风格。
 
-Shadcn Card 是 draft 四部分被动视觉容器，没有 Base Card counterpart。
-
-<h2 id="card-contract">Card 契约</h2>
-
-- 从 `@proto.ui/prototypes-shadcn/card` 导入 `ShadcnCardRoot`、`ShadcnCardHeader`、`ShadcnCardContent`、`ShadcnCardFooter`；同时提供小写 facade alias。
-- 两种外观均使用 `bg-card`、`text-card-foreground` 与轻阴影。Root 未显式选择外观时继承最近的 style scope；无外层 scope 时仍保留 New York 兼容默认值。
-- New York 使用 `rounded-xl`、显式主题边框、默认 24px 间距/内边距与 8px Header 网格间距。Rhea 无边框，使用前景色 ring、受主题限制的圆角、默认 20px 间距/内边距与 6px Header 网格间距。Header、Content、Footer 仍拥有各自区域间距。
-- 标题与描述仍是普通内容。按需要组合原生 heading/paragraph；嵌套 Shadcn Text 标题与正文显式使用 `tone: 'inherit'`，muted 描述有意使用 `tone: 'muted'`。
-- 四部分均不添加 role、tabindex、事件或状态；anchor/control 保留自己的导航与激活语义。
-- 有界子集不提供上游 CardTitle、CardDescription、CardAction、基于 action 的列布局、Header container-query 标记、border-presence selector 或 `asChild`，不宣称完整上游兼容。
-
-New York 对照来源固定为 [shadcn/ui f31ed819 Card](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/card.tsx)，遵循 [MIT notice](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/LICENSE.md)。Proto UI 是独立实现；上述外观说明仅描述其有界 Card 子集，不宣称完整 Rhea 源码对齐。当前 revision 的原生截图、首帧与跨宿主验收仍是独立门槛；draft 源码不代表 stable 或 Finf 目标完成。
+## 预览
 
 <PrototypePreviewer demoId="demo-shadcn-card" initialRuntime="wc" />
 
@@ -29,7 +18,15 @@ New York 对照来源固定为 [shadcn/ui f31ed819 Card](https://github.com/shad
 
 <InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-card" manager="npm" />
 
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。
+
+也可以直接从 `@proto.ui/prototypes-shadcn/card` 导入 `ShadcnCardRoot`、`ShadcnCardHeader`、`ShadcnCardContent`、`ShadcnCardFooter`（同时提供小写别名）。
+
+<h2 id="card-contract">用法</h2>
+
+- **结构与排版**：`Header`、`Content` 与 `Footer` 各自管理区域内边距与间距。标题和描述内容可直接使用原生标题/段落元素，或在嵌套 [Text](../text/) 时为标题与正文指定 `tone="inherit"`、为辅助说明指定 `tone="muted"`。
+- **风格预设**：未显式指定风格时，`Root` 会继承最近的 [Style Scope](../style-scope/)；无外层作用域时默认使用 New York 风格（`rounded-xl`、边框、24px 间距与内边距、8px Header 间距）。在 **Shadcn Rhea** 风格下则使用无边框前景色 ring、20px 间距与内边距以及 6px Header 间距。
+- **纯展示语义**：四个部件不附加交互角色、焦点或事件，卡片内部的链接和按钮保留各自的原生导航与点击行为。
 
 ## API
 
@@ -41,7 +38,9 @@ New York 对照来源固定为 [shadcn/ui f31ed819 Card](https://github.com/shad
   ]}
 />
 
-`size` 属于 Root。`divider` 属于 Header 与 Footer。Content 没有自己的属性。四个部分都不暴露事件。
+- `size` 作用于 `Root`，用于切换默认与紧凑间距。
+- `divider` 作用于 `Header` 与 `Footer`，用于显示区域分隔线。
+- `Content` 无额外属性；四个部件均不触发事件。
 
 ## 参考
 

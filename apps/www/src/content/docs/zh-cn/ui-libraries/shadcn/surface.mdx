@@ -1,6 +1,6 @@
 ---
 title: 'Surface'
-description: 'Shadcn 被动视觉表面，语义与交互事实由消费者拥有。'
+description: '提供统一边框、圆角、层级与状态样式的通用视觉容器组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,9 +8,11 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Surface 是一个纯视觉表面容器，继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的输入约定，根据外部传入的视觉变体与交互状态渲染背景、边框、圆角与阴影，同时保持语义和交互控制权归外层组件所有。本页示例使用 **Shadcn Rhea** 风格。
 
-`shadcn-surface-root` 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Shadcn 通过 `asSurfaceRoot()` 继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 契约，再由家族反馈 Rule 实现呈现。
+## 预览
+
+下方示例展示了不同的变体与状态外观；其中的聚焦和按压样本均为静态状态演示，不附带额外交互行为。
 
 <PrototypePreviewer
   demoId="demo-shadcn-surface"
@@ -18,9 +20,15 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-Demo 将明确的被动状态传给真实包原型。focus、press 样本是视觉事实，不是可点击或可聚焦的控件。外层间距与内部内容 padding 属于示例，不通过添加事件处理把 Surface 冒充 Button。
+## 安装
 
-## 使用 Surface
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-surface" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+
+## 用法
+
+从 `@proto.ui/prototypes-shadcn/surface`（或包根）导入 `surfaceRoot` 并适配到目标运行时：
 
 ```tsx
 import * as React from 'react';
@@ -38,52 +46,21 @@ export function Summary() {
 }
 ```
 
-`/surface` subpath 与包根导出 `surfaceRoot`；`SurfaceRootProps`、`SurfaceRootExposes` 描述共用契约。Base 还导出用于家族编写的 `asSurfaceRoot` 和 `SurfaceRootAsHookContract`。不要在交互 owner 内加入 Surface 后，再给它另一份 role、tab stop 或激活处理。使用原生 anchor 时，导航、键盘行为、target、download 仍归该 anchor。
+### 视觉状态与组合原则
 
-## 输入
+- `hovered`、`focusVisible`、`pressed` 和 `current` 均由外层交互组件或语义容器传入，Surface 自身不监听指针、焦点或键盘事件，也不添加无障碍角色。需要可交互按钮或原生链接时，请直接使用 Button 组件或原生 `<a>` 元素。
+- 内部内容与布局间距由调用方控制。当内部嵌套的 `Text` 需要继承外层 Surface（如 `solid` 或 `accent`）的前景色时，请在 `Text` 上设置 `tone="inherit"`。
+- 当 `actionProfile` 保持默认 `'none'` 时，`pressed` 不会产生位移动画；显式配置 `rhea` 或 `luma` 操作外观时，按压状态会呈现 1px 按下位移。
 
-| Prop | Values | Default |
-| --- | --- | --- |
-| `variant` | `transparent`, `outline`, `secondary`, `muted`, `accent`, `solid`, `scrim` | `outline` |
-| `radius` | `default`, `none`, `sm`, `md`, `lg`, `xl`, `full` | `default` |
-| `border` | `all`, `bottom`, `none` | `all` |
-| `elevation` | `none`, `raised` | `none` |
-| `transitionState` | `closed`, `entering`, `entered`, `leaving` | `entered` |
-| `fade` | boolean | `false` |
-| `hovered` | boolean | `false` |
-| `focusVisible` | boolean | `false` |
-| `pressed` | boolean | `false` |
-| `current` | boolean | `false` |
+### 配合 Transition 使用淡入淡出
 
-`hovered`、`focusVisible`、`pressed`、`current` 都是现有语义 owner 提供的事实；Surface 不自行检测指针、焦点、键盘、选择或导航状态。它没有 exposed state、event、method、无障碍 role 或 native property。`current` 是呈现输入，不是 `aria-current` 实现；需要真实 Button 时应组合受治理的 Button 协议。
-
-移除输入后恢复默认值。`secondary` 选择家族的次级前景/背景，不通过 elevation 推断变体。默认圆角和绘制由各家族决定，共用 prop 词汇不等于外观一致。内容与布局继续归消费者；当带风格的 Text 子项需要保留外层 Surface 前景时，使用 `tone="inherit"`。
-
-## 观察已有 Transition
-
-`fade` 显式启用家族拥有的 opacity 呈现。在带风格投射中，`fade=true` 时 `closed`、`leaving` 对应 opacity 0，`entering`、`entered` 对应 opacity 1。`transitionState` 是既有 [Transition owner](/zh-cn/ui-libraries/base/transition/) 提供的事实；Surface 不创建第二个时钟、调度策略、阶段事件或完成信号。`fade=false` 时，阶段输入不会启用这组 opacity 映射。
-
-Web 的 `surface-fade` token 消费 `--pui-surface-transition-duration`，默认 `0ms`。Web composition 可通过该变量传入既有 owner 解析后的 duration，并负责验证毫秒数有限且非负。不存在通用 220ms 默认值，也没有 Surface duration prop。reduced-motion 与起始 opacity 属于有界 Web 样式行为，不证明原生目标支持动态 CSS 变量。
-
-`scrim` 选择家族的常规遮暗绘制，不增加材质采样、模糊或折射。opacity 0 不代表禁用、inert、卸载或移除语义 owner：交互门控、presence 与焦点仍归既有 Dialog/Transition 等语义 owner，Surface 不接管这些责任。
-
-默认 `actionProfile="none"` 时，`pressed` 不会移动 Surface，也不会移除已提供的 elevation。只有显式 `rhea` 或 `luma` action appearance 才选择一像素按下位移；原生导航或内容 Surface 不会因为收到 pressed 事实就自动成为 Button。
-
-## Host 与 Compiler 边界
-
-Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符合性 slice 覆盖 Web Components、React、Vue 3、Vue 2。从源码构建的 CLI 为这四种 facade target 注册 `<family>-surface`，Web 样式编译器消费真实家族 token；`gpui` facade 生成为明确不支持。其 Web Adapter 与 compiler 证据应分别阅读：显示 Web 投射不等于完整原生支持或任意 Prototype AOT。Surface 不隐藏宿主特定材质后端、截图捕获、导航服务或代码 renderer。不支持的目标或样式诊断应明确保留，不能当成等价输出。
-
-## 依据
-
-`P-SHADCN-SURFACE`与 `T-SURFACE-0001` 治理此 draft slice。源码：`packages/prototypes/shadcn/src/surface/`.
-
-## 安装
-
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-surface" manager="npm" />
-
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+- 开启 `fade` 后，Surface 会响应来自 [Base Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState`：`closed` 和 `leaving` 映射为透明（opacity `0`），`entering` 和 `entered` 映射为不透明（opacity `1`）。
+- 在 Web 端，淡入淡出时长读取 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`），可由外层组件传入合法的非负毫秒值。
+- `scrim` 变体提供常规半透明遮罩底色。透明度为 `0` 仅影响视觉呈现，禁用、卸载和焦点管理仍由外层 Dialog 或 Transition 控制。
 
 ## API
+
+以下属性属于 `Root`（移除属性时恢复默认值）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -93,7 +70,11 @@ Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符
       type: "'transparent' | 'outline' | 'secondary' | 'muted' | 'accent' | 'solid' | 'scrim'",
       default: 'outline',
     },
-    { name: 'radius', type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'", default: 'default' },
+    {
+      name: 'radius',
+      type: "'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'",
+      default: 'default',
+    },
     { name: 'border', type: "'all' | 'bottom' | 'none'", default: 'all' },
     { name: 'elevation', type: "'none' | 'raised'", default: 'none' },
     {
@@ -109,7 +90,7 @@ Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符
   ]}
 />
 
-这些属性属于 Root。Surface 不增加角色、焦点或激活拥有者。
+`@proto.ui/prototypes-shadcn/surface` 同时导出 `SurfaceRootProps` 与 `SurfaceRootExposes` 类型定义。
 
 ## 参考
 

@@ -1,15 +1,15 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached modal panel with four placement choices.'
+description: 'An edge-attached modal panel with four placements, scrollable content, and draggable snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-This page explicitly selects **Shadcn Rhea** for profile-aware parts. Each headless Trigger and Close directly contains a public outline Button, which supplies the group's physical interaction surface and Rhea appearance. Browser, native-host and visual acceptance still require evidence for this composition. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A modal drawer that slides in from any of the four viewport edges, supporting content-fit sizing, vertical scrolling, and draggable snap points. The examples on this page use the **Shadcn Rhea** style preset.
 
-An edge-attached modal panel with four placement choices.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer"
@@ -18,25 +18,9 @@ An edge-attached modal panel with four placement choices.
   codePanel={false}
 />
 
-Rhea Content uses transparent outer padding (`p-4`) around its owned inset popover surface, whose radius is capped at 24px and whose shadow belongs to the public prototype. Header/Footer keep their profile-owned padding. The bottom Handle remains a real resize control: its shared 100px width and 1rem top margin pair with Rhea's 0.375rem height, rather than the old New York 0.5rem height. Non-bottom resize controls are retained. The handle is not yet the upstream bottom-only decorative indicator or full-Content drag surface; accepted extent/side semantics and those remaining interaction differences stay explicit.
-
-The short example uses the upstream demo's centered full-width max-w-sm interior; this is consumer composition, not a width imposed on every Drawer. The historical New York Trigger/Close Button paint (2.25rem default height, 1rem inline padding, optional wrap) remains only in that compatibility profile. Modern Rhea Trigger/Close stay headless. The directly nested public Button uses Rhea's default 2rem height and 0.75rem inline padding; set `wrap` on that Button for a long label. Its minimum remains 2rem while the label can grow within the supplied width. The existing continuous Trigger group makes the Button the sole physical activation and focus surface, while the outer Drawer member retains open-request ownership (`C-AS-TRIGGER-0001-D/F/J`).
-
-Top/bottom Content fits its content by default. Its retained compatibility maximum is the available height minus 6 root-text units, always bounded by the safe available region. This does not implement New York’s viewport-relative max-h-80vh and separate mt-24/mb-24 spacing. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right use fractional width, with a default maximum of 20 root-text units. An explicit maxExtent replaces that default; width, edge attachment and drag preview all use the same capped extent. For example, `maxExtent={{ unit: 'logical', value: 480 }}` gives a full-snap width of 480 logical units when space permits. The available unit is a fraction of the current safe width; valid minimum is ignored in fractional mode. Use maxExtent to size the sheet, rather than a separate CSS width.
-
-The project composes Content as a vertical Scroll surface. The pinned New York DrawerContent wrapper does not itself declare an overflow utility. The long example keeps Close inside the same scrollport.
-
-Root is the logical owner and still renders a wrapper. When placing it directly inside an application grid, use `hostStyle={{ display: 'contents' }}` on the React Root (or `display: contents` on the Web Component Root) to avoid an empty grid row. The neutral Root has no interactive role; Content, focus scope and naming retain their own semantic nodes. Keep application header/main regions outside the modal Content.
-
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Each example forwards the Trigger/Close's exposed effective disabled state to its Button, including Root inheritance and local command changes. The Button starts disabled until the current command snapshot is bound. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
-
-For top/bottom, omitted, null or empty snapPoints selects content-fit mode. Left/right keep fractional mode with a default point of one. A nonempty valid array selects explicit snaps: positive fractions up to one, sorted and deduplicated. snapPoint alone does not enable snapping. Explicit snap fractions use the full capped extent, not an implicit 85% multiplier. defaultSnapPoint is local; snapPoint with snapPointChange is owner-controlled. Invalid point arrays or length records on any edge are rejected, not converted to full height.
-
-In content-fit mode Handle is a pointer-only, aria-hidden drag affordance, without keyboard resizing or an Enter/Space close action. Explicit snaps retain the named separator, arrows, Home/End and range values. Content.dragDismissible=false prevents drag dismissal; independent Close, Escape and outside dismissal retain their existing protocol. Interrupted gestures and rejected controlled requests restore the accepted presentation.
-
-Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is rejected before presentation: Root keeps its logical open value, while Mask waits for one valid Content declaration. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
-
 ### Long content
+
+`Content` provides a vertical scroll area so tall drawers scroll smoothly inside the sheet:
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-scroll"
@@ -45,9 +29,9 @@ Runtime invalid extent updates expose extentValid=false, cancel Handle input and
   codePanel={false}
 />
 
-### Explicit half/full snaps
+### Explicit half and full snap points
 
-This example retains the explicit resizing interaction and announces committed changes.
+Configure `snapPoints` to snap between height fractions via drag gestures or keyboard arrow keys:
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-snap"
@@ -56,9 +40,33 @@ This example retains the explicit resizing interaction and announces committed c
   codePanel={false}
 />
 
+## Usage
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+### Composition and triggers
+
+- **Trigger and Close**: Under Rhea, `Trigger` and `Close` stay headless; nest a public `Button` (such as an outline button, with `wrap` for long labels) directly inside them so the button supplies the physical focus/activation surface while forwarding the effective `disabled` state.
+- **Grid layouts**: `Root` renders a wrapper element. When placing it directly inside a CSS Grid, pass `hostStyle={{ display: 'contents' }}` in React (or `display: contents` on Web Components) to avoid an extra grid row.
+- **Visual structure**: Rhea `Content` wraps its inset popover surface (capped at 24px radius) with transparent `p-4` outer padding, and renders a 100px × `0.375rem` drag `Handle` with a `1rem` top margin.
+
+### Sizing (`minExtent` / `maxExtent`)
+
+Use `minExtent` and `maxExtent` on `Content` instead of raw CSS widths:
+
+- Accepted units are `logical`, `root-text`, `available`, and `available-minus-root-text` with a nonnegative finite `value` (for example, `maxExtent={{ unit: 'logical', value: 480 }}`).
+- Top and bottom drawers fit their content height by default (bounded by the safe available area); left and right drawers use fractional width capped at 20 `root-text` units unless overridden with `maxExtent`.
+- Invalid runtime extent updates are ignored while retaining the last valid sizing intent (`extentValid` becomes `false`).
+
+### Snap points and drag dismissal
+
+- **Content-fit mode**: When `snapPoints` is omitted or empty on top/bottom drawers, `Handle` acts as a pointer-only drag affordance.
+- **Explicit snaps**: Pass an array of fractions in `(0, 1]` (sorted and deduplicated automatically) and manage the active snap with `defaultSnapPoint` or controlled `snapPoint` / `snapPointChange`. In this mode, `Handle` also supports arrow keys and `Home`/`End`.
+- Set `dragDismissible={false}` to disable drag-to-close while keeping `Close`, `Escape`, and outside clicks active. If a controlled close request is rejected, drag preview settles back to the current open state.
+
 ## API
 
-Drawer is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -69,7 +77,13 @@ Drawer is workspace source. There is no public `proto-ui add` target. Passing `o
   ]}
 />
 
-These props belong to Root. Content defaults `side` to `bottom`. Trigger and Close default `disabled` to `false`. Handle defaults `disabled` to `false` and `a11yLabel` to `Resize drawer`. Overlay defaults `passthrough` to `false`. Title, Description, Header, and Footer have no props.
+These props belong to `Root`. Other part defaults:
+
+- **Content**: `side` defaults to `'bottom'` (`'top' | 'right' | 'bottom' | 'left'`), plus `minExtent`, `maxExtent`, `snapPoints`, `snapPoint`, `defaultSnapPoint`, and `dragDismissible`.
+- **Trigger / Close**: `disabled` defaults to `false`.
+- **Handle**: `disabled` defaults to `false`; `a11yLabel` defaults to `'Resize drawer'`.
+- **Overlay**: `passthrough` defaults to `false`.
+- **Title / Description / Header / Footer**: No props.
 
 ## References
 
@@ -78,7 +92,4 @@ These props belong to Root. Content defaults `side` to `bottom`. Trigger and Clo
   files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml', 'P-SHADCN-BUTTON.yaml']}
 />
 
-<SpecEntityLinks
-  directory="spec/contracts"
-  files={['C-AS-TRIGGER-0001.yaml']}
-/>
+<SpecEntityLinks directory="spec/contracts" files={['C-AS-TRIGGER-0001.yaml']} />

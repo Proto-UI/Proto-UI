@@ -1,13 +1,15 @@
 ---
-title: shadcn Form
-description: Draft portable form atoms.
+title: 'Form'
+description: 'Coordinates multi-field validation, async submission, named value serialization, and form reset.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Coordinates validation, submission, and reset across form fields, supporting both synchronous and asynchronous checks, named serialization, and nested fieldset disabling. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-form"
@@ -16,15 +18,9 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Root gathers explicitly registered FormField atoms, validates their canonical Field controls and emits submit with named value snapshots only when all enabled fields are valid. Disabled fields are omitted; duplicate names fail closed. Async validation waits for current results and rejects changed values, removal, cancellation and detach. Form disabled also reaches contained Fields. FormSubmit and FormReset own keyboard/pointer activation. Focused single-line Field, Number Field and OTP editors support implicit Enter submission, excluding IME composition, modifiers and repeated keydown. requestReset restores mounted initial uncontrolled values, requests controlled-owner changes without overwriting them, cancels editing and pending validation, then emits reset. resetValidation only clears validation. No network submission, native navigation or hidden HTML inputs are created.
+### Versioned async validation and nested controls
 
-All four visual families inherit Base behavior. Parts: root, field, submit, reset.
-
-FormSubmit and FormReset expose typed disabled, hovered, pressed, focused and focusVisible states plus focusSelf. Their single Form activation owner is independent of Button; styled projections use each family’s existing passive Button recipe for focus, hover, press and disabled feedback.
-
-Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
-
-## Versioned validation and nested controls
+This example demonstrates external validation requests delivered via `resolveValidation` with their `requestId`. Editing, resetting, or toggling `readOnly` before an older reply arrives automatically discards the stale result, and disabling a nested `Fieldset` omits its fields from submission:
 
 <PrototypePreviewer
   demoId="demo-shadcn-form-validation"
@@ -33,9 +29,9 @@ Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI,
   codePanel={false}
 />
 
-This public recipe holds actual external validation requests in its consumer. Submit starts validation; Return success or Return error delivers the current `requestId` through `resolveValidation`. Edit, reset or change readOnly before returning an older result to see its rejection. Cancel submit retires the Form attempt; an independent Field may still accept its current validation result without completing that canceled submission. A new submit supersedes the previous attempt. Controlled editor notifications read the canonical value after the framework commits the owner response; rejected text never becomes a Field value. The account value stays controlled by the application, and nested Fieldsets govern the Checkbox Group and multiline notes. Disabling the parent group omits its fields from submitted values without rewriting their owners. Form reset restores uncontrolled baselines and asks the controlled owner to restore its initial value. The demo owns no network request.
+### Explicit choice fields
 
-## Explicit choice fields
+Use `fieldCheckbox`, `fieldRadioGroup`, and `fieldSwitch` from `@proto.ui/prototypes-shadcn/field` inside a `FormField` to wire required validation, read-only behavior, fieldset disabling, and reset for choice controls:
 
 <PrototypePreviewer
   demoId="demo-shadcn-field-choices"
@@ -44,17 +40,25 @@ This public recipe holds actual external validation requests in its consumer. Su
   codePanel={false}
 />
 
-The `shadcn-field` source entry exports `fieldCheckbox`, `fieldRadioGroup` and `fieldSwitch`. Place each inside an explicit `FormField` and use the same-family Checkbox Indicator, Radio Items/Indicators or Switch Thumb. Ordinary Checkbox and Radio Group remain usable without registering a form field.
+## Usage
 
-The recipe keeps Checkbox and Radio values controlled by its consumer, while Switch is uncontrolled. Refuse requests to observe unchanged canonical values and dirty state; accept them to update the values used by required validation and submission. Checkbox submits its boolean `checked`; mixed display does not satisfy required when checked is false. Radio submits its canonical string, with empty meaning missing for required.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Read-only is an explicit Field policy. Labels still focus the corresponding control, and Radio arrows still move roving focus without proposing another value. Fieldset separately inherits disabled policy and omits its participating fields from Form values. Reset requests the creation value from controlled owners and restores uncontrolled values; refusing that request retains canonical value and dirty. A reset does not generate change validation.
+### Anatomy
 
-Hold a consumer reply, replace the controls, then deliver it to see the stale reply rejected by its consumer revision. “Replace on next request” replaces real control instances from their outward callback. The current owner can then submit again. These examples are draft semantics shared by the four Web Adapters; native input and assistive technology acceptance is recorded separately.
+Compose `Form` from `Root`, `Field`, `Submit`, and `Reset`:
+
+- **Root**: Collects explicitly registered `FormField` parts, validates enabled fields, and emits form values keyed by field name on `submit` once all checks pass. Disabled fields (including those inside a disabled `Fieldset`) are omitted, and duplicate field names are rejected. Setting `disabled` on `Root` disables all contained fields.
+- **Field**: Declares the field's `name` and connects it to form submission and reset. Standalone `Checkbox`, `RadioGroup`, and `Switch` controls stay independent unless wrapped with `fieldCheckbox`, `fieldRadioGroup`, or `fieldSwitch`.
+- **Submit / Reset**: Styled with the matching button appearance, supporting pointer/keyboard activation and exposing `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf`.
+
+### Submission, async validation, and reset
+
+- **Implicit Enter submit**: Pressing `Enter` inside a focused single-line `Field`, `Number Field`, or `Input OTP` submits the form (ignoring IME composition, modifier keys, and key repeat).
+- **Async coordination**: Submission waits for active async validation requests and automatically cancels superseded attempts on edits, field removal, cancellation, or a newer submission.
+- **Reset**: `requestReset()` (or `Reset`) restores initial values for uncontrolled fields, proposes initial values for controlled fields, cancels pending validation, and emits `reset` without triggering change validation. Use `resetValidation()` to clear errors without modifying values.
 
 ## API
-
-The source CLI registry provides `shadcn-form`. Use the exact source revision and matching workspace build when consuming the current 0.3 draft; this page does not claim that an older published package contains the new recipe.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -64,7 +68,7 @@ The source CLI registry provides `shadcn-form`. Use the exact source revision an
   ]}
 />
 
-These props belong to Root. Field defaults `name` to `''`. Submit and Reset default `disabled` to `false`.
+These props belong to `Root`. `Field` defaults `name` to `''`; `Submit` and `Reset` default `disabled` to `false`.
 
 ## References
 

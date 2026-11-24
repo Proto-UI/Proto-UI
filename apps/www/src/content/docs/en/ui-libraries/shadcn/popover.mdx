@@ -1,15 +1,15 @@
 ---
 title: 'Popover'
-description: 'An anchored non-modal dialog for small interactive content.'
+description: 'An anchored non-modal popup for compact interactive content.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Popover displays a non-modal floating surface anchored to a trigger, suited for quick settings, compact forms, or lightweight navigation panels. The examples on this page use the **Shadcn Rhea** style preset.
 
-An anchored non-modal dialog for small interactive content.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-popover"
@@ -18,17 +18,26 @@ An anchored non-modal dialog for small interactive content.
   codePanel={false}
 />
 
-Content is positioned against Trigger, with side, align, sideOffset, alignOffset and collisionPadding. It is not modal and does not lock background scrolling or trap Tab. Outside press, focus moving beyond Trigger and Content, Escape and Close request dismissal. Moving focus between Trigger and portalled content stays inside. A focus-outside close leaves focus on the outside control; it does not restore focus to Trigger.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value. Refusing a focus.outside request keeps Content present and does not trap focus. A later interaction can request dismissal again. Focus-only requests report focusReason as programmatic because the neutral focus observation does not identify an input device.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Trigger, Content, Title, Description, Close.
+## Usage
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+Popover consists of `Root`, `Trigger`, `Content`, `Title`, `Description`, and `Close`:
 
-## Navigation presentation
+- `Content` positions itself relative to `Trigger` using `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
+- Because Popover is non-modal, background scrolling remains unlocked and `Tab` navigation is not trapped.
+- Pressing outside, moving focus out of `Trigger` and `Content`, pressing `Escape`, or activating `Close` requests dismissal. Moving focus between `Trigger` and portalled `Content` counts as staying inside; closing due to focus moving outside leaves focus on that external element.
 
-This separate example explicitly selects `presentation="navigation"` on Trigger and Content. Content uses the available anchored area and its own scrolling; the original default example above is unchanged.
+### Controlled and uncontrolled
+
+- `Root` supports controlled `open` and uncontrolled `defaultOpen`.
+- In controlled mode, listen to `openChange` and provide the next value. Rejecting a `focus.outside` request keeps `Content` visible without trapping external focus. Focus-only outside dismissals report `focusReason` as `'programmatic'`.
+
+### Navigation presentation
+
+Set `presentation="navigation"` on `Trigger` and `Content` to render a scrollable anchored navigation panel where native links keep standard browser behavior:
 
 <PrototypePreviewer
   demoId="demo-shadcn-popover-navigation"
@@ -37,13 +46,9 @@ This separate example explicitly selects `presentation="navigation"` on Trigger 
   codePanel={false}
 />
 
-The native links keep normal browser activation. This example does not implement the website directory’s unique-tree handback or a page-specific focus owner. Trigger styling remains provisional pending design review. New navigation-mode four-runtime native evidence is still pending; ordinary Popover results do not certify this mode.
-
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
-
 ## API
 
-Passing `open` selects controlled mode. Content placement defaults are separate from Root.
+Pass `open` for controlled mode. `Root` exposes `open`, `openPopover`, `close`, `toggle`, and `openChange`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -61,8 +66,15 @@ Passing `open` selects controlled mode. Content placement defaults are separate 
   ]}
 />
 
-`side` through `collisionPadding` belong to Content. `presentation` is the Shadcn Trigger and Content paint prop. Root exposes `open`, `openPopover`, `close`, `toggle`, and `openChange`.
+Prop ownership:
+
+- `open`, `defaultOpen`, `disabled`, and `a11yLabel` belong to `Root`.
+- `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding` belong to `Content`.
+- `presentation` belongs to `Trigger` and `Content`.
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-POPOVER.yaml', 'P-BASE-POPOVER.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-SHADCN-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

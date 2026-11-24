@@ -1,15 +1,15 @@
 ---
 title: 'ContextMenu'
-description: '支持键盘访问的上下文命令菜单。'
+description: '支持右键、长按与键盘快捷键唤起的上下文命令菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+在触发区域通过右键、触摸/手写笔长按或键盘快捷键（`ContextMenu` / `Shift+F10`）打开的上下文菜单，内置键盘导航、首字母跳转与碰撞定位。本页示例采用 **Shadcn Rhea** 风格。
 
-支持键盘访问的上下文命令菜单。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-context-menu"
@@ -18,19 +18,26 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 context.menu 或 ContextMenu/Shift+F10 时打开，并阻止已处理请求的原生菜单；普通左键不打开。Content 使用真实 Overlay/Focus/Transition 导航、文字跳转与受控关闭。右键与已接受的触摸/笔长按使用输入位置锚点，ContextMenu/Shift+F10 使用触发区域锚点。共享宿主私有保存几何，只提供不透明的输入来源关联；DOM 坐标不进入可移植 props、state 或 JSON context。
+## 用法
 
-组成: Root, Trigger, Content, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+### 部件结构
 
-触摸/笔需要在宿主移动容差内持续按住 600 ms。移动、释放、取消、禁用与卸载均取消待完成长按。已接受的键盘/长按会抑制其重复原生菜单事件，长按还抑制其兼容点击；普通点击与滚动仍由宿主处理。默认 bottom/start 放置且无额外间距。
+由 `Root`、`Trigger`、`Content` 与 `Item` 组合而成：
 
-受控 open 仍是请求：启用的 Root 接受请求传递时才阻止原生菜单，调用方可以继续保留 open=false。之后调用方打开时使用最近仍有效的输入锚点；程序方法 openContextMenu 使用触发器后备锚点。Escape 与选择完成按现有焦点策略恢复触发器。共享源码运行时覆盖不代表 compiler/native 准入或真实设备长按验收。
+- **Trigger**：响应右键菜单事件、`ContextMenu` / `Shift+F10` 快捷键以及持续 600 ms 的触摸/手写笔长按（移动、抬起或取消会中止长按，普通左键点击与滚动不受影响）。
+- **Content**：通过右键或长按打开时自动定位在输入点；通过键盘快捷键或编程方式 `openContextMenu` 打开时定位在触发区域。支持方向键导航、字符快速跳转与边界碰撞翻转。
+- **Item**：菜单命令项，激活后默认自动关闭菜单（可通过 `closeOnItemCommit={false}` 保持打开）。
+
+### 受控模式与焦点恢复
+
+- 传入 `open` 进入受控模式：触发区域会抑制浏览器原生右键菜单并向外部发出打开请求，外部可自行决定是否将 `open` 更新为 `true`。
+- 按 `Escape` 或选中命令关闭菜单时，焦点会自动回到触发区域。
 
 ## API
 
-Context Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+传入 `open` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -47,7 +54,7 @@ Context Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。Content 默认 `side="bottom"`、`align="start"`、`sideOffset` `0`、`alignOffset` `0`、`avoidCollisions` 为 true、`collisionPadding` `0`、`excludeAnchorTranslation` 为 false。
+以上属性属于 `Root`。`Content` 默认配置为 `side="bottom"`、`align="start"`、`sideOffset={0}`、`alignOffset={0}`、`avoidCollisions={true}`、`collisionPadding={0}`、`excludeAnchorTranslation={false}`。
 
 ## 参考
 

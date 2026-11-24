@@ -1,13 +1,15 @@
 ---
-title: shadcn Meter
-description: A bounded numerical measurement with shared Base semantics.
+title: 'Meter'
+description: 'A bounded numerical measurement indicator with threshold status classification.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Meter displays a known numerical measurement within a bounded range—such as disk usage, quota balance, or strength—and classifies it against optional thresholds. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-meter"
@@ -16,19 +18,28 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. low/high/optimum classify the measured value as optimal, suboptimal or critical; they do not change the numerical value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+## Usage
 
-Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+After registering the package entry, import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from the `meter` subpath:
 
-This entry is workspace source. It is not a public `proto-ui add` catalog id.
+- `Root` manages the finite range and status calculation.
+- `Label` provides the accessible name.
+- `Track` and `Indicator` visualize the current proportion within the range.
+- `Value` displays `valueText`, or falls back to the normalized numeric value.
+
+### Range and threshold classification
+
+- Values are clamped within `[min, max]`; when `min` equals `max`, the percentage is `0`.
+- `low`, `high`, and `optimum` classify the reading as `optimal`, `suboptimal`, or `critical` without altering the numeric value.
+- Meter is a read-only display with no keyboard tab stop. `Root` and its parts expose `value`, `percentage`, `indeterminate`, and `status`, updating together whenever props change.
 
 ## API
 
-`low`, `high`, and `optimum` classify the measured value. They do not change the number.
+The following props belong to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -46,7 +57,4 @@ This entry is workspace source. It is not a public `proto-ui add` catalog id.
 
 ## References
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-METER.yaml', 'P-BASE-METER.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-METER.yaml', 'P-BASE-METER.yaml']} />

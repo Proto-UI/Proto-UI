@@ -1,15 +1,15 @@
 ---
 title: 'Combobox'
-description: '可编辑搜索与独立选项值。'
+description: '支持可编辑搜索过滤与独立选项值提交的组合选择框。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+结合单行搜索输入框与下拉选项列表的组合选择框，将已选选项标识与输入查询文本分离管理。本页示例采用 **Shadcn Rhea** 风格。
 
-可编辑搜索与独立选项值。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-combobox"
@@ -18,17 +18,27 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root.value 为选项标识，inputValue 为独立编辑文本。不匹配的输入不会自动成为已选择选项。
+## 用法
 
-宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-组成: Root, Input, Content, Item, Empty, Trigger.
+### 部件结构
 
-草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
+由 `Root`、`Input`、`Content`、`Item`、`Empty` 与 `Trigger` 组合而成：
+
+- `Root` 的 `value` 保存已选中的选项键，`inputValue` 保存当前输入框内的查询文本；未匹配到有效选项的自由文本不会被自动提交为选中值。
+- 如需允许直接提交自由文本，请使用 [Autocomplete](../autocomplete/)。
+
+### 过滤与交互行为
+
+- **内置过滤**：默认按 `textValue` 与 `keywords` 过滤，忽略大小写及重音符号。设置 `filter={false}` 可交由应用层自行过滤列表项。
+- **空状态与禁用项**：`Empty` 根据实时匹配数显隐；禁用项及重复 `value` 的选项不可提交。
+- **键盘与输入法**：使用方向键在候选项中移动时，焦点始终停留在单行输入框内；输入法（IME）组合输入期间不会触发选中。
+- **受控模式**：`open`、`value` 与 `inputValue` 可各自独立受控，传入对应属性即可切换为受控状态。
 
 ## API
 
-Combobox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`、`inputValue` 或 `open` 会使对应事实进入受控模式。它复用共享搜索家族的属性。`defaultOpen` 为 `false`。
+传入 `value`、`inputValue` 或 `open` 会使对应状态进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -44,7 +54,12 @@ Combobox 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `va
   ]}
 />
 
-这些属性属于 Root。Input 的 `placeholder`、`a11yLabel`、`name` 默认 `''`。Content 默认 `side="bottom"`、`align="start"`、`sideOffset` `4`、`collisionPadding` `8`。Item 的 `value`、`textValue`、`keywords` 默认 `''`，`disabled` 默认 `false`。Trigger 的 `disabled` 默认 `false`。
+以上属性属于 `Root`。其他部件属性默认值：
+
+- **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
+- **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
+- **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
+- **Trigger**：`disabled` 默认为 `false`。
 
 ## 参考
 
