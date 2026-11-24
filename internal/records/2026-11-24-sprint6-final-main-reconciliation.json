@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint6-final-main-reconciliation",
+  "summary": {
+    "head": "2795afbc69357ff91f5a900614b4cd5e4ecca030",
+    "main": "4144eb94e5dc5fc7065599a6bf1a1613a5bf2c48",
+    "observedAt": "2026-11-24T10:51:40.135738+00:00",
+    "refreshExit": 0,
+    "checkExit": 0,
+    "addedConsumerIds": [],
+    "removedConsumerIds": [],
+    "changedCanonicalRows": [],
+    "historicalMainUnchanged": true,
+    "incomingEvidencePaths": 373,
+    "incomingEvidenceByteMismatches": 0,
+    "sharedHostChange": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+    "sharedHostSha256": "4a1081000a296a565cbb0e5289d132be3f636140b8b4618ce7b0f55a28ed67ce",
+    "prior3840InputBridgeApplicable": false,
+    "reason": "Accepted incoming Scroll web-host implementation is in adapter closure; fresh canonical package measurement required.",
+    "freshNativeTypesAndBudgets": "pending; not executed at this head",
+    "sourceReview": "Fresh read-only review found no overlap with the seven follow-up source/test files and no demonstrated blocker in selected Bootstrap, Liquid browser-only and reservation workflows.",
+    "separateInheritedDebt": "Seven stale exact source bindings in broad coverage admission records were statically observed in incoming main. These checks are not executed by selected lanes; no admissions or failure boundaries were edited."
+  },
+  "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/final-main-reconciliation.tar.gz",
+  "archiveSha256": "f0e2ab7751c7827f32d7af2e726011de3a4f4ce366123ae785ea14f7035b6e44",
+  "archiveBytes": 1394908,
+  "checksNotRepeated": "No source-specific local tests were relabelled or repeated for unchanged seven-file source. Existing 176/176 and 124/124 receipts keep their original 62f binding; full fresh hosted validation remains pending."
+}
