@@ -1,27 +1,13 @@
 // Public experimental consumer fixture, independent of the observation assertions.
 import { expect, vi } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
+import { AdaptToWebComponent, setElementProps, type WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import {
-  AdaptToWebComponent,
-  setElementProps,
-  type WebComponentAdapterElement,
-} from '@proto.ui/adapter-web-component';
-import {
-  dialogRoot,
-  dialogTrigger,
-  dialogMask,
-  dialogContent,
-  dialogTitle,
-  dialogDescription,
-  dialogClose,
+  dialogRoot, dialogTrigger, dialogMask, dialogContent, dialogTitle, dialogDescription, dialogClose,
 } from '@proto.ui/prototypes-base';
 import type {
-  DialogRootProps,
-  DialogRootExposes,
-  DialogContentProps,
-  DialogContentExposes,
-  DialogMaskProps,
-  DialogMaskExposes,
+  DialogRootProps, DialogRootExposes, DialogContentProps, DialogContentExposes,
+  DialogMaskProps, DialogMaskExposes,
 } from '../../../packages/prototypes/base/src/dialog/types';
 
 export interface Fixture {
@@ -41,9 +27,7 @@ export interface Fixture {
   cleanup(): Promise<void>;
 }
 let fixtureIndex = 0;
-export const flush = async () => {
-  for (let i = 0; i < 8; i++) await Promise.resolve();
-};
+export const flush = async () => { for (let i = 0; i < 8; i++) await Promise.resolve(); };
 
 export function createDialogFixture(controlled = false): Fixture {
   const prefix = `study-754-${++fixtureIndex}`;
@@ -60,18 +44,9 @@ export function createDialogFixture(controlled = false): Fixture {
     },
   });
   // Bind the public protocol types, rather than accepting opaque getExposes values.
-  const Root = AdaptToWebComponent(
-    dialogRoot as Prototype<DialogRootProps, DialogRootExposes>,
-    options('root')
-  );
-  const Content = AdaptToWebComponent(
-    dialogContent as Prototype<DialogContentProps, DialogContentExposes>,
-    options('content')
-  );
-  const Mask = AdaptToWebComponent(
-    dialogMask as Prototype<DialogMaskProps, DialogMaskExposes>,
-    options('mask')
-  );
+  const Root = AdaptToWebComponent(dialogRoot as Prototype<DialogRootProps, DialogRootExposes>, options('root'));
+  const Content = AdaptToWebComponent(dialogContent as Prototype<DialogContentProps, DialogContentExposes>, options('content'));
+  const Mask = AdaptToWebComponent(dialogMask as Prototype<DialogMaskProps, DialogMaskExposes>, options('mask'));
   const Trigger = AdaptToWebComponent(dialogTrigger, options('trigger'));
   const Title = AdaptToWebComponent(dialogTitle, options('title'));
   const Description = AdaptToWebComponent(dialogDescription, options('description'));
@@ -98,10 +73,7 @@ export function createDialogFixture(controlled = false): Fixture {
   cancel.addEventListener('click', () => actions.push('cancel'));
   save.addEventListener('click', () => actions.push('save'));
   root.addEventListener('openChange', (event) => requests.push((event as CustomEvent).detail));
-  setElementProps(root, {
-    a11yLabel: 'Record editor fallback',
-    ...(controlled ? { open: true } : {}),
-  });
+  setElementProps(root, { a11yLabel: 'Record editor fallback', ...(controlled ? { open: true } : {}) });
   setElementProps(content, { enterDuration: 200, leaveDuration: 200 });
   setElementProps(mask, { enterDuration: 200, leaveDuration: 200 });
   actionsWrapper.append(cancel, save);
@@ -125,39 +97,19 @@ export function createDialogFixture(controlled = false): Fixture {
   const open = async () => {
     await flush();
     trigger.focus();
-    trigger.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
-    );
+    trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
     await flush();
     await complete();
   };
   const escape = async () => {
-    window.dispatchEvent(
-      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
-    );
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
     await flush();
   };
   const cleanup = async () => {
     for (const element of owned) element.remove();
-    await expect
-      .poll(() => [...lifecycle].filter(([, count]) => count.created !== count.disposed))
-      .toEqual([]);
+    await expect.poll(() => [...lifecycle].filter(([, count]) => count.created !== count.disposed)).toEqual([]);
     await vi.waitFor(() => expect(document.body.style.overflow).toBe(originalOverflow));
   };
-  return {
-    root,
-    trigger,
-    mask,
-    content,
-    title,
-    description,
-    cancel,
-    save,
-    actions,
-    requests,
-    complete,
-    open,
-    escape,
-    cleanup,
-  };
+  return { root, trigger, mask, content, title, description, cancel, save, actions, requests, complete, open, escape, cleanup };
 }
+

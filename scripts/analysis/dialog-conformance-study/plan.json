@@ -57,7 +57,9 @@
       "id": "D754-RELATIONS",
       "criterion": "P-BASE-DIALOG-CONTENT-A11Y-RELATIONS",
       "expected": "Live Title/Description removal clears both relationships and retains the documented Root label fallback; re-add restores live targets.",
-      "existingCheckFragments": ["projects only live Title and Description relationships"],
+      "existingCheckFragments": [
+        "projects only live Title and Description relationships"
+      ],
       "responsibility": "component-contract",
       "precondition": "Entry completed before active-state observations; early-entry traversal is separately unresolved."
     },
