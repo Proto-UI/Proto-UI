@@ -673,6 +673,45 @@ function isStringValue(
  * summaries are shared only inside that operation.
  */
 export function createHookSourceSummaryContext(): HookSourceSummaryContext {
+  return createHookSourceSummaryContextInternal()!;
+}
+
+/**
+ * CSS resources for one explicit standard Runtime instance of the selected
+ * source's default Prototype. This scenario constructs fresh modules before
+ * setup; it does not describe borrowed setup calls or ordinary source queries.
+ * Only string tokens leave this independent summary, binding and graph scope.
+ */
+export async function projectStandardRuntimeRootStyleTokens(
+  source: ts.SourceFile,
+  collect: (
+    scenario: Readonly<{
+      kind: 'standard-runtime-root-style';
+      source: ts.SourceFile;
+      summary: HookSourceSummaryContext;
+    }>
+  ) => Promise<readonly string[]>
+): Promise<Readonly<{
+  kind: 'standard-runtime-root-style-tokens';
+  source: ts.SourceFile;
+  tokens: readonly string[];
+}> | null> {
+  const summary = createHookSourceSummaryContextInternal(source);
+  if (!summary) return null;
+  const tokens = await collect(
+    Object.freeze({ kind: 'standard-runtime-root-style' as const, source, summary })
+  );
+  return Object.freeze({
+    kind: 'standard-runtime-root-style-tokens' as const,
+    source,
+    tokens: Object.freeze([...new Set(tokens)]),
+  });
+}
+
+function createHookSourceSummaryContextInternal(
+  rootStyleSource?: ts.SourceFile
+): HookSourceSummaryContext | null {
+  let rootStyleSetup: ts.FunctionLikeDeclaration | null = null;
   const moduleContext = createHookSourceModuleContext();
   const registeredSources = new Map<string, ts.SourceFile>();
   const authoredSourcePaths = new Set<string>();
@@ -2046,6 +2085,127 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
   };
 
   /**
+   * The explicit standard Runtime Root scenario starts with a new Props kernel:
+   * no prior schema, defaults or validators. Only its complete closed prefix
+   * can use this fact. Ordinary queries and shared asHook Def frames cannot.
+   */
+  const nativePropsInitializationPrefix = (
+    call: ts.CallExpression,
+    targetCall: ts.CallExpression,
+    owner: ts.FunctionLikeDeclaration,
+    module: Module
+  ): boolean => {
+    const parameter = owner.parameters[0];
+    if (
+      !rootStyleSource ||
+      rootStyleSource !== module.source ||
+      rootStyleSetup !== owner ||
+      owner.parameters.length !== 1 ||
+      !parameter ||
+      !ts.isIdentifier(parameter.name) ||
+      parameter.initializer ||
+      parameter.dotDotDotToken ||
+      !owner.body ||
+      !ts.isBlock(owner.body) ||
+      owner.asteriskToken ||
+      owner.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword) ||
+      !isAuthoredSetup(owner, module.source) ||
+      !hasOnlyAuthoredSetupReferences(owner, module.source) ||
+      hasBindingWrite(parameter.name, module) ||
+      hasDynamicRuleSource(module.source)
+    )
+      return false;
+    const target = moduleContext.resolveReference(parameter.name, module);
+    if (!target) return false;
+    // This proof belongs to the capture query, not to a Props call alone.
+    // Require the entire preceding statement interval and the target's callee
+    // evaluation to be closed; a later getter read can register another hook.
+    if (
+      targetCall.questionDotToken ||
+      targetCall.arguments.length !== 0 ||
+      !ts.isIdentifier(unwrap(targetCall.expression))
+    )
+      return false;
+    const end = owner.body.statements.findIndex((statement) => {
+      if (
+        !ts.isVariableStatement(statement) ||
+        (statement.declarationList.flags & ts.NodeFlags.Const) === 0 ||
+        statement.declarationList.declarations.length !== 1
+      )
+        return false;
+      const initializer = statement.declarationList.declarations[0].initializer;
+      if (!initializer) return false;
+      let value = unwrap(initializer);
+      while (ts.isPropertyAccessExpression(value)) {
+        if (value.questionDotToken) return false;
+        value = unwrap(value.expression);
+      }
+      return value === targetCall;
+    });
+    if (end <= 0) return false;
+    let containsCall = false;
+
+    const closedData = (node: ts.Node): boolean => {
+      const value = unwrap(node);
+      if (registrationLiteral(value) !== unknownRegistrationLiteral) return true;
+      if (
+        ts.isPrefixUnaryExpression(value) &&
+        (value.operator === ts.SyntaxKind.PlusToken ||
+          value.operator === ts.SyntaxKind.MinusToken) &&
+        ts.isNumericLiteral(value.operand)
+      )
+        return true;
+      if (ts.isArrayLiteralExpression(value)) return value.elements.every(closedData);
+      return (
+        ts.isObjectLiteralExpression(value) &&
+        value.properties.every(
+          (property) =>
+            ts.isPropertyAssignment(property) &&
+            !ts.isComputedPropertyName(property.name) &&
+            propertyName(property.name) !== '__proto__' &&
+            closedData(property.initializer)
+        )
+      );
+    };
+    for (const statement of owner.body.statements.slice(0, end)) {
+      if (!ts.isExpressionStatement(statement)) return false;
+      const invocation = unwrap(statement.expression);
+      containsCall ||= invocation === call;
+      if (
+        !ts.isCallExpression(invocation) ||
+        invocation.questionDotToken ||
+        invocation.arguments.length !== 1 ||
+        !ts.isObjectLiteralExpression(unwrap(invocation.arguments[0])) ||
+        !closedData(invocation.arguments[0])
+      )
+        return false;
+      const method = unwrap(invocation.expression);
+      if (
+        !ts.isPropertyAccessExpression(method) ||
+        method.questionDotToken ||
+        (method.name.text !== 'define' && method.name.text !== 'setDefaults')
+      )
+        return false;
+      const props = unwrap(method.expression);
+      if (
+        !ts.isPropertyAccessExpression(props) ||
+        props.questionDotToken ||
+        props.name.text !== 'props'
+      )
+        return false;
+      const receiver = unwrap(props.expression);
+      if (!ts.isIdentifier(receiver)) return false;
+      const actual = moduleContext.resolveReference(receiver, module);
+      if (
+        actual?.declaration !== target.declaration ||
+        actual.module.source !== target.module.source
+      )
+        return false;
+    }
+    return containsCall;
+  };
+
+  /**
    * A fresh, source-identity-bound guard for producer definition lifetime.
    * It does not prove a helper pure or make a Rule argument into a State.
    * Both declaration-suppression and input-preservation must use this same
@@ -2679,6 +2839,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             reference = reference.parent;
           const member = reference.parent;
           if (
+            ts.findAncestor(node, isFunctionLike) !== parameter.parent ||
             (!ts.isPropertyAccessExpression(member) && !ts.isElementAccessExpression(member)) ||
             member.expression !== reference ||
             memberName(member) === null
@@ -3016,6 +3177,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       nested: boolean
     ): boolean | null => {
       if (ts.isTypeNode(node) || isFunctionLike(node)) return true;
+      if (ts.isSpreadElement(node)) {
+        walk(node.expression, module, env, certain, children, nested);
+        // Iteration runs after the operand and before the next argument.
+        opaque = true;
+        return true;
+      }
       if (ts.isExpressionStatement(node))
         return walk(node.expression, module, env, certain, children, nested);
       if (ts.isAwaitExpression(node) || ts.isYieldExpression(node)) {
@@ -3267,6 +3434,9 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           argumentOrigins.push(capabilityOrigin(argument, module, env));
           argumentSources.push(ruleSource(argument, module, env));
         }
+        // The evaluations above do not prove expanded argument positions.
+        // Do not bind values or capabilities by the syntactic argument index.
+        if (node.arguments.some(ts.isSpreadElement)) return true;
         if (memberName(node.expression) === 'method') {
           const owner = memberOwner(node.expression);
           const method = literal(node.arguments[0], module, env);
@@ -3834,8 +4004,16 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     return {
       entries,
       invoke,
+      markSpreadBoundary: () => {
+        opaque = true;
+      },
       proveRuleOnlyInvocation,
-      replayHelper: (node: ts.CallExpression, source: ts.SourceFile, certain: boolean) => {
+      replayHelper: (
+        node: ts.CallExpression,
+        source: ts.SourceFile,
+        certain: boolean,
+        targetCall: ts.CallExpression
+      ) => {
         const module = moduleForSource(source);
         if (canonicalPrivilegedCall(node, module)) return;
         const helper = functionFor(node.expression, module);
@@ -3856,6 +4034,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           hasOnlyAuthoredSetupReferences(boundary, source)
         ) {
           authoredOwner = true;
+          if (nativePropsInitializationPrefix(node, targetCall, boundary, module)) return;
           const parameter = boundary.parameters[0];
           if (
             parameter &&
@@ -4011,7 +4190,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     ): { value: HookSourceValue; hook?: string } | null => {
       const earlier = producerForCall(node, source);
       if (!earlier) {
-        if (executesBefore) replay.replayHelper(node, source, pathCertain);
+        if (executesBefore) replay.replayHelper(node, source, pathCertain, call);
         return null;
       }
       const earlierName = producerName(earlier);
@@ -4092,6 +4271,11 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       if (conflict) return;
       if (cutoffAllowed && reachedTarget) return;
       if (node !== call && isFunctionLike(node)) return;
+      if (ts.isSpreadElement(node)) {
+        visit(node.expression, pathCertain);
+        replay.markSpreadBoundary();
+        return;
+      }
       if (
         ts.isBinaryExpression(node) &&
         (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
@@ -6086,6 +6270,120 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     }
     canonicalPrototypeConfigs.set(config, canonical);
     return canonical;
+  }
+
+  /** Select a concrete default entry for the explicit standard-instance scenario.
+   * An export edge is not itself a freshness proof: freshness belongs only to
+   * the separate Runtime construction scenario and never to ordinary resolve.
+   */
+  function selectStandardRuntimeRootSetup(
+    source: ts.SourceFile
+  ): ts.FunctionLikeDeclaration | null {
+    const module = moduleForSource(source);
+    const exported = moduleContext.resolveExport(module, 'default');
+    if (!exported || exported.module.source !== source) return null;
+    let value: ts.Node = exported.declaration;
+    let holder: ts.VariableDeclaration | null = null;
+    if (ts.isVariableDeclaration(value)) {
+      if (
+        !ts.isIdentifier(value.name) ||
+        !value.initializer ||
+        !ts.isVariableStatement(value.parent.parent) ||
+        !stableVariable(value, module)
+      )
+        return null;
+      holder = value;
+      value = unwrap(value.initializer);
+    }
+    if (
+      !ts.isCallExpression(value) ||
+      value.questionDotToken ||
+      value.arguments.length !== 1 ||
+      ts.findAncestor(value.parent, ts.isFunctionLike) ||
+      !moduleContext.isDefinePrototypeReference(value.expression, module)
+    )
+      return null;
+    const config = unwrap(value.arguments[0]);
+    if (!ts.isObjectLiteralExpression(config)) return null;
+    const keys = new Set<string>();
+    for (const property of config.properties) {
+      if (ts.isSpreadAssignment(property) || ts.isComputedPropertyName(property.name)) return null;
+      const key = propertyName(property.name);
+      if (!key || keys.has(key) || (key !== 'name' && key !== 'setup')) return null;
+      keys.add(key);
+      if (
+        key === 'name' &&
+        (!ts.isPropertyAssignment(property) ||
+          typeof registrationLiteral(property.initializer) !== 'string')
+      )
+        return null;
+    }
+    const property = configProperty(config, 'setup');
+    const setup = property ? functionFor(propertyExpression(property), module) : null;
+    if (
+      !keys.has('name') ||
+      !setup ||
+      setup.module.source !== source ||
+      !isAuthoredSetup(setup.fn, source) ||
+      !hasOnlyAuthoredSetupReferences(setup.fn, source)
+    )
+      return null;
+    if (holder) {
+      // Keep the actual exported object stable at module creation. A local
+      // alias, member access, write or ordinary call needs its own entry proof.
+      const declaration = holder;
+      let escaped = false;
+      const visit = (node: ts.Node): void => {
+        if (escaped || ts.isTypeNode(node)) return;
+        if (ts.isIdentifier(node) && node !== declaration.name) {
+          const binding = moduleContext.resolveReference(node, module);
+          if (binding?.module.source === source && binding.declaration === declaration) {
+            let outer: ts.Node = node;
+            while (outer.parent && unwrap(outer.parent) === node) outer = outer.parent;
+            const parent = outer.parent;
+            const exportAssignment =
+              ts.isExportAssignment(parent) &&
+              !parent.isExportEquals &&
+              parent.expression === outer;
+            const exportSpecifier =
+              ts.isExportSpecifier(parent) &&
+              !parent.isTypeOnly &&
+              (parent.propertyName ?? parent.name) === node;
+            if (!exportAssignment && !exportSpecifier) escaped = true;
+          }
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(source);
+      if (escaped) return null;
+    }
+    return setup.fn;
+  }
+
+  if (rootStyleSource) {
+    registerSource(rootStyleSource);
+    rootStyleSetup = selectStandardRuntimeRootSetup(rootStyleSource);
+    const owner = rootStyleSetup;
+    if (!owner?.body || !ts.isBlock(owner.body)) return null;
+    const first = owner.body.statements[0];
+    if (!first || !ts.isExpressionStatement(first)) return null;
+    const firstCall = unwrap(first.expression);
+    if (!ts.isCallExpression(firstCall)) return null;
+    const module = moduleForSource(rootStyleSource);
+    const hasClosedCapture = owner.body.statements.some((statement) => {
+      if (!ts.isVariableStatement(statement) || statement.declarationList.declarations.length !== 1)
+        return false;
+      const initializer = statement.declarationList.declarations[0].initializer;
+      if (!initializer) return false;
+      let value = unwrap(initializer);
+      while (ts.isPropertyAccessExpression(value)) value = unwrap(value.expression);
+      return (
+        ts.isCallExpression(value) &&
+        producerForCall(value, rootStyleSource) !== null &&
+        nativePropsInitializationPrefix(firstCall, value, owner, module)
+      );
+    });
+    if (!hasClosedCapture) return null;
   }
 
   return {

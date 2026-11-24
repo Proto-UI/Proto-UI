@@ -78,6 +78,14 @@ Within those admitted projector bodies, `var` remains function-scoped across nes
 
 Default-imported names are resolved through their source module rather than the built-in hook-name table. A matching local spelling cannot certify an unrelated default export; a source-proven default producer still retains its declared state selectors. Rejected authored projections cannot regain state proof from a built-in hook's spelling. Returned object literals containing getters, setters or method declarations do not prove a complete public projection, including through local aliases and spreads. Ordinary alias or parameter rebinding invalidates the previous holder without losing the source declaration itself.
 
+## Standard Runtime Root CSS resources
+
+CSS resource collection also considers a separate standard Runtime instance of a selected source file's default-exported Prototype. That instance creates fresh modules before entering setup, so a bounded, closed Props initialization prefix has no pre-existing schema validator to invoke. This additional projection can retain the first captured Hook's Rule-selector resources after such initialization. It requires the actual canonical entry and setup binding, one setup parameter without an initializer, and a complete closed statement interval through the direct capture. Unknown calls, getter reads, argument effects and other unsupported prefixes retain the unresolved boundary.
+
+This is a CSS-resource scenario, not a proof about every use of the exported object. Imported Prototypes that were not selected as entries, shared asHook bodies and ordinary borrowed setup calls do not inherit that fresh-instance context. Ordinary source-summary and coverage queries remain unchanged, including their unresolved captures. The additional pass owns separate summary, import-binding and mutable-graph scopes; only final string tokens are merged into the generated resource set. Existing runtime-only Rule conditions keep their lowering restrictions.
+
+The projection carries Root Rule usage separately from Template usage. When both targets need the same token string, both outputs retain it; unrelated Template-only tokens do not acquire Root use merely because the file also has a projected Rule.
+
 ## Opt-in Shadow style companion
 
 The source CLI generates the companion consumed by the Web Component Adapter's explicit experimental `shadow: { mode: 'open', presentation: 'split', styleArtifact }` profile. Pass the imported value as `styleArtifact`; generating it alone does not select that profile. Existing boolean `shadow` options remain unchanged. See the [Adapter guide](../adapters/web-component/README.md) for admitted prototypes, recipes and customization limits. Installing an already-published CLI version does not imply that it includes this source change.
