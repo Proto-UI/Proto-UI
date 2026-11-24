@@ -96,6 +96,10 @@ serde_json = "1.0"
 await mkdir(path.join(output, 'tests'));
 await copyFile(path.join(fixture, 'consumer.rs'), path.join(output, 'tests', 'a11y_value.rs'));
 await copyFile(
+  path.join(fixture, 'press_modifiers.rs'),
+  path.join(output, 'tests', 'press_modifiers.rs')
+);
+await copyFile(
   path.join(fixture, 'sequential_focus.rs'),
   path.join(output, 'tests', 'sequential_focus.rs')
 );
@@ -116,6 +120,7 @@ const receipt = {
     }))
   ),
   consumerSha256: sha256(await readFile(path.join(fixture, 'consumer.rs'))),
+  pressModifiersConsumerSha256: sha256(await readFile(path.join(fixture, 'press_modifiers.rs'))),
   sequentialFocusConsumerSha256: sha256(await readFile(path.join(fixture, 'sequential_focus.rs'))),
   generatedPackageName: name,
   nativeSdk: provenance.nativeSdk,

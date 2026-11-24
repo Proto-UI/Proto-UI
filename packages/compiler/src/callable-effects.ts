@@ -1360,8 +1360,12 @@ function analyzeCallableFlow(
         }
         return known;
       }
-      case 'reference':
-        return scope.lookup(value.name, value.bindingId)?.value ?? UNKNOWN;
+      case 'reference': {
+        const values = scope.lookup(value.name, value.bindingId)?.value ?? UNKNOWN;
+        // Scalar flow facts may refine an opaque input or recursive result,
+        // but cannot erase a tracked container or authority-bearing value.
+        return scalarDataView(value.type, true) ? checkedFacts(values, value.type) : values;
+      }
       case 'narrow': {
         const values = expression(value.value, scope, execution);
         return checkedFacts(
@@ -1552,8 +1556,14 @@ function analyzeCallableFlow(
           const condition = truth(left, value.operator === '??');
           const useRight =
             value.operator === '&&' ? condition : condition === undefined ? undefined : !condition;
+          // Only the short-circuiting left alternatives reach the result.
+          // In particular a nullish left value cannot survive a ?? fallback.
+          const retained = left.filter((item) => {
+            const choice = truth([item], value.operator === '??');
+            return value.operator === '&&' ? choice !== true : choice !== false;
+          });
           return branches([
-            ...(useRight !== true ? [() => left] : []),
+            ...(useRight !== true ? [() => retained] : []),
             ...(useRight !== false ? [() => expression(value.right, scope, execution)] : []),
           ]);
         }
@@ -1827,12 +1837,17 @@ function analyzeCallableFlow(
         } else if (cell.tracked) store.cells.set(cell, merge([cellValue(cell), initial]));
         return [cell];
       }
-      case 'lexical-read':
-        return merge(
+      case 'lexical-read': {
+        const values = merge(
           expression(value.cell, scope, execution).map((cell) =>
             cell.kind === 'cell' ? cellValue(cell) : UNKNOWN
           )
         );
+        // Scalar cells need no identity tracking, but their checked storage
+        // domain still proves a data snapshot. Aggregate views must retain
+        // their actual contents, including fields hidden by a declared shape.
+        return scalarDataView(value.type, true) ? checkedFacts(values, value.type) : values;
+      }
       case 'lexical-update': {
         const cells = expression(value.cell, scope, execution);
         for (const cell of cells)

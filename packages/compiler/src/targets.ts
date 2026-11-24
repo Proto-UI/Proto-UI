@@ -977,7 +977,8 @@ export function checkTargetOperations(
           (value.name.startsWith('set.') ||
             value.name.startsWith('map.') ||
             (value.name.startsWith('array.') &&
-              !['array.every', 'array.includes'].includes(value.name)))
+              !['array.every', 'array.includes'].includes(value.name) &&
+              !(selected.framework === 'gpui' && value.name === 'array.isArray')))
         )
           diagnostic(
             'PUI4003',

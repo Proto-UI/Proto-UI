@@ -43,6 +43,16 @@ describe('checked GPUI scalar representation', () => {
     expect(code).toContain('.ordinary.clone().expect("checked native data callable")');
   });
 
+  it('lowers checked Math.abs through the native number operation', () => {
+    const result = compilePrototype(
+      program(`def.expose.method('absolute',(value:number)=>Math.abs(value));`),
+      { profile: 'gpui-source-v1' }
+    );
+    expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.output.code).toContain('.scalar_number().abs()');
+  });
+
   it.each([
     [1e21, '1e+21_f64'],
     [1e30, '1e+30_f64'],

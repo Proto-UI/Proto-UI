@@ -456,6 +456,8 @@ const nativeCases = [
   'typedDefaults',
   'numericLiterals',
   'membership',
+  'arrayKinds',
+  'absoluteValues',
   'assignment',
   'assignmentFailure',
   'caughtUnits',
