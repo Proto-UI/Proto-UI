@@ -54,6 +54,10 @@ const environment = {
 // Merged 0.3 integration train (sprints 1-7, #1731, seven-sprint evidence corpus):
 // five bounded numeric ceilings measured by the gate on the integrated candidate:
 // internal/records/2026-11-23-train-package-budget.json
+// Accepted Sprint 6 material reservation, resident width and presence-channel
+// costs after integration into main; original canonical failures, source/hash
+// equality and bounded 0.5% headroom rounded to 100 bytes are retained in:
+// internal/records/2026-11-24-main-sprint6-package-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -61,7 +65,7 @@ const cases = [
   // #652 capability growth. The blocking whole-entry gate and measurement
   // shape remain unchanged; see the exact Linux CI comparison and attribution:
   // internal/records/2026-09-27-shadow-split-budget-proposal.zh-CN.md
-  ['core root', 'packages/core/src/index.ts', 12_800],
+  ['core root', 'packages/core/src/index.ts', 13_100],
   // The prior 64,000 ceiling covered #621 Table Checkpoint B registering
   // module-table-structure in the eager runtime closure: +3,294 gzip bytes
   // over main 9eb93e9b (63,294 at Table head 2d305208 vs 60,000 on main).
@@ -95,7 +99,7 @@ const cases = [
   // internal/records/2026-10-07-finf-source-parity-budget.json
   // Integrated Portal/opt-in sink/review repair closure and bounded margin:
   // internal/records/2026-10-07-finf-web-optical-portal-budget.json
-  ['runtime root', 'packages/runtime/src/index.ts', 104_300],
+  ['runtime root', 'packages/runtime/src/index.ts', 107_400],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -120,8 +124,8 @@ const cases = [
   // changed the three adapter closures. Each ceiling is the canonical
   // node-24 measurement at the reviewed head with its own bounded headroom:
   // internal/records/2026-11-24-adapter-closure-package-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 173_380],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 172_180],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 180_900],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 179_700],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -129,7 +133,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 208_740],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 217_400],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_900],
 ];
