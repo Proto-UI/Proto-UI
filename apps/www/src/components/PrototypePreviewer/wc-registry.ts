@@ -1,6 +1,6 @@
 import { createCanonicalMotionPalette } from './canonical-motion-palette';
 import { createPreviewMaterialSink } from './preview-material-provider';
-import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import type { Prototype } from '@proto.ui/core';
 import { getPreviewWcName } from './wc-name';
 
@@ -23,4 +23,9 @@ export function ensurePreviewWcRegistered(prototypeId: string, proto: Prototype<
 
   registeredPreviewWc.set(prototypeId, wcName);
   return wcName;
+}
+
+/** Seed properties before this or another caller connects a projected host. */
+export function seedPreviewWcProps(element: HTMLElement, props: Record<string, unknown>): void {
+  setElementProps(element, props);
 }

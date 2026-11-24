@@ -1018,6 +1018,22 @@ describe.sequential(
                         .getPropertyValue('--pui-muted')
                         .trim(),
                       activeText: active.textContent,
+                      inlineTextOffset: (() => {
+                        const text = document.createTreeWalker(active, NodeFilter.SHOW_TEXT);
+                        let leaf = text.nextNode();
+                        while (leaf && !leaf.textContent?.trim()) leaf = text.nextNode();
+                        if (!leaf) throw new Error('Active option has no rendered text');
+                        const range = document.createRange();
+                        range.selectNodeContents(leaf);
+                        const optionRect = range.getBoundingClientRect();
+                        const inputRect = input.getBoundingClientRect();
+                        const inset =
+                          parseFloat(inner.borderInlineStartWidth) +
+                          parseFloat(inner.paddingInlineStart);
+                        return inner.direction === 'rtl'
+                          ? inputRect.right - inset - optionRect.right
+                          : inputRect.left + inset - optionRect.left;
+                      })(),
                       shellCount: root.querySelectorAll(
                         '[data-projection-prototype="shadcn-input-shell"]'
                       ).length,
@@ -1069,6 +1085,7 @@ describe.sequential(
               expect(paint.innerRadius).toBe('0px');
               expect(paint.innerBorder).toBe('0px');
               expect(paint.innerFont).toBe('14px');
+              expect(Math.abs(paint.inlineTextOffset)).toBeLessThanOrEqual(1);
               expect(paint.activeRadius).toBe('14px');
               expect(paint.activeBackground).toBe(paint.expectedMuted);
               expect(paint.activeText).toBe('Build a prototype');
@@ -1260,6 +1277,12 @@ describe.sequential(
             for (const layout of LAYOUTS) {
               await stage(`layout-${layout.name}`);
               await page.setViewportSize({ width: layout.width, height: 1000 });
+              if (layout.width < 768) {
+                const layoutToggle = page.locator('[data-home-gallery-layout-toggle]');
+                await layoutToggle.waitFor({ state: 'visible' });
+                if ((await layoutToggle.getAttribute('aria-expanded')) === 'false')
+                  await layoutToggle.click();
+              }
               if (layout.textScale === 200) {
                 record.textResize = await resizeText200(page);
                 await save();

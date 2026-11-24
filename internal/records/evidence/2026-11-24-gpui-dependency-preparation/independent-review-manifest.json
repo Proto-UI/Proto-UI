@@ -1,0 +1,107 @@
+{
+  "reviewKind": "independent-local-source-review",
+  "executionMode": "human-assisted",
+  "executionModeSource": "current-user",
+  "reviewClass": "review-governed-implementation-slice",
+  "baseSha": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+  "headSha": "b939afe35d30a1a436766d80beea7093a46e4fb2",
+  "observedAt": "2026-11-24T06:43:10.222Z",
+  "trackedDiffSha256": "795a95540ac8a33dd090eabf14e774fe406ceb6817741bdfbf7ea9ac7e92706f",
+  "files": [
+    {
+      "path": ".github/workflows/compiler-gpui-source-consumers.yml",
+      "tracked": true,
+      "sha256": "480c5072af97db8e039346fb8576347c0c1b8df9fd960a4d9101b9cf64ef1591"
+    },
+    {
+      "path": "packages/compiler/README.md",
+      "tracked": true,
+      "sha256": "8daa0c763f2ef3a0c4e4993463244d4086b6b2af68b1a3cc93872555518754c4"
+    },
+    {
+      "path": "packages/compiler/src/gpui-capabilities.ts",
+      "tracked": true,
+      "sha256": "5c3a8302bd59bd52bc7bc2b2e92548e296a637ba32635e09c9e20040100ce1b9"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-sdk.ts",
+      "tracked": true,
+      "sha256": "c79c0daf0b86191b51dcf15548f5ab0c3ce94da7a175208a7294ac8be22d380c"
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "tracked": true,
+      "sha256": "f4b38eae631740cdfa843d89fed82e1bff3b1478686b3e4d2266a622d291823d"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/gpui-a11y-value/produce.mjs",
+      "tracked": true,
+      "sha256": "a33a861b1eff87a9027a9c7aee70e2fb5a0df4e78b384445bb30de7cd36eff71"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/gpui-control-label/produce.mjs",
+      "tracked": true,
+      "sha256": "81de44a50673731a3ef85b33f0a8d6f45ec8e7ddb511a40bbd954a2044755a99"
+    },
+    {
+      "path": "packages/compiler/test/fixtures/gpui-ordinary-values/produce.mjs",
+      "tracked": true,
+      "sha256": "f6fa5fc394716cc1db5392993ff43b30fd2515253f620e8793c3e9c6a02e4dbf"
+    },
+    {
+      "path": "scripts/gpui/check-cargo-graph.mjs",
+      "tracked": true,
+      "sha256": "de3fa6ff9960daaeaee8aaf30bc0ba6fac2282726f4722380ddd97cc0ff5a454"
+    },
+    {
+      "path": "scripts/gpui/lib/cargo-graph.mjs",
+      "tracked": true,
+      "sha256": "cc4391ee3c3a262acb481dcdfc84900a74d3b54ef8a963a989cfbde176393f40"
+    },
+    {
+      "path": "scripts/gpui/test/cargo-graph.test.mjs",
+      "tracked": true,
+      "sha256": "2ab92b2ccfb27a6fdef07b0fb2ca90513beb075c4a51c631b97c8aa1a1ff3255"
+    },
+    {
+      "path": "internal/compiler/gpui-dependency-migration.md",
+      "tracked": false,
+      "sha256": "ab0800306fdf5fcd9a0fbd2f36e22ebd6b3d92de77aef26e4b3fd888752a9edc"
+    },
+    {
+      "path": "packages/compiler/src/gpui-dependency.ts",
+      "tracked": false,
+      "sha256": "6febde6d958bac5979d412f37825f4b91abc21fe30e5e3f62578fe59c9d045c4"
+    },
+    {
+      "path": "scripts/gpui/test/cargo-source-migration.test.mjs",
+      "tracked": false,
+      "sha256": "55afc902d6d1dae150babb9e2dcd4f03fcd1e644af0cfd0abf0c63c7560b17cc"
+    },
+    {
+      "path": "internal/records/2026-11-24-gpui-dependency-preparation.md",
+      "tracked": false,
+      "sha256": "3d39f3df4cd03897a1c2bda524e62184af4d0cdb120c33c7c7a5cffdb6691c53"
+    }
+  ],
+  "node": "v24.22.3",
+  "cargoVersion": "cargo 1.98.1 (797e8a9bc 2026-08-05)\nrelease: 1.98.1\ncommit-hash: 797e8a9bca276c1c9f9f738d2a20f484fa4eea9d\ncommit-date: 2026-08-05\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.4 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Debian 13.0.0 (trixie) [64-bit]",
+  "cargoGraphTests": {
+    "total": 55,
+    "passed": 55,
+    "failed": 0,
+    "skipped": 0,
+    "log": "independent-final-graph-tests.log"
+  },
+  "externalTarget": {
+    "path": "/workspace/scratch/1b24643d38b1/gpui-preparation-evidence/independent-final-ci-target",
+    "exists": false,
+    "entries": []
+  },
+  "findings": {
+    "discovered": 2,
+    "resolved": 2,
+    "open": 0
+  },
+  "reportSha256": "6388d7a9d799a7c2488f22133a082746567eadff4c75b7df872e0ba620a516f8"
+}

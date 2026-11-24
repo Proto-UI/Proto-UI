@@ -216,6 +216,7 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
         code={effectiveCode}
         lang={codeLangForRuntime(effectiveInitialRuntime)}
         framed={false}
+        scrollLimit="preview"
       />
     )
   }

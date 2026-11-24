@@ -573,18 +573,28 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         // Values are family source feedback, not another family's visual oracle:
         // packages/prototypes/bootstrap-2-3-2/src/{checkbox,switch,toggle,input,textarea,separator}.
         for (const value of [checkbox, switchRoot, thumb, toggle, input, textarea]) {
-          expect(value.radius).toBe('4px');
           expect(value.border).toBe('1px');
           expect(value.opacity).toBe('1');
         }
-        expect(checkbox.width).toBe('20px');
-        expect(checkbox.height).toBe('20px');
-        expect(indicator.width).toBe('14px');
-        expect(indicator.height).toBe('14px');
-        expect(switchRoot.width).toBe('44px');
+        for (const value of [toggle, input, textarea]) expect(value.radius).toBe('4px');
+        expect(checkbox.radius).toBe('2px');
+        expect(checkbox.width).toBe('14px');
+        expect(checkbox.height).toBe('14px');
+        expect(checkbox.image).toContain('linear-gradient');
+        expect(checkbox.background).toBe('rgb(245, 245, 245)');
+        expect(checkbox.color).toBe('rgb(51, 51, 51)');
+        expect(indicator.width).toBe('12px');
+        expect(indicator.height).toBe('12px');
+        expect(switchRoot.radius).toBe('5px');
+        expect(switchRoot.width).toBe('40px');
         expect(switchRoot.height).toBe('24px');
         expect(thumb.width).toBe('20px');
-        expect(thumb.height).toBe('20px');
+        expect(thumb.height).toBe('22px');
+        expect(thumb.radius).toBe('0px');
+        expect(switchRoot.image).toContain('linear-gradient');
+        expect(switchRoot.background).toBe('rgb(230, 230, 230)');
+        expect(switchRoot.shadow).toContain('inset');
+        expect(thumb.image).toContain('linear-gradient');
         expect(toggle.image).toContain('linear-gradient');
         expect(toggle.padding).toBe('4px 12px');
         for (const value of [toggle, input, textarea]) {
@@ -636,7 +646,9 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
           .poll(() => indicator.locator('svg path').getAttribute('d'))
           .toBe('M5 12L10 17L19 7');
         expect(await state(runtime, 'indicator', 'checked')).toBe(true);
-        expect((await paint(checkbox)).background).not.toBe(beforeCheckbox.background);
+        expect((await paint(checkbox)).background).toBe(beforeCheckbox.background);
+        expect((await paint(checkbox)).color).toBe('rgb(51, 51, 51)');
+        expect((await paint(checkbox)).image).toBe(beforeCheckbox.image);
         expect(
           (await requests(runtime, 'checkbox', 'checkedChange')).map((request) => request.detail)
         ).toEqual([{ checked: true, indeterminate: false }]);
@@ -681,12 +693,22 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         const switchRoot = part(runtime, 'switch');
         const thumb = part(runtime, 'thumb');
         const initialThumb = await thumb.boundingBox();
+        const housing = (await switchRoot.boundingBox())!;
+        expect(initialThumb!.x - housing.x).toBeCloseTo(1);
+        expect(initialThumb!.y - housing.y).toBeCloseTo(1);
+        expect(housing.height - initialThumb!.height).toBeCloseTo(2);
         const beforeSwitch = await paint(switchRoot);
         await switchRoot.click();
         await expect.poll(() => switchRoot.getAttribute('aria-checked')).toBe('true');
         await expect.poll(() => state(runtime, 'thumb', 'checked')).toBe(true);
-        expect((await thumb.boundingBox())!.x).toBeGreaterThan(initialThumb!.x + 10);
-        expect((await paint(switchRoot)).background).not.toBe(beforeSwitch.background);
+        await expect
+          .poll(async () => {
+            const checkedThumb = (await thumb.boundingBox())!;
+            return Math.abs(housing.x + housing.width - checkedThumb.x - checkedThumb.width - 1);
+          })
+          .toBeLessThan(0.5);
+        expect((await paint(switchRoot)).background).toBe('rgb(0, 109, 204)');
+        expect((await paint(switchRoot)).image).not.toBe(beforeSwitch.image);
         await switchRoot.press('Space');
         await expect.poll(() => switchRoot.getAttribute('aria-checked')).toBe('false');
         await expect.poll(() => state(runtime, 'thumb', 'checked')).toBe(false);
