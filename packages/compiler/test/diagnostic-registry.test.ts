@@ -26,6 +26,7 @@ const NON_DIAGNOSTIC_PUI_IDENTIFIERS = new Set([
   'PUI_VIEW_PENDING_ATTR',
   'PUI_VIEW_REVEALING_ATTR',
   'PUI_VIEW_DETACHED_ATTR',
+  'PUI_PORTAL_PREPARING_ATTR',
 ]);
 
 /** Diagnostic categories declared on CompilerDiagnostic (ir.ts). */
@@ -245,8 +246,10 @@ describe('diagnostic registry', () => {
     const text = `export const PUI_VIEW_PENDING_ATTR = 'data-pui-view-pending';
 export const PUI_VIEW_REVEALING_ATTR = 'data-pui-view-revealing';
 export const PUI_VIEW_DETACHED_ATTR = 'data-pui-view-detached';
+export const PUI_PORTAL_PREPARING_ATTR = 'data-pui-portal-preparing';
 import { PUI_VIEW_DETACHED_ATTR } from './presentation-host';
-root.setAttribute(PUI_VIEW_PENDING_ATTR, '');`;
+root.setAttribute(PUI_VIEW_PENDING_ATTR, '');
+root.hasAttribute(PUI_PORTAL_PREPARING_ATTR);`;
     expect(literalCodes([{ file: 'host-binding-control.ts', text }])).toEqual(new Set());
     for (const name of NON_DIAGNOSTIC_PUI_IDENTIFIERS) expect(isDiagnosticCode(name)).toBe(false);
   });
