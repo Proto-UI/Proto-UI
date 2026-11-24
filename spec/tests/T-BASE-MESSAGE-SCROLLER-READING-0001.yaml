@@ -1,0 +1,65 @@
+id: T-BASE-MESSAGE-SCROLLER-READING-0001
+type: test
+title: MessageScroller stable-key reading and restoration conformance
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  zh-CN: 绑定已有 draft 阅读协议的有限数据与确定性 Web Component 组合证据；真实浏览器、物理输入、辅助技术和非 Web 宿主的完整接受仍未由本测试证明。
+  en: Maps finite-data and deterministic Web Component composition evidence for the existing draft reading protocol; full browser, physical-input, assistive-technology and non-Web acceptance is not established by these tests.
+summary: Covers stable identity precedence, viewport capture, initial-hint lifetime, mount-epoch isolation and selection restoration without transferring host measurement or application storage into the prototype.
+cases:
+  - id: T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-CAPTURE
+    title: Capture distinguishes first-crossing from visible-primary preference
+    covers: [P-BASE-MESSAGE-SCROLLER-KEYED-CAPTURE]
+    expectation: first-crossing-retains-inset-policy-and-visible-preferred-excludes-offscreen-entries
+  - id: T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-IDENTITY
+    title: Exact key precedes predecessor and absolute fallback without substituting an index
+    covers: [P-BASE-MESSAGE-SCROLLER-KEYED-CAPTURE]
+    expectation: restored-scroll-commands-use-opaque-identities-and-relative-deltas
+  - id: T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-OWNER
+    title: The opt-in reading hook composes one existing scroll surface
+    covers: [P-BASE-MESSAGE-SCROLLER-KEYED-READING-OWNER]
+    expectation: generic-preserve-visible-does-not-add-a-second-anchor-correction
+  - id: T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-LIFETIME
+    title: Initial hints survive incomplete layout until explicit reader handoff
+    covers: [P-BASE-MESSAGE-SCROLLER-RESTORATION-LIFETIME]
+    expectation: empty-content-and-programmatic-scroll-preserve-hints-while-explicit-reader-input-facts-retire-them
+  - id: T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-EPOCH
+    title: Retired mount epochs and selection tickets cannot change current reading
+    covers: [P-BASE-MESSAGE-SCROLLER-RESTORATION-LIFETIME]
+    expectation: stale-frame-and-selection-ticket-reports-are-refused-after-session-remount
+  - id: T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-SELECTION
+    title: Selection restoration requires matching current content and is deduplicated
+    covers: [P-BASE-MESSAGE-SCROLLER-SELECTION-RESTORE]
+    expectation: invalid-host-facts-and-replayed-selection-records-do-not-reapply-or-retire-reading-hints
+implementations:
+  - id: message-scroller-reading-conformance
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/message-scroller-reading.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-CAPTURE
+      - T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-IDENTITY
+      - T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-OWNER
+      - T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-LIFETIME
+      - T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-EPOCH
+      - T-BASE-MESSAGE-SCROLLER-READING-0001-CASE-SELECTION
+    notes:
+      - Finite host facts and deterministic DOM metrics exercise the real Hook and Web Component adapter; synthetic input records are not physical-input or native-browser acceptance.
+      - A retained RuntimeSession rejects stale mount frames and selection tickets; the Web Component fixture separately proves terminal disposal. Position-ticket replay is not asserted by this implementation.
+verifies:
+  prototypes:
+    - id: P-BASE-MESSAGE-SCROLLER
+      anchors:
+        - P-BASE-MESSAGE-SCROLLER-KEYED-READING-OWNER
+        - P-BASE-MESSAGE-SCROLLER-KEYED-CAPTURE
+        - P-BASE-MESSAGE-SCROLLER-RESTORATION-LIFETIME
+        - P-BASE-MESSAGE-SCROLLER-SELECTION-RESTORE
+exercises:
+  prototypes: [P-BASE-MESSAGE-SCROLLER]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Cataloged executable coverage of the existing opt-in stable-key reading criteria and retained draft admission boundaries.
+tags: [test, prototype, base, message-scroller, reading, restoration]
