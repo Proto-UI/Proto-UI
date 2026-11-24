@@ -328,8 +328,8 @@ export function createRuntimePreviewSurface(
         family: currentFamily,
         theme: currentTheme,
         prototypeId: (next) => surfacePrototypeId(next as ProjectionFamilyId),
-        props: (next) => {
-          const props = panelSurfaceProps('canvas');
+        props: (next): Record<string, unknown> => {
+          const props = panelSurfaceProps('canvas') as Record<string, unknown>;
           if (next !== 'liquid-glass') return props;
           // An enclosing material scene already owns the visible canvas. Keep
           // the passive shell for slot/layout ownership, without a second frame.
@@ -338,7 +338,11 @@ export function createRuntimePreviewSurface(
             scene &&
             scene.querySelector(':scope > canvas[data-material-backdrop]') &&
             findPreviewMaterialProvider(scene);
-          return { ...props, variant: 'transparent', ...(hasCanvas ? { border: 'none' } : {}) };
+          return {
+            ...props,
+            variant: 'transparent',
+            ...(hasCanvas ? { border: 'none' } : {}),
+          };
         },
         layout: {
           display: 'flex',

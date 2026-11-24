@@ -1218,7 +1218,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               const currentDialogs = await dialog.elementHandles();
               try {
                 return await wheel.evaluate(
-                  (probe, dialogs) => probe.read(dialogs.length === 1 ? dialogs[0] : null),
+                  (probe, dialogs) => probe.read(dialogs.length === 1 ? (dialogs[0] as unknown as Element) : null),
                   currentDialogs
                 );
               } finally {

@@ -61,7 +61,7 @@ describe('Contents wheel observer / native event controls', () => {
           const current = await dialog.elementHandles();
           try {
             return await probe.evaluate(
-              (observer, dialogs) => observer.read(dialogs.length === 1 ? dialogs[0] : null),
+              (observer, dialogs) => observer.read(dialogs.length === 1 ? (dialogs[0] as unknown as Element) : null),
               current
             );
           } finally {
