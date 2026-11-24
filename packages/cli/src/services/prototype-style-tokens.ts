@@ -8,6 +8,7 @@ import ts from 'typescript';
 import { canonicalizeLoweredVariants } from '../generated/lowered-variant-order.js';
 import {
   createHookSourceSummaryContext,
+  projectStandardRuntimeRootStyleTokens,
   createSourceGraphVersionTracker,
   hookSourceCallMutation,
   mutateSourceGraph,
@@ -34,9 +35,41 @@ export async function collectProtoStyleTokensFromFiles(
     const scope = createScope(null, null, sourceSummary);
     await applyImportBindings(file, sourceFile, scope, moduleCache, []);
     walk(sourceFile, scope, tokens, collectExposures(sourceFile));
+    const projected = await collectStandardRuntimeRootTokens(sourceFile);
+    for (const token of projected) tokens.add(token);
   }
 
   return Array.from(tokens).sort();
+}
+
+/** A separate standard-instance CSS inventory, never a source-readiness proof.
+ * No module bindings, mutable graph versions or captured source values return
+ * to the ordinary collector; only the final immutable string tokens are used.
+ */
+async function collectStandardRuntimeRootTokens(
+  sourceFile: ts.SourceFile
+): Promise<readonly string[]> {
+  const projection = await projectStandardRuntimeRootStyleTokens(
+    sourceFile,
+    async ({ source, summary }) => {
+      const tokens = new Set<string>();
+      const ruleTokens = new Set<string>();
+      const moduleCache = new Map();
+      const scope = createScope(null, null, summary);
+      await applyImportBindings(source.fileName, source, scope, moduleCache, []);
+      // Preserve target identity: the ordinary pass already contains literal
+      // tokens, including Template-only uses. This scenario adds only the
+      // Rule variants collected through the existing Root inventory channel.
+      walk(source, scope, tokens, collectExposures(source), {
+        occurrences: [],
+        sourceRoot: path.dirname(source.fileName),
+        sourcePath: path.basename(source.fileName),
+        nonTemplateTokens: ruleTokens,
+      });
+      return [...ruleTokens];
+    }
+  );
+  return projection?.tokens ?? [];
 }
 
 /** Only proven Template uses bypass Root recipes. Unclassified tw() calls,
@@ -77,6 +110,13 @@ export async function collectProtoShadowStyleTokenUsage(root) {
       unclassifiedTokens,
       styleHandleUsage,
     });
+    const projected = await collectStandardRuntimeRootTokens(sourceFile);
+    for (const token of projected) {
+      tokens.add(token);
+      // A Root Rule use remains a Root use when the same string already has
+      // a Template use. Merge these target sets, never their string difference.
+      nonTemplateTokens.add(token);
+    }
   }
   // Reuse Root occurrence provenance; a token used on both targets needs both
   // outputs and must still pass the complete Root recipe preflight.
