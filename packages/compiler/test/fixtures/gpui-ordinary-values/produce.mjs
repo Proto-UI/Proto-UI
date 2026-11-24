@@ -168,6 +168,10 @@ dependencies.push([
   emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),
 ]);
 dependencies.push([
+  'composed_scroll',
+  emit('composed_scroll', readFileSync(path.join(fixture, 'composed-scroll.proto.ts'), 'utf8')),
+]);
+dependencies.push([
   'public_mutation',
   emit('public_mutation', readFileSync(path.join(fixture, 'public-mutation.proto.ts'), 'utf8')),
 ]);
@@ -301,6 +305,10 @@ copyFileSync(
   path.join(fixture, 'scroll-reader-consumer.rs'),
   path.join(output, 'transition/tests/scroll_reader.rs')
 );
+copyFileSync(
+  path.join(fixture, 'composed-scroll-consumer.rs'),
+  path.join(output, 'transition/tests/composed_scroll.rs')
+);
 receipt.consumerSha256 = digest(readFileSync(path.join(fixture, 'consumer.rs')));
 receipt.controlLabelConsumerSha256 = digest(
   readFileSync(path.join(fixture, 'control-label-consumer.rs'))
@@ -316,6 +324,9 @@ receipt.scrollPauseConsumerSha256 = digest(
 );
 receipt.scrollReaderConsumerSha256 = digest(
   readFileSync(path.join(fixture, 'scroll-reader-consumer.rs'))
+);
+receipt.composedScrollConsumerSha256 = digest(
+  readFileSync(path.join(fixture, 'composed-scroll-consumer.rs'))
 );
 // Independent ECMAScript operator reference. The Rust consumer calls the
 // generated authored methods; this file never replaces their implementation.

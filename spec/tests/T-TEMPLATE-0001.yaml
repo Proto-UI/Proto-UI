@@ -58,6 +58,16 @@ cases:
       - C-TEMPLATE-0006-D
     expectation: prototype-ref-template-type-rejected
 implementations:
+  - id: compiler-qt-native-root-children
+    kind: adapter-test
+    status: needs-review
+    path: packages/compiler/test/qt-native-consumer.native.test.ts
+    required: false
+    consumesCases:
+      - T-TEMPLATE-0001-CASE-ROOT-CHILDREN
+    notes:
+      - Actual Qt 6.4.2 C++/QML consumer for sibling order, independent Root styles, default slot, empty output and stable Root identity; opt-in SDK execution is required, and a skipped test is no evidence.
+      - The public Qt profile remains unavailable; this dormant direct-emitter consumer does not accept the full Template or platform matrix.
   - id: template-authoring-fixture
     kind: fixture
     status: active

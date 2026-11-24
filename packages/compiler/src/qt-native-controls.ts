@@ -8,7 +8,7 @@ export function createControls(options) {
   const textListeners=[],imageListeners=[],facts=new Map();
   let scrollConfig={axes:'both',projection:'auto',endFollow:{mode:'off'}};
   let scrollSnapshot={axes:'both',horizontal:{position:0,visibleRatio:1,canScrollBefore:false,canScrollAfter:false,atEnd:true},vertical:{position:0,visibleRatio:1,canScrollBefore:false,canScrollAfter:false,atEnd:true},scrolling:false,projection:'unresolved',endFollow:{state:'off',requestStatus:'idle'}};
-  let followRequest='idle',followState='off',wasAtEnd=true,explicitlyPaused=false,scrollGeometry=null;
+  let followRequest='idle',followState='off',wasAtEnd=true,explicitlyPaused=false,scrollGeometry=null,requestGeneration=0;
   function observed(key,initial) {
     let value=initial;const listeners=new Set(),watchers=new Set();
     const handle={get() {options.alive();return value;},spec:{kind:typeof initial==='boolean'?'bool':typeof initial==='number'?'number.range':'string'},watch(cb){options.setup();watchers.add(cb);return ()=>{options.alive();watchers.delete(cb);};},subscribe(cb) {options.alive();listeners.add(cb);return ()=>{options.alive();listeners.delete(cb);};},unsubscribe(off) {options.alive();off();}};
@@ -42,24 +42,65 @@ export function createControls(options) {
     const root=options.root();if(root)root.syncImage(imagePatch,imageGeneration);
     options.refreshFacts();
   },snapshot() {options.alive();return imageDeclared?Object.freeze({source:imagePatch.source,loadingStatus:imageStatus,fit:imagePatch.fit}):null;}};
+  function publishFollow(current) {
+    if(!current())return;
+    scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{endFollow:Object.freeze({state:followState,requestStatus:followRequest})}));
+    let failed=false,failure;
+    for(const [key,value] of [['followState',followState],['followRequest',followRequest]]){
+      if(!current())break;
+      try{facts.get(key).set(value);}catch(error){if(!failed){failed=true;failure=error;}}
+    }
+    if(failed)throw failure;
+  }
+  function rejectPending(current) {
+    if(current()&&followRequest==='pending'){followRequest='rejected';publishFollow(current);}
+  }
   Object.assign(scroll,{configure(patch) {
     options.setup();
     Object.assign(scrollConfig,patch);if(patch.requireProjection)scrollConfig.projection=patch.requireProjection;followState=scrollConfig.endFollow.mode==='off'?'off':'pending';
+  },sync(patch) {
+    options.runtime();
+    const axes=patch.axes==null?scrollConfig.axes:patch.axes;
+    if(!['horizontal','vertical','both'].includes(axes))throw new Error('Invalid scroll axes');
+    if(axes===scrollConfig.axes)return;
+    const generation=++requestGeneration;scrollConfig=Object.assign({},scrollConfig,{axes});
+    const root=options.root(),current=()=>generation===requestGeneration&&options.root()===root;
+    try{if(root&&options.ready())root.syncScroll(scrollConfig);rejectPending(current);}
+    catch(error){try{rejectPending(current);}catch(cleanupError){}throw error;}
   },bindComposedChrome(binding) {options.setup();options.bindScrollChrome(binding);hasChrome=true;scrollConfig.projection='composed';},request(request) {
-    options.runtime();const root=options.root();
-    if(!root){if(request.kind==='to-end'){followRequest='rejected';facts.get('followRequest').set(followRequest);}return;}
-    if(request.kind==='to-end'&&scrollConfig.endFollow.mode==='while-at-end'&&request.axis!==scrollConfig.endFollow.axis){followRequest='rejected';facts.get('followRequest').set(followRequest);return;}
-    if(request.kind==='to-end'){explicitlyPaused=false;followRequest='applied';if(scrollConfig.endFollow.mode==='while-at-end')followState='following';}
-    root.scrollRequest(request);
+    options.runtime();
+    if(!scrollDeclared)return {kind:'rejected',reason:'not-declared'};
+    const root=options.root();if(!root||!options.ready())return {kind:'rejected',reason:'not-mounted'};
+    const unavailable={kind:'rejected',reason:'unavailable'};
+    if(request.kind==='reveal'||!['horizontal','vertical'].includes(request.axis)||scrollConfig.axes!=='both'&&scrollConfig.axes!==request.axis)return unavailable;
+    if(!['by','page','to','control-drag','to-end'].includes(request.kind))throw new Error('Unknown Scroll request');
+    if(request.kind==='to-end'&&scrollConfig.endFollow.mode==='while-at-end'&&request.axis!==scrollConfig.endFollow.axis)return unavailable;
+    const generation=++requestGeneration;
+    const current=()=>generation===requestGeneration&&options.ready()&&options.root()===root;
+    try{
+      if(request.kind==='to-end'){followRequest='pending';publishFollow(current);}
+      else rejectPending(current);
+      if(!current())return unavailable;
+      const normalized=request.kind==='to'||request.kind==='control-drag'?Object.assign({},request,{position:Math.max(0,Math.min(1,request.position))}):request;
+      root.scrollRequest(normalized);
+      if(!current())return unavailable;
+      if(request.kind==='to-end'){explicitlyPaused=false;followRequest='applied';if(scrollConfig.endFollow.mode==='while-at-end')followState='following';publishFollow(current);}
+      return current()?{kind:'dispatched'}:unavailable;
+    }catch(error){
+      // Retire an unapplied request, preserving the first failure even when an
+      // observer throws a falsy value. A newer or applied outcome is retained.
+      try{rejectPending(current);}catch(cleanupError){}
+      throw error;
+    }
   },pauseFollowing() {
     options.runtime();
     if(!scrollDeclared)return {kind:'rejected',reason:'not-declared'};
     const root=options.root();if(!root)return {kind:'rejected',reason:'not-mounted'};
     const policy=scrollConfig.endFollow,axis=policy.axis||'vertical';
     if(!options.ready()||policy.mode!=='while-at-end'||scrollConfig.axes!=='both'&&scrollConfig.axes!==axis)return {kind:'rejected',reason:'unavailable'};
-    explicitlyPaused=true;followState='paused';
+    ++requestGeneration;explicitlyPaused=true;followState='paused';if(followRequest==='pending')followRequest='rejected';
     scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{endFollow:Object.freeze({state:followState,requestStatus:followRequest})}));
-    facts.get('followState').set(followState);
+    facts.get('followState').set(followState);if(options.root()===root&&options.ready())facts.get('followRequest').set(followRequest);
     return options.root()===root&&options.ready()?{kind:'dispatched'}:{kind:'rejected',reason:'unavailable'};
   },getSnapshot() {options.alive();return scrollSnapshot;}});
   return {hooks:{asTextControl() {options.setup();if(!textDeclaration)throw new Error('TextControl requires its checked Module declaration');textDeclared=true;return text;},asImageView() {options.setup();if(!imageDeclaration)throw new Error('ImageView requires its checked Module declaration');imageDeclared=true;return image;},asScrollSurface() {options.setup();scrollDeclared=true;return scroll;}},
@@ -116,8 +157,8 @@ export function createControls(options) {
       if(imageDeclared)return {role:'img',name:imagePatch.alternativeText||'',accessibleIgnored:imagePatch.a11yMode==='decorative'};
       return {};
     },
-    unmount() {++imageGeneration;composing=false;explicitlyPaused=false;scrollGeometry=null;scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{projection:'unresolved',scrolling:false}));facts.get('scrolling').set(false);facts.get('projection').set('unresolved');},
-    dispose() {++imageGeneration;textListeners.length=0;imageListeners.length=0;let failure;for(const fact of facts.values())try{fact.clear();}catch(error){if(failure===undefined)failure=error;}if(failure!==undefined)throw failure;}
+    unmount() {++imageGeneration;++requestGeneration;composing=false;explicitlyPaused=false;scrollGeometry=null;if(followRequest==='pending')followRequest='rejected';scrollSnapshot=Object.freeze(Object.assign({},scrollSnapshot,{projection:'unresolved',scrolling:false,endFollow:Object.freeze({state:followState,requestStatus:followRequest})}));facts.get('scrolling').set(false);facts.get('projection').set('unresolved');facts.get('followRequest').set(followRequest);},
+    dispose() {++imageGeneration;++requestGeneration;textListeners.length=0;imageListeners.length=0;let failure;for(const fact of facts.values())try{fact.clear();}catch(error){if(failure===undefined)failure=error;}if(failure!==undefined)throw failure;}
   };
 }
 `;

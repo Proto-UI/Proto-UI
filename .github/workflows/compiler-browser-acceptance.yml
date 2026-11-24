@@ -75,6 +75,7 @@ jobs:
             packages/compiler/test/browser-source-input.test.ts \
             packages/compiler/test/capture-facade.test.ts \
             packages/compiler/test/value-ir.test.ts \
+            packages/compiler/test/public-value-types.test.ts \
             packages/compiler/test/capture-lookup-integrity.test.ts \
             packages/compiler/test/authored-hook-language.test.ts \
             packages/compiler/test/mutable-callable-orders.test.ts \
@@ -90,6 +91,8 @@ jobs:
             packages/compiler/test/react-owner-hydration.test.ts \
             packages/compiler/test/react-context-source.test.ts \
             packages/compiler/test/vue-owner-hydration.test.ts \
+            packages/compiler/test/vue-owner-initial-graph.test.ts \
+            packages/compiler/test/owner-hydration-matrix.test.ts \
             packages/compiler/test/vue-context-source.test.ts \
             packages/compiler/test/button-ssr-server.test.ts \
             packages/compiler/test/gpui-a11y-value.test.ts \
@@ -97,10 +100,13 @@ jobs:
             packages/compiler/test/gpui-hook-renderer.test.ts \
             packages/compiler/test/gpui-event-notification.test.ts \
             packages/compiler/test/scroll-axis-sync.test.ts \
+            packages/compiler/test/native-scroll-axis-sync.test.ts \
+            packages/compiler/test/qt-scroll-request-outcomes.test.ts \
             packages/compiler/test/gpui-scalar-lowering.test.ts \
             packages/compiler/test/gpui-style-selection.test.ts \
             packages/compiler/test/gpui-control-label.test.ts \
             packages/compiler/test/gpui-sdk-compatibility.test.ts \
+            packages/compiler/test/gpui-composed-scroll.test.ts \
             packages/compiler/test/gpui-authored-inputs.test.ts \
             packages/compiler/test/string-coercion.test.ts \
             packages/adapters/web-component/test/focus-entry-input-origin.test.ts \
@@ -122,7 +128,7 @@ jobs:
             scripts/coverage-matrices/test/check-coverage-matrices.test.mjs \
             2>&1 | tee "$EVIDENCE/configuration-controls.log"
           node scripts/ci/check-ci-schedule.mjs 2>&1 | tee "$EVIDENCE/ci-schedule.log"
-          node --test scripts/ci/test/ci-scheduling-policy.test.mjs scripts/ci/test/cycle-job-inventory.test.mjs scripts/ci/test/cycle-report.test.mjs \
+          node --test scripts/ci/test/ci-scheduling-policy.test.mjs scripts/ci/test/cycle-job-inventory.test.mjs scripts/ci/test/cycle-report.test.mjs scripts/ci/test/gpui-composed-scroll-evidence.test.mjs scripts/ci/test/qt-native-evidence.test.mjs \
             2>&1 | tee "$EVIDENCE/ci-controls.log"
       - name: Verify specification authoring against the actual main merge base
         run: |
@@ -252,6 +258,7 @@ jobs:
           CHROME_PATH="$PUI_CHROME_EXECUTABLE" COMPILER_EVIDENCE_DIR="$PUI_EVIDENCE_DIR" \
             corepack pnpm@10.32.1 exec vitest run \
             packages/compiler/test/owner-hydration-retirement.browser.test.ts \
+            packages/compiler/test/owner-hydration-matrix.browser.test.ts \
             --maxWorkers=1 --minWorkers=1 \
             2>&1 | tee "$PUI_EVIDENCE_DIR/owner-retirement-browser.log"
       - name: Verify native input direction during the original trusted event

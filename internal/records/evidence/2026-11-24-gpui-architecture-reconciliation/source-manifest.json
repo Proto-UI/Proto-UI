@@ -1,0 +1,229 @@
+{
+  "purpose": "#687 four original first-step acceptance; no conformance admission",
+  "refs": {
+    "main": "0fbb52ef832cc27c78e24c28c59a55a16f51d7fe",
+    "candidate": "b8800d4cef9302718d4514b1ba28508860059929"
+  },
+  "sources": {
+    "main": [
+      {
+        "path": "internal/records/2026-09-22-gpui-adapter-architecture-decision.md",
+        "gitBlob": "553e3d21aa284448469c50fe0e01b1e17409441a",
+        "bytes": 36363,
+        "sha256": "8fa5d55f4ee0ae77f6c96c3dd192c61bc7169f745c306d86beaad7a5db067b22"
+      },
+      {
+        "path": "native/gpui/README.md",
+        "gitBlob": "92dd021a92f3199ac229b68a78b546b45bad7d74",
+        "bytes": 3692,
+        "sha256": "01e8d57b5cb9083c8e9e6a6a04bf6d5e0bd180b763a60d9c292a2fd54d0316ec"
+      },
+      {
+        "path": "native/gpui/Cargo.toml",
+        "gitBlob": "d7d613e2004c0f120cbc6d04b0219e0d59368e61",
+        "bytes": 909,
+        "sha256": "2737cd5239ba034972091132832246f5136c4f46ed9eb4e457f3ceac7e587156"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/src/a11y.rs",
+        "gitBlob": "20e8fb0f9e2cda3a693b9c719d05b4815a1c7aac",
+        "bytes": 9149,
+        "sha256": "396e5a573d3d73cb89fa0585da0fe70ba6270daf7fc3a550165167991367cd63"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/src/host.rs",
+        "gitBlob": "6d6c17f050c1e1efd8e913ddfb8433b3c0f2f5bf",
+        "bytes": 37363,
+        "sha256": "ec2b60aa6b0733e60170d297f206df56fb111e56eb6b0fa94c0d35f58f38bf66"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/src/hub.rs",
+        "gitBlob": "8e9e81bacd872aa1776547d3d58e1bee4ec79a73",
+        "bytes": 55900,
+        "sha256": "6dd306df3b90914fdcb8185abf9cd89138b15dddec9d25fbd14beeb7a0e929d6"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/tests/button_t0.rs",
+        "gitBlob": "9853182f676f83884183857b3157683fc9ceb4b9",
+        "bytes": 10386,
+        "sha256": "1c51ff2756270fbd53747182fa35a3406fd95ec29bed493f2d7dc99f8b930465"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/README.md",
+        "gitBlob": "96c955443d20bb44ea7dc69652c735bf25068ec6",
+        "bytes": 1779,
+        "sha256": "f79740d657733b233cdad3f0fae98eb176ababc1557f051ea1826d175ac5e09f"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/src/session.ts",
+        "gitBlob": "e6064dac6941bb6ea6f88caf80da07ea57f1f26a",
+        "bytes": 39878,
+        "sha256": "0f1a69daef0d9f386821eb33e9f2b4c29efd9293b1fa7dc24ab7c246d2f0aea5"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/src/bus.ts",
+        "gitBlob": "f546f2b06b40a99da9ffd150117e649d5741163e",
+        "bytes": 2645,
+        "sha256": "25b36f6cba2a269e341e120cfa1edf993b9f04117fa88b44ce961bc3cb7382b0"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/src/stdio.ts",
+        "gitBlob": "5a6458ab0dea3614f9d7a59447582f6934ee0dfa",
+        "bytes": 8372,
+        "sha256": "b436729ca4845558609110a23b268f6d279e9b8e49a4799783d958e42686bdd8"
+      },
+      {
+        "path": "packages/modules/focus/src/caps.ts",
+        "gitBlob": "bfc51ad94b37dbc815834bda5fd78f04bbf48c60",
+        "bytes": 3597,
+        "sha256": "935e79d3dd49a047a3bf7d121813b59f4a5800a181c3b2dc6ceb26af5c1acfb3"
+      },
+      {
+        "path": "packages/modules/focus/src/center.ts",
+        "gitBlob": "e5d23a1ed473a165a71bb38bf33112b93869b868",
+        "bytes": 25753,
+        "sha256": "dda91f0b2fd0be6f9de9a88c6c75af486797887ae419c878ceecddf6c782589a"
+      },
+      {
+        "path": "packages/modules/event/src/caps.ts",
+        "gitBlob": "e3d92d55f807bc548a3ae09c9c94f25388d4ce4a",
+        "bytes": 1175,
+        "sha256": "ad4562557b557f8083a5e543c670a2815a9a7e8fa43ff694453708a4498dc95a"
+      },
+      {
+        "path": "packages/modules/as-trigger/src/caps.ts",
+        "gitBlob": "97183b3bae5289ac9302a0c135dcb2f3518c1438",
+        "bytes": 1651,
+        "sha256": "ee382c6c18df35aa1e072127d1b678edbbb2d53639705275d454a56d52f1374d"
+      },
+      {
+        "path": "packages/spec/schema/src/index.ts",
+        "gitBlob": "73b5c3c7ff01b388398558975981ee0fd60e5165",
+        "bytes": 29508,
+        "sha256": "fb16f9b58f172a28036e768de63c0483a1cf9a2bc6606f1a632ebcf1a12523d0"
+      },
+      {
+        "path": "spec/host-caps/HC-FOCUS-ORDER-0001.yaml",
+        "gitBlob": "30d7ed59c67ad1cd5d004ffcfdd9a311b09ddb98",
+        "bytes": 7063,
+        "sha256": "463b4e1b3c5d5eaa77ba8ec2a2930ca67c8f2e3af398b616d3f9d5cb3291c26e"
+      },
+      {
+        "path": "spec/decisions/D-ADAPTER-PROFILE-0001.yaml",
+        "gitBlob": "6ecd9884fcbfe8cbc469111996c47fa92de7a300",
+        "bytes": 6328,
+        "sha256": "b10592679f75e07261c8c70c16146a5161ee95a86257624d06b50f31a8d97ded"
+      }
+    ],
+    "candidate": [
+      {
+        "path": "internal/records/2026-09-22-gpui-adapter-architecture-decision.md",
+        "gitBlob": "553e3d21aa284448469c50fe0e01b1e17409441a",
+        "bytes": 36363,
+        "sha256": "8fa5d55f4ee0ae77f6c96c3dd192c61bc7169f745c306d86beaad7a5db067b22"
+      },
+      {
+        "path": "native/gpui/README.md",
+        "gitBlob": "92dd021a92f3199ac229b68a78b546b45bad7d74",
+        "bytes": 3692,
+        "sha256": "01e8d57b5cb9083c8e9e6a6a04bf6d5e0bd180b763a60d9c292a2fd54d0316ec"
+      },
+      {
+        "path": "native/gpui/Cargo.toml",
+        "gitBlob": "d7d613e2004c0f120cbc6d04b0219e0d59368e61",
+        "bytes": 909,
+        "sha256": "2737cd5239ba034972091132832246f5136c4f46ed9eb4e457f3ceac7e587156"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/src/a11y.rs",
+        "gitBlob": "7643efb1099ec5578954bc6fd179890e7d27fcab",
+        "bytes": 9453,
+        "sha256": "666e35ac0855f1610b503102843eb4eb4b37ef8b2878fbbddd5efb097b49891f"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/src/host.rs",
+        "gitBlob": "18e0bb7edc86aa61cf84d3054cdfaf66fc287044",
+        "bytes": 43629,
+        "sha256": "d86a9dc2b503af4a78cf9819222c69c493fdf6e47c409d96aa21b7343800481d"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/src/hub.rs",
+        "gitBlob": "8e9e81bacd872aa1776547d3d58e1bee4ec79a73",
+        "bytes": 55900,
+        "sha256": "6dd306df3b90914fdcb8185abf9cd89138b15dddec9d25fbd14beeb7a0e929d6"
+      },
+      {
+        "path": "native/gpui/crates/proto-ui-gpui/tests/button_t0.rs",
+        "gitBlob": "9853182f676f83884183857b3157683fc9ceb4b9",
+        "bytes": 10386,
+        "sha256": "1c51ff2756270fbd53747182fa35a3406fd95ec29bed493f2d7dc99f8b930465"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/README.md",
+        "gitBlob": "96c955443d20bb44ea7dc69652c735bf25068ec6",
+        "bytes": 1779,
+        "sha256": "f79740d657733b233cdad3f0fae98eb176ababc1557f051ea1826d175ac5e09f"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/src/session.ts",
+        "gitBlob": "e6064dac6941bb6ea6f88caf80da07ea57f1f26a",
+        "bytes": 39878,
+        "sha256": "0f1a69daef0d9f386821eb33e9f2b4c29efd9293b1fa7dc24ab7c246d2f0aea5"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/src/bus.ts",
+        "gitBlob": "f546f2b06b40a99da9ffd150117e649d5741163e",
+        "bytes": 2645,
+        "sha256": "25b36f6cba2a269e341e120cfa1edf993b9f04117fa88b44ce961bc3cb7382b0"
+      },
+      {
+        "path": "packages/adapters/gpui-peer/src/stdio.ts",
+        "gitBlob": "5a6458ab0dea3614f9d7a59447582f6934ee0dfa",
+        "bytes": 8372,
+        "sha256": "b436729ca4845558609110a23b268f6d279e9b8e49a4799783d958e42686bdd8"
+      },
+      {
+        "path": "packages/modules/focus/src/caps.ts",
+        "gitBlob": "bfc51ad94b37dbc815834bda5fd78f04bbf48c60",
+        "bytes": 3597,
+        "sha256": "935e79d3dd49a047a3bf7d121813b59f4a5800a181c3b2dc6ceb26af5c1acfb3"
+      },
+      {
+        "path": "packages/modules/focus/src/center.ts",
+        "gitBlob": "e5d23a1ed473a165a71bb38bf33112b93869b868",
+        "bytes": 25753,
+        "sha256": "dda91f0b2fd0be6f9de9a88c6c75af486797887ae419c878ceecddf6c782589a"
+      },
+      {
+        "path": "packages/modules/event/src/caps.ts",
+        "gitBlob": "e3d92d55f807bc548a3ae09c9c94f25388d4ce4a",
+        "bytes": 1175,
+        "sha256": "ad4562557b557f8083a5e543c670a2815a9a7e8fa43ff694453708a4498dc95a"
+      },
+      {
+        "path": "packages/modules/as-trigger/src/caps.ts",
+        "gitBlob": "97183b3bae5289ac9302a0c135dcb2f3518c1438",
+        "bytes": 1651,
+        "sha256": "ee382c6c18df35aa1e072127d1b678edbbb2d53639705275d454a56d52f1374d"
+      },
+      {
+        "path": "packages/spec/schema/src/index.ts",
+        "gitBlob": "73b5c3c7ff01b388398558975981ee0fd60e5165",
+        "bytes": 29508,
+        "sha256": "fb16f9b58f172a28036e768de63c0483a1cf9a2bc6606f1a632ebcf1a12523d0"
+      },
+      {
+        "path": "spec/host-caps/HC-FOCUS-ORDER-0001.yaml",
+        "gitBlob": "30d7ed59c67ad1cd5d004ffcfdd9a311b09ddb98",
+        "bytes": 7063,
+        "sha256": "463b4e1b3c5d5eaa77ba8ec2a2930ca67c8f2e3af398b616d3f9d5cb3291c26e"
+      },
+      {
+        "path": "spec/decisions/D-ADAPTER-PROFILE-0001.yaml",
+        "gitBlob": "6ecd9884fcbfe8cbc469111996c47fa92de7a300",
+        "bytes": 6328,
+        "sha256": "b10592679f75e07261c8c70c16146a5161ee95a86257624d06b50f31a8d97ded"
+      }
+    ]
+  }
+}

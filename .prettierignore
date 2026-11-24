@@ -127,3 +127,9 @@ internal/records/evidence/2026-11-22-sprint7-history-continuation/
 internal/records/evidence/2026-11-22-sprint7-history-source-binding/
 internal/records/evidence/2026-11-22-sprint7-protocol-build-revision/
 internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint/
+
+# Frozen operation inventories retain the original bytes checked by their manifests.
+internal/records/evidence/2026-11-24-gpui-operation-inventory/ordinary-inventory.json
+internal/records/evidence/2026-11-24-gpui-operation-inventory/supplemental-summary.json
+# Source-bound cost inputs, original terminal observations and their custody manifests.
+internal/records/evidence/2026-11-24-sprint5-gpui-cost/

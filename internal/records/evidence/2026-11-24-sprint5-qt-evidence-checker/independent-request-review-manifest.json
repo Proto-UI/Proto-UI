@@ -1,0 +1,84 @@
+{
+  "scope": "Independent emitted QtControls guest review of author request changes; no Qt SDK/hardware claim.",
+  "results": {
+    "initial": {
+      "passed": 2,
+      "failed": 3
+    },
+    "intermediate": {
+      "passed": 8,
+      "failed": 1
+    },
+    "final": {
+      "passed": 10,
+      "failed": 0
+    }
+  },
+  "archive": {
+    "file": "independent-request-review.tar.gz",
+    "bytes": 7172,
+    "sha256": "16135f67b4fd4f06f7d81777ed248d425a6fb5dd1f02bdd04ade07aee1898525"
+  },
+  "files": [
+    {
+      "file": "final/request-independent-green-r3.json",
+      "bytes": 2614,
+      "sha256": "2162595626817377e153717f64bfddca01f0bb0c150e7a1f74dd2cb9b8591050"
+    },
+    {
+      "file": "final/request-independent-green-r3.log",
+      "bytes": 2614,
+      "sha256": "2162595626817377e153717f64bfddca01f0bb0c150e7a1f74dd2cb9b8591050"
+    },
+    {
+      "file": "final/request-independent-r3.mjs",
+      "bytes": 8115,
+      "sha256": "8c7a4ecc319dc7d911360dedc1797be810b54276dec6090d8f87fd22de088e32"
+    },
+    {
+      "file": "initial/request-independent-probe.json",
+      "bytes": 1657,
+      "sha256": "9d14e4c7c65724c0b7045cd94010127a71f62c8d1123b9f2bd38bfa37acef5a0"
+    },
+    {
+      "file": "initial/request-independent-probe.log",
+      "bytes": 1657,
+      "sha256": "9d14e4c7c65724c0b7045cd94010127a71f62c8d1123b9f2bd38bfa37acef5a0"
+    },
+    {
+      "file": "initial/request-independent-probe.mjs",
+      "bytes": 4515,
+      "sha256": "d0863d39a0b59f3a345fdf014adee12f506a7241d1cb9ce7ab1548116ae32cec"
+    },
+    {
+      "file": "intermediate/request-independent-green-r2.json",
+      "bytes": 2400,
+      "sha256": "ce48e03b68044fc060c1f9e381818ca3116295a66c4128d84773dcbd80472b53"
+    },
+    {
+      "file": "intermediate/request-independent-green-r2.log",
+      "bytes": 2400,
+      "sha256": "ce48e03b68044fc060c1f9e381818ca3116295a66c4128d84773dcbd80472b53"
+    },
+    {
+      "file": "intermediate/request-independent-r2.mjs",
+      "bytes": 7152,
+      "sha256": "f94c82a8542f283bdf96da35b2822fa30b13dfe23a6c3bf2a06a912164f74266"
+    },
+    {
+      "file": "source/final-qt-native-controls.ts",
+      "bytes": 14582,
+      "sha256": "19622fe938caa54cbbb1593ffeb906faa4e94e9770eadb1de1bbb7268e6f9670"
+    },
+    {
+      "file": "source/initial-qt-native-controls.ts",
+      "bytes": 13950,
+      "sha256": "96b624725ce01de4d8cb5dece1adda7ef9b6d94b037dfe4643cd171c2b104dbd"
+    },
+    {
+      "file": "source/intermediate-qt-native-controls.ts",
+      "bytes": 14412,
+      "sha256": "d971636f1986221fbf8005918744cdafdedd4fe6240a70ecec89b03f25d6427b"
+    }
+  ]
+}

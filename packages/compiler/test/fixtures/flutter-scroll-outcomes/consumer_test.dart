@@ -135,6 +135,7 @@ void main() {
     }
   });
   registerPauseFollowingCases();
+  registerAxisSyncCases();
 }
 
 // Additional actual Widget regressions for explicit pause and reader ownership.

@@ -1,0 +1,2280 @@
+{
+  "schemaVersion": 1,
+  "kind": "supplemental-source-demand-inventory",
+  "root": "/workspace/scratch/f7b299133482/proto-ui-s5",
+  "compilerFiles": [
+    {
+      "path": "packages/compiler/src/a11y-event-types.ts",
+      "sha256": "d631e662e489012bf92505cb15c03ec6e1163abab7dea0720731a2bc92382a54"
+    },
+    {
+      "path": "packages/compiler/src/artifact-library.ts",
+      "sha256": "3de31d7c6d67d6c6372f976426bf12008e293bd1516071dc109f8a6ec8d825e6"
+    },
+    {
+      "path": "packages/compiler/src/artifact-linking.test.ts",
+      "sha256": "8f255a6d78118727c533480743aea1a4a9b9fc0a84a51a5137b410ee59606a3c"
+    },
+    {
+      "path": "packages/compiler/src/artifact-linking.ts",
+      "sha256": "e59d6054e69554c3a1a672f8e24562d7714601deb4f542e4855831362a4e5700"
+    },
+    {
+      "path": "packages/compiler/src/artifact-output.test.ts",
+      "sha256": "bd3b322787e70f8130bf052157960f770daefffa58b1d26375e88bda5d1f70c0"
+    },
+    {
+      "path": "packages/compiler/src/artifact-output.ts",
+      "sha256": "e4bafece65e3b4bc8e412c4eeed2bc716b0c27454c62bd68c192dbf900615ec2"
+    },
+    {
+      "path": "packages/compiler/src/browser/client.ts",
+      "sha256": "f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7"
+    },
+    {
+      "path": "packages/compiler/src/browser/crypto-binding.ts",
+      "sha256": "4386b42e7e263669d883ee6c75290c34a929526c14300985d4b0007c33424971"
+    },
+    {
+      "path": "packages/compiler/src/browser/engine.ts",
+      "sha256": "7af36299f4849ef3592f74f886742a19098717c3a4c40b74f86a4d88bf62e463"
+    },
+    {
+      "path": "packages/compiler/src/browser/entry.ts",
+      "sha256": "5421505d22a844b9ac462f77bb2a8037db24acf8f8d1a5f576e3177e176f7dac"
+    },
+    {
+      "path": "packages/compiler/src/browser/index.ts",
+      "sha256": "ee60b1177260fa7f6a28da830097f4b82cb8ea67ab68ea40ceddc9dbcc3f1f1d"
+    },
+    {
+      "path": "packages/compiler/src/browser/preview-artifact.ts",
+      "sha256": "9d5141aedc78addfce06a06bdd3ed39c5bad0f0c8a378bf3476454e17c819e13"
+    },
+    {
+      "path": "packages/compiler/src/browser/protocol.ts",
+      "sha256": "db3298ab6042c97af5d105feb1c65bac125544ddd380dd42dabd11e711408048"
+    },
+    {
+      "path": "packages/compiler/src/browser/util-binding.ts",
+      "sha256": "11412b4c2605ed48bdfe1a6306ceb9e3c229bb0027cfc97a2e33c213ae6f2471"
+    },
+    {
+      "path": "packages/compiler/src/browser/wasm-url.d.ts",
+      "sha256": "b8c6ba692302d1e2f278c0c6efa545186d2b23dd33742209e5f19d80a83d55fc"
+    },
+    {
+      "path": "packages/compiler/src/browser/worker.ts",
+      "sha256": "d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078"
+    },
+    {
+      "path": "packages/compiler/src/callable-effects.ts",
+      "sha256": "f151a48fd13b23e2111c8072ad1ca6b2dbbc8bb7f271085c719685aec15c2b5c"
+    },
+    {
+      "path": "packages/compiler/src/capture-analysis.ts",
+      "sha256": "1f5a53715aca8c3b4e6d50d98915d4ac4e81e41a9c4d4000f29cc29649f023af"
+    },
+    {
+      "path": "packages/compiler/src/capture-effects.ts",
+      "sha256": "592d2f2a4e3fab8ba8e04dda540a0a04f5b48bd45b510da054c7f6b13d49f846"
+    },
+    {
+      "path": "packages/compiler/src/capture-types.ts",
+      "sha256": "6451eaa8456fe2818e13470790275a5675436fef2ea0178d9efb5ec71a0bcf1f"
+    },
+    {
+      "path": "packages/compiler/src/cli-entry.ts",
+      "sha256": "e7e76b44fe0bb0d8489641056d1783c5eec5ecf17d33414e9d3991d1b23e2564"
+    },
+    {
+      "path": "packages/compiler/src/cli.ts",
+      "sha256": "8c8cf343944e2192aaebcaaf90546b10c4f90ded2efcda2768f4340f6c30d91e"
+    },
+    {
+      "path": "packages/compiler/src/compile.ts",
+      "sha256": "e06cf9b5963d1e63b0ddc3cc1ababba3a5570c8f1db468fbab0e0f7b6c294ffe"
+    },
+    {
+      "path": "packages/compiler/src/compiler-build.ts",
+      "sha256": "9b696d4da0c00c3212a447b0ad184ff6f54d744676722e45c33f7dc9afdbf3cc"
+    },
+    {
+      "path": "packages/compiler/src/conformance/button-cases.ts",
+      "sha256": "a6365c7192f66be6b7ae66f7c3234707afae9965f48d3df3e493455f25925344"
+    },
+    {
+      "path": "packages/compiler/src/conformance/journey.ts",
+      "sha256": "ef358280d05149b21f2cd38fb5837935a7185a1f2ad1b17a9da6ed54f7b206a8"
+    },
+    {
+      "path": "packages/compiler/src/conformance/registry.ts",
+      "sha256": "7511fc8f17d17ed32b986aeaafd5d7a996f3dc3d5d555dfe710211015bf55328"
+    },
+    {
+      "path": "packages/compiler/src/conformance/result.ts",
+      "sha256": "c455cca122d8b2ae43a50d97647844f12e98638e7b420a56a995216d06523f86"
+    },
+    {
+      "path": "packages/compiler/src/conformance/sequences.ts",
+      "sha256": "05b1e52821ba8d4e77c2afb4ab73e2158e85606196836f517994883c1784b8f4"
+    },
+    {
+      "path": "packages/compiler/src/conformance/trace.ts",
+      "sha256": "d8fdc1486aaa5d8e64627ed448330a3106702a642ac01012b3c44efc1b9077fa"
+    },
+    {
+      "path": "packages/compiler/src/conformance/update-cases.ts",
+      "sha256": "5d8cc913c8a47c4c0af0df37121df1fde55f74a95bc8b43674525c1e0487f850"
+    },
+    {
+      "path": "packages/compiler/src/consumer-closure.test.ts",
+      "sha256": "74fc94ba607ea07b7c9724af599c36639dec020ace37b31dc0009b5d372f8a9f"
+    },
+    {
+      "path": "packages/compiler/src/consumer-closure.ts",
+      "sha256": "823dc2d107f4e3c647dc9a27fe5f824839aefee232f08c3d38be27a877616315"
+    },
+    {
+      "path": "packages/compiler/src/context-declarations.ts",
+      "sha256": "c53f6ce08cefa2189e854f4dbcc93b3f26a68d3d784c9b7251f39bfa46de4d21"
+    },
+    {
+      "path": "packages/compiler/src/core-value-types.ts",
+      "sha256": "f861c563d82b0f06bccc5c7550f6cf043d7c78d38655ef3c42a92283f1f9ecd4"
+    },
+    {
+      "path": "packages/compiler/src/data-types.ts",
+      "sha256": "57e974df306ff4c4cb071d68fa4d29b41c9a98138956a61b03efb500aa467ee4"
+    },
+    {
+      "path": "packages/compiler/src/declaration-order.ts",
+      "sha256": "336044fe1e9cfab48a51c42699055e9e3ea068f59b3a37cd15a9970b86a9b57a"
+    },
+    {
+      "path": "packages/compiler/src/deferred.ts",
+      "sha256": "9b334b80b30b460417d2c94080fb60d0e4e78b936041aea1f544b8501a4c162b"
+    },
+    {
+      "path": "packages/compiler/src/demand-pruning.ts",
+      "sha256": "0ab0215925b44a29d627ba36e33903b11bcf94173983a9a8287be68342096f64"
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-format.test.ts",
+      "sha256": "142b98fbb124f2886c902aadd344baad13283c883f7956ff19f852bec7314d67"
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-format.ts",
+      "sha256": "f2dbca50e7ccee04a97a8726a8b4e172892d9cf8e8a9e02c5cf577c58aec062a"
+    },
+    {
+      "path": "packages/compiler/src/diagnostic-registry.ts",
+      "sha256": "7f7db209f22c732a9fe81b03cf298ca170f0d14af55b19c2f179cc20463a09fb"
+    },
+    {
+      "path": "packages/compiler/src/diagnostics.ts",
+      "sha256": "b53c984b24eeddebcffab5f6f5391bd71b271f0e805f9576f6956d69ae0a8aec"
+    },
+    {
+      "path": "packages/compiler/src/emitter-map.ts",
+      "sha256": "f7abd459f03889a189fc3a1d3d98d811a416a91fdedd320323c01b5cc8838e5f"
+    },
+    {
+      "path": "packages/compiler/src/event-types.ts",
+      "sha256": "05494b958ff400e6d6dfa4a685067fa2902f2ec3107febfde78e3000070d79c9"
+    },
+    {
+      "path": "packages/compiler/src/expression-types.ts",
+      "sha256": "4dbaa2720ad035771734306aa47c1e8dc876b79c458241fd9733e860447c69bc"
+    },
+    {
+      "path": "packages/compiler/src/flow-proof.ts",
+      "sha256": "6796d95ebf0a332fcbad6ed5d880510cc8482c03f42c8f322ccb0cc4bd06dab2"
+    },
+    {
+      "path": "packages/compiler/src/flutter-native-host.ts",
+      "sha256": "d217af72508d14fe94191943904be01bfcb881196f155392f6dcb67405966507"
+    },
+    {
+      "path": "packages/compiler/src/flutter-native-modules.ts",
+      "sha256": "870cf3d50a26d2f693590216a5039167905a5a660ac987c4df047f197ffd87de"
+    },
+    {
+      "path": "packages/compiler/src/flutter-source.ts",
+      "sha256": "53b7d3f8915515462c8f9ad6c81ae2daa29898b86cb341d6a5b157715029e928"
+    },
+    {
+      "path": "packages/compiler/src/focus-activation-entry.test.ts",
+      "sha256": "b4e6b73d830a9f327715d0f5cd5f47183b557ed13e51d4549a3c00ba235e97ab"
+    },
+    {
+      "path": "packages/compiler/src/gpui-capabilities.ts",
+      "sha256": "8d0b8957bc876e79863c5ce5d77213ec48efe8f940fad81812e312a5ca424269"
+    },
+    {
+      "path": "packages/compiler/src/gpui-data-methods.ts",
+      "sha256": "2f2c5eb15d2ac814cb1df6d9e4c6ef35c9bfbe0ce584e6c0fd33c6802b461f88"
+    },
+    {
+      "path": "packages/compiler/src/gpui-lexical-names.ts",
+      "sha256": "82114909c9039a02b015ca6818426ab98e4d3ea5c36ce5e0a3e2cd77fe397517"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-a11y.ts",
+      "sha256": "9aa8d4437082240a14feccdf38d60fe54ec37680eb72d13ee0e367fd4618d3ce"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-async.ts",
+      "sha256": "aaf3a4e22e1d265db553c49e1806d6855021c7058a7508d3c0388b2d06c2c6e6"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-authored-hooks.ts",
+      "sha256": "6b92e4b6140f0b5e252c6dc267f2686750c9c38b9dbd665b83e138de29a257cc"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-boundary.ts",
+      "sha256": "a0cfb4cc13fcd25a16c3a66fcb6ee8f1cfafc730230202a8273be64ced2daced"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-control-label.ts",
+      "sha256": "0940aedd15a0e0acfb13b869f1ee9b0e14449a05552ceeabd9351ffd5d340183"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-host.ts",
+      "sha256": "4bbb55c4faa3f3f3db64ac0232fc7ab7a77e94c8939419f58b8755361c53f761"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-hover.ts",
+      "sha256": "596bfd58f0241d7ee377837f2469019f61e09688710af21d05f59f7b8bc3c7a1"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-image.ts",
+      "sha256": "8a728abc4fa638c5ff8095d3ec5975de260c56721b16ca6b7c81f991d0095bae"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-key-boundary.ts",
+      "sha256": "888bec35cad426047a45c35d24d266ec27114a8435ffde46dd1de2b81bef03e3"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-key.ts",
+      "sha256": "b8f4af63e89402c8ba1952639f3f1587b8786346362a5164437f261820ee148a"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-manifest.ts",
+      "sha256": "06c2cbfe858a288006d60428ea5d4fa4264fbe38115a3cbf62f91c5155fedf0e"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-modules.ts",
+      "sha256": "b47fa0305395ccfb389dbaa7c20b3e5ff620ea75d3848980e1e842f4bed5ce94"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-move.ts",
+      "sha256": "41676d9558d32c7dd7df4b8ff719bcb144551da61cd4cbe5501e575c3a8ce43c"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-notify.ts",
+      "sha256": "9527bfdcbb5288ffe804e777698bfdbad196825b1d230a0b2882bbebfac5ca9f"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-overlay.ts",
+      "sha256": "96dc752ed6074282f85a04969eaa9100ec881918c267c1722e77b5e105667fb8"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-owner.ts",
+      "sha256": "9a51f86dea670370de1977961a8ce7c6d8ab653f107d8b22ca5d0904ca47fb84"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-positioning.ts",
+      "sha256": "13fec3f365c755a906b745350e0eb5a48ec1549934b7d20fe0a6f43a8b8f34dd"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-scroll-chrome.ts",
+      "sha256": "d5307f9691c821b0513582c556dafe8d82b30466bede4581fd36fca8bd1acd06"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-scroll.ts",
+      "sha256": "057991d0a34579f0f3371eb42c56bf8e46cb038b3f022120450eb67472ff1f85"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-sdk-compatibility.ts",
+      "sha256": "bcdd693e9098d2782af0653d388653b259534ca6f7c8a857a86dc131c22204dd"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-sdk.ts",
+      "sha256": "5dad85fbae15ca7e6b6b7bf0db418d9717543722bd1d5bb3362fd43744966e0b"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-selection.ts",
+      "sha256": "c87dab5426eb2930b1c255ce7a2bbf637a4ae788090d26865e892fed4f28404d"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-style.ts",
+      "sha256": "19176f635b013995d12e634f563bc4aa0677aced23a5128a7c7743dd1ffa7b50"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-table.ts",
+      "sha256": "c07348e43737d3601312f772428d4a683e19ffa44b32f69634a928789df24fbc"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-text.ts",
+      "sha256": "8dd8fdc414318f352ce8d14f06095d97112eda8b6759ca9f93679adbb8b8750c"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-topology.ts",
+      "sha256": "cbc8664c6865a6fae668a16c36ab38d6babc0c53af86fef77ece82f423ab62b4"
+    },
+    {
+      "path": "packages/compiler/src/gpui-native-values.ts",
+      "sha256": "f228276676e48ad4ef406be14695770ea7ff8da2f6237fae81764b764eb0badf"
+    },
+    {
+      "path": "packages/compiler/src/gpui-scalar-lowering.ts",
+      "sha256": "edd088033e4d9efbcfa10d80f85969dc25a34d58253336045562a9c059669c3c"
+    },
+    {
+      "path": "packages/compiler/src/gpui-source.ts",
+      "sha256": "645b834de08a6953194983940e8ab0c331806519b54d5d5a27aad5ea7874f07a"
+    },
+    {
+      "path": "packages/compiler/src/hook-admission.ts",
+      "sha256": "6ad383788543ff8d67672eb5731332236ea1167792bb17b11f469501b3b7cf2c"
+    },
+    {
+      "path": "packages/compiler/src/index.ts",
+      "sha256": "fb3ddedd6527cba0ae09b8baf61eef64cba81df5db969a60604a25452c83313f"
+    },
+    {
+      "path": "packages/compiler/src/interaction-value-shape.ts",
+      "sha256": "2aed743c7bfe340df6e0c794d4a8d9b9728e21ca02f921d3a06be78e6fb3a483"
+    },
+    {
+      "path": "packages/compiler/src/ir-validation.ts",
+      "sha256": "b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535"
+    },
+    {
+      "path": "packages/compiler/src/ir.ts",
+      "sha256": "8db5d64a4ced995f6e5d42084b72698fbf843f24e6fe9f027f274455dd590990"
+    },
+    {
+      "path": "packages/compiler/src/legacy-native-admission.ts",
+      "sha256": "1751aa9e9fc1a9254744f854f9b803414662843a59ead2c0956b94635a6e1fae"
+    },
+    {
+      "path": "packages/compiler/src/memory.ts",
+      "sha256": "90829ba9a93426452570606c39ca9891137dcb746cf73ebfd455b53852e7068c"
+    },
+    {
+      "path": "packages/compiler/src/native-adapter-modules.ts",
+      "sha256": "10ffb3c8eb9a0062b3a2ea6eeff254d6f24184406a64cc8d58141e293b84a02e"
+    },
+    {
+      "path": "packages/compiler/src/native-async.ts",
+      "sha256": "50ca38b4e9148104fb3a2ffe515b6018db51587c0030a722b1c2821da455d8fe"
+    },
+    {
+      "path": "packages/compiler/src/native-authored-hooks.ts",
+      "sha256": "b34b58421d411f143426a39e079cbbae97339753a3b8204d0e6a451569203c1b"
+    },
+    {
+      "path": "packages/compiler/src/native-capture-provenance.ts",
+      "sha256": "8250ae98381760bdb0f9dfa3c09cb2ed372903c36e2d51dee3aeb7a1616f97aa"
+    },
+    {
+      "path": "packages/compiler/src/native-context-legacy.ts",
+      "sha256": "9afc1c780ae8f9939f3d147e17ad09a009726782ee9f97c683698cb860404dd4"
+    },
+    {
+      "path": "packages/compiler/src/native-context.ts",
+      "sha256": "e1c04e57a199cba6d27ee86dce61720960fdfac18e6e19a14231997e122309e5"
+    },
+    {
+      "path": "packages/compiler/src/native-control-label.ts",
+      "sha256": "c5af25dc2a129bcf17c8578053e15226734e571fd44145dad02521eba27151ab"
+    },
+    {
+      "path": "packages/compiler/src/native-focus-scope-restore.test.ts",
+      "sha256": "18075135f8b74cc0f4e25e76e18133a05b6832157d06e2bbc3df2c15b1e0732d"
+    },
+    {
+      "path": "packages/compiler/src/native-image-view.ts",
+      "sha256": "bf4125a6bbf7086f2d7005905e63c48d2c7816c3c2df914fa119e6e60f2dbd5e"
+    },
+    {
+      "path": "packages/compiler/src/native-instance-associations.ts",
+      "sha256": "68e2120609e67d184b405b25f8426c139bbe160f84086bad6e797807d95804e1"
+    },
+    {
+      "path": "packages/compiler/src/native-interaction.ts",
+      "sha256": "738f41c5124ca63c2d26bc264f0e6322816fb1541a3daf5cded597f4b4cea910"
+    },
+    {
+      "path": "packages/compiler/src/native-presence-presentation.ts",
+      "sha256": "a8eda6e63c28eb8cfd7e275f8644944a31631ebc264dec99c0fdabdab92edc82"
+    },
+    {
+      "path": "packages/compiler/src/native-public-values.ts",
+      "sha256": "f09317eb31e6ec8497b1dc7fda018c05db244ce383694935a1fa5c19f8531f07"
+    },
+    {
+      "path": "packages/compiler/src/native-scroll-reveal.ts",
+      "sha256": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603"
+    },
+    {
+      "path": "packages/compiler/src/native-shader-host.generated.ts",
+      "sha256": "fb23622645a30bcad762043ad280a50731b87dcfe614636dd453095fe2160257"
+    },
+    {
+      "path": "packages/compiler/src/native-shader-specialization.ts",
+      "sha256": "ff4e13f7837e945cf8bf052ff283d1af24739c96cc3b6d813ee5dfa4fcf76705"
+    },
+    {
+      "path": "packages/compiler/src/native-shader.ts",
+      "sha256": "6229f87913d90e603d84b02afdbb8b9ce4c489df4b5d00c139336715efacb434"
+    },
+    {
+      "path": "packages/compiler/src/native-static-declarations.ts",
+      "sha256": "22b2635ca9593e4aa756c02827e542c8ec67cb5da262be20d90e720b6587cbb5"
+    },
+    {
+      "path": "packages/compiler/src/native-style.ts",
+      "sha256": "d515ebc9c56a7311cd1448ece1158f1e454ac1db0284d10c28771e74f48dde26"
+    },
+    {
+      "path": "packages/compiler/src/native-support/README.md",
+      "sha256": "84c41cc9c8b9ede256c7688c6c8ca26b198a9f9dc89dc5ac248e63cace5758db"
+    },
+    {
+      "path": "packages/compiler/src/native-support/archive/README.md",
+      "sha256": "3de8ba0f1cdc4d7162a0d6a58208924b32bb36cef414e9e471f34ba66dcb7820"
+    },
+    {
+      "path": "packages/compiler/src/native-support/archive/gpui-transition-v1.rs.txt",
+      "sha256": "f45ccbc72ca88b34162b4250d5172de7bd0d36cdbcfe97783bd7f568f98e2843"
+    },
+    {
+      "path": "packages/compiler/src/native-support/artifacts.ts",
+      "sha256": "80418ee51341169e15a9b98204d873ac6945da3c2f44f773228789dd0d04bc0a"
+    },
+    {
+      "path": "packages/compiler/src/native-support/dom-interaction.template.ts",
+      "sha256": "bcfb9281943a920aaa26bfe46b323acf30e41476f02d66f30b9ef6f76b293c86"
+    },
+    {
+      "path": "packages/compiler/src/native-support/dom-modules.template.ts",
+      "sha256": "815be7bd71be0e00295a179889768911ee63f7b04560230f83bff9288739bca9"
+    },
+    {
+      "path": "packages/compiler/src/native-support/legacy-text-v1.template.ts",
+      "sha256": "ef6762716678e06b621121ac269f76b234c84fda93377a2480f08159dc3d4009"
+    },
+    {
+      "path": "packages/compiler/src/native-support/part-relationships.template.ts",
+      "sha256": "c4e33fbc362ab5ef54774391eeaa51dc20e16a48a47641e63067f468331d9632"
+    },
+    {
+      "path": "packages/compiler/src/native-support/plan.ts",
+      "sha256": "ed6c75653150edb1a3e75a4c917568d74755a0dd4aa393a068ea3026fdc93422"
+    },
+    {
+      "path": "packages/compiler/src/native-support/specialize.ts",
+      "sha256": "7a5419d98b7858ded2fdd0e03eb988bc30403556c16da171c4e80ab42aa492c6"
+    },
+    {
+      "path": "packages/compiler/src/native-support/template-ast.ts",
+      "sha256": "0ab3759a95708ce010ac0611abf815bb518c707532dddd24e9e7f3b45ab730e3"
+    },
+    {
+      "path": "packages/compiler/src/native-support-legacy.ts",
+      "sha256": "e99b3a51f2613839c0860749a936490d12413206d742b78f30e8b333cee43873"
+    },
+    {
+      "path": "packages/compiler/src/native-support-migration.ts",
+      "sha256": "bf4c2864e4e261b1b7d32e24da163c2caa76fc1297eda36bf0cd0310bf7d1659"
+    },
+    {
+      "path": "packages/compiler/src/native-value-lowering.ts",
+      "sha256": "47e5582e764c4cd11734b32999f829c2cbc81394de910dc9180347628aa85a6d"
+    },
+    {
+      "path": "packages/compiler/src/native-vue2-associations.ts",
+      "sha256": "7633f8b773a82b9118dc1b9f34e0b631858f978ca9ea5ec035a11e4c4819fbd8"
+    },
+    {
+      "path": "packages/compiler/src/notification-plan.ts",
+      "sha256": "174b0cbec7e7743721fbebd7b9fc7df7cf7d5a1456a81d48884a819de893b3f1"
+    },
+    {
+      "path": "packages/compiler/src/observable-semantics.ts",
+      "sha256": "2e22b1f5f5e13a25818287b7b54e1cbbeb321e2122e9852bbba2be441041054d"
+    },
+    {
+      "path": "packages/compiler/src/operations.ts",
+      "sha256": "c7b855fcb9ed3849bb7d2fff7c5cf0855153740190ed63b545ba95d36ea7bab5"
+    },
+    {
+      "path": "packages/compiler/src/owner-initial-data.ts",
+      "sha256": "5625cb343a66295aa1078da7f39f434d1b6d88598ba1e412147e36af3f234f83"
+    },
+    {
+      "path": "packages/compiler/src/parser-module.ts",
+      "sha256": "7736816a80d846c118e22e031e5c7fd1e45a6ffcb4635f817b517d8d90ed8099"
+    },
+    {
+      "path": "packages/compiler/src/parser-source-demand.ts",
+      "sha256": "2303ce1f6712bf37f2a99ceb2b585607fd89fbb04304fef3483f01895e9c10b3"
+    },
+    {
+      "path": "packages/compiler/src/parser.ts",
+      "sha256": "55625344eaf56fb8327fc82fa46364611f8604b5259f8f7615df0b4f0f94f286"
+    },
+    {
+      "path": "packages/compiler/src/pointer-facts-admission.ts",
+      "sha256": "0e994a26e17cb2b8dda74c27728ef5e4af050a9cdba00e8000785b4575c24385"
+    },
+    {
+      "path": "packages/compiler/src/portable-data-methods.ts",
+      "sha256": "8f2877067ea1b17eb834d09a43b7cd621ed1298790d1b7d84df80d2d4b07594c"
+    },
+    {
+      "path": "packages/compiler/src/project-output.test.ts",
+      "sha256": "07b5cf140661bf1196701583bd0e4fd6623e7ec5d660ce0e7de76ae2677e67be"
+    },
+    {
+      "path": "packages/compiler/src/project-output.ts",
+      "sha256": "fa9320039a27b95f78a498116848fd733361bcf09ded0c690110e937489facab"
+    },
+    {
+      "path": "packages/compiler/src/project.test.ts",
+      "sha256": "0a5386d40b4c5740388292e96a653ed51b59201d51f85d2567c1f4e83bc6488c"
+    },
+    {
+      "path": "packages/compiler/src/project.ts",
+      "sha256": "1758504f1170dabeaa096346e41f79bcd660f9dafb33428bb3894d675484907e"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-context.ts",
+      "sha256": "3c2889a595e1815c917f61bc7beb857de00b82034697c1e59c87008380656fb5"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-controls.ts",
+      "sha256": "8f883d3c96c6f734e733a669cffb829ed81f39ca6b325e42b1551b2f22d53d6c"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-host.ts",
+      "sha256": "edb5aa4ca8e13ddddc157ec5b84c66e6090dd403a8a6c1f6cdf9a00bbd239035"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-interaction.ts",
+      "sha256": "a380821e8ea10dcd951d27b834ba3d450a6fd3311fdb14c774d67f0ce1fffac0"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-owner.ts",
+      "sha256": "caae03b76edb76ec65d06caa97f94cd5b811a73468c5d34375d23fca641babb7"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-presentation.ts",
+      "sha256": "67d7e0c0612e7e8a0c67d3754771faae0e84c3d56b69d92e02e6ce26d96cbad5"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-style.ts",
+      "sha256": "b030490ebb75ef806a58cbaa28e0cfaf42303d137f5f276f70855c2e00f486e0"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-table.ts",
+      "sha256": "23b867762ba16d3516b11bc865cd5ea62ae42a5fd10d94568b6e4d8d0fedbfed"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-topology.ts",
+      "sha256": "881aa215cc81bb01cd453cfafe588717854d023fc4dc42325aa2bed45b1e3df3"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-view.ts",
+      "sha256": "25739307a1c219dd6f387464113582e29e0a56a20cdb5cb5eeb3f036de49a650"
+    },
+    {
+      "path": "packages/compiler/src/qt-source.ts",
+      "sha256": "6da3a8ad1ea17b0b270aede0c30200f392b48a23537781d454c5aaae0f867b1e"
+    },
+    {
+      "path": "packages/compiler/src/react-source.ts",
+      "sha256": "9dbb89e47855ea5179f49cbb41299dbb5802b27251b5a4b7155a6f657e0e56c1"
+    },
+    {
+      "path": "packages/compiler/src/react-ssr-source.ts",
+      "sha256": "99134a497667b85c8d0faadb2f2ff10da79a9455e734fa8f53467d9fa0fe0a6d"
+    },
+    {
+      "path": "packages/compiler/src/react.ts",
+      "sha256": "5b075b8fc0b3859ec461fd16a5584f527f9fc6476396fcba1f7444d170c59a24"
+    },
+    {
+      "path": "packages/compiler/src/record-accessors.ts",
+      "sha256": "f94638701473d21d1741ec79f6d4c7536e8dbcba26a2b47e82b4560f25a91f4e"
+    },
+    {
+      "path": "packages/compiler/src/resolved-props.ts",
+      "sha256": "8900eb188c0d3ea536328c8f7679a6a4f303ce10395140e1e769cb504f2af1dc"
+    },
+    {
+      "path": "packages/compiler/src/rule-declarations.ts",
+      "sha256": "20b3f5c12bcbbb22b57df8d89b82da1304d46affa4c01cf2bef3ebe2a2f0c9c9"
+    },
+    {
+      "path": "packages/compiler/src/rule-plan.ts",
+      "sha256": "f4d0921ed90994017d979e43181594af71896de85ca2343fe23e44ed6075b3d5"
+    },
+    {
+      "path": "packages/compiler/src/rust-data-source.ts",
+      "sha256": "caab183cf5cb969f336975e64c5345f9ce0d077f72b8a144e377b14ba7e63082"
+    },
+    {
+      "path": "packages/compiler/src/rust-data-support.ts",
+      "sha256": "6de04f194690bab39ae490d70afcf3dd5188b97996fe9450fdf02b151c13d077"
+    },
+    {
+      "path": "packages/compiler/src/rust-data.ts",
+      "sha256": "fc3f7251c050a60e5aea14a95f4ec0be21dced44b5782bf80d15a53db66d53e2"
+    },
+    {
+      "path": "packages/compiler/src/rust-scalar-intrinsics.ts",
+      "sha256": "abb4c23d06c3853c24d2877719105cf91751511f7e93c9ca356e4b295b745840"
+    },
+    {
+      "path": "packages/compiler/src/rust-scalar-semantics.ts",
+      "sha256": "40d088681706d433ce99bdc956aeff686279b2cc8b926fd1f4ba746c599d1ceb"
+    },
+    {
+      "path": "packages/compiler/src/shader-plan.ts",
+      "sha256": "f514d79fa3b549e3f65778e69f4144bf4233aea761c7e0fce810a9905d25fd17"
+    },
+    {
+      "path": "packages/compiler/src/source-loader.ts",
+      "sha256": "076257fa2e1231d51befccff537fa31473ed9b6c2412ebdcaa4016ab71771796"
+    },
+    {
+      "path": "packages/compiler/src/source-map.ts",
+      "sha256": "ac9ba1039e818771920507eef2ccd170c822ffe42e0f667f8f1e752d5718fbbe"
+    },
+    {
+      "path": "packages/compiler/src/source-module-bindings.ts",
+      "sha256": "72f55b32db48b9ccce16f8d13c3ae57a8d29b1e313806b4ebba3b76344b61695"
+    },
+    {
+      "path": "packages/compiler/src/source-module-initialization.ts",
+      "sha256": "43420a608e6695e7abaa6d711d613786a25818ccf16e3688fd9bf323e236cbe1"
+    },
+    {
+      "path": "packages/compiler/src/source-resolution.ts",
+      "sha256": "bfdaa53e9e33c2566fbc6f06e8e36c8db406fcc5ecf6e64a56ebf7eb4ccf5768"
+    },
+    {
+      "path": "packages/compiler/src/source-syntax.ts",
+      "sha256": "2f4d5d07115f4e1431200859de9a34db74f724f8ad23be02ea3bd948a3641e3b"
+    },
+    {
+      "path": "packages/compiler/src/source-type-resolution.ts",
+      "sha256": "294dac34705a8439bcda69f8390c665dd76ff247074f494a505d3470f6bb9d62"
+    },
+    {
+      "path": "packages/compiler/src/source-types.ts",
+      "sha256": "ea18c8a15c36b97ece9fdca856f8df288eb1fd4553ff18e1141984a90b03665c"
+    },
+    {
+      "path": "packages/compiler/src/source-values.ts",
+      "sha256": "e8e0ca333ec6afdb80823623bf9f1a119783965eae63f541e45c9d7ca8fc7e02"
+    },
+    {
+      "path": "packages/compiler/src/static-declarations.ts",
+      "sha256": "e76b738d2a9f27e00cac09679052b176e7611ee7e8e0150f410ab7000ac651f2"
+    },
+    {
+      "path": "packages/compiler/src/style-plan.test.ts",
+      "sha256": "35237aaace850a2991f2ff129fb599167d43a82e7274837e266d726600331380"
+    },
+    {
+      "path": "packages/compiler/src/style-plan.ts",
+      "sha256": "1095f92194f6dd9cc573cb5958d7a519a0254fa2840355008da3edb4f7a6a1e9"
+    },
+    {
+      "path": "packages/compiler/src/targets.ts",
+      "sha256": "2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58"
+    },
+    {
+      "path": "packages/compiler/src/template-shape.ts",
+      "sha256": "cebe764ff5aea5bfc3169f4b92fb6e11b23c9703bce6f7a0c30cd96919b15430"
+    },
+    {
+      "path": "packages/compiler/src/value-children.ts",
+      "sha256": "0db8cf768e65833e6ba038ea6ae2310ebb1e162f2c38b5e602ca51d4f77c5f16"
+    },
+    {
+      "path": "packages/compiler/src/value-types.ts",
+      "sha256": "49b50cc3938cdccbdc58116143b2d33b654fb2e3d4121da969cb21b9cc1fc46c"
+    },
+    {
+      "path": "packages/compiler/src/vue-source.ts",
+      "sha256": "e5ace099ed1d0a1b5998535d72e0a3dbfb0e2c9b98e8f2b493ee17fe24889fba"
+    },
+    {
+      "path": "packages/compiler/src/vue-ssr-support.ts",
+      "sha256": "3d21b7af644bcf281c674175d80403b76e60bd099666b0fbcdbb93492fc3f74a"
+    },
+    {
+      "path": "packages/compiler/src/vue2-context-source.test.ts",
+      "sha256": "cd0c9608c05967c2422362714f3390c6563c823289ad0ef66571d16f2edda0cf"
+    },
+    {
+      "path": "packages/compiler/src/vue2-native-template.ts",
+      "sha256": "1f2405cffcbc8b1c938eeac7b316fc1da5a5ff73dfc252983a2c5a3c6881e464"
+    },
+    {
+      "path": "packages/compiler/src/vue2-portal-source.test.ts",
+      "sha256": "6d25687d5818efb15c016b5204f6172d450b187a4d9644ce06a36120dfa883ac"
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.test.ts",
+      "sha256": "7ba0a88e8d6bcdbb5c56702393d8e0aef515b8311e2a245b4274a4888717351e"
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "sha256": "a404abfcc204f3527745eea84c6636be91e4aa3a9d93e7427cda5d87fd725edc"
+    },
+    {
+      "path": "packages/compiler/src/vue2-ssr-entry.ts",
+      "sha256": "fba6b5881f7d2c8cce9137df34424da03d38e7a649cd7616916ea0333b41de2d"
+    },
+    {
+      "path": "packages/compiler/src/vue2-style-source.test.ts",
+      "sha256": "00eeeade607fb145c042ea7db3d7b28cffc1cc4ffcd6368c5f35b7eabd92b65d"
+    },
+    {
+      "path": "packages/compiler/src/watch.test.ts",
+      "sha256": "36f490d38a34d6db40529e2ac85631acd5cf0aec8dd480ccf15e4cb4e08a10d0"
+    },
+    {
+      "path": "packages/compiler/src/watch.ts",
+      "sha256": "3efc34b688dfab1a0245747a042585c4d049b586ca1c9d9d018d8c5b1869ad67"
+    },
+    {
+      "path": "packages/compiler/src/web-component-browser-support.test.ts",
+      "sha256": "0b83ada830a9db3a8d6a8e4513c3bb17a1bb2f4e81b20b0e7abb6ea6d41b84ec"
+    },
+    {
+      "path": "packages/compiler/src/web-component-browser-support.ts",
+      "sha256": "a224b0424db459eb488bfbf897e0858e2240da7c52df7260837a9e96078f4507"
+    },
+    {
+      "path": "packages/compiler/src/web-component-context.test.ts",
+      "sha256": "df4d8f2d7e09b49e569e23a0080dc0a1511efffc2325a0e0938dab1349e9739f"
+    },
+    {
+      "path": "packages/compiler/src/web-component-source.test.ts",
+      "sha256": "0c79844151a1155251af641fc6db942ad5b81b30d758cb0fe00c4df465af7db3"
+    },
+    {
+      "path": "packages/compiler/src/web-component-source.ts",
+      "sha256": "2daf4a29f2da998b7e4b4ffe58b9dc465c533375d26ad24882ef64d7859e8b0f"
+    },
+    {
+      "path": "packages/compiler/src/web-component-ssr-style.test.ts",
+      "sha256": "59c4cc5a91c9278b129f93e10e528abe6e0feac856f78736ab60cae73b1d21f0"
+    },
+    {
+      "path": "packages/compiler/src/web-component-ssr-style.ts",
+      "sha256": "b95ca1dd44e4837672087199524c0595116a4e19b4a37d0f5075cee2485fe644"
+    },
+    {
+      "path": "packages/compiler/src/web-component-ssr-support.ts",
+      "sha256": "fedcbd045bc7219c3153a448fdccf8860ace3458bb816a7c816c919c510c2405"
+    },
+    {
+      "path": "packages/compiler/src/web-component-style.test.ts",
+      "sha256": "c49be258f2c0e2206d226961e23e7642731dfa34c952ca1c8509e02ab73ac2be"
+    },
+    {
+      "path": "packages/core/src/a11y.ts",
+      "sha256": "6915c5303dc2d6c445453c30336c0371addc947e1e19bad9ca22dfd73a261c48"
+    },
+    {
+      "path": "packages/core/src/anatomy.ts",
+      "sha256": "7223692e13cd0374df56bd0a4c00fc5f37ef8b10ef6e97e10fc1aaa8960ea5aa"
+    },
+    {
+      "path": "packages/core/src/axis-input.ts",
+      "sha256": "8b9bf9fa9963c71873c0e8c2552e98ebe0c588e056b53516be22ff8f90513093"
+    },
+    {
+      "path": "packages/core/src/boundary.ts",
+      "sha256": "41008ba239136e46494041787d6b8ca265fb1cdcf02ccfec0fa7e3396cc6de63"
+    },
+    {
+      "path": "packages/core/src/caps/entry.ts",
+      "sha256": "23fe15c0766dfc0af7e45a01b210ef3f5b564089e9645293fc6dd215bbe61b99"
+    },
+    {
+      "path": "packages/core/src/caps/host.ts",
+      "sha256": "b2542e965a6c0f548003662f931b505f063118cd4036cfbabf27767462e9e81d"
+    },
+    {
+      "path": "packages/core/src/caps/index.ts",
+      "sha256": "a0833fa73b44034da91bff352029f01181427cdb21fdc3be50fdbf7bafa387ef"
+    },
+    {
+      "path": "packages/core/src/caps/token.ts",
+      "sha256": "f1e92dece196a380477006d905f5b2abc528f8eba41caa7aeaee1edf88e9df79"
+    },
+    {
+      "path": "packages/core/src/caps/vault.ts",
+      "sha256": "13e6a085ab5d772789c0867e680765d48f410e0c23880e02110cac01c06b5725"
+    },
+    {
+      "path": "packages/core/src/collection.ts",
+      "sha256": "a4a451c037b2114c7f9c94c814c2f09abc584890e24004d55e8b49fe8792c4bc"
+    },
+    {
+      "path": "packages/core/src/context-menu-input.ts",
+      "sha256": "0c276fd43a01dd4539284e1e0242d71695c122a1f6b16acdf2f8144c6da36da5"
+    },
+    {
+      "path": "packages/core/src/context.ts",
+      "sha256": "5a6d275535a3e5f93ea6b2bc03a6514fa7d641abfe87e9b1768a3645400089f6"
+    },
+    {
+      "path": "packages/core/src/control-label.ts",
+      "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6"
+    },
+    {
+      "path": "packages/core/src/delay.ts",
+      "sha256": "b2111d833c7d46e48e06a4816eb1b8638afccb1b98cd630b1e36aea611b8dbfe"
+    },
+    {
+      "path": "packages/core/src/effects/index.ts",
+      "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5"
+    },
+    {
+      "path": "packages/core/src/effects/types.ts",
+      "sha256": "dcaeed5ba405406d18ad15e7c86e9a1f76fa2e988b719b5f733e7b6fed75c471"
+    },
+    {
+      "path": "packages/core/src/errors/codes.ts",
+      "sha256": "1e35e7e6a995ef0b484ea4fb3852f2aaa8579340316f15e27ff4d048d567268f"
+    },
+    {
+      "path": "packages/core/src/errors/index.ts",
+      "sha256": "652c62a961d7e676deda59136735193f362515d55132038ea572724e4b3f4b9d"
+    },
+    {
+      "path": "packages/core/src/focus.ts",
+      "sha256": "1d9b84a5fb1e58187ccf7e3a90bf66c3d270e4c0f610b7c784d7b3d75cef7941"
+    },
+    {
+      "path": "packages/core/src/handles.ts",
+      "sha256": "da54a619755e23fee1c4d4ab9b23af130f75e78510b27a96125e356896f48f14"
+    },
+    {
+      "path": "packages/core/src/hit-participation.ts",
+      "sha256": "d2e293f4887dc8d2717f8f7858e07fd95d5906706d7f40e012d8c13ef5f93a43"
+    },
+    {
+      "path": "packages/core/src/image-view.ts",
+      "sha256": "3a6df9612b0982a50ec02d2544342dc88d431ea91a49d5207704cbc723a18673"
+    },
+    {
+      "path": "packages/core/src/index.ts",
+      "sha256": "f4dd107050fe18500b2661fd6e5f6606ab02fa36ca6a783660b5add3f186953e"
+    },
+    {
+      "path": "packages/core/src/internal.ts",
+      "sha256": "2b16d692f539b0addc652c8fb9cc03b51064d3eba8424fbf836161b289a9eda7"
+    },
+    {
+      "path": "packages/core/src/material-contact.ts",
+      "sha256": "e85152859bdf21cf2890c14c6634c0ddeca70610962b535de0ac7dd42d65fdaa"
+    },
+    {
+      "path": "packages/core/src/material.ts",
+      "sha256": "28b285b8a0347fb3fdebfec9b3eebe0002f48a6817559dd9d9ce08f10eb1f78c"
+    },
+    {
+      "path": "packages/core/src/module/index.ts",
+      "sha256": "d5c19655468e29f60c871b21e73af8ebc653f736e7123ade916f22c4a5f80ce5"
+    },
+    {
+      "path": "packages/core/src/module/types.ts",
+      "sha256": "07feee9d49bd7ae7e78cf2329edb6ded3d8b909c9a4c261ae8fc04df26a912df"
+    },
+    {
+      "path": "packages/core/src/move.ts",
+      "sha256": "2400ddff0b68ffba57dce16f9984b998439b8cfe86d14f1aa84762a5fa79541f"
+    },
+    {
+      "path": "packages/core/src/native-link.ts",
+      "sha256": "3b9b67e934ff43b09bdd01c0c208a9fcd975d02ce0f36f842cf07844e6ad29c4"
+    },
+    {
+      "path": "packages/core/src/overlay.ts",
+      "sha256": "020ed59cd9fe99ed3ece6a9e48b3f702b2449cace10ba1d289fca4b3924405d2"
+    },
+    {
+      "path": "packages/core/src/positioning.ts",
+      "sha256": "d0336ed3c5ecf5ac1082116029374443ece6e5db746ad2f73d60d375097265d4"
+    },
+    {
+      "path": "packages/core/src/presence-presentation.ts",
+      "sha256": "8ff886ee4aa10048241308b4dda81998fd9c0f954eb247e884087ead3cf25398"
+    },
+    {
+      "path": "packages/core/src/prototype.ts",
+      "sha256": "a947c979836fcd7c4bece4bc27d614de3d541ea09826f70e908bd45de58e10bc"
+    },
+    {
+      "path": "packages/core/src/resident-motion.ts",
+      "sha256": "11cda0d9f4490745959ce1f5365965b9613c4d95cef22cb97494f9518abbc909"
+    },
+    {
+      "path": "packages/core/src/scroll.ts",
+      "sha256": "a2f34a384c798e6a4a0fbbbad7eb67465b508c5a1a8182c29733ebfbe4a3f64a"
+    },
+    {
+      "path": "packages/core/src/shader-presentation.ts",
+      "sha256": "7c8a766196133ddbc786885218ba2b5b6012d994b00bb10c8981acdb1e6ea7e7"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/application-role.ts",
+      "sha256": "2f95669717b5b7e5521cfdd8eb0711f2615f2afeb001b62b8b6fea993a548cab"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/index.ts",
+      "sha256": "5615a1d8614eafa79cd3c245317d433208f81262bc2bf19d153e460f5d1105a3"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/placeholder.ts",
+      "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/recorder.ts",
+      "sha256": "d0622791924858f06da45c936bf847752ab1451a2adf2f9539cafef4f8229edb"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/root-effect.ts",
+      "sha256": "38c07aca4122c82f2cb0ac5dac470e52c784a1f2553d99f036a5684d5601cdbb"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/semantic-merge.ts",
+      "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/style.ts",
+      "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc"
+    },
+    {
+      "path": "packages/core/src/spec/feedback/tokens.ts",
+      "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3"
+    },
+    {
+      "path": "packages/core/src/spec/index.ts",
+      "sha256": "24f03a4f1c9ea9b526a2defa35239fc920e34d2b48e41c106f409f1167694bb3"
+    },
+    {
+      "path": "packages/core/src/spec/owned-template-blueprint.ts",
+      "sha256": "99fc68f49987facedd31c01c0121f92b188d6f2c20769202d47657464a055a75"
+    },
+    {
+      "path": "packages/core/src/spec/svg-tags.ts",
+      "sha256": "816196bcb9d6899d9185a4dfd11ebe07398a7717afccdb9b5e56e46f95e30bf0"
+    },
+    {
+      "path": "packages/core/src/spec/template.ts",
+      "sha256": "b1d9800a9bb71907c85e8de6923048839b4144d8f00898362221b2f7483cb522"
+    },
+    {
+      "path": "packages/core/src/state.ts",
+      "sha256": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f"
+    },
+    {
+      "path": "packages/core/src/text-control.ts",
+      "sha256": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1"
+    },
+    {
+      "path": "packages/hooks/src/as-accessible.ts",
+      "sha256": "938982aa1001f7254310b2073adec8d66da320827d591ed7e28a99fd5c520384"
+    },
+    {
+      "path": "packages/hooks/src/as-axis-input.ts",
+      "sha256": "e22b604b1556d4aef3e09c88627721f7b72254b210aa3fc3066a81eadf52a50f"
+    },
+    {
+      "path": "packages/hooks/src/as-boundary.ts",
+      "sha256": "5f7279214d9f2f861ff85c518a1d3cd44a44b79736fb6401ef3d02711eb3d6cd"
+    },
+    {
+      "path": "packages/hooks/src/as-collection-item.ts",
+      "sha256": "0d2cf3608acfb21a293b8b8157f40a0893e4629308a96cc17c5699b3681fb093"
+    },
+    {
+      "path": "packages/hooks/src/as-collection.ts",
+      "sha256": "98d53a0a61332a0e45f8f5039b6fed5c10bd0afd9f9e6e9ce3516a3d18263652"
+    },
+    {
+      "path": "packages/hooks/src/as-context-menu-input.ts",
+      "sha256": "c6fcfed333e375a5a0e77803447a510ab8e8926c39ccf1c05898d45142dc8119"
+    },
+    {
+      "path": "packages/hooks/src/as-control-label.ts",
+      "sha256": "84ce3b5b2cf36ac7a121921f9336e712c9c9f5d36e736ec8148acd4d84853422"
+    },
+    {
+      "path": "packages/hooks/src/as-focus-entry.ts",
+      "sha256": "41f3f952885231b0d4102d37966220bd0455a4a9fa0c2ac7b61f04af9c1c5152"
+    },
+    {
+      "path": "packages/hooks/src/as-focus-roving.ts",
+      "sha256": "9656f58b53f73cd2e708e1f62b68853231492a0b1eb37a5cfe23b221015ac87b"
+    },
+    {
+      "path": "packages/hooks/src/as-focus-scope.ts",
+      "sha256": "86bf7cb435492aab940080792e43eaa1ce8c75aab77675bef68f3c2afe61358a"
+    },
+    {
+      "path": "packages/hooks/src/as-focusable.ts",
+      "sha256": "6ff597b80bcd060c8e0b3582d4ebd25f18153db875f3eca2a582dcf18568c066"
+    },
+    {
+      "path": "packages/hooks/src/as-hit-participation.ts",
+      "sha256": "ffff7155fee1ff841edaa0a57573ce5d021f3c7f08cc2c3aae2378ca2c1673db"
+    },
+    {
+      "path": "packages/hooks/src/as-image-view.ts",
+      "sha256": "540050ffc7d94a7e01ed730230c56b9771ff3d3d5116ea019d64ff6ec19a0f48"
+    },
+    {
+      "path": "packages/hooks/src/as-native-link.ts",
+      "sha256": "251c82ce09a7dfb1a1d3f1fd4727515748e0c351b0f554aaab49b1bb22c96879"
+    },
+    {
+      "path": "packages/hooks/src/as-overlay.ts",
+      "sha256": "d79de70bfe35e87da5d47bb2c28da234647c40b1571bf44ce4d904f1bf477c26"
+    },
+    {
+      "path": "packages/hooks/src/as-scroll-surface.ts",
+      "sha256": "efbdbd027f29401d0f437f68457ce072be588a01323274aa4d3ee70ab98217e9"
+    },
+    {
+      "path": "packages/hooks/src/as-table-structure.ts",
+      "sha256": "c77cd8286b8b6d54e61ac22a2dd18ab537d2427889f93400f28a5e659169f01a"
+    },
+    {
+      "path": "packages/hooks/src/as-text-control.ts",
+      "sha256": "89141df1ec7267a2f20721b0018e6956f026a7dc65edb30c53264d0e7dde9e01"
+    },
+    {
+      "path": "packages/hooks/src/as-trigger.ts",
+      "sha256": "0a1bcb7ab21f2de9b00f5a746c6dc6eebb9dc5f23d7f34534a853c4fd4c9fd53"
+    },
+    {
+      "path": "packages/hooks/src/collection/use-collection-item.ts",
+      "sha256": "2c0a89753a1a3c4321d28365b4bfec56c73981bbbd5562052d2b789d322d26f4"
+    },
+    {
+      "path": "packages/hooks/src/collection/use-collection.ts",
+      "sha256": "43195dc5b3c9f62d4b9621ee737fd216592e8ed1128d70121901fe057b96c1d5"
+    },
+    {
+      "path": "packages/hooks/src/index.ts",
+      "sha256": "ec3a4421e6bb1ec63d93eea75815b3cfb76b4cc29c78fbc97d0096861713b2ce"
+    },
+    {
+      "path": "packages/hooks/src/privileged.ts",
+      "sha256": "37b95b6f1536d07402ecdad9b0e01d89e82bbeb88930f925892c6129d2263f80"
+    }
+  ],
+  "actualNativeExecution": false,
+  "sourceDrift": [],
+  "sharedOperations": [
+    "capture.getState",
+    "capture.getMethod",
+    "capture.getAsHook",
+    "capture.getAsHookHandle",
+    "scheduler.delay",
+    "delay.cancel",
+    "presence.owner",
+    "presence.onCompletionRequest",
+    "presence.publish",
+    "presence.settle",
+    "presence.isCurrent",
+    "presentation.snapshotCompletion",
+    "meta.get",
+    "style.tw",
+    "rule.declare",
+    "rule.dispose",
+    "feedback.style.use",
+    "feedback.material.shader",
+    "feedback.style.presence",
+    "feedback.style.release",
+    "subscription.release",
+    "binding.release",
+    "feedback.style.patch",
+    "feedback.style.suppress",
+    "feedback.style.clearPatch",
+    "hook.asTrigger",
+    "hook.asFocusable",
+    "hook.asAccessible",
+    "hook.asControlLabel",
+    "controlLabel.label",
+    "controlLabel.target",
+    "controlLabel.sync",
+    "controlLabelRequest.isCurrent",
+    "run.update",
+    "props.define",
+    "props.setDefaults",
+    "props.watch",
+    "props.watchAll",
+    "props.watchRaw",
+    "props.watchRawAll",
+    "props.get",
+    "props.getRaw",
+    "props.isProvided",
+    "render.read.props.get",
+    "render.read.props.getRaw",
+    "render.read.props.isProvided",
+    "state.bool",
+    "state.string",
+    "state.numberDiscrete",
+    "state.numberRange",
+    "state.enum",
+    "state.get",
+    "state.set",
+    "state.setDefault",
+    "state.watch",
+    "expose.state",
+    "expose.value",
+    "expose.event",
+    "expose.method",
+    "expose.emit",
+    "lifecycle.setPresent",
+    "lifecycle.onCreated",
+    "lifecycle.onMounted",
+    "lifecycle.onUpdated",
+    "lifecycle.onUnmounted",
+    "lifecycle.onBeforeDispose",
+    "event.on",
+    "event.onGlobal",
+    "event.requestDefaultActionPrevention",
+    "eventControl.requestDefaultActionPrevention",
+    "focus.configure",
+    "focus.setDisabled",
+    "focus.focusSelf",
+    "accessible.state",
+    "accessible.action",
+    "accessible.role",
+    "accessible.nameFromContent",
+    "render.el",
+    "render.slot",
+    "context.provide",
+    "context.subscribe",
+    "context.trySubscribe",
+    "context.read",
+    "context.tryRead",
+    "context.update",
+    "context.tryUpdate",
+    "render.read.context.read",
+    "render.read.context.tryRead",
+    "hook.asFocusEntry",
+    "hook.asFocusScope",
+    "hook.asFocusRoving",
+    "hook.asOverlay",
+    "hook.asScrollSurface",
+    "hook.asTextControl",
+    "hook.asImageView",
+    "hook.asTableStructure",
+    "hook.asBoundary",
+    "hook.asHitParticipation",
+    "hook.asCollection",
+    "hook.asCollectionItem",
+    "focusEntry.configure",
+    "focusEntry.focus",
+    "focusEntry.setDisabled",
+    "focusScope.configure",
+    "focusRoving.configure",
+    "focusRoving.focusFirst",
+    "focusRoving.focusLast",
+    "focusRoving.focusNext",
+    "focusRoving.focusPrev",
+    "focusRoving.focusSelected",
+    "focus.focus",
+    "focus.blur",
+    "focus.setNavParticipation",
+    "focus.setRovingStatus",
+    "focus.focusFirst",
+    "focus.focusLast",
+    "focus.focusNext",
+    "focus.focusPrev",
+    "focus.focusSelected",
+    "focus.restoreFocus",
+    "focus.activate",
+    "focus.deactivate",
+    "focus.setLoop",
+    "focus.setOrientation",
+    "focus.isActive",
+    "focus.isFocused",
+    "focusScope.getRoving",
+    "accessible.id",
+    "accessible.name",
+    "accessible.description",
+    "accessible.part",
+    "accessible.relation",
+    "accessible.tree",
+    "accessible.level",
+    "anatomy.claim",
+    "anatomy.subscribeParts",
+    "anatomy.has",
+    "anatomy.parts",
+    "anatomy.partsOf",
+    "anatomy.order.version",
+    "anatomy.order.parts",
+    "anatomy.order.partsOf",
+    "anatomy.order.indexOfSelf",
+    "anatomy.order.prevOfSelf",
+    "anatomy.order.nextOfSelf",
+    "anatomyPart.hasExpose",
+    "anatomyPart.getExpose",
+    "anatomyPart.hasHook",
+    "tableStructure.configure",
+    "tableStructure.getObjectRef",
+    "tableStructure.getSnapshot",
+    "host.get",
+    "collection.configure",
+    "collection.getItems",
+    "collection.getCount",
+    "collectionItem.configure",
+    "collectionItem.getSnapshot",
+    "boundary.configure",
+    "boundary.observe",
+    "boundary.setStackActive",
+    "boundary.registerRegion",
+    "boundary.unregisterRegion",
+    "boundary.classify",
+    "boundary.notify",
+    "boundary.subscribeOutside",
+    "hitParticipation.configure",
+    "hitParticipation.registerRegion",
+    "hitParticipation.unregisterRegion",
+    "overlay.isOpen",
+    "overlay.openOverlay",
+    "overlay.close",
+    "overlay.toggle",
+    "overlay.configure",
+    "overlay.updatePosition",
+    "overlay.registerTrigger",
+    "overlay.registerAnchor",
+    "overlay.registerAnchorPart",
+    "overlay.registerContent",
+    "overlay.getPositionSnapshot",
+    "overlay.keepMounted",
+    "overlay.bindPresence",
+    "scroll.configure",
+    "scroll.sync",
+    "scroll.bindComposedChrome",
+    "scroll.request",
+    "scroll.pauseFollowing",
+    "scroll.getSnapshot",
+    "textControl.on",
+    "textControl.sync",
+    "textControl.resetValue",
+    "textControl.snapshot",
+    "imageView.on",
+    "imageView.sync",
+    "imageView.snapshot",
+    "positioning.connect",
+    "positioning.update",
+    "positioning.requestUpdate",
+    "positioning.disconnect",
+    "positioning.getSnapshot"
+  ],
+  "profileOperations": [
+    "scheduler.delay",
+    "delay.cancel",
+    "presence.owner",
+    "presence.onCompletionRequest",
+    "presence.publish",
+    "presence.settle",
+    "presence.isCurrent",
+    "presentation.snapshotCompletion",
+    "meta.get",
+    "capture.getState",
+    "capture.getMethod",
+    "capture.getAsHook",
+    "capture.getAsHookHandle",
+    "run.update",
+    "style.tw",
+    "rule.declare",
+    "rule.dispose",
+    "feedback.style.use",
+    "feedback.style.release",
+    "feedback.style.patch",
+    "feedback.style.suppress",
+    "feedback.style.clearPatch",
+    "subscription.release",
+    "binding.release",
+    "props.define",
+    "props.setDefaults",
+    "props.watch",
+    "props.watchAll",
+    "props.watchRaw",
+    "props.watchRawAll",
+    "props.get",
+    "props.getRaw",
+    "props.isProvided",
+    "hook.asTrigger",
+    "hook.asFocusable",
+    "hook.asAccessible",
+    "hook.asFocusScope",
+    "hook.asFocusRoving",
+    "hook.asOverlay",
+    "hook.asScrollSurface",
+    "hook.asTextControl",
+    "hook.asImageView",
+    "hook.asTableStructure",
+    "hook.asBoundary",
+    "hook.asHitParticipation",
+    "hook.asCollection",
+    "hook.asCollectionItem",
+    "event.on",
+    "event.onGlobal",
+    "event.requestDefaultActionPrevention",
+    "focus.configure",
+    "focus.setDisabled",
+    "focus.focusSelf",
+    "focus.focus",
+    "focus.blur",
+    "focus.setNavParticipation",
+    "focus.setRovingStatus",
+    "focus.focusFirst",
+    "focus.focusLast",
+    "focus.focusNext",
+    "focus.focusPrev",
+    "focus.focusSelected",
+    "focus.restoreFocus",
+    "focus.activate",
+    "focus.deactivate",
+    "focus.setLoop",
+    "focus.setOrientation",
+    "focus.isActive",
+    "focus.isFocused",
+    "focusScope.getRoving",
+    "focusScope.configure",
+    "focusRoving.configure",
+    "focusRoving.focusFirst",
+    "focusRoving.focusLast",
+    "focusRoving.focusNext",
+    "focusRoving.focusPrev",
+    "focusRoving.focusSelected",
+    "accessible.state",
+    "accessible.action",
+    "accessible.role",
+    "accessible.nameFromContent",
+    "accessible.id",
+    "accessible.name",
+    "accessible.description",
+    "accessible.relation",
+    "accessible.tree",
+    "accessible.level",
+    "anatomy.claim",
+    "anatomy.subscribeParts",
+    "anatomy.has",
+    "anatomy.parts",
+    "anatomy.partsOf",
+    "anatomy.order.version",
+    "anatomy.order.parts",
+    "anatomy.order.partsOf",
+    "anatomy.order.indexOfSelf",
+    "anatomy.order.prevOfSelf",
+    "anatomy.order.nextOfSelf",
+    "anatomyPart.hasExpose",
+    "anatomyPart.getExpose",
+    "anatomyPart.hasHook",
+    "tableStructure.configure",
+    "tableStructure.getObjectRef",
+    "tableStructure.getSnapshot",
+    "host.get",
+    "collection.configure",
+    "collection.getItems",
+    "collection.getCount",
+    "collectionItem.configure",
+    "collectionItem.getSnapshot",
+    "boundary.configure",
+    "boundary.observe",
+    "boundary.setStackActive",
+    "boundary.registerRegion",
+    "boundary.unregisterRegion",
+    "boundary.classify",
+    "boundary.notify",
+    "boundary.subscribeOutside",
+    "hitParticipation.configure",
+    "hitParticipation.registerRegion",
+    "hitParticipation.unregisterRegion",
+    "overlay.isOpen",
+    "overlay.openOverlay",
+    "overlay.close",
+    "overlay.toggle",
+    "overlay.configure",
+    "overlay.updatePosition",
+    "overlay.registerTrigger",
+    "overlay.registerAnchor",
+    "overlay.registerAnchorPart",
+    "overlay.registerContent",
+    "overlay.getPositionSnapshot",
+    "overlay.keepMounted",
+    "overlay.bindPresence",
+    "scroll.configure",
+    "scroll.bindComposedChrome",
+    "scroll.request",
+    "scroll.pauseFollowing",
+    "scroll.getSnapshot",
+    "textControl.on",
+    "textControl.sync",
+    "textControl.snapshot",
+    "textControl.resetValue",
+    "imageView.on",
+    "imageView.sync",
+    "imageView.snapshot",
+    "positioning.connect",
+    "positioning.update",
+    "positioning.requestUpdate",
+    "positioning.disconnect",
+    "positioning.getSnapshot",
+    "state.bool",
+    "state.string",
+    "state.enum",
+    "state.numberDiscrete",
+    "state.numberRange",
+    "state.get",
+    "state.set",
+    "state.setDefault",
+    "state.watch",
+    "expose.state",
+    "expose.event",
+    "expose.method",
+    "expose.emit",
+    "expose.value",
+    "lifecycle.setPresent",
+    "lifecycle.onCreated",
+    "lifecycle.onMounted",
+    "lifecycle.onUpdated",
+    "lifecycle.onUnmounted",
+    "lifecycle.onBeforeDispose",
+    "render.el",
+    "render.slot",
+    "render.read.props.get",
+    "render.read.props.getRaw",
+    "render.read.props.isProvided",
+    "context.provide",
+    "context.subscribe",
+    "context.trySubscribe",
+    "context.read",
+    "context.tryRead",
+    "context.update",
+    "context.tryUpdate",
+    "render.read.context.read",
+    "render.read.context.tryRead",
+    "eventControl.requestDefaultActionPrevention",
+    "hook.asControlLabel",
+    "controlLabel.label",
+    "controlLabel.target",
+    "controlLabel.sync",
+    "controlLabelRequest.isCurrent",
+    "scroll.sync",
+    "eventControl.requestDefaultActionPrevention"
+  ],
+  "generatedOperations": [
+    "accessible.action",
+    "accessible.name",
+    "accessible.nameFromContent",
+    "accessible.relation",
+    "accessible.role",
+    "accessible.state",
+    "anatomy.claim",
+    "capture.getAsHookHandle",
+    "controlLabel.label",
+    "controlLabel.sync",
+    "controlLabel.target",
+    "controlLabelRequest.isCurrent",
+    "event.on",
+    "event.onGlobal",
+    "event.requestDefaultActionPrevention",
+    "eventControl.requestDefaultActionPrevention",
+    "expose.emit",
+    "expose.event",
+    "expose.method",
+    "expose.state",
+    "feedback.style.use",
+    "focus.activate",
+    "focus.blur",
+    "focus.configure",
+    "focus.deactivate",
+    "focus.focus",
+    "focus.focusSelf",
+    "focus.setDisabled",
+    "focus.setNavParticipation",
+    "focusScope.configure",
+    "hook.asAccessible",
+    "hook.asControlLabel",
+    "hook.asFocusScope",
+    "hook.asFocusable",
+    "hook.asTableStructure",
+    "hook.asTextControl",
+    "hook.asTrigger",
+    "lifecycle.onBeforeDispose",
+    "lifecycle.onCreated",
+    "lifecycle.onMounted",
+    "lifecycle.onUnmounted",
+    "props.define",
+    "props.get",
+    "props.setDefaults",
+    "props.watch",
+    "render.el",
+    "render.slot",
+    "rule.declare",
+    "state.bool",
+    "state.get",
+    "state.numberDiscrete",
+    "state.numberRange",
+    "state.set",
+    "state.string",
+    "style.tw",
+    "tableStructure.getSnapshot",
+    "textControl.on",
+    "textControl.resetValue",
+    "textControl.snapshot",
+    "textControl.sync"
+  ],
+  "originalReceiptSha256": "57828ffdf167264b7c386579b0155d5052f1dba7b399e0f0d5e7ad8f5fd4e3fe",
+  "records": [
+    {
+      "name": "official_button",
+      "file": "packages/prototypes/base/src/button/button.proto.ts",
+      "carrier": "gpui-control-label/consumer.rs",
+      "sourceSha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+      "sourceBytes": 6686,
+      "milliseconds": 218.90260000000012,
+      "ok": true,
+      "operations": [
+        "accessible.action",
+        "accessible.nameFromContent",
+        "accessible.role",
+        "accessible.state",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "event.on",
+        "event.onGlobal",
+        "event.requestDefaultActionPrevention",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "feedback.style.use",
+        "focus.configure",
+        "focus.focusSelf",
+        "focus.setDisabled",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "hook.asFocusable",
+        "hook.asTrigger",
+        "lifecycle.onCreated",
+        "lifecycle.onUnmounted",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "state.bool",
+        "state.get",
+        "state.set",
+        "style.tw"
+      ],
+      "generatedComponentSha256": "0578945601b1b03eb96811fb639e4fceecb61bf2fca8a83e1c24f7aafccde4d6",
+      "generatedComponentBytes": 51247,
+      "sourceClosure": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8"
+        }
+      ]
+    },
+    {
+      "name": "official_label",
+      "file": "packages/prototypes/base/src/label/root.proto.ts",
+      "carrier": "gpui-control-label/consumer.rs",
+      "sourceSha256": "f3c22ec4a9c8c7ad3bc73e135c60dc9d025ca9166eef9f6a1be95e905bdbec6d",
+      "sourceBytes": 1969,
+      "milliseconds": 30.47552399999995,
+      "ok": true,
+      "operations": [
+        "controlLabel.label",
+        "controlLabel.sync",
+        "hook.asControlLabel",
+        "lifecycle.onCreated",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "render.slot",
+        "rule.declare"
+      ],
+      "generatedComponentSha256": "514856acfce8850c4b38025981965322bf01086bece8411eaf53b293cb00684b",
+      "generatedComponentBytes": 28529,
+      "sourceClosure": [
+        {
+          "file": "packages/prototypes/base/src/label/root.proto.ts",
+          "sha256": "f3c22ec4a9c8c7ad3bc73e135c60dc9d025ca9166eef9f6a1be95e905bdbec6d"
+        },
+        {
+          "file": "packages/prototypes/base/src/label/types.ts",
+          "sha256": "c67d4948d3791212a2ebe3a9e4d9cc76ca90038b97d55fa514d341947620b910"
+        }
+      ]
+    },
+    {
+      "name": "official_input",
+      "file": "packages/prototypes/base/src/input/root.proto.ts",
+      "carrier": "gpui-control-label/consumer.rs",
+      "sourceSha256": "851fabc3b1b9b859e5ee4a8888a27a03f415e3352180b86253163cc8ee4719fc",
+      "sourceBytes": 11085,
+      "milliseconds": 176.885759,
+      "ok": true,
+      "operations": [
+        "accessible.name",
+        "accessible.relation",
+        "accessible.role",
+        "accessible.state",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "focus.blur",
+        "focus.configure",
+        "focus.focusSelf",
+        "focus.setDisabled",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "hook.asFocusable",
+        "hook.asTextControl",
+        "lifecycle.onBeforeDispose",
+        "lifecycle.onCreated",
+        "lifecycle.onMounted",
+        "lifecycle.onUnmounted",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "state.bool",
+        "state.get",
+        "state.set",
+        "state.string",
+        "textControl.on",
+        "textControl.resetValue",
+        "textControl.snapshot",
+        "textControl.sync"
+      ],
+      "generatedComponentSha256": "b1c2bebba75ee2fe9b92f87165208c6eedbbd5362cb1b1f0bd4d03b97a63c66e",
+      "generatedComponentBytes": 96535,
+      "sourceClosure": [
+        {
+          "file": "packages/prototypes/base/src/input/root.proto.ts",
+          "sha256": "851fabc3b1b9b859e5ee4a8888a27a03f415e3352180b86253163cc8ee4719fc"
+        },
+        {
+          "file": "packages/prototypes/base/src/input/types.ts",
+          "sha256": "1e4402451be080acfa6e2d2f60a8a0b3a45e1d2565d081989c35bb044c730f48"
+        }
+      ]
+    },
+    {
+      "name": "official_input_delegate",
+      "file": "packages/compiler/test/fixtures/gpui-control-label/input-delegate.proto.ts",
+      "carrier": "gpui-control-label/consumer.rs",
+      "sourceSha256": "8d996c799344dc8d3bbc0d8ba6387d8cf607bb43bf310927207b797fa1b77f7c",
+      "sourceBytes": 1004,
+      "milliseconds": 264.1072720000002,
+      "ok": true,
+      "operations": [
+        "accessible.name",
+        "accessible.relation",
+        "accessible.role",
+        "accessible.state",
+        "capture.getAsHookHandle",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "focus.blur",
+        "focus.configure",
+        "focus.focusSelf",
+        "focus.setDisabled",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "hook.asFocusable",
+        "hook.asTextControl",
+        "lifecycle.onBeforeDispose",
+        "lifecycle.onCreated",
+        "lifecycle.onMounted",
+        "lifecycle.onUnmounted",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "state.bool",
+        "state.get",
+        "state.set",
+        "state.string",
+        "textControl.on",
+        "textControl.resetValue",
+        "textControl.snapshot",
+        "textControl.sync"
+      ],
+      "generatedComponentSha256": "2c8bc6c39a0698d16c3bb77b98efdde184c1b103575a8ca0058c97376d84a8e3",
+      "generatedComponentBytes": 106707,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-control-label/input-delegate.proto.ts",
+          "sha256": "8d996c799344dc8d3bbc0d8ba6387d8cf607bb43bf310927207b797fa1b77f7c"
+        },
+        {
+          "file": "packages/prototypes/base/src/input/root.proto.ts",
+          "sha256": "851fabc3b1b9b859e5ee4a8888a27a03f415e3352180b86253163cc8ee4719fc"
+        },
+        {
+          "file": "packages/prototypes/base/src/input/types.ts",
+          "sha256": "1e4402451be080acfa6e2d2f60a8a0b3a45e1d2565d081989c35bb044c730f48"
+        }
+      ]
+    },
+    {
+      "name": "numeric_value",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/value.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "8a72cb168f190c5ff112b91b47cf40931e68afad5efa315439e6d41dbd847bea",
+      "sourceBytes": 4666,
+      "milliseconds": 46.44625899999983,
+      "ok": true,
+      "operations": [
+        "accessible.action",
+        "accessible.name",
+        "accessible.role",
+        "accessible.state",
+        "event.on",
+        "eventControl.requestDefaultActionPrevention",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "hook.asAccessible",
+        "lifecycle.onCreated",
+        "props.define",
+        "props.get",
+        "render.slot",
+        "state.bool",
+        "state.get",
+        "state.numberDiscrete",
+        "state.numberRange",
+        "state.set",
+        "state.string"
+      ],
+      "generatedComponentSha256": "e1a6dc82e7a7cd9e9661f09a951160e3937b47f97194812568371875314ee2ee",
+      "generatedComponentBytes": 58133,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/value.proto.ts",
+          "sha256": "8a72cb168f190c5ff112b91b47cf40931e68afad5efa315439e6d41dbd847bea"
+        }
+      ]
+    },
+    {
+      "name": "numeric_activation",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/activation.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "b67aa61c4ffd90d29e12ddcd8377ad9b112a7fef3313b7cb2eab4c7b78f36a69",
+      "sourceBytes": 2055,
+      "milliseconds": 20.183825999999954,
+      "ok": true,
+      "operations": [
+        "accessible.action",
+        "accessible.name",
+        "accessible.role",
+        "accessible.state",
+        "event.on",
+        "event.requestDefaultActionPrevention",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "hook.asAccessible",
+        "hook.asTrigger",
+        "lifecycle.onCreated",
+        "props.define",
+        "props.get",
+        "render.slot",
+        "state.bool",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set"
+      ],
+      "generatedComponentSha256": "12fce18c760eb723ea5fe33b6854901b4ac31bbcd8d5b6664badbd975e42f4c4",
+      "generatedComponentBytes": 42319,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/activation.proto.ts",
+          "sha256": "b67aa61c4ffd90d29e12ddcd8377ad9b112a7fef3313b7cb2eab4c7b78f36a69"
+        }
+      ]
+    },
+    {
+      "name": "numeric_host-activation",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/host-activation.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "8ef5a76358b4782e2ec733e2d4064998eb5b6bd2ac047bfb05738348eae87531",
+      "sourceBytes": 959,
+      "milliseconds": 13.793011000000206,
+      "ok": true,
+      "operations": [
+        "accessible.action",
+        "accessible.role",
+        "event.on",
+        "expose.emit",
+        "expose.event",
+        "expose.state",
+        "hook.asAccessible",
+        "render.slot",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set"
+      ],
+      "generatedComponentSha256": "a41cab0e27e2a1cc750002b612c0216ccb25763cf139d44859f13ea65b47e88b",
+      "generatedComponentBytes": 26425,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/host-activation.proto.ts",
+          "sha256": "8ef5a76358b4782e2ec733e2d4064998eb5b6bd2ac047bfb05738348eae87531"
+        }
+      ]
+    },
+    {
+      "name": "numeric_text",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/text.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "f242c912e1c353cce1e0eb8229783e079c828ee76ceb844a268e800881185662",
+      "sourceBytes": 1363,
+      "milliseconds": 20.380040999999892,
+      "ok": true,
+      "operations": [
+        "expose.method",
+        "hook.asTextControl",
+        "lifecycle.onCreated",
+        "props.define",
+        "props.get",
+        "render.slot",
+        "textControl.resetValue",
+        "textControl.snapshot",
+        "textControl.sync"
+      ],
+      "generatedComponentSha256": "f07b9d57670fbefc14f994f910edf9e8e465ad066f13d741ac53cd387c09e4bb",
+      "generatedComponentBytes": 38787,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/text.proto.ts",
+          "sha256": "f242c912e1c353cce1e0eb8229783e079c828ee76ceb844a268e800881185662"
+        }
+      ]
+    },
+    {
+      "name": "numeric_press-modifiers",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/press-modifiers.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "b2dd0f0d17e7ea236abf1f27e62fe6810f7da0dc42563c5839818912089a0d35",
+      "sourceBytes": 550,
+      "milliseconds": 10.808814999999868,
+      "ok": true,
+      "operations": [
+        "event.on",
+        "expose.emit",
+        "expose.event",
+        "hook.asTrigger",
+        "render.slot"
+      ],
+      "generatedComponentSha256": "21e0c6a1decc277ed84e32e3edef7fd25be5513f2a9f11cfdef390722868ae89",
+      "generatedComponentBytes": 23985,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/press-modifiers.proto.ts",
+          "sha256": "b2dd0f0d17e7ea236abf1f27e62fe6810f7da0dc42563c5839818912089a0d35"
+        }
+      ]
+    },
+    {
+      "name": "numeric_tab-focus",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/tab-focus.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "7208de315f0c80065b4767ac2c24450d57430443e5141843abdaa48b6472d40a",
+      "sourceBytes": 1318,
+      "milliseconds": 22.14751800000022,
+      "ok": true,
+      "operations": [
+        "event.on",
+        "event.requestDefaultActionPrevention",
+        "expose.method",
+        "expose.state",
+        "feedback.style.use",
+        "focus.blur",
+        "focus.focus",
+        "focus.setDisabled",
+        "focus.setNavParticipation",
+        "hook.asFocusable",
+        "lifecycle.onCreated",
+        "props.define",
+        "props.get",
+        "props.watch",
+        "render.el",
+        "style.tw"
+      ],
+      "generatedComponentSha256": "c5c17249cf466636c0a78fb597462b0d2dc6d5f8c9b483617c330247db0fb613",
+      "generatedComponentBytes": 32952,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/tab-focus.proto.ts",
+          "sha256": "7208de315f0c80065b4767ac2c24450d57430443e5141843abdaa48b6472d40a"
+        }
+      ]
+    },
+    {
+      "name": "numeric_tab-scope",
+      "file": "packages/compiler/test/fixtures/gpui-a11y-value/tab-scope.proto.ts",
+      "carrier": "gpui-a11y-value/consumer.rs and sequential_focus.rs",
+      "sourceSha256": "b84d3a47114290c1cddd83c0f9ea6722bbb316753dd5d26a2c0bef491eeefb10",
+      "sourceBytes": 531,
+      "milliseconds": 12.012685000000147,
+      "ok": true,
+      "operations": [
+        "expose.method",
+        "feedback.style.use",
+        "focus.activate",
+        "focus.deactivate",
+        "focusScope.configure",
+        "hook.asFocusScope",
+        "render.slot",
+        "style.tw"
+      ],
+      "generatedComponentSha256": "be807d1717357cb162e01965042c558803bfa609ab53d3cc6ba0f15fd86ae77c",
+      "generatedComponentBytes": 26754,
+      "sourceClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-a11y-value/tab-scope.proto.ts",
+          "sha256": "b84d3a47114290c1cddd83c0f9ea6722bbb316753dd5d26a2c0bef491eeefb10"
+        }
+      ]
+    },
+    {
+      "name": "original_table_root",
+      "file": "packages/prototypes/base/src/table/root.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "02ddab4ea87a2ee0c49f665cad9ae0f037ef1e13abdea4dec88c50d767b0b4c1",
+      "sourceBytes": 844,
+      "milliseconds": 14.502418000000034,
+      "ok": true,
+      "operations": [
+        "accessible.role",
+        "accessible.state",
+        "anatomy.claim",
+        "expose.method",
+        "hook.asAccessible",
+        "hook.asTableStructure",
+        "render.slot",
+        "tableStructure.getSnapshot"
+      ],
+      "generatedComponentSha256": "1695bf0069bb6186dad8a3d7e9951196cdb38713ec79b7b0b92dd392f26d98fe",
+      "generatedComponentBytes": 25628,
+      "sourceClosure": [
+        {
+          "file": "packages/prototypes/base/src/table/root.proto.ts",
+          "sha256": "02ddab4ea87a2ee0c49f665cad9ae0f037ef1e13abdea4dec88c50d767b0b4c1"
+        }
+      ]
+    },
+    {
+      "name": "original_table_row",
+      "file": "packages/prototypes/base/src/table/row.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "ba0c06fe326383d7e6e0ec5f70a67b7f9b372f0485b472ef851de03372728b1f",
+      "sourceBytes": 700,
+      "milliseconds": 13.375021000000288,
+      "ok": true,
+      "operations": [
+        "accessible.role",
+        "accessible.state",
+        "anatomy.claim",
+        "hook.asAccessible",
+        "hook.asTableStructure",
+        "render.slot"
+      ],
+      "generatedComponentSha256": "d2a466c01af59b224a85e154a519c50f4da605c675710981d30a06e514dba021",
+      "generatedComponentBytes": 23704,
+      "sourceClosure": [
+        {
+          "file": "packages/prototypes/base/src/table/row.proto.ts",
+          "sha256": "ba0c06fe326383d7e6e0ec5f70a67b7f9b372f0485b472ef851de03372728b1f"
+        }
+      ]
+    },
+    {
+      "name": "original_table_cell",
+      "file": "packages/prototypes/base/src/table/cell.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "465882c74f7c75f4b5c4e631fcea4a42974ddf3ca40573fda4d966ce06574933",
+      "sourceBytes": 1584,
+      "milliseconds": 7.8677849999999125,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Only declared primitive props are currently admitted.",
+          "span": {
+            "file": "packages/prototypes/base/src/table/cell.proto.ts",
+            "start": 445,
+            "end": 635,
+            "line": 10,
+            "column": 5,
+            "endLine": 14,
+            "endColumn": 7
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_table_header-cell",
+      "file": "packages/prototypes/base/src/table/header-cell.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "1aad0553e6a2a2a87822a05af105a90adb128124043cb4813533be0962659a72",
+      "sourceBytes": 2029,
+      "milliseconds": 7.398670000000038,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Type @proto.ui/module-table-structure:TableHeaderKind has no semantic declaration.",
+          "span": {
+            "file": "packages/prototypes/base/src/table/types.ts",
+            "start": 598,
+            "end": 613,
+            "line": 17,
+            "column": 16,
+            "endLine": 17,
+            "endColumn": 31
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_table_caption",
+      "file": "packages/prototypes/base/src/table/caption.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "62949d8950d3ac8f36bab4d228007705c578a5be3a084a576e3df44cae604032",
+      "sourceBytes": 688,
+      "milliseconds": 13.310986999999841,
+      "ok": true,
+      "operations": [
+        "accessible.role",
+        "anatomy.claim",
+        "hook.asAccessible",
+        "hook.asTableStructure",
+        "render.slot"
+      ],
+      "generatedComponentSha256": "3be6fd3fe363e3358bc098408bf8cc072ecda5e1d6e678a34241818aa0bd340e",
+      "generatedComponentBytes": 23397,
+      "sourceClosure": [
+        {
+          "file": "packages/prototypes/base/src/table/caption.proto.ts",
+          "sha256": "62949d8950d3ac8f36bab4d228007705c578a5be3a084a576e3df44cae604032"
+        }
+      ]
+    },
+    {
+      "name": "original_image_root",
+      "file": "packages/prototypes/base/src/image/root.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "da5c148a7969c15d9350d0a3330493fa6cbe36865ed498f27a8a97c3828aad21",
+      "sourceBytes": 2864,
+      "milliseconds": 5.448358999999982,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Type @proto.ui/core:ImageViewA11yMode has no semantic declaration.",
+          "span": {
+            "file": "packages/prototypes/base/src/image/types.ts",
+            "start": 226,
+            "end": 243,
+            "line": 13,
+            "column": 14,
+            "endLine": 13,
+            "endColumn": 31
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_textarea_root",
+      "file": "packages/prototypes/base/src/textarea/root.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "4debfbe3dea307423e5c87bc24071522bacd3d0de114bedef95d4026a9bbfbf6",
+      "sourceBytes": 13069,
+      "milliseconds": 28.58947900000021,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1004",
+          "category": "unsupported-input",
+          "message": "Top-level runtime bindings must be admitted static core declarations.",
+          "span": {
+            "file": "packages/prototypes/base/src/field/shared.ts",
+            "start": 6699,
+            "end": 6788,
+            "line": 179,
+            "column": 33,
+            "endLine": 183,
+            "endColumn": 3
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_dialog_root",
+      "file": "packages/prototypes/base/src/dialog/root.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378",
+      "sourceBytes": 5087,
+      "milliseconds": 45.19923999999992,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type AnyKeyword.",
+          "span": {
+            "file": "packages/prototypes/base/src/dialog/root.proto.ts",
+            "start": 2888,
+            "end": 2891,
+            "line": 96,
+            "column": 29,
+            "endLine": 96,
+            "endColumn": 32
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_dialog_content",
+      "file": "packages/prototypes/base/src/dialog/content.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95",
+      "sourceBytes": 9983,
+      "milliseconds": 40.60725300000013,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type AnyKeyword.",
+          "span": {
+            "file": "packages/prototypes/base/src/dialog/content.proto.ts",
+            "start": 3255,
+            "end": 3258,
+            "line": 90,
+            "column": 19,
+            "endLine": 90,
+            "endColumn": 22
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_dialog_trigger",
+      "file": "packages/prototypes/base/src/dialog/trigger.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "1c10e2ffb932b2b7fc121b0254f7d57317e54c332c6ec91fbcd3304fc087e24e",
+      "sourceBytes": 2668,
+      "milliseconds": 14.938873000000058,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type AnyKeyword.",
+          "span": {
+            "file": "packages/prototypes/base/src/dialog/command.ts",
+            "start": 1559,
+            "end": 1562,
+            "line": 43,
+            "column": 44,
+            "endLine": 43,
+            "endColumn": 47
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_scroll-area_root",
+      "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "5afd5f3183173e0afee9bc7e1c201c0a85aeea22efbc92e4aeb527ac3d87be00",
+      "sourceBytes": 944,
+      "milliseconds": 4.17669799999976,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Context value does not match its declared key type.",
+          "span": {
+            "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+            "start": 401,
+            "end": 431,
+            "line": 10,
+            "column": 44,
+            "endLine": 10,
+            "endColumn": 74
+          }
+        }
+      ]
+    },
+    {
+      "name": "original_scroll-area_viewport",
+      "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+      "carrier": "unselected original public source; no new native execution asserted",
+      "sourceSha256": "dffdd42415e2adc09b22bb248038b45dbd947cf1ac2bd8ee4a8c5d8c839723e6",
+      "sourceBytes": 3260,
+      "milliseconds": 5.635811000000103,
+      "ok": false,
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Arrays cannot leak semantic handles into data.",
+          "span": {
+            "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+            "start": 1220,
+            "end": 1375,
+            "line": 31,
+            "column": 32,
+            "endLine": 36,
+            "endColumn": 4
+          }
+        }
+      ]
+    }
+  ]
+}

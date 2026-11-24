@@ -1,0 +1,454 @@
+{
+  "scope": "Author source and actual emitted artifacts in simulated DOM, exact-parent controls, strict production closure and planning. Physical nine-case browser acceptance pending.",
+  "baseTree": "95576086dfad30c721b95dff5e97d4d103ba6be8",
+  "sourceTree": "543ea376db64388814ba4a02cd968236c69747a7",
+  "archive": {
+    "file": "author.tar.gz",
+    "bytes": 596280,
+    "sha256": "3fe7eb64e466fb61e89d3b45ce93c93d8901cb3550ce5c22b26e8bc6ab4a92b5"
+  },
+  "entries": [
+    {
+      "path": "controls/base-vue-source.ts",
+      "bytes": 101285,
+      "sha256": "d61921cf9d7d632ffb94f75da60a255724d2e63397e6b9d3d50963e26ac32664"
+    },
+    {
+      "path": "controls/base-vue-ssr-support.ts",
+      "bytes": 6772,
+      "sha256": "b21bc88b15cee9be8ca76efa9dd7cb74458b64a929a7130b53fde1b3c29099f0"
+    },
+    {
+      "path": "controls/broad-source-types-termination.json",
+      "bytes": 450,
+      "sha256": "1ad08830f0b08db2ca0abd1734e70899f63815a485dc4d814e853065c2cc6e4f"
+    },
+    {
+      "path": "controls/candidate-source-bindings.json",
+      "bytes": 530,
+      "sha256": "f28b9b0599141140a419bfccb67664bce66beec68e448305b0a87aadb689f71a"
+    },
+    {
+      "path": "controls/parent.config.mts",
+      "bytes": 517,
+      "sha256": "ccc761f099112055ce42d7d021ac70d2dad1b79b244a93f09b189f83a2226c12"
+    },
+    {
+      "path": "controls/product.patch",
+      "bytes": 7482,
+      "sha256": "222f74310e3ab2a8373dc8b5da0108da91544e8f70630f61ac4bc9662b7d80b5"
+    },
+    {
+      "path": "controls/source-bindings.json",
+      "bytes": 575,
+      "sha256": "7e8dc3802d85f33f193647a54c0210f416b22b6d9182ca4edb67c2ec882b5209"
+    },
+    {
+      "path": "controls/strict-production.cjs",
+      "bytes": 1099,
+      "sha256": "21b32041d094d67cb3274be7654c191afa3b4960dbda444cdcd67c7c17d0fe31"
+    },
+    {
+      "path": "controls/strict.cjs",
+      "bytes": 1358,
+      "sha256": "c00c7e3c666f3631000c58c6eba0de759d6d6ef5e748f9a5c273b42858d0b1e5"
+    },
+    {
+      "path": "counterfactual/graph-source-bindings.json",
+      "bytes": 2367,
+      "sha256": "b3f0f9d0d3e1af4948e0b87a451e3326ca687d1b0c02905ef960f7f61a921ce9"
+    },
+    {
+      "path": "counterfactual/props-only.config.mts",
+      "bytes": 526,
+      "sha256": "775b40a5c5c58aeb720857e91c0991566dc69739c2b76a2f582409d517de8d2c"
+    },
+    {
+      "path": "independent-mounted-finding/author-current-original-probe.test.ts",
+      "bytes": 5122,
+      "sha256": "0f1ff0494283e1344f81b0505ad3377c8aa1922f2fe6f5467bbb886debc0cd7d"
+    },
+    {
+      "path": "independent-mounted-finding/finding.json",
+      "bytes": 2214,
+      "sha256": "efd15f5380d0fe8dd7bc900c638a4ac9de503c03698dee1268b223ede8d060bb"
+    },
+    {
+      "path": "independent-mounted-finding/original-reviewed.patch",
+      "bytes": 7482,
+      "sha256": "222f74310e3ab2a8373dc8b5da0108da91544e8f70630f61ac4bc9662b7d80b5"
+    },
+    {
+      "path": "independent-mounted-finding/parent-vue-source.ts",
+      "bytes": 101285,
+      "sha256": "d61921cf9d7d632ffb94f75da60a255724d2e63397e6b9d3d50963e26ac32664"
+    },
+    {
+      "path": "independent-mounted-finding/parent-vue-ssr-support.ts",
+      "bytes": 6772,
+      "sha256": "b21bc88b15cee9be8ca76efa9dd7cb74458b64a929a7130b53fde1b3c29099f0"
+    },
+    {
+      "path": "independent-mounted-finding/probe.json",
+      "bytes": 3275,
+      "sha256": "1ab15bac2745f6471257b950a392ade32e410d39f411f4a0f140341f52534b4f"
+    },
+    {
+      "path": "independent-mounted-finding/probe.log",
+      "bytes": 54254,
+      "sha256": "d20eac9907ed83df1051e3d1afafe8c8cc62f881e1dbfdfd358e3013f0a5e83c"
+    },
+    {
+      "path": "independent-mounted-finding/probe.test.ts",
+      "bytes": 5122,
+      "sha256": "0f1ff0494283e1344f81b0505ad3377c8aa1922f2fe6f5467bbb886debc0cd7d"
+    },
+    {
+      "path": "independent-mounted-finding/vue-source.ts",
+      "bytes": 102024,
+      "sha256": "66354e62daa8788327d376182962621fa45536fa2ee7c12d9fb91d7a1dbbf8b4"
+    },
+    {
+      "path": "independent-mounted-finding/vue-ssr-support.ts",
+      "bytes": 7762,
+      "sha256": "834690f1a8899f90406761ee15b7e79958fd4befdd301cce41dc86ed93b123b7"
+    },
+    {
+      "path": "intermediate-props-only/2026-11-24-sprint5-owner-browser-matrix.md",
+      "bytes": 9174,
+      "sha256": "30c459015cd013541d56b33831c9531b5fac1409acf8f8f247da1348cea8bba4"
+    },
+    {
+      "path": "intermediate-props-only/author.tar.gz",
+      "bytes": 205631,
+      "sha256": "2af247e2f3f152d870cfa9e32fbea2c91a8c0b988489855c0235bd70c36550a0"
+    },
+    {
+      "path": "intermediate-props-only/manifest.json",
+      "bytes": 8963,
+      "sha256": "42a3cbae0a7a4f1c3f22d085655cbd45961db40763db32afe01a8613a1eddb35"
+    },
+    {
+      "path": "intermediate-props-only/vue-source.ts",
+      "bytes": 102024,
+      "sha256": "66354e62daa8788327d376182962621fa45536fa2ee7c12d9fb91d7a1dbbf8b4"
+    },
+    {
+      "path": "intermediate-props-only/vue-ssr-support.ts",
+      "bytes": 7762,
+      "sha256": "834690f1a8899f90406761ee15b7e79958fd4befdd301cce41dc86ed93b123b7"
+    },
+    {
+      "path": "owner-matrix-absence-final.log",
+      "bytes": 57959,
+      "sha256": "5d297c1af6f244309d18449f325f5589269190dc2d725a737c8ee19d7d4f589d"
+    },
+    {
+      "path": "owner-matrix-absence-projection.log",
+      "bytes": 60403,
+      "sha256": "0088b7398e4254cfac703b64e938a4dc51b63934fa369e725fc6ab50c2bc4f87"
+    },
+    {
+      "path": "owner-matrix-eight-first.log",
+      "bytes": 61739,
+      "sha256": "aacaa1a9fef4f670f5a66c9d11c874c1b0c79acb6eb4f3efdf222ed96581a483"
+    },
+    {
+      "path": "owner-matrix-first-barrier.log",
+      "bytes": 58284,
+      "sha256": "d346ffce8e59160f1ca8822468d7e39a6f2216cab5a5a3dc3ff71e0887d55ad1"
+    },
+    {
+      "path": "owner-matrix-format.log",
+      "bytes": 228,
+      "sha256": "3e3175755b47734d7a7db4e32e598d95d5d257501dd3e95f4562e5288ce8f7a9"
+    },
+    {
+      "path": "owner-matrix-graph-first.json",
+      "bytes": 1878,
+      "sha256": "4f6cea6141a39090c1b0cb9af07d6e7cf356cc15ef908f70c4d59ce6699a9821"
+    },
+    {
+      "path": "owner-matrix-graph-first.log",
+      "bytes": 52341,
+      "sha256": "428e08bfe76d6edb9f35a3e9d0c64f707f3a8afcd9e0931bcd89eac8f76aef31"
+    },
+    {
+      "path": "owner-matrix-graph-format-control.log",
+      "bytes": 61,
+      "sha256": "12ed5d2798b1f025e54f7bef7238b898a4a9cd305036dd6973c570764686e673"
+    },
+    {
+      "path": "owner-matrix-graph-format-final.log",
+      "bytes": 395,
+      "sha256": "01a95a8f2f9c7c7e0d3bca0fe7f0860267495a4d5f1e75eb2f4e4afb45c31a0a"
+    },
+    {
+      "path": "owner-matrix-graph-format.log",
+      "bytes": 159,
+      "sha256": "389b08ef05d5b5692a69cf9b69d4ec81547acac58db605e4d9a9d80620de2da0"
+    },
+    {
+      "path": "owner-matrix-graph-parent-final.json",
+      "bytes": 14443,
+      "sha256": "f6ae5411bc5f4f5e1ed0df959040abe9d3d218670b2b3562a34f9ac7c9e36aa3"
+    },
+    {
+      "path": "owner-matrix-graph-parent-final.log",
+      "bytes": 57039,
+      "sha256": "ac0487a53a536d7d13721363e57522db0cf24d36ef98d7ba56e98d782a76db5a"
+    },
+    {
+      "path": "owner-matrix-graph-probe-green.json",
+      "bytes": 1241,
+      "sha256": "06d8fa942096170395a0c8651052f13b07e1569cdcce9781024e27892d5132a8"
+    },
+    {
+      "path": "owner-matrix-graph-probe-green.log",
+      "bytes": 52253,
+      "sha256": "e89303280a3fb3c36461852ee9419705ef823649cd70f22321b7ceab32425187"
+    },
+    {
+      "path": "owner-matrix-graph-production-types.log",
+      "bytes": 88,
+      "sha256": "27a1bcdd71193a9cb92b080a046ed19158ae5e7c7e980e08eac7809338e87474"
+    },
+    {
+      "path": "owner-matrix-graph-props-parent.json",
+      "bytes": 13746,
+      "sha256": "680fc52199907b3adcd196a0cd0db72618404ae6bd07ff1c42e6d946f5b4e27a"
+    },
+    {
+      "path": "owner-matrix-graph-props-parent.log",
+      "bytes": 52756,
+      "sha256": "b1796e64d87ec1081b55dae1b02f209554ee646bfe7803c148faeb197ba6af24"
+    },
+    {
+      "path": "owner-matrix-graph-props-validated.json",
+      "bytes": 12095,
+      "sha256": "e2c22d05f216c1fe2257aa550228b276959656fbdefdae97dccc50ce016c24b3"
+    },
+    {
+      "path": "owner-matrix-graph-props-validated.log",
+      "bytes": 52759,
+      "sha256": "bcfc56da6af836254b50647bf15370646cf56dfa78268d5599e884197b5c059a"
+    },
+    {
+      "path": "owner-matrix-graph-source-final.json",
+      "bytes": 13348,
+      "sha256": "3e65f2c713635f3057515b63ba5445c54cf9f6ed0ec2759a53c1936ddf53a196"
+    },
+    {
+      "path": "owner-matrix-graph-source-final.log",
+      "bytes": 58614,
+      "sha256": "3c69e56769d3662bf4de13e4d8b976367cfdcbf05c8b5ad2518d278de3525b94"
+    },
+    {
+      "path": "owner-matrix-graph-source-validated.json",
+      "bytes": 13312,
+      "sha256": "c96b20bfeff7b519b85080631e1c8b35c1929d44ab699de1d9b6f271f79a433c"
+    },
+    {
+      "path": "owner-matrix-graph-source-validated.log",
+      "bytes": 58618,
+      "sha256": "714fca3e844b3a6204c2b4ca2114495a2edf0a587753e1c6d1a50b3b6570e205"
+    },
+    {
+      "path": "owner-matrix-graph-spec-node.log",
+      "bytes": 99,
+      "sha256": "3e6895c4979466a48335ba46d15b18f752ec7fb617b84c5443b89a21a6a14d12"
+    },
+    {
+      "path": "owner-matrix-graph-spec.log",
+      "bytes": 916,
+      "sha256": "358fdc765d3bb3dbd2983f2b1d77cd7ee7da8a1d7bde6c2e5ef669d9ee88f44b"
+    },
+    {
+      "path": "owner-matrix-graph-vue-request.json",
+      "bytes": 26593,
+      "sha256": "f07c66dca9be1db93ba861e2c91119722ce020e749ee1c1026425b5db91b5af3"
+    },
+    {
+      "path": "owner-matrix-graph-vue-request.log",
+      "bytes": 70088,
+      "sha256": "c8ee43e07b25a608c871565c68b8e5fce6a241a0f804cd3e520df1d7cd6b4e34"
+    },
+    {
+      "path": "owner-matrix-parent-final.json",
+      "bytes": 12158,
+      "sha256": "dfe69eb55c1069c45890e5ac3acf241d007daa92a1b42ca25d80f45233b97392"
+    },
+    {
+      "path": "owner-matrix-parent-final.log",
+      "bytes": 56919,
+      "sha256": "01785d760233a773cb55706cda5cce8fbc70db82f5d58c569bfdae55fdc897da"
+    },
+    {
+      "path": "owner-matrix-preflight-first.log",
+      "bytes": 65149,
+      "sha256": "87fa918e0a8d796aefb34b4216255392954f6ff4a99e6739c1dbafd6664d5873"
+    },
+    {
+      "path": "owner-matrix-preflight-second.log",
+      "bytes": 61645,
+      "sha256": "4455ceeb8ddb2248bfce2098387761333cd2c9980e87c11fdda456123b8d5a45"
+    },
+    {
+      "path": "owner-matrix-preflight-third.log",
+      "bytes": 60960,
+      "sha256": "ad81230aeacf3a04cb048548be7cf8d8eb18848c8ae8c373b7f9a7028a23e892"
+    },
+    {
+      "path": "owner-matrix-producer-first.log",
+      "bytes": 2560,
+      "sha256": "89315e07680d421cb4c05e7244049cd2b5ea90a6dc1803b3b7581bedb0a39adb"
+    },
+    {
+      "path": "owner-matrix-producer-second.log",
+      "bytes": 1495,
+      "sha256": "f19b46ed2f9da6f4f041879c46677bc97e66c9379b1d1e159e8d1ac2a28886d7"
+    },
+    {
+      "path": "owner-matrix-production-types.log",
+      "bytes": 88,
+      "sha256": "27a1bcdd71193a9cb92b080a046ed19158ae5e7c7e980e08eac7809338e87474"
+    },
+    {
+      "path": "owner-matrix-projection-diagnostic.config.mts",
+      "bytes": 930,
+      "sha256": "05fc7dd245ca41e92d6a281c9d43a482109a4ddbaf014918d869700fee1a59e0"
+    },
+    {
+      "path": "owner-matrix-request-regression.json",
+      "bytes": 26074,
+      "sha256": "f2de270f6f4fa40a432792179042cd16730411ef840c7c2a8e06693cc60d8b1e"
+    },
+    {
+      "path": "owner-matrix-request-regression.log",
+      "bytes": 69944,
+      "sha256": "90ceaa88672525505082ec163474d883378e5bd41db73767c121b0a659a5952a"
+    },
+    {
+      "path": "owner-matrix-runtime-owner.json",
+      "bytes": 210,
+      "sha256": "03139c7d4b0a6bac8db5d69a3ccbfd8e53ea11123f1fb04f48219efb57641220"
+    },
+    {
+      "path": "owner-matrix-runtime-plan.log",
+      "bytes": 12107,
+      "sha256": "04a234677f975af6def0bd7ef8925eeba070db34b8a5a80a8750a82f555d8519"
+    },
+    {
+      "path": "owner-matrix-source-final.json",
+      "bytes": 13362,
+      "sha256": "28995c7bdce661c8c7efd139bdcad761d66f7332c97935100eff79d4563fbab4"
+    },
+    {
+      "path": "owner-matrix-source-final.log",
+      "bytes": 58092,
+      "sha256": "2c68fb84d0bbbfbdf48f7bc1f41b37754d9338f0ad548b0af9c8fe8bb0289b9a"
+    },
+    {
+      "path": "owner-matrix-source-green.json",
+      "bytes": 11419,
+      "sha256": "e6e1ff3949a375fa2db798bdb49a333522bf7c1284558c274672ca6d373ce9a2"
+    },
+    {
+      "path": "owner-matrix-source-green.log",
+      "bytes": 58092,
+      "sha256": "4c7021eaf69cea1ad78ab86fa7572c7395dbc41aadaa6dde415f7bf9809668e2"
+    },
+    {
+      "path": "owner-matrix-source-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "owner-matrix-spec.log",
+      "bytes": 99,
+      "sha256": "3e6895c4979466a48335ba46d15b18f752ec7fb617b84c5443b89a21a6a14d12"
+    },
+    {
+      "path": "owner-matrix-vue-artifact-types-red.log",
+      "bytes": 59295,
+      "sha256": "15f963fe40a2b37cf5ec975100732985c82384be6680240ad0d94c3c1b92d05c"
+    },
+    {
+      "path": "owner-matrix-vue-diagnostic.log",
+      "bytes": 59659,
+      "sha256": "08682431bb868982276b9543d6d767f81bd8dc78b5f53e7393537a53d6af9fee"
+    },
+    {
+      "path": "owner-matrix-vue-projection.log",
+      "bytes": 60407,
+      "sha256": "42993d3349e6f40039fd890583573ca33fa03f2a0c797eaeba448b05430e838d"
+    },
+    {
+      "path": "owner-matrix-vue-request-regression.json",
+      "bytes": 26594,
+      "sha256": "418bdcf605ea12868e3192beed1091a94ee542d3177d1d52f45b925325ce24aa"
+    },
+    {
+      "path": "owner-matrix-vue-request-regression.log",
+      "bytes": 69948,
+      "sha256": "40a6e7c049e881ef735e97c5e85ede3088e7f5350f020c8dd1568a7e0bb462aa"
+    }
+  ],
+  "sourceBindings": [
+    {
+      "path": "packages/compiler/src/vue-source.ts",
+      "sha256": "e5ace099ed1d0a1b5998535d72e0a3dbfb0e2c9b98e8f2b493ee17fe24889fba",
+      "gitBlob": "c6a2b189093d177fe0592e4e257cbae65ce07379"
+    },
+    {
+      "path": "packages/compiler/src/vue-ssr-support.ts",
+      "sha256": "3d21b7af644bcf281c674175d80403b76e60bd099666b0fbcdbb93492fc3f74a",
+      "gitBlob": "991829b163e48d7855f50004486f3d9dbd4f1cef"
+    },
+    {
+      "path": "packages/compiler/test/owner-hydration-matrix-fixture.ts",
+      "sha256": "42b1c996b726bc362399a879330bd30bf4b94e627530c2138bb869c07b8b058d",
+      "gitBlob": "96ece2c70274964e9e32713645805471d95e91f9"
+    },
+    {
+      "path": "packages/compiler/test/owner-hydration-matrix-build.ts",
+      "sha256": "f91986872cbf3454363c3ab35a875813ed856d5df0bcbfdc412bf2897b11ca6c",
+      "gitBlob": "ba6f038bbb08917da2ecf7eb00fdfeda7a8d2042"
+    },
+    {
+      "path": "packages/compiler/test/owner-hydration-matrix-consumer.ts",
+      "sha256": "abafa49005724934f05d2ff5101f54be9a45c7ae3879524a5276b93535584bd9",
+      "gitBlob": "df0006ae978d0ea07d5e0f42969b37e4b9cdb320"
+    },
+    {
+      "path": "packages/compiler/test/owner-hydration-matrix-assertions.ts",
+      "sha256": "03cc4e2f93adf163ac05885a00a53d965475300b2cf7d00deabc230c1191cf4c",
+      "gitBlob": "766510e6aa65389d053dc7d81ce5b767c01fd6c4"
+    },
+    {
+      "path": "packages/compiler/test/owner-hydration-matrix.browser.test.ts",
+      "sha256": "c8a5bae73ac03c4d6eb2014ffe154ff9cc1aed16585f6543693ca3992af2972b",
+      "gitBlob": "ae91498788b3c135339cb7220b70c010118b7106"
+    },
+    {
+      "path": "packages/compiler/test/owner-hydration-matrix.test.ts",
+      "sha256": "19639b695c4344f137632d764934caac00310e23be9ba406f8d9d115bf861a5c",
+      "gitBlob": "3630f3c7cd78e208cea26f45c2bed3fb37667084"
+    },
+    {
+      "path": "packages/compiler/test/vue-owner-initial-graph.test.ts",
+      "sha256": "cd55d294a49750d08f65718e17eadc82f25a31f63245e60d6e322553f27f35b8",
+      "gitBlob": "b309d7487429defd794bced651c8a06e51f119db"
+    },
+    {
+      "path": "scripts/test/runtime-test-plan.mjs",
+      "sha256": "7fc1e73a6e10e33c50335a24e26d793ff9fd2e695ef8c2d67f2a78b50ebb3e2e",
+      "gitBlob": "f18abe3fd806b2b9190bf9850b0664c95a1f97d9"
+    },
+    {
+      "path": "spec/tests/T-LIFECYCLE-OWNER-BROWSER-0001.yaml",
+      "sha256": "54c8e0bd9759d8ef4ff81f9b95063b89021c82909cf016c75878c4b526aa9390",
+      "gitBlob": "2dee4e7802d8a8b926992a6e914f2e84ab6f4c71"
+    }
+  ]
+}

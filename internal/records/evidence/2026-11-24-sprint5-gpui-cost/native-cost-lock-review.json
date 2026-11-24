@@ -1,0 +1,23 @@
+{
+  "kind": "cargo-resolved-cost-workspace-lock",
+  "newExternalPackages": [
+    [
+      "accesskit_consumer",
+      "0.38.0",
+      "registry+https://github.com/rust-lang/crates.io-index",
+      "5d10a236f96f87d70732e44520046785431ef01d5bcd6b041317bfadd2f88245"
+    ],
+    [
+      "hashbrown",
+      "0.16.1",
+      "registry+https://github.com/rust-lang/crates.io-index",
+      "841d1cc9bed7f9236f321df977030373f4a4163ae1a7dbfe1a51a2c1a51d9100"
+    ]
+  ],
+  "removedExternalPackages": [],
+  "existingExternalPackagesPreserved": true,
+  "rationale": "The cost workspace includes the native SDK as a member; its original exact dev-dependency accesskit_consumer=0.38.0 requires hashbrown^0.16. The ordinary consumer dependency-only lock did not include that member dev-closure. No SDK requirement or generated Rust was changed.",
+  "actualCargoLockSha256": "eca1e2118206b78fd6f5e9097f8411b0d6831a1e43394ff11befaa8ee00b417c",
+  "producerSha256": "2c2edd113c5f5faccb242a850877f6d6d6fac191b2851318d892f940d8d3df89",
+  "priorRejectedReceipt": "/tmp/s5-native-cost-root-f7b2/evidence-env-r2/status.json"
+}

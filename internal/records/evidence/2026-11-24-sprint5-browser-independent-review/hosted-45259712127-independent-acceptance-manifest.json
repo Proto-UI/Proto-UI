@@ -1,0 +1,249 @@
+{
+  "path": "/workspace/scratch/f7b299133482/browser-evidence/hosted-45259712127-independent-acceptance.tar.gz",
+  "sha256": "32ca7e676dda651baf6f0e866f64c85ecb0df7d4d65d1d4f6042e5359e94ba7e",
+  "bytes": 1672484,
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3456,
+      "sha256": "32e187a7eee79e993d0ffcddf89d299a19ca36e7fc157d7ea888fc6672b2f397"
+    },
+    {
+      "path": "artifacts.json",
+      "bytes": 6257,
+      "sha256": "90b6e27936209f7d430f0411417e27e68e26465e12176ebc9003ee23c2154f0b"
+    },
+    {
+      "path": "browser/base-button-en.png",
+      "bytes": 119208,
+      "sha256": "b99211d68d904d013beb7ee0a1e99a0e58746433a8928b5f013913bad4b222ec"
+    },
+    {
+      "path": "browser/base-button-zh.png",
+      "bytes": 136207,
+      "sha256": "1891b838e6fde58eaafabdce744c75e049c3972cff74fbebb7c7124647806199"
+    },
+    {
+      "path": "browser/browser.txt",
+      "bytes": 29,
+      "sha256": "04ce1829b69f68a11eb8ef036a6ab18a63411689e39b9b3331c0d884b707983a"
+    },
+    {
+      "path": "browser/dependency-lock.sha256",
+      "bytes": 81,
+      "sha256": "6de4a07b2ef9daea54b548542e13c29ae4ad4a4281bf4cba11d8cf5e91144d90"
+    },
+    {
+      "path": "browser/font-environment.txt",
+      "bytes": 119,
+      "sha256": "57c85c87f8f59355060dca5faf598232ac0aa539f4b29358fbede5a8a2b72d51"
+    },
+    {
+      "path": "browser/font-preparation/font-environment.txt",
+      "bytes": 390,
+      "sha256": "819975c02d1402eaabcf4664f47060ea07f699de772c65d52dae557420d5b96f"
+    },
+    {
+      "path": "browser/node.txt",
+      "bytes": 9,
+      "sha256": "4409d3bfa08b82f385bd424eeda65fc63b756129f0e89e82df77f1fecafccc14"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/disposed.json",
+      "bytes": 2429,
+      "sha256": "388d570b4e8829e762abce953d97163d33633bbf12cf088ae8fa49958fb9f705"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/disposed.png",
+      "bytes": 9920,
+      "sha256": "569de8276738e297e88ec1a5a2f23bfde228d5ad97269166ac82409ef1a2d817"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/provenance.json",
+      "bytes": 1972,
+      "sha256": "262329c61a2527972d6c7abcd89e2aaf645a4ebccf4834dd53f8d1659198dc31"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/same-checkpoint.json",
+      "bytes": 2348,
+      "sha256": "3318025b3d4a9a77f4af983139fdba6af99a4097d4e6e964a0b8f26e96fe70ed"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/same-checkpoint.png",
+      "bytes": 9920,
+      "sha256": "569de8276738e297e88ec1a5a2f23bfde228d5ad97269166ac82409ef1a2d817"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/terminal.json",
+      "bytes": 2359,
+      "sha256": "fd530840adb9a8cf4b414a796de40854d08faf8fd1b5c1ac10b2dd154f95cf50"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/terminal.png",
+      "bytes": 8821,
+      "sha256": "d7e31439995bd704068480880dac35fbeea58bf93d7647b9c14219dd4e29d789"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/unmounted.json",
+      "bytes": 2430,
+      "sha256": "e8e456c32ae3f6e53eddb2c2a32f8906f46c58dd4387cca16aefd84635a4c65a"
+    },
+    {
+      "path": "browser/owner-hydration-retirement/unmounted.png",
+      "bytes": 9920,
+      "sha256": "569de8276738e297e88ec1a5a2f23bfde228d5ad97269166ac82409ef1a2d817"
+    },
+    {
+      "path": "browser/pnpm.txt",
+      "bytes": 8,
+      "sha256": "f71ff3f5176cd06dce75ef9c6a6a4ea9eacefa43f5bd92c6cc9322dd2c8216a3"
+    },
+    {
+      "path": "browser/production/production.json",
+      "bytes": 778671,
+      "sha256": "e723aaa5a4322faf78a1a858ecf07c9e93c47eee1df35c47c79eb1724a6f249e"
+    },
+    {
+      "path": "browser/receipt.json",
+      "bytes": 2428676,
+      "sha256": "a42ca0456c448c32a83397eca601f4c3da61cc4ff3daea5cf96753fa7415ffdc"
+    },
+    {
+      "path": "browser/source-sha.txt",
+      "bytes": 41,
+      "sha256": "3c94aa2ec507ba0dbf419ec1c9716717a1b28188298b7276024e79da135af20f"
+    },
+    {
+      "path": "browser/source-tree.txt",
+      "bytes": 41,
+      "sha256": "d24c07d29c8b902e423e48964f270cec78ff357daf11281af0ceccc8e50e5cdf"
+    },
+    {
+      "path": "browser/verified-delivery.json",
+      "bytes": 1200966,
+      "sha256": "c63b96bffbbd9026d7516b65ffaf1f1c9672b45fdce1eabf83dee87d70f0ee95"
+    },
+    {
+      "path": "browser-archive-manifest.json",
+      "bytes": 6786,
+      "sha256": "f8c45cadc7eb027cf577cc386550e3b466cdd1d8d2802bca92742609ac9a57f8"
+    },
+    {
+      "path": "delivery-eight-rows.json",
+      "bytes": 5240,
+      "sha256": "06a6c9fd86eac3285f0b2f746f2249fbf5908327f432fc5b4bc9d63de8cce621"
+    },
+    {
+      "path": "integrity-manifest.json",
+      "bytes": 7917,
+      "sha256": "01819fcb1188b17b9d21d32b89b0a630e6de27af92b4fb7107bb8d6a23a9f5c0"
+    },
+    {
+      "path": "jobs.json",
+      "bytes": 21470,
+      "sha256": "f3e1c1e43d1630e1384289817647143e35dfd7b42a660a1e7c9fcc1f37958129"
+    },
+    {
+      "path": "production/build-inputs.sha256",
+      "bytes": 173,
+      "sha256": "640ba49ba3716b994a08569ee4a67c5bdb22d16c80509c395fd349aa2f042fd1"
+    },
+    {
+      "path": "production/production-graph.sha256",
+      "bytes": 107,
+      "sha256": "5f115a0bbd4205d1ace4945aa068098d640da1bfda1eddc06db56da2994e5c90"
+    },
+    {
+      "path": "production-archive-manifest.json",
+      "bytes": 2172,
+      "sha256": "3f023d2fecddf7460b8a5c223c6498ce4dded0d8e00d63ee9260f7ed130edef2"
+    },
+    {
+      "path": "retention.json",
+      "bytes": 2174,
+      "sha256": "8b5ab81a8283201ba068a7dfec08fcaf4c393df783cfbb1a652d701eb9e37490"
+    },
+    {
+      "path": "reverification.json",
+      "bytes": 1619,
+      "sha256": "713696745a0d0c0e79d4620f729a88fcb126aec6cd8c2a4d57d8958e94f5dad4"
+    },
+    {
+      "path": "review.json",
+      "bytes": 16626,
+      "sha256": "cab1d1e6edbf8a63d0fb14bf1f75eb93c891f0319be37ac9c49ac3068f7127c3"
+    },
+    {
+      "path": "review.md",
+      "bytes": 7260,
+      "sha256": "d5f13716223928ff73a71e83de87cba357b2ddebbd994d997d84d3b9cd2a252b"
+    },
+    {
+      "path": "reviewed-sources/apps__www__src__components__PrototypePreviewer__browser-compiler-panel.ts",
+      "bytes": 14278,
+      "sha256": "13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9"
+    },
+    {
+      "path": "reviewed-sources/apps__www__src__components__PrototypePreviewer__compiled-preview-sandbox.ts",
+      "bytes": 11856,
+      "sha256": "f159da1722e8c7b7e9e3ebf4772c077c841e60275cde2a8e1f482e5379df153e"
+    },
+    {
+      "path": "reviewed-sources/packages__compiler__src__browser__client.ts",
+      "bytes": 9905,
+      "sha256": "f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7"
+    },
+    {
+      "path": "reviewed-sources/packages__compiler__src__browser__worker.ts",
+      "bytes": 2100,
+      "sha256": "d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078"
+    },
+    {
+      "path": "reviewed-sources/scripts__analysis__browser-compiler-browser.mts",
+      "bytes": 24283,
+      "sha256": "81c264aada7399a13373aa763da419a52b562a5cf9917582ecdb2b582a716c50"
+    },
+    {
+      "path": "reviewed-sources/scripts__compiler__browser-delivery-index.mjs",
+      "bytes": 5912,
+      "sha256": "732ce9feb958af37887ef92a8e1d683b4caa13ba63dd4d408d5d32b7e1a69ae6"
+    },
+    {
+      "path": "reviewed-sources/scripts__compiler__browser-production.mjs",
+      "bytes": 10118,
+      "sha256": "407cc8bb27c4aedec80f5c3a424316a3526b8eccd03be1e910dad4905d2bf2d8"
+    },
+    {
+      "path": "run.json",
+      "bytes": 13651,
+      "sha256": "0dbfb555d2c8d79a27f395be7650ac7524582105e4401560fac92c9083b8dd0a"
+    },
+    {
+      "path": "source/types.log",
+      "bytes": 21165,
+      "sha256": "28e8e0e397c8be4102000695a1ec6087b19a1dbe934f5a45bb70015bba41cfb4"
+    },
+    {
+      "path": "source/vitest.json",
+      "bytes": 248944,
+      "sha256": "7092e6fc5f66380e86e98937172e4dc70adcca214af9a9d893fbe3b1f00a8e5d"
+    },
+    {
+      "path": "source-archive-manifest.json",
+      "bytes": 3017,
+      "sha256": "50412a76ef84b921c12c5cfababfe586762bbe07d91bb943373170a8e722242f"
+    },
+    {
+      "path": "source-input-verification.json",
+      "bytes": 316,
+      "sha256": "67329608c59d328ebb69e12ae8473dff8f0f1c8daf3ad9c89d879be941909838"
+    },
+    {
+      "path": "verify.py",
+      "bytes": 7933,
+      "sha256": "ee401785dc229abddf014aead3b217dfce23a76bbd16cfeb3345525ad3721575"
+    }
+  ],
+  "head": "2df421b1fc55cc0649be6675c0ee46a69ad9316f",
+  "scope": "Independent bounded acceptance of selected hostedbrowser/source/production jobs; rawlargeGitHubZIPs excluded"
+}

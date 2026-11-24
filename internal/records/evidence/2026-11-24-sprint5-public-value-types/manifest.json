@@ -1,0 +1,11 @@
+{
+  "archive": "public-value-types-evidence.tar.gz",
+  "bytes": 455136,
+  "sha256": "0ffb79cdc99f82a005fc161e5b3252820b71de574abc71c927bad3849a6f2494",
+  "verifiedFiles": 90,
+  "baseHead": "1afa22e88c087db244f0e28a835b2926fb8bce8e",
+  "baseTree": "b598bab4ea3821dbad035a055fab233e678d1ce0",
+  "candidateTree": "af5626eff762adf4e2cd0318f1bcdd970044f08a",
+  "sourcePatchSha256": "0a5ae976720e91199ce37ccd4c96cc78f2493abf16b3d7ca55f0c2712b5d795b",
+  "actualNativeExecution": false
+}

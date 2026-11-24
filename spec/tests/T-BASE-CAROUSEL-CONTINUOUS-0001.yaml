@@ -53,6 +53,18 @@ implementations:
     kind: adapter-test
     required: true
     consumesCases: [T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-HOST]
+  - id: native-scroll-axes-guest-and-source
+    path: packages/compiler/test/native-scroll-axis-sync.test.ts
+    status: needs-review
+    kind: runtime-test
+    required: true
+    consumesCases: [T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-AXIS]
+  - id: flutter-scroll-axes-widget-consumer
+    path: packages/compiler/test/flutter-scroll-outcomes.native.test.ts
+    status: needs-review
+    kind: runtime-test
+    required: true
+    consumesCases: [T-BASE-CAROUSEL-CONTINUOUS-0001-CASE-AXIS]
 revisions:
   - version: 0.3.0-alpha.2
     change: introduced

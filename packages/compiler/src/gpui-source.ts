@@ -246,6 +246,7 @@ export function emitGpuiSource(
     'hitParticipation.unregisterRegion',
     'scroll.configure',
     'scroll.sync',
+    'scroll.bindComposedChrome',
     'scroll.request',
     'scroll.pauseFollowing',
     'scroll.getSnapshot',
@@ -2289,6 +2290,8 @@ impl __PuiNativeRecordValue {
             return `scroll_configure(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.sync':
             return `scroll_sync(${receiverOwner()}, ${argument(0)})`;
+          case 'scroll.bindComposedChrome':
+            return `scroll_bind_composed_chrome(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.request':
             return `scroll_request(${receiverOwner()}, ${argument(0)})`;
           case 'scroll.pauseFollowing':

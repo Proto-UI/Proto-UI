@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "boundary": "Independent source/evidence reviews only; each hosted run retains its actual source. Existing 353 published gzip members are referenced, not duplicated.",
+  "files": [
+    {
+      "path": "hosted-45259712127-independent-acceptance-manifest.json",
+      "bytes": 8524,
+      "sha256": "5923f8c96ace0f2a6aa7ca6cc689b8fc335adf0ef4b0b7e48a6bd9d43c55eb00"
+    },
+    {
+      "path": "hosted-45259712127-independent-acceptance.tar.gz",
+      "bytes": 1672484,
+      "sha256": "32ca7e676dda651baf6f0e866f64c85ecb0df7d4d65d1d4f6042e5359e94ba7e"
+    },
+    {
+      "path": "hosted-45282014115-independent-acceptance-manifest.json",
+      "bytes": 287,
+      "sha256": "1b83de7d357c3d3f225f6360cdda757a4367b6a80530d456372ac9f0820f9de1"
+    },
+    {
+      "path": "hosted-45282014115-independent-acceptance.tar.gz",
+      "bytes": 19100,
+      "sha256": "225769811e6dd3515ae2a857d9ed3e55eb41a3785dfffb9ead104975ef8426fa"
+    }
+  ]
+}

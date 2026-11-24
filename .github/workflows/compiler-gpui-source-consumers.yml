@@ -207,6 +207,12 @@ jobs:
         run: |
           set -euo pipefail
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test scroll_reader -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/scroll-reader-consumer.log"
+      - name: Verify composed native Scroll geometry and current view leases
+        id: composed_scroll
+        if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test composed_scroll -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/composed-scroll-consumer.log"
       - name: Execute emitted SDK lifecycle and control regressions
         if: ${{ !cancelled() && steps.native_sdk.outcome == 'success' }}
         run: |
@@ -214,6 +220,11 @@ jobs:
           cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/numeric-action/Cargo.toml" \
             -p proto-ui-gpui-native --features test-support,gpui/test-support --lib -- --test-threads=1 --nocapture \
             2>&1 | tee "$RUNNER_TEMP/gpui-evidence/native-sdk-controls.log"
+      - name: Require complete composed Scroll evidence and summarize the native result
+        if: ${{ !cancelled() }}
+        env:
+          PROTO_UI_COMPOSED_STEP_OUTCOME: ${{ steps.composed_scroll.outcome }}
+        run: node scripts/ci/check-gpui-composed-scroll-evidence.mjs "$RUNNER_TEMP/gpui-evidence"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -223,6 +234,53 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+  # Actual Qt Quick consumers exercise the dormant direct source emitter.
+  # This does not activate a public Qt compilation profile.
+  qt-native-consumer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install frozen source and Qt build dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qt-native-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/qt-native-evidence/source-sha.txt"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libgl1-mesa-dev libxkbcommon-dev
+      - name: Prepare and record the exact Qt 6.4.2 SDK
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/qt-sdk-tools"
+          "$RUNNER_TEMP/qt-sdk-tools/bin/python" -m pip install --report "$RUNNER_TEMP/qt-native-evidence/tools-install.json" aqtinstall==3.3.0
+          timeout --signal=TERM --kill-after=5s 360s "$RUNNER_TEMP/qt-sdk-tools/bin/python" -m aqt install-qt linux desktop 6.4.2 gcc_64 --outputdir "$RUNNER_TEMP/qt-source-sdk" --archives qtbase qtdeclarative qtsvg icu 2>&1 | tee "$RUNNER_TEMP/qt-native-evidence/sdk-install.log"
+          QT_SDK_DIR="$RUNNER_TEMP/qt-source-sdk/6.4.2/gcc_64"
+          "$QT_SDK_DIR/bin/qmake" -query > "$RUNNER_TEMP/qt-native-evidence/qt-environment.txt"
+          test "$("$QT_SDK_DIR/bin/qmake" -query QT_VERSION)" = '6.4.2'
+          printf 'PROTO_UI_QT_DIR=%s\nPROTO_UI_QT_EVIDENCE_DIR=%s/qt-native-evidence\n' "$QT_SDK_DIR" "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - name: Execute source-generated Qt Root and Scroll consumers
+        run: |
+          set -euo pipefail
+          test -x "$PROTO_UI_QT_DIR/bin/qmake"
+          corepack pnpm@10.32.1 exec vitest run packages/compiler/test/qt-native-consumer.native.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile.json="$PROTO_UI_QT_EVIDENCE_DIR/vitest.json" 2>&1 | tee "$PROTO_UI_QT_EVIDENCE_DIR/native.log"
+          node scripts/ci/check-qt-native-evidence.mjs "$PROTO_UI_QT_EVIDENCE_DIR"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compiler-qt-native-${{ github.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/qt-native-evidence
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
   # This consumes the dormant direct Flutter emitter with real Widgets. It
   # does not activate a public Flutter compilation profile.
   flutter-scroll-consumer:
@@ -256,7 +314,7 @@ jobs:
           test -x "$PROTO_UI_FLUTTER"
           corepack pnpm@10.32.1 exec vitest run packages/compiler/test/flutter-scroll-outcomes.native.test.ts --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile.json="$PROTO_UI_FLUTTER_EVIDENCE_DIR/vitest.json" 2>&1 | tee "$PROTO_UI_FLUTTER_EVIDENCE_DIR/native.log"
       - name: Require executed wrapper and complete native Widget evidence
-        run: node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 14
+        run: node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 17
       - uses: actions/upload-artifact@v4
         if: always()
         with:

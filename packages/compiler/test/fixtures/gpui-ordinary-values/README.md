@@ -23,7 +23,16 @@ CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 \
 CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 \
   cargo +1.98.1 test --manifest-path /tmp/proto-native-consumers/transition/Cargo.toml \
   --locked --features test-support --test a11y_activation -- --test-threads=1 --nocapture
+CARGO_BUILD_JOBS=1 CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 \
+  cargo +1.98.1 test --manifest-path /tmp/proto-native-consumers/transition/Cargo.toml \
+  --locked --features test-support --test composed_scroll -- --test-threads=1 --nocapture
 ```
+
+The `composed_scroll` target consumes a source-declared, renamed Anatomy family and Context provider through the real GPUI layout, paint and platform-event entry. Four complete journeys cover normalized native ScrollHandle geometry, Thumb padding and minimum extent, press offset without a jump, resizing during a drag, target replacement, disabled axes and absent overflow, detach cleanup, and cached duplicate physical views. A duplicate revokes the old lease immediately; removing the duplicate must neither falsely detach the surviving view nor revive the old gesture. These tests use the headless GPUI framework platform; they do not claim physical device, GPU, OS accessibility or all-profile acceptance. Native peers use the emitted declaration's actual nominal identity, without aliasing independently compiled families by a textual descriptor.
+
+The unchanged Base ScrollArea Viewport still has a separate checked-source admission refusal for an array containing semantic handles. `gpui-composed-scroll.test.ts` preserves that `PUI1006` input. The successful renamed fixture does not restamp that original Viewport as compiled. The shared `scroll.bindComposedChrome` declaration is lowered generically; there is no component-name or source-path special case.
+
+The native workflow runs `composed_scroll` once even when an unrelated consumer fails, provided the required SDK build succeeded. Its evidence checker requires all four exact cases, zero failed/ignored/filtered cases, the actual Cargo step outcome, the full locked graph, and an unchanged source-bound test oracle. The JSON receipt and job summary preserve missing or failed execution as failure.
 
 The separate `style_mapping` target checks the emitted SDK's bounded plain-Text mapping: `user-select: none` and its WebKit spelling are honored without a selection controller. `auto`, `text`, other selection values and unknown properties retain explicit unmapped diagnostics. This target does not claim native selectable-text or restoration support; the existing ordinary and ControlLabel consumer assertions remain separate.
 

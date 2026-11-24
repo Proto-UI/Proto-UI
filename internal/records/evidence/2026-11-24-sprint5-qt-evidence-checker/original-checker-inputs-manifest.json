@@ -1,0 +1,65 @@
+{
+  "scope": "Additive preservation of the original eight-case checker/producer snapshot. Original synthetic false-green receipts bind prepare.ts SHA 6c468f0df74e90ea401d2c5ee6e1417ccf3e566a3332dbc20daa650ca6cbd55d. This capsule completes exact replay inputs; it is not a native run.",
+  "archive": {
+    "file": "original-checker-inputs.tar.gz",
+    "bytes": 16590,
+    "sha256": "780c4ba223115030b7c99b032ebb7a3a0dabcd56e55a219006e00074b8455d82"
+  },
+  "files": [
+    {
+      "file": "packages/compiler/src/qt-native-controls.ts",
+      "bytes": 13719,
+      "sha256": "08cf9bf538a342a70cc6ece813c0600f6d95e54d1acd5f70679a8866e74335ef"
+    },
+    {
+      "file": "packages/compiler/src/qt-native-owner.ts",
+      "bytes": 23924,
+      "sha256": "caae03b76edb76ec65d06caa97f94cd5b811a73468c5d34375d23fca641babb7"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/qt-native-consumer/Consumer.qml",
+      "bytes": 6440,
+      "sha256": "0f743d45b793f43ccd6c864ffc2c33be2a6518622135f83abf970e6a6461db2f"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/qt-native-consumer/default.proto.ts",
+      "bytes": 188,
+      "sha256": "fc52049904671288491972f22680fc82f0ea5b095c6adeb30bd9a8876e58f9b8"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/qt-native-consumer/empty.proto.ts",
+      "bytes": 209,
+      "sha256": "1cf08032c618f585f8eb50eaecc99ee9bcf57679a56f003cbea8b2f6c4eb0e9f"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/qt-native-consumer/prepare.ts",
+      "bytes": 3617,
+      "sha256": "6c468f0df74e90ea401d2c5ee6e1417ccf3e566a3332dbc20daa650ca6cbd55d"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/qt-native-consumer/scroll.proto.ts",
+      "bytes": 1259,
+      "sha256": "de827e2354d106c3b8c86362a3a2e96956272f74387f04e08b558385ece68b6c"
+    },
+    {
+      "file": "packages/compiler/test/fixtures/qt-native-consumer/siblings.proto.ts",
+      "bytes": 561,
+      "sha256": "8738da8764dc0a3f1abad20f9b1f4f2f7738902990640064d7c20f6e16d98926"
+    },
+    {
+      "file": "packages/compiler/test/qt-native-consumer.native.test.ts",
+      "bytes": 4234,
+      "sha256": "03e24808aaa846c1f7c691724805042c6854f58d5d9947a1cfca54848794cf28"
+    },
+    {
+      "file": "scripts/ci/check-qt-native-evidence.mjs",
+      "bytes": 4705,
+      "sha256": "718cd589ee447827f495b3e8de22238c9d1f723c99f46a0459ee8e806edd1383"
+    },
+    {
+      "file": "scripts/ci/test/qt-native-evidence.test.mjs",
+      "bytes": 2402,
+      "sha256": "0917c9296fabd9fe4ee4140025bacbee23db41b1deaf66d197b18da3656e2610"
+    }
+  ]
+}

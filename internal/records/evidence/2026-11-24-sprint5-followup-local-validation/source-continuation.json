@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-23T23:27:59.772818+00:00",
+  "baseRevision": "1afa22e88c087db244f0e28a835b2926fb8bce8e",
+  "executedInputCount": 841,
+  "duringExecutionDrift": [],
+  "laterChangedInputs": [
+    {
+      "path": "packages/compiler/src/qt-native-controls.ts",
+      "executedSha256": "96b624725ce01de4d8cb5dece1adda7ef9b6d94b037dfe4643cd171c2b104dbd",
+      "currentSha256": "19622fe938caa54cbbb1593ffeb906faa4e94e9770eadb1de1bbb7268e6f9670"
+    },
+    {
+      "path": "packages/compiler/test/qt-scroll-request-outcomes.test.ts",
+      "executedSha256": "4e3685a84e0d847c0e2d4ceeb609652c51762186eb686a69015770b87df0d4b8",
+      "currentSha256": "0aea1e625c6e04a28eb155fcf05cb57a7a7bcaf60ada45263327f186ab02f9de"
+    }
+  ],
+  "boundary": "The original 49-file 816/816 execution belongs to its original frozen working source. Later final Qt 30/30, CI 99/99, spec authoring and public-doc checks retain their own commands and timestamps. This is not a full-current-head workspace type or native run."
+}

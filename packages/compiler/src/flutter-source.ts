@@ -896,13 +896,19 @@ export function emitFlutterSource(
               contract.receiver === 'void'
             )
               throw new Error(`Flutter lowering missing operation ${op}`);
-            const values = value.arguments.map((arg, index) =>
-              (contract.arguments[index]?.role === 'value' &&
-                contract.arguments[index]?.types?.includes('record')) ||
-              arg.kind === 'record'
+            const values = value.arguments.map((arg, index) => {
+              const boundary = contract.arguments[index];
+              const schema = boundary?.valueSchema;
+              // Finite host record arguments also arrive through typed aliases.
+              // Convert once at this boundary, preserving absent optional fields.
+              const recordBoundary =
+                boundary?.role === 'value' &&
+                (boundary.types?.some((type) => type === 'record' || type === 'module-config') ||
+                  (typeof schema === 'object' && schema.kind === 'record'));
+              return recordBoundary || arg.kind === 'record'
                 ? configuration(arg, depth)
-                : args[index]
-            );
+                : args[index];
+            });
             const call = `${receiver}.${contract.path}(${values.join(', ')})`;
             return isDataValueType(value.type) && typeof value.type !== 'string'
               ? nativeData(call, value.type, true)

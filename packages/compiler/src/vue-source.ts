@@ -850,7 +850,7 @@ ${hasAuthoredHooks ? `import { createNativeAuthoredHooks as ${n('CreateAuthored'
 import * as ${n('Vue')} from 'vue';
 ${
   ssr
-    ? `import { sessionKey as ${n('SessionKey')}, treeKey as ${n('TreeKey')}, encode as ${n('Encode')}, decode as ${n('Decode')}, project as ${n('Project')}, adopt as ${n('Adopt')}, createSession as ${n('CreateSession')}, close as ${n('Close')}, committed as ${n('Committed')}, type Session as ${n('Session')}, type Tree as ${n('Tree')}, type Handoff as GeneratedHandoff } from './.proto-ui/vue/ssr-v1';
+    ? `import { sessionKey as ${n('SessionKey')}, treeKey as ${n('TreeKey')}, encode as ${n('Encode')}, decode as ${n('Decode')}, project as ${n('Project')}, adopt as ${n('Adopt')}, createSession as ${n('CreateSession')}, close as ${n('Close')}, committed as ${n('Committed')}, deferInitialProps as ${n('DeferInitialProps')}, acceptInitialOwner as ${n('AcceptInitialOwner')}, type Session as ${n('Session')}, type Tree as ${n('Tree')}, type Handoff as GeneratedHandoff } from './.proto-ui/vue/ssr-v1';
 import { renderToString as ${n('RenderToString')} } from 'vue/server-renderer';
 export type { Handoff as GeneratedHandoff } from './.proto-ui/vue/ssr-v1';`
     : ''
@@ -924,7 +924,12 @@ ${
     let ${n('Queued')} = false, ${n('Requested')} = false, ${n('QueueTicket')} = 0;
     let ${n('EpochId')} = 0;
     let ${n('CurrentEpoch')}: ${n('Epoch')} | undefined;
-${ssr ? `    ${n('Tree')}.ready = () => !${n('Disposed')} && !${n('Disposing')} && ${n('Present')}.value && !!${n('CurrentEpoch')}?.committed && (${n('ParentTree')}?.ready?.() ?? true);` : ''}
+${
+  ssr
+    ? `    ${n('Tree')}.initialReady = () => !${n('Disposed')} && !${n('Disposing')} && ${n('Started')} && (!${n('Record')} || ${n('HydrationValidated')}) && (${n('ParentTree')}?.initialReady?.() ?? true);
+    ${n('Tree')}.ready = () => !${n('Disposed')} && !${n('Disposing')} && ${n('Present')}.value && !!${n('CurrentEpoch')}?.committed && (${n('ParentTree')}?.ready?.() ?? true);`
+    : ''
+}
     const ${n('Life')}: Record<'created' | 'mounted' | 'updated' | 'unmounted' | 'beforeDispose', Array<(run: ${n('Run')}) => void>> = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
     const ${n('Exposes')}: Record<string, unknown> = Object.create(null);
     const ${n('States')} = new Set<object>();
@@ -1339,6 +1344,7 @@ ${!controlLabel ? emitUndeclaredInstanceAssociations('_props.instanceAssociation
     }
     function ${n('NotifyProps')}(): void {
       if (${n('Disposed')} || ${n('Disposing')}) return;
+${ssr ? `      if (${n('DeferInitialProps')}(${n('Session')}, ${n('Tree')}.id, ${n('NotifyProps')})) return;` : ''}
 ${controlLabel ? `      ${n('Interaction')}.refresh();` : emitUndeclaredInstanceAssociations('_props.instanceAssociations', n('Associations'))}
       const raw = ${n('GetHostProps')}();
       const changed = Object.keys({ ...${n('RawProps')}, ...raw }).some((key) => Object.hasOwn(raw, key) !== Object.hasOwn(${n('RawProps')}, key) || !Object.is(raw[key], ${n('RawProps')}[key]));
@@ -1454,6 +1460,7 @@ ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
         ${atoms.refresh}
 ${usesInteraction ? `        ${n('Interaction')}.refresh();` : ''}
         ${n('InvokeLife')}('created');
+${ssr ? `        if (!${n('Server')} && ${n('Record')} && ${n('Present')}.value !== ${n('Record')}.present) throw new Error('[Vue SSR] client initial presence differs from source-bound server projection');` : ''}
         return renderer;
       } catch (error) {
 ${
@@ -1479,7 +1486,12 @@ ${
     })();
 ${
   ssr
-    ? `    }
+    ? `      if (!${n('Server')} && ${n('Record')} && !${n('Record')}.present) {
+        ${n('HydrationValidated')} = true;
+        ${n('AcceptInitialOwner')}(${n('Session')}, ${n('Tree')}.id);
+        ${n('NotifyProps')}();
+      }
+    }
     if (${n('Server')}) {
       ${n('StartOwner')}();
       if (${n('Session')}.closed) throw ${n('Session')}.failure?.value;
@@ -1527,30 +1539,32 @@ ${usesInteraction ? `            ${n('Interaction')}.mount();` : ''}
 ${
   ssr
     ? `          const expected = epoch, expectedRevision = drawnRevision, expectedActivation = drawnActivation;
+          const current = () => epoch === expected && expected.active && drawnRevision === expectedRevision && drawnActivation === expectedActivation && !${n('Disposed')} && !${n('Disposing')};
           ${n('Committed')}(${n('Session')}, ${n('Tree')}.id + ':view', () => {
-            if (epoch !== expected || !expected.active || drawnRevision !== expectedRevision || drawnActivation !== expectedActivation || ${n('Disposed')} || ${n('Disposing')}) return;
-            ${n('StartOwner')}(); acceptCommit();
+            if (!current()) return;
+            ${n('StartOwner')}(); prepareInitial();
+          }, () => {
+            if (current()) acceptCommit();
           });
         }
+        function prepareInitial(): void {
+          if (${n('HydrationValidated')} || !${n('Record')} || !root?.isConnected || ${n('ParentTree')}?.initialReady && !${n('ParentTree')}.initialReady()) return;
+          if (${n('Disposed')} || ${n('Disposing')} || deactivated || !epoch.active || epoch !== ${n('CurrentEpoch')} || !${n('Present')}.value) return;
+          const frame: ${n('Frame')} = { epoch, slotUsed: false };
+          const output = typeof ${n('Renderer')} === 'function' ? ${n('Children')}(${n('Renderer')}(frame)) : ${n('Slot')}(frame);
+          const children = output == null ? [] : Array.isArray(output) ? output : [output];
+          const tag = ${usesInteraction ? `${n('Interaction')}.rootTag() ?? 'div'` : "'div'"};
+          if (!${n('Present')}.value || tag !== ${n('Record')}.tag || JSON.stringify(${n('Project')}(children, ${n('SlotView')})) !== JSON.stringify(${n('Record')}.children))
+            throw new Error('[Vue SSR] client initial render differs from source-bound server projection');
+          ${n('HydrationValidated')} = true;
+          ${n('AcceptInitialOwner')}(${n('Session')}, ${n('Tree')}.id);
+        }
         function acceptCommit(): void {
-          if (!root?.isConnected || ${n('ParentTree')}?.ready && !${n('ParentTree')}.ready()) return;`
+          if (!root?.isConnected || ${n('Record')} && !${n('HydrationValidated')} || ${n('ParentTree')}?.ready && !${n('ParentTree')}.ready()) return;`
     : ''
 }
           if (${n('Disposed')} || ${n('Disposing')} || deactivated || !epoch.active || epoch !== ${n('CurrentEpoch')} || !${n('Present')}.value) return;
           if (!epoch.committed) {
-${
-  ssr
-    ? `            if (!${n('HydrationValidated')} && ${n('Record')}) {
-              const frame: ${n('Frame')} = { epoch, slotUsed: false };
-              const output = typeof ${n('Renderer')} === 'function' ? ${n('Children')}(${n('Renderer')}(frame)) : ${n('Slot')}(frame);
-              const children = output == null ? [] : Array.isArray(output) ? output : [output];
-              const tag = ${usesInteraction ? `${n('Interaction')}.rootTag() ?? 'div'` : "'div'"};
-              if (!${n('Present')}.value || tag !== ${n('Record')}.tag || JSON.stringify(${n('Project')}(children, ${n('SlotView')})) !== JSON.stringify(${n('Record')}.children))
-                throw new Error('[Vue SSR] client initial render differs from source-bound server projection');
-              ${n('HydrationValidated')} = true;
-            }`
-    : ''
-}
             epoch.committed = true;
             committedRevision = drawnRevision;
 ${usesStyle ? `            ${n('Style')}.mount();` : ''}

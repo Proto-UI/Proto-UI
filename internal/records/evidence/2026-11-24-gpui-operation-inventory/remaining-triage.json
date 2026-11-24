@@ -1,0 +1,893 @@
+{
+  "schemaVersion": 1,
+  "kind": "gpui-remaining-evidence-triage",
+  "sharedOperations": 199,
+  "profileOperations": 192,
+  "ordinaryGeneratedOperations": 85,
+  "supplementalGeneratedOperations": 60,
+  "unionAcrossExplicitSourceBindings": 98,
+  "remainingInTheseSelectedGeneratedInputs": 94,
+  "ordinarySourceBinding": "composed-current-inventory-binding.json",
+  "supplementalReceiptSha256": "57828ffdf167264b7c386579b0155d5052f1dba7b399e0f0d5e7ad8f5fd4e3fe",
+  "supplementalCompilerDrift": [],
+  "rows": [
+    {
+      "operation": "accessible.description",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "accessible.id",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "accessible.level",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "accessible.tree",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.has",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.order.indexOfSelf",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.order.nextOfSelf",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.order.parts",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.order.partsOf",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.order.prevOfSelf",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.order.version",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.parts",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.partsOf",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomy.subscribeParts",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomyPart.getExpose",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomyPart.hasExpose",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "anatomyPart.hasHook",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "binding.release",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.classify",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.configure",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.notify",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.observe",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.registerRegion",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.setStackActive",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.subscribeOutside",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "boundary.unregisterRegion",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "collection.configure",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "collection.getCount",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "collection.getItems",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "collectionItem.configure",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "collectionItem.getSnapshot",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "context.tryUpdate",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "feedback.style.clearPatch",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "feedback.style.patch",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "feedback.style.release",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "feedback.style.suppress",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.focusLast",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.focusNext",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.focusPrev",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.focusSelected",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.isActive",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.isFocused",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.restoreFocus",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.setLoop",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.setOrientation",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focus.setRovingStatus",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focusRoving.focusFirst",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focusRoving.focusPrev",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focusRoving.focusSelected",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "focusScope.getRoving",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hitParticipation.configure",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hitParticipation.registerRegion",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hitParticipation.unregisterRegion",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hook.asBoundary",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hook.asCollection",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hook.asCollectionItem",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hook.asHitParticipation",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hook.asImageView",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "hook.asOverlay",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "host.get",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "imageView.on",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "imageView.snapshot",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "imageView.sync",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.bindPresence",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.close",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.configure",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.getPositionSnapshot",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.isOpen",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.keepMounted",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.openOverlay",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.registerAnchor",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.registerAnchorPart",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.registerContent",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.registerTrigger",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.toggle",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "overlay.updatePosition",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "positioning.connect",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "positioning.disconnect",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "positioning.getSnapshot",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "positioning.requestUpdate",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "positioning.update",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "props.getRaw",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "props.watchAll",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "props.watchRaw",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "props.watchRawAll",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "render.read.context.read",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "render.read.context.tryRead",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "render.read.props.get",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "render.read.props.getRaw",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "render.read.props.isProvided",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "rule.dispose",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "subscription.release",
+      "nextEvidence": "software-defined lifecycle and data consumer",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "tableStructure.configure",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    },
+    {
+      "operation": "tableStructure.getObjectRef",
+      "nextEvidence": "native host/layout consumer and independent oracle",
+      "physicalDeviceRequiredForSourceOrHeadlessNative": false,
+      "implementationMissingProven": false,
+      "owner": "Compiler/native owner in #1056; relevant Module/Host Capability owner for semantic conflicts"
+    }
+  ],
+  "sourceRejections": [
+    {
+      "name": "original_table_cell",
+      "file": "packages/prototypes/base/src/table/cell.proto.ts",
+      "sourceSha256": "465882c74f7c75f4b5c4e631fcea4a42974ddf3ca40573fda4d966ce06574933",
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Only declared primitive props are currently admitted.",
+          "span": {
+            "file": "packages/prototypes/base/src/table/cell.proto.ts",
+            "start": 445,
+            "end": 635,
+            "line": 10,
+            "column": 5,
+            "endLine": 14,
+            "endColumn": 7
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_table_header-cell",
+      "file": "packages/prototypes/base/src/table/header-cell.proto.ts",
+      "sourceSha256": "1aad0553e6a2a2a87822a05af105a90adb128124043cb4813533be0962659a72",
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Type @proto.ui/module-table-structure:TableHeaderKind has no semantic declaration.",
+          "span": {
+            "file": "packages/prototypes/base/src/table/types.ts",
+            "start": 598,
+            "end": 613,
+            "line": 17,
+            "column": 16,
+            "endLine": 17,
+            "endColumn": 31
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_image_root",
+      "file": "packages/prototypes/base/src/image/root.proto.ts",
+      "sourceSha256": "da5c148a7969c15d9350d0a3330493fa6cbe36865ed498f27a8a97c3828aad21",
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Type @proto.ui/core:ImageViewA11yMode has no semantic declaration.",
+          "span": {
+            "file": "packages/prototypes/base/src/image/types.ts",
+            "start": 226,
+            "end": 243,
+            "line": 13,
+            "column": 14,
+            "endLine": 13,
+            "endColumn": 31
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_textarea_root",
+      "file": "packages/prototypes/base/src/textarea/root.proto.ts",
+      "sourceSha256": "4debfbe3dea307423e5c87bc24071522bacd3d0de114bedef95d4026a9bbfbf6",
+      "diagnostics": [
+        {
+          "code": "PUI1004",
+          "category": "unsupported-input",
+          "message": "Top-level runtime bindings must be admitted static core declarations.",
+          "span": {
+            "file": "packages/prototypes/base/src/field/shared.ts",
+            "start": 6699,
+            "end": 6788,
+            "line": 179,
+            "column": 33,
+            "endLine": 183,
+            "endColumn": 3
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_dialog_root",
+      "file": "packages/prototypes/base/src/dialog/root.proto.ts",
+      "sourceSha256": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378",
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type AnyKeyword.",
+          "span": {
+            "file": "packages/prototypes/base/src/dialog/root.proto.ts",
+            "start": 2888,
+            "end": 2891,
+            "line": 96,
+            "column": 29,
+            "endLine": 96,
+            "endColumn": 32
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_dialog_content",
+      "file": "packages/prototypes/base/src/dialog/content.proto.ts",
+      "sourceSha256": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95",
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type AnyKeyword.",
+          "span": {
+            "file": "packages/prototypes/base/src/dialog/content.proto.ts",
+            "start": 3255,
+            "end": 3258,
+            "line": 90,
+            "column": 19,
+            "endLine": 90,
+            "endColumn": 22
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_dialog_trigger",
+      "file": "packages/prototypes/base/src/dialog/trigger.proto.ts",
+      "sourceSha256": "1c10e2ffb932b2b7fc121b0254f7d57317e54c332c6ec91fbcd3304fc087e24e",
+      "diagnostics": [
+        {
+          "code": "PUI1020",
+          "category": "unsupported-input",
+          "message": "Unsupported ordinary value type AnyKeyword.",
+          "span": {
+            "file": "packages/prototypes/base/src/dialog/command.ts",
+            "start": 1559,
+            "end": 1562,
+            "line": 43,
+            "column": 44,
+            "endLine": 43,
+            "endColumn": 47
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_scroll-area_root",
+      "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+      "sourceSha256": "5afd5f3183173e0afee9bc7e1c201c0a85aeea22efbc92e4aeb527ac3d87be00",
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Context value does not match its declared key type.",
+          "span": {
+            "file": "packages/prototypes/base/src/scroll-area/root.proto.ts",
+            "start": 401,
+            "end": 431,
+            "line": 10,
+            "column": 44,
+            "endLine": 10,
+            "endColumn": 74
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    },
+    {
+      "name": "original_scroll-area_viewport",
+      "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+      "sourceSha256": "dffdd42415e2adc09b22bb248038b45dbd947cf1ac2bd8ee4a8c5d8c839723e6",
+      "diagnostics": [
+        {
+          "code": "PUI1006",
+          "category": "unsupported-input",
+          "message": "Arrays cannot leak semantic handles into data.",
+          "span": {
+            "file": "packages/prototypes/base/src/scroll-area/viewport.proto.ts",
+            "start": 1220,
+            "end": 1375,
+            "line": 31,
+            "column": 32,
+            "endLine": 36,
+            "endColumn": 4
+          }
+        }
+      ],
+      "owner": "shared Compiler/parser/IR; original prototype remains unchanged",
+      "physicalEnvironmentBlocker": false
+    }
+  ],
+  "physicalAcceptanceDebt": [
+    "Real OS accessibility/assistive technology for applicable native controls",
+    "Physical pointer/touch/pen and platform text-input/IME/selection paths when originally required",
+    "macOS/Linux native platform differences and real performance/device measurements"
+  ],
+  "limits": [
+    "The union combines named source-bound generation receipts; it is not 98 runtime operation passes and not final-tree acceptance.",
+    "No listed operation is marked complete or N/A merely because a named emitter case exists.",
+    "No missing source/headless consumer is attributed to unavailable physical hardware.",
+    "Native resource counts, Rust allocation requests and release link bytes are separate measurements."
+  ]
+}

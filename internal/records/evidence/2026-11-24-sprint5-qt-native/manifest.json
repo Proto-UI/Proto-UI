@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "boundary": "Historical and successor native/source evidence keep exact original input bindings. No new native execution at final Qt request source is asserted by archiving.",
+  "files": [
+    {
+      "path": "independent-root-review.json",
+      "bytes": 1581,
+      "sha256": "ff4e939d4b47785aedb912df6825a93690a7a6dd19570f6e7e459b039c15c376"
+    },
+    {
+      "path": "qt-native-raw-evidence.tar.gz",
+      "bytes": 95948,
+      "sha256": "36880e9caae5cd4899e347d38918a638444b7893c28d29dbb5b5bc58da50a3b4"
+    },
+    {
+      "path": "qt-native-v1.tar.gz",
+      "bytes": 50891,
+      "sha256": "4ad10ced2df5a1a996edf59cd99e8320bd395634b4d0153956ab18934d60650c"
+    },
+    {
+      "path": "qt-native-v2.tar.gz",
+      "bytes": 50907,
+      "sha256": "85edab56f92d67a44411a1907033f9e7c88ff0da0882a98fb1c0a6c8cc0523e2"
+    },
+    {
+      "path": "qt-native-v4.tar.gz",
+      "bytes": 56612,
+      "sha256": "350b4cd1380e6533d551d6ad26145bc9a1afdede0c798bc65e081b041b870d98"
+    },
+    {
+      "path": "qt-native-v5-inputs.tar.gz",
+      "bytes": 60702,
+      "sha256": "861489f00f5a88a284e65fd4ad05a1dfb74ece5374ebc623f126ebfee3224be2"
+    },
+    {
+      "path": "qt-native-v5-results.tar.gz",
+      "bytes": 6843,
+      "sha256": "4d8488d8d5525845025bd8693de9184f22281259be94e5c4e8bdf2805ea64b71"
+    },
+    {
+      "path": "qt-request-source-history.tar.gz",
+      "bytes": 71881,
+      "sha256": "0360ed1a290076c1a0a73df5cb49e236b14d12cc16b9f46af0b71cefa0f94f59"
+    }
+  ]
+}

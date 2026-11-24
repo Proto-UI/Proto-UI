@@ -1,0 +1,50 @@
+{
+  "files": [
+    {
+      "path": "native-cost-final-summary.json",
+      "bytes": 33764,
+      "sha256": "e4779636f390f17cdc78751166390481ce2d8b0445effc74b896a9a9c99e7e7b"
+    },
+    {
+      "path": "native-cost-lock-review.json",
+      "bytes": 1100,
+      "sha256": "91008a855002a66c478497312b6dcf67a178b6603c7d6c68e90b05bc5292eb5f"
+    },
+    {
+      "path": "root-native-cost-api-inputs.tar.gz",
+      "bytes": 262422,
+      "sha256": "5c695137b5b98513252c15b25e4f49967e659bd80ad746da67f6449267dccae3"
+    },
+    {
+      "path": "root-native-cost-doc-order-inputs.tar.gz",
+      "bytes": 263017,
+      "sha256": "1dc7190b3b7fb30866c33420d0efb3ee8a41a4f0951307709050a53f39e9d662"
+    },
+    {
+      "path": "root-native-cost-inputs.tar.gz",
+      "bytes": 262822,
+      "sha256": "16520f72cf9930fdb50b75cc52cb634d1fceeab7eb4282d86ef42f4a1200c0e2"
+    },
+    {
+      "path": "root-native-cost-locked-inputs.tar.gz",
+      "bytes": 262463,
+      "sha256": "0ccc9880f5e4b61f208d4d630194ff5cda49c19d57a491c53af4b2b7a1a94fbf"
+    },
+    {
+      "path": "root-native-cost-unique-inputs.tar.gz",
+      "bytes": 262971,
+      "sha256": "53b4f096837216c6e5f1f47cdc4cb88367acc944f054545fc8a99659b1ea3674"
+    },
+    {
+      "path": "unique-artifact-negative-controls.tar.gz",
+      "bytes": 136329,
+      "sha256": "39c8a1d03f31fa5dd89e6a119f7df59fb552b1a3d224fa302d113f9a58dc8abd"
+    }
+  ],
+  "deviceNativeArchive": {
+    "path": "native-cost-history-and-final.tar.gz",
+    "bytes": 3078169,
+    "sha256": "eccc9bf38d66fbe095b229ae0eeeba4023eacb9039770307b410ae6b337c8acc",
+    "source": "/tank/shared/projects/proto-ui-agent/sprint5-f7b2/native-cost-accepted/native-cost-history-and-final.tar.gz"
+  }
+}

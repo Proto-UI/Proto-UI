@@ -1,0 +1,828 @@
+{
+  "startedAt": "2026-11-23T23:36:42.341164+00:00",
+  "finishedAt": "2026-11-23T23:38:55.767979+00:00",
+  "status": "passed",
+  "sourceDrift": [],
+  "sourceReceiptSha256": "c97416e2e7a7b38bf88c342e3445deb0f47353876350a3d8630f92be61a2799f",
+  "cases": [
+    {
+      "name": "empty",
+      "status": "passed",
+      "headlessTestSupport": true,
+      "productionTestSupport": false,
+      "construction": {
+        "passedTests": 2,
+        "samples": 31,
+        "first": {
+          "case": "empty",
+          "sample": 0,
+          "phase": "first construction in process",
+          "nanoseconds": 1782322,
+          "successfulAllocationCalls": 1593,
+          "successfulReallocationCalls": 10,
+          "deallocationCalls": 7,
+          "requestedBytesIncludingReallocation": 247803,
+          "liveOwnerDelta": 1,
+          "resourcesAfterConstruction": {
+            "root": {
+              "states": 0,
+              "hooks": 0,
+              "listeners": 0,
+              "stateWatchers": 0,
+              "propsWatchers": 0,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": false,
+              "keyInput": false,
+              "boundaryInput": false,
+              "focusObservation": false,
+              "nativeSubscriptions": 0
+            }
+          },
+          "resourcesAfterLayout": {
+            "root": {
+              "states": 0,
+              "hooks": 0,
+              "listeners": 0,
+              "stateWatchers": 0,
+              "propsWatchers": 0,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": false,
+              "keyInput": false,
+              "boundaryInput": false,
+              "focusObservation": false,
+              "nativeSubscriptions": 0
+            }
+          }
+        },
+        "repeatedSummary": {
+          "nanoseconds": {
+            "minimum": 41712,
+            "median": 43622,
+            "maximum": 59263
+          },
+          "successfulAllocationCalls": {
+            "minimum": 13,
+            "median": 13,
+            "maximum": 13
+          },
+          "successfulReallocationCalls": {
+            "minimum": 0,
+            "median": 0,
+            "maximum": 0
+          },
+          "deallocationCalls": {
+            "minimum": 2,
+            "median": 2,
+            "maximum": 2
+          },
+          "requestedBytesIncludingReallocation": {
+            "minimum": 5862,
+            "median": 5862,
+            "maximum": 5862
+          }
+        }
+      },
+      "releaseArtifact": {
+        "path": "/tmp/s5-native-cost-doc-order-f7b2/evidence/empty.so",
+        "libraryName": "proto_ui_cost_empty",
+        "bytes": 2606472,
+        "sha256": "fb95d1a49d6911ee0db17eb2ae375173d7d616b6f245cc2713cc0867837a8221",
+        "defaultFeaturesOnly": true
+      }
+    },
+    {
+      "name": "base_button",
+      "status": "passed",
+      "headlessTestSupport": true,
+      "productionTestSupport": false,
+      "construction": {
+        "passedTests": 2,
+        "samples": 31,
+        "first": {
+          "case": "base_button",
+          "sample": 0,
+          "phase": "first construction in process",
+          "nanoseconds": 2313039,
+          "successfulAllocationCalls": 1868,
+          "successfulReallocationCalls": 14,
+          "deallocationCalls": 110,
+          "requestedBytesIncludingReallocation": 290742,
+          "liveOwnerDelta": 1,
+          "resourcesAfterConstruction": {
+            "root": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            }
+          },
+          "resourcesAfterLayout": {
+            "root": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            }
+          }
+        },
+        "repeatedSummary": {
+          "nanoseconds": {
+            "minimum": 236843,
+            "median": 249013,
+            "maximum": 298126
+          },
+          "successfulAllocationCalls": {
+            "minimum": 284,
+            "median": 284,
+            "maximum": 284
+          },
+          "successfulReallocationCalls": {
+            "minimum": 3,
+            "median": 3,
+            "maximum": 3
+          },
+          "deallocationCalls": {
+            "minimum": 106,
+            "median": 106,
+            "maximum": 106
+          },
+          "requestedBytesIncludingReallocation": {
+            "minimum": 47069,
+            "median": 47069,
+            "maximum": 47069
+          }
+        }
+      },
+      "releaseArtifact": {
+        "path": "/tmp/s5-native-cost-doc-order-f7b2/evidence/base_button.so",
+        "libraryName": "proto_ui_cost_base_button",
+        "bytes": 3353640,
+        "sha256": "62f9506ed09338073f33940693c63d3a00d21ebce01f36209af246c266c94b99",
+        "defaultFeaturesOnly": true
+      }
+    },
+    {
+      "name": "composed",
+      "status": "passed",
+      "headlessTestSupport": true,
+      "productionTestSupport": false,
+      "construction": {
+        "passedTests": 2,
+        "samples": 31,
+        "first": {
+          "case": "composed",
+          "sample": 0,
+          "phase": "first construction in process",
+          "nanoseconds": 4166396,
+          "successfulAllocationCalls": 4021,
+          "successfulReallocationCalls": 34,
+          "deallocationCalls": 331,
+          "requestedBytesIncludingReallocation": 633254,
+          "liveOwnerDelta": 4,
+          "resourcesAfterConstruction": {
+            "root": {
+              "states": 0,
+              "hooks": 0,
+              "listeners": 0,
+              "stateWatchers": 0,
+              "propsWatchers": 0,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": false,
+              "keyInput": false,
+              "boundaryInput": false,
+              "focusObservation": false,
+              "nativeSubscriptions": 0
+            },
+            "button0": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            },
+            "button1": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            },
+            "button2": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            }
+          },
+          "resourcesAfterLayout": {
+            "root": {
+              "states": 0,
+              "hooks": 0,
+              "listeners": 0,
+              "stateWatchers": 0,
+              "propsWatchers": 0,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": false,
+              "keyInput": false,
+              "boundaryInput": false,
+              "focusObservation": false,
+              "nativeSubscriptions": 0
+            },
+            "button0": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            },
+            "button1": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            },
+            "button2": {
+              "states": 3,
+              "hooks": 4,
+              "listeners": 8,
+              "stateWatchers": 0,
+              "propsWatchers": 1,
+              "contextSubscriptions": 0,
+              "anatomySubscriptions": 0,
+              "collectionStates": 0,
+              "scrollHandles": 0,
+              "boundaryRegions": 0,
+              "boundaryCallbacks": 0,
+              "metadataKeys": 0,
+              "schedulerBindings": 0,
+              "delays": 0,
+              "presenceOwners": 0,
+              "pointerInput": true,
+              "keyInput": true,
+              "boundaryInput": false,
+              "focusObservation": true,
+              "nativeSubscriptions": 5
+            }
+          }
+        },
+        "repeatedSummary": {
+          "nanoseconds": {
+            "minimum": 703936,
+            "median": 735828,
+            "maximum": 988291
+          },
+          "successfulAllocationCalls": {
+            "minimum": 867,
+            "median": 867,
+            "maximum": 867
+          },
+          "successfulReallocationCalls": {
+            "minimum": 9,
+            "median": 9,
+            "maximum": 10
+          },
+          "deallocationCalls": {
+            "minimum": 321,
+            "median": 321,
+            "maximum": 321
+          },
+          "requestedBytesIncludingReallocation": {
+            "minimum": 144848,
+            "median": 144848,
+            "maximum": 144912
+          }
+        }
+      },
+      "releaseArtifact": {
+        "path": "/tmp/s5-native-cost-doc-order-f7b2/evidence/composed.so",
+        "libraryName": "proto_ui_cost_composed",
+        "bytes": 9764528,
+        "sha256": "b3aa49f846f5da368497673eabe77e33fea792244f1b407bbf8b09ad5754ecc6",
+        "defaultFeaturesOnly": true
+      }
+    }
+  ],
+  "productionArtifact": "optimized native cdylib; no OS application shell or test-support",
+  "constructionBoundary": "same-thread System allocation requests during subject::mount; preexisting App/Window and later layout excluded",
+  "budgetAccepted": false,
+  "lock": {
+    "sha256": "eca1e2118206b78fd6f5e9097f8411b0d6831a1e43394ff11befaa8ee00b417c",
+    "newExternalPackages": [],
+    "removedUnusedExternalPackages": []
+  },
+  "sourceModules": [
+    {
+      "name": "empty",
+      "entry": "packages/compiler/test/fixtures/gpui-ordinary-values/cost-empty.proto.ts",
+      "sourceSha256": "1f47f7d430907ea78c5756a65b84c72cb9a1eb012a6652f9ec28e1b8aecd8200",
+      "packageName": "generated-gpui-22cc1fe742307e5a965e0e3dbdd07199",
+      "inputClosure": [
+        {
+          "file": "packages/compiler/test/fixtures/gpui-ordinary-values/cost-empty.proto.ts",
+          "content": "import { definePrototype } from '@proto.ui/core';\n\n// The empty cost baseline has no hooks, State, Props, listeners or authored render.\n// Its implicit anonymous slot is the shared void-setup projection.\nexport default definePrototype({ name: 'native-cost-empty', setup() {} });\n",
+          "sha256": "1f47f7d430907ea78c5756a65b84c72cb9a1eb012a6652f9ec28e1b8aecd8200"
+        }
+      ],
+      "componentBytes": 20824,
+      "componentSha256": "163af99c7924b04843b5b6269b9f3da449c198d1aff3fd52bd84940ea0884b66",
+      "generatedFiles": [
+        {
+          "path": "Component.rs",
+          "bytes": 20824,
+          "sha256": "163af99c7924b04843b5b6269b9f3da449c198d1aff3fd52bd84940ea0884b66"
+        },
+        {
+          "path": "Cargo.toml",
+          "bytes": 852,
+          "sha256": "e824be619873bd8cf6cba19877e1e7c10907e7358f8737c5360106a710d0986b"
+        },
+        {
+          "path": ".proto-ui/gpui-native/LICENSE",
+          "bytes": 1078,
+          "sha256": "7b6e3e65736b51f976b8443bca2cc9796e010b1e8a4dfff7316240681e0ebf66"
+        },
+        {
+          "path": ".proto-ui/gpui-native/Cargo.toml",
+          "bytes": 940,
+          "sha256": "13f292bef5ae9349703ca315b122c799aad29d2d5b739bb89b00028840fd06b6"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/lib.rs",
+          "bytes": 406,
+          "sha256": "183ba4e0400b81db3cda82aac4ce1a640033b2e446d560349ca6063f8dc7af1a"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-owner.rs",
+          "bytes": 576662,
+          "sha256": "bc54e742c49945857ff9ccc7a92a8bc88c7b4aa461291e49716fde35d1f1e9e9"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-a11y.rs",
+          "bytes": 24778,
+          "sha256": "130ca38efc20a43d9c222979b05d284d4acf9206b0185e398ee8a3889424855b"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-host.rs",
+          "bytes": 1641,
+          "sha256": "2c850c912c1b50f7c111bb6b9e021be9b7be68672290491078b326f43b839b8c"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-key.rs",
+          "bytes": 7344,
+          "sha256": "b78508e097f3f829334d19f09e78576c2534356d1a76c496e602c07f406750fe"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/gpui-native-move.rs",
+          "bytes": 22980,
+          "sha256": "32e23b120e05c46d30dfdc9b25934e4399cc5345eb0155c7dcf4b10377f61498"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/mod.rs",
+          "bytes": 8081,
+          "sha256": "20b3733f2b4425d4defc74b3f0498905ce0365f2a93c739d02d9c1ce8c838d6c"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/color.rs",
+          "bytes": 10795,
+          "sha256": "c59e1b254d2fc6657c64eaf6b2774478f672fbcfe752439c3e627013366c92e5"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/length.rs",
+          "bytes": 12551,
+          "sha256": "8d0652598bca59dd632c5037f201690e0a3adc9e60ab745c798226e2babc6ad9"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/theme.rs",
+          "bytes": 6466,
+          "sha256": "e4e6fc0660ec8b6b8f3ff3efabfb64373706638816c436bd6752191bc5e96730"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/style/mapping.rs",
+          "bytes": 19834,
+          "sha256": "f0e46712db27ed6aec1417f5bbc451cd2c9a3842caef5257790985fa05fca6ab"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/fixtures/style-tokens.json",
+          "bytes": 23949,
+          "sha256": "3df6fc5b2e1829daf10101fdd08b6d838c1049affa0f645b13aa11997b7ecc65"
+        },
+        {
+          "path": ".proto-ui/gpui-native/src/fixtures/theme-tokens.json",
+          "bytes": 9105,
+          "sha256": "8d2ec62460854fc19e1f69cfdf2b4937be9e302b6adbb5385794852a682d91c7"
+        },
+        {
+          "path": ".proto-ui/fixtures/style-tokens.json",
+          "bytes": 23949,
+          "sha256": "3df6fc5b2e1829daf10101fdd08b6d838c1049affa0f645b13aa11997b7ecc65"
+        }
+      ]
+    },
+    {
+      "name": "base_button",
+      "entry": "packages/prototypes/base/src/button/button.proto.ts",
+      "sourceSha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+      "packageName": "generated-gpui-09b805d2e9390b1855f5975b764108eb",
+      "inputClosure": [
+        {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "content": "import type { DefHandle, RunHandle } from '@proto.ui/core';\nimport { defineAsHook, definePrototype, tw } from '@proto.ui/core';\nimport { asAccessible, asControlLabel, asFocusable, asTrigger } from '@proto.ui/hooks';\nimport type { ButtonAsHookContract, ButtonExposes, ButtonProps, ButtonStateHandles } from './types';\n\nexport type { ButtonProps, ButtonExposes, ButtonStateHandles, ButtonAsHookContract } from './types';\n\nfunction setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {\n  // P-BASE-BUTTON-CONTENT-SELECTION: action-subject affordance, not visual paint.\n  // C-CONTENT-SELECTION-AFFORDANCE-0001 preserves explicit select-text restoration,\n  // host range/copy behavior and useful neighboring content. No event cancellation.\n  def.feedback.style.use(tw('select-none'));\n  const accessible = asAccessible();\n  // P-BASE-BUTTON-TRIGGER-SEMANTICS, P-BASE-BUTTON-NESTED-TRIGGER-ROUTE\n  asTrigger();\n\n  // P-BASE-BUTTON-PROP-DISABLED\n  def.props.define({\n    disabled: { type: 'boolean', empty: 'fallback' },\n  });\n  def.props.setDefaults({\n    disabled: false,\n  });\n\n  // P-BASE-BUTTON-DISABLED-EXPOSE\n  const disabled = def.state.bool('disabled', false);\n  def.expose.state('disabled', disabled);\n  accessible.state('disabled', disabled);\n\n  // P-BASE-BUTTON-POINTER-HOVER\n  const hovered = def.state.bool('hovered', false);\n  def.expose.state('hovered', hovered);\n\n  // P-BASE-BUTTON-FOCUSABLE, P-BASE-BUTTON-DISABLED-REJECT-FOCUS\n  const focusable = asFocusable<ButtonProps>();\n  focusable.configure({ disabled: false });\n\n  const focused = focusable.focused;\n  const focusVisible = focusable.focusVisible;\n\n  // P-BASE-BUTTON-FOCUSABLE\n  def.expose.state('focused', focused);\n  def.expose.state('focusVisible', focusVisible);\n\n  // P-BASE-BUTTON-REQUEST-FOCUS, P-BASE-BUTTON-DISABLED-REJECT-FOCUS\n  def.expose.method('focusSelf', (options) => {\n    if (disabled.get()) return;\n    focusable.focusSelf(options);\n  });\n\n  // P-BASE-BUTTON-PRESS-LIFECYCLE\n  const pressed = def.state.bool('pressed', false);\n  def.expose.state('pressed', pressed);\n\n  const clearTransientInteraction = (reason: string) => {\n    hovered.set(false, reason);\n    pressed.set(false, reason);\n  };\n\n  // P-BASE-BUTTON-PRESS-LIFECYCLE, P-BASE-BUTTON-POINTER-HOVER\n  def.lifecycle.onUnmounted(() => {\n    clearTransientInteraction('reason: button view unmounted => reset transient interaction');\n  });\n\n  // P-BASE-BUTTON-PROP-DISABLED-CONTROLLED, P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT\n  const syncDisabled = (nextDisabled: boolean) => {\n    disabled.set(nextDisabled, 'reason: sync disabled');\n    focusable.setDisabled(nextDisabled);\n    if (nextDisabled) {\n      clearTransientInteraction('reason: button disabled => reset transient interaction');\n    }\n  };\n  def.lifecycle.onCreated((run) => {\n    syncDisabled(run.props.get().disabled);\n  });\n  def.props.watch(['disabled'], (_run, next) => {\n    syncDisabled(next.disabled);\n  });\n\n  // P-BASE-BUTTON-CLICK-SIGNAL, P-BASE-BUTTON-CLICK-PROTOCOL-NAME\n  def.expose.event('click', { payload: 'void' });\n  // P-BASE-BUTTON-ROLE-COMMAND\n  accessible.action('activate', { event: 'click' });\n\n  // P-BASE-BUTTON-ACCESSIBLE-ROLE\n  accessible.role('button');\n\n  // P-BASE-BUTTON-ACCESSIBLE-NAME, P-BASE-BUTTON-CONTENT-LABEL-SOURCE\n  accessible.nameFromContent();\n\n  const activate = (run: RunHandle<ButtonProps>, isCurrent: () => boolean = () => true) => {\n    if (disabled.get() || !isCurrent()) return;\n    pressed.set(false, 'reason: button activation => pressed');\n    if (disabled.get() || !isCurrent()) return;\n    run.expose.emit('click');\n  };\n  asControlLabel().target<ButtonProps>((run, request) => {\n    const isCurrent = () => !disabled.get() && request.isCurrent();\n    if (!isCurrent()) return;\n    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });\n    if (isCurrent()) activate(run, isCurrent);\n  });\n\n  // P-BASE-BUTTON-KEYBOARD-ACTIVATION, P-BASE-BUTTON-KEYBOARD-SPACE-PREVENT-DEFAULT,\n  // HC-DEFAULT-ACTION-0001: prevention is requested through the portable\n  // control facade, never through a raw host preventDefault function.\n  def.event.onGlobal('key.down', (_run, ev) => {\n    const detail = ev;\n    if (disabled.get()) return;\n    if (!focused.get()) return;\n    if (detail?.key !== ' ') return;\n    ev.control.requestDefaultActionPrevention({\n      reason: 'button.space-activation',\n      source: 'base-button',\n    });\n  });\n\n  // P-BASE-BUTTON-POINTER-HOVER\n  def.event.on('pointer.enter', () => {\n    if (disabled.get()) return;\n    hovered.set(true, 'reason: button pointer.enter => hovered');\n  });\n  def.event.on('pointer.leave', () => {\n    hovered.set(false, 'reason: button pointer.leave => hovered');\n    pressed.set(false, 'reason: button pointer.leave => pressed');\n  });\n  def.event.on('pointer.cancel', () => {\n    hovered.set(false, 'reason: button pointer.cancel => hovered');\n    pressed.set(false, 'reason: button pointer.cancel => pressed');\n  });\n\n  def.event.on('press.cancel', () => {\n    clearTransientInteraction('reason: button press.cancel => reset transient interaction');\n  });\n\n  // P-BASE-BUTTON-PRESS-LIFECYCLE\n  def.event.on('pointer.down', () => {\n    if (disabled.get()) return;\n    pressed.set(true, 'reason: button pointer.down => pressed');\n  });\n  def.event.on('pointer.up', () => {\n    pressed.set(false, 'reason: button pointer.up => pressed');\n  });\n\n  // P-BASE-BUTTON-ROLE-COMMAND, P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION\n  def.event.on('press.commit', (run) => {\n    pressed.set(false, 'reason: button press.commit => pressed');\n    activate(run);\n  });\n\n  /*\n   * P-BASE-BUTTON-PROP-LABEL-DEFERRED: independent naming uses InstanceAssociations.controlLabel.\n   * TODO(P-BASE-BUTTON-A11Y-ENHANCEMENT): practice optional a11y enhancements through the future a11y syntax.\n   */\n}\n\n/*\n * P-BASE-BUTTON criteria outside Button-internal prototype syntax:\n * - P-BASE-BUTTON-NO-VISUAL-VARIANT-CORE: absence of visual props is the implementation.\n * - P-BASE-BUTTON-PROP-VISUAL-DEFERRED: owned by feedback/style or visual variants.\n * - P-BASE-BUTTON-ICON-CONTENT: content/styling convention, not a Button structure API.\n * - P-BASE-BUTTON-PROP-FORM-DEFERRED: awaits Form prototype cataloging.\n * - P-BASE-BUTTON-FORM-EXTENSION: awaits Form prototype cataloging.\n * - P-BASE-BUTTON-PROP-COMMAND-DEFERRED: awaits command/overlay capability cataloging.\n */\n\n// P-BASE-BUTTON-AUTHORING-ENTRIES\nexport const asButton = defineAsHook<ButtonProps, ButtonExposes, ButtonAsHookContract>({\n  name: 'as-button',\n  setup: setupButton,\n});\n\nconst button = definePrototype({\n  name: 'base-button',\n  setup: setupButton,\n});\n\nexport default button;\n",
+          "sha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8"
+        }
+      ],
+      "componentBytes": 51247,
+      "componentSha256": "0578945601b1b03eb96811fb639e4fceecb61bf2fca8a83e1c24f7aafccde4d6",
+      "generatedFiles": [
+        {
+          "path": "Component.rs",
+          "bytes": 51247,
+          "sha256": "0578945601b1b03eb96811fb639e4fceecb61bf2fca8a83e1c24f7aafccde4d6"
+        },
+        {
+          "path": "Cargo.toml",
+          "bytes": 861,
+          "sha256": "9f018de4c2cb9f2728039fc4abb9f560b6208ad3bee87442e2dae98f607b82f5"
+        },
+        {
+          "path": ".proto-ui/fixtures/style-tokens.json",
+          "bytes": 23949,
+          "sha256": "3df6fc5b2e1829daf10101fdd08b6d838c1049affa0f645b13aa11997b7ecc65"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "rustc",
+      "command": [
+        "rustc",
+        "+1.98.1",
+        "--version",
+        "--verbose"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:36:42.347911+00:00",
+      "finishedAt": "2026-11-23T23:36:42.492158+00:00",
+      "sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37"
+    },
+    {
+      "name": "cargo",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "--version"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:36:42.494973+00:00",
+      "finishedAt": "2026-11-23T23:36:42.830361+00:00",
+      "sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503"
+    },
+    {
+      "name": "host",
+      "command": [
+        "uname",
+        "-a"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:36:42.832685+00:00",
+      "finishedAt": "2026-11-23T23:36:42.836071+00:00",
+      "sha256": "8cb8b746f96e8c480afcf6548088fa301015afa8e0610b709dddfd8aa490c44f"
+    },
+    {
+      "name": "resolve-consumers",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "metadata",
+        "--all-features",
+        "--format-version",
+        "1",
+        "--manifest-path",
+        "/tmp/s5-native-cost-doc-order-f7b2/generated/Cargo.toml"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:36:42.858587+00:00",
+      "finishedAt": "2026-11-23T23:36:53.775568+00:00",
+      "sha256": "834eaf997a6060128bf55425de2d955c258848d24c14e45baea3edbd6d3e9194"
+    },
+    {
+      "name": "locked-graph",
+      "command": [
+        "node",
+        "/tmp/s5-native-cost-doc-order-f7b2/generated/tools/check-cargo-graph.mjs",
+        "--manifest-path",
+        "/tmp/s5-native-cost-doc-order-f7b2/generated/Cargo.toml",
+        "--git",
+        "https://github.com/zed-industries/zed",
+        "--rev",
+        "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8",
+        "--toolchain",
+        "1.98.1",
+        "--output",
+        "/tmp/s5-native-cost-doc-order-f7b2/evidence/cargo-graph.json"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:36:53.813998+00:00",
+      "finishedAt": "2026-11-23T23:36:54.516537+00:00",
+      "sha256": "115ec7f3159a390f0fda14845e3e8d0292004a4dca84b909089523631fdd5db7"
+    },
+    {
+      "name": "empty-construction",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--locked",
+        "-p",
+        "proto-ui-cost-empty",
+        "--features",
+        "test-support",
+        "--test",
+        "measure",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:36:54.520881+00:00",
+      "finishedAt": "2026-11-23T23:37:41.479080+00:00",
+      "sha256": "2c3815dd36eb758f2196c3bbbd0e74449549a836fc6a1d2b464faa1678e4192c"
+    },
+    {
+      "name": "empty-release",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "build",
+        "--locked",
+        "--release",
+        "-p",
+        "proto-ui-cost-empty",
+        "--lib",
+        "--no-default-features"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:37:41.483585+00:00",
+      "finishedAt": "2026-11-23T23:38:34.046463+00:00",
+      "sha256": "ed9b705a20f82183e76974925a72c42ed383665af8058e23aa6e1be15b0ed04a"
+    },
+    {
+      "name": "empty-linked-file",
+      "command": [
+        "file",
+        "/tmp/s5-native-cost-doc-order-f7b2/evidence/empty.so"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:34.056103+00:00",
+      "finishedAt": "2026-11-23T23:38:34.088304+00:00",
+      "sha256": "7bc8734a7914484a1a1a233e2df8a32736b1fad7bc6735cc39843dd9abd0dc37"
+    },
+    {
+      "name": "base_button-construction",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--locked",
+        "-p",
+        "proto-ui-cost-base-button",
+        "--features",
+        "test-support",
+        "--test",
+        "measure",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:34.094088+00:00",
+      "finishedAt": "2026-11-23T23:38:43.107078+00:00",
+      "sha256": "28e538d0cffbd34177a9968347ef6815094667f829c6a5039657fdeb91f0d00a"
+    },
+    {
+      "name": "base_button-release",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "build",
+        "--locked",
+        "--release",
+        "-p",
+        "proto-ui-cost-base-button",
+        "--lib",
+        "--no-default-features"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:43.111556+00:00",
+      "finishedAt": "2026-11-23T23:38:48.094168+00:00",
+      "sha256": "af22d38fe3f233e131717a9650b03f5d04ed1f618ad72ecc09b09d44e4ffc8d3"
+    },
+    {
+      "name": "base_button-linked-file",
+      "command": [
+        "file",
+        "/tmp/s5-native-cost-doc-order-f7b2/evidence/base_button.so"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:48.104663+00:00",
+      "finishedAt": "2026-11-23T23:38:48.112080+00:00",
+      "sha256": "50ec797a9d7be2f52253d132c9ffddc611b90264caa426f176d968a77deeb810"
+    },
+    {
+      "name": "composed-construction",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "test",
+        "--locked",
+        "-p",
+        "proto-ui-cost-composed",
+        "--features",
+        "test-support",
+        "--test",
+        "measure",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:48.118835+00:00",
+      "finishedAt": "2026-11-23T23:38:53.819768+00:00",
+      "sha256": "42eadf90735f79ac8d22c087c4d8415a221293bc028f22159a99901df4144b42"
+    },
+    {
+      "name": "composed-release",
+      "command": [
+        "cargo",
+        "+1.98.1",
+        "build",
+        "--locked",
+        "--release",
+        "-p",
+        "proto-ui-cost-composed",
+        "--lib",
+        "--no-default-features"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:53.829545+00:00",
+      "finishedAt": "2026-11-23T23:38:55.692729+00:00",
+      "sha256": "b688bf396e0b7eaa5283585c23361eaec76d99d0dd8b4ac24a5dbac3fe8b95dc"
+    },
+    {
+      "name": "composed-linked-file",
+      "command": [
+        "file",
+        "/tmp/s5-native-cost-doc-order-f7b2/evidence/composed.so"
+      ],
+      "exitCode": 0,
+      "startedAt": "2026-11-23T23:38:55.717298+00:00",
+      "finishedAt": "2026-11-23T23:38:55.728257+00:00",
+      "sha256": "6127ad38ad3333b465c62e4645aa55cdd676f0c4a79808df7c4384129fdd2b9d"
+    }
+  ]
+}

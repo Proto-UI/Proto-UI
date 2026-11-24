@@ -1,0 +1,88 @@
+id: T-LIFECYCLE-OWNER-BROWSER-0001
+type: test
+title: Source-bound browser owner adoption and current input after native validation
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: These private generated consumers exercise a bounded React, Vue 3 and Vue 2 owner matrix. Independent physical execution and review are recorded separately from simulated DOM preflight; neither activates owner initialization or canonical SSR admission.
+summary: Observe native adoption, distinct State and Context identities, retirement, current controlled input and explicit fresh recovery using actual emitted modules and framework renderers.
+cases:
+  - id: T-LIFECYCLE-OWNER-BROWSER-0001-CASE-IDENTITY
+    title: Same owner updates and view re-entry retain identity while child and replacement owners are fresh
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-A
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-F
+    expectation: direct-State-and-Context-identity-observation-across-native-wrapper-shadowing-hide-show-and-fresh-adoption-with-old-callback-refusal
+  - id: T-LIFECYCLE-OWNER-BROWSER-0001-CASE-RECOVERY
+    title: Rejected native adoption retires real work before explicit recovery
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-D
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+    expectation: native-effects-listeners-and-watchers-stop-after-mismatch-and-explicit-current-input-creates-a-clean-owner
+  - id: T-LIFECYCLE-OWNER-BROWSER-0001-CASE-CURRENT-INPUT
+    title: Vue Context descendants validate the initial projection before current controlling Props are applied
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-C
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-F
+    expectation: initial-server-values-validate-as-one-graph-before-current-Props-propagate-including-absence-and-falsy-partial-startup-failure
+  - id: T-LIFECYCLE-OWNER-BROWSER-0001-CASE-INITIAL-GRAPH
+    title: Initial graph validation precedes accepted view callbacks and cancellation retires deferred work
+    covers:
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-E
+      - C-LIFECYCLE-OWNER-INITIALIZATION-0001-F
+      - C-LIFECYCLE-0002-D
+      - C-LIFECYCLE-0002-E
+    expectation: mounted-and-updated-Context-writes-follow-complete-initial-projection-validation-without-changing-ordinary-update-order-and-terminal-failure-drops-queued-work
+implementations:
+  - id: actual-native-browser
+    kind: runtime-test
+    status: needs-review
+    required: true
+    path: packages/compiler/test/owner-hydration-matrix.browser.test.ts
+    consumesCases:
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-IDENTITY
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-RECOVERY
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-CURRENT-INPUT
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-INITIAL-GRAPH
+    notes:
+      - Uses actual private emitted modules, real React/Vue server serialization and bundled native framework consumers in sandboxed Chromium. Runtime-plan registration assigns this source suite to the existing unique browser shard owner.
+      - Provenance binds fixture inputs, emitted artifacts, relevant emitter/helper sources, framework versions, checkout and the delivered browser bundle. Per-case output retains observed identities, lifetime counts, errors and screenshots.
+      - Local simulated DOM preflight does not establish physical browser acceptance. Application authentication/provenance, complete compiler/helper version binding, arbitrary state migration, native platform parity and complete per-target initialization remain outside these bounded cases.
+  - id: simulated-artifact-preflight
+    kind: runtime-test
+    status: needs-review
+    required: true
+    path: packages/compiler/test/owner-hydration-matrix.test.ts
+    consumesCases:
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-IDENTITY
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-RECOVERY
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-CURRENT-INPUT
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-INITIAL-GRAPH
+    notes:
+      - The same actual browser bundle runs in happy-dom to check fixture assembly and source behavior; the changed complete Vue SSR artifact closure also receives strict TypeScript validation. This entry is not physical browser evidence.
+  - id: native-source-initial-graph
+    kind: runtime-test
+    status: needs-review
+    required: true
+    path: packages/compiler/test/vue-owner-initial-graph.test.ts
+    consumesCases:
+      - T-LIFECYCLE-OWNER-BROWSER-0001-CASE-INITIAL-GRAPH
+    notes:
+      - Actual parser, emitted Vue modules and native Vue server/client execution cover mounted/updated Context writes, an actual pending async descendant, current Props after successful release, terminal cancellation, and a falsy mounted failure with secondary cleanup failure.
+      - This source consumer runs in simulated DOM. It does not establish physical browser execution of the async or failure probes.
+verifies:
+  contracts:
+    - id: C-LIFECYCLE-OWNER-INITIALIZATION-0001
+    - id: C-LIFECYCLE-0002
+openQuestions:
+  - id: T-LIFECYCLE-OWNER-BROWSER-0001-Q-ACCEPTANCE
+    question: Independently accept exact-source physical receipts and retain the separate full-target initialization and trust requirements from T-LIFECYCLE-REQUEST-OWNER-0001.
+    blocks:
+      - activation:T-LIFECYCLE-OWNER-BROWSER-0001
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Added a private generated browser owner matrix and initial Vue Context adoption ordering controls without promoting SSR admission.
+tags: [lifecycle, owner, initialization, hydration, context, browser]

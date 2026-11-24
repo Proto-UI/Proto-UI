@@ -1,0 +1,33 @@
+{
+  "scope": "Independent static review only of the six-line Qt host Root/template children delta; no SDK execution claimed by this reviewer.",
+  "baseHead": "b8800d4cef9302718d4514b1ba28508860059929",
+  "sourceBindings": [
+    {
+      "path": "packages/compiler/src/qt-native-owner.ts",
+      "sha256": "caae03b76edb76ec65d06caa97f94cd5b811a73468c5d34375d23fca641babb7"
+    },
+    {
+      "path": "packages/compiler/src/qt-source.ts",
+      "sha256": "6da3a8ad1ea17b0b270aede0c30200f392b48a23537781d454c5aaae0f867b1e"
+    },
+    {
+      "path": "packages/compiler/src/qt-native-view.ts",
+      "sha256": "25739307a1c219dd6f387464113582e29e0a56a20cdb5cb5eeb3f036de49a650"
+    },
+    {
+      "path": "spec/contracts/C-TEMPLATE-0001.yaml",
+      "sha256": "049a3effc8b8d4e9f9fab6f4c043990402cd246c7c487f9768c15078e4f3e8aa"
+    }
+  ],
+  "reviewed": [
+    "C-TEMPLATE-0001 A/B/C requires authored output under a host-owned Root, ordered sibling children, and no Root replacement by a template node.",
+    "Fixed Item Root wraps flattened output; default void selects one anonymous slot; empty output retains a Root.",
+    "applyNode true is limited to host Root; native adapter rootTag and rootNode marker stay owned by that Root; child projections use false.",
+    "Ordinary updates reuse root, detach ends its physical epoch, and destroyNode moves native parking slot back to its host instead of destroying it."
+  ],
+  "findings": [],
+  "notEstablished": [
+    "Independent execution of the eight actual Qt SDK consumer cases",
+    "Physical GPU or full Qt profile acceptance"
+  ]
+}

@@ -35,6 +35,15 @@ export default definePrototype({
       scroll.request({ kind: 'to', axis: 'horizontal', position: 0.5 })
     );
     def.expose.method('pauseKind', () => scroll.pauseFollowing().kind);
+    def.expose.method('syncHorizontal', () => scroll.sync({ axes: 'horizontal' }));
+    def.expose.method('syncVertical', () => scroll.sync({ axes: 'vertical' }));
+    def.expose.method('syncBoth', () => scroll.sync({ axes: 'both' }));
+    def.expose.method('syncOmitted', () => scroll.sync({}));
+    const axesOnly: { axes: 'horizontal'; projection: 'composed' } = {
+      axes: 'horizontal',
+      projection: 'composed',
+    };
+    def.expose.method('syncExtra', () => scroll.sync(axesOnly));
     def.expose.method(
       'byZeroKind',
       () => scroll.request({ kind: 'by', axis: 'vertical', delta: 0 }).kind

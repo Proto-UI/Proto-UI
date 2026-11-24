@@ -591,15 +591,32 @@ class NativeScroll {
   final Map<NativeHostTarget, (NativeHostGeometry?, void Function(PointerEvent)?, NativeHostGeometry?, void Function(PointerEvent))> _chromeOwned = {};
   final Map<int, PointerRoute> _dragRoutes = {};
   void configure(Map<String, Object?> patch) { owner.ensureSetup(); config = {...config, ...patch}; if (!['vertical','horizontal','both'].contains(config['axes'] ?? 'vertical')) throw ArgumentError('Invalid scroll axes'); if (!['auto','system','composed'].contains(config['projection'] ?? 'auto')) throw ArgumentError('Invalid scroll projection'); axes.publish(config['axes'] as String? ?? 'vertical'); _followFacts(); }
+  void sync(Map<String, Object?> patch) {
+    owner.ensureRuntime();
+    final next = patch['axes'] ?? config['axes'] ?? 'vertical';
+    if (!['horizontal','vertical','both'].contains(next)) throw ArgumentError('Invalid scroll axes');
+    if (next == (config['axes'] ?? 'vertical')) return;
+    config = {...config, 'axes': next};
+    final generation = ++_requestGeneration;
+    _readerObservation = null;
+    _followObservation = null;
+    _releaseChrome();
+    if (_pendingEndGeneration != null) {
+      _pendingEndGeneration = null;
+      endFollow.requestStatus.publish('rejected');
+    }
+    if (!owner.alive || generation != _requestGeneration) return;
+    owner.project();
+  }
   void bindComposedChrome(Map<String, Object?> binding) { owner.ensureSetup(); if (chrome.isNotEmpty && !identical(chrome, binding)) throw StateError('Composed chrome may be bound only once'); chrome = binding; }
   ScrollController _controller(String axis) => axis == 'horizontal' ? _horizontalControl : _verticalControl;
+  bool _allowsAxis(String axis) => (config['axes'] ?? 'vertical') == 'both' || (config['axes'] ?? 'vertical') == axis;
   ScrollPosition? _followPosition() {
     final policy = config['endFollow'];
     if (policy is! Map<String,Object?> || policy['mode'] != 'while-at-end') return null;
     final axis = policy['axis'] as String? ?? 'vertical';
     final control = _controller(axis);
-    if (!owner.alive || !owner.ready || !control.hasClients ||
-        axes.get() != 'both' && axes.get() != axis) return null;
+    if (!owner.alive || !owner.ready || !control.hasClients || !_allowsAxis(axis)) return null;
     return control.position.hasContentDimensions ? control.position : null;
   }
   ScrollPosition? _ownedNotificationPosition(BuildContext? context) {
@@ -659,7 +676,15 @@ class NativeScroll {
     return false;
   }
   void _followFacts() { final policy = config['endFollow']; endFollow.state.publish(policy is! Map<String,Object?> || policy['mode'] != 'while-at-end' ? 'off' : !owner.ready ? 'pending' : following ? 'following' : 'paused'); }
-  void _refresh() { if (!owner.alive || !owner.ready) return; horizontal.refresh(_horizontalControl); vertical.refresh(_verticalControl); _followFacts(); _refreshChrome(); }
+  void _refresh() {
+    if (!owner.alive || !owner.ready) return;
+    final hasHorizontal = _horizontalControl.hasClients, hasVertical = _verticalControl.hasClients;
+    // Axis intent is not an observation. Publish only attached native axes,
+    // after Flutter has applied the current widget/controller topology.
+    if (hasHorizontal || hasVertical) axes.publish(hasHorizontal && hasVertical ? 'both' : hasHorizontal ? 'horizontal' : 'vertical');
+    if (!owner.alive || !owner.ready) return;
+    horizontal.refresh(_horizontalControl); vertical.refresh(_verticalControl); _followFacts(); _refreshChrome();
+  }
   void _refreshChrome() {
     if (!owner.alive || !owner.ready || chrome.isEmpty || projection.get() != 'composed') return;
     final family = chrome['anatomy'] as NativeAnatomyFamily;
@@ -734,7 +759,7 @@ class NativeScroll {
     if (!owner.ready) return reject('not-mounted');
     final axis = request['axis'] as String? ?? 'vertical';
     final control = _controller(axis);
-    if (!control.hasClients || axes.get() != 'both' && axes.get() != axis) return reject('unavailable');
+    if (!control.hasClients || !_allowsAxis(axis)) return reject('unavailable');
     final metrics = control.position;
     if (!['by','page','to-end','to','control-drag'].contains(kind)) throw ArgumentError('Unknown Scroll request');
     if (!metrics.hasContentDimensions) return reject('unavailable');
@@ -762,7 +787,7 @@ class NativeScroll {
     final policy = config['endFollow'];
     if (policy is! Map<String,Object?> || policy['mode'] != 'while-at-end') return const {'kind':'rejected','reason':'unavailable'};
     final axis = policy['axis'] as String? ?? 'vertical';
-    if (!_controller(axis).hasClients || axes.get() != 'both' && axes.get() != axis) return const {'kind':'rejected','reason':'unavailable'};
+    if (!_controller(axis).hasClients || !_allowsAxis(axis)) return const {'kind':'rejected','reason':'unavailable'};
     final generation = ++_requestGeneration, epoch = owner.epoch;
     following = false;
     _explicitlyPaused = true;
@@ -778,8 +803,15 @@ class NativeScroll {
   Widget wrap(Widget root) {
     Widget result = root;
     final axes = config['axes'] as String? ?? 'vertical';
-    if (axes == 'vertical' || axes == 'both') result = SingleChildScrollView(controller: _verticalControl, child: result);
-    if (axes == 'horizontal' || axes == 'both') result = SingleChildScrollView(controller: _horizontalControl, scrollDirection: Axis.horizontal, child: result);
+    // Horizontal content may be taller than the non-scrolling viewport. Give
+    // its natural block layout room, while the viewport retains its finite
+    // cross-axis size and clips painting/hit testing at that boundary.
+    if (axes == 'horizontal') result = OverflowBox(alignment: AlignmentDirectional.topStart,
+      minHeight: 0, maxHeight: double.infinity, fit: OverflowBoxFit.deferToChild, child: result);
+    // A different physical axis must not inherit the old ScrollableState or
+    // ScrollPosition merely because both views have the same widget class.
+    if (axes == 'vertical' || axes == 'both') result = SingleChildScrollView(key: ObjectKey(_verticalControl), controller: _verticalControl, child: result);
+    if (axes == 'horizontal' || axes == 'both') result = SingleChildScrollView(key: ObjectKey(_horizontalControl), controller: _horizontalControl, scrollDirection: Axis.horizontal, child: result);
     if ((config['requireProjection'] ?? config['projection']) != 'composed') result = Scrollbar(controller: axes == 'horizontal' ? _horizontalControl : _verticalControl, child: result);
     final policy = config['endFollow'];
     if (policy is Map<String, Object?> && policy['mode'] == 'while-at-end') {

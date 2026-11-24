@@ -2506,6 +2506,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "proto-ui-gpui-consumer-composed-scroll"
+version = "0.1.0"
+dependencies = [
+ "gpui",
+ "proto-ui-gpui-native",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "proto-ui-gpui-consumer-context-a"
 version = "0.1.0"
 dependencies = [
@@ -2824,6 +2834,7 @@ dependencies = [
  "proto-ui-gpui-consumer-base-label",
  "proto-ui-gpui-consumer-base-toggle",
  "proto-ui-gpui-consumer-cold",
+ "proto-ui-gpui-consumer-composed-scroll",
  "proto-ui-gpui-consumer-context-a",
  "proto-ui-gpui-consumer-context-b",
  "proto-ui-gpui-consumer-context-child",

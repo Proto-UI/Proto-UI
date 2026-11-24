@@ -1,0 +1,80 @@
+{
+  "scope": "Independent reviewer original mounted control, preserved props-only failure and final exact-source replay; static no-new-finding review by /root/browser is reported separately from physical execution.",
+  "finalSourceBindings": [
+    {
+      "file": "packages/compiler/src/vue-source.ts",
+      "sha256": "e5ace099ed1d0a1b5998535d72e0a3dbfb0e2c9b98e8f2b493ee17fe24889fba"
+    },
+    {
+      "file": "packages/compiler/src/vue-ssr-support.ts",
+      "sha256": "3d21b7af644bcf281c674175d80403b76e60bd099666b0fbcdbb93492fc3f74a"
+    }
+  ],
+  "result": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "archive": {
+    "file": "independent-review.tar.gz",
+    "bytes": 75579,
+    "sha256": "f45878a8b88881c3fd639b1b49b137364220eed1669add3d8007db496f1085ee"
+  },
+  "entries": [
+    {
+      "path": "final-independent-probe.json",
+      "bytes": 1233,
+      "sha256": "abd4f3a5ff415bd5cbef71530e45c4b4294650b1db43275edb69f537b4acb05f"
+    },
+    {
+      "path": "final-independent-probe.log",
+      "bytes": 52803,
+      "sha256": "a811e08024445f64549376679478b2e058106da0b186dc0a52d93b9ce62244ef"
+    },
+    {
+      "path": "finding.json",
+      "bytes": 2214,
+      "sha256": "efd15f5380d0fe8dd7bc900c638a4ac9de503c03698dee1268b223ede8d060bb"
+    },
+    {
+      "path": "original-reviewed.patch",
+      "bytes": 7482,
+      "sha256": "222f74310e3ab2a8373dc8b5da0108da91544e8f70630f61ac4bc9662b7d80b5"
+    },
+    {
+      "path": "parent-vue-source.ts",
+      "bytes": 101285,
+      "sha256": "d61921cf9d7d632ffb94f75da60a255724d2e63397e6b9d3d50963e26ac32664"
+    },
+    {
+      "path": "parent-vue-ssr-support.ts",
+      "bytes": 6772,
+      "sha256": "b21bc88b15cee9be8ca76efa9dd7cb74458b64a929a7130b53fde1b3c29099f0"
+    },
+    {
+      "path": "probe.json",
+      "bytes": 3275,
+      "sha256": "1ab15bac2745f6471257b950a392ade32e410d39f411f4a0f140341f52534b4f"
+    },
+    {
+      "path": "probe.log",
+      "bytes": 54254,
+      "sha256": "d20eac9907ed83df1051e3d1afafe8c8cc62f881e1dbfdfd358e3013f0a5e83c"
+    },
+    {
+      "path": "probe.test.ts",
+      "bytes": 5122,
+      "sha256": "0f1ff0494283e1344f81b0505ad3377c8aa1922f2fe6f5467bbb886debc0cd7d"
+    },
+    {
+      "path": "vue-source.ts",
+      "bytes": 102024,
+      "sha256": "66354e62daa8788327d376182962621fa45536fa2ee7c12d9fb91d7a1dbbf8b4"
+    },
+    {
+      "path": "vue-ssr-support.ts",
+      "bytes": 7762,
+      "sha256": "834690f1a8899f90406761ee15b7e79958fd4befdd301cce41dc86ed93b123b7"
+    }
+  ]
+}

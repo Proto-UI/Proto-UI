@@ -72,6 +72,24 @@ cases:
     expectation: no-false-projection-no-request-replay-no-stale-physical-lease
 
 implementations:
+  - id: compiler-qt-scroll-request-outcomes
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/qt-scroll-request-outcomes.test.ts
+    required: false
+    consumesCases: [T-SCROLL-0001-CASE-REQUEST, T-SCROLL-0001-CASE-LIFETIME]
+    notes:
+      - Exercises the exact emitted Qt guest with bounded host witnesses; not native geometry or public profile acceptance.
+  - id: compiler-qt-native-scroll-consumer
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/qt-native-consumer.native.test.ts
+    required: false
+    consumesCases:
+      [T-SCROLL-0001-CASE-FACTS, T-SCROLL-0001-CASE-REQUEST, T-SCROLL-0001-CASE-LIFETIME]
+    notes:
+      - The optional Qt 6.4.2 SDK lane executes original generated QML and C++ with offscreen software rendering. An unset SDK skips the wrapper and supplies no acceptance.
+      - This bounded system Scroll fixture does not establish composed chrome, reveal, physical input, platform accessibility, or canonical profile admission.
   - id: scroll-availability-transaction
     kind: runtime-test
     status: passing

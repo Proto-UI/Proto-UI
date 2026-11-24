@@ -181,11 +181,11 @@ export function createOwner(host, options) {
     const read={get() {if(!active)throw new Error('Render frame expired');return resolved;},getRaw() {if(!active)throw new Error('Render frame expired');return raw;},isProvided(key) {if(!active)throw new Error('Render frame expired');return own(raw,key);}};
     const frame={el() {if(!active)throw new Error('Render frame expired');return element.apply(undefined,arguments);},slot() {if(!active)throw new Error('Render frame expired');if(slotUsed)throw new Error('Only one anonymous slot is allowed');slotUsed=true;return {qtTemplate:true,slot:true,tag:'slot',children:null};},props:read,read:{props:read,context:{read(key) {if(!active)throw new Error('Render frame expired');return scope.api.read(key);},tryRead(key) {if(!active)throw new Error('Render frame expired');return scope.api.tryRead(key);}}}};
     let output;
-    try {output=typeof render==='function'?render(frame):null;}finally{active=false;}
-    const roots=[];flatten(output,roots);
-    if(roots.length>1)throw new Error('Native Template requires a single Root');
-    cached=roots[0]||{qtTemplate:true,tag:'Item',children:null};
-    if(cached.slot)throw new Error('Anonymous slot cannot replace the single Root');
+    try {output=typeof render==='function'?render(frame):frame.slot();}finally{active=false;}
+    const children=[];flatten(output,children);
+    // C-TEMPLATE-0001: the host owns Root. Authored output, including a
+    // singular anonymous slot or sibling array, describes only its children.
+    cached={qtTemplate:true,tag:'Item',children};
     if(!root)root=options.createNode(options.content);
     applyNode(root,cached,true);options.rootChanged(root);
   }

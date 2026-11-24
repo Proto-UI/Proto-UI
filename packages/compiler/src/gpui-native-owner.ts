@@ -8,6 +8,7 @@ import { gpuiNativeTopologySource } from './gpui-native-topology';
 import { gpuiNativeTableSource } from './gpui-native-table';
 import { gpuiNativeBoundarySource } from './gpui-native-boundary';
 import { gpuiNativeScrollSource } from './gpui-native-scroll';
+import { gpuiNativeScrollChromeSource } from './gpui-native-scroll-chrome';
 import { gpuiNativeTextSource } from './gpui-native-text';
 import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
@@ -798,7 +799,7 @@ pub fn native_style(owner:&OwnerRef,tokens:&[String])->gpui::StyleRefinement{let
 pub fn paint_native_root(value:&NativeSnapshot,owner:&OwnerRef,focus:&FocusHandle,path:String,drive:Drive)->AnyElement{
 // The stable native host Root retains channels, feedback and commit ownership.
 // Authored children are captured native factories, never semantic tag dispatch.
-let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(style,fixed,translation)=native_presentation(owner,&tokens);*element.style()=style;
+let mut native_role=None;let mut element=div().id(gpui::ElementId::Name(path.clone().into()));let tokens=styles(owner);owner.borrow_mut().native_translation=gpui::Point::default();let(mut style,fixed,mut translation)=native_presentation(owner,&tokens);scroll_chrome_style(owner,&mut style);if scroll_chrome_owns_position(owner){translation=NativeTranslation::ZERO;}*element.style()=style;
 if control_label_is_label(owner){native_role=Some(gpui::Role::Label);element=element.role(gpui::Role::Label);}
 if image_supported(owner){element=element.role(gpui::Role::Image);}
 if owner.borrow().modules.hooks.contains("scroll")&&owner.borrow().modules.scroll.builtin_projection(){let (axes,handle)={let o=owner.borrow();(text_or(field(&o.modules.scroll.config,"axes"),"both"),o.modules.scroll.handle().clone())};element=element.track_scroll(&handle);if axes!="vertical"{element=element.overflow_x_scroll();}if axes!="horizontal"{element=element.overflow_y_scroll();}let scrolled=owner.clone();let scroll_drive=drive.clone();let scroll_epoch=owner.borrow().epoch;element=element.on_scroll_wheel(move|event,window,cx|{if scroll_input(&scrolled,event,window,scroll_epoch){scroll_drive(window,cx);}});}
@@ -852,7 +853,7 @@ element=element.child(canvas(move|_,window,_|{
             #[cfg(feature="experimental-focus-tree")]refresh_native_entry(&owner,window);
             Owner::commit(&owner,revision);if owner.borrow().disposed||!owner.borrow().present{return}
             if native_hover_reconcile(&owner,window,cx){window.prevent_default()}
-            poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{drive(window,cx)}
+            poll_state_watchers();if !owner.borrow().disposed&&owner.borrow().present{scroll_chrome_frame(&owner,window,cx);drive(window,cx)}
         }).is_none(){drive_pending_native_events(&owner,window,cx); }
     });
 }).absolute().size_full());
@@ -862,7 +863,7 @@ let slot=owner.borrow().slot.clone();let mut child_index=0;for child in (value.f
 // Built-in slot extents settle after their children. An external viewport may
 // be a later sibling; its observation belongs to the paint callback above.
 if owner.borrow().modules.hooks.contains("scroll"){let scrolled=owner.clone();element=element.child(canvas(move|_,window,_|{let builtin=scrolled.borrow().modules.scroll.builtin_projection();if builtin{scroll_frame(&scrolled,window);}},|_,_,_,_|{}).absolute().size_full());}
-let element=translated_element(crate::gpui_native_a11y::Semantics{element:element.into_element(),owner:Rc::downgrade(owner),role:native_role}.into_any_element(),translation,Some(Rc::downgrade(owner)));let(element,fixed)=positioning_root(owner,element,fixed);overlay_root(owner,element,fixed)
+let element=translated_element(crate::gpui_native_a11y::Semantics{element:element.into_element(),owner:Rc::downgrade(owner),role:native_role}.into_any_element(),translation,Some(Rc::downgrade(owner)));let element=scroll_chrome_root(owner,element);let(element,fixed)=positioning_root(owner,element,fixed);overlay_root(owner,element,fixed)
 }
 pub fn modifiers(fields:&mut Map<String,Json>,modifiers:gpui::Modifiers){fields.insert("altKey".into(),Json::Bool(modifiers.alt));fields.insert("ctrlKey".into(),Json::Bool(modifiers.control));fields.insert("shiftKey".into(),Json::Bool(modifiers.shift));fields.insert("metaKey".into(),Json::Bool(modifiers.platform));}
 pub fn portable_key(key:&gpui::Keystroke)->Option<String>{Some(crate::gpui_native_key::portable_key(key).unwrap_or_else(||"Unidentified".into()))}
@@ -1218,6 +1219,7 @@ mod callback_handle_identity_tests {
   gpuiNativeTableSource +
   gpuiNativeBoundarySource +
   gpuiNativeScrollSource +
+  gpuiNativeScrollChromeSource +
   gpuiNativeTextSource +
   gpuiNativeImageSource +
   gpuiNativePositioningSource +

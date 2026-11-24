@@ -1,0 +1,858 @@
+{
+  "scope": "Qt evidence checker repair. Synthetic report controls do not attest native execution. The actual producer is parser -> cold IR -> Qt emitted files only.",
+  "sourceCandidate": {
+    "baselineTree": "fa4e2343aca9601ca2cf3023a0f48a7896b691d4",
+    "candidateTree": "69670848cc0205119690509ff81be2979b4e70c1",
+    "sourceCommit": "b8800d4cef9302718d4514b1ba28508860059929",
+    "patch": "/workspace/scratch/f7b299133482/qt-evidence-checker-review/qt-evidence-checker-source.patch",
+    "patchSha256": "25559d25a409542ae33a85bacbddff32b3d4e2d65c5954a9f8d30f6d6c94783b",
+    "files": [
+      {
+        "file": "scripts/ci/check-qt-native-evidence.mjs",
+        "sha256": "7161f42c2c91f48bc4dee665cd73487ba37fa36d592200bc1f375fd7dee0c426"
+      },
+      {
+        "file": "scripts/ci/test/qt-native-evidence.test.mjs",
+        "sha256": "7cecc59ebb5caa6b195c94571555df517692d88d812c5f6e53ddfaf7f7b559ec"
+      },
+      {
+        "file": "packages/compiler/test/fixtures/qt-native-consumer/prepare.ts",
+        "sha256": "38d2825660f88e90b4f09ca5f6eb8d71d02996f41f0525032499093d454affbc"
+      },
+      {
+        "file": "packages/compiler/test/fixtures/qt-native-consumer/evidence-contract.json",
+        "sha256": "b4f7927f44126ee894380962691d8d736c2fea994034872c581f02ffd454eda8"
+      }
+    ],
+    "checks": {
+      "checker": {
+        "passed": 39,
+        "failed": 0,
+        "skipped": 0
+      },
+      "strict": {
+        "files": 410,
+        "diagnostics": 0
+      },
+      "actualProducer": {
+        "cases": 12,
+        "sourceInputs": 82,
+        "generatedArtifacts": 27,
+        "artifactsUnchangedFromParent12": true
+      },
+      "nativeExecution": false
+    }
+  },
+  "archive": {
+    "file": "author.tar.gz",
+    "bytes": 491832,
+    "sha256": "226869a5d3ba70c6576bc3d3487d0e08876a569614261d78b7f99198ec1d3c88"
+  },
+  "files": [
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtControls.mjs",
+      "bytes": 13908,
+      "sha256": "8fe06844058541b38153718a65ab6cfd813078943cd27103c92d05d9f47522a7"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtInteraction.mjs",
+      "bytes": 19715,
+      "sha256": "a6de149aef66ed9f37ecbf28688760f27b2f0c8b64edfa5f670f06fba74cf838"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtNativeHost.cpp",
+      "bytes": 22106,
+      "sha256": "8b5202a923a59652b343962d9c9631bf6fd27ee7d598e366c4f1b20389b88c7a"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtNativeHost.h",
+      "bytes": 2229,
+      "sha256": "a50918a1cdd759f172784b6d1f632237d93ae3b127f3031c26b48db57d3add85"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtNode.qml",
+      "bytes": 17936,
+      "sha256": "ee280b0a2852f92caa0da6dd65e4e3ba194ebb130bab8144c688a2f7a9881105"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtOwner.mjs",
+      "bytes": 23891,
+      "sha256": "76b207dd3c8c0352b064af26d8e395d5921df1e9755f1782bd717cb78be379be"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtPresentation.mjs",
+      "bytes": 5959,
+      "sha256": "03e31d934d80f6d235e9f64429f1ea906f48ded0f87514f15edb089d71ea8628"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtStyle.mjs",
+      "bytes": 2317,
+      "sha256": "c0dcf314f809fe9143f88d30fb14073aa2c037f7a970b5dfffd0e3acd3e7e97d"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtTableProjection.mjs",
+      "bytes": 8242,
+      "sha256": "b3164909426d7d8c605190256d58deda24c8e0394e7c34bfe29f9cae09e49952"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/QtTopology.mjs",
+      "bytes": 26468,
+      "sha256": "abbf1de3a1f99a9bb3c25f79cbfdf69ee81145d7a8748f66c376edb183a01c96"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/context/QtContextScope.mjs",
+      "bytes": 8568,
+      "sha256": "148ecbfc92432f3c23cc36dd2afab7e849271618ddcdae274e3f7ece08df9150"
+    },
+    {
+      "file": "actual-producer-artifacts/.proto-ui/qt/main.cpp",
+      "bytes": 752,
+      "sha256": "cf6b1b236f35ece4bd192d9adea312388996575baf8cebb4805ebaa59f773397"
+    },
+    {
+      "file": "actual-producer-artifacts/App.qml",
+      "bytes": 190,
+      "sha256": "8ee10beeac67cedf9b204eb3ba9b9d62eaf93f538d1a32d0a6483dd8d1efee0e"
+    },
+    {
+      "file": "actual-producer-artifacts/CMakeLists.txt",
+      "bytes": 388,
+      "sha256": "92d1a56339a9aaa74af7ba8cc60a11acd6ebc9532c09cb8e40979ea49f3f787e"
+    },
+    {
+      "file": "actual-producer-artifacts/Component.qml",
+      "bytes": 26148,
+      "sha256": "0b36748aba18ac3c17f6276a52bf7627ab7aee872526794ae769d73b8437a282"
+    },
+    {
+      "file": "actual-producer-artifacts/Consumer.qml",
+      "bytes": 8378,
+      "sha256": "0de1eeb0a0e0947cb0f16ba1a522ae47b6b6cca2764922c04a1821bdeb5dc806"
+    },
+    {
+      "file": "actual-producer-artifacts/TemplateDefault.qml",
+      "bytes": 5288,
+      "sha256": "d8b630db6bde98bb762a94e47e71e3fb02d21a5d37ae7d7edac5c9c786152bb7"
+    },
+    {
+      "file": "actual-producer-artifacts/TemplateEmpty.qml",
+      "bytes": 5491,
+      "sha256": "af190581f39b0c96f39ad9ab4f1d245e4e409d3e4e9ba98e9524a8e6bb82670f"
+    },
+    {
+      "file": "actual-producer-artifacts/TemplateSiblings.qml",
+      "bytes": 6331,
+      "sha256": "41c18bef78e88a1dbcc906d5bb043cdbbecab3e8c2d0f890876dab582f0f88fb"
+    },
+    {
+      "file": "actual-producer-artifacts/inputs/default.proto.ts",
+      "bytes": 188,
+      "sha256": "fc52049904671288491972f22680fc82f0ea5b095c6adeb30bd9a8876e58f9b8"
+    },
+    {
+      "file": "actual-producer-artifacts/inputs/empty.proto.ts",
+      "bytes": 209,
+      "sha256": "1cf08032c618f585f8eb50eaecc99ee9bcf57679a56f003cbea8b2f6c4eb0e9f"
+    },
+    {
+      "file": "actual-producer-artifacts/inputs/scroll.proto.ts",
+      "bytes": 1779,
+      "sha256": "830e09c541407caa7776e6470d912fb2f02f02f93c10edc5347b3f467c870d3f"
+    },
+    {
+      "file": "actual-producer-artifacts/inputs/siblings.proto.ts",
+      "bytes": 561,
+      "sha256": "8738da8764dc0a3f1abad20f9b1f4f2f7738902990640064d7c20f6e16d98926"
+    },
+    {
+      "file": "actual-producer-artifacts/ir/default.json",
+      "bytes": 2862,
+      "sha256": "ea3cdaaffd8ba73f90803f0d2e4a85780f420a69a034fb6ec3b0dfee73eb664f"
+    },
+    {
+      "file": "actual-producer-artifacts/ir/empty.json",
+      "bytes": 4709,
+      "sha256": "9f87fc95797a423baca2c2e33e2526a67f06ee4cbf6ccafdc11cb3443c3e416e"
+    },
+    {
+      "file": "actual-producer-artifacts/ir/scroll.json",
+      "bytes": 167203,
+      "sha256": "293617decaf2b54cc849d1d74ee59984d469eb004977697b04154819c88d5a03"
+    },
+    {
+      "file": "actual-producer-artifacts/ir/siblings.json",
+      "bytes": 26185,
+      "sha256": "001196fb6cbda94d2b99ad2ba3e1c0dccd109738514925e88f32339250787d2b"
+    },
+    {
+      "file": "actual-producer-artifacts/source-receipt.json",
+      "bytes": 19872,
+      "sha256": "ede7fa0515e40f5494281fadf6e7beaa27c20a64df5e4e0bcb6c696e9a83833f"
+    },
+    {
+      "file": "author/baseline-12-manifest.json",
+      "bytes": 1780,
+      "sha256": "ff19d1f852fba88de54e3f031fedfd36ab8867fd4b9713232fad58be910bcf63"
+    },
+    {
+      "file": "author/baseline-manifest.json",
+      "bytes": 1780,
+      "sha256": "0d69c3a370d5bf830389697dbd93561c6b2652356bcc2a4dbb06a88007a549f3"
+    },
+    {
+      "file": "author/checker-final.log",
+      "bytes": 2775,
+      "sha256": "b6d5b4fecbd185d33bbb1b5767db80e8be252febf48b5e6be4a364538115dc1b"
+    },
+    {
+      "file": "author/checker-green-r1.log",
+      "bytes": 2692,
+      "sha256": "cd4795e15c6c31fa6aeaca82b5978051a809f60af4afb03a374f135dc734aa11"
+    },
+    {
+      "file": "author/final-producer.json",
+      "bytes": 21133,
+      "sha256": "c27954fa796381c63b16abb2aab29284f671cacc607445f81bf1a2350722c82a"
+    },
+    {
+      "file": "author/parent-12-producer.json",
+      "bytes": 6585,
+      "sha256": "a43f1494d46fad6acd68b44256f3ff104b029c2d3b3fd09d08c90d437877bffc"
+    },
+    {
+      "file": "author/prepare-final.log",
+      "bytes": 144,
+      "sha256": "6d4d17822a052be0a122962b1ee39ba6679f408455c4208dc02b7f18a2cda0c3"
+    },
+    {
+      "file": "author/prepare-parent-12.log",
+      "bytes": 941,
+      "sha256": "a890f7a5b857a9c0305c22558a4e835dd67a75739e443a6369c50a1b3049f879"
+    },
+    {
+      "file": "author/producer-artifact-comparison.json",
+      "bytes": 137,
+      "sha256": "9a46ef9898266b3ea9aabb07803f676c81c97a51090da33235df6ffd695effb3"
+    },
+    {
+      "file": "author/qt-evidence-checker-source.patch",
+      "bytes": 33494,
+      "sha256": "25559d25a409542ae33a85bacbddff32b3d4e2d65c5954a9f8d30f6d6c94783b"
+    },
+    {
+      "file": "author/source-candidate.json",
+      "bytes": 1419,
+      "sha256": "1943405185e6e634171ec0e3296fe8ce11f24394a05eb0409286cd7b34c910d2"
+    },
+    {
+      "file": "author/source-input-closure.json",
+      "bytes": 4415,
+      "sha256": "fc841b4f71aa504460555d283eb8c122df5983cd5eca6a5c08090419629742ba"
+    },
+    {
+      "file": "author/strict-producer.log",
+      "bytes": 4038,
+      "sha256": "d167102f64837775f5ef0a5e41b5278057126554242265da4af88adc7d7171bb"
+    },
+    {
+      "file": "author/strict-producer.mjs",
+      "bytes": 914,
+      "sha256": "aad8150a288525f955a3f30d481f462f99697cc386b29483b94faabefaa43f02"
+    },
+    {
+      "file": "before/packages/compiler/test/fixtures/qt-native-consumer/prepare.ts",
+      "bytes": 3870,
+      "sha256": "a4648052e6ee1baf09d1d5b1bf3fff032c59798b54dd10f1f83a526b7c4cded3"
+    },
+    {
+      "file": "before/scripts/ci/check-qt-native-evidence.mjs",
+      "bytes": 4705,
+      "sha256": "718cd589ee447827f495b3e8de22238c9d1f723c99f46a0459ee8e806edd1383"
+    },
+    {
+      "file": "before/scripts/ci/test/qt-native-evidence.test.mjs",
+      "bytes": 2402,
+      "sha256": "0917c9296fabd9fe4ee4140025bacbee23db41b1deaf66d197b18da3656e2610"
+    },
+    {
+      "file": "candidate-inputs/package.json",
+      "bytes": 11274,
+      "sha256": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/package.json",
+      "bytes": 1066,
+      "sha256": "1664972b337d48996e9a40d32095ba0b65677d3a5ea7f1c2374ef00b546ed37b"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/a11y-event-types.ts",
+      "bytes": 13535,
+      "sha256": "d631e662e489012bf92505cb15c03ec6e1163abab7dea0720731a2bc92382a54"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/callable-effects.ts",
+      "bytes": 78632,
+      "sha256": "f151a48fd13b23e2111c8072ad1ca6b2dbbc8bb7f271085c719685aec15c2b5c"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/capture-analysis.ts",
+      "bytes": 8553,
+      "sha256": "1f5a53715aca8c3b4e6d50d98915d4ac4e81e41a9c4d4000f29cc29649f023af"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/capture-types.ts",
+      "bytes": 4916,
+      "sha256": "6451eaa8456fe2818e13470790275a5675436fef2ea0178d9efb5ec71a0bcf1f"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/context-declarations.ts",
+      "bytes": 2345,
+      "sha256": "c53f6ce08cefa2189e854f4dbcc93b3f26a68d3d784c9b7251f39bfa46de4d21"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/core-value-types.ts",
+      "bytes": 7890,
+      "sha256": "f861c563d82b0f06bccc5c7550f6cf043d7c78d38655ef3c42a92283f1f9ecd4"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/data-types.ts",
+      "bytes": 15278,
+      "sha256": "57e974df306ff4c4cb071d68fa4d29b41c9a98138956a61b03efb500aa467ee4"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/declaration-order.ts",
+      "bytes": 1527,
+      "sha256": "336044fe1e9cfab48a51c42699055e9e3ea068f59b3a37cd15a9970b86a9b57a"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/demand-pruning.ts",
+      "bytes": 11513,
+      "sha256": "0ab0215925b44a29d627ba36e33903b11bcf94173983a9a8287be68342096f64"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/diagnostics.ts",
+      "bytes": 1303,
+      "sha256": "b53c984b24eeddebcffab5f6f5391bd71b271f0e805f9576f6956d69ae0a8aec"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/event-types.ts",
+      "bytes": 1723,
+      "sha256": "05494b958ff400e6d6dfa4a685067fa2902f2ec3107febfde78e3000070d79c9"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/expression-types.ts",
+      "bytes": 22296,
+      "sha256": "4dbaa2720ad035771734306aa47c1e8dc876b79c458241fd9733e860447c69bc"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/flow-proof.ts",
+      "bytes": 6635,
+      "sha256": "6796d95ebf0a332fcbad6ed5d880510cc8482c03f42c8f322ccb0cc4bd06dab2"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/hook-admission.ts",
+      "bytes": 2553,
+      "sha256": "6ad383788543ff8d67672eb5731332236ea1167792bb17b11f469501b3b7cf2c"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/interaction-value-shape.ts",
+      "bytes": 6273,
+      "sha256": "2aed743c7bfe340df6e0c794d4a8d9b9728e21ca02f921d3a06be78e6fb3a483"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/ir-validation.ts",
+      "bytes": 103882,
+      "sha256": "b8ef32a38d694348ffc221dff7df643110795d4918ada24f4060cc856731e535"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/ir.ts",
+      "bytes": 17718,
+      "sha256": "8db5d64a4ced995f6e5d42084b72698fbf843f24e6fe9f027f274455dd590990"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-adapter-modules.ts",
+      "bytes": 2521,
+      "sha256": "10ffb3c8eb9a0062b3a2ea6eeff254d6f24184406a64cc8d58141e293b84a02e"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-control-label.ts",
+      "bytes": 48240,
+      "sha256": "c5af25dc2a129bcf17c8578053e15226734e571fd44145dad02521eba27151ab"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-image-view.ts",
+      "bytes": 14668,
+      "sha256": "bf4125a6bbf7086f2d7005905e63c48d2c7816c3c2df914fa119e6e60f2dbd5e"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-interaction.ts",
+      "bytes": 15716,
+      "sha256": "738f41c5124ca63c2d26bc264f0e6322816fb1541a3daf5cded597f4b4cea910"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-public-values.ts",
+      "bytes": 9392,
+      "sha256": "f09317eb31e6ec8497b1dc7fda018c05db244ce383694935a1fa5c19f8531f07"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-scroll-reveal.ts",
+      "bytes": 6744,
+      "sha256": "ea2c8f357eadb0bb011a88c2a235a359ab1db77250a1ab780ac0ac1ada056603"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-static-declarations.ts",
+      "bytes": 3782,
+      "sha256": "22b2635ca9593e4aa756c02827e542c8ec67cb5da262be20d90e720b6587cbb5"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/artifacts.ts",
+      "bytes": 11697,
+      "sha256": "80418ee51341169e15a9b98204d873ac6945da3c2f44f773228789dd0d04bc0a"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/dom-interaction.template.ts",
+      "bytes": 42786,
+      "sha256": "bcfb9281943a920aaa26bfe46b323acf30e41476f02d66f30b9ef6f76b293c86"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/dom-modules.template.ts",
+      "bytes": 156692,
+      "sha256": "815be7bd71be0e00295a179889768911ee63f7b04560230f83bff9288739bca9"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/legacy-text-v1.template.ts",
+      "bytes": 30569,
+      "sha256": "ef6762716678e06b621121ac269f76b234c84fda93377a2480f08159dc3d4009"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/part-relationships.template.ts",
+      "bytes": 12998,
+      "sha256": "c4e33fbc362ab5ef54774391eeaa51dc20e16a48a47641e63067f468331d9632"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/plan.ts",
+      "bytes": 9128,
+      "sha256": "ed6c75653150edb1a3e75a4c917568d74755a0dd4aa393a068ea3026fdc93422"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/specialize.ts",
+      "bytes": 13118,
+      "sha256": "7a5419d98b7858ded2fdd0e03eb988bc30403556c16da171c4e80ab42aa492c6"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-support/template-ast.ts",
+      "bytes": 5732,
+      "sha256": "0ab3759a95708ce010ac0611abf815bb518c707532dddd24e9e7f3b45ab730e3"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/native-value-lowering.ts",
+      "bytes": 16132,
+      "sha256": "47e5582e764c4cd11734b32999f829c2cbc81394de910dc9180347628aa85a6d"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/notification-plan.ts",
+      "bytes": 1650,
+      "sha256": "174b0cbec7e7743721fbebd7b9fc7df7cf7d5a1456a81d48884a819de893b3f1"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/operations.ts",
+      "bytes": 86485,
+      "sha256": "c7b855fcb9ed3849bb7d2fff7c5cf0855153740190ed63b545ba95d36ea7bab5"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/parser-module.ts",
+      "bytes": 34354,
+      "sha256": "7736816a80d846c118e22e031e5c7fd1e45a6ffcb4635f817b517d8d90ed8099"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/parser-source-demand.ts",
+      "bytes": 4310,
+      "sha256": "2303ce1f6712bf37f2a99ceb2b585607fd89fbb04304fef3483f01895e9c10b3"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/parser.ts",
+      "bytes": 167913,
+      "sha256": "55625344eaf56fb8327fc82fa46364611f8604b5259f8f7615df0b4f0f94f286"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/pointer-facts-admission.ts",
+      "bytes": 12344,
+      "sha256": "0e994a26e17cb2b8dda74c27728ef5e4af050a9cdba00e8000785b4575c24385"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-context.ts",
+      "bytes": 10471,
+      "sha256": "3c2889a595e1815c917f61bc7beb857de00b82034697c1e59c87008380656fb5"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-controls.ts",
+      "bytes": 13950,
+      "sha256": "96b624725ce01de4d8cb5dece1adda7ef9b6d94b037dfe4643cd171c2b104dbd"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-host.ts",
+      "bytes": 26074,
+      "sha256": "edb5aa4ca8e13ddddc157ec5b84c66e6090dd403a8a6c1f6cdf9a00bbd239035"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-interaction.ts",
+      "bytes": 19547,
+      "sha256": "a380821e8ea10dcd951d27b834ba3d450a6fd3311fdb14c774d67f0ce1fffac0"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-owner.ts",
+      "bytes": 23924,
+      "sha256": "caae03b76edb76ec65d06caa97f94cd5b811a73468c5d34375d23fca641babb7"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-presentation.ts",
+      "bytes": 5999,
+      "sha256": "67d7e0c0612e7e8a0c67d3754771faae0e84c3d56b69d92e02e6ce26d96cbad5"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-style.ts",
+      "bytes": 6973,
+      "sha256": "b030490ebb75ef806a58cbaa28e0cfaf42303d137f5f276f70855c2e00f486e0"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-table.ts",
+      "bytes": 1010,
+      "sha256": "23b867762ba16d3516b11bc865cd5ea62ae42a5fd10d94568b6e4d8d0fedbfed"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-topology.ts",
+      "bytes": 26504,
+      "sha256": "881aa215cc81bb01cd453cfafe588717854d023fc4dc42325aa2bed45b1e3df3"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-native-view.ts",
+      "bytes": 17968,
+      "sha256": "25739307a1c219dd6f387464113582e29e0a56a20cdb5cb5eeb3f036de49a650"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/qt-source.ts",
+      "bytes": 29541,
+      "sha256": "6da3a8ad1ea17b0b270aede0c30200f392b48a23537781d454c5aaae0f867b1e"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/record-accessors.ts",
+      "bytes": 2194,
+      "sha256": "f94638701473d21d1741ec79f6d4c7536e8dbcba26a2b47e82b4560f25a91f4e"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/rule-declarations.ts",
+      "bytes": 24089,
+      "sha256": "20b3f5c12bcbbb22b57df8d89b82da1304d46affa4c01cf2bef3ebe2a2f0c9c9"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/rule-plan.ts",
+      "bytes": 14233,
+      "sha256": "f4d0921ed90994017d979e43181594af71896de85ca2343fe23e44ed6075b3d5"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-module-bindings.ts",
+      "bytes": 2231,
+      "sha256": "72f55b32db48b9ccce16f8d13c3ae57a8d29b1e313806b4ebba3b76344b61695"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-module-initialization.ts",
+      "bytes": 9221,
+      "sha256": "43420a608e6695e7abaa6d711d613786a25818ccf16e3688fd9bf323e236cbe1"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-resolution.ts",
+      "bytes": 5960,
+      "sha256": "bfdaa53e9e33c2566fbc6f06e8e36c8db406fcc5ecf6e64a56ebf7eb4ccf5768"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-syntax.ts",
+      "bytes": 8500,
+      "sha256": "2f4d5d07115f4e1431200859de9a34db74f724f8ad23be02ea3bd948a3641e3b"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-type-resolution.ts",
+      "bytes": 12238,
+      "sha256": "294dac34705a8439bcda69f8390c665dd76ff247074f494a505d3470f6bb9d62"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-types.ts",
+      "bytes": 1853,
+      "sha256": "ea18c8a15c36b97ece9fdca856f8df288eb1fd4553ff18e1141984a90b03665c"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/source-values.ts",
+      "bytes": 17478,
+      "sha256": "e8e0ca333ec6afdb80823623bf9f1a119783965eae63f541e45c9d7ca8fc7e02"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/static-declarations.ts",
+      "bytes": 8702,
+      "sha256": "e76b738d2a9f27e00cac09679052b176e7611ee7e8e0150f410ab7000ac651f2"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/template-shape.ts",
+      "bytes": 14757,
+      "sha256": "cebe764ff5aea5bfc3169f4b92fb6e11b23c9703bce6f7a0c30cd96919b15430"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/value-children.ts",
+      "bytes": 745,
+      "sha256": "0db8cf768e65833e6ba038ea6ae2310ebb1e162f2c38b5e602ca51d4f77c5f16"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/src/value-types.ts",
+      "bytes": 22196,
+      "sha256": "49b50cc3938cdccbdc58116143b2d33b654fb2e3d4121da969cb21b9cc1fc46c"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/Consumer.qml",
+      "bytes": 8378,
+      "sha256": "0de1eeb0a0e0947cb0f16ba1a522ae47b6b6cca2764922c04a1821bdeb5dc806"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/default.proto.ts",
+      "bytes": 188,
+      "sha256": "fc52049904671288491972f22680fc82f0ea5b095c6adeb30bd9a8876e58f9b8"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/empty.proto.ts",
+      "bytes": 209,
+      "sha256": "1cf08032c618f585f8eb50eaecc99ee9bcf57679a56f003cbea8b2f6c4eb0e9f"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/evidence-contract.json",
+      "bytes": 6545,
+      "sha256": "b4f7927f44126ee894380962691d8d736c2fea994034872c581f02ffd454eda8"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/prepare.ts",
+      "bytes": 3371,
+      "sha256": "38d2825660f88e90b4f09ca5f6eb8d71d02996f41f0525032499093d454affbc"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/scroll.proto.ts",
+      "bytes": 1779,
+      "sha256": "830e09c541407caa7776e6470d912fb2f02f02f93c10edc5347b3f467c870d3f"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/fixtures/qt-native-consumer/siblings.proto.ts",
+      "bytes": 561,
+      "sha256": "8738da8764dc0a3f1abad20f9b1f4f2f7738902990640064d7c20f6e16d98926"
+    },
+    {
+      "file": "candidate-inputs/packages/compiler/test/qt-native-consumer.native.test.ts",
+      "bytes": 4234,
+      "sha256": "03e24808aaa846c1f7c691724805042c6854f58d5d9947a1cfca54848794cf28"
+    },
+    {
+      "file": "candidate-inputs/packages/core/src/control-label.ts",
+      "bytes": 5484,
+      "sha256": "5ef3f317bdadf74070622efc1ea7dbaa0a1aa3079b7f9ea669468c05c6c4a8c6"
+    },
+    {
+      "file": "candidate-inputs/packages/core/src/spec/feedback/placeholder.ts",
+      "bytes": 387,
+      "sha256": "4d68d6f1b4c37fd98bace9d81a7fd7377de2943c4bc21001fe6900b54aaf8052"
+    },
+    {
+      "file": "candidate-inputs/packages/core/src/spec/feedback/semantic-merge.ts",
+      "bytes": 5658,
+      "sha256": "85d3221a8c55b985aa416771658c4b0594d181b62028d021d93e809eca54de58"
+    },
+    {
+      "file": "candidate-inputs/packages/core/src/spec/feedback/style.ts",
+      "bytes": 1155,
+      "sha256": "cb8000de9c07ac974ac4950f8053de7848d9911692c36402b1af08690bb17dcc"
+    },
+    {
+      "file": "candidate-inputs/packages/core/src/spec/feedback/tokens.ts",
+      "bytes": 4438,
+      "sha256": "250e9fba631156de890dac800447ac636b3c1d07eb66b0052a6d76f05cfe7db3"
+    },
+    {
+      "file": "candidate-inputs/pnpm-lock.yaml",
+      "bytes": 270891,
+      "sha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8"
+    },
+    {
+      "file": "candidate-inputs/scripts/ci/check-qt-native-evidence.mjs",
+      "bytes": 7647,
+      "sha256": "7161f42c2c91f48bc4dee665cd73487ba37fa36d592200bc1f375fd7dee0c426"
+    },
+    {
+      "file": "candidate-inputs/tsconfig.json",
+      "bytes": 3432,
+      "sha256": "f0e0085455b433e6f1ad390815c9a00ee834a582dd7c1072a79052c475e30cb2"
+    },
+    {
+      "file": "candidate-tests/scripts/ci/test/qt-native-evidence.test.mjs",
+      "bytes": 13731,
+      "sha256": "7cecc59ebb5caa6b195c94571555df517692d88d812c5f6e53ddfaf7f7b559ec"
+    },
+    {
+      "file": "original-negative-controls/probe.log",
+      "bytes": 982,
+      "sha256": "d3b03dbb4670cc521ceb255b4674ec1180bed9eeae64c59db079a52b4815ad19"
+    },
+    {
+      "file": "original-negative-controls/probe.mjs",
+      "bytes": 3904,
+      "sha256": "d4e681953a535f7d5463a3b3446330446bd5d0052d067f1ed6c674372c02b831"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/acceptance.json",
+      "bytes": 1457,
+      "sha256": "8c9c5775e3e56d8a021b160ef59dd474c61a06a3936df5e3151d7438d807fc60"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/Consumer.qml",
+      "bytes": 6440,
+      "sha256": "0f743d45b793f43ccd6c864ffc2c33be2a6518622135f83abf970e6a6461db2f"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/build.json",
+      "bytes": 105,
+      "sha256": "53a2d6a061fde28c850a997b56ebd6db39a23049f4b480506ccfddb911fdc730"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/configure.json",
+      "bytes": 99,
+      "sha256": "3c57898d7a37dd32cc223ebcb96113cda46d6e5894d145f216e47336590d0a8f"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/consumer.json",
+      "bytes": 831,
+      "sha256": "5cbf6159159668e5dfd81b9fe0cb7198c972356a219838a1cba30c60fac242dd"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/generated-drift.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/qt-version.json",
+      "bytes": 111,
+      "sha256": "978f848f397c54558cd02776765b696bcbc9941b9e2f90c6dac3412ae105083c"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/proto-qt-native-independent/source-receipt.json",
+      "bytes": 466,
+      "sha256": "e40bc5642f6ccb0f5fc3c7dfe763f2f0350511649f7bcc626e2a0d28efbbde17"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/source-sha.txt",
+      "bytes": 41,
+      "sha256": "71cb7c351168d14de3fdb69e68d1ccbff2bf8280eed7b50395842a30b0984933"
+    },
+    {
+      "file": "original-negative-controls/receipts/empty-inventories-de0y98/vitest.json",
+      "bytes": 279,
+      "sha256": "71c0bc587e8f0895410db3723986321e3389ccddde1ad9463720684fc95ea1b9"
+    },
+    {
+      "file": "original-negative-controls/receipts/findings.json",
+      "bytes": 982,
+      "sha256": "d3b03dbb4670cc521ceb255b4674ec1180bed9eeae64c59db079a52b4815ad19"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/acceptance.json",
+      "bytes": 1457,
+      "sha256": "5669cf2198cd5d433f7ad10e255253d727c306ccf797777e54b7054aeaa2cc9a"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/Consumer.qml",
+      "bytes": 6440,
+      "sha256": "0f743d45b793f43ccd6c864ffc2c33be2a6518622135f83abf970e6a6461db2f"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/build.json",
+      "bytes": 105,
+      "sha256": "53a2d6a061fde28c850a997b56ebd6db39a23049f4b480506ccfddb911fdc730"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/configure.json",
+      "bytes": 99,
+      "sha256": "3c57898d7a37dd32cc223ebcb96113cda46d6e5894d145f216e47336590d0a8f"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/consumer.json",
+      "bytes": 553,
+      "sha256": "c4b7148f7fa1eb6053eda7616a2d7eb4ac27ba915b60005afcd83cb64b75ade6"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/generated-drift.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/qt-version.json",
+      "bytes": 111,
+      "sha256": "978f848f397c54558cd02776765b696bcbc9941b9e2f90c6dac3412ae105083c"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/proto-qt-native-independent/source-receipt.json",
+      "bytes": 336,
+      "sha256": "7cf86462b00819b747f6a57c2aada165adaf11741e31f16816125396d38a3b39"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/source-sha.txt",
+      "bytes": 41,
+      "sha256": "71cb7c351168d14de3fdb69e68d1ccbff2bf8280eed7b50395842a30b0984933"
+    },
+    {
+      "file": "original-negative-controls/receipts/foreign-case-list-Nsq12V/vitest.json",
+      "bytes": 279,
+      "sha256": "71c0bc587e8f0895410db3723986321e3389ccddde1ad9463720684fc95ea1b9"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/acceptance.json",
+      "bytes": 1457,
+      "sha256": "6124e49f2eca41b84c76067516c5ec62c916eb5ac235359eb93fc54e1e536a6d"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/Consumer.qml",
+      "bytes": 6440,
+      "sha256": "0f743d45b793f43ccd6c864ffc2c33be2a6518622135f83abf970e6a6461db2f"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/build.json",
+      "bytes": 105,
+      "sha256": "53a2d6a061fde28c850a997b56ebd6db39a23049f4b480506ccfddb911fdc730"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/configure.json",
+      "bytes": 99,
+      "sha256": "3c57898d7a37dd32cc223ebcb96113cda46d6e5894d145f216e47336590d0a8f"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/consumer.json",
+      "bytes": 831,
+      "sha256": "5cbf6159159668e5dfd81b9fe0cb7198c972356a219838a1cba30c60fac242dd"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/generated-drift.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/qt-version.json",
+      "bytes": 111,
+      "sha256": "978f848f397c54558cd02776765b696bcbc9941b9e2f90c6dac3412ae105083c"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/proto-qt-native-independent/source-receipt.json",
+      "bytes": 614,
+      "sha256": "56a8fe20ef2267da3e1d2b6ba16cce3696a4e6ec787034f04bcacddc0f92ff48"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/source-sha.txt",
+      "bytes": 41,
+      "sha256": "71cb7c351168d14de3fdb69e68d1ccbff2bf8280eed7b50395842a30b0984933"
+    },
+    {
+      "file": "original-negative-controls/receipts/omitted-generated-artifacts-qDKJLp/vitest.json",
+      "bytes": 279,
+      "sha256": "71c0bc587e8f0895410db3723986321e3389ccddde1ad9463720684fc95ea1b9"
+    }
+  ]
+}

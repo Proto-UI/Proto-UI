@@ -588,6 +588,7 @@ function assertNativeScrollConsumerEvidence(workflow) {
   for (const [target, log] of [
     ['scroll_pause', 'scroll-pause-consumer.log'],
     ['scroll_reader', 'scroll-reader-consumer.log'],
+    ['composed_scroll', 'composed-scroll-consumer.log'],
   ]) {
     const matches = job.steps.filter((step) =>
       new RegExp(`--test ${target}(?:\\s|$)`, 'u').test(step.run ?? '')
@@ -603,10 +604,24 @@ function assertNativeScrollConsumerEvidence(workflow) {
       'set -euo pipefail',
       `cargo +1.98.1 test --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --features test-support --test ${target} -- --test-threads=1 --nocapture 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/${log}"`,
     ]);
+    if (target === 'composed_scroll') assert.equal(step.id, 'composed_scroll');
   }
+  const receipts = job.steps.filter((step) =>
+    step.run?.includes('check-gpui-composed-scroll-evidence.mjs')
+  );
+  assert.equal(receipts.length, 1);
+  assert.equal(receipts[0].if, '${{ !cancelled() }}');
+  assert.equal(receipts[0]['continue-on-error'], undefined);
+  assert.deepEqual(receipts[0].env, {
+    PROTO_UI_COMPOSED_STEP_OUTCOME: '${{ steps.composed_scroll.outcome }}',
+  });
+  assert.equal(
+    receipts[0].run,
+    'node scripts/ci/check-gpui-composed-scroll-evidence.mjs "$RUNNER_TEMP/gpui-evidence"'
+  );
 }
 
-test('native Scroll evidence executes both complete locked targets in the existing native owner', () => {
+test('native Scroll evidence executes all complete locked targets in the existing native owner', () => {
   assertNativeScrollConsumerEvidence(readWorkflows()['compiler-gpui-source-consumers.yml']);
 });
 
@@ -666,6 +681,27 @@ test('native Scroll evidence rejects missing, duplicate, filtered, optional or s
       targetStep(workflow).run = targetStep(workflow).run.replace('set -euo pipefail', 'set -eu');
     },
   ];
+  for (const composedMutation of [
+    (steps) => steps.filter((step) => !step.run?.includes('--test composed_scroll ')),
+    (steps) => [
+      ...steps,
+      structuredClone(steps.find((step) => step.run?.includes('--test composed_scroll '))),
+    ],
+    (steps) =>
+      steps.map((step) =>
+        step.run?.includes('--test composed_scroll ') ? { ...step, if: 'false' } : step
+      ),
+    (steps) =>
+      steps.filter((step) => !step.run?.includes('check-gpui-composed-scroll-evidence.mjs')),
+    (steps) =>
+      steps.map((step) =>
+        step.run?.includes('check-gpui-composed-scroll-evidence.mjs') ? { ...step, env: {} } : step
+      ),
+  ]) {
+    const changed = structuredClone(original);
+    changed.jobs['native-consumer'].steps = composedMutation(changed.jobs['native-consumer'].steps);
+    assert.throws(() => assertNativeScrollConsumerEvidence(changed));
+  }
   for (const mutate of mutations) {
     const changed = structuredClone(original);
     mutate(changed);
@@ -718,7 +754,7 @@ function assertFlutterScrollConsumerEvidence(workflow) {
   assert.equal(checks[0]['continue-on-error'], undefined);
   assert.equal(
     checks[0].run,
-    'node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 14'
+    'node scripts/ci/check-flutter-scroll-evidence.mjs "$RUNNER_TEMP/flutter-scroll-evidence" 17'
   );
   assert.ok(job.steps.indexOf(prepare[0]) < job.steps.indexOf(native[0]));
   assert.ok(job.steps.indexOf(native[0]) < job.steps.indexOf(checks[0]));

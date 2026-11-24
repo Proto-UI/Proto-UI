@@ -1,0 +1,154 @@
+{
+  "scope": "Actual sandboxed Chromium 145.0.7632.6 nine-case owner matrix, portable delivery of frozen actual emitted artifacts with byte-identical repository assertions.",
+  "archive": {
+    "file": "physical.tar.gz",
+    "bytes": 747308,
+    "sha256": "6e75de549320717af44a34d440bc38a414c1cce9ccf01c680d30c3fedea69876"
+  },
+  "execution": {
+    "browserVersion": "145.0.7632.6",
+    "nodeVersion": "v24.22.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "chromiumSandbox": true,
+    "bundleSha256": "12c5461e71862940ccfa79a7c08acc8f2a3e77ce9d0ce226e4e45c0fff83c6bf",
+    "oracleSha256": "03cc4e2f93adf163ac05885a00a53d965475300b2cf7d00deabc230c1191cf4c",
+    "candidateSourceTree": "543ea376db64388814ba4a02cd968236c69747a7",
+    "authorTree": "f18a29ead00664ee50e806863900cc7a379d0ad0"
+  },
+  "result": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "startedAt": "2026-11-23T22:33:31.011571+00:00",
+    "finishedAt": "2026-11-23T22:34:05.529346+00:00"
+  },
+  "entries": [
+    {
+      "path": "browser.log",
+      "bytes": 104,
+      "sha256": "49326adbe314885637f008b5c0edff96ae2037c97bace808e7645fdc286796bb"
+    },
+    {
+      "path": "evidence/execution.json",
+      "bytes": 11012,
+      "sha256": "feb3473d4d64b5de2949d626a7fcd301063ffe0ea7ddc1d50da08c96211113f0"
+    },
+    {
+      "path": "evidence/react-ownership.json",
+      "bytes": 5442,
+      "sha256": "49688e575904d16e63dd58d48adbb55cd1d81c03cc5f53f28946b609771ddba6"
+    },
+    {
+      "path": "evidence/react-ownership.png",
+      "bytes": 14877,
+      "sha256": "1343ccc9a05f9c4cc66120f60fe4dd156d819327dc7209497739feb83a03420e"
+    },
+    {
+      "path": "evidence/react-rejection.json",
+      "bytes": 2930,
+      "sha256": "8f6721f6f9a143565c3506bac60129d4280271cde647d37364c731b4a8a7b203"
+    },
+    {
+      "path": "evidence/react-rejection.png",
+      "bytes": 13881,
+      "sha256": "902d2c341c1d6329279868dce40ec4270ca45cb816df35fb35efae9a362d82ab"
+    },
+    {
+      "path": "evidence/vue-absent.json",
+      "bytes": 3094,
+      "sha256": "ff0241349aff5093e83ef492c82c0e837fb1f532ced32b7aa4c798d49c26bb15"
+    },
+    {
+      "path": "evidence/vue-absent.png",
+      "bytes": 13980,
+      "sha256": "6544393df8d482d210ceee2d393efea7eb97aaca64e56f0616df934b8a0c27b0"
+    },
+    {
+      "path": "evidence/vue-commit.json",
+      "bytes": 3278,
+      "sha256": "8454c63286e278aa9e57f81cb2dd612d2b5e50f9abc2ba20d59c00d8fcd75bb4"
+    },
+    {
+      "path": "evidence/vue-commit.png",
+      "bytes": 13913,
+      "sha256": "b349a1930a7101d894e73379f91edf819d6fb1ebd7dba700e9eb174ccce8de1c"
+    },
+    {
+      "path": "evidence/vue-failure.json",
+      "bytes": 3821,
+      "sha256": "4db4b3ac84cbc6399b3c852a3d3e40aff130fa52fda7296dbbf563936897a9bf"
+    },
+    {
+      "path": "evidence/vue-failure.png",
+      "bytes": 13866,
+      "sha256": "dcde885476f8835c9c989ab1fe5dc7fb12e5de898366f24a1b1ac1aeec728b5e"
+    },
+    {
+      "path": "evidence/vue-ownership.json",
+      "bytes": 4930,
+      "sha256": "71874f34cff2754e762dd42f5f5279508a98bb429e1ecc97f5d33b685ec0951c"
+    },
+    {
+      "path": "evidence/vue-ownership.png",
+      "bytes": 14992,
+      "sha256": "050698ed19d84b7674e2be30bee5013b3d096d63e7d8c9f8080e3730a5600c2a"
+    },
+    {
+      "path": "evidence/vue-rejection.json",
+      "bytes": 2343,
+      "sha256": "d80ffcaecfcde21fb0548211856ab77c74bf9fa4d2c5188386022e42f5b67433"
+    },
+    {
+      "path": "evidence/vue-rejection.png",
+      "bytes": 14762,
+      "sha256": "e9fe82a1b09c3329f786f15d5b1455863bf32e6a75a0ee695a8895ee8a06f989"
+    },
+    {
+      "path": "evidence/vue2-ownership.json",
+      "bytes": 5335,
+      "sha256": "e0dc046ae3eac57f60e09213985a46c8d5a88ff7c97c57ebf4bab62e76b9748b"
+    },
+    {
+      "path": "evidence/vue2-ownership.png",
+      "bytes": 15336,
+      "sha256": "d7a7cba043dad3af9289587ce2d8c29e7a410505528e56cb061c324ecf246ed1"
+    },
+    {
+      "path": "evidence/vue2-rejection.json",
+      "bytes": 1960,
+      "sha256": "51c5712d1cb0b960616c9806d792fb44f16edb83093bc30d80344f4e86c75d98"
+    },
+    {
+      "path": "evidence/vue2-rejection.png",
+      "bytes": 14846,
+      "sha256": "44c20beeae378604e2e1c4c0cabc3f7fb3674e7a094d741ab9427c9a07b0a4a9"
+    },
+    {
+      "path": "finished.json",
+      "bytes": 123,
+      "sha256": "06bacc8fbc870ee6905130ef55a48ab573a7892842207954fe03a39a6055d4ac"
+    },
+    {
+      "path": "payload.tar.gz",
+      "bytes": 649032,
+      "sha256": "da76f6e486884ceb8bb6eb74e96f1b7734ae45c7470ed7cac3f6afff78680f94"
+    },
+    {
+      "path": "process.json",
+      "bytes": 612,
+      "sha256": "6de0f354b1128dfdccf18df558ef2cb81f7c7db288278f594bc589b70ea271c7"
+    },
+    {
+      "path": "run-driver.py",
+      "bytes": 1387,
+      "sha256": "d70e517b14b75e39475ebad74b3798fd9883fe63f969b1e497c6bac5e55c700b"
+    },
+    {
+      "path": "vitest.json",
+      "bytes": 3126,
+      "sha256": "743d79f28202f78e035738c64c3fb80943565d16221c99876f571fdf9da57155"
+    }
+  ]
+}

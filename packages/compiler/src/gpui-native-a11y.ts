@@ -1,6 +1,6 @@
 // Pinned GPUI Element::write_a11y_info writes the actual AccessKit node.
 export const gpuiNativeA11ySource = String.raw`use gpui::{App, Bounds, Element, ElementId, GlobalElementId, InspectorElementId, LayoutId, Pixels, Window};
-use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view,control_label_commit,ControlLabelNativeView,control_label_retain_native_view,control_label_release_native_view,control_label_manages_native_view};
+use crate::gpui_native_owner::{OwnerWeak,Value,text_content,resolved,detach_native_view,control_label_commit,ControlLabelNativeView,control_label_retain_native_view,control_label_release_native_view,control_label_manages_native_view,ScrollChromeNativeView,scroll_chrome_retain_native_view,scroll_chrome_release_native_view,scroll_chrome_manages_native_view};
 use std::hash::{Hash,Hasher};
 #[cfg(not(feature = "gpui-modern-element-api"))]
 fn node_id(id: &GlobalElementId) -> gpui::accesskit::NodeId {
@@ -69,12 +69,14 @@ fn positive_integer(value:&Value)->Option<usize>{let number=match value{Value::N
 fn finite_number(value:&Value)->Option<f64>{let number=match value{Value::Number(number)=>*number,Value::Json(serde_json::Value::Number(number))=>number.as_f64()?,_=>return None};number.is_finite().then_some(number)}
 fn token_is(value:&Value,token:&str)->bool{matches!(value,Value::Json(serde_json::Value::String(value))if value.eq_ignore_ascii_case(token))}
 fn aria_boolean(value:&Value)->Option<bool>{match value{Value::Json(serde_json::Value::Bool(value))=>Some(*value),_ if token_is(value,"true")=>Some(true),_ if token_is(value,"false")=>Some(false),_=>None}}
-struct NativeViewLease{owner:OwnerWeak,window:gpui::WindowId,hitbox:gpui::HitboxId,control_label_managed:bool,control_label:Option<std::rc::Rc<ControlLabelNativeView>>}
+struct NativeViewLease{owner:OwnerWeak,window:gpui::WindowId,hitbox:gpui::HitboxId,control_label_managed:bool,control_label:Option<std::rc::Rc<ControlLabelNativeView>>,scroll_chrome_managed:bool,scroll_chrome:Option<std::rc::Rc<ScrollChromeNativeView>>}
 impl Drop for NativeViewLease{fn drop(&mut self){
-if let Some(view)=self.control_label.take(){control_label_release_native_view(&view);return;}
+let managed=self.control_label_managed||self.control_label.is_some()||self.scroll_chrome_managed||self.scroll_chrome.is_some();
+if let Some(view)=self.control_label.take(){control_label_release_native_view(&view);}
+if let Some(view)=self.scroll_chrome.take(){scroll_chrome_release_native_view(&view);}
 // A managed state remains managed even if admission later withdraws its receipt.
 // Its late Drop must not fall back to a recycled window/hitbox identity.
-if self.control_label_managed{return;}
+if managed{return;}
 if let Some(owner)=self.owner.upgrade(){let live={let owner=owner.borrow();owner.window_id==Some(self.window)&&owner.native_hitbox.as_ref().is_some_and(|hitbox|hitbox.id==self.hitbox)};if live{detach_native_view(&owner);}}
 }}
 pub struct Semantics<E:Element>{pub element:E,pub owner:OwnerWeak,pub role:Option<gpui::Role>}
@@ -93,10 +95,12 @@ if let Some(owner)=self.owner.upgrade(){let hitbox=window.insert_hitbox(bounds,g
 // GPUI retains accessed element state through cached frames and drops it when
 // the actual native subtree disappears. No frame polling or owner disposal.
 if let Some(id)=id{let a11y_node=self.a11y_role().map(|_|node_id(id));window.with_element_state(id,|state:Option<NativeViewLease>,window|{
-let mut state=state.filter(|state|std::rc::Weak::ptr_eq(&state.owner,&self.owner)).unwrap_or_else(||NativeViewLease{owner:self.owner.clone(),window:window_id,hitbox:hitbox_id,control_label_managed:false,control_label:None});
+let mut state=state.filter(|state|std::rc::Weak::ptr_eq(&state.owner,&self.owner)).unwrap_or_else(||NativeViewLease{owner:self.owner.clone(),window:window_id,hitbox:hitbox_id,control_label_managed:false,control_label:None,scroll_chrome_managed:false,scroll_chrome:None});
 state.window=window_id;state.hitbox=hitbox_id;
 state.control_label_managed|=state.control_label.is_some()||control_label_manages_native_view(&owner);
 state.control_label=control_label_retain_native_view(&owner,state.control_label.take(),a11y_node,hitbox.clone(),bounds,window,cx);
+state.scroll_chrome_managed|=state.scroll_chrome.is_some()||scroll_chrome_manages_native_view(&owner);
+state.scroll_chrome=scroll_chrome_retain_native_view(&owner,state.scroll_chrome.take(),hitbox.clone(),bounds,window,cx);
 ((),state)});}
 // A cached authored projection can acquire a different physical binding without
 // another Owner::commit. Cached native views may enter layout during prepaint;
@@ -241,12 +245,12 @@ mod native_view_scope_tests {
             // collision is valid across windows and must not identify a lease.
             let id=gpui::HitboxId::placeholder();
             {let mut o=owner.borrow_mut();o.phase="idle";o.mounted=true;o.window_id=Some(second_id);o.bounds=Some(Bounds::default());o.native_hitbox=Some(gpui::Hitbox{id,bounds:Bounds::default(),content_mask:gpui::ContentMask::default(),behavior:gpui::HitboxBehavior::Normal});}
-            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:first_id,hitbox:id,control_label_managed:false,control_label:None});assert!(ready(&owner));
+            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:first_id,hitbox:id,control_label_managed:false,control_label:None,scroll_chrome_managed:false,scroll_chrome:None});assert!(ready(&owner));
             // A previously managed state may have withdrawn its receipt while
             // absent, then be dropped after a newer native epoch reused this id.
-            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id,control_label_managed:true,control_label:None});
+            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id,control_label_managed:true,control_label:None,scroll_chrome_managed:false,scroll_chrome:None});
             assert!(ready(&owner), "a withdrawn managed state cannot fall back to legacy hitbox identity");
-            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id,control_label_managed:false,control_label:None});assert!(!ready(&owner));Owner::dispose(&owner);
+            drop(NativeViewLease{owner:Rc::downgrade(&owner),window:second_id,hitbox:id,control_label_managed:false,control_label:None,scroll_chrome_managed:false,scroll_chrome:None});assert!(!ready(&owner));Owner::dispose(&owner);
         }).unwrap();
     }
 }

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "boundary": "Local working-source checks only; full hosted final-head acceptance remains separate.",
+  "files": [
+    {
+      "path": "alias-and-serial-wasm.tar.gz",
+      "bytes": 1052507,
+      "sha256": "3635c5fed7a7d92bc09932d49c844a1ad345787ead63bc7e8ee752e8dcfa73c5"
+    },
+    {
+      "path": "local-validation.tar.gz",
+      "bytes": 195374,
+      "sha256": "731b4770c749b51ff01134870efad7610e917fdc8973ca22acdfa19418a076e0"
+    },
+    {
+      "path": "source-continuation.json",
+      "bytes": 1030,
+      "sha256": "54c525f0571186968fdef7f98aa43ca20dbaa21d04f15ad2fa928b5e80a13e55"
+    }
+  ]
+}

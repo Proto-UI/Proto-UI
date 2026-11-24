@@ -1,0 +1,6994 @@
+{
+  "schemaVersion": 1,
+  "kind": "gpui-source-lowering-inventory",
+  "sourceRevision": "12af03bcdcdfc1f319c77e51950ae1a71abf6d25",
+  "sourceFiles": [
+    {
+      "file": "packages/compiler/src/gpui-source.ts",
+      "sha256": "645b834de08a6953194983940e8ab0c331806519b54d5d5a27aad5ea7874f07a"
+    },
+    {
+      "file": "packages/compiler/src/gpui-scalar-lowering.ts",
+      "sha256": "edd088033e4d9efbcfa10d80f85969dc25a34d58253336045562a9c059669c3c"
+    },
+    {
+      "file": "packages/compiler/src/gpui-native-owner.ts",
+      "sha256": "9a51f86dea670370de1977961a8ce7c6d8ab653f107d8b22ca5d0904ca47fb84"
+    },
+    {
+      "file": "packages/compiler/src/gpui-native-sdk.ts",
+      "sha256": "5dad85fbae15ca7e6b6b7bf0db418d9717543722bd1d5bb3362fd43744966e0b"
+    },
+    {
+      "file": "packages/compiler/src/targets.ts",
+      "sha256": "2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58"
+    },
+    {
+      "file": "packages/compiler/src/operations.ts",
+      "sha256": "c7b855fcb9ed3849bb7d2fff7c5cf0855153740190ed63b545ba95d36ea7bab5"
+    },
+    {
+      "file": "packages/compiler/src/ir.ts",
+      "sha256": "8db5d64a4ced995f6e5d42084b72698fbf843f24e6fe9f027f274455dd590990"
+    }
+  ],
+  "producerReceiptSha256": "bc6f8fa5dd0608bc9af7776ef240747e57ebf5b77c7135579b6e4e5267250ffd",
+  "sdk": {
+    "schemaVersion": 1,
+    "name": "proto-ui-gpui-native",
+    "version": "0.2.0",
+    "dependencyMode": "profile",
+    "contentSha256": "2333886424403eb5d8f9947ce66435b32b3124c6e53e6d258570b8d49b5eb693"
+  },
+  "evidenceBoundary": "Static checked-source demand and generated artifacts only. Generated consumers are not individual operation runtime passes. Retained optimized link bytes, initialization traces, OS input and accessibility require their own results.",
+  "representation": {
+    "numericAndBooleanLocals": "f64/bool; mutable cells Rc<RefCell<f64/bool>>",
+    "provenDataCallables": "typed Rc<dyn Fn>; one stable Value callable bridge at dynamic/public boundaries",
+    "templates": "NativeSnapshot and native GPUI factories; no Value::Template paint interpreter",
+    "strings": "lossless Value boundary; UTF-16 comparisons include caught code units",
+    "ordinaryRecordsAndArrays": "identity-preserving Value storage remains; complete per-field native lowering is not established",
+    "support": "shared content-bound SDK source; reached operation/callback pruning controls call sites and capability initialization; full helper source selection and optimized link cost are not certified"
+  },
+  "expressionInventory": [
+    {
+      "kind": "array",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "ordinary",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "authored-hook",
+      "generatedConsumers": [
+        "transition",
+        "named_button",
+        "ordinary",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "focus_scope",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "binary",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "scalars",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "call",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "ordinary",
+        "plain",
+        "scalars",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "conditional",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "ordinary",
+        "scalars",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "context-key",
+      "generatedConsumers": [
+        "ordinary",
+        "composed_scroll",
+        "context_a",
+        "context_b",
+        "context_child"
+      ]
+    },
+    {
+      "kind": "element",
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "function",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "helper-call",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "intrinsic",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "scalars",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "lexical-cell",
+      "generatedConsumers": [
+        "transition",
+        "base_toggle",
+        "ordinary",
+        "plain",
+        "validation",
+        "scalars",
+        "hook_failed",
+        "hook_project_failed",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "validation_retry",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "lexical-read",
+      "generatedConsumers": [
+        "transition",
+        "base_toggle",
+        "ordinary",
+        "plain",
+        "validation",
+        "scalars",
+        "hook_failed",
+        "hook_project_failed",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "validation_retry",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "lexical-update",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "plain",
+        "scalars",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "lexical-write",
+      "generatedConsumers": [
+        "transition",
+        "base_toggle",
+        "ordinary",
+        "validation",
+        "scalars",
+        "hook_failed",
+        "hook_project_failed",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "validation_retry",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "literal",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "member",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "ordinary",
+        "plain",
+        "validation",
+        "scalars",
+        "scroll_reader",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "member-write",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "scalars",
+        "public_mutation",
+        "render_mutation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "narrow",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "validation",
+        "focus_scope",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "object-spread",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "operation",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "record",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "focus_scope",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "reference",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "rule",
+      "generatedConsumers": [
+        "base_label"
+      ]
+    },
+    {
+      "kind": "static-capability",
+      "generatedConsumers": [
+        "composed_scroll",
+        "context_a",
+        "context_b",
+        "context_child"
+      ]
+    },
+    {
+      "kind": "style-handle",
+      "generatedConsumers": [
+        "base_button",
+        "named_button",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll"
+      ]
+    },
+    {
+      "kind": "unary",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "ordinary",
+        "scalars",
+        "hook_pending",
+        "hook_failed",
+        "hook_project_failed",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "undefined",
+      "generatedConsumers": [
+        "ordinary",
+        "scalars",
+        "hook_undefined"
+      ]
+    }
+  ],
+  "statementInventory": [
+    {
+      "kind": "const",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "effect",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "if",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target",
+        "ordinary",
+        "validation",
+        "scalars",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "return",
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "throw",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "validation",
+        "scalars",
+        "hook_failed",
+        "hook_project_failed",
+        "created_failure",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "kind": "try",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "validation",
+        "scalars",
+        "hook_failed",
+        "hook_project_failed",
+        "validation_retry",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    }
+  ],
+  "intrinsicInventory": [
+    {
+      "name": "array.every",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "name": "array.includes",
+      "generatedConsumers": [
+        "scalars"
+      ]
+    },
+    {
+      "name": "error",
+      "generatedConsumers": [
+        "transition",
+        "scalars",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "name": "math.floor",
+      "generatedConsumers": []
+    },
+    {
+      "name": "math.round",
+      "generatedConsumers": []
+    },
+    {
+      "name": "number.isFinite",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "scalars",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "name": "object.assign",
+      "generatedConsumers": [
+        "scalars"
+      ]
+    },
+    {
+      "name": "object.freeze",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "name": "object.hasOwn",
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "name": "string",
+      "generatedConsumers": [
+        "scalars"
+      ]
+    },
+    {
+      "name": "typeof",
+      "generatedConsumers": [
+        "transition",
+        "scalars",
+        "cold",
+        "mutant"
+      ]
+    }
+  ],
+  "operationInventory": [
+    {
+      "operation": "capture.getState",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2035,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "capture.getMethod",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2036,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "capture.getAsHook",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2037,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "capture.getAsHookHandle",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2038,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [],
+      "generatedConsumers": [
+        "hook_options_nested",
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "scheduler.delay",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2017,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "delay-task",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "scheduler",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "delay.cancel",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2019,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "scheduler",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "presence.owner",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2021,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "presence-owner",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "presence",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "presence.onCompletionRequest",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2029,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "presence",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "presence.publish",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2023,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "presence",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "presence.settle",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2025,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "presence",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "presence.isCurrent",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2027,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "presence",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "presentation.snapshotCompletion",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2031,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "value-union",
+        "members": [
+          {
+            "kind": "literal",
+            "value": "timer"
+          },
+          {
+            "kind": "object",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "presentation"
+                },
+                "readonly": true
+              },
+              {
+                "name": "timeoutMs",
+                "type": "number",
+                "readonly": true
+              }
+            ]
+          }
+        ]
+      },
+      "effects": [],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "meta.get",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2033,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "meta",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "style.tw",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": null,
+      "specialLowering": "compile-time style-handle",
+      "requiredCapabilities": [],
+      "resultType": "style-handle",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "named_button",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "rule.declare",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": null,
+      "specialLowering": "checked rule expression",
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "rule-handle",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_label"
+      ]
+    },
+    {
+      "operation": "rule.dispose",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2055,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "feedback.style.use",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2045,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "style-disposer",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "named_button",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "feedback.material.shader",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": null,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "style-disposer",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "style",
+          "scope": "instance"
+        },
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "feedback.style.presence",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": null,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "style-disposer",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "presence",
+          "scope": "instance"
+        },
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "feedback.style.release",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2047,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "subscription.release",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2091,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "binding.release",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2092,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "feedback.style.patch",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2049,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "feedback.style.suppress",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2051,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "feedback.style.clearPatch",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2053,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "style-projection"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "style",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asTrigger",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2128,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "input-events"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "event-route",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "hook.asFocusable",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2130,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "focus",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "focus_scope",
+        "focus_target"
+      ]
+    },
+    {
+      "operation": "hook.asAccessible",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2132,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree"
+      ],
+      "resultType": "accessible",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target"
+      ]
+    },
+    {
+      "operation": "hook.asControlLabel",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2134,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree",
+        "input-events"
+      ],
+      "resultType": "control-label",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target"
+      ]
+    },
+    {
+      "operation": "controlLabel.label",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2136,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "control-label-handle",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_label",
+        "generic_label",
+        "generic_setup_label"
+      ]
+    },
+    {
+      "operation": "controlLabel.target",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2138,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "control-label-handle",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target"
+      ]
+    },
+    {
+      "operation": "controlLabel.sync",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2140,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_label",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target"
+      ]
+    },
+    {
+      "operation": "controlLabelRequest.isCurrent",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2142,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target"
+      ]
+    },
+    {
+      "operation": "run.update",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2043,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "request-update",
+          "resource": "update-queue",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation",
+        "render_mutation"
+      ]
+    },
+    {
+      "operation": "props.define",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2057,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "props-schema",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "ordinary",
+        "validation",
+        "render_mutation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "props.setDefaults",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2059,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "props-schema",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "props.watch",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2061,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "callable",
+        "parameters": [],
+        "returnType": "void"
+      },
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "props",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "ordinary",
+        "validation",
+        "render_mutation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "props.watchAll",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2064,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "callable",
+        "parameters": [],
+        "returnType": "void"
+      },
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "props",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "props.watchRaw",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2062,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "callable",
+        "parameters": [],
+        "returnType": "void"
+      },
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "raw-props",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "props.watchRawAll",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2065,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "callable",
+        "parameters": [],
+        "returnType": "void"
+      },
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "raw-props",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "props.get",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2067,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "props",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "props",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "ordinary",
+        "validation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "props.getRaw",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2070,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "record",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "raw-props",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "props.isProvided",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2073,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "raw-props",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_toggle",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "render.read.props.get",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2068,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "props",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "props",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "render.read.props.getRaw",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2071,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "record",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "raw-props",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "render.read.props.isProvided",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2074,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "raw-props",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "state.bool",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2076,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "state:boolean",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "focus_scope",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "state.string",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2077,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "state:string",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "named_button"
+      ]
+    },
+    {
+      "operation": "state.numberDiscrete",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2078,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "state:number",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "hook_options_multiple",
+        "created_failure",
+        "focus_scope",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "state.numberRange",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2079,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "state:number",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation",
+        "validation_retry"
+      ]
+    },
+    {
+      "operation": "state.enum",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2081,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "state:string",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "state.get",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2083,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "ordinary",
+        "validation",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "focus_scope",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "state.set",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2085,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "ordinary",
+        "validation",
+        "focus_scope",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "state.setDefault",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2087,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "state",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "state.watch",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2089,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "binding-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "state",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "ordinary"
+      ]
+    },
+    {
+      "operation": "expose.state",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2096,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "ordinary",
+        "validation_retry",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "expose.value",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2098,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "plain",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "validation_retry",
+        "duplicate",
+        "focus_scope",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "expose.event",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2102,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target",
+        "validation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "expose.method",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2100,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label",
+        "generic_label_target",
+        "ordinary",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "public_mutation",
+        "hook_options",
+        "hook_options_factory",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "expose.emit",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2104,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "signal",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target",
+        "validation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "lifecycle.setPresent",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2106,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view-intent",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "lifecycle.onCreated",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2108,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view-intent",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "base_label",
+        "named_button",
+        "generic_label_target",
+        "validation",
+        "created_failure",
+        "cold",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "lifecycle.onMounted",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2109,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "validation",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "lifecycle.onUpdated",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2110,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation"
+      ]
+    },
+    {
+      "operation": "lifecycle.onUnmounted",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2111,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "lifecycle.onBeforeDispose",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2112,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view-intent",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "event.on",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2352,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "input-events"
+      ],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "event-route",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "focus_scope",
+        "focus_target"
+      ]
+    },
+    {
+      "operation": "event.onGlobal",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2353,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "input-events"
+      ],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "event-route",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "event.requestDefaultActionPrevention",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2358,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "input-events"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "event-route",
+          "scope": "view"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "focus_target"
+      ]
+    },
+    {
+      "operation": "eventControl.requestDefaultActionPrevention",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2359,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "input-events"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "event-route",
+          "scope": "view"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2144,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "focus.setDisabled",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2146,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "focus_target"
+      ]
+    },
+    {
+      "operation": "focus.focusSelf",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2149,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "signal",
+          "resource": "focus",
+          "scope": "view"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "accessible.state",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2202,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "accessible.action",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2204,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "accessible.role",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2200,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button",
+        "generic_label_target"
+      ]
+    },
+    {
+      "operation": "accessible.nameFromContent",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2206,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree"
+      ],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "base_button",
+        "base_toggle",
+        "named_button"
+      ]
+    },
+    {
+      "operation": "render.el",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": null,
+      "specialLowering": "nativeElement/snapshotExpression",
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "template",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "view"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "ordinary",
+        "plain",
+        "validation",
+        "roundtrip",
+        "scalars",
+        "public_mutation",
+        "hook_pending",
+        "hook_failed",
+        "hook_undefined",
+        "hook_project_failed",
+        "hook_options",
+        "hook_options_factory",
+        "hook_options_multiple",
+        "hook_options_nested",
+        "hook_conditional",
+        "hook_conditional_taken",
+        "hook_conditional_multiple",
+        "render_mutation",
+        "validation_retry",
+        "duplicate",
+        "created_failure",
+        "focus_scope",
+        "focus_target",
+        "cold",
+        "context_a",
+        "context_b",
+        "context_child",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "render.slot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": null,
+      "specialLowering": "nativeElement/snapshotExpression",
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "template",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "view"
+        }
+      ],
+      "generatedConsumers": [
+        "base_label",
+        "generic_label",
+        "generic_setup_label",
+        "generic_label_target",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll",
+        "focus_scope",
+        "context_a",
+        "context_b"
+      ]
+    },
+    {
+      "operation": "context.provide",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2115,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "ordinary",
+        "composed_scroll",
+        "context_a",
+        "context_b"
+      ]
+    },
+    {
+      "operation": "context.subscribe",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2117,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "callable",
+        "parameters": [],
+        "returnType": "void"
+      },
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "context",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "ordinary"
+      ]
+    },
+    {
+      "operation": "context.trySubscribe",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2118,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "callable",
+        "parameters": [],
+        "returnType": "void"
+      },
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "context",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": [
+        "context_child"
+      ]
+    },
+    {
+      "operation": "context.read",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2120,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "record",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "transition",
+        "cold",
+        "mutant"
+      ]
+    },
+    {
+      "operation": "context.tryRead",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2121,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "context_child"
+      ]
+    },
+    {
+      "operation": "context.update",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2125,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "ordinary"
+      ]
+    },
+    {
+      "operation": "context.tryUpdate",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2126,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "render.read.context.read",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2122,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "record",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "render.read.context.tryRead",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2123,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "context",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asFocusEntry",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": 2151,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "focus-entry",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asFocusScope",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2153,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "focus-scope",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "hook.asFocusRoving",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2155,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "focus-target"
+      ],
+      "resultType": "focus-roving",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "hook.asOverlay",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2319,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "overlay",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asScrollSurface",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2287,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "scroll",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "hook.asTextControl",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2301,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "text-control",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asImageView",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2311,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "image-view",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asTableStructure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2256,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "accessibility-tree"
+      ],
+      "resultType": "table-structure",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asBoundary",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2264,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "boundary",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asHitParticipation",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2266,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "hit-participation",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asCollection",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2242,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "collection",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hook.asCollectionItem",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2244,
+      "specialLowering": null,
+      "requiredCapabilities": [
+        "view-render"
+      ],
+      "resultType": "collection-item",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusEntry.configure",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": 2157,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusEntry.focus",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": 2163,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusEntry.setDisabled",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": 2165,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusScope.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2159,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "focusRoving.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2161,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "focusRoving.focusFirst",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2173,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusRoving.focusLast",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2174,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "focusRoving.focusNext",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2175,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "focusRoving.focusPrev",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2176,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusRoving.focusSelected",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2177,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.focus",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2148,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_target"
+      ]
+    },
+    {
+      "operation": "focus.blur",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2167,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.setNavParticipation",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2169,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.setRovingStatus",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2171,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.focusFirst",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2178,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "focus_scope"
+      ]
+    },
+    {
+      "operation": "focus.focusLast",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2179,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.focusNext",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2180,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.focusPrev",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2181,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.focusSelected",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2182,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.restoreFocus",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2184,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.activate",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2186,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.deactivate",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2188,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.setLoop",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2190,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.setOrientation",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2192,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.isActive",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2194,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focus.isFocused",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2196,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "focusScope.getRoving",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2198,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "nullable:focus-roving",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "focus",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "accessible.id",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2208,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "accessible.name",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2209,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "named_button"
+      ]
+    },
+    {
+      "operation": "accessible.description",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2210,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "accessible.part",
+      "declaredByGpuiProfile": false,
+      "emitterCaseLine": null,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "accessible.relation",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2212,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "accessible.tree",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2214,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "accessible.level",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2216,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.claim",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2218,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "composed_scroll",
+        "context_a",
+        "context_b",
+        "context_child"
+      ]
+    },
+    {
+      "operation": "anatomy.subscribeParts",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2220,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "subscription-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.has",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2222,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.parts",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2224,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "anatomy-parts",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.partsOf",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2227,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "anatomy-parts",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.order.version",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2230,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "number",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.order.parts",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2225,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "anatomy-parts",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.order.partsOf",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2228,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "anatomy-parts",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.order.indexOfSelf",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2232,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "number",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.order.prevOfSelf",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2233,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "nullable:anatomy-part",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomy.order.nextOfSelf",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2234,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "nullable:anatomy-part",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomyPart.hasExpose",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2236,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomyPart.getExpose",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2238,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "unknown",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "expose",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "anatomyPart.hasHook",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2240,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "tableStructure.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2258,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "tableStructure.getObjectRef",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2260,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "a11y-ref",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "tableStructure.getSnapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2262,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "nullable:table-snapshot",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "accessibility",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "host.get",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2094,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "nullable:host-target",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "collection.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2246,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "collection.getItems",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2250,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "collection-snapshot-list",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "collection.getCount",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2252,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "number",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "collectionItem.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2248,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "collectionItem.getSnapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2254,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "collection-snapshot",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2268,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.observe",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2272,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.setStackActive",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2274,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.registerRegion",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2276,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "binding-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.unregisterRegion",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2279,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.classify",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2282,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "string",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.notify",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2283,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "string",
+      "effects": [
+        {
+          "kind": "signal",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "boundary.subscribeOutside",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2285,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "binding-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hitParticipation.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2270,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hitParticipation.registerRegion",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2277,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "binding-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "hitParticipation.unregisterRegion",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2280,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.isOpen",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2321,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.openOverlay",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2323,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.close",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2324,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.toggle",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2325,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2327,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.updatePosition",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2329,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.registerTrigger",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2331,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.registerAnchor",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2332,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.registerAnchorPart",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2333,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.registerContent",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2334,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.getPositionSnapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2336,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "union",
+        "members": [
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "side",
+                "type": "string"
+              },
+              {
+                "name": "align",
+                "type": "string"
+              },
+              {
+                "name": "strategy",
+                "type": "string"
+              }
+            ]
+          },
+          "null"
+        ]
+      },
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.keepMounted",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2338,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "overlay.bindPresence",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2340,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "scroll.configure",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2289,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "scroll.sync",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2291,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation",
+        "external_scroll",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "scroll.bindComposedChrome",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2293,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "scroll.request",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2295,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "union",
+        "members": [
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "dispatched"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "queued"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "rejected"
+                }
+              },
+              {
+                "name": "reason",
+                "type": {
+                  "kind": "union",
+                  "members": [
+                    {
+                      "kind": "literal",
+                      "value": "not-mounted"
+                    },
+                    {
+                      "kind": "literal",
+                      "value": "not-declared"
+                    },
+                    {
+                      "kind": "literal",
+                      "value": "unavailable"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "validation",
+        "external_scroll",
+        "scroll_reader",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "scroll.pauseFollowing",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2297,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "union",
+        "members": [
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "dispatched"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "queued"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "kind",
+                "type": {
+                  "kind": "literal",
+                  "value": "rejected"
+                }
+              },
+              {
+                "name": "reason",
+                "type": {
+                  "kind": "union",
+                  "members": [
+                    {
+                      "kind": "literal",
+                      "value": "not-mounted"
+                    },
+                    {
+                      "kind": "literal",
+                      "value": "not-declared"
+                    },
+                    {
+                      "kind": "literal",
+                      "value": "unavailable"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "scroll_reader"
+      ]
+    },
+    {
+      "operation": "scroll.getSnapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2299,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "record",
+        "fields": [
+          {
+            "name": "axes",
+            "type": "string"
+          },
+          {
+            "name": "horizontal",
+            "type": {
+              "kind": "record",
+              "fields": [
+                {
+                  "name": "position",
+                  "type": "number"
+                },
+                {
+                  "name": "visibleRatio",
+                  "type": "number"
+                },
+                {
+                  "name": "canScrollBefore",
+                  "type": "boolean"
+                },
+                {
+                  "name": "canScrollAfter",
+                  "type": "boolean"
+                },
+                {
+                  "name": "atEnd",
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          {
+            "name": "vertical",
+            "type": {
+              "kind": "record",
+              "fields": [
+                {
+                  "name": "position",
+                  "type": "number"
+                },
+                {
+                  "name": "visibleRatio",
+                  "type": "number"
+                },
+                {
+                  "name": "canScrollBefore",
+                  "type": "boolean"
+                },
+                {
+                  "name": "canScrollAfter",
+                  "type": "boolean"
+                },
+                {
+                  "name": "atEnd",
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          {
+            "name": "scrolling",
+            "type": "boolean"
+          },
+          {
+            "name": "projection",
+            "type": "string"
+          },
+          {
+            "name": "endFollow",
+            "type": {
+              "kind": "record",
+              "fields": [
+                {
+                  "name": "state",
+                  "type": "string"
+                },
+                {
+                  "name": "requestStatus",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": [
+        "external_scroll",
+        "composed_scroll"
+      ]
+    },
+    {
+      "operation": "textControl.on",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2303,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "subscription-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "textControl.sync",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2305,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "textControl.resetValue",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2307,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "boolean",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "textControl.snapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2309,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "union",
+        "members": [
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "value",
+                "type": "string"
+              },
+              {
+                "name": "composing",
+                "type": "boolean"
+              },
+              {
+                "name": "selection",
+                "optional": true,
+                "type": {
+                  "kind": "union",
+                  "members": [
+                    "null",
+                    {
+                      "kind": "record",
+                      "fields": [
+                        {
+                          "name": "start",
+                          "type": "number"
+                        },
+                        {
+                          "name": "end",
+                          "type": "number"
+                        },
+                        {
+                          "name": "direction",
+                          "type": {
+                            "kind": "union",
+                            "members": [
+                              {
+                                "kind": "literal",
+                                "value": "forward"
+                              },
+                              {
+                                "kind": "literal",
+                                "value": "backward"
+                              },
+                              {
+                                "kind": "literal",
+                                "value": "none"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "null"
+        ]
+      },
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "imageView.on",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2313,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "subscription-disposer",
+      "effects": [
+        {
+          "kind": "subscribe",
+          "resource": "view",
+          "scope": "subscription"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "imageView.sync",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2315,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "imageView.snapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2317,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "union",
+        "members": [
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "source",
+                "type": "string"
+              },
+              {
+                "name": "loadingStatus",
+                "type": "string"
+              },
+              {
+                "name": "fit",
+                "type": "string"
+              }
+            ]
+          },
+          "null"
+        ]
+      },
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "positioning.connect",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2342,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "declare",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "positioning.update",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2344,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "positioning.requestUpdate",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2346,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "positioning.disconnect",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2348,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": "void",
+      "effects": [
+        {
+          "kind": "write",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    },
+    {
+      "operation": "positioning.getSnapshot",
+      "declaredByGpuiProfile": true,
+      "emitterCaseLine": 2350,
+      "specialLowering": null,
+      "requiredCapabilities": [],
+      "resultType": {
+        "kind": "union",
+        "members": [
+          {
+            "kind": "record",
+            "fields": [
+              {
+                "name": "side",
+                "type": "string"
+              },
+              {
+                "name": "align",
+                "type": "string"
+              },
+              {
+                "name": "strategy",
+                "type": "string"
+              }
+            ]
+          },
+          "null"
+        ]
+      },
+      "effects": [
+        {
+          "kind": "read",
+          "resource": "view",
+          "scope": "instance"
+        }
+      ],
+      "generatedConsumers": []
+    }
+  ],
+  "modules": [
+    {
+      "name": "transition",
+      "sourceSha256": "8ae92db6b5eb4f814f4c4b55808533713672505e14452d7eed5ca32a18d0ff82",
+      "generatedComponentSha256": "065926499fbcd7f17e4b56c9b8262eb3df87b0eafd4eda604506d596bb94be19",
+      "generatedComponentBytes": 237038,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getMethod",
+        "capture.getState",
+        "context.read",
+        "delay.cancel",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "expose.value",
+        "lifecycle.onBeforeDispose",
+        "lifecycle.onCreated",
+        "lifecycle.onMounted",
+        "lifecycle.onUnmounted",
+        "lifecycle.setPresent",
+        "meta.get",
+        "presence.isCurrent",
+        "presence.onCompletionRequest",
+        "presence.owner",
+        "presence.publish",
+        "presence.settle",
+        "presentation.snapshotCompletion",
+        "props.define",
+        "props.get",
+        "props.isProvided",
+        "props.setDefaults",
+        "props.watch",
+        "render.el",
+        "scheduler.delay",
+        "state.bool",
+        "state.enum",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set",
+        "state.setDefault"
+      ],
+      "reachedFunctionCount": 74,
+      "reachedAuthoredHooks": [
+        "transition/as-transition.proto.ts#asTransition"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "call",
+        "conditional",
+        "element",
+        "function",
+        "helper-call",
+        "intrinsic",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-update",
+        "lexical-write",
+        "literal",
+        "member",
+        "member-write",
+        "narrow",
+        "object-spread",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": [
+        "array.every",
+        "error",
+        "number.isFinite",
+        "object.freeze",
+        "object.hasOwn",
+        "typeof"
+      ]
+    },
+    {
+      "name": "base_button",
+      "sourceSha256": "806891994e6b141ca3f76dce3288a056064eadfb0c4be0c7d8860bb001923ee8",
+      "generatedComponentSha256": "0578945601b1b03eb96811fb639e4fceecb61bf2fca8a83e1c24f7aafccde4d6",
+      "generatedComponentBytes": 51247,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "accessible.action",
+        "accessible.nameFromContent",
+        "accessible.role",
+        "accessible.state",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "event.on",
+        "event.onGlobal",
+        "event.requestDefaultActionPrevention",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "feedback.style.use",
+        "focus.configure",
+        "focus.focusSelf",
+        "focus.setDisabled",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "hook.asFocusable",
+        "hook.asTrigger",
+        "lifecycle.onCreated",
+        "lifecycle.onUnmounted",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "state.bool",
+        "state.get",
+        "state.set",
+        "style.tw"
+      ],
+      "reachedFunctionCount": 19,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "binary",
+        "call",
+        "conditional",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "style-handle",
+        "unary"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "base_toggle",
+      "sourceSha256": "8b04a35d1e0e61899eb4956bd1e117a8b63b2e369a5314d8cf30ca46fdcb033f",
+      "generatedComponentSha256": "190459778dcd619b613a65e2c4db92316cad6d727f643e3b43b731ccf8909280",
+      "generatedComponentBytes": 57686,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "accessible.action",
+        "accessible.nameFromContent",
+        "accessible.role",
+        "accessible.state",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "event.on",
+        "event.onGlobal",
+        "event.requestDefaultActionPrevention",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "focus.configure",
+        "focus.focusSelf",
+        "focus.setDisabled",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "hook.asFocusable",
+        "hook.asTrigger",
+        "lifecycle.onCreated",
+        "lifecycle.onUnmounted",
+        "props.define",
+        "props.get",
+        "props.isProvided",
+        "props.setDefaults",
+        "props.watch",
+        "state.bool",
+        "state.get",
+        "state.set"
+      ],
+      "reachedFunctionCount": 20,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "binary",
+        "call",
+        "conditional",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "unary"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "base_label",
+      "sourceSha256": "f3c22ec4a9c8c7ad3bc73e135c60dc9d025ca9166eef9f6a1be95e905bdbec6d",
+      "generatedComponentSha256": "514856acfce8850c4b38025981965322bf01086bece8411eaf53b293cb00684b",
+      "generatedComponentBytes": 28529,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "controlLabel.label",
+        "controlLabel.sync",
+        "hook.asControlLabel",
+        "lifecycle.onCreated",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "render.slot",
+        "rule.declare"
+      ],
+      "reachedFunctionCount": 5,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "binary",
+        "call",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "rule"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "feedback.style.use",
+        "prop",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "named_button",
+      "sourceSha256": "56f4c4cb86b047e38fba76346e5b5b91114e8130f96f6318ac5581fa9008f202",
+      "generatedComponentSha256": "f0aefe7cfdc5c1caaedba6dddbd1e6b3be170382e256289bc6572b7b15d7a8f2",
+      "generatedComponentBytes": 67219,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "accessible.action",
+        "accessible.name",
+        "accessible.nameFromContent",
+        "accessible.role",
+        "accessible.state",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "event.on",
+        "event.onGlobal",
+        "event.requestDefaultActionPrevention",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "feedback.style.use",
+        "focus.configure",
+        "focus.focusSelf",
+        "focus.setDisabled",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "hook.asFocusable",
+        "hook.asTrigger",
+        "lifecycle.onCreated",
+        "lifecycle.onUnmounted",
+        "props.define",
+        "props.get",
+        "props.setDefaults",
+        "props.watch",
+        "state.bool",
+        "state.get",
+        "state.set",
+        "state.string",
+        "style.tw"
+      ],
+      "reachedFunctionCount": 21,
+      "reachedAuthoredHooks": [
+        "packages/prototypes/base/src/button/button.proto.ts#asButton"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "call",
+        "conditional",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "style-handle",
+        "unary"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "generic_label",
+      "sourceSha256": "359876cecafea55fcfadc32c662a74df47e196bf2cb227601ebb0dec4765b77f",
+      "generatedComponentSha256": "1cfd7675c7aa11fb898d89a0152c767b8dd4b8b71c0266377ca97d9ef039a8f8",
+      "generatedComponentBytes": 24594,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "controlLabel.label",
+        "controlLabel.sync",
+        "expose.method",
+        "hook.asControlLabel",
+        "render.slot"
+      ],
+      "reachedFunctionCount": 3,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "generic_setup_label",
+      "sourceSha256": "359876cecafea55fcfadc32c662a74df47e196bf2cb227601ebb0dec4765b77f",
+      "generatedComponentSha256": "4684cd4d0551b0fa047a866bb3c68deacc303ea941c873fa50932cd82f38a2ea",
+      "generatedComponentBytes": 22916,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "controlLabel.label",
+        "controlLabel.sync",
+        "hook.asControlLabel",
+        "render.slot"
+      ],
+      "reachedFunctionCount": 2,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "generic_label_target",
+      "sourceSha256": "359876cecafea55fcfadc32c662a74df47e196bf2cb227601ebb0dec4765b77f",
+      "generatedComponentSha256": "09531e00c082d8374054dec19ea6b997bf6b1b38ab500d4addadca2f42c4e060",
+      "generatedComponentBytes": 27772,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "accessible.role",
+        "controlLabel.sync",
+        "controlLabel.target",
+        "controlLabelRequest.isCurrent",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "hook.asAccessible",
+        "hook.asControlLabel",
+        "lifecycle.onCreated",
+        "render.slot"
+      ],
+      "reachedFunctionCount": 5,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "binary",
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "ordinary",
+      "sourceSha256": "cfb7f4ce32b643a63a63b1be1b239aab3ec05650d7def85901d41c8baf09745d",
+      "generatedComponentSha256": "1ef4bb8e46bf39e7ae4f0232d14fe48afb77d5610bebc51293b0e8ab31c4cef4",
+      "generatedComponentBytes": 138751,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getMethod",
+        "capture.getState",
+        "context.provide",
+        "context.subscribe",
+        "context.update",
+        "delay.cancel",
+        "expose.method",
+        "expose.state",
+        "expose.value",
+        "lifecycle.onBeforeDispose",
+        "lifecycle.onUnmounted",
+        "lifecycle.setPresent",
+        "props.define",
+        "props.get",
+        "props.watch",
+        "render.el",
+        "scheduler.delay",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set",
+        "state.watch"
+      ],
+      "reachedFunctionCount": 54,
+      "reachedAuthoredHooks": [
+        "ordinary.proto.ts#asWatched"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "call",
+        "conditional",
+        "context-key",
+        "function",
+        "helper-call",
+        "intrinsic",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-update",
+        "lexical-write",
+        "literal",
+        "member",
+        "member-write",
+        "narrow",
+        "object-spread",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "unary",
+        "undefined",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": [
+        "array.every",
+        "number.isFinite",
+        "object.freeze",
+        "object.hasOwn"
+      ]
+    },
+    {
+      "name": "plain",
+      "sourceSha256": "ddcb4b47dc537b3168044465ec84bee06d45f27ef3ca427d0cb2c98f7657dfb9",
+      "generatedComponentSha256": "fb91c0625e47ef68c677537607376a2c28089246e9b69d322d9ba065ca62d329",
+      "generatedComponentBytes": 25986,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.value",
+        "render.el"
+      ],
+      "reachedFunctionCount": 3,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "binary",
+        "call",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-update",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "value"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "validation",
+      "sourceSha256": "722fdf3c5c7766ffdc986480946476074584b8c24275ae4ea5d9dfbb0c21c450",
+      "generatedComponentSha256": "962aca012cbf73292c6903aa13ca026ac68e49241e8b33e3441e2b4d23476a13",
+      "generatedComponentBytes": 68742,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "hook.asScrollSurface",
+        "lifecycle.onCreated",
+        "lifecycle.onMounted",
+        "lifecycle.onUpdated",
+        "props.define",
+        "props.get",
+        "props.watch",
+        "render.el",
+        "run.update",
+        "scroll.configure",
+        "scroll.request",
+        "scroll.sync",
+        "state.get",
+        "state.numberRange",
+        "state.set"
+      ],
+      "reachedFunctionCount": 25,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "binary",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "member",
+        "narrow",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "roundtrip",
+      "sourceSha256": "69edc8d68906bd4979e33de42d272b5674334ddbd9c696febf9c5afaf1df0196",
+      "generatedComponentSha256": "2f7300b75fb5bd6497f96dfe813d38fcf43334a4f5de82f0565ea682ec539503",
+      "generatedComponentBytes": 30451,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "render.el"
+      ],
+      "reachedFunctionCount": 7,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "scalars",
+      "sourceSha256": "e12cb879d2a434abc83a5cb1a98dab1e15236c6ea3240780a3b129d67e386e56",
+      "generatedComponentSha256": "14995a423979efda878e66d7011b3a646e288db9b3e28fd66e1362c72c0d79ac",
+      "generatedComponentBytes": 70460,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "render.el"
+      ],
+      "reachedFunctionCount": 18,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "binary",
+        "call",
+        "conditional",
+        "function",
+        "intrinsic",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-update",
+        "lexical-write",
+        "literal",
+        "member",
+        "member-write",
+        "operation",
+        "record",
+        "reference",
+        "unary",
+        "undefined"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": [
+        "array.includes",
+        "error",
+        "number.isFinite",
+        "object.assign",
+        "string",
+        "typeof"
+      ]
+    },
+    {
+      "name": "external_scroll",
+      "sourceSha256": "01429d9ec1b5f79c9a992d3e42b722bf7de2e3d3d99faf03a7316fe28a30396a",
+      "generatedComponentSha256": "ca4c84b627d52440e8a5805fe17be70ed002176a6db2078c4f353481a8685256",
+      "generatedComponentBytes": 40699,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "feedback.style.use",
+        "hook.asScrollSurface",
+        "render.slot",
+        "scroll.configure",
+        "scroll.getSnapshot",
+        "scroll.request",
+        "scroll.sync",
+        "style.tw"
+      ],
+      "reachedFunctionCount": 9,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference",
+        "style-handle"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "scroll_reader",
+      "sourceSha256": "9d5b7c6e9df5713695fd218c9aac6af34aa02be86eb664d97759fd4ef119e058",
+      "generatedComponentSha256": "366f5d612f1f262da67257952b040bbc7fe90760b6f0a6fb227651f8440a2a65",
+      "generatedComponentBytes": 26846,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "feedback.style.use",
+        "hook.asScrollSurface",
+        "render.slot",
+        "scroll.configure",
+        "scroll.pauseFollowing",
+        "scroll.request",
+        "style.tw"
+      ],
+      "reachedFunctionCount": 4,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "style-handle"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "composed_scroll",
+      "sourceSha256": "02c86427a4a53211625b77e322549ace9f337acf66ac66e800f50ad381da6578",
+      "generatedComponentSha256": "deda2d3ad3e243744ac56584010c2790002f829d052fa64ad1c9726ff913a0bd",
+      "generatedComponentBytes": 37187,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "anatomy.claim",
+        "context.provide",
+        "expose.method",
+        "feedback.style.use",
+        "hook.asScrollSurface",
+        "render.slot",
+        "scroll.bindComposedChrome",
+        "scroll.configure",
+        "scroll.getSnapshot",
+        "scroll.request",
+        "scroll.sync",
+        "style.tw"
+      ],
+      "reachedFunctionCount": 7,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "context-key",
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference",
+        "static-capability",
+        "style-handle"
+      ],
+      "statementKinds": [
+        "anatomy-family",
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "public_mutation",
+      "sourceSha256": "4f5ee727674894950ca6051e21ad747e83d21c577c654c6ebbc7fead5a1ab4a2",
+      "generatedComponentSha256": "e24b454ace898e7338cd0fb1b9a19bd54ea1a15acb11e87631a3b57eaf6adfc6",
+      "generatedComponentBytes": 27892,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "render.el"
+      ],
+      "reachedFunctionCount": 6,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "function",
+        "literal",
+        "member-write",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_pending",
+      "sourceSha256": "368ce75b79066f81181110b399bb0148b940e785c307f7e47117b89cb2772455",
+      "generatedComponentSha256": "666f9bd40ba58aa93394c0a1646626e87bbee553b31c9fedb712a1e962cd3a88",
+      "generatedComponentBytes": 33848,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.value",
+        "render.el"
+      ],
+      "reachedFunctionCount": 4,
+      "reachedAuthoredHooks": [
+        "hook_pending.proto.ts#child",
+        "hook_pending.proto.ts#outer",
+        "hook_pending.proto.ts#shadow"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "function",
+        "literal",
+        "operation",
+        "reference",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_failed",
+      "sourceSha256": "368ce75b79066f81181110b399bb0148b940e785c307f7e47117b89cb2772455",
+      "generatedComponentSha256": "8fa6309ef269319e3293ccca9d9b67e8be475edd5c8e68ea824c749ee88c79da",
+      "generatedComponentBytes": 29867,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.value",
+        "render.el"
+      ],
+      "reachedFunctionCount": 3,
+      "reachedAuthoredHooks": [
+        "hook_failed.proto.ts#failed"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "operation",
+        "reference",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_undefined",
+      "sourceSha256": "368ce75b79066f81181110b399bb0148b940e785c307f7e47117b89cb2772455",
+      "generatedComponentSha256": "0add150e401d3b2fcafbe77774da940b2df08a259f69eca134609767ce0d4cfa",
+      "generatedComponentBytes": 26548,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.value",
+        "render.el"
+      ],
+      "reachedFunctionCount": 4,
+      "reachedAuthoredHooks": [
+        "hook_undefined.proto.ts#undefinedProjection"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "function",
+        "literal",
+        "operation",
+        "reference",
+        "undefined",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_project_failed",
+      "sourceSha256": "368ce75b79066f81181110b399bb0148b940e785c307f7e47117b89cb2772455",
+      "generatedComponentSha256": "2525ee129e4e4706d6ee728981f428ed42fb3f26fe0b169510b37fd7eb4b7e87",
+      "generatedComponentBytes": 28841,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.value",
+        "render.el"
+      ],
+      "reachedFunctionCount": 4,
+      "reachedAuthoredHooks": [
+        "hook_project_failed.proto.ts#failedProjection"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "operation",
+        "reference",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_options",
+      "sourceSha256": "5815d69d2e5598c330680d2792641d7389c6b5242303d8698a19340786be6114",
+      "generatedComponentSha256": "5d213db1ede7f5bf0efaecb06acc259ca132a2e66071f1259e9849767f7ea8f3",
+      "generatedComponentBytes": 29444,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getState",
+        "expose.method",
+        "expose.value",
+        "render.el",
+        "state.bool",
+        "state.get"
+      ],
+      "reachedFunctionCount": 5,
+      "reachedAuthoredHooks": [
+        "hook_options.proto.ts#install"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "value"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "hook",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_options_factory",
+      "sourceSha256": "5815d69d2e5598c330680d2792641d7389c6b5242303d8698a19340786be6114",
+      "generatedComponentSha256": "3bd9fbf3d0dc6df982c0c3f264b2259548e32d580b1406844ad6400787b762cf",
+      "generatedComponentBytes": 30629,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getState",
+        "expose.method",
+        "expose.value",
+        "render.el",
+        "state.bool",
+        "state.get"
+      ],
+      "reachedFunctionCount": 7,
+      "reachedAuthoredHooks": [
+        "hook_options_factory.proto.ts#install"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "value"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "hook",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_options_multiple",
+      "sourceSha256": "5815d69d2e5598c330680d2792641d7389c6b5242303d8698a19340786be6114",
+      "generatedComponentSha256": "e00424b92c31446d5003a32d375a0db5f376e5ed18dd9c308d1a87c08aa8b650",
+      "generatedComponentBytes": 31490,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getState",
+        "expose.value",
+        "render.el",
+        "state.bool",
+        "state.get",
+        "state.numberDiscrete"
+      ],
+      "reachedFunctionCount": 5,
+      "reachedAuthoredHooks": [
+        "hook_options_multiple.proto.ts#multiple"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "hook",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_options_nested",
+      "sourceSha256": "5815d69d2e5598c330680d2792641d7389c6b5242303d8698a19340786be6114",
+      "generatedComponentSha256": "c78bb9dd5b53557ce0c04a18e97a7d97756845c58e07e4028169bbbd93ca3d98",
+      "generatedComponentBytes": 28937,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getAsHookHandle",
+        "capture.getState",
+        "expose.value",
+        "render.el",
+        "state.bool",
+        "state.get"
+      ],
+      "reachedFunctionCount": 5,
+      "reachedAuthoredHooks": [
+        "hook_options_nested.proto.ts#inner",
+        "hook_options_nested.proto.ts#outer"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "hook",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_conditional",
+      "sourceSha256": "548ae0d8c5347aeee615d7273af508cf335ce1e56b295ea13fb880c5a41e10a5",
+      "generatedComponentSha256": "b423b14abb1bd33f6f5f702aa06673066cce7f107247cb6ef24dd92674a8a896",
+      "generatedComponentBytes": 28552,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "render.el",
+        "state.bool",
+        "state.get"
+      ],
+      "reachedFunctionCount": 6,
+      "reachedAuthoredHooks": [
+        "hook_conditional.proto.ts#once"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "hook",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_conditional_taken",
+      "sourceSha256": "548ae0d8c5347aeee615d7273af508cf335ce1e56b295ea13fb880c5a41e10a5",
+      "generatedComponentSha256": "f95a2b2672f557529b5fa8bf8102bebdd978fd877a5dd56860f0931c87b9f802",
+      "generatedComponentBytes": 28617,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "render.el",
+        "state.bool",
+        "state.get"
+      ],
+      "reachedFunctionCount": 6,
+      "reachedAuthoredHooks": [
+        "hook_conditional_taken.proto.ts#once"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "hook",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "hook_conditional_multiple",
+      "sourceSha256": "548ae0d8c5347aeee615d7273af508cf335ce1e56b295ea13fb880c5a41e10a5",
+      "generatedComponentSha256": "e889c243e9c2b21affd0831310634c11e010f0d837ff3541db73c3b5c0aa2731",
+      "generatedComponentBytes": 28659,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "render.el",
+        "state.bool",
+        "state.get"
+      ],
+      "reachedFunctionCount": 6,
+      "reachedAuthoredHooks": [
+        "hook_conditional_multiple.proto.ts#multiple"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "call",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "hook",
+        "if",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "render_mutation",
+      "sourceSha256": "016498216f689e6ed0bd7144d24227da3a570029c2eb929f4302efc15b670184",
+      "generatedComponentSha256": "0f357d24c1d767be6dac3c193b60e3a4995ed46734bc00cc319ae86df3fe8271",
+      "generatedComponentBytes": 27669,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.method",
+        "props.define",
+        "props.watch",
+        "render.el",
+        "run.update"
+      ],
+      "reachedFunctionCount": 6,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "call",
+        "function",
+        "literal",
+        "member",
+        "member-write",
+        "operation",
+        "record",
+        "reference"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "validation_retry",
+      "sourceSha256": "722fdf3c5c7766ffdc986480946476074584b8c24275ae4ea5d9dfbb0c21c450",
+      "generatedComponentSha256": "6ff56bbc5835fd0b42d22ec9cbf2f088f9344163876addd9a32ead0aeff36e30",
+      "generatedComponentBytes": 26161,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.state",
+        "expose.value",
+        "render.el",
+        "state.numberRange"
+      ],
+      "reachedFunctionCount": 2,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "array",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "value"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "return",
+        "try"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "duplicate",
+      "sourceSha256": "ddcb4b47dc537b3168044465ec84bee06d45f27ef3ca427d0cb2c98f7657dfb9",
+      "generatedComponentSha256": "abf2cbe5b3ac9f2a1093973f5b41788d1d3a84e7d4bb1cb3475b3a9ac7ece23b",
+      "generatedComponentBytes": 24081,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "expose.value",
+        "render.el"
+      ],
+      "reachedFunctionCount": 2,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "function",
+        "literal",
+        "operation",
+        "reference",
+        "value"
+      ],
+      "statementKinds": [
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "created_failure",
+      "sourceSha256": "ddcb4b47dc537b3168044465ec84bee06d45f27ef3ca427d0cb2c98f7657dfb9",
+      "generatedComponentSha256": "8dca9a543b7efea0a02bbdaf73cdeddec3311a2229f23fdd269976630899a2c9",
+      "generatedComponentBytes": 24160,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "lifecycle.onCreated",
+        "render.el",
+        "state.numberDiscrete"
+      ],
+      "reachedFunctionCount": 3,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "function",
+        "literal",
+        "operation",
+        "reference"
+      ],
+      "statementKinds": [
+        "effect",
+        "return",
+        "throw"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "focus_scope",
+      "sourceSha256": "a70300dc0830facf25ab2ee5dc82bb972221785100cc7862331c84cbba835d1e",
+      "generatedComponentSha256": "7935c62ad224e0f7aa63d8457d75001f3e86b40040b9824f6f678f320cc493d8",
+      "generatedComponentBytes": 52990,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getAsHook",
+        "capture.getAsHookHandle",
+        "event.on",
+        "expose.method",
+        "expose.state",
+        "expose.value",
+        "focus.focusFirst",
+        "focusRoving.configure",
+        "focusRoving.focusLast",
+        "focusRoving.focusNext",
+        "focusScope.configure",
+        "hook.asFocusRoving",
+        "hook.asFocusScope",
+        "hook.asFocusable",
+        "render.el",
+        "render.slot",
+        "state.bool",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set"
+      ],
+      "reachedFunctionCount": 12,
+      "reachedAuthoredHooks": [
+        "focus_scope.proto.ts#asAfter",
+        "focus_scope.proto.ts#asOuter"
+      ],
+      "expressionKinds": [
+        "authored-hook",
+        "binary",
+        "function",
+        "literal",
+        "member",
+        "narrow",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "method",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "focus_target",
+      "sourceSha256": "a70300dc0830facf25ab2ee5dc82bb972221785100cc7862331c84cbba835d1e",
+      "generatedComponentSha256": "bbd264ff479c31f6c095ad0859302b91ffc3a75badc17ce22418bae5cd49441c",
+      "generatedComponentBytes": 33821,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "event.on",
+        "event.requestDefaultActionPrevention",
+        "expose.method",
+        "expose.state",
+        "focus.focus",
+        "focus.setDisabled",
+        "hook.asFocusable",
+        "render.el"
+      ],
+      "reachedFunctionCount": 9,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "binary",
+        "call",
+        "function",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-write",
+        "literal",
+        "member",
+        "operation",
+        "reference",
+        "state"
+      ],
+      "statementKinds": [
+        "const",
+        "effect",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "cold",
+      "sourceSha256": "a8698ceb9ba792e733f2a3172574b1a635d38a54caa36da13cf8f999cdc5a3a1",
+      "generatedComponentSha256": "ee249e8a10bf4151dba8940b14bbc2234fb9ecbdc18ef1eb77f007c1168303c4",
+      "generatedComponentBytes": 237226,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getMethod",
+        "capture.getState",
+        "context.read",
+        "delay.cancel",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "expose.value",
+        "lifecycle.onBeforeDispose",
+        "lifecycle.onCreated",
+        "lifecycle.onMounted",
+        "lifecycle.onUnmounted",
+        "lifecycle.setPresent",
+        "meta.get",
+        "presence.isCurrent",
+        "presence.onCompletionRequest",
+        "presence.owner",
+        "presence.publish",
+        "presence.settle",
+        "presentation.snapshotCompletion",
+        "props.define",
+        "props.get",
+        "props.isProvided",
+        "props.setDefaults",
+        "props.watch",
+        "render.el",
+        "scheduler.delay",
+        "state.bool",
+        "state.enum",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set",
+        "state.setDefault"
+      ],
+      "reachedFunctionCount": 74,
+      "reachedAuthoredHooks": [
+        "transition/as-transition.proto.ts#asTransition"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "call",
+        "conditional",
+        "element",
+        "function",
+        "helper-call",
+        "intrinsic",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-update",
+        "lexical-write",
+        "literal",
+        "member",
+        "member-write",
+        "narrow",
+        "object-spread",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": [
+        "array.every",
+        "error",
+        "number.isFinite",
+        "object.freeze",
+        "object.hasOwn",
+        "typeof"
+      ]
+    },
+    {
+      "name": "context_a",
+      "sourceSha256": "80d5006483c8110d7eaaa23bae721150904cb46d8440935695b2614e1937f5eb",
+      "generatedComponentSha256": "6a3d3d2e8e95751a8b9fd1499bbb7603213982998f278e60c8023b988258cac3",
+      "generatedComponentBytes": 24869,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "anatomy.claim",
+        "context.provide",
+        "render.el",
+        "render.slot"
+      ],
+      "reachedFunctionCount": 2,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "context-key",
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference",
+        "static-capability"
+      ],
+      "statementKinds": [
+        "anatomy-family",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "context_b",
+      "sourceSha256": "80d5006483c8110d7eaaa23bae721150904cb46d8440935695b2614e1937f5eb",
+      "generatedComponentSha256": "8a6f440fc18e409ddf9d4bf1c246b9ab916aa3c76cbf2c9b9be843f834641eac",
+      "generatedComponentBytes": 24842,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "anatomy.claim",
+        "context.provide",
+        "render.el",
+        "render.slot"
+      ],
+      "reachedFunctionCount": 2,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "context-key",
+        "function",
+        "literal",
+        "operation",
+        "record",
+        "reference",
+        "static-capability"
+      ],
+      "statementKinds": [
+        "anatomy-family",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "context_child",
+      "sourceSha256": "80d5006483c8110d7eaaa23bae721150904cb46d8440935695b2614e1937f5eb",
+      "generatedComponentSha256": "3778f4d88c81f230963b8159c537f7be7af6641d0505dfdd09b295db880f054e",
+      "generatedComponentBytes": 26529,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "anatomy.claim",
+        "context.tryRead",
+        "context.trySubscribe",
+        "expose.state",
+        "lifecycle.onCreated",
+        "render.el",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set"
+      ],
+      "reachedFunctionCount": 3,
+      "reachedAuthoredHooks": [],
+      "expressionKinds": [
+        "binary",
+        "context-key",
+        "function",
+        "literal",
+        "member",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "static-capability",
+        "unary"
+      ],
+      "statementKinds": [
+        "anatomy-family",
+        "const",
+        "effect",
+        "return"
+      ],
+      "intrinsics": []
+    },
+    {
+      "name": "mutant",
+      "sourceSha256": "8ae92db6b5eb4f814f4c4b55808533713672505e14452d7eed5ca32a18d0ff82",
+      "generatedComponentSha256": "b13cd387e8d370b4f2193451191afb55f07ef066ed82bb3249e87845ba811584",
+      "generatedComponentBytes": 237019,
+      "imports": [
+        "  pub use native::gpui_native_owner::{ControlLabelRef, InstanceAssociations};",
+        "  pub use proto_ui_gpui_native as native;",
+        "  use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};",
+        "  use native::gpui_native_owner::*;",
+        "  use serde_json::Value as Json;",
+        "  use std::rc::Rc;"
+      ],
+      "reachedOperations": [
+        "capture.getMethod",
+        "capture.getState",
+        "context.read",
+        "delay.cancel",
+        "expose.emit",
+        "expose.event",
+        "expose.method",
+        "expose.state",
+        "expose.value",
+        "lifecycle.onBeforeDispose",
+        "lifecycle.onCreated",
+        "lifecycle.onMounted",
+        "lifecycle.onUnmounted",
+        "lifecycle.setPresent",
+        "meta.get",
+        "presence.isCurrent",
+        "presence.onCompletionRequest",
+        "presence.owner",
+        "presence.publish",
+        "presence.settle",
+        "presentation.snapshotCompletion",
+        "props.define",
+        "props.get",
+        "props.isProvided",
+        "props.setDefaults",
+        "props.watch",
+        "render.el",
+        "scheduler.delay",
+        "state.bool",
+        "state.enum",
+        "state.get",
+        "state.numberDiscrete",
+        "state.set",
+        "state.setDefault"
+      ],
+      "reachedFunctionCount": 74,
+      "reachedAuthoredHooks": [
+        "transition/as-transition.proto.ts#asTransition"
+      ],
+      "expressionKinds": [
+        "array",
+        "authored-hook",
+        "binary",
+        "call",
+        "conditional",
+        "element",
+        "function",
+        "helper-call",
+        "intrinsic",
+        "lexical-cell",
+        "lexical-read",
+        "lexical-update",
+        "lexical-write",
+        "literal",
+        "member",
+        "member-write",
+        "narrow",
+        "object-spread",
+        "operation",
+        "record",
+        "reference",
+        "state",
+        "unary",
+        "value"
+      ],
+      "statementKinds": [
+        "as-hook",
+        "const",
+        "effect",
+        "event",
+        "if",
+        "method",
+        "return",
+        "throw",
+        "try"
+      ],
+      "intrinsics": [
+        "array.every",
+        "error",
+        "number.isFinite",
+        "object.freeze",
+        "object.hasOwn",
+        "typeof"
+      ]
+    }
+  ]
+}
