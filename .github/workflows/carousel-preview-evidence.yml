@@ -20,7 +20,6 @@ jobs:
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       ASTRO_TELEMETRY_DISABLED: '1'
-      PROTO_UI_CAROUSEL_EVIDENCE: ${{ runner.temp }}/carousel-preview
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +31,8 @@ jobs:
       - name: Bind the selected source before setup
         run: |
           set -euo pipefail
+          export PROTO_UI_CAROUSEL_EVIDENCE="$RUNNER_TEMP/carousel-preview"
+          echo "PROTO_UI_CAROUSEL_EVIDENCE=$PROTO_UI_CAROUSEL_EVIDENCE" >> "$GITHUB_ENV"
           mkdir -p "$PROTO_UI_CAROUSEL_EVIDENCE"
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           node --input-type=module <<'NODE'
