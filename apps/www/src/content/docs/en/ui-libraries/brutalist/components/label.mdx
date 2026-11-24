@@ -1,12 +1,14 @@
 ---
 title: 'Label'
-description: 'Independent control naming and activation through an explicit Proto UI association.'
+description: 'Accessible control naming and click activation via explicit Proto UI instance associations.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-This Label remains **draft**. The brutalist projection shares the independent Base Label protocol. Proto UI is an independent project; design references inform a deliberate projection rather than becoming project authority.
+Brutalist Label pairs explicitly with `Checkbox`, `Switch`, `Radio Group Item`, `Input`, `Textarea`, `Button`, `Toggle`, and `Toggle Group Item` to provide accessible naming and pointer activation without manual DOM IDs.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-label"
@@ -14,38 +16,33 @@ This Label remains **draft**. The brutalist projection shares the independent Ba
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The demo pairs Brutalist Label with Brutalist Checkbox, Switch, Radio Group Item, Input and Textarea, including their Indicator and Thumb parts. Actionable labels use the public defaults; the naming-only example sets `activation={false}`. “On/Off” reads each target's exposed state. “Requests” counts the controlled Checkbox's ordinary `checkedChange` proposals while its application owner keeps `checked={false}`. Label does not forward DOM clicks or own another control value. Input and Textarea remain native text editors; their read-only examples can receive focus from the Label while retaining their text. The disabled choice keeps its name and rejects activation and focus.
+## Installation
 
-## Two independent effects
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-- `naming` defaults to `true`. The target refers to the actual rendered Label using an accessibility relationship. Do not add a hidden copy of the same name.
-- `activation` defaults to `true`. Once explicitly paired, an eligible pointer or trusted non-pointer action requests the target's existing operation. Set `activation={false}` for a naming-only label; setting it back to `true` or removing the Prop restores activation. Checkbox and Switch keep their controlled/disabled behavior; Radio Item delegates to its Group; Input and Textarea request focus without editing or moving the selection themselves.
-- Label adds no button role, Tab stop or separate keyboard action. Keyboard input remains on the control. Nested links/buttons, modified pointer input, pointercancel and drag gestures are not forwarded.
-- Naming-only labels and long descriptions remain copyable. A short actionable Label declares its own selection affordance. The controlled example deliberately keeps its value off after proposals; this is the application's ownership decision.
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-label`
+- **Package exports**: import from `@proto.ui/prototypes-brutalist/label`
 
-Activation stays in the originating click turn so editor focus is not delayed to a timer. Cancellation already observed by the host click listener is respected; a later listener cannot undo a committed operation. Cancelling pointerup alone is not click cancellation. This is a bounded custom Label protocol, not a claim to reproduce every native HTML label default-action detail. Actual assistive-technology behavior remains to be verified.
+## Usage
 
-Upgrade note: previously paired labels that omitted `activation` now activate by default. Declare `activation={false}` to retain passive naming. With `selection='policy'`, actionable labels suppress accidental text selection; use `selection='text'` when an actionable label must also be copyable. Unpaired labels never search for a parent or nearby control.
+### Independent naming and activation
 
-## Explicit association, outside JSON Props
+- **`naming` (default `true`)**: Links the rendered `Label` as the target control's accessible name without duplicating hidden text.
+- **`activation` (default `true`)**: Once paired, eligible clicks activate the target control in the same click turn—`Checkbox` and `Switch` follow their controlled/disabled rules, `Radio Item` delegates selection to its group, and `Input` / `Textarea` focus the editor (read-only editors still focus; disabled controls keep their name while ignoring activation). Set `activation={false}` for a naming-only label.
+- **`selection` (default `'policy'`)**: Actionable labels suppress accidental text selection by default; set `selection="text"` if the label should remain copyable. Nested links/buttons, modified clicks, and drags are ignored, and unpaired labels never bind implicitly to nearby controls.
 
-Create one stable `createControlLabelRef()` from `@proto.ui/core` for each pair. Keep it for the row's logical lifetime. In React, Vue and Vue 2, pass `instanceAssociations: { controlLabel: ref }` as the Adapter-owned input to both components. It is removed before raw/resolved Proto Props, even with a custom `getProps` projection.
+### Wiring an explicit association
 
-In WC, call `setElementAssociations(target, { controlLabel: ref })` and the same setter for the Label from `@proto.ui/adapter-web-component`. Use normal Props only for `naming`, `activation` and the control's values. Attribute strings, JSON-cloned references and unknown association keys are rejected. DemoSpec expresses `associations: { controlLabel: 'row-key' }`; each render instance materializes an independent public reference for that key.
+Create one stable reference per pair with `createControlLabelRef()` from `@proto.ui/core` (one live `Label` and one live target in the same document/shadow root):
 
-Exactly one live Label and one live target are supported per reference. Missing/duplicate/stale endpoints fail closed. Explicitly paired siblings are allowed; Web views must also share Document and tree root. A reference does not authorize cross-document or cross-shadow-root matching, DOM lookup or arbitrary commands. A nonempty explicit `ariaLabel`/`labelledBy` keeps naming ownership and diagnoses a conflicting Label naming request; use an explicit activation-only Label when appropriate.
+- **React / Vue / Vue 2**: Pass `instanceAssociations: { controlLabel: ref }` to both components (handled at the adapter layer, outside ordinary JSON props).
+- **Web Components**: Call `setElementAssociations(element, { controlLabel: ref })` from `@proto.ui/adapter-web-component` on both the target control and the `Label`.
 
-## Consumption and limits
-
-Import from `@proto.ui/prototypes-brutalist/label`. CLI component `brutalist-label` generates WC, React, Vue and Vue 2 facades.
-
-The declared association target set is Checkbox, Switch, Radio Group Item, Input, Textarea, Button, Toggle and Toggle Group Item. Icon-only commands can use an independent Label through the same association. Button keeps its click signal; Toggle keeps activeChange; Toggle Group Item delegates selection to its Group. Each target declares its own participation and is exercised through the Prototype packages and their Adapters. Among these targets, the private Compiler admits Button, Toggle and the Label to standalone Web source and keeps an explicit unsupported diagnostic for the others, including Toggle Group Root and Item. Form submission, validation, multiple-label ordering and native-platform/assistive-technology certification are not provided by this association. Browser acceptance is tracked separately from source and synthetic host tests.
-
-- [Label contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
-- [P-BRUTALIST-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-LABEL.yaml)
-- [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
+If the target already declares a non-empty `ariaLabel` or `labelledBy`, that name takes precedence; set `naming={false}` when you only want pointer activation.
 
 ## API
+
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -55,5 +52,3 @@ The declared association target set is Checkbox, Switch, Radio Group Item, Input
     { name: 'selection', type: "'policy' | 'auto' | 'text' | 'none'", default: 'policy' },
   ]}
 />
-
-These props belong to Root.

@@ -1,14 +1,14 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: '支持显式层级、展开折叠、RTL 方向适配与完整键盘导航的 Brutalist 风格树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，parentKey 指向父项；重复标识、缺失父项和环路均拒绝。方向键、Home/End 与首字母移动焦点；左右键展开、折叠或定位父子项。value 与 expandedKeys 支持受控请求。
+Tree 用于展示可展开、可单选的层级结构数据，支持完整的方向键、首字符跳转与双向文字方向（LTR / RTL）键盘导航。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-tree"
@@ -16,17 +16,31 @@ Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，p
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 方向与分支关系
+## 安装
 
-Root 设置 `direction="rtl"` 后，左右导航键交换：左键展开或进入子项，右键折叠或返回父项；默认 LTR 的映射相反。上下键、Home/End 与首字母导航继续遵循逻辑可见顺序。Shadcn 与 Brutalist Group 的缩进跟随文字方向。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/tree` 导入组件原型并使用对应宿主 Adapter 适配。
 
-每个 `TreeGroup` 的 `nodeKey` 与所属分支 Item 相同；把子 Item 放入 Group，并用 `parentKey` 指向该分支。Item 与 Group 通过作用域内的 key 建立 controls／labelled-by 关系。目标被移除、缺失或有歧义时，关系会撤回，不留下悬空引用。折叠隐藏 Group，但保留完整逻辑层级；原焦点在折叠分支内时移到可见祖先，树外焦点不被抢走。
+## 用法
 
-`readOnly` 阻止选择变更，仍允许导航和展开。受控 `value`、`expandedKeys` 在应用接受请求前保持已提交值。插入、移动或移除 Item 会更新层级，不伪造用户选择事件。
+### 层级结构与分组关系
+
+- 每个 `Item` 需提供树内唯一的 `nodeKey`，子节点通过 `parentKey` 指向所属父节点；重复键、缺失父节点或循环引用会被忽略以保持层级有效。
+- 为每个 `TreeGroup` 设置与对应分支 `Item` 相同的 `nodeKey`，并将该分支的子 `Item` 放入分组中。组件会自动维护 `Item` 与 `Group` 之间的 `aria-controls` / `aria-labelledby` 关联，并在节点移除或变化时自动清理。
+- 折叠分支会隐藏对应的 `Group` 但保留逻辑层级。如果折叠时焦点位于该分支内部，焦点会自动回到最近的可见祖先节点；树外焦点不受影响。
+
+### 键盘导航与 RTL 适配
+
+- `ArrowUp` / `ArrowDown`、`Home` / `End` 和首字母跳转按逻辑可见顺序移动焦点。
+- 默认 LTR 模式下，`ArrowRight` 展开分支或进入子节点，`ArrowLeft` 折叠分支或返回父节点；在 `Root` 上设置 `direction="rtl"` 会自动对调左右键映射，并让分组缩进跟随文字方向。
+
+### 只读与受控模式
+
+- `readOnly` 阻止更改选中项，但仍允许键盘导航与展开/折叠分支。
+- 向 `Root` 传入 `value` 或 `expandedKeys` 可分别进入受控模式，外部状态接受请求后再更新提交值。动态增删或移动节点会同步更新层级，不会触发伪造的用户选择事件。
 
 ## API
 
-Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 或 `expandedKeys` 会使对应事实进入受控模式。
+以下属性属于 `Root`（传入 `value` 或 `expandedKeys` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -40,4 +54,8 @@ Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`
   ]}
 />
 
-这些属性属于 Root。Item 的 `nodeKey`、`parentKey`、`textValue` 默认 `''`，`disabled` 默认 `false`。Group 接受 `nodeKey`。Toggle 额外接受 Button 的属性。
+其余子部件属性默认值：
+
+- **Item**：`nodeKey`、`parentKey`、`textValue` 默认 `''`，`disabled` 默认 `false`。
+- **Group**：接受 `nodeKey`。
+- **Toggle**：额外接受 Button 的属性。

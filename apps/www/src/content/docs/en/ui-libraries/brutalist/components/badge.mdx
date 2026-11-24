@@ -1,5 +1,6 @@
 ---
 title: Badge
+description: 'A static Brutalist label for tagging roles, environments, or categories.'
 sidebar:
   order: 3
 ---
@@ -10,28 +11,30 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Badge is a direct styled-only label with no Base counterpart.
+Brutalist Badge is a static label for tagging roles, environments, or categories, styled with 5px rounded corners, a `2px` black border, DM Sans 500 typography, and flat high-contrast tones.
 
-## Contract
-
-- 5px rounded geometry, a `2px` black border, DM Sans 500 and no outer shadow in every tone.
-- Public `tone` is `accent`, `info`, or `danger`; each tone pairs its flat fill with the intended foreground.
-- `outline` is structural grammar, not a variant. Badge has no pill radius, gradient, glass, or glow.
-- Passive, roleless, and non-focusable: Badge owns no status announcement, activation, pressed, selected, command, or event channel.
-
-Use Badge for passive labels such as roles or environments. Dynamic status belongs to a live-region owner; navigation belongs to Link; activation belongs to Button; pressed state belongs to Toggle.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-badge`
+
+## Usage
+
+- Choose a visual tone via `tone`: `'accent'` (default), `'info'`, or `'danger'`. Each tone pairs a flat background fill with its matching foreground color.
+- Badge is a passive, non-focusable label. Use `Live Region` for live status announcements, `Button` for actions, or `Toggle` for pressed states.
+
 ## API
 
-Badge is workspace source. For this workspace version, the CLI target is `brutalist-badge`. Use matching CLI and package versions; check the chosen release's availability before installing.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'tone', type: "'accent' | 'info' | 'danger'", default: 'accent' }]}
 />
-
-This prop belongs to Root.

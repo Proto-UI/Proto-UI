@@ -1,83 +1,59 @@
 ---
-title: Brutalist Field
-description: Atomic Field labeling, value reporting and controlled or consumer-validated errors.
+title: 'Brutalist Field'
+description: 'A structured form field coordinating label association, value bridging, built-in constraints, and async external validation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Draft workspace family. All six atoms share one Base protocol; native/AT/material/GPUI completion is not yet established.
+Brutalist Field pairs a form control with its label, description, error message, and validation state, supporting built-in constraints and async external validation with bold Brutalist typography and crisp borders.
 
-Square controls, thick borders, hard shadows and strong typographic hierarchy.
+## Preview
 
-<PrototypePreviewer demoId="demo-brutalist-field" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+<PrototypePreviewer
+  demoId="demo-brutalist-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
 
-## Anatomy and ownership
+## Installation
 
-Root groups exactly one Control with an optional Label, Description and Error, plus passive Validity readers. Nested Roots have independent domains. Names, help and the current error resolve through Anatomy and A11y; no caller-supplied DOM IDs are needed. Duplicate singleton parts fail closed. Progressive mounting may temporarily have no Control, but that state cannot validate or accept an old reply.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root owns validity, touched and dirty. Control owns its value and physical editor. The default Control uses the existing TextControl and Focus modules directly. For other value-bearing controls, asFieldControl is a generic registration/relationship bridge: the author reports the canonical value and consumes effective disabled/readOnly/required. It does not inspect arbitrary DOM or an unrelated expose named value. asFieldTextControl is the ready-to-use single-line authoring entry. Custom controls also explicitly declare asControlLabel().target(theirExistingOperation, FIELD_LABEL_PAIR); this setup-only pair reuses native input, same-physical-scope and isCurrent guards without putting a callback/reference in Props.
+- **Package exports**: import `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError`, and `fieldValidity` from `@proto.ui/prototypes-brutalist/field`
 
-## JSON Props
+## Usage
 
-| Part | Props | Meaning |
-| --- | --- | --- |
-| Root | invalid, errors | Supplying invalid makes validity controlled; errors are its messages |
-| Root | defaultInvalid, defaultErrors | Initialization-only uncontrolled defaults |
-| Root | disabled, readOnly, required | false; Root policy combines with local Control policy |
-| Root | minLength, maxLength | -1 disables the bound; otherwise nonnegative integer UTF-16 string length, also projected to the default editor |
-| Root | validationMode | onBlur (default), onChange or manual |
-| Root | externalValidation | false; true emits a versioned request after built-in checks pass |
-| Control | value, defaultValue | Controlled or uncontrolled string ownership is fixed when TextControl initializes |
-| Control | disabled, readOnly, required | Local policy cannot override an enabled Root constraint |
-| Control | placeholder, name, autoComplete, inputMode, enterKeyHint, ariaLabel | Existing finite text-editor hints; not arbitrary native prop forwarding |
-| Label | activation | true; pointer activation requests focus on the same enabled Control |
-| Description | none | Selectable help text from authored content |
-| Error | message, keepMounted | Explicit localized message override; otherwise current errors/built-in text. keepMounted defaults false |
-| Validity | none | Passive state and getValidity() snapshot reader |
+### Parts
 
-Proto UI Props contain JSON-compatible data. Framework onValueChange/onValidationRequest/onValidityChange callbacks are Adapter projections of expose events, not callback-valued Proto UI Props. There are no DOM refs, validate callbacks, render callbacks, Form objects or string-ID association Props.
+- **Root**: Manages validation state (`invalid`, `errors`), `dirty`, `touched`, and effective `disabled`/`readOnly`/`required` policy. Contains one `Control`, optional `Label`, `Description`, and `Error`, plus any number of read-only `Validity` readers. Nested roots operate independently.
+- **Control**: Hosts the value and text input. Custom value-bearing controls can integrate via Base's `asFieldControl` bridge and `asControlLabel().target(..., FIELD_LABEL_PAIR)` for label click focusing.
+- **Label**: Names the control and focuses it on pointer activation when `activation` is enabled, ignoring drags, modified clicks, and nested interactive elements.
+- **Description**: Optional selectable help text.
+- **Error**: Displays `message` when provided, otherwise the active `errors` strings or a built-in English fallback. Unmounts content when closed by default (set `keepMounted` to keep it mounted while hidden).
+- **Validity**: Passive status reader exposing `getValidity()`.
 
-## Validation and controlled results
+### Built-in validation and controlled state
 
-Root exposes validate(reason?), resolveValidation(requestId, result), cancelValidation(), resetValidation(), focusControl(options?), getValidity(), and invalid/pending/dirty/touched/filled/focused/disabled/readOnly/required states. A completed check emits validityChange with status, invalid, pending, dirty, touched, filled, focused, flags and errors. In controlled mode this is a proposal; the canonical invalid value stays unchanged until the owner supplies new Props. A synchronous owner response takes precedence. getValidity() and its arrays are defensive copies.
+- `validationMode` supports `'onBlur'` (default), `'onChange'` (waits until `compositionend` during IME input), and `'manual'`.
+- Built-in checks cover `required`, `minLength`, and `maxLength` (measured in UTF-16 code units; optional empty strings skip length checks). `required` treats `null`, `false`, `""`, and empty arrays as empty, while `0` and whitespace strings count as filled without implicit trimming. Built-in flags are `valueMissing`, `tooShort`, and `tooLong`; external errors set `customError`.
+- Pass `invalid` to control validation externally: completed checks emit `validityChange` so the owner can update `invalid` and `errors`.
+- `resetValidation()` clears validation state and `touched` without resetting the field value or dirty baseline. Pair with `Form` when you need submission or full form reset.
 
-required considers null, false, an empty string and an empty array empty. Zero and whitespace are valid filled values; no implicit trimming occurs. A nonempty string array is filled even if an element is empty. Only finite numbers, booleans, strings, string arrays and null may cross the generic bridge. Optional empty strings bypass minLength/maxLength. Bounds count UTF-16 code units, not grapheme clusters. Built-in flags are valueMissing, tooShort and tooLong; external errors use customError.
+### Async external validation
 
-The initial state is unvalidated unless an explicit default/owner validity was supplied. Pending never implies valid. Without a current Control the status is unvalidated even when the owner supplied invalid=false. dirty compares the canonical value with the Control's initial value; rejected controlled edits do not dirty the field. blur marks touched. resetValidation clears validation/touched only; it neither changes the value nor redefines its dirty baseline and is not a form reset.
+When `externalValidation` is `true`, passing built-in checks emits `validationRequest` with `{ requestId, value, reason }`. Resolve it by calling `resolveValidation(requestId, { invalid, errors })`. Stale results are automatically ignored if the value, control, or policy changes or a newer request starts.
 
-## Consumer-owned asynchronous checks
+### Accessibility
 
-With externalValidation=true, a passed built-in check emits validationRequest with requestId, value and reason. The consumer runs the request and calls `resolveValidation(requestId, { invalid, errors })`. A result is accepted at most once for the current Root, Control lease and value/policy revision. A new value, newer request, Control replacement/removal, detach, disable/readOnly transition, composition start, policy change, cancellation or reset invalidates old work. Malformed and cross-root results are rejected without clearing a legitimate pending request.
-
-onChange waits through composition until compositionend. Read-only Controls remain focusable and may be explicitly validated; disabled Controls suppress editing, focus requests and validation without changing owner values. The demo's timer is an ordinary consumer that uses the public request/result bridge. It implements no Field protocol in page code.
-
-## Accessibility and lifetime
-
-The one physical editor is named by Label, described by Description, and linked to Error through aria-errormessage only while canonical invalid is true. Web also projects aria-required, aria-invalid, aria-busy and aria-readonly. Label and Root add no Tab stop. Keyboard editing and selection belong to the control's existing host editor. Label pointer activation uses the actual ControlLabel guard, rejecting drag/cancel, modified/secondary clicks, nested interactive content and already-prevented input. It focuses the same Control; it does not create a second input.
-
-Error uses explicit message, current error strings or a finite built-in English explanation. Authors supply localized overrides or localized external error messages. It creates no implicit alert/live region. Closed Error uses repeatable L1 detach by default; keepMounted retains it with hidden accessibility and style. IDREF contributions are withdrawn and restored with their actual target leases. An application may choose an existing LiveRegion for announcements according to its interaction needs.
-
-Description stays passive and selectable. One aggregate Error is linked, avoiding undocumented ordering among multiple error parts. Value-specific composite controls use the generic bridge; their own keyboard and selection semantics remain their responsibility.
-
-## Consumption and evidence boundary
-
-Import fieldRoot, fieldLabel, fieldControl, fieldDescription, fieldError and fieldValidity from the family field subpath. Base also exports the corresponding authoring entries, the generic asFieldControl bridge, finite types and anatomy/context vocabulary. The CLI facade includes all six parts for React, Vue, Vue 2 and Web Components as a workspace-source family; this is not a statement that an npm release already includes them.
-
-This is not Fieldset or Form. Submission, hidden fields, form serialization/reset, debounce, native constraint-validity forwarding and server request implementations are outside this explicit contract. The same full Field semantics are used by every visual projection.
-
-The current local evidence is 24 Base tests plus 20 tests per Web Adapter (104 total), using the actual Base and four styled families in synthetic DOM. Native browser keyboard/paint, assistive-technology output, narrow/large-text geometry, optical material realization and GPUI remain separately required gates. The native-browser journey is wired for exact-source screenshots and real pointer/keyboard input. Local Chromium startup is blocked by socket EPERM; no native pass is inferred.
-
-The GPUI peer currently has no physical TextControl host. It also reports or omits several needed native mappings: required/invalid/busy/readOnly and describedBy/errorMessage are not established native equivalents. Liquid Glass declares one static editing-surface optical intent with an opaque fallback; neither an intent token nor JS transport proves optical/native rendering.
-
-[Base UI Field comparison](https://base-ui.com/react/components/field) · [shadcn Field comparison](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 forms reference](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple text-fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
-
-These are independent design comparisons. Base UI's render callbacks, validators and Form submission mode, shadcn's layout wrapper/API, Bootstrap's DOM/classes and Apple system editing chrome are not inherited APIs or Proto UI authority.
+- Label, description, and error associations are wired automatically and cleaned up on unmount without manual DOM IDs; `aria-errormessage` is linked only while `invalid` is `true`.
+- Web hosts sync `aria-required`, `aria-invalid`, `aria-busy`, and `aria-readonly`. `Error` does not create an implicit live region; combine with `LiveRegion` when live announcements are needed.
 
 ## API
 
-Field is workspace source. There is no public `proto-ui add` target. Passing `invalid` selects controlled validity; Control `value` selects controlled input. Description and Validity add no props of their own.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -96,7 +72,7 @@ Field is workspace source. There is no public `proto-ui add` target. Passing `in
   ]}
 />
 
-These props belong to Root.
+### Control
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -123,7 +99,17 @@ These props belong to Root.
   ]}
 />
 
-These props belong to Control. Label defaults `activation` to `true`. Error defaults `message` to `''` and `keepMounted` to `false`.
+### Other parts
+
+- **Label**: `activation?: boolean` (default `true`)
+- **Description**: No props
+- **Error**: `message?: string` (default `''`), `keepMounted?: boolean` (default `false`)
+- **Validity**: No props
+
+### Methods and events
+
+- **Root methods**: `validate(reason?)`, `resolveValidation(requestId, result)`, `cancelValidation()`, `resetValidation()`, `focusControl(options?)`, `getValidity()`
+- **Events**: `validityChange` (emits validation status and snapshot), `validationRequest` (payload `{ requestId, value, reason }`)
 
 ## References
 

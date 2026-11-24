@@ -1,12 +1,14 @@
 ---
 title: 'Toast'
-description: '可暂停、关闭并发出明确操作意图的限时实时通知。'
+description: '支持定时关闭、悬停/聚焦暂停与显式操作按钮的 Brutalist 风格实时通知组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-可暂停、关闭并发出明确操作意图的限时实时通知。
+Toast 用于展示短暂的实时通知消息，支持自动倒计时关闭、悬停或聚焦暂停、快捷键定位以及应用层自定义操作。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-toast"
@@ -15,15 +17,32 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/Close 焦点会暂停剩余时长。受控 open 只发出一次超时关闭请求，等待调用方更新。Close、有焦点时的 Escape、Action 请求关闭；实际副作用归应用处理。Viewport 提供 F8 聚焦快捷键；不包含全局队列或系统通知传输。
+## 安装
 
-组成: Root, Viewport, Title, Description, Action, Close.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/toast` 导入组件原型并使用对应宿主 Adapter 适配。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+### 组件结构
+
+Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` 六个部分组成：
+
+- `Root`：管理单条通知的打开状态、过渡时长、倒计时与播报礼貌级别（`politeness`）。
+- `Viewport`：通知停靠区域，提供默认的 `F8` 快捷键用于快速将焦点移入通知区。
+- `Title` / `Description`：通知标题与说明文案。
+- `Action`：触发应用层操作意图并请求关闭（实际业务逻辑由应用处理）。
+- `Close`：手动关闭当前通知的按钮。
+
+### 计时与关闭行为
+
+- 默认展示 `5000ms`；将 `duration` 设为 `0` 可保持常驻不自动关闭。
+- 鼠标悬停在通知上，或焦点位于 `Action` / `Close` 按钮上时，剩余倒计时会自动暂停。
+- 点击 `Close`、在通知聚焦时按 `Escape` 或触发 `Action` 都会请求关闭。受控模式（传入 `open`）下，超时后仅发出一次关闭请求并等待调用方更新状态。
+- 如需多条通知排队或跨页面调度，请在应用层管理通知队列。
 
 ## API
 
-Toast 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open` 进入受控模式。
+以下属性属于 `Root`（传入 `open` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -39,5 +58,9 @@ Toast 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `open`
   ]}
 />
 
-这些属性属于 Root。Viewport 的 `a11yLabel` 默认 `Notifications`，`hotkey` 默认 `F8`。Title 与 Description 没有属性。Action 的 `disabled` 默认 `false`，`a11yLabel` 没有默认值。Close 的 `disabled` 默认 `false`。
+其余子部件属性默认值：
 
+- **Viewport**：`a11yLabel` 默认 `'Notifications'`，`hotkey` 默认 `'F8'`。
+- **Title**、**Description**：无属性。
+- **Action**：`disabled` 默认 `false`，`a11yLabel` 可选（无默认值）。
+- **Close**：`disabled` 默认 `false`。

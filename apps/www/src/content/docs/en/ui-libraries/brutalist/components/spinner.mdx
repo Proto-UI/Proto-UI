@@ -1,5 +1,6 @@
 ---
 title: Spinner
+description: 'A 2px currentColor open-arc loading indicator in the Brutalist family with reduced-motion support.'
 sidebar:
   order: 9
 ---
@@ -9,27 +10,30 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
-> Availability: Spinner is a workspace-only draft. The npm artifacts for `@proto.ui/prototypes-brutalist@0.2.0` and `@proto.ui/prototypes-brutalist@0.3.0-alpha.1` do not export `./spinner`. The ecosystem release train [V-PROTO-UI-0010](https://github.com/Proto-UI/Proto-UI/blob/main/spec/versions/V-PROTO-UI-0010.yaml) remains `draft`; a package in npm does not establish train activation or immutable snapshot evidence. Lifecycle: [P-BRUTALIST-SPINNER](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SPINNER.yaml) remains `draft`; this page describes the in-repository implementation, not an active protocol guarantee.
 
-Brutalist Spinner is a direct styled-only visual indicator: a 2px `currentColor` circular ring with one open arc, no fill or soft shadow. It rotates linearly once per 1000ms only when reduced motion is not requested; `prefers-reduced-motion: reduce` removes the animation and retains the open edge as a non-color orientation cue.
+Spinner is a visual loading indicator drawn as a 2px `currentColor` circular ring with an open arc and no fill or soft shadow, suited for inline button states and loading regions.
 
-Spinner is passive, contentless, excluded from the accessibility tree (`aria-hidden`, roleless, non-focusable), and owns no loading, busy, progress, completion, announcement, or live-region semantics.
-
-`size` provides sm, md, and lg (16 / 24 / 32 CSS pixels), defaults to `md`, and restores that default after prop removal.
-
-Compose it inline inside a parent Button or beside authored loading text in a parent-owned status or busy region: operation state, accessible text, placement, alignment, delay, replacement, and focus continuity stay parent-owned; Spinner does not create those semantics.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-spinner" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototype from `@proto.ui/prototypes-brutalist/spinner` (workspace CLI target: `brutalist-spinner`).
+
+## Usage
+
+- **Sizes**: `size` supports `'sm'` (16px), `'md'` (24px, default), and `'lg'` (32px); removing the prop restores `'md'`.
+- **Reduced motion**: Rotates linearly once every 1000ms by default. Under `prefers-reduced-motion: reduce`, rotation stops while the open arc remains visible as a non-color cue.
+- **Parent-owned semantics**: Spinner is `aria-hidden` and non-focusable. Compose it inside a parent Button or status/busy region that manages `aria-busy`, accessible text, timing, and focus continuity.
+
 ## API
 
-Spinner is workspace source. For this workspace version, the CLI target is `brutalist-spinner`. Use matching CLI and package versions; check the chosen release's availability before installing.
+The following prop belongs to `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'size', type: "'sm' | 'md' | 'lg'", default: 'md' }]}
 />
-
-This prop belongs to Root.

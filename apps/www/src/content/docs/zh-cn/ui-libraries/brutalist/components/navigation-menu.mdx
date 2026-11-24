@@ -1,12 +1,14 @@
 ---
 title: 'NavigationMenu'
-description: '具有原生目的地链接的命名导航展开面板。'
+description: '带有原生目的地链接与可展开导航面板的 Brutalist 风格导航菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-具有原生目的地链接的命名导航展开面板。
+NavigationMenu 用于构建站点级或应用级导航栏，将互斥展开的命名导航面板与浏览器原生链接语义结合在一起。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-navigation-menu"
@@ -15,19 +17,33 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   codePanel={false}
 />
 
-Root 是 navigation 地标，Trigger 是展开按钮，Content 是有名称的 region。Root.value 标识唯一展开面板。Item 发出命令；Link 投影带 href、target、rel 与当前页语义的真实锚点。URL 预览、Enter、修饰键/中键浏览及导航由浏览器持有，不合成 Space 激活或应用路由。
+## 安装
 
-组成: Root, Trigger, Content, Item, Link.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/navigation-menu` 导入组件原型并使用对应宿主 Adapter 适配。
 
-草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+## 用法
 
-Link 在原生激活之后发出只读 navigate 观察，字段为 href、target、rel、modified；它不是可取消的路由请求。普通当前窗口激活会关闭面板，closeOnSelect=false 可保留；修饰键/中键及 \_blank 激活保留当前页面板。禁用 Link 会移除目标并阻止激活。current=true 通过 aria-current 标识当前页。
+### 组件结构
 
-React/Vue/Vue2 使用原生锚点根节点；Web Components 把调用方内容保留在其持有的局部锚点内，焦点、样式与无障碍投影跟随真实物理表面。演示使用同文档目标，仅观察浏览器导航。源码运行时检查之外的真实浏览器、打包、编译器与 native 验收仍待完成。
+NavigationMenu 由 `Root`、`Trigger`、`Content`、`Item` 和 `Link` 五个部分组成：
+
+- `Root`：作为 navigation 地标容器，通过 `value` 管理当前唯一展开的导航面板。
+- `Trigger`：切换对应面板展开状态的按钮，与 `Content` 通过 `value` 配对。
+- `Content`：带无障碍名称的 region 面板容器。
+- `Item`：触发普通命令操作的菜单项。
+- `Link`：渲染真实的原生锚点链接，支持 `href`、`target`、`rel` 和 `current`（设置 `aria-current` 标识当前页）。
+
+### 链接导航行为
+
+- **原生浏览体验**：URL 预览、`Enter` 激活以及修饰键/中键打开新标签页均由浏览器原生处理；如需接入应用路由，可在外层监听事件或结合路由方案处理。
+- **只读 `navigate` 事件**：`Link` 在原生激活后发出只读 `navigate` 事件，载荷包含 `{ href, target, rel, modified }`，用于观察导航行为。
+- **自动关闭规则**：普通当前窗口激活默认关闭当前面板（设置 `closeOnSelect={false}` 可保持打开）；使用修饰键、中键点击或 `target="_blank"` 打开时保留当前页面的展开面板。
+- **禁用状态**：设置 `disabled` 后，`Link` 会移除跳转目标并阻止激活。
+- **跨宿主渲染**：React、Vue 与 Vue 2 直接使用原生 `<a>` 根节点；Web Components 会将自定义内容保留在内部持有的锚点元素中，焦点、样式与无障碍属性同步作用在该元素上。
 
 ## API
 
-Navigation Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+以下属性属于 `Root`（传入 `value` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -39,5 +55,9 @@ Navigation Menu 是工作区源码，没有公开的 `proto-ui add` 目标。传
   ]}
 />
 
-这些属性属于 Root。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 与 `a11yLabel` 默认 `''`，`sideOffset` 默认 `4`。Item 的 `value` 与 `textValue` 默认 `''`，`disabled` 默认 `false`，`closeOnSelect` 默认 `true`。Link 的 `href` 与 `rel` 默认 `''`，`current` 默认 `false`，`target` 默认 `_self`。
+其余子部件属性默认值：
 
+- **Trigger**：`value` 默认 `''`，`disabled` 默认 `false`。
+- **Content**：`value` 与 `a11yLabel` 默认 `''`，`sideOffset` 默认 `4`。
+- **Item**：`value` 与 `textValue` 默认 `''`，`disabled` 默认 `false`，`closeOnSelect` 默认 `true`。
+- **Link**：`href` 与 `rel` 默认 `''`，`current` 默认 `false`，`target` 默认 `'_self'`。

@@ -1,5 +1,6 @@
 ---
 title: Badge
+description: '用于角色、环境或分类标识的 Brutalist 静态徽标组件。'
 sidebar:
   order: 3
 ---
@@ -10,28 +11,30 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Badge 是没有 Base counterpart 的 direct styled-only 标签。
+Brutalist Badge 是用于标注角色、环境或分类信息的静态徽标组件，采用 5px 圆角、`2px` 黑色边框、无外影与平涂高对比度配色。
 
-## 契约
-
-- 每个 tone 都使用5px 圆角、`2px` 黑色边框与无外影表面。
-- 公开 `tone` 为 `accent`、`info` 或 `danger`；每个 tone 都将平涂 fill 与对应 foreground 配对。
-- `outline` 是结构语法而不是 variant；Badge 不使用 pill 圆角、渐变、玻璃或柔光。
-- Badge 被动、无 role、不可聚焦，不拥有 status announcement、activation、pressed、selected、command 或 event channel。
-
-Badge 用于角色、环境等被动标签。动态 status 由 live-region owner 承担；导航属于 Link；激活属于 Button；pressed state 属于 Toggle。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
 </div>
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-badge`
+
+## 用法
+
+- 通过 `tone` 选择配色风格：`accent`（默认）、`info` 或 `danger`，每种配色均内置对应的平涂背景与前景文字色。
+- Badge 是不可聚焦的静态标签，适合展示状态词、角色或环境标识。需要动态播报请使用 `Live Region`，需要交互点击请使用 `Button` 或 `Toggle`。
+
 ## API
 
-Badge 是工作区源码。当前工作区 CLI 目标为 `brutalist-badge`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'tone', type: "'accent' | 'info' | 'danger'", default: 'accent' }]}
 />
-
-这个属性属于 Root。

@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Dropdown Menu'
-description: '基于 Base Dropdown 的硬表面下拉菜单投影'
+description: '支持分组标签、分隔线、快捷键提示与危险操作变体的 Brutalist 下拉菜单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,23 +9,29 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Dropdown Menu 继承 Base 的 trigger/content/item 语义，并使用圆角平面 panel 与带硬阴影的 Button-like trigger。
+Brutalist Dropdown Menu 继承 Base Dropdown 的完整触发、键盘导航与关闭语义，搭配圆角平面浮层、硬阴影触发按钮及高对比度菜单项样式。
+
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-dropdown-menu" initialRuntime="wc" />
 </div>
 
-## 分组动作组成（草稿）
+## 安装
 
-Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组、禁用的 API 动作，以及最后一个使用 destructive Item 变体的 Delete 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-## 包入口与生成的 facade
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-dropdown`（生成 `Root`、`Trigger`、`Content`、`Item`）
+- **包导出**：从 `@proto.ui/prototypes-brutalist/dropdown` 导入全部部件（含 `Group`、`Label`、`Separator`、`Shortcut`）
 
-包入口是 `@proto.ui/prototypes-brutalist/dropdown`。当前源码 CLI 注册了 `brutalist-dropdown`，为所选宿主生成 Root、Trigger、Content 与 Item。Group、Label、Separator 与 Shortcut 是额外的包导出；这个 CLI 目标不会生成它们的 facade。源码注册不代表已安装包或打包消费者验收。
+## 用法
+
+- **分组与装饰部件**：`Group` 与 `Label` 自动建立菜单分组的无障碍命名关系；`Separator` 用于分隔菜单区块；`Shortcut` 用于展示键盘快捷键提示（仅作视觉标注，不注册全局快捷键）。
+- **菜单项变体与触发图标**：在 `Item` 上设置 `variant="destructive"` 高亮危险操作，设置 `inset` 对齐带图标的菜单项；在 `Trigger` 上开启 `indicator` 显示下拉箭头指示图标。
 
 ## API
 
-传入 `open` 进入受控模式。
+传入 `open: boolean` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -44,4 +50,11 @@ Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut �
   ]}
 />
 
-前五个属性属于 Root。`inset` 与 `variant` 属于 Item；`indicator`、`indicatorIcon`、`indicatorSize` 与 `indicatorStrokeWidth` 属于 Trigger。Content 接受 Transition 属性，`side` 默认 `bottom`，`align` 默认 `center`，`sideOffset` 默认 `4`，`alignOffset` 与 `collisionPadding` 默认 `0`，`avoidCollisions` 默认 `true`，`excludeAnchorTranslation` 默认 `true`。Item 的 `disabled`、`value` 与 `textValue` 默认 `false`、`''` 与 `''`；`closeOnCommit` 没有默认值，回退到 Root 策略。Group 的 `a11yLabel` 默认 `''`。Label、Separator 与 Shortcut 没有属性。
+前五个属性属于 `Root`；`inset` 与 `variant` 属于 `Item`；`indicator`、`indicatorIcon`、`indicatorSize` 与 `indicatorStrokeWidth` 属于 `Trigger`。
+
+### 其他部件属性
+
+- **Content**：支持 Transition 属性；`side`（默认 `'bottom'`）、`align`（默认 `'center'`）、`sideOffset`（默认 `4`）、`alignOffset`（默认 `0`）、`collisionPadding`（默认 `0`）、`avoidCollisions`（默认 `true`）、`excludeAnchorTranslation`（默认 `true`）
+- **Item**：`disabled?: boolean`（默认 `false`）、`value?: string`（默认 `''`）、`textValue?: string`（默认 `''`）、`closeOnCommit?: boolean`（默认继承 Root 的 `closeOnItemCommit`）
+- **Group**：`a11yLabel?: string`（默认 `''`）
+- **Label / Separator / Shortcut**：无独立属性

@@ -1,11 +1,15 @@
 ---
-title: brutalist Slider
-description: Draft portable input atoms.
+title: 'Brutalist Slider'
+description: 'Select a single value or range along a track with pointer drag, keyboard stepping, and Field/Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Slider lets users pick a single value or a multi-thumb range via pointer drag, touch, or keyboard stepping, with horizontal/vertical orientation and `Field` / `Form` integration.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-slider"
@@ -14,15 +18,27 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root owns value/defaultValue, min/max/step, disabled/readOnly, orientation and direction. Track uses shared normalized AxisInput for real pointer/touch drag. Thumb is one focusable slider: arrows, Shift×10, PageUp/PageDown, Home/End; horizontal RTL reverses lateral arrows. Values clamp and snap from min. Controlled requests emit valueChange while retaining owner values; valueCommit marks completion, cancel restores an uncontrolled drag start. Label names Thumb; Value and Indicator are passive. The scalar entry retains single-thumb behavior; the additive Values composition below supplies range and multiple-thumb ownership.
+## Installation
 
-Use FieldThumb instead of Thumb inside Field/FormField to bridge FieldLabel activation, canonical numeric validation, policy, Form serialization and reset. Standalone Thumb continues to use SliderLabel.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: root, label, track, indicator, thumb, field-thumb, value. All four styled families inherit Base behavior.
+- **Package exports**: import scalar slider parts and multi-value `sliderValues*` parts from `@proto.ui/prototypes-brutalist/slider`
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+## Usage
 
-## Range and multiple values
+### Single-value parts
+
+The scalar slider consists of `Root`, `Label`, `Track`, `Indicator`, `Thumb`, `FieldThumb`, and `Value`:
+
+- **Root**: Manages `value` / `defaultValue`, `min`, `max`, `step`, `disabled`, `readOnly`, `orientation`, and `direction`. Values snap to `step` from `min` and clamp within bounds.
+- **Track / Indicator**: Handle pointer and touch dragging along the track and render the filled range.
+- **Thumb**: Focusable slider thumb for standalone usage. Supports arrow keys, `Shift` ×10 stepping, `PageUp` / `PageDown`, and `Home` / `End` (with lateral arrows reversed in horizontal RTL).
+- **FieldThumb**: Use instead of `Thumb` inside `Field` or `FormField` to integrate `FieldLabel` focusing, numeric validation, form serialization, and reset.
+- **Label / Value**: Name the slider and display the current value.
+
+Pass `value` for controlled mode. Dragging emits `valueChange`, release emits `valueCommit`, and cancelling restores the starting value in uncontrolled mode.
+
+### Range and multiple values
 
 <PrototypePreviewer
   demoId="demo-brutalist-slider-values"
@@ -31,13 +47,16 @@ Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, pac
   codePanel={false}
 />
 
-Import the six `sliderValues*` entries from `@proto.ui/prototypes-brutalist/slider`. Use one Values Root with `defaultValue={[20, 80]}` and one indexed Thumb per value, nested inside Values Track. Track owns the shared input lease: a direct click seeks the nearest editable slot, and an off-center Thumb grab keeps its offset. `thumbCollisionBehavior` accepts `push`, `swap` or `none`; a swap moves active focus while capture stays on Track. Keyboard edits retain their existing same-slot limits.
+For range or multi-thumb sliders, import the `sliderValues*` parts from `@proto.ui/prototypes-brutalist/slider`:
 
-The complete Values Root is an optional grouped Field control. Inside Field/FormField it reports its canonical finite `number[]`, baseline, group focus and relations; FieldLabel focuses the first editable Thumb. Controlled refusal keeps owner values and does not validate the rejected candidate. Cancellation discards completion; reset retires the contact and requests the creation baseline, including from a disabled Form. The original scalar Slider parts retain their separate contract.
+- Pass an array such as `defaultValue={[20, 80]}` on `Values Root` and place one indexed `Thumb` per value inside `Values Track`.
+- Clicking the track moves the nearest editable thumb, and grabbing a thumb preserves the pointer offset.
+- `thumbCollisionBehavior` accepts `'push'`, `'swap'`, or `'none'`; `'swap'` transfers active focus when thumbs cross.
+- `Values Root` integrates directly with `Field` / `FormField` as a grouped control reporting `number[]`, with `FieldLabel` focusing the first editable thumb.
 
 ## API
 
-Slider is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Parts do not add props of their own.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -55,7 +74,7 @@ Slider is workspace source. There is no public `proto-ui add` target. Passing `v
   ]}
 />
 
-These props belong to Root.
+Pass `value: number` to enable controlled mode. Scalar child parts declare no props of their own.
 
 ## References
 

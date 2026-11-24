@@ -1,11 +1,15 @@
 ---
-title: brutalist Slider
-description: 可移植输入原子草稿。
+title: 'Brutalist Slider'
+description: '支持单滑块与多滑块范围选择、键盘步进及表单集成的 Brutalist 滑块组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Slider 允许用户通过指针拖动、触摸或键盘步进在连续区间内选择一个或多个数值，支持横向/纵向布局与 `Field` / `Form` 表单集成。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-slider"
@@ -14,15 +18,27 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Track 通过共享 AxisInput 接入真实指针/触摸拖动；Thumb 支持箭头、Shift 十倍、PageUp/PageDown、Home/End，水平 RTL 反向。数值从 min 对齐步长并限制边界；受控请求不覆盖作者值，valueCommit 标记完成，取消恢复非受控拖动起点。当前实现单 thumb，多 thumb 约束待补。
+## 安装
 
-在 Field/FormField 内用 FieldThumb 替代 Thumb，桥接 FieldLabel 激活、规范数值校验、策略、Form 序列化及复位。独立 Thumb 仍使用 SliderLabel。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-部件: root, label, track, indicator, thumb, field-thumb, value. 四个视觉家族继承同一 Base 行为。
+- **包导出**：从 `@proto.ui/prototypes-brutalist/slider` 导入标量滑块部件与多值滑块 `sliderValues*` 部件
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+## 用法
 
-## 范围与多值
+### 单值滑块部件
+
+单值滑块由 `Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb` 和 `Value` 组成：
+
+- **Root**：管理 `value` / `defaultValue`、`min`、`max`、`step`、`disabled`、`readOnly`、`orientation` 与 `direction`。数值从 `min` 对齐步长并约束在边界内。
+- **Track / Indicator**：轨道响应指针与触摸拖动，填充条显示当前进度区间。
+- **Thumb**：独立使用时承载可聚焦滑块，支持方向键、`Shift` 10 倍步进、`PageUp` / `PageDown`、`Home` / `End`（横向 RTL 下左右键自动反转）。
+- **FieldThumb**：在 `Field` 或 `FormField` 内替代 `Thumb` 使用，自动衔接 `FieldLabel` 聚焦、数值校验、表单序列化与重置。
+- **Label / Value**：分别为滑块命名和展示当前值。
+
+传入 `value` 进入受控模式：拖动过程中触发 `valueChange`，释放确认时触发 `valueCommit`，取消拖动则恢复非受控起始值。
+
+### 范围与多值滑块
 
 <PrototypePreviewer
   demoId="demo-brutalist-slider-values"
@@ -31,13 +47,16 @@ Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Tra
   codePanel={false}
 />
 
-从 `@proto.ui/prototypes-brutalist/slider` 导入六个 `sliderValues*` 入口。Values Root 设置 `defaultValue={[20, 80]}`，每个值配一个带 index 的 Thumb，并将 Thumb 放入 Values Track。Track 独占共享输入 lease：点击轨道选择最近的可编辑槽，偏离中心抓取 Thumb 保留偏移。`thumbCollisionBehavior` 支持 `push`、`swap`、`none`；swap 转移活动焦点而 capture 始终属于 Track。键盘编辑保留原逐槽限制。
+需要范围选择或多滑块时，从 `@proto.ui/prototypes-brutalist/slider` 导入 `sliderValues*` 系列部件：
 
-完整 Values Root 可作为 Field/FormField 的一个组合控件，报告 canonical 有限 `number[]`、初始基线、组焦点和关系，FieldLabel 聚焦首个可编辑 Thumb。受控拒绝保持 owner 值，不校验被拒绝的 candidate。取消只撤销提交；reset 撤销当前接触并请求初始基线，也适用于 disabled Form。原标量 Slider 部件保留独立契约。
+- 在 `Values Root` 上设置数组初始值（例如 `defaultValue={[20, 80]}`），并在 `Values Track` 内为每个数值放置一个带 `index` 的 `Thumb`。
+- 点击轨道会自动定位到最近的可编辑滑块；拖动滑块时保留抓取偏移量。
+- `thumbCollisionBehavior` 支持 `'push'`、`'swap'` 和 `'none'`，在 `'swap'` 模式下交换位置时会自动转移焦点。
+- `Values Root` 可直接放入 `Field` / `FormField`，提交有限的 `number[]` 数组，`FieldLabel` 点击时聚焦首个可编辑滑块。
 
 ## API
 
-Slider 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。各部件自身没有属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -55,7 +74,7 @@ Slider 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `valu
   ]}
 />
 
-这些属性属于 Root。
+传入 `value: number` 进入受控模式；其他单值子部件不声明独立属性。
 
 ## 参考
 

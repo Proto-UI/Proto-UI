@@ -1,6 +1,6 @@
 ---
 title: 'Radio Group'
-description: '覆盖在 Base Radio Group 协议之上的 Brutalist Radio Group 草案呈现。'
+description: '提供单选语义、漫游焦点与清晰几何轮廓的 Brutalist 风格单选框组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,35 +9,40 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-这个 draft family 包含 Root、Item 与 Indicator。唯一选中 value、按 Collection 排序的 Item、selected-or-first roving focus、生效的 disabled behavior、pointer 与键盘 activation，以及包含每个 `radio` item `aria-checked` 的可访问 `radiogroup` object 均由 Base Radio Group 所有。
+Radio Group 用于在一组互斥选项中进行单项选择。Brutalist 风格以纵向网格排布 16px 圆形 2px 黑边选项，选中时通过内部实心圆点标识状态，同时保持清晰的焦点偏移环。
 
-Brutalist 层只拥有呈现。按固定 Neo `radio-group.tsx@3306a802` 来源，Root 以 `grid gap-2` 列排布 Item；每个 Item 是 16px 圆形 2px 边框控件；checked 只通过 Indicator 绘制恰好一个 `size-2` 实心圆点，Item 本身的填色与边框不变。focus 保留 family offset ring，disabled 保留 opacity 门控，press 不改变几何或阴影。Indicator 是被动且派生的：不拥有 activation、focus 或 checked 语义，其 SVG 圆点为 `aria-hidden`。
-
-Root、Item 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/radio-group` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-radio-group` registry entry，也不产生单独的 publication 或 release 承诺。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-radio-group" initialRuntime="wc" />
 </div>
 
-## 建议验收路径
+## 安装
 
-1. 用 pointer 与方向键操作 Default 和 Comfortable；确认 roving focus 与单一选择。
-2. 确认第一组的 Compact（disabled）选项无法被选中或聚焦。
-3. 确认第二组初始没有任何 checked item，且不会静默选择第一项。
-4. 确认 checked Item 在 16px 圆内绘制恰好一个圆点，圆本身保持静止表面。
-5. 在 Web Components、React、Vue 与 Vue 2 的 Light/Dark 模式中重复检查。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/radio-group` 导入 `Root`、`Item` 与 `Indicator`（当前工作区 CLI 目标为 `brutalist-radio-group`）。
 
-相关 catalog entities 仍为 `draft`；本页记录当前方向，而不是稳定的 Radio Group guarantee。
+## 用法
 
-## 只读与显式 Form 组合
+### 组件结构
 
-Root 接受 `readOnly`：保留焦点并拒绝新值提案；disabled 还会退出焦点参与。只读 Radio Group 仍可使用已有导航键漫游焦点。普通 Root 不会自动注册到 Field 或 Form。
+Radio Group 由 `Root`、`Item` 和 `Indicator` 组成：
 
-在显式 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 的 `fieldRadioGroup`，接入 canonical 值、required 校验、Label/Description/Error 关系与重置。[Form 选择控件示例](../../form/) 展示受控拒绝、接受更新、只读焦点、禁用分组与真实 owner 更换。`resetValue()` 请求实例创建时的基线，不会强迫受控 owner 接受。
+- `Root`：统一管理单项选中值、选项顺序、漫游焦点、禁用/只读策略以及 `radiogroup` 无障碍语义。
+- `Item`：单个 `radio` 选项，维护 `aria-checked`、指针与键盘激活行为；选中时保持外圆底色与边框不变。
+- `Indicator`：纯视觉指示器，在选中状态下于圆内绘制一个 `size-2` 实心圆点（SVG 为 `aria-hidden`）。
+
+### 键盘交互与只读状态
+
+- 支持使用方向键在启用选项间漫游焦点并完成单选，初始焦点落在已选中项或第一个可用项上。
+- `readOnly` 保留键盘焦点与方向键漫游能力，但阻止修改当前选中值；`disabled` 则同时阻止选中与焦点参与。
+
+### 表单集成
+
+普通 `Root` 不会自动注册到 Field 或 Form。如需接入必填校验、标签/描述/错误关联与重置能力，请在 `FormField` 中使用 `@proto.ui/prototypes-brutalist/field` 提供的 `fieldRadioGroup`，完整示例见[Form 选择控件示例](../../form/)。调用 `resetValue()` 会恢复实例创建时的初始值（受控模式下以变更请求发出）。
 
 ## API
 
-Radio Group 是工作区源码。当前工作区 CLI 目标为 `brutalist-radio-group`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `value` 进入受控模式。
+以下属性属于 `Root`（传入 `value` 进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -49,4 +54,7 @@ Radio Group 是工作区源码。当前工作区 CLI 目标为 `brutalist-radio-
   ]}
 />
 
-这些属性属于 Root。Item 的 `value` 默认 `''`，`disabled` 默认 `false`。Indicator 没有属性。
+其余子部件：
+
+- **Item**：`value` 默认 `''`，`disabled` 默认 `false`。
+- **Indicator**：无属性。

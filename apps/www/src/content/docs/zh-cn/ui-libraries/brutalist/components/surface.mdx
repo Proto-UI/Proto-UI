@@ -1,12 +1,14 @@
 ---
 title: 'Surface'
-description: 'Brutalist 被动视觉表面，语义与交互事实由消费者拥有。'
+description: '接收外层状态输入并提供统一边框、背景与阴影样式的 Brutalist 被动视觉表面组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-`brutalist-surface-root` 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Brutalist 通过 `asSurfaceRoot()` 继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 契约，再由家族反馈 Rule 实现呈现。
+Surface 是基于 [Base Surface](/zh-cn/ui-libraries/base/surface/) 的 Brutalist 被动视觉容器，提供一个内容插槽并消费视觉外观与状态输入，适合为面板、卡片和交互控件提供统一的表面表现。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-surface"
@@ -14,9 +16,15 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-Demo 将明确的被动状态传给真实包原型。focus、press 样本是视觉事实，不是可点击或可聚焦的控件。外层间距与内部内容 padding 属于示例，不通过添加事件处理把 Surface 冒充 Button。
+预览中的 `hovered`、`focusVisible`、`pressed` 等示例直接由外部属性驱动；外层间距与内边距由使用方自行控制。
 
-## 使用 Surface
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/surface` 导入 `surfaceRoot`（当前工作区 CLI 目标为 `brutalist-surface`）。
+
+## 用法
+
+### 基础示例
 
 ```tsx
 import * as React from 'react';
@@ -34,46 +42,23 @@ export function Summary() {
 }
 ```
 
-`/surface` subpath 与包根导出 `surfaceRoot`；`SurfaceRootProps`、`SurfaceRootExposes` 描述共用契约。Base 还导出用于家族编写的 `asSurfaceRoot` 和 `SurfaceRootAsHookContract`。不要在交互 owner 内加入 Surface 后，再给它另一份 role、tab stop 或激活处理。使用原生 anchor 时，导航、键盘行为、target、download 仍归该 anchor。
+`/surface` 子路径与包根均导出 `surfaceRoot`，配套类型 `SurfaceRootProps` 与 `SurfaceRootExposes` 描述共用契约；如需自定义风格封装，可结合 Base 导出的 `asSurfaceRoot` 与 `SurfaceRootAsHookContract`。
 
-## 输入
+### 状态输入与语义组合
 
-| Prop | Values | Default |
-| --- | --- | --- |
-| `variant` | `transparent`, `outline`, `secondary`, `muted`, `accent`, `solid`, `scrim` | `outline` |
-| `radius` | `default`, `none`, `sm`, `md`, `lg`, `xl`, `full` | `default` |
-| `border` | `all`, `bottom`, `none` | `all` |
-| `elevation` | `none`, `raised` | `none` |
-| `transitionState` | `closed`, `entering`, `entered`, `leaving` | `entered` |
-| `fade` | boolean | `false` |
-| `hovered` | boolean | `false` |
-| `focusVisible` | boolean | `false` |
-| `pressed` | boolean | `false` |
-| `current` | boolean | `false` |
+- **纯被动视觉输入**：`hovered`、`focusVisible`、`pressed` 和 `current` 均由外层交互组件或状态管理方传入，Surface 本身不监听事件，也不设置 ARIA role、`aria-current` 或焦点停靠点。
+- **保留原生语义**：当与原生链接或按钮组合时，将 `href`、`target`、`download` 或点击行为保留在原生元素或 Button 组件上，不要在 Surface 上重复叠加交互角色。
+- **颜色与继承**：移除属性后会恢复默认值。`secondary` 使用 Brutalist 次级背景与常规前景色，不受 `elevation` 影响。当内部包含带样式的 Text 子元素并希望沿用 Surface 前景色时，可在 Text 上设置 `tone="inherit"`。
 
-`hovered`、`focusVisible`、`pressed`、`current` 都是现有语义 owner 提供的事实；Surface 不自行检测指针、焦点、键盘、选择或导航状态。它没有 exposed state、event、method、无障碍 role 或 native property。`current` 是呈现输入，不是 `aria-current` 实现；需要真实 Button 时应组合受治理的 Button 协议。
+### 配合 Transition 使用
 
-移除输入后恢复默认值。`secondary` 使用 Brutalist 次级背景与普通前景，不通过 elevation 推断变体。默认圆角和绘制由各家族决定，共用 prop 词汇不等于外观一致。内容与布局继续归消费者；当带风格的 Text 子项需要保留外层 Surface 前景时，使用 `tone="inherit"`。
-
-## 观察已有 Transition
-
-`fade` 显式启用家族拥有的 opacity 呈现。在带风格投射中，`fade=true` 时 `closed`、`leaving` 对应 opacity 0，`entering`、`entered` 对应 opacity 1。`transitionState` 是既有 [Transition owner](/zh-cn/ui-libraries/base/transition/) 提供的事实；Surface 不创建第二个时钟、调度策略、阶段事件或完成信号。`fade=false` 时，阶段输入不会启用这组 opacity 映射。
-
-Web 的 `surface-fade` token 消费 `--pui-surface-transition-duration`，默认 `0ms`。Web composition 可通过该变量传入既有 owner 解析后的 duration，并负责验证毫秒数有限且非负。不存在通用 220ms 默认值，也没有 Surface duration prop。reduced-motion 与起始 opacity 属于有界 Web 样式行为，不证明原生目标支持动态 CSS 变量。
-
-`scrim` 选择家族的常规遮暗绘制，不增加材质采样、模糊或折射。opacity 0 不代表禁用、inert、卸载或移除语义 owner：交互门控、presence 与焦点仍归既有 Dialog/Transition 等语义 owner，Surface 不接管这些责任。
-
-## Host 与 Compiler 边界
-
-Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符合性 slice 覆盖 Web Components、React、Vue 3、Vue 2。从源码构建的 CLI 为这四种 facade target 注册 `<family>-surface`，Web 样式编译器消费真实家族 token；`gpui` facade 生成为明确不支持。其 Web Adapter 与 compiler 证据应分别阅读：显示 Web 投射不等于完整原生支持或任意 Prototype AOT。Surface 不隐藏宿主特定材质后端、截图捕获、导航服务或代码 renderer。不支持的目标或样式诊断应明确保留，不能当成等价输出。
-
-## 依据
-
-`P-BRUTALIST-SURFACE`与 `T-SURFACE-0001` 治理此 draft slice。源码：`packages/prototypes/brutalist/src/surface/`.
+- 将 `fade` 设为 `true` 时，Surface 会根据来自 [Transition](/zh-cn/ui-libraries/base/transition/) 的 `transitionState` 映射透明度：`closed` 与 `leaving` 对应 `0`，`entering` 与 `entered` 对应 `1`；`fade={false}` 时不启用透明度映射。
+- 在 Web 端，可通过 CSS 变量 `--pui-surface-transition-duration`（默认 `0ms`，需传入有限非负毫秒值）传递过渡时长。
+- `scrim` 变体用于常规遮暗背景层。透明度为 `0` 仅影响视觉表现，交互禁用、焦点管理与挂载状态仍由外层 Dialog 或 Transition 负责。
 
 ## API
 
-Surface 是工作区源码。当前工作区 CLI 目标为 `brutalist-surface`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -102,5 +87,3 @@ Surface 是工作区源码。当前工作区 CLI 目标为 `brutalist-surface`�
     { name: 'current', type: 'boolean', default: 'false' },
   ]}
 />
-
-这些属性属于 Root。

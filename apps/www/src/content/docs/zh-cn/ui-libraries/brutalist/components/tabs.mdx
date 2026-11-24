@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Tabs'
-description: '基于 Base Tabs 的硬边 Tabs 投影'
+description: '支持水平与垂直方向、自动/手动激活及扁平圆角样式的 Brutalist 风格选项卡组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,15 +9,30 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-Tabs 继承 Base 的选择、激活与 descendant-first panel focus-entry 语义，并使用5px 圆角平面 list/trigger。参考 demo 为 Root 提供响应式稳定宽度，因此切换 panel 不会让 widget 改变宽度或重新居中。
+Tabs 用于在同一区域内切换多组关联内容面板，提供 5px 圆角扁平标签栏与选项卡样式，并支持自动或手动激活以及面板优先子元素聚焦语义。
+
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-tabs" initialRuntime="wc" />
 </div>
 
+为 `Root` 设置稳定的响应式宽度（如上方示例），可以避免切换不同长度的面板内容时整体宽度抖动或偏移。
+
+## 安装
+
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-tabs` 添加，或从 `@proto.ui/prototypes-brutalist/tabs` 导入。
+
+## 用法
+
+- **组件结构**：由 `Root`、`List`、`Trigger`、`Content` 和 `Indicator` 组成，通过相同的 `value` 将 `Trigger` 与对应的 `Content` 关联。
+- **外观切换**：`List` 与 `Trigger` 支持 `appearance="default"` 和 `appearance="underline"` 两种样式。
+- **激活与挂载**：`Root` 的 `activationMode` 可选 `'automatic'`（焦点移动即激活）或 `'manual'`（按 Enter / Space 确认激活）。关闭的 `Content` 默认卸载内容节点，设置 `keepMounted={true}` 可保留隐藏节点。
+- **受控模式**：向 `Root` 传入 `value` 进入受控模式，否则使用 `defaultValue` 进行非受控初始化。
+
 ## API
 
-Tabs 是工作区源码。当前工作区 CLI 目标为 `brutalist-tabs`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `value` 进入受控模式。
+以下前三个属性（`defaultValue`、`orientation`、`activationMode`）属于 `Root`（传入 `value` 进入受控模式），`appearance` 属于 `List` 与 `Trigger`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -29,4 +44,9 @@ Tabs 是工作区源码。当前工作区 CLI 目标为 `brutalist-tabs`。CLI �
   ]}
 />
 
-前三个属性属于 Root。`appearance` 属于 List 与 Trigger。List 的 `orientation` 默认 `horizontal`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。Trigger 的 `value` 默认 `''`，`disabled` 默认 `false`。Content 的 `value` 默认 `''`，`keepMounted` 默认 `false`。Indicator 没有属性。
+其余子部件属性默认值：
+
+- **List**：`orientation` 默认 `'horizontal'`，`loop` 默认 `false`，`a11yLabel` 默认 `''`。
+- **Trigger**：`value` 默认 `''`，`disabled` 默认 `false`。
+- **Content**：`value` 默认 `''`，`keepMounted` 默认 `false`。
+- **Indicator**：无属性。

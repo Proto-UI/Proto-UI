@@ -1,15 +1,15 @@
 ---
 title: 'Brutalist'
-description: 'Find Brutalist components, their Base interaction owners and complete family documentation.'
+description: 'Browse Brutalist components, installation instructions, and the family design contract.'
 ---
 
 import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
 
-Brutalist is Proto UI's neo-brutalist visual family. Its components retain the documented Base interaction protocols while providing their own borders, shadows, spacing and motion. Read the [design contract](./design-contract/) alongside the component you use.
+Brutalist is Proto UI's Neo-Brutalist component library. Its components pair Base interaction and accessibility behavior with crisp black borders, hard offset shadows, tight spacing, and tactile press feedback. Read the [design contract](./design-contract/) alongside the components you use.
 
-## Install and use
+## Installation
 
-For the published 0.2.0 Web Component baseline in an existing application:
+Install the published 0.2.0 release in an existing application (Web Components example):
 
 ```sh
 npx @proto.ui/cli@0.2.0 init --prototypes brutalist
@@ -23,14 +23,10 @@ pnpm dlx @proto.ui/cli@0.2.0 init --prototypes brutalist
 pnpm dlx @proto.ui/cli@0.2.0 add wc brutalist-button
 ```
 
-The selected package is `@proto.ui/prototypes-brutalist`; the CLI also installs its matching Adapter and generates local facades. Import the generated styles once as described in [Quick Start](/en/start-here/quick-start/), then follow [Button's usage](./components/button/). React and Vue 3 select `react` or `vue` instead of `wc`. Vue 2.6 belongs to the workspace 0.3 line rather than this stable install recipe.
+The CLI installs `@proto.ui/prototypes-brutalist` along with the matching framework adapter and generates local wrapper files. Import the generated styles once as described in [Quick Start](/en/start-here/quick-start/), then follow the [Button usage guide](./components/button/). For React or Vue 3, replace `wc` with `react` or `vue`. Vue 2.6 support is currently available from workspace source.
 
-## Find a component
+## Components
 
-This current workspace export index links to each family's real documentation route. A compound family documents its parts together. Draft workspace additions are not evidence that an identically named export exists in the older 0.2.0 package; read the family's delivery and host limits.
+The index below lists every Brutalist component family in the workspace and links to its documentation page. Compound families document all of their parts together. Newer components that are only available from workspace source note their availability in their installation section.
 
 <PrototypeDocumentationIndex library="brutalist" />
-
-## Evidence and lifecycle
-
-Source previews, published-package consumption, motion/accessibility acceptance and lifecycle admission are separate results. The [coverage index](/en/build/prototypes/documentation-coverage/) preserves the historical checkpoints; [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042) retains the full public documentation acceptance conditions.
