@@ -1,10 +1,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   connectWebMaterialPaintReservation,
+  createWebMaterialPaintReservationRef as legacyReservationRef,
   updateWebMaterialPaintReservation,
   releaseWebMaterialPaintFootprint,
   type MaterialPaintFootprint,
 } from '../src/material/paint-reservation';
+import { createWebMaterialPaintReservationRef } from '../src';
+import { createAnatomyFamily, type AnatomyPartView } from '@proto.ui/core';
+import type { AnatomyPort } from '@proto.ui/module-anatomy';
+import { MaterialPaintReservationRegistry } from '@proto.ui/module-feedback';
 
 // Explicit geometry injection. These tests exercise ownership and admission
 // transitions; actual CSS sizing and optical pixels require the native probe.
@@ -46,12 +51,138 @@ const footprint = (patch: Partial<MaterialPaintFootprint> = {}): MaterialPaintFo
   edges: { top: 17, right: 17, bottom: 17, left: 17 },
   ...patch,
 });
+
+// Real logical registry and public physical callbacks; only Anatomy lookup and
+// geometry are injected. A separate lazy geometry module must see the same leases.
+function logicalTarget(target: HTMLElement) {
+  const family = createAnatomyFamily('material-reservation-entry-ownership', {
+    roles: {
+      root: { cardinality: { min: 1, max: 1 } },
+      heading: { cardinality: { min: 1, max: 1 } },
+      target: { cardinality: { min: 1, max: 1 } },
+    },
+    relations: [
+      { kind: 'contains', parent: 'root', child: 'heading' },
+      { kind: 'contains', parent: 'heading', child: 'target' },
+    ],
+  });
+  const unused = (): never => {
+    throw new Error('unexpected Anatomy operation');
+  };
+  const self = {};
+  const part: AnatomyPartView = {
+    role: 'target',
+    hasExpose: unused,
+    getExpose: unused,
+    hasHook: unused,
+  };
+  const anatomy: AnatomyPort = {
+    resolveSelfInstance: () => self,
+    resolveSelfRole: () => 'heading',
+    parts: () => [part],
+    isCurrentPart: () => true,
+    resolveAncestorInstance: () => self,
+    resolvePartTarget: () => target,
+    subscribeOrder: () => () => {},
+    subscribeTargets: () => () => {},
+    getDiagnostics: unused,
+    syncStructure: unused,
+    resolvePartInstance: unused,
+    resolveDomainScope: unused,
+    descendantsOf: unused,
+    order: {
+      version: unused,
+      parts: unused,
+      partsOf: unused,
+      indexOfSelf: unused,
+      prevOfSelf: unused,
+      nextOfSelf: unused,
+    },
+    setOrderCallbackDispatcher: unused,
+  };
+  const registry = new MaterialPaintReservationRegistry(() => anatomy);
+  return { registry, declare: () => registry.declare({ family, targetRole: 'target' }) };
+}
 afterEach(() => {
   vi.restoreAllMocks();
   document.body.replaceChildren();
 });
 
 describe('draft host-local material paint reservation', () => {
+  it('shares public callback ownership with the lazy geometry entry and preserves a same-node successor', () => {
+    const f = fixture();
+    f.release();
+    const { registry, declare } = logicalTarget(f.target);
+    const ref = createWebMaterialPaintReservationRef(declare());
+    expect(legacyReservationRef).toBe(createWebMaterialPaintReservationRef);
+    ref(f.part);
+    registry.setActive(true);
+    try {
+      expect(updateWebMaterialPaintReservation(f.target, footprint())).toMatchObject({
+        reason: 'paint-reservation-layout-pending',
+      });
+      const first = updateWebMaterialPaintReservation(f.target, footprint());
+      expect(first.status).toBe('ready');
+      const next = connectWebMaterialPaintReservation(f.target, f.part, {});
+      try {
+        expect(first.status === 'ready' && first.current()).toBe(false);
+        updateWebMaterialPaintReservation(f.target, footprint({ view: 2 }));
+        ref(null);
+        expect(f.part.style.width).toBe('200px');
+        expect(updateWebMaterialPaintReservation(f.target, footprint({ view: 2 })).status).toBe(
+          'ready'
+        );
+      } finally {
+        next();
+      }
+      expect(f.part.style.width).toBe('');
+      expect(f.part.style.padding).toBe('');
+      expect(updateWebMaterialPaintReservation(f.target, footprint())).toMatchObject({
+        reason: 'paint-reservation-missing',
+      });
+      expect(f.target.parentNode).toBe(f.part);
+    } finally {
+      ref(null);
+      registry.dispose();
+    }
+  });
+
+  it('retains callback collision and cleanup across the public and lazy geometry entries', () => {
+    const f = fixture();
+    f.release();
+    const other = document.createElement('div');
+    document.body.append(other);
+    const { registry, declare } = logicalTarget(f.target);
+    const first = createWebMaterialPaintReservationRef(declare());
+    const second = createWebMaterialPaintReservationRef(declare());
+    first(f.part);
+    second(other);
+    registry.setActive(true);
+    try {
+      expect(updateWebMaterialPaintReservation(f.target, footprint())).toMatchObject({
+        reason: 'paint-reservation-ambiguous',
+      });
+      second(null);
+      expect(other.style.display).toBe('');
+      expect(f.part.style.display).toBe('block');
+      updateWebMaterialPaintReservation(f.target, footprint());
+      const ready = updateWebMaterialPaintReservation(f.target, footprint());
+      expect(ready.status).toBe('ready');
+      registry.setActive(false);
+      expect(ready.status === 'ready' && ready.current()).toBe(false);
+      expect(f.part.style.width).toBe('');
+      expect(f.part.style.padding).toBe('');
+      expect(updateWebMaterialPaintReservation(f.target, footprint())).toMatchObject({
+        reason: 'paint-reservation-missing',
+      });
+      expect(f.target.parentNode).toBe(f.part);
+    } finally {
+      first(null);
+      second(null);
+      registry.dispose();
+    }
+  });
+
   it('owns only exact part geometry and requires a later observed layout before ready', () => {
     const f = fixture();
     f.target.style.padding = '12px 16px';
