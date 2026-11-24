@@ -10,7 +10,7 @@ export default definePrototype<ShadcnNumberFieldRootProps, NumberFieldRootExpose
     const inherited = asNumberFieldRoot();
     // Proto composition layout has no claimed upstream NumberField equivalent.
     setupShadcnStyleSelection(def, 'nova');
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-wrap items-center gap-2 text-foreground'));
+    def.feedback.style.use(tw('flex w-full min-w-0 items-center gap-2 text-foreground'));
     return inherited.render;
   },
 });
