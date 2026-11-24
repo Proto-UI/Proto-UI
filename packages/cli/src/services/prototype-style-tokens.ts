@@ -507,6 +507,52 @@ function memberSemantics(entry) {
 // a later graph replacement or member write cannot reuse that proof.
 const definitiveLocalMemberWrites = new WeakMap();
 
+// Token graphs already carry the identity of ordinary local containers. They
+// never prove a State: this association only withdraws a semantic map that
+// another path already proved when that exact container can be overwritten.
+const localContainerSemanticMaps = new WeakMap();
+
+function rememberLocalContainerSemantics(value, graph = value?.tokenGraph) {
+  if (
+    !value?.semanticMap ||
+    sourceValueCandidates(value).length > 0 ||
+    (graph?.kind !== 'object' && graph?.kind !== 'array' && graph?.kind !== 'union')
+  )
+    return;
+  let maps = localContainerSemanticMaps.get(graph);
+  if (!maps) {
+    maps = new Set();
+    localContainerSemanticMaps.set(graph, maps);
+  }
+  maps.add(value.semanticMap);
+}
+
+function withdrawLocalContainerSemantics(graph, recursive, keys = null, seen = new Set()) {
+  if (!graph || seen.has(graph)) return;
+  seen.add(graph);
+  for (const map of localContainerSemanticMaps.get(graph) ?? []) {
+    const proofs = definitiveLocalMemberWrites.get(map);
+    if (keys === null) {
+      map.clear();
+      proofs?.clear();
+    } else {
+      for (const key of keys) {
+        map.delete(key);
+        proofs?.delete(key);
+      }
+    }
+  }
+  // A union is a choice of receiver identities even for an outer-only copy.
+  if (graph.items) {
+    for (const item of graph.items) withdrawLocalContainerSemantics(item, recursive, keys, seen);
+  }
+  if (recursive) {
+    for (const child of graph.members?.values() ?? [])
+      withdrawLocalContainerSemantics(child, true, null, seen);
+    withdrawLocalContainerSemantics(graph.unknownMember, true, null, seen);
+  }
+}
+
 function freshLocalMemberSemantics(node, scope) {
   const owner = memberOwner(node);
   const key = memberName(node);
@@ -633,6 +679,62 @@ function sourceFunctionForCall(node, scope) {
 }
 
 const sourceFunctionRegions = new WeakMap();
+const privateFunctionReferences = new WeakMap();
+
+/**
+ * The inventory walk still visits unused bodies. A private declaration with
+ * no possible lexical reference cannot execute its captured-container call.
+ * Count every same-spelled identifier, including shadows and property names:
+ * this may refuse a harmless body, but cannot mistake another reference for
+ * the declaration. Dynamic lexical access and script globals have no proof.
+ */
+function isUnreferencedPrivateFunction(fn) {
+  if (
+    !ts.isFunctionDeclaration(fn) ||
+    !fn.name ||
+    !fn.body ||
+    fn.modifiers?.some((modifier) =>
+      [
+        ts.SyntaxKind.ExportKeyword,
+        ts.SyntaxKind.DefaultKeyword,
+        ts.SyntaxKind.DeclareKeyword,
+      ].includes(modifier.kind)
+    )
+  )
+    return false;
+  const source = fn.getSourceFile();
+  if (!ts.isExternalModule(source) && !ts.findAncestor(fn.parent, ts.isFunctionLike)) return false;
+  let inventory = privateFunctionReferences.get(source);
+  if (!inventory) {
+    inventory = { onlyReference: new Map(), dynamicScope: false };
+    const visit = (node) => {
+      if (ts.isWithStatement(node)) inventory.dynamicScope = true;
+      if (ts.isIdentifier(node)) {
+        if (node.text === 'eval') inventory.dynamicScope = true;
+        inventory.onlyReference.set(
+          node.text,
+          inventory.onlyReference.has(node.text) ? null : node
+        );
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    privateFunctionReferences.set(source, inventory);
+  }
+  return !inventory.dynamicScope && inventory.onlyReference.get(fn.name.text) === fn.name;
+}
+
+function insideUnreferencedPrivateFunction(node, scope) {
+  for (let parent = node.parent; parent; parent = parent.parent) {
+    if (
+      ts.isFunctionDeclaration(parent) &&
+      !scope.activeSourceFunctions.has(parent) &&
+      isUnreferencedPrivateFunction(parent)
+    )
+      return true;
+  }
+  return false;
+}
 
 function nodeWithin(node, ancestor) {
   for (let current = node; current; current = current.parent) {
@@ -1046,6 +1148,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           // A key this cannot read may name any member the container has.
           member === null;
         if (written.length > 0 && !container.semanticMap) container.semanticMap = new Map();
+        rememberLocalContainerSemantics(container);
         const keys =
           member === null
             ? [
@@ -1416,9 +1519,20 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
     const authoredProducer =
       (helper !== null || sourceMutation || tokenMutation) &&
       (scope.sourceSummary?.isAuthoredProducerCall?.(node, node.getSourceFile()) ?? false);
+    // A known function is not a purity proof. This fresh receipt additionally
+    // binds the actual canonical owner, complete helper body, ordered prefix,
+    // native Rule callbacks and genuine State inputs for this exact invocation.
+    const inputProof =
+      helper && !authoredProducer && (sourceMutation || tokenMutation)
+        ? scope.sourceSummary?.proveRuleOnlyInvocation?.(node, node.getSourceFile())
+        : null;
+    const preservesInputs =
+      inputProof?.source === node.getSourceFile() &&
+      inputProof?.call === node &&
+      inputProof?.helper === helper?.node;
     if (helper && !authoredProducer)
       collectSourceFunctionCall(node, helper, captured, scope, tokens, rootInventory);
-    if (sourceMutation)
+    if (sourceMutation && !preservesInputs)
       applyCallSourceMutation(
         node,
         scope,
@@ -1428,7 +1542,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
         mutation,
         authoredProducer
       );
-    if (tokenMutation)
+    if (tokenMutation && !preservesInputs)
       applyTokenCallMutation(
         node,
         scope,
@@ -2389,6 +2503,7 @@ function registerValueBinding(name, binding, scope, exposures, bindingNode) {
       binding.semanticMap = shared;
       local.semanticMap = shared;
     }
+    rememberLocalContainerSemantics(local);
     scope.bindings.set(name.text, applyExposure(name.text, local, scope, exposures));
     return;
   }
@@ -3131,7 +3246,8 @@ function sourceSummaryValue(node, scope) {
   if (
     !ts.isCallExpression(node) &&
     !ts.isPropertyAccessExpression(node) &&
-    !ts.isElementAccessExpression(node)
+    !ts.isElementAccessExpression(node) &&
+    !ts.isObjectLiteralExpression(node)
   )
     return null;
   const value = unwrapTransparent(node);
@@ -3582,6 +3698,25 @@ function resolveExpressionBase(node, scope) {
       }
     }
     const value = asMapValue(entries);
+    if (node.properties.some(ts.isSpreadAssignment)) {
+      // A spread makes a fresh container and follows authored overwrite
+      // order. The shared source graph proves those copied members, while
+      // preserving nested identities; a later write to the original outer
+      // container must not rewrite this clone's captured State leaves.
+      const source = sourceSummaryValue(node, scope);
+      const sources = source?.resolvedValues ?? (source ? [source.resolved.value] : []);
+      if (sources.length > 0 && sources.every(sourceMembersProven))
+        return {
+          ...value,
+          semanticMap: source.semanticMap,
+          sourceValue: source.resolved.value,
+          sourceValues: sources,
+        };
+      // An unknown spread can overwrite earlier fields or run getters before
+      // later fields are read. Preserve token inventory without certifying a
+      // convenient subset of the handle map.
+      return value;
+    }
     return semantics.size > 0 ? { ...value, semanticMap: semantics } : value;
   }
 
@@ -4960,7 +5095,7 @@ function resolveStateHandleSemantic(node, scope) {
   ) {
     return resolveStateHandleSemantic(node.expression, scope);
   }
-  if (ts.isIdentifier(node)) return lookup(node.text, scope).semantic ?? null;
+  if (ts.isIdentifier(node)) return bindingSemantics(lookup(node.text, scope))[0] ?? null;
   return readMemberSemantics(node, scope)[0] ?? null;
 }
 
@@ -4982,7 +5117,7 @@ function resolveStateHandleSemantics(node, scope) {
   }
   if (ts.isCallExpression(inner)) {
     const resolved = resolveExpression(inner, scope);
-    const semantics = [resolved.semantic, ...(resolved.alternatives ?? [])].filter(Boolean);
+    const semantics = bindingSemantics(resolved);
     if (semantics.length > 0) return semantics;
   }
   // A source that covers the member but cannot prove it does not hand the
@@ -5103,6 +5238,7 @@ function assignIdentifierBinding(node, scope, exposures) {
     next = { ...next, sourceValue: nextSourceValues[0], sourceValues: nextSourceValues };
   }
   if (next.bindingNode) next = { ...next, bindingNode: node };
+  rememberLocalContainerSemantics(next);
   owner.bindings.set(name, next);
 }
 
@@ -5650,6 +5786,7 @@ function evaluateTokenGraph(expression, scope) {
 
 function withTokenGraph(value, graph) {
   if (!graph) return value;
+  rememberLocalContainerSemantics(value, graph);
   const finite = finiteTokenStrings(graph);
   const strings = [...new Set(tokenStrings(graph))];
   // Preserve the old array join representation and semantic metadata. Nested
@@ -5740,9 +5877,13 @@ function applyTokenCallMutation(
   authoredProducer
 ) {
   if (authoredProducer) return;
+  // Preserve token inventory walking, but do not execute a provably unused
+  // private body's calls against the semantic maps of its outer owner.
+  const withdrawSemantics = !insideUnreferencedPrivateFunction(node, scope);
   if (mutation.kind === 'copy') {
     const target = arguments_[mutation.target];
     if (target?.kind !== 'object') {
+      if (withdrawSemantics) withdrawLocalContainerSemantics(target, false);
       taintTokenGraph(target);
       return;
     }
@@ -5760,8 +5901,14 @@ function applyTokenCallMutation(
       const proven = alternatives.every(
         (item) => item?.kind === 'noop' || (item?.kind === 'object' && item.complete)
       );
-      if (!proven) taintTokenGraph(target);
+      if (!proven) {
+        if (withdrawSemantics) withdrawLocalContainerSemantics(target, false);
+        taintTokenGraph(target);
+      }
       const keys = new Set(sources.flatMap((item) => [...item.members.keys()]));
+      // A copy can replace outer members, not mutate an earlier captured child.
+      // Token values cannot manufacture replacement State provenance.
+      if (withdrawSemantics) withdrawLocalContainerSemantics(target, false, keys);
       for (const key of keys) {
         const values = alternatives.map(
           (item) =>
@@ -5778,8 +5925,14 @@ function applyTokenCallMutation(
     }
     return;
   }
-  if (!readsOnly) taintTokenGraph(receiver);
-  for (const value of arguments_) taintTokenGraph(value);
+  if (!readsOnly) {
+    if (withdrawSemantics) withdrawLocalContainerSemantics(receiver, true);
+    taintTokenGraph(receiver);
+  }
+  for (const value of arguments_) {
+    if (withdrawSemantics) withdrawLocalContainerSemantics(value, true);
+    taintTokenGraph(value);
+  }
 }
 
 function bindTokenLoopPattern(name, graph, scope) {

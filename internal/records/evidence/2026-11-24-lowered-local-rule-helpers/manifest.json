@@ -1,0 +1,467 @@
+{
+  "createdAt": "2026-11-23T19:36:42.308115+00:00",
+  "scope": "Sprint 1 #1178 closed private same-file helper argument proof and source-backed spread capture; not full gate completion",
+  "sourceBinding": {
+    "headAtFinalFullRun": "0b0b861bf18a18d20aa2f0e627ba477dbab463e5",
+    "registeredFiles": 7577,
+    "changedDuringFinalFullRun": [],
+    "candidateFiles": {
+      "packages/cli/src/services/closed-rule-helpers.ts": "eba590ff2e543b72db153167dc38ebcff3658d65bf17b118e38a1a62d85b2ba1",
+      "packages/cli/src/services/lowered-hook-coverage.ts": "cb272c37c1ae32d651392ebde03bc91c6db99f3c5126fe4846ccb8b1e14f682e",
+      "packages/cli/src/services/prototype-style-tokens.ts": "41edcc1b43672c5828b5a14c5dcb56d2391f58f9e36d7849798e433b1f90da58",
+      "packages/cli/test/lowered-local-helper-coverage.test.ts": "10d35d896be62f11e64a1875d2ea7cf33791d94e945cdbde6d1670c86255e22e",
+      "packages/cli/test/lowered-authored-setup-rows.test.ts": "def983fde781c53d77825e749218289e743ce7143ed212b4edb413c1b7c807e2"
+    },
+    "worktreeChangesNotCommittedByChild": true
+  },
+  "finalResults": {
+    "related": {
+      "numTotalTests": 162,
+      "numPassedTests": 162,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    },
+    "sliceTypes": {
+      "exitCode": 0,
+      "outputBytes": 0,
+      "wholeWorkspace": false
+    },
+    "fullFile": {
+      "numTotalTests": 199,
+      "numPassedTests": 198,
+      "numFailedTests": 1,
+      "numPendingTests": 0
+    },
+    "wholeInventory": {
+      "count": 724,
+      "files": 109,
+      "reasons": {
+        "intent": 66,
+        "condition": 30,
+        "subject": 550,
+        "comparison": 77,
+        "spec": 1
+      },
+      "deltaVsPriorHelper": {
+        "added": [],
+        "removed": []
+      },
+      "deltaVsStableSetup": {
+        "added": [],
+        "removed": []
+      }
+    }
+  },
+  "reviewBoundaries": [
+    "Independent lexical 14/14 probes bind the superseded candidate hashes; no final-tree rerun is claimed.",
+    "Independent argument review reproduced stale scalar in old candidate and accepted conservative repaired capture boundary after reading same 11-case successor.",
+    "Two peers reviewed the final source-backed spread-capture diff; this is bounded local source review, not native CI or formal GitHub approval."
+  ],
+  "limits": [
+    "724 unresolved rows remain, with identical filepath/reason/expression/multiplicity to the prior 724.",
+    "Declaration provenance and shaped-attribute assertions after the full-inventory failed expectation were not reached.",
+    "Private same-file closed helpers only; exported or escaped declaration rules are not erased.",
+    "Final source does not yet include the later origin/main #1751 source-summary changes; integration owner must test affected combination."
+  ],
+  "artifacts": [
+    {
+      "file": "runs/local-helper-red.log.gz",
+      "kind": "actual test output",
+      "bytes": 9499,
+      "sha256": "14dc314039de2fa823bbd8c69efad9689f6f036ef13e4fdaafa37b88109765ab",
+      "archiveSha256": "15a2e1bcdc022c46bd9aa206772ae2182faca66a5785a3c54a2ab7f13554b81e"
+    },
+    {
+      "file": "runs/local-helper-red.json.gz",
+      "kind": "actual test output",
+      "bytes": 15919,
+      "sha256": "73bcd86f31e52ccfae6debc87a547ee8a204844f7ed4071bf17aac79e5777203",
+      "archiveSha256": "c30a95e81a8503db49fd5ef678f70afbd125f682454872822a5e11e8d1a2c34f"
+    },
+    {
+      "file": "runs/local-helper-candidate1.log.gz",
+      "kind": "actual test output",
+      "bytes": 8664,
+      "sha256": "e21c5890d899156e24fe224ebfc450545648f988665554b23ae77c436ee44207",
+      "archiveSha256": "745a7270537e680d8cd37fd512252cbc12cdf568a2a18c4fb1d23f5f3bbf065a"
+    },
+    {
+      "file": "runs/local-helper-candidate1.json.gz",
+      "kind": "actual test output",
+      "bytes": 14103,
+      "sha256": "d65f0f2f11da0c8dc0e624b1dc25ca84704e0afe0a1ff5faa8039c7e18b8e84c",
+      "archiveSha256": "02c56d87f50fe7e90f97b5a892de65950faa6ebdd78646be41316688af93d196"
+    },
+    {
+      "file": "runs/local-helper-candidate2.log.gz",
+      "kind": "actual test output",
+      "bytes": 3672,
+      "sha256": "ffc23b84e482cf96a886576d10632af7514c60c65302c55acf79c77c24acf3b2",
+      "archiveSha256": "55ee7ae955d8cf0c03406959dc9edc878c643f1da6307d2ae328a45f7510f46f"
+    },
+    {
+      "file": "runs/local-helper-candidate2.json.gz",
+      "kind": "actual test output",
+      "bytes": 4846,
+      "sha256": "c5d0fb03cdaed4d744d2d46a50b168a3ee0a97728fcf506861db988ff2b90774",
+      "archiveSha256": "41fed61e5e9cc1c9bb3175fc547d0d6908cd8a91b04bc10bf01be3919c3c35bb"
+    },
+    {
+      "file": "runs/local-helper-boundary-controls.log.gz",
+      "kind": "actual test output",
+      "bytes": 4626,
+      "sha256": "01c060f9e1ac35cb1be22bd0b9a8c6c8b19f60a4800392780c0eb93ad52edd5b",
+      "archiveSha256": "eaea7e24e061b2ed439c347b49bad8b1d41ebdc40e5b7a7ef2b5731fe7183274"
+    },
+    {
+      "file": "runs/local-helper-boundary-controls.json.gz",
+      "kind": "actual test output",
+      "bytes": 18207,
+      "sha256": "cc3fdb6e85bfe2cf0f4bd54b996538825b22da366924d8dd4178057258ed13d6",
+      "archiveSha256": "046f714a3fefa36da528e484a9092738c8865222c447e781058628b97f8da3da"
+    },
+    {
+      "file": "runs/local-helper-related.log.gz",
+      "kind": "actual test output",
+      "bytes": 8173,
+      "sha256": "0d4358bebd933df60b59ef7c3170ba9b81e9fa47f86235dd08d488f6f881e60f",
+      "archiveSha256": "fb0625c9ba0d04a2c89129dd43ccebb97fb079b086e2565a8f75e2f513dec513"
+    },
+    {
+      "file": "runs/local-helper-related.json.gz",
+      "kind": "actual test output",
+      "bytes": 48341,
+      "sha256": "97f3105a561944018e420a6c34d2c14fab016956088b418b5aba09401fe414ab",
+      "archiveSha256": "43f67b9d121953710c0b1fbf8c3e3c90f9f9d112ecd885c4398f9c5db6319921"
+    },
+    {
+      "file": "runs/helper-final-full-inventory.log.gz",
+      "kind": "actual test output",
+      "bytes": 80206,
+      "sha256": "47c82b23f604db1565306ecf1c9ba91730fedb356e8cec2c23d9d5b7d70bd70b",
+      "archiveSha256": "7ef72e43e6ac593f3a595676d2a99edc3ebbc0fb101aa366b6ea0e495930c527"
+    },
+    {
+      "file": "runs/helper-final-full-inventory.json.gz",
+      "kind": "actual test output",
+      "bytes": 66432,
+      "sha256": "24a9ee2372a9ee6ae94090552172879f18e8cbb388a2b49397d45cecedeee184",
+      "archiveSha256": "233dd8fd55fe7c39ebea3c4bfb2f34227d1e7a21c4435ca56c6d42a714fb89d9"
+    },
+    {
+      "file": "runs/local-helper-effects-red.log.gz",
+      "kind": "actual test output",
+      "bytes": 8159,
+      "sha256": "714d4776f8adee9d31affac4d8116e0d87238b32c9f77474fbd491e5f0ccb96d",
+      "archiveSha256": "f8544eef496c3731c469f64c056c8fbb8fc54f4f5db6e3c02e4d1908ca136b79"
+    },
+    {
+      "file": "runs/local-helper-effects-red.json.gz",
+      "kind": "actual test output",
+      "bytes": 27565,
+      "sha256": "72da2a5696704a65188caf618c79d8e1b79314e757b3a39a35fe577f002ff049",
+      "archiveSha256": "b6768be22b7620fd9d284863f974d671c0db16f0032a3121ce464680cd0932b3"
+    },
+    {
+      "file": "runs/local-helper-effects-candidate.log.gz",
+      "kind": "actual test output",
+      "bytes": 4683,
+      "sha256": "5fdabd806833f174892a2a840d044c0ca1d525604258afd973355f95f73a332b",
+      "archiveSha256": "e765bb5c31cab9dbbfba34ba09e8066e52056ba3b79ab554a36244d55980f9e9"
+    },
+    {
+      "file": "runs/local-helper-effects-candidate.json.gz",
+      "kind": "actual test output",
+      "bytes": 14675,
+      "sha256": "324f4da7a49a23e0aa425c1b722a2977fc03e3abc6400ea6bc37c683d195ceb1",
+      "archiveSha256": "692dfa61da2c695cfb240090e2f2e84b95c8a21b5cb45096ed8dd089b1c94043"
+    },
+    {
+      "file": "runs/local-helper-effects-spread-candidate.log.gz",
+      "kind": "actual test output",
+      "bytes": 4565,
+      "sha256": "57c270a4c119a5c4ab490e8fe9fd02907493bdcffb49b6c1274ec5de05ccdf87",
+      "archiveSha256": "5ccb8877042c19093dcc84a0aef52f647ee9c7fef517ec3257eb0c26e8d8756e"
+    },
+    {
+      "file": "runs/local-helper-effects-spread-candidate.json.gz",
+      "kind": "actual test output",
+      "bytes": 25662,
+      "sha256": "ab01d4dd26930224bd7f5b40018945fdf8397f5fb617e9f74874995c120f6679",
+      "archiveSha256": "9a745ad726d8f6f84445c2a7c117061c8ef71c4013727e864dc1981a8ec680c7"
+    },
+    {
+      "file": "runs/local-helper-effects-related.log.gz",
+      "kind": "actual test output",
+      "bytes": 8270,
+      "sha256": "87de763781e7cf1f9a06fba7fa16e3935f98914412f2697799c54a632600bc1f",
+      "archiveSha256": "6b225929135a37cda683dd206a6d33003541e5b2589d4f3f0029d45490d72397"
+    },
+    {
+      "file": "runs/local-helper-effects-related.json.gz",
+      "kind": "actual test output",
+      "bytes": 55844,
+      "sha256": "a9413910bbbc904e07285dce1d27dba4ec920a73ed0c3d13b6e924c47b607f08",
+      "archiveSha256": "6dff0f696c02d5810f4f08de3aec1b66d1050dfe080af1594b0263ec45055ed2"
+    },
+    {
+      "file": "runs/helper-repaired-full-inventory.log.gz",
+      "kind": "actual test output",
+      "bytes": 79925,
+      "sha256": "97183241152abe76443b6eba157136b71a06e7cce22b4100d66d9a8283529692",
+      "archiveSha256": "4aa7e80ed438bb5c9ea937c87171e8ba0caf42ad1944c6884f469c52b71b33b2"
+    },
+    {
+      "file": "runs/helper-repaired-full-inventory.json.gz",
+      "kind": "actual test output",
+      "bytes": 66443,
+      "sha256": "520d6140460afee0a44b17d95aa31d9b10f59bb0259076fffe8ce95b34253948",
+      "archiveSha256": "93f1dc26ff263cc6739f6f69584e808508b8d311e7ea631a73a4d64b6b1fd5b8"
+    },
+    {
+      "file": "runs/helper-full-before.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 748741,
+      "sha256": "2358465de51fd310b944b0769585816b1236cf663194b49494929aa653f99d51",
+      "archiveSha256": "f22f0c7718af3fc7f1ae5945ecb39e3fd75fe5430425556a4b950920cad2e9b2"
+    },
+    {
+      "file": "runs/helper-full-source-readback.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 142,
+      "sha256": "79981e8e43c20aaa77780d5f87ce2c6a8c51e2c2d6895fc0695378b206ad8a02",
+      "archiveSha256": "d8e258a7d1c0cbfccbc58276734127610fb84214d5d8c34a7eb9bc3ac8dc3dba"
+    },
+    {
+      "file": "runs/helper-final-full-unresolved.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 73785,
+      "sha256": "98a41464a083ea4fd0852504ddf879245c3187bc4dbec10d3fa573c3e359f610",
+      "archiveSha256": "fbbd0747f71f865ce7ab3bf1cac63dcadb3b82a70506f4a01c13462d90005311"
+    },
+    {
+      "file": "runs/helper-repaired-full-before.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 981315,
+      "sha256": "62b20b4915f3a3cac08e157de3e7386c7df82f309131b809c62af9e96f29f08c",
+      "archiveSha256": "4c6866b8292858f3b36d0796f011ff6a5f52b975971ef2157512414e13695414"
+    },
+    {
+      "file": "runs/helper-repaired-full-source-readback.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 159,
+      "sha256": "0f76199165896a5fd90473b4119fb5efa1e7c6a26697b3e6b163f5d338649b0a",
+      "archiveSha256": "e54eef18c710243ba3f5e8f0b197238b67a59cf219f5005dae31442929002310"
+    },
+    {
+      "file": "runs/helper-repaired-full-unresolved.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 73885,
+      "sha256": "89add8eab2532599521e9660b433da100c859bd04a594583d272716a9bee5af1",
+      "archiveSha256": "0d7f58d9d229c7d28bf701e02fadfb66a73db2d92e581c9c0e395fedcbe22339"
+    },
+    {
+      "file": "runs/local-helper-effects-related-command.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 788,
+      "sha256": "36e19f379ec1049e4fdc0f1c34ccd4864f4b074c18e49c1c178f8f9457ad0f9b",
+      "archiveSha256": "97ffa31aa4fa612c6c35eb61569a8437a2e9f116c355640762af813a237f7ef4"
+    },
+    {
+      "file": "runs/helper-repaired-full-command.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 316,
+      "sha256": "43f2eca3180674ef9f9224e6195b2ace423852df732e179f4b11155ad1838e5e",
+      "archiveSha256": "14ccb61431af7e24758dde696bf88ee8111a9c025b0226e0e372d4fccc4ce0f8"
+    },
+    {
+      "file": "runs/local-helper-types.log.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "file": "runs/local-helper-effects-types.log.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "file": "runs/local-helper-format.log.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 232,
+      "sha256": "d4119032b05c63f9969c79ddf377faf30f87fa6f674fc52077367e30cff49f97",
+      "archiveSha256": "f4dc45811bf4ef341762eb3171c6c4450da24f73673d3d160ddab5756608d811"
+    },
+    {
+      "file": "runs/local-helper-effects-format.log.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 255,
+      "sha256": "c1d8f48f1f6c0cc21ec7a1c1992436d433bb6797ae770b9d86421dff8cbc42f1",
+      "archiveSha256": "4e10154a20b029da16a39dfb7d2e803993087c509d4e45fab67f85b295421255"
+    },
+    {
+      "file": "runs/tsconfig.lowered-slice.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 741,
+      "sha256": "0c544f215d93b51bbccacb73dc75cc2077f385be5842f87aaeeba41302e8264c",
+      "archiveSha256": "4702709e83d54e9c04e89808ce9ce7a701914d3c623519ce21cf17637925baea"
+    },
+    {
+      "file": "runs/helper-argument-review-after-guard.json.gz",
+      "kind": "source binding, command, diagnostic or retained stage result",
+      "bytes": 3391,
+      "sha256": "68b7695982faa59642b693b676fa1319990eaedb5ac7393367957b9fe0aa443e",
+      "archiveSha256": "67c6920f1286d77b2220c69c89b3085d58a4aeba68ff4dd87b51867d67c9b4f2"
+    },
+    {
+      "file": "final-source/packages/cli/src/services/closed-rule-helpers.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 8635,
+      "sha256": "eba590ff2e543b72db153167dc38ebcff3658d65bf17b118e38a1a62d85b2ba1",
+      "archiveSha256": "47a83cb4297905d76dbce2b903728e6c9d55c1843c29299f1e5576a18df9b213"
+    },
+    {
+      "file": "final-source/packages/cli/src/services/lowered-hook-coverage.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 195304,
+      "sha256": "cb272c37c1ae32d651392ebde03bc91c6db99f3c5126fe4846ccb8b1e14f682e",
+      "archiveSha256": "4899dcdd328aeb03503b3b7254fa1674b7a6a89a7a9e863d3880630db2d9de24"
+    },
+    {
+      "file": "final-source/packages/cli/src/services/prototype-style-tokens.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 226661,
+      "sha256": "41edcc1b43672c5828b5a14c5dcb56d2391f58f9e36d7849798e433b1f90da58",
+      "archiveSha256": "9c243b2335eb2ad572efb3177e34d2b1955e5099d79cb2dbc7e1cbf0d44077e3"
+    },
+    {
+      "file": "final-source/packages/cli/src/services/hook-source-summary.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 200813,
+      "sha256": "c1069d9d23463e0a0cbe99c91d3c278cc1d348a7e36c66db80e9b25436b079f2",
+      "archiveSha256": "a6796d573d5389545a68af6678434756e5fcd8ee22ad3287546eeda676dc8662"
+    },
+    {
+      "file": "final-source/packages/cli/src/services/hook-source-module.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 81409,
+      "sha256": "2b562536cd24e10bcc8aec33e67f38446851fb49492f471fc8fd7b6d4089d816",
+      "archiveSha256": "f43c0ac4ce67214a3b427175c88a522dae48ad641194c481c0d4c6d0d7845c5d"
+    },
+    {
+      "file": "final-source/packages/cli/test/lowered-local-helper-coverage.test.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 12516,
+      "sha256": "10d35d896be62f11e64a1875d2ea7cf33791d94e945cdbde6d1670c86255e22e",
+      "archiveSha256": "97bacd4ba56e23a2bb8b958108c950b711b331ea870575998ce2273274537878"
+    },
+    {
+      "file": "final-source/packages/cli/test/lowered-authored-setup-rows.test.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 3474,
+      "sha256": "def983fde781c53d77825e749218289e743ce7143ed212b4edb413c1b7c807e2",
+      "archiveSha256": "1132e88d22a3dc77316f7e81eff251677de07f65c155995de6fa45269a2053b9"
+    },
+    {
+      "file": "final-source/packages/cli/test/lowered-token-map-coverage.test.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 9006,
+      "sha256": "3427738ba9b9814bdeb9a863ea1bb88926332b66a2aaa2f72977831986eb1026",
+      "archiveSha256": "e96fad8eb3d7d3451e8c050a03bd67ec7eaced3f9d13cd37f8649021bda6c675"
+    },
+    {
+      "file": "final-source/packages/cli/test/lowered-hook-coverage.test.ts.gz",
+      "kind": "final source, checked against final pre/post full-run binding",
+      "bytes": 258756,
+      "sha256": "27653463b457205cc0f2add1959deea1ff948bc9f3d47f2aad9a947e61e29eac",
+      "archiveSha256": "286de675e572cec0689226f65fc65be9197d8dae3170f6daa426a48c8c78bd65"
+    },
+    {
+      "file": "superseded-source/packages/cli/src/services/closed-rule-helpers.ts.gz",
+      "kind": "superseded source reconstructed and matched to original pre-run SHA-256",
+      "bytes": 4277,
+      "sha256": "e1f13b0b62deca30b6b6e5e80d7f711cce7409e1fe7c3adf50d61b76d16e1d32",
+      "archiveSha256": "efff4d7ce73740c46a040256030dd63879fc83eb2351ee14ab0a6864b31c9824"
+    },
+    {
+      "file": "superseded-source/packages/cli/src/services/lowered-hook-coverage.ts.gz",
+      "kind": "superseded source reconstructed and matched to original pre-run SHA-256",
+      "bytes": 194892,
+      "sha256": "032e4e437b71bfd7223f3a712d6af2d894e19ea16021d3a5ad14e3b132346c46",
+      "archiveSha256": "0c60d69cda1c190f9e19f4fc62661e6429a341bca85216d8bfdffa16381a3eed"
+    },
+    {
+      "file": "superseded-source/packages/cli/src/services/prototype-style-tokens.ts.gz",
+      "kind": "superseded source reconstructed and matched to original pre-run SHA-256",
+      "bytes": 225659,
+      "sha256": "a9be38a0a85db28a552ec319c35b285ca4865d4398942f3bac3a74f4ddd9976a",
+      "archiveSha256": "21e7cbab0ac1d27116a032163a5bc144aaae48e5ec3015ae56769d65088b2bc2"
+    },
+    {
+      "file": "superseded-source/packages/cli/test/lowered-local-helper-coverage.test.ts.gz",
+      "kind": "superseded source reconstructed and matched to original pre-run SHA-256",
+      "bytes": 7418,
+      "sha256": "f2e8919f3ffa13987d4acda4c7a771f6b712e509b7a9369aad58d7db105ca90a",
+      "archiveSha256": "8116dd5f4b2785b2fe8fc78ca6dec6676dd99d92513d4d07bfda26c401f2f4bf"
+    },
+    {
+      "file": "superseded-source/reconstruction.json.gz",
+      "kind": "superseded source reconstructed and matched to original pre-run SHA-256",
+      "bytes": 1455,
+      "sha256": "ec24a2dacd068b8d86d8d0db908a524a5ec63e141bbd36717c95997e47287e44",
+      "archiveSha256": "72fc2cdbaf1573be52b13287a1f63d98eeb4942b43a98da38c8f9e30e4c8a3f5"
+    },
+    {
+      "file": "independent-lexical/probe.mjs.gz",
+      "kind": "independent old-candidate source/lexical review, not rerun on final candidate",
+      "bytes": 4825,
+      "sha256": "8af46621359655083e6ee1357fe680906eab9bb4c50bcd4c0d12445bf94b031d",
+      "archiveSha256": "6aa132b48447cc6ec7ee03861c952c0e2fcc484b7996795dd909253f3104e91e"
+    },
+    {
+      "file": "independent-lexical/result.json.gz",
+      "kind": "independent old-candidate source/lexical review, not rerun on final candidate",
+      "bytes": 10191,
+      "sha256": "387ce4dd6b5b6799897e72d0d57e7e4446744a55696a1befd93364cccb408bca",
+      "archiveSha256": "7895fcebf016f33d4886bb35840174e18f3314f247b0b34f3e1f9a53989b2b35"
+    },
+    {
+      "file": "independent-lexical/review.json.gz",
+      "kind": "independent old-candidate source/lexical review, not rerun on final candidate",
+      "bytes": 1780,
+      "sha256": "c7216df1d6528281c6e87dec6c895c8b050e172af5c5ea174e54a405074be358",
+      "archiveSha256": "18f9c95119c8bb9a209e94529ed0642cc5cf713cc19879b514cf13743fd2b98f"
+    },
+    {
+      "file": "independent-lexical/stderr.log.gz",
+      "kind": "independent old-candidate source/lexical review, not rerun on final candidate",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "file": "independent-argument/helper-argument-review.mts.gz",
+      "kind": "independent old-candidate argument probe and post-probe source readback",
+      "bytes": 3133,
+      "sha256": "2570a532b9a30ed10c72eef12fd7660fb18439d5b3bbb05871776f1cffabc344",
+      "archiveSha256": "7a1e5b87fb6f1d3f9931b1f770fd54837223b8cb30456aaf1896774046a35002"
+    },
+    {
+      "file": "independent-argument/helper-argument-review.json.gz",
+      "kind": "independent old-candidate argument probe and post-probe source readback",
+      "bytes": 3326,
+      "sha256": "67ec0efef4a418cab704738456678f4d2deeec927c5b0012922dca738a4f93b7",
+      "archiveSha256": "c964f559d3fc240117c07fd34786816bac981be3a9f18430b7fc0ecdb812ed35"
+    },
+    {
+      "file": "independent-argument/helper-argument-review-source.json.gz",
+      "kind": "independent old-candidate argument probe and post-probe source readback",
+      "bytes": 954,
+      "sha256": "26ba3603dbd503ab59ff9dac02a41de8821ef4ccdb5951f10d02ef25d541120b",
+      "archiveSha256": "5a9ed0dc2da0834e00b7d5747dfc35bdbce8d9d91ed7ceabbee900c436995e12"
+    }
+  ]
+}
