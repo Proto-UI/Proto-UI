@@ -1,5 +1,5 @@
 import { createWebInputOriginAnchor } from '../src/web/input-origin-anchor';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConfig } from '@proto.ui/core';
 import { createFloatingUiAnchoredPositionHost } from '../src';
 
@@ -277,6 +277,290 @@ describe('module-positioning: Floating UI host', () => {
         if (descriptor) Object.defineProperty(target, key, descriptor);
         else Reflect.deleteProperty(target, key);
       }
+    }
+  });
+});
+
+describe('module-positioning: relevant scroll observation', () => {
+  let viewportDescriptors: [string, PropertyDescriptor | undefined][];
+  beforeEach(() => {
+    viewportDescriptors = ['clientWidth', 'clientHeight'].map((name) => [
+      name,
+      Object.getOwnPropertyDescriptor(document.documentElement, name),
+    ]);
+    Object.defineProperties(document.documentElement, {
+      clientWidth: { configurable: true, value: 1024 },
+      clientHeight: { configurable: true, value: 768 },
+    });
+  });
+  afterEach(() => {
+    for (const [name, descriptor] of viewportDescriptors) {
+      if (descriptor) Object.defineProperty(document.documentElement, name, descriptor);
+      else Reflect.deleteProperty(document.documentElement, name);
+    }
+  });
+
+  function attach(anchor: HTMLElement, floating: HTMLElement) {
+    setRect(anchor, rect(100, 100, 50, 20));
+    setRect(floating, rect(0, 0, 40, 10));
+    const onResolved = vi.fn();
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: baseConfig,
+      onResolved,
+    });
+    return { lease, onResolved };
+  }
+
+  it.each(['floating', 'descendant', 'unrelated', 'reference'] as const)(
+    'retains its available-space cap during %s scrolling',
+    async (target) => {
+      const anchor = document.createElement('button');
+      const floating = document.createElement('div');
+      const descendant = document.createElement('div');
+      const unrelated = document.createElement('div');
+      floating.append(descendant);
+      document.body.append(anchor, floating, unrelated);
+      const { lease, onResolved } = attach(anchor, floating);
+      try {
+        await flush();
+        const cap = floating.style.getPropertyValue('--proto-ui-available-height');
+        expect(cap).toMatch(/px$/);
+        onResolved.mockClear();
+        ({ floating, descendant, unrelated, reference: anchor })[target].dispatchEvent(
+          new Event('scroll')
+        );
+        // This checks the synchronous lease boundary, before a new async solve
+        // could restore the cap. Happy DOM does not certify native scrolling.
+        expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+        await flush();
+        expect(onResolved).not.toHaveBeenCalled();
+      } finally {
+        lease.dispose();
+      }
+    }
+  );
+
+  it('keeps the outer cap while a newly scrolling outer panel moves an inner anchor', async () => {
+    const outerAnchor = document.createElement('button');
+    const outerFloating = document.createElement('div');
+    const innerAnchor = document.createElement('button');
+    const innerFloating = document.createElement('div');
+    outerFloating.append(innerAnchor);
+    document.body.append(outerAnchor, outerFloating, innerFloating);
+    const outer = attach(outerAnchor, outerFloating);
+    const inner = attach(innerAnchor, innerFloating);
+    try {
+      await flush();
+      const cap = outerFloating.style.getPropertyValue('--proto-ui-available-height');
+      expect(cap).toMatch(/px$/);
+      outer.onResolved.mockClear();
+      inner.onResolved.mockClear();
+      // autoUpdate did not see an overflow ancestor at attach time.
+      outerFloating.style.overflow = 'auto';
+      setRect(innerAnchor, rect(100, 80, 50, 20));
+      outerFloating.dispatchEvent(new Event('scroll'));
+      expect(outerFloating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+      await flush();
+      expect(outer.onResolved).not.toHaveBeenCalled();
+      expect(inner.onResolved).toHaveBeenCalled();
+      expect(innerFloating.style.top).toBe('104px');
+    } finally {
+      inner.lease.dispose();
+      outer.lease.dispose();
+    }
+  });
+
+  it('observes a newly scrolling floating ancestor when the reference is outside it', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const scroller = document.createElement('div');
+    scroller.append(floating);
+    document.body.append(anchor, scroller);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      onResolved.mockClear();
+      scroller.style.overflow = 'auto';
+      scroller.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('still updates when a scroller inside the floating box moves its reference', async () => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    const scroller = document.createElement('div');
+    scroller.append(anchor);
+    floating.append(scroller);
+    document.body.append(floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      onResolved.mockClear();
+      scroller.style.overflow = 'auto';
+      setRect(anchor, rect(100, 80, 50, 20));
+      scroller.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).toHaveBeenCalled();
+      expect(floating.style.top).toBe('104px');
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it.each(['document', 'viewport'] as const)('retains %s scroll updates', async (target) => {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      setRect(anchor, rect(100, 80, 50, 20));
+      (target === 'document' ? document : window).dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(floating.style.top).toBe('104px');
+      lease.dispose();
+      onResolved.mockClear();
+      setRect(anchor, rect(100, 60, 50, 20));
+      (target === 'document' ? document : window).dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).not.toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it.each(['shadow', 'slot'] as const)(
+    'observes a new scroll ancestor through %s ancestry and revokes it on disposal',
+    async (kind) => {
+      const host = document.createElement('div');
+      const root = host.attachShadow({ mode: 'open' });
+      const scroller = document.createElement('div');
+      const anchor = document.createElement('button');
+      const floating = document.createElement('div');
+      root.append(scroller);
+      if (kind === 'slot') {
+        const slot = document.createElement('slot');
+        scroller.append(slot);
+        host.append(anchor);
+        // Happy DOM omits assignedSlot. Model this flattened-tree link while
+        // using a real ShadowRoot for the non-composed event boundary below.
+        Object.defineProperty(anchor, 'assignedSlot', { configurable: true, value: slot });
+      } else scroller.append(anchor);
+      document.body.append(host, floating);
+      const { lease, onResolved } = attach(anchor, floating);
+      try {
+        await flush();
+        scroller.style.overflow = 'auto';
+        setRect(anchor, rect(100, 80, 50, 20));
+        // Native element scroll does not cross its shadow boundary.
+        scroller.dispatchEvent(new Event('scroll'));
+        await flush();
+        expect(floating.style.top).toBe('104px');
+        lease.dispose();
+        onResolved.mockClear();
+        setRect(anchor, rect(100, 60, 50, 20));
+        scroller.dispatchEvent(new Event('scroll'));
+        await flush();
+        expect(onResolved).not.toHaveBeenCalled();
+      } finally {
+        lease.dispose();
+      }
+    }
+  );
+
+  it('uses the actual scroll origin rather than a retargeted shadow host', async () => {
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    const anchor = document.createElement('button');
+    const unrelated = document.createElement('div');
+    const floating = document.createElement('div');
+    root.append(anchor, unrelated);
+    document.body.append(host, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      const cap = floating.style.getPropertyValue('--proto-ui-available-height');
+      expect(cap).toMatch(/px$/);
+      onResolved.mockClear();
+      // A composed synthetic event exercises retargeting; it does not stand
+      // in for the browser's non-composed native scroll acceptance.
+      unrelated.dispatchEvent(new Event('scroll', { composed: true }));
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+      await flush();
+      expect(onResolved).not.toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('refreshes shadow observation after a same-target update and releases the old root', async () => {
+    const firstHost = document.createElement('div');
+    const secondHost = document.createElement('div');
+    const firstRoot = firstHost.attachShadow({ mode: 'open' });
+    const secondRoot = secondHost.attachShadow({ mode: 'open' });
+    const firstScroller = document.createElement('div');
+    const secondScroller = document.createElement('div');
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    firstScroller.append(anchor);
+    firstRoot.append(firstScroller);
+    secondRoot.append(secondScroller);
+    document.body.append(firstHost, secondHost, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    const removedFromFirst = vi.spyOn(firstRoot, 'removeEventListener');
+    const removedFromSecond = vi.spyOn(secondRoot, 'removeEventListener');
+    try {
+      await flush();
+      secondScroller.append(anchor);
+      lease.update({ anchor, floating, config: baseConfig, onResolved });
+      await flush();
+      expect(removedFromFirst).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+      onResolved.mockClear();
+      secondScroller.style.overflow = 'auto';
+      setRect(anchor, rect(100, 80, 50, 20));
+      secondScroller.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(onResolved).toHaveBeenCalled();
+      expect(floating.style.top).toBe('104px');
+      lease.dispose();
+      expect(removedFromSecond).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+    } finally {
+      lease.dispose();
+      removedFromFirst.mockRestore();
+      removedFromSecond.mockRestore();
+    }
+  });
+
+  it('allows the same composed scroll event to be dispatched again after propagation', async () => {
+    const host = document.createElement('div');
+    const root = host.attachShadow({ mode: 'open' });
+    const scroller = document.createElement('div');
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    scroller.append(anchor);
+    root.append(scroller);
+    document.body.append(host, floating);
+    const { lease, onResolved } = attach(anchor, floating);
+    try {
+      await flush();
+      scroller.style.overflow = 'auto';
+      const event = new Event('scroll', { composed: true });
+      for (const y of [80, 60]) {
+        onResolved.mockClear();
+        setRect(anchor, rect(100, y, 50, 20));
+        scroller.dispatchEvent(event);
+        await flush();
+        expect(floating.style.top).toBe(`${y + 24}px`);
+        expect(onResolved).toHaveBeenCalledTimes(1);
+      }
+    } finally {
+      lease.dispose();
     }
   });
 });

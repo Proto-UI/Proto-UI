@@ -137,6 +137,10 @@ jobs:
             'apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts',
             'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
             'apps/www/src/styles/site-contents-command.css',
+            'packages/modules/positioning/src/web/floating-ui-host.ts',
+            'packages/modules/positioning/src/web/owned-style-lease.ts',
+            'packages/modules/positioning/src/web/root-space-observer.ts',
+            'packages/modules/positioning/test/floating-ui-host.test.ts',
           ].map(hashFile);
           // Actual outputs of apps-www generate:proto-ui-style, including the
           // ignored CSS/Shadow artifacts that git status cannot account for.

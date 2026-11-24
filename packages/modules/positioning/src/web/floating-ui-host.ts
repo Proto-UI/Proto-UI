@@ -42,6 +42,76 @@ function isElement(value: unknown): value is HTMLElement {
   return typeof HTMLElement !== 'undefined' && value instanceof HTMLElement;
 }
 
+function composedParent(node: Node): Node | null {
+  if (node.nodeType === 1 && (node as Element).assignedSlot) return (node as Element).assignedSlot;
+  return node.parentNode ?? (node.nodeType === 11 ? ((node as ShadowRoot).host ?? null) : null);
+}
+
+function isStrictComposedAncestor(target: EventTarget | null, element: HTMLElement): boolean {
+  for (let node = composedParent(element); node; node = composedParent(node)) {
+    if (node === target) return true;
+  }
+  return false;
+}
+
+/** Capture newly scrollable ancestors without treating a panel's own scroll as geometry. */
+function observePositionScroll(reference: HTMLElement, floating: HTMLElement, update: () => void) {
+  const roots = new Set<Document | ShadowRoot>();
+  let disposed = false;
+  const onScroll = (event: Event) => {
+    if (disposed) return;
+    const path = event.composedPath();
+    // Only the outermost observed root handles this propagation. Do not retain
+    // Event identity: callers may legally dispatch the same Event again.
+    for (let index = path.length - 1; index >= 0; index--) {
+      if (!roots.has(path[index] as Document | ShadowRoot)) continue;
+      if (event.currentTarget !== path[index]) return;
+      break;
+    }
+    const origin = path[0] ?? event.target;
+    if (
+      !(
+        origin === reference.ownerDocument ||
+        origin === floating.ownerDocument ||
+        isStrictComposedAncestor(origin, reference) ||
+        isStrictComposedAncestor(origin, floating)
+      )
+    )
+      return;
+    update();
+  };
+  const refresh = () => {
+    if (disposed) return;
+    const next = new Set<Document | ShadowRoot>([reference.ownerDocument, floating.ownerDocument]);
+    for (const element of [reference, floating]) {
+      for (let node: Node | null = element; node; node = composedParent(node)) {
+        if (node.nodeType === 11 && 'host' in node) next.add(node as ShadowRoot);
+      }
+    }
+    for (const root of roots) {
+      if (!next.has(root)) {
+        root.removeEventListener('scroll', onScroll, true);
+        roots.delete(root);
+      }
+    }
+    for (const root of next) {
+      if (!roots.has(root)) {
+        root.addEventListener('scroll', onScroll, true);
+        roots.add(root);
+      }
+    }
+  };
+  refresh();
+  return {
+    refresh,
+    dispose() {
+      disposed = true;
+      for (const root of roots) root.removeEventListener('scroll', onScroll, true);
+      roots.clear();
+    },
+  };
+}
+
 /**
  * Anchored geometry may exclude the anchor's own CSS translation. Interaction
  * transforms (hover lift, press-down) are decoration of the anchor surface;
@@ -317,6 +387,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let sizeObservers: ResizeObserver[] = [];
       let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
       let projectedSize: ReturnType<typeof ownStyles> | null = null;
+      let scrollObservation: ReturnType<typeof observePositionScroll> | null = null;
       const retireProjectedSize = () => {
         const previous = projectedSize;
         projectedSize = null;
@@ -370,6 +441,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           }
           return;
         }
+        scrollObservation?.refresh();
         // Available-space variables are outputs of the last solve. Measuring
         // through that cap can make an overflowing preferred side appear to
         // fit forever after content/font/viewport changes. Release only our
@@ -513,13 +585,15 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         // autoUpdate records overflow ancestors only once. A scroller that
         // becomes overflow:auto after the popup opens (nested demo panes)
         // never notifies that list, so the fixed popper keeps its pre-scroll
-        // coordinates. Element scroll does not bubble, but it is observable
-        // in the capture phase on the document.
-        const ownerDocument = reference.element.ownerDocument;
-        const onCapturedScroll = () => {
+        // coordinates. Capture only scrolls that can move this reference or
+        // floating box. Re-solving for its own content scroll would briefly
+        // release the available-size cap and clamp its native scroll offset.
+        // Native scroll is not composed, so observe the relevant shadow roots
+        // as well as the document; a composed event is handled only once.
+        const ownScroll = observePositionScroll(reference.element, floating, () => {
           void position();
-        };
-        ownerDocument.addEventListener('scroll', onCapturedScroll, true);
+        });
+        scrollObservation = ownScroll;
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
           generation++;
           retireSizing();
@@ -532,7 +606,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           stopAuto();
           stopRoot();
           stopInvalidation?.();
-          ownerDocument.removeEventListener('scroll', onCapturedScroll, true);
+          ownScroll.dispose();
+          if (scrollObservation === ownScroll) scrollObservation = null;
         };
       };
 
