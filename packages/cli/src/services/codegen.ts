@@ -214,6 +214,7 @@ function renderPreset(
       ? `((${rootExport}Element.prototype as unknown) as { connectedCallback?: () => void }).connectedCallback?.call(this);`
       : `${rootExport}Element.prototype.connectedCallback?.call(this);`;
   return [
+    `/* Style this composed host with the '${elementName}' CSS selector. */`,
     `export class ${exportName}Element extends ${rootExport}Element {`,
     `  connectedCallback() {`,
     `    const hasDirectDefaultPart = Array.from(this.children).some(`,

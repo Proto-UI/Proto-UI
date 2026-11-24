@@ -34,6 +34,9 @@ pub struct A11yProjection {
     /// [`names_from_descendants`].
     pub name_from_content: bool,
     pub disabled: bool,
+    /// Whether the current value is read-only. Absence leaves this fact
+    /// unspecified; false explicitly clears a prior read-only projection.
+    pub read_only: Option<bool>,
     /// Whether a toggle button, a switch or a checkbox is on, when the object
     /// is one.
     pub toggled: Option<Toggled>,
@@ -101,6 +104,7 @@ pub fn project(snapshot: &A11ySnapshotWire) -> (Option<A11yProjection>, Vec<A11y
     };
 
     let mut disabled = false;
+    let mut read_only = None;
     let mut toggled = None;
     let mut selected = None;
     let mut orientation = None;
@@ -110,6 +114,7 @@ pub fn project(snapshot: &A11ySnapshotWire) -> (Option<A11yProjection>, Vec<A11y
             ("hidden", Value::Bool(true)) => return (None, Vec::new()),
             ("hidden", Value::Bool(false)) => {}
             ("disabled", Value::Bool(value)) => disabled = *value,
+            ("readOnly", Value::Bool(value)) => read_only = Some(*value),
             ("selected", Value::Bool(value)) => selected = Some(*value),
             ("orientation", Value::String(value)) if value == "horizontal" => {
                 orientation = Some(Orientation::Horizontal)
@@ -172,6 +177,7 @@ pub fn project(snapshot: &A11ySnapshotWire) -> (Option<A11yProjection>, Vec<A11y
         label,
         name_from_content,
         disabled,
+        read_only,
         toggled,
         selected,
         orientation,

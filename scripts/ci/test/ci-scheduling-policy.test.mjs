@@ -612,10 +612,29 @@ test('manual compiler evidence can explicitly request the unchanged strict packa
   );
 });
 
+function isGeneratedNativeConsumerStep(step, target) {
+  const run = step.run ?? '';
+  // Different authored crates may legitimately share a Rust target name.
+  // Bind this inventory to the exact generated crate as well as its target.
+  return (
+    run.includes('--manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml"') &&
+    new RegExp(`--test ${target}(?:\\s|$)`, 'u').test(run)
+  );
+}
+
 function assertNativeGeneratedConsumerEvidence(workflow) {
   const job = workflow.jobs['native-consumer'];
   assert.equal(job.if, undefined);
   assert.equal(job.needs, undefined);
+  const sdkSteps = job.steps.filter((step) => step.id === 'native_sdk');
+  assert.equal(sdkSteps.length, 1, 'native consumers require the actual SDK build');
+  const [sdk] = sdkSteps;
+  assert.equal(sdk.if, undefined);
+  assert.equal(sdk['continue-on-error'], undefined);
+  assert.deepEqual(sdk.run.trim().split('\n'), [
+    'set -euo pipefail',
+    'cargo +1.98.1 check --locked --manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml" --lib 2>&1 | tee "$RUNNER_TEMP/gpui-evidence/default-check.log"',
+  ]);
   for (const [target, log] of [
     ['control_label', 'control-label-consumer.log'],
     ['style_mapping', 'style-mapping-consumer.log'],
@@ -623,12 +642,13 @@ function assertNativeGeneratedConsumerEvidence(workflow) {
     ['scroll_pause', 'scroll-pause-consumer.log'],
     ['scroll_reader', 'scroll-reader-consumer.log'],
   ]) {
-    const matches = job.steps.filter((step) =>
-      new RegExp(`--test ${target}(?:\\s|$)`, 'u').test(step.run ?? '')
-    );
+    const matches = job.steps.filter((step) => isGeneratedNativeConsumerStep(step, target));
     assert.equal(matches.length, 1, `one complete native ${target} target is mandatory`);
     const [step] = matches;
-    assert.equal(step.if, undefined);
+    // A failure in another consumer must not suppress this mandatory target.
+    // This exact status-function guard only requires the shared SDK prerequisite;
+    // no input flag, branch filter or swallowed failure can make it optional.
+    assert.equal(step.if, "${{ !cancelled() && steps.native_sdk.outcome == 'success' }}");
     assert.equal(step['continue-on-error'], undefined);
     assert.deepEqual(step.run.trim().split('\n'), [
       'set -euo pipefail',
@@ -647,7 +667,9 @@ test('native generated evidence rejects missing, duplicated, filtered, optional 
   // another unchanged target was already missing or duplicated.
   assertNativeGeneratedConsumerEvidence(original);
   const targetStep = (workflow, target) =>
-    workflow.jobs['native-consumer'].steps.find((step) => step.run?.includes(`--test ${target} `));
+    workflow.jobs['native-consumer'].steps.find((step) =>
+      isGeneratedNativeConsumerStep(step, target)
+    );
   for (const target of [
     'control_label',
     'style_mapping',
@@ -657,6 +679,26 @@ test('native generated evidence rejects missing, duplicated, filtered, optional 
   ]) {
     const mutations = [
       (workflow) => {
+        delete targetStep(workflow, target).if;
+      },
+      (workflow) => {
+        targetStep(workflow, target).if =
+          "${{ success() && steps.native_sdk.outcome == 'success' }}";
+      },
+      (workflow) => {
+        targetStep(workflow, target).if =
+          "${{ !cancelled() && steps.native_sdk.outcome == 'success' && inputs.scroll }}";
+      },
+      (workflow) => {
+        workflow.jobs['native-consumer'].steps.find((step) => step.id === 'native_sdk')[
+          'continue-on-error'
+        ] = true;
+      },
+      (workflow) => {
+        workflow.jobs['native-consumer'].steps.find((step) => step.id === 'native_sdk').if =
+          'false';
+      },
+      (workflow) => {
         const steps = workflow.jobs['native-consumer'].steps;
         steps.push(
           structuredClone(steps.find((step) => step.run?.includes('--test scroll_pause ')))
@@ -664,7 +706,7 @@ test('native generated evidence rejects missing, duplicated, filtered, optional 
       },
       (workflow) => {
         workflow.jobs['native-consumer'].steps = workflow.jobs['native-consumer'].steps.filter(
-          (step) => !step.run?.includes(`--test ${target} `)
+          (step) => !isGeneratedNativeConsumerStep(step, target)
         );
       },
       (workflow) => {
@@ -680,6 +722,12 @@ test('native generated evidence rejects missing, duplicated, filtered, optional 
         targetStep(workflow, target).run = targetStep(workflow, target).run.replace(
           '-- --test-threads=1',
           'one-case -- --test-threads=1'
+        );
+      },
+      (workflow) => {
+        targetStep(workflow, target).run = targetStep(workflow, target).run.replace(
+          '--manifest-path "$RUNNER_TEMP/gpui-evidence/generated/transition/Cargo.toml"',
+          '--manifest-path "$RUNNER_TEMP/gpui-evidence/official-control-label/Cargo.toml"'
         );
       },
       (workflow) => {

@@ -817,8 +817,44 @@ function controlledBoxObservers() {
   vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
   return {
     observers,
+    observing(target: Element) {
+      // Retain the registration history after disconnect clears the live targets.
+      return observers.filter((observer) =>
+        observer.observe.mock.calls.some(([observed]) => observed === target)
+      );
+    },
     notify(target: Element, changedBox: ResizeObserverBoxOptions) {
       for (const observer of observers) observer.notify(target, changedBox);
+    },
+  };
+}
+
+// Controlled root/body layout facts. These model notification selection and
+// current-reference readback; native browser tests own actual scrollbar layout.
+function rootSpaceGeometry() {
+  const root = document.documentElement,
+    body = document.body;
+  let rootWidth = 900,
+    bodyWidth = 900,
+    bodyLeft = 0;
+  vi.spyOn(root, 'clientWidth', 'get').mockImplementation(() => rootWidth);
+  vi.spyOn(root, 'getBoundingClientRect').mockImplementation(() => rect(0, 0, rootWidth, 768));
+  vi.spyOn(body, 'clientWidth', 'get').mockImplementation(() => bodyWidth);
+  vi.spyOn(body, 'getBoundingClientRect').mockImplementation(() =>
+    rect(bodyLeft, 0, bodyWidth, 768)
+  );
+  return {
+    root,
+    body,
+    referenceLeft(source: 'root' | 'body') {
+      return source === 'root' ? rootWidth / 2 : bodyLeft + bodyWidth / 2;
+    },
+    resize(source: 'root' | 'body', width: number) {
+      if (source === 'root') rootWidth = width;
+      else bodyWidth = width;
+    },
+    moveBody(left: number) {
+      bodyLeft = left;
     },
   };
 }
@@ -839,12 +875,17 @@ describe('neutral target geometry box-observation contract', () => {
     ];
     const lease = createTargetAlignmentLease(f.connection);
     try {
-      expect(control.observers).toHaveLength(2);
+      const boxes = control.observing(f.frame);
+      const roots = control.observing(document.documentElement);
+      expect(boxes).toHaveLength(2);
+      expect(roots).toHaveLength(1);
+      expect(new Set(control.observers)).toEqual(new Set([...boxes, ...roots]));
       for (const [index, box] of ['content-box', 'border-box'].entries()) {
-        expect(control.observers[index].observe.mock.calls).toEqual(
+        expect(boxes[index].observe.mock.calls).toEqual(
           expected.map((target) => [target, { box }])
         );
       }
+      expect(roots[0].observe.mock.calls).toEqual([[document.documentElement], [document.body]]);
     } finally {
       lease.dispose();
     }
@@ -860,8 +901,12 @@ describe('neutral target geometry box-observation contract', () => {
       targetAlignment: { ...targets, inlineTarget: f.blockTarget },
     });
     try {
-      expect(control.observers).toHaveLength(2);
-      for (const observer of control.observers) {
+      const boxes = control.observing(f.frame);
+      const roots = control.observing(document.documentElement);
+      expect(boxes).toHaveLength(2);
+      expect(roots).toHaveLength(1);
+      expect(new Set(control.observers)).toEqual(new Set([...boxes, ...roots]));
+      for (const observer of boxes) {
         expect(observer.observe).toHaveBeenCalledTimes(6);
         expect(
           observer.observe.mock.calls.filter(([target]) => target === f.blockTarget)
@@ -944,7 +989,13 @@ describe('neutral target geometry box-observation contract', () => {
     const oldObservers = [...control.observers];
     try {
       lease.update(second.connection);
-      expect(control.observers).toHaveLength(4);
+      const oldBoxes = control.observing(first.frame);
+      const newBoxes = control.observing(second.frame);
+      const roots = control.observing(document.documentElement);
+      expect(oldBoxes).toHaveLength(2);
+      expect(newBoxes).toHaveLength(2);
+      expect(roots).toHaveLength(2);
+      expect(new Set(control.observers)).toEqual(new Set([...oldBoxes, ...newBoxes, ...roots]));
       for (const observer of oldObservers) expect(observer.disconnect).toHaveBeenCalledOnce();
       expect(first.frame.style.minWidth).toBe('');
       second.onAlignment.mockClear();
@@ -988,7 +1039,11 @@ describe('neutral target geometry box-observation contract', () => {
     width = 200;
     const reopened = createTargetAlignmentLease(f.connection);
     try {
-      expect(control.observers).toHaveLength(4);
+      const boxes = control.observing(f.frame);
+      const roots = control.observing(document.documentElement);
+      expect(boxes).toHaveLength(4);
+      expect(roots).toHaveLength(2);
+      expect(new Set(control.observers)).toEqual(new Set([...boxes, ...roots]));
       expect(f.frame.style.minWidth).toBe('200px');
       width = 300;
       for (const observer of oldObservers) observer.replayQueued();
@@ -997,6 +1052,132 @@ describe('neutral target geometry box-observation contract', () => {
       expect(f.frame.style.minWidth).toBe('300px');
     } finally {
       reopened.dispose();
+    }
+  });
+});
+
+describe('neutral target geometry root-space observation', () => {
+  for (const source of ['root', 'body'] as const) {
+    for (const direction of ['ltr', 'rtl'] as const) {
+      it(`remeasures a fixed-size reference after ${source}-only geometry changes in ${direction}`, () => {
+        const control = controlledBoxObservers();
+        const space = rootSpaceGeometry();
+        const f = fixture();
+        f.frame.style.direction = direction;
+        const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+        const measure = vi.fn(() => rect(space.referenceLeft(source), 240, 180, 36));
+        reference.getBoundingClientRect = measure;
+        const lease = createTargetAlignmentLease(f.connection);
+        const edge = direction === 'ltr' ? 'left' : 'right';
+        try {
+          expect(f.frame.style[edge]).toBe(direction === 'ltr' ? '450px' : '270px');
+          expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+          measure.mockClear();
+          f.onAlignment.mockClear();
+          control.notify(space[source], 'content-box');
+          expect(measure).not.toHaveBeenCalled();
+
+          // No frame/target size change, scroll, resize or manual lease update:
+          // only the page containing geometry changes this reference's origin.
+          space.resize(source, 870);
+          expect(f.frame.style[edge]).toBe(direction === 'ltr' ? '450px' : '270px');
+          control.notify(space[source], 'content-box');
+          expect(f.frame.style[edge]).toBe(
+            direction === 'ltr' ? '435px' : source === 'root' ? '255px' : '285px'
+          );
+          expect(f.frame.style.minWidth).toBe('180px');
+          expect(measure).toHaveBeenCalled();
+          expect(f.onAlignment).not.toHaveBeenCalled();
+          measure.mockClear();
+          control.notify(space[source], 'content-box');
+          expect(measure).not.toHaveBeenCalled();
+
+          lease.dispose();
+          f.frame.style[edge] = '777px';
+          space.resize(source, 840);
+          for (const observer of control.observing(space.root)) observer.replayQueued();
+          expect(f.frame.style[edge]).toBe('777px');
+          expect(measure).not.toHaveBeenCalled();
+          expect(f.onAlignment).not.toHaveBeenCalled();
+        } finally {
+          lease.dispose();
+        }
+      });
+    }
+  }
+
+  it('shares root observation without retaining a disposed target owner', () => {
+    const control = controlledBoxObservers();
+    const space = rootSpaceGeometry();
+    const first = fixture(),
+      second = fixture();
+    const firstReference = first.connection.targetAlignment!.blockReference as HTMLElement;
+    const secondReference = second.connection.targetAlignment!.blockReference as HTMLElement;
+    firstReference.getBoundingClientRect = () => rect(space.referenceLeft('root'), 240, 180, 36);
+    secondReference.getBoundingClientRect = () =>
+      rect(space.referenceLeft('root') - 200, 240, 180, 36);
+    const a = createTargetAlignmentLease(first.connection);
+    const b = createTargetAlignmentLease(second.connection);
+    try {
+      const roots = control.observing(space.root);
+      expect(roots).toHaveLength(1);
+      expect(control.observing(first.frame)).toHaveLength(2);
+      expect(control.observing(second.frame)).toHaveLength(2);
+      a.dispose();
+      first.frame.style.left = '777px';
+      first.onAlignment.mockClear();
+      expect(roots[0].disconnect).not.toHaveBeenCalled();
+      space.resize('root', 870);
+      control.notify(space.root, 'content-box');
+      expect(first.frame.style.left).toBe('777px');
+      expect(first.onAlignment).not.toHaveBeenCalled();
+      expect(second.frame.style.left).toBe('235px');
+      b.dispose();
+      expect(roots[0].disconnect).toHaveBeenCalledOnce();
+      second.frame.style.left = '888px';
+      second.onAlignment.mockClear();
+      space.resize('root', 840);
+      roots[0].replayQueued();
+      expect(first.frame.style.left).toBe('777px');
+      expect(second.frame.style.left).toBe('888px');
+      expect(first.onAlignment).not.toHaveBeenCalled();
+      expect(second.onAlignment).not.toHaveBeenCalled();
+    } finally {
+      a.dispose();
+      b.dispose();
+    }
+  });
+
+  it('responds to body-origin mutations and releases the mutation subscription on disposal', async () => {
+    const space = rootSpaceGeometry();
+    const f = fixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    const measure = vi.fn(() => rect(space.referenceLeft('body'), 240, 180, 36));
+    reference.getBoundingClientRect = measure;
+    const previousStyle = space.body.getAttribute('style');
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(f.frame.style.left).toBe('450px');
+      // Geometry is simulated, while this notification uses the real DOM
+      // MutationObserver; no ResizeObserver notification is injected.
+      space.moveBody(15);
+      space.body.style.marginLeft = '15px';
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(f.frame.style.left).toBe('465px');
+      lease.dispose();
+      f.frame.style.left = '777px';
+      measure.mockClear();
+      f.onAlignment.mockClear();
+      space.moveBody(30);
+      space.body.style.marginLeft = '30px';
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(f.frame.style.left).toBe('777px');
+      expect(measure).not.toHaveBeenCalled();
+      expect(f.onAlignment).not.toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+      if (previousStyle === null) space.body.removeAttribute('style');
+      else space.body.setAttribute('style', previousStyle);
     }
   });
 });

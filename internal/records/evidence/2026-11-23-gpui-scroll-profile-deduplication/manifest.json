@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "scope": "Remove an integrated duplicate GPUI operation entry",
+  "sourceParent": "691f31462159af32882b65e0f3630c5ce04475d7",
+  "integratedMain": "457d27f7fe554f398970a836ee9c95edb4846f47",
+  "sourceFile": "packages/compiler/src/targets.ts",
+  "originalSha256": "c66a50f16798afd2555baf04d617d30a737ba4f21eddebd18a98236fcc82add2",
+  "candidateSha256": "2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58",
+  "candidateByteEqualToIntegratedMain": true,
+  "testCounts": {
+    "numTotalTests": 32,
+    "numPassedTests": 32,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "verifiedSourceHashes": {
+    "packages/compiler/src/targets.ts": "2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58",
+    "packages/compiler/test/scroll-axis-sync.test.ts": "569a856f69104b3ce71ba350ae67f4e6c64ce97932e4083c53db8ab3efdf2e7b",
+    "packages/compiler/test/gpui-event-notification.test.ts": "d6cc4ad611cd67d11e5519b217d04ab201913cf3bf3bf9d117131d4e411b0505",
+    "packages/compiler/test/gpui-capabilities.test.ts": "ae79c496d714575de037680de3d5d89c79133bb28bec8aee77cbd0a8efd69ce4"
+  },
+  "files": [
+    {
+      "path": "raw/candidate-targets.ts.gz",
+      "origin": "scroll-profile-dedup/candidate-targets.ts",
+      "rawBytes": 31323,
+      "rawSha256": "2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58",
+      "gzipBytes": 7194,
+      "gzipSha256": "c42864e00f373697fcf693872d79f41a9728cb8dcfeeb293888b7daf5e7d15fd"
+    },
+    {
+      "path": "raw/candidate.patch.gz",
+      "origin": "scroll-profile-dedup/candidate.patch",
+      "rawBytes": 495,
+      "rawSha256": "554072c3fd76b2b4613d6b55e2dddd93b0f29ba346cde89db6c36c88ec64eb0c",
+      "gzipBytes": 286,
+      "gzipSha256": "4a528f07b5e842085ab89482e299780f3bbdf7b901698931fde6813fbc3c1812"
+    },
+    {
+      "path": "raw/diff-check.log.gz",
+      "origin": "scroll-profile-dedup/diff-check.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "raw/format-check.log.gz",
+      "origin": "scroll-profile-dedup/format-check.log",
+      "rawBytes": 66,
+      "rawSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "gzipBytes": 82,
+      "gzipSha256": "6cd316ae8e81df0ff79776205007450fac3d62e1ba8e884e169e326d7955ebe5"
+    },
+    {
+      "path": "raw/launcher.log.gz",
+      "origin": "scroll-profile-dedup/launcher.log",
+      "rawBytes": 0,
+      "rawSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzipBytes": 20,
+      "gzipSha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+    },
+    {
+      "path": "raw/original-targets.ts.gz",
+      "origin": "scroll-profile-dedup/original-targets.ts",
+      "rawBytes": 31346,
+      "rawSha256": "c66a50f16798afd2555baf04d617d30a737ba4f21eddebd18a98236fcc82add2",
+      "gzipBytes": 7195,
+      "gzipSha256": "d2fda9110107461e442bf171388ab1b990ac5b4dd573c4639321efea82ff9bd6"
+    },
+    {
+      "path": "raw/run.py.gz",
+      "origin": "scroll-profile-dedup/run.py",
+      "rawBytes": 3251,
+      "rawSha256": "c6f408b19b703b28434976e4975c4961297aa8a1c6c630a68c6e9f7b6291ae80",
+      "gzipBytes": 1495,
+      "gzipSha256": "3752281741f1a2ec9933449dc55823926d0eb1253a214d89c9dd4b3ba1d42bcd"
+    },
+    {
+      "path": "raw/scope-controls.log.gz",
+      "origin": "scroll-profile-dedup/scope-controls.log",
+      "rawBytes": 73805,
+      "rawSha256": "27e8bcc2725bed20b467fd0d76fca69e6e359c352cf5918aa658bf0ff81c996e",
+      "gzipBytes": 12809,
+      "gzipSha256": "c1ad7fae71b26ad397f6efe7e633f48d1f39216cea5e14f9bb839bef0a68850d"
+    },
+    {
+      "path": "raw/status.json.gz",
+      "origin": "scroll-profile-dedup/status.json",
+      "rawBytes": 2742,
+      "rawSha256": "7ba3b44e3f26796744f70d4fbb67bc5f1a2283e2ad66aaa1eb22edb5a6daa9d0",
+      "gzipBytes": 807,
+      "gzipSha256": "2de668e7439b5053d1bd815155c4a88961b42642890c8c1ca97c5040f3bf682f"
+    },
+    {
+      "path": "raw/vitest.json.gz",
+      "origin": "scroll-profile-dedup/vitest.json",
+      "rawBytes": 13595,
+      "rawSha256": "32b016fcff81aaaf2fdb0a0dc7c7483a77cde3413255728dbe4e0f97cfe63c2a",
+      "gzipBytes": 2015,
+      "gzipSha256": "0a951a4db6a8307f31ffecc0fc079bece5b8c110f143af6aa230ce22f8028ac5"
+    },
+    {
+      "path": "unchanged-source/packages/compiler/test/scroll-axis-sync.test.ts.gz",
+      "origin": "691f31462159af32882b65e0f3630c5ce04475d7:packages/compiler/test/scroll-axis-sync.test.ts",
+      "rawBytes": 4233,
+      "rawSha256": "569a856f69104b3ce71ba350ae67f4e6c64ce97932e4083c53db8ab3efdf2e7b",
+      "gzipBytes": 1378,
+      "gzipSha256": "bc981ddf226cc38d6ebf2da0abaf4079a8f4d3b16c1a8b8412068c856d1c08c5"
+    },
+    {
+      "path": "unchanged-source/packages/compiler/test/gpui-event-notification.test.ts.gz",
+      "origin": "691f31462159af32882b65e0f3630c5ce04475d7:packages/compiler/test/gpui-event-notification.test.ts",
+      "rawBytes": 5216,
+      "rawSha256": "d6cc4ad611cd67d11e5519b217d04ab201913cf3bf3bf9d117131d4e411b0505",
+      "gzipBytes": 1635,
+      "gzipSha256": "963d4ba1dfb582e6e1d483cd3288b950725e7ae4f955bc7d7eff14d15f5a85e4"
+    },
+    {
+      "path": "unchanged-source/packages/compiler/test/gpui-capabilities.test.ts.gz",
+      "origin": "691f31462159af32882b65e0f3630c5ce04475d7:packages/compiler/test/gpui-capabilities.test.ts",
+      "rawBytes": 4905,
+      "rawSha256": "ae79c496d714575de037680de3d5d89c79133bb28bec8aee77cbd0a8efd69ce4",
+      "gzipBytes": 1785,
+      "gzipSha256": "24e0cd67b292bbd5dc7c4f98db530114a415ede4abd9197059b67c81e2fb65bd"
+    },
+    {
+      "path": "archive-prepare.py.gz",
+      "origin": "archive preparation driver",
+      "rawBytes": 8444,
+      "rawSha256": "02b13f17590374f575a9a482f30da69a12c7d354760c10f1cd22422c5acfa129",
+      "gzipBytes": 3338,
+      "gzipSha256": "0ca922bfc5e110537f5e068964eed847665a9b390bb53e150cbd7a4147399e51"
+    }
+  ]
+}

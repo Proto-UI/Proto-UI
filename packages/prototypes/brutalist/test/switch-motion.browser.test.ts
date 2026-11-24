@@ -128,8 +128,7 @@ describe.each(['document', 'shadow'] as const)('Brutalist resident Switch %s', (
               let moving = false,
                 stable = 0;
               while (true) {
-                if (moving ? performance.now() >= limit : performance.now() >= minimum)
-                  break;
+                if (moving ? performance.now() >= limit : performance.now() >= minimum) break;
                 await new Promise(requestAnimationFrame);
                 const next = sample();
                 samples.push(next);

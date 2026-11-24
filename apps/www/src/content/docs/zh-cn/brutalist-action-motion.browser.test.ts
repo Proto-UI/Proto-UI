@@ -1007,9 +1007,7 @@ async function captureItemPair(
               !content ||
               content
                 .getAnimations({ subtree: true })
-                .every(
-                  (animation) => !animation.pending && animation.playState !== 'running'
-                )
+                .every((animation) => !animation.pending && animation.playState !== 'running')
             );
           })
         ),

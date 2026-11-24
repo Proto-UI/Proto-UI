@@ -38,10 +38,7 @@
     "independentProbes": {
       "passed": 72,
       "failed": 0,
-      "reports": [
-        "shader-independent-review-v2.json.gz",
-        "shader-capture-pairs-review.json.gz"
-      ]
+      "reports": ["shader-independent-review-v2.json.gz", "shader-capture-pairs-review.json.gz"]
     },
     "generatedStrictTypes": {
       "profilesPassed": 4,

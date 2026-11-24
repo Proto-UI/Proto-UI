@@ -9,7 +9,7 @@ pub struct Modules {
     pub control_label:ControlLabelModule,
     pub boundary:BoundaryModule,pub hit:HitModule,pub scroll:ScrollModule,
     pub topology:Topology,pub hooks:BTreeSet<&'static str>,pub focus:FocusModule,pub state_watchers:Vec<NativeStateWatch>,
-    pub control_label:ControlLabelModule,pub text:TextModule,pub image:ImageModule,pub positioning:PositioningModule,pub overlay:OverlayModule,
+    pub text:TextModule,pub image:ImageModule,pub positioning:PositioningModule,pub overlay:OverlayModule,
     pub accessible_text:BTreeMap<String,Value>,pub accessible_relations:BTreeMap<String,Value>,
     pub accessible_tree:Value,pub accessible_level:Value,pub action_events:BTreeMap<String,String>,action_identities:BTreeMap<String,Rc<()>>,pub a11y_node:Option<gpui::accesskit::NodeId>,
     pub a11y_frame:u64,pub a11y_bindings:usize,
