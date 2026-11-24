@@ -2062,10 +2062,11 @@ it('dedicated draft-family suites remain registered but leave every general brow
 
 function assertDraftFamilyCycle(cycle) {
   for (const [id, owner, predecessor] of [
+    ['carousel-preview', '.github/workflows/carousel-preview-evidence.yml', 'select-item-sizing'],
     [
       'bootstrap-state-controls',
       '.github/workflows/bootstrap-state-controls-evidence.yml',
-      'select-item-sizing',
+      'carousel-preview',
     ],
     [
       'liquid-material',
@@ -2146,7 +2147,7 @@ it('dedicated draft-family coverage rejects duplicate, missing, disabled and dea
 });
 
 it('dedicated draft-family cycle rejects an uncalled owner or an omitted successor after failure', () => {
-  for (const id of ['bootstrap-state-controls', 'liquid-material']) {
+  for (const id of ['carousel-preview', 'bootstrap-state-controls', 'liquid-material']) {
     for (const mutation of [
       'missing',
       'duplicate',

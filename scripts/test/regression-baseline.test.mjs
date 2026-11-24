@@ -241,7 +241,7 @@ test('governance evidence rejects omissions, forged aggregate success, changed c
   }
 });
 
-test('separate 45-minute jobs remain independent and both block Tests and the cycle', () => {
+test('governance and general runtime have separate execution budgets and both block Tests and the cycle', () => {
   const { jobs } = YAML.parse(
     readFileSync(path.join(runtimeRoot, '.github/workflows/ci.yml'), 'utf8')
   );
@@ -249,11 +249,11 @@ test('separate 45-minute jobs remain independent and both block Tests and the cy
   const general = jobs['test-general'];
   assert.equal(general.needs, 'test-plan');
   assert.deepEqual(governance.needs, ['test-plan', 'cycle-plan']);
-  for (const [job, name] of [
-    [governance, 'governance'],
-    [general, 'general'],
+  for (const [job, name, minutes] of [
+    [governance, 'governance', 45],
+    [general, 'general', 90],
   ]) {
-    assert.equal(job['timeout-minutes'], 45);
+    assert.equal(job['timeout-minutes'], minutes);
     assert.equal(job.env.PROTO_UI_GENERAL_JOB, name);
     assert.equal(job.env.PROTO_UI_RUNTIME_SLOT, name);
     assert.equal(job['continue-on-error'], undefined);
