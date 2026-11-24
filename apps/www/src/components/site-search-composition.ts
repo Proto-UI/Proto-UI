@@ -253,7 +253,20 @@ export function createSiteSearchComposition(options: {
       let seedingQuery = false;
       let seededCommand: DemoPublicInstance | undefined;
       let focusedFailureAction: DemoPublicInstance | undefined;
-      let failureFocusOpening: { epoch: number } | undefined;
+      type FailureFocusOpening = { epoch: number; queryWakeConsumed?: boolean };
+      let failureFocusOpening: FailureFocusOpening | undefined;
+      type QueryFocusBinding = {
+        owner: DemoPublicInstance;
+        retired: boolean;
+        off?: () => void;
+      };
+      type FailureEntryWake = {
+        opening: FailureFocusOpening;
+        binding: QueryFocusBinding;
+        action: DemoPublicInstance;
+      };
+      let queryFocusBinding: QueryFocusBinding | undefined;
+      let queuedFailureEntryWake: FailureEntryWake | undefined;
       // A generation swap replaces the focused control with an equivalent one in
       // the new generation.  The Dialog content's own automatic entry focus
       // must not win that race, so this generation's content runs with
@@ -523,6 +536,10 @@ export function createSiteSearchComposition(options: {
           // request for this generation's control can be accepted.
           if (event.type !== 'next') return;
           restoreRequestedFocus();
+          // A committed Retry can precede activation of this panel's focus
+          // scope. A refused call is still pending, so presentation retries
+          // through the normal paint and its current publication guards.
+          if (failureFocusOpening && current() && session.read().open) requestPaint();
         });
       };
       const disposers = new Set<() => void>();
@@ -547,6 +564,7 @@ export function createSiteSearchComposition(options: {
         if (!active && open && options.retainsOpenWhileLocked?.()) return;
         if (!active || !open) {
           failureFocusOpening = undefined;
+          queuedFailureEntryWake = undefined;
           focusedFailureAction = undefined;
           // Late author-slot completions from a closed generation cannot certify
           // a later reopen, even if its retained DOM box identity is unchanged.
@@ -828,17 +846,24 @@ export function createSiteSearchComposition(options: {
             failureFocusOpening === failureFocus &&
             !entryPolicyManual &&
             entryFocusUnchanged &&
+            panelPresented() &&
             currentAction &&
             currentAction !== focusedFailureAction
           ) {
-            // The real Retry control must own the focus after a failed
-            // preparation, so the user can retry without a pointer. A public
-            // instance can exist before its control can take focus, so the
-            // attempt is recorded only when the control's own focus fact
-            // proves the focus landed. An unrecorded attempt leaves the next
-            // paint free to try again instead of losing the focus forever.
             api.call('search-page-action', 'focusSelf');
-            if (targetHoldsFocus('search-page-action')) focusedFailureAction = currentAction;
+            // Public calls may be refused before scope activation, or reenter
+            // close/replacement. Only the current control's focus fact proves
+            // that this opening's handoff actually completed.
+            if (
+              live &&
+              current() &&
+              session.read().open &&
+              epoch === paintEpoch &&
+              failureFocusOpening === failureFocus &&
+              api.getPublicInstance?.('search-page-action') === currentAction &&
+              targetHoldsFocus('search-page-action')
+            )
+              focusedFailureAction = currentAction;
           }
         }
         if (
@@ -894,6 +919,120 @@ export function createSiteSearchComposition(options: {
           if (live && epoch === paintEpoch) options.onFailure(error);
         });
       };
+      const failureEntryWakeIsCurrent = (request: FailureEntryWake) => {
+        if (
+          !current() ||
+          queryFocusBinding !== request.binding ||
+          request.binding.retired ||
+          failureFocusOpening !== request.opening ||
+          request.opening.queryWakeConsumed ||
+          entryPolicyManual ||
+          api.getPublicInstance?.('query') !== request.binding.owner ||
+          api.getPublicInstance?.('search-page-action') !== request.action ||
+          focusedFailureAction === request.action
+        )
+          return false;
+        const { open, snapshot, retrying } = session.read();
+        return (
+          open &&
+          !retrying &&
+          !snapshot.query.trim() &&
+          (snapshot.phase === 'error' || snapshot.moreError)
+        );
+      };
+      const wakeFailureEntry = (binding: QueryFocusBinding) => {
+        const opening = failureFocusOpening;
+        const action = api.getPublicInstance?.('search-page-action');
+        if (!opening || !action) return;
+        const request: FailureEntryWake = { opening, binding, action };
+        if (!failureEntryWakeIsCurrent(request)) return;
+        if (
+          queuedFailureEntryWake?.opening === opening &&
+          queuedFailureEntryWake.binding === binding &&
+          queuedFailureEntryWake.action === action
+        )
+          return;
+        queuedFailureEntryWake = request;
+        // The focused fact publishes inside the host focus event, before that
+        // event finishes advancing the focus epoch. Read intent after the stack
+        // returns; this is one event-driven wake, never a timer or a retry loop.
+        queueMicrotask(() => {
+          if (queuedFailureEntryWake !== request) return;
+          queuedFailureEntryWake = undefined;
+          try {
+            if (!failureEntryWakeIsCurrent(request) || !targetHoldsFocus('query')) return;
+            if (!failureEntryWakeIsCurrent(request) || !panelPresented()) return;
+            if (!failureEntryWakeIsCurrent(request)) return;
+            const epoch = options.focusEpoch();
+            if (epoch !== opening.epoch && epoch !== opening.epoch + 1) return;
+            // A still-preparing panel has not consumed the wake. Its existing
+            // transition notification can also retry through the normal paint.
+            opening.queryWakeConsumed = true;
+            requestPaint();
+          } catch (error) {
+            if (current() && failureFocusOpening === opening) options.onFailure(error);
+          }
+        });
+      };
+      const retireQueryFocus = (binding: QueryFocusBinding) => {
+        binding.retired = true;
+        if (queuedFailureEntryWake?.binding === binding) queuedFailureEntryWake = undefined;
+        const off = binding.off;
+        binding.off = undefined;
+        off?.();
+      };
+      const watchQueryFocus = (owner: DemoPublicInstance | undefined) => {
+        // Keep a disconnected owner as a tombstone until its identity changes.
+        if (queryFocusBinding?.owner === owner) return;
+        const previous = queryFocusBinding;
+        queryFocusBinding = undefined;
+        if (previous) retireQueryFocus(previous);
+        // Retiring a subscription may synchronously publish a newer owner.
+        if (!live || queryFocusBinding || !owner || api.getPublicInstance?.('query') !== owner)
+          return;
+        const binding: QueryFocusBinding = { owner, retired: false };
+        queryFocusBinding = binding;
+        try {
+          const focused = owner.getExposes()?.focused as
+            | {
+                subscribe(listener: (event: { type?: string; next?: boolean }) => void): () => void;
+              }
+            | undefined;
+          if (
+            !live ||
+            queryFocusBinding !== binding ||
+            binding.retired ||
+            api.getPublicInstance?.('query') !== owner ||
+            !focused?.subscribe
+          )
+            return;
+          const off = focused.subscribe((event) => {
+            if (event.type === 'disconnect') {
+              retireQueryFocus(binding);
+              return;
+            }
+            if (
+              event.type === 'next' &&
+              event.next === true &&
+              live &&
+              queryFocusBinding === binding &&
+              !binding.retired
+            )
+              wakeFailureEntry(binding);
+          });
+          if (
+            live &&
+            queryFocusBinding === binding &&
+            !binding.retired &&
+            api.getPublicInstance?.('query') === owner
+          )
+            binding.off = off;
+          else off();
+        } catch (error) {
+          retireQueryFocus(binding);
+          throw error;
+        }
+      };
       if (!api.subscribePublicInstances)
         throw new Error('Search requires committed public instance identity subscriptions');
       const offInstances = api.subscribePublicInstances(
@@ -902,10 +1041,28 @@ export function createSiteSearchComposition(options: {
         // generation actually owns.
         family === 'shadcn'
           ? ['command', 'query-shell', 'query', 'panel', 'close']
-          : ['command', 'panel', 'close'],
+          : ['command', 'query', 'panel', 'close'],
         (instances) => {
           const shell = instances['query-shell'];
           const control = instances.query;
+          watchQueryFocus(control);
+          // A query subscription can synchronously publish a newer pair. The
+          // older notification must not retire that pair's InputShell binding.
+          if (
+            !live ||
+            api.getPublicInstance?.('query') !== control ||
+            (family === 'shadcn' && api.getPublicInstance?.('query-shell') !== shell)
+          )
+            return;
+          // A focused subscription may disconnect synchronously without a
+          // newer identity snapshot. Retire the old pair without reading the
+          // terminal control or entering its other public fact subscriptions.
+          if (queryFocusBinding?.retired && queryFocusBinding.owner === control) {
+            const previous = inputBinding;
+            inputBinding = undefined;
+            previous?.binding?.dispose();
+            return;
+          }
           if (
             family === 'shadcn' &&
             (inputBinding?.shell !== shell || inputBinding?.control !== control)
@@ -997,11 +1154,17 @@ export function createSiteSearchComposition(options: {
         clearPublications();
         dialogProjection = undefined;
         failureFocusOpening = undefined;
+        queuedFailureEntryWake = undefined;
         pendingFocusRestore = null;
         const errors: unknown[] = [];
         for (const stop of [
           off,
           offInstances,
+          () => {
+            const binding = queryFocusBinding;
+            queryFocusBinding = undefined;
+            if (binding) retireQueryFocus(binding);
+          },
           () => inputBinding?.binding?.dispose(),
           () => offPanelTransition?.(),
         ]) {

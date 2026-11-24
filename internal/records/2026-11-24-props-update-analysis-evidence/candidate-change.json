@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "scope": "#1453 bounded compile-time Props update advice",
+  "capturedAt": "2026-11-23T18:58:12.521847+00:00",
+  "head": "81c103bd462b73910f7279122fab5f282d172d56",
+  "mode": "human-assisted",
+  "hashes": {
+    "packages/compiler/src/props-update-analysis.ts": "f960a6632384b69c1852d14f926f16787426e29880c6103564eaf4dcf11d0a90",
+    "packages/compiler/test/props-update-analysis.test.ts": "b1e4479420ece909754f2e35dab52fea4b140501c89099af36d661989e34d788",
+    "packages/compiler/src/memory.ts": "9b31c65ce68999fbdeafc5c404844ac77f77bb28070f168edf23c6c8fd01834a",
+    "packages/compiler/src/index.ts": "999c64f9785b0095577d91fd66ce6dfebe6ad5d5e87d45d3bd87a8e7b8034cce",
+    "packages/compiler/src/cli.ts": "9e4d8fe8a319ab65727304b11c8ab3bf05d85b346327d5c0d78070ce0a39c5a8",
+    "packages/compiler/README.md": "0227c1143abaf252153a4c12a0cfc146494cf1bac5b1f62644bbf75c93b8e6f3",
+    "packages/adapters/react/README.md": "eb850114f068d3ed70220e5f79db01baa5331ef74dcdeed6c4db094927b3d859"
+  },
+  "limitations": [
+    "Source hashes captured after the focused test run; not a before/after whole-tree binding.",
+    "Shared integration checkout may contain other agents changes.",
+    "No complete current-head browser, whole-workspace type, production or real Shenko acceptance claimed."
+  ]
+}
