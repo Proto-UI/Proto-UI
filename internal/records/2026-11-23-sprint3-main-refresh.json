@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "kind": "ordinary merge of updated Sprint 3 branch and main",
+  "parent": "5f19c7b498767db167e945c1ceb200be9cb1be29",
+  "importedHead": "b87beddcac17ab4fd4dcf5e83342fa7a49821c82",
+  "importedBase": "7c66b9b39c9064346887957bc7292c3dc997f82a",
+  "resolution": "Keep bounded verified official-package font preparation in two original producers; retain both branches other source, evidence and history. Preserve new compiler source-regression/production-build opt-in jobs.",
+  "compilerHistoricalFinding": {
+    "at": "52fd5100dbf0eb64011fd7c05e51c27313537b9e",
+    "observation": "Older parallel reconciliation removed reset observation lease guards, four-profile queued-selection tests and GPUI error notification flush. This is a source/coverage finding; restored original 24 tests actually passed 24/24 on the earlier source, so no runtime red was reproduced.",
+    "restoredBaseline": {
+      "exitCode": 0,
+      "logSha256": "43f21241c24bcf257809eee33a996258d3df74b3ff5058795ae1e6b58dc4f39b"
+    },
+    "current": "Imported b87 restores all original guards and the original 24 fixed selection assertions, plus 8 new cases; no duplicate compiler-source patch is applied."
+  },
+  "validation": {
+    "textExit": 0,
+    "fontExit": 1,
+    "parent": "5f19c7b498767db167e945c1ceb200be9cb1be29",
+    "mergeHead": "b87beddcac17ab4fd4dcf5e83342fa7a49821c82",
+    "logs": {
+      "font-controls.log": "a9f0b3b0356cfd7fdf3c46c82d16d28e60877167482e692b1761972f4c7022b4",
+      "text-reset.log": "175b76355d0de59e99a7b2e50523d8495651e76325881dfa0af9c2e8502afa3d"
+    }
+  },
+  "remaining": "Final clean-head canonical browser/native/release, whitepaper capture, strict budgets, complete CI and independent review are not established by these local controls."
+}

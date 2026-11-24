@@ -1,0 +1,66 @@
+name: Draft shader source and lease browser evidence
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  shader-browser:
+    # Match the existing ordinary native lane's supported namespace environment.
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify exact source and supported runner isolation
+        run: |
+          set -euo pipefail
+          node scripts/test/shader-browser-evidence.mjs prepare "$RUNNER_TEMP/shader-presentation"
+          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/shader-presentation/lockfile.sha256"
+          node --version > "$RUNNER_TEMP/shader-presentation/node-environment.txt"
+      - name: Install locked dependencies before isolated execution
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version > "$RUNNER_TEMP/shader-presentation/browser-environment.txt"
+      - name: Execute all shader journeys with isolated loopback and no credential environment
+        timeout-minutes: 14
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/shader-presentation"
+          TEST_HOME=$(mktemp -d "$RUNNER_TEMP/shader-home.XXXXXX")
+          PARENT_USER_NS=$(readlink /proc/self/ns/user)
+          PARENT_NET_NS=$(readlink /proc/self/ns/net)
+          unshare --user --map-current-user --net --keep-caps sh -c '
+            set -eu
+            test "$(id -u)" -ne 0
+            ip link set lo up
+            exec setpriv --bounding-set=-all --inh-caps=-all --ambient-caps=-all \
+              env -i PATH="$1" HOME="$2" CI=1 NODE_ENV=test \
+              CHROME_PATH="$3" CANDIDATE_SHA="$4" \
+              NODE_OPTIONS=--max-old-space-size=1536 \
+              node scripts/test/shader-browser-evidence.mjs run "$5" "$6" "$7"
+          ' sh "$PATH" "$TEST_HOME" "$CHROME_PATH" "$CANDIDATE_SHA" "$EVIDENCE" "$PARENT_USER_NS" "$PARENT_NET_NS" \
+            2>&1 | tee "$EVIDENCE/browser.log"
+      - name: Preserve source manifests, original failures, pixels and resources
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shader-presentation-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/shader-presentation
+          # Include .proto-ui generated support from this isolated evidence directory.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

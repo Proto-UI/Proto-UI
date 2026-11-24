@@ -121,7 +121,7 @@
       ],
       "assignees": [],
       "milestone": null,
-      "owners": ["harness follow-tail implementer"]
+      "owners": ["harness follow-tail maintainer"]
     },
     {
       "number": 1323,
@@ -176,7 +176,7 @@
         "disclosure domain plus website shell",
         "disclosure/button domains plus website examples",
         "file intake maintainer",
-        "harness follow-tail implementer",
+        "harness follow-tail maintainer",
         "harness implementer",
         "harness implementer, with scroll catalog lifecycle respected",
         "image and workspace maintainers",

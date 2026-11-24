@@ -1605,7 +1605,7 @@ function renderPixelTypographyUtility(utility: string): string[] | null {
 
 function renderSpacingUtility(utility: string): string[] | null {
   const spacingMatch = utility.match(
-    /^(gap|basis|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mx|my|mt|mb|ml|mr|top|bottom|left|right)-(.+)$/
+    /^(gap|basis|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|ps|pe|pt|pb|mx|my|mt|mb|ml|mr|top|bottom|left|right|start|end)-(.+)$/
   );
   if (!spacingMatch) return null;
   const [, kind, rawValue] = spacingMatch;
@@ -1626,6 +1626,8 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (kind === 'py') return [`padding-block: ${value};`];
   if (kind === 'pl') return [`padding-left: ${value};`];
   if (kind === 'pr') return [`padding-right: ${value};`];
+  if (kind === 'ps') return [`padding-inline-start: ${value};`];
+  if (kind === 'pe') return [`padding-inline-end: ${value};`];
   if (kind === 'pt') return [`padding-top: ${value};`];
   if (kind === 'pb') return [`padding-bottom: ${value};`];
   if (kind === 'mx') return [`margin-inline: ${value};`];
@@ -1638,6 +1640,8 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (kind === 'bottom') return [`bottom: ${value};`];
   if (kind === 'right') return [`right: ${value};`];
   if (kind === 'left') return [`left: ${value};`];
+  if (kind === 'start') return [`inset-inline-start: ${value};`];
+  if (kind === 'end') return [`inset-inline-end: ${value};`];
   return null;
 }
 

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { expect, it } from 'vitest';
 import { compileProject } from '../src/project';
@@ -83,6 +83,56 @@ it.each([
       expect(projectCompilationArtifacts(missing, options)).toMatchObject({
         ok: false,
         diagnostics: [{ code: 'PUI3002' }],
+      });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  },
+  30_000
+);
+
+it.each([
+  'react-dom-source-v1',
+  'vue-source-v1',
+  'vue2-source-v1',
+  'web-component-source-v1',
+] as const)(
+  '%s: mixed pixel/scene project unifies the reached source capability and rejects its replacement',
+  async (profile) => {
+    const base = path.join(process.cwd(), 'packages/compiler/test/generated-modules');
+    await mkdir(base, { recursive: true });
+    const root = await mkdtemp(path.join(base, 'shader-scene-project-'));
+    try {
+      await writeFile(path.join(root, 'copy.proto.ts'), shaderVariantSource('copy'));
+      await writeFile(
+        path.join(root, 'scene.proto.ts'),
+        await readFile('packages/compiler/test/fixtures/shader-scene-owner.proto.ts', 'utf8')
+      );
+      const compiled = await compileProject({
+        root,
+        entries: ['copy.proto.ts', 'scene.proto.ts'],
+        profile,
+      });
+      if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+      const ext =
+        profile === 'react-dom-source-v1' ? '.tsx' : profile === 'vue2-source-v1' ? '.js' : '.ts';
+      const options = {
+        sourcePaths: { 'copy.proto.ts': 'Copy' + ext, 'scene.proto.ts': 'Scene' + ext },
+      };
+      const artifacts = projectCompilationArtifacts(compiled.value, options);
+      if (!artifacts.ok) throw new Error(JSON.stringify(artifacts.diagnostics));
+      for (const expected of nativeShaderArtifacts(['copy-rgba8-v1', 'tint-rgba8-v1'], true))
+        expect(artifacts.value.filter((file) => file.path === expected.path)).toEqual([expected]);
+      const entry = compiled.value.entries.find((entry) => entry.entry === 'scene.proto.ts')!;
+      const support = entry.compilation.output.supportingFiles!.find((file) =>
+        file.path.endsWith('scene-web-v1.ts')
+      )!;
+      support.contents += '\n/* unreviewed replacement */';
+      expect(projectCompilationArtifacts(compiled.value, options)).toMatchObject({
+        ok: false,
+        diagnostics: [
+          { code: 'PUI3002', message: expect.stringContaining('modified shader support') },
+        ],
       });
     } finally {
       await rm(root, { recursive: true, force: true });

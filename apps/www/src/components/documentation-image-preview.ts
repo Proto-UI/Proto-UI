@@ -245,8 +245,12 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         image.naturalHeight || sourceSize.height,
         readingSpace
       );
-      diagramRoot.style.width = `${diagramReadingSize ? readingSpace.width : fitting.width}px`;
-      diagramRoot.style.height = `${diagramReadingSize ? readingSpace.height : fitting.height}px`;
+      const rootWidth = `${diagramReadingSize ? readingSpace.width : fitting.width}px`;
+      const rootHeight = `${diagramReadingSize ? readingSpace.height : fitting.height}px`;
+      // Only a changed measurement may touch the layout. Rewriting the same
+      // values invalidates the reading viewport's own scroll content.
+      if (diagramRoot.style.width !== rootWidth) diagramRoot.style.width = rootWidth;
+      if (diagramRoot.style.height !== rootHeight) diagramRoot.style.height = rootHeight;
       diagramViewport.dataset.docsImageScale = diagramReadingSize ? 'reading' : 'fit';
       if (diagramReadingSize) {
         const width = image.naturalWidth || sourceSize.width;
@@ -267,8 +271,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
             Number.isFinite(authoredWidth) && authoredWidth > 0 ? authoredWidth : 0
           );
         if (width > 0 && height > 0) {
-          image.style.width = `${readingWidth}px`;
-          image.style.height = `${(readingWidth * height) / width}px`;
+          const imageWidth = `${readingWidth}px`;
+          const imageHeight = `${(readingWidth * height) / width}px`;
+          if (image.style.width !== imageWidth) image.style.width = imageWidth;
+          if (image.style.height !== imageHeight) image.style.height = imageHeight;
         }
       } else {
         image.style.removeProperty('width');
@@ -745,7 +751,23 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   window.addEventListener('resize', geometry, options);
   window.visualViewport?.addEventListener('resize', geometry, options);
   window.visualViewport?.addEventListener('scroll', geometry, options);
-  doc.addEventListener('scroll', geometry, { ...options, capture: true });
+  // The reading viewport is this application's own scroll surface. Re-running
+  // the geometry inside its scroll event would re-lay out the very zoomed
+  // image the user is scrolling, so the native wheel displacement is replaced
+  // by the application's own write instead of moving the reading viewport.
+  // The application's geometry follows the window viewport, not its own
+  // reading scroll.
+  const onDocumentScroll = (event: Event) => {
+    const target = event.target;
+    if (
+      target instanceof Node &&
+      diagramViewport &&
+      (target === diagramViewport || diagramViewport.contains(target))
+    )
+      return;
+    geometry();
+  };
+  doc.addEventListener('scroll', onDocumentScroll, { ...options, capture: true });
   const cleanup = () => {
     if (disposed) return;
     disposed = true;

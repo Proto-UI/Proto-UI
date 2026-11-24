@@ -16,7 +16,7 @@ concurrency:
 jobs:
   capture:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 40
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       DIAGRAM_EVIDENCE_DIR: /tmp/whitepaper-diagram-evidence
@@ -51,7 +51,7 @@ jobs:
         id: build
         run: |
           set -o pipefail
-          node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-diagram-evidence.test.mjs scripts/docs/test/whitepaper-diagram-evidence-profiles.test.mjs scripts/docs/test/whitepaper-diagram-evidence-receipts.test.mjs scripts/docs/test/whitepaper-diagram-build.test.mjs scripts/docs/test/whitepaper-diagram-inventory.test.mjs scripts/docs/test/authored-diagram-evidence.test.mjs
+          node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-diagram-evidence.test.mjs scripts/docs/test/whitepaper-diagram-evidence-profiles.test.mjs scripts/docs/test/whitepaper-diagram-evidence-receipts.test.mjs scripts/docs/test/diagram-reading-observation.test.mjs scripts/docs/test/whitepaper-diagram-build.test.mjs scripts/docs/test/whitepaper-diagram-inventory.test.mjs scripts/docs/test/authored-diagram-evidence.test.mjs
           corepack pnpm@10.32.1 --filter apps-www run generate:proto-ui-style 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/generate.log"
           node apps/www/scripts/whitepaper-diagram-build.mjs begin-build
           corepack pnpm@10.32.1 --filter apps-www build 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/build.log"

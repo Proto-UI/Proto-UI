@@ -1,0 +1,347 @@
+{
+  "schemaVersion": 1,
+  "issue": 754,
+  "sourceHead": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "studyId": "dialog-check-discrimination-754-v3",
+  "planSha256": "25a9a81b02b348beca3f296cb044751c37dd9a333c367e9f579d0fd129056118",
+  "checkFreezeSha256": "579eb729d4d45384df66aa2cac6e78f3e06d895f9a5ab1f19f415c9b3e438f4a",
+  "heldOutHandoffSha256": "32da96f6a6394ee583fb6d0e6ff4fc0d8cd8eb2c5cff2bf558e1150b579b0790",
+  "startedAt": "2026-11-23T19:12:11.785Z",
+  "finishedAt": "2026-11-23T19:15:04.441Z",
+  "environment": {
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "vitest": "2.1.9",
+    "happyDom": "15.11.7",
+    "input": "synthetic DOM events; explicit unit Transition completion; real WC Adapter/Base Dialog",
+    "dependencyInstallation": "same-base locked root workspace linked read-only; not standalone packed install"
+  },
+  "totals": {
+    "cells": 9,
+    "existingChecksPerCell": 28,
+    "addedObservationsPerCell": 5,
+    "executed": 297,
+    "passed": 274,
+    "failed": 23,
+    "skipped": 0,
+    "runnerExitCode": 1,
+    "reducerExitCode": 0
+  },
+  "rows": [
+    {
+      "id": "baseline",
+      "cohort": "public-calibration",
+      "kind": "valid-control",
+      "verdict": "accepted-control",
+      "existingPassed": 28,
+      "existingFailed": 0,
+      "addedPassed": 5,
+      "addedFailed": 0,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": null,
+      "responsibility": null
+    },
+    {
+      "id": "focus-no-loop",
+      "cohort": "public-calibration",
+      "kind": "injected-broken",
+      "verdict": "caught",
+      "existingPassed": 26,
+      "existingFailed": 2,
+      "addedPassed": 4,
+      "addedFailed": 1,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": {
+        "step": "Tab from Cancel reverse=false",
+        "actual": {
+          "reachedExpectedControl": false,
+          "preventedHostTraversal": false
+        },
+        "expected": {
+          "reachedExpectedControl": true,
+          "preventedHostTraversal": true
+        }
+      },
+      "responsibility": "component-contract"
+    },
+    {
+      "id": "controlled-eager-close",
+      "cohort": "public-calibration",
+      "kind": "injected-broken",
+      "verdict": "caught",
+      "existingPassed": 24,
+      "existingFailed": 4,
+      "addedPassed": 4,
+      "addedFailed": 1,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": {
+        "step": "declined request retains owner and view",
+        "actual": {
+          "open": false,
+          "detached": false,
+          "leaving": true
+        },
+        "expected": {
+          "open": true,
+          "detached": false,
+          "leaving": false
+        }
+      },
+      "responsibility": "component-contract"
+    },
+    {
+      "id": "description-dangling",
+      "cohort": "public-calibration",
+      "kind": "injected-broken",
+      "verdict": "caught",
+      "existingPassed": 27,
+      "existingFailed": 1,
+      "addedPassed": 4,
+      "addedFailed": 1,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": {
+        "step": "removal clears relations and uses Root fallback",
+        "actual": {
+          "labelledBy": null,
+          "describedBy": "pui-dialog-3-description",
+          "label": "Record editor fallback"
+        },
+        "expected": {
+          "labelledBy": null,
+          "describedBy": null,
+          "label": "Record editor fallback"
+        }
+      },
+      "responsibility": "component-contract"
+    },
+    {
+      "id": "presence-early-complete",
+      "cohort": "public-calibration",
+      "kind": "injected-broken",
+      "verdict": "caught",
+      "existingPassed": 21,
+      "existingFailed": 7,
+      "addedPassed": 3,
+      "addedFailed": 2,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": {
+        "step": "leave retains view after logical close",
+        "actual": {
+          "open": false,
+          "state": "closed",
+          "detached": true
+        },
+        "expected": {
+          "open": false,
+          "state": "leaving",
+          "detached": false
+        }
+      },
+      "responsibility": "component-contract"
+    },
+    {
+      "id": "legal-rounded-border",
+      "cohort": "public-calibration",
+      "kind": "legal-customization",
+      "verdict": "accepted-control",
+      "existingPassed": 28,
+      "existingFailed": 0,
+      "addedPassed": 5,
+      "addedFailed": 0,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": null,
+      "responsibility": null
+    },
+    {
+      "id": "heldout-cancel-routes-save",
+      "cohort": "held-out",
+      "kind": "injected-broken",
+      "verdict": "missed",
+      "existingPassed": 28,
+      "existingFailed": 0,
+      "addedPassed": 4,
+      "addedFailed": 1,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": {
+        "step": "Cancel invokes only cancel",
+        "actual": [
+          "save"
+        ],
+        "expected": [
+          "cancel"
+        ]
+      },
+      "responsibility": "application-task"
+    },
+    {
+      "id": "heldout-missing-live-title",
+      "cohort": "held-out",
+      "kind": "injected-broken",
+      "verdict": "caught",
+      "existingPassed": 26,
+      "existingFailed": 2,
+      "addedPassed": 4,
+      "addedFailed": 1,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": {
+        "step": "live relations target present parts",
+        "actual": {
+          "title": false,
+          "description": true
+        },
+        "expected": {
+          "title": true,
+          "description": true
+        }
+      },
+      "responsibility": "component-contract"
+    },
+    {
+      "id": "heldout-legal-article-wrapper",
+      "cohort": "held-out",
+      "kind": "legal-customization",
+      "verdict": "accepted-control",
+      "existingPassed": 28,
+      "existingFailed": 0,
+      "addedPassed": 5,
+      "addedFailed": 0,
+      "totalExecuted": 33,
+      "skipped": 0,
+      "firstDivergence": null,
+      "responsibility": null
+    }
+  ],
+  "publicCalibration": {
+    "detection": {
+      "caught": 4,
+      "missed": 0,
+      "denominator": 4,
+      "rate": 1
+    },
+    "falseAlarms": {
+      "rejectedLegal": 0,
+      "acceptedLegal": 1,
+      "denominator": 1,
+      "rate": 0
+    },
+    "exclusions": []
+  },
+  "heldOut": {
+    "status": "independently-authored-after-check-freeze",
+    "visibility": "Public after handoff; checker was not adapted. No formal model or secure-isolation claim.",
+    "detection": {
+      "caught": 1,
+      "missed": 1,
+      "denominator": 2,
+      "rate": 0.5
+    },
+    "falseAlarms": {
+      "rejectedLegal": 0,
+      "acceptedLegal": 1,
+      "denominator": 1,
+      "rate": 0
+    },
+    "exclusions": []
+  },
+  "allSelectedCases": {
+    "detection": {
+      "caught": 5,
+      "missed": 1,
+      "denominator": 6,
+      "rate": 0.8333333333333334
+    },
+    "falseAlarms": {
+      "rejectedLegal": 0,
+      "acceptedLegal": 2,
+      "denominator": 2,
+      "rate": 0
+    }
+  },
+  "byResponsibility": {
+    "component-contract": {
+      "detection": {
+        "caught": 5,
+        "missed": 0,
+        "denominator": 5,
+        "rate": 1
+      },
+      "falseAlarms": {
+        "rejectedLegal": 0,
+        "acceptedLegal": 0,
+        "denominator": 0,
+        "rate": null
+      },
+      "exclusions": []
+    },
+    "application-task": {
+      "detection": {
+        "caught": 0,
+        "missed": 1,
+        "denominator": 1,
+        "rate": 0
+      },
+      "falseAlarms": {
+        "rejectedLegal": 0,
+        "acceptedLegal": 0,
+        "denominator": 0,
+        "rate": null
+      },
+      "exclusions": []
+    }
+  },
+  "ineffectiveMutationCount": 0,
+  "ruleDisputeCount": 0,
+  "excludedFinalCellCount": 0,
+  "originalBaseline": {
+    "source": "attempt-03/baseline",
+    "existingPassed": 26,
+    "existingFailed": 2,
+    "addedPassed": 5,
+    "addedFailed": 0,
+    "state": "unresolved early-entry traversal; not scored as mutant detection",
+    "rawWcSha256": "6c7d9db272c68a669d0f3451856e203781ee07a606fcfd76775fa5100131dfe2",
+    "preparedExecutedWcSha256": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444"
+  },
+  "runnerControls": {
+    "command": "node --test scripts/analysis/dialog-conformance-study/report.test.mjs scripts/analysis/dialog-conformance-study/source-variant.test.mjs",
+    "passed": 13,
+    "failed": 0,
+    "skipped": 0
+  },
+  "actionableGaps": [
+    {
+      "id": "D754-EARLY-ENTRY",
+      "currentTracker": "https://github.com/Proto-UI/Proto-UI/issues/1178",
+      "historicalScopeSources": [
+        1161,
+        1177
+      ],
+      "excludedMisattribution": 1191,
+      "nextAction": "Preserve the two raw unchanged WC first-Tab failures and rejected cancelability hypothesis; trace Focus/Portal entry ownership and native early input before deciding fixture vs product repair. Do not narrow ordinary suite."
+    },
+    {
+      "id": "D754-APPLICATION-ACTION",
+      "owner": "#754 application fixture/future consumer maintenance task",
+      "nextAction": "Keep added action-identity observation with application tasks; do not require Base Close to own business actions. Intentional mutant is not a shipped app defect."
+    }
+  ],
+  "untested": [
+    "Early-entry traversal (two failures retained outside settled-entry scoring)",
+    "Native mutation input/paint",
+    "Assistive technology",
+    "Other Adapter/host profiles",
+    "Generated Dialog",
+    "Paired Agent repair/maintenance and repeated-run variance"
+  ],
+  "independence": "Different Agent authored three variants after frozen checks and reviewed expectation scope; variants public after handoff, no model-blind or human-review claim",
+  "liveTracking": "Child has not written GitHub state. Parent must bind integration/evidence and verify the earned update/readback.",
+  "reportSha256": "93cf10112ac41693a8b099c20daf74a6406ea6412824a047f2e2c5d6cc691525"
+}

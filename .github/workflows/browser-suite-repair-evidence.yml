@@ -3,6 +3,11 @@ name: Browser suite repair evidence
 on:
   workflow_dispatch:
     inputs:
+      shader_presentation:
+        description: Run the draft shader source and lease browser journeys
+        type: boolean
+        required: false
+        default: false
       sprint3_acceptance:
         description: Run Sprint 3 acceptance instead of the selected repair scope
         type: boolean
@@ -33,7 +38,7 @@ concurrency:
 
 jobs:
   focused-browser:
-    if: ${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    if: ${{ inputs.scope != 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -84,7 +89,7 @@ jobs:
           retention-days: 30
 
   sprint1:
-    if: ${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true }}
+    if: ${{ inputs.scope == 'sprint1' && inputs.sprint3_acceptance != true && inputs.sprint3_followup != true && inputs.shader_presentation != true }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
@@ -138,5 +143,13 @@ jobs:
   sprint3-followup:
     if: github.event_name == 'workflow_dispatch' && inputs.sprint3_followup == true
     uses: ./.github/workflows/sprint3-followup-evidence.yml
+    permissions:
+      contents: read
+
+  # Explicit manual opt-in. The complete scheduled runtime browser selection
+  # continues to include this suite through runtime-test-plan.mjs.
+  shader-presentation:
+    if: github.event_name == 'workflow_dispatch' && inputs.shader_presentation == true
+    uses: ./.github/workflows/shader-presentation-evidence.yml
     permissions:
       contents: read

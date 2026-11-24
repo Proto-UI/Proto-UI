@@ -4,14 +4,22 @@
 // Every entry binds its full source and the reviewed browser compiler owner.
 // No path prefixes, import categories or surrounding UI exemptions are admitted.
 // See internal/records/2026-11-23-seven-sprint-website-source-inventory.md.
+// Owner review renewal 2026-11-24: the reviewed owner body now retires its
+// compiler session asynchronously before a new Worker or session starts. The
+// renewal changes no importer, specifier or import edge.
+// Import-edge review renewal 2026-11-24: seven changed importer bodies are
+// re-pinned to their reviewed bytes, and the new Core SVG tag schema module
+// is recorded with its single Core edge. Every added edge stays inside the
+// reviewed compiler and Core source graph. No new website consumer, path
+// prefix or import category is admitted.
 const BROWSER_COMPILER_OWNER = Object.freeze({
   path: 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts',
-  sha256: 'f734e78b8ec62770c3432c8ffdf002c258b1378ce88ea90fbf7bdb746f7f9112',
+  sha256: '13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9',
 });
 
 export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
   'packages/compiler/src/core-value-types.ts': Object.freeze({
-    sourceSha256: 'f861c563d82b0f06bccc5c7550f6cf043d7c78d38655ef3c42a92283f1f9ecd4',
+    sourceSha256: '43627a45555d5eb33a1265a761509d2de6518f0f4dd7aba6c03ada0a47e97716',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/control-label']),
   }),
@@ -31,17 +39,17 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['../../core/src/spec/feedback/tokens']),
   }),
   'packages/compiler/src/native-async.ts': Object.freeze({
-    sourceSha256: '50ca38b4e9148104fb3a2ffe515b6018db51587c0030a722b1c2821da455d8fe',
+    sourceSha256: '818979b93274fb6371bdb24964f699508f373025cd1685c3e97b0fe9a32c31b7',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
   'packages/compiler/src/native-shader-specialization.ts': Object.freeze({
-    sourceSha256: 'ff4e13f7837e945cf8bf052ff283d1af24739c96cc3b6d813ee5dfa4fcf76705',
+    sourceSha256: '22a5a5b43fcccd6e13533e22f21e3d50e606d11a78f5930a4082a18e5c4dbd38',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
   'packages/compiler/src/native-shader.ts': Object.freeze({
-    sourceSha256: '6229f87913d90e603d84b02afdbb8b9ce4c489df4b5d00c139336715efacb434',
+    sourceSha256: '2504c8cafcbc1a99a4cedac3c230d52318d5b944eb2e4f031496544795a3490f',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -73,7 +81,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/compiler/src/shader-plan.ts': Object.freeze({
-    sourceSha256: 'f514d79fa3b549e3f65778e69f4144bf4233aea761c7e0fce810a9905d25fd17',
+    sourceSha256: '625b890c12d1a1fcd2a96a3930ba0f2e0a7d241d442133c1ce60dda55250f0bd',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),
@@ -91,7 +99,7 @@ export const BROWSER_COMPILER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'packages/compiler/src/targets.ts': Object.freeze({
-    sourceSha256: '2fd07e809c8b740303e8ea7b23a119e6d529cbf79425d2ce526488ac0b475e58',
+    sourceSha256: '95b6996a6136ba531a553ec64739e2933e22628541b14309dec75964eeea7e51',
     companionSource: BROWSER_COMPILER_OWNER,
     specifiers: Object.freeze(['../../core/src/shader-presentation']),
   }),

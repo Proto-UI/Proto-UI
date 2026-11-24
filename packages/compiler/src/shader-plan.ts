@@ -22,19 +22,35 @@ function data(value: ExpressionIR): unknown {
     'The current native shader profile requires an inline own-data graph; dynamic graphs and aliased resources need separately implemented specialization.'
   );
 }
-export function readNativeShaderPlan(value: ExpressionIR): ShaderPresentationDeclaration {
-  return snapshotShaderPresentation(data(value) as ShaderPresentationDeclaration);
+export function readNativeShaderPlan(
+  value: ExpressionIR,
+  read: (value: ExpressionIR) => unknown = data
+): ShaderPresentationDeclaration {
+  return snapshotShaderPresentation(read(value) as ShaderPresentationDeclaration);
 }
-export function emitNativeShaderDeclaration(value: ExpressionIR, prefix: string): string {
-  const declaration = readNativeShaderPlan(value);
+export const shaderPlanKey = (value: ExpressionIR): string =>
+  createHash('sha256').update(JSON.stringify(value)).digest('hex');
+
+export function emitNativeShaderDeclaration(
+  value: ExpressionIR,
+  prefix: string,
+  plan?: ShaderPresentationDeclaration
+): string {
+  const declaration = plan ?? readNativeShaderPlan(value);
   const key = createHash('sha256').update(JSON.stringify(declaration)).digest('hex');
   const variables = new Map([['$source', '__shaderSource']]);
-  const source = {
-    width: declaration.source.width,
-    height: declaration.source.height,
-    pixels: declaration.source.pixels,
-  };
-  const lines = [`const __shaderSource = __shaderDevice.upload(${JSON.stringify(source)});`];
+  const scene = declaration.source.kind === 'owned-scene';
+  const source =
+    declaration.source.kind === 'owned-pixels'
+      ? {
+          width: declaration.source.width,
+          height: declaration.source.height,
+          pixels: declaration.source.pixels,
+        }
+      : null;
+  const lines = [
+    `const __shaderSource = __shaderDevice.upload(${scene ? '__shaderInput' : JSON.stringify(source)});`,
+  ];
   for (const [index, pass] of declaration.passes.entries()) {
     const variable = `__shaderPass${index}`;
     const input = variables.get(pass.input)!;
@@ -44,5 +60,7 @@ export function emitNativeShaderDeclaration(value: ExpressionIR, prefix: string)
     variables.set(pass.id, variable);
   }
   lines.push(`return ${variables.get(declaration.output)};`);
+  if (declaration.source.kind === 'owned-scene')
+    return `${prefix}Shader.declareScene(${JSON.stringify(declaration.source.slot)}, ${declaration.passes.length + 1}, ${JSON.stringify(key)}, ${JSON.stringify(declaration.fallback)}, (__shaderDevice, __shaderInput) => { ${lines.join(' ')} })`;
   return `${prefix}Shader.declare(${JSON.stringify(key)}, ${JSON.stringify(declaration.fallback)}, (__shaderDevice) => { ${lines.join(' ')} })`;
 }

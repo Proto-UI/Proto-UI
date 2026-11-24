@@ -1,3 +1,4 @@
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import {
   collectWebOwnedDecorationTargets,
   createWebOwnedDecorationStage,
@@ -123,6 +124,7 @@ export interface VueAdapterOptions<Props extends PropsBaseType> {
   /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   schedule?: (task: () => void) => void;
   getProps?: (props: VueAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -864,6 +866,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             rawPropsSource,
             effectsPort,
             residentMotion: opt.residentMotion,
+            shader: opt.shader,
             visualFeedbackSink: createVisualSink
               ? createDeferredViewVisualSink(
                   () => createVisualSink!(rootEl, effectsPort),

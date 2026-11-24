@@ -215,6 +215,33 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
     // Preserve openRoute's exact navigation and first-visible-preview boundary.
     await page.goto(`${baseUrl}${MATRIX_ROUTE}`, { waitUntil: 'networkidle' });
     await page.locator('[data-previewer-id]').first().waitFor({ state: 'visible' });
+    // The Matrix page owns its demo modules. The development server delivers
+    // and transforms them one at a time, which is the page load that precedes
+    // the initialization phase. Delivering them here keeps the original
+    // 60000ms inited phase measuring previewer initialization.
+    const delivery = await page.evaluate(async () => {
+      const api = (
+        globalThis as typeof globalThis & {
+          __protoUiDemoMatrix?: {
+            warmDemoModules?: () => Promise<number>;
+            demoModuleCount?: () => number;
+          };
+        }
+      ).__protoUiDemoMatrix;
+      if (typeof api?.warmDemoModules !== 'function') return { delivered: 0, registered: 0 };
+      return {
+        delivered: await api.warmDemoModules(),
+        registered: api.demoModuleCount?.() ?? 0,
+      };
+    });
+    console.log(
+      `[demo-matrix-readiness] demo modules delivered: ${delivery.delivered}/${delivery.registered}`
+    );
+    // Every registered demo module has to reach the browser. A module that
+    // fails to load is dropped by the delivery step, and the Matrix would then
+    // measure an initialization phase over fewer demos than it claims.
+    expect(delivery.registered).toBeGreaterThan(0);
+    expect(delivery.delivered).toBe(delivery.registered);
   } catch (error) {
     await persistReadinessDiagnostic(page, 'route-open', 'failed', error);
     await state.startupDiagnostic?.finish();

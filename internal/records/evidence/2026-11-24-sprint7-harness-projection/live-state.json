@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "kind": "public-live-state-readback",
+  "observedAt": "2026-11-23T19:07:42.440076+00:00",
+  "repository": "cyjin-yl/shenko",
+  "merge": {
+    "sha": "6fb0d8ca2855d51624ae9d4e49ad47c0550fded5",
+    "parents": [
+      "2c778c1832a71f68b6323c86af6c5fa9b1314b85",
+      "07d6a473d2ac03dca7a351a3299c9b504e547ae0"
+    ]
+  },
+  "runs": [
+    {
+      "id": 45103877174,
+      "head_sha": "07d6a473d2ac03dca7a351a3299c9b504e547ae0",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/cyjin-yl/shenko/actions/runs/45103877174"
+    },
+    {
+      "id": 45106487830,
+      "head_sha": "07d6a473d2ac03dca7a351a3299c9b504e547ae0",
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/cyjin-yl/shenko/actions/runs/45106487830"
+    }
+  ],
+  "scope": "Read-only state and original source ancestry; not a new execution or platform approval"
+}

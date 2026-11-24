@@ -152,6 +152,7 @@ for (const profile of nativeOwnerProfiles) {
     });
     expect(owner.handle.getExposes().snapshot().selection).toEqual(hostSelection(input));
     expect(input.value).toBe('owner');
+    expect(hostSelection(input)).toEqual({ start: 2, end: 5, direction: 'forward' });
   });
   // C-TEXT-CONTROL-SELECTION-0001-LIFETIME: reset also retires selection work.
   // These are generated framework consumers with synthetic DOM events, not OS input evidence.

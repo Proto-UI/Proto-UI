@@ -101,6 +101,7 @@ export function projectCompilationArtifacts(
   // One project has one reached support closure. Upgrade only bytes emitted by
   // this compiler, retaining the ordinary conflicting/tampered artifact rejection.
   let controlLabel = false;
+  let shaderScenes = false;
   const shaderKernels = new Set<ShaderKernel>();
   const admissions = new Map<string, TargetOperationAnalysis>();
   for (const entry of entries) {
@@ -108,9 +109,12 @@ export function projectCompilationArtifacts(
     if (!admitted.ok) return admitted;
     controlLabel ||= admitted.value.operations.includes('hook.asControlLabel');
     admissions.set(entry.entry, admitted.value);
+    shaderScenes ||= admitted.value.shaderScenes;
     for (const kernel of admitted.value.shaderKernels) shaderKernels.add(kernel);
   }
-  const projectShader = shaderKernels.size ? nativeShaderArtifacts([...shaderKernels]) : [];
+  const projectShader = shaderKernels.size
+    ? nativeShaderArtifacts([...shaderKernels], shaderScenes)
+    : [];
   const baseNative = nativeInteractionArtifacts('full');
   const pairedNative = controlLabel
     ? nativeInteractionArtifacts('full', { controlLabel: true })
@@ -122,7 +126,9 @@ export function projectCompilationArtifacts(
     let { compilation } = entries[index];
     let supporting = compilation.output.supportingFiles;
     const entryKernels = admissions.get(entries[index].entry)!.shaderKernels;
-    const canonicalShader = entryKernels.length ? nativeShaderArtifacts(entryKernels) : [];
+    const canonicalShader = entryKernels.length
+      ? nativeShaderArtifacts(entryKernels, admissions.get(entries[index].entry)!.shaderScenes)
+      : [];
     const actualShader = (supporting ?? []).filter((file) =>
       file.path.startsWith('.proto-ui/shader/')
     );

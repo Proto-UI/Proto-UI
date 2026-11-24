@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "scope": "pull-request:1713",
+  "kind": "bounded-regression-evidence",
+  "baselineHeadBeforeEdit": "f96babfbeac4f04d8934e112a47762b0b688433f",
+  "checkoutHeadAtReport": "99e08235c1a0997c81921141675700a1049fce96",
+  "candidateState": "two uncommitted consumer-harness files; not a final exact-head native acceptance",
+  "node": "v24.22.3",
+  "nodeExecutable": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+  "files": [
+    {
+      "path": "scripts/test/installed-public-consumers/verify-native.mjs",
+      "beforeGitBlob": "64d1ac6af922cdcb95756f0f8e0caade12e298d2",
+      "beforeSha256": "10b27ea367962ee1f55e9a3843e5791b4203ae8b01658bc08780a3c0817e7107",
+      "afterGitBlob": "48a27020594bce5fde40a48b3f1c284edd35140e",
+      "afterSha256": "b981e2eafe14a5eeac792de7e35b2d030e8b0e0639ab85d46f02ff63c799f41b",
+      "afterBytes": 32096
+    },
+    {
+      "path": "scripts/test/installed-public-consumers/verify-native.test.mjs",
+      "beforeGitBlob": "f61296f5203b59f399df91623a36de537445353c",
+      "beforeSha256": "d3517da8b601e11be9be3b35ecb66d99da036ef715266e16d39d4cb7a8678e6b",
+      "afterGitBlob": "88de3e0ca5c7c3ef13bfdaad66168f68343e9589",
+      "afterSha256": "7fedf83923128be1a2385d38547a622751e088446577cb685a7934bb08c8de49",
+      "afterBytes": 8227
+    }
+  ],
+  "definitions": [
+    {
+      "id": "P-BASE-SELECT-VALUE",
+      "lifecycle": "draft",
+      "path": "spec/prototypes/P-BASE-SELECT-VALUE.yaml",
+      "sourceHead": "f96babfbeac4f04d8934e112a47762b0b688433f",
+      "sha256": "1dd0690b4a2060764d99b02d6f8408880682a65dc1c445cd812b53407df7332c"
+    },
+    {
+      "id": "C-STATE-0001",
+      "lifecycle": "draft",
+      "path": "spec/contracts/C-STATE-0001.yaml",
+      "sourceHead": "f96babfbeac4f04d8934e112a47762b0b688433f",
+      "sha256": "021e971c552d4501f6d68a56ac97ca1e2e10db524fa39f710731663c14afbef1"
+    },
+    {
+      "id": "A-REACT-18-19-0001",
+      "lifecycle": "active",
+      "path": "spec/adapters/A-REACT-18-19-0001.yaml",
+      "sourceHead": "f96babfbeac4f04d8934e112a47762b0b688433f",
+      "sha256": "e21ccb0d0d1b9019af5735cdf5a292ce9df86d604e567c6cf2b6c3fe2c7d42f2"
+    }
+  ],
+  "rootCause": "The consumer treated Root data-value/textValue projection as proof that React had already committed Value renderer children. The observed React failure read Pick a framework before the rendered Vue label became available. Semantic state publication and host rendered-child commit are separate boundaries; this repair changes only the test observation boundary.",
+  "definitionLimits": "P-BASE-SELECT-VALUE and C-STATE-0001 remain draft; no lifecycle is promoted. The active React profile explicitly separates state mutation from React rendering.",
+  "repair": "Preserve the existing exact value and textValue checks and the exact final textContent===Vue assertion. Before that final assertion, use the existing bounded until helper to observe that the same actual DOM Value text equals Vue.",
+  "observationTimeoutMs": 5000,
+  "sleepAdded": false,
+  "originalUntilCadenceUnchanged": true,
+  "nativeSelectDenominator": 4,
+  "nativeInputsFocusPortalCleanupAssertions": "unchanged",
+  "redCheckpoint": "The three existing commit-observation statements were first extracted without semantic change into assertSelectCommittedProjection, then the injected later-host-task case failed with actual Pick a framework / expected Vue. No import or setup failure was counted as red. Original red-checkpoint source hashes were not separately sampled; baseline and final hashes are recorded above.",
+  "commands": [
+    {
+      "command": "PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:$PATH node --test --test-name-pattern='Select commit waits when semantic state' scripts/test/installed-public-consumers/verify-native.test.mjs",
+      "cwd": "/home/agent/Proto-UI-ready-v4",
+      "exitCode": 1,
+      "scope": "one selected ordering control; original assertion behavior preserved by extraction",
+      "counts": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "logPath": "/home/agent/s3-ready-v4-evidence/select-projection-regression/projection-red.log",
+      "logSha256": "416e466f69c66f56c19156ce2ad6b5cf455d444d034e3f5be0e7ada6c8409b56"
+    },
+    {
+      "command": "PATH=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:$PATH node --test scripts/test/installed-public-consumers/verify-native.test.mjs",
+      "cwd": "/home/agent/Proto-UI-ready-v4",
+      "exitCode": 0,
+      "scope": "complete original control file plus four new projection controls",
+      "counts": {
+        "tests": 11,
+        "pass": 11,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      "logPath": "/home/agent/s3-ready-v4-evidence/select-projection-regression/verify-native-green.log",
+      "logSha256": "78ae9981c943985ba9b89ed6df7f1274e15eeb3b41b3725a9cd3c3ab8f41a95a"
+    }
+  ],
+  "newControls": [
+    "Later host task projects Vue after semantic value/textValue are already committed.",
+    "Incorrect semantic textValue remains rejected even when the rendered label is Vue.",
+    "Never-projecting label reaches the existing 5000ms rejection using mocked Date/setTimeout, without five seconds of real waiting.",
+    "An observed Vue label followed by placeholder remains rejected by the retained final exact assertion."
+  ],
+  "injectionBoundary": "The new Node controls inject ordering at the actual consumer assertion helper. They do not run React or a native browser and do not count as browser acceptance.",
+  "originalNativeFailure": {
+    "runId": 45206446598,
+    "jobId": 137806713492,
+    "candidate": "6a2bb11a1e8abf3fffa8921d267db215bb70b10d",
+    "path": "/home/agent/s3-ready-v4-evidence/installed-6a2/unpacked/installed/select-native/native.json",
+    "sha256": "e889a1c6a74d6e13653e4bfa47899c3d27f3da34d9768b19aed21cc359fa5913",
+    "rows": [
+      {
+        "host": "wc",
+        "family": "base",
+        "status": "passed",
+        "failure": null
+      },
+      {
+        "host": "react",
+        "family": "base",
+        "status": "failed",
+        "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Pick a framework'\n- 'Vue'\n\n    at selectCase (file:///home/runner/work/Proto-UI/Proto-UI/scripts/test/installed-public-consumers/verify-native.mjs:540:10)\n    at async runNative (file:///home/runner/work/Proto-UI/Proto-UI/scripts/test/installed-public-consumers/verify-native.mjs:737:33)\n    at async file:///home/runner/work/Proto-UI/Proto-UI/scripts/test/installed-public-consumers/verify-native.mjs:816:22"
+      },
+      {
+        "host": "vue",
+        "family": "base",
+        "status": "passed",
+        "failure": null
+      },
+      {
+        "host": "vue2",
+        "family": "base",
+        "status": "passed",
+        "failure": null
+      }
+    ],
+    "preserved": true
+  },
+  "formatting": {
+    "prettierCheckExitCode": 0,
+    "diffCheckExitCode": 0
+  },
+  "nativeRerun": "not performed by this patch; retain original 3 passed / 1 failed until final-candidate installed four-host CI executes",
+  "productionCleanupReadOnly": {
+    "head": "b87beddcac17ab4fd4dcf5e83342fa7a49821c82",
+    "sandboxPath": "apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts",
+    "sandboxBlob": "f1437070beb514a544f4cf0d26016b03c2d8250d",
+    "unchangedFrom6a2": true,
+    "ackDeadlineMs": 250,
+    "panelPath": "apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts",
+    "panelBlob": "a37b8b90bf7247138607ff3d7be73c0d25c22dd2",
+    "panelChange": "Serializes pending retirement and retains cleanup failures; does not change acknowledgement deadline."
+  },
+  "mutations": "Only the two listed source files changed by this agent; no commit, push, dispatch or production-timeout changes.",
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-select-projection/raw.json.gz",
+    "sha256": "b2506308bc0d2b5b615052cb80a1a2e5dcd36bf374f52c8867d4c5a2d3a447bc",
+    "bytes": 5652
+  },
+  "originalFailurePng": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-select-projection/original-react-failure.png",
+    "sha256": "365d0f796483126ec6f8b135b059a132cd0506a50ba727c4c49dd18c9a8ea1ba",
+    "rootInspection": "Original failure PNG visibly shows Vue after the earlier immediate text assertion had observed the placeholder; this supports investigating the observation boundary, not erasing the failed native case."
+  }
+}
