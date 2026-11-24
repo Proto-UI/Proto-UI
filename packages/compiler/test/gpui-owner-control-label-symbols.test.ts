@@ -25,17 +25,6 @@ describe('generated GPUI native owner source', () => {
       )
     );
     const missing = [...called].filter((name) => !defined.has(name)).sort();
-    // Two symbols are called without a definition in the emitted sources:
-    // `control_label_commit` (also imported from the owner module by the
-    // generated a11y module) and `control_label_pointer_move`. They are the
-    // open native-consumer defect that keeps the GPUI native consumer lane
-    // red; the ratchet below fails on any NEW undefined symbol so the class
-    // cannot grow unnoticed while the two are repaired.
-    const KNOWN_UNDEFINED = ['control_label_commit', 'control_label_pointer_move'];
-    expect(
-      missing.filter((name) => !KNOWN_UNDEFINED.includes(name)),
-      'the generated owner source calls undefined ControlLabel symbols'
-    ).toEqual([]);
-    expect(missing, 'the known undefined ControlLabel symbols changed').toEqual(KNOWN_UNDEFINED);
+    expect(missing, 'the generated owner source calls undefined ControlLabel symbols').toEqual([]);
   });
 });
