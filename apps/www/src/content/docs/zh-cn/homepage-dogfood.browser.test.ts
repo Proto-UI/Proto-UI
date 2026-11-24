@@ -1217,10 +1217,10 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               // dialog; an old node's unchanged split surface is insufficient.
               const currentDialogs = await dialog.elementHandles();
               try {
-                return await wheel.evaluate(
-                  (probe, dialogs) => probe.read(dialogs.length === 1 ? dialogs[0] : null),
-                  currentDialogs
-                );
+                return await wheel.evaluate((probe, dialogs) => {
+                  const current = dialogs.length === 1 ? dialogs[0] : null;
+                  return probe.read(current instanceof Element ? current : null);
+                }, currentDialogs);
               } finally {
                 await Promise.all(currentDialogs.map((current) => current.dispose()));
               }

@@ -12,6 +12,7 @@ import {
   renderPrefixedThemeCss,
 } from '../../../cli/src/services/proto-style-css';
 import { SHADCN_THEME_CSS } from '../../../cli/src/legacy/type';
+import { SHADCN_STYLE_TOKENS } from '../../../cli/src/generated/shadcn-style-tokens';
 import {
   assertNativeTapRoute,
   assertNoAuthoredOutsideHit,
@@ -48,6 +49,175 @@ beforeAll(async () => {
   browser = await launchBrowser();
 }, 30000);
 afterAll(async () => browser?.close());
+
+describe.each(
+  (['default', 'sm'] as const).flatMap((size) => [16, 32].map((font) => ({ size, font })))
+)('Shadcn $size settled directional endpoints at $font px root font', ({ size, font }) => {
+  it('mirrors every profile inside its track across direction and drag-mode changes', async () => {
+    const page = await browser.newPage();
+    const observations: unknown[] = [];
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(String(error)));
+    try {
+      await page.route('**/*', (route) => route.abort());
+      await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+      await page.setContent(
+        '<main style="padding:24px"><h1>Switch directional endpoints</h1></main>'
+      );
+      await page.addStyleTag({
+        // Exercise the CSS closure shipped by CLI presets as well as the source prototype.
+        content:
+          renderPrefixedThemeCss(SHADCN_THEME_CSS) +
+          '\n' +
+          renderProtoStyleTokenCss(SHADCN_STYLE_TOKENS),
+      });
+      await page.addScriptTag({ content: script });
+      await page.evaluate(
+        ({ size, font }) => {
+          const p = (window as any).SwitchConsumer;
+          document.documentElement.style.fontSize = `${font}px`;
+          const Root = p.adapt(p.switchRoot),
+            Thumb = p.adapt(p.switchThumb);
+          (window as any).directionalSwitches = [];
+          (window as any).directionalRequests = [];
+          for (const profile of [
+            'new-york-v4',
+            'vega',
+            'nova',
+            'maia',
+            'lyra',
+            'mira',
+            'luma',
+            'sera',
+            'rhea',
+          ].filter((profile) => font === 16 || profile === 'sera')) {
+            for (const direction of ['ltr', 'rtl']) {
+              const row = document.createElement('div');
+              row.style.cssText = 'display:flex;align-items:center;gap:16px;margin:12px 0';
+              const label = document.createElement('span');
+              label.textContent = `${profile} / ${direction}`;
+              label.style.width = '180px';
+              const ancestor = document.createElement('div');
+              ancestor.dir = direction === 'ltr' ? 'rtl' : 'ltr';
+              const root = new Root(),
+                thumb = new Thumb();
+              p.setElementProps(root, { styleProfile: profile, size, direction, checked: false });
+              root.append(thumb);
+              root.addEventListener('checkedChange', (event: Event) => {
+                (window as any).directionalRequests.push((event as CustomEvent).detail);
+              });
+              ancestor.append(root);
+              row.append(label, ancestor);
+              document.querySelector('main')!.append(row);
+              (window as any).directionalSwitches.push({ profile, direction, root, thumb });
+            }
+          }
+        },
+        { size, font }
+      );
+      const endpoints = new Map<string, number>();
+      for (const checked of [false, true]) {
+        for (const flipped of [false, true, false]) {
+          for (const draggable of [false, true, false]) {
+            const measured = await page.evaluate(
+              async ({ size, checked, flipped, draggable }) => {
+                const w = window as any;
+                for (const item of w.directionalSwitches) {
+                  const direction = flipped
+                    ? item.direction === 'ltr'
+                      ? 'rtl'
+                      : 'ltr'
+                    : item.direction;
+                  w.SwitchConsumer.setElementProps(item.root, {
+                    styleProfile: item.profile,
+                    size,
+                    checked,
+                    draggable,
+                    direction,
+                  });
+                }
+                await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+                await Promise.all(
+                  document.getAnimations().map((animation) => animation.finished.catch(() => {}))
+                );
+                await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+                return w.directionalSwitches.map((item: any) => {
+                  const root = item.root.getBoundingClientRect(),
+                    thumb = item.thumb.getBoundingClientRect();
+                  return {
+                    profile: item.profile,
+                    direction: flipped
+                      ? item.direction === 'ltr'
+                        ? 'rtl'
+                        : 'ltr'
+                      : item.direction,
+                    computedDirection: getComputedStyle(item.root).direction,
+                    checked: item.root.getAttribute('aria-checked'),
+                    width: root.width,
+                    thumbWidth: thumb.width,
+                    leftGap: thumb.left - root.left,
+                    rightGap: root.right - thumb.right,
+                  };
+                }) as {
+                  profile: string;
+                  direction: string;
+                  computedDirection: string;
+                  checked: string;
+                  width: number;
+                  thumbWidth: number;
+                  leftGap: number;
+                  rightGap: number;
+                }[];
+              },
+              { size, checked, flipped, draggable }
+            );
+            observations.push({ checked, flipped, draggable, measured });
+            for (const item of measured) {
+              const label = `${item.profile}/${size}/${item.direction}/checked=${checked}/draggable=${draggable}`;
+              expect(item.computedDirection, label).toBe(item.direction);
+              expect(item.checked, label).toBe(String(checked));
+              expect(item.thumbWidth, label).toBeGreaterThan(0);
+              expect(item.leftGap, label).toBeGreaterThanOrEqual(-0.25);
+              expect(item.rightGap, label).toBeGreaterThanOrEqual(-0.25);
+              const mirror = measured.find(
+                (other) => other.profile === item.profile && other.direction !== item.direction
+              )!;
+              expect(Math.abs(item.leftGap - mirror.rightGap), label).toBeLessThan(0.25);
+              const key = `${item.profile}/${item.direction}/${checked}`;
+              if (!endpoints.has(key)) endpoints.set(key, item.leftGap);
+              expect(Math.abs(item.leftGap - endpoints.get(key)!), label).toBeLessThan(0.25);
+              if (checked) {
+                const movement =
+                  item.leftGap - endpoints.get(`${item.profile}/${item.direction}/false`)!;
+                expect((item.direction === 'ltr' ? 1 : -1) * movement, label).toBeGreaterThan(2);
+              }
+            }
+            expect(await page.evaluate(() => (window as any).directionalRequests)).toEqual([]);
+          }
+        }
+      }
+      expect(errors).toEqual([]);
+    } finally {
+      try {
+        await writeFile(
+          path.join(output, `switch-${size}-${font}-directional-endpoints.json`),
+          JSON.stringify(
+            { size, font, browserVersion: browser.version(), observations, errors },
+            null,
+            2
+          )
+        );
+        await page.screenshot({
+          path: path.join(output, `switch-${size}-${font}-directional-endpoints.png`),
+          fullPage: true,
+        });
+      } finally {
+        await page.close();
+      }
+    }
+  }, 30000);
+});
+
 describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
   for (const scope of ['document', 'shadow'] as const)
     for (const font of [16, 32])

@@ -33,6 +33,7 @@ npm install @proto.ui/module-feedback@0.3.0-alpha.2
 ## Related Internal Packages
 
 - `@proto.ui/core`
+- `@proto.ui/module-anatomy`
 - `@proto.ui/module-base`
 - `@proto.ui/module-state`
 

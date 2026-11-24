@@ -1,0 +1,49 @@
+id: V-PROTO-UI-0012
+type: version
+title: Proto UI 0.3.0
+status: draft
+since: 0.3.0
+summary: First stable release on the 0.3 line, promoting the reviewed Base, Shadcn, Brutalist and Lucide prototype surface together with the website and CLI surfaces, and deferring the remaining UI library families to the 0.4 line.
+statement:
+  en: Proto UI 0.3.0 is one stable ecosystem release identity shared exactly by all 47 public @proto.ui packages and the corresponding immutable spec snapshot.
+  zh-CN: Proto UI 0.3.0 是由全部 47 个公开 @proto.ui package 与对应不可变 spec snapshot 精确共享的一次稳定生态发行身份。
+release:
+  version: 0.3.0
+  channel: stable
+  gitTag: v0.3.0
+  npmDistTag: latest
+  packageVersionPolicy: exact
+  packageScope: public-@proto.ui
+dependsOn:
+  decisions:
+    - D-GLOBAL-RELEASE-VERSION-0001
+criteria:
+  - id: V-PROTO-UI-0012-DRAFT-BOUNDARY
+    text:
+      en: The draft entity may govern aligned 0.3.0 package manifests, release assets and catalog references, but it must not claim npm, Git tag, GitHub Release, latest-channel or immutable snapshot evidence.
+      zh-CN: 本 draft 实体可以治理已对齐的 0.3.0 package manifest、发行物料与 catalog 引用，但不得声称已存在 npm、Git tag、GitHub Release、latest channel 或不可变 snapshot 证据。
+  - id: V-PROTO-UI-0012-IDENTITY
+    text:
+      en: Before publication, VERSION, every public @proto.ui package manifest, staged internal dependency versions and the spec snapshot must be prepared at 0.3.0 exactly.
+      zh-CN: 发布前，VERSION、全部公开 @proto.ui package manifest、暂存发布包的内部依赖版本以及 spec snapshot 必须统一准备为 0.3.0。
+  - id: V-PROTO-UI-0012-STABLE-PROMOTION
+    text:
+      en: The stable release may publish only after the reviewed 0.3 scope closure is merged, the full release rehearsal passes from the reviewed preparation diff, and no unresolved release blocker is admitted into the train. The 0.3 published prototype surface is limited to the Base, Shadcn, Brutalist and Lucide families plus the website and CLI surfaces; the remaining UI library families stay deferred to the 0.4 line.
+      zh-CN: 仅当已评审的 0.3 范围闭环已合入、完整 release rehearsal 在已评审准备差异上通过，且不存在被纳入 release train 的未解决发版 blocker 时，才可发布稳定版。0.3 发布的原型表面限定为 Base、Shadcn、Brutalist 与 Lucide 家族以及网站与 CLI 表面；其余 UI library 家族顺延至 0.4 线。
+  - id: V-PROTO-UI-0012-REGISTRY-READINESS
+    text:
+      en: Publication requires every public package identity to pass the existing registry-readiness policy. Four identities introduced by the 0.3 line still have no registry bootstrap, so preparing this version neither creates package identities nor changes registry tags.
+      zh-CN: 真实发布要求全部公开 package identity 通过既有 registry-readiness policy。0.3 线引入的四个 identity 仍缺少 registry bootstrap，准备本版本既不创建 package identity，也不改变 registry tag。
+  - id: V-PROTO-UI-0012-PUBLICATION
+    text:
+      en: This entity may become active only after all 47 npm packages exist at 0.3.0, their latest tags point to it, the v0.3.0 Git tag resolves to the publication commit, and immutable snapshot evidence exists. Stable 0.2.0 retains its independent release identity.
+      zh-CN: 仅当全部 47 个 npm package 均存在 0.3.0、各自 latest tag 均指向该版本、v0.3.0 Git tag 解析到发布 commit，且不可变 snapshot 证据存在后，本实体才可转为 active。Stable 0.2.0 保留其独立发行身份。
+sources:
+  - path: internal/releases/0.3.0/package-bom.json
+  - path: internal/releases/0.3.0/release-notes.md
+  - path: internal/releases/0.3.0/release-notes.zh-CN.md
+  - path: internal/records/2026-11-24-0.3.0-release-prep.zh-CN.md
+openQuestions: []
+revisions:
+  - version: 0.3.0
+    change: introduced

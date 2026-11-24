@@ -7,6 +7,11 @@ lifecycleRationale:
   en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Accordion, Collapsible, Carousel, Resizable, Scroll Area, Progress, Meter, Label, Separator, Message Scroller, Virtual List and scalar Slider profile coverage.
 cases:
+  - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-CAROUSEL-PRESENTATION
+    title: Real Carousel documentation preview preserves navigation, cards and scroll input across Web runtimes
+    covers:
+      - P-SHADCN-CAROUSEL-PRESENTATION
+    expectation: named-icon-navigation-and-card-composition-with-native-scroll
   - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-PROFILES
     title: Profile recipes preserve each family Base owner, slots and derived facts
     covers:
@@ -42,6 +47,17 @@ openQuestions:
       - criterion:P-SHADCN-RESIZABLE#P-SHADCN-RESIZABLE-ADMISSION
       - activation:T-SHADCN-LAYOUT-PROFILES-0001
 implementations:
+  - id: shadcn-carousel-documentation-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-carousel.browser.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-LAYOUT-PROFILES-0001-CASE-CAROUSEL-PRESENTATION
+    exercises:
+      - P-SHADCN-CAROUSEL
+    notes:
+      - Real documentation preview, four Web runtimes, desktop and narrow viewports, named icon controls, Card geometry and keyboard/click scrolling. Does not establish non-Web or assistive-technology acceptance.
   - id: shadcn-layout-profiles-r91
     kind: module-test
     status: planned

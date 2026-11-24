@@ -9068,19 +9068,19 @@
     },
     {
       "ID": "www.docs.code-panel-scroll",
-      "Path": "apps/www/src/components/CodeFileBrowser.astro`, `apps/www/src/components/code-file-browser-client.ts`, `apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro`, `apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
-      "User job": "Browse files and read long highlighted source in bounded file panels and the RuntimeBox footer",
-      "Current owner": "Website CodeFileBrowser and CodePanel own frame dimensions, source and enhancement lifetime; public Shadcn WC Scroll Area owns the viewport and tracks; Tree retains file semantics",
+      "Path": "apps/www/src/components/PrototypePreviewer/CodeScrollArea.astro`, `apps/www/src/components/PrototypePreviewer/code-scroll-area-client.ts",
+      "User job": "Read long highlighted source in the generated file pane and RuntimeBox footer",
+      "Current owner": "Website CodePanel owns source and enhancement lifetime; public Shadcn WC Scroll Area owns the viewport and tracks",
       "Target class": "site-composition",
       "Proto UI chain": "P-SHADCN-SCROLL-AREA`, `P-SHADCN-SCROLL-AREA-VIEWPORT`, `P-SHADCN-SCROLL-AREA-SCROLLBAR`, `P-SHADCN-SCROLL-AREA-THUMB` over Base scroll anatomy and `HC-SCROLL-SURFACE-0001",
       "Lifecycle": "Scroll Area and Scroll Surface Host Capability remain draft; catalog status: `P-SHADCN-SCROLL-AREA=draft`; `P-SHADCN-SCROLL-AREA-VIEWPORT=draft`; `P-SHADCN-SCROLL-AREA-SCROLLBAR=draft`; `P-SHADCN-SCROLL-AREA-THUMB=draft`; `HC-SCROLL-SURFACE-0001=draft",
-      "WC host and SSR/no-JS strategy": "WC: existing Previewer registry supplies real anatomy for the tree and source; SSR: labelled tree links and semantic pre/code; no-JS: native file navigation and all source remain readable",
+      "WC host and SSR/no-JS strategy": "WC: existing Previewer registry supplies real anatomy; SSR: labelled source wrapper and semantic pre/code; no-JS: native keyboard-focusable pre remains readable",
       "Dependency and owner": "[#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) consumer verification; owners: Scroll/A11y domains and website documentation",
       "Difficulty": "F5",
       "Milestone": "M0 / S10",
       "State": "blocked",
-      "Evidence": "Reviewed source shares the lazy WC anatomy across the file tree, source pane and RuntimeBox; file panels have constrained heights and transfer tree scroll ownership to the admitted viewport. Original source and Copy remain separate. No new raw package edge.",
-      "Escape or exemption": "Native tree scrolling and pre remain the fallback before or without enhancement; failed Tree admission reveals all linked source; no new raw-import exception",
+      "Evidence": "Two existing code consumers share one WC viewport while retaining the original source and Copy. Three relative registry imports, no new raw package edge.",
+      "Escape or exemption": "Native pre remains the accessible fallback before or without enhancement; no new raw-import exception",
       "Re-review or removal issue": "[#1323](https://github.com/Proto-UI/Proto-UI/issues/1323) retains cross-browser wheel, keys, drag, remount and clipboard evidence",
       "program": "website",
       "source": "internal/website/self-hosting-coverage-matrix.md",
@@ -26864,20 +26864,20 @@
   "candidateSource": {
     "kind": "candidate",
     "baseMain": "25c3d0731e39003d87f541afc5e1a294a9d95568",
-    "revision": "2f05b2908915cd6c22966c953a596002d821d79d",
-    "sourceBindingsObject": "2f05b2908915cd6c22966c953a596002d821d79d",
+    "revision": "d52a6a69df1c1a03d8579d9f5839d252492c515b",
+    "sourceBindingsObject": "d52a6a69df1c1a03d8579d9f5839d252492c515b",
     "sourceObjectProof": {
       "objectType": "commit",
-      "rootTree": "ff27e2dce98ca350e55af5055416ed43d1c95faf",
-      "commitBase64": "dHJlZSBmZjI3ZTJkY2U5OGNhMzUwZTU1YWY1MDU1NDE2ZWQ0M2QxYzk1ZmFmCnBhcmVudCA5YzhiOGIwNzA3MGRhZDkyZjE5ZjMyNDJhODEyNDE0MjAwZWEyYzAzCmF1dGhvciBjeWppbi15bCA8Y2hlbnllamluMjAwNEBmb3htYWlsLmNvbT4gMTc5NTUyNjEyMyArMDgwMApjb21taXR0ZXIgY3lqaW4teWwgPGNoZW55ZWppbjIwMDRAZm94bWFpbC5jb20+IDE3OTU1MjYxMjMgKzA4MDAKCmZpeCh3d3cpOiBjb25zdHJhaW4gZmlsZSBicm93c2VyIHBhbmVscyBhbmQgcmV1c2UgU2Nyb2xsQXJlYQoKR2l2ZSBkZXNrdG9wIGFuZCBuYXJyb3cgZmlsZSBicm93c2VycyBzdGFibGUgcGFuZWwgZGltZW5zaW9ucywgd2l0aCBpbmRlcGVuZGVudApzY3JvbGxpbmcgZm9yIHRoZSBmaWxlIHRyZWUgYW5kIHRoZSBzZWxlY3RlZCBzb3VyY2UuIFJldXNlIHRoZSBwdWJsaWMgU2hhZGNuClNjcm9sbEFyZWEgYW5hdG9teSBmb3IgZmlsZSBuYXZpZ2F0aW9uIGFuZCBwcmVzZXJ2ZSBpdHMgbmF0aXZlIGZhbGxiYWNrLApmb2N1c2VkIGNvbnRlbnQsIHNlbGVjdGVkIHNvdXJjZSwgYW5kIHNjcm9sbCBvd25lcnNoaXAgZHVyaW5nIGVuaGFuY2VtZW50LgoKQ292ZXIgaGVpZ2h0IHN0YWJpbGl0eSwgaW5kZXBlbmRlbnQgc2Nyb2xsaW5nLCBuby1KYXZhU2NyaXB0IHJlYWRhYmlsaXR5LApmb2N1c2VkIGZhbGxiYWNrIHJldHJ5LCBhbmQgbG9jYWwga2V5Ym9hcmQgZm9jdXMgcmV2ZWFsLiBSZW5ldyBvbmx5IHRoZSB0aHJlZQpyZXZpZXdlZCB3ZWJzaXRlIGNvbnN1bWVyIHNvdXJjZSBiaW5kaW5ncy4KCkFnZW50LWFzc2lzdGVkIGNoYW5nZTogZ2VuZXJhdGVkIHdpdGggQ2hhdEdQVCBmcm9tIHRoZSBleGlzdGluZyBQcm90by1VSQpyZXBvc2l0b3J5IGFuZCB0aGUgdXNlcidzIHNjcmVlbnNob3QvcmVxdWVzdC4gTm8gdGhpcmQtcGFydHkgc291cmNlIHdhcyBjb3BpZWQuCgpTaWduZWQtb2ZmLWJ5OiBjeWppbi15bCA8Y2hlbnllamluMjAwNEBmb3htYWlsLmNvbT4K",
+      "rootTree": "b906f877d6c3ee54c6732416290dee5a984a6a6d",
+      "commitBase64": "dHJlZSBiOTA2Zjg3N2Q2YzNlZTU0YzY3MzI0MTYyOTBkZWU1YTk4NGE2YTZkCnBhcmVudCAzMzdiZTA3Mjg3YmE0NzcwZTEwMjBkMzAwZDdkMjViNDc5MmQwNmRlCmF1dGhvciBDb2RleCA8Y29kZXhAb3BlbmFpLmNvbT4gMTc5NTUyMjUzNSArMDAwMApjb21taXR0ZXIgQ29kZXggPGNvZGV4QG9wZW5haS5jb20+IDE3OTU1MjI1MzUgKzAwMDAKCmNob3JlKGNvdmVyYWdlKTogcmVjb25jaWxlIHRoZSBtZXJnZWQgQWNjb3JkaW9uIHNvdXJjZSBiaW5kaW5nCgpTaWduZWQtb2ZmLWJ5OiBDb2RleCA8Y29kZXhAb3BlbmFpLmNvbT4K",
       "trees": [
         {
-          "sha": "ff27e2dce98ca350e55af5055416ed43d1c95faf",
-          "contentBase64": "NDAwMDAgLmFnZW50cwBQWNvdzIXzGo7Xg0J1o7yPEOguwjEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAmjVmNBbS/vgVw1LzDifh3v2aIBkxMDA3NTUgLmdpdGlnbm9yZQCk3A/UWHmNwaHJNNQiN3Rv9sOpBTEwMDY0NCAuZ2l0a2VlcACLE3iReR/paSeteOZLCq173tCL3DQwMDAwIC5odXNreQAWFsxVM6BapsB0zRFp93ryDJYVzzEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQBMLPrhzlCq7k3AE92hTeMg5E9f0zEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kADcOH7juImzIQvD8dt0tHujxVtoEMTAwNjQ0IENPTlRSSUJVVElORy5tZAA5LMqt+N50ExTujCc98ylmtK85ITEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAHq8bhVwQYHvb5PwplqYJBUssGSgxMDA2NDQgUkVBRE1FLnpoLUNOLm1kACsfr24LODMo7JrL1MUCPUL54I6IMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kABaDnHRfiy+pQ2wOzu8z+ipnHqulMTAwNjQ0IFZFUlNJT04AaQbp7SyLvzTm2RgQ7WR6GU+RwLU0MDAwMCBhcHBzAPiABEWI7Yx0AMPHuOhtYkGb474XNDAwMDAgYmVuY2htYXJrcwDRPYTSThUf9DvIdJua3wg+ctYS0zQwMDAwIGRvY3MAZfHk1qr/zujtvjvzyjGUSQfQBZg0MDAwMCBleHBlcmltZW50cwCOCGvSrSJ8WhUsEkMeKb2v+6dDoTQwMDAwIGludGVybmFsALfnBv4oFV0SGGVzPvH8UYkG5FUUNDAwMDAgbmF0aXZlAGaMt/9BQc0bGn36vWTc0fZ/PgezMTAwNjQ0IHBhY2thZ2UuanNvbgBGb8ltEaxsx/3CBONbP++MfeJd8jQwMDAwIHBhY2thZ2VzAAe+7+vU2TJTnDdv8b3+fxD7tfuKMTAwNjQ0IHBucG0tbG9jay55YW1sAM7buP3mZDmWaNugVQzRqO2lva10MTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAsVE80JCdxJK8CXEY9EAAGN37cd00MDAwMCBzY3JpcHRzAJSULJAZnFtqZDGl0AS0RZ/8eHbLNDAwMDAgc2hhcmVkAF1AfWf7tQx0ubMcwjscXjEC+lA8NDAwMDAgc3BlYwCk1hebPH+7awz2hQrHqZRs0rWaRDEwMDY0NCB0c2NvbmZpZy5qc29uAIzQNmqshOQvkVE8UQPiYySKd3OEMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHMB5q2UGwS2HETBjTIqFvZSyUi8NDAwMDAgdHlwZXMAkivDO/aUnu94+Sa2kucbd5GTY9wxMDA2NDQgdmVyY2VsLmpzb24ACU7v5jxWHjnpFmbKDJJU0p3LwGkxMDA2NDQgdml0ZXN0LmNvbmZpZy50cwAB4Li5hYQnINEiKd8nANCCYlcP2w=="
+          "sha": "b906f877d6c3ee54c6732416290dee5a984a6a6d",
+          "contentBase64": "NDAwMDAgLmFnZW50cwBQWNvdzIXzGo7Xg0J1o7yPEOguwjEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAmjVmNBbS/vgVw1LzDifh3v2aIBkxMDA3NTUgLmdpdGlnbm9yZQCk3A/UWHmNwaHJNNQiN3Rv9sOpBTEwMDY0NCAuZ2l0a2VlcACLE3iReR/paSeteOZLCq173tCL3DQwMDAwIC5odXNreQAWFsxVM6BapsB0zRFp93ryDJYVzzEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQBMLPrhzlCq7k3AE92hTeMg5E9f0zEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kADcOH7juImzIQvD8dt0tHujxVtoEMTAwNjQ0IENPTlRSSUJVVElORy5tZAA5LMqt+N50ExTujCc98ylmtK85ITEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAHq8bhVwQYHvb5PwplqYJBUssGSgxMDA2NDQgUkVBRE1FLnpoLUNOLm1kACsfr24LODMo7JrL1MUCPUL54I6IMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kABaDnHRfiy+pQ2wOzu8z+ipnHqulMTAwNjQ0IFZFUlNJT04AaQbp7SyLvzTm2RgQ7WR6GU+RwLU0MDAwMCBhcHBzAJOuX+2M36+uKJXMNA5Ali7CJVKMNDAwMDAgYmVuY2htYXJrcwDRPYTSThUf9DvIdJua3wg+ctYS0zQwMDAwIGRvY3MAZfHk1qr/zujtvjvzyjGUSQfQBZg0MDAwMCBleHBlcmltZW50cwCOCGvSrSJ8WhUsEkMeKb2v+6dDoTQwMDAwIGludGVybmFsAM1RMfZWeJogi+FCGs/7CU+fsNdZNDAwMDAgbmF0aXZlAErMGr7pe+AafzY2BwTQ8G7t8mGoMTAwNjQ0IHBhY2thZ2UuanNvbgBGb8ltEaxsx/3CBONbP++MfeJd8jQwMDAwIHBhY2thZ2VzAI2u3AuDCp/7fQooNJsVnGCWLrAnMTAwNjQ0IHBucG0tbG9jay55YW1sAM7buP3mZDmWaNugVQzRqO2lva10MTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAsVE80JCdxJK8CXEY9EAAGN37cd00MDAwMCBzY3JpcHRzAJSULJAZnFtqZDGl0AS0RZ/8eHbLNDAwMDAgc2hhcmVkAF1AfWf7tQx0ubMcwjscXjEC+lA8NDAwMDAgc3BlYwCk1hebPH+7awz2hQrHqZRs0rWaRDEwMDY0NCB0c2NvbmZpZy5qc29uAIzQNmqshOQvkVE8UQPiYySKd3OEMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHMB5q2UGwS2HETBjTIqFvZSyUi8NDAwMDAgdHlwZXMAkivDO/aUnu94+Sa2kucbd5GTY9wxMDA2NDQgdmVyY2VsLmpzb24ACU7v5jxWHjnpFmbKDJJU0p3LwGkxMDA2NDQgdml0ZXN0LmNvbmZpZy50cwAB4Li5hYQnINEiKd8nANCCYlcP2w=="
         },
         {
-          "sha": "b7e706fe28155d121865733ef1fc518906e45514",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACvHjjanzoWQ2eVa/39ruAT/LtldDQwMDAwIGFnZW50LWhhcm5lc3MANmJBiY5O5hCpTNXkzz0B743wFmM0MDAwMCBhZ2VudC1vcGVyYXRpb25zAMTDnpFTZRZKStGa7G8DVFLdYMI6NDAwMDAgYXV0b25vbW91cy1tYWludGVuYW5jZQBB63B1TPKVnhR8GYZAzSqnX9zqdTQwMDAwIGJhc2VsaW5lcwDcCnamgEyJQImmmPeDZxhH2qIGPDQwMDAwIGNvbXBpbGVyAHanWbkSDJ/hfJyogOU667v9sLr5NDAwMDAgY29udHJhY3RzAFxHfHOIC1hOl+6+YiryNAReH1GpNDAwMDAgY292ZXJhZ2UtbWF0cmljZXMAJ5oP/dxvRQgH7F05QSyZLLSy11M0MDAwMCBmaXh0dXJlcwD1OgxnUCdqemygRBZkRdOBSl7tHTQwMDAwIGdvdmVybmFuY2UAsDrBPIdAqialWhRIMHAFgdz2FDc0MDAwMCBpc3N1ZXMAuE1YBuw7/U/e7wdkrqAJtFsrAPw0MDAwMCBtb2RlbHMAslv8WXJ4ULBUAHzbsu4H3bbJaUs0MDAwMCByZWNvcmRzAOoeyhC9qnZkZrpdlxI1H2O4Wc97NDAwMDAgcmVsZWFzZXMAWBkDx3jKi8h4vFYtbAAS0Pa8vTk0MDAwMCB0dXRvcmlhbAB8J2XnDXylD48vhXnq1AYkYHPX1TQwMDAwIHdlYnNpdGUABntnph3Liy/JGPv1Sc+RU2FtuLA="
+          "sha": "cd5131f656789a208be1421acffb094f9fb0d759",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACvHjjanzoWQ2eVa/39ruAT/LtldDQwMDAwIGFnZW50LWhhcm5lc3MANmJBiY5O5hCpTNXkzz0B743wFmM0MDAwMCBhZ2VudC1vcGVyYXRpb25zAMTDnpFTZRZKStGa7G8DVFLdYMI6NDAwMDAgYXV0b25vbW91cy1tYWludGVuYW5jZQBB63B1TPKVnhR8GYZAzSqnX9zqdTQwMDAwIGJhc2VsaW5lcwDcCnamgEyJQImmmPeDZxhH2qIGPDQwMDAwIGNvbXBpbGVyAHanWbkSDJ/hfJyogOU667v9sLr5NDAwMDAgY29udHJhY3RzAFxHfHOIC1hOl+6+YiryNAReH1GpNDAwMDAgY292ZXJhZ2UtbWF0cmljZXMAXGUL+hQLoNxHjEUUm5DinRzQ7HA0MDAwMCBmaXh0dXJlcwD1OgxnUCdqemygRBZkRdOBSl7tHTQwMDAwIGdvdmVybmFuY2UAsDrBPIdAqialWhRIMHAFgdz2FDc0MDAwMCBpc3N1ZXMAuE1YBuw7/U/e7wdkrqAJtFsrAPw0MDAwMCBtb2RlbHMAslv8WXJ4ULBUAHzbsu4H3bbJaUs0MDAwMCByZWNvcmRzAEmqoEcssUCuABeAVHHv/POuSaanNDAwMDAgcmVsZWFzZXMAWBkDx3jKi8h4vFYtbAAS0Pa8vTk0MDAwMCB0dXRvcmlhbAB8J2XnDXylD48vhXnq1AYkYHPX1TQwMDAwIHdlYnNpdGUASrTFnG8KMtQaBtOaEyCNSjPO59k="
         },
         {
           "sha": "366241898e4ee610a94cd5e4cf3d01ef8df01663",
@@ -26912,12 +26912,12 @@
           "contentBase64": "MTAwNjQ0IHN0eWxlLWx1bWEuY3NzAIkfu24uTOt8eGXXeCGmRyiEOTsHMTAwNjQ0IHN0eWxlLWx5cmEuY3NzAAU0LyaMhs8Z00Pmg+spulXjn9FVMTAwNjQ0IHN0eWxlLW1haWEuY3NzAO0TxocaC9YWj3FrUvChruFakD7cMTAwNjQ0IHN0eWxlLW1pcmEuY3NzAB9rnv43ALzGQXwvpcCawkEeLwlEMTAwNjQ0IHN0eWxlLW5vdmEuY3NzACkyBLK/CN39htvEm3XcR0nNITXtMTAwNjQ0IHN0eWxlLXJoZWEuY3NzAJS7yip/eIRefPvP9o+49TXjhIqYMTAwNjQ0IHN0eWxlLXNlcmEuY3NzAG+ywSiU4CZ5c/7+mixfSWpKRORPMTAwNjQ0IHN0eWxlLXZlZ2EuY3NzAJ8Ds8bcWoA9uWOoF0PUfVtfj5/g"
         },
         {
-          "sha": "067b67a61dcb8b2fc918fbf549cf9153616db8b0",
-          "contentBase64": "MTAwNjQ0IHNlbGYtaG9zdGluZy1jb3ZlcmFnZS1tYXRyaXgubWQA0ErDrPjle4rQ273VxXG2SboEoyw="
+          "sha": "4ab4c59c6f0a32d41a06d39a13208d4a33cee7d9",
+          "contentBase64": "MTAwNjQ0IHNlbGYtaG9zdGluZy1jb3ZlcmFnZS1tYXRyaXgubWQA4OoBwrgq6V2xoZH45IzWbNbi3Lc="
         },
         {
-          "sha": "07beefebd4d932539c376ff1bdfe7f10fbb5fb8a",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZABP7tnmVoFUwKP1fSY4S2+b9muc1jQwMDAwIGFkYXB0ZXJzAHN7fOsjx/KLMvyiitNoogZ1NRzwNDAwMDAgY2xpADm7RZdWSjXzHNB55FZPFUerrQyINDAwMDAgY29tcGlsZXIA1bayHzCF6reELhocJS0a7Vyi9H80MDAwMCBjb21wb3NpdGlvbnMA3njYlgi5mvlXVHfzBXC8HPFMOG00MDAwMCBjb3JlAGzxwQ+55k2Rmeg7uFNVgJuxGuZuNDAwMDAgaG9va3MAxchxB3n415ELNUhzzTRri1khvzI0MDAwMCBob3N0LXByb3RvY29sANkJaBI73Y1qKc2ZBzOo+1dKriL1NDAwMDAgbW9kdWxlcwCeH5yFqjjPwwVNal3QhIXlw/EDSTQwMDAwIHByb3RvdHlwZXMAlyOSm7hJg0jTx7/98dtrrP5w/Fg0MDAwMCBydW50aW1lAL1akib8cpcHFqFQ6M6Fz/rIxgk0NDAwMDAgc3BlYwDeui9jYf3SVjcbfivVmwtLqjohnDQwMDAwIHR5cGVzAHfbdJ4jzTaPSDOotjN5ba1l7zVwNDAwMDAgd2ViLWNvbmZvcm1hbmNlAA/WnCEvVQKg0q6FTrnL/60srIg6"
+          "sha": "8daedc0b830a9ffb7d0a28349b159c60962eb027",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZABP7tnmVoFUwKP1fSY4S2+b9muc1jQwMDAwIGFkYXB0ZXJzAHN7fOsjx/KLMvyiitNoogZ1NRzwNDAwMDAgY2xpAGV13HJ+BnJzXTmHeEg4/bm0zmSFNDAwMDAgY29tcGlsZXIA1bayHzCF6reELhocJS0a7Vyi9H80MDAwMCBjb21wb3NpdGlvbnMA3njYlgi5mvlXVHfzBXC8HPFMOG00MDAwMCBjb3JlAGzxwQ+55k2Rmeg7uFNVgJuxGuZuNDAwMDAgaG9va3MAxchxB3n415ELNUhzzTRri1khvzI0MDAwMCBob3N0LXByb3RvY29sANkJaBI73Y1qKc2ZBzOo+1dKriL1NDAwMDAgbW9kdWxlcwCZFiGijLkCabIFnynm54UjPpZ32jQwMDAwIHByb3RvdHlwZXMAlyOSm7hJg0jTx7/98dtrrP5w/Fg0MDAwMCBydW50aW1lALBKF5Ltv6m86hduF9VXVFurLwR7NDAwMDAgc3BlYwDeui9jYf3SVjcbfivVmwtLqjohnDQwMDAwIHR5cGVzAHfbdJ4jzTaPSDOotjN5ba1l7zVwNDAwMDAgd2ViLWNvbmZvcm1hbmNlAA/WnCEvVQKg0q6FTrnL/60srIg6"
         },
         {
           "sha": "9723929bb8498348d3c7bffdf1db6bacfe70fc58",
@@ -28232,7 +28232,7 @@
       },
       {
         "path": "internal/website/self-hosting-coverage-matrix.md",
-        "sha256": "858e37be3342e457be8d8258c7cf334c238d66aee4f713a837dbf777873225d3"
+        "sha256": "cb14c96b74d35697bf451e0cf7b1e24ca3fb1d9efe3b40acf229f15b7d07e824"
       },
       {
         "path": "packages/prototypes/base/package.json",

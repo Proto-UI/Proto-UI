@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   createAnatomyFamily,
   definePrototype,
@@ -131,9 +131,9 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
     role: 'root' | 'item',
     parent = root,
     subscribe = false,
-    physicalParent = targets.get(parent)!
+    physicalParent = targets.get(parent)!,
+    owner: Owner = { id }
   ) => {
-    const owner: Owner = { id };
     const target = document.createElement(role === 'root' ? 'div' : 'span');
     instrument(target);
     physicalParent.append(target);
@@ -197,6 +197,111 @@ function createDomain(subscriberCount: number, itemCount = 12, shareBridge = fal
 }
 
 describe('Runtime Anatomy synchronous order fanout cost', () => {
+  for (const source of ['sync', 'notify'] as const) {
+    it(`${source}: repeated comparison paths avoid pair-map lookups without skipping host reads`, () => {
+      const measure = (subscribers: number) => {
+        const domain = createDomain(subscribers, 64, true);
+        const order = domain.items.map((_, index) => domain.items[(index * 37) % 64]!);
+        for (const owner of order) domain.element.append(domain.targets.get(owner)!);
+        domain[source]();
+        domain.reset();
+        const targets = new Set(domain.targets.values());
+        const get = vi.spyOn(Map.prototype, 'get');
+        let lookups: number;
+        try {
+          domain[source]();
+          lookups = get.mock.calls.filter(([key]) => targets.has(key)).length;
+        } finally {
+          get.mockRestore();
+        }
+        const reads = [...domain.targetReads.values()].reduce((sum, count) => sum + count, 0);
+        const comparisons = domain.comparisons();
+        expect([...domain.notifications.values()].flat()).toEqual([]);
+        expect(domain.query()).toEqual(order.map((owner) => owner.id));
+        return { lookups, reads, comparisons };
+      };
+      const single = measure(1);
+      const many = measure(16);
+      console.info('Anatomy comparison-path counts', JSON.stringify({ source, single, many }));
+      expect(single.lookups).toBeGreaterThan(0);
+      expect(many.lookups).toBeLessThanOrEqual(single.lookups * 2);
+      // This optimization must not coalesce even repeated host getter calls.
+      expect(many.reads).toBe(single.reads * 16);
+      expect(many.comparisons).toBe(single.comparisons);
+    });
+  }
+
+  for (const change of ['reorder', 'replacement-target', 'replacement-comparator'] as const) {
+    it(`a mounted notification observes an independent domain's live ${change}`, () => {
+      const domain = createDomain(2, 2, true);
+      const mountingRoot = domain.add('mounting-root', 'root');
+      domain.reset();
+      const [first, second] = domain.items;
+      if (change === 'reorder') {
+        domain.element.prepend(domain.targets.get(second!)!);
+      } else if (change === 'replacement-target') {
+        const replacement = document.createElement('span');
+        domain.instrument(replacement);
+        domain.targets.get(second!)!.remove();
+        domain.targets.set(second!, replacement);
+        domain.element.prepend(replacement);
+      } else {
+        for (const owner of [domain.root, ...domain.items]) {
+          const target = domain.targets.get(owner)!;
+          const original = target.compareDocumentPosition.bind(target);
+          target.compareDocumentPosition = (other: Node) => {
+            const result = original(other);
+            return result & 4 ? 2 : result & 2 ? 4 : result;
+          };
+        }
+      }
+
+      // No order-observer or author callback runs before this publication.
+      // An unrelated source does not prove the current host inputs unchanged.
+      domain.add('new-current-item', 'item', mountingRoot);
+
+      const expected = [second!.id, first!.id];
+      for (const item of domain.items) expect(domain.notifications.get(item)).toEqual([expected]);
+      expect(domain.query()).toEqual(expected);
+    });
+  }
+
+  it('a mount callback can reorder an independent domain before later recipients', () => {
+    const domain = createDomain(3, 3, true);
+    const independent = domain.add('independent-root', 'root');
+    const first = domain.add('independent-a', 'item', independent, true);
+    const second = domain.add('independent-b', 'item', independent, true);
+    domain.reset();
+    let immediate: string[] = [];
+    domain.handlers.set(domain.items[0]!, () => {
+      domain.handlers.delete(domain.items[0]!);
+      domain.targets.get(independent)!.prepend(domain.targets.get(second)!);
+      immediate = domain.query(independent);
+    });
+
+    domain.add('new-outer-item', 'item');
+
+    expect(immediate).toEqual(['independent-b', 'independent-a']);
+    expect(domain.notifications.get(first)).toEqual([immediate]);
+    expect(domain.notifications.get(second)).toEqual([immediate]);
+  });
+
+  it('a newly claimed root publishes membership withdrawal from its previous outer domain', () => {
+    const domain = createDomain(2, 2, true);
+    const futureRoot: Owner = { id: 'future-root' };
+    domain.parents.set(futureRoot, domain.root);
+    domain.add('adopted', 'item', futureRoot, false, domain.element);
+    domain.reset();
+
+    domain.add('future-root', 'root', domain.root, false, domain.element, futureRoot);
+
+    expect(domain.query()).toEqual(['item-0', 'item-1']);
+    expect(domain.query(futureRoot)).toEqual(['adopted']);
+    for (const item of domain.items) {
+      expect(domain.notifications.get(item)).toEqual([['item-0', 'item-1']]);
+    }
+  });
+
   for (const source of ['sync', 'notify'] as const) {
     it(`${source}: a stable shuffled domain reuses comparisons while reacquiring current targets`, () => {
       const subscriberCount = 16;

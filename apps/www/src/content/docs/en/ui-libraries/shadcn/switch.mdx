@@ -30,7 +30,7 @@ Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your targ
 
 ### Compositions and optional drag
 
-Switches toggle via click or `Space` by default; pass `draggable={true}` to opt into pointer dragging (supporting both `ltr` and `rtl` directions). The example below pairs Switch with Field `Label`, `Description`, and Choice Cards: clicking the open area of a card toggles the switch while nested links such as “Learn more” keep their own navigation. Highlight styling follows the committed `checked` state, and `disabled` / `readOnly` switches ignore toggle attempts.
+Switches toggle via click or `Space` by default; pass `draggable={true}` to opt into pointer dragging. Set `direction="rtl"` to mirror the thumb's positions and movement in either mode; direction defaults to `ltr` independently of the surrounding document. The example below pairs Switch with Field `Label`, `Description`, and Choice Cards: clicking the open area of a card toggles the switch while nested links such as “Learn more” keep their own navigation. Highlight styling follows the committed `checked` state, and `disabled` / `readOnly` switches ignore toggle attempts.
 
 <PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
 
