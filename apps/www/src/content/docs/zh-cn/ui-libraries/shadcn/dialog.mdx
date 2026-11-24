@@ -12,6 +12,8 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 预览
 
+`P-SHADCN-DIALOG` 及其继承的 `P-BASE-DIALOG` 协议仍处于 **early draft**。以下预览使用 `0.3.0-alpha.2` 工作区源码，覆盖 Web Components、React、Vue 3 与 Vue 2.6。接入应用时请选择匹配的 CLI、适配器和原型版本；待完成的检查见下方“兼容性与无障碍覆盖”。
+
 <div class="dialog-demo-container">
 
 <PrototypePreviewer
@@ -26,9 +28,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 先按[快速开始](../../../start-here/quick-start/)完成初始化并在应用入口引入生成的 `proto-ui-style.css`，然后生成 Dialog 组件：
 
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-dialog" manager="npm" />
+<InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dialog" manager="npm" />
 
-把 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的本地组件封装。命令会从 `@proto.ui/prototypes-shadcn/dialog` 导出完整复合部件，同时提供带默认关闭图标的 `ShadcnDialogContent` 与无默认关闭图标的 `ShadcnDialogContentRaw`。
+已发布的 `0.2.0` CLI 支持 `wc`、`react` 和 `vue`；把 `wc` 替换为 `react` 或 `vue` 可生成对应宿主的组件。命令从 `@proto.ui/prototypes-shadcn/dialog` 生成复合部件，同时提供带默认关闭图标的 `ShadcnDialogContent` 与无默认关闭图标的 `ShadcnDialogContentRaw`。
+
+Vue 2.6（`>=2.6.0 <2.7`）、Rhea 预设以及下文的 Mask 指针默认行为，需要匹配的 `0.3.0-alpha.2` 工作区 CLI、适配器和原型源码。请将这部分工作区预览与上方固定版本的稳定版安装区分开。
 
 ## 用法
 
@@ -60,6 +64,12 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 - 普通对话框可通过 `Escape` 或点击外部遮罩关闭；在 `ShadcnDialogRoot` 上设置 `alert={true}` 会切换为 `role="alertdialog"`，保留 `Escape` 关闭但禁止点击外部关闭（此时建议提供 `Description` 说明核心信息）。
 - 缺少 `Title` 时，可通过 `Root` 的 `a11yLabel` 提供兜底无障碍名称。
 - `Mask` 与 `Content` 会分别在 150 ms 与 200 ms 离场过渡结束后再卸载节点；参与遮罩的 `Mask` 不会在点击时夺走已恢复的焦点。
+
+### 兼容性与无障碍覆盖
+
+[当前 Dialog Content 测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-DIALOG-CONTENT-0001.yaml)记录了已检查的行为与待完成的浏览器验证。四种预览宿主的完整键盘流程、受控拒绝、响应式/主题/语言组合以及安装包集成仍有待验证项。屏幕阅读器行为需要使用应用实际的浏览器与辅助技术组合单独验证。
+
+请组合独立的 Mask 与 Content 部件；当前不支持 upstream 的 `asChild` 和 `modal` 属性。Header 与 Footer 负责布局；应用持有校验与持久化，并决定操作何时成功、何时请求关闭。
 
 ## API
 
