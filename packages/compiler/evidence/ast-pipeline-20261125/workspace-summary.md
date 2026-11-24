@@ -2,7 +2,9 @@
 
 ## Result
 
-Command: `corepack pnpm@10.32.1 -s check:types:workspace`.
+Reproduction command: `corepack pnpm@10.32.1 -w -s check:types:workspace`.
+
+The recorded runs used each checkout's repository root as their working directory. The explicit workspace-root flag preserves that command context when reproducing the check from a package directory.
 
 | Checkout/environment | TypeScript errors | Exit |
 | --- | --: | --: |
