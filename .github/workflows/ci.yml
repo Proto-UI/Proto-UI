@@ -600,9 +600,17 @@ jobs:
     # independent governance job and still blocks the combined Tests gate.
     runs-on: ubuntu-24.04
     # Full general inventory, isolated from the governance chain. Keep the
-    # existing 45m job cap, worker count and every authored test deadline.
-    # Build packages/styles here instead of borrowing another job's outputs.
-    timeout-minutes: 45
+    # worker count and every authored test deadline. Build packages/styles
+    # here instead of borrowing another job's outputs.
+    # 2026-11-24: this job now owns the package build plus the runtime phase,
+    # which the combined lane ran inside 45 minutes before the split. Cycle
+    # 45254336687 (main 0fbb52ef8) reached the runtime phase at 20:21:40Z
+    # after ~23 minutes of prerequisites and gates and was still running when
+    # the job was cancelled at 20:43:23Z, so the runtime phase alone needs
+    # roughly 30-45 minutes and the build adds more. The allowance matches
+    # that measured cost with margin, using the same convention the browser
+    # lane already follows (a 900s shard deadline inside a 20-minute job).
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
