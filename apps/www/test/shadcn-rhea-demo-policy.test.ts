@@ -204,6 +204,86 @@ import w2Demo43 from '../src/content/docs/demo_components/tooltip/demo-shadcn-to
 import w2Demo44 from '../src/content/docs/demo_components/tooltip/demo-shadcn-tooltip-shortcut.demo';
 import w2Demo45 from '../src/content/docs/demo_components/tooltip/demo-shadcn-tooltip-sides.demo';
 import w2MenubarProfilesDemo from '../src/content/docs/demo_components/menubar/demo-shadcn-menubar-profiles.demo';
+import w3Demo0 from '../src/content/docs/demo_components/input/demo-shadcn-input-basic.demo';
+import w3Demo1 from '../src/content/docs/demo_components/input/demo-shadcn-input-disabled.demo';
+import w3Demo2 from '../src/content/docs/demo_components/input/demo-shadcn-input-field.demo';
+import w3Demo3 from '../src/content/docs/demo_components/input/demo-shadcn-input-form.demo';
+import w3Demo4 from '../src/content/docs/demo_components/input/demo-shadcn-input-inline.demo';
+import w3Demo5 from '../src/content/docs/demo_components/input/demo-shadcn-input-invalid.demo';
+import w3Demo6 from '../src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-command.demo';
+import w3Demo7 from '../src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-controlled.demo';
+import w3Demo8 from '../src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-profiles.demo';
+import w3Demo9 from '../src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-rhea.demo';
+import w3Demo10 from '../src/content/docs/demo_components/input-shell/demo-shadcn-input-shell-states.demo';
+import w3Demo11 from '../src/content/docs/demo_components/input-otp/demo-shadcn-input-otp-alphanumeric.demo';
+import w3Demo12 from '../src/content/docs/demo_components/input-otp/demo-shadcn-input-otp-controlled.demo';
+import w3Demo13 from '../src/content/docs/demo_components/input-otp/demo-shadcn-input-otp-disabled.demo';
+import w3Demo14 from '../src/content/docs/demo_components/input-otp/demo-shadcn-input-otp-form.demo';
+import w3Demo15 from '../src/content/docs/demo_components/input-otp/demo-shadcn-input-otp-invalid.demo';
+import w3Demo16 from '../src/content/docs/demo_components/input-otp/demo-shadcn-input-otp-separator.demo';
+import w3Demo17 from '../src/content/docs/demo_components/textarea/demo-shadcn-textarea-button.demo';
+import w3Demo18 from '../src/content/docs/demo_components/textarea/demo-shadcn-textarea-disabled.demo';
+import w3Demo19 from '../src/content/docs/demo_components/textarea/demo-shadcn-textarea-field.demo';
+import w3Demo20 from '../src/content/docs/demo_components/textarea/demo-shadcn-textarea-invalid.demo';
+import w3Demo21 from '../src/content/docs/demo_components/textarea/demo-shadcn-textarea-rtl.demo';
+import w3Demo22 from '../src/content/docs/demo_components/number-field/demo-shadcn-number-field-controlled.demo';
+import w3Demo23 from '../src/content/docs/demo_components/number-field/demo-shadcn-number-field-formatting.demo';
+import w3Demo24 from '../src/content/docs/demo_components/number-field/demo-shadcn-number-field-rtl.demo';
+import w3Demo25 from '../src/content/docs/demo_components/number-field/demo-shadcn-number-field-scrub-nullable.demo';
+import w3Demo26 from '../src/content/docs/demo_components/number-field/demo-shadcn-number-field-states.demo';
+import w3Demo27 from '../src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-controlled.demo';
+import w3Demo28 from '../src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-description.demo';
+import w3Demo29 from '../src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-disabled.demo';
+import w3Demo30 from '../src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-invalid.demo';
+import w3Demo31 from '../src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-rtl.demo';
+import w3Demo32 from '../src/content/docs/demo_components/checkbox/demo-shadcn-checkbox-table.demo';
+import w3Demo33 from '../src/content/docs/demo_components/checkbox-group/demo-shadcn-checkbox-group-basic.demo';
+import w3Demo34 from '../src/content/docs/demo_components/checkbox-group/demo-shadcn-checkbox-group-controlled.demo';
+import w3Demo35 from '../src/content/docs/demo_components/checkbox-group/demo-shadcn-checkbox-group-disabled.demo';
+import w3Demo36 from '../src/content/docs/demo_components/checkbox-group/demo-shadcn-checkbox-group-form.demo';
+import w3Demo37 from '../src/content/docs/demo_components/checkbox-group/demo-shadcn-checkbox-group-horizontal.demo';
+import w3Demo38 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-choice-card.demo';
+import w3Demo39 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-description.demo';
+import w3Demo40 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-disabled.demo';
+import w3Demo41 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-fieldset.demo';
+import w3Demo42 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-invalid.demo';
+import w3Demo43 from '../src/content/docs/demo_components/radio-group/demo-shadcn-radio-group-rtl.demo';
+import w3Demo44 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-choice-card.demo';
+import w3Demo45 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-description.demo';
+import w3Demo46 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-disabled.demo';
+import w3Demo47 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-invalid.demo';
+import w3Demo48 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-rtl.demo';
+import w3Demo49 from '../src/content/docs/demo_components/switch/demo-shadcn-switch-sizes.demo';
+import w3Demo50 from '../src/content/docs/demo_components/select/demo-shadcn-select-align-item.demo';
+import w3Demo51 from '../src/content/docs/demo_components/select/demo-shadcn-select-disabled.demo';
+import w3Demo52 from '../src/content/docs/demo_components/select/demo-shadcn-select-rtl.demo';
+import w3Demo53 from '../src/content/docs/demo_components/select/demo-shadcn-select-scrollable.demo';
+import w3Demo54 from '../src/content/docs/demo_components/select/demo-shadcn-select-sizes.demo';
+import w3Demo55 from '../src/content/docs/demo_components/combobox/demo-shadcn-combobox-controlled.demo';
+import w3Demo56 from '../src/content/docs/demo_components/combobox/demo-shadcn-combobox-disabled.demo';
+import w3Demo57 from '../src/content/docs/demo_components/combobox/demo-shadcn-combobox-invalid.demo';
+import w3Demo58 from '../src/content/docs/demo_components/combobox/demo-shadcn-combobox-keywords.demo';
+import w3Demo59 from '../src/content/docs/demo_components/autocomplete/demo-shadcn-autocomplete-controlled.demo';
+import w3Demo60 from '../src/content/docs/demo_components/autocomplete/demo-shadcn-autocomplete-disabled.demo';
+import w3Demo61 from '../src/content/docs/demo_components/autocomplete/demo-shadcn-autocomplete-free-text.demo';
+import w3Demo62 from '../src/content/docs/demo_components/autocomplete/demo-shadcn-autocomplete-keywords.demo';
+import w3Demo63 from '../src/content/docs/demo_components/slider/demo-shadcn-slider-controlled.demo';
+import w3Demo64 from '../src/content/docs/demo_components/slider/demo-shadcn-slider-disabled.demo';
+import w3Demo65 from '../src/content/docs/demo_components/slider/demo-shadcn-slider-multiple.demo';
+import w3Demo66 from '../src/content/docs/demo_components/slider/demo-shadcn-slider-rtl.demo';
+import w3Demo67 from '../src/content/docs/demo_components/slider/demo-shadcn-slider-vertical.demo';
+import w3Demo68 from '../src/content/docs/demo_components/field/demo-shadcn-field-choice.demo';
+import w3Demo69 from '../src/content/docs/demo_components/field/demo-shadcn-field-input.demo';
+import w3Demo70 from '../src/content/docs/demo_components/field/demo-shadcn-field-select.demo';
+import w3Demo71 from '../src/content/docs/demo_components/field/demo-shadcn-field-textarea.demo';
+import w3Demo72 from '../src/content/docs/demo_components/field/demo-shadcn-field-validation.demo';
+import w3Demo73 from '../src/content/docs/demo_components/fieldset/demo-shadcn-fieldset-aria-label.demo';
+import w3Demo74 from '../src/content/docs/demo_components/fieldset/demo-shadcn-fieldset-legend-label.demo';
+import w3Demo75 from '../src/content/docs/demo_components/fieldset/demo-shadcn-fieldset-nested-disabled.demo';
+import w3Demo76 from '../src/content/docs/demo_components/fieldset/demo-shadcn-fieldset-radio-group.demo';
+import w3Demo77 from '../src/content/docs/demo_components/form/demo-shadcn-form-actions.demo';
+import w3Demo78 from '../src/content/docs/demo_components/form/demo-shadcn-form-disabled.demo';
+import w3Demo79 from '../src/content/docs/demo_components/form/demo-shadcn-form-profile.demo';
 
 const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-button', demo0],
@@ -381,9 +461,98 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-tooltip-disabled', w2Demo43],
   ['demo-shadcn-tooltip-shortcut', w2Demo44],
   ['demo-shadcn-tooltip-sides', w2Demo45],
+  ['demo-shadcn-input-shell', inputShellDemo],
+  ['demo-shadcn-input-basic', w3Demo0],
+  ['demo-shadcn-input-disabled', w3Demo1],
+  ['demo-shadcn-input-field', w3Demo2],
+  ['demo-shadcn-input-form', w3Demo3],
+  ['demo-shadcn-input-inline', w3Demo4],
+  ['demo-shadcn-input-invalid', w3Demo5],
+  ['demo-shadcn-input-shell-command', w3Demo6],
+  ['demo-shadcn-input-shell-controlled', w3Demo7],
+  ['demo-shadcn-input-shell-rhea', w3Demo9],
+  ['demo-shadcn-input-shell-states', w3Demo10],
+  ['demo-shadcn-input-otp-alphanumeric', w3Demo11],
+  ['demo-shadcn-input-otp-controlled', w3Demo12],
+  ['demo-shadcn-input-otp-disabled', w3Demo13],
+  ['demo-shadcn-input-otp-form', w3Demo14],
+  ['demo-shadcn-input-otp-invalid', w3Demo15],
+  ['demo-shadcn-input-otp-separator', w3Demo16],
+  ['demo-shadcn-textarea-button', w3Demo17],
+  ['demo-shadcn-textarea-disabled', w3Demo18],
+  ['demo-shadcn-textarea-field', w3Demo19],
+  ['demo-shadcn-textarea-invalid', w3Demo20],
+  ['demo-shadcn-textarea-rtl', w3Demo21],
+  ['demo-shadcn-number-field-controlled', w3Demo22],
+  ['demo-shadcn-number-field-formatting', w3Demo23],
+  ['demo-shadcn-number-field-rtl', w3Demo24],
+  ['demo-shadcn-number-field-scrub-nullable', w3Demo25],
+  ['demo-shadcn-number-field-states', w3Demo26],
+  ['demo-shadcn-checkbox-controlled', w3Demo27],
+  ['demo-shadcn-checkbox-description', w3Demo28],
+  ['demo-shadcn-checkbox-disabled', w3Demo29],
+  ['demo-shadcn-checkbox-invalid', w3Demo30],
+  ['demo-shadcn-checkbox-rtl', w3Demo31],
+  ['demo-shadcn-checkbox-table', w3Demo32],
+  ['demo-shadcn-checkbox-group-basic', w3Demo33],
+  ['demo-shadcn-checkbox-group-controlled', w3Demo34],
+  ['demo-shadcn-checkbox-group-disabled', w3Demo35],
+  ['demo-shadcn-checkbox-group-form', w3Demo36],
+  ['demo-shadcn-checkbox-group-horizontal', w3Demo37],
+  ['demo-shadcn-radio-group-choice-card', w3Demo38],
+  ['demo-shadcn-radio-group-description', w3Demo39],
+  ['demo-shadcn-radio-group-disabled', w3Demo40],
+  ['demo-shadcn-radio-group-fieldset', w3Demo41],
+  ['demo-shadcn-radio-group-invalid', w3Demo42],
+  ['demo-shadcn-radio-group-rtl', w3Demo43],
+  ['demo-shadcn-switch-choice-card', w3Demo44],
+  ['demo-shadcn-switch-description', w3Demo45],
+  ['demo-shadcn-switch-disabled', w3Demo46],
+  ['demo-shadcn-switch-invalid', w3Demo47],
+  ['demo-shadcn-switch-rtl', w3Demo48],
+  ['demo-shadcn-switch-sizes', w3Demo49],
+  ['demo-shadcn-select-align-item', w3Demo50],
+  ['demo-shadcn-select-disabled', w3Demo51],
+  ['demo-shadcn-select-rtl', w3Demo52],
+  ['demo-shadcn-select-scrollable', w3Demo53],
+  ['demo-shadcn-select-sizes', w3Demo54],
+  ['demo-shadcn-combobox-controlled', w3Demo55],
+  ['demo-shadcn-combobox-disabled', w3Demo56],
+  ['demo-shadcn-combobox-invalid', w3Demo57],
+  ['demo-shadcn-combobox-keywords', w3Demo58],
+  ['demo-shadcn-autocomplete-controlled', w3Demo59],
+  ['demo-shadcn-autocomplete-disabled', w3Demo60],
+  ['demo-shadcn-autocomplete-free-text', w3Demo61],
+  ['demo-shadcn-autocomplete-keywords', w3Demo62],
+  ['demo-shadcn-slider-controlled', w3Demo63],
+  ['demo-shadcn-slider-disabled', w3Demo64],
+  ['demo-shadcn-slider-multiple', w3Demo65],
+  ['demo-shadcn-slider-rtl', w3Demo66],
+  ['demo-shadcn-slider-vertical', w3Demo67],
+  ['demo-shadcn-field-choice', w3Demo68],
+  ['demo-shadcn-field-input', w3Demo69],
+  ['demo-shadcn-field-select', w3Demo70],
+  ['demo-shadcn-field-textarea', w3Demo71],
+  ['demo-shadcn-field-validation', w3Demo72],
+  ['demo-shadcn-fieldset-aria-label', w3Demo73],
+  ['demo-shadcn-fieldset-legend-label', w3Demo74],
+  ['demo-shadcn-fieldset-nested-disabled', w3Demo75],
+  ['demo-shadcn-fieldset-radio-group', w3Demo76],
+  ['demo-shadcn-form-actions', w3Demo77],
+  ['demo-shadcn-form-disabled', w3Demo78],
+  ['demo-shadcn-form-profile', w3Demo79],
 ];
 
 const profileExamples = [
+  {
+    id: 'demo-shadcn-input-shell-profiles',
+    page: 'input-shell.mdx',
+    demo: w3Demo8,
+    profiles: [
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-style-scope', 'rhea'],
+    ],
+  },
   {
     id: 'demo-shadcn-menubar-profiles',
     page: 'menubar.mdx',
@@ -417,12 +586,6 @@ const profileExamples = [
       ['shadcn-style-scope', 'rhea'],
       ['shadcn-style-scope', 'rhea'],
     ],
-  },
-  {
-    id: 'demo-shadcn-input-shell',
-    page: 'input-shell.mdx',
-    demo: inputShellDemo,
-    profiles: [],
   },
   {
     id: 'demo-shadcn-popover-navigation',
@@ -532,7 +695,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(183);
+    expect(expected).toHaveLength(263);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

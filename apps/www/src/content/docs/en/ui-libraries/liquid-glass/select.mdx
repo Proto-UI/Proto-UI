@@ -4,8 +4,10 @@ description: 'An eleven-part Liquid Glass single-select dropdown with controlled
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Select builds on [Base Select](/en/ui-libraries/base/select/) with eleven composable parts—Root, Trigger, Value, Content, Surface, Viewport, Item, ItemText, Group, Label, and Separator—providing controlled or uncontrolled single selection and a glass popup surface.
+Liquid Glass Select builds on [Base Select](/en/ui-libraries/base/select/) with eleven composable parts. Glass material requests belong exclusively to `Trigger` and open `Surface` with concentric corner geometry and high-contrast opaque fallbacks, never stacking glass on glass.
 
 ## Preview
 
@@ -14,14 +16,11 @@ Liquid Glass Select builds on [Base Select](/en/ui-libraries/base/select/) with 
   demoId="demo-liquid-glass-select"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
-
-The preview demonstrates uncontrolled selection, a disabled trigger, controlled confirmation via **Accept selection**, and RTL long-label wrapping. The toolbar uses this family's Select to switch among WC, React, Vue, and Vue 2.
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source. Import all eleven parts from `@proto.ui/prototypes-liquid-glass/select`:
 
 ```ts
 import {
@@ -41,28 +40,151 @@ import {
 
 ## Usage
 
-### Composition and part roles
+```tsx
+import {
+  LiquidGlassSelectContent,
+  LiquidGlassSelectGroup,
+  LiquidGlassSelectItem,
+  LiquidGlassSelectItemText,
+  LiquidGlassSelectLabel,
+  LiquidGlassSelectRoot,
+  LiquidGlassSelectSurface,
+  LiquidGlassSelectTrigger,
+  LiquidGlassSelectValue,
+  LiquidGlassSelectViewport,
+} from '../proto-ui/components/react';
 
-Compose the popup as `Content > Surface > Viewport > Item > ItemText`, placing `Group` (with `Label` and `Item` children) and `Separator` inside `Viewport` when grouping options:
+export function FruitSelect() {
+  return (
+    <LiquidGlassSelectRoot defaultValue="apple">
+      <LiquidGlassSelectTrigger className="w-48" accessibleLabel="Fruit selector">
+        <LiquidGlassSelectValue placeholder="Select a fruit" />
+      </LiquidGlassSelectTrigger>
+      <LiquidGlassSelectContent>
+        <LiquidGlassSelectSurface>
+          <LiquidGlassSelectViewport>
+            <LiquidGlassSelectGroup>
+              <LiquidGlassSelectLabel>Fruits</LiquidGlassSelectLabel>
+              <LiquidGlassSelectItem value="apple" textValue="Apple">
+                <LiquidGlassSelectItemText>Apple</LiquidGlassSelectItemText>
+              </LiquidGlassSelectItem>
+              <LiquidGlassSelectItem value="banana" textValue="Banana">
+                <LiquidGlassSelectItemText>Banana</LiquidGlassSelectItemText>
+              </LiquidGlassSelectItem>
+            </LiquidGlassSelectGroup>
+          </LiquidGlassSelectViewport>
+        </LiquidGlassSelectSurface>
+      </LiquidGlassSelectContent>
+    </LiquidGlassSelectRoot>
+  );
+}
+```
 
-- **Root**: manages `open`, `value`, selected text, and the option collection; `open` and `value` can be controlled independently.
-- **Trigger & Value**: `Trigger` provides `combobox` semantics—click toggles, Enter/Space opens, and ArrowDown/ArrowUp opens at the selected or first/last enabled item. `Value` resolves selected text, raw value, `placeholder`, or empty content in order.
-- **Content / Surface / Viewport**: `Content` handles portal mounting, collision positioning, and dismissal without painting a surface; `Surface` owns the popup paint and glass material slot; `Viewport` is the scroll container with room so item focus rings are not clipped.
-- **Item / ItemText / Group / Label / Separator**: pointer click, Enter, or Space commits an enabled item (hover and arrow navigation never commit, and disabled items are skipped). Updating the selected item's `textValue` refreshes `Value`. Escape closes and restores Trigger focus; Tab and outside press close.
+### Composition & material principles
 
-### Layout and material
+```text
+SelectRoot
+├── SelectTrigger (liquid-glass slot)
+│   └── SelectValue
+└── SelectContent (portal & placement frame)
+    └── SelectSurface (sole popup liquid-glass slot, rounded-2xl)
+        └── SelectViewport (p-2 scrollport)
+            ├── SelectGroup
+            │   ├── SelectLabel
+            │   └── SelectItem (rounded-lg concentric radius)
+            │       └── SelectItemText
+            └── SelectSeparator
+```
 
-- Long labels wrap and shrink cleanly, popup dimensions stay within available host bounds, and text alignment and trailing indicators follow logical reading direction. Leave outer room around `Trigger` for its focus ring.
-- `Trigger` and open `Surface` request `liquid-glass` optics and automatically fall back to readable opaque styling whenever backdrop, overlap, contrast, or accessibility preferences disallow glass.
-- Select is a single-selection dropdown; for searchable options or free text, use [Combobox](/en/ui-libraries/liquid-glass/combobox/) or [Autocomplete](/en/ui-libraries/liquid-glass/autocomplete/).
+- **Single glass surface & concentric radii**: `Content` owns portal mounting and collision positioning without painting glass. `Surface` is the sole popup material owner (`rounded-2xl` with `p-2` `Viewport` and `rounded-lg` `Item` concentric corners plus a subtle inset specular rim).
+- **Accessibility & preference fallbacks**: Pointer press deformation automatically withdraws when `prefers-reduced-motion: reduce` is active. Disabled controls and items withdraw glass optics and stay legible with semantic foreground fallbacks rather than whole-host opacity.
+- For searchable options or free text, use [Combobox](/en/ui-libraries/liquid-glass/combobox/) or [Autocomplete](/en/ui-libraries/liquid-glass/autocomplete/).
+
+## Examples
+
+### Scrollable
+
+Showcases the glass popup surface over a colorful backdrop with a scrollable grouped timezone list.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-select-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled triggers and disabled items withdraw glass optics while keeping crisp, readable opaque styling.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-select-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Inside a `dir="rtl"` container, text alignment and trailing indicators adapt automatically to logical reading direction.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-select-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Defaults and notes |
-| --- | --- | --- |
-| Root | `open`, `defaultOpen`, `value`, `defaultValue` | Independently controlled or uncontrolled visibility and selection |
-| Root | `disabled`, `closeOnSelect` | Disables interaction / closes automatically after selection |
-| Root | `openChange`, `valueChange` | Visibility and selection proposal events |
-| Value | `placeholder` | Fallback text shown when no option is selected |
-| Content | `position`, `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, `collisionPadding` | Positioning mode (default `'popper'`, also supports `'item-aligned'`) and collision options |
-| Item | `value`, `textValue`, `disabled`, `select` | Option identifier, display text, disabled flag, and selection event |
+### Root / Trigger / Value
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Root.open', type: 'boolean', default: 'undefined' },
+    { name: 'Root.defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'Root.value', type: 'string', default: 'undefined' },
+    { name: 'Root.defaultValue', type: 'string', default: "''" },
+    { name: 'Root.disabled', type: 'boolean', default: 'false' },
+    { name: 'Root.readOnly', type: 'boolean', default: 'false' },
+    { name: 'Root.closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'Root.openChange', type: '(detail) => void', default: '—' },
+    { name: 'Root.valueChange', type: '(detail) => void', default: '—' },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content / Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.position', type: "'popper' | 'item-aligned'", default: "'popper'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '8' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: 'Inherits Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+`Surface`, `Viewport`, `ItemText`, `Group`, `Label`, and `Separator` are structural parts with no additional props.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-SELECT.yaml',
+    'P-LIQUID-GLASS-SELECT-TRIGGER.yaml',
+    'P-LIQUID-GLASS-SELECT-CONTENT.yaml',
+    'P-LIQUID-GLASS-SELECT-ITEM.yaml',
+    'P-BASE-SELECT.yaml',
+  ]}
+/>

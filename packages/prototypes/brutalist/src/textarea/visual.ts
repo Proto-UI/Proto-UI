@@ -13,9 +13,16 @@ export function setupTextareaVisual(
 ) {
   def.feedback.style.use(
     tw(
-      'flex min-h-[80px] w-full resize-y rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans font-medium text-sm text-foreground outline-none selection:bg-main selection:text-main-foreground'
+      'flex min-h-[80px] w-full resize-y rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans font-medium text-sm text-foreground placeholder:text-muted-foreground outline-none selection:bg-main selection:text-main-foreground'
     )
   );
+  def.rule({
+    when: (w) =>
+      invalid
+        ? w.all(w.meta('colorScheme').eq('dark'), w.state(invalid).eq(false))
+        : w.meta('colorScheme').eq('dark'),
+    intent: (i) => i.feedback.style.use(tw('border-foreground')),
+  });
   def.rule({
     when: (w) => w.state(state.focusVisible).eq(true),
     intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
@@ -24,9 +31,11 @@ export function setupTextareaVisual(
     when: (w) => w.state(state.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
   });
-  if (invalid)
+  if (invalid) {
     def.rule({
       when: (w) => w.state(invalid).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-2 border-foreground')),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-2 border-destructive ring-2 ring-destructive/20')),
     });
+  }
 }

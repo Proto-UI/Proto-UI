@@ -1,11 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Checkbox Group'
-description: '支持多项选择、全选联动与表单校验的 Bootstrap 2.3.2 复选框组。'
+description: '支持多项选择、全选联动、行内排布与表单校验的 Bootstrap 2.3.2 复选框组。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Checkbox Group 用于管理一组关联的复选框值，支持全选（含半选状态）以及与 `Field`、`Form` 的直接集成。
+Bootstrap 2.3.2 Checkbox Group 用于管理一组关联的复选框值，保留经典 14px/20px 排版、内阴影边框与主色渐变选中态，并支持全选/半选以及与 `Field` / `Form` 的直接集成。
 
 ## 预览
 
@@ -13,7 +15,6 @@ Bootstrap 2.3.2 Checkbox Group 用于管理一组关联的复选框值，支持�
   demoId="demo-bootstrap-2-3-2-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -22,19 +23,115 @@ Bootstrap 2.3.2 Checkbox Group 用于管理一组关联的复选框值，支持�
 
 ## 用法
 
-由 `Root`、`Item` 和可选的 `All` 组成：
+```tsx
+import {
+  Bootstrap232CheckboxGroupRoot,
+  Bootstrap232CheckboxGroupAll,
+  Bootstrap232CheckboxGroupItem,
+} from '../proto-ui/components/react';
 
-- **值管理**：`Root` 通过 `value` / `defaultValue` 管理字符串数组，受控模式下发出 `valueChange` 请求而不直接修改外部值；调用 `getValue()` 返回当前数组副本。重复 `value` 的选项会被忽略。
-- **全选联动**：`All` 自动汇总所有未禁用选项的选中状态（勾选、半选横线或未选），点击时只切换可用项，保留已禁用项的既有选中状态。
-- **键盘与无障碍**：每个选项独立参与 Tab 顺序，按 `Space` 切换选中（`Enter` 不触发切换）。指示图标使用勾选/横线/空框清晰表达状态，不仅依赖颜色区分。
-- **表单集成**：置于 `Field` 或 `FormField` 内时，自动支持标签点击激活、必填校验、`Form` 序列化与重置。
+export function Example() {
+  return (
+    <Bootstrap232CheckboxGroupRoot defaultValue={['email']} ariaLabel="Notification channels">
+      <Bootstrap232CheckboxGroupAll>All notifications</Bootstrap232CheckboxGroupAll>
+      <Bootstrap232CheckboxGroupItem value="email">Email updates</Bootstrap232CheckboxGroupItem>
+      <Bootstrap232CheckboxGroupItem value="sms">SMS alerts</Bootstrap232CheckboxGroupItem>
+    </Bootstrap232CheckboxGroupRoot>
+  );
+}
+```
+
+### 部件结构与键盘交互
+
+- **Root**：通过 `value` / `defaultValue` 管理字符串数组，支持 `orientation`（`horizontal` 对应 `.checkbox.inline` 水平排布）、`disabled`、`readOnly` 与 `ariaLabel`。
+- **Item**：单个复选框选项，接收唯一的 `value` 与可选 `disabled`；每项独立参与 `Tab` 顺序，按 `Space` 切换选中（`Enter` 不切换）。
+- **All**：自动汇总所有可用选项的勾选、半选横线或未选状态，点击时只切换可用项并保留已禁用项的原状态。
+- **表单集成**：置于 `Field` 或 `FormField` 内时，自动支持标签点击聚焦、必填校验、序列化与重置。
+
+## 示例
+
+### 基础用法
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 水平排列
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单校验
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件   | 属性 / 事件 / 方法                    | 说明                               |
-| ------ | ------------------------------------- | ---------------------------------- |
-| `Root` | `value` / `defaultValue`              | `string[]`，选中值数组             |
-| `Root` | `disabled` / `readOnly` / `ariaLabel` | 禁用、只读与组级可访问名称         |
-| `Root` | `valueChange` / `getValue()`          | 选中值变更请求事件与读取副本的方法 |
-| `Item` | `value` / `disabled`                  | 选项唯一值与单项禁用               |
-| `All`  | —                                     | 全选/半选联动控制项                |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string[] | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### All
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### 事件、方法与状态
+
+- **Root 事件**：`valueChange`（载荷 `{ value: string[] }`）。
+- **Root 方法**：`getValue(): string[]`、`resetValue(): boolean`、`focusSelf(): void`。
+- **暴露状态**：Root 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`；Item 与 All 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`、`focused`、`focusVisible`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CHECKBOX-GROUP.yaml', 'P-BASE-CHECKBOX-GROUP.yaml']}
+/>

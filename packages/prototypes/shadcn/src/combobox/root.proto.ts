@@ -6,8 +6,9 @@ export default definePrototype<ComboboxRootProps, ComboboxRootExposes>({
   name: 'shadcn-combobox-root',
   modules: asComboboxRoot.modules,
   setup(def) {
-    asComboboxRoot();
+    const behavior = asComboboxRoot();
     setupShadcnStyleScope(def);
-    def.feedback.style.use(tw('relative flex min-w-0 w-full max-w-md flex-wrap gap-2'));
+    def.feedback.style.use(tw('relative flex min-w-0 w-full max-w-md items-center gap-1.5'));
+    return behavior.render;
   },
 });

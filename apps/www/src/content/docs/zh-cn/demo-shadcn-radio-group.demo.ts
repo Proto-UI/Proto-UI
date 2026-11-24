@@ -1,48 +1,27 @@
 import { withShadcnRheaDemo } from '../shadcn-demo-style';
-import type { DemoNode, DemoSetupContext } from '../../../components/PrototypePreviewer/demo-types';
+import type { DemoNode } from '../../../components/PrototypePreviewer/demo-types';
 
-function option(group: string, value: string, label: string, disabled = false): DemoNode {
+function option(value: string, label: string): DemoNode {
+  const key = `hero-${value}`;
   return {
     kind: 'box',
-    className: 'flex items-center gap-2',
+    className: 'flex items-center gap-3',
     children: [
       {
         kind: 'proto',
         prototypeId: 'shadcn-radio-group-item',
-        ref: `${group}-${value}`,
-        props: { value, disabled },
-        associations: { controlLabel: `${group}-${value}` },
+        ref: key,
+        props: { value },
+        associations: { controlLabel: key },
         children: [{ kind: 'proto', prototypeId: 'shadcn-radio-group-indicator' }],
       },
       {
         kind: 'proto',
         prototypeId: 'shadcn-label-root',
-        ref: `${group}-${value}-label`,
-        associations: { controlLabel: `${group}-${value}` },
-        // Base owns the default activation; no page-local click forwarding.
-        className: disabled ? 'text-sm leading-none opacity-50' : 'text-sm leading-none',
+        ref: `${key}-label`,
+        associations: { controlLabel: key },
+        className: 'text-sm font-medium leading-none',
         children: [label],
-      },
-    ],
-  };
-}
-
-function group(ref: string, title: string, defaultValue: string, disabled = false): DemoNode {
-  return {
-    kind: 'box',
-    className: 'flex flex-col gap-3',
-    children: [
-      { kind: 'box', className: 'text-sm font-medium', children: [title] },
-      {
-        kind: 'proto',
-        prototypeId: 'shadcn-radio-group-root',
-        ref,
-        props: { a11yLabel: title, defaultValue, disabled },
-        children: [
-          option(ref, 'default', 'Default'),
-          option(ref, 'comfortable', 'Comfortable'),
-          option(ref, 'compact', 'Compact (disabled)', true),
-        ],
       },
     ],
   };
@@ -50,52 +29,21 @@ function group(ref: string, title: string, defaultValue: string, disabled = fals
 
 export default withShadcnRheaDemo({
   type: 'demo',
-  setup({ host, refs, api }: DemoSetupContext) {
-    const label = refs.selectedValue;
-    if (!label) return;
-
-    let frame = 0;
-    const renderValue = () => {
-      const value = api.getExposes('density')?.value as { get(): string } | undefined;
-      label.textContent = `Value: ${value?.get() || 'none'}`;
-    };
-    const scheduleValue = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(renderValue);
-    };
-    const observer = new MutationObserver(scheduleValue);
-    observer.observe(host, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['aria-checked'],
-    });
-    host.addEventListener('valueChange', scheduleValue);
-    scheduleValue();
-
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      host.removeEventListener('valueChange', scheduleValue);
-    };
-  },
   root: {
     kind: 'box',
-    className: 'flex w-full flex-col gap-4',
+    className: 'flex justify-center p-2',
     children: [
       {
-        kind: 'box',
-        className: 'grid gap-6 sm:grid-cols-3',
+        kind: 'proto',
+        prototypeId: 'shadcn-radio-group-root',
+        ref: 'heroGroup',
+        className: 'w-fit',
+        props: { a11yLabel: 'Display density', defaultValue: 'comfortable' },
         children: [
-          group('density', 'Density preference', 'comfortable'),
-          group('empty', 'No initial selection', ''),
-          group('disabled', 'Disabled group', 'comfortable', true),
+          option('default', 'Default'),
+          option('comfortable', 'Comfortable'),
+          option('compact', 'Compact'),
         ],
-      },
-      {
-        kind: 'box',
-        ref: 'selectedValue',
-        className: 'text-sm text-muted-foreground',
-        children: ['Value: —'],
       },
     ],
   },

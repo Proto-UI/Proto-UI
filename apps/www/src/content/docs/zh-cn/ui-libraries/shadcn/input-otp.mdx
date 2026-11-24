@@ -15,44 +15,167 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 用法
+## 安装
 
 当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-### 部件结构
+## 用法
 
-`Input OTP` 由 `Root`、`Input`（独立使用）或 `Control`（表单内使用）、`Slot` 与 `Separator` 组成：
+```tsx
+import {
+  ShadcnInputOtpRoot,
+  ShadcnInputOtpInput,
+  ShadcnInputOtpSlot,
+  ShadcnInputOtpSeparator,
+} from '../proto-ui/components/react';
 
-- **Root**：管理 `value` / `defaultValue`、位数 `length`（`1`–`32`，默认 `6`）、字符集过滤（`numeric` 或 `alphanumeric`）、`disabled`、`readOnly`、`name` 与 `ariaLabel`。
-- **Input / Control**：承载唯一的真实单行编辑器，在输入法组合结束后自动过滤非法字符并截断到 `length`。独立场景使用 `Input`；在 [Field](../field/) 或 [Form](../form/) 中使用 `Control` 替代 `Input`，以接入标签聚焦、表单校验、序列化与重置。
-- **Slot / Separator**：`Slot` 按 `index` 展示对应字符且对辅助技术隐藏，不增加额外 `Tab` 顺序；当可编辑的输入框聚焦时，激活格严格跟随真实光标位置或选区范围（失焦、禁用或只读时不显示激活格）。
+export function VerificationCode() {
+  return (
+    <ShadcnInputOtpRoot styleProfile="rhea" length={6}>
+      <ShadcnInputOtpInput styleProfile="rhea" placeholder="123456" />
+      <div className="inline-flex items-center">
+        <ShadcnInputOtpSlot styleProfile="rhea" index={0} first />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={1} />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={2} last />
+      </div>
+      <ShadcnInputOtpSeparator styleProfile="rhea">–</ShadcnInputOtpSeparator>
+      <div className="inline-flex items-center">
+        <ShadcnInputOtpSlot styleProfile="rhea" index={3} first />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={4} />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={5} last />
+      </div>
+    </ShadcnInputOtpRoot>
+  );
+}
+```
 
-### 事件与校验行为
+```text
+InputOtpRoot
+├── InputOtpInput (或表单内的 InputOtpControl)
+├── InputOtpSlot (index 0..2)
+├── InputOtpSeparator
+└── InputOtpSlot (index 3..5)
+```
 
-- 传入 `value` 进入受控模式时，输入修改会通过 `valueChange` 提出变更请求；每次接受完整位数的有效验证码时触发一次 `completed` 事件。
-- 在表单中使用 `Control` 时，仅当值实际发生有效变化后才触发自动 `onChange` 校验；受控拒绝或过滤后无变化不会重复触发，重置、策略变更或卸载会自动取消排队中的校验。
+### 部件与交互说明
+
+- **Root**：管理 `value` / `defaultValue`、位数 `length`（`1`–`32`，默认 `6`）、字符过滤模式 `pattern`（`'numeric'` 或 `'alphanumeric'`）、`disabled`、`readOnly`、`invalid`、`name` 与 `ariaLabel`。
+- **Input / Control**：承载唯一的真实单行编辑器，支持整段粘贴、选区编辑、IME 输入法合成过滤与 `one-time-code` 自动填充。独立场景使用 `Input`；在 [Field](../field/) 或 [Form](../form/) 中使用 `Control` 替代 `Input`，自动衔接标签聚焦、表单校验、序列化与重置。
+- **Slot / Separator**：`Slot` 按 `index` 渲染对应字符并对辅助技术隐藏，不增加额外 `Tab` 焦点；输入框聚焦且可编辑时，激活格随真实光标或选区高亮。分段组合时可通过 `first` 与 `last` 控制各分组两端的圆角与左边框。
+- **事件与校验**：输入变更会触发 `valueChange`；每次接受完整有效验证码时触发一次 `completed`。在表单内使用 `Control` 时，仅当值发生有效变化后触发自动变更校验。
+
+## 示例
+
+### 分隔符
+
+使用 `Separator` 将验证码拆分为多个视觉分组，并通过 `first` / `last` 保留每组两端圆角。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 字母数字模式
+
+将 `pattern` 设为 `'alphanumeric'` 以同时接受数字与英文字母。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+通过 `disabled` 禁用整个验证码输入与槽位交互。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 错误态
+
+在 `Root` 或单个 `Slot` 上传入 `invalid`（或置于无效的 `Field` 内），即可呈现错误边框与焦点环。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+传入 `value` 并监听 `valueChange`，由外部状态控制验证码并实时显示输入结果。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单与四位 PIN 校验
+
+结合 [Field](../field/)、`Control` 与 `length={4}` 构建带标签聚焦、校验错误与重置动作的四位 PIN 表单。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `value` 进入受控模式。`Input` 可选接受 `placeholder`（无默认值）。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'length', type: 'number', default: '6' },
-    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
     { name: 'name', type: 'string', default: "''" },
-    { name: 'ariaLabel', type: 'string', default: 'One-time code' },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-以上属性属于 `Root`。`Slot` 的 `index` 默认为 `0`。
+### Input / Control
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Slot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'index', type: 'number', default: '0' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'first', type: 'boolean', default: 'index === 0' },
+    { name: 'last', type: 'boolean', default: 'index === length - 1' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### 事件与暴露方法
+
+- **Root 事件**：`valueChange`（`{ value: string }`）、`completed`（`{ value: string }`）。
+- **Root 暴露状态与方法**：状态 `value`、`complete`、`disabled`、`readOnly`、`focused`；方法 `requestValue(value)`、`clear()`、`resetValue()`、`focusInput()`。
+- **Slot 暴露状态**：`character`、`active`、`filled`。
 
 ## 参考
 

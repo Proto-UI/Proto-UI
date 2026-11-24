@@ -8,5 +8,6 @@ export default definePrototype<ComboboxContentProps, ComboboxContentExposes>({
   setup(def) {
     const behavior = asComboboxContent();
     setupSearchContentPaint(def, behavior.getState!('open')!);
+    return behavior.render;
   },
 });

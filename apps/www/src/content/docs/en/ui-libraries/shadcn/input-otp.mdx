@@ -15,44 +15,167 @@ A segmented one-time password input backed by a single real text control so past
   demoId="demo-shadcn-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Usage
+## Installation
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-### Anatomy
+## Usage
 
-Compose `Input OTP` from `Root`, `Input` (standalone) or `Control` (inside a form), `Slot`, and `Separator`:
+```tsx
+import {
+  ShadcnInputOtpRoot,
+  ShadcnInputOtpInput,
+  ShadcnInputOtpSlot,
+  ShadcnInputOtpSeparator,
+} from '../proto-ui/components/react';
 
-- **Root**: Manages `value` / `defaultValue`, `length` (`1`–`32`, default `6`), `pattern` (`'numeric'` or `'alphanumeric'`), `disabled`, `readOnly`, `name`, and `ariaLabel`.
+export function VerificationCode() {
+  return (
+    <ShadcnInputOtpRoot styleProfile="rhea" length={6}>
+      <ShadcnInputOtpInput styleProfile="rhea" placeholder="123456" />
+      <div className="inline-flex items-center">
+        <ShadcnInputOtpSlot styleProfile="rhea" index={0} first />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={1} />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={2} last />
+      </div>
+      <ShadcnInputOtpSeparator styleProfile="rhea">–</ShadcnInputOtpSeparator>
+      <div className="inline-flex items-center">
+        <ShadcnInputOtpSlot styleProfile="rhea" index={3} first />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={4} />
+        <ShadcnInputOtpSlot styleProfile="rhea" index={5} last />
+      </div>
+    </ShadcnInputOtpRoot>
+  );
+}
+```
+
+```text
+InputOtpRoot
+├── InputOtpInput (or InputOtpControl inside Field / Form)
+├── InputOtpSlot (index 0..2)
+├── InputOtpSeparator
+└── InputOtpSlot (index 3..5)
+```
+
+### Anatomy and interaction
+
+- **Root**: Manages `value` / `defaultValue`, `length` (`1`–`32`, default `6`), `pattern` (`'numeric'` or `'alphanumeric'`), `disabled`, `readOnly`, `invalid`, `name`, and `ariaLabel`.
 - **Input / Control**: Provides the single underlying text editor, stripping disallowed characters and clamping length after IME composition finishes. Use `Input` standalone, or replace it with `Control` inside a [Field](../field/) or [Form](../form/) for label focus, validation, serialization, and reset.
-- **Slot / Separator**: Passive, `aria-hidden` readouts indexed by `index` without extra tab stops. While editable and focused, active slot highlights track the real caret or selection range (clearing on blur, `disabled`, or `readOnly`).
+- **Slot / Separator**: Passive `aria-hidden` readouts indexed by `index` without extra tab stops. While editable and focused, active slot highlights track the real caret or selection range. For split groups around a `Separator`, pass `first` and `last` on group endpoints to round each group cleanly.
+- **Events and validation**: Edits emit `valueChange`, and `completed` fires once each time a complete valid code is accepted. Inside a form, `Control` triggers automatic `onChange` validation only after an accepted value change.
 
-### Events and validation
+## Examples
 
-- In controlled mode (`value` provided), edits emit `valueChange` proposals. `completed` fires once each time a complete valid code is accepted.
-- Inside a form, `Control` triggers automatic `onChange` validation only after an accepted value change; rejected or filtered no-op edits skip redundant validation, and reset or unmount cancels queued checks.
+### Separator
+
+Use `Separator` to divide slots into visual groups, passing `first` and `last` to keep group corners rounded.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Alphanumeric
+
+Set `pattern="alphanumeric"` to accept both letters and digits.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Set `disabled` on `Root` to prevent editing and dim the control.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` on `Root` or individual `Slot` cells (or nest inside an invalid `Field`) to highlight validation errors.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Control the code externally with `value` and `valueChange` to inspect or update input in real time.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form & Four-Digit PIN
+
+Combine [Field](../field/), `Control`, and `length={4}` for a 4-digit PIN form with label focus, validation errors, and reset support.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `value` selects controlled mode. `Input` accepts an optional `placeholder` with no default.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'length', type: 'number', default: '6' },
-    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
     { name: 'name', type: 'string', default: "''" },
-    { name: 'ariaLabel', type: 'string', default: 'One-time code' },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-These props belong to `Root`. `Slot` defaults `index` to `0`.
+### Input / Control
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Slot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'index', type: 'number', default: '0' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'first', type: 'boolean', default: 'index === 0' },
+    { name: 'last', type: 'boolean', default: 'index === length - 1' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Events & Methods
+
+- **Root events**: `valueChange` (`{ value: string }`), `completed` (`{ value: string }`).
+- **Root states & methods**: states `value`, `complete`, `disabled`, `readOnly`, `focused`; methods `requestValue(value)`, `clear()`, `resetValue()`, `focusInput()`.
+- **Slot states**: `character`, `active`, `filled`.
 
 ## References
 

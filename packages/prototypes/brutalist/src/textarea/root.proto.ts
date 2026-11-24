@@ -17,6 +17,6 @@ export const BrutalistTextareaRoot = definePrototype<
     }
 
     setupTextareaVisual(def, state);
-    return () => null;
+    return textarea.render;
   },
 });

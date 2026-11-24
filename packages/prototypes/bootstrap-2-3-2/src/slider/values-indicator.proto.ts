@@ -12,7 +12,7 @@ export default definePrototype<SliderValuesPartProps, SliderValuesPartExposes>({
     const state = inherited.stateHandles!;
     def.feedback.style.use(
       tw(
-        'pointer-events-none absolute left-[calc(var(--pui-start-percentage)*1%)] top-0 h-full w-[calc(var(--pui-extent)*1%)] rounded-[4px] bg-primary'
+        'pointer-events-none absolute left-[calc(var(--pui-start-percentage)*1%)] top-0 h-full w-[calc(var(--pui-extent)*1%)] rounded-[4px] bg-[linear-gradient(#149bdf,#0480be)] shadow-[inset_0_-1px_0_rgb(0_0_0/15%)]'
       )
     );
     def.rule({

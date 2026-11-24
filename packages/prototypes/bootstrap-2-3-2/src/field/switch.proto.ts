@@ -19,5 +19,6 @@ export default definePrototype<FieldSwitchProps, FieldSwitchExposes>({
       throw new Error('[bootstrap-2-3-2-field-switch] Missing Base/Field facts.');
     }
     setupSwitchRootVisual(def, control.stateHandles, binding.state.invalid);
+    return control.render;
   },
 });

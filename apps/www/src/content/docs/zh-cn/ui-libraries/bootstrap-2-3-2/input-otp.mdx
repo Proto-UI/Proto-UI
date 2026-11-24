@@ -4,8 +4,10 @@ description: '支持一次性验证码粘贴、分格高亮与表单集成的 Bo
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Input OTP 使用单一真实文本输入框配合分格视觉展示，原生支持整段粘贴、删除、选区移动与浏览器 `one-time-code` 自动填充。
+Bootstrap 2.3.2 Input OTP 使用单一真实文本输入框配合经典内阴影分格与 `#52a8ec` 蓝色聚焦光晕，原生支持整段粘贴、删除、选区移动与浏览器 `one-time-code` 自动填充。
 
 ## 预览
 
@@ -13,7 +15,6 @@ Bootstrap 2.3.2 Input OTP 使用单一真实文本输入框配合分格视觉展
   demoId="demo-bootstrap-2-3-2-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -22,19 +23,126 @@ Bootstrap 2.3.2 Input OTP 使用单一真实文本输入框配合分格视觉展
 
 ## 用法
 
-由 `Root`、`Input`（或在 `Field` / `FormField` 中使用 `Control`）、`Slot` 和可选的 `Separator` 组成：
+```tsx
+import {
+  Bootstrap232InputOtpRoot,
+  Bootstrap232InputOtpInput,
+  Bootstrap232InputOtpSlot,
+  Bootstrap232InputOtpSeparator,
+} from '../proto-ui/components/react';
 
-- **单一编辑器与分格显示**：所有输入、选择、粘贴和 IME 组合都在同一个 `Input` 内完成，并在组合结束后自动按数字或字母数字规则过滤并截断至 `length`（`1`–`32`，默认 `6`）。每个 `Slot` 为纯视觉展示格，聚焦且可编辑时根据实际光标或选区高亮对应格位。
-- **完成事件**：受控模式下通过 `valueChange` 接收更新请求；每当输入达到完整长度并被接受时触发一次 `completed` 事件，由应用决定后续验证逻辑。
-- **表单集成**：在 `Field` 或 `FormField` 内使用时，用 `Control` 替换 `Input`，即可自动桥接标签激活、校验、IME 取消、`Form` 序列化与重置。
+export function BootstrapVerificationCode() {
+  return (
+    <Bootstrap232InputOtpRoot length={6}>
+      <Bootstrap232InputOtpInput placeholder="123456" />
+      <div className="inline-flex items-center gap-1.5">
+        <Bootstrap232InputOtpSlot index={0} />
+        <Bootstrap232InputOtpSlot index={1} />
+        <Bootstrap232InputOtpSlot index={2} />
+      </div>
+      <Bootstrap232InputOtpSeparator>–</Bootstrap232InputOtpSeparator>
+      <div className="inline-flex items-center gap-1.5">
+        <Bootstrap232InputOtpSlot index={3} />
+        <Bootstrap232InputOtpSlot index={4} />
+        <Bootstrap232InputOtpSlot index={5} />
+      </div>
+    </Bootstrap232InputOtpRoot>
+  );
+}
+```
+
+- **单一编辑器与分格显示**：所有输入、选择、粘贴和 IME 组合都在同一个 `Input` 内完成，并按 `numeric` 或 `alphanumeric` 过滤截断至 `length`（`1`–`32`，默认 `6`）。
+- **经典视觉状态**：静止态保留 4px 圆角、1px `#ccc` 边框与内阴影；激活槽使用经典 `#52a8ec` 蓝光聚焦；禁用态呈现 `#eee` 背景；错误态采用 `.control-group.error` 红色边框与光晕。
+- **表单集成**：在 `Field` 或 `FormField` 内用 `Control` 替换 `Input`，自动桥接标签激活、校验、序列化与重置。
+
+## 示例
+
+### 分隔符
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 字母数字模式
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 错误态
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单与四位 PIN 校验
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | 受控或初始验证码字符串 |
-| `Root` | `length` | 验证码位数，`1`–`32`，默认 `6` |
-| `Root` | `disabled` / `readOnly` / `name` / `ariaLabel` | 状态、表单字段名与可访问名称 |
-| `Root` | `valueChange` / `completed` | 值变更请求与输入完成事件 |
-| `Input` / `Control` | — | 实际输入编辑器（在 `Field`/`FormField` 内使用 `Control`） |
-| `Slot` / `Separator` | — | 按索引展示字符的分格与可选分隔符 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'length', type: 'number', default: '6' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
+  ]}
+/>
+
+### Input / Control 与 Slot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input / Control: placeholder', type: 'string', default: "''" },
+    { name: 'Slot: index', type: 'number', default: '0' },
+    { name: 'Slot: invalid', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### 事件与暴露方法
+
+- **Root 事件**：`valueChange`（`{ value: string }`）、`completed`（`{ value: string }`）。
+- **Root 暴露状态与方法**：状态 `value`、`complete`、`disabled`、`readOnly`、`focused`；方法 `requestValue(value)`、`clear()`、`resetValue()`、`focusInput()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-INPUT-OTP.yaml', 'P-BASE-INPUT-OTP.yaml']}
+/>

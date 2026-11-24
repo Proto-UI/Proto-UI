@@ -30,7 +30,7 @@ export default definePrototype<LiquidGlassSelectSurfaceProps>({
     // Clipping is not another scrollport; Viewport alone owns scrolling.
     def.feedback.style.use(
       tw(
-        'z-50 relative flex flex-col min-w-0 w-[max(var(--proto-ui-anchor-width),12rem)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-hidden outline-none rounded-2xl border border-border bg-secondary text-secondary-foreground shadow-md'
+        'z-50 relative flex flex-col min-w-0 w-[max(var(--proto-ui-anchor-width),12rem)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-hidden outline-none rounded-2xl border border-border bg-secondary text-secondary-foreground shadow-md ring-1 ring-inset ring-foreground/10'
       )
     );
     return inherited.render;

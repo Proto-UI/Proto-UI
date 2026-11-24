@@ -3,14 +3,12 @@ import { SHADCN_STYLE_IDS, setupShadcnStyleSelection, type ShadcnStyleProps } fr
 import { setupInputShellContainment } from '../input-shell/context';
 import { setupMenuOpenPaint } from '../dropdown/visual';
 
-/** MIT shadcn-ui/ui@3d98900e9b73c45f035f8109e9d41ba6a51685e7,
- * .cn-combobox-* and .cn-input-group-* in each retained style-*.css;
- * independent new-york-v4/ui/combobox.tsx and input-group.tsx at that pin.
- * Autocomplete deliberately borrows vocabulary, not Combobox semantics: the
- * pinned upstream inventory has no official Autocomplete component.
+/** MIT shadcn-ui/ui, .cn-combobox-* and .cn-input-group-* in each retained
+ * style-*.css; independent new-york-v4/ui/combobox.tsx and input-group.tsx.
+ * Autocomplete deliberately borrows vocabulary, not Combobox semantics.
  * Base's six-part popup has no separate List/InputGroup/ItemIndicator parts;
- * combined scroll containment and standalone editor/trigger paint are bounded
- * Proto compositions, not fabricated full upstream anatomy or icon parity.
+ * combined scroll containment and editor/trigger paint stay bounded to the
+ * inherited Base anatomy.
  */
 const PROFILES = {
   vega: {
@@ -19,7 +17,7 @@ const PROFILES = {
     input: 'h-9 px-2.5 py-1 text-base',
     shape: 'rounded-md border-input bg-transparent shadow-xs transition-[color,box-shadow]',
     focus: 'border-ring ring-3 ring-ring/50',
-    trigger: 'rounded-[calc(var(--radius)-5px)] text-sm',
+    trigger: 'h-9 rounded-md border-input bg-transparent shadow-xs text-sm',
   },
   nova: {
     surface: 'rounded-lg shadow-md ring-1 ring-foreground/10',
@@ -27,7 +25,7 @@ const PROFILES = {
     input: 'h-8 px-2.5 py-1 text-base',
     shape: 'rounded-lg border-input bg-transparent transition-colors',
     focus: 'border-ring ring-3 ring-ring/50',
-    trigger: 'rounded-[calc(var(--radius)-3px)] text-sm',
+    trigger: 'h-8 rounded-lg border-input bg-transparent text-sm',
   },
   maia: {
     surface: 'rounded-[var(--pui-radius-2xl)] shadow-2xl ring-1 ring-foreground/5',
@@ -35,7 +33,7 @@ const PROFILES = {
     input: 'h-9 px-3 py-1 text-base',
     shape: 'rounded-[var(--pui-radius-4xl)] border-input bg-input/30 transition-colors',
     focus: 'border-ring ring-3 ring-ring/50',
-    trigger: 'rounded-[var(--pui-radius-4xl)] text-sm',
+    trigger: 'h-9 rounded-[var(--pui-radius-4xl)] border-input bg-input/30 text-sm',
   },
   lyra: {
     surface: 'rounded-none shadow-md ring-1 ring-foreground/10',
@@ -43,7 +41,7 @@ const PROFILES = {
     input: 'h-8 px-2.5 py-1 text-xs',
     shape: 'rounded-none border-input bg-transparent transition-colors',
     focus: 'border-ring ring-1 ring-ring/50',
-    trigger: 'rounded-none text-xs',
+    trigger: 'h-8 rounded-none border-input bg-transparent text-xs',
   },
   mira: {
     surface: 'rounded-lg shadow-md ring-1 ring-foreground/10',
@@ -51,7 +49,7 @@ const PROFILES = {
     input: 'h-7 px-2 py-0.5 text-sm',
     shape: 'rounded-md border-input bg-input/20 transition-colors',
     focus: 'border-ring ring-2 ring-ring/30',
-    trigger: 'rounded-md text-xs leading-relaxed',
+    trigger: 'h-7 rounded-md border-input bg-input/20 text-xs leading-relaxed',
   },
   luma: {
     surface: 'rounded-[var(--pui-radius-3xl)] shadow-lg ring-1 ring-foreground/5',
@@ -60,7 +58,7 @@ const PROFILES = {
     shape:
       'rounded-[var(--pui-radius-4xl)] border-transparent bg-input/50 transition-[color,box-shadow,background-color]',
     focus: 'border-ring ring-3 ring-ring/30',
-    trigger: 'rounded-xl text-sm',
+    trigger: 'h-9 rounded-[var(--pui-radius-4xl)] border-transparent bg-input/50 text-sm',
   },
   sera: {
     surface: 'rounded-none shadow-md ring-1 ring-foreground/10',
@@ -69,7 +67,7 @@ const PROFILES = {
     shape:
       'rounded-none border-transparent border-b-input bg-transparent transition-[color,border-color]',
     focus: 'border-b-ring',
-    trigger: 'rounded-none text-xs',
+    trigger: 'h-10 rounded-none border-transparent border-b-input bg-transparent text-xs',
   },
   rhea: {
     surface: 'rounded-[var(--pui-radius-2xl)] shadow-lg ring-1 ring-foreground/5',
@@ -78,7 +76,7 @@ const PROFILES = {
     shape:
       'rounded-[var(--pui-radius-2xl)] border-transparent bg-input/50 transition-[color,box-shadow] duration-200',
     focus: 'border-ring ring-3 ring-ring/30',
-    trigger: 'rounded-xl text-sm',
+    trigger: 'h-8 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/50 text-sm',
   },
   'new-york-v4': {
     surface: 'rounded-md shadow-md ring-1 ring-foreground/10',
@@ -86,7 +84,7 @@ const PROFILES = {
     input: 'h-9 px-3 py-1 text-base',
     shape: 'rounded-md border-input bg-transparent shadow-xs transition-[color,box-shadow]',
     focus: 'border-ring ring-3 ring-ring/50',
-    trigger: 'rounded-[calc(var(--radius)-5px)] text-sm',
+    trigger: 'h-9 rounded-md border-input bg-transparent shadow-xs text-sm',
   },
 } as const;
 
@@ -142,6 +140,10 @@ export function setupSearchInputPaint<
     });
   }
   def.rule({
+    when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+    intent: (i) => i.feedback.style.use(tw('duration-0')),
+  });
+  def.rule({
     when: (w) => w.state(state.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
   });
@@ -152,13 +154,14 @@ export function setupSearchTriggerPaint<
   Exposes = Record<string, unknown>,
 >(
   def: DefHandle<Props, Exposes>,
-  state: { disabled: State<boolean>; focusVisible: State<boolean> }
+  state: { disabled: State<boolean>; focusVisible: State<boolean>; focused?: State<boolean> }
 ) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
-  // Source-derived compact InputGroupButton paint, without calling asButton.
-  // The actual Trigger still owns its own disabled, focus and toggle protocol.
+  // Trigger owns its own disabled, focus, and toggle protocol without calling asButton.
   def.feedback.style.use(
-    tw('inline-flex size-6 p-0 gap-2 items-center justify-center outline-none')
+    tw(
+      'inline-flex shrink-0 min-w-8 items-center justify-center gap-1.5 border px-2 text-muted-foreground outline-none cursor-pointer transition-colors select-none'
+    )
   );
   for (const id of SHADCN_STYLE_IDS) {
     def.rule({
@@ -170,9 +173,26 @@ export function setupSearchTriggerPaint<
       intent: (i) => i.feedback.style.use(tw(PROFILES[id].focus)),
     });
   }
+  for (const id of ['vega', 'nova', 'lyra', 'mira', 'new-york-v4'] as const) {
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(id), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('bg-input/30')),
+    });
+  }
+  if (state.focused) {
+    const focusedState = state.focused;
+    def.rule({
+      when: (w) => w.all(w.state(focusedState).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-foreground')),
+    });
+  }
+  def.rule({
+    when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+    intent: (i) => i.feedback.style.use(tw('duration-0')),
+  });
   def.rule({
     when: (w) => w.state(state.disabled).eq(true),
-    intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
+    intent: (i) => i.feedback.style.use(tw('pointer-events-none cursor-not-allowed opacity-50')),
   });
 }
 
@@ -212,12 +232,19 @@ export function setupSearchContentPaint<
     }
   }
   setupMenuOpenPaint(def, open, true);
+  def.rule({
+    when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+    intent: (i) => i.feedback.style.use(tw('duration-0')),
+  });
 }
 
 export function setupSearchItemPaint<
   Props extends ShadcnStyleProps,
   Exposes = Record<string, unknown>,
->(def: DefHandle<Props, Exposes>, state: { disabled: State<boolean>; active: State<boolean> }) {
+>(
+  def: DefHandle<Props, Exposes>,
+  state: { disabled: State<boolean>; active: State<boolean>; selected?: State<boolean> }
+) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(
     tw(
@@ -228,6 +255,27 @@ export function setupSearchItemPaint<
     def.rule({
       when: (w) => w.state(style).eq(id),
       intent: (i) => i.feedback.style.use(tw(PROFILES[id].item)),
+    });
+  }
+  if (state.selected) {
+    const selectedState = state.selected;
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(selectedState).eq(true),
+          w.state(state.active).eq(false),
+          w.state(state.disabled).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('font-medium text-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(selectedState).eq(true),
+          w.state(state.active).eq(true),
+          w.state(state.disabled).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('font-medium')),
     });
   }
   def.rule({

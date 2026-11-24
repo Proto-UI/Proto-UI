@@ -15,56 +15,108 @@ Brutalist Form orchestrates explicitly registered `FormField` entries, validates
   demoId="demo-brutalist-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
 Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-form`
+```bash
+proto-ui add <react|vue|vue2|wc> brutalist-form
+```
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistFormRoot,
+  BrutalistFormField,
+  BrutalistFormSubmit,
+  BrutalistFormReset,
+  BrutalistFieldLabel,
+  BrutalistFieldControl,
+  BrutalistFieldError,
+} from '../proto-ui/components/react';
 
-Form is composed of `Root`, `Field` (`FormField`), `Submit` (`FormSubmit`), and `Reset` (`FormReset`):
+export function ExampleBrutalistForm() {
+  return (
+    <BrutalistFormRoot ariaLabel="Profile form" onSubmit={({ values }) => console.log(values)}>
+      <BrutalistFormField name="username" required>
+        <BrutalistFieldLabel>Username</BrutalistFieldLabel>
+        <BrutalistFieldControl placeholder="ada_lovelace" />
+        <BrutalistFieldError />
+      </BrutalistFormField>
+      <div className="flex items-center gap-2">
+        <BrutalistFormSubmit>Submit</BrutalistFormSubmit>
+        <BrutalistFormReset>Reset</BrutalistFormReset>
+      </div>
+    </BrutalistFormRoot>
+  );
+}
+```
 
-- **Root**: Collects registered `FormField` items, runs built-in and async validation, and emits `submit` with named values when all enabled fields pass. Disabled fields are omitted, duplicate field names block serialization, and `disabled` cascades to contained fields.
-- **Field**: Connects a supported control to the form using `name` as its submission key.
-- **Submit / Reset**: Handle pointer and keyboard activation with Brutalist button styling, exposing `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf()`.
+### Anatomy & Behavior
 
-Pressing `Enter` in a focused single-line `Field`, `Number Field`, or `Input OTP` triggers implicit submission (ignoring IME composition, modifier keys, and key repeats). `requestReset()` restores uncontrolled initial values, requests initial values from controlled owners, cancels pending edits and validation, and emits `reset`; `resetValidation()` clears validation state only.
+- **Root**: Collects registered `FormField` items, runs synchronous and async validation, and emits `submit` with named values once all enabled fields pass. Disabled fields are excluded, duplicate field names throw `FORM_DUPLICATE_NAME` during serialization, and `disabled` cascades to contained fields.
+- **Field**: Extends `FieldRoot` with a submission `name`, using DM Sans typography and high-contrast error ink.
+- **Submit / Reset**: Apply Brutalist 2px black borders and 4px hard shadows, supporting pointer/keyboard activation and live `prefers-reduced-motion` timing.
+- **Implicit Enter submit & reset**: Pressing `Enter` in a focused single-line `Field`, `Number Field`, or `Input OTP` triggers submission; `requestReset()` restores uncontrolled initial values and proposes resets to controlled owners, while `resetValidation()` clears validation state only.
+
+## Examples
+
+### Profile form
+
+A standard profile layout combining `Fieldset`, a text input, and a multiline textarea:
+
+<PrototypePreviewer
+  demoId="demo-brutalist-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Bug report form
+
+Combines required title, multiline description, and checkbox-group fields with validation and reset:
+
+<PrototypePreviewer
+  demoId="demo-brutalist-form-bug-report"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled fieldset
+
+Disabling a nested `Fieldset` cascades to its contained fields and omits them from submitted values:
+
+<PrototypePreviewer
+  demoId="demo-brutalist-form-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### Async validation and nested fieldsets
+
+When fields use external async validation, submission waits for each active `requestId` to resolve via `resolveValidation`, automatically discarding stale replies after edits, resets, or read-only changes:
 
 <PrototypePreviewer
   demoId="demo-brutalist-form-validation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-When fields use external async validation, submission waits for each active `requestId` to resolve via `resolveValidation`. Stale results from edited, reset, read-only, or superseded submissions are automatically discarded. Nested `Fieldset` groups can disable sections at once and omit those fields from submitted values.
-
 ### Choice controls in forms
+
+Import `fieldCheckbox`, `fieldRadioGroup`, and `fieldSwitch` from `brutalist-field` inside `FormField` to participate in validation and reset:
 
 <PrototypePreviewer
   demoId="demo-brutalist-field-choices"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
-
-Import `fieldCheckbox`, `fieldRadioGroup`, and `fieldSwitch` from `brutalist-field`, place them inside `FormField`, and pair them with Brutalist Checkbox Indicator, Radio Items/Indicators, or Switch Thumb:
-
-- `fieldCheckbox` submits its boolean `checked` value (mixed display does not satisfy `required` when `checked` is `false`).
-- `fieldRadioGroup` submits the selected string value (an empty string counts as missing when `required`).
-- In read-only mode, labels still focus their control and Radio arrow keys still rove focus without proposing value changes.
 
 ## API
 
-### Root
+### FormRoot
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -74,11 +126,34 @@ Import `fieldCheckbox`, `fieldRadioGroup`, and `fieldSwitch` from `brutalist-fie
   ]}
 />
 
-### Other parts
+Exposed states: `disabled`, `pending`, `submitted`. Methods: `getValues()`, `requestSubmit()`, `requestReset()`, `resetValidation()`, `cancelSubmit()`. Events: `submit`, `invalid`, `reset`.
 
-- **Field**: `name?: string` (default `''`)
-- **Submit / Reset**: `disabled?: boolean` (default `false`)
+### FormField
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+Exposed states: `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`. Methods: `focusSelf(options?)`.
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-FORM.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-FORM.yaml', 'P-BASE-FORM.yaml']}
+/>

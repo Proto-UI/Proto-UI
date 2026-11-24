@@ -1,4 +1,9 @@
-import { COMMAND_FOCUS, COMMAND_HOVER, COMMAND_PRESS } from '../interactive-surface';
+import {
+  COMMAND_BLOCKED,
+  COMMAND_FOCUS,
+  COMMAND_HOVER,
+  COMMAND_PRESS,
+} from '../interactive-surface';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asCheckboxRoot } from '@proto.ui/prototypes-base/checkbox';
 import type { LiquidGlassCheckboxRootExposes, LiquidGlassCheckboxRootProps } from './types';
@@ -19,15 +24,20 @@ export default definePrototype<LiquidGlassCheckboxRootProps, LiquidGlassCheckbox
     if (!state) throw new Error('[liquid-glass-checkbox-root] Base Checkbox states are required.');
     const { checked, indeterminate, disabled, hovered, pressed, focusVisible } = state;
 
-    // A compact square control: checked/mixed share the governed primary fill
-    // and the Indicator's currentColor mark supplies the non-color difference.
+    // A compact square control using concentric radius-md (6px): checked/mixed
+    // share the governed primary fill when enabled and the Indicator's
+    // currentColor mark supplies the non-color difference.
     def.feedback.style.use(
       tw(
-        'inline-flex size-5 shrink-0 items-center justify-center rounded-[6px] border border-border bg-background text-foreground shadow-sm outline-none select-none cursor-pointer'
+        'inline-flex size-5 shrink-0 items-center justify-center rounded-md border border-border bg-secondary text-secondary-foreground shadow-sm outline-none select-none cursor-pointer'
       )
     );
     def.rule({
-      when: (w) => w.any(w.state(checked).eq(true), w.state(indeterminate).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(disabled).eq(false),
+          w.any(w.state(checked).eq(true), w.state(indeterminate).eq(true))
+        ),
       intent: (i) => i.feedback.style.use(tw('border-primary bg-primary text-primary-foreground')),
     });
     def.rule({
@@ -80,7 +90,9 @@ export default definePrototype<LiquidGlassCheckboxRootProps, LiquidGlassCheckbox
     def.rule({
       when: (w) => w.state(disabled).eq(true),
       // Whole-host opacity would make the fallback depend on the backdrop.
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
+      // Distinct opaque muted surface keeps disabled visually quiet with >= 4.5:1 contrast.
+      intent: (i) =>
+        i.feedback.style.use(tw(`${COMMAND_BLOCKED} border-border bg-muted text-muted-foreground`)),
     });
     // The inherited render is preserved; the Root does not paint its own glyph.
     return inherited.render;

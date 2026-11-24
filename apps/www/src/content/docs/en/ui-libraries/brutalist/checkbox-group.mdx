@@ -1,13 +1,13 @@
 ---
 title: 'Brutalist Checkbox Group'
-description: 'Manage a string array of selected checkboxes with select-all support and Field/Form integration.'
+description: 'Manage a string array of selected checkboxes with select-all support, horizontal layout, and Field/Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Checkbox Group coordinates a set of checkboxes backed by a string array, with built-in select-all/mixed state handling and distinct Brutalist check indicators.
+Brutalist Checkbox Group coordinates a set of checkboxes backed by a string array, with select-all/mixed state, vertical or horizontal layout, square 2px borders, DM Sans 500 label typography, and high-contrast focus rings.
 
 ## Preview
 
@@ -15,7 +15,6 @@ Brutalist Checkbox Group coordinates a set of checkboxes backed by a string arra
   demoId="demo-brutalist-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -24,21 +23,72 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  BrutalistCheckboxGroupRoot,
+  BrutalistCheckboxGroupAll,
+  BrutalistCheckboxGroupItem,
+} from '../proto-ui/components/react';
 
-Checkbox Group consists of `Root`, `Item`, and `All`:
+export function Example() {
+  return (
+    <BrutalistCheckboxGroupRoot defaultValue={['email']} ariaLabel="Notification channels">
+      <BrutalistCheckboxGroupAll>All notifications</BrutalistCheckboxGroupAll>
+      <BrutalistCheckboxGroupItem value="email">Email updates</BrutalistCheckboxGroupItem>
+      <BrutalistCheckboxGroupItem value="sms">SMS alerts</BrutalistCheckboxGroupItem>
+    </BrutalistCheckboxGroupRoot>
+  );
+}
+```
 
-- **Root**: Manages the selected string array via `value` / `defaultValue`, along with `disabled`, `readOnly`, and `ariaLabel`.
-- **Item**: Represents an individual option with a unique `value` and optional `disabled` flag. Duplicate values ignore ambiguous toggle requests.
-- **All**: Derives checked or mixed state from enabled registered items and toggles only enabled items while preserving disabled selections.
+### Anatomy and keyboard
 
-`Item` and `All` render decorative `aria-hidden` state icons (check for checked, dash for mixed, empty box for unchecked) so state never depends on color alone.
+- **Root**: Manages the selected `string[]` value (`value` / `defaultValue`), `orientation`, `disabled`, `readOnly`, and `ariaLabel`.
+- **Item**: Individual option with a unique `value` and optional `disabled` flag. Each enabled option has its own `Tab` stop and toggles with `Space` (`Enter` does not toggle).
+- **All**: Derives checked, mixed (`aria-checked="mixed"`), or unchecked state across enabled items and toggles only enabled items while preserving disabled selections.
+- **Accessibility and forms**: The square 20×20 indicator box renders check/dash glyphs and owns the focus ring; inside `Field` or `FormField`, `Root` participates in label activation, required validation, serialization, and reset.
 
-### Controlled usage and keyboard
+## Examples
 
-- Pass `value` for controlled mode; toggling emits `valueChange` without overwriting external state. Call `getValue()` to read a defensive copy of the current value array.
-- Each option is focusable in the `Tab` order and toggles with `Space` (`Enter` does not toggle).
-- Inside `Field` or `Form`, `Root` reports the value array, group focus, and local policies for label activation, required validation, form serialization, and reset without creating hidden HTML inputs.
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form Validation
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -47,20 +97,41 @@ Checkbox Group consists of `Root`, `Item`, and `All`:
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string[] | undefined', default: 'Uncontrolled' },
     { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
   ]}
 />
 
-Pass `value: string[]` to enable controlled mode.
+### Item
 
-### Other parts
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- **Item**: `value: string`, `disabled?: boolean` (default `false`)
-- **All**: No props
+### All
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Events, Methods, and States
+
+- **Root events**: `valueChange` (payload `{ value: string[] }`).
+- **Root methods**: `getValue(): string[]`, `resetValue(): boolean`, `focusSelf(): void`.
+- **Exposed states**: Root exposes `checked`, `indeterminate`, `disabled`, `readOnly`; Item and All expose `checked`, `indeterminate`, `disabled`, `readOnly`, `focused`, `focusVisible`.
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-CHECKBOX-GROUP.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CHECKBOX-GROUP.yaml', 'P-BASE-CHECKBOX-GROUP.yaml']}
+/>

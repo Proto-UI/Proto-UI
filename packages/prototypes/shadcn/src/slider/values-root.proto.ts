@@ -14,6 +14,10 @@ export default definePrototype<ShadcnSliderValuesRootProps, SliderValuesRootExpo
     const inherited = asSliderValuesRoot();
     setupShadcnStyleScope(def);
     def.feedback.style.use(tw('flex w-full min-w-0 flex-wrap items-center gap-3 text-foreground'));
+    def.rule({
+      when: (w) => w.prop('orientation').eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('h-full w-auto flex-col flex-nowrap min-h-40')),
+    });
     return inherited.render;
   },
 });

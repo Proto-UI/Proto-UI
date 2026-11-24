@@ -1,0 +1,170 @@
+---
+title: 'Bootstrap 2.3.2 Radio Group'
+description: 'A radio group styled with archived Bootstrap 2.3.2 beveled gradients and blue focus glow over Base Radio Group.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Radio Group renders archived inset-beveled option wells, classic blue checked gradients, and soft `#0088cc` focus glows while inheriting `radiogroup` / `radio` accessibility semantics, roving focus, and controlled state management from Base Radio Group.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-radio-group"
+  manager="npm"
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate framework facades, or import directly from `@proto.ui/prototypes-bootstrap-2-3-2/radio-group`.
+
+## Usage
+
+```tsx
+import {
+  BootstrapLabelRoot,
+  BootstrapRadioGroupIndicator,
+  BootstrapRadioGroupItem,
+  BootstrapRadioGroupRoot,
+} from '../proto-ui/components/react';
+
+export function RadioGroupUsage() {
+  return (
+    <BootstrapRadioGroupRoot defaultValue="comfortable" a11yLabel="Display density">
+      <div className="flex items-center gap-2">
+        <BootstrapRadioGroupItem value="default">
+          <BootstrapRadioGroupIndicator />
+        </BootstrapRadioGroupItem>
+        <BootstrapLabelRoot>Default</BootstrapLabelRoot>
+      </div>
+      <div className="flex items-center gap-2">
+        <BootstrapRadioGroupItem value="comfortable">
+          <BootstrapRadioGroupIndicator />
+        </BootstrapRadioGroupItem>
+        <BootstrapLabelRoot>Comfortable</BootstrapLabelRoot>
+      </div>
+      <div className="flex items-center gap-2">
+        <BootstrapRadioGroupItem value="compact">
+          <BootstrapRadioGroupIndicator />
+        </BootstrapRadioGroupItem>
+        <BootstrapLabelRoot>Compact</BootstrapLabelRoot>
+      </div>
+    </BootstrapRadioGroupRoot>
+  );
+}
+```
+
+### Styling & Accessibility
+
+- Unchecked indicators display an inset beveled light well (`#f5f5f5` → `#f9f9f9`), switching to the classic `#0088cc` → `#0077b3` vertical gradient with a 6px white center dot when checked.
+- Keyboard focus displays the classic soft blue focus glow (`rgba(82, 168, 236, 0.6)`) alongside forced-colors outline preservation.
+- Arrow keys move roving focus and select across enabled items; `Home` / `End` jump to the first and last enabled items; `Space` selects the focused item.
+
+## Examples
+
+### Description
+
+Pair each radio item with 12px classic helper text explaining the choice.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Choice Card
+
+Use 4px-radius inset option panels that highlight with Bootstrap's pale blue accent when selected.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Fieldset
+
+Group plan choices with `FieldRoot`, `FieldLabel`, and `FieldDescription`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disable a single item or the entire group using classic `opacity-65` and `cursor-not-allowed` feedback.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Combine `FieldRoot` and `FieldError` to show Bootstrap 2.3.2 error validation feedback (`#b94a48`).
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-radio-group-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string (required)', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator, Events & Methods
+
+- **Indicator**: No props; mirrors checked and disabled state from its parent `Item`.
+- **Events**: `valueChange` (`{ value: string }`) on Root; `select` (`{ value: string }`) on Item.
+- **Methods**: `requestValue(value)`, `resetValue()`, `focusFirst()`, `focusLast()`, `focusNext()`, `focusPrev()`, `focusSelected()`, `focusSelf()` on Root.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-RADIO-GROUP.yaml',
+    'P-BOOTSTRAP-2-3-2-RADIO-GROUP-ITEM.yaml',
+    'P-BOOTSTRAP-2-3-2-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
+/>

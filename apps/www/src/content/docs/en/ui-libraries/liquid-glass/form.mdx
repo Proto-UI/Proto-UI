@@ -4,8 +4,10 @@ description: 'A Liquid Glass form container that coordinates field validation, k
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Form composes `Root`, `Field`, `Submit`, and `Reset` to validate registered fields (including async checks), emit form values keyed by field name on submit, and reset fields cleanly.
+Liquid Glass Form composes `Root`, `Field`, `Submit`, and `Reset` to validate registered fields (including async checks), emit form values keyed by field name on submit, and reset fields cleanly while keeping fields on a legible content surface and reserving glass for floating actions.
 
 ## Preview
 
@@ -13,26 +15,135 @@ Liquid Glass Form composes `Root`, `Field`, `Submit`, and `Reset` to validate re
   demoId="demo-liquid-glass-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source via `@proto.ui/prototypes-liquid-glass/form` (not yet included in the 0.2.0 stable release).
 
 ## Usage
 
-- **Parts**: `Root`, `Field`, `Submit`, `Reset`.
-- **Validation and submission**: activating `Submit` (or pressing Enter inside a focused single-line Field, Number Field, or Input OTP, excluding IME composition and modifiers) validates every enabled registered field and emits `submit` with values keyed by field name once valid. Disabled fields are excluded and duplicate names are ignored; in-flight async checks discard stale submissions on edit, cancel, or unmount. Form does not trigger network requests, navigation, or hidden HTML inputs.
-- **Reset**: `Reset` or `requestReset()` restores uncontrolled initial values, proposes resets to controlled fields without overwriting them, cancels pending edits/validation, and emits `reset`. `resetValidation()` clears validation state only.
-- **Action buttons**: `FormSubmit` and `FormReset` share Liquid Glass Button visual feedback and accept `material="auto"` or `"opaque"`, reverting to opaque styling when disabled.
+```tsx
+import {
+  LiquidGlassFormRoot,
+  LiquidGlassFormField,
+  LiquidGlassFormSubmit,
+  LiquidGlassFormReset,
+  LiquidGlassFieldLabel,
+  LiquidGlassFieldControl,
+  LiquidGlassFieldError,
+} from '../proto-ui/components/react';
+
+export function ExampleLiquidGlassForm() {
+  return (
+    <LiquidGlassFormRoot
+      ariaLabel="Workspace settings"
+      onSubmit={({ values }) => console.log(values)}
+    >
+      <LiquidGlassFormField name="workspace" required>
+        <LiquidGlassFieldLabel>Workspace name</LiquidGlassFieldLabel>
+        <LiquidGlassFieldControl placeholder="Design Systems" />
+        <LiquidGlassFieldError />
+      </LiquidGlassFormField>
+      <div className="flex items-center gap-2">
+        <LiquidGlassFormSubmit variant="prominent" material="auto">
+          Save workspace
+        </LiquidGlassFormSubmit>
+        <LiquidGlassFormReset variant="regular" material="auto">
+          Reset
+        </LiquidGlassFormReset>
+      </div>
+    </LiquidGlassFormRoot>
+  );
+}
+```
+
+### Material Hierarchy & Accessibility Fallbacks
+
+- **Avoid glass-on-glass**: Keep form fields and helper text on a legible content surface, and use `material="auto"` on floating action buttons (`Submit` defaults to tinted `prominent` glass; `Reset` defaults to `regular` glass). Inside translucent sheets or cards, switch action controls to `material="opaque"` so glass layers never stack.
+- **System preference fallbacks**: When Reduce Transparency (`reducedTransparency`) or Increase Contrast (`increasedContrast`) is active, action buttons withdraw optical glass to their opaque style fills. When Reduce Motion (`reducedMotion`) is active, press deformation is suppressed. Disabled buttons withdraw glass while preserving readable contrast.
+- **Validation and submission**: Activating `Submit` (or pressing `Enter` in a focused single-line input) validates all enabled registered fields and emits `submit` with keyed values. Disabled fields are excluded, duplicate names throw `FORM_DUPLICATE_NAME` during serialization, and invalid `FormField` parts switch to `text-destructive`.
+
+## Examples
+
+### Profile form
+
+Showcases clear separation between the legible form content surface and floating Liquid Glass action controls over a colorful backdrop:
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material hierarchy and opaque fallback
+
+Compare `material="auto"` (`prominent` tinted glass + `regular` glass) against `material="opaque"` (for avoiding glass-on-glass inside translucent surfaces, including `destructive` actions):
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-form-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Async validation and nested fieldsets
+
+Demonstrates versioned external async validation requests, stale-result rejection, and nested `Fieldset` disabling:
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-form-validation"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Method / Event | Description |
-| --- | --- | --- |
-| Root | `disabled` | Disables the form and propagates disabled state to contained fields |
-| Root | `requestReset()`, `resetValidation()` | Resets values and validation / clears validation only |
-| Root | `submit`, `reset` | Emits form values keyed by field name on valid submit / emitted on reset |
-| Field | — | Registers a field for form validation and serialization |
-| Submit / Reset | `material` | `'auto' \| 'opaque'`; exposes `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf()` |
+### FormRoot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+Exposed states: `disabled`, `pending`, `submitted`. Methods: `getValues()`, `requestSubmit()`, `requestReset()`, `resetValidation()`, `cancelSubmit()`. Events: `submit`, `invalid`, `reset`.
+
+### FormField
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'prominent' / 'regular'",
+    },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+Exposed states: `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`. Methods: `focusSelf(options?)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-FORM.yaml', 'P-BASE-FORM.yaml']}
+/>

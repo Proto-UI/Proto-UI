@@ -1,0 +1,117 @@
+---
+title: 'Liquid Glass Textarea'
+description: 'A legible opaque content-layer multiline text editor with concentric rounded geometry designed to pair cleanly with Liquid Glass controls.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Textarea follows the Apple Liquid Glass Human Interface Guidelines separation between the opaque Content Layer and floating Liquid Glass controls: the editor renders on a high-legibility opaque surface (`bg-background`, `rounded-2xl`, crisp border) without applying translucent glass directly onto editable text, pairing cleanly with prominent Liquid Glass action buttons.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Available from workspace source via `@proto.ui/prototypes-liquid-glass/textarea` (and `@proto.ui/prototypes-liquid-glass/field` for form composition).
+
+## Usage
+
+```tsx
+import { LiquidGlassTextareaRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassTextareaRoot placeholder="Type your message here." rows={4} />
+```
+
+- **Content Layer hierarchy**: Text editing stays on an opaque, readable surface rather than stacking glass on content; pairing the editor's `rounded-2xl` geometry inside a `rounded-3xl` container preserves concentric corner radii.
+- **Accessibility and state styling**: Keyboard focus shows a `forced-colors`-aware outer focus ring; disabled state uses semantic `bg-muted` and `text-muted-foreground` fills rather than lowering element opacity so fallback contrast stays readable; invalid state renders a semantic destructive border and halo via `FieldTextarea`.
+- **Inherited semantics**: Controlled/uncontrolled values, IME composition events, `resetValue()`, `focusSelf()`, and `blurSelf()` are owned by [Base Textarea](/en/ui-libraries/base/textarea/).
+
+## Examples
+
+### Field
+
+Compose `Field`, `FieldLabel`, `FieldDescription`, and `FieldTextarea` for accessible labeling and helper text.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disabled editors switch to a muted background and foreground pair while preserving contrast without opacity drop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` and `errors` to `Field` to display semantic destructive border/ring styling and an accessible error message.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Button
+
+Pair the opaque content-layer Textarea with `regular` and `prominent` Liquid Glass action buttons to demonstrate clear content-vs-control layering without glass-on-glass stacking.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+The following props belong to `Root` (pass `value` for controlled mode; `minLength` and `maxLength` default to `-1` when unlimited):
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string | undefined', default: 'uncontrolled' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+- **Exposed states**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing` (plus `invalid` and `pending` on `FieldTextarea`).
+- **Exposed methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue()`.
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
+/>

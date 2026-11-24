@@ -5,8 +5,9 @@ description: '支持关键词过滤搜索与严格选项值绑定的 Brutalist �
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Combobox 将可编辑搜索输入框与下拉选项列表结合，确保已提交的 `value` 始终对应真实选项标识，未匹配的输入文本不会被自动当作有效选项。
+Brutalist Combobox 将可编辑搜索输入框与下拉选项列表结合，遵循 5px `rounded-base` 圆角、2px 黑色边框与硬边投影规范，确保已提交的 `value` 始终对应真实选项标识。
 
 ## 预览
 
@@ -14,39 +15,88 @@ Brutalist Combobox 将可编辑搜索输入框与下拉选项列表结合，确�
   demoId="demo-brutalist-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前 Combobox 仅在源码工作区（`@proto.ui/prototypes-brutalist/combobox`）提供，尚未进入 `0.2.0` 稳定版 CLI 注册表。
 
 ## 用法
 
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-brutalist/combobox';
+```
+
+```html
+<brutalist-combobox-root a11y-label="Framework">
+  <brutalist-combobox-input placeholder="Select framework..."></brutalist-combobox-input>
+  <brutalist-combobox-trigger>▾</brutalist-combobox-trigger>
+  <brutalist-combobox-content>
+    <brutalist-combobox-item value="next.js" text-value="Next.js">Next.js</brutalist-combobox-item>
+    <brutalist-combobox-item value="sveltekit" text-value="SvelteKit"
+      >SvelteKit</brutalist-combobox-item
+    >
+    <brutalist-combobox-item value="astro" text-value="Astro">Astro</brutalist-combobox-item>
+    <brutalist-combobox-empty>No framework found.</brutalist-combobox-empty>
+  </brutalist-combobox-content>
+</brutalist-combobox-root>
+```
+
 ### 部件组成
 
-Combobox 由 `Root`、`Input`、`Content`、`Item`、`Empty` 和 `Trigger` 组成：
-
 - **Root**：分别管理已选选项值 `value`、搜索框文本 `inputValue` 和弹层状态 `open`，三者均可独立受控。
-- **Input**：承载单行搜索编辑器；使用方向键切换高亮选项时焦点始终保持在输入框内，输入法合成期间不会触发误选。
-- **Content**：锚定在输入框下方的选项浮层，支持方向、对齐、偏移与碰撞留白配置。
-- **Item**：候选项，按 `textValue` 与 `keywords` 执行忽略大小写和重音的匹配；禁用项或重复值不可提交。
-- **Empty**：无匹配项时自动显示的空状态提示。
-- **Trigger**：展开或收起下拉列表的触发按钮。
+- **Input**：单行搜索输入框，保持无阴影扁平编辑面与清晰焦点环；方向键导航时焦点停留在输入框内，IME 合成期间不会误选。
+- **Trigger**：抬起型触发按钮（4px 硬边黑影），点击切换选项列表展开状态。
+- **Content**：锚定在输入框下方的浮层面板（3px 硬边黑影），支持方向、对齐、偏移与碰撞留白配置。
+- **Item / Empty**：按 `textValue` 与 `keywords` 执行忽略大小写和重音的匹配；设置 `filter={false}` 可交由应用层自定义过滤。
 
-### 自定义过滤
+## 示例
 
-默认开启内置过滤（`filter={true}`）。如需在外部执行异步搜索或自定义匹配规则，将 `filter` 设为 `false` 并直接传入过滤后的 `Item` 列表即可。
+### 成员选择
+
+<PrototypePreviewer
+  demoId="demo-brutalist-combobox-users"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 时区检索
+
+<PrototypePreviewer
+  demoId="demo-brutalist-combobox-timezones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-brutalist-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+分别传入 `value`、`inputValue` 或 `open` 可独立控制对应状态。
+
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -56,12 +106,25 @@ Combobox 由 `Root`、`Input`、`Content`、`Item`、`Empty` 和 `Trigger` 组�
   ]}
 />
 
-分别传入 `value`、`inputValue` 或 `open` 可独立控制对应状态。
-
 ### 其他部件属性
 
-- **Input**：`placeholder?: string`、`a11yLabel?: string`、`name?: string`（默认均为 `''`）
-- **Content**：`side`（默认 `'bottom'`）、`align`（默认 `'start'`）、`sideOffset`（默认 `4`）、`collisionPadding`（默认 `8`）
-- **Item**：`value`、`textValue`、`keywords`（默认均为 `''`）、`disabled?: boolean`（默认 `false`）
-- **Empty**：无独立属性
-- **Trigger**：`disabled?: boolean`（默认 `false`）
+<ApiPropsTable
+  headers={{ name: '部件与属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input.placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '4' },
+    { name: 'Content.collisionPadding', type: 'number', default: '8' },
+    { name: 'Item.value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>

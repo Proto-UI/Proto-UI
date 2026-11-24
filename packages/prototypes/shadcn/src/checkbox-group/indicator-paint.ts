@@ -3,16 +3,13 @@ import {
   tw,
   type DelayTask,
   type DefHandle,
-  type BorrowedStateHandle,
+  type ObservedStateHandle,
   type RendererHandle,
   type State,
   type RunHandle,
 } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
-import type {
-  CheckboxGroupItemProps,
-  CheckboxGroupItemExposes,
-} from '@proto.ui/prototypes-base/checkbox-group';
+import type { CheckboxGroupItemExposes } from '@proto.ui/prototypes-base/checkbox-group';
 import { SHADCN_STYLE_SCOPE, type ShadcnStyleId } from '../style-scope';
 import type { ShadcnCheckboxGroupItemProps } from './types';
 
@@ -20,7 +17,7 @@ type GroupVisualProps = ShadcnCheckboxGroupItemProps;
 // The passive checkbox box uses the real `.cn-checkbox` recipe, not a second
 // Checkbox protocol. Group Root/Item/All remain the only value and input owners.
 const BOX_SHAPE: Readonly<Record<ShadcnStyleId, string>> = {
-  'new-york-v4': 'size-4 rounded-[4px]',
+  'new-york-v4': 'size-4 rounded-[4px] shadow-xs transition-shadow',
   vega: 'size-4 rounded-[4px] shadow-xs transition-shadow',
   nova: 'size-4 rounded-[4px] transition-colors',
   maia: 'size-4 rounded-[6px] transition-shadow',
@@ -31,26 +28,26 @@ const BOX_SHAPE: Readonly<Record<ShadcnStyleId, string>> = {
   rhea: 'size-4 rounded-[5px] transition-shadow',
 };
 const BOX_UNCHECKED: Readonly<Record<ShadcnStyleId, string>> = {
-  'new-york-v4': 'border-input bg-transparent text-foreground',
-  vega: 'border-input bg-transparent text-foreground',
-  nova: 'border-input bg-transparent text-foreground',
-  maia: 'border-input bg-transparent text-foreground',
-  lyra: 'border-input bg-transparent text-foreground',
-  mira: 'border-input bg-transparent text-foreground',
+  'new-york-v4': 'border-input bg-transparent dark:bg-input/30 text-foreground',
+  vega: 'border-input bg-transparent dark:bg-input/30 text-foreground',
+  nova: 'border-input bg-transparent dark:bg-input/30 text-foreground',
+  maia: 'border-input bg-transparent dark:bg-input/30 text-foreground',
+  lyra: 'border-input bg-transparent dark:bg-input/30 text-foreground',
+  mira: 'border-input bg-transparent dark:bg-input/30 text-foreground',
   luma: 'border-transparent bg-input/90 text-foreground',
   sera: 'border-input bg-transparent text-foreground',
   rhea: 'border-transparent bg-input/90 text-foreground',
 };
-const ROW_FOCUS: Readonly<Record<ShadcnStyleId, string>> = {
-  'new-york-v4': 'forced-colors-focus-outline ring-ring/50 ring-3',
-  vega: 'forced-colors-focus-outline ring-ring/50 ring-3',
-  nova: 'forced-colors-focus-outline ring-ring/50 ring-3',
-  maia: 'forced-colors-focus-outline ring-ring/50 ring-[3px]',
-  lyra: 'forced-colors-focus-outline ring-ring/50 ring-1',
-  mira: 'forced-colors-focus-outline ring-ring/30 ring-2',
-  luma: 'forced-colors-focus-outline ring-ring/30 ring-3',
-  sera: 'forced-colors-focus-outline ring-ring/30 ring-2',
-  rhea: 'forced-colors-focus-outline ring-ring/30 ring-3',
+const BOX_FOCUS: Readonly<Record<ShadcnStyleId, string>> = {
+  'new-york-v4': 'border-ring ring-ring/50 ring-3',
+  vega: 'border-ring ring-ring/50 ring-3',
+  nova: 'border-ring ring-ring/50 ring-3',
+  maia: 'border-ring ring-ring/50 ring-[3px]',
+  lyra: 'border-ring ring-ring/50 ring-1',
+  mira: 'border-ring ring-ring/30 ring-2',
+  luma: 'border-ring ring-ring/30 ring-3',
+  sera: 'border-ring ring-ring/30 ring-2',
+  rhea: 'border-ring ring-ring/30 ring-3',
 };
 
 // Passive glyph grammar from ../checkbox/indicator.proto.ts. No interaction,
@@ -58,22 +55,14 @@ const ROW_FOCUS: Readonly<Record<ShadcnStyleId, string>> = {
 export function checkboxGroupGlyph(
   def: DefHandle<GroupVisualProps, CheckboxGroupItemExposes>,
   state: {
-    checked: BorrowedStateHandle<boolean, CheckboxGroupItemProps>;
-    indeterminate: BorrowedStateHandle<boolean, CheckboxGroupItemProps>;
-    focusVisible: State<boolean>;
+    checked: ObservedStateHandle<boolean, any>;
+    indeterminate: ObservedStateHandle<boolean, any>;
+    focusVisible: ObservedStateHandle<boolean, any>;
   },
   style: State<ShadcnStyleId>
 ) {
-  // Retain the admitted ordinary-row focus owner. Exact glyph-target focus
-  // geometry and wrapped-card label ring clearing remain separate gaps.
-  for (const profile of Object.keys(ROW_FOCUS) as ShadcnStyleId[]) {
-    def.rule({
-      when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
-      intent: (i) => i.feedback.style.use(tw(ROW_FOCUS[profile])),
-    });
-  }
-  // Every profile shares the same forced-colors outline; project it on the
-  // web-exposed focus fact so forced-colors media keeps a painted row signal.
+  // Keep forced-colors outline on the focused row host while painting the
+  // visual focus ring directly on the 16x16 indicator box.
   def.rule({
     when: (w) => w.state(state.focusVisible).eq(true),
     intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
@@ -91,6 +80,7 @@ export function checkboxGroupGlyph(
   };
   state.checked.watch(update);
   state.indeterminate.watch(update);
+  state.focusVisible.watch(update);
   let renderedStyle = style.get();
   const syncStyle = (run: RunHandle<GroupVisualProps>) => {
     if (style.get() !== renderedStyle) request(run);
@@ -121,7 +111,8 @@ export function checkboxGroupGlyph(
         style: tw(
           'pointer-events-none inline-flex shrink-0 items-center justify-center border',
           BOX_SHAPE[renderedStyle],
-          path ? 'border-primary bg-primary text-primary-foreground' : BOX_UNCHECKED[renderedStyle]
+          path ? 'border-primary bg-primary text-primary-foreground' : BOX_UNCHECKED[renderedStyle],
+          state.focusVisible.get() ? BOX_FOCUS[renderedStyle] : ''
         ),
       },
       r.svg.root(

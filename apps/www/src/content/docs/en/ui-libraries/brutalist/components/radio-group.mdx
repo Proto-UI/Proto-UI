@@ -5,48 +5,154 @@ description: 'A Brutalist-styled radio group with single selection, roving focus
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Radio Group lets users choose one option from a mutually exclusive set. Its Brutalist presentation lays out 16px circular 2px-bordered options in a vertical grid (`grid gap-2`), marking the checked option with a single filled inner dot and an offset focus ring.
+Radio Group lets users choose one option from a mutually exclusive set. Its Brutalist presentation lays out 16px circular 2px-bordered options in a vertical grid (`grid gap-2`), marking the checked option with a filled inner dot, dark-mode contrast adaptation, and an offset focus ring.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-radio-group" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `Root`, `Item`, and `Indicator` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/radio-group` (workspace CLI target: `brutalist-radio-group`).
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-radio-group" manager="npm" />
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate framework facades, or import `Root`, `Item`, and `Indicator` from `@proto.ui/prototypes-brutalist/radio-group`.
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  BrutalistLabelRoot,
+  BrutalistRadioGroupIndicator,
+  BrutalistRadioGroupItem,
+  BrutalistRadioGroupRoot,
+} from '../proto-ui/components/react';
 
-Radio Group is composed of `Root`, `Item`, and `Indicator`:
+export function RadioGroupUsage() {
+  return (
+    <BrutalistRadioGroupRoot defaultValue="comfortable" a11yLabel="Display density">
+      <div className="flex items-center gap-3">
+        <BrutalistRadioGroupItem value="default">
+          <BrutalistRadioGroupIndicator />
+        </BrutalistRadioGroupItem>
+        <BrutalistLabelRoot>Default</BrutalistLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <BrutalistRadioGroupItem value="comfortable">
+          <BrutalistRadioGroupIndicator />
+        </BrutalistRadioGroupItem>
+        <BrutalistLabelRoot>Comfortable</BrutalistLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <BrutalistRadioGroupItem value="compact">
+          <BrutalistRadioGroupIndicator />
+        </BrutalistRadioGroupItem>
+        <BrutalistLabelRoot>Compact</BrutalistLabelRoot>
+      </div>
+    </BrutalistRadioGroupRoot>
+  );
+}
+```
 
-- `Root`: Manages the selected value, item ordering, roving focus, disabled/read-only state, and `radiogroup` accessibility semantics.
-- `Item`: Renders each `radio` option with `aria-checked`, pointer/keyboard activation, and a constant resting circle surface.
-- `Indicator`: Renders a single `size-2` filled circular dot (`aria-hidden`) when its parent `Item` is checked.
+### Anatomy & Interaction
 
-### Keyboard & Read-Only Behavior
+```text
+BrutalistRadioGroupRoot
+├── BrutalistRadioGroupItem
+│   └── BrutalistRadioGroupIndicator
+└── BrutalistRadioGroupItem
+    └── BrutalistRadioGroupIndicator
+```
 
-- Arrow keys move roving focus across enabled items and select options; initial roving focus targets the checked item or the first enabled option.
-- Setting `readOnly` keeps roving focus active while blocking value updates, whereas `disabled` removes focus participation as well.
+- `Root`: Manages the selected value, item order, roving arrow-key focus, disabled/read-only state, and `radiogroup` accessibility semantics.
+- `Item`: Renders each 16px circular 2px-bordered `radio` option, switching ring and dot color to theme foreground in dark mode so contrast stays crisp on dark surfaces.
+- `Indicator`: Passive visual mark rendering a `size-2` filled circular dot (`aria-hidden`) when its parent `Item` is checked.
+- **Keyboard & Read-Only**: Arrow keys wrap and select across enabled items, and `Space` selects the focused item. `readOnly` keeps roving focus active while blocking updates; `disabled` removes focus participation.
+- **Form Composition**: Compose `fieldRadioGroup` from `@proto.ui/prototypes-brutalist/field` inside `FormField` for validation, error linkage, and `resetValue()`. See the [Form choice recipe](../../form/).
 
-### Form Composition
+## Examples
 
-A standalone `Root` does not auto-register with Field or Form. To wire up required validation, label/description/error linkage, and reset support, compose `fieldRadioGroup` from `@proto.ui/prototypes-brutalist/field` inside `FormField`. See the [Form choice recipe](../../form/) for a full example. Calling `resetValue()` restores the initial creation value (or emits a change request in controlled mode).
+### Description
+
+Combine `BrutalistLabelRoot` with helper descriptions so clicking visible labels selects each option.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-description"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Choice Card
+
+Use 2px-bordered, 5px-radius cards with 4px hard offset shadows for selectable plan cards.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-choice-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Fieldset
+
+Group subscription options with `FieldRoot`, `FieldLabel`, and `FieldDescription`.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-fieldset"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Disabled
+
+Disable a single `Item` or an entire `Root` group while dimming associated labels.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Invalid
+
+Pair `FieldRoot`, `FieldRadioGroup`, and `FieldError` to display validation feedback.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-radio-group-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The following props belong to `Root` (pass `value` to enter controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -54,7 +160,30 @@ The following props belong to `Root` (pass `value` to enter controlled mode):
   ]}
 />
 
-Other parts:
+### Item
 
-- **Item**: `value` defaults to `''`; `disabled` defaults to `false`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string (required)', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Indicator, Events & Methods
+
 - **Indicator**: No props.
+- **Events**: `valueChange` (`{ value: string }`) on Root; `select` (`{ value: string }`) on Item.
+- **Methods**: `requestValue(value)`, `resetValue()`, `focusFirst()`, `focusLast()`, `focusNext()`, `focusPrev()`, `focusSelected()`, `focusSelf()` on Root.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-RADIO-GROUP.yaml',
+    'P-BRUTALIST-RADIO-GROUP-ITEM.yaml',
+    'P-BRUTALIST-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
+/>

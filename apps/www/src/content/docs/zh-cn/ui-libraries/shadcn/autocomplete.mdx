@@ -3,7 +3,7 @@ title: 'Autocomplete'
 description: '支持输入过滤、候选项建议以及自由文本提交的自动补全输入框。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
@@ -15,51 +15,133 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+Autocomplete 当前仅在源码工作区提供，尚未进入 0.2.0 稳定版；可在工作区内直接引入 `@proto.ui/prototypes-shadcn/autocomplete` 并适配到 Web Components、React、Vue 3 或 Vue 2。
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```html
+<proto-ui-shadcn-autocomplete-root a11y-label="Framework">
+  <proto-ui-shadcn-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-shadcn-autocomplete-input>
+  <proto-ui-shadcn-autocomplete-trigger size="icon">
+    <span class="sr-only">Toggle suggestions</span>
+  </proto-ui-shadcn-autocomplete-trigger>
+  <proto-ui-shadcn-autocomplete-content>
+    <proto-ui-shadcn-autocomplete-item value="next" text-value="Next.js" keywords="react ssr">
+      Next.js
+    </proto-ui-shadcn-autocomplete-item>
+    <proto-ui-shadcn-autocomplete-item value="astro" text-value="Astro" keywords="islands static">
+      Astro
+    </proto-ui-shadcn-autocomplete-item>
+    <proto-ui-shadcn-autocomplete-empty>No matching frameworks.</proto-ui-shadcn-autocomplete-empty>
+  </proto-ui-shadcn-autocomplete-content>
+</proto-ui-shadcn-autocomplete-root>
+```
 
-### 部件结构
+### 部件结构与交互行为
 
-由 `Root`、`Input`、`Content`、`Item`、`Empty` 与 `Trigger` 组合而成：
+- **部件组成**：由 `Root`、`Input`、`Trigger`、`Content`、`Item` 与 `Empty` 组合而成。所有部件自动继承 `Root` 或外层 [Style Scope](../style-scope/) 的 `styleProfile`。
+- **值与查询分离**：`Root` 的 `value` 表示已提交的文本，`inputValue` 表示当前输入框内的查询内容。选中建议项时提交其 `textValue`；无高亮匹配项时按 `Enter` 可直接提交自由文本。
+- **内置过滤与空状态**：默认按 `textValue` 与 `keywords` 过滤，忽略大小写及重音符号；设置 `filter={false}` 时由应用层提供已过滤子项。`Empty` 按实际匹配数量自动显隐，禁用项与重复值选项不可提交。
+- **键盘与输入法**：方向键浏览建议时焦点始终停留在输入框内，IME 组合输入期间不会误触选择。
 
-- `Root` 的 `value` 表示已提交的文本，`inputValue` 表示当前输入框内的查询内容。
-- 选中某条建议时会提交该项的 `textValue`；当没有高亮的匹配项时，按 `Enter` 可直接提交当前输入的自由文本。
+## 示例
 
-### 过滤与交互行为
+### 关键词与忽略重音匹配
 
-- **内置过滤**：默认按 `textValue` 与 `keywords` 过滤，忽略大小写及重音符号。设置 `filter={false}` 时可由应用层自行传入过滤后的子项。
-- **空状态与禁用项**：`Empty` 根据实际匹配数量自动显隐；禁用项不可提交，重复值的选项也会被忽略。
-- **键盘与输入法**：使用方向键浏览建议列表时，焦点始终停留在单行输入框内；输入法（IME）组合输入期间不会误触选择。
-- **受控模式**：`open`、`value`、`inputValue` 各自独立支持受控，传入对应属性即可进入受控模式。
+内置过滤会同时匹配 `textValue` 与 `keywords`，并自动折叠重音符号（输入 `cafe`、`coffee` 或 `brazil` 均可命中对应条目）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无触发器的自由文本提交
+
+省略 `Trigger` 即可作为纯输入联想框使用；当输入内容不在建议列表中时，按 `Enter` 直接提交自定义文本。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-free-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+`disabled` 会禁用输入与弹层交互；`readOnly` 保留可读值并阻止修改或弹出建议。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 状态同步与弹层定位
+
+通过监听 `valueChange`、`inputValueChange` 与 `openChange` 事件，或传入 `value`、`inputValue`、`open` 属性，可独立控制三项状态并配置弹层定位及循环导航。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-autocomplete-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 传入 `value`、`inputValue` 或 `open` 会使对应状态进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'filter', type: 'boolean', default: 'true' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'inherit'",
+    },
   ]}
 />
 
-以上属性属于 `Root`。其他部件属性默认值：
+### Root 事件与方法
 
-- **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
-- **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
-- **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
-- **Trigger**：`disabled` 默认为 `false`。
+- **事件**：`valueChange`（`{ value, textValue, reason }`）、`inputValueChange`（`{ value, composing }`）、`openChange`（`{ open, reason }`）。
+- **方法**：`openPopup()`、`close()`、`setInputValue(value, composing?)`、`select(value, reason?)`。
+
+### 其他部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Input · size', type: "'sm' | 'default' | 'lg'", default: "'default'" },
+    { name: 'Input · invalid', type: 'boolean', default: 'false' },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger · size', type: "'default' | 'icon'", default: "'default'" },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '4 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
 ## 参考
 

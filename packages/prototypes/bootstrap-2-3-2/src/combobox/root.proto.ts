@@ -9,7 +9,7 @@ export default definePrototype<ComboboxRootProps, ComboboxRootExposes>({
   modules: asComboboxRoot.modules,
   setup(def) {
     const behavior = asComboboxRoot();
-    def.feedback.style.use(tw('relative inline-flex min-w-0 items-start'));
+    def.feedback.style.use(tw('relative inline-flex min-w-0 items-stretch'));
     return behavior.render;
   },
 });

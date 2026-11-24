@@ -1,3 +1,3 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
-import { createFormPrimitivesDemo } from './form-primitives-demo.shared';
-export default withShadcnRheaDemo(createFormPrimitivesDemo('shadcn', 'checkbox-group'));
+import { createCheckboxGroupExampleDemo } from './demo_components/checkbox-group/checkbox-group-demo.shared';
+export default withShadcnRheaDemo(createCheckboxGroupExampleDemo('shadcn', 'hero'));

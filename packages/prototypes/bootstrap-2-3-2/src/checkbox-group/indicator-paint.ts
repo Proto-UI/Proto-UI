@@ -3,7 +3,7 @@ import {
   tw,
   type DelayTask,
   type DefHandle,
-  type BorrowedStateHandle,
+  type ObservedStateHandle,
   type RendererHandle,
 } from '@proto.ui/core';
 import type {
@@ -17,8 +17,9 @@ import type {
 export function checkboxGroupGlyph(
   def: DefHandle<CheckboxGroupItemProps, CheckboxGroupItemExposes>,
   state: {
-    checked: BorrowedStateHandle<boolean, CheckboxGroupItemProps>;
-    indeterminate: BorrowedStateHandle<boolean, CheckboxGroupItemProps>;
+    checked: ObservedStateHandle<boolean, any>;
+    indeterminate: ObservedStateHandle<boolean, any>;
+    focusVisible: ObservedStateHandle<boolean, any>;
   }
 ) {
   let refresh: DelayTask | null = null;
@@ -32,23 +33,28 @@ export function checkboxGroupGlyph(
   };
   state.checked.watch(update);
   state.indeterminate.watch(update);
-  def.lifecycle.onUnmounted(() => {
+  state.focusVisible.watch(update);
+  const cancel = () => {
     refresh?.cancel();
     refresh = null;
-  });
+  };
+  def.lifecycle.onUnmounted(cancel);
+  def.lifecycle.onBeforeDispose(cancel);
   return (r: RendererHandle<any>) => {
     const path = state.indeterminate.get()
       ? 'M5 12H19'
       : state.checked.get()
         ? 'M5 12L10 17L19 7'
         : null;
-    const boxStyle = path
-      ? tw(
-          'pointer-events-none inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-primary bg-primary text-primary-foreground shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
-        )
-      : tw(
-          'pointer-events-none inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-[#333] shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
-        );
+    const boxStyle = tw(
+      'pointer-events-none inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]',
+      path
+        ? 'border-primary bg-[linear-gradient(#08c,#0077b3)] text-primary-foreground'
+        : 'border-[#ccc] bg-white text-[#333]',
+      state.focusVisible.get()
+        ? 'outline-none ring-2 ring-ring ring-offset-2 ring-offset-background'
+        : ''
+    );
     return r.el(
       'span',
       { style: boxStyle },

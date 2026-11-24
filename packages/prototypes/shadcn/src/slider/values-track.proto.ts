@@ -18,10 +18,38 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesPartExpo
     const style = setupSliderValuesStyle(def);
     const rail = def.feedback.style.declareDecoration();
     // Family rail paint; the inherited Values Track owns the shared AxisInput lease.
-    def.feedback.style.use(tw('relative block h-3 w-full select-none'));
+    def.feedback.style.use(tw('relative block h-3 w-full touch-none select-none'));
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.orientation).eq('horizontal'),
+          w.any(
+            w.state(style).eq('vega'),
+            w.state(style).eq('maia'),
+            w.state(style).eq('luma'),
+            w.state(style).eq('rhea'),
+            w.state(style).eq('new-york-v4')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('h-4')),
+    });
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),
       intent: (i) => i.feedback.style.use(tw('h-full min-h-40 w-3')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.orientation).eq('vertical'),
+          w.any(
+            w.state(style).eq('vega'),
+            w.state(style).eq('maia'),
+            w.state(style).eq('luma'),
+            w.state(style).eq('rhea'),
+            w.state(style).eq('new-york-v4')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('w-4')),
     });
     def.rule({
       when: (w) =>

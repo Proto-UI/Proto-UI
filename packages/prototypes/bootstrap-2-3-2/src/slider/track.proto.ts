@@ -8,7 +8,7 @@ export default definePrototype<SliderPartProps, SliderPartExposes>({
     const inherited = asSliderTrack();
     def.feedback.style.use(
       tw(
-        'relative block rounded-[4px] bg-[linear-gradient(#f5f5f5,#f9f9f9)] shadow-[inset_0_1px_2px_rgb(0_0_0/10%)]'
+        'relative block touch-none select-none rounded-[4px] bg-[linear-gradient(#f5f5f5,#f9f9f9)] shadow-[inset_0_1px_2px_rgb(0_0_0/10%)]'
       )
     );
     def.rule({
@@ -17,7 +17,11 @@ export default definePrototype<SliderPartProps, SliderPartExposes>({
     });
     def.rule({
       when: (w) => w.state(inherited.stateHandles!.orientation).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('h-full w-[20px]')),
+      intent: (i) => i.feedback.style.use(tw('h-full min-h-[160px] w-[20px]')),
+    });
+    def.rule({
+      when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-65')),
     });
     return inherited.render;
   },

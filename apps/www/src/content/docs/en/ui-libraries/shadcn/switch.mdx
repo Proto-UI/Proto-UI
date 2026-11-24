@@ -1,6 +1,6 @@
 ---
 title: 'Switch'
-description: 'A two-state toggle switch supporting size variants, field cards, and optional dragging.'
+description: 'A control that allows the user to toggle between checked and not checked, with size variants, field compositions, RTL support, and optional dragging.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Switch toggles a setting between on and off with keyboard support, size presets, choice-card compositions, and optional pointer dragging. The examples on this page use the **Shadcn Rhea** style preset.
+Switch toggles a setting between on and off with keyboard support, size and style presets, field choice-card compositions, RTL mirroring, and optional pointer dragging. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -24,48 +28,128 @@ Replace `wc` with `react` or `vue` to generate the facade for your target framew
 
 ## Usage
 
-### Sizes and presets
+```tsx
+import { ShadcnSwitch } from '@/components/ui/switch';
+```
 
-- Set `size="sm"` on `Root` for the compact switch, or omit `size` / pass `size="default"` for the standard size. `Thumb` derives its dimensions automatically from its `Root` and takes no `size` prop.
-- Changing `size` updates visuals only and does not alter `checked` or emit `checkedChange`.
-- Under the **Shadcn Rhea** preset, the default switch measures `2rem × 1.25rem` (`1rem` thumb) and the small switch measures `1.5rem × 1rem` (`0.75rem` thumb). The `new-york-v4` preset uses `2rem × 1.15rem` and `1.5rem × 0.875rem`.
+```tsx
+<ShadcnSwitch defaultChecked />
+```
 
-### Compositions and optional drag
+- **Anatomy & state**: `Root` owns controlled `checked`, uncontrolled `defaultChecked`, `Space` key toggling, focus, and disabled state. `Thumb` derives its checked state, size, style preset, and direction from its owning `Root` with no extra props.
+- **Sizes & presets**: Switch between `size="sm"` and `size="default"`, and choose among `rhea`, `nova`, `vega`, `maia`, `lyra`, `mira`, `luma`, `sera`, and `new-york-v4` via `styleProfile` or an ancestor `StyleScope`.
+- **Styling the generated Web Component**: The generated `ShadcnSwitchElement` registers as `<proto-ui-shadcn-switch>` with its default `Thumb`, whereas the raw `Root` registers as `<proto-ui-shadcn-switch-root>`. Target `proto-ui-shadcn-switch` in CSS when customizing the composed track, and see the [Web Component styling guide](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) for custom sizing examples.
 
-Switches toggle via click or `Space` by default; pass `draggable={true}` to opt into pointer dragging. Set `direction="rtl"` to mirror the thumb's positions and movement in either mode; direction defaults to `ltr` independently of the surrounding document. The example below pairs Switch with Field `Label`, `Description`, and Choice Cards: clicking the open area of a card toggles the switch while nested links such as “Learn more” keep their own navigation. Highlight styling follows the committed `checked` state, and `disabled` / `readOnly` switches ignore toggle attempts.
+## Examples
 
-<PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
+### Description
+
+Pair `Field`, `FieldLabel`, `FieldDescription`, and `FieldSwitch` to provide a title and helper description alongside the switch.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Choice Card
+
+Make the entire card clickable and highlight the border and background when the switch is checked.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Set `disabled` on the `Switch` or its enclosing `Field` to prevent toggling.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Set `invalid` on the enclosing `Field` to display destructive border and ring cues on `FieldSwitch`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Size
+
+Use the `size` prop to switch between `sm` and `default`. `Thumb` updates its dimensions and travel distance automatically.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Pass `direction="rtl"` to mirror the thumb resting position and travel direction for right-to-left layouts.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Compositions & Optional Drag
+
+Pass `draggable={true}` to opt into pointer dragging: dragging previews thumb position continuously and requests a state change on release. The combined showcase below demonstrates controlled, read-only, disabled, nested link isolation, and LTR / RTL dragging patterns.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-compositions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 <div id="switch-composition-details">
-  The label names the switch and the description provides helper text. Dragging previews thumb
-  position while pressed and requests a state change on release; Root manages the checked state.
+  The label supplies the accessible name and the description provides helper text; links inside a
+  choice card retain their own navigation without toggling the switch.
 </div>
-
-### Styling the generated Web Component
-
-- The generated `ShadcnSwitchElement` registers as `<proto-ui-shadcn-switch>` and includes its default `Thumb`. Target `proto-ui-shadcn-switch` in CSS when styling the composed track.
-- The separately exported raw `Root` registers as `<proto-ui-shadcn-switch-root>`, so selectors targeting that tag will not match the composed element.
-- When customizing dimensions, keep Root size, Thumb size, and checked travel distance in sync; see the [Web Component styling guide](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host) for a full LTR example. When using built-in presets, set `styleProfile` and `size` on `Root` so `Thumb` stays aligned automatically.
 
 ## API
 
-The following props belong to `Root` (pass `checked` for controlled mode; `Thumb` has no props):
+The following props and events belong to `Root` (`shadcn-switch-root` / `shadcn-field-switch`; `Thumb` has no props):
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'draggable', type: 'boolean', default: 'false' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
-    { name: 'size', type: "'default' | 'sm'", default: 'default' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'size', type: "'default' | 'sm'", default: "'default'" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'new-york-v4' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea'",
+      default: "'inherit'",
+    },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
   ]}
 />
+
+When composed as `shadcn-field-switch` inside `shadcn-field-root`, the switch also inherits `invalid`, `readOnly`, `disabled`, and label association from its owning `Field`.
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-SWITCH.yaml', 'P-BASE-SWITCH.yaml']}
+  files={[
+    'P-SHADCN-SWITCH.yaml',
+    'P-SHADCN-SWITCH-THUMB.yaml',
+    'P-BASE-SWITCH.yaml',
+    'P-BASE-SWITCH-THUMB.yaml',
+  ]}
 />

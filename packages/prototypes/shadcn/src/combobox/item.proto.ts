@@ -10,6 +10,8 @@ export default definePrototype<ComboboxItemProps, ComboboxItemExposes>({
     setupSearchItemPaint(def, {
       disabled: behavior.getState!('disabled')!,
       active: behavior.getState!('active')!,
+      selected: behavior.getState!('selected')!,
     });
+    return behavior.render;
   },
 });

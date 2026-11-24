@@ -3,9 +3,11 @@ title: 'Autocomplete'
 description: '支持输入建议过滤与自由文本提交的 Bootstrap 2.3.2 自动补全组件。'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Autocomplete 为单行输入框提供实时建议列表，既可以选择候选条目，也允许在无匹配项时按 `Enter` 直接提交自由文本。
+Bootstrap 2.3.2 Autocomplete 将经典 30px 表单输入与 `.typeahead` 下拉建议面板结合，保留标志性的蓝色聚焦外光晕、渐变按钮反馈与列表高亮，同时共享完整的 Base 自动补全与自由文本提交语义。
 
 ## 预览
 
@@ -13,30 +15,117 @@ Autocomplete 为单行输入框提供实时建议列表，既可以选择候选�
   demoId="demo-bootstrap-2-3-2-autocomplete"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供（`@proto.ui/prototypes-bootstrap-2-3-2/autocomplete`），尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-由 `Root`、`Input`、`Trigger`、`Content`、`Item` 和 `Empty` 组成：
+```html
+<proto-ui-bootstrap-2-3-2-autocomplete-root a11y-label="Framework">
+  <proto-ui-bootstrap-2-3-2-autocomplete-input
+    placeholder="Search frameworks…"
+  ></proto-ui-bootstrap-2-3-2-autocomplete-input>
+  <proto-ui-bootstrap-2-3-2-autocomplete-trigger
+    >Options</proto-ui-bootstrap-2-3-2-autocomplete-trigger
+  >
+  <proto-ui-bootstrap-2-3-2-autocomplete-content>
+    <proto-ui-bootstrap-2-3-2-autocomplete-item
+      value="next"
+      text-value="Next.js"
+      keywords="react ssr"
+    >
+      Next.js
+    </proto-ui-bootstrap-2-3-2-autocomplete-item>
+    <proto-ui-bootstrap-2-3-2-autocomplete-item
+      value="astro"
+      text-value="Astro"
+      keywords="islands static"
+    >
+      Astro
+    </proto-ui-bootstrap-2-3-2-autocomplete-item>
+    <proto-ui-bootstrap-2-3-2-autocomplete-empty
+      >No matching frameworks.</proto-ui-bootstrap-2-3-2-autocomplete-empty
+    >
+  </proto-ui-bootstrap-2-3-2-autocomplete-content>
+</proto-ui-bootstrap-2-3-2-autocomplete-root>
+```
 
-- **值与查询分离**：`Root` 的 `value` 表示已提交文本，`inputValue` 表示当前输入的查询内容。选择建议项会提交其 `textValue`；无高亮建议时按 `Enter` 可直接提交自由文本。
-- **过滤与空状态**：内置过滤同时匹配 `textValue` 和 `keywords`，忽略大小写与重音符号。如需由外部自行过滤，设置 `filter={false}`。`Empty` 在无匹配项时自动显示。
-- **键盘与输入法**：使用方向键浏览建议时焦点始终保持在输入框内；中文等 IME 组合输入期间不会误触发选择。禁用项及重复值选项不可提交。
-- **独立受控**：`open`、`value` 和 `inputValue` 均支持独立受控，并通过对应的变更事件通知父组件。
+### 部件与交互说明
+
+- **部件组成**：由 `Root`、`Input`、`Trigger`、`Content`、`Item` 与 `Empty` 组成。
+- **值与查询分离**：`value` 表示已提交文本，`inputValue` 表示当前输入查询；选择建议提交 `textValue`，无高亮项时按 `Enter` 提交自由文本。
+- **过滤、键盘与输入法**：内置过滤匹配 `textValue` 与 `keywords` 并忽略大小写及重音；方向键导航期间焦点保持在 `Input` 内，IME 组合输入不会误触选择。
+
+## 示例
+
+### 关键词与忽略重音匹配
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-autocomplete-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无触发器的自由文本提交
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-autocomplete-free-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读状态
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-autocomplete-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `inputValue` / `open` | 分别控制已提交文本、查询文本与下拉展开状态 |
-| `Root` | `filter` | 是否启用内置过滤；设为 `false` 时由调用方提供已过滤列表 |
-| `Input` | — | 单行文本输入控件，保持键盘焦点 |
-| `Trigger` | — | 切换建议列表展开状态的按钮 |
-| `Content` | — | 建议列表容器 |
-| `Item` | `value` / `textValue` / `keywords` / `disabled` | 单个候选项；重复值与禁用项不可提交 |
-| `Empty` | — | 无匹配建议时的提示区域 |
+### Root
+
+传入 `value`、`inputValue` 或 `open` 可独立受控；暴露 `valueChange`、`inputValueChange`、`openChange` 事件与 `openPopup()`、`close()`、`setInputValue()`、`select()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input · placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger · disabled', type: 'boolean', default: 'false' },
+    { name: 'Content · side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content · align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content · sideOffset / collisionPadding', type: 'number', default: '2 / 8' },
+    { name: 'Item · value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item · disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-AUTOCOMPLETE.yaml', 'P-BASE-AUTOCOMPLETE.yaml']}
+/>

@@ -1,11 +1,13 @@
 ---
-title: 'Field'
+title: 'Liquid Glass Field'
 description: 'A Liquid Glass form field combining accessible labeling, value reporting, and built-in or asynchronous validation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Field composes `Root`, `Label`, `Control`, `Description`, `Error`, and `Validity` with rounded editing surfaces and static optical styling, coordinating labeling, help text, validation state, and error display.
+Liquid Glass Field composes a label, editing control, secondary helper copy, and semantic error feedback with 2xl rounded geometry, a static editing surface with opaque fallback, and clear vibrancy hierarchy.
 
 ## Preview
 
@@ -13,51 +15,176 @@ Liquid Glass Field composes `Root`, `Label`, `Control`, `Description`, `Error`, 
   demoId="demo-liquid-glass-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError`, and `fieldValidity` from `@proto.ui/prototypes-liquid-glass/field`.
+Currently available from workspace source. Import core parts and bound controls from `@proto.ui/prototypes-liquid-glass/field`:
+
+```ts
+import {
+  fieldRoot,
+  fieldLabel,
+  fieldControl,
+  fieldDescription,
+  fieldError,
+  fieldValidity,
+  fieldTextarea,
+  fieldSelectTrigger,
+  fieldSwitch,
+} from '@proto.ui/prototypes-liquid-glass/field';
+```
 
 ## Usage
 
-### Composition and accessible wiring
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@proto.ui/prototypes-liquid-glass/field';
 
-- Place one `Control` inside `Root`, with an optional `Label`, `Description`, aggregate `Error`, and any number of passive `Validity` readers. Nested Roots maintain independent scopes and duplicate singleton parts are ignored.
-- `Control` provides a built-in single-line text editor. Custom value controls (such as Number Field, Input OTP, Slider, or Checkbox Group) integrate through `asFieldControl` and `asControlLabel().target(..., FIELD_LABEL_PAIR)`.
-- Field automatically links and cleans up `aria-labelledby`, `aria-describedby`, and (only while `invalid` is true) `aria-errormessage` without manual DOM IDs, while syncing `aria-required`, `aria-invalid`, `aria-busy`, and `aria-readonly`.
-- Clicking `Label` focuses the paired enabled `Control` without adding a Tab stop, ignoring drags, modified clicks, and nested interactive elements.
+export function ProfileField() {
+  return (
+    <FieldRoot required minLength={3}>
+      <FieldLabel>Username</FieldLabel>
+      <FieldControl placeholder="Max Leiter" />
+      <FieldDescription>Choose a unique username for your account.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
 
-### Built-in and asynchronous validation
+### Material and hierarchy notes
 
-- **Built-in rules**: `required` treats `null`, `false`, empty strings, and empty arrays as empty (`0` and whitespace are filled; no implicit trimming). `minLength` and `maxLength` count UTF-16 code units and skip optional empty strings. Built-in flags are `valueMissing`, `tooShort`, and `tooLong`; external errors use `customError`.
-- **Timing and controlled state**: `validationMode` defaults to `'onBlur'` and also supports `'onChange'` (waiting for IME `compositionend`) and `'manual'`. When `invalid` is controlled, `validityChange` emits proposals without overwriting your prop. `resetValidation()` clears validation and `touched` without changing the value or `dirty` baseline.
-- **Asynchronous checks**: with `externalValidation={true}`, passing built-in checks emits `validationRequest` (`{ requestId, value, reason }`). Call `resolveValidation(requestId, { invalid, errors })` when your check completes; stale replies are automatically discarded after value changes, newer requests, unmount, or disable/readOnly transitions.
-- **Error rendering**: `Error` displays `message`, then current `errors`, then a built-in English fallback. Error unmounts when closed by default (set `keepMounted={true}` to keep a hidden node mounted). Pair with a LiveRegion when live announcements are required.
+- **Static editing surface with opaque fallback**: `Control` declares a static `liquid-glass` material candidate while retaining explicit `bg-background` and `text-foreground` fallback styling. Disabled states switch to `bg-muted` and `text-muted-foreground` rather than reducing surface opacity so fallback legibility stays intact.
+- **Semantic vibrancy**: Helper descriptions and validity text use muted secondary ink (`text-muted-foreground`), while invalid states use `text-destructive` and `border-destructive`.
+- **Automatic ARIA wiring**: Links and cleans up `aria-labelledby`, `aria-describedby`, and (while invalid) `aria-errormessage` without manual DOM IDs. Pair with [Fieldset](../fieldset/) and [Form](../form/) for group disabling or form submission.
 
-For grouped disabled state see [Fieldset](/en/ui-libraries/liquid-glass/fieldset/); for submission and reset see [Form](/en/ui-libraries/liquid-glass/form/).
+## Examples
+
+### Input
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Textarea
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Select
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal Settings Rows
+
+Use `orientation="horizontal"` for compact inline switch rows.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props | Defaults and notes |
-| --- | --- | --- |
-| Root | `invalid`, `errors` | Providing `invalid` enables controlled validity; `errors` supplies messages |
-| Root | `defaultInvalid`, `defaultErrors` | Initialization-only uncontrolled defaults |
-| Root | `disabled`, `readOnly`, `required` | All `false`; combine with local Control policy |
-| Root | `minLength`, `maxLength` | Default `-1` (unbounded); non-negative UTF-16 code-unit bounds |
-| Root | `validationMode` | `'onBlur'` (default), `'onChange'`, or `'manual'` |
-| Root | `externalValidation` | `false`; emits `validationRequest` after built-in checks pass |
-| Control | `value`, `defaultValue` | Controlled or uncontrolled text value (fixed on initialization) |
-| Control | `disabled`, `readOnly`, `required` | Local policy (cannot override an active Root constraint) |
-| Control | `placeholder`, `name`, `autoComplete`, `inputMode`, `enterKeyHint`, `ariaLabel` | Supported text-editor hints |
-| Label | `activation` | `true`; pointer click requests focus on the enabled Control |
-| Description | — | Passive, selectable help content from your children |
-| Error | `message`, `keepMounted` | Optional localized override; `keepMounted` defaults to `false` |
-| Validity | — | Passive state and `getValidity()` snapshot reader |
+### Root props
 
-### Events and methods
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default', description: 'Description' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: 'Layout orientation for label and control',
+    },
+    { name: 'invalid', type: 'boolean', description: 'Controlled invalid state' },
+    { name: 'errors', type: 'string[]', description: 'Controlled error messages' },
+    {
+      name: 'defaultInvalid',
+      type: 'boolean',
+      default: 'false',
+      description: 'Initial uncontrolled invalid state',
+    },
+    {
+      name: 'defaultErrors',
+      type: 'string[]',
+      default: '[]',
+      description: 'Initial uncontrolled error messages',
+    },
+    {
+      name: 'disabled',
+      type: 'boolean',
+      default: 'false',
+      description: 'Disables field and control',
+    },
+    {
+      name: 'readOnly',
+      type: 'boolean',
+      default: 'false',
+      description: 'Blocks edits while keeping focus',
+    },
+    { name: 'required', type: 'boolean', default: 'false', description: 'Marks field as required' },
+    {
+      name: 'minLength',
+      type: 'number',
+      default: '-1',
+      description: 'Minimum UTF-16 length (-1 disables)',
+    },
+    {
+      name: 'maxLength',
+      type: 'number',
+      default: '-1',
+      description: 'Maximum UTF-16 length (-1 disables)',
+    },
+    {
+      name: 'validationMode',
+      type: "'onBlur' | 'onChange' | 'manual'",
+      default: 'onBlur',
+      description: 'When validation runs',
+    },
+    {
+      name: 'externalValidation',
+      type: 'boolean',
+      default: 'false',
+      description: 'Emits validationRequest after built-in checks pass',
+    },
+  ]}
+/>
 
-- Root methods: `validate(reason?)`, `resolveValidation(requestId, result)`, `cancelValidation()`, `resetValidation()`, `focusControl(options?)`, `getValidity()`.
-- Root states: `invalid`, `pending`, `dirty`, `touched`, `filled`, `focused`, `disabled`, `readOnly`, `required`.
-- Root events: `validityChange` (status, flags, and errors snapshot) and `validationRequest` (`{ requestId, value, reason }`), mapped to `onValidityChange`, `onValidationRequest`, and `onValueChange` in adapters.
+### Control & other parts
+
+- **Control**: `value` / `defaultValue`, `disabled`, `readOnly`, `required`, `placeholder`, `name`, `autoComplete`, `inputMode`, `enterKeyHint`, `ariaLabel`.
+- **Bound controls**: `fieldTextarea`, `fieldSelectTrigger`, `fieldSwitch`.
+- **Label**: `activation?: boolean` (default `true`).
+- **Error**: `message?: string`, `keepMounted?: boolean` (default `false`).
+- **Methods & events (Root)**: `validate(reason?)`, `resolveValidation(requestId, result)`, `cancelValidation()`, `resetValidation()`, `focusControl(options?)`, `getValidity()`; events `validityChange`, `validationRequest`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-FIELD.yaml',
+    'P-LIQUID-GLASS-FIELD-LABEL.yaml',
+    'P-LIQUID-GLASS-FIELD-CONTROL.yaml',
+    'P-LIQUID-GLASS-FIELD-DESCRIPTION.yaml',
+    'P-LIQUID-GLASS-FIELD-ERROR.yaml',
+    'P-LIQUID-GLASS-FIELD-VALIDITY.yaml',
+  ]}
+/>

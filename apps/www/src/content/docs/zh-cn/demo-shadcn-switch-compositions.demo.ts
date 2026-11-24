@@ -4,6 +4,7 @@ import type { DemoChild, DemoNode, DemoSpec } from '@/components/PrototypePrevie
 type SwitchExample = {
   id: string;
   title: string;
+  description: string;
   checked: boolean;
   card?: boolean;
   disabled?: boolean;
@@ -15,15 +16,72 @@ type SwitchExample = {
 
 // App composition only: Base remains the sole activation/value owner.
 export const SWITCH_COMPOSITION_CASES: readonly SwitchExample[] = [
-  { id: 'description', title: 'Share across devices', checked: false },
-  { id: 'choice', title: 'Enable notifications', checked: false, card: true },
-  { id: 'selected', title: 'Sync notifications', checked: true, card: true },
-  { id: 'disabled', title: 'Archived notifications', checked: true, disabled: true, card: true },
-  { id: 'controlled', title: 'Owner keeps this off', checked: false, controlled: true, card: true },
-  { id: 'readonly', title: 'Read-only notifications', checked: false, readOnly: true, card: true },
-  { id: 'rtl', title: 'المشاركة عبر الأجهزة', checked: true, direction: 'rtl' },
-  { id: 'drag', title: 'Optional drag ability', checked: false, draggable: true },
-  { id: 'drag-rtl', title: 'السحب الاختياري', checked: false, draggable: true, direction: 'rtl' },
+  {
+    id: 'description',
+    title: 'Share across devices',
+    description: 'Focus is shared across devices, and turns off when you leave the app.',
+    checked: false,
+  },
+  {
+    id: 'choice',
+    title: 'Enable notifications',
+    description: 'Receive notifications when focus mode is enabled or disabled.',
+    checked: false,
+    card: true,
+  },
+  {
+    id: 'selected',
+    title: 'Sync notifications',
+    description: 'Keep notification preferences synced across your signed-in devices.',
+    checked: true,
+    card: true,
+  },
+  {
+    id: 'disabled',
+    title: 'Archived notifications',
+    description: 'This preference is currently unavailable for archived projects.',
+    checked: true,
+    disabled: true,
+    card: true,
+  },
+  {
+    id: 'controlled',
+    title: 'Managed sync policy',
+    description: 'Controlled by workspace policy; toggle requests are handled by the parent state.',
+    checked: false,
+    controlled: true,
+    card: true,
+  },
+  {
+    id: 'readonly',
+    title: 'Read-only notifications',
+    description: 'Visible for reference; changes are locked while review mode is active.',
+    checked: false,
+    readOnly: true,
+    card: true,
+  },
+  {
+    id: 'rtl',
+    title: 'المشاركة عبر الأجهزة',
+    description: 'يتم مشاركة التركيز عبر الأجهزة، ويتم إيقاف تشغيله عند مغادرة التطبيق.',
+    checked: true,
+    direction: 'rtl',
+  },
+  {
+    id: 'drag',
+    title: 'Draggable switch',
+    description: 'Hold and drag the thumb across the track, then release to toggle.',
+    checked: false,
+    draggable: true,
+  },
+  {
+    id: 'drag-rtl',
+    title: 'السحب الاختياري',
+    description: 'اضغط مع الاستمرار واسحب المقبض لتبديل الحالة.',
+    checked: false,
+    draggable: true,
+    direction: 'rtl',
+  },
 ];
 
 const atom = (
@@ -45,7 +103,7 @@ const demo: DemoSpec = {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'grid w-full max-w-lg gap-6',
+    className: 'grid w-full max-w-lg gap-4',
     children: SWITCH_COMPOSITION_CASES.map(
       (entry): DemoNode => ({
         kind: 'box',
@@ -71,13 +129,10 @@ const demo: DemoSpec = {
                     entry.card ? "after:absolute after:inset-0 after:content-['']" : undefined
                   ),
                   atom('field-description', `${entry.id}-description`, {}, [
-                    entry.draggable
-                      ? 'Optional enhancement: hold and drag the thumb; release requests a value.'
-                      : entry.controlled
-                        ? 'Requests are counted below; the owner deliberately retains the off value.'
-                        : 'Focus is shared across devices. Help remains separate from the control name.',
+                    entry.description,
                     ...(entry.id === 'choice'
                       ? [
+                          ' ',
                           {
                             kind: 'box' as const,
                             tag: 'a' as const,
@@ -113,7 +168,7 @@ const demo: DemoSpec = {
             tag: 'span',
             ref: `${entry.id}-requests`,
             attrs: { 'aria-hidden': 'true', 'data-request-count': '0' },
-            className: 'text-xs text-muted-foreground',
+            className: 'sr-only',
             children: ['Requests: 0'],
           },
         ],

@@ -1,13 +1,13 @@
 ---
 title: 'Brutalist Number Field'
-description: 'A numeric input with stepper buttons, localized formatting, empty-value support, and label scrubbing.'
+description: 'A Brutalist numeric input with stepper buttons, localized formatting, nullable values, and label scrubbing.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Number Field combines a `spinbutton` text input with increment and decrement buttons, localized number formatting, optional empty values, label scrubbing, and `Field` / `Form` integration.
+Brutalist Number Field follows the Brutalist design contract (DM Sans typography, `5px` `rounded-base` corners, `2px` borders, shadowless editable input paired with `2px` border-color offset steppers) while inheriting the complete Base Number Field protocol.
 
 ## Preview
 
@@ -15,46 +15,102 @@ Brutalist Number Field combines a `spinbutton` text input with increment and dec
   demoId="demo-brutalist-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts directly from `@proto.ui/prototypes-brutalist/number-field`:
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-brutalist/number-field';
+```
 
 ## Usage
 
-### Parts
+```tsx
+<BrutalistNumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <BrutalistNumberFieldLabel>Quantity</BrutalistNumberFieldLabel>
+  <BrutalistNumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </BrutalistNumberFieldDecrement>
+  <BrutalistNumberFieldInput />
+  <BrutalistNumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </BrutalistNumberFieldIncrement>
+</BrutalistNumberFieldRoot>
+```
 
-Number Field consists of `Root`, `Label`, `Input`, `Control`, `Increment`, and `Decrement`:
+- **Parts**: `Root` owns the `number | null` value, bounds, formatting, and state; `Input` handles standalone editing (swap in `Control` inside `Field` or `FormField` for `FieldLabel`, invalid styling, serialization, and reset); `Label` names the editor and supports horizontal drag when `scrub` is enabled; `Increment` and `Decrement` share keyboard step logic.
+- **Keyboard and IME**: `ArrowUp` / `ArrowDown` step by `step`, holding `Shift` multiplies by 10, and `Home` / `End` jump to `min` / `max`. IME composition automatically pauses parsing, commits, stepping, and scrubbing.
+- **Formatting and nullability**: Use `locale` and `formatOptions` for decimal, currency, or percent display and parsing; set `allowEmpty` to allow clearing and committing `null`.
 
-- **Root**: Manages `number | null` via `value` / `defaultValue`, finite bounds `min` / `max` (default `0` / `100`), positive `step` (default `1`), formatting, and `disabled` / `readOnly` state.
-- **Input**: Standalone text editor with `spinbutton` semantics. Allows incomplete drafts while typing and commits a valid number or restores the last accepted value on blur or `Enter`.
-- **Control**: Use instead of `Input` inside `Field` or `FormField` to integrate `FieldLabel`, numeric validation, form serialization, and reset.
-- **Increment / Decrement**: Stepper buttons sharing the same step logic as keyboard arrows.
-- **Label**: Names the standalone input and doubles as a horizontal drag target when `scrub` is enabled.
+## Examples
 
-### Formatting, empty values, and interaction
+### Currency and Percent Formatting
 
-- **Keyboard**: `ArrowUp` / `ArrowDown` steps by `step`, holding `Shift` multiplies by 10, and `Home` / `End` jumps to `min` / `max`. Parsing, committing, stepping, and scrubbing pause automatically during IME composition.
-- **Locale formatting**: Set `locale` and `formatOptions` for decimal, currency, or percent display and parsing. Display rounding never alters stored numeric precision; invalid formatting options set `formatInvalid` and fall back to ungrouped decimals.
-- **Empty values**: Enable `allowEmpty` so clearing and committing the input requests `null`. Read `getValue(): number | null` and `empty` to inspect empty state. The first step from `null` initializes to snapped `0` within `[min, max]`.
-- **Label scrubbing**: Enable `scrub` to drag across `Label` to adjust the value; `scrubSteps` (default `100`) sets how many steps equal one label width, and `direction="rtl"` reverses horizontal drag direction.
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label Scrubbing and Nullable Values
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled, Read-only, and Unbounded
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL Layout and Scrubbing
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root
+### Root Props
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'value', type: 'number | null', default: '—' },
     { name: 'defaultValue', type: 'number | null', default: '0' },
-    { name: 'min', type: 'number', default: '0' },
-    { name: 'max', type: 'number', default: '100' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
     { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'name', type: 'string', default: "''" },
     { name: 'allowEmpty', type: 'boolean', default: 'false' },
@@ -66,8 +122,30 @@ Number Field consists of `Root`, `Label`, `Input`, `Control`, `Increment`, and `
   ]}
 />
 
-`Label`, `Input`, `Control`, `Increment`, and `Decrement` declare no props of their own. Passing `value` (including `null`) enables controlled mode.
+### Events, Methods, and States
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Signature / Type', default: 'Part' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
+  ]}
+/>
 
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-NUMBER-FIELD.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-NUMBER-FIELD.yaml', 'P-BASE-NUMBER-FIELD.yaml']}
+/>

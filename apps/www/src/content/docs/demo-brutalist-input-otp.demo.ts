@@ -1,2 +1,3 @@
-import { createNumericInputDemo } from './numeric-input-demo.shared';
-export default createNumericInputDemo('brutalist', 'input-otp');
+import { createInputOtpHeroDemo } from './demo_components/input-otp/input-otp-demo.shared';
+
+export default createInputOtpHeroDemo('brutalist');

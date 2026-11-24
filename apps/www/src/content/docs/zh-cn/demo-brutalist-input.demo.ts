@@ -2,22 +2,27 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'flex w-full max-w-md flex-col gap-5',
+    className: 'flex w-full max-w-sm flex-col gap-5',
     children: [
       {
         kind: 'box',
         className: 'flex flex-col gap-2',
         children: [
-          { kind: 'box', className: 'text-sm font-medium', children: ['Name'] },
+          { kind: 'box', className: 'text-sm font-medium', children: ['Email'] },
           {
             kind: 'proto',
             prototypeId: 'brutalist-input-root',
-            props: { defaultValue: 'Guang', placeholder: 'Your name', ariaLabel: 'Name' },
+            props: {
+              defaultValue: 'alex@example.com',
+              placeholder: 'Email',
+              inputMode: 'email',
+              ariaLabel: 'Email',
+            },
           },
           {
             kind: 'box',
             className: 'text-xs text-muted-foreground',
-            children: ['The Text Control value, editing events, and focus remain Base-owned.'],
+            children: ['We will send account notifications to this address.'],
           },
         ],
       },
@@ -29,7 +34,11 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-input-root',
-            props: { defaultValue: 'Unavailable', disabled: true, ariaLabel: 'Disabled example' },
+            props: {
+              defaultValue: 'Disabled field',
+              disabled: true,
+              ariaLabel: 'Disabled example',
+            },
           },
         ],
       },
@@ -42,8 +51,9 @@ export default {
             kind: 'proto',
             prototypeId: 'brutalist-input-root',
             props: {
-              defaultValue: 'Base keeps this focusable.',
+              defaultValue: 'https://app.example.com/acme',
               readOnly: true,
+              inputMode: 'url',
               ariaLabel: 'Read-only example',
             },
           },

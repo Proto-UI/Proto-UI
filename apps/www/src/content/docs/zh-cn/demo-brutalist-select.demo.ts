@@ -1,31 +1,23 @@
-import type { DemoSetupContext, DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
-
-function setup({ host }: DemoSetupContext) {
-  const trigger = host.querySelector<HTMLElement>('[role="combobox"]');
-  if (!trigger) return;
-
-  const label = 'Surface selector';
-  const restoreLabel = () => {
-    if (trigger.getAttribute('aria-label') !== label) trigger.setAttribute('aria-label', label);
-  };
-  restoreLabel();
-  const observer = new MutationObserver(restoreLabel);
-  observer.observe(trigger, { attributes: true, attributeFilter: ['aria-label'] });
-  return () => observer.disconnect();
-}
+import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
 export default {
   type: 'demo',
-  setup,
   root: {
     kind: 'proto',
     prototypeId: 'brutalist-select-root',
-    props: { defaultValue: 'paper' },
     children: [
       {
         kind: 'proto',
         prototypeId: 'brutalist-select-trigger',
-        children: [{ kind: 'proto', prototypeId: 'brutalist-select-value' }],
+        className: 'w-48',
+        props: { accessibleLabel: 'Fruit selector' },
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-select-value',
+            props: { placeholder: 'Select a fruit' },
+          },
+        ],
       },
       {
         kind: 'proto',
@@ -34,14 +26,32 @@ export default {
           {
             kind: 'proto',
             prototypeId: 'brutalist-select-item',
-            props: { value: 'paper', textValue: 'Paper' },
-            children: ['Paper'],
+            props: { value: 'apple', textValue: 'Apple' },
+            children: ['Apple'],
           },
           {
             kind: 'proto',
             prototypeId: 'brutalist-select-item',
-            props: { value: 'ink', textValue: 'Ink' },
-            children: ['Ink'],
+            props: { value: 'banana', textValue: 'Banana' },
+            children: ['Banana'],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-select-item',
+            props: { value: 'blueberry', textValue: 'Blueberry' },
+            children: ['Blueberry'],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-select-item',
+            props: { value: 'grapes', textValue: 'Grapes' },
+            children: ['Grapes'],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'brutalist-select-item',
+            props: { value: 'pineapple', textValue: 'Pineapple' },
+            children: ['Pineapple'],
           },
         ],
       },

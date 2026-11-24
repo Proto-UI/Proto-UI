@@ -1,6 +1,6 @@
 ---
 title: 'Switch'
-description: '支持尺寸切换、表单组合与可选拖动的双态开关组件。'
+description: '用于在开启与关闭之间切换的双态开关组件，支持多种尺寸、表单组合、RTL 与可选拖动。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Switch 用于在开启与关闭两种状态之间切换，支持键盘操作、不同尺寸预设、选项卡片组合以及可选的指针拖动。本页示例使用 **Shadcn Rhea** 风格。
+Switch 用于在开启与关闭两种状态之间切换，支持键盘操作、多种尺寸与风格预设、Field 选项卡片组合、RTL 方向镜像以及可选的指针拖动。本页示例使用 **Shadcn Rhea** 风格。
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-switch"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -24,49 +28,128 @@ Switch 用于在开启与关闭两种状态之间切换，支持键盘操作、�
 
 ## 用法
 
-### 尺寸与预设
+```tsx
+import { ShadcnSwitch } from '@/components/ui/switch';
+```
 
-- 在 `Root` 上设置 `size="sm"` 可切换为小号开关，省略或设置 `size="default"` 使用默认尺寸。`Thumb` 会自动跟随所属 `Root` 的尺寸，无需单独传参。
-- 切换 `size` 仅更新视觉外观，不会改变 `checked` 值或触发 `checkedChange`。
-- 在 **Shadcn Rhea** 预设中，默认尺寸为 `2rem × 1.25rem`（Thumb 为 `1rem`），小号为 `1.5rem × 1rem`（Thumb 为 `0.75rem`）；`new-york-v4` 预设则沿用 `2rem × 1.15rem` 与 `1.5rem × 0.875rem` 的尺寸比例。
+```tsx
+<ShadcnSwitch defaultChecked />
+```
+
+- **结构与状态**：`Root` 负责管理受控 `checked`、非受控 `defaultChecked`、键盘 `Space` 切换、焦点与禁用状态；`Thumb` 自动跟随所属 `Root` 的状态、尺寸、风格预设与方向，无需重复传参。
+- **尺寸与预设**：通过 `size="sm"` 或 `size="default"` 切换尺寸，通过 `styleProfile`（或在父级使用 `StyleScope`）在 `rhea`、`nova`、`vega`、`maia`、`lyra`、`mira`、`luma`、`sera` 与 `new-york-v4` 之间切换外观。
+- **自定义 Web Component 样式**：CLI 生成的组合组件 `ShadcnSwitchElement` 使用标签 `<proto-ui-shadcn-switch>` 并内置默认 `Thumb`，覆盖轨道样式时请以 `proto-ui-shadcn-switch` 为选择器；单独导出的原始 `Root` 使用标签 `<proto-ui-shadcn-switch-root>`。完整自定义尺寸示例可参考 [Web Component 样式指南](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host)。
+
+## 示例
+
+### 带说明文字
+
+结合 `Field`、`FieldLabel`、`FieldDescription` 与 `FieldSwitch`，为开关提供清晰的标题与辅助说明。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 选项卡片
+
+将整张卡片作为可点击区域，在开关开启时同步高亮卡片边框与背景。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+在 `Switch` 或外层 `Field` 上设置 `disabled` 以阻止状态切换。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验失败状态
+
+在 `Field` 上设置 `invalid` 后，`FieldSwitch` 会呈现错误边框与外环提示。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 尺寸
+
+使用 `size` 属性在 `sm` 与 `default` 之间切换，`Thumb` 会自动匹配尺寸与位移距离。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 方向
+
+设置 `direction="rtl"` 可将滑块起点与移动方向镜像至从右向左，适用于阿拉伯语与希伯来语等从右到左排版。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### 组合模式与可选拖动
 
-Switch 默认通过点击或按 `Space` 键切换；传入 `draggable={true}` 可按需开启滑块拖动。两种模式均可通过 `direction="rtl"` 镜像滑块位置与移动方向；方向缺省为 `ltr`，不随外层文档方向改变。下方示例展示了搭配 Field `Label`、`Description` 以及 Choice Card 的完整组合用法：卡片空白区域可直接点击切换，内部的“Learn more”链接保留自身跳转行为；受控模式下卡片高亮跟随已确认的 `checked` 状态，`disabled` 与 `readOnly` 状态不会发出变更请求。
+传入 `draggable={true}` 可开启滑块拖动，拖动过程中实时预览位置，松开时提交变更请求。下方综合示例展示受控、只读、禁用、嵌套链接隔离以及 LTR / RTL 拖动组合。
 
-<PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-switch-compositions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 <div id="switch-composition-details">
-  Label 为开关提供名称，Description
-  提供辅助说明。按住拖动时仅实时预览滑块位置，松开时才提交状态变更请求；开关状态始终由 Root
-  统一管理。
+  Label 为开关提供无障碍名称，Description
+  提供辅助说明；卡片内部链接保留自身导航行为，不会误触开关切换。
 </div>
-
-### 自定义 Web Component 样式
-
-- CLI 生成的组合组件 `ShadcnSwitchElement` 使用标签 `<proto-ui-shadcn-switch>` 并内置默认 `Thumb`，覆盖轨道样式时请以 `proto-ui-shadcn-switch` 为选择器。
-- 单独导出的原始 `Root` 使用标签 `<proto-ui-shadcn-switch-root>`，其标签选择器不会命中上述组合元素。
-- 自定义轨道尺寸、滑块尺寸和选中位移时请同步调整三者比例；完整示例可参考 [Web Component 样式指南](https://github.com/Proto-UI/Proto-UI/blob/main/packages/adapters/web-component/README.md#styling-the-composed-host)。使用内置预设时，只需在 `Root` 上设置 `styleProfile` 和 `size`，`Thumb` 会自动匹配。
 
 ## API
 
-以下属性属于 `Root`（传入 `checked` 可进入受控模式，`Thumb` 无额外属性）：
+以下属性与事件属于 `Root`（`shadcn-switch-root` / `shadcn-field-switch`；`Thumb` 无额外属性）：
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
   rows={[
     { name: 'checked', type: 'boolean | undefined', default: '非受控' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'draggable', type: 'boolean', default: 'false' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
-    { name: 'size', type: "'default' | 'sm'", default: 'default' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'size', type: "'default' | 'sm'", default: "'default'" },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'new-york-v4' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea'",
+      default: "'inherit'",
+    },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
   ]}
 />
+
+当使用 `shadcn-field-switch` 搭配 `shadcn-field-root` 时，还可从所属 `Field` 继承 `invalid`、`readOnly`、`disabled` 与标签关联。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-SWITCH.yaml', 'P-BASE-SWITCH.yaml']}
+  files={[
+    'P-SHADCN-SWITCH.yaml',
+    'P-SHADCN-SWITCH-THUMB.yaml',
+    'P-BASE-SWITCH.yaml',
+    'P-BASE-SWITCH-THUMB.yaml',
+  ]}
 />

@@ -5,8 +5,9 @@ description: 'A searchable Brutalist dropdown selector that binds to committed o
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Combobox combines a searchable text input with an anchored option list. `value` always tracks a committed option key separately from the editable `inputValue`, so unmatched query text is never silently accepted as a selection.
+Brutalist Combobox combines a searchable text input with an anchored option list using 5px `rounded-base` corners, 2px black borders, and hard offset shadows. `value` always tracks a committed option key separately from the editable `inputValue`.
 
 ## Preview
 
@@ -14,39 +15,88 @@ Brutalist Combobox combines a searchable text input with an anchored option list
   demoId="demo-brutalist-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Combobox is currently available from workspace source (`@proto.ui/prototypes-brutalist/combobox`) and is not yet included in the `0.2.0` stable CLI registry.
 
 ## Usage
 
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-brutalist/combobox';
+```
+
+```html
+<brutalist-combobox-root a11y-label="Framework">
+  <brutalist-combobox-input placeholder="Select framework..."></brutalist-combobox-input>
+  <brutalist-combobox-trigger>▾</brutalist-combobox-trigger>
+  <brutalist-combobox-content>
+    <brutalist-combobox-item value="next.js" text-value="Next.js">Next.js</brutalist-combobox-item>
+    <brutalist-combobox-item value="sveltekit" text-value="SvelteKit"
+      >SvelteKit</brutalist-combobox-item
+    >
+    <brutalist-combobox-item value="astro" text-value="Astro">Astro</brutalist-combobox-item>
+    <brutalist-combobox-empty>No framework found.</brutalist-combobox-empty>
+  </brutalist-combobox-content>
+</brutalist-combobox-root>
+```
+
 ### Parts
 
-Combobox consists of `Root`, `Input`, `Content`, `Item`, `Empty`, and `Trigger`:
-
 - **Root**: Manages selected option `value`, search text `inputValue`, and popup `open` state, each independently controllable.
-- **Input**: Single-line editor that keeps focus during arrow-key navigation and avoids selecting during IME composition.
-- **Content**: Anchored option popup with configurable placement, alignment, offset, and collision padding.
-- **Item**: Selectable option matched case- and diacritic-insensitively against `textValue` and `keywords`. Disabled or duplicate-valued items cannot be selected.
-- **Empty**: Shown automatically when no options match the query.
-- **Trigger**: Button to open or close the option list.
+- **Input**: Flat editable field with crisp focus rings; keeps focus during arrow-key navigation and avoids selecting during IME composition.
+- **Trigger**: Raised 4px hard-shadow button to toggle the option list.
+- **Content**: Anchored floating popup panel with a 3px hard shadow and configurable placement, alignment, offset, and collision padding.
+- **Item / Empty**: Matches case- and diacritic-insensitively against `textValue` and `keywords`. Set `filter={false}` to filter options in your own application logic.
 
-### Custom filtering
+## Examples
 
-Built-in filtering is enabled by default (`filter={true}`). Set `filter={false}` to filter options in your own application logic and render only matching `Item` children.
+### Users
+
+<PrototypePreviewer
+  demoId="demo-brutalist-combobox-users"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Timezones
+
+<PrototypePreviewer
+  demoId="demo-brutalist-combobox-timezones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+<PrototypePreviewer
+  demoId="demo-brutalist-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+Pass `value`, `inputValue`, or `open` to control each state independently.
+
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -56,12 +106,25 @@ Built-in filtering is enabled by default (`filter={true}`). Set `filter={false}`
   ]}
 />
 
-Pass `value`, `inputValue`, or `open` to control each state independently.
-
 ### Other parts
 
-- **Input**: `placeholder?: string`, `a11yLabel?: string`, `name?: string` (all default to `''`)
-- **Content**: `side` (default `'bottom'`), `align` (default `'start'`), `sideOffset` (default `4`), `collisionPadding` (default `8`)
-- **Item**: `value`, `textValue`, `keywords` (all default to `''`), `disabled?: boolean` (default `false`)
-- **Empty**: No props
-- **Trigger**: `disabled?: boolean` (default `false`)
+<ApiPropsTable
+  headers={{ name: 'Part & Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input.placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '4' },
+    { name: 'Content.collisionPadding', type: 'number', default: '8' },
+    { name: 'Item.value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>

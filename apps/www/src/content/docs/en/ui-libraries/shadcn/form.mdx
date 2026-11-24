@@ -15,18 +15,100 @@ Coordinates validation, submission, and reset across form fields, supporting bot
   demoId="demo-shadcn-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+## Installation
+
+Currently available from workspace source via `@proto.ui/prototypes-shadcn/form` (not yet included in the 0.2.0 stable release).
+
+## Usage
+
+```tsx
+import {
+  ShadcnFormRoot,
+  ShadcnFormField,
+  ShadcnFormSubmit,
+  ShadcnFormReset,
+  ShadcnFieldLabel,
+  ShadcnFieldControl,
+  ShadcnFieldError,
+} from '../proto-ui/components/react';
+
+export function ExampleForm() {
+  return (
+    <ShadcnFormRoot
+      styleProfile="rhea"
+      ariaLabel="Account settings"
+      onSubmit={({ values }) => console.log(values)}
+    >
+      <ShadcnFormField styleProfile="rhea" name="username" required>
+        <ShadcnFieldLabel styleProfile="rhea">Username</ShadcnFieldLabel>
+        <ShadcnFieldControl styleProfile="rhea" placeholder="ada_lovelace" />
+        <ShadcnFieldError styleProfile="rhea" />
+      </ShadcnFormField>
+      <div className="flex items-center gap-2">
+        <ShadcnFormSubmit styleProfile="rhea">Save</ShadcnFormSubmit>
+        <ShadcnFormReset styleProfile="rhea" variant="outline">
+          Reset
+        </ShadcnFormReset>
+      </div>
+    </ShadcnFormRoot>
+  );
+}
+```
+
+### Anatomy
+
+- **Root**: Collects explicitly registered `FormField` parts, validates enabled fields, and emits `submit` with form values keyed by field name once all checks pass. Disabled fields (including those inside a disabled `Fieldset`) are excluded, and duplicate field names throw `FORM_DUPLICATE_NAME` during serialization. Setting `disabled` on `Root` cascades to all contained fields and actions.
+- **Field**: Extends `FieldRoot` with a submission `name`. Standalone `Checkbox`, `RadioGroup`, and `Switch` controls stay independent unless wrapped with `fieldCheckbox`, `fieldRadioGroup`, or `fieldSwitch` from `@proto.ui/prototypes-shadcn/field`.
+- **Submit / Reset**: Styled with matching button presets (`variant`, `size`, and `styleProfile`), supporting pointer and keyboard activation and exposing `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf()`.
+
+### Keyboard & Accessibility
+
+- **Implicit Enter submit**: Pressing `Enter` inside a focused single-line `Field`, `Number Field`, or `Input OTP` submits the form (ignoring IME composition, modifier keys, and key repeat).
+- **Focus on invalid**: When validation fails, `invalid` is emitted and focus moves to the first invalid field control.
+- **Reset vs clear validation**: `Reset` or `requestReset()` restores uncontrolled initial values, proposes initial values to controlled owners, cancels pending validation, and emits `reset`. Call `resetValidation()` to clear validation errors without modifying field values.
+
+## Examples
+
+### Profile form
+
+Combine `Fieldset`, a text input, and a multiline `Textarea` with a primary submit and an `outline` reset action:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action variants and sizes
+
+`FormSubmit` and `FormReset` accept `variant` (`default`, `secondary`, `outline`, `destructive`, `ghost`) and `size` (`sm`, `default`, `lg`):
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled fieldset
+
+Disabling a nested `Fieldset` cascades to its contained fields and automatically excludes them from submitted values:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ### Versioned async validation and nested controls
 
-This example demonstrates external validation requests delivered via `resolveValidation` with their `requestId`. Editing, resetting, or toggling `readOnly` before an older reply arrives automatically discards the stale result, and disabling a nested `Fieldset` omits its fields from submission:
+Demonstrates external validation requests delivered via `resolveValidation` with their `requestId`. Editing, resetting, or toggling `readOnly` before an older reply arrives automatically discards the stale result:
 
 <PrototypePreviewer
   demoId="demo-shadcn-form-validation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ### Explicit choice fields
@@ -37,38 +119,55 @@ Use `fieldCheckbox`, `fieldRadioGroup`, and `fieldSwitch` from `@proto.ui/protot
   demoId="demo-shadcn-field-choices"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Usage
-
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
-
-### Anatomy
-
-Compose `Form` from `Root`, `Field`, `Submit`, and `Reset`:
-
-- **Root**: Collects explicitly registered `FormField` parts, validates enabled fields, and emits form values keyed by field name on `submit` once all checks pass. Disabled fields (including those inside a disabled `Fieldset`) are omitted, and duplicate field names are rejected. Setting `disabled` on `Root` disables all contained fields.
-- **Field**: Declares the field's `name` and connects it to form submission and reset. Standalone `Checkbox`, `RadioGroup`, and `Switch` controls stay independent unless wrapped with `fieldCheckbox`, `fieldRadioGroup`, or `fieldSwitch`.
-- **Submit / Reset**: Styled with the matching button appearance, supporting pointer/keyboard activation and exposing `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`, and `focusSelf`.
-
-### Submission, async validation, and reset
-
-- **Implicit Enter submit**: Pressing `Enter` inside a focused single-line `Field`, `Number Field`, or `Input OTP` submits the form (ignoring IME composition, modifier keys, and key repeat).
-- **Async coordination**: Submission waits for active async validation requests and automatically cancels superseded attempts on edits, field removal, cancellation, or a newer submission.
-- **Reset**: `requestReset()` (or `Reset`) restores initial values for uncontrolled fields, proposes initial values for controlled fields, cancels pending validation, and emits `reset` without triggering change validation. Use `resetValidation()` to clear errors without modifying values.
-
 ## API
+
+### FormRoot
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
   ]}
 />
 
-These props belong to `Root`. `Field` defaults `name` to `''`; `Submit` and `Reset` default `disabled` to `false`.
+Exposed states: `disabled`, `pending`, `submitted`. Methods: `getValues()`, `requestSubmit()`, `requestReset()`, `resetValidation()`, `cancelSubmit()`. Events: `submit` (`{ values, submissionId }`), `invalid` (`{ names }`), `reset`.
+
+### FormField
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'secondary' | 'outline' | 'destructive' | 'ghost'",
+      default: "'default' / 'secondary'",
+    },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+Exposed states: `disabled`, `hovered`, `pressed`, `focused`, `focusVisible`. Methods: `focusSelf(options?)`.
 
 ## References
 

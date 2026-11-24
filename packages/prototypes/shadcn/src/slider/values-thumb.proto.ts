@@ -64,18 +64,24 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
             w.state(style).eq(id),
             w.any(
               w.state(state.disabled).eq(true),
-              w.all(w.state(state.focusVisible).eq(false), w.state(state.hovered).eq(false))
+              w.all(
+                w.state(state.focusVisible).eq(false),
+                w.state(state.hovered).eq(false),
+                w.state(state.dragging).eq(false)
+              )
             )
           ),
         intent: (i) => i.feedback.style.to(paint).use(recipe.rest),
       });
+      // Activity is the sole Root interaction's selected slot, never a second
+      // pointer/Trigger owner on Thumb; dragging reuses the active profile's ring.
       def.rule({
         when: (w) =>
           w.all(
             w.state(style).eq(id),
             w.state(state.disabled).eq(false),
             w.state(state.focusVisible).eq(false),
-            w.state(state.hovered).eq(true)
+            w.any(w.state(state.hovered).eq(true), w.state(state.dragging).eq(true))
           ),
         intent: (i) => i.feedback.style.to(paint).use(recipe.hover),
       });
@@ -93,17 +99,28 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
       when: (w) => w.all(w.state(style).eq('luma'), w.state(state.orientation).eq('vertical')),
       intent: (i) => i.feedback.style.to(paint).use(tw('h-6 w-4')),
     });
-    for (const id of ['luma', 'rhea'] as const)
+    for (const id of ['luma', 'rhea'] as const) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.not(w.meta('colorScheme').eq('dark'))),
         intent: (i) => i.feedback.style.to(paint).use(tw('bg-clip-padding')),
       });
-    // Activity is the sole Root interaction's selected slot, never a second
-    // pointer/Trigger owner on Thumb.
-    def.rule({
-      when: (w) => w.all(w.state(state.dragging).eq(true), w.state(state.disabled).eq(false)),
-      intent: (i) => i.feedback.style.to(paint).use(tw('ring-4 ring-ring/50')),
-    });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(id),
+            w.meta('colorScheme').eq('dark'),
+            w.any(
+              w.state(state.disabled).eq(true),
+              w.all(
+                w.state(state.focusVisible).eq(false),
+                w.state(state.hovered).eq(false),
+                w.state(state.dragging).eq(false)
+              )
+            )
+          ),
+        intent: (i) => i.feedback.style.to(paint).use(tw('ring-border')),
+      });
+    }
     return (r) => {
       const content = inherited.render!(r);
       return Array.isArray(content)

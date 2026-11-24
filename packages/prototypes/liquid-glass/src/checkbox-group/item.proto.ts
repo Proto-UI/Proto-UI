@@ -9,34 +9,40 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
   name: 'liquid-glass-checkbox-group-item',
   setup(def) {
     const inherited = asCheckboxGroupItem();
+    // Content-layer checkbox rows stay compact and neutral (no glass-on-glass card slabs).
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-11 items-center gap-2 rounded-2xl border border-border bg-background px-3 py-2 text-foreground outline-none'
+        'inline-flex min-h-6 min-w-0 items-center gap-2.5 text-sm font-medium leading-5 text-foreground select-none cursor-pointer outline-none'
       )
     );
     const state = inherited.stateHandles!;
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
+      // Avoid whole-host opacity so opaque fallback contrast stays readable.
+      intent: (i) =>
+        i.feedback.style.use(tw('text-muted-foreground cursor-not-allowed shadow-none')),
     });
     def.rule({
-      when: (w) => w.state(state.checked).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-primary bg-primary text-primary-foreground')),
-    });
-    def.rule({
-      when: (w) => w.state(state.indeterminate).eq(true),
-      intent: (i) => i.feedback.style.use(tw('border-primary bg-accent text-accent-foreground')),
+      when: (w) => w.all(w.state(state.readOnly).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
     });
     const glyph = checkboxGroupGlyph(def, state);
     const render = inherited.render;
     if (!render) throw new Error('[liquid-glass-checkbox-group-item] Missing Base renderer.');
     return (renderer) => {
       const content = render(renderer);
-      return [glyph(renderer), ...(Array.isArray(content) ? content : [content])];
+      return [
+        glyph(renderer),
+        renderer.el(
+          'span',
+          { style: tw('min-w-0 whitespace-normal break-words') },
+          ...(Array.isArray(content) ? content : [content])
+        ),
+      ];
     };
   },
 });

@@ -8,7 +8,12 @@ import type {
 } from '@proto.ui/prototypes-base/field';
 import type { ShadcnStyleProps } from '../style-scope';
 
-export type ShadcnFieldRootProps = FieldRootProps & ShadcnStyleProps;
+export type ShadcnFieldOrientation = 'vertical' | 'horizontal';
+
+export type ShadcnFieldRootProps = FieldRootProps &
+  ShadcnStyleProps & {
+    orientation?: ShadcnFieldOrientation;
+  };
 export type ShadcnFieldControlProps = FieldControlProps & ShadcnStyleProps;
 export type ShadcnFieldLabelProps = FieldLabelProps & ShadcnStyleProps;
 export type ShadcnFieldDescriptionProps = FieldDescriptionProps & ShadcnStyleProps;

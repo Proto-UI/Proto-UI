@@ -1,14 +1,17 @@
 import type { DemoSetupContext, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
-import { bindInputShellControl } from '@proto.ui/prototypes-shadcn/input-shell';
+import {
+  bindInputShellControl,
+  type InputShellProps,
+} from '@proto.ui/prototypes-shadcn/input-shell';
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 
-/** One real editor; the public binder owns the two-fact projection and its retirement. */
-export default {
+/** Interactive disabled toggle with public fact binding under Shadcn Rhea. */
+export default withShadcnRheaDemo({
   type: 'demo',
   setup({ refs, api }: DemoSetupContext) {
     let current = true;
     const disposers = new Set<() => void>();
-    // Demo setup and cleanup delimit the committed view. The normalized public
-    // expose port remains live; no State values or subscriptions are copied.
+    const shellProps: InputShellProps = { focusIndicator: 'ring' };
     const control = { getExposes: () => api.getExposes('control') };
     const binding = bindInputShellControl(
       {
@@ -21,13 +24,15 @@ export default {
       {
         instance: refs.shell,
         setFacts(facts) {
-          api.setProps('shell', facts);
-          refs.factState.textContent = `focusVisible=${facts.focusVisible} disabled=${facts.disabled}`;
+          api.setProps('shell', { ...shellProps, ...facts });
+          refs.toggleLabel.textContent = facts.disabled ? 'Enable input' : 'Disable input';
         },
       },
       control
     );
     api.setProps('toggleDisabled', {
+      variant: 'outline',
+      size: 'sm',
       onClick: () => {
         const disabled = api.getExposes('control')?.disabled as { get(): boolean };
         api.setProps('control', { disabled: !disabled.get() });
@@ -36,55 +41,56 @@ export default {
     return () => {
       current = false;
       binding.dispose();
-      for (const dispose of disposers) dispose();
+      for (const dispose of [...disposers]) dispose();
       disposers.clear();
     };
   },
   root: {
     kind: 'box',
-    className: 'grid w-full min-w-0 max-w-full gap-4 p-4',
+    className: 'grid w-full min-w-0 max-w-sm gap-3 p-4',
     children: [
       {
         kind: 'proto',
         prototypeId: 'shadcn-input-shell',
         ref: 'shell',
+        props: {
+          focusIndicator: 'ring',
+        },
         children: [
           {
             kind: 'proto',
             prototypeId: 'shadcn-input-shell-control',
             ref: 'control',
             props: {
-              placeholder: 'Search mail · 搜索邮件',
-              ariaLabel: 'Search mail · 搜索邮件',
+              placeholder: 'Search messages…',
+              ariaLabel: 'Search messages',
             },
           },
         ],
       },
       {
         kind: 'box',
-        className: 'flex flex-wrap gap-2',
+        className: 'flex items-center gap-2',
         children: [
           {
             kind: 'proto',
             prototypeId: 'shadcn-button',
             ref: 'toggleDisabled',
-            children: ['Toggle control disabled · 切换禁用'],
+            props: {
+              variant: 'outline',
+              size: 'sm',
+            },
+            children: [
+              {
+                kind: 'box',
+                ref: 'toggleLabel',
+                className: 'inline',
+                children: ['Disable input'],
+              },
+            ],
           },
         ],
       },
-      {
-        kind: 'box',
-        className: 'font-mono text-xs text-muted-foreground',
-        children: [
-          'shell facts: ',
-          { kind: 'box', ref: 'factState', className: 'inline', children: ['Waiting for control facts'] },
-        ],
-      },
-      {
-        kind: 'box',
-        className: 'text-xs text-muted-foreground',
-        children: ['The actual editor retains editing and focus ownership; the public binder projects only focus-visible and disabled facts. 控件保留编辑与焦点所有权。'],
-      },
     ],
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

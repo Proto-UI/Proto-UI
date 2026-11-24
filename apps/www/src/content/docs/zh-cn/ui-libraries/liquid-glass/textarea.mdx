@@ -1,0 +1,117 @@
+---
+title: 'Liquid Glass Textarea'
+description: '遵循内容层与玻璃层分离原则、采用清晰不透明编辑表面与同心圆角的多行文本输入框。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Textarea 遵循 Apple Liquid Glass 人机界面指南中的层次划分：将多行文本编辑区置于高可读性的不透明内容层（`bg-background`、`rounded-2xl`、清晰边框），不在文本输入表面叠加玻璃材质，从而与上方或旁侧的 Liquid Glass 操作按钮形成清晰视觉层级。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前以工作区源码提供，可从 `@proto.ui/prototypes-liquid-glass/textarea`（以及表单组合入口 `@proto.ui/prototypes-liquid-glass/field`）导入。
+
+## 用法
+
+```tsx
+import { LiquidGlassTextareaRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<LiquidGlassTextareaRoot placeholder="Type your message here." rows={4} />
+```
+
+- **内容层与材质层级**：文本编辑区始终保持不透明可读表面，避免玻璃叠玻璃或背景透出干扰阅读；将其置于外层 `rounded-3xl` 容器内时，`rounded-2xl` 内圆角保持同心圆角过渡。
+- **可访问性与状态反馈**：键盘焦点显示 `forced-colors` 兼容的高对比度外偏焦点环；禁用态使用语义化的 `bg-muted` 与 `text-muted-foreground`，不降低整块不透明度以确保高对比度回退可读；校验错误通过 `FieldTextarea` 呈现语义化红色边框与光晕。
+- **行为继承**：受控/非受控值、IME 组合事件、`resetValue()`、`focusSelf()` 与 `blurSelf()` 均由 [Base Textarea](/zh-cn/ui-libraries/base/textarea/) 统一提供。
+
+## 示例
+
+### 表单字段
+
+组合 `Field`、`FieldLabel`、`FieldDescription` 与 `FieldTextarea` 提供清晰的标签与说明关联。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用
+
+禁用状态下切换为柔和的 `bg-muted` 表面与弱化前景色，同时保持可读对比度。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 无效状态
+
+通过 `Field` 的 `invalid` 与 `errors` 属性显示语义化错误边框、提示环及错误信息。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配按钮
+
+将不透明内容层的 Textarea 与常规（`regular`）及强调（`prominent`）Liquid Glass 按钮搭配，呈现清晰的内容层与控制层分离。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-textarea-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+以下属性属于 `Root`（传入 `value` 可进入受控模式；未限制长度时 `minLength` 与 `maxLength` 为 `-1`）：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'rows', type: 'number', default: '2' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+- **暴露状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`（在 `FieldTextarea` 中额外暴露 `invalid` 与 `pending`）。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue()`。
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
+/>

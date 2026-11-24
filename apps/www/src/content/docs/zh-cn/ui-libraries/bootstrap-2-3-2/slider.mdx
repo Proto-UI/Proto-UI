@@ -1,11 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Slider'
-description: '支持指针/触摸拖动、步长吸附、键盘微调与表单集成的 Bootstrap 2.3.2 滑块组件。'
+description: '支持单值与多值范围拖动、步长吸附、键盘微调与表单集成的 Bootstrap 2.3.2 滑块组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Slider 用于在连续或离散数值区间内通过拖动或键盘选择单个数值，并支持无缝接入 `Field` 与 `Form`。
+Bootstrap 2.3.2 Slider 沿用经典 20px 内凹渐变轨道、蓝色渐变进度条与凸起按钮滑块风格，支持单值与多值范围选择，并可无缝接入 `Field` 与 `Form`。
 
 ## 预览
 
@@ -13,27 +15,127 @@ Bootstrap 2.3.2 Slider 用于在连续或离散数值区间内通过拖动或键
   demoId="demo-bootstrap-2-3-2-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-bootstrap-2-3-2/slider` 导入单值滑块与多值滑块 `sliderValues*` 部件。
 
 ## 用法
 
-由 `Root`、`Label`、`Track`、`Indicator`、`Thumb`（在 `Field` / `FormField` 内替换为 `FieldThumb`）和 `Value` 组成：
+```tsx
+import {
+  Bootstrap232SliderRoot,
+  Bootstrap232SliderTrack,
+  Bootstrap232SliderIndicator,
+  Bootstrap232SliderThumb,
+} from '../proto-ui/components/react';
 
-- **拖动与键盘**：在 `Track` 上支持鼠标与触摸拖动；聚焦 `Thumb` 后可使用方向键、`Shift`（10 倍步长）、`PageUp` / `PageDown` 以及 `Home` / `End` 调整数值，水平 `direction="rtl"` 自动反转左右方向键。数值从 `min` 起按 `step` 对齐并限制在 `[min, max]` 内。
-- **实时变更与提交**：受控模式下拖动发出 `valueChange` 请求但不直接覆盖外部值；操作完成时触发 `valueCommit`，取消拖动则恢复非受控拖动前的起值。
-- **表单集成**：在 `Field` / `FormField` 内使用 `FieldThumb` 替换 `Thumb`，即可联动 `FieldLabel` 激活、数值校验、`Form` 序列化与重置。
+export function Example() {
+  return (
+    <Bootstrap232SliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <Bootstrap232SliderTrack>
+        <Bootstrap232SliderIndicator />
+        <Bootstrap232SliderThumb />
+      </Bootstrap232SliderTrack>
+    </Bootstrap232SliderRoot>
+  );
+}
+```
+
+- **部件组成**：单值滑块由 `Root`、`Label`、`Track`、`Indicator`、`Thumb`（表单内替换为 `FieldThumb`）和 `Value` 组成；多值范围使用 `sliderValues*` 入口。
+- **拖动与键盘**：在 `Track` 上支持鼠标与触摸拖动；聚焦 `Thumb` 后支持方向键、`Shift`（10 倍步长）、`PageUp` / `PageDown` 与 `Home` / `End`（水平 RTL 自动反转）。
+- **受控与表单**：受控模式下发出 `valueChange` 提议并在完成时触发 `valueCommit`；`FieldThumb` 与 `Values Root` 自动联动 `FieldLabel`、校验与重置。
+
+## 示例
+
+### 范围选择
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-slider-values"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多滑块
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | 受控或初始滑块数值 |
-| `Root` | `min` / `max` / `step` | 数值上下界与步长 |
-| `Root` | `disabled` / `readOnly` / `orientation` / `direction` | 交互状态、方向与书写方向 |
-| `Root` | `valueChange` / `valueCommit` | 拖动过程请求事件与操作完成事件 |
-| `Label` / `Track` / `Indicator` / `Thumb` / `FieldThumb` / `Value` | — | 名称、轨道、进度指示、滑块手柄（表单内用 `FieldThumb`）与数值显示 |
+### Root（单值）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: '非受控' },
+    { name: 'defaultValue', type: 'number', default: '0' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'orientation', type: "'horizontal' | 'vertical'", default: 'horizontal' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+### Values Root 与子部件（多值）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | readonly number[]', default: '非受控' },
+    { name: 'defaultValue', type: 'number | readonly number[]', default: '0' },
+    { name: 'largeStep', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues', type: 'number', default: '0' },
+    { name: 'thumbCollisionBehavior', type: "'push' | 'swap' | 'none'", default: "'push'" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'index (Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Indicator)', type: 'number', default: '首尾范围' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-SLIDER.yaml',
+    'P-BOOTSTRAP-2-3-2-SLIDER-THUMB.yaml',
+    'P-BOOTSTRAP-2-3-2-SLIDER-FIELD-THUMB.yaml',
+    'P-BOOTSTRAP-2-3-2-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
+/>

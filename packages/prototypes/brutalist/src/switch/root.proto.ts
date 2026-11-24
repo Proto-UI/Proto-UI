@@ -2,8 +2,10 @@ import { definePrototype } from '@proto.ui/core';
 import { asSwitchRoot } from '@proto.ui/prototypes-base/switch';
 import type { BrutalistSwitchRootProps, BrutalistSwitchRootExposes } from './types';
 import { setupSwitchRootVisual } from './root-visual';
+
 export default definePrototype<BrutalistSwitchRootProps, BrutalistSwitchRootExposes>({
   name: 'brutalist-switch-root',
+  modules: asSwitchRoot.modules,
   setup(def) {
     const control = asSwitchRoot();
     if (!control.stateHandles)

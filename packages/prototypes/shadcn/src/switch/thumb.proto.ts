@@ -236,6 +236,10 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
       when: (w) => w.state(dragging).eq(true),
       intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     for (const profile of ['luma', 'rhea'] as const) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.not(w.meta('colorScheme').eq('dark'))),

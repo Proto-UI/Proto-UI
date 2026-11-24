@@ -1,13 +1,13 @@
 ---
 title: 'Number Field'
-description: 'A numeric input with stepping buttons, localized formatting, and label scrubbing.'
+description: 'A Shadcn numeric input with stepping buttons, localized formatting, nullable values, and label scrubbing.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Number Field provides a `spinbutton` numeric input supporting increment/decrement buttons, keyboard stepping, locale-aware formatting, nullable values, and drag-to-scrub on its label. The examples on this page use the **Shadcn Rhea** style preset.
+Number Field provides a `spinbutton` numeric input supporting increment/decrement buttons, keyboard stepping, `Intl` locale formatting, nullable values, and label drag-to-scrub. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,49 +15,107 @@ Number Field provides a `spinbutton` numeric input supporting increment/decremen
   demoId="demo-shadcn-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts directly from `@proto.ui/prototypes-shadcn/number-field`:
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-shadcn/number-field';
+```
 
 ## Usage
 
-Number Field consists of `Root`, `Label`, `Input`, `Control`, `Increment`, and `Decrement`:
+Compose `Root`, `Label`, `Input`, `Control`, `Increment`, and `Decrement`:
 
-- `Root` manages the `number | null` value, bounds (`min`/`max`, defaulting to `0`/`100`), positive `step` (`1`), and disabled/read-only state.
-- Use `Input` with `NumberFieldLabel` for standalone fields; inside `Field` or `FormField`, use `Control` instead so `FieldLabel`, validation, IME cancellation, serialization, and form reset connect automatically.
-- `Increment` and `Decrement` share the same stepping logic as keyboard arrow keys.
+```tsx
+<ShadcnNumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <ShadcnNumberFieldLabel>Quantity</ShadcnNumberFieldLabel>
+  <ShadcnNumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </ShadcnNumberFieldDecrement>
+  <ShadcnNumberFieldInput />
+  <ShadcnNumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </ShadcnNumberFieldIncrement>
+</ShadcnNumberFieldRoot>
+```
 
-### Editing and keyboard stepping
+Inside `Field` or `FormField`, replace `Input` with `Control` to connect `FieldLabel`, validation errors, form serialization, and reset automatically:
 
-- Incomplete drafts stay intact while typing; pressing `Enter` or blurring commits a valid number or restores the last accepted value.
-- `ArrowUp` / `ArrowDown` step by `step`, holding `Shift` multiplies by 10, and `Home` / `End` jump to `min` / `max`.
-- Pass `value` to enter controlled mode—user interactions emit update requests without overwriting the controlled value directly.
-- During IME composition, parsing, commits, stepping, and scrubbing pause automatically; changing `locale` preserves ongoing composition text.
+```tsx
+<ShadcnFieldRoot required>
+  <ShadcnFieldLabel>Quantity</ShadcnFieldLabel>
+  <ShadcnNumberFieldRoot defaultValue={1} min={1} max={99}>
+    <ShadcnNumberFieldDecrement>−</ShadcnNumberFieldDecrement>
+    <ShadcnNumberFieldControl />
+    <ShadcnNumberFieldIncrement>+</ShadcnNumberFieldIncrement>
+  </ShadcnNumberFieldRoot>
+  <ShadcnFieldError />
+</ShadcnFieldRoot>
+```
 
-### Localized formatting
+- **Keyboard and editing**: Incomplete drafts stay editable until `Enter` or blur commits a valid number or restores the last accepted value. `ArrowUp` / `ArrowDown` step by `step` (hold `Shift` for 10× steps), and `Home` / `End` jump to `min` / `max`. Parsing, commits, stepping, and scrubbing pause during IME composition.
+- **Localized formatting**: Configure `locale` and `formatOptions` for decimal, currency, and percent display and parsing without rounding away underlying precision. Invalid options expose `formatInvalid` and fall back to ungrouped decimals.
+- **Empty values and scrubbing**: Enable `allowEmpty` so clearing the field commits `null` (read exact `number | null` via `getValue()` and check `empty`). Enable `scrub` to drag horizontally across `Label` for continuous adjustment.
 
-Use `locale` and `formatOptions` for decimal, currency, and percent formatting as well as parsing localized digits, separators, and signs. Display rounding never mutates underlying numeric precision, including commits without edits. Invalid format options set `formatInvalid` and fall back to ungrouped decimals.
+## Examples
 
-### Empty values
+### Currency and Percent Formatting
 
-- Explicit `null` represents an empty field, and `value={null}` remains controlled.
-- `allowEmpty` defaults to `false`; enable it to allow clearing the input and committing `null`.
-- `getValue()` on `Root`, `Input`, and `Control` returns `number | null`, while `empty` flags emptiness. The compatibility numeric `value` getter holds the last finite number while empty; events and Field/Form integrations always receive actual `null`.
-- The first step from `null` initializes to snapped `0` within bounds.
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-### Label scrubbing
+### Label Scrubbing and Nullable Values
 
-Enable `scrub` to adjust the value continuously by dragging across `Label`:
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-- `scrubSteps` (default `100`) defines how many steps correspond to dragging across one initial label width; `direction="rtl"` reverses horizontal movement.
-- Releasing after a change commits once; canceling restores the starting value in uncontrolled mode. Text selection inside the input remains unaffected.
+### Disabled, Read-only, and Unbounded
+
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL Layout and Scrubbing
+
+<PrototypePreviewer
+  demoId="demo-shadcn-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (`Label`, `Input`, `Control`, `Increment`, and `Decrement` add no props; pass `value` for controlled mode):
+### Root Props
+
+Pass `value` (including `null`) for controlled mode. `Label`, `Input`, `Control`, `Increment`, and `Decrement` also accept an optional `styleProfile` prop to override the enclosing [Style Scope](../style-scope/).
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -79,6 +137,28 @@ The following props belong to `Root` (`Label`, `Input`, `Control`, `Increment`, 
     { name: 'scrub', type: 'boolean', default: 'false' },
     { name: 'scrubSteps', type: 'number', default: '100' },
     { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "Inherited scope or 'nova'" },
+  ]}
+/>
+
+### Events, Methods, and States
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Signature / Type', default: 'Part' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
   ]}
 />
 

@@ -1,6 +1,6 @@
 ---
 title: 'Select'
-description: '支持分组、键盘导航与类型预查的下拉选择器组件。'
+description: '支持分组、键盘导航、类型预查与多种定位模式的下拉单选器组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -12,7 +12,11 @@ Select 提供符合无障碍规范的下拉单选列表，在 Web Components、R
 
 ## 预览
 
-<PrototypePreviewer demoId="demo-shadcn-select" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## 安装
 
@@ -24,45 +28,187 @@ Select 提供符合无障碍规范的下拉单选列表，在 Web Components、R
 
 ## 用法
 
-Select 包含以下部件：
+```tsx
+import {
+  ShadcnSelectContent,
+  ShadcnSelectGroup,
+  ShadcnSelectItem,
+  ShadcnSelectItemText,
+  ShadcnSelectLabel,
+  ShadcnSelectRoot,
+  ShadcnSelectSurface,
+  ShadcnSelectTrigger,
+  ShadcnSelectValue,
+  ShadcnSelectViewport,
+} from '../proto-ui/components/react';
 
-- `Root`、`Trigger`、`Value`、`Content`、`Surface`、`Viewport`、`Item`、`ItemText`、`Group`、`Label` 和 `Separator`。
-- `Group` 用于分组选项，`Label` 为所属分组命名，`Separator` 作为无内容的装饰分隔线。所有部件（包括 Portal 弹出的内容）自动继承 `Root` 的样式作用域。
+export function ThemeSelect() {
+  return (
+    <ShadcnSelectRoot styleProfile="rhea">
+      <ShadcnSelectTrigger styleProfile="rhea" className="w-48" accessibleLabel="Theme">
+        <ShadcnSelectValue styleProfile="rhea" placeholder="Theme" />
+      </ShadcnSelectTrigger>
+      <ShadcnSelectContent styleProfile="rhea">
+        <ShadcnSelectSurface styleProfile="rhea">
+          <ShadcnSelectViewport styleProfile="rhea">
+            <ShadcnSelectGroup styleProfile="rhea">
+              <ShadcnSelectLabel styleProfile="rhea">Theme</ShadcnSelectLabel>
+              <ShadcnSelectItem styleProfile="rhea" value="light" textValue="Light">
+                <ShadcnSelectItemText styleProfile="rhea">Light</ShadcnSelectItemText>
+              </ShadcnSelectItem>
+              <ShadcnSelectItem styleProfile="rhea" value="dark" textValue="Dark">
+                <ShadcnSelectItemText styleProfile="rhea">Dark</ShadcnSelectItemText>
+              </ShadcnSelectItem>
+            </ShadcnSelectGroup>
+          </ShadcnSelectViewport>
+        </ShadcnSelectSurface>
+      </ShadcnSelectContent>
+    </ShadcnSelectRoot>
+  );
+}
+```
 
-### 外观与定位
+### 组合结构
 
-- `Trigger` 支持 `size="sm | default"` 以及 `appearance` 属性。在 `styleProfile="rhea"` 等现代预设下使用 `appearance="default"`；`appearance="ghost"` 仅在 `new-york-v4`（别名 `new-york`）预设下可用。
-- `Content` 支持 `position="item-aligned | popper"`，默认为 `item-aligned`。使用完整的 `Surface` → `Viewport` → `Item` → `ItemText` 结构可获得精确的 `item-aligned` 定位，同时也兼容 `popper` 定位。
+使用完整的十一部件结构以启用 `rhea` 等现代半透明预设与 `item-aligned` 对齐：
 
-### 输入设备与焦点分离
+```text
+SelectRoot
+├── SelectTrigger
+│   └── SelectValue
+└── SelectContent
+    └── SelectSurface
+        └── SelectViewport
+            ├── SelectGroup
+            │   ├── SelectLabel
+            │   └── SelectItem
+            │       └── SelectItemText
+            └── SelectSeparator
+```
 
-下方示例展示了可滚动下拉列表如何区分聚焦项与已提交值：无按键按住时的鼠标移动可高亮导航选项，而触摸、触控笔和拖动滚动不会误触悬停导航；受控模式下拒绝变更时，当前已提交值保持不变。
+- **键盘与无障碍**：点击或按 `Enter` / `Space` / `ArrowDown` / `ArrowUp` 展开列表；方向键与类型预查浏览选项，按 `Enter` / `Space` 提交，`Escape` 取消并将焦点返回 `Trigger`。可通过 `accessibleLabel` 或配合 `Field` 为 `Trigger` 提供无障碍名称。
+- **风格预设**：支持 `styleProfile`（`new-york-v4` / `new-york`、`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`），Portal 弹层自动继承 `Root` 的样式作用域。`Trigger` 的 `appearance="ghost"` 仅在 `new-york-v4` 预设下可用。
+
+## 示例
+
+### 选项对齐模式（Align Item With Trigger）
+
+通过 `Content` 的 `position="item-aligned | popper"` 切换选中项与触发器对齐，或紧贴触发器边缘弹出。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-align-item"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可滚动长列表（Scrollable）
+
+在 `Viewport` 上约束最大高度即可承载多分组长列表（如时区选择）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态（Disabled）
+
+支持禁用整个 `Root`，也支持单独禁用列表中的部分 `Item`（键盘导航自动跳过禁用项）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 触发器尺寸（Sizes）
+
+`Trigger` 支持 `size="sm"` 与 `size="default"` 两种高度。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态（Controlled）
+
+传入 `value` 与 `onValueChange` 即可由外部接管选中值，并可随时通过外部操作重置或同步。
 
 <PrototypePreviewer
   demoId="demo-shadcn-select-input"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+### 从右到左排版（RTL）
+
+在 `dir="rtl"` 容器中，文本对齐、逻辑内边距与选中勾选指示器自动随书写方向镜像。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ## API
 
-以下属性属于 `Root`（传入 `open` 或 `value` 可分别进入受控模式；`size` 与 `appearance` 属于 `Trigger`，`position` 属于 `Content`）：
+### Root
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+    { name: 'openChange', type: '(detail) => void', default: '—' },
+    { name: 'valueChange', type: '(detail) => void', default: '—' },
   ]}
 />
+
+### Trigger / Value
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Trigger.size', type: "'sm' | 'default'", default: "'default'" },
+    { name: 'Trigger.appearance', type: "'default' | 'ghost'", default: "'default'" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content / Item
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Content.position', type: "'item-aligned' | 'popper'", default: "'item-aligned'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'Content.sideOffset', type: 'number', default: '0' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: '继承 Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+`Surface`、`Viewport`、`ItemText`、`Group`、`Label` 与 `Separator` 均支持继承 `styleProfile`。
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-SELECT.yaml', 'P-BASE-SELECT.yaml']}
+  files={['P-SHADCN-SELECT.yaml', 'P-SHADCN-SELECT-STYLE.yaml', 'P-BASE-SELECT.yaml']}
 />

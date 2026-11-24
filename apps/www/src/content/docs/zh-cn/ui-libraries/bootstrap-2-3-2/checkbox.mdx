@@ -1,25 +1,23 @@
 ---
 title: 'Bootstrap 2.3.2 Checkbox'
-description: '基于 Base Checkbox 的 Bootstrap 2.3.2 自定义复选框组件。'
+description: '基于 Base Checkbox 的 Bootstrap 2.3.2 自定义复选框组件，支持选中、半选、受控与列表组合。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <DraftProjectionStyle />
 
-Bootstrap 2.3.2 Checkbox 采用自定义 `Root` / `Indicator` 结构来呈现 Bootstrap 2.3.2 视觉语言，不是归档版本原生 checkbox 的直接复刻，也不依赖旧版 Bootstrap JavaScript 或 Glyphicons。
+Bootstrap 2.3.2 Checkbox 采用自定义 `Root` / `Indicator` 结构来呈现 Bootstrap 2.3.2 经典的 14px 斜面渐变控件与蓝色聚焦光晕，不依赖旧版 Bootstrap JavaScript 或 Glyphicons。
 
 ## 预览
-
-可切换未选中、选中与半选（`mixed`）示例，并按 `Tab` 聚焦最后一个控件查看键盘焦点样式。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-checkbox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={true}
-  codePanel={false}
 />
 
 ## 安装
@@ -28,16 +26,102 @@ Bootstrap 2.3.2 Checkbox 采用自定义 `Root` / `Indicator` 结构来呈现 Bo
 
 ## 用法
 
-- **状态由 Root 统一管理**：支持受控与非受控 `checked`、`indeterminate`，处理指针与 `Space` 键激活、禁用、焦点以及带 `mixed` 状态的 `checkbox` 无障碍角色。
-- **Indicator**：放置在 `Root` 内部，自动根据所属 `Root` 状态显示勾号或横线；同时为半选和选中时优先显示半选横线。
-- **配色说明**：在深色页面中保持经典的归档 Bootstrap 2.3.2 浅色配色。
+```tsx
+import {
+  Bootstrap232CheckboxIndicator,
+  Bootstrap232CheckboxRoot,
+  Bootstrap232LabelRoot,
+} from '@proto.ui/prototypes-bootstrap-2-3-2';
+
+export function Example() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <Bootstrap232CheckboxRoot defaultChecked>
+        <Bootstrap232CheckboxIndicator />
+      </Bootstrap232CheckboxRoot>
+      <Bootstrap232LabelRoot>Accept terms and conditions</Bootstrap232LabelRoot>
+    </div>
+  );
+}
+```
+
+- **状态由 Root 统一管理**：支持受控与非受控 `checked`、`indeterminate`，处理指针与 `Space` 键激活、禁用、只读、焦点以及带 `mixed` 状态的 `checkbox` 无障碍角色。
+- **Indicator**：放置在 `Root` 内部，自动根据所属 `Root` 状态显示深色勾号或横线；同时为半选和选中时优先显示半选横线。
+- **经典视觉反馈**：悬停与按压延续 Bootstrap 2.3.2 斜面渐变响应，聚焦时显示 `#52a8ec` 蓝色外光晕，并在深色页面中保持经典的浅色控件配色。
+
+## 示例
+
+### 带说明文字
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控与半选
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多选列表
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表格行选择
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `checked` / `defaultChecked` | 受控或初始选中状态 |
-| `Root` | `indeterminate` / `defaultIndeterminate` | 受控或初始半选（`mixed`）状态 |
-| `Root` | `disabled` | 禁用复选框交互 |
-| `Root` | `checkedChange` / `indeterminateChange` | 选中与半选状态变更事件 |
-| `Indicator` | — | 视觉指示器，放置在 `Root` 内自动跟随状态 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'checked', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Root` 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`、`required`、`hovered`、`focused`、`focusVisible`、`pressed` 状态，`focusSelf(options?)` 与 `resetValue()` 方法，以及 `checkedChange`（`{ checked, indeterminate }`）与 `indeterminateChange`（`{ indeterminate }`）事件。
+
+### Indicator
+
+`Indicator` 不声明额外属性，放置在 `Root` 内部自动同步勾选与半选图标，暴露 `checked`、`indeterminate`、`isChecked()` 与 `isIndeterminate()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-CHECKBOX.yaml',
+    'P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>

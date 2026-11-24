@@ -1,8 +1,10 @@
 import type { FormFieldProps, FormFieldExposes } from '@proto.ui/prototypes-base/form';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asFormField } from '@proto.ui/prototypes-base/form';
+
 export default definePrototype<FormFieldProps, FormFieldExposes>({
   name: 'bootstrap-2-3-2-form-field',
+  modules: asFormField.modules,
   setup(def) {
     const inherited = asFormField();
     const field = inherited.getAsHookHandle!('as-field-root');

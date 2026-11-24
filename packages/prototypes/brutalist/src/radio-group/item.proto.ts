@@ -5,8 +5,8 @@ import type { BrutalistRadioGroupItemExposes, BrutalistRadioGroupItemProps } fro
 
 // Source: neobrutalism-components radio-group.tsx@3306a802 RadioPrimitive.Root.
 // The pinned item is a 16px circular 2px-bordered control; checked changes only
-// the indicator dot, never the item fill or border, so no checked rule exists
-// here. Focus and disabled reuse the family surface tokens.
+// the indicator dot, never the item fill or border. Dark mode switches ink and
+// ring color to foreground so the dot and outline remain legible on dark surfaces.
 const ITEM_SURFACE_TOKENS = [
   'inline-flex',
   'aspect-square',
@@ -19,6 +19,7 @@ const ITEM_SURFACE_TOKENS = [
   'border-border',
   'bg-transparent',
   'text-black',
+  'cursor-pointer',
   'outline-none',
   'select-none',
   'transition-none',
@@ -29,8 +30,10 @@ const radioGroupItem = definePrototype<
   BrutalistRadioGroupItemExposes
 >({
   name: 'brutalist-radio-group-item',
+  modules: asRadioGroupItem.modules,
   setup(def) {
-    const state = asRadioGroupItem().stateHandles;
+    const inherited = asRadioGroupItem();
+    const state = inherited.stateHandles;
     if (!state) {
       throw new Error(
         '[brutalist-radio-group-item] asRadioGroupItem must project Item state handles.'
@@ -41,6 +44,10 @@ const radioGroupItem = definePrototype<
     def.feedback.style.use(tw(ITEM_SURFACE_TOKENS));
 
     def.rule({
+      when: (when) => when.meta('colorScheme').eq('dark'),
+      intent: (intent) => intent.feedback.style.use(tw('border-foreground text-foreground')),
+    });
+    def.rule({
       when: (when) => when.state(focusVisible).eq(true),
       intent: (intent) => intent.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
     });
@@ -49,8 +56,7 @@ const radioGroupItem = definePrototype<
       intent: (intent) =>
         intent.feedback.style.use(tw(`${BRUTALIST_DISABLED_TOKENS} cursor-not-allowed`)),
     });
-    // Base owns checked, roving focus and activation. Upstream invalid styles
-    // stay omitted: this layer adds no validation owner and no checked variant.
+    return inherited.render;
   },
 });
 

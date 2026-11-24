@@ -1,53 +1,126 @@
 ---
 title: 'Brutalist Switch'
-description: '胶囊轨道、2px 黑边与机械式滑块行程的 Brutalist 风格开关组件。'
+description: '胶囊轨道、2px 黑边与机械式滑块行程的 Brutalist 风格开关组件，支持尺寸切换与表单组合。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Switch 用于在开启与关闭两种状态之间切换。Brutalist 风格采用 2px 黑边的胶囊轨道与白色圆形滑块，无外侧阴影，强调清晰的机械式状态切换。
+Switch 用于在开启与关闭两种状态之间切换。Brutalist 风格采用 2px 黑色边框的胶囊轨道与白色圆形滑块，无外侧阴影，强调清晰的机械式状态切换。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-switch` 添加，或从 `@proto.ui/prototypes-brutalist/switch` 导入。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-switch" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，也可直接从 `@proto.ui/prototypes-brutalist/switch` 导入。
 
 ## 用法
 
-### 外观与动效
+```tsx
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-brutalist/switch';
+```
 
-- **几何与配色**：在 16px 根字号下，轨道尺寸为 `24×48px`，白色圆形滑块为 `16px`。关闭时轨道呈中性底色，开启时切换为主色蓝；滑块保持白色，仅沿水平轴移动 `1.25rem`（20px，两端各留白 6px）。
-- **状态反馈**：过渡时长为 `150ms`，开启 `prefers-reduced-motion: reduce` 后立即切换位置；按下时轨道不位移、不增加阴影；键盘聚焦时显示外偏移焦点环；禁用状态下保持外观并阻止激活。
-- **文字与方向**：可见标签文本放在 Switch `Root` 内即可作为无障碍名称并支持点击切换，默认采用 DM Sans 字体（缺省字形回退到宿主字体）。滑块使用物理左右定位，在 RTL 父容器中同样保持居中且不越界。
+```html
+<proto-ui-brutalist-switch-root>
+  <proto-ui-brutalist-switch-thumb></proto-ui-brutalist-switch-thumb>
+  <span class="sr-only">Airplane Mode</span>
+</proto-ui-brutalist-switch-root>
+```
 
-### 交互说明
+- **几何与配色**：默认尺寸轨道为 `24×48px`（`16px` 白色圆形滑块，位移 `20px`）；`size="sm"` 轨道为 `20×36px`（`12px` 滑块，位移 `12px`）。关闭时轨道为中性底色，开启时切换为主色蓝。
+- **状态与动效**：滑块与轨道过渡时长为 `150ms`，开启 `prefers-reduced-motion: reduce` 后自动取消过渡动画；按下时轨道不位移、不增加阴影；键盘聚焦时显示外偏移焦点环。
+- **交互说明**：支持点击与 `Space` 键切换及受控模式 `checked`。当前版本暂未启用滑动手势拖动，`draggable` 固定为 `false`。
 
-- 点击与键盘激活均可正常切换状态；传入 `checked` 可进入受控模式。
-- 当前版本暂未启用滑动手势拖动，`draggable` 默认为 `false`（传入 `true` 会自动回退为 `false`）。
+## 示例
+
+### 带说明文字
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-description"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 选项卡片
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-choice-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 禁用状态
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 校验失败状态
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 尺寸
+
+使用 `size` 属性在 `sm` 与 `default` 之间切换。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-switch-sizes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下属性属于 `Root`（传入 `checked` 进入受控模式）：
+以下属性与事件属于 `Root`（`Thumb` 无额外属性）：
 
 <ApiPropsTable
-  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'checked', type: 'boolean | undefined', default: '非受控' },
     { name: 'defaultChecked', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'draggable', type: 'boolean', default: 'false' },
-    { name: 'direction', type: "'ltr' | 'rtl'", default: 'ltr' },
+    { name: 'size', type: "'default' | 'sm'", default: "'default'" },
+    { name: 'draggable', type: 'false', default: 'false' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+    { name: 'checkedChange', type: 'event ({ checked: boolean })', default: '—' },
+    { name: 'focusSelf', type: 'method (options?: FocusRequestOptions) => void', default: '—' },
   ]}
 />
 
-其余子部件：
+## 参考
 
-- **Thumb**：无属性。
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-SWITCH.yaml', 'P-BRUTALIST-SWITCH-THUMB.yaml', 'P-BASE-SWITCH.yaml']}
+/>

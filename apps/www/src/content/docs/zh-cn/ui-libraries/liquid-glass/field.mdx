@@ -1,11 +1,13 @@
 ---
-title: 'Field'
+title: 'Liquid Glass Field'
 description: '提供标签关联、值上报与内置/异步校验的 Liquid Glass 表单字段组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Field 由 `Root`、`Label`、`Control`、`Description`、`Error`、`Validity` 六个部件组成，提供圆角编辑表面与静置材质风格，统一管理字段标签、帮助文本、校验状态与错误提示。
+Liquid Glass Field 将标签、编辑控件、次级说明与错误提示组合为清晰的字段单元，采用 2xl 圆角、静置编辑材质与不透明回退表面，并遵循次级层次（`text-muted-foreground`）与语义化错误色（`text-destructive`）规范。
 
 ## 预览
 
@@ -13,51 +15,156 @@ Liquid Glass Field 由 `Root`、`Label`、`Control`、`Description`、`Error`、
   demoId="demo-liquid-glass-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/field` 导入 `fieldRoot`、`fieldLabel`、`fieldControl`、`fieldDescription`、`fieldError` 与 `fieldValidity`。
+当前仅在源码工作区提供，可从 `@proto.ui/prototypes-liquid-glass/field` 导入核心部件与已绑定控件：
+
+```ts
+import {
+  fieldRoot,
+  fieldLabel,
+  fieldControl,
+  fieldDescription,
+  fieldError,
+  fieldValidity,
+  fieldTextarea,
+  fieldSelectTrigger,
+  fieldSwitch,
+} from '@proto.ui/prototypes-liquid-glass/field';
+```
 
 ## 用法
 
-### 组合与标签关联
+```tsx
+import {
+  FieldRoot,
+  FieldLabel,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+} from '@proto.ui/prototypes-liquid-glass/field';
 
-- 每个 `Root` 包含一个 `Control`，可按需搭配一个 `Label`、一个 `Description`、一个汇总 `Error` 以及多个只读 `Validity`；嵌套的 `Root` 各自独立，重复的唯一部件会被忽略。
-- `Control` 默认内置单行文本编辑器，也支持通过 Base 的 `asFieldControl` 与 `asControlLabel().target(..., FIELD_LABEL_PAIR)` 接入自定义值控件（Number Field、Input OTP、Slider、Checkbox Group 等）。
-- 组件自动维护 `aria-labelledby`、`aria-describedby` 与（仅在有效 `invalid=true` 时）`aria-errormessage` 关联并在卸载时清理，无需手写 DOM ID；同时同步 `aria-required`、`aria-invalid`、`aria-busy` 与 `aria-readonly`。
-- 点击 `Label` 会聚焦同一启用的 `Control`（不会增加额外 Tab 停靠点，并自动忽略拖拽、修饰键点击与嵌套按钮/链接）。
+export function ProfileField() {
+  return (
+    <FieldRoot required minLength={3}>
+      <FieldLabel>Username</FieldLabel>
+      <FieldControl placeholder="Max Leiter" />
+      <FieldDescription>Choose a unique username for your account.</FieldDescription>
+      <FieldError />
+    </FieldRoot>
+  );
+}
+```
 
-### 内置校验与异步校验
+### 材质与层次说明
 
-- **内置规则**：`required` 将 `null`、`false`、空字符串与空数组视为空（`0` 与纯空白字符视为有效，不自动 `trim`）；`minLength` / `maxLength` 按 UTF-16 码元计数（可选空字符串跳过长度检查）。内置校验标记为 `valueMissing`、`tooShort`、`tooLong`，外部错误使用 `customError`。
-- **触发时机**：`validationMode` 默认 `onBlur`，可选 `onChange`（等待 IME 组合结束后触发）或 `manual`。受控传入 `invalid` 时，`validityChange` 仅提出建议，需由调用方更新 `invalid`；`resetValidation()` 仅清除校验和 `touched` 状态，不修改值或 `dirty` 基线。
-- **异步校验**：设置 `externalValidation={true}` 后，内置规则通过时会发出 `validationRequest`（载荷 `{ requestId, value, reason }`）。完成后调用 `resolveValidation(requestId, { invalid, errors })` 提交结果；若期间值变更、发起了新请求、控件卸载或切换为禁用/只读，过期结果会自动被忽略。
-- **错误展示**：`Error` 优先展示显式 `message`，其次是 `errors` 数组，最后回退为内置英文提示；默认关闭时卸载内容节点（设置 `keepMounted={true}` 可保留隐藏节点）。如需屏幕阅读器主动播报，请配合 LiveRegion 使用。
+- **静置编辑表面与不透明回退**：`Control` 声明静置 `liquid-glass` 材质候选，同时保留明确的 `bg-background` / `text-foreground` 回退；禁用态使用 `bg-muted` 与 `text-muted-foreground` 保持可读性，避免纯透明度叠加导致对比度下降。
+- **语义层次**：帮助说明与校验状态使用次级文字层次（`text-muted-foreground`），校验错误统一使用 `text-destructive` 与 `border-destructive`。
+- **自动无障碍关联**：自动维护 `aria-labelledby`、`aria-describedby` 与（仅在 `invalid` 时）`aria-errormessage`，卸载时自动清理。配合 [Fieldset](../fieldset/) 与 [Form](../form/) 实现整组禁用与表单提交。
 
-Field 专注于单字段校验；分组禁用请配合 [Fieldset](/zh-cn/ui-libraries/liquid-glass/fieldset/)，表单提交与重置请配合 [Form](/zh-cn/ui-libraries/liquid-glass/form/)。
+## 示例
+
+### 文本输入
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 多行文本
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 下拉选择
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 水平设置行
+
+使用 `orientation="horizontal"` 构建紧凑的开关设置行。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-field-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `invalid` / `errors` | 传入 `invalid` 即进入受控校验模式，`errors` 为错误文案数组 |
-| Root | `defaultInvalid` / `defaultErrors` | 非受控初始校验状态（仅初始化一次） |
-| Root | `disabled` / `readOnly` / `required` | 均为 `false`；与 Control 本地策略叠加生效 |
-| Root | `minLength` / `maxLength` | 默认 `-1`（不限制）；非负整数按 UTF-16 码元限制文本长度 |
-| Root | `validationMode` | `'onBlur'`（默认）、`'onChange'` 或 `'manual'` |
-| Root | `externalValidation` | `false`；设为 `true` 时在内置校验通过后触发 `validationRequest` |
-| Control | `value` / `defaultValue` | 文本值；初始化时固定受控或非受控模式 |
-| Control | `disabled` / `readOnly` / `required` | 局部策略（不会解除 Root 已开启的约束） |
-| Control | `placeholder` / `name` / `autoComplete` / `inputMode` / `enterKeyHint` / `ariaLabel` | 常用文本编辑器提示属性 |
-| Label | `activation` | `true`；点击标签时请求聚焦同一启用的 Control |
-| Description | — | 渲染传入的被动帮助文本（保持自然可选中） |
-| Error | `message` / `keepMounted` | `message` 覆盖错误文案；`keepMounted` 默认 `false` |
-| Validity | — | 被动读取当前校验状态与 `getValidity()` 快照 |
+### Root 属性
 
-### 事件与方法
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值', description: '说明' }}
+  rows={[
+    {
+      name: 'orientation',
+      type: "'vertical' | 'horizontal'",
+      default: 'vertical',
+      description: '标签与控件的排列方向',
+    },
+    { name: 'invalid', type: 'boolean', description: '受控的无效状态' },
+    { name: 'errors', type: 'string[]', description: '受控错误消息列表' },
+    {
+      name: 'defaultInvalid',
+      type: 'boolean',
+      default: 'false',
+      description: '非受控初始无效状态',
+    },
+    { name: 'defaultErrors', type: 'string[]', default: '[]', description: '非受控初始错误消息' },
+    { name: 'disabled', type: 'boolean', default: 'false', description: '禁用字段与控件' },
+    {
+      name: 'readOnly',
+      type: 'boolean',
+      default: 'false',
+      description: '只读模式，保留焦点与手动校验',
+    },
+    { name: 'required', type: 'boolean', default: 'false', description: '声明必填约束' },
+    { name: 'minLength', type: 'number', default: '-1', description: '最小长度（UTF-16 码元）' },
+    { name: 'maxLength', type: 'number', default: '-1', description: '最大长度（UTF-16 码元）' },
+    {
+      name: 'validationMode',
+      type: "'onBlur' | 'onChange' | 'manual'",
+      default: 'onBlur',
+      description: '校验触发时机',
+    },
+    {
+      name: 'externalValidation',
+      type: 'boolean',
+      default: 'false',
+      description: '内置规则通过后发出异步校验请求',
+    },
+  ]}
+/>
 
-- Root 方法：`validate(reason?)`、`resolveValidation(requestId, result)`、`cancelValidation()`、`resetValidation()`、`focusControl(options?)`、`getValidity()`。
-- Root 状态：`invalid`、`pending`、`dirty`、`touched`、`filled`、`focused`、`disabled`、`readOnly`、`required`。
-- Root 事件：`validityChange`（含状态、flags 与 errors 快照）、`validationRequest`（载荷 `{ requestId, value, reason }`）。在宿主适配器中分别映射为 `onValidityChange`、`onValidationRequest` 与 `onValueChange`。
+### Control 与其他部件
+
+- **Control**：`value` / `defaultValue`、`disabled`、`readOnly`、`required`、`placeholder`、`name`、`autoComplete`、`inputMode`、`enterKeyHint`、`ariaLabel`。
+- **已绑定控件**：`fieldTextarea`、`fieldSelectTrigger`、`fieldSwitch`。
+- **Label**：`activation?: boolean`（默认 `true`）。
+- **Error**：`message?: string`、`keepMounted?: boolean`（默认 `false`）。
+- **方法与事件（Root）**：`validate(reason?)`、`resolveValidation(requestId, result)`、`cancelValidation()`、`resetValidation()`、`focusControl(options?)`、`getValidity()`；事件 `validityChange`、`validationRequest`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-FIELD.yaml',
+    'P-LIQUID-GLASS-FIELD-LABEL.yaml',
+    'P-LIQUID-GLASS-FIELD-CONTROL.yaml',
+    'P-LIQUID-GLASS-FIELD-DESCRIPTION.yaml',
+    'P-LIQUID-GLASS-FIELD-ERROR.yaml',
+    'P-LIQUID-GLASS-FIELD-VALIDITY.yaml',
+  ]}
+/>

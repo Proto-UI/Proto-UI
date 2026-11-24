@@ -12,13 +12,17 @@ export default definePrototype<ShadcnCheckboxGroupItemProps, CheckboxGroupItemEx
     // Ordinary checkbox row; card-label presentation is not an implicit variant.
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-6 min-w-0 items-center gap-2 text-sm font-medium leading-5 text-foreground outline-none'
+        'inline-flex min-h-6 min-w-0 items-center gap-2 text-sm font-medium leading-5 text-foreground select-none cursor-pointer outline-none'
       )
     );
     const state = inherited.stateHandles!;
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.readOnly).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
     });
     const glyph = checkboxGroupGlyph(def, state, style);
     return (renderer) => [

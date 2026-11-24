@@ -1,13 +1,13 @@
 ---
 title: 'Brutalist Checkbox Group'
-description: '管理多选框字符串数组值、全选联动与表单字段集成的 Brutalist 复选框组组件。'
+description: '管理多选框字符串数组值、全选联动、水平排列与表单字段集成的 Brutalist 复选框组组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Checkbox Group 用于管理一组多选框的选中值数组，支持“全选/半选”联动，并内置清晰的勾选与横线状态指示器。
+Brutalist Checkbox Group 用于管理一组多选框的选中值数组，支持全选/半选联动与垂直/水平排布，遵循 Brutalist 的 2px 实线方框、DM Sans 500 正文字重与高对比度焦点环规范。
 
 ## 预览
 
@@ -15,7 +15,6 @@ Brutalist Checkbox Group 用于管理一组多选框的选中值数组，支持�
   demoId="demo-brutalist-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
@@ -24,21 +23,72 @@ Brutalist Checkbox Group 用于管理一组多选框的选中值数组，支持�
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  BrutalistCheckboxGroupRoot,
+  BrutalistCheckboxGroupAll,
+  BrutalistCheckboxGroupItem,
+} from '../proto-ui/components/react';
 
-Checkbox Group 由 `Root`、`Item` 和 `All` 三个部件组成：
+export function Example() {
+  return (
+    <BrutalistCheckboxGroupRoot defaultValue={['email']} ariaLabel="Notification channels">
+      <BrutalistCheckboxGroupAll>All notifications</BrutalistCheckboxGroupAll>
+      <BrutalistCheckboxGroupItem value="email">Email updates</BrutalistCheckboxGroupItem>
+      <BrutalistCheckboxGroupItem value="sms">SMS alerts</BrutalistCheckboxGroupItem>
+    </BrutalistCheckboxGroupRoot>
+  );
+}
+```
 
-- **Root**：通过 `value` / `defaultValue` 统一管理选中项的字符串数组，支持 `disabled`、`readOnly` 与 `ariaLabel`。
-- **Item**：表示单个选项，需提供唯一的 `value`，支持独立的 `disabled` 属性。重复的 `value` 会忽略含糊的切换请求。
-- **All**：根据已注册的可用选项自动推导全选或半选（mixed）状态，切换时仅操作未禁用选项，并保留禁用选项的当前选中态。
+### 部件结构与键盘交互
 
-`Item` 与 `All` 内置装饰性状态图标（选中为勾、半选为横线、未选中为空框），确保状态表达不仅依赖颜色。
+- **Root**：通过 `value` / `defaultValue` 管理选中值字符串数组，支持 `orientation`、`disabled`、`readOnly` 与 `ariaLabel`。
+- **Item**：表示单个选项，需提供唯一 `value` 并支持独立的 `disabled`。每个可用项拥有独立 `Tab` 停靠点，按 `Space` 切换（`Enter` 不切换）。
+- **All**：根据全部可用选项自动推导勾选、半选（`mixed`）或未选状态，点击时仅切换未禁用项并保留已禁用项的原状态。
+- **无障碍与表单**：20×20 方形指示器绘制对勾或横线图标，焦点环直接作用在指示框上；置于 `Field` 或 `FormField` 内时自动支持标签点击聚焦、必填校验、序列化与重置。
 
-### 受控模式与交互
+## 示例
 
-- 传入 `value` 进入受控模式，切换操作触发 `valueChange` 事件，不直接覆盖外部状态；调用 `getValue()` 可获取当前值数组的副本。
-- 每个选项拥有独立的 `Tab` 停靠点，按 `Space` 切换选中态，按 `Enter` 不会触发切换。
-- 放入 `Field` 或 `Form` 中时，`Root` 自动同步数组值、焦点与策略，支持标签点击聚焦、必填校验、表单序列化与重置（不生成隐藏的原生 HTML 表单项）。
+### 基础用法
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 水平排列
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表单校验
+
+<PrototypePreviewer
+  demoId="demo-brutalist-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -47,20 +97,41 @@ Checkbox Group 由 `Root`、`Item` 和 `All` 三个部件组成：
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string[] | undefined', default: '非受控' },
     { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
   ]}
 />
 
-传入 `value: string[]` 可切换为受控模式。
+### Item
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
 
-- **Item**：`value: string`，`disabled?: boolean`（默认 `false`）
-- **All**：无独立属性
+### All
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### 事件、方法与状态
+
+- **Root 事件**：`valueChange`（载荷 `{ value: string[] }`）。
+- **Root 方法**：`getValue(): string[]`、`resetValue(): boolean`、`focusSelf(): void`。
+- **暴露状态**：Root 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`；Item 与 All 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`、`focused`、`focusVisible`。
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-CHECKBOX-GROUP.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CHECKBOX-GROUP.yaml', 'P-BASE-CHECKBOX-GROUP.yaml']}
+/>

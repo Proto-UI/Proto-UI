@@ -1,11 +1,12 @@
 import type { InputOtpSlotExposes } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
-import { asInputOtpSlot } from '@proto.ui/prototypes-base/input-otp';
+import { FIELD_CONTEXT } from '@proto.ui/prototypes-base/field';
+import { asInputOtpSlot, INPUT_OTP_CONTEXT } from '@proto.ui/prototypes-base/input-otp';
 import { setupShadcnStyleSelection, SHADCN_STYLE_IDS } from '../style-scope';
 import type { ShadcnInputOtpSlotProps } from './types';
 import { INPUT_OTP_VISUAL } from './visual';
 
-/** Source .cn-input-otp-slot; endpoints describe the full-code segment, not split groups. */
+/** Source .cn-input-otp-slot; endpoints support both full-code defaults and explicit split groups. */
 const SLOT_SURFACE = {
   vega: 'size-9 border-y border-r border-input bg-transparent text-sm shadow-xs transition-all',
   nova: 'size-8 border-y border-r border-input bg-transparent text-sm transition-all',
@@ -51,25 +52,75 @@ const SLOT_ACTIVE = {
   rhea: 'z-10 border-ring ring-3 ring-ring/30',
   'new-york-v4': 'z-10 border-ring ring-3 ring-ring/50',
 } as const;
+const SLOT_INVALID = {
+  vega: 'border-destructive',
+  nova: 'border-destructive',
+  maia: 'border-destructive',
+  lyra: 'border-destructive',
+  mira: 'border-destructive',
+  luma: 'border-destructive',
+  sera: 'border-b-destructive',
+  rhea: 'border-destructive',
+  'new-york-v4': 'border-destructive',
+} as const;
+const SLOT_ACTIVE_INVALID = {
+  vega: 'z-10 border-destructive ring-3 ring-destructive/20',
+  nova: 'z-10 border-destructive ring-3 ring-destructive/20',
+  maia: 'z-10 border-destructive ring-3 ring-destructive/20',
+  lyra: 'z-10 border-destructive ring-1 ring-destructive/20',
+  mira: 'z-10 border-destructive ring-2 ring-destructive/20',
+  luma: 'z-10 border-destructive ring-3 ring-destructive/20',
+  sera: 'z-10 border-b-destructive',
+  rhea: 'z-10 border-destructive ring-3 ring-destructive/20',
+  'new-york-v4': 'z-10 border-destructive ring-3 ring-destructive/20',
+} as const;
+
 export default definePrototype<ShadcnInputOtpSlotProps, InputOtpSlotExposes>({
   name: 'shadcn-input-otp-slot',
   modules: asInputOtpSlot.modules,
   setup(def) {
     const inherited = asInputOtpSlot();
     const style = setupShadcnStyleSelection(def, 'nova');
+    def.props.define({
+      invalid: { type: 'boolean', empty: 'fallback' },
+      first: { type: 'boolean', empty: 'fallback' },
+      last: { type: 'boolean', empty: 'fallback' },
+    });
+    def.props.setDefaults({ invalid: false });
     const first = def.state.bool('otpVisualFirst', false);
     const last = def.state.bool('otpVisualLast', false);
-    const syncEndpoints = (run: RunHandle<ShadcnInputOtpSlotProps>) => {
-      const index = run.props.get().index!;
-      const length = run.context.tryRead(INPUT_OTP_VISUAL)?.length;
-      first.set(index === 0, 'reason: OTP visual first slot');
-      last.set(length !== undefined && index === length - 1, 'reason: OTP visual last slot');
+    const invalid = def.state.bool('otpVisualInvalid', false);
+    const disabled = def.state.bool('otpVisualDisabled', false);
+    const syncVisual = (run: RunHandle<ShadcnInputOtpSlotProps>) => {
+      const p = run.props.get();
+      const index = p.index ?? 0;
+      const visual = run.context.tryRead(INPUT_OTP_VISUAL);
+      const otp = run.context.tryRead(INPUT_OTP_CONTEXT);
+      const field = run.context.tryRead(FIELD_CONTEXT);
+      const length = visual?.length ?? otp?.length;
+      first.set(
+        run.props.isProvided('first') ? Boolean(p.first) : index === 0,
+        'reason: OTP visual first slot'
+      );
+      last.set(
+        run.props.isProvided('last')
+          ? Boolean(p.last)
+          : length !== undefined && index === length - 1,
+        'reason: OTP visual last slot'
+      );
+      invalid.set(
+        Boolean(p.invalid || visual?.invalid || field?.invalid),
+        'reason: OTP visual invalid slot'
+      );
+      disabled.set(Boolean(otp?.disabled || visual?.disabled), 'reason: OTP visual disabled slot');
     };
-    def.context.trySubscribe(INPUT_OTP_VISUAL, syncEndpoints);
-    def.props.watch(['index'], syncEndpoints);
-    def.lifecycle.onCreated(syncEndpoints);
-    def.lifecycle.onMounted(syncEndpoints);
-    def.lifecycle.onUpdated(syncEndpoints);
+    def.context.trySubscribe(INPUT_OTP_VISUAL, syncVisual);
+    def.context.trySubscribe(INPUT_OTP_CONTEXT, syncVisual);
+    def.context.trySubscribe(FIELD_CONTEXT, syncVisual);
+    def.props.watch(['index', 'first', 'last', 'invalid'], syncVisual);
+    def.lifecycle.onCreated(syncVisual);
+    def.lifecycle.onMounted(syncVisual);
+    def.lifecycle.onUpdated(syncVisual);
     def.feedback.style.use(
       tw(
         'relative inline-flex shrink-0 items-center justify-center tabular-nums text-foreground outline-none'
@@ -90,8 +141,46 @@ export default definePrototype<ShadcnInputOtpSlotProps, InputOtpSlotExposes>({
       });
       def.rule({
         when: (w) =>
-          w.all(w.state(style).eq(profile), w.state(inherited.stateHandles!.active).eq(true)),
+          w.all(
+            w.state(style).eq(profile),
+            w.state(inherited.stateHandles!.active).eq(true),
+            w.state(invalid).eq(false)
+          ),
         intent: (i) => i.feedback.style.use(tw(SLOT_ACTIVE[profile])),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(invalid).eq(true),
+            w.state(inherited.stateHandles!.active).eq(false)
+          ),
+        intent: (i) => i.feedback.style.use(tw(SLOT_INVALID[profile])),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(invalid).eq(true),
+            w.state(inherited.stateHandles!.active).eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw(SLOT_ACTIVE_INVALID[profile])),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(invalid).eq(true),
+            w.meta('colorScheme').eq('dark')
+          ),
+        intent: (i) =>
+          i.feedback.style.use(
+            tw(
+              profile === 'sera'
+                ? 'border-b-destructive/50'
+                : 'border-destructive/50 ring-destructive/40'
+            )
+          ),
       });
     }
     for (const profile of ['vega', 'nova', 'lyra', 'mira', 'new-york-v4'] as const) {
@@ -100,6 +189,20 @@ export default definePrototype<ShadcnInputOtpSlotProps, InputOtpSlotExposes>({
         intent: (i) => i.feedback.style.use(tw('bg-input/30')),
       });
     }
+    for (const profile of ['maia', 'luma', 'rhea'] as const) {
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
+        intent: (i) => i.feedback.style.use(tw('bg-input/50')),
+      });
+    }
+    def.rule({
+      when: (w) => w.state(disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
+    });
+    def.rule({
+      when: (w) => w.meta('reducedMotion').eq(true),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     return inherited.render;
   },
 });

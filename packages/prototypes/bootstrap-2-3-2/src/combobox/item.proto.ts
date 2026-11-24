@@ -21,6 +21,24 @@ export default definePrototype<ComboboxItemProps, ComboboxItemExposes>({
     def.rule({
       when: (w) =>
         w.all(
+          w.state(behavior.getState!('selected')!).eq(true),
+          w.state(behavior.getState!('active')!).eq(false),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('font-bold text-primary')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(behavior.getState!('selected')!).eq(true),
+          w.state(behavior.getState!('active')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('font-bold')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
           w.state(behavior.getState!('active')!).eq(true),
           w.state(behavior.getState!('disabled')!).eq(false)
         ),

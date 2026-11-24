@@ -1,11 +1,13 @@
 ---
 title: 'Combobox'
-description: 'A Liquid Glass searchable combobox that keeps committed option identity separate from input text.'
+description: 'A Liquid Glass searchable combobox that pairs a legible input with a floating translucent suggestion surface.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Combobox combines an editable search field with a popup listbox. Unlike Autocomplete, `Root.value` always represents a committed option key while `inputValue` tracks editable text—unmatched input is never silently accepted as a selection.
+Liquid Glass Combobox pairs a legible content-layer search field with a floating translucent suggestion popup using concentric radii (`rounded-2xl` outer surface with `p-1` and `rounded-xl` items), while keeping the committed option key (`value`) separate from `inputValue`.
 
 ## Preview
 
@@ -13,24 +15,116 @@ Liquid Glass Combobox combines an editable search field with a popup listbox. Un
   demoId="demo-liquid-glass-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Combobox is currently available from workspace source (`@proto.ui/prototypes-liquid-glass/combobox`) and is not yet included in the `0.2.0` stable CLI registry.
 
 ## Usage
 
-- **Parts**: `Root`, `Input`, `Content`, `Item`, `Empty`, `Trigger`.
-- **Independent state**: `open`, `value` (selected key), and `inputValue` (search query) can each be controlled independently with their respective change requests.
-- **Filtering and keyboard**: built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively; set `filter={false}` to render caller-filtered items. Focus stays in `Input` during arrow navigation, IME composition never selects, `Empty` tracks actual matches, and disabled or duplicate-valued items cannot commit.
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-liquid-glass/combobox';
+```
+
+```html
+<liquid-glass-combobox-root a11y-label="Framework">
+  <liquid-glass-combobox-input placeholder="Select a framework..."></liquid-glass-combobox-input>
+  <liquid-glass-combobox-trigger>▾</liquid-glass-combobox-trigger>
+  <liquid-glass-combobox-content>
+    <liquid-glass-combobox-item value="next.js" text-value="Next.js"
+      >Next.js</liquid-glass-combobox-item
+    >
+    <liquid-glass-combobox-item value="sveltekit" text-value="SvelteKit"
+      >SvelteKit</liquid-glass-combobox-item
+    >
+    <liquid-glass-combobox-item value="astro" text-value="Astro">Astro</liquid-glass-combobox-item>
+    <liquid-glass-combobox-empty>No frameworks found.</liquid-glass-combobox-empty>
+  </liquid-glass-combobox-content>
+</liquid-glass-combobox-root>
+```
+
+- **Single glass layer**: Only the open `Content` surface requests `liquid-glass` material; `Input`, `Trigger`, and `Item` remain solid content-layer surfaces so glass is never stacked on glass.
+- **Fallback and opt-out**: Automatically falls back to a high-contrast opaque surface when glass material is unavailable or when `material="opaque"` is set. Disabled states use muted opaque colors rather than reducing opacity.
+- **Independent state and filtering**: `open`, `value`, and `inputValue` can each be controlled independently; built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively.
+
+## Examples
+
+### Trigger Prominence and Opaque Opt-Out
+
+Use `prominence="prominent"` on `Trigger` for primary emphasis, or `material="opaque"` on `Content` to opt out of glass translucency.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-combobox-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Timezones
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-combobox-timezones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop | Description |
-| --- | --- | --- |
-| Root | `value`, `inputValue`, `open` | Independently controllable option key, search text, and popup visibility |
-| Root | `filter` | Set to `false` to provide pre-filtered items |
-| Item | `textValue`, `keywords`, `disabled` | Option label, search keywords, and disabled flag |
-| Empty | — | Rendered when no items match the current query |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Other parts
+
+<ApiPropsTable
+  headers={{ name: 'Part & Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input.placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Content.material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '4' },
+    { name: 'Content.collisionPadding', type: 'number', default: '8' },
+    { name: 'Item.value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>

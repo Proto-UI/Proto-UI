@@ -10,8 +10,17 @@ export default definePrototype<ShadcnNumberFieldPartProps, NumberFieldInputExpos
   modules: asNumberFieldInput.modules,
   setup(def) {
     const inherited = asNumberFieldInput();
-    setupInputVisual(def, inherited.stateHandles!, undefined, true);
+    const state = inherited.stateHandles!;
+    setupInputVisual(def, state, undefined, false);
     def.feedback.style.use(tw('block flex-1 tabular-nums'));
+    def.rule({
+      when: (w) => w.state(state.focusVisible).eq(true),
+      intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.readOnly).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50 text-muted-foreground')),
+    });
     return inherited.render;
   },
 });

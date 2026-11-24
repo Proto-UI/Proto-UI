@@ -1,8 +1,5 @@
-import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoNode, DemoSpec } from '../../components/PrototypePreviewer/demo-types';
 
-type ValueRequest = { value: string; textValue: string; reason: string };
-const longLabel =
-  'A translated option with enough detail to wrap safely · 選択肢の説明 · VeryLongUnbrokenOptionLabelsMustRemainReadableAtTwoHundredPercentTextSize';
 function item(value: string, textValue: string, disabled = false): DemoNode {
   return {
     kind: 'proto',
@@ -17,176 +14,116 @@ function item(value: string, textValue: string, disabled = false): DemoNode {
     ],
   };
 }
-function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
-  return {
-    kind: 'proto',
-    prototypeId: 'liquid-glass-select-root',
-    ref,
-    props,
+
+export default {
+  type: 'demo',
+  root: {
+    kind: 'box',
+    ref: 'heroStage',
+    className:
+      'min-w-0 w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    materialStage: { mountRef: 'heroFlow', overlayRef: 'heroOverlay' },
     children: [
       {
-        kind: 'proto',
-        prototypeId: 'liquid-glass-select-trigger',
-        ref: `${ref}Trigger`,
+        kind: 'box',
+        ref: 'heroFlow',
+        className: 'flex flex-wrap items-center gap-3',
         children: [
           {
             kind: 'proto',
-            prototypeId: 'liquid-glass-select-value',
-            props: { placeholder: 'Choose an option' },
-          },
-        ],
-      },
-      {
-        kind: 'proto',
-        prototypeId: 'liquid-glass-select-content',
-        ref: `${ref}Content`,
-        props: { align: 'start', sideOffset: 8, collisionPadding: 12 },
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-surface',
-            ref: `${ref}Surface`,
+            prototypeId: 'liquid-glass-select-root',
+            ref: 'fruitSelect',
+            props: { value: 'apple' },
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'liquid-glass-select-viewport',
-                ref: `${ref}Viewport`,
+                prototypeId: 'liquid-glass-select-trigger',
+                className: 'w-48',
+                props: { accessibleLabel: 'Produce selector' },
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'liquid-glass-select-group',
-                    children: [
-                      {
-                        kind: 'proto',
-                        prototypeId: 'liquid-glass-select-label',
-                        children: ['Available options'],
-                      },
-                      item('alpha', 'Alpha'),
-                      item('beta', 'Beta'),
-                    ],
+                    prototypeId: 'liquid-glass-select-value',
+                    props: { placeholder: 'Select a fruit' },
                   },
-                  { kind: 'proto', prototypeId: 'liquid-glass-select-separator' },
+                ],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'liquid-glass-select-content',
+                props: { align: 'start', sideOffset: 8, collisionPadding: 12 },
+                children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'liquid-glass-select-group',
+                    prototypeId: 'liquid-glass-select-surface',
                     children: [
                       {
                         kind: 'proto',
-                        prototypeId: 'liquid-glass-select-label',
-                        children: ['Additional options'],
+                        prototypeId: 'liquid-glass-select-viewport',
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'liquid-glass-select-group',
+                            children: [
+                              {
+                                kind: 'proto',
+                                prototypeId: 'liquid-glass-select-label',
+                                children: ['Fruits'],
+                              },
+                              item('apple', 'Apple'),
+                              item('banana', 'Banana'),
+                              item('blueberry', 'Blueberry'),
+                            ],
+                          },
+                          { kind: 'proto', prototypeId: 'liquid-glass-select-separator' },
+                          {
+                            kind: 'proto',
+                            prototypeId: 'liquid-glass-select-group',
+                            children: [
+                              {
+                                kind: 'proto',
+                                prototypeId: 'liquid-glass-select-label',
+                                children: ['Vegetables'],
+                              },
+                              item('carrot', 'Carrot'),
+                              item('broccoli', 'Broccoli'),
+                              item('spinach', 'Spinach'),
+                            ],
+                          },
+                        ],
                       },
-                      item('disabled', 'Unavailable option', true),
-                      item('long', longLabel),
                     ],
                   },
                 ],
               },
             ],
           },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-button',
+            ref: 'resetProduce',
+            children: ['Reset'],
+          },
         ],
       },
-    ],
-  };
-}
-function materialStage(ref: string, children: DemoNode[]): Extract<DemoNode, { kind: 'box' }> {
-  return {
-    kind: 'box',
-    ref,
-    className: 'min-w-0 w-full',
-    materialStage: { mountRef: `${ref}Flow`, overlayRef: `${ref}Overlay` },
-    children: [
-      { kind: 'box', ref: `${ref}Flow`, children },
-      { kind: 'box', ref: `${ref}Overlay`, children: [] },
-    ],
-  };
-}
-export default {
-  type: 'demo',
-  root: {
-    kind: 'box',
-    ref: 'selectLayout',
-    className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
-    children: [
-      materialStage('uncontrolledStage', [
-        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-3' },
-        select('uncontrolled', { defaultValue: 'alpha' }),
-      ]),
-      materialStage('disabledStage', [
-        { kind: 'box', children: ['Disabled selection'], className: 'text-sm mb-3' },
-        select('disabled', { defaultValue: 'beta', disabled: true }),
-      ]),
-      materialStage('controlledStage', [
-        {
-          kind: 'box',
-          children: ['Controlled value: accept the pending request above the selection'],
-          className: 'text-sm',
-        },
-        {
-          kind: 'box',
-          ref: 'requestStatus',
-          attrs: { 'aria-live': 'polite' },
-          className: 'text-sm break-words mb-3',
-          children: ['No pending request.'],
-        },
-        {
-          kind: 'proto',
-          prototypeId: 'liquid-glass-button',
-          ref: 'accept',
-          className: 'min-w-0 max-w-full mb-3',
-          children: [
-            {
-              kind: 'box',
-              tag: 'span',
-              ref: 'acceptLabel',
-              className: 'min-w-0 whitespace-normal wrap-anywhere',
-              children: ['Accept selection'],
-            },
-          ],
-        },
-        select('controlled', { value: 'alpha' }),
-      ]),
-      {
-        ...materialStage('selectRtlLayout', [
-          { kind: 'box', children: ['RTL · long selected label'], className: 'text-sm' },
-          select('rtl', { defaultValue: 'long' }),
-        ]),
-        kind: 'box',
-        attrs: { dir: 'rtl' },
-        className: 'grid grid-cols-1 min-w-0 gap-2',
-      },
+      { kind: 'box', ref: 'heroOverlay', children: [] },
     ],
   },
-  setup({ refs, api }) {
-    let value = 'alpha';
-    let pending: ValueRequest | null = null;
-    const propose = (request: ValueRequest) => {
-      pending = request;
-      refs.requestStatus.textContent = `Requested ${request.textValue} (${request.reason}); committed selection remains ${value}.`;
+  setup({ api }) {
+    let alive = true;
+    const sync = (next: string) => {
+      if (!alive) return;
+      api.setProps('fruitSelect', {
+        value: next,
+        onValueChange: (event: { value: string }) => sync(event.value),
+      });
     };
-    const update = () => api.setProps('controlled', { value, onValueChange: propose });
-    const accept = () => {
-      if (!pending) return;
-      value = pending.value;
-      pending = null;
-      update();
-      refs.requestStatus.textContent = `Owner accepted: ${value}.`;
-    };
-    update();
-    api.setProps('accept', { onClick: accept });
-    const labels = ['uncontrolled', 'disabled', 'controlled', 'rtl'];
-    const labelTriggers = () => {
-      for (const id of labels) refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
-    };
-    labelTriggers();
-    const observer = new MutationObserver(() => {
-      for (const id of labels)
-        if (refs[`${id}Trigger`].getAttribute('aria-label') !== `${id} selection`)
-          refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
+    sync('apple');
+    api.setProps('resetProduce', {
+      onClick: () => sync('apple'),
     });
-    for (const id of labels)
-      observer.observe(refs[`${id}Trigger`], { attributes: true, attributeFilter: ['aria-label'] });
     return () => {
-      observer.disconnect();
+      alive = false;
     };
   },
 } satisfies DemoSpec;

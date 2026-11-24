@@ -1,11 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Checkbox Group'
-description: 'A Bootstrap 2.3.2 checkbox group with select-all support and Field/Form integration.'
+description: 'A Bootstrap 2.3.2 checkbox group with select-all support, inline layout, and Field/Form validation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Checkbox Group coordinates a set of checkboxes sharing a string-array value, with built-in select-all (including indeterminate state) and seamless `Field` / `Form` integration.
+Bootstrap 2.3.2 Checkbox Group coordinates a set of checkboxes sharing a string-array value, preserving classic 14px/20px form proportions, inset borders, primary gradient fills, select-all/mixed state, and direct `Field` / `Form` integration.
 
 ## Preview
 
@@ -13,7 +15,6 @@ Bootstrap 2.3.2 Checkbox Group coordinates a set of checkboxes sharing a string-
   demoId="demo-bootstrap-2-3-2-checkbox-group"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -22,19 +23,115 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-Compose `Root`, `Item`, and an optional `All` control:
+```tsx
+import {
+  Bootstrap232CheckboxGroupRoot,
+  Bootstrap232CheckboxGroupAll,
+  Bootstrap232CheckboxGroupItem,
+} from '../proto-ui/components/react';
 
-- **State management**: `Root` manages a `string[]` via `value` / `defaultValue`. In controlled mode it emits `valueChange` without mutating caller state; `getValue()` returns a copy. Duplicate item values are ignored.
-- **Select all**: `All` reflects checked, mixed (dash), or unchecked across enabled items and toggles only enabled items while preserving disabled selections.
-- **Keyboard and visuals**: Each item has its own Tab stop and toggles with `Space` (`Enter` does not toggle). The decorative indicator uses check, dash, and empty box shapes so state is not conveyed by color alone.
-- **Form integration**: Inside `Field` or `FormField`, `Root` automatically participates in label activation, required validation, form serialization, and reset.
+export function Example() {
+  return (
+    <Bootstrap232CheckboxGroupRoot defaultValue={['email']} ariaLabel="Notification channels">
+      <Bootstrap232CheckboxGroupAll>All notifications</Bootstrap232CheckboxGroupAll>
+      <Bootstrap232CheckboxGroupItem value="email">Email updates</Bootstrap232CheckboxGroupItem>
+      <Bootstrap232CheckboxGroupItem value="sms">SMS alerts</Bootstrap232CheckboxGroupItem>
+    </Bootstrap232CheckboxGroupRoot>
+  );
+}
+```
+
+### Anatomy and keyboard
+
+- **Root**: Manages a `string[]` value (`value` / `defaultValue`), `orientation` (`horizontal` maps to `.checkbox.inline` layout), `disabled`, `readOnly`, and `ariaLabel`.
+- **Item**: Individual option with a unique `value` and optional `disabled` flag. Each item has its own `Tab` stop and toggles with `Space` (`Enter` does not toggle).
+- **All**: Reflects checked, mixed (dash), or unchecked across enabled items and toggles only enabled items while preserving disabled selections.
+- **Forms**: Inside `Field` or `FormField`, `Root` participates in label activation, required validation, form serialization, and reset.
+
+## Examples
+
+### Basic
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Horizontal
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-horizontal"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and Read-Only
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form Validation
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox-group-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events / Methods | Description |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | `string[]` of selected item values |
-| `Root` | `disabled` / `readOnly` / `ariaLabel` | Group disabled, read-only, and accessible name props |
-| `Root` | `valueChange` / `getValue()` | Change request event and copy reader |
-| `Item` | `value` / `disabled` | Unique item key and per-item disabled flag |
-| `All` | — | Toggles all enabled items and reflects mixed state |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string[] | undefined', default: 'Uncontrolled' },
+    { name: 'defaultValue', type: 'string[]', default: '[]' },
+    { name: 'orientation', type: "'vertical' | 'horizontal'", default: "'vertical'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### All
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Events, Methods, and States
+
+- **Root events**: `valueChange` (payload `{ value: string[] }`).
+- **Root methods**: `getValue(): string[]`, `resetValue(): boolean`, `focusSelf(): void`.
+- **Exposed states**: Root exposes `checked`, `indeterminate`, `disabled`, `readOnly`; Item and All expose `checked`, `indeterminate`, `disabled`, `readOnly`, `focused`, `focusVisible`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-CHECKBOX-GROUP.yaml', 'P-BASE-CHECKBOX-GROUP.yaml']}
+/>

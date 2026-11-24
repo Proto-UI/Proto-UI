@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Slider 允许用户通过指针拖动、触摸或键盘步进在连续区间内选择一个或多个数值，支持横向/纵向布局与 `Field` / `Form` 表单集成。
+Brutalist Slider 以 5px 圆角（`rounded-base`）、2px 黑色描边与硬阴影滑块呈现单值与多值范围调节，完整支持指针拖动、键盘步进与 `Field` / `Form` 表单集成。
 
 ## 预览
 
@@ -15,52 +15,88 @@ Brutalist Slider 允许用户通过指针拖动、触摸或键盘步进在连续
   demoId="demo-brutalist-slider"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-- **包导出**：从 `@proto.ui/prototypes-brutalist/slider` 导入标量滑块部件与多值滑块 `sliderValues*` 部件
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-brutalist/slider` 导入标量滑块部件与多值滑块 `sliderValues*` 部件。
 
 ## 用法
 
-### 单值滑块部件
+```tsx
+import {
+  BrutalistSliderRoot,
+  BrutalistSliderTrack,
+  BrutalistSliderIndicator,
+  BrutalistSliderThumb,
+} from '../proto-ui/components/react';
 
-单值滑块由 `Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb` 和 `Value` 组成：
+export function Example() {
+  return (
+    <BrutalistSliderRoot defaultValue={33} min={0} max={100} step={1}>
+      <BrutalistSliderTrack>
+        <BrutalistSliderIndicator />
+        <BrutalistSliderThumb />
+      </BrutalistSliderTrack>
+    </BrutalistSliderRoot>
+  );
+}
+```
 
-- **Root**：管理 `value` / `defaultValue`、`min`、`max`、`step`、`disabled`、`readOnly`、`orientation` 与 `direction`。数值从 `min` 对齐步长并约束在边界内。
-- **Track / Indicator**：轨道响应指针与触摸拖动，填充条显示当前进度区间。
-- **Thumb**：独立使用时承载可聚焦滑块，支持方向键、`Shift` 10 倍步进、`PageUp` / `PageDown`、`Home` / `End`（横向 RTL 下左右键自动反转）。
-- **FieldThumb**：在 `Field` 或 `FormField` 内替代 `Thumb` 使用，自动衔接 `FieldLabel` 聚焦、数值校验、表单序列化与重置。
-- **Label / Value**：分别为滑块命名和展示当前值。
+- **单值部件**：`Root`、`Label`、`Track`、`Indicator`、`Thumb`、`FieldThumb`、`Value`。在 `Field` 或 `FormField` 内用 `FieldThumb` 替换 `Thumb`。
+- **键盘与受控模式**：支持方向键、`Shift` 十倍步进、`PageUp` / `PageDown`、`Home` / `End`（横向 RTL 自动反转）。传入 `value` 进入受控模式，交互触发 `valueChange` 与 `valueCommit`。
+- **多值范围**：使用 `sliderValues*` 系列部件，通过 `thumbCollisionBehavior` 配置 `'push'`、`'swap'` 或 `'none'` 碰撞行为。
 
-传入 `value` 进入受控模式：拖动过程中触发 `valueChange`，释放确认时触发 `valueCommit`，取消拖动则恢复非受控起始值。
+## 示例
 
-### 范围与多值滑块
+### 双滑块范围
 
 <PrototypePreviewer
   demoId="demo-brutalist-slider-values"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-需要范围选择或多滑块时，从 `@proto.ui/prototypes-brutalist/slider` 导入 `sliderValues*` 系列部件：
+### 多滑块
 
-- 在 `Values Root` 上设置数组初始值（例如 `defaultValue={[20, 80]}`），并在 `Values Track` 内为每个数值放置一个带 `index` 的 `Thumb`。
-- 点击轨道会自动定位到最近的可编辑滑块；拖动滑块时保留抓取偏移量。
-- `thumbCollisionBehavior` 支持 `'push'`、`'swap'` 和 `'none'`，在 `'swap'` 模式下交换位置时会自动转移焦点。
-- `Values Root` 可直接放入 `Field` / `FormField`，提交有限的 `number[]` 数组，`FieldLabel` 点击时聚焦首个可编辑滑块。
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-multiple"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 垂直方向
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-vertical"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root
+### Root（单值）
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'number | undefined', default: '非受控' },
     { name: 'defaultValue', type: 'number', default: '0' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
@@ -74,8 +110,30 @@ Brutalist Slider 允许用户通过指针拖动、触摸或键盘步进在连续
   ]}
 />
 
-传入 `value: number` 进入受控模式；其他单值子部件不声明独立属性。
+### Values Root 与子部件（多值）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | readonly number[]', default: '非受控' },
+    { name: 'defaultValue', type: 'number | readonly number[]', default: '0' },
+    { name: 'largeStep', type: 'number', default: '10 × step' },
+    { name: 'minStepsBetweenValues', type: 'number', default: '0' },
+    { name: 'thumbCollisionBehavior', type: "'push' | 'swap' | 'none'", default: "'push'" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'index (Thumb)', type: 'number', default: '0' },
+    { name: 'startIndex / endIndex (Indicator)', type: 'number', default: '首尾范围' },
+  ]}
+/>
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-SLIDER.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-SLIDER.yaml',
+    'P-BRUTALIST-SLIDER-VALUES.yaml',
+    'P-BASE-SLIDER.yaml',
+    'P-BASE-SLIDER-VALUES.yaml',
+  ]}
+/>

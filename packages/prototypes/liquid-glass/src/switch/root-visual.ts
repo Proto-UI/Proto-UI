@@ -1,4 +1,9 @@
-import { COMMAND_FOCUS, COMMAND_HOVER, COMMAND_PRESS } from '../interactive-surface';
+import {
+  COMMAND_BLOCKED,
+  COMMAND_FOCUS,
+  COMMAND_HOVER,
+  COMMAND_PRESS,
+} from '../interactive-surface';
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import type { SwitchRootStateHandles } from '@proto.ui/prototypes-base/switch';
 import type { LiquidGlassSwitchRootProps } from './types';
@@ -22,13 +27,17 @@ export function setupLiquidSwitchRootVisual(
   const { checked, disabled, hovered, pressed, focusVisible } = state;
 
   // Project-owned 3rem × 1.75rem capsule with a sliding thumb, guided by HIG's
-  // on/off silhouette rather than an Apple pixel-size or native parity claim.
+  // on/off silhouette rather than an Apple pixel-size or native implementation.
   // The Thumb paints the moving circle; this track owns its state colors.
   def.feedback.style.use(
     tw(
-      'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border bg-muted text-foreground px-0.5 outline-none select-none cursor-pointer'
+      'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border border-border bg-muted text-foreground px-0.5 outline-none select-none cursor-pointer transition-colors duration-150 ease-in-out'
     )
   );
+  def.rule({
+    when: (w) => w.meta('preference.reducedMotion').eq('reduce'),
+    intent: (i) => i.feedback.style.use(tw('transition-none')),
+  });
   def.rule({
     when: (w) => w.state(checked).eq(true),
     intent: (i) => i.feedback.style.use(tw('border-primary bg-primary text-primary-foreground')),
@@ -88,6 +97,6 @@ export function setupLiquidSwitchRootVisual(
   def.rule({
     when: (w) => w.state(disabled).eq(true),
     // No host opacity: the declared fallback stays complete and readable.
-    intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
+    intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
   });
 }

@@ -1,8 +1,5 @@
-import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoNode, DemoSpec } from '../../components/PrototypePreviewer/demo-types';
 
-type ValueRequest = { value: string; textValue: string; reason: string };
-const longLabel =
-  'A translated option with enough detail to wrap safely · 選択肢の説明 · VeryLongUnbrokenOptionLabelsMustRemainReadableAtTwoHundredPercentTextSize';
 function item(value: string, textValue: string, disabled = false): DemoNode {
   return {
     kind: 'proto',
@@ -17,64 +14,74 @@ function item(value: string, textValue: string, disabled = false): DemoNode {
     ],
   };
 }
-function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
-  return {
-    kind: 'proto',
-    prototypeId: 'bootstrap-2-3-2-select-root',
-    ref,
-    props,
+
+export default {
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className: 'flex flex-wrap items-center gap-3',
     children: [
       {
         kind: 'proto',
-        prototypeId: 'bootstrap-2-3-2-select-trigger',
-        ref: `${ref}Trigger`,
+        prototypeId: 'bootstrap-2-3-2-select-root',
+        ref: 'fruitSelect',
+        props: { value: 'apple' },
         children: [
           {
             kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-select-value',
-            props: { placeholder: 'Choose an option' },
-          },
-        ],
-      },
-      {
-        kind: 'proto',
-        prototypeId: 'bootstrap-2-3-2-select-content',
-        ref: `${ref}Content`,
-        props: { align: 'start', sideOffset: 2, collisionPadding: 12 },
-        children: [
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-select-surface',
+            prototypeId: 'bootstrap-2-3-2-select-trigger',
+            className: 'w-48',
+            props: { accessibleLabel: 'Produce selector' },
             children: [
               {
                 kind: 'proto',
-                prototypeId: 'bootstrap-2-3-2-select-viewport',
+                prototypeId: 'bootstrap-2-3-2-select-value',
+                props: { placeholder: 'Select a fruit' },
+              },
+            ],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'bootstrap-2-3-2-select-content',
+            props: { align: 'start', sideOffset: 2, collisionPadding: 12 },
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'bootstrap-2-3-2-select-surface',
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'bootstrap-2-3-2-select-group',
+                    prototypeId: 'bootstrap-2-3-2-select-viewport',
                     children: [
                       {
                         kind: 'proto',
-                        prototypeId: 'bootstrap-2-3-2-select-label',
-                        children: ['Available choices'],
+                        prototypeId: 'bootstrap-2-3-2-select-group',
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'bootstrap-2-3-2-select-label',
+                            children: ['Fruits'],
+                          },
+                          item('apple', 'Apple'),
+                          item('banana', 'Banana'),
+                          item('blueberry', 'Blueberry'),
+                        ],
                       },
-                      item('alpha', 'Alpha'),
-                      item('beta', 'Beta'),
-                    ],
-                  },
-                  { kind: 'proto', prototypeId: 'bootstrap-2-3-2-select-separator' },
-                  {
-                    kind: 'proto',
-                    prototypeId: 'bootstrap-2-3-2-select-group',
-                    children: [
+                      { kind: 'proto', prototypeId: 'bootstrap-2-3-2-select-separator' },
                       {
                         kind: 'proto',
-                        prototypeId: 'bootstrap-2-3-2-select-label',
-                        children: ['More choices'],
+                        prototypeId: 'bootstrap-2-3-2-select-group',
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'bootstrap-2-3-2-select-label',
+                            children: ['Vegetables'],
+                          },
+                          item('carrot', 'Carrot'),
+                          item('broccoli', 'Broccoli'),
+                          item('spinach', 'Spinach'),
+                        ],
                       },
-                      item('disabled', 'Unavailable option', true),
-                      item('long', longLabel),
                     ],
                   },
                 ],
@@ -83,93 +90,29 @@ function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
           },
         ],
       },
-    ],
-  };
-}
-export default {
-  type: 'demo',
-  root: {
-    kind: 'box',
-    ref: 'selectLayout',
-    className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
-    children: [
-      { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm' },
-      select('uncontrolled', { defaultValue: 'alpha' }),
-      { kind: 'box', children: ['Disabled selection'], className: 'text-sm' },
-      select('disabled', { defaultValue: 'beta', disabled: true }),
-      {
-        kind: 'box',
-        children: ['Controlled value: accept the pending request below'],
-        className: 'text-sm',
-      },
-      select('controlled', { value: 'alpha' }),
-      {
-        kind: 'box',
-        ref: 'requestStatus',
-        attrs: { 'aria-live': 'polite' },
-        className: 'text-sm break-words',
-        children: ['No pending request.'],
-      },
       {
         kind: 'proto',
         prototypeId: 'bootstrap-2-3-2-button',
-        ref: 'accept',
-        className: 'min-w-0 max-w-full',
-        children: [
-          {
-            kind: 'box',
-            tag: 'span',
-            ref: 'acceptLabel',
-            className: 'min-w-0 whitespace-normal wrap-anywhere',
-            children: ['Accept selection'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        attrs: { dir: 'rtl' },
-        ref: 'selectRtlLayout',
-        className: 'grid grid-cols-1 min-w-0 gap-2',
-        children: [
-          { kind: 'box', children: ['RTL · long selected label'], className: 'text-sm' },
-          select('rtl', { defaultValue: 'long' }),
-        ],
+        ref: 'resetProduce',
+        children: ['Reset'],
       },
     ],
   },
-  setup({ refs, api }) {
-    let value = 'alpha';
-    let pending: ValueRequest | null = null;
-    const propose = (request: ValueRequest) => {
-      pending = request;
-      refs.requestStatus.textContent = `Requested ${request.textValue} (${request.reason}); committed selection remains ${value}.`;
+  setup({ api }) {
+    let alive = true;
+    const sync = (next: string) => {
+      if (!alive) return;
+      api.setProps('fruitSelect', {
+        value: next,
+        onValueChange: (event: { value: string }) => sync(event.value),
+      });
     };
-    const update = () => api.setProps('controlled', { value, onValueChange: propose });
-    const accept = () => {
-      if (!pending) return;
-      value = pending.value;
-      pending = null;
-      update();
-      refs.requestStatus.textContent = `Owner accepted: ${value}.`;
-    };
-    update();
-    api.setProps('accept', { onClick: accept });
-    // The demo owns each trigger's accessible name. A host that rewrites the
-    // attribute must not take that ownership, so the demo re-asserts it.
-    const labels = ['uncontrolled', 'disabled', 'controlled', 'rtl'];
-    const labelTriggers = () => {
-      for (const id of labels) refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
-    };
-    labelTriggers();
-    const observer = new MutationObserver(() => {
-      for (const id of labels)
-        if (refs[`${id}Trigger`].getAttribute('aria-label') !== `${id} selection`)
-          refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
+    sync('apple');
+    api.setProps('resetProduce', {
+      onClick: () => sync('apple'),
     });
-    for (const id of labels)
-      observer.observe(refs[`${id}Trigger`], { attributes: true, attributeFilter: ['aria-label'] });
     return () => {
-      observer.disconnect();
+      alive = false;
     };
   },
 } satisfies DemoSpec;

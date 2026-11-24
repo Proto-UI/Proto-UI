@@ -1,6 +1,8 @@
 import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
 type Proto = Extract<DemoNode, { kind: 'proto' }>;
+
 const part = (part: string, ref: string, children: Proto['children'] = [], props = {}): Proto => ({
   kind: 'proto',
   prototypeId: `shadcn-slider-${part}`,
@@ -8,53 +10,56 @@ const part = (part: string, ref: string, children: Proto['children'] = [], props
   props,
   children,
 });
-const row = (
-  name: string,
-  title: string,
-  props: Record<string, unknown> = {},
-  field = false
-): DemoNode => {
-  const control = part(
-    'root',
-    `${name}-root`,
-    [
-      part('track', `${name}-track`, [
-        part('indicator', `${name}-indicator`),
-        part(field ? 'field-thumb' : 'thumb', `${name}-thumb`),
-      ]),
-    ],
-    { defaultValue: 25, min: 0, max: 100, step: 5, ariaLabel: title, ...props }
-  );
-  return {
-    kind: 'box',
-    attrs: { 'data-slider-case': name },
-    className: 'grid gap-3',
-    children: [
-      { kind: 'box', className: 'text-sm font-medium', children: [title] },
-      {
-        kind: 'box',
-        className: name === 'vertical' ? 'h-40 w-7' : 'w-full py-2',
-        children: [
-          field
-            ? { kind: 'proto', prototypeId: 'shadcn-field-root', props: {}, children: [control] }
-            : control,
-        ],
-      },
-    ],
-  };
-};
+
 export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'grid w-full min-w-0 gap-6 p-4',
+    className: 'mx-auto grid w-full max-w-xs gap-6 p-4',
     children: [
-      row('horizontal', 'Volume · 音量'),
-      row('disabled', 'Disabled · 禁用', { disabled: true }),
-      row('readonly', 'Read only · 只读', { readOnly: true }),
-      row('rtl', 'RTL · 从右向左', { direction: 'rtl' }),
-      row('field', 'FieldThumb · 字段滑块', {}, true),
-      row('vertical', 'Vertical · 垂直', { orientation: 'vertical' }),
+      {
+        kind: 'box',
+        className: 'grid gap-3',
+        children: [
+          { kind: 'box', className: 'text-sm font-medium', children: ['Volume'] },
+          part(
+            'root',
+            'volume-root',
+            [
+              part('track', 'volume-track', [
+                part('indicator', 'volume-indicator'),
+                part('thumb', 'volume-thumb'),
+              ]),
+            ],
+            { defaultValue: 75, min: 0, max: 100, step: 1, ariaLabel: 'Volume' }
+          ),
+        ],
+      },
+      {
+        kind: 'box',
+        className: 'grid gap-3',
+        children: [
+          { kind: 'box', className: 'text-sm font-medium', children: ['Brightness (Field)'] },
+          {
+            kind: 'proto',
+            prototypeId: 'shadcn-field-root',
+            props: {},
+            children: [
+              part(
+                'root',
+                'field-root',
+                [
+                  part('track', 'field-track', [
+                    part('indicator', 'field-indicator'),
+                    part('field-thumb', 'field-thumb'),
+                  ]),
+                ],
+                { defaultValue: 50, min: 0, max: 100, step: 5, ariaLabel: 'Brightness' }
+              ),
+            ],
+          },
+        ],
+      },
     ],
   },
 } satisfies DemoSpec);

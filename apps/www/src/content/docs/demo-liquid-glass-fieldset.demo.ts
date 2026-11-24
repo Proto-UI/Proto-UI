@@ -1,2 +1,3 @@
-import { createFormPrimitivesDemo } from './form-primitives-demo.shared';
-export default createFormPrimitivesDemo('liquid-glass', 'fieldset');
+import { createFieldsetAddressDemo } from './demo_components/fieldset/fieldset-demo.shared';
+
+export default createFieldsetAddressDemo('liquid-glass');

@@ -4,6 +4,8 @@ import {
   type AutocompleteInputProps,
   type AutocompleteInputExposes,
 } from '@proto.ui/prototypes-base/autocomplete';
+import { COMMAND_FOCUS } from '../interactive-surface';
+
 export default definePrototype<AutocompleteInputProps, AutocompleteInputExposes>({
   name: 'liquid-glass-autocomplete-input',
   modules: asAutocompleteInput.modules,
@@ -11,19 +13,19 @@ export default definePrototype<AutocompleteInputProps, AutocompleteInputExposes>
     const behavior = asAutocompleteInput();
     def.feedback.style.use(
       tw(
-        'rounded-xl border border-border min-w-0 grow bg-background px-3 py-2 text-base text-foreground outline-none'
+        'rounded-xl border border-border min-w-0 flex-1 bg-background px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground'
       )
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background')
-        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS)),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('bg-muted text-muted-foreground border-border/50 cursor-not-allowed shadow-none')
+        ),
     });
     return behavior.render;
   },

@@ -1,27 +1,26 @@
 ---
 title: 'Select'
-description: '由五个部件组成、支持受控单选与锚定弹层的 Bootstrap 2.3.2 下拉选择框。'
+description: '由十一个部件组成、支持分组、受控单选与锚定弹层的 Bootstrap 2.3.2 下拉选择框。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Select 是基于 Base Select 的设计语言扩展，借鉴归档 Bootstrap 2.3.2 按钮下拉菜单的圆角、阴影与间距，提供完整的受控单选、键盘导航与碰撞避让弹层。
+Bootstrap 2.3.2 Select 是基于 [Base Select](/zh-cn/ui-libraries/base/select/) 的经典设计语言实现，保留 Bootstrap 2.3.2 `.btn` 与 `.dropdown-menu` 的渐变、圆角、阴影与间距，并提供完整的分组、受控单选与碰撞避让弹层。
 
 ## 预览
-
-示例涵盖非受控选择、禁用态、受控选择（选中后点击 **Accept selection** 提交新值）以及 RTL 长文本换行。
 
 <PrototypePreviewer
   class="select-content-preview"
   demoId="demo-bootstrap-2-3-2-select"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/select` 导入全部十一个部件：
 
 ```ts
 import {
@@ -29,31 +28,162 @@ import {
   selectTrigger,
   selectValue,
   selectContent,
+  selectSurface,
+  selectViewport,
   selectItem,
+  selectItemText,
+  selectGroup,
+  selectLabel,
+  selectSeparator,
 } from '@proto.ui/prototypes-bootstrap-2-3-2/select';
 ```
 
 ## 用法
 
-### 组合与交互
+```tsx
+import {
+  Bootstrap232SelectContent,
+  Bootstrap232SelectGroup,
+  Bootstrap232SelectItem,
+  Bootstrap232SelectItemText,
+  Bootstrap232SelectLabel,
+  Bootstrap232SelectRoot,
+  Bootstrap232SelectSurface,
+  Bootstrap232SelectTrigger,
+  Bootstrap232SelectValue,
+  Bootstrap232SelectViewport,
+} from '../proto-ui/components/react';
 
-由 `Root`、`Trigger`、`Value`、`Content` 和 `Item` 五个部件组成：
+export function FruitSelect() {
+  return (
+    <Bootstrap232SelectRoot defaultValue="apple">
+      <Bootstrap232SelectTrigger className="w-48" accessibleLabel="Fruit selector">
+        <Bootstrap232SelectValue placeholder="Select a fruit" />
+      </Bootstrap232SelectTrigger>
+      <Bootstrap232SelectContent>
+        <Bootstrap232SelectSurface>
+          <Bootstrap232SelectViewport>
+            <Bootstrap232SelectGroup>
+              <Bootstrap232SelectLabel>Fruits</Bootstrap232SelectLabel>
+              <Bootstrap232SelectItem value="apple" textValue="Apple">
+                <Bootstrap232SelectItemText>Apple</Bootstrap232SelectItemText>
+              </Bootstrap232SelectItem>
+              <Bootstrap232SelectItem value="banana" textValue="Banana">
+                <Bootstrap232SelectItemText>Banana</Bootstrap232SelectItemText>
+              </Bootstrap232SelectItem>
+            </Bootstrap232SelectGroup>
+          </Bootstrap232SelectViewport>
+        </Bootstrap232SelectSurface>
+      </Bootstrap232SelectContent>
+    </Bootstrap232SelectRoot>
+  );
+}
+```
 
-- **状态由 Root 统一管理**：`open` 与 `value` 可分别独立进入受控模式，非受控初始值通过 `defaultOpen` 和 `defaultValue` 提供。
-- **键盘与鼠标**：点击 `Trigger` 切换展开，`Enter` / `Space` 打开列表，`ArrowDown` / `ArrowUp` 定位到当前已选项或首末可用项；在列表中用方向键浏览不会提前改值，按 `Enter` / `Space` 或点击可用 `Item` 提交选择（禁用项自动跳过）。按 `Escape` 取消并将焦点交回 `Trigger`，按 `Tab` 或点击外部自动关闭。
-- **文本展示与换行**：`Value` 按已选文本 → 原始 `value` → `placeholder` → 空内容依次回退，更新已选 `Item` 的 `textValue` 会自动刷新展示文本。长标签自动换行，弹层宽度与高度自动受视口可用空间约束。
-- **风格细节**：由于归档 Bootstrap 2.3.2 原生依赖浏览器 `<select>`，本组件借鉴其 button-dropdown 视觉语法（4px 触发器圆角、6px 面板圆角、rem 缩放内边距，并加深选中蓝底以确保白字对比度）。
+### 组合结构
 
-更多协议细节请参阅 [Base Select](/zh-cn/ui-libraries/base/select/)。
+```text
+SelectRoot
+├── SelectTrigger
+│   └── SelectValue
+└── SelectContent
+    └── SelectSurface
+        └── SelectViewport
+            ├── SelectGroup
+            │   ├── SelectLabel
+            │   └── SelectItem
+            │       └── SelectItemText
+            └── SelectSeparator
+```
+
+- **经典样式细节**：触发器沿用 Bootstrap 2.3.2 `.btn` + 8×4 黑色三角指示器；弹层沿用 `.dropdown-menu` 6px 圆角、柔和外阴影、11px 大写分组标题（`.nav-header`）、双色分隔线（`.divider`）及蓝色渐变高亮项。
+- **键盘与无障碍**：支持 `Enter` / `Space` / 方向键展开与导航、类型预查、`Escape` 取消并返回焦点；长标签自动换行并遵循书写方向。
+
+## 示例
+
+### 可滚动长列表（Scrollable）
+
+在 `Viewport` 上约束高度以滚动浏览分组时区列表。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态（Disabled）
+
+支持禁用整个选择器或禁用单个选项。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左排版（RTL）
+
+在 `dir="rtl"` 容器中，文本对齐与尾部选中标记自动随书写方向翻转。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen`、`value` / `defaultValue` | 独立控制展开状态与选中值 |
-| `Root` | `disabled` / `closeOnSelect` | 禁用控件 / 选中后是否自动关闭 |
-| `Root` | `openChange` / `valueChange` | 展开状态与选中值变更请求事件 |
-| `Trigger` | — | 带有 `combobox` 语义的触发按钮 |
-| `Value` | `placeholder` | 显示当前选中标签或占位文案 |
-| `Content` | `side` / `align` / `sideOffset` / `alignOffset` / `avoidCollisions` / `collisionPadding` | 锚定列表弹层与碰撞避让配置 |
-| `Item` | `value` / `textValue` / `disabled` / `select` | 单个选项定义及选中事件 |
+### Root / Trigger / Value
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Root.open', type: 'boolean', default: 'undefined' },
+    { name: 'Root.defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'Root.value', type: 'string', default: 'undefined' },
+    { name: 'Root.defaultValue', type: 'string', default: "''" },
+    { name: 'Root.disabled', type: 'boolean', default: 'false' },
+    { name: 'Root.readOnly', type: 'boolean', default: 'false' },
+    { name: 'Root.closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'Root.openChange', type: '(detail) => void', default: '—' },
+    { name: 'Root.valueChange', type: '(detail) => void', default: '—' },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content / Item
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Content.position', type: "'popper' | 'item-aligned'", default: "'popper'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '2' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: '继承 Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+`Surface`、`Viewport`、`ItemText`、`Group`、`Label` 与 `Separator` 为结构与分组部件，不额外声明组件属性。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-SELECT.yaml',
+    'P-BOOTSTRAP-2-3-2-SELECT-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-SELECT-CONTENT.yaml',
+    'P-BOOTSTRAP-2-3-2-SELECT-ITEM.yaml',
+    'P-BASE-SELECT.yaml',
+  ]}
+/>

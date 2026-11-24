@@ -1,0 +1,134 @@
+---
+title: 'Liquid Glass Checkbox'
+description: '基于 Base Checkbox 的 Liquid Glass 光学材质复选框组件，支持选中染色、半选状态与高对比度不透明回退。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Checkbox 将光学折射表面与克制的选中染色结合到 20px 同心圆角方框中，支持未选、已选与半选（`indeterminate`）状态，并在减弱透明度、增强对比度或禁用态下自动保持可读的不透明表面。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Liquid Glass Checkbox 当前以 Proto UI 工作区源码提供，从 `@proto.ui/prototypes-liquid-glass` 或 `@proto.ui/prototypes-liquid-glass/checkbox` 导入 `checkboxRoot` 与 `checkboxIndicator`。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassCheckboxIndicator,
+  LiquidGlassCheckboxRoot,
+  LiquidGlassLabelRoot,
+} from '@proto.ui/prototypes-liquid-glass';
+
+export function Example() {
+  return (
+    <div className="flex items-center gap-3">
+      <LiquidGlassCheckboxRoot defaultChecked>
+        <LiquidGlassCheckboxIndicator />
+      </LiquidGlassCheckboxRoot>
+      <LiquidGlassLabelRoot>Subscribe to release notes</LiquidGlassLabelRoot>
+    </div>
+  );
+}
+```
+
+### 材质层次与无障碍
+
+- **光学材质与染色**：默认 `material="auto"` 在支持背景源的宿主上请求光学折射，选中与半选态叠加主题主色染色（`tint: 'style-fill'`）；`Indicator` 保持纯被动绘制，不叠加第二层玻璃材质（避免 glass-on-glass）。
+- **系统偏好自动回退**：当系统开启减少透明度、增强对比度、强制颜色模式或控件处于禁用态时，自动切换为满足对比度要求的不透明填充；开启减弱动态效果时自动停用按压形变。
+- **显式不透明表面**：在密集表单或纯色面板上可传入 `material="opaque"`，关闭光学效果并保留完整的选中与焦点反馈。
+
+## 示例
+
+### 说明与卡片组合
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+禁用态采用低饱和度不透明表面而非整体降透，确保在彩色背景上依然保持清晰边界与可读对勾。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 光学材质与不透明对比
+
+对比 `material="auto"` 与 `material="opaque"` 在彩色背景上的表现。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控与半选
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 表格行选择
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'checked', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Root` 暴露 `checked`、`indeterminate`、`disabled`、`readOnly`、`required`、`hovered`、`focused`、`focusVisible`、`pressed` 状态，`focusSelf(options?)` 与 `resetValue()` 方法，以及 `checkedChange`（`{ checked, indeterminate }`）与 `indeterminateChange`（`{ indeterminate }`）事件。
+
+### Indicator
+
+`Indicator` 不声明额外属性，也不请求独立光学材质，自动随最近的 `Root` 同步对勾或半选横线，暴露 `checked`、`indeterminate`、`isChecked()` 与 `isIndeterminate()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-CHECKBOX.yaml',
+    'P-LIQUID-GLASS-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>

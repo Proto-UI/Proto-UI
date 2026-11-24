@@ -1,0 +1,128 @@
+---
+title: 'Liquid Glass Input'
+description: 'A legible content-layer single-line text input designed to pair cleanly with floating Liquid Glass controls.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Input is built on [Base Input](../../base/input/). Following Apple Liquid Glass layer separation, inline text editors stay on a crisp, legible opaque content surface with concentric rounded geometry instead of stacking glass-on-glass, pairing naturally with floating glass controls.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={true}
+/>
+
+## Installation
+
+Currently available from Proto UI workspace source and not yet published to the CLI; import directly from `@proto.ui/prototypes-liquid-glass/input`.
+
+## Usage
+
+```tsx
+import { LiquidGlassInputRoot } from '@/components/ui/liquid-glass-input';
+
+export function Example() {
+  return <LiquidGlassInputRoot placeholder="Enter text" ariaLabel="Text input" />;
+}
+```
+
+- **Layer hierarchy and legibility**: Uses `h-11`, `rounded-2xl`, a clear border, and an opaque semantic background so text stays sharp against rich backdrops. Pointer focus displays a subtle accent ring, while keyboard focus shows a high-contrast offset ring with forced-colors support.
+- **State clarity**: `readOnly` and `disabled` differentiate via semantic muted fills and ink without washing out contrast with low opacity.
+- **Composition**: Pair with Liquid Glass `Label`, `Field`, or floating Liquid Glass `Button` controls for forms and search bars.
+
+## Examples
+
+### Basic
+
+A standalone content-layer text input framed over a vibrant backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Field
+
+Compose `Field`, `FieldLabel`, `FieldControl`, and `FieldDescription` for labeled form inputs.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Pass `invalid` and `errors` to `Field` for accessible validation feedback.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inline
+
+Pair a legible content-layer `Input` with a floating Liquid Glass `Button` for search actions.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-input-inline"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'autoComplete', type: 'string', default: "''" },
+    { name: 'minLength', type: 'number', default: '-1' },
+    { name: 'maxLength', type: 'number', default: '-1' },
+    {
+      name: 'inputMode',
+      type: "'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search'",
+      default: 'undefined',
+    },
+    {
+      name: 'enterKeyHint',
+      type: "'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send'",
+      default: 'undefined',
+    },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'labelledBy', type: 'string', default: "''" },
+    { name: 'describedBy', type: 'string', default: "''" },
+  ]}
+/>
+
+### Exposed States, Methods, and Events
+
+- **States**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`
+- **Methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue(value?: string): boolean`
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-INPUT.yaml', 'P-BASE-INPUT.yaml']}
+/>

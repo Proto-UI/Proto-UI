@@ -8,34 +8,40 @@ import type { InputShellProps, InputShellControlProps } from './types';
  * Only the public bounded one-editor shell is projected, not InputGroup API. */
 const SHELL_PROFILES = {
   vega: {
-    shell: 'h-9 rounded-md border-input shadow-xs transition-[color,box-shadow]',
+    shell: 'h-9 rounded-md border-input bg-transparent shadow-xs transition-[color,box-shadow]',
     focus: 'border-ring ring-3 ring-ring/50',
+    invalid: 'border-destructive ring-destructive/20 ring-3',
     command: 'h-8 rounded-lg border-input/30 bg-input/30 shadow-none',
   },
   nova: {
-    shell: 'h-8 rounded-lg border-input transition-colors',
+    shell: 'h-8 rounded-lg border-input bg-transparent transition-colors',
     focus: 'border-ring ring-3 ring-ring/50',
+    invalid: 'border-destructive ring-destructive/20 ring-3',
     command: 'h-8 rounded-lg border-input/30 bg-input/30 shadow-none',
   },
   maia: {
     shell: 'h-9 rounded-[var(--pui-radius-4xl)] border-input bg-input/30 transition-colors',
     focus: 'border-ring ring-3 ring-ring/50',
+    invalid: 'border-destructive ring-destructive/20 ring-3',
     command: 'h-9 rounded-[var(--pui-radius-4xl)] border-input bg-input/30 transition-colors',
   },
   lyra: {
-    shell: 'h-8 rounded-none border-input transition-colors',
+    shell: 'h-8 rounded-none border-input bg-transparent transition-colors',
     focus: 'border-ring ring-1 ring-ring/50',
+    invalid: 'border-destructive ring-destructive/20 ring-1',
     command: 'h-8 rounded-none border-0 border-input/30 bg-input/30 shadow-none',
   },
   mira: {
     shell: 'h-7 rounded-md border-input bg-input/20 transition-colors',
     focus: 'border-ring ring-2 ring-ring/30',
+    invalid: 'border-destructive ring-destructive/20 ring-2',
     command: 'h-8 rounded-md border-input bg-input/20 transition-colors',
   },
   luma: {
     shell:
       'h-9 rounded-[var(--pui-radius-4xl)] border-transparent bg-input/50 transition-[color,box-shadow,background-color]',
     focus: 'border-ring ring-3 ring-ring/30',
+    invalid: 'border-destructive ring-destructive/20 ring-3',
     command:
       'h-9 rounded-[var(--pui-radius-4xl)] border-transparent bg-input/50 transition-[color,box-shadow,background-color]',
   },
@@ -43,6 +49,7 @@ const SHELL_PROFILES = {
     shell:
       'h-10 rounded-none border-transparent border-b-input bg-transparent transition-[color,border-color]',
     focus: 'border-b-ring',
+    invalid: 'border-b-destructive',
     command:
       'h-10 rounded-none border-transparent border-b-input bg-transparent px-3 transition-[color,border-color]',
   },
@@ -50,18 +57,22 @@ const SHELL_PROFILES = {
     shell:
       'h-8 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/50 transition-[color,box-shadow] duration-200',
     focus: 'border-ring ring-3 ring-ring/30',
+    invalid: 'border-destructive ring-destructive/20 ring-3',
     command:
       'h-8 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/50 transition-[color,box-shadow] duration-200',
   },
   'new-york-v4': {
-    shell: 'h-9 rounded-md border-input shadow-xs transition-[color,box-shadow]',
+    shell: 'h-9 rounded-md border-input bg-transparent shadow-xs transition-[color,box-shadow]',
     focus: 'border-ring ring-3 ring-ring/50',
+    invalid: 'border-destructive ring-destructive/20',
     command: 'h-auto rounded-none border-0 bg-transparent shadow-none',
   },
 } as const;
 
 export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
-  const style = setupShadcnStyleSelection(def, 'new-york-v4');
+  const style = setupShadcnStyleSelection(def, 'new-york-v4', {
+    supportedStyles: SHADCN_STYLE_IDS,
+  });
   const command = setupCommandInputMode(def);
   const menu = setupCommandMenuInputMode(def);
   def.feedback.style.use(tw('relative flex w-full min-w-0 items-center outline-none'));
@@ -83,11 +94,49 @@ export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
         w.all(
           w.state(style).eq(id),
           w.state(command).eq(false),
+          w.prop('invalid').eq(false),
           w.prop('focusVisible').eq(true),
           w.prop('focusIndicator').eq('ring')
         ),
       intent: (i) => i.feedback.style.use(tw(profile.focus)),
     });
+    def.rule({
+      when: (w) =>
+        w.all(w.state(style).eq(id), w.state(command).eq(false), w.prop('invalid').eq(true)),
+      intent: (i) => i.feedback.style.use(tw(profile.invalid)),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(id),
+          w.state(command).eq(false),
+          w.prop('invalid').eq(true),
+          w.meta('colorScheme').eq('dark')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            id === 'sera'
+              ? 'border-b-destructive/50'
+              : id === 'new-york-v4'
+                ? 'ring-destructive/40'
+                : 'border-destructive/50 ring-destructive/40'
+          )
+        ),
+    });
+    if (id === 'new-york-v4') {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(id),
+            w.state(command).eq(false),
+            w.prop('invalid').eq(true),
+            w.prop('focusVisible').eq(true),
+            w.prop('focusIndicator').eq('ring')
+          ),
+        intent: (i) => i.feedback.style.use(tw('ring-3')),
+      });
+    }
   }
   // Border/inset belong to the opted-in Command wrapper. This still wraps
   // exactly one editor; no addon or additional focus/interaction owner.
@@ -114,6 +163,10 @@ export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
     intent: (i) => i.feedback.style.use(tw('bg-input/30')),
   });
   // The actual editor remains the sole opacity/disabled/focus owner.
+  def.rule({
+    when: (w) => w.all(w.state(command).eq(false), w.prop('disabled').eq(true)),
+    intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
+  });
   for (const id of ['nova', 'lyra'] as const) {
     def.rule({
       when: (w) =>
@@ -150,7 +203,9 @@ export function setupInputShellControlPaint(
   def: DefHandle<InputShellControlProps>,
   disabled: State<boolean>
 ) {
-  const style = setupShadcnStyleSelection(def, 'new-york-v4');
+  const style = setupShadcnStyleSelection(def, 'new-york-v4', {
+    supportedStyles: SHADCN_STYLE_IDS,
+  });
   def.feedback.style.use(
     tw(
       'min-w-0 w-full grow rounded-none border-0 bg-transparent shadow-none outline-none ring-0 text-foreground selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground'

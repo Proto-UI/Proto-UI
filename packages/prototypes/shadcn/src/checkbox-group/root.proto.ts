@@ -8,7 +8,15 @@ export default definePrototype<ShadcnCheckboxGroupRootProps, CheckboxGroupRootEx
   setup(def) {
     const inherited = asCheckboxGroupRoot();
     setupShadcnStyleScope(def);
+    def.props.define({
+      orientation: { type: 'enum', options: ['vertical', 'horizontal'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ orientation: 'vertical' });
     def.feedback.style.use(tw('flex w-full min-w-0 flex-col gap-3 text-foreground'));
+    def.rule({
+      when: (w) => w.prop('orientation').eq('horizontal'),
+      intent: (i) => i.feedback.style.use(tw('flex-row flex-wrap items-center gap-4')),
+    });
     return inherited.render;
   },
 });

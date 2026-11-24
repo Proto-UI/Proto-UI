@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-结合单行搜索输入框与下拉选项列表的组合选择框，将已选选项标识与输入查询文本分离管理。本页示例采用 **Shadcn Rhea** 风格。
+结合单行搜索输入框与下拉选项列表的组合选择框，将已选选项标识（`value`）与当前输入查询文本（`inputValue`）分离管理。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,51 +15,172 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+当前 Combobox 仅在源码工作区（`@proto.ui/prototypes-shadcn/combobox`）提供，尚未发布至 `0.2.0` 稳定版 CLI 注册表。
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-shadcn/combobox';
+```
+
+```html
+<shadcn-combobox-root a11y-label="Framework">
+  <shadcn-combobox-input placeholder="Select a framework..."></shadcn-combobox-input>
+  <shadcn-combobox-trigger>▾</shadcn-combobox-trigger>
+  <shadcn-combobox-content>
+    <shadcn-combobox-item value="next.js" text-value="Next.js">Next.js</shadcn-combobox-item>
+    <shadcn-combobox-item value="sveltekit" text-value="SvelteKit">SvelteKit</shadcn-combobox-item>
+    <shadcn-combobox-item value="astro" text-value="Astro">Astro</shadcn-combobox-item>
+    <shadcn-combobox-empty>No frameworks found.</shadcn-combobox-empty>
+  </shadcn-combobox-content>
+</shadcn-combobox-root>
+```
 
 ### 部件结构
 
-由 `Root`、`Input`、`Content`、`Item`、`Empty` 与 `Trigger` 组合而成：
+```text
+ComboboxRoot
+├── ComboboxInput
+├── ComboboxTrigger (optional)
+└── ComboboxContent
+    ├── ComboboxItem
+    └── ComboboxEmpty (optional)
+```
 
-- `Root` 的 `value` 保存已选中的选项键，`inputValue` 保存当前输入框内的查询文本；未匹配到有效选项的自由文本不会被自动提交为选中值。
+- `Root` 的 `value` 保存已选中的选项键，`inputValue` 保存输入框内的实时查询文本；未匹配到有效选项的自由文本不会被自动提交为选中值。
 - 如需允许直接提交自由文本，请使用 [Autocomplete](../autocomplete/)。
-
-### 过滤与交互行为
-
-- **内置过滤**：默认按 `textValue` 与 `keywords` 过滤，忽略大小写及重音符号。设置 `filter={false}` 可交由应用层自行过滤列表项。
-- **空状态与禁用项**：`Empty` 根据实时匹配数显隐；禁用项及重复 `value` 的选项不可提交。
+- **内置过滤**：默认按 `textValue` 与 `keywords` 过滤，忽略大小写及重音符号；设置 `filter={false}` 可交由应用层自行过滤。
 - **键盘与输入法**：使用方向键在候选项中移动时，焦点始终停留在单行输入框内；输入法（IME）组合输入期间不会触发选中。
-- **受控模式**：`open`、`value` 与 `inputValue` 可各自独立受控，传入对应属性即可切换为受控状态。
+
+## 示例
+
+### 关键词匹配
+
+为每个 `Item` 提供 `keywords`，即可通过地区、城市或缩写快速检索选项（如输入 `Europe`、`NYC` 或 `JST`）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-keywords"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误状态
+
+在 `Input` 上设置 `invalid` 即可呈现错误边框与聚焦高亮。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+在 `Root` 上传入 `disabled` 或 `readOnly` 可禁用编辑或锁定当前已选值。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+`value`、`inputValue` 与 `open` 可各自独立受控，并配合 `valueChange`、`inputValueChange`、`openChange` 事件与外部按钮同步更新。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-combobox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 传入 `value`、`inputValue` 或 `open` 会使对应状态进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'filter', type: 'boolean', default: 'true' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
   ]}
 />
 
-以上属性属于 `Root`。其他部件属性默认值：
+**事件与方法**：`valueChange`、`inputValueChange`、`openChange`、`execute`；方法 `select(value, reason?)`、`setInputValue(value, composing?)`、`openPopup()`、`close()`。
 
-- **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
-- **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
-- **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
-- **Trigger**：`disabled` 默认为 `false`。
+### Input
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'placeholder', type: 'string', default: "''" },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'collisionPadding', type: 'number', default: '8' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
+
+### Item 与 Empty
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId | "inherit"', default: "'inherit'" },
+  ]}
+/>
 
 ## 参考
 

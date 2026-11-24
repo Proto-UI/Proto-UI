@@ -1,13 +1,13 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { setupShadcnStyleSelection, SHADCN_STYLE_IDS, type ShadcnStyleProps } from '../style-scope';
 
-/** Pinned .cn-field gap/invalid paint; Base alone owns validation and relationships. */
+/** Pinned .cn-field gap/invalid/disabled paint; Base alone owns validation and relationships. */
 export function setupFieldRootVisual<
   Props extends ShadcnStyleProps,
   Exposes = Record<string, unknown>,
->(def: DefHandle<Props, Exposes>, invalid: State<boolean>) {
+>(def: DefHandle<Props, Exposes>, invalid: State<boolean>, disabled?: State<boolean>) {
   const style = setupShadcnStyleSelection(def, 'nova');
-  def.feedback.style.use(tw('flex w-full min-w-0 flex-col text-foreground'));
+  def.feedback.style.use(tw('flex w-full min-w-0 text-foreground'));
   for (const profile of SHADCN_STYLE_IDS) {
     def.rule({
       when: (w) => w.state(style).eq(profile),
@@ -21,6 +21,12 @@ export function setupFieldRootVisual<
     when: (w) => w.state(invalid).eq(true),
     intent: (i) => i.feedback.style.use(tw('text-destructive')),
   });
+  if (disabled) {
+    def.rule({
+      when: (w) => w.state(disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50')),
+    });
+  }
   return style;
 }
 
@@ -48,14 +54,14 @@ export function setupFieldTextVisual<
   const style = setupShadcnStyleSelection(def, 'nova');
   def.feedback.style.use(tw('break-words'));
   if (part === 'label') {
-    def.feedback.style.use(tw('flex w-fit items-center gap-2'));
+    def.feedback.style.use(tw('flex w-fit items-center gap-2 select-none'));
   } else {
     def.feedback.style.use(tw('block'));
     def.feedback.style.use(
       tw(
         part === 'error'
           ? 'font-normal leading-normal text-destructive'
-          : 'text-left font-normal leading-normal text-muted-foreground'
+          : 'font-normal leading-normal text-muted-foreground'
       )
     );
   }
@@ -79,7 +85,8 @@ export function setupFieldTextVisual<
   if (disabled) {
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50')),
+      intent: (i) =>
+        i.feedback.style.use(tw(part === 'label' ? 'opacity-50 cursor-not-allowed' : 'opacity-50')),
     });
   }
   return style;

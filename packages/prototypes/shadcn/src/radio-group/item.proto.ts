@@ -14,14 +14,14 @@ import type { ShadcnRadioGroupItemExposes, ShadcnRadioGroupItemProps } from './t
 const ITEM_SURFACE: Readonly<Record<ShadcnStyleId, string>> = {
   'new-york-v4':
     'size-4 rounded-full border-input text-primary shadow-xs transition-[color,box-shadow]',
-  vega: 'size-4 rounded-full border-input bg-transparent',
-  nova: 'size-4 rounded-full border-input bg-transparent',
-  maia: 'size-4 rounded-full border-input bg-transparent',
-  lyra: 'size-4 rounded-full border-input bg-transparent',
-  mira: 'size-4 rounded-full border-input bg-transparent',
-  luma: 'size-4 rounded-full border-transparent bg-input/90',
-  sera: 'size-4.5 rounded-full border-input bg-transparent',
-  rhea: 'size-4 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/90',
+  vega: 'size-4 rounded-full border-input bg-transparent transition-shadow',
+  nova: 'size-4 rounded-full border-input bg-transparent transition-shadow',
+  maia: 'size-4 rounded-full border-input bg-transparent transition-shadow',
+  lyra: 'size-4 rounded-full border-input bg-transparent transition-shadow',
+  mira: 'size-4 rounded-full border-input bg-transparent transition-shadow',
+  luma: 'size-4 rounded-full border-transparent bg-input/90 transition-shadow',
+  sera: 'size-4.5 rounded-full border-input bg-transparent transition-shadow',
+  rhea: 'size-4 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/90 transition-shadow',
 };
 const ITEM_CHECKED: Readonly<Record<ShadcnStyleId, string>> = {
   'new-york-v4': 'text-primary',
@@ -48,8 +48,10 @@ const ITEM_FOCUS: Readonly<Record<ShadcnStyleId, string>> = {
 
 const radioGroupItem = definePrototype<ShadcnRadioGroupItemProps, ShadcnRadioGroupItemExposes>({
   name: 'shadcn-radio-group-item',
+  modules: asRadioGroupItem.modules,
   setup(def) {
-    const state = asRadioGroupItem().stateHandles;
+    const inherited = asRadioGroupItem();
+    const state = inherited.stateHandles;
     if (!state) {
       throw new Error(
         '[shadcn-radio-group-item] asRadioGroupItem must project Item state handles.'
@@ -68,7 +70,9 @@ const radioGroupItem = definePrototype<ShadcnRadioGroupItemProps, ShadcnRadioGro
     def.lifecycle.onMounted(syncVisual);
     def.lifecycle.onUpdated(syncVisual);
     def.feedback.style.use(
-      tw('flex items-center justify-center aspect-square shrink-0 border outline-none')
+      tw(
+        'flex items-center justify-center aspect-square shrink-0 border outline-none cursor-pointer'
+      )
     );
     for (const profile of SHADCN_STYLE_IDS) {
       def.rule({
@@ -101,9 +105,7 @@ const radioGroupItem = definePrototype<ShadcnRadioGroupItemProps, ShadcnRadioGro
         intent: (i) => i.feedback.style.use(tw('bg-input/30')),
       });
     }
-    // Base Radio Group explicitly defers Field-invalid/form semantics. No raw
-    // aria-invalid prop or validator is invented for source-only variants.
-    // Upstream wrapping-label ring clears and expanded hit targets remain gaps.
+    return inherited.render;
   },
 });
 

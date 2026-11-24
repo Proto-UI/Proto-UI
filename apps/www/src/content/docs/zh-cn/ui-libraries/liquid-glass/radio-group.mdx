@@ -1,0 +1,164 @@
+---
+title: 'Liquid Glass Radio Group'
+description: '结合层次透光材质、同心圆点比例与常规/强调层级的 Liquid Glass 单选框组组件。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Radio Group 以通透的玻璃材质边界、柔和的高光边缘和同心圆点比例（`size-2` 圆点位于 `size-5` 圆形控件内）呈现单选交互，支持 `regular` 与 `prominent` 视觉层级以及 `material="opaque"` 显式退让，并由 Base Radio Group 统一管理单选语义与漫游焦点。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Liquid Glass Radio Group 当前以 Proto UI 工作区源码提供，可从 `@proto.ui/prototypes-liquid-glass/radio-group` 导入 `radioGroupRoot`、`radioGroupItem` 与 `radioGroupIndicator` 并适配到目标运行时。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassLabelRoot,
+  LiquidGlassRadioGroupIndicator,
+  LiquidGlassRadioGroupItem,
+  LiquidGlassRadioGroupRoot,
+} from '../proto-ui/components/react';
+
+export function RadioGroupUsage() {
+  return (
+    <LiquidGlassRadioGroupRoot defaultValue="comfortable" a11yLabel="Display density">
+      <div className="flex items-center gap-3">
+        <LiquidGlassRadioGroupItem value="default">
+          <LiquidGlassRadioGroupIndicator />
+        </LiquidGlassRadioGroupItem>
+        <LiquidGlassLabelRoot>Default</LiquidGlassLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <LiquidGlassRadioGroupItem value="comfortable">
+          <LiquidGlassRadioGroupIndicator />
+        </LiquidGlassRadioGroupItem>
+        <LiquidGlassLabelRoot>Comfortable</LiquidGlassLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <LiquidGlassRadioGroupItem value="compact">
+          <LiquidGlassRadioGroupIndicator />
+        </LiquidGlassRadioGroupItem>
+        <LiquidGlassLabelRoot>Compact</LiquidGlassLabelRoot>
+      </div>
+    </LiquidGlassRadioGroupRoot>
+  );
+}
+```
+
+### 材质层次与无障碍
+
+- **避免玻璃叠加玻璃**：只有单个 `Item` 声明 Liquid Glass 材质，`Root` 容器与 `Indicator` 圆点均不叠加玻璃层。若单选框组放置在已使用玻璃材质的面板或卡片中，请为 `Item` 设置 `material="opaque"`，改用高对比度实心回退表面。
+- **层级区分**：日常选项使用默认 `variant="regular"`；需要突出关键选项时使用 `variant="prominent"`，配合主题主色边界与染色。
+- **自适应回退**：当系统开启减少透明度、减弱动态效果、增强对比度或强制颜色模式，或宿主缺少可用背景源时，控件自动回退至可读的不透明色彩配对；禁用态不使用低透明度淡出（`opacity-50`），确保选中标记与文字在实心表面上依然清晰可辨。
+
+## 示例
+
+### 带说明文字
+
+在多彩层次背景上配合说明文案展示常规选项的透光层次与清晰对比度。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 选择卡片（同心圆角与避免叠层）
+
+外层容器与内层卡片采用同心圆角（`rounded-2xl` + `p-1` → `rounded-xl`），卡片内单选项通过 `material="opaque"` 避免玻璃叠加玻璃。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 材质层级与不透明退让
+
+对比 `variant="regular"`、`variant="prominent"` 以及 `material="opaque"` 在相同背景下的视觉层级。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用态
+
+禁用态自动撤回材质候选并保持完整不透明前景色与选中圆点，避免弱对比度洗白。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 校验错误
+
+结合 `FieldRoot` 与 `FieldError` 在层次背景中清晰呈现单选校验错误。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-radio-group-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string（必填）', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### Indicator、事件与方法
+
+- **Indicator**：无额外属性，自动继承所属 `Item` 的前景色绘制同心圆点。
+- **事件**：Root 触发 `valueChange`（`{ value: string }`）；Item 触发 `select`（`{ value: string }`）。
+- **方法**：Root 暴露 `requestValue(value)`、`resetValue()`、`focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()`、`focusSelected()`、`focusSelf()`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-RADIO-GROUP.yaml',
+    'P-LIQUID-GLASS-RADIO-GROUP-ITEM.yaml',
+    'P-LIQUID-GLASS-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
+/>

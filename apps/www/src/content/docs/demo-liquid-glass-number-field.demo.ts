@@ -1,2 +1,3 @@
-import { createNumericInputDemo } from './numeric-input-demo.shared';
-export default createNumericInputDemo('liquid-glass', 'number-field');
+import { createNumberFieldHeroDemo } from './demo_components/number-field/shared';
+
+export default createNumberFieldHeroDemo('liquid-glass');

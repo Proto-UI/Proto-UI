@@ -15,60 +15,159 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-form"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+## 安装
+
+当前组件在工作区源码中提供，尚未包含在 0.2.0 稳定版包中；可从 `@proto.ui/prototypes-shadcn/form` 引入。
+
+## 用法
+
+```tsx
+import {
+  ShadcnFormRoot,
+  ShadcnFormField,
+  ShadcnFormSubmit,
+  ShadcnFormReset,
+  ShadcnFieldLabel,
+  ShadcnFieldControl,
+  ShadcnFieldError,
+} from '../proto-ui/components/react';
+
+export function ExampleForm() {
+  return (
+    <ShadcnFormRoot
+      styleProfile="rhea"
+      ariaLabel="Account settings"
+      onSubmit={({ values }) => console.log(values)}
+    >
+      <ShadcnFormField styleProfile="rhea" name="username" required>
+        <ShadcnFieldLabel styleProfile="rhea">Username</ShadcnFieldLabel>
+        <ShadcnFieldControl styleProfile="rhea" placeholder="ada_lovelace" />
+        <ShadcnFieldError styleProfile="rhea" />
+      </ShadcnFormField>
+      <div className="flex items-center gap-2">
+        <ShadcnFormSubmit styleProfile="rhea">Save</ShadcnFormSubmit>
+        <ShadcnFormReset styleProfile="rhea" variant="outline">
+          Reset
+        </ShadcnFormReset>
+      </div>
+    </ShadcnFormRoot>
+  );
+}
+```
+
+### 部件结构
+
+- **Root**：收集内部显式注册的 `FormField`，全部启用字段校验通过后通过 `submit` 事件输出按字段名组织的数据。禁用字段（含被父级 `Fieldset` 禁用的字段）自动排除；重复字段名会在序列化时抛出 `FORM_DUPLICATE_NAME` 错误。设置 `disabled` 会向下级联禁用所有内部字段与操作按钮。
+- **Field**：继承 `FieldRoot` 能力并声明提交键名 `name`。独立的 `Checkbox`、`RadioGroup` 或 `Switch` 不会自动注册，如需接入表单请使用 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldCheckbox`、`fieldRadioGroup` 或 `fieldSwitch`。
+- **Submit / Reset**：支持指针与键盘激活，支持 `variant`、`size` 与 `styleProfile`，并暴露 `disabled`、`hovered`、`pressed`、`focused`、`focusVisible` 与 `focusSelf()`。
+
+### 键盘与无障碍
+
+- **隐式回车提交**：在聚焦的单行 `Field`、`Number Field` 或 `Input OTP` 内按 `Enter` 可直接触发表单提交（自动排除输入法组合、修饰键与长按连发）。
+- **校验失败聚焦**：校验不通过时触发 `invalid` 事件并自动将焦点移至首个无效字段控件。
+- **重置与清理**：`Reset` 或 `requestReset()` 还原非受控字段初值、向受控字段发出初值提议、取消进行中的校验并触发 `reset` 事件；`resetValidation()` 仅清除校验状态而不改动值。
+
+## 示例
+
+### 个人资料表单
+
+组合 `Fieldset`、单行输入框与多行 `Textarea`，并在操作栏中并排放置提交与 `outline` 重置按钮：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-profile"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作按钮变体与尺寸
+
+`FormSubmit` 与 `FormReset` 支持 `variant`（`default`、`secondary`、`outline`、`destructive`、`ghost`）与 `size`（`sm`、`default`、`lg`）：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-actions"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 嵌套 Fieldset 禁用
+
+禁用嵌套 `Fieldset` 会级联禁用组内字段，并在提交序列化时自动排除这些字段的值：
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ### 异步校验与嵌套控件
 
-下方示例演示外部异步校验请求的完整生命周期：提交时发起校验，通过 `resolveValidation` 返回对应 `requestId` 的结果；若期间修改内容、重置或切换只读，过期结果会自动被丢弃。同时展示受控字段与嵌套 `Fieldset` 禁用联动：
+演示外部异步校验请求的完整生命周期：提交或编辑时发起请求，通过 `resolveValidation` 返回对应 `requestId` 的结果；若期间修改内容、重置或切换只读，过期结果会自动丢弃：
 
 <PrototypePreviewer
   demoId="demo-shadcn-form-validation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ### 选择类控件集成
 
-通过 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldCheckbox`、`fieldRadioGroup` 与 `fieldSwitch`，可在显式 `FormField` 中组合受控或非受控的选择类控件，接入必填校验、只读、分组禁用与表单重置：
+通过 `@proto.ui/prototypes-shadcn/field` 导出的 `fieldCheckbox`、`fieldRadioGroup` 与 `fieldSwitch`，可在显式 `FormField` 中接入必填校验、只读、分组禁用与表单重置：
 
 <PrototypePreviewer
   demoId="demo-shadcn-field-choices"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## 用法
-
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
-
-### 部件结构
-
-`Form` 由 `Root`、`Field`、`Submit` 与 `Reset` 四个部件组成：
-
-- **Root**：汇总内部显式注册的 `FormField`，校验通过后在 `submit` 事件中返回按字段名组织的表单数据。重复字段名会被拒绝序列化，禁用字段（含被父级 `Fieldset` 禁用的字段）自动从提交数据中排除；`Root` 的 `disabled` 会同步传递到内部所有字段。
-- **Field**：为单个字段声明 `name` 并将其接入表单提交与重置流程。普通独立的 `Checkbox`、`RadioGroup` 或 `Switch` 不会自动注册，如需参与表单请使用 `fieldCheckbox`、`fieldRadioGroup` 或 `fieldSwitch`。
-- **Submit / Reset**：复用本套按钮视觉样式，支持键盘与指针激活，并暴露 `disabled`、`hovered`、`pressed`、`focused`、`focusVisible` 与 `focusSelf`。
-
-### 提交、异步校验与重置
-
-- **隐式回车提交**：在聚焦的单行 `Field`、`Number Field` 或 `Input OTP` 中按 `Enter` 可直接触发提交（自动排除输入法组合、修饰键与长按重复触发）。
-- **异步提交协调**：存在异步校验字段时，表单会等待当前版本的校验结果；若期间值变更、字段移除、取消提交或发起新提交，旧尝试会自动失效。
-- **表单重置**：调用 `requestReset()` 或点击 `Reset` 会恢复非受控字段的初始值，向受控字段发出恢复初值的请求，并取消进行中的编辑与校验，最后触发 `reset` 事件（不触发 `onChange` 校验）。若仅需清除校验错误而不还原值，请使用 `resetValidation()`。
-
 ## API
+
+### FormRoot
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
   ]}
 />
 
-以上属性属于 `Root`。`Field` 的 `name` 默认为 `''`；`Submit` 与 `Reset` 的 `disabled` 默认为 `false`。
+暴露状态：`disabled`、`pending`、`submitted`。暴露方法：`getValues()`、`requestSubmit()`、`requestReset()`、`resetValidation()`、`cancelSubmit()`。事件：`submit`（`{ values, submissionId }`）、`invalid`（`{ names }`）、`reset`。
+
+### FormField
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'validationMode', type: "'onSubmit' | 'onBlur' | 'onChange'", default: "'onSubmit'" },
+    { name: 'externalValidation', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+### FormSubmit / FormReset
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'variant',
+      type: "'default' | 'secondary' | 'outline' | 'destructive' | 'ghost'",
+      default: "'default' / 'secondary'",
+    },
+    { name: 'size', type: "'default' | 'sm' | 'lg'", default: "'default'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'nova'" },
+  ]}
+/>
+
+暴露状态：`disabled`、`hovered`、`pressed`、`focused`、`focusVisible`。暴露方法：`focusSelf(options?)`。
 
 ## 参考
 

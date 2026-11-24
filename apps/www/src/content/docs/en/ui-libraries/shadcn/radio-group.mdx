@@ -8,11 +8,15 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Radio Group lets users choose one option from a mutually exclusive set, with full `radiogroup`/`radio` accessibility semantics, roving focus, and focus-ring/disabled styling. The examples on this page use the **Shadcn Rhea** style preset.
+Radio Group lets users choose one option from a mutually exclusive set, with full `radiogroup` / `radio` accessibility semantics, roving focus, and focus-ring/disabled styling. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-radio-group" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -24,57 +28,156 @@ Replace `wc` with `react`, `vue`, or `vue2` to generate the facade for your targ
 
 ## Usage
 
-Import `shadcnRadioGroupRoot`, `shadcnRadioGroupItem`, and `shadcnRadioGroupIndicator` from `@proto.ui/prototypes-shadcn/radio-group` (or the package root) and adapt them to your runtime:
+```tsx
+import {
+  ShadcnLabelRoot,
+  ShadcnRadioGroupIndicator,
+  ShadcnRadioGroupItem,
+  ShadcnRadioGroupRoot,
+} from '../proto-ui/components/react';
 
-| Part | Props | Responsibility |
-| --- | --- | --- |
-| `Root` | `value?`, `defaultValue?`, `disabled?`, `readOnly?`, `a11yLabel?` | Manages the selected value and the collection of items. |
-| `Item` | `value` (required), `disabled?` | Represents an option, requests selection, and derives checked/disabled states. |
-| `Indicator` | None | Optional decorative indicator rendered inside an `Item` when checked. |
+export function RadioGroupUsage() {
+  return (
+    <ShadcnRadioGroupRoot styleProfile="rhea" defaultValue="option-one" a11yLabel="Options">
+      <div className="flex items-center gap-3">
+        <ShadcnRadioGroupItem styleProfile="rhea" value="option-one">
+          <ShadcnRadioGroupIndicator styleProfile="rhea" />
+        </ShadcnRadioGroupItem>
+        <ShadcnLabelRoot styleProfile="rhea">Option One</ShadcnLabelRoot>
+      </div>
+      <div className="flex items-center gap-3">
+        <ShadcnRadioGroupItem styleProfile="rhea" value="option-two">
+          <ShadcnRadioGroupIndicator styleProfile="rhea" />
+        </ShadcnRadioGroupItem>
+        <ShadcnLabelRoot styleProfile="rhea">Option Two</ShadcnLabelRoot>
+      </div>
+    </ShadcnRadioGroupRoot>
+  );
+}
+```
 
-### Labeling and accessibility
+### Composition
 
-- Provide a meaningful `a11yLabel` on `Root` and a unique, non-empty `value` on each `Item`.
-- Pair each `Item` with `labelRoot` from `@proto.ui/prototypes-shadcn/label` using a shared reference from `createControlLabelRef()` passed via `InstanceAssociations.controlLabel`. The visible label serves as the accessible name and activates the item on click (set `activation={false}` on `Label` for naming only).
+```text
+RadioGroupRoot
+├── RadioGroupItem
+│   └── RadioGroupIndicator
+└── RadioGroupItem
+    └── RadioGroupIndicator
+```
 
-### Controlled and uncontrolled
+- **Labeling**: Provide a meaningful `a11yLabel` on `Root` and a unique, non-empty `value` on each `Item`. Pair each `Item` with `shadcn-label-root` via `createControlLabelRef()` bound to `InstanceAssociations.controlLabel` so the visible label both names and activates the option (set `activation={false}` on `Label` for naming only).
+- **Controlled & uncontrolled**: Initialize uncontrolled mode with `defaultValue`, or pass `value` for controlled mode where `Root` emits `valueChange` requests. `readOnly` preserves roving focus while preventing value changes; `disabled` removes items from focus order.
+- **Keyboard interaction**: `Tab` focuses the selected enabled `Item`; arrow keys wrap and select across enabled items; `Home` / `End` jump to the first and last enabled items; `Space` selects the focused item (`Enter` does not).
+- **Form integration**: Inside `FormField`, use `fieldRadioGroup` from `@proto.ui/prototypes-shadcn/field` to wire up required validation, Label / Description / Error associations, and `resetValue()`. See the [Form choice recipe](../form/).
 
-- Uncontrolled mode initializes from `defaultValue` and emits `valueChange` on selection.
-- Passing `value` switches to controlled mode: `Root` emits change requests while your app provides the next `value`. Empty or unmatched values are preserved, and a selected item remains checked if it becomes disabled.
-- `readOnly` preserves roving focus while preventing value changes; `disabled` removes focus participation as well.
+## Examples
 
-### Keyboard interaction
+### Description
 
-- Pressing `Tab` focuses the selected enabled `Item`.
-- Arrow keys move focus and select while wrapping across enabled items; `Home` and `End` jump to the first and last enabled items, skipping disabled ones.
-- `Space` selects the focused item; `Enter` does not.
+Pair radio options with secondary descriptions to clarify each choice.
 
-### Form integration
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
-An ordinary `Root` does not auto-register with a form. Inside `FormField`, use `fieldRadioGroup` from `@proto.ui/prototypes-shadcn/field` to wire up required validation, Label/Description/Error associations, and `resetValue()`. See the [Form choice recipe](../form/) for a full example.
+### Choice Card
+
+Compose bordered cards with titles, descriptions, and trailing radio indicators for plan or tier selection.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-choice-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Fieldset
+
+Use `FieldsetRoot` and `FieldsetLegend` to group radio items with a semantic heading and helper text.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Pass `disabled` on an individual `Item` to disable one option, or on `Root` to disable the entire group.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+Combine `FieldRoot`, `FieldRadioGroup`, and `FieldError` to present validation errors with accessible error messaging.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Place `RadioGroupRoot` inside a `dir="rtl"` container for right-to-left option flow and logical text alignment.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-radio-group-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` for controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-Other part props:
+### Item
 
-- `Item`: `value` (required), `disabled` (defaults to `false`).
-- `Indicator`: no props.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string (required)', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Indicator
+
+`Indicator` accepts no props; it derives `checked` and `disabled` state from its enclosing `Item` and renders the selection dot.
+
+### Events & Methods
+
+- **Root events**: `valueChange` (`{ value: string }`)
+- **Item events**: `select` (`{ value: string }`)
+- **Root methods**: `requestValue(value)`, `resetValue()`, `focusFirst()`, `focusLast()`, `focusNext()`, `focusPrev()`, `focusSelected()`, `focusSelf()`
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-RADIO-GROUP.yaml', 'P-BASE-RADIO-GROUP.yaml']}
+  files={[
+    'P-SHADCN-RADIO-GROUP.yaml',
+    'P-SHADCN-RADIO-GROUP-ITEM.yaml',
+    'P-SHADCN-RADIO-GROUP-INDICATOR.yaml',
+    'P-BASE-RADIO-GROUP.yaml',
+  ]}
 />

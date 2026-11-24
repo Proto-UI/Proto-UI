@@ -1,0 +1,134 @@
+---
+title: 'Liquid Glass Checkbox'
+description: 'A Liquid Glass checkbox over Base Checkbox with optical material tinting, indeterminate state, and readable opaque fallbacks.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Checkbox pairs a 20px concentric-radius control surface with restrained optical refraction and selection tinting, supporting unchecked, checked, and `indeterminate` (`mixed`) states with high-contrast opaque fallbacks.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Liquid Glass Checkbox is currently available from workspace source. Import `checkboxRoot` and `checkboxIndicator` from `@proto.ui/prototypes-liquid-glass` or `@proto.ui/prototypes-liquid-glass/checkbox`.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassCheckboxIndicator,
+  LiquidGlassCheckboxRoot,
+  LiquidGlassLabelRoot,
+} from '@proto.ui/prototypes-liquid-glass';
+
+export function Example() {
+  return (
+    <div className="flex items-center gap-3">
+      <LiquidGlassCheckboxRoot defaultChecked>
+        <LiquidGlassCheckboxIndicator />
+      </LiquidGlassCheckboxRoot>
+      <LiquidGlassLabelRoot>Subscribe to release notes</LiquidGlassLabelRoot>
+    </div>
+  );
+}
+```
+
+### Material hierarchy and accessibility
+
+- **Optical surface and selection tint**: `material="auto"` requests backdrop refraction where supported and applies a primary fill tint (`tint: 'style-fill'`) when checked or indeterminate. `Indicator` stays passive with no secondary glass layer, avoiding glass-on-glass stacking.
+- **Automatic preference fallbacks**: Reduced transparency, increased contrast, forced colors, and disabled states automatically resolve to readable opaque fills, while reduced motion disables press deformation.
+- **Explicit opaque mode**: Set `material="opaque"` for dense forms or solid panels where translucent material is unnecessary.
+
+## Examples
+
+### Description and card row
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-description"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled and read-only
+
+Disabled state uses a distinct muted opaque fill instead of whole-host opacity so boundaries and checkmarks remain legible over colorful backdrops.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Optical auto vs. opaque
+
+Compare `material="auto"` and `material="opaque"` side by side over a rich backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled and indeterminate
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Table
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'checked', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultChecked', type: 'boolean', default: 'false' },
+    { name: 'indeterminate', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultIndeterminate', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+`Root` exposes `checked`, `indeterminate`, `disabled`, `readOnly`, `required`, `hovered`, `focused`, `focusVisible`, and `pressed` states, `focusSelf(options?)` and `resetValue()` methods, and `checkedChange` (`{ checked, indeterminate }`) and `indeterminateChange` (`{ indeterminate }`) events.
+
+### Indicator
+
+`Indicator` declares no props and no optical material of its own. It mirrors the enclosing `Root` state and exposes `checked`, `indeterminate`, `isChecked()`, and `isIndeterminate()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-CHECKBOX.yaml',
+    'P-LIQUID-GLASS-CHECKBOX-INDICATOR.yaml',
+    'P-BASE-CHECKBOX.yaml',
+    'P-BASE-CHECKBOX-INDICATOR.yaml',
+  ]}
+/>

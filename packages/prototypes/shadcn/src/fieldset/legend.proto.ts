@@ -60,6 +60,10 @@ export default definePrototype<ShadcnFieldsetLegendProps, FieldsetRootExposes>({
           ),
       });
     }
+    def.rule({
+      when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50')),
+    });
     return inherited.render;
   },
 });

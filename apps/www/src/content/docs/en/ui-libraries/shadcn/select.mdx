@@ -1,6 +1,6 @@
 ---
 title: 'Select'
-description: 'An accessible dropdown selector supporting groups, keyboard navigation, and typeahead.'
+description: 'Displays a list of options for the user to pick from—triggered by a button.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -12,7 +12,11 @@ Select renders an accessible single-selection dropdown with shared selection, fo
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-shadcn-select" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-shadcn-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
@@ -24,45 +28,187 @@ Replace `wc` with `react` or `vue` to generate the facade for your target framew
 
 ## Usage
 
-Select consists of:
+```tsx
+import {
+  ShadcnSelectContent,
+  ShadcnSelectGroup,
+  ShadcnSelectItem,
+  ShadcnSelectItemText,
+  ShadcnSelectLabel,
+  ShadcnSelectRoot,
+  ShadcnSelectSurface,
+  ShadcnSelectTrigger,
+  ShadcnSelectValue,
+  ShadcnSelectViewport,
+} from '../proto-ui/components/react';
 
-- `Root`, `Trigger`, `Value`, `Content`, `Surface`, `Viewport`, `Item`, `ItemText`, `Group`, `Label`, and `Separator`.
-- `Group` organizes related options, `Label` names its group, and `Separator` renders a contentless decorative divider. Every part—including portalled content—inherits the style scope from `Root`.
+export function ThemeSelect() {
+  return (
+    <ShadcnSelectRoot styleProfile="rhea">
+      <ShadcnSelectTrigger styleProfile="rhea" className="w-48" accessibleLabel="Theme">
+        <ShadcnSelectValue styleProfile="rhea" placeholder="Theme" />
+      </ShadcnSelectTrigger>
+      <ShadcnSelectContent styleProfile="rhea">
+        <ShadcnSelectSurface styleProfile="rhea">
+          <ShadcnSelectViewport styleProfile="rhea">
+            <ShadcnSelectGroup styleProfile="rhea">
+              <ShadcnSelectLabel styleProfile="rhea">Theme</ShadcnSelectLabel>
+              <ShadcnSelectItem styleProfile="rhea" value="light" textValue="Light">
+                <ShadcnSelectItemText styleProfile="rhea">Light</ShadcnSelectItemText>
+              </ShadcnSelectItem>
+              <ShadcnSelectItem styleProfile="rhea" value="dark" textValue="Dark">
+                <ShadcnSelectItemText styleProfile="rhea">Dark</ShadcnSelectItemText>
+              </ShadcnSelectItem>
+            </ShadcnSelectGroup>
+          </ShadcnSelectViewport>
+        </ShadcnSelectSurface>
+      </ShadcnSelectContent>
+    </ShadcnSelectRoot>
+  );
+}
+```
 
-### Appearance and positioning
+### Composition
 
-- `Trigger` accepts `size="sm | default"` and `appearance`. Use `appearance="default"` with `styleProfile="rhea"` and other modern presets; `appearance="ghost"` is supported only with `new-york-v4` (alias `new-york`).
-- `Content` accepts `position="item-aligned | popper"`, defaulting to `item-aligned`. Composing `Surface` → `Viewport` → `Item` → `ItemText` enables full item-aligned positioning, while `popper` positioning is also supported.
+Compose all eleven parts to enable modern translucent presets such as `rhea` and item-aligned positioning:
 
-### Pointer, keyboard, and touch interaction
+```text
+SelectRoot
+├── SelectTrigger
+│   └── SelectValue
+└── SelectContent
+    └── SelectSurface
+        └── SelectViewport
+            ├── SelectGroup
+            │   ├── SelectLabel
+            │   └── SelectItem
+            │       └── SelectItemText
+            └── SelectSeparator
+```
 
-The scrollable example below separates highlighted focus from committed selection: mouse movement without held buttons navigates options, while touch, pen, and drag scrolling do not trigger hover selection. In controlled mode, declining an update preserves the currently committed value.
+- **Keyboard & accessibility**: Click or press `Enter`, `Space`, `ArrowDown`, or `ArrowUp` to open. Navigate with arrow keys or typeahead, press `Enter` or `Space` to commit, and press `Escape` to cancel and return focus to `Trigger`. Provide an accessible name via `accessibleLabel` or a composed `Field`.
+- **Style presets**: Accepts `styleProfile` (`new-york-v4` / `new-york`, `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`). Portalled content inherits the scope from `Root`. `Trigger` `appearance="ghost"` is supported under `new-york-v4`.
+
+## Examples
+
+### Align Item With Trigger
+
+Use `position="item-aligned | popper"` on `SelectContent` to choose whether the selected item aligns over the trigger or aligns to the trigger edge.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-align-item"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable
+
+Constrain the maximum height on `SelectViewport` to scroll through grouped long lists such as timezones.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Disable the entire `SelectRoot` or disable individual `SelectItem` options (keyboard navigation skips disabled items).
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Sizes
+
+`SelectTrigger` supports `size="sm"` and `size="default"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-sizes"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `value` and `onValueChange` on `SelectRoot` to control the selected option from external state.
 
 <PrototypePreviewer
   demoId="demo-shadcn-select-input"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
+/>
+
+### RTL
+
+Inside a `dir="rtl"` container, text alignment, logical padding, and the trailing check indicator mirror automatically.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-select-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
 ## API
 
-The following props belong to `Root` (pass `open` or `value` for controlled mode; `size` and `appearance` belong to `Trigger`; `position` belongs to `Content`):
+### Root
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+    { name: 'openChange', type: '(detail) => void', default: '—' },
+    { name: 'valueChange', type: '(detail) => void', default: '—' },
   ]}
 />
+
+### Trigger / Value
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Trigger.size', type: "'sm' | 'default'", default: "'default'" },
+    { name: 'Trigger.appearance', type: "'default' | 'ghost'", default: "'default'" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.accessibleLabel', type: 'string', default: "''" },
+    { name: 'Value.placeholder', type: 'string', default: "''" },
+  ]}
+/>
+
+### Content / Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.position', type: "'item-aligned' | 'popper'", default: "'item-aligned'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'Content.sideOffset', type: 'number', default: '0' },
+    { name: 'Content.alignOffset', type: 'number', default: '0' },
+    { name: 'Content.avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'Content.collisionPadding', type: 'number', default: '10' },
+    { name: 'Item.value', type: 'string', default: "''" },
+    { name: 'Item.textValue', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+    { name: 'Item.closeOnSelect', type: 'boolean', default: 'Inherits Root' },
+    { name: 'Item.select', type: '(detail) => void', default: '—' },
+  ]}
+/>
+
+`Surface`, `Viewport`, `ItemText`, `Group`, `Label`, and `Separator` all inherit `styleProfile`.
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-SELECT.yaml', 'P-BASE-SELECT.yaml']}
+  files={['P-SHADCN-SELECT.yaml', 'P-SHADCN-SELECT-STYLE.yaml', 'P-BASE-SELECT.yaml']}
 />

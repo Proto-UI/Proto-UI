@@ -1,11 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Input OTP'
-description: 'A Bootstrap 2.3.2 one-time passcode input with single-editor paste, caret slot highlighting, and Form integration.'
+description: 'A Bootstrap 2.3.2 one-time passcode input with single-editor paste, classic blue focus glow, and Form integration.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Input OTP pairs one real text input with passive visual slots, preserving native paste, selection, deletion, and browser `one-time-code` autofill.
+Bootstrap 2.3.2 Input OTP pairs one real text input with classic inset-shadow slots and Bootstrap's `#52a8ec` focus glow, preserving native paste, selection, deletion, and browser `one-time-code` autofill.
 
 ## Preview
 
@@ -13,7 +15,6 @@ Bootstrap 2.3.2 Input OTP pairs one real text input with passive visual slots, p
   demoId="demo-bootstrap-2-3-2-input-otp"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -22,19 +23,126 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-Compose `Root`, `Input` (or `Control` inside `Field` / `FormField`), `Slot`, and optional `Separator`:
+```tsx
+import {
+  Bootstrap232InputOtpRoot,
+  Bootstrap232InputOtpInput,
+  Bootstrap232InputOtpSlot,
+  Bootstrap232InputOtpSeparator,
+} from '../proto-ui/components/react';
 
-- **Single editor, visual slots**: Editing, selection, paste, and IME composition happen in one real input. After composition ends, disallowed characters are stripped (numeric or alphanumeric) and clamped to `length` (`1`–`32`, default `6`). Each `Slot` is decorative (`aria-hidden`) and highlights based on the real caret or selection while focused and editable.
-- **Completion**: Controlled inputs emit `valueChange` proposals; `completed` fires once for each accepted full-length code so your application can trigger verification.
-- **Form integration**: Replace `Input` with `Control` inside `Field` or `FormField` to bridge `FieldLabel`, validation, IME handling, `Form` serialization, and reset.
+export function BootstrapVerificationCode() {
+  return (
+    <Bootstrap232InputOtpRoot length={6}>
+      <Bootstrap232InputOtpInput placeholder="123456" />
+      <div className="inline-flex items-center gap-1.5">
+        <Bootstrap232InputOtpSlot index={0} />
+        <Bootstrap232InputOtpSlot index={1} />
+        <Bootstrap232InputOtpSlot index={2} />
+      </div>
+      <Bootstrap232InputOtpSeparator>–</Bootstrap232InputOtpSeparator>
+      <div className="inline-flex items-center gap-1.5">
+        <Bootstrap232InputOtpSlot index={3} />
+        <Bootstrap232InputOtpSlot index={4} />
+        <Bootstrap232InputOtpSlot index={5} />
+      </div>
+    </Bootstrap232InputOtpRoot>
+  );
+}
+```
+
+- **Single editor, visual slots**: Editing, selection, paste, and IME composition stay in one real input, sanitizing characters (`numeric` or `alphanumeric`) and clamping length to `1`–`32` (default `6`).
+- **Classic Bootstrap 2.3.2 states**: Rest slots keep 4px corners, 1px `#ccc` borders, and subtle inset shadows; active slots use the `#52a8ec` blue focus glow; disabled cells use `#eee`; invalid cells follow `.control-group.error` crimson styling.
+- **Form integration**: Swap `Input` for `Control` inside `Field` or `FormField` to bridge `FieldLabel`, validation, serialization, and reset.
+
+## Examples
+
+### Separator
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-separator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Alphanumeric
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-alphanumeric"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Invalid
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-invalid"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Form & Four-Digit PIN
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input-otp-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `value` / `defaultValue` | Controlled or initial OTP string |
-| `Root` | `length` | Number of characters, `1`–`32` (default `6`) |
-| `Root` | `disabled` / `readOnly` / `name` / `ariaLabel` | State flags, field name, and accessible name |
-| `Root` | `valueChange` / `completed` | Value change proposal and full-code completion event |
-| `Input` / `Control` | — | Real text editor (use `Control` inside `Field`/`FormField`) |
-| `Slot` / `Separator` | — | Passive character slots and optional visual divider |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'length', type: 'number', default: '6' },
+    { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: "'numeric'" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'invalid', type: 'boolean', default: 'false' },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'ariaLabel', type: 'string', default: "'One-time code'" },
+  ]}
+/>
+
+### Input / Control & Slot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Input / Control: placeholder', type: 'string', default: "''" },
+    { name: 'Slot: index', type: 'number', default: '0' },
+    { name: 'Slot: invalid', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Events & Methods
+
+- **Root events**: `valueChange` (`{ value: string }`), `completed` (`{ value: string }`).
+- **Root states & methods**: states `value`, `complete`, `disabled`, `readOnly`, `focused`; methods `requestValue(value)`, `clear()`, `resetValue()`, `focusInput()`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-INPUT-OTP.yaml', 'P-BASE-INPUT-OTP.yaml']}
+/>

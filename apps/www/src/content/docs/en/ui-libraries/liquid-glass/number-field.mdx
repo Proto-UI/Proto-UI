@@ -3,9 +3,13 @@ title: 'Number Field'
 description: 'A Liquid Glass numeric input supporting stepping, localized formatting, nullable values, and label scrubbing.'
 ---
 
-import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Number Field provides a `spinbutton` numeric editor with increment/decrement buttons, keyboard stepping, `locale`/`formatOptions` formatting and parsing, optional `null` emptiness, and label scrubbing.
+Liquid Glass Number Field provides a `spinbutton` numeric editor with increment/decrement buttons, keyboard stepping, `locale` / `formatOptions` formatting and parsing, optional `null` emptiness, and label scrubbing.
+
+Following Apple Liquid Glass hierarchy guidance, content-layer numeric editors and their inline steppers stay legible opaque surfaces rather than stacking glass-on-glass, paired with `44×44` minimum stepper hit targets, tactile hover/press feedback, high-contrast muted disabled fills (without fading opacity), and Forced Colors focus outlines.
 
 ## Preview
 
@@ -13,30 +17,137 @@ Liquid Glass Number Field provides a `spinbutton` numeric editor with increment/
   demoId="demo-liquid-glass-number-field"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts directly from `@proto.ui/prototypes-liquid-glass/number-field`:
+
+```ts
+import {
+  numberFieldRoot,
+  numberFieldLabel,
+  numberFieldInput,
+  numberFieldControl,
+  numberFieldIncrement,
+  numberFieldDecrement,
+} from '@proto.ui/prototypes-liquid-glass/number-field';
+```
 
 ## Usage
 
-- **Parts**: `Root`, `Label`, `Input`, `Control`, `Increment`, `Decrement`.
-- **Editing and stepping**: incomplete drafts are tolerated while typing; blur or Enter commits a valid number or restores the last accepted value. Buttons and Up/Down arrows step by `step` (`Shift` multiplies by 10; `Home`/`End` jump to `min`/`max`). Controlled mode proposes updates without overwriting caller state.
-- **Formatting and IME**: `locale` and `formatOptions` support decimal, currency, and percent display and localized parsing without altering underlying precision. Invalid options set `formatInvalid` and fall back to ungrouped decimals. IME composition pauses parsing, commits, stepping, and scrubbing.
-- **Empty values**: set `allowEmpty={true}` to allow clearing the input and committing `null`. Read real `number | null` values via `getValue()` alongside `empty`; stepping from `null` initializes snapped `0` within bounds.
-- **Label scrubbing**: enable `scrub` to drag across `Label` to adjust the value (`scrubSteps` defaults to `100`; `direction="rtl"` mirrors horizontal dragging). Releasing after a change commits once, and cancelling restores the starting value.
-- **Field and Form integration**: use `Control` instead of `Input` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to connect `FieldLabel`, validation, serialization, and reset.
+```tsx
+<LiquidGlassNumberFieldRoot defaultValue={12} min={0} max={100} step={1} ariaLabel="Quantity">
+  <LiquidGlassNumberFieldLabel>Quantity</LiquidGlassNumberFieldLabel>
+  <LiquidGlassNumberFieldDecrement>
+    <span aria-hidden="true">−</span>
+    <span className="sr-only">Decrease Quantity</span>
+  </LiquidGlassNumberFieldDecrement>
+  <LiquidGlassNumberFieldInput />
+  <LiquidGlassNumberFieldIncrement>
+    <span aria-hidden="true">+</span>
+    <span className="sr-only">Increase Quantity</span>
+  </LiquidGlassNumberFieldIncrement>
+</LiquidGlassNumberFieldRoot>
+```
+
+- **Surface hierarchy and accessibility**: Content-layer editing remains an opaque high-contrast surface; disabled controls switch to a legible muted fill instead of opacity dimming, and keyboard focus emits an offset ring plus a Forced Colors outline fallback.
+- **Editing and stepping**: Incomplete drafts stay intact while typing; blur or `Enter` commits a valid number or restores the last accepted value. Buttons and Up/Down arrows step by `step` (`Shift` multiplies by 10; `Home` / `End` jump to `min` / `max`). IME composition pauses parsing, commits, stepping, and scrubbing.
+- **Field and Form integration**: Use `Control` instead of `Input` inside [Field](/en/ui-libraries/liquid-glass/field/) or [Form](/en/ui-libraries/liquid-glass/form/) to connect `FieldLabel`, invalid error rings, serialization, and reset.
+
+## Examples
+
+### Currency and Percent Formatting
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-formatting"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Label Scrubbing and Nullable Values
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-scrub-nullable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled, Read-only, and Unbounded
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL Layout and Scrubbing
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-number-field-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Method / State | Defaults and notes |
-| --- | --- | --- |
-| Root | `value`, `defaultValue` | `number \| null`; `value={null}` stays controlled |
-| Root | `min`, `max`, `step` | `0`, `100`, `1` (positive step) |
-| Root | `allowEmpty` | `false`; enables clearing to `null` |
-| Root | `locale`, `formatOptions` | Localized decimal, currency, or percent formatting |
-| Root | `scrub`, `scrubSteps`, `direction` | Label drag scrubbing (`scrubSteps` default `100`) |
-| Root | `disabled`, `readOnly`, `name`, `ariaLabel` | Interaction state, field name, and accessible label |
-| Root / Input / Control | `getValue()`, `empty`, `formatInvalid` | Returns `number \| null`, empty flag, and formatting validity |
+### Root Props
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | null', default: '—' },
+    { name: 'defaultValue', type: 'number | null', default: '0' },
+    { name: 'min', type: 'number | null', default: '0' },
+    { name: 'max', type: 'number | null', default: '100' },
+    { name: 'step', type: 'number', default: '1' },
+    { name: 'snapToStep', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'name', type: 'string', default: "''" },
+    { name: 'allowEmpty', type: 'boolean', default: 'false' },
+    { name: 'locale', type: 'string', default: '—' },
+    { name: 'formatOptions', type: 'NumberFieldFormatOptions', default: '—' },
+    { name: 'scrub', type: 'boolean', default: 'false' },
+    { name: 'scrubSteps', type: 'number', default: '100' },
+    { name: 'direction', type: "'ltr' | 'rtl'", default: "'ltr'" },
+  ]}
+/>
+
+### Events, Methods, and States
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Signature / Type', default: 'Part' }}
+  rows={[
+    { name: 'valueChange', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'valueCommit', type: 'Event<{ value: number | null }>', default: 'Root' },
+    { name: 'getValue()', type: '() => number | null', default: 'Root / Input / Control' },
+    { name: 'requestValue(next)', type: '(value: number | null) => boolean', default: 'Root' },
+    { name: 'commitValue()', type: '() => void', default: 'Root' },
+    { name: 'stepBy(direction)', type: '(direction: number) => boolean', default: 'Root' },
+    { name: 'resetValue()', type: '() => boolean', default: 'Root / Input / Control' },
+    { name: 'empty / dragging / formatInvalid / draft', type: 'ExposeState', default: 'Root' },
+    {
+      name: 'disabled / focusVisible',
+      type: 'ExposeState<boolean>',
+      default: 'Increment / Decrement',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-NUMBER-FIELD.yaml', 'P-BASE-NUMBER-FIELD.yaml']}
+/>

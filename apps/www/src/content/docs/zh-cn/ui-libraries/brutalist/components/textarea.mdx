@@ -3,43 +3,110 @@ title: 'Brutalist Textarea'
 description: '基于原生 textarea、采用 5px 圆角平涂中性表面与清晰墨黑边框的 Brutalist 风格多行文本输入框。'
 ---
 
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Textarea 在保留原生 `<textarea>` 元素与输入语义的基础上，提供 5px 圆角平涂中性表面、墨黑边框与无外侧阴影的 Brutalist 视觉样式。
+Textarea 在保留原生 `<textarea>` 元素与输入语义的基础上，提供 5px 圆角平涂中性表面、2px 清晰边框、DM Sans 500 字体与无外侧阴影的 Brutalist 视觉样式。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-textarea" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-textarea` 添加，或从 `@proto.ui/prototypes-brutalist/textarea` 导入。
+<InstallCommandCard
+  commands={{
+    npm: 'npx @proto.ui/cli@latest add wc brutalist-textarea',
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add wc brutalist-textarea',
+  }}
+  manager="npm"
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装；也可直接从 `@proto.ui/prototypes-brutalist/textarea` 导入。
 
 ## 用法
 
-### 输入行为与外观
+```tsx
+import { BrutalistTextareaRoot } from '../proto-ui/components/react';
+```
 
-- **完整原生输入体验**：支持受控（`value`）与非受控（`defaultValue`）模式、归一化的 `valueChange` 与 `change` 事件、IME 组合输入安全的受控值恢复、`focus()` / `blur()` 方法，以及 `ariaLabel` / `labelledBy` / `describedBy` 无障碍关联。
-- **视觉规格**：默认最小高度 80px、水平 12px / 垂直 8px 内边距、`text-sm` 行高与 DM Sans 500 字体，选区采用静态主色高亮；尺寸拖拽由浏览器或外层样式控制，不自动测量高度。
+```tsx
+<BrutalistTextareaRoot placeholder="Type your message here." rows={4} />
+```
 
-### 重置与表单集成
+- **输入与焦点语义**：支持受控（`value`）与非受控（`defaultValue`）模式、归一化的 `valueChange` 与 `change` 事件、IME 组合输入安全的受控值恢复、`focusSelf()` / `blurSelf()` / `resetValue()` 方法，以及 `ariaLabel` / `labelledBy` / `describedBy` 无障碍关联。
+- **视觉规格**：默认最小高度 80px、水平 12px / 垂直 8px 内边距、`text-sm` 字号与 DM Sans 500 字体，选区采用静态主色高亮，暗色模式下边框自动切换为前景色以保持高对比度。
+- **表单集成**：如需接入标签、描述、错误信息与校验状态，请从 `@proto.ui/prototypes-brutalist/field` 导入 `fieldTextarea`，完整用法见 [Form 配方](../../form/)。
 
-- 工作区源码中的 `resetValue()` 可将非受控输入框恢复为实例创建时的初始值（受控模式下提出变更请求），在 `readOnly` 或 `disabled` 状态下仍可调用，并会结束进行中的输入法组合。
-- 如需接入表单标签、描述、错误信息与校验，请从 `@proto.ui/prototypes-brutalist/field` 导入 `fieldTextarea`，完整用法见 [Form 配方](../../form/)。
+## 示例
+
+### 表单字段
+
+使用 `Field`、`FieldLabel`、`FieldDescription` 与 `FieldTextarea` 构建带标签与帮助说明的多行输入字段。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-field"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 禁用
+
+在 `Field` 上设置 `disabled` 可同步禁用标签与多行输入框。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-disabled"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 无效状态
+
+通过 `Field` 的 `invalid` 与 `errors` 属性呈现珊瑚红错误边框与错误提示。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-invalid"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 搭配按钮
+
+将无阴影的平涂输入框与带 4px 硬影的 Brutalist 按钮组合，形成清晰的层级对比。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-textarea-button"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 进入受控模式）：
+以下属性属于 `Root`（传入 `value` 可进入受控模式；未限制长度时 `minLength` 与 `maxLength` 为 `-1`）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string | undefined', default: '非受控' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -50,9 +117,20 @@ Textarea 在保留原生 `<textarea>` 元素与输入语义的基础上，提供
     { name: 'autoComplete', type: 'string', default: "''" },
     { name: 'minLength', type: 'number', default: '-1' },
     { name: 'maxLength', type: 'number', default: '-1' },
-    { name: 'wrap', type: "'soft' | 'hard'", default: 'soft' },
+    { name: 'wrap', type: "'soft' | 'hard'", default: "'soft'" },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'labelledBy', type: 'string', default: "''" },
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
+/>
+
+- **暴露状态**：`value`、`disabled`、`readOnly`、`focused`、`focusVisible`、`composing`（在 `FieldTextarea` 中额外暴露 `invalid` 与 `pending`）。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`、`resetValue()`。
+- **事件**：`valueChange`、`change`、`compositionStart`、`compositionUpdate`、`compositionEnd`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-TEXTAREA.yaml', 'P-BASE-TEXTAREA.yaml']}
 />

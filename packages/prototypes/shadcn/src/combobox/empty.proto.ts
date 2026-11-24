@@ -8,5 +8,6 @@ export default definePrototype<ComboboxEmptyProps, ComboboxEmptyExposes>({
   setup(def) {
     const behavior = asComboboxEmpty();
     setupSearchEmptyPaint(def, behavior.getState!('visible')!);
+    return behavior.render;
   },
 });

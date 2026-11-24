@@ -11,9 +11,12 @@ import { setupSwitchRootVisual } from './root-visual';
 // Extension: core Bootstrap 2.3.2 does not supply a Switch component.
 export default definePrototype<SwitchRootProps, SwitchRootExposes>({
   name: 'bootstrap-2-3-2-switch-root',
+  modules: asSwitchRoot.modules,
   setup(def) {
-    const state = asSwitchRoot().stateHandles;
+    const inherited = asSwitchRoot();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[bootstrap-2-3-2-switch-root] Base state handles required.');
     setupSwitchRootVisual(def, state);
+    return inherited.render;
   },
 });

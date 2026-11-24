@@ -4,8 +4,10 @@ description: 'A Liquid Glass passive group container providing accessible groupi
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Fieldset composes `Root`, `Legend`, and `Description` to group related form fields and cascade disabled state. As a content-layer container, Fieldset renders as an ordinary rounded, bordered surface (`gap-3`) without requesting glass material, leaving descendant controls to manage their own presentation.
+Liquid Glass Fieldset composes `Root`, `Legend`, and `Description` to group related form fields and cascade disabled state. As a content-layer container, Fieldset renders as an opaque grouped surface (`rounded-2xl bg-secondary p-4` at the top level, stepping down concentrically to `rounded-xl bg-background p-3` when nested) without requesting glass material, preventing glass-on-glass stacking while letting descendant controls manage their own presentation.
 
 ## Preview
 
@@ -13,7 +15,6 @@ Liquid Glass Fieldset composes `Root`, `Legend`, and `Description` to group rela
   demoId="demo-liquid-glass-fieldset"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
@@ -22,6 +23,29 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
+```tsx
+import {
+  FieldsetRoot,
+  FieldsetLegend,
+  FieldsetDescription,
+} from '@/components/liquid-glass/fieldset';
+import { FieldRoot, FieldLabel, FieldControl } from '@/components/liquid-glass/field';
+
+export function Example() {
+  return (
+    <FieldsetRoot>
+      <FieldsetLegend>Address Information</FieldsetLegend>
+      <FieldsetDescription>We need your address to deliver your order.</FieldsetDescription>
+      <FieldRoot required>
+        <FieldLabel>Street Address</FieldLabel>
+        <FieldControl placeholder="123 Main St" />
+      </FieldRoot>
+    </FieldsetRoot>
+  );
+}
+```
+
+- **Content-layer surface & concentric radii**: Top-level `Fieldset.Root` uses an opaque grouped surface (`rounded-2xl bg-secondary p-4`) and automatically steps down to a concentric inner radius and contrasting opaque fill (`rounded-xl bg-background p-3`) when nested, keeping crisp boundaries across light, dark, and increased-contrast settings. Disabled headings use semantic muted text (`text-muted-foreground`) rather than fading the container opacity.
 - **Cascading disabled policy**: effective disabled equals local `disabled` OR any enclosing Fieldset's disabled state. For nested `outer → middle → inner` Roots:
   - Disabling `outer` disables all three.
   - Setting `middle` disabled and re-enabling `outer` keeps `middle` and `inner` disabled.
@@ -29,13 +53,54 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 - Participating Fields inside the group (including inside `Legend`) inherit disabled state and handle their own validation invalidation. Fieldset does not manage values, validation, or form submission.
 - **Accessible relationships**: `Root` declares the `group` role and automatically links `Legend` and `Description` without manual DOM IDs. Supply at most one `Legend` and one `Description` per group (duplicates are ignored); nested groups stay scoped to their own children.
 
+## Examples
+
+### Label-scale legend and checkbox group
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-fieldset-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Nested disabled inheritance and concentric radii
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-fieldset-nested-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
 
-| Part | Prop | Default | Description |
-| --- | --- | --- | --- |
-| Root | `disabled` | `false` | Disables participating fields in this group and nested groups |
-| Root | `ariaLabel` | `''` | Accessible label for the group |
-| Legend | — | — | Optional semibold passive group heading; exposes inherited `disabled` |
-| Description | — | — | Optional muted passive help text; exposes inherited `disabled` |
+### Root
 
-All three parts expose read-only effective `disabled` state; update `Root`'s `disabled` prop to change policy.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Legend
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'variant', type: "'legend' | 'label'", default: "'legend'" }]}
+/>
+
+### Description
+
+`Description` declares no props of its own; all three parts expose read-only effective `disabled` state (`ExposeState<boolean>`). Update `Root`'s `disabled` prop to change policy.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-FIELDSET.yaml',
+    'P-LIQUID-GLASS-FIELDSET-LEGEND.yaml',
+    'P-LIQUID-GLASS-FIELDSET-DESCRIPTION.yaml',
+  ]}
+/>

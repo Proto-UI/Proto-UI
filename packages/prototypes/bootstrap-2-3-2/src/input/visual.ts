@@ -19,7 +19,7 @@ export function setupInputVisual<Props extends object, Exposes>(
 ): void {
   def.feedback.style.use(
     tw(
-      'inline-block box-content w-[206px] mb-[10px] rounded-[4px] border border-[#ccc] bg-white px-[6px] py-[4px] font-sans text-[14px] font-normal leading-[20px] text-[#555] align-middle shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)] outline-none transition-[border,box-shadow] duration-200 ease-linear',
+      'inline-block box-content w-[206px] mb-[10px] rounded-[4px] border border-[#ccc] bg-white px-[6px] py-[4px] font-sans text-[14px] font-normal leading-[20px] text-[#555] placeholder:text-muted-foreground align-middle shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)] outline-none transition-[border,box-shadow] duration-200 ease-linear',
       mode === 'multiline' ? 'h-auto' : 'h-[20px]'
     )
   );

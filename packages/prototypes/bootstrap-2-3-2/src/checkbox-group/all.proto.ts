@@ -12,7 +12,7 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
     // Ordinary checkbox row; card-label presentation is not an implicit variant.
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-[20px] min-w-0 mb-[5px] items-center gap-[5px] font-normal text-[14px] leading-[20px] text-foreground outline-none'
+        'inline-flex min-h-[20px] min-w-0 mb-[5px] items-center gap-[5px] font-normal text-[14px] leading-[20px] text-foreground select-none cursor-pointer outline-none'
       )
     );
     const state = inherited.stateHandles!;
@@ -21,9 +21,12 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       intent: (i) => i.feedback.style.use(tw('opacity-65 cursor-not-allowed')),
     });
     def.rule({
+      when: (w) => w.all(w.state(state.readOnly).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
+    def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2')),
+      intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
     });
     const glyph = checkboxGroupGlyph(def, state);
     return (renderer) => [

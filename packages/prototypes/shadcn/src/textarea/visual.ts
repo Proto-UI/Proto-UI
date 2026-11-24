@@ -125,7 +125,7 @@ export function setupTextareaVisual<
       intent: (i) => i.feedback.style.use(tw('bg-input/30')),
     });
   }
-  for (const profile of ['nova', 'lyra'] as const) {
+  for (const profile of ['nova', 'lyra', 'maia', 'luma', 'rhea'] as const) {
     def.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.state(state.disabled).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-input/50')),

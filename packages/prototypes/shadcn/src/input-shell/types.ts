@@ -5,6 +5,8 @@ export type InputShellProps = ShadcnStyleProps & {
   /** Fact projection only; bind to the control rather than maintaining independent state. */
   focusVisible?: boolean;
   disabled?: boolean;
+  /** Optional visual validation state projected from an enclosing form or Field. */
+  invalid?: boolean;
   /** Command upstream uses a different input slot and intentionally has no group focus ring. */
   focusIndicator?: 'ring' | 'none';
 };

@@ -1,36 +1,92 @@
 ---
 title: 'Input'
-description: 'A standalone Brutalist single-line text input with font-relative sizing, IME support, and focus rings.'
+description: 'A standalone Brutalist single-line text input with font-relative sizing, IME support, and theme-adaptive focus rings.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Input is a standalone single-line text input styled with `2.5rem` font-relative height, a 2px border, `rounded-base` corners, no resting shadow, and a crisp black focus ring.
+Brutalist Input is a single-line text input built on [Base Input](../../../base/input/), styled with `2.5rem` font-relative height, a 2px border, `rounded-base` (5px) corners, no resting shadow, and a theme-adaptive focus ring across light and dark modes.
 
 ## Preview
 
-<PrototypePreviewer demoId="demo-brutalist-input" initialRuntime="wc" />
+<PrototypePreviewer
+  demoId="demo-brutalist-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-input" manager="npm" />
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-input`
-- **Package exports**: import `brutalistInputRoot` from `@proto.ui/prototypes-brutalist/input` or the package root
+Currently available from workspace source. Replace `wc` with `react`, `vue`, or `vue2` to generate a local facade, or import `brutalistInputRoot` directly from `@proto.ui/prototypes-brutalist/input`.
 
 ## Usage
 
-- Supports uncontrolled `defaultValue` and controlled `value`, normalized text editing and IME composition events, `disabled` / `readOnly` states, and accessible naming via `ariaLabel`, `labelledBy`, and `describedBy`.
-- Dimensions stay `rem`-based so the control scales cleanly with root font size. For built-in validation and error messaging, pair with `Field` and `Form`.
+```tsx
+import { BrutalistInputRoot } from '@/components/ui/brutalist-input';
+
+export function Example() {
+  return <BrutalistInputRoot placeholder="Email" inputMode="email" ariaLabel="Email" />;
+}
+```
+
+- **Controlled and editing state**: Supports uncontrolled `defaultValue` and controlled `value`, normalized editing and IME composition events, `disabled` / `readOnly` states, and accessible naming via `ariaLabel`, `labelledBy`, and `describedBy`.
+- **Typography and contrast**: Uses DM Sans (`font-sans font-medium`), muted placeholder ink, and `rem`-based sizing. In dark mode, the focus ring switches to `ring-ring` to maintain clear boundary contrast.
+
+## Examples
+
+### Default
+
+A standalone text input with bold Brutalist borders.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Use `disabled` to prevent focus and user input.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With Label
+
+Associate a Brutalist `Label` with `Input` so clicking the label moves focus to the editor.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-with-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With Button
+
+Pair `Input` with a Brutalist `Button` for inline subscribe or search actions.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-input-with-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-### Root
+### Root Props
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -56,4 +112,15 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   ]}
 />
 
-Pass `value: string` to enable controlled mode.
+### Exposed States, Methods, and Events
+
+- **States**: `value`, `disabled`, `readOnly`, `focused`, `focusVisible`, `composing`
+- **Methods**: `focusSelf(options?)`, `blurSelf()`, `resetValue(value?: string): boolean`
+- **Events**: `valueChange`, `change`, `compositionStart`, `compositionUpdate`, `compositionEnd`
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-INPUT.yaml', 'P-BASE-INPUT.yaml']}
+/>

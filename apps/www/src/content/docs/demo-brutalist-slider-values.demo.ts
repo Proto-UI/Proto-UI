@@ -1,3 +1,3 @@
-import { createSliderValuesDemo } from './slider-values-demo.shared';
+import { createSliderRangeDemo } from './demo_components/slider/slider-demo-helpers';
 
-export default createSliderValuesDemo('brutalist');
+export default createSliderRangeDemo('brutalist');

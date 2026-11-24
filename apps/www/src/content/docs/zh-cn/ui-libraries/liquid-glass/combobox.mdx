@@ -1,11 +1,13 @@
 ---
 title: 'Combobox'
-description: '支持关键词搜索与受控选项标识的 Liquid Glass 组合框。'
+description: '支持关键词搜索与浮层液态玻璃材质的 Liquid Glass 组合框。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Combobox 将可编辑搜索框与下拉选项列表结合。与 Autocomplete 不同，Combobox 将已选选项标识 `value` 与输入文本 `inputValue` 严格区分，未匹配任何选项的输入不会自动成为已选值。
+Liquid Glass Combobox 将清晰可读的内容层输入框与悬浮在前景之上的液态玻璃建议浮层结合，保持同心圆角（外层 `rounded-2xl` 搭配 `p-1` 与内层 `rounded-xl`），并将已选选项标识 `value` 与输入文本 `inputValue` 严格区分。
 
 ## 预览
 
@@ -13,24 +15,116 @@ Liquid Glass Combobox 将可编辑搜索框与下拉选项列表结合。与 Aut
   demoId="demo-liquid-glass-combobox"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前 Combobox 仅在源码工作区（`@proto.ui/prototypes-liquid-glass/combobox`）提供，尚未进入 `0.2.0` 稳定版 CLI 注册表。
 
 ## 用法
 
-- **部件组成**：`Root`、`Input`、`Content`、`Item`、`Empty`、`Trigger`。
-- **独立状态**：`open`、`value`（选项标识）与 `inputValue`（搜索文本）均支持独立受控。
-- **搜索与导航**：默认按 `textValue` 与 `keywords` 执行忽略大小写和重音的过滤，也可设置 `filter={false}` 由应用提供已过滤子项。方向键浏览时焦点留在 `Input`，IME 组合输入期间不会误选；`Empty` 反映实际匹配数，禁用项和重复值项不会提交。
+```tsx
+import {
+  comboboxRoot,
+  comboboxInput,
+  comboboxTrigger,
+  comboboxContent,
+  comboboxItem,
+  comboboxEmpty,
+} from '@proto.ui/prototypes-liquid-glass/combobox';
+```
+
+```html
+<liquid-glass-combobox-root a11y-label="Framework">
+  <liquid-glass-combobox-input placeholder="Select a framework..."></liquid-glass-combobox-input>
+  <liquid-glass-combobox-trigger>▾</liquid-glass-combobox-trigger>
+  <liquid-glass-combobox-content>
+    <liquid-glass-combobox-item value="next.js" text-value="Next.js"
+      >Next.js</liquid-glass-combobox-item
+    >
+    <liquid-glass-combobox-item value="sveltekit" text-value="SvelteKit"
+      >SvelteKit</liquid-glass-combobox-item
+    >
+    <liquid-glass-combobox-item value="astro" text-value="Astro">Astro</liquid-glass-combobox-item>
+    <liquid-glass-combobox-empty>No frameworks found.</liquid-glass-combobox-empty>
+  </liquid-glass-combobox-content>
+</liquid-glass-combobox-root>
+```
+
+- **单层液态玻璃**：仅展开态的 `Content` 浮层请求 `liquid-glass` 材质，`Input`、`Trigger` 与 `Item` 保持实体内容层，避免玻璃叠玻璃。
+- **材质回退与退出**：当宿主不支持透明材质或显式设置 `material="opaque"` 时，自动回退为高对比度不透明表面；禁用态采用可读中性色调而非透明度衰减。
+- **独立状态与搜索**：`open`、`value` 与 `inputValue` 均支持独立受控；默认按 `textValue` 与 `keywords` 执行忽略大小写和重音的过滤。
+
+## 示例
+
+### 触发层级与不透明材质退出
+
+通过 `Trigger` 的 `prominence="prominent"` 突出主触发按钮，或在 `Content` 上设置 `material="opaque"` 显式关闭玻璃材质。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-combobox-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 时区检索
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-combobox-timezones"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用与只读
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-combobox-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件  | 属性                                  | 说明                                            |
-| ----- | ------------------------------------- | ----------------------------------------------- |
-| Root  | `value` / `inputValue` / `open`       | 独立受控的已选选项键、输入查询文本与弹层状态    |
-| Root  | `filter`                              | 设为 `false` 时关闭内置过滤，使用外部已过滤子项 |
-| Item  | `textValue` / `keywords` / `disabled` | 选项文本、匹配关键词与禁用开关                  |
-| Empty | —                                     | 无匹配选项时显示的空状态                        |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### 其他部件属性
+
+<ApiPropsTable
+  headers={{ name: '部件与属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Input.placeholder / a11yLabel / name', type: 'string', default: "''" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Content.material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Content.side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'Content.align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'Content.sideOffset', type: 'number', default: '4' },
+    { name: 'Content.collisionPadding', type: 'number', default: '8' },
+    { name: 'Item.value / textValue / keywords', type: 'string', default: "''" },
+    { name: 'Item.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-COMBOBOX.yaml', 'P-BASE-COMBOBOX.yaml']}
+/>
