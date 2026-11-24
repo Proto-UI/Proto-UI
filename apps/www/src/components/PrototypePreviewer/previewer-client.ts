@@ -5,7 +5,8 @@ import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
 import { renderDemo } from './demo-renderer';
 import { collectPrototypeIds, type DemoSpec } from './demo-types';
-import { createRuntimePreviewSurface, runtimePreviewFamily } from './runtime-preview-surface';
+import { createRuntimePreviewSurface } from './runtime-preview-surface';
+import { runtimePreviewFamily } from '../site-library-family';
 import {
   resolveProjectionThemeSurfaceStyle,
   scheduleProjectionThemeRead,

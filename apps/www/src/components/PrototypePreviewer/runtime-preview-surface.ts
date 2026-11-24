@@ -23,7 +23,6 @@ import {
   type ProjectionFamilyManifest,
 } from './projection-families';
 import { type ProjectionThemeSurfaceStyle } from './projection-theme';
-import { resolveSiteLibraryFamily } from '../site-library-family';
 import { findPreviewMaterialProvider } from './preview-material-provider';
 
 export const RUNTIME_PREVIEW_SURFACE_ID = surfacePrototypeId;
@@ -38,15 +37,6 @@ function assertAvailableRef(node: DemoChild): void {
   )
     throw new Error('[RuntimeBox] reserved surface ref is in use.');
   for (const child of node.children ?? []) assertAvailableRef(child);
-}
-
-export function runtimePreviewFamily(root: HTMLElement): ProjectionFamilyId {
-  for (let scope: HTMLElement | null = root; scope; scope = scope.parentElement) {
-    const family = scope.dataset.projectionFamily ?? scope.dataset.siteLibraryFamily;
-    if (family === 'shadcn' || family === 'brutalist') return family;
-    if (scope.classList.contains('brutalist-demo-frame')) return 'brutalist';
-  }
-  return resolveSiteLibraryFamily(root.ownerDocument.defaultView?.location.pathname ?? '/');
 }
 
 function assertCanvasFamily(family: ProjectionFamilyId): void {

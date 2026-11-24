@@ -17,6 +17,15 @@ export function resolveSiteLibraryFamily(pathname: string): SiteLibraryFamily {
   return 'shadcn';
 }
 
+export function runtimePreviewFamily(root: HTMLElement): SiteLibraryFamily {
+  for (let scope: HTMLElement | null = root; scope; scope = scope.parentElement) {
+    const family = scope.dataset.projectionFamily ?? scope.dataset.siteLibraryFamily;
+    if (family === 'shadcn' || family === 'brutalist') return family;
+    if (scope.classList.contains('brutalist-demo-frame')) return 'brutalist';
+  }
+  return resolveSiteLibraryFamily(root.ownerDocument.defaultView?.location.pathname ?? '/');
+}
+
 export function siteControlTags(family: SiteLibraryFamily) {
   return {
     Button: `wc-${family}-button`,

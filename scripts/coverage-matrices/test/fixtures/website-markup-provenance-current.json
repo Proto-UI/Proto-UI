@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "issue834.bounded-source-reference",
-  "revision": "723cf85e5a338723b2313665c07705c36a449976",
-  "scope": "Direct producer, input, receiver and Copy source inventory for the sampled Website routes; includes removal and Header preparation owners, the Button example producer, the extracted InstallCommandCard client and the optional BrowserCompilerPanel template/client owners. Transitive/runtime and served-source proof remain unobserved. Earlier references and their original execution results are retained separately. Sprint 2 integration retains the previous exact reference as website-markup-provenance-8d4d48d.json; only the two added documentation sidebar links change the Astro configuration source hash. The website visual source reference archives the preceding bytes as website-markup-provenance-d8dfeab.json, renews the integrated Astro configuration, CodePanel, its client and PrototypePreviewer, and adds the two direct scroll sources. This does not observe served/transitive closure or run native browser acceptance. The release documentation renewal preserves that visual reference as website-markup-provenance-bd2d1cf.json and reviews the three sampled documentation rewrites, the restored Button/Dialog version and lifecycle boundaries, and the module-anatomy workspace dependency link. The 33 direct source identities and unverified admission remain unchanged; runtime, served/transitive and release acceptance require separate evidence.",
+  "revision": "a8636eb6c4a6bf6144d31caf1e351670a1ea49bc",
+  "scope": "Direct source inventory for the sampled Website routes at the code surface family-selection repair. The previous 33-file reference is retained as website-markup-provenance-723cf85.json. Five input bodies changed. The previewer imports its family lookup from the site family module. Copy selects the family Button directly. The Button examples and Chinese page use the updated Rhea sizes, icons and previews. The Astro configuration adds the client chunk isolation integration, groups concept data with its bootstrap and includes three early-draft sidebar links. This records file identity only. Browser outcomes, served content, transitive dependencies and published CLI compatibility require separate evidence.",
   "sourceAdmission": "unverified",
   "sources": [
     {
@@ -23,7 +23,7 @@
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
-      "sha256": "09e2046f94faf337ab37360e6c6239264fa1190415af578d561e92f3f4f3df65"
+      "sha256": "90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c"
     },
     {
       "path": "apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts",
@@ -51,7 +51,7 @@
     },
     {
       "path": "apps/www/src/components/site-copy-command.ts",
-      "sha256": "75e31bef21c8e6cd2db3647f201b42403836fe3de530529d994b553c85bd604d"
+      "sha256": "a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b"
     },
     {
       "path": "apps/www/src/components/site-copy-controller.ts",
@@ -67,7 +67,7 @@
     },
     {
       "path": "apps/www/src/content/docs/demo_components/button/buttonCode.ts",
-      "sha256": "6450f95db2c6373faa6ec98def3463dc1a11646371efa7d818d5c418705dd798"
+      "sha256": "aef8bd3ee11a1964910993dda5249a692d79fa5c227bb12b5a362e22978f8fa6"
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/transition.mdx",
@@ -75,11 +75,11 @@
     },
     {
       "path": "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/button.mdx",
-      "sha256": "bd4296cbeb5840a10923d210379b420c127b15fe3902f638f80274756fc3e429"
+      "sha256": "f2ea57c270227ccef990d18be92f87befe01f8ab91619227cc25d5d8c2ae26c0"
     },
     {
       "path": "apps/www/astro.config.mjs",
-      "sha256": "c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee"
+      "sha256": "2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177"
     },
     {
       "path": "apps/www/package.json",

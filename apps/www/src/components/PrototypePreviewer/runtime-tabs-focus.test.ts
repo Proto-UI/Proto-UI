@@ -11,8 +11,11 @@ vi.mock('./demo-modules', () => ({
 }));
 vi.mock('./demo-renderer', () => ({ renderDemo: render }));
 vi.mock('./runtimes/host-mount', () => ({ releaseHostMount() {} }));
-vi.mock('./runtime-preview-surface', () => ({
+vi.mock('../site-library-family', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../site-library-family')>()),
   runtimePreviewFamily: (root: HTMLElement) => root.dataset.testFamily,
+}));
+vi.mock('./runtime-preview-surface', () => ({
   createRuntimePreviewSurface: (demo: unknown) => ({
     demo,
     ready: Promise.resolve(),
