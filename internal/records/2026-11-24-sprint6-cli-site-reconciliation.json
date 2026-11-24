@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-11-24T09:56:26.741581+00:00",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+  "parent": "1f118343560009102f5cf5c541f22994c52cca88",
+  "purpose": "Restore the original Rule-site observation API and closed local helper replay lost in main integration, while preserving the newer complete cross-file inventory.",
+  "sourceAuthority": {
+    "historicalCommit": "411a49880e3d81229007bed1fbe195b6141eade9",
+    "integratedMain": "88fc0883bec70abbc0d7505d88370657c279639e",
+    "closedHelperDependencyBlob": "1732e828158d4463e9e12bf364cf1ff196dda6fb",
+    "relatedPartialBroaderWork": "https://github.com/Proto-UI/Proto-UI/pull/1759",
+    "importedBroaderWork": false
+  },
+  "scope": {
+    "files": {
+      "packages/cli/src/services/lowered-hook-coverage.ts": "ab2ca773b8db8c766d362dcdf703b799ac0411aa174cc2439d97e69e6413722f",
+      "packages/cli/test/lowered-rule-api-isolation.test.ts": "a463c0d6621f21fc181746501e371fd09955f13dd748ad637d15c695c5cc8d75"
+    },
+    "sourceAddedLines": 216,
+    "sourceRemovedLines": 12,
+    "restored": [
+      "Same-SourceFile site/raw/production observation API and original public types",
+      "Source-proven local helper declaration substitution and actual per-call visits",
+      "Argument evaluation order, shared container version refresh and unknown-call refusal"
+    ],
+    "preserved": [
+      "Complete cross-file inventory, entry/Rule/function/call-path and declaration identity",
+      "Existing cross-file helper capture/replay and all mutation handling",
+      "All original 79 tests and closed helper/summary source bytes"
+    ],
+    "isolation": "Local closedHelpers requires replayHelpers && !closure. Cross-file inventory does not enter the local replay branch.",
+    "excluded": [
+      "Cross-module flat replay",
+      "Pending helper debt redesign",
+      "Default or mutable-record transport",
+      "Token-map and authored-setup escape changes"
+    ]
+  },
+  "reproduction": {
+    "canonicalHead": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "run": 45365822387,
+    "job": 138347165630,
+    "inheritedTypesErrors": 14,
+    "originalScopedTests": {
+      "passed": 33,
+      "failed": 50,
+      "total": 83,
+      "reason": "33 missing-API cases and 17 original closed-local parameter replay failures"
+    }
+  },
+  "validation": {
+    "initialCandidate": {
+      "passed": 79,
+      "failed": 4,
+      "boundary": "Original79 all passed. The first new fixture passed a whole mutable producer result and reached explicitly excluded record/escape semantics; that fixture and failures remain archived."
+    },
+    "finalCandidate": {
+      "files": 4,
+      "passed": 83,
+      "failed": 0,
+      "skipped": 0,
+      "boundary": "Original9/20/50 cases unchanged; four new combinations use already captured genuine State handles and retain unknown calls, exact source identities and complete call paths."
+    },
+    "officialBuildAndTypes": [
+      {
+        "label": "cli-build",
+        "command": ["node", "scripts/build/public-packages.mjs", "--package", "@proto.ui/cli"],
+        "startedAt": "2026-11-24T09:52:00.215653+00:00",
+        "endedAt": "2026-11-24T09:52:03.493130+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "website-generate",
+        "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+        "startedAt": "2026-11-24T09:52:03.493704+00:00",
+        "endedAt": "2026-11-24T09:53:13.609332+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "type-contracts",
+        "command": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "internal/contracts/types/tsconfig.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-24T09:53:13.609705+00:00",
+        "endedAt": "2026-11-24T09:53:22.325840+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "workspace-types",
+        "command": [
+          "node",
+          "--max-old-space-size=6144",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "tsconfig.workspace.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-24T09:53:22.326266+00:00",
+        "endedAt": "2026-11-24T09:54:08.479861+00:00",
+        "exitCode": 0
+      }
+    ],
+    "candidateInputsStable": true,
+    "wholeCliCorpus": "Not run in this bounded repair. Existing whole-source coverage debt remains open; this does not claim PR1759 complete."
+  },
+  "independentReview": {
+    "reviewer": "Separate Codex agent s6_host_union, read-only",
+    "findings": [],
+    "historicalSiteApiByteEquivalent": true,
+    "currentCrossFileInventoryByteEquivalent": true,
+    "mutationAndCrossFileReplayByteEquivalent": true,
+    "testsRunByReviewer": false,
+    "githubApproval": false
+  },
+  "rawEvidence": {
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/cli-site-api-repair.tar.gz",
+    "sha256": "fcb67c081a58272de31e897f18066c5144dc0c086e6b2969d7e4e2c277baae95",
+    "bytes": 155721,
+    "members": 23
+  },
+  "remaining": "New exact-head hosted source/public validation, remaining current Liquid failures, strict package-budget disposition and genuine independent GitHub approval remain separate gates."
+}
