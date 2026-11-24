@@ -53,12 +53,128 @@ async function capture(page: Page, name: string) {
     sourceFocused: document.activeElement?.hasAttribute('data-docs-image-trigger') ?? false,
     triggerFrames: (window as any).__docsTriggerFrames ?? [],
     focusTimeline: (window as any).__docsFocusTimeline ?? [],
+    previewFocus: (window as any).__docsImageFocusProbe?.read(true) ?? null,
+    previewFocusTimeline: (window as any).__docsImageFocusProbe?.timeline ?? [],
   }));
   await writeFile(
     path.join(evidence, `${name}.json`),
     JSON.stringify({ ...state, pageErrors: failuresByPage.get(page) ?? [] }, null, 2)
   );
   await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: false });
+}
+async function observePreviewFocus(page: Page, sourceSelector: string) {
+  await page.evaluate((selector) => {
+    const timeline: object[] = [];
+    const identities = new WeakMap<Element, number>();
+    let nextIdentity = 1;
+    let closeButton: HTMLElement | null = null;
+    let closeCommand: HTMLElement | null = null;
+    const label = (node: EventTarget | null) => {
+      if (!(node instanceof Element)) return null;
+      if (!identities.has(node)) identities.set(node, nextIdentity++);
+      return {
+        identity: identities.get(node),
+        tag: node.localName,
+        source: node.hasAttribute('data-docs-image-trigger'),
+        close: node.hasAttribute('data-docs-image-close'),
+        prototype: (node as HTMLElement).dataset.docsPreviewPrototype ?? null,
+      };
+    };
+    const control = (node: HTMLElement | null, includeStyle: boolean) => {
+      if (!node) return null;
+      // These two readonly facts are declared by Base Button and DialogClose.
+      // Never request focus, invoke activation or manufacture an interaction fact.
+      let publicFacts: object;
+      try {
+        const exposes = (
+          node as HTMLElement & {
+            getExposes?: () => {
+              focused?: { get(): boolean };
+              focusVisible?: { get(): boolean };
+            };
+          }
+        ).getExposes?.();
+        publicFacts = {
+          focused: exposes?.focused?.get() ?? null,
+          focusVisible: exposes?.focusVisible?.get() ?? null,
+        };
+      } catch (error) {
+        publicFacts = { error: String(error) };
+      }
+      return {
+        ...label(node),
+        connected: node.isConnected,
+        active: document.activeElement === node,
+        nativeFocusVisible: node.matches(':focus-visible'),
+        dataFocusVisible: node.getAttribute('data-focus-visible'),
+        dataFocused: node.getAttribute('data-focused'),
+        publicFacts,
+        ...(includeStyle ? { clipPath: getComputedStyle(node).clipPath } : {}),
+      };
+    };
+    const read = (includeStyle = false) => {
+      const liveClose = document.querySelector<HTMLElement>('[data-docs-image-close]');
+      if (liveClose) {
+        closeButton = liveClose;
+        closeCommand = liveClose.closest<HTMLElement>(
+          'docs-preview-shadcn-dialog-close, docs-preview-brutalist-dialog-close'
+        );
+      }
+      // Retain the observed handles across the closing view epoch so the
+      // evidence can distinguish detached old facts from the next live owner.
+      const content = document.querySelector<HTMLElement>('[data-docs-image-content]');
+      const trigger =
+        document.querySelector(selector)?.closest<HTMLElement>('[data-docs-image-trigger]') ?? null;
+      return {
+        activeElement: label(document.activeElement),
+        reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
+        closeButton: control(closeButton, includeStyle),
+        closeCommand: control(closeCommand, includeStyle),
+        trigger: control(trigger, includeStyle),
+        modal: {
+          contentPresent: Boolean(content),
+          phase: content?.getAttribute('data-transition-state') ?? null,
+          detached: content?.hasAttribute('data-pui-view-detached') ?? null,
+          ariaModal: content?.getAttribute('aria-modal') ?? null,
+          bodyOverflow: document.body.style.overflow,
+          sourceInert: Boolean(trigger?.closest('[inert]')),
+          activeInert: Boolean(document.activeElement?.closest('[inert]')),
+        },
+      };
+    };
+    (window as any).__docsImageFocusProbe = { read, timeline };
+    for (const type of [
+      'pointerdown',
+      'mousedown',
+      'pointerup',
+      'mouseup',
+      'click',
+      'keydown',
+      'keyup',
+      'focusin',
+      'focusout',
+    ]) {
+      for (const capture of [true, false])
+        document.addEventListener(
+          type,
+          (event) => {
+            timeline.push({
+              time: performance.now(),
+              type,
+              capture,
+              trusted: event.isTrusted,
+              target: label(event.target),
+              key: event instanceof KeyboardEvent ? event.key : null,
+              pointerType: event instanceof PointerEvent ? event.pointerType : null,
+              defaultPrevented: event.defaultPrevented,
+              // Do not force computed-style/layout sampling inside native input.
+              ...read(),
+            });
+          },
+          { capture, passive: true }
+        );
+    }
+  }, sourceSelector);
 }
 async function entered(page: Page) {
   // PUI's logical phase and the browser's first painted transition frame have
@@ -238,6 +354,13 @@ type MotionFrame = {
   opacity: number;
   sourceOpacity: number | null;
 };
+type MotionInput = {
+  type: string;
+  trusted: boolean;
+  source: MediaBox | null;
+  sourceCurrentSrc: string | null;
+  scroll: { x: number; y: number };
+};
 async function recordNextMotion(
   page: Page,
   input: 'pointerdown' | 'keydown',
@@ -247,11 +370,27 @@ async function recordNextMotion(
   // changes application state nor slows the requested 220ms motion.
   await page.evaluate(
     ({ input, sourceSelector }) => {
-      const record = { frames: [] as MotionFrame[], done: false };
+      const record = {
+        frames: [] as MotionFrame[],
+        input: null as MotionInput | null,
+        done: false,
+      };
       (window as any).__docsImageMotion = record;
       window.addEventListener(
         input,
-        () => {
+        (event) => {
+          // Locator input can scroll before dispatch. Measure the original
+          // media at the native input boundary, before application handlers;
+          // never derive the expected origin from the animated foreground.
+          const source = document.querySelector(sourceSelector);
+          const box = source?.getBoundingClientRect();
+          record.input = {
+            type: event.type,
+            trusted: event.isTrusted,
+            source: box ? { x: box.x, y: box.y, width: box.width, height: box.height } : null,
+            sourceCurrentSrc: source instanceof HTMLImageElement ? source.currentSrc : null,
+            scroll: { x: scrollX, y: scrollY },
+          };
           let start = -1;
           const sample = (time: number) => {
             if (start < 0) start = time;
@@ -290,12 +429,21 @@ async function recordNextMotion(
 }
 async function motionFrames(page: Page, name: string): Promise<MotionFrame[]> {
   await page.waitForFunction(() => (window as any).__docsImageMotion?.done);
-  const frames = (await page.evaluate(
-    () => (window as any).__docsImageMotion.frames
-  )) as MotionFrame[];
-  if (evidence)
-    await writeFile(path.join(evidence, `${name}-frames.json`), JSON.stringify(frames, null, 2));
-  return frames;
+  const motion = (await page.evaluate(() => ({
+    frames: (window as any).__docsImageMotion.frames,
+    input: (window as any).__docsImageMotion.input,
+  }))) as { frames: MotionFrame[]; input: MotionInput | null };
+  if (evidence) {
+    await writeFile(
+      path.join(evidence, `${name}-frames.json`),
+      JSON.stringify(motion.frames, null, 2)
+    );
+    await writeFile(
+      path.join(evidence, `${name}-input.json`),
+      JSON.stringify(motion.input, null, 2)
+    );
+  }
+  return motion.frames;
 }
 function expectLinearImageMotion(
   frames: MotionFrame[],
@@ -1032,6 +1180,7 @@ describe('automatic documentation image preview in real Chromium', () => {
         const trigger = page.locator('.whitepaper-figure [data-docs-image-trigger]').first();
         const source = trigger.locator('img');
         const sourceSelector = '.whitepaper-figure [data-docs-image-trigger] img';
+        await observePreviewFocus(page, sourceSelector);
         const readSource = () =>
           source.evaluate((node) => {
             const image = node as HTMLImageElement;
@@ -1052,8 +1201,17 @@ describe('automatic documentation image preview in real Chromium', () => {
           `whitepaper-conditional-consistency${width < 640 ? '.mobile' : ''}.${locale}.svg`
         );
         expect(original.alt.length).toBeGreaterThan(0);
-        const origin = (await source.boundingBox())!;
+        const beforeInput = await source.evaluate((node) => {
+          const { x, y, width, height } = node.getBoundingClientRect();
+          return { origin: { x, y, width, height }, scroll: { x: scrollX, y: scrollY } };
+        });
+        const origin = beforeInput.origin;
         await capture(page, `${name}-source`);
+        if (evidence)
+          await writeFile(
+            path.join(evidence, `${name}-source-measurement.json`),
+            JSON.stringify({ ...beforeInput, original }, null, 2)
+          );
         await recordNextMotion(page, 'pointerdown', sourceSelector);
         if (width < 640) await trigger.tap();
         else await trigger.click();
@@ -1071,7 +1229,21 @@ describe('automatic documentation image preview in real Chromium', () => {
             )
           ).toContain(original.caption.replace(/\s+/g, ' '));
         const opening = await motionFrames(page, `${name}-opening`);
-        expectLinearImageMotion(opening, origin, fit.content, 'opening');
+        const openingInput = (await page.evaluate(
+          () => (window as any).__docsImageMotion.input
+        )) as MotionInput | null;
+        expect(openingInput).toMatchObject({
+          type: 'pointerdown',
+          trusted: true,
+          sourceCurrentSrc: original.currentSrc,
+        });
+        expect(openingInput?.source).not.toBeNull();
+        const inputOrigin = openingInput!.source!;
+        for (const key of ['x', 'y', 'width', 'height'] as const)
+          expect(Number.isFinite(inputOrigin[key])).toBe(true);
+        expect(inputOrigin.width).toBeGreaterThan(0);
+        expect(inputOrigin.height).toBeGreaterThan(0);
+        expectLinearImageMotion(opening, inputOrigin, fit.content, 'opening');
         await capture(page, `${name}-contained`);
         await page.locator('.docs-image-full').click();
         expect(
@@ -1104,6 +1276,20 @@ describe('automatic documentation image preview in real Chromium', () => {
         expect(await trigger.getAttribute('data-docs-image-source-instant')).toBeNull();
         await capture(page, `${name}-returned`);
 
+        // A new pointer activation must not retain the previous Escape's
+        // keyboard-only Close presentation. Save the actual state before asserting.
+        if (width < 640) await trigger.tap();
+        else await trigger.click();
+        await entered(page);
+        const repeatedPointer = await page.evaluate(() =>
+          (window as any).__docsImageFocusProbe.read(true)
+        );
+        await capture(page, `${name}-repeated-pointer`);
+        expect(repeatedPointer.closeButton?.clipPath).toBe('inset(50%)');
+        await page.keyboard.press('Escape');
+        await closed(page);
+        expect(await trigger.evaluate((node) => document.activeElement === node)).toBe(true);
+
         // Keyboard activation may reveal Close; it remains a real PUI action.
         await page.keyboard.press('Enter');
         await entered(page);
@@ -1135,6 +1321,9 @@ describe('automatic documentation image preview in real Chromium', () => {
           colorScheme,
           original,
           origin,
+          beforeInput,
+          openingInput,
+          inputOrigin,
           fit,
           opening,
           returnOrigin,
@@ -1142,6 +1331,7 @@ describe('automatic documentation image preview in real Chromium', () => {
           background,
           afterWheel,
           keyboardFocus,
+          repeatedPointer,
           reopened,
           reopenedKeyboardFocus,
           pointerOrigin,
@@ -1546,6 +1736,7 @@ describe('automatic documentation image preview in real Chromium', () => {
     const page = track(await context.newPage());
     try {
       await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
+      await observePreviewFocus(page, '[data-docs-image-trigger] img[alt="Vector landscape"]');
       const trigger = await open(page, 'Vector landscape');
       expect(
         await page
@@ -1556,8 +1747,16 @@ describe('automatic documentation image preview in real Chromium', () => {
       await page.keyboard.press('Escape');
       await closed(page);
       expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
+      await capture(page, 'reduced-motion-escape-returned');
       await trigger.click();
       await entered(page);
+      const repeatedPointer = await page.evaluate(() =>
+        (window as any).__docsImageFocusProbe.read(true)
+      );
+      await capture(page, 'reduced-motion-repeated-pointer');
+      expect(repeatedPointer.reducedMotion).toBe(true);
+      expect(repeatedPointer.closeButton?.clipPath).toBe('inset(50%)');
+      records.push({ reducedMotionRepeatedPointer: repeatedPointer });
       await page.mouse.click(1, 1);
       await closed(page);
       expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
