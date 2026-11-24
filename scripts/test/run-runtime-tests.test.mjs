@@ -564,7 +564,7 @@ describe('bounded documentation readiness', () => {
     }
     // The process-owning runner retains its existing finally cleanup. Helper
     // tests below prove request/timer cleanup; this is only a wiring guard.
-    assert.match(runner, /finally \{\s*await stopServer\(\)/);
+    assert.match(runner, /finally \{\s*try \{\s*await stopChildren\(\)/);
   });
 
   it('keeps the style generation outside every browser readiness window', () => {

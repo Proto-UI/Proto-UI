@@ -3,12 +3,13 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { createWriteStream, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { createWriteStream, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { executeGeneralChecks } from './general-ci.mjs';
 import { assertRuntimeSource, assertVitestReport, writeJson } from './runtime-ci.mjs';
 import { readOptionalJson, runtimeSourceSnapshot } from './runtime-observation.mjs';
+import { liveOwned, observeChildren } from './linux-process-ownership.mjs';
 
 export const SPRINT1_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-matrix-accessibility.browser.test.ts',
@@ -344,75 +345,6 @@ export function assertSprint1StepEvidence(step, sourceSha, repo = root) {
   };
 }
 
-// Every signal target is observed below this invocation's child PID or carries
-// its exact random inherited marker. Start times are rechecked before signals.
-// The marker recovers an early orphan after its short-lived parent exits between
-// observations. Other processes' environment bytes are never printed or retained.
-function processFact(pid) {
-  try {
-    const stat = readFileSync(`/proc/${pid}/stat`, 'utf8');
-    const fields = stat.slice(stat.lastIndexOf(')') + 2).split(' ');
-    return { pid: Number(pid), state: fields[0], parent: Number(fields[1]), started: fields[19] };
-  } catch {
-    return null;
-  }
-}
-function liveOwned(owned) {
-  return [...owned.values()].filter((saved) => {
-    const current = processFact(saved.pid);
-    return current?.started === saved.started && !['Z', 'X'].includes(current.state);
-  });
-}
-function observeChildren(leader, owned, ownership) {
-  const facts = readdirSync('/proc')
-    .filter((name) => /^\d+$/.test(name))
-    .map(processFact)
-    .filter(Boolean);
-  const selected = new Set(liveOwned(owned).map((entry) => entry.pid));
-  if (leader && !owned.has(leader)) {
-    const fact = facts.find((entry) => entry.pid === leader);
-    if (fact) {
-      owned.set(leader, fact);
-      selected.add(leader);
-      ownership.started ??= Number(fact.started);
-    }
-  }
-  for (const fact of facts) {
-    const key = `${fact.pid}/${fact.started}`;
-    if (
-      selected.has(fact.pid) ||
-      ownership.unmarked.has(key) ||
-      Number(fact.started) < (ownership.started ?? 0)
-    )
-      continue;
-    let matches = false;
-    try {
-      // Limit marker inspection to new processes owned by this UID.
-      // Cache negative identities, so old unrelated processes are not rescanned.
-      if (statSync(`/proc/${fact.pid}`).uid === ownership.uid) {
-        const environment = readFileSync(`/proc/${fact.pid}/environ`);
-        matches = Buffer.concat([Buffer.from([0]), environment]).includes(ownership.match);
-      }
-    } catch {
-      /* A process may exit or deny inspection between /proc reads. */
-    }
-    if (matches) {
-      owned.set(fact.pid, fact);
-      selected.add(fact.pid);
-    } else ownership.unmarked.add(key);
-  }
-  let added;
-  do {
-    added = false;
-    for (const fact of facts) {
-      if (!selected.has(fact.pid) && selected.has(fact.parent)) {
-        selected.add(fact.pid);
-        owned.set(fact.pid, fact);
-        added = true;
-      }
-    }
-  } while (added);
-}
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function runSprint1Command(

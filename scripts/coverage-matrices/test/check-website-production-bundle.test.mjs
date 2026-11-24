@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { createRequire } from 'node:module';
 import ts from 'typescript';
 import { fileURLToPath } from 'node:url';
 import {
@@ -1485,6 +1486,98 @@ const chunkFunction = configSource.statements.find(
 assert.ok(chunkFunction);
 const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)})`, {
   normalizedBundleModuleId: (id) => id,
+});
+const configDefinition = configSource.statements.find(ts.isExportAssignment).expression
+  .arguments[0];
+const propertyValue = (object, name) =>
+  object.properties.find((property) => property.name?.getText(configSource) === name).initializer;
+const configuredOutput = ['vite', 'build', 'rollupOptions', 'output'].reduce(
+  propertyValue,
+  configDefinition
+);
+const outputOptions = vm.runInNewContext(`(${configuredOutput.getText(configSource)})`, {
+  websiteManualChunk: classifyChunk,
+});
+
+// Execute the installed Website bundler: a classifier returning undefined does
+// not by itself stop Rollup from moving a barrel's dependencies into its chunk.
+const wwwRequire = createRequire(new URL('../../../apps/www/package.json', import.meta.url));
+const astroRequire = createRequire(wwwRequire.resolve('astro/package.json'));
+const { rollup } = astroRequire('rollup');
+const optionalSceneModule = 'packages/adapters/base/src/material/shader-scene-host.ts';
+async function buildOptionalSceneFixture(lazy, overrides = {}) {
+  const header = 'apps/www/src/components/override/Header.astro';
+  const controls = 'apps/www/src/components/site-shadcn-controls.ts';
+  const barrel = 'packages/adapters/base/src/index.ts';
+  const host = 'packages/adapters/base/src/host/adapter-host.ts';
+  const preview = 'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts';
+  const files = new Map([
+    [
+      header,
+      `import { mount } from '${controls}'; export const ready = mount();` +
+        (lazy ? ` export const loadScene = () => import('${preview}');` : ''),
+    ],
+    [controls, `export { mount } from '${barrel}';`],
+    [barrel, `export { mount } from '${host}'; export { scene } from '${optionalSceneModule}';`],
+    [host, 'export function mount() { return "ordinary-control"; }'],
+    [optionalSceneModule, 'export function scene() { return "optional-scene-code"; }'],
+    [preview, `import { scene } from '${optionalSceneModule}'; export const render = scene;`],
+  ]);
+  const bundle = await rollup({
+    input: header,
+    plugins: [
+      {
+        name: 'optional-scene-regression-fixture',
+        resolveId: (id) => (files.has(id) ? id : null),
+        load: (id) => files.get(id) ?? null,
+      },
+    ],
+  });
+  try {
+    return (await bundle.generate({ format: 'es', ...outputOptions, ...overrides })).output;
+  } finally {
+    await bundle.close();
+  }
+}
+
+test('manual chunks exclude an unreferenced scene from the emitted control graph', async () => {
+  const inherited = await buildOptionalSceneFixture(false, { onlyExplicitManualChunks: false });
+  const oldScene = inherited.find((output) => optionalSceneModule in (output.modules ?? {}));
+  assert.ok(oldScene, 'The old grouping must reproduce the empty eager module record.');
+  assert.equal(oldScene.modules[optionalSceneModule].renderedLength, 0);
+  assert.equal(oldScene.modules[optionalSceneModule].code, null);
+  assert.ok(inherited.every((output) => !output.code.includes('optional-scene-code')));
+
+  const actual = await buildOptionalSceneFixture(false);
+  assert.ok(actual.every((output) => !(optionalSceneModule in output.modules)));
+  assert.deepEqual(
+    actual.map((output) => output.code),
+    inherited.map((output) => output.code),
+    'Removing an empty graph record must not be confused with removing emitted shader code.'
+  );
+});
+
+test('manual chunks retain a reached optional scene only in its lazy consumer', async () => {
+  const inherited = await buildOptionalSceneFixture(true, { onlyExplicitManualChunks: false });
+  const previousBridge = inherited.find((output) => output.name === 'site-shadcn-controls');
+  assert.ok(previousBridge.modules[optionalSceneModule].renderedLength > 0);
+
+  const actual = await buildOptionalSceneFixture(true);
+  const bridge = actual.find((output) => output.name === 'site-shadcn-controls');
+  const scene = actual.find((output) => optionalSceneModule in output.modules);
+  assert.ok(scene?.isDynamicEntry);
+  assert.ok(scene.modules[optionalSceneModule].renderedLength > 0);
+  assert.ok(!(optionalSceneModule in bridge.modules));
+  const chunks = new Map(actual.map((output) => [output.fileName, output]));
+  const pending = actual.filter((output) => output.isEntry).map((output) => output.fileName);
+  const staticChunks = new Set();
+  while (pending.length) {
+    const file = pending.pop();
+    if (staticChunks.has(file)) continue;
+    staticChunks.add(file);
+    pending.push(...chunks.get(file).imports);
+  }
+  assert.ok(!staticChunks.has(scene.fileName), 'No eager chunk may import the optional scene.');
 });
 const materialBoundary = chunkFunction.body.statements.find(
   (node) =>

@@ -2221,6 +2221,9 @@ export default defineConfig({
       rollupOptions: {
         output: {
           manualChunks: websiteManualChunk,
+          // Keep excluded providers outside eager control chunks even when a
+          // grouped public barrel re-exports them. Preserve their lazy owners.
+          onlyExplicitManualChunks: true,
         },
       },
     },

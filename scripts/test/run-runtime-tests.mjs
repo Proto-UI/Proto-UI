@@ -6,7 +6,6 @@
 // content stores writing `data-store.json.tmp` race on the rename, so one dev
 // server exits and its suite fails. One server for the whole run removes that.
 
-import { spawn } from 'node:child_process';
 import { readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
@@ -20,6 +19,7 @@ import {
   ciContext,
 } from './runtime-ci.mjs';
 import { waitForServerReadiness } from './server-readiness.mjs';
+import { createRuntimeProcessOwner } from './runtime-process-owner.mjs';
 import {
   readOptionalJson,
   runtimeObservation,
@@ -36,6 +36,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // can exceed its own hook timeout and fall back to spawning its own server.
 // Warm every route the suites wait on.
 const READY_TIMEOUT_MS = 180_000;
+const processes = createRuntimeProcessOwner();
+const spawn = processes.spawn;
 
 const phase = process.env.PROTO_UI_RUNTIME_PHASE;
 const shard = process.env.PROTO_UI_RUNTIME_SHARD;
@@ -101,6 +103,7 @@ if (selection) {
 let devServer = null;
 let serverOutput = '';
 let shuttingDown = false;
+let interruptedSignal = null;
 let styleGeneration = null;
 const reportedSnapshots = new Set();
 
@@ -152,7 +155,7 @@ async function generateProtoUiStyle() {
       stdio: 'inherit',
     });
     child.on('error', reject);
-    child.on('exit', (code, signal) => {
+    child.on('close', (code, signal) => {
       if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
       else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
       else resolve();
@@ -190,41 +193,11 @@ async function startServer() {
   return url;
 }
 
-// The child is detached into its own process group, so signal the group to take
-// the dev server's own children with it.
-async function stopServer() {
-  if (shuttingDown || !devServer || devServer.exitCode !== null || !devServer.pid) return;
+// Every child belongs to this wrapper. A parent exit does not establish that
+// its descendants stopped, and CI cancellation may signal only this PID.
+async function stopChildren() {
   shuttingDown = true;
-  const pid = devServer.pid;
-  if (process.platform === 'win32') {
-    await new Promise((resolve) => {
-      const killer = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
-        stdio: 'ignore',
-        windowsHide: true,
-      });
-      killer.once('error', resolve);
-      killer.once('exit', resolve);
-    });
-    return;
-  }
-
-  const target = -pid;
-  try {
-    process.kill(target, 'SIGTERM');
-  } catch {
-    return;
-  }
-  const exited = await Promise.race([
-    new Promise((resolve) => devServer.once('exit', () => resolve(true))),
-    new Promise((resolve) => setTimeout(() => resolve(false), 5_000)),
-  ]);
-  if (!exited && devServer.exitCode === null) {
-    try {
-      process.kill(target, 'SIGKILL');
-    } catch {
-      // Already gone.
-    }
-  }
+  await processes.stopAll();
 }
 
 async function runVitest(args, baseUrl) {
@@ -287,19 +260,27 @@ async function runVitest(args, baseUrl) {
   });
 }
 
-// A signal reaches the whole foreground group, so vitest gets it too and this
-// process only has to make sure the dev server does not outlive the run.
+const signalExitCode = (signal) => ({ SIGHUP: 129, SIGINT: 130, SIGTERM: 143 })[signal];
+function reportCleanupError(error) {
+  console.error(`[test:runtime] ${error.message}`);
+  for (const cause of error.errors ?? []) console.error(`[test:runtime] ${cause.message}`);
+}
+
+// Do not assume shell/runner signal forwarding. Stop Vitest, preparation,
+// Astro and their owned descendants even when only this wrapper is signalled.
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(signal, () => {
+    if (interruptedSignal) return;
+    interruptedSignal = signal;
     reportServerSnapshot(`runner received ${signal}`);
     try {
       recordObservation({ signal });
     } catch (error) {
       console.error(`[test:runtime] interrupted evidence: ${error.message}`);
     }
-    void stopServer().finally(() => {
-      process.exit(signal === 'SIGINT' ? 130 : 143);
-    });
+    void stopChildren()
+      .catch(reportCleanupError)
+      .finally(() => process.exit(signalExitCode(signal)));
   });
 }
 
@@ -329,6 +310,11 @@ try {
     console.error(`[test:runtime] evidence error: ${evidenceError.message}`);
   }
 } finally {
-  await stopServer();
+  try {
+    await stopChildren();
+  } catch (error) {
+    reportCleanupError(error);
+    exitCode = 1;
+  }
 }
-process.exit(exitCode);
+process.exit(interruptedSignal ? signalExitCode(interruptedSignal) : exitCode);
