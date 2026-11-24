@@ -56,60 +56,60 @@ export const TOAST_DESCRIPTION_RECIPES = {
 
 export const TOAST_ACTION_RECIPES = {
   vega: tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   nova: tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   maia: tw(
-    'rounded-lg h-7 px-3 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-lg h-7 px-3 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   lyra: tw(
-    'rounded-none h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-none h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   mira: tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   luma: tw(
-    'rounded-lg h-7 px-3 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-lg h-7 px-3 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   sera: tw(
-    'rounded-none h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-none h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   rhea: tw(
-    'rounded-lg h-7 px-3 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-lg h-7 px-3 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
   'new-york-v4': tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent hover:bg-primary/90'
+    'rounded-md h-7 px-2.5 text-xs font-medium bg-primary text-primary-foreground border border-transparent'
   ),
 } as const satisfies OverlayRecipes;
 
 export const TOAST_CLOSE_RECIPES = {
   vega: tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   nova: tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   maia: tw(
-    'rounded-lg h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-lg h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   lyra: tw(
-    'rounded-none h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-none h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   mira: tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   luma: tw(
-    'rounded-lg h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-lg h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   sera: tw(
-    'rounded-none h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-none h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   rhea: tw(
-    'rounded-lg h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-lg h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
   'new-york-v4': tw(
-    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+    'rounded-md h-7 px-2.5 text-xs font-medium border border-border bg-transparent text-muted-foreground'
   ),
 } as const satisfies OverlayRecipes;

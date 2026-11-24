@@ -23,32 +23,46 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
   modules: asToastRoot.modules,
   setup(def) {
     const behavior = asToastRoot();
+    const state = behavior.stateHandles!;
     def.props.define({
       variant: { type: 'enum', empty: 'fallback', options: [...BOOTSTRAP_TOAST_VARIANTS] },
     });
     def.props.setDefaults({ variant: 'default' });
     // Toast is a Proto extension, not a Bootstrap plugin. Preserve the pinned
-    // .alert geometry and warning default while supporting info/success/error variants.
+    // .alert geometry and warning default while supporting Base type and variant projections.
     def.feedback.style.use(
       tw(
         'min-w-0 w-full rounded-[4px] border pl-[14px] pr-[35px] py-[8px] font-sans text-[14px] leading-[20px] shadow-[0_1px_3px_rgb(0_0_0/10%)] text-start'
       )
     );
     def.rule({
-      when: (w) => w.prop('variant').eq('default'),
+      when: (w) =>
+        w.all(
+          w.prop('variant').eq('default'),
+          w.any(w.state(state.type).eq('default'), w.state(state.type).eq('warning'))
+        ),
       intent: (i) =>
         i.feedback.style.use(
-          tw(
-            'border-[#fbeed5] bg-[#fcf8e3] text-paint-[#c09853_0_1px_0_rgb(255_255_255/50%)]'
-          )
+          tw('border-[#fbeed5] bg-[#fcf8e3] text-paint-[#c09853_0_1px_0_rgb(255_255_255/50%)]')
         ),
     });
     def.rule({
-      when: (w) => w.prop('variant').eq('info'),
+      when: (w) =>
+        w.any(
+          w.prop('variant').eq('info'),
+          w.all(
+            w.prop('variant').eq('default'),
+            w.any(w.state(state.type).eq('info'), w.state(state.type).eq('loading'))
+          )
+        ),
       intent: (i) => i.feedback.style.use(tw('border-[#ccc] bg-[#d9edf7] text-[#005580]')),
     });
     def.rule({
-      when: (w) => w.prop('variant').eq('success'),
+      when: (w) =>
+        w.any(
+          w.prop('variant').eq('success'),
+          w.all(w.prop('variant').eq('default'), w.state(state.type).eq('success'))
+        ),
       intent: (i) =>
         i.feedback.style.use(
           tw(
@@ -57,9 +71,12 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
         ),
     });
     def.rule({
-      when: (w) => w.prop('variant').eq('error'),
-      intent: (i) =>
-        i.feedback.style.use(tw('border-[#953b39] bg-destructive/15 text-[#953b39]')),
+      when: (w) =>
+        w.any(
+          w.prop('variant').eq('error'),
+          w.all(w.prop('variant').eq('default'), w.state(state.type).eq('error'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('border-[#953b39] bg-destructive/15 text-[#953b39]')),
     });
     return behavior.render;
   },

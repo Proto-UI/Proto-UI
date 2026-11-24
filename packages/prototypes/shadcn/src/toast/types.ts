@@ -5,14 +5,17 @@ import type {
   ToastDescriptionProps as BaseDescriptionProps,
   ToastActionProps as BaseActionProps,
   ToastCloseProps as BaseCloseProps,
+  ToastPosition,
+  ToastSwipeDirection,
+  ToastType,
 } from '@proto.ui/prototypes-base/toast';
 import type { ShadcnStyleProps } from '../style-scope';
 
-export type ToastType = 'default' | 'success' | 'info' | 'warning' | 'error' | 'loading';
+export type { ToastPosition, ToastSwipeDirection, ToastType };
 
 export type ToastRootProps = BaseRootProps &
   ShadcnStyleProps & {
-    type?: ToastType;
+    richColors?: boolean;
   };
 export type ToastViewportProps = BaseViewportProps & ShadcnStyleProps;
 export type ToastTitleProps = BaseTitleProps & ShadcnStyleProps;

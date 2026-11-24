@@ -115,6 +115,24 @@ export const codeMap: Record<RuntimeId, Record<string, string>> = {
   });
 </script>
     `),
+    'demo-shadcn-toast-position': formatCode(`
+      <proto-ui-shadcn-toast-viewport position="top-center" a11y-label="Positioned notifications">
+        <proto-ui-shadcn-toast-root type="info" duration="4000">
+          <proto-ui-shadcn-toast-title>Toast (Top Center)</proto-ui-shadcn-toast-title>
+          <proto-ui-shadcn-toast-description>Viewport position set to "top-center".</proto-ui-shadcn-toast-description>
+          <proto-ui-shadcn-toast-close>Dismiss</proto-ui-shadcn-toast-close>
+        </proto-ui-shadcn-toast-root>
+      </proto-ui-shadcn-toast-viewport>
+    `),
+    'demo-shadcn-toast-rich-colors': formatCode(`
+      <proto-ui-shadcn-toast-viewport position="bottom-right" expand>
+        <proto-ui-shadcn-toast-root type="success" rich-colors>
+          <proto-ui-shadcn-toast-title>Deployment succeeded</proto-ui-shadcn-toast-title>
+          <proto-ui-shadcn-toast-description>Release 0.3.0 is live in production.</proto-ui-shadcn-toast-description>
+          <proto-ui-shadcn-toast-close>Dismiss</proto-ui-shadcn-toast-close>
+        </proto-ui-shadcn-toast-root>
+      </proto-ui-shadcn-toast-viewport>
+    `),
     'demo-shadcn-toast-persistent': formatCode(`
 <proto-ui-shadcn-style-scope id="toast-persistent-scope">
   <proto-ui-shadcn-button id="open-persistent">Show Persistent Toast</proto-ui-shadcn-button>
@@ -523,6 +541,24 @@ export function ToastPromiseDemo() {
     </ShadcnStyleScope>
   );
 }
+    `),
+    'demo-shadcn-toast-position': formatCode(`
+      <ShadcnToastViewport position="top-center" a11yLabel="Positioned notifications">
+        <ShadcnToastRoot type="info" duration={4000}>
+          <ShadcnToastTitle>Toast (Top Center)</ShadcnToastTitle>
+          <ShadcnToastDescription>Viewport position set to "top-center".</ShadcnToastDescription>
+          <ShadcnToastClose>Dismiss</ShadcnToastClose>
+        </ShadcnToastRoot>
+      </ShadcnToastViewport>
+    `),
+    'demo-shadcn-toast-rich-colors': formatCode(`
+      <ShadcnToastViewport position="bottom-right" expand>
+        <ShadcnToastRoot type="success" richColors>
+          <ShadcnToastTitle>Deployment succeeded</ShadcnToastTitle>
+          <ShadcnToastDescription>Release 0.3.0 is live in production.</ShadcnToastDescription>
+          <ShadcnToastClose>Dismiss</ShadcnToastClose>
+        </ShadcnToastRoot>
+      </ShadcnToastViewport>
     `),
     'demo-shadcn-toast-persistent': formatCode(`
 import { useState } from 'react';
@@ -1127,6 +1163,24 @@ function createEvent() {
   </ShadcnStyleScope>
 </template>
     `),
+    'demo-shadcn-toast-position': formatCode(`
+      <ShadcnToastViewport position="top-center" a11y-label="Positioned notifications">
+        <ShadcnToastRoot type="info" :duration="4000">
+          <ShadcnToastTitle>Toast (Top Center)</ShadcnToastTitle>
+          <ShadcnToastDescription>Viewport position set to "top-center".</ShadcnToastDescription>
+          <ShadcnToastClose>Dismiss</ShadcnToastClose>
+        </ShadcnToastRoot>
+      </ShadcnToastViewport>
+    `),
+    'demo-shadcn-toast-rich-colors': formatCode(`
+      <ShadcnToastViewport position="bottom-right" expand>
+        <ShadcnToastRoot type="success" rich-colors>
+          <ShadcnToastTitle>Deployment succeeded</ShadcnToastTitle>
+          <ShadcnToastDescription>Release 0.3.0 is live in production.</ShadcnToastDescription>
+          <ShadcnToastClose>Dismiss</ShadcnToastClose>
+        </ShadcnToastRoot>
+      </ShadcnToastViewport>
+    `),
     'demo-shadcn-toast-persistent': formatCode(`
 <script setup lang="ts">
 import { ref } from 'vue';
@@ -1695,6 +1749,24 @@ export default {
   },
 };
 </script>
+    `),
+    'demo-shadcn-toast-position': formatCode(`
+      <ShadcnToastViewport position="top-center" a11y-label="Positioned notifications">
+        <ShadcnToastRoot type="info" :duration="4000">
+          <ShadcnToastTitle>Toast (Top Center)</ShadcnToastTitle>
+          <ShadcnToastDescription>Viewport position set to "top-center".</ShadcnToastDescription>
+          <ShadcnToastClose>Dismiss</ShadcnToastClose>
+        </ShadcnToastRoot>
+      </ShadcnToastViewport>
+    `),
+    'demo-shadcn-toast-rich-colors': formatCode(`
+      <ShadcnToastViewport position="bottom-right" expand>
+        <ShadcnToastRoot type="success" rich-colors>
+          <ShadcnToastTitle>Deployment succeeded</ShadcnToastTitle>
+          <ShadcnToastDescription>Release 0.3.0 is live in production.</ShadcnToastDescription>
+          <ShadcnToastClose>Dismiss</ShadcnToastClose>
+        </ShadcnToastRoot>
+      </ShadcnToastViewport>
     `),
     'demo-shadcn-toast-persistent': formatCode(`
 <template>

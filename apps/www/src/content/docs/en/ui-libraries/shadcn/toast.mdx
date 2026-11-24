@@ -85,6 +85,26 @@ Keep a loading toast open with `type="loading"` and `duration={0}` while an asyn
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+### Position
+
+Set `position` on `Viewport` (`top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, or `bottom-right`) to anchor the notification stack in any viewport corner or edge, and call `dismissAll()` to clear active notifications together.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-position"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Rich Colors & Status Icons
+
+Enable `richColors` on `Root` to pair built-in semantic status icons (`success`, `info`, `warning`, `error`, `loading`) with tinted surfaces. `type="loading"` stays persistent until resolved or explicitly timed out, and `type="error"` defaults to `politeness="assertive"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-rich-colors"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ### Controlled & Persistent
 
 Supply `open` and `duration={0}` when your application controls when a critical notification appears and closes.
@@ -104,13 +124,24 @@ Supply `open` and `duration={0}` when your application controls when a critical 
   rows={[
     { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
-    { name: 'duration', type: 'number', default: '5000' },
+    { name: 'duration', type: 'number', default: '5000 (0 for loading)' },
     { name: 'paused', type: 'boolean', default: 'false' },
-    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    {
+      name: 'politeness',
+      type: "'polite' | 'assertive'",
+      default: "'polite' ('assertive' for error)",
+    },
     {
       name: 'type',
       type: "'default' | 'success' | 'info' | 'warning' | 'error' | 'loading'",
       default: "'default'",
+    },
+    { name: 'dismissible', type: 'boolean', default: 'true' },
+    { name: 'richColors', type: 'boolean', default: 'false' },
+    {
+      name: 'position',
+      type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+      default: 'Inherited from Viewport',
     },
     { name: 'appear', type: 'boolean', default: 'false' },
     { name: 'enterDuration', type: 'number', default: '0' },
@@ -127,8 +158,22 @@ Supply `open` and `duration={0}` when your application controls when a critical 
   rows={[
     { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
     { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    {
+      name: 'Viewport.position',
+      type: "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'",
+      default: "'bottom-right'",
+    },
+    { name: 'Viewport.expand', type: 'boolean', default: 'false' },
+    { name: 'Viewport.visibleToasts', type: 'number', default: '3' },
+    { name: 'Viewport.duration', type: 'number', default: '—' },
+    {
+      name: 'Viewport.swipeDirection',
+      type: "'right' | 'left' | 'up' | 'down' | 'none'",
+      default: "'right'",
+    },
     { name: 'Action.disabled', type: 'boolean', default: 'false' },
     { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Action.keepOpen', type: 'boolean', default: 'false' },
     { name: 'Close.disabled', type: 'boolean', default: 'false' },
   ]}
 />
@@ -136,7 +181,7 @@ Supply `open` and `duration={0}` when your application controls when a critical 
 Events and exposed methods:
 
 - **Events**: `Root` emits `openChange` (`{ open: boolean; reason: string }`); `Action` emits `action` (`void`).
-- **Methods**: `Root` exposes `openToast()`, `close(reason?)`, `pause()`, and `resume()`; `Viewport` exposes `focusFirst()`.
+- **Methods**: `Root` exposes `openToast()`, `close(reason?)`, `pause()`, and `resume()`; `Viewport` exposes `focusFirst()`, `pauseAll()`, `resumeAll()`, and `dismissAll(reason?)`.
 
 ## References
 

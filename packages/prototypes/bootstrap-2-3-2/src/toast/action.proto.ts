@@ -20,8 +20,7 @@ export default definePrototype<ToastActionProps, ToastActionExposes>({
     );
     def.rule({
       when: (w) => w.all(w.state(state.disabled).eq(false), w.not(w.state(state.focused).eq(true))),
-      intent: (i) =>
-        i.feedback.style.use(tw('text-[#08c] hover:text-[#005580] hover:underline')),
+      intent: (i) => i.feedback.style.use(tw('text-[#08c]')),
     });
     def.rule({
       when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.focused).eq(true)),
@@ -34,7 +33,9 @@ export default definePrototype<ToastActionProps, ToastActionExposes>({
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')),
+        i.feedback.style.use(
+          tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')
+        ),
     });
     return behavior.render;
   },
