@@ -420,6 +420,21 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     sourceSha256: '64de80957e698deb7453372ca73d9a47e3c3386f7f17a991a1fd6684e636cf88',
     specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
   }),
+  'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-composite.demo.ts':
+    Object.freeze({
+      sourceSha256: '93b9670fe3be83fa13b44bc5854ee8a4771928700363026d0d245d6cdba564fe',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
+  'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope-state-preservation.demo.ts':
+    Object.freeze({
+      sourceSha256: 'e151f512ba3906d1dfa7091ab0c0d91ccc149c6b2049875773da86554e142c34',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
+  'apps/www/src/content/docs/demo_components/style-scope/demo-shadcn-style-scope.demo.ts':
+    Object.freeze({
+      sourceSha256: '9b74d2eb3388fdbed1abbab46b71a3e89f4f5e08f6d53e0e6c109f26f93f4772',
+      specifiers: Object.freeze(['@proto.ui/prototypes-shadcn/input-shell']),
+    }),
   // Main integration sources: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports,
   // and unpinned entries do not certify the source body (see the note above).
@@ -759,7 +774,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
   'apps/www/src/components/site-shadcn-controls.ts': Object.freeze({
-    sourceSha256: '6a338d58c8c2bc73e534799170d180ffb48123aaa3248d6ac0d6b16fb0039f6d',
+    sourceSha256: 'fc2006315ebca2293380cc1402eafac4b9064f48e5951ad263162a8d2a5e67f4',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-bootstrap-2-3-2/button',
@@ -8909,11 +8924,11 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_EXPLICIT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256,
-          WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256,
+          ...WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
-        if (configSha === WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256)
+        if (WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS.includes(configSha))
           inputs.push(WEBSITE_CLIENT_CHUNKS_HELPER);
       } else if (
         ![
@@ -9794,8 +9809,11 @@ const WEBSITE_EXPLICIT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256 =
 // Scope explicit grouping to the client and keep the existing concept data with
 // its bootstrap. Bind the new build hook alongside the existing exact helpers;
 // the four Retry import owners and historical profile requirements stay fixed.
-const WEBSITE_CLIENT_CHUNKS_RETRY_VIRTUAL_CONFIG_SHA256 =
-  '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d';
+const WEBSITE_CLIENT_CHUNKS_RETRY_CONFIGS = Object.freeze([
+  '10404ebdfd8ec0f96f74f59bba0b064b9f361b26de9483e82e5550d7aba7e58d',
+  // Adds the Bootstrap Image and Liquid Glass Image/Separator sidebar links.
+  '2d9b2f28c7435754064aaa15e15a18ff0823f46a4081b11e1e89f302b8725177',
+]);
 const WEBSITE_CLIENT_CHUNKS_HELPER = [
   'apps/www/scripts/client-chunk-isolation.mjs',
   'ab1b90b6ab049058595d686ae23b835cdec6d3b96058bd4055982c8a73c57e69',
