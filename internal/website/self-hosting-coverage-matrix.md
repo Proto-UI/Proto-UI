@@ -221,6 +221,8 @@ The same bounded review then reads the final prepublication theme-owner repair a
 
 The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/2026-11-23-integration-bootstrap-source-bindings.md) reads the complete existing and incoming source bodies before renewing four integration-specific fingerprints: Search commands/composition and native-link recipes/controls. The composition retains per-opening Search retirement and external-focus ownership, adds the existing Sprint 6 Bootstrap family recipes, and preserves the Hero pill's native focus ring alongside the Bootstrap Navbar's text/layout inputs. Owners, dispositions and exact import edges are unchanged. The already reviewed hover fingerprint remains the byte-identical Sprint 4/Sprint 1 value. Historical runtime, visual and performance evidence stays bound to its original source; these new fingerprints establish source admission only.
 
+The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundary-repair.json) reviews main `248f8270dd3458d1fcbc507e618337f98b9fde96` against every recovered prior source hash. The exact Feedback/Runtime, optical host and browser-compiler closures retain their existing owners; six finite helpers gain exact path, source and literal-import bindings. The material source's prior edge-only exception now also requires its complete source hash, and the duplicate Presence projector override is removed. The Bootstrap fixture adds only existing composition-event observation. DemoMatrix's page-only module delivery hook receives its missing matrix binding. The compiler panel's grouped binding drops the extra raw-Adapter owner, preserving its three blocked UI owners. All row states, lifecycle gates and browser/native/optical acceptance debt remain unchanged.
+
 | Interactive or integration source | Owning matrix row | Source SHA-256 |
 | --- | --- | --- |
 | `apps/www/src/content/docs/zh-cn/native-composition-evidence.ts` | `www.demo.demo-matrix` | `500383b4dec06992582ba5132e36fc3fa73036d7648e5fdc39ccd7a87d3d599b` |
@@ -291,13 +293,13 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/content/docs/demo-liquid-glass-collapsible.demo.ts` | `www.demo.authored-controllers` | `1c2ec85076c0b2ba5975e2f826c723539a06e74133220003fbf726a7953ae1a1` |
 | `apps/www/src/content/docs/demo-shadcn-collapsible.demo.ts` | `www.demo.authored-controllers` | `a6a3dcfcab66618357acbe97cb4e98cc2a751827d015b798e268ae4c174be61c` |
 | `apps/www/src/content/docs/demo-base-collapsible.demo.ts` | `www.demo.authored-controllers` | `6949bad43880e30cd0849ebbc94e1451b362015fc99619ca2cd0e4283004d976` |
-| `apps/www/src/pages/en/test/bootstrap-state-controls.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `674d45c03594182e46eb2a79e6b7a5c0facd29eb84eef20612a05b40210a2d97` |
+| `apps/www/src/pages/en/test/bootstrap-state-controls.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `e1b429683a78b52b10ab3c24efb411d10097da439167fe9288003b130fe3425a` |
 | `apps/www/src/pages/en/test/command-no-addon.astro` | `www.demo.demo-matrix` | `72a8d7770b353fca2083a4c28e40dd6862b120b54e9887be7d3d0a0835887477` |
 | `apps/www/src/pages/en/test/command-width.astro` | `www.demo.demo-matrix` | `4fed62430112c133942e761b7975198c875b13c8a3d0b1c2ac18bbfa59e30a5a` |
 | `apps/www/src/components/PrototypePreviewer/demo-associations.ts` | `www.demo.prototype-previewer` | `ce19da5e43e2ed99c5d372027d8b3ff796d9601c8020907ad71c4e260ceb9365` |
 | `apps/www/src/components/CodeExample.astro` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs`, `www.docs.code-surface` | `991f8c3bd93c21eaee831b98876389b77d58331b5dd68cd8bf186857958c4851` |
 | `apps/www/src/components/PrototypePreviewer/BrowserCompilerPanel.astro` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `f92cfa3023ca6f53b5b8f1f292c951fe73cf37fa180f448845cb61b7656cfb5a` |
-| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers`, `www.demo.raw-adapter-runtimes` | `13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9` |
+| `apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts` | `www.demo.runtime-select`, `www.demo.code-panel`, `www.demo.authored-controllers` | `13b9bbdffefe45434ce733f652d0600023651cc474d352daf26b9427710706c9` |
 | `apps/www/src/components/PrototypePreviewer/compiled-preview-sandbox.ts` | `www.demo.raw-adapter-runtimes` | `f159da1722e8c7b7e9e3ebf4772c077c841e60275cde2a8e1f482e5379df153e` |
 | `packages/compiler/src/browser/client.ts` | `www.demo.raw-adapter-runtimes` | `f6af8985c52edbfdbd0e1796fc680e0f54e3c889769d099459abe0f23bc58be7` |
 | `packages/compiler/src/browser/worker.ts` | `www.demo.raw-adapter-runtimes` | `d373263fa25d9f77fe22603b89523461d43a007cdc40e21f53b4a55f39036078` |
@@ -330,6 +332,7 @@ The 2026-11-23 [combined Bootstrap and Search source reconciliation](../records/
 | `apps/www/src/components/PrototypePreviewer/CodePanel.astro` | `www.demo.code-panel`, `www.docs.code-panel-copy`, `www.docs.code-panel-expand`, `www.docs.code-surface` | `38afd6e5c7fd509682bbb4211fc4c0f637b49d7d6f7134afb04ff6dc1e518403` |
 | `apps/www/src/components/StaticCodeBlock.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface` | `755a863bb83b647e62dd8e12931eb2eb221ea179311b98aaa1b1a032230dec5b` |
 | `apps/www/src/components/PrototypePreviewer/DemoPreviewer.astro` | `www.demo.prototype-previewer` | `f8fcf3d1603b1a6e21e464cc9b70b4dcba2b53cbc6a74f8a41975e770e0e4c72` |
+| `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e` |
 | `apps/www/src/components/PrototypePreviewer/DialogDemoStyles.astro` | `www.demo.prototype-previewer` | `3f25d1a890299e4246e2757dc096402a07288ee168c8ca9344b8b3c5ef0ef987` |
 | `apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro` | `www.demo.home-demo-select` | `1f782f87be8278736cc80c4fd70907172cd22cd4c31b388dae0d963ecefbc38c` |
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `008827e9e757d342728638b51f0b62fdc753c70479f6a6c4324c6fdbaedae286` |
