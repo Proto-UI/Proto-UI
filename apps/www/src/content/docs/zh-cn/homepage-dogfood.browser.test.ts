@@ -1211,6 +1211,20 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               })
             ).toBe(true);
             const wheel = await dialog.evaluateHandle(observeContentsWheel);
+            const readWheel = async () => {
+              // Query the current public role without waiting for a replacement
+              // to appear. The retained probe must still belong to that exact
+              // dialog; an old node's unchanged split surface is insufficient.
+              const currentDialogs = await dialog.elementHandles();
+              try {
+                return await wheel.evaluate(
+                  (probe, dialogs) => probe.read(dialogs.length === 1 ? dialogs[0] : null),
+                  currentDialogs
+                );
+              } finally {
+                await Promise.all(currentDialogs.map((current) => current.dispose()));
+              }
+            };
             let initialGeometry: ReturnType<
               ReturnType<typeof observeContentsWheel>['read']
             > | null = null;
@@ -1219,13 +1233,13 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             let wheelError: unknown;
             const wheelCompletionErrors: unknown[] = [];
             try {
-              initialGeometry = await wheel.evaluate((probe) => probe.read());
+              initialGeometry = await readWheel();
               // Visible slotted navigation and a positive scroll range do not
               // establish that Content has acquired its positioned viewport:
               // clientHeight=0 also makes scrollHeight-clientHeight positive.
               // Observe the existing public available-space commit before input.
-              await expect.poll(() => wheel.evaluate((probe) => probe.read().ready)).toBe(true);
-              scrolling = await wheel.evaluate((probe) => probe.read());
+              await expect.poll(async () => (await readWheel()).ready).toBe(true);
+              scrolling = await readWheel();
               expect(scrolling.hitInContent).toBe(true);
               expect(scrolling.max).toBeGreaterThan(0);
               await page.mouse.move(scrolling.x, scrolling.y);
@@ -1233,7 +1247,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               await page.mouse.wheel(0, direction * 500);
               await vi.waitFor(
                 async () => {
-                  const current = await wheel.evaluate((probe) => probe.read());
+                  const current = await readWheel();
+                  expect(current.connected).toBe(true);
+                  expect(current.sameDialog).toBe(true);
                   expect(current.sameSurface).toBe(true);
                   const top = current.top;
                   expect(top).not.toBe(scrolling!.top);
@@ -1247,7 +1263,10 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                     requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
                   )
               );
-              const after = await wheel.evaluate((probe) => probe.read());
+              const after = await readWheel();
+              expect(after.connected).toBe(true);
+              expect(after.sameDialog).toBe(true);
+              expect(after.sameSurface).toBe(true);
               expect(after.documentY).toBe(scrolling.documentY);
               expect(
                 after.wheels.some(
@@ -1275,7 +1294,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
                       originalDeadlineMs: 1000,
                       initialGeometry,
                       before: scrolling,
-                      after: await wheel.evaluate((probe) => probe.read()),
+                      after: await readWheel(),
                       error: wheelError ? String(wheelError) : null,
                     },
                     null,

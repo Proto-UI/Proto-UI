@@ -77,6 +77,29 @@ describe('Contents wheel observation boundaries', () => {
     }
   });
 
+  it('rejects a different current dialog and a detached retained dialog', () => {
+    const { host, observer } = fixture();
+    const replacement = document.createElement('div');
+    document.body.append(replacement);
+    try {
+      expect(observer.read(replacement)).toMatchObject({
+        connected: true,
+        sameDialog: false,
+        sameSurface: true,
+        ready: false,
+      });
+      host.remove();
+      expect(observer.read(replacement)).toMatchObject({
+        connected: false,
+        sameDialog: false,
+        sameSurface: true,
+        ready: false,
+      });
+    } finally {
+      observer.dispose();
+    }
+  });
+
   it('resolves a document hit retargeted to the host of the public shadow surface', () => {
     const { surface, observer } = fixture(true);
     const publicSurfaceObserver = observeContentsWheel(surface);
@@ -112,5 +135,22 @@ describe('Contents wheel observation boundaries', () => {
     observer.dispose();
     surface.dispatchEvent(new WheelEvent('wheel', { bubbles: true, deltaY: 500 }));
     expect(observer.read().wheels).toHaveLength(1);
+  });
+
+  it('samples cancellation at read time even after an intervening microtask checkpoint', async () => {
+    const { surface, observer } = fixture();
+    const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: 500 });
+    try {
+      surface.dispatchEvent(event);
+      await Promise.resolve();
+      expect(observer.read().wheels[0].defaultPrevented).toBe(false);
+      // Simulate a later native listener's cancellation after a checkpoint.
+      // This checks the oracle's lifetime, not browser event dispatch ordering.
+      event.preventDefault();
+      expect(observer.read().wheels[0].defaultPrevented).toBe(true);
+      expect(surface.scrollTop).toBe(0);
+    } finally {
+      observer.dispose();
+    }
   });
 });

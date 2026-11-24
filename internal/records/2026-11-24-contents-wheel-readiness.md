@@ -12,13 +12,15 @@ The revised test waits for measured public available-width/height facts, a posit
 
 A passive observer records initial geometry, the pre-input state, final state, wheel delivery and any failure for each family/runtime/opening action. Failure screenshots and observer cleanup are retained without replacing the original assertion error if evidence writing fails. No scroll offset, CSS, focus or synthetic input is injected by the observer.
 
+Independent review identified two observer defects before acceptance: a native event can reach a microtask checkpoint before a later listener cancels it, and a detached old dialog can retain the same old split surface. The observer now retains each bounded WheelEvent and samples its cancellation at read time. Each browser reading also resolves the current public dialog and checks exact identity and connection both during scroll polling and after settling; replacing the whole dialog cannot pass by moving a detached old node.
+
 This is a test-readiness correction and diagnostic improvement. It does not yet establish that the readiness gap caused the historical failure, that native scrolling now passes, or that a production scrolling defect is fixed. The Shadcn and Brutalist navigation contracts remain draft; no lifecycle or release acceptance changes here.
 
 ## Executed scope and remaining verification
 
 The candidate is based on main `248f8270dd3458d1fcbc507e618337f98b9fde96`.
 
-- `contents-wheel-evidence.test.ts` and `site-contents-evidence.test.ts`: **16 passed / 0 failed** on Node 24.22.3 and pnpm 10.32.1. The five new controls inject layout to reject zero-height/unpositioned/offscreen/replaced owners, resolve an open shadow hit, and distinguish synthetic or cancelled input. These are oracle checks, not native browser evidence.
+- `contents-wheel-evidence.test.ts` and `site-contents-evidence.test.ts`: **18 passed / 0 failed** on Node 24.22.3 and pnpm 10.32.1. The seven new controls inject layout to reject zero-height/unpositioned/offscreen/replaced owners and entire dialogs, resolve an open shadow hit, and distinguish synthetic or cancelled input including cancellation after a checkpoint. These are oracle checks, not native browser evidence.
 - The self-contained observer passes a TypeScript no-emit check with ES2022, DOM types, NodeNext resolution and `skipLibCheck`.
 - Local native reproduction first failed before test execution because the workspace ran out of space. A temporary external dependency-store attempt also failed during Astro setup. After those environment conditions were corrected, the website served successfully, but Chromium exited before any test because its process singleton UNIX socket was denied with `EPERM`. None of these setup failures is counted as a product failure or a pass.
 

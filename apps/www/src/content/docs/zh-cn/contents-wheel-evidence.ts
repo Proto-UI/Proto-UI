@@ -6,29 +6,24 @@ export function observeContentsWheel(element: HTMLElement) {
   const surface =
     element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ?? element;
   const wheels: Array<{
-    trusted: boolean;
-    deltaY: number;
+    event: WheelEvent;
     surfaceInPath: boolean;
     contentInPath: boolean;
-    defaultPrevented: boolean;
   }> = [];
   const onWheel = (event: WheelEvent) => {
     if (wheels.length >= 8) return;
     const path = event.composedPath();
-    const row = {
-      trusted: event.isTrusted === true,
-      deltaY: event.deltaY,
+    wheels.push({
+      event,
       surfaceInPath: path.includes(surface),
       contentInPath: path.includes(element),
-      defaultPrevented: event.defaultPrevented,
-    };
-    wheels.push(row);
-    // Observe cancellation after every listener has had its turn. This passive
-    // listener never cancels input or changes scroll position.
-    view.queueMicrotask(() => (row.defaultPrevented = event.defaultPrevented));
+    });
+    // Native dispatch can perform a microtask checkpoint before a later
+    // listener. Retain the event and sample cancellation on each later read,
+    // rather than freezing a potentially premature capture/microtask value.
   };
   document.addEventListener('wheel', onWheel, { capture: true, passive: true });
-  const read = () => {
+  const read = (currentDialog: Element | null = element) => {
     const rect = surface.getBoundingClientRect();
     const host = element.getBoundingClientRect();
     const css = view.getComputedStyle(surface);
@@ -42,14 +37,16 @@ export function observeContentsWheel(element: HTMLElement) {
     const sameSurface =
       surface ===
       (element.shadowRoot?.querySelector<HTMLElement>('[data-pui-split-surface]') ?? element);
+    const connected = element.isConnected && surface.isConnected;
+    const sameDialog = currentDialog === element;
     const positioned =
       Number.isFinite(availableHeight) &&
       availableHeight > 0 &&
       Number.isFinite(availableWidth) &&
       availableWidth > 0;
     const visible =
-      element.isConnected &&
-      surface.isConnected &&
+      connected &&
+      sameDialog &&
       sameSurface &&
       surface.clientHeight > 0 &&
       rect.width > 0 &&
@@ -87,6 +84,8 @@ export function observeContentsWheel(element: HTMLElement) {
       ready: positioned && visible && /^(auto|scroll|overlay)$/.test(css.overflowY),
       positioned,
       visible,
+      connected,
+      sameDialog,
       sameSurface,
       hitInContent,
       hit: hit ? { tag: hit.localName, id: hit.id, role: hit.getAttribute('role') } : null,
@@ -102,7 +101,13 @@ export function observeContentsWheel(element: HTMLElement) {
       host: { x: host.x, y: host.y, width: host.width, height: host.height },
       x,
       y,
-      wheels: wheels.map((row) => ({ ...row })),
+      wheels: wheels.map(({ event, surfaceInPath, contentInPath }) => ({
+        trusted: event.isTrusted === true,
+        deltaY: event.deltaY,
+        surfaceInPath,
+        contentInPath,
+        defaultPrevented: event.defaultPrevented,
+      })),
     };
   };
   return {
