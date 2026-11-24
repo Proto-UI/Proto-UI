@@ -115,7 +115,7 @@ corepack pnpm@10.32.1 test
 
 仓库开发遵循 [0.3 交付计划](internal/governance/release-0.3-plan.md)和[保留原始来源的交付清单](internal/governance/release-0.3-list.md)。承诺家族为 Base、Shadcn、Brutalist 与 Lucide，以及交付它们所需的官网、CLI 和共享实现。其他家族保持 WIP / Experimental；日期、依赖和验收边界以该计划为准。
 
-当前工作区在 [draft `V-PROTO-UI-0011`](spec/versions/V-PROTO-UI-0011.yaml) 下准备 `0.3.0-alpha.2`；这不改变稳定版 `0.2.0` 的安装路径，也不证明 alpha.2 已发布。私有 Compiler 和原生宿主开发分别记录各自的实现范围与证据边界。
+当前工作区在 [draft `V-PROTO-UI-0012`](spec/versions/V-PROTO-UI-0012.yaml) 下准备 `0.3.0`；这不改变稳定版 `0.2.0` 的安装路径，也不证明 0.3.0 已发布。私有 Compiler 和原生宿主开发分别记录各自的实现范围与证据边界。
 
 [`internal/records/**`](internal/records/) 下的相关日期记录解释工程历史与未完成工作。发行承诺来自受治理的计划，稳定保证来自适用的 spec 实体与发布证据。
 

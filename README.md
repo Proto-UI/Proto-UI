@@ -115,7 +115,7 @@ corepack pnpm@10.32.1 test
 
 Repository development follows the [0.3 delivery plan](internal/governance/release-0.3-plan.md) and [source-bound delivery list](internal/governance/release-0.3-list.md). The committed libraries are Base, Shadcn, Brutalist and Lucide, together with their required website, CLI and shared implementation work. Other families remain WIP / Experimental. The plan owns dates, dependencies and acceptance boundaries.
 
-The workspace currently prepares `0.3.0-alpha.2` under [draft `V-PROTO-UI-0011`](spec/versions/V-PROTO-UI-0011.yaml); this does not change the stable `0.2.0` install path or prove alpha.2 publication. Private compiler and native-host development have their own documented implementation and evidence boundaries.
+The workspace currently prepares `0.3.0` under [draft `V-PROTO-UI-0012`](spec/versions/V-PROTO-UI-0012.yaml); this does not change the stable `0.2.0` install path or prove 0.3.0 publication. Private compiler and native-host development have their own documented implementation and evidence boundaries.
 
 Relevant dated records under [`internal/records/**`](internal/records/) explain engineering history and remaining work. Release commitments come from the governed plan, and stable guarantees from applicable spec entities and release evidence.
 

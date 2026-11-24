@@ -436,9 +436,9 @@ export function emitReact(
       dependencies: [
         { name: 'react', version: '19.2.6', role: 'target' },
         { name: 'react-dom', version: '19.2.6', role: 'target' },
-        { name: '@proto.ui/core', version: '0.3.0-alpha.2', role: 'semantic-runtime' },
-        { name: '@proto.ui/hooks', version: '0.3.0-alpha.2', role: 'semantic-runtime' },
-        { name: '@proto.ui/adapter-react', version: '0.3.0-alpha.2', role: 'host-bridge' },
+        { name: '@proto.ui/core', version: '0.3.0', role: 'semantic-runtime' },
+        { name: '@proto.ui/hooks', version: '0.3.0', role: 'semantic-runtime' },
+        { name: '@proto.ui/adapter-react', version: '0.3.0', role: 'host-bridge' },
       ],
       provenance: {
         source: ir.source,

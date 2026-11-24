@@ -14,12 +14,12 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 
 <!-- proto-ui-release-status:start -->
 
-> **Unpublished release preparation:** `0.3.0-alpha.2` has not been published. The command below is an example for use after publication; it is not currently an installable version.
+> **Unpublished release preparation:** `0.3.0` has not been published. The command below is an example for use after publication; it is not currently an installable version.
 
 <!-- proto-ui-release-status:end -->
 
 ```bash
-npm install @proto.ui/module-test-sys@0.3.0-alpha.2
+npm install @proto.ui/module-test-sys@0.3.0
 ```
 
 ## Internal Structure
