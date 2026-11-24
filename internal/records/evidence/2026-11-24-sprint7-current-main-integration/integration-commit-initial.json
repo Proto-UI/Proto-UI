@@ -1,0 +1,19 @@
+{
+  "command": [
+    "git",
+    "-c",
+    "user.name=Codex",
+    "-c",
+    "user.email=codex@openai.com",
+    "commit",
+    "--signoff",
+    "-m",
+    "Merge fixed main and frozen discovery fixture into Sprint 7 carrier",
+    "-m",
+    "Preserve the published 5df fixture integration and original Sprint 7 histories. Resolve only the additive prettierignore conflict by retaining both complete suffixes; keep all research payloads and prior recovery records unchanged. Record the eight passing discovery controls without relabeling earlier failures."
+  ],
+  "nodeOptions": "--max-old-space-size=256",
+  "startedAt": "2026-11-24T03:24:34.506889+00:00",
+  "finishedAt": "2026-11-24T03:24:39.925415+00:00",
+  "exitCode": 1
+}

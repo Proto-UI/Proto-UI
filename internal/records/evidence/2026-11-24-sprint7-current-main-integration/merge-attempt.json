@@ -1,0 +1,18 @@
+{
+  "command": [
+    "git",
+    "-c",
+    "user.name=Codex",
+    "-c",
+    "user.email=codex@openai.com",
+    "merge",
+    "--no-commit",
+    "--no-ff",
+    "5df50345c1dfb0feb8158be20f763ce5f97ffbf3"
+  ],
+  "startedAt": "2026-11-24T03:19:13.334636+00:00",
+  "finishedAt": "2026-11-24T03:19:13.532150+00:00",
+  "exitCode": 1,
+  "baseHead": "8f6dbb6b3fea5af0031bb0560af7c74a21d2ca96",
+  "incoming": "5df50345c1dfb0feb8158be20f763ce5f97ffbf3"
+}

@@ -206,7 +206,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core']),
   }),
   'packages/modules/feedback/src/presence/controller.ts': Object.freeze({
-    sourceSha256: '8594e2fea1a9cb140974adba6e3abe8450e2b4314d51bc2256c3e2e075e6a02d',
+    sourceSha256: 'e6dae8191cc740fe1aa01df4fe091f5933d7c0426556ba60eda8427861fca3c6',
     specifiers: Object.freeze(['./sink', '@proto.ui/core']),
   }),
   'packages/modules/feedback/src/presence/projector.ts': Object.freeze({

@@ -1,0 +1,75 @@
+{
+  "collectionTimeNote": "Connector calls ran after the recorded 2026-11-23 20:45:30 UTC clock and before the separate native 20:46:24 UTC read; exact per-call clocks were not captured.",
+  "issue": {
+    "id": 6140749000,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/1147",
+    "title": "[Finf v2][887-followup][sync-decisions] 同步旧有全部 Issue 与 PR 并记录决策",
+    "issue_number": 1147,
+    "body": "<!-- proto-ui:issue-governance:20261122:1147:v1 -->\n\n## 2026-11-22 当前代码核对\n\nAgent: ChatGPT，按当前用户授权核对与治理。审计截止 [`a8bf56087`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；各项执行证据保留其实际 SHA。\n\n核对基线：[`2c7eae25357d`](https://github.com/Proto-UI/Proto-UI/commit/2c7eae25357d0c5bae29bd5e92caae3a4ea39730)。\n\n- [x] **历史决策恢复记录已落库**：[现有记录](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/records/2026-11-10-legacy-issue-pr-decisions.md)与[原始来源绑定](https://github.com/Proto-UI/Proto-UI/blob/2c7eae25357d0c5bae29bd5e92caae3a4ea39730/internal/records/2026-11-10-legacy-issue-pr-decisions.json)保留选定Issue/PR决策、未完成条件与范围更正。\n- [ ] 为“旧有全部Issue与PR”恢复明确时间截点和完整对象集，逐项覆盖已关闭/已合并对象与原source条件，并记录决定和剩余owner。当前开放portfolio同步是独立有界工作，不能代替全部历史范围。\n\n主线增量核对截止 [`a8bf56087e58`](https://github.com/Proto-UI/Proto-UI/commit/a8bf56087e5836e3c14c153cafbd796bd98bff37)；本段已执行的测试仍绑定 `2c7eae25357d`，不重标为新 main 运行。\n\n- [x] **本轮全部87个开放 Issue 的逐项审计与处置判断已完成**：以 `a8bf56087e5836e3c14c153cafbd796bd98bff37` 为源码截止，对照实际实现、原正文和全部现有讨论，判定3项完整关闭、67项更新进度、17项保留准确现状；逐条写回及回读结果汇总于 #890。这个完成项限定本轮开放对象集，原全部历史对象条件继续开放。\n\n---\n\n## 来源\n\n拆自 #1091（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] 同步旧有全部 Issue 与 PR 并记录决策 — 历史状态 pending\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。 旧三小时无人接管授权不继承，不能据此自动接管或操作生产。",
+    "state": "open",
+    "user": {
+      "login": "cyjin-yl",
+      "name": "cyjin-yl",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+      "id": 19223209
+    },
+    "assignees": null,
+    "labels": null,
+    "milestone": null,
+    "state_reason": "reopened",
+    "comments": 2,
+    "created_at": "2026-10-31T23:00:00Z",
+    "updated_at": "2026-11-22T19:02:00Z",
+    "closed_at": null,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/issues/1147",
+    "display_title": "[Finf v2][887-followup][sync-decisions] 同步旧有全部 Issue 与 PR 并记录决策"
+  },
+  "comments": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1147#issuecomment-6684398558",
+      "body": "Deferred to 0.4. Meta bookkeeping item: sync all legacy issues/PRs and record decisions — session process tracking carried under the Finf v2 umbrella, not 0.3 product work.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684398558,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Deferred to 0.4. Meta bookkeeping item: sync all legacy issues/PRs and record decisions — session process tracking carried under the Finf v2 umbrella, not 0.3 product work.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1147#issuecomment-7084054576",
+      "body": "<!-- sprint7-history:source-checkpoint:20261122 -->\n\nAgent: ChatGPT Codex，按当前用户“继续之前七个 Sprint 没做完的部分”的既有授权续接。历史源 checkpoint 与来源绑定修复已公开在 Draft PR #1725，当前 head `96a2f9b7b7a70130b91b837e1aa9bfc491d8c4ce`；原 `b42fd96`/`56362ce` 两个签署提交和完整来源均保留，未改写历史。\n\n固定集合截止 `2026-11-22T10:22:30Z`：1,697 个对象（467 Issue、1,230 PR），8,106 条顶层评论、4,128 条 inline 评论。完整来源对账通过；独立复核逐一校验 1,740 份 native capture、全部原 Issue/comment 页和原 50 条人工阅读来源。工具修复实际 21/21，两个完整生成器重放得到与原件逐字节相同的 gzip；篡改来源的两次真实 CLI 均拒绝且不产生输出。\n\n独立历史决定接受数仍是 **0/1,697**，原 50 条阅读不是新的全历史人工审查，`ready` 仍真实 exit 1。本 Issue 的全部历史同步条件继续开放，已有 0.4 bookkeeping 处置不变；本进度不增加 0.3 产品 gate、不关闭原条件、不转移实现 owner，也不以合并/CI/DCO历史替代当前技术验收。\n\n[公开源映射、原始失败、重放结果与独立复核](https://github.com/Proto-UI/Proto-UI/tree/96a2f9b7b7a70130b91b837e1aa9bfc491d8c4ce/internal/records/evidence/2026-11-22-sprint7-history-source-binding)。下一步由 #1147 决定审阅范围与对应独立 reviewer，逐项接受或保留来源缺口；各原执行条件继续由现有 source-bound owner 承接。",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 7084054576,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "\n<p dir=\"auto\">Agent: ChatGPT Codex，按当前用户“继续之前七个 Sprint 没做完的部分”的既有授权续接。历史源 checkpoint 与来源绑定修复已公开在 Draft PR <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"6546266799\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/1725\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/Proto-UI/Proto-UI/pull/1725/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/pull/1725\">#1725</a>，当前 head <code class=\"notranslate\">96a2f9b7b7a70130b91b837e1aa9bfc491d8c4ce</code>；原 <code class=\"notranslate\">b42fd96</code>/<code class=\"notranslate\">56362ce</code> 两个签署提交和完整来源均保留，未改写历史。</p>\n<p dir=\"auto\">固定集合截止 <code class=\"notranslate\">2026-11-22T10:22:30Z</code>：1,697 个对象（467 Issue、1,230 PR），8,106 条顶层评论、4,128 条 inline 评论。完整来源对账通过；独立复核逐一校验 1,740 份 native capture、全部原 Issue/comment 页和原 50 条人工阅读来源。工具修复实际 21/21，两个完整生成器重放得到与原件逐字节相同的 gzip；篡改来源的两次真实 CLI 均拒绝且不产生输出。</p>\n<p dir=\"auto\">独立历史决定接受数仍是 <strong>0/1,697</strong>，原 50 条阅读不是新的全历史人工审查，<code class=\"notranslate\">ready</code> 仍真实 exit 1。本 Issue 的全部历史同步条件继续开放，已有 0.4 bookkeeping 处置不变；本进度不增加 0.3 产品 gate、不关闭原条件、不转移实现 owner，也不以合并/CI/DCO历史替代当前技术验收。</p>\n<p dir=\"auto\"><a href=\"https://github.com/Proto-UI/Proto-UI/tree/96a2f9b7b7a70130b91b837e1aa9bfc491d8c4ce/internal/records/evidence/2026-11-22-sprint7-history-source-binding\">公开源映射、原始失败、重放结果与独立复核</a>。下一步由 <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"6140749000\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/1147\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/1147/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/1147\">#1147</a> 决定审阅范围与对应独立 reviewer，逐项接受或保留来源缺口；各原执行条件继续由现有 source-bound owner 承接。</p>"
+    }
+  ],
+  "serializedAt": "2026-11-23T20:47:45.839422+00:00"
+}

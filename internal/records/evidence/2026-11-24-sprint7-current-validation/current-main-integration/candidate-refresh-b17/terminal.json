@@ -1,0 +1,23 @@
+{
+  "head": "7fc9d23980def3fa975ea21b7e2656ed238d5f61",
+  "command": [
+    "node",
+    "scripts/coverage-matrices/prototype-coverage.mjs",
+    "--refresh-candidate",
+    "7fc9d23980def3fa975ea21b7e2656ed238d5f61",
+    "--write"
+  ],
+  "startedAt": "2026-11-24T05:20:01.337349+00:00",
+  "exitCode": 0,
+  "timedOut": false,
+  "elapsedMs": 52953,
+  "changedTopLevelKeys": [
+    "candidateSource"
+  ],
+  "mainSourceEvidencePreserved": true,
+  "protoMainPreserved": true,
+  "status": " M internal/coverage-matrices/prototype-coverage-matrix.json\n M internal/coverage-matrices/prototype-coverage-matrix.md\n",
+  "beforeCandidateRevision": "84f40b077fd1fa64af04c6259942a4286153d8d4",
+  "afterCandidateRevision": "7fc9d23980def3fa975ea21b7e2656ed238d5f61",
+  "dataSha256": "bbe7704ef6702d80f57cb9384d868c4afa9d82549bcbb54aa13059ba8a805457"
+}

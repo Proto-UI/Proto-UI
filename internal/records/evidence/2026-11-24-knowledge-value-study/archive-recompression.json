@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-11-23T21:04:30.492857+00:00",
+  "operation": "Lossless tar container recompression; each regular member path/bytes/SHA256 unchanged",
+  "original": {
+    "name": "raw-tabs-evidence.tar.gz",
+    "sha256": "04d53ec535e60ea78cbfe95e8f3aa4d565fd32005715a78932cae977de3708b4",
+    "bytes": 20077292
+  },
+  "published": {
+    "name": "raw-tabs-evidence.tar.xz",
+    "sha256": "18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2",
+    "bytes": 9821220
+  },
+  "verifiedFiles": 1402,
+  "mismatches": []
+}

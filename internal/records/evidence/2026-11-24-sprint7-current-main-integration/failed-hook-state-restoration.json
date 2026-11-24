@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-11-24T03:34:39.461829+00:00",
+  "statusAfterFailedHook": "HEAD remained 8f6; tracked index/worktree were observed clean and MERGE_HEAD absent after rollback. A zero-byte index.lock remained from the killed attempt; its separate recovery receipt is retained.",
+  "backupStash": "24d4dffc1",
+  "backupIndexCommit": "a36f1bb2c1e40158962f892dff69f982f33808da",
+  "backupIndexParent": "8f6dbb6b3fea5af0031bb0560af7c74a21d2ca96",
+  "backupIndexTree": "fa2eb8e5903d8c22ea71961325becc1fcea19257",
+  "preservedLocalRef": "refs/s7-recovery/failed-hook-index-456f",
+  "restoration": "After preserving the stale zero-byte lock, performed the same ordinary merge again, observed only the known prettierignore conflict, then restored resolved ignore and owned records from the exact pre-hook index snapshot.",
+  "restoredIndexTree": "fa2eb8e5903d8c22ea71961325becc1fcea19257",
+  "exactIndexTreeMatch": true,
+  "mergeHead": "5df50345c1dfb0feb8158be20f763ce5f97ffbf3",
+  "newCommitCreated": false
+}

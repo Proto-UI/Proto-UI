@@ -1,0 +1,113 @@
+{
+  "collectionTimeNote": "Connector calls ran after the recorded 2026-11-23 20:45:30 UTC clock and before the separate native 20:46:24 UTC read; exact per-call clocks were not captured.",
+  "issue": {
+    "id": 5602941886,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/749",
+    "title": "[experiment][compiler] Compare deterministic projection with generative implementation",
+    "issue_number": 749,
+    "body": "## Context\n\nProto UI currently has an active, restricted-TypeScript Button Compiler workstream, not a general production Compiler or complete Compiler/Adapter parity guarantee. As observed on 2026-09-27, [#732](https://github.com/Proto-UI/Proto-UI/issues/732) is open; [PR #736](https://github.com/Proto-UI/Proto-UI/pull/736), [PR #739](https://github.com/Proto-UI/Proto-UI/pull/739), and [PR #742](https://github.com/Proto-UI/Proto-UI/pull/742) are open. #733 is a downstream native-mixing/lifecycle parity slice that explicitly depends on #732. This experiment must not imply those paths are already complete.\n\n## Research question / hypothesis\n\nFor the same primitive semantics and target, how does deterministic Proto UI projection compare with a direct Agent-generated implementation in correctness, variance, failure modes, and cross-host consistency?\n\nThe comparison may favor either route, show mixed results, or be inconclusive. It does not assume deterministic projection is more reliable.\n\n## Experimental setup\n\n**Prerequisites / phase gate:** start only after an executable generated-target pipeline and clean consumer exist for the selected scope (currently Button via #732/#736 or a reviewed replacement), the source graph/unsupported-input boundary is explicit (currently #739 or equivalent), and an independent validation oracle is available (currently #742 or an equivalent reviewed oracle). If these are not ready, the Issue remains a staged plan; do not substitute Compiler unit fixtures for a real consumer path.\n\n**Phase A:** use only primitive(s), authoring forms, host/runtime versions, and lifecycle surfaces that both production paths actually support. Button is the current candidate. Pin source, target versions, props/theme, task instructions, browser, and input sequence.\n\n- **Proto UI path:** `Prototype → Compiler → target implementation`.\n- **Generative path:** `requirements/specification → Agent → target implementation`, with equivalent source requirements and target constraints. Do not give the Agent the finished compiled output.\n\nValidate both outputs against one oracle designed and maintained independently of both production paths. The oracle may cite applicable catalog authority, upstream public standards, and separately authored black-box journeys; document each source and any unresolved conflicts. Matching the Adapter is not sufficient if both paths violate an independently supported criterion.\n\nRepeat independent Agent generation where resources allow, retaining every run and seed. Add hosts and primitives only when both paths can be compared fairly. Treat #733 as a later prerequisite only for claims that include native/generated mixing or its expanded lifecycle surface.\n\n## Baseline / control\n\nThe direct Agent-generated route is the generative comparison. The deterministic compiled output is the other treatment. Keep validation conditions identical. Where possible, report both within-host correctness and cross-host divergence without pooling unlike host evidence.\n\n## Measurements\n\nReport average and distribution of correctness across cases/runs, run-to-run variance, first-divergence location, recurring and rare failures, unsupported cases, and cross-host consistency. Specifically classify keyboard interaction, focus movement/restoration, dismissal, presence, cleanup, stale event/dispatch behavior, and accessibility where those semantics are in the selected support scope. Record runtime/helper dependencies and implementation edits required after generation. Preserve untested and blocked rows separately from passes.\n\n## Expected artifacts\n\nA frozen scope/authority matrix; exact Compiler, Agent, source, target, browser and toolchain revisions; generation prompts/seeds; clean consumer setup; oracle sources; raw output and traces; per-case results and divergence reproducers; repeated-run summaries; limitations/confounders; and a supported / weakened / inconclusive / falsified interpretation. Report any criterion that the oracle itself cannot settle.\n\n## Known limitations / confounders\n\nRound 1 may cover Button and one Web target only. A narrow restricted-TypeScript input is not representative of every Prototype. Oracle choices, model/version, prompting, runtime dependencies, browser quirks, compiler maturity, adaptation effort, and selective test coverage can bias results. The open Compiler PRs are candidate prerequisites, not evidence of merged or released capability. Do not infer broad Adapter parity or support for other hosts.\n\n## Completion criteria\n\n- [ ] The prerequisite gate, selected common support scope, paths, independent oracle, versions, and exact same inputs are recorded; a blocked prerequisite is reported plainly rather than represented as a result.\n- [ ] All collected runs, cases, failures, exclusions and repeated-generation seeds are retained and summarized with variance where repeated runs occurred.\n- [ ] Reliability, recurring/rare failure modes, and cross-host conclusions are limited to measured support; untested/unsupported/blocked are not counted as passing.\n- [ ] Limitations/confounders and hypothesis classification are recorded even if paths tie or the generative path performs better.\n- [ ] Native mixing and additional lifecycle parity are claimed only after the relevant #733 scope is available and measured.\n\n## Related work and dependencies\n\n- Blocked on an executable pipeline and independent oracle: [#732](https://github.com/Proto-UI/Proto-UI/issues/732), [PR #736](https://github.com/Proto-UI/Proto-UI/pull/736), [PR #739](https://github.com/Proto-UI/Proto-UI/pull/739), [PR #742](https://github.com/Proto-UI/Proto-UI/pull/742), or reviewed replacements if those PRs change.\n- [#733](https://github.com/Proto-UI/Proto-UI/issues/733) follows #732 and is relevant before extending claims to native/generated mixing and its lifecycle behaviors.\n- Second phase, after Round 1 knowledge and discovery baselines are specified. This plan does not block normal release work.\n\n## Agent evidence\n\nSanitized request paraphrase: compare deterministic projection and direct generation with an independent oracle, while reporting only real current Compiler scope. This Issue records a plan; no Compiler output or parity result is claimed. Visual evidence debt applies during execution to rendered interaction claims: retain captures of actual outputs and source-bound transition traces; prose-only artifacts do not establish behavior.\n",
+    "state": "open",
+    "user": {
+      "login": "guangliang2019",
+      "name": "guangliang2019",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/52768321?v=4",
+      "id": 52768321
+    },
+    "assignees": null,
+    "labels": [
+      {
+        "name": "spike",
+        "color": "fef2c0",
+        "description": "Research or feasibility spike"
+      },
+      {
+        "name": "area: adapters",
+        "color": "28d9c8",
+        "description": "Changes related to adapters and host integrations."
+      },
+      {
+        "name": "needs evidence",
+        "color": "fbca04",
+        "description": "Collect or strengthen source-grounded executable evidence; work may continue."
+      }
+    ],
+    "milestone": 7,
+    "state_reason": "reopened",
+    "comments": 3,
+    "created_at": "2026-09-27T13:17:45Z",
+    "updated_at": "2026-11-06T12:46:50Z",
+    "closed_at": null,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/issues/749",
+    "display_title": "[experiment][compiler] Compare deterministic projection with generative implementation"
+  },
+  "comments": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/749#issuecomment-5909874047",
+      "body": "## Benchmark-methodology follow-up — reuse frozen cases and model manifests from the knowledge benchmark\n\nWhen this comparison becomes executable, it should consume the same versioned benchmark cases/result schema established by #734/#748 where the selected primitive/support scope overlaps, rather than creating a separate incompatible task suite.\n\n### Common case identity\n\nFor every comparison row, record a stable benchmark case ID and frozen semantic scope. The deterministic and generative paths must receive equivalent task requirements and be validated by the same hidden/independent oracle. Changes to the oracle or case definition create a new benchmark version rather than silently rewriting earlier results.\n\n### Generative model variable\n\nTreat the direct Agent-generated path as model-dependent evidence. Record exact model/provider snapshot, date, reasoning/effort mode, sampling controls, tools/context limits, Agent harness version and allowed retrieval boundary. Where resources allow, use a small capability ladder rather than one model only.\n\nRepeat independent generation for each formal model/case cell (a small fixed count such as 3 is sufficient for an initial round) so run-to-run variance can be compared with deterministic projection. Preserve all failed, divergent and unusually successful runs.\n\n### Result dimensions\n\nKeep deterministic-vs-generative comparison multidimensional:\n\n- behavioral/accessibility/lifecycle/host correctness;\n- first-divergence location and failure class;\n- run-to-run variance;\n- unsupported cases;\n- post-generation edits/repair work;\n- helper/runtime dependency differences;\n- cross-host divergence where actually measured;\n- token/compute/time for the generative path, but do not treat current inference cost as the only value axis.\n\nA useful outcome may be equal average correctness but materially different variance/reproducibility. Do not hide that by reducing the result to one aggregate score.\n\n### Longitudinal reruns\n\nFuture stronger models should be run against the same frozen benchmark version and appended as new rows. This allows Proto UI to measure whether deterministic projection's advantage narrows, persists, or moves from average correctness toward variance, auditability, consistency, or maintenance properties as models improve.\n\nThis is methodology alignment only; all current #749 prerequisite and common-support-scope gates remain unchanged.",
+      "user": {
+        "login": "guangliang2019",
+        "name": "guangliang2019",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/52768321?v=4",
+        "id": 52768321
+      },
+      "id": 5909874047,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<h2 dir=\"auto\">Benchmark-methodology follow-up — reuse frozen cases and model manifests from the knowledge benchmark</h2>\n<p dir=\"auto\">When this comparison becomes executable, it should consume the same versioned benchmark cases/result schema established by <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5582685317\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/734\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/734/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/734\">#734</a>/<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5602935823\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/748\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/748/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/748\">#748</a> where the selected primitive/support scope overlaps, rather than creating a separate incompatible task suite.</p>\n<h3 dir=\"auto\">Common case identity</h3>\n<p dir=\"auto\">For every comparison row, record a stable benchmark case ID and frozen semantic scope. The deterministic and generative paths must receive equivalent task requirements and be validated by the same hidden/independent oracle. Changes to the oracle or case definition create a new benchmark version rather than silently rewriting earlier results.</p>\n<h3 dir=\"auto\">Generative model variable</h3>\n<p dir=\"auto\">Treat the direct Agent-generated path as model-dependent evidence. Record exact model/provider snapshot, date, reasoning/effort mode, sampling controls, tools/context limits, Agent harness version and allowed retrieval boundary. Where resources allow, use a small capability ladder rather than one model only.</p>\n<p dir=\"auto\">Repeat independent generation for each formal model/case cell (a small fixed count such as 3 is sufficient for an initial round) so run-to-run variance can be compared with deterministic projection. Preserve all failed, divergent and unusually successful runs.</p>\n<h3 dir=\"auto\">Result dimensions</h3>\n<p dir=\"auto\">Keep deterministic-vs-generative comparison multidimensional:</p>\n<ul dir=\"auto\">\n<li>behavioral/accessibility/lifecycle/host correctness;</li>\n<li>first-divergence location and failure class;</li>\n<li>run-to-run variance;</li>\n<li>unsupported cases;</li>\n<li>post-generation edits/repair work;</li>\n<li>helper/runtime dependency differences;</li>\n<li>cross-host divergence where actually measured;</li>\n<li>token/compute/time for the generative path, but do not treat current inference cost as the only value axis.</li>\n</ul>\n<p dir=\"auto\">A useful outcome may be equal average correctness but materially different variance/reproducibility. Do not hide that by reducing the result to one aggregate score.</p>\n<h3 dir=\"auto\">Longitudinal reruns</h3>\n<p dir=\"auto\">Future stronger models should be run against the same frozen benchmark version and appended as new rows. This allows Proto UI to measure whether deterministic projection's advantage narrows, persists, or moves from average correctness toward variance, auditability, consistency, or maintenance properties as models improve.</p>\n<p dir=\"auto\">This is methodology alignment only; all current <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5602941886\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/749\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/749/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/749\">#749</a> prerequisite and common-support-scope gates remain unchanged.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/749#issuecomment-6684446549",
+      "body": "Deferred to 0.4. Deterministic-projection vs generative-implementation comparison experiment; outside 0.3 scope.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684446549,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Deferred to 0.4. Deterministic-projection vs generative-implementation comparison experiment; outside 0.3 scope.</p>"
+    },
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/749#issuecomment-6684473129",
+      "body": "Determination detail: this compares deterministic Proto projection against generative implementation for the same primitive semantics, predicated on the restricted-TS Button compiler line (#732 → #736/#739/#742). Comparison experiment, not an implementation gap; deferred to 0.4.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684473129,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Determination detail: this compares deterministic Proto projection against generative implementation for the same primitive semantics, predicated on the restricted-TS Button compiler line (<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5582678411\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/732\" data-hovercard-type=\"issue\" data-hovercard-url=\"/Proto-UI/Proto-UI/issues/732/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/issues/732\">#732</a> → <a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5583609370\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/736\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/Proto-UI/Proto-UI/pull/736/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/pull/736\">#736</a>/<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5599554051\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/739\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/Proto-UI/Proto-UI/pull/739/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/pull/739\">#739</a>/<a class=\"issue-link js-issue-link\" data-error-text=\"Failed to load title\" data-id=\"5600458508\" data-permission-text=\"Title is private\" data-url=\"https://github.com/Proto-UI/Proto-UI/issues/742\" data-hovercard-type=\"pull_request\" data-hovercard-url=\"/Proto-UI/Proto-UI/pull/742/hovercard\" href=\"https://github.com/Proto-UI/Proto-UI/pull/742\">#742</a>). Comparison experiment, not an implementation gap; deferred to 0.4.</p>"
+    }
+  ],
+  "serializedAt": "2026-11-23T20:47:45.833609+00:00"
+}

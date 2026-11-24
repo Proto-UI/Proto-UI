@@ -1,0 +1,16 @@
+[
+  {
+    "path": "maintained-script-formatting-originals.tar.gz",
+    "sha256": "e8aa865ec575db66d7f2532e4896245fad6632b93a9329cfeed78b843cf67f63",
+    "bytes": 16539,
+    "source": "/workspace/scratch/0d7d81e85daf/s7-control/formatting-before",
+    "purpose": "Reproducible maintenance control; not an experimental participant or new browser observation."
+  },
+  {
+    "path": "future-packet-preparation/generated-control-packets.tar.gz",
+    "sha256": "98064ca340a87f0a1d124460049fc72cd92422a90acf934ca1e9a2cb0241092f",
+    "bytes": 116241,
+    "source": "/workspace/scratch/0d7d81e85daf/s7-future-packets-corrected-01",
+    "purpose": "Reproducible maintenance control; not an experimental participant or new browser observation."
+  }
+]

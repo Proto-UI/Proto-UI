@@ -1,0 +1,319 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-24T02:45:40.477336+00:00",
+  "reviewer": "/root/s7_acceptance",
+  "sourceCommit": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+  "candidateSourceTree": "acba1d91555093786477c61049e7011ee015c187",
+  "scope": "Only the 116 changed files of the retained S7 source commit. No device E-directory export, new device access, network browser session, CI dispatch or external publication occurred in this recovery.",
+  "method": [
+    "Read all 116 changed payloads and recursively read all retained TAR/ZIP regular files without extracting their trees; validate member path safety, ZIP CRC and content hashes.",
+    "Classify each of the nine root archives by experiment provenance, top-level membership and payload kind; inspect fixed task texts, retained command inventories and non-build/error output, source/fixture boundaries and white-listed production receipt fields.",
+    "Inspect JSON, JSONL and Playwright trace metadata for browser session or credential fields; inspect every trace.network request scheme/hostname and cookie/authorization headers.",
+    "Inspect three retained production screenshots from the Button, preference and Tabs fixtures. This is a representative visual scope check, not a claim that every frame was visually reviewed or any new browser observation was executed."
+  ],
+  "counts": {
+    "contentFiles": 7967,
+    "bytesReadIncludingNested": 177870052,
+    "utf8Files": 5970,
+    "tarArchives": 30,
+    "binaryFiles": 1893,
+    "zipArchives": 74
+  },
+  "pathAndCrcErrors": [],
+  "exactCredentialPatternFlags": [],
+  "archiveInventory": [
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/oracle-calibration.tar.gz",
+      "bytes": 2102457,
+      "sha256": "6f5831aa14bc2446504e4d36594a3347e1378c2d4b6e130320fad1e422b53a36",
+      "category": "Button oracle calibration",
+      "scope": "Three retained calibration batches: positive and deliberately invalid local fixtures, built assets, local Playwright observations and source-bound results; unsuccessful early oracle runs remain included.",
+      "recursiveFileEntries": 955,
+      "suffixInventory": {
+        ".gz": 1,
+        ".js": 42,
+        ".html": 65,
+        ".css": 65,
+        ".json": 67,
+        ".png": 169,
+        ".zip": 26,
+        ".trace": 26,
+        ".network": 26,
+        ".jpeg": 378,
+        ".stacks": 26,
+        ".txt": 26,
+        ".log": 29,
+        ".mjs": 6,
+        ".py": 3
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/primary-native-evidence.tar.gz",
+      "bytes": 2703106,
+      "sha256": "80b784725d25d7e9f716019a7f8ff0b8101796cb599293dad774b5c8e568a8db",
+      "category": "Button production observations",
+      "scope": "Six isolated production fixture observations, their exact inputs and built assets, 60 checkpoint PNGs, six traces, targeted launch commands and loopback static-server output; this is not a device-directory backup.",
+      "recursiveFileEntries": 500,
+      "suffixInventory": {
+        ".gz": 2,
+        ".js": 12,
+        ".css": 30,
+        ".html": 30,
+        ".tsx": 36,
+        ".json": 75,
+        ".ts": 72,
+        ".png": 60,
+        ".zip": 6,
+        ".trace": 6,
+        ".network": 6,
+        ".jpeg": 139,
+        ".stacks": 6,
+        ".txt": 6,
+        ".map": 6,
+        ".log": 7,
+        ".py": 1
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-button-projection-study/source-and-command-evidence.tar.xz",
+      "bytes": 951340,
+      "sha256": "31bb475589d39bf39f43befcf3ad282276e8193c4b62930cdcc79c4cfa431106",
+      "category": "Button source and command evidence",
+      "scope": "1,693 source/command files under six experiment directories: Compiler sources and generated editable outputs, old and admitted reruns, excluded and clean generative deliveries, independent oracle review, and pinned dependency install output.",
+      "recursiveFileEntries": 1694,
+      "suffixInventory": {
+        ".xz": 1,
+        ".json": 151,
+        ".js": 12,
+        ".css": 25,
+        ".html": 25,
+        ".ts": 1294,
+        ".tsx": 46,
+        ".map": 12,
+        ".md": 31,
+        ".log": 79,
+        ".txt": 6,
+        ".yaml": 6,
+        ".jsonl": 4,
+        ".py": 2
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-generated-button-consumption/sealed-study.tar.xz",
+      "bytes": 4469816,
+      "sha256": "09dc202c6f07fc737c47317c034573d51351cc8d7b467e62c93dc6f6b3c4a86f",
+      "category": "Preference consumer study",
+      "scope": "One study root containing the fixed public task and protocol, supplied generated component and starter, excluded consumer-01 timing record plus real supplemental observations, admitted consumer-02 edits and monotonic receipts, production builds and local fixture traces. Task text and source reads are intentional study inputs, not a private conversational export.",
+      "recursiveFileEntries": 1227,
+      "suffixInventory": {
+        ".xz": 1,
+        ".json": 218,
+        ".js": 6,
+        ".css": 27,
+        ".html": 22,
+        ".ts": 331,
+        ".tsx": 53,
+        ".map": 18,
+        ".md": 31,
+        ".jsonl": 11,
+        ".yml": 18,
+        ".png": 45,
+        ".zip": 6,
+        ".trace": 5,
+        ".network": 5,
+        ".jpeg": 222,
+        ".stacks": 5,
+        ".txt": 103,
+        ".log": 59,
+        ".sha256": 1,
+        ".patch": 10,
+        ".py": 22,
+        ".lock": 2,
+        ".yaml": 1,
+        ".diff": 5
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/participant-records.tar.gz",
+      "bytes": 2005949,
+      "sha256": "34240aafc47d636233281b2885179a5a674bedd89d31e29a8772f2e3d01b4d84",
+      "category": "Tabs participant deliveries",
+      "scope": "Nine fixed-task participant source/build deliveries, three maintenance branches, public knowledge material, targeted install/build/browser-startup command records, and original unsuccessful local browser launches. Temporary Playwright profile arguments are startup diagnostics; no profile directory is archived.",
+      "recursiveFileEntries": 563,
+      "suffixInventory": {
+        ".gz": 14,
+        ".txt": 75,
+        ".json": 140,
+        ".md": 33,
+        ".jsonl": 18,
+        ".log": 82,
+        ".mjs": 13,
+        ".js": 28,
+        ".css": 58,
+        ".html": 58,
+        ".jsx": 30,
+        ".diff": 3,
+        ".sha256": 3,
+        ".py": 1,
+        ".patch": 1,
+        ".zip": 1,
+        ".yaml": 5
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz",
+      "bytes": 9821220,
+      "sha256": "18504111a3a891fca9097517f5a1b523f4e458658e3b904cd6aaabea04c8d4f2",
+      "category": "Tabs operator observations",
+      "scope": "Fixed Tabs calibration and submitted participant fixtures, production builds, source/response bindings, local browser traces, accessibility snapshots and screenshots, and targeted operator driver output. Earlier failed controls and observations remain included.",
+      "recursiveFileEntries": 2826,
+      "suffixInventory": {
+        ".xz": 1,
+        ".mjs": 78,
+        ".json": 558,
+        ".log": 229,
+        ".html": 269,
+        ".jsx": 84,
+        ".css": 154,
+        ".yml": 115,
+        ".png": 115,
+        ".zip": 35,
+        ".trace": 35,
+        ".network": 35,
+        ".jpeg": 762,
+        ".stacks": 35,
+        ".txt": 167,
+        ".py": 14,
+        "": 2,
+        ".js": 35,
+        ".gz": 7,
+        ".md": 56,
+        ".jsonl": 30,
+        ".sha256": 4,
+        ".patch": 2,
+        ".diff": 4
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/future-packet-preparation/generated-control-packets.tar.gz",
+      "bytes": 116241,
+      "sha256": "98064ca340a87f0a1d124460049fc72cd92422a90acf934ca1e9a2cb0241092f",
+      "category": "Future corrected control packets",
+      "scope": "Prepared fixed task/fixture packets with the corrected knowledge criterion anchor; these are retained preparation artifacts, not a second executed experiment.",
+      "recursiveFileEntries": 77,
+      "suffixInventory": {
+        ".gz": 1,
+        ".txt": 18,
+        ".md": 12,
+        ".html": 9,
+        ".json": 19,
+        ".jsx": 9,
+        ".css": 9
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/maintained-script-formatting-originals.tar.gz",
+      "bytes": 16539,
+      "sha256": "e8aa865ec575db66d7f2532e4896245fad6632b93a9329cfeed78b843cf67f63",
+      "category": "Formatting preimages",
+      "scope": "Five exact analysis-script source preimages, retained separately from the maintained formatted scripts.",
+      "recursiveFileEntries": 6,
+      "suffixInventory": {
+        ".gz": 1,
+        ".mjs": 5
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    },
+    {
+      "path": "internal/records/evidence/2026-11-24-sprint7-integration/pr1757-review-publication-package.tar.gz",
+      "bytes": 24998,
+      "sha256": "6888b05e9ee53192d52d1cd0e1c5238da782df5d348981fb1da8cc6673903385",
+      "category": "Public PR review metadata",
+      "scope": "Eleven JSON documents for the already public PR #1757 exact-head review/publication protocol; historical statuses remain historical, not current authorization or current acceptance.",
+      "recursiveFileEntries": 12,
+      "suffixInventory": {
+        ".gz": 1,
+        ".json": 11
+      },
+      "disposition": "No unrelated private-device or private-session payload found in this inspected archive."
+    }
+  ],
+  "browserScope": {
+    "traceRequests": 319,
+    "unexpectedSessionPaths": [],
+    "nonemptyCookieOrPrivateProfileFieldsFound": 0,
+    "authorizationKeyFindings": {
+      "totalOccurrences": 24,
+      "independentReviewScopeObjects": 2,
+      "consumerEvidenceDirectoryPermissionStatements": 22,
+      "disposition": "All 24 are plain-language study/review authorization scope records; none is an HTTP Authorization header or credential."
+    },
+    "screenshotsInspected": [
+      {
+        "archive": "internal/records/evidence/2026-11-24-button-projection-study/primary-native-evidence.tar.gz",
+        "member": "button-primary-observation-01/button-primary-01/deterministic-1/operator/browser/01-enabled.png",
+        "observation": "Generic Artifact preflight fixture, action/count/disabled checkbox; no personal content or browser chrome."
+      },
+      {
+        "archive": "internal/records/evidence/2026-11-24-generated-button-consumption/sealed-study.tar.xz",
+        "member": "study/runs/consumer-02/operator-feedback/browser-01/09-persisted-after-reload.png",
+        "observation": "Generic preference fixture with synthetic Recovered preference value and exercise-only storage-error checkbox."
+      },
+      {
+        "archive": "internal/records/evidence/2026-11-24-knowledge-value-study/raw-tabs-evidence.tar.xz",
+        "member": "submitted-02/knowledge-1-initial-observation/01-initial.png",
+        "observation": "Generic Reference sections fixture with four task labels and action counter."
+      }
+    ],
+    "requestSchemeAndHostname": {
+      "http://127.0.0.1": 319
+    },
+    "groupingNote": "The summary groups URL scheme and hostname and omits the fixture-specific port; original request URLs retain their actual ports in each trace."
+  },
+  "taskAndCommandScope": {
+    "distinctFixedTaskTexts": 3,
+    "fixedTaskTypes": [
+      "React Button activation comparison",
+      "Save a preference consumer journey",
+      "Four horizontal Tabs reference fixture"
+    ],
+    "distinctCommandArrays": 218,
+    "distinctRetainedCommandOutputBodies": 130,
+    "scope": "Source and fixture reads/edits, pinned install/build and observer commands, public GitHub reads, historical review protocol commands and targeted source/deployment readbacks; no generic device-directory, credential-store or private-conversation export."
+  },
+  "productionReadback": {
+    "artifact": {
+      "path": "internal/records/evidence/2026-11-24-sprint7-dcbot/production-readback.json",
+      "bytes": 7723,
+      "sha256": "851dcb4d34f60bb304808f0d237d7620321359ae93a6051888f9177bdd1a6ae0"
+    },
+    "included": [
+      "Public source PR/merge references",
+      "Deployment image/source/binary hashes and ordinary project paths",
+      "Four GET-only report body-match booleans and non-reversible content fingerprints",
+      "Aggregate queue counts and recorded failure/pending states",
+      "Timer state and recovery receipts",
+      "Log hashes/byte/line counts, error counts, field counts and message-template counts"
+    ],
+    "notEmbedded": [
+      "Raw private production report bodies",
+      "Raw full device/container logs",
+      "Discord user/message/media identifiers",
+      "Browser profiles, sessions, credentials or private conversational prompts"
+    ],
+    "historicalRawReceiptBinding": "Private originals are represented by byte counts and SHA-256 digests only; no new upload of those originals is authorized by this audit."
+  },
+  "limitations": [
+    "Regex screening by itself is not a general proof that private material is absent; the disposition also relies on provenance, archive membership, structured-field, command and visual-scope checks.",
+    "This is local publication-scope preparation, not platform approval, new experimental execution, general product acceptance or a claim that the prior blocked whole-device archive is now permitted.",
+    "Original experiment observations, failures and source hashes remain unchanged. Already public source material may be linked without duplicating broader device material."
+  ],
+  "disposition": "The inspected candidate consists of bounded public-development experiment source/fixtures and source-bound evidence plus a white-listed production receipt; no unrelated private payload was found. Root retains external transport and platform review coordination."
+}

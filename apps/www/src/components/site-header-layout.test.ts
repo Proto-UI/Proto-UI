@@ -7,8 +7,14 @@ const browser = readFileSync(
   'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
   'utf8'
 );
+const browserHeadingSelector = browser.match(
+  /^\s*const heading = page\.locator\('([^']+)'\);$/m
+)?.[1];
 
-function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installation</h2>') {
+function actualMarkdownFixture(
+  section = '<h2 id="actual-doc-heading">Installation</h2>',
+  headingId = 'actual-doc-heading'
+) {
   // Materialize the checked-in wrapper itself. Never invent a legacy class to
   // make a Website selector pass when the real MarkdownContent does not have it.
   const body = markdown
@@ -16,7 +22,7 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
     .replace('<SiteCopyBootstrap />', '')
     .replace('<slot />', section);
   document.body.innerHTML = `<div class="site-page-frame"><header><div data-docs-site-header></div></header><div><main>${body}</main></div></div>`;
-  const heading = document.querySelector<HTMLHeadingElement>('#actual-doc-heading')!;
+  const heading = document.getElementById(headingId) as HTMLHeadingElement;
   if (heading) expect(heading.closest('[data-doc-flow]')).not.toBeNull();
   expect(document.querySelector('.sl-markdown-content')).toBeNull();
   return heading;
@@ -159,11 +165,17 @@ describe('Docs header offset targets the actual MarkdownContent wrapper', () => 
     expect(targets).toContain(document.querySelector('#legacy-bookmark'));
   });
 
-  it('uses a browser heading locator that exists in the real wrapper', () => {
-    const heading = actualMarkdownFixture();
-    const selector = browser.match(/const heading = page\.locator\('([^']+)'\)\.first\(\)/)?.[1];
-    expect(selector).toBeTruthy();
-    expect(document.querySelector(selector!)).toBe(heading);
+  it('keeps the browser installation target when a preview becomes the first section', () => {
+    const heading = actualMarkdownFixture('<h2 id="安装">安装</h2>', '安装');
+    expect(browserHeadingSelector).toBe('[data-doc-flow] h2[id="安装"]');
+    expect(document.querySelector(browserHeadingSelector!)).toBe(heading);
+    const preview = document.createElement('h2');
+    preview.id = '预览';
+    preview.textContent = '预览';
+    heading.before(preview);
+    expect(document.querySelector('[data-doc-flow] h2[id]')).toBe(preview);
+    expect(document.querySelectorAll(browserHeadingSelector!)).toHaveLength(1);
+    expect(document.querySelector(browserHeadingSelector!)).toBe(heading);
   });
 });
 
@@ -176,15 +188,18 @@ for (const family of ['shadcn', 'brutalist']) {
           )?.[1] ?? '/zh-cn/ui-libraries/brutalist/components/button/')
         : '/zh-cn/ui-libraries/shadcn/button/';
     const page = readFileSync(`apps/www/src/content/docs${route.replace(/\/$/, '')}.mdx`, 'utf8');
-    const section = page.match(/^## (.+)$/m)?.[1];
+    const section = [...page.matchAll(/^## (.+)$/gm)].find(([, text]) => text === '安装')?.[1];
+    expect(section).toBe('安装');
     actualMarkdownFixture(
       section
-        ? `<h2 id="actual-doc-heading">${section}</h2>`
-        : '<p>No section in this authored page</p>'
+        ? `<h2 id="预览">预览</h2><h2 id="安装">${section}</h2>`
+        : '<p>No installation section in this authored page</p>',
+      '安装'
     );
-    const selector = browser.match(/const heading = page\.locator\('([^']+)'\)\.first\(\)/)?.[1];
-    expect(document.querySelector(selector!)).not.toBeNull();
-    expect(document.querySelector(selector!)?.textContent).toBe(section);
+    expect(browserHeadingSelector).toBe('[data-doc-flow] h2[id="安装"]');
+    expect(document.querySelectorAll(browserHeadingSelector!)).toHaveLength(1);
+    expect(document.querySelector(browserHeadingSelector!)?.id).toBe('安装');
+    expect(document.querySelector(browserHeadingSelector!)?.textContent).toBe(section);
   });
 }
 
