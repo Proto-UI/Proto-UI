@@ -1,0 +1,89 @@
+{
+  "reviewedSource": "04052a7ea70cd69c062a804b438d99ae7d900e6a",
+  "applicableCurrentMain": "1cc4ad159da621d58e2b668d0d2ef0a22be6ed1b",
+  "sourceBindings": [
+    {
+      "path": "apps/www/test/component-consumer-repairs.browser.test.ts",
+      "sameBytes": true,
+      "currentBlob": "63a744d22031e3b76243c5130e1c3f29d28328ad",
+      "currentSha256": "2a20178558cf57bbfa6ee74c7f9666545f7b10560f720346939fa2714123006f"
+    },
+    {
+      "path": "apps/www/test/fixtures/component-consumer-repairs.ts",
+      "sameBytes": true,
+      "currentBlob": "56bf5e7ef1acfae46ab08d567954a1c38acba402",
+      "currentSha256": "8fb9264bb6ac7f9351ada5bce66ce714ff130e36659cb48f47a1e67ad44f96f1"
+    },
+    {
+      "path": "packages/adapters/react/src/adapt.ts",
+      "sameBytes": true,
+      "currentBlob": "cf4be4dbc5930697e5c56a72b0cf7ef69586d338",
+      "currentSha256": "19059122572fc60b056e4f500186198d09adac50ea1c85b5855c7b70501971ae"
+    },
+    {
+      "path": "packages/adapters/base/src/host/view-visibility.ts",
+      "sameBytes": true,
+      "currentBlob": "c970e841bc02aeb884efdb20ef373d46a926cead",
+      "currentSha256": "a071c8c0d255cad0a8801477163c77fe4e7c504c127750a6de511046eee69c2b"
+    },
+    {
+      "path": "packages/prototypes/base/src/tooltip/root.proto.ts",
+      "sameBytes": true,
+      "currentBlob": "2eb7fc93530f4bf658808371be691aa55a51d978",
+      "currentSha256": "cbcdd96d3f28343f0619ed66109444ec74376367b3df77e80c41c1b006650d30"
+    },
+    {
+      "path": "packages/prototypes/base/src/tooltip/content.proto.ts",
+      "sameBytes": true,
+      "currentBlob": "7b906fb3817d3995bf930c8a79192b9a4e11971a",
+      "currentSha256": "c11ff819afd9a4eeffb70348e473c47f60f41bda2ad744e0b7d44e0dcdeeedb9"
+    },
+    {
+      "path": "packages/prototypes/base/src/tooltip/trigger.proto.ts",
+      "sameBytes": true,
+      "currentBlob": "bb7327281bf665f393eec16fe56c2708ec32d7f8",
+      "currentSha256": "d3ae818c8a50e9305de65b3e0aafb4a7b70d0d40bae3ae6430ff6222337e818c"
+    },
+    {
+      "path": "spec/contracts/C-LIFECYCLE-0008.yaml",
+      "sameBytes": true,
+      "currentBlob": "310611bd5277b9b008a8f2493d4fbc0ea53a6c2a",
+      "currentSha256": "021ce74e0439481bda5a316982573e06dfd16ea77b0f6c11b36e6077b20549e7"
+    },
+    {
+      "path": "spec/contracts/C-HOST-VIEW-ATTACHMENT-0001.yaml",
+      "sameBytes": true,
+      "currentBlob": "0fd9ea52f8cdf67b172ecc83192fe9d17aa11d34",
+      "currentSha256": "ae2882b494024c31674c122dc15f62590971421c383ef361ae5de6288f8e6b82"
+    },
+    {
+      "path": "spec/contracts/C-AS-TRANSITION-0001.yaml",
+      "sameBytes": true,
+      "currentBlob": "3be1a1476f111a20904d28833828a3e207275543",
+      "currentSha256": "d562fc2e6d6c2a2c1e16747f6dc8fbfe356e5534037adcdc09675f0c9f2667df"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-TOOLTIP-CONTENT.yaml",
+      "sameBytes": true,
+      "currentBlob": "14eaf665fe5947605a3e701929ebde59749b5d16",
+      "currentSha256": "07780ec713c36937a67a339f581086b4381af54128b1ce4c28df8f68b0d6058b"
+    }
+  ],
+  "allReviewedFilesByteIdenticalAcrossMerge": true,
+  "finding": "The original fixture waits for semantic root.open but immediately reads id from a still-detached/pending retained shell. Existing active lifecycle A/D/J keeps ViewIntent and actual committed view separate; pending/detached CSS deliberately hides that shell. Root source-bound diagnostics observed the later committed content receive stable id and description. A visible current Content readiness wait is justified before unchanged identity assertions.",
+  "proposal": {
+    "path": "apps/www/test/component-consumer-repairs.browser.test.ts",
+    "addedLine": "      await node(page, 'content').waitFor({ state: 'visible' });",
+    "scope": "All 12 Tooltip Button matrix cases; original 84-case file remains intact.",
+    "preserved": [
+      "original semantic-open wait",
+      "content id truthy assertion",
+      "button aria-describedby exact equality",
+      "one activation / focus / Tab / Escape / disabled / cleanup assertions",
+      "all explicit timeouts, case inventory, sandbox and fixtures"
+    ],
+    "failureBoundary": "Permanently pending/hidden Content still fails readiness; a revealed root with missing/wrong identity still fails the original assertions. No sleep, repeated attempt or polling of the desired identity value is introduced."
+  },
+  "validation": "No test execution or source mutation by this reviewer. Root must run original complete84 on its own candidate. Prior 83/84 and source-bound4-of5 timings remain history; no new all-green claim.",
+  "patchSha256": "42e5631be6128f6c5fb2577434ed595390477b45f7d17c18303fbba724d1a054"
+}

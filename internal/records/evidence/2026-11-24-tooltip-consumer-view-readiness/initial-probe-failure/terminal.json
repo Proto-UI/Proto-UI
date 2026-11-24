@@ -1,0 +1,6 @@
+{
+  "status": "failed diagnostic setup",
+  "error": "Playwright evaluation of a tsx-transformed local helper referenced __name before any case-prefix observation; source/tests unchanged.",
+  "log": "../probe-tooltip.log",
+  "acceptanceResult": null
+}

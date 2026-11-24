@@ -153,3 +153,6 @@ internal/records/evidence/2026-11-24-react-portal-origin-native/
 
 # Preserve original Scroll Reveal source-gate receipts and logs.
 internal/records/evidence/2026-11-24-scroll-reveal-source-gate/
+
+# Preserve original Tooltip view-readiness receipts, probes and captures.
+internal/records/evidence/2026-11-24-tooltip-consumer-view-readiness/
