@@ -47,12 +47,10 @@ const options = [
     >
       <SelectValue data-placeholder="选择适配器">Runtime</SelectValue>
     </SelectTrigger>
-    <!-- This Runtime field permits multi-line values at enlarged text sizes.
-         Its popup uses intrinsic rows rather than matching the Trigger box. -->
     <SelectContent
       data-site-select-content
       data-site-control-family={family}
-      data-position="popper"
+      data-position={family === 'brutalist' ? 'popper' : undefined}
       data-align={family === 'brutalist' ? 'end' : undefined}
     >
       {

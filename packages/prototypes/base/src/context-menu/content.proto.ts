@@ -107,6 +107,11 @@ function setupContextMenuContent(
     leave: transition.controls.leave,
     present: transition.isPresent,
   });
+  transition.isPresent.watch((_run, event) => {
+    if (event.type === 'next' && !event.next && !currentContext?.open) {
+      overlay.registerInputAnchor(null);
+    }
+  });
 
   const open = def.state.bool('open', false);
   def.expose.state('open', open);
@@ -225,12 +230,16 @@ function setupContextMenuContent(
       wasOpen && getNavigationEntries(run).some((entry: any) => entry.focused);
     const inputAnchorChanged = currentContext?.inputAnchorVersion !== ctx.inputAnchorVersion;
     currentContext = ctx;
-    const readInputAnchor = run.anatomy
-      .partsOf(CONTEXT_MENU_FAMILY, 'root')[0]
-      ?.getExpose('__getInputAnchor');
-    overlay.registerInputAnchor(
-      ctx.open && !ctx.disabled && typeof readInputAnchor === 'function' ? readInputAnchor() : null
-    );
+    if (ctx.open) {
+      const readInputAnchor = run.anatomy
+        .partsOf(CONTEXT_MENU_FAMILY, 'root')[0]
+        ?.getExpose('__getInputAnchor');
+      overlay.registerInputAnchor(
+        !ctx.disabled && typeof readInputAnchor === 'function' ? readInputAnchor() : null
+      );
+    } else if (!transition.isPresent.get()) {
+      overlay.registerInputAnchor(null);
+    }
     contentId.set(
       createContextMenuContentId(ctx.rootId),
       'reason: contextMenu content identity sync'
