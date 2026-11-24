@@ -60,10 +60,10 @@ describe('Contents wheel observer / native event controls', () => {
         const read = async () => {
           const current = await dialog.elementHandles();
           try {
-            return await probe.evaluate(
-              (observer, dialogs) => observer.read(dialogs.length === 1 ? dialogs[0] : null),
-              current
-            );
+            return await probe.evaluate((observer, dialogs) => {
+              const current = dialogs.length === 1 ? dialogs[0] : null;
+              return observer.read(current instanceof Element ? current : null);
+            }, current);
           } finally {
             await Promise.all(current.map((element) => element.dispose()));
           }
