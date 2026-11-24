@@ -14,6 +14,8 @@ export const TOAST_TYPES = ['default', 'success', 'info', 'warning', 'error', 'l
 
 export const TOAST_SWIPE_DIRECTIONS = ['right', 'left', 'up', 'down', 'none'] as const;
 
+export const TOAST_STACK_TIERS = ['front', 'second', 'third', 'overflow'] as const;
+
 export const TOAST_FAMILY = createAnatomyFamily('base-toast', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -38,6 +40,7 @@ export type ToastViewportContextValue = {
   swipeDirection: ToastSwipeDirection;
   dismissEpoch: number;
   dismissReason: string;
+  openIds: string[];
 };
 
 export const TOAST_VIEWPORT_CONTEXT =

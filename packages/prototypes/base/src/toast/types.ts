@@ -19,6 +19,8 @@ export type ToastType = 'default' | 'success' | 'info' | 'warning' | 'error' | '
 
 export type ToastSwipeDirection = 'right' | 'left' | 'up' | 'down' | 'none';
 
+export type ToastStackTier = 'front' | 'second' | 'third' | 'overflow';
+
 export interface ToastViewportProps {
   a11yLabel?: string;
   hotkey?: string;
@@ -64,6 +66,7 @@ export type ToastRootExposes = TransitionExposes & {
   dismissible: ExposeState<boolean>;
   position: ExposeState<ToastPosition>;
   expanded: ExposeState<boolean>;
+  stackTier: ExposeState<ToastStackTier>;
   openToast: ExposeMethod<() => void>;
   close: ExposeMethod<(reason?: string) => void>;
   pause: ExposeMethod<() => void>;
@@ -79,6 +82,7 @@ export type ToastRootAsHookContract = {
     dismissible: State<boolean>;
     position: State<ToastPosition>;
     expanded: State<boolean>;
+    stackTier: State<ToastStackTier>;
   };
 };
 

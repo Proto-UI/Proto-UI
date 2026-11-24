@@ -77,6 +77,7 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
     swipeDirection: 'right',
     dismissEpoch: 0,
     dismissReason: 'viewport-dismiss',
+    openIds: [],
   };
   def.context.provide(TOAST_VIEWPORT_CONTEXT, initialContext);
 
@@ -96,7 +97,7 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
     position.set(nextPosition, 'reason: toast viewport position');
     expanded.set(nextExpanded, 'reason: toast viewport expand');
     paused.set(nextPaused, 'reason: toast viewport pause');
-    run.context.update(TOAST_VIEWPORT_CONTEXT, {
+    run.context.update(TOAST_VIEWPORT_CONTEXT, (prev) => ({
       position: nextPosition,
       expanded: nextExpanded,
       paused: nextPaused,
@@ -105,7 +106,8 @@ function setup(def: DefHandle<ToastViewportProps, ToastViewportExposes>) {
       swipeDirection: resolveSwipeDirection(p.swipeDirection),
       dismissEpoch,
       dismissReason,
-    });
+      openIds: prev.openIds,
+    }));
   };
 
   def.expose.state('position', position);

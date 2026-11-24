@@ -13,12 +13,14 @@ import {
   TOAST_CONTEXT,
   TOAST_FAMILY,
   TOAST_POSITIONS,
+  TOAST_STACK_TIERS,
   TOAST_TYPES,
   TOAST_VIEWPORT_CONTEXT,
   createToastId,
 } from './shared';
 import type {
   ToastPosition,
+  ToastStackTier,
   ToastType,
   ToastRootProps,
   ToastRootExposes,
@@ -85,6 +87,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       options: TOAST_POSITIONS,
     }),
     expanded = def.state.bool('expanded', false),
+    stackTier = def.state.enum('stackTier', 'front', { options: TOAST_STACK_TIERS }),
     role = def.state.string('role', 'status'),
     live = def.state.string('live', 'polite'),
     atomic = def.state.bool('atomic', true);
@@ -109,6 +112,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   def.expose.state('dismissible', dismissible);
   def.expose.state('position', position);
   def.expose.state('expanded', expanded);
+  def.expose.state('stackTier', stackTier);
   def.expose.event('openChange', { payload: 'json' });
 
   let currentRun: RunHandle<ToastRootProps> | null = null,
@@ -179,6 +183,27 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     });
   };
 
+  const syncViewportMembership = (run: RunHandle<ToastRootProps> | null, isOpen: boolean) => {
+    if (!run) return;
+    const vp = run.context.tryRead(TOAST_VIEWPORT_CONTEXT);
+    if (!vp) return;
+    if (isOpen) {
+      if (vp.openIds[0] === id) return;
+      run.context.tryUpdate(TOAST_VIEWPORT_CONTEXT, (prev) =>
+        prev.openIds[0] === id
+          ? prev
+          : { ...prev, openIds: [id, ...prev.openIds.filter((item) => item !== id)] }
+      );
+      return;
+    }
+    if (!vp.openIds.includes(id)) return;
+    run.context.tryUpdate(TOAST_VIEWPORT_CONTEXT, (prev) =>
+      prev.openIds.includes(id)
+        ? { ...prev, openIds: prev.openIds.filter((item) => item !== id) }
+        : prev
+    );
+  };
+
   const apply = (next: boolean) => {
     const run = currentRun,
       view = viewEpoch;
@@ -191,6 +216,8 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       type: toastType.get(),
       dismissible: dismissible.get(),
     });
+    if (currentRun !== run || viewEpoch !== view) return;
+    syncViewportMembership(currentRun, next);
     if (currentRun !== run || viewEpoch !== view) return;
     if (next) {
       transition.controls.enter();
@@ -233,6 +260,19 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       : vpPos;
     position.set(nextPos, 'reason: toast position');
     expanded.set(!!vp?.expanded, 'reason: toast viewport expanded');
+    const idx = vp ? vp.openIds.indexOf(id) : 0;
+    const limit = vp?.visibleToasts ?? 3;
+    const nextTier: ToastStackTier =
+      idx <= 0
+        ? 'front'
+        : idx >= limit
+          ? 'overflow'
+          : idx === 1
+            ? 'second'
+            : idx === 2
+              ? 'third'
+              : 'overflow';
+    stackTier.set(nextTier, 'reason: toast stack tier');
     viewportPaused = !!vp?.paused;
     viewportDuration = vp?.duration ?? null;
     syncPaused();
@@ -288,13 +328,15 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   def.lifecycle.onMounted((run) => {
     currentRun = run;
     mounted = true;
+    if (open.get()) syncViewportMembership(run, true);
     syncViewport(run);
     relations(run);
     syncPaused();
     schedule();
   });
 
-  def.lifecycle.onUnmounted(() => {
+  def.lifecycle.onUnmounted((run) => {
+    syncViewportMembership(run, false);
     viewEpoch++;
     mounted = false;
     hovered = false;
