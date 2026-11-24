@@ -248,9 +248,9 @@ describe('#1488 E native Search controller retirement', () => {
             })
           );
           expect((await page.goto(baseUrl + route, { waitUntil: 'networkidle' }))?.ok()).toBe(true);
-          const initial = await page.evaluate(
+          const initial = (await page.evaluate(
             `${installProbe}(${JSON.stringify({ runtime, state, failure: state === 'active' ? 'undefined' : 'error', reentry: state === 'pending' })})`
-          );
+          )) as Snapshot;
           observations.push({ step: 'ready', state: initial });
           expect(initial.openers).toEqual([{ disposed: 0, activated: 1, connected: true }]);
           expect(initial.scopeListeners).toHaveLength(2);
