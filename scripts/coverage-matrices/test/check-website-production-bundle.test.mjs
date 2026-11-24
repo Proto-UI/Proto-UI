@@ -1539,7 +1539,12 @@ async function outputOptionsForTarget(target) {
   return config.build.rollupOptions.output;
 }
 const optionalSceneModule = 'packages/adapters/base/src/material/shader-scene-host.ts';
-async function buildOptionalSceneFixture(lazy, overrides = {}, target = 'client') {
+async function buildOptionalSceneFixture(
+  lazy,
+  overrides = {},
+  target = 'client',
+  { reexportScene = false } = {}
+) {
   const header = 'apps/www/src/components/override/Header.astro';
   const controls = 'apps/www/src/components/site-shadcn-controls.ts';
   const barrel = 'packages/adapters/base/src/index.ts';
@@ -1557,6 +1562,19 @@ async function buildOptionalSceneFixture(lazy, overrides = {}, target = 'client'
     [optionalSceneModule, 'export function scene() { return "optional-scene-code"; }'],
     [preview, `import { scene } from '${optionalSceneModule}'; export const render = scene;`],
   ]);
+  if (reexportScene) {
+    const shared = 'packages/adapters/base/src/material/shader-webgl2-host.ts';
+    files.set(
+      host,
+      `import { webgl } from '${shared}'; export function mount() { return webgl(); }`
+    );
+    files.set(
+      optionalSceneModule,
+      `import { webgl } from '${shared}'; export function scene() { return "optional-scene-code" + webgl(); }`
+    );
+    files.set(shared, 'export function webgl() { return "shared-host"; }');
+    files.set(preview, `export { scene as render } from '${optionalSceneModule}';`);
+  }
   const bundle = await rollup({
     input: header,
     plugins: [
@@ -1637,6 +1655,60 @@ test('manual chunks retain a reached optional scene only in its lazy consumer', 
     pending.push(...chunks.get(file).imports);
   }
   assert.ok(!staticChunks.has(scene.fileName), 'No eager chunk may import the optional scene.');
+});
+
+function staticChunkClosure(output, roots = output.filter((chunk) => chunk.isEntry)) {
+  const chunks = new Map(output.map((chunk) => [chunk.fileName, chunk]));
+  const pending = roots.map((chunk) => chunk.fileName);
+  const visited = new Set();
+  while (pending.length) {
+    const file = pending.pop();
+    if (visited.has(file)) continue;
+    const chunk = chunks.get(file);
+    assert.ok(chunk, `The static dependency ${file} must exist in the emitted graph.`);
+    visited.add(file);
+    pending.push(...chunk.imports);
+  }
+  return [...visited].map((file) => chunks.get(file));
+}
+
+test('manual chunks keep a pure scene re-export lazy with a shared eager host', async () => {
+  const fixture = { reexportScene: true };
+  assert.equal(
+    classifyChunk('packages/adapters/base/src/material/shader-webgl2-host.ts'),
+    'site-shadcn-controls'
+  );
+  for (const manualChunks of [
+    classifyChunk,
+    (id) => (id === optionalSceneModule ? 'site-optional-scene' : classifyChunk(id)),
+  ]) {
+    const inherited = await buildOptionalSceneFixture(
+      true,
+      { manualChunks, onlyExplicitManualChunks: false },
+      'client',
+      fixture
+    );
+    const eagerScene = staticChunkClosure(inherited).find(
+      (chunk) => chunk.modules[optionalSceneModule]?.renderedLength > 0
+    );
+    assert.ok(
+      eagerScene,
+      'Both implicit grouping and the exact named-scene alternative must reproduce eager retained code.'
+    );
+  }
+
+  const actual = await buildOptionalSceneFixture(true, {}, 'client', fixture);
+  const scene = actual.find((chunk) => chunk.modules[optionalSceneModule]?.renderedLength > 0);
+  assert.ok(scene, 'The lazy consumer must retain the actual scene implementation.');
+  const eager = staticChunkClosure(actual);
+  assert.ok(!eager.includes(scene), 'The Header static closure must not load the scene.');
+  const lazyFiles = new Set(eager.flatMap((chunk) => chunk.dynamicImports));
+  assert.ok(lazyFiles.size > 0, 'The dynamic consumer must remain a real import.');
+  const lazy = staticChunkClosure(
+    actual,
+    actual.filter((chunk) => lazyFiles.has(chunk.fileName))
+  );
+  assert.ok(lazy.includes(scene), 'The dynamic consumer closure must reach the scene.');
 });
 
 async function buildConceptFixture(manualChunks) {
