@@ -367,7 +367,6 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `d89dc89aaae69a0f6e9f1f4b23ce77f171edc62c7e2fba36bdb10244a2af60c2` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `3176c5c92408e9428283b428c130f818c33ab2fd53666fd255e6d6a99b2a31ca` |
-| `apps/www/src/components/PrototypePreviewer/DemoMatrix.astro` | `www.demo.demo-matrix` | `aafe95f305b3125ec7eea7b388612e847567d6efc8e0adc5243b105dcac6d43e` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f` |
 | `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3` |
 | `apps/www/src/components/SiteLibraryStyle.astro` | `www.build.style-generation` | `7fec23169c164d43f266b8fc71efbf55aaadba2bb4561f8670dc69e3d8c49e33` |
