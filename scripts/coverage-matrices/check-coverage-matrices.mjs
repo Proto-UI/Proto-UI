@@ -259,7 +259,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts': Object.freeze({
-    sourceSha256: '3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108',
+    sourceSha256: '85b7c3c518e6f1ef1e72f20b975d6ac4ce317c1a046a3cc0562602c899dffc46',
     specifiers: Object.freeze([
       '@proto.ui/adapter-web-component',
       '@proto.ui/prototypes-brutalist/badge',
@@ -12805,6 +12805,17 @@ const WEBSITE_STARTUP_EVENT_SHA256 =
 const WEBSITE_OPTICAL_HOST_SOURCE = 'packages/adapters/base/src/material/program-pool.ts';
 const WEBSITE_OPTICAL_HOST_SHA256 =
   '921fd75bf4f74cdbc8a2add54a0a27e380c8b5855b92cb1db9d6ec3a8756f854';
+// The Website's own reviewed compiler panel loads these compiler browser
+// sources in the browser, so the interactive-source discovery reaches them
+// outside `apps/www/src/**`. They need a reviewed Source-scan binding. This
+// exact list is the only compiler source category: no other `packages/**`
+// path is admitted by it, and each row keeps the runtime-infrastructure owner
+// that already names the source in its Path cell.
+const WEBSITE_COMPILER_BROWSER_SOURCES = Object.freeze([
+  'packages/compiler/src/browser/client.ts',
+  'packages/compiler/src/browser/worker.ts',
+]);
+const WEBSITE_COMPILER_BROWSER_OWNER = 'www.demo.raw-adapter-runtimes';
 function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   const headingIndexes = findExactLineIndexes(lines, '## Source-scan bindings').filter(
     (index) => index > afterIndex
@@ -12843,16 +12854,18 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
       sourcePath?.startsWith('apps/www/public/') &&
       /\.(?:cjs|html?|js|mjs|svg)$/iu.test(sourcePath);
     const isReviewedOpticalHost = sourcePath === WEBSITE_OPTICAL_HOST_SOURCE;
+    const isReviewedCompilerBrowserSource = WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath);
     if (
       sourcePaths.length !== 1 ||
       (!isWebsiteSource &&
         !isPublicExecutable &&
         !isReviewedOpticalHost &&
+        !isReviewedCompilerBrowserSource &&
         !Object.hasOwn(LIBRARY_CARD_INTERACTIVE_MATERIAL_SOURCES, sourcePath) &&
         sourcePath !== WEBSITE_STARTUP_EVENT_SOURCE)
     ) {
       issues.push(
-        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical/build-time event source`
+        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical/build-time event/compiler browser source`
       );
       continue;
     }
@@ -12940,6 +12953,17 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact optical host source, digest and owner remain unverified`
+        );
+        continue;
+      }
+    }
+    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
+      // The compiler browser sources are not derived from a Website Path cell,
+      // so their reviewed owner is asserted here instead of by the grouped
+      // binding rule.
+      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
+        issues.push(
+          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
         );
         continue;
       }
