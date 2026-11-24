@@ -338,26 +338,32 @@ try {
           entry.code = initialSource;
           await screenshot('code-expanded');
           if (kind === 'candidate') {
-            const backplate = shell.locator('[data-demo-ref="copy-backplate"]');
-            const plate = await backplate.evaluate((e) => {
+            assert.equal(await shell.locator('[data-demo-ref="copy-backplate"]').count(), 0);
+            const appearance = await copy.evaluate((e) => {
               const style = getComputedStyle(e);
               const canvas = document.createElement('canvas');
               canvas.width = canvas.height = 1;
               const ctx = canvas.getContext('2d')!;
-              ctx.fillStyle = style.backgroundColor;
-              ctx.fillRect(0, 0, 1, 1);
+              const alpha = (color: string) => {
+                ctx.clearRect(0, 0, 1, 1);
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, 1, 1);
+                return ctx.getImageData(0, 0, 1, 1).data[3];
+              };
               return {
                 prototype: e.getAttribute('data-projection-prototype'),
-                alpha: ctx.getImageData(0, 0, 1, 1).data[3],
+                backgroundAlpha: alpha(style.backgroundColor),
+                borderAlpha: alpha(style.borderTopColor),
                 role: e.getAttribute('role'),
                 tabindex: e.getAttribute('tabindex'),
               };
             });
-            assert.equal(plate.prototype, 'shadcn-surface-root');
-            assert.equal(plate.alpha, 255);
-            assert.equal(plate.role, null);
-            assert.equal(plate.tabindex, null);
-            entry.copyBackplate = plate;
+            assert.equal(appearance.prototype, 'shadcn-button');
+            assert.equal(appearance.backgroundAlpha, 0);
+            assert.equal(appearance.borderAlpha, 0);
+            assert.equal(appearance.role, 'button');
+            assert.equal(appearance.tabindex, '0');
+            entry.copyAppearance = appearance;
           }
           await copy.hover();
           await screenshot('copy-hover');
@@ -752,7 +758,10 @@ try {
         const close = homeMenu(page);
         const before = await close.boundingBox();
         const bounds = await body.boundingBox();
-        assert.ok(bounds && before, 'The enlarged panel and its native close toggle have layout boxes');
+        assert.ok(
+          bounds && before,
+          'The enlarged panel and its native close toggle have layout boxes'
+        );
         const initialScroll = await body.evaluate((e) => e.scrollTop);
         assert.ok(
           await body.evaluate((e) => e.scrollHeight > e.clientHeight),
