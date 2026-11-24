@@ -758,6 +758,547 @@
         }
       ],
       "archive": "candidate-fe4f.tar.gz"
+    },
+    {
+      "label": "baseline-9527",
+      "revision": "952722e5b619c60ddf797543fba11eea6c06d812",
+      "node": "v24.22.3",
+      "typescript": "5.9.3",
+      "tsx": "4.21.0",
+      "exitCode": 2,
+      "process": {
+        "entry": "packages/prototypes/base/src/drawer/content.proto.ts",
+        "profiles": [
+          "gpui-source-v1",
+          "react-dom-source-v1",
+          "react-runtime-v1",
+          "vue-source-v1",
+          "vue2-source-v1",
+          "web-component-source-v1"
+        ],
+        "heapLimitMiB": 1536,
+        "timeoutMs": 180000,
+        "status": null,
+        "signal": "SIGTERM",
+        "error": "spawnSync /opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node ETIMEDOUT",
+        "resources": null,
+        "elapsedMs": 180087.377295,
+        "sourceRevision": "952722e5b619c60ddf797543fba11eea6c06d812",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "--max-old-space-size=1536",
+          "--import",
+          "tsx",
+          "/workspace/scratch/5e512bf106bf/gpui-drawer/scripts/compiler/library-profile-inventory.mjs",
+          "--worker",
+          "/workspace/scratch/5e512bf106bf/drawer-9527-baseline-inventory/attempts/e7138deee56725c490f79e80d46ba8cb-0b6727da-675c-46d5-8042-958599b201b5.request.json"
+        ]
+      },
+      "sourceFilesSha256": "821cba93042bf642a839b7494c14807a811cd56575363fbb77fdab11237f39e4",
+      "sourceFileCount": 13,
+      "selectedComplete": false,
+      "admissionCoverageComplete": false,
+      "allImplementedEntriesAdmitted": false,
+      "universeCounts": {
+        "entries": 1015,
+        "families": {
+          "base": 184,
+          "bootstrap-2-3-2": 205,
+          "brutalist": 206,
+          "liquid-glass": 201,
+          "lucide": 1,
+          "shadcn": 218
+        },
+        "profiles": 12,
+        "implementedProfiles": 6,
+        "rows": 12180,
+        "statuses": {
+          "PASS": 0,
+          "FAIL": 0,
+          "UNSUPPORTED": 1,
+          "UNIMPLEMENTED": 6090,
+          "UNTESTED": 6089
+        },
+        "compilerDefects": 0
+      },
+      "rows": [
+        {
+          "profile": "flutter-source-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile flutter-source-v1 identifies flutter, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "gpui-source-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 143636.78380900002,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance is not closed at this invocation. Supply a checked callable or an explicit host callback contract.",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 4895,
+              "end": 7588,
+              "line": 164,
+              "column": 20,
+              "endLine": 237,
+              "endColumn": 4
+            }
+          }
+        },
+        {
+          "profile": "qt-source-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile qt-source-v1 identifies qt, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "react-dom-source-v1",
+          "status": "UNTESTED",
+          "elapsedMs": null,
+          "firstDiagnostic": null
+        },
+        {
+          "profile": "react-dom-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile react-dom-ssr-v1 identifies react, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "react-runtime-v1",
+          "status": "UNTESTED",
+          "elapsedMs": null,
+          "firstDiagnostic": null
+        },
+        {
+          "profile": "vue-source-v1",
+          "status": "UNTESTED",
+          "elapsedMs": null,
+          "firstDiagnostic": null
+        },
+        {
+          "profile": "vue-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile vue-ssr-v1 identifies vue, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "vue2-source-v1",
+          "status": "UNTESTED",
+          "elapsedMs": null,
+          "firstDiagnostic": null
+        },
+        {
+          "profile": "vue2-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile vue2-ssr-v1 identifies vue2, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "web-component-source-v1",
+          "status": "UNTESTED",
+          "elapsedMs": null,
+          "firstDiagnostic": null
+        },
+        {
+          "profile": "web-component-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile web-component-ssr-v1 identifies web-component, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        }
+      ],
+      "archive": "baseline-9527.tar.gz"
+    },
+    {
+      "label": "candidate-393b",
+      "revision": "393bba802996c48758ef50bc3d6a73ede441c8bc",
+      "node": "v24.22.3",
+      "typescript": "5.9.3",
+      "tsx": "4.21.0",
+      "exitCode": 0,
+      "process": {
+        "entry": "packages/prototypes/base/src/drawer/content.proto.ts",
+        "profiles": [
+          "gpui-source-v1",
+          "react-dom-source-v1",
+          "react-runtime-v1",
+          "vue-source-v1",
+          "vue2-source-v1",
+          "web-component-source-v1"
+        ],
+        "heapLimitMiB": 1536,
+        "timeoutMs": 180000,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "resources": {
+          "heapLimitMiB": 1536,
+          "final": {
+            "rss": 564006912,
+            "heapTotal": 275820544,
+            "heapUsed": 128332096,
+            "external": 47161275,
+            "arrayBuffers": 33766967,
+            "peakRssKiB": 565840
+          },
+          "profiles": [
+            "gpui-source-v1",
+            "react-dom-source-v1",
+            "react-runtime-v1",
+            "vue-source-v1",
+            "vue2-source-v1",
+            "web-component-source-v1"
+          ]
+        },
+        "elapsedMs": 30961.295111,
+        "sourceRevision": "393bba802996c48758ef50bc3d6a73ede441c8bc",
+        "command": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+          "--max-old-space-size=1536",
+          "--import",
+          "tsx",
+          "/workspace/scratch/5e512bf106bf/gpui-drawer/scripts/compiler/library-profile-inventory.mjs",
+          "--worker",
+          "/workspace/scratch/5e512bf106bf/drawer-393b-inventory/attempts/e7138deee56725c490f79e80d46ba8cb-81e3e150-e545-4e9f-8f29-d053aaf9601c.request.json"
+        ]
+      },
+      "sourceFilesSha256": "821cba93042bf642a839b7494c14807a811cd56575363fbb77fdab11237f39e4",
+      "sourceFileCount": 13,
+      "selectedComplete": true,
+      "admissionCoverageComplete": false,
+      "allImplementedEntriesAdmitted": false,
+      "universeCounts": {
+        "entries": 1015,
+        "families": {
+          "base": 184,
+          "bootstrap-2-3-2": 205,
+          "brutalist": 206,
+          "liquid-glass": 201,
+          "lucide": 1,
+          "shadcn": 218
+        },
+        "profiles": 12,
+        "implementedProfiles": 6,
+        "rows": 12180,
+        "statuses": {
+          "PASS": 0,
+          "FAIL": 0,
+          "UNSUPPORTED": 6,
+          "UNIMPLEMENTED": 6090,
+          "UNTESTED": 6084
+        },
+        "compilerDefects": 0
+      },
+      "rows": [
+        {
+          "profile": "flutter-source-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile flutter-source-v1 identifies flutter, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "gpui-source-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 5417.800553,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance exceeds the deterministic analysis store-work budget (16777216 visits; span identifies analysis context).",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 14203,
+              "end": 14213,
+              "line": 456,
+              "column": 7,
+              "endLine": 456,
+              "endColumn": 17
+            }
+          }
+        },
+        {
+          "profile": "qt-source-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile qt-source-v1 identifies qt, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "react-dom-source-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 4491.412168,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance exceeds the deterministic analysis store-work budget (16777216 visits; span identifies analysis context).",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 14203,
+              "end": 14213,
+              "line": 456,
+              "column": 7,
+              "endLine": 456,
+              "endColumn": 17
+            }
+          }
+        },
+        {
+          "profile": "react-dom-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile react-dom-ssr-v1 identifies react, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "react-runtime-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 4599.581346999998,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance exceeds the deterministic analysis store-work budget (16777216 visits; span identifies analysis context).",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 14203,
+              "end": 14213,
+              "line": 456,
+              "column": 7,
+              "endLine": 456,
+              "endColumn": 17
+            }
+          }
+        },
+        {
+          "profile": "vue-source-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 5649.634972,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance exceeds the deterministic analysis store-work budget (16777216 visits; span identifies analysis context).",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 14203,
+              "end": 14213,
+              "line": 456,
+              "column": 7,
+              "endLine": 456,
+              "endColumn": 17
+            }
+          }
+        },
+        {
+          "profile": "vue-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile vue-ssr-v1 identifies vue, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "vue2-source-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 4429.433026999999,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance exceeds the deterministic analysis store-work budget (16777216 visits; span identifies analysis context).",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 14203,
+              "end": 14213,
+              "line": 456,
+              "column": 7,
+              "endLine": 456,
+              "endColumn": 17
+            }
+          }
+        },
+        {
+          "profile": "vue2-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile vue2-ssr-v1 identifies vue2, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        },
+        {
+          "profile": "web-component-source-v1",
+          "status": "UNSUPPORTED",
+          "elapsedMs": 4265.212944000003,
+          "firstDiagnostic": {
+            "code": "PUI1007",
+            "category": "unsupported-input",
+            "message": "Callable provenance exceeds the deterministic analysis store-work budget (16777216 visits; span identifies analysis context).",
+            "span": {
+              "file": "packages/prototypes/base/src/transition/machine.ts",
+              "start": 14203,
+              "end": 14213,
+              "line": 456,
+              "column": 7,
+              "endLine": 456,
+              "endColumn": 17
+            }
+          }
+        },
+        {
+          "profile": "web-component-ssr-v1",
+          "status": "UNIMPLEMENTED",
+          "elapsedMs": null,
+          "firstDiagnostic": {
+            "code": "PUI4001",
+            "category": "unsupported-input",
+            "message": "Target profile web-component-ssr-v1 identifies web-component, but no working emitter is implemented. Choose an implemented profile explicitly.",
+            "span": {
+              "file": "<target>",
+              "start": -1,
+              "end": -1,
+              "line": 0,
+              "column": 0,
+              "endLine": 0,
+              "endColumn": 0
+            }
+          }
+        }
+      ],
+      "archive": "candidate-393b.tar.gz"
     }
   ],
   "artifacts": [
@@ -777,6 +1318,26 @@
       "sha256": "3b3ac2adfde2ee0fa9025d1035b18dec922d9c81de3e5b699449fc060a4b6f13"
     },
     {
+      "file": "baseline-9527-inventory.log.gz",
+      "bytes": 413,
+      "sha256": "315b0743c883e4508c00b7db831e9eaffcd75f2eb3a0b0060da552015e3ea5ba"
+    },
+    {
+      "file": "baseline-9527-nullish-spread.log.gz",
+      "bytes": 13943,
+      "sha256": "275452dbab7aced568bab20ae82691f86f66825d1cc5c59d1a4bcc60af0579c0"
+    },
+    {
+      "file": "baseline-9527-recursive-record.log.gz",
+      "bytes": 486,
+      "sha256": "467f6b416d112fe20b95dbefd93f5ddf2b62769987ec8f8ee6971e8bb0ec842d"
+    },
+    {
+      "file": "baseline-9527.tar.gz",
+      "bytes": 241873,
+      "sha256": "e6f55aaa1a2ef88559d07948f1bcd4c7a244760ba3be38f496ac3f851aac835b"
+    },
+    {
       "file": "baseline-nullish-spread.log.gz",
       "bytes": 13824,
       "sha256": "6ce9290299f89c61243185b6099a98bfe45b1c31e3dfa39cf29973558aba08c7"
@@ -785,6 +1346,21 @@
       "file": "baseline-recursive-record.log.gz",
       "bytes": 485,
       "sha256": "bd9bd1c77c6b61cafa11501be2a0977409bec1387486ecdc9ed894881f71f59a"
+    },
+    {
+      "file": "candidate-393b-inventory.log.gz",
+      "bytes": 520,
+      "sha256": "4d32c195f4b8ab7c69917bf43abadc31711a7c5fe217a9e93b94862e95f17070"
+    },
+    {
+      "file": "candidate-393b-provenance-tests.log.gz",
+      "bytes": 30758,
+      "sha256": "61842d7a63f4b9748c55013415b6f45925a44b306855683599f590f86d61dd9a"
+    },
+    {
+      "file": "candidate-393b.tar.gz",
+      "bytes": 243774,
+      "sha256": "513fe6ede1b97884ee93acd24c19f5754430a44c72c5f9b7e738534a57542ca1"
     },
     {
       "file": "candidate-fe4f.tar.gz",
@@ -821,5 +1397,16 @@
       "bytes": 420,
       "sha256": "cd0d0d1a76f888524e767f85b9394e4ea9a6717231e5fb7a00ee34e916e1bb60"
     }
-  ]
+  ],
+  "integratedCandidate": "393bba802996c48758ef50bc3d6a73ede441c8bc",
+  "integratedBase": "952722e5b619c60ddf797543fba11eea6c06d812",
+  "integratedChecks": {
+    "compilerFiles": 14,
+    "passed": 264,
+    "failed": 1,
+    "preExistingFailure": "json-boundary-provenance: known nullish spread PUI1006; independently rerun on clean952722e5",
+    "typecheckExitCode": 0,
+    "inventoryExitCode": 0,
+    "admittedDrawerProfiles": 0
+  }
 }

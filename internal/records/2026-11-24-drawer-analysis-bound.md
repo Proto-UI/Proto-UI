@@ -2,13 +2,49 @@
 
 This is a bounded development record, not a Drawer compiler-support or host-acceptance claim.
 
+## Revalidation after main advanced
+
+Main subsequently advanced to `952722e5b619c60ddf797543fba11eea6c06d812`, including callable scalar/nullish-flow and GPUI changes. The repair was integrated as `393bba802996c48758ef50bc3d6a73ede441c8bc`. Fresh checkouts and output directories were used for both revisions; the earlier receipts below remain historical evidence.
+
+| Current comparison | Worker elapsed | Process outcome | Completed implemented-profile rows |
+| --- | --: | --- | --- |
+| Clean main `952722e5` | 180087 ms | `SIGTERM`, `ETIMEDOUT`; inventory exit 2 | 1 of 6, `UNSUPPORTED` |
+| Integrated `393bba802` | 30961 ms | Exit 0, no signal or process error | 6 of 6, all `UNSUPPORTED` / `PUI1007` |
+
+The same original inventory command and 180000 ms / 1536 MiB configuration were used, with `/workspace/scratch/5e512bf106bf/drawer-9527-baseline-inventory` and `/workspace/scratch/5e512bf106bf/drawer-393b-inventory` as output directories. Main's first GPUI row completed after 143637 ms before the next profile timed out. The integrated worker retained all six diagnostic rows, each in 4265–5650 ms, with peak process RSS 565840 KiB. All five retained runs have the identical 13-file Drawer source closure. The selected inventory still has zero admitted Drawer profiles and incomplete full-library coverage. These local resource receipts shared the machine with focused validation and are not isolated throughput benchmarks.
+
+The integrated candidate ran 14 compiler test files: 264 passed and one failed. The new `flow-observation-join` tests and the new resource tests passed. The remaining nullish-spread `PUI1006` failure was separately reproduced on clean `952722e5` before candidate testing (1 failed, 78 skipped); it is still pre-existing at this newer base. The retained-record recursion also still produced `PUI1999` / `RangeError` on clean main, while the candidate's source-located refusal regression passed. Compiler source plus the new test passed the same TypeScript no-emit check with exit 0.
+
+The integrated test command was:
+
+```sh
+node node_modules/vitest/vitest.mjs run \
+  packages/compiler/test/callable-analysis-budget.test.ts \
+  packages/compiler/test/reviewer-factory-record-isolation.test.ts \
+  packages/compiler/test/reviewer-callable-fingerprint.test.ts \
+  packages/compiler/test/reviewer-mutable-callable-orders.test.ts \
+  packages/compiler/test/exception-flow.test.ts \
+  packages/compiler/test/json-array-provenance.test.ts \
+  packages/compiler/test/json-boundary-provenance.test.ts \
+  packages/compiler/test/mutable-callable-provenance.test.ts \
+  packages/compiler/test/reviewer-mutable-callable-provenance.test.ts \
+  packages/compiler/test/ordinary-flow-soundness.test.ts \
+  packages/compiler/test/reviewer-public-record-refresh.test.ts \
+  packages/compiler/test/reviewer-projected-record-mutation.test.ts \
+  packages/compiler/test/authored-transition-frontend.test.ts \
+  packages/compiler/test/flow-observation-join.test.ts \
+  --maxWorkers 1 --minWorkers 1 --fileParallelism false --reporter=dot
+```
+
+The new archives and logs are appended to the evidence summary under `baseline-9527` and `candidate-393b`. No implementation change was needed during this revalidation. Wider acceptance and actual Drawer lowering remain open.
+
 ## Request and scope
 
 Agent paraphrase: investigate the report that the Drawer compilation worker reaches its 180-second deadline, preserve the failure, and repair the responsible compiler analysis without changing Drawer behavior or weakening acceptance evidence.
 
 The repaired condition is worker completion with an explicit, source-located admission result. Full Drawer admission and lowering remain unsupported. No public API, prototype source, spec lifecycle, target capability declaration, worker timeout or heap setting changed.
 
-The code candidate is `fe4f9281f0f38418c61233e6e166f1b6969c20f8`, based on main `248f8270dd3458d1fcbc507e618337f98b9fde96`. The earlier observed revision was `88fc0883bec70abbc0d7505d88370657c279639e`. The evidence-only commit containing this record does not change the tested implementation.
+The original code candidate was `fe4f9281f0f38418c61233e6e166f1b6969c20f8`, based on main `248f8270dd3458d1fcbc507e618337f98b9fde96`. The earlier observed revision was `88fc0883bec70abbc0d7505d88370657c279639e`. The evidence-only commits containing this record do not change the tested implementation; the newer integration is recorded above.
 
 ## Reproduction and result
 
@@ -106,7 +142,7 @@ The exact temporary TypeScript configuration is retained with the evidence. It i
 
 ## Retained evidence and remaining work
 
-[Evidence summary](evidence/2026-11-24-drawer-analysis-bound/summary.json) binds every archive/log to a SHA-256 digest. The three `.tar.gz` archives retain each original inventory plan, full report, source closure, request, completed rows, stdout/stderr and process outcome. The missing resource/row receipts in timed-out attempts remain missing; no successful receipt is synthesized for them. Compressed test logs preserve both the known baseline failure and candidate failure.
+[Evidence summary](evidence/2026-11-24-drawer-analysis-bound/summary.json) binds every archive/log to a SHA-256 digest. The five `.tar.gz` archives retain each original inventory plan, full report, source closure, request, completed rows, stdout/stderr and process outcome. The missing resource/row receipts in timed-out attempts remain missing; no successful receipt is synthesized for them. Compressed test logs preserve both the known baseline failure and candidate failure.
 
 Agent evidence disposition: complete for the reproduced local worker timeout, bounded refusal, stack-overflow control and named focused tests; partial for wider compiler acceptance. This is internal analysis work, so executable receipts and the source-bound walkthrough are the applicable evidence; no UI capture or uploaded image is claimed. Independent review and any external publication are separate work.
 
