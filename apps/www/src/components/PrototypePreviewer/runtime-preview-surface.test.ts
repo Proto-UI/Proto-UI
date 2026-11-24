@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  createRuntimePreviewSurface,
-  runtimePreviewFamily,
-  runtimePreviewRecipe,
-} from './runtime-preview-surface';
+import { createRuntimePreviewSurface, runtimePreviewRecipe } from './runtime-preview-surface';
+import { runtimePreviewFamily } from '../site-library-family';
 import { collectPrototypeIds, type DemoSetupContext, type DemoSpec } from './demo-types';
 import { assertProjectionRecipeClosure } from './projection-composition';
 import { PROJECTION_FAMILY_MANIFESTS, type ProjectionFamilyManifest } from './projection-families';

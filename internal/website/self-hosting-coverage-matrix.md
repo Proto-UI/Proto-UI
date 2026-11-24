@@ -360,7 +360,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/preview-error-surface.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2e87c9b3070858d025dc741cd7815c1c97e8c207ff1d681bd8149daed19e1d93` |
 | `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `96cf7ed08aad2aec25fc1d9a5ed5b543e48ffc22d35da172fac24b61a23fbe25` |
 | `apps/www/src/components/PrototypePreviewer/previewer-startup-task.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `50f0fec29776cfaa282d655614d7ce4639c5be833e5cdefb9a4f8042e6686f65` |
-| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `09e2046f94faf337ab37360e6c6239264fa1190415af578d561e92f3f4f3df65` |
+| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `90e29929723d05768bf7c21688b8303737097807ca4f66ec1e75fbb198455a8c` |
 | `apps/www/src/components/PrototypePreviewer/previewer-removal.ts` | `www.demo.prototype-previewer` | `468d3b8fe0563caffd66bbde02caf933bec6b81bcf088847e88b5df7907a5f19` |
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `b9d97d3f4d7f20099737379e27ad9c3875f67bcc3d8cd2ce19ee73991bf3b30b` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `e398822d0df0265f3d367d25daa92073fd3fb9464d86d76a1eee8298750d6cd3` |
@@ -368,7 +368,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `9eb11c5eff68f6a382ad895ca1c6f698480de5ca56a6b41095e5626c9955c6c6` |
 | `apps/www/src/components/PrototypePreviewer/runtime-loading-mask.ts` | `www.demo.home-demo-select` | `d688b2ee5af32dc2f2b7461b7f843b4b9e8136dc01f4a1885204c96cb9658f16` |
 | `apps/www/src/components/PrototypePreviewer/runtime-tabs.ts` | `www.demo.runtime-select` | `f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178` |
-| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `60e953a2d1d3826c8c7c3d357fea269f25934c680c216bdd5bdd624561742b5d` |
+| `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `3af95119b8f190cfe06b757d744c0f258db8a0f6f482d51e52ce87776c393cc2` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `3176c5c92408e9428283b428c130f818c33ab2fd53666fd255e6d6a99b2a31ca` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `250ea15a4d6f238397dda64dba8df8d60eabb42ddb02979b0ad0895ee3c29a0f` |
 | `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `25f62b734b220cb862a5321fe70ac0e4aea927157d6454b7c7e208002e768ba3` |
@@ -394,7 +394,7 @@ The 2026-11-24 [main boundary repair](../records/2026-11-24-main-website-boundar
 | `apps/www/src/components/override/TableOfContents/starlight-toc.ts` | `www.shell.table-of-contents` | `0081183e4d4fde2d4c2df9c990e01b49b230f397d75b2e48c73afa409146b9a1` |
 | `apps/www/src/components/override/ThemeProvider.astro` | `www.shell.theme-provider` | `7357e80613d87dcba985a5318d2d03b853537cef660ac76fbd457145cb227993` |
 | `apps/www/src/components/override/ThemeToggle.astro` | `www.shell.theme-toggle` | `343da75ff4a3ded93be875afe59837a85851bb42dc6df9b469b71e78594933da` |
-| `apps/www/src/components/site-code-surface.ts` | `www.docs.code-surface`, `www.docs.note-surface` | `97a44d91efc560c3e2fa9fcbed26c4b07ebe14eeca80315b93fd5294d28d6b98` |
+| `apps/www/src/components/site-code-surface.ts` | `www.docs.code-surface`, `www.docs.note-surface` | `ef4ab5132985a087c0ea432eb55de4a0043f1151335a7bc62e608e26e9b14b5f` |
 | `apps/www/src/components/site-contents-command.ts` | `www.shell.mobile-menu-toggle` | `b9076feb0bdf2f2a7d3887ef0a1a44f88b086c6ff33256ae4b71282e6d6b4799` |
 | `apps/www/src/components/site-copy-client.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `b4cdf3ccd25e466ae152c1b31b8e82e8010442f1b828a4b575c290ca67cbcb0d` |
 | `apps/www/src/components/site-copy-command.ts` | `www.docs.code-panel-copy`, `www.docs.install-copy` | `a538f0f194489fd86386e8e53701cab265ac077f14edb8dfaa216e13aec0700b` |
