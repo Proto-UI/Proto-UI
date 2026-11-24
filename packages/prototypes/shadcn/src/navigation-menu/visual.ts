@@ -9,15 +9,15 @@ export const NAVIGATION_CONTENT_PAINT = createContextKey<{ content: boolean }>(
   'shadcn-navigation-content-paint'
 );
 const CONTENT_LINK = {
-  vega: 'gap-1.5 rounded-sm p-2 text-sm',
-  nova: 'gap-2 rounded-md p-2 text-sm',
-  maia: 'gap-1.5 rounded-[var(--pui-radius-xl)] p-3 text-sm',
-  lyra: 'gap-2 rounded-none p-2 text-xs',
-  mira: 'gap-1.5 rounded-md p-2 text-xs leading-relaxed',
-  luma: 'gap-1.5 rounded-[var(--pui-radius-2xl)] p-3 text-sm',
-  sera: 'gap-1.5 rounded-none p-3 text-sm',
+  vega: 'gap-1.5 rounded-sm p-2 text-sm w-full',
+  nova: 'gap-2 rounded-md p-2 text-sm w-full',
+  maia: 'gap-1.5 rounded-[var(--pui-radius-xl)] p-3 text-sm w-full',
+  lyra: 'gap-2 rounded-none p-2 text-xs w-full',
+  mira: 'gap-1.5 rounded-md p-2 text-xs leading-relaxed w-full',
+  luma: 'gap-1.5 rounded-[var(--pui-radius-2xl)] p-3 text-sm w-full',
+  sera: 'gap-1.5 rounded-none p-3 text-sm w-full',
   rhea: 'gap-2 rounded-[var(--pui-radius-xl)] p-2 text-sm font-normal w-full',
-  'new-york-v4': 'flex-col gap-1 rounded-sm p-2 text-sm',
+  'new-york-v4': 'flex-col gap-1 rounded-sm p-2 text-sm w-full',
 } as const;
 
 function setupNavigationContentMode<
@@ -35,6 +35,23 @@ function setupNavigationContentMode<
   def.lifecycle.onMounted(sync);
   def.lifecycle.onUpdated(sync);
   return content;
+}
+
+function setupHoverState<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>,
+  disabled: State<boolean>
+) {
+  const hovered = def.state.bool('hovered', false);
+  def.event.on('pointer.enter', () => {
+    if (!disabled.get()) hovered.set(true, 'reason: pointer entered navigation action');
+  });
+  def.event.on('pointer.leave', () => {
+    hovered.set(false, 'reason: pointer left navigation action');
+  });
+  def.event.on('pointer.cancel', () => {
+    hovered.set(false, 'reason: pointer cancelled on navigation action');
+  });
+  return hovered;
 }
 
 /** Source: 3d98900 apps/v4/registry/styles/style-*.css, navigation-menu
@@ -113,11 +130,12 @@ export function setupNavigationActionPaint<
   const trigger = kind === 'trigger';
   const style = setupMenuStyle(def);
   const content = setupNavigationContentMode(def);
+  const hovered = setupHoverState(def, states.disabled);
   def.feedback.style.use(
     tw(
       trigger
-        ? 'inline-flex h-9 w-max min-w-0 items-center justify-center font-medium outline-none transition-all'
-        : 'flex min-w-0 items-center outline-none transition-all'
+        ? 'inline-flex h-9 w-max min-w-0 cursor-pointer select-none items-center justify-center gap-1 bg-background font-medium outline-none transition-all'
+        : 'flex min-w-0 cursor-pointer select-none items-center text-left no-underline outline-none transition-all'
     )
   );
   for (const id of SHADCN_STYLE_IDS) {
@@ -148,11 +166,21 @@ export function setupNavigationActionPaint<
       intent: (i) => i.feedback.style.use(tw('ring-0 outline-none')),
     });
   def.rule({
-    when: (w) => w.all(w.not(w.state(style).eq('new-york-v4')), w.state(states.focused).eq(true)),
+    when: (w) =>
+      w.all(
+        w.not(w.state(style).eq('new-york-v4')),
+        w.state(states.disabled).eq(false),
+        w.any(w.state(states.focused).eq(true), w.state(hovered).eq(true))
+      ),
     intent: (i) => i.feedback.style.use(tw('bg-muted')),
   });
   def.rule({
-    when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(states.focused).eq(true)),
+    when: (w) =>
+      w.all(
+        w.state(style).eq('new-york-v4'),
+        w.state(states.disabled).eq(false),
+        w.any(w.state(states.focused).eq(true), w.state(hovered).eq(true))
+      ),
     intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
   });
   if (states.expanded) {
@@ -162,7 +190,9 @@ export function setupNavigationActionPaint<
         w.all(
           w.not(w.state(style).eq('new-york-v4')),
           w.state(expanded).eq(true),
-          w.state(states.focused).eq(false)
+          w.state(states.disabled).eq(false),
+          w.state(states.focused).eq(false),
+          w.state(hovered).eq(false)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
@@ -171,7 +201,9 @@ export function setupNavigationActionPaint<
         w.all(
           w.state(style).eq('new-york-v4'),
           w.state(expanded).eq(true),
-          w.state(states.focused).eq(false)
+          w.state(states.disabled).eq(false),
+          w.state(states.focused).eq(false),
+          w.state(hovered).eq(false)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent/50 text-accent-foreground')),
     });
@@ -183,7 +215,9 @@ export function setupNavigationActionPaint<
         w.all(
           w.not(w.state(style).eq('new-york-v4')),
           w.prop('current').eq(true),
-          w.state(states.focused).eq(false)
+          w.state(states.disabled).eq(false),
+          w.state(states.focused).eq(false),
+          w.state(hovered).eq(false)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
@@ -192,7 +226,9 @@ export function setupNavigationActionPaint<
         w.all(
           w.state(style).eq('new-york-v4'),
           w.prop('current').eq(true),
-          w.state(states.focused).eq(false)
+          w.state(states.disabled).eq(false),
+          w.state(states.focused).eq(false),
+          w.state(hovered).eq(false)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent/50 text-accent-foreground')),
     });
@@ -203,23 +239,31 @@ export function setupNavigationActionPaint<
   });
 }
 
-export function setupNavigationContentPaint(def: DefHandle<NavigationMenuContentProps>) {
+export function setupNavigationContentPaint(
+  def: DefHandle<NavigationMenuContentProps>,
+  open: State<boolean>
+) {
   const style = setupMenuStyle(def);
   def.feedback.style.use(
     tw(
-      'z-50 bg-popover text-popover-foreground outline-none max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto'
+      'z-50 bg-popover text-popover-foreground outline-none transition-none max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto'
     )
   );
   for (const id of SHADCN_STYLE_IDS) {
     def.rule({
       when: (w) => w.state(style).eq(id),
-      intent: (i) => i.feedback.style.use(tw(PROFILES[id].content)),
+      intent: (i) =>
+        i.feedback.style.use(tw(PROFILES[id].content, id === 'new-york-v4' ? '' : 'duration-100')),
     });
-    if (id === 'luma' || id === 'rhea') {
+    if (id === 'maia' || id === 'luma' || id === 'rhea') {
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.meta('colorScheme').eq('dark')),
         intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
       });
     }
   }
+  def.rule({
+    when: (w) => w.state(open).eq(true),
+    intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
+  });
 }

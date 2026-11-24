@@ -1,11 +1,13 @@
 ---
 title: 'Command'
-description: 'A Bootstrap 2.3.2 inline searchable command list that emits explicit execution intents.'
+description: 'A Bootstrap 2.3.2 searchable command palette preserving classic gradients and focus glow.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Command renders an inline, always-open searchable list of commands for quickly filtering and triggering application actions.
+Bootstrap 2.3.2 Command pairs classic 2.3.2 input focus glow and gradient menu highlights with real-time filtering, keyboard navigation, and dialog composition.
 
 ## Preview
 
@@ -13,28 +15,104 @@ Command renders an inline, always-open searchable list of commands for quickly f
   demoId="demo-bootstrap-2-3-2-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/command`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-Compose `Root`, `Input`, `Content`, `Item`, and `Empty`:
+```tsx
+import {
+  commandRoot,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/command';
+```
 
-- **Executing commands**: The list stays inline and open. Pressing `Enter` or clicking an item emits `execute` with the selected command so your application handles the action; typing a query never executes anything.
-- **Filtering and empty state**: Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively, or set `filter={false}` for caller-filtered children. `Empty` renders when no commands match.
-- **Keyboard and IME**: Focus stays in `Input` during Arrow navigation, and IME composition never triggers selection. Disabled and duplicate-valued items cannot commit.
+### Composition
+
+```text
+CommandRoot
+├── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
+
+- **Classic styling**: Retains the 30px input height, `#52a8ec` focus glow, 6px dropdown panel shadow, and `#08c -> #0077b3` active highlight gradient with a bounded `300px` scrollable list.
+- **Filtering and execution**: Matches `textValue` and `keywords` case- and diacritic-insensitively, or set `filter={false}` for external filtering. Pressing `Enter` or clicking an item emits `execute`.
+- **Keyboard and IME**: Focus stays in `Input` during arrow navigation, IME composition never triggers selection, and disabled or duplicate-valued items cannot execute.
+
+## Examples
+
+### Command in Dialog
+
+Compose `Command` inside a classic Bootstrap 2.3.2 modal dialog.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Shortcuts & Keywords
+
+Display trailing shortcut labels inside menu items and match synonyms via `keywords`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable
+
+Browse a longer list of actions inside the bounded `300px` scrolling dropdown container.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `value` / `inputValue` / `open` / `filter` | Controlled state inputs and built-in/external filter toggle |
-| `Root` | `execute` | Emitted when a command item is activated |
-| `Input` | — | Single-line command search input |
-| `Content` | — | Inline command list container |
-| `Item` | `value` / `textValue` / `keywords` / `disabled` | Individual command entry |
-| `Empty` | — | Displayed when no commands match |
+### Root
+
+Pass `value`, `inputValue`, or `open` to control each state independently.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
+    { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'true' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'readOnly', type: 'boolean', default: 'false' },
+    { name: 'filter', type: 'boolean', default: 'true' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Other Parts & Events
+
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Empty**: No props; shown when no commands match.
+- **Events**: `Root` emits `execute`, `valueChange`, `inputValueChange`, and `openChange`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-COMMAND.yaml', 'P-BASE-COMMAND.yaml']}
+/>

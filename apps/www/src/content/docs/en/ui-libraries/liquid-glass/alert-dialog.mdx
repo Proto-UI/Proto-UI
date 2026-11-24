@@ -1,11 +1,13 @@
 ---
 title: 'Alert Dialog'
-description: 'A Liquid Glass modal confirmation dialog with safe cancel focus and explicit action intent.'
+description: 'A Liquid Glass modal confirmation dialog with concentric corners, safe cancel focus, and explicit action intent.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Alert Dialog interrupts the user for important or destructive confirmations. It traps focus, prevents outside-click dismissal, and focuses `Cancel` first when available.
+Liquid Glass Alert Dialog interrupts the user for important or destructive confirmations. The floating dialog sheet pairs concentric `rounded-3xl` geometry and translucent material intent with crisp non-glass pill controls inside, focusing `Cancel` first and preventing outside-click dismissal.
 
 ## Preview
 
@@ -13,25 +15,132 @@ Liquid Glass Alert Dialog interrupts the user for important or destructive confi
   demoId="demo-liquid-glass-alert-dialog"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-liquid-glass`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-- **Parts**: `Root`, `Trigger`, `Content`, `Title`, `Description`, `Cancel`, `Action`, `Mask`.
-- **Modality and focus**: `Root` sets alert dialog semantics, `Mask` handles modality, and `Content` traps focus while starting on `Cancel`. Escape and `Cancel` request dismissal.
-- **Explicit action**: `Action` emits `action` before requesting close; your application performs the actual side effect.
-- **Controlled state**: pass `open` and listen to `openChange` for controlled visibility, or pass `defaultOpen` for uncontrolled usage. Disabled triggers and actions do not activate.
+```tsx
+import {
+  LiquidGlassAlertDialogRoot,
+  LiquidGlassAlertDialogTrigger,
+  LiquidGlassAlertDialogMask,
+  LiquidGlassAlertDialogContent,
+  LiquidGlassAlertDialogTitle,
+  LiquidGlassAlertDialogDescription,
+  LiquidGlassAlertDialogCancel,
+  LiquidGlassAlertDialogAction,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassAlertDialogRoot>
+      <LiquidGlassAlertDialogTrigger>Show Dialog</LiquidGlassAlertDialogTrigger>
+      <LiquidGlassAlertDialogMask />
+      <LiquidGlassAlertDialogContent>
+        <div className="grid gap-1.5">
+          <LiquidGlassAlertDialogTitle>Are you absolutely sure?</LiquidGlassAlertDialogTitle>
+          <LiquidGlassAlertDialogDescription>
+            This action cannot be undone. This will permanently delete your account.
+          </LiquidGlassAlertDialogDescription>
+        </div>
+        <div className="flex flex-wrap-reverse items-center justify-end gap-2.5 pt-1">
+          <LiquidGlassAlertDialogCancel>Cancel</LiquidGlassAlertDialogCancel>
+          <LiquidGlassAlertDialogAction>Continue</LiquidGlassAlertDialogAction>
+        </div>
+      </LiquidGlassAlertDialogContent>
+    </LiquidGlassAlertDialogRoot>
+  );
+}
+```
+
+### Material & Layering
+
+- **Single translucent sheet**: `Content` declares `liquid-glass` material intent while open with paired semantic fallback fill and foreground colors; `Mask` remains an ordinary dimming scrim.
+- **No glass-on-glass stacking**: `Cancel` and `Action` sit inside `Content` as opaque/tinted pill capsules using `regular`, `prominent`, and `destructive` prominence rather than nested glass layers.
+- **Accessibility fallbacks**: Pass `material="opaque"` to opt out explicitly; reduced-transparency and high-contrast preferences fall back automatically to the style-owned opaque palette. Disabled controls stay legible without muting fallback opacity.
+
+## Examples
+
+### Small
+
+Set `size="sm"` on `Content` for a compact centered confirmation sheet.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-alert-dialog-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive
+
+Use `variant="destructive"` on `Trigger` and `Action` to distinguish irreversible deletion from the regular `Cancel` capsule.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-alert-dialog-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Opaque Material Fallback
+
+Pass `material="opaque"` to keep solid contrast over dense content or reduced-transparency contexts.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-alert-dialog-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Control dialog visibility externally with `open`, `openChange`, and `action`.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-alert-dialog-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Event | Description |
-| --- | --- | --- |
-| Root | `open`, `defaultOpen` | Controlled / uncontrolled open state |
-| Root | `openChange` | Emitted when opening or dismissing is requested |
-| Action | `action` | Emitted on confirmation before requesting dismissal |
-| Mask / Content | — | Provides modal backdrop, focus trap, and initial focus on `Cancel` |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event / Method', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (uncontrolled)' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
+    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
+  ]}
+/>
+
+### Content, Mask & Commands
+
+<ApiPropsTable
+  headers={{ name: 'Part & Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.size', type: "'default' | 'sm'", default: "'default'" },
+    { name: 'Content.material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '200 / 150' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Trigger.variant', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    { name: 'Trigger.material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'Action.variant', type: "'prominent' | 'regular' | 'destructive'", default: "'prominent'" },
+    { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.action (event)', type: '{ reason: string }', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-ALERT-DIALOG.yaml', 'P-BASE-ALERT-DIALOG.yaml']}
+/>

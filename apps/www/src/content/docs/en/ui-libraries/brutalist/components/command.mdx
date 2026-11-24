@@ -1,12 +1,13 @@
 ---
 title: 'Command'
-description: 'An inline searchable Brutalist command list that emits execution events for application actions.'
+description: 'A Brutalist searchable command palette with keyboard navigation and dialog composition.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Command renders an inline, searchable list of commands. Activating an item with `Enter` or pointer emits `execute` so your application can perform the corresponding action.
+Brutalist Command renders a high-contrast searchable command menu with 2px borders, hard offset shadows, and crisp active highlights. Clicking an item or pressing `Enter` emits `execute`.
 
 ## Preview
 
@@ -14,38 +15,85 @@ Brutalist Command renders an inline, searchable list of commands. Activating an 
   demoId="demo-brutalist-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-brutalist/command`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-### Parts
+```tsx
+import {
+  commandRoot,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+  commandDialogContent,
+} from '@proto.ui/prototypes-brutalist/command';
+```
 
-Command consists of `Root`, `Input`, `Content`, `Item`, and `Empty`:
+### Composition
 
-- **Root**: Manages open state (`defaultOpen` defaults to `true`), query text `inputValue`, filtering, and keyboard looping. `value`, `inputValue`, and `open` can each be controlled independently.
-- **Input**: Single-line search input that retains focus while navigating items with arrow keys and ignores selection during IME composition.
-- **Content**: Inline panel displaying matching commands.
-- **Item**: Executable command entry matched case- and diacritic-insensitively over `textValue` and `keywords`. Disabled or duplicate-valued items cannot execute.
-- **Empty**: Shown when no commands match the query.
+```text
+CommandRoot
+├── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
 
-### Executing commands
+- **Surface grammar**: `CommandRoot` owns the 2px border, `rounded-base` corners, and 4px hard shadow, while `CommandInput` uses a clean bottom divider without double inner borders.
+- **Dialog composition**: Pair `DialogRoot`, `DialogTrigger`, `DialogMask`, and `CommandDialogContent` to present a Brutalist command modal.
+- **Filtering and keyboard**: Matches case- and diacritic-insensitively over `textValue` and `keywords`, or set `filter={false}` for external filtering. Focus stays in `Input` during arrow navigation and IME composition never commits.
 
-Typing filters the command list without running anything; pressing `Enter` or clicking an item emits `execute` with the chosen command. Set `filter={false}` to filter items in your own code.
+## Examples
+
+### Command Dialog
+
+Launch the command menu inside `brutalist-command-dialog-content`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Shortcuts & Keywords
+
+Combine monospace shortcut labels with synonym matching via `keywords`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable
+
+Navigate a long command list inside the bounded `18.75rem` viewport.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+Pass `value`, `inputValue`, or `open` to control each state independently.
+
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -55,11 +103,17 @@ Typing filters the command list without running anything; pressing `Enter` or cl
   ]}
 />
 
-Pass `value`, `inputValue`, or `open` to control each state independently.
+### Other Parts & Events
 
-### Other parts
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side="bottom"`, `align="start"`, `sideOffset={4}`, `collisionPadding={8}`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Empty / DialogContent**: No public props; `DialogContent` inherits modal state from `DialogRoot`.
+- **Events**: `Root` emits `execute`, `valueChange`, `inputValueChange`, and `openChange`.
 
-- **Input**: `placeholder?: string`, `a11yLabel?: string`, `name?: string` (all default to `''`)
-- **Content**: `side` (default `'bottom'`), `align` (default `'start'`), `sideOffset` (default `4`), `collisionPadding` (default `8`)
-- **Item**: `value`, `textValue`, `keywords` (all default to `''`), `disabled?: boolean` (default `false`)
-- **Empty**: No props
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-COMMAND.yaml', 'P-BASE-COMMAND.yaml']}
+/>

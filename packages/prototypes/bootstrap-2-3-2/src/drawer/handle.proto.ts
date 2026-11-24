@@ -5,11 +5,17 @@ import {
   type DrawerHandleProps,
   type DrawerHandleExposes,
 } from '@proto.ui/prototypes-base/drawer';
+
 export default definePrototype<DrawerHandleProps, DrawerHandleExposes>({
   name: 'bootstrap-2-3-2-drawer-handle',
   setup(def) {
-    asDrawerHandle();
+    const behavior = asDrawerHandle();
+    const focusVisible = behavior.getState!('focusVisible')!;
     useDrawerHandleEdgeStyle(def);
-    def.feedback.style.use(tw('border border-[#bbb] bg-[#ccc] shadow-inner'));
+    def.feedback.style.use(tw('border border-border bg-muted shadow-inner'));
+    def.rule({
+      when: (w) => w.state(focusVisible).eq(true),
+      intent: (i) => i.feedback.style.use(tw('ring-ring')),
+    });
   },
 });

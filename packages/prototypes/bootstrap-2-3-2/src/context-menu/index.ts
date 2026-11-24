@@ -1,7 +1,7 @@
 export { default as contextMenuRoot } from './root.proto';
 export { default as contextMenuTrigger } from './trigger.proto';
 export { default as contextMenuContent } from './content.proto';
-export { default as contextMenuItem } from './item.proto';
+export { default as contextMenuItem, type ContextMenuItemProps } from './item.proto';
 export { default } from './root.proto';
 export type {
   ContextMenuRootProps,
@@ -10,6 +10,5 @@ export type {
   ContextMenuTriggerExposes,
   ContextMenuContentProps,
   ContextMenuContentExposes,
-  ContextMenuItemProps,
   ContextMenuItemExposes,
 } from '@proto.ui/prototypes-base/context-menu';

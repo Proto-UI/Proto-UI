@@ -4,23 +4,27 @@ import {
   type ToastCloseProps,
   type ToastCloseExposes,
 } from '@proto.ui/prototypes-base/toast';
+import { BRUTALIST_DISABLED_TOKENS, BRUTALIST_FOCUS_TOKENS } from '../style';
 
 export default definePrototype<ToastCloseProps, ToastCloseExposes>({
   name: 'brutalist-toast-close',
+  modules: asToastClose.modules,
   setup(def) {
     const behavior = asToastClose();
     def.feedback.style.use(
       tw(
-        'rounded-none border-2 border-foreground inline-flex min-w-0 items-center justify-center px-3 py-2 outline-none'
+        'rounded-base border-2 border-black bg-secondary-background text-foreground shadow-[4px_4px_0_0_#000] font-sans font-bold text-xs leading-4 inline-flex min-w-0 shrink-0 items-center justify-center h-8 px-3 whitespace-nowrap select-none cursor-pointer outline-none active:translate-x-1 active:translate-y-1 active:shadow-none'
       )
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) =>
+        i.feedback.style.use(tw(`${BRUTALIST_DISABLED_TOKENS} cursor-not-allowed shadow-none`)),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
     });
+    return behavior.render;
   },
 });

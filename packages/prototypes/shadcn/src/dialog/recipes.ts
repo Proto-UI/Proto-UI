@@ -40,12 +40,12 @@ export const DIALOG_HEADER = {
   vega: tw('gap-2'),
   nova: tw('gap-2'),
   maia: tw('gap-2'),
-  lyra: tw('gap-1 text-left'),
+  lyra: tw('gap-1 text-start'),
   mira: tw('gap-1'),
   luma: tw('gap-1.5'),
   sera: tw('gap-2'),
   rhea: tw('gap-1.5'),
-  'new-york-v4': tw('gap-2 text-left'),
+  'new-york-v4': tw('gap-2 text-start'),
 } as const satisfies OverlayRecipes;
 
 export const DIALOG_FOOTER = {
@@ -89,28 +89,28 @@ export const DIALOG_DESCRIPTION = {
 // borrows Dialog Close states and never installs Button behavior.
 export const DIALOG_CLOSE_ICON = {
   vega: tw(
-    'absolute top-4 right-4 size-8 rounded-[min(var(--radius-md),10px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-4 end-4 size-8 rounded-[min(var(--pui-radius-md),10px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   nova: tw(
-    'absolute top-2 right-2 size-7 rounded-[min(var(--radius-md),12px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-2 end-2 size-7 rounded-[min(var(--radius-md),12px)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   maia: tw(
-    'absolute top-4 right-4 size-8 rounded-[var(--pui-radius-4xl)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-4 end-4 size-8 rounded-[var(--pui-radius-4xl)] text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   lyra: tw(
-    'absolute top-2 right-2 size-7 rounded-none text-xs font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-2 end-2 size-7 rounded-none text-xs font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   mira: tw(
-    'absolute top-2 right-2 size-6 rounded-md text-xs leading-relaxed font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-2 end-2 size-6 rounded-md text-xs leading-relaxed font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   luma: tw(
-    'absolute top-4 right-4 size-8 rounded-[var(--pui-radius-4xl)] bg-secondary text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-4 end-4 size-8 rounded-[var(--pui-radius-4xl)] bg-secondary text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   sera: tw(
-    'absolute top-5 right-5 size-9 rounded-none bg-secondary text-xs font-semibold uppercase tracking-widest border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-5 end-5 size-9 rounded-none bg-secondary text-xs font-semibold uppercase tracking-widest border border-transparent bg-clip-padding outline-none transition-all'
   ),
   rhea: tw(
-    'absolute top-4 right-4 size-7 rounded-[var(--pui-radius-2xl)] bg-secondary text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
+    'absolute top-4 end-4 size-7 rounded-[var(--pui-radius-2xl)] bg-secondary text-sm font-medium border border-transparent bg-clip-padding outline-none transition-all'
   ),
   'new-york-v4': tw(
     'absolute right-4 top-4 rounded-sm opacity-70 transition-opacity outline-none ring-offset-0'

@@ -7,8 +7,10 @@ import {
 
 export default definePrototype<AlertDialogTitleProps, AlertDialogTitleExposes>({
   name: 'liquid-glass-alert-dialog-title',
+  modules: asAlertDialogTitle.modules,
   setup(def) {
     const behavior = asAlertDialogTitle();
-    def.feedback.style.use(tw('text-lg font-semibold'));
+    def.feedback.style.use(tw('text-lg font-semibold tracking-tight text-foreground'));
+    return behavior.render;
   },
 });

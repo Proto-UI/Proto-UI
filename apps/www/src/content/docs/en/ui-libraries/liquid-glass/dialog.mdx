@@ -1,0 +1,162 @@
+---
+title: 'Liquid Glass Dialog'
+description: 'A Liquid Glass modal dialog featuring layered translucent glass material, concentric pill controls, prominence hierarchy, and accessible opaque fallbacks.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Liquid Glass Dialog builds on [Base Dialog](../../base/dialog/) with a floating `liquid-glass` sheet surface, subtle inset rim highlight, concentric pill actions, fluid presence transitions, and automatic opaque fallbacks for reduced-transparency and high-contrast environments.
+
+## Preview
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-liquid-glass/dialog`). Generate runtime facades inside the workspace with `proto-ui add <wc|react|vue|vue2> liquid-glass-dialog`.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassDialogClose,
+  LiquidGlassDialogContent,
+  LiquidGlassDialogDescription,
+  LiquidGlassDialogMask,
+  LiquidGlassDialogRoot,
+  LiquidGlassDialogTitle,
+  LiquidGlassDialogTrigger,
+} from '@/components/proto-ui/liquid-glass';
+
+export function LiquidGlassDialogExample() {
+  return (
+    <LiquidGlassDialogRoot a11yLabel="Edit profile">
+      <LiquidGlassDialogTrigger>Open Dialog</LiquidGlassDialogTrigger>
+      <LiquidGlassDialogMask />
+      <LiquidGlassDialogContent>
+        <LiquidGlassDialogTitle>Edit profile</LiquidGlassDialogTitle>
+        <LiquidGlassDialogDescription>
+          Make changes to your profile here. Click save when you&apos;re done.
+        </LiquidGlassDialogDescription>
+        <div className="flex justify-end gap-2">
+          <LiquidGlassDialogClose prominence="regular">Cancel</LiquidGlassDialogClose>
+          <LiquidGlassDialogClose prominence="prominent">Save changes</LiquidGlassDialogClose>
+        </div>
+      </LiquidGlassDialogContent>
+    </LiquidGlassDialogRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+LiquidGlassDialogRoot
+├── LiquidGlassDialogTrigger
+├── LiquidGlassDialogMask
+└── LiquidGlassDialogContent
+    ├── LiquidGlassDialogTitle
+    ├── LiquidGlassDialogDescription
+    └── LiquidGlassDialogClose
+```
+
+### Material and accessibility guidelines
+
+- **Never stack glass-on-glass**: Only `Content` declares `liquid-glass` material; inner `Close` pill buttons remain crisp non-glass surfaces so contrast and hierarchy stay legible.
+- **Prominence hierarchy & concentric radii**: `Trigger` supports `regular` and `prominent`; `Close` supports `regular`, `prominent`, and `destructive`. `rounded-full` pills nest concentrically within the `rounded-2xl` sheet padding.
+- **Motion & fallbacks**: Enter/leave transitions (200 ms / 150 ms) respect `prefers-reduced-motion`. Disabled controls withdraw elevation rather than dimming opacity, preserving readability under opaque fallback, and `material="opaque"` provides an explicit per-dialog opt-out.
+
+## Examples
+
+### Prominence and Destructive Hierarchy
+
+Combine a `prominent` trigger with `regular` and `destructive` close actions for clear confirmation hierarchy.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog-prominence"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Scrollable Content with Fixed Footer
+
+Scroll long content inside the glass sheet while keeping title hierarchy and dismissal controls anchored.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Opaque Surface Opt-Out (`material="opaque"`)
+
+Opt out to an opaque secondary surface when dense text or busy backdrops call for solid contrast.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog-opaque"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## API
+
+### LiquidGlassDialogRoot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (controlled)' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### LiquidGlassDialogContent
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+  ]}
+/>
+
+### LiquidGlassDialogTrigger / LiquidGlassDialogClose / LiquidGlassDialogMask
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Trigger.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Close.prominence', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

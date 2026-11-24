@@ -1,0 +1,33 @@
+id: T-BRUTALIST-DRAWER-STRUCTURE-0001
+type: test
+title: Brutalist Drawer Header and Footer passive structure evidence
+status: draft
+since: 0.3.0
+lifecycleRationale:
+  en: Logical Web Component unit coverage for Brutalist Drawer Header and Footer passive slots; browser/native visual acceptance remains separate.
+  zh-CN: Brutalist Drawer Header 与 Footer 被动槽位的逻辑 Web Component 单元测试；浏览器与 native 视觉验收另行推进。
+summary: Verifies Brutalist Drawer Header and Footer passive composition, authored children preservation, and layout tokens.
+cases:
+  - id: T-BRUTALIST-DRAWER-STRUCTURE-0001-CASE-HEADER-FOOTER
+    title: Passive Brutalist Header and Footer slots preserve authored children and flex-col layout tokens
+    covers:
+      - P-BRUTALIST-DRAWER-HEADER-STRUCTURE
+      - P-BRUTALIST-DRAWER-FOOTER-STRUCTURE
+    expectation: passive-slots-preserve-children-and-layout-tokens
+implementations:
+  - id: brutalist-drawer-header-footer-unit
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/brutalist/test/drawer-header-footer.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-DRAWER-STRUCTURE-0001-CASE-HEADER-FOOTER
+exercises:
+  prototypes:
+    - P-BRUTALIST-DRAWER-HEADER
+    - P-BRUTALIST-DRAWER-FOOTER
+revisions:
+  - version: 0.3.0
+    change: introduced
+    summary: Added executable unit test coverage for Brutalist Drawer Header and Footer parts.
+tags: [test, brutalist, drawer, header, footer]

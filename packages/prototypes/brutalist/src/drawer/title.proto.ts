@@ -8,7 +8,7 @@ import {
 export default definePrototype<DrawerTitleProps, DrawerTitleExposes>({
   name: 'brutalist-drawer-title',
   setup(def) {
-    const behavior = asDrawerTitle();
-    def.feedback.style.use(tw('text-xl font-black'));
+    asDrawerTitle();
+    def.feedback.style.use(tw('font-heading text-lg font-bold leading-none tracking-tight text-foreground'));
   },
 });

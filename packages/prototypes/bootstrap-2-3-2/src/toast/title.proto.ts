@@ -10,8 +10,8 @@ export default definePrototype<ToastTitleProps, ToastTitleExposes>({
   modules: asToastTitle.modules,
   setup(def) {
     const behavior = asToastTitle();
-    // .alert h4 retains the warning ink and zero margin.
-    def.feedback.style.use(tw('m-0 text-[17.5px] leading-[20px] font-bold text-inherit'));
+    // .alert h4 retains the alert ink and zero margin.
+    def.feedback.style.use(tw('block m-0 text-[17.5px] leading-[20px] font-bold text-inherit'));
     return behavior.render;
   },
 });

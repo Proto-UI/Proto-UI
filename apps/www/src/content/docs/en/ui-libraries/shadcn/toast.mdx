@@ -15,14 +15,35 @@ Toast displays brief, non-blocking notifications with auto-dismiss timers that p
   demoId="demo-shadcn-toast"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-shadcn/toast` and adapt them for your target runtime.
+
+```ts
+import {
+  toastViewport,
+  toastRoot,
+  toastTitle,
+  toastDescription,
+  toastAction,
+  toastClose,
+} from '@proto.ui/prototypes-shadcn/toast';
+```
 
 ## Usage
+
+```tsx
+<ShadcnToastViewport a11yLabel="Notifications">
+  <ShadcnToastRoot defaultOpen={false} duration={5000}>
+    <ShadcnToastTitle>Event has been created</ShadcnToastTitle>
+    <ShadcnToastDescription>Sunday, December 03, 2023 at 9:00 AM</ShadcnToastDescription>
+    <ShadcnToastAction a11yLabel="Undo event creation">Undo</ShadcnToastAction>
+    <ShadcnToastClose>Dismiss</ShadcnToastClose>
+  </ShadcnToastRoot>
+</ShadcnToastViewport>
+```
 
 Toast consists of `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
 
@@ -32,26 +53,90 @@ Toast consists of `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Clo
 - In controlled mode (`open` supplied), reaching the timeout emits a single dismissal request until your state updates.
 - `Viewport` labels the notification region (default `Notifications`) and provides the `F8` shortcut to jump focus directly to the viewport. Managing a queue of multiple toasts stays in your application state.
 
+## Examples
+
+### Types
+
+Set `type` (`default`, `success`, `info`, `warning`, `error`, or `loading`) to classify the notification, and pair error notices with `politeness="assertive"`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-types"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Action
+
+Use `Action` for explicit undo or retry intents. Activating it emits `action` before requesting dismissal.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Promise
+
+Keep a loading toast open with `type="loading"` and `duration={0}` while an async task runs, then switch to a result toast once it finishes.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-promise"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Persistent
+
+Supply `open` and `duration={0}` when your application controls when a critical notification appears and closes.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-persistent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
+
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'duration', type: 'number', default: '5000' },
     { name: 'paused', type: 'boolean', default: 'false' },
-    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
-    { name: 'a11yLabel', type: 'string', default: 'Notifications' },
-    { name: 'hotkey', type: 'string', default: 'F8' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    {
+      name: 'type',
+      type: "'default' | 'success' | 'info' | 'warning' | 'error' | 'loading'",
+      default: "'default'",
+    },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: "'reverse'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: 'Inherited from scope' },
   ]}
 />
 
-Prop ownership:
+### Viewport, Action & Close
 
-- `defaultOpen`, `duration` (`0` keeps the toast open), `paused`, and `politeness` belong to `Root` (pass `open` for controlled mode).
-- `a11yLabel` and `hotkey` belong to `Viewport`.
-- `disabled` belongs to `Action` and `Close`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
+    { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    { name: 'Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+Events and exposed methods:
+
+- **Events**: `Root` emits `openChange` (`{ open: boolean; reason: string }`); `Action` emits `action` (`void`).
+- **Methods**: `Root` exposes `openToast()`, `close(reason?)`, `pause()`, and `resume()`; `Viewport` exposes `focusFirst()`.
 
 ## References
 

@@ -1,12 +1,13 @@
 ---
-title: 'ContextMenu'
-description: '支持右键、触摸长按与键盘快捷键唤起的 Brutalist 上下文菜单组件。'
+title: 'Context Menu'
+description: '支持右键、触摸长按与键盘快捷键唤起的 Brutalist 上下文命令菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist ContextMenu 在鼠标右键、触摸/手写笔长按或按下 `ContextMenu` / `Shift+F10` 快捷键时弹出上下文命令菜单，并支持键盘导航、首字跳转与自动焦点恢复。
+Brutalist Context Menu 在鼠标右键、触摸/手写笔长按（600 ms）或按下 `ContextMenu` / `Shift+F10` 时弹出带有 2px 黑色边框与 3px 硬阴影的上下文菜单，内置键盘导航、首字跳转与焦点恢复。
 
 ## 预览
 
@@ -14,48 +15,148 @@ Brutalist ContextMenu 在鼠标右键、触摸/手写笔长按或按下 `Context
   demoId="demo-brutalist-context-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+该组件目前在源码工作区提供，尚未进入 0.2.0 稳定版 CLI 注册表。
 
 ## 用法
 
-### 部件组成
+```tsx
+import {
+  BrutalistContextMenuContent,
+  BrutalistContextMenuItem,
+  BrutalistContextMenuRoot,
+  BrutalistContextMenuTrigger,
+} from '@/components/proto-ui';
 
-ContextMenu 由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
+export function Example() {
+  return (
+    <BrutalistContextMenuRoot>
+      <BrutalistContextMenuTrigger className="flex h-36 w-72 items-center justify-center rounded-base border-2 border-dashed border-black bg-secondary-background text-sm font-sans font-medium">
+        Right click here
+      </BrutalistContextMenuTrigger>
+      <BrutalistContextMenuContent>
+        <BrutalistContextMenuItem value="back">Back</BrutalistContextMenuItem>
+        <BrutalistContextMenuItem value="forward" disabled>Forward</BrutalistContextMenuItem>
+        <BrutalistContextMenuItem value="reload">Reload</BrutalistContextMenuItem>
+      </BrutalistContextMenuContent>
+    </BrutalistContextMenuRoot>
+  );
+}
+```
 
-- **Root**：管理开关状态（受控 `open` 或非受控 `defaultOpen`）、整体禁用 `disabled`、选中后关闭策略 `closeOnItemCommit` 以及打开时的默认焦点落点。
-- **Trigger**：定义上下文菜单的触发区域，在右键、触摸/手写笔长按（持续 600ms 且未超过移动容差）或 `ContextMenu` / `Shift+F10` 时请求打开菜单并抑制浏览器原生右键菜单；普通左键点击与滚动保持默认行为。
-- **Content**：浮层菜单面板，右键与长按时锚定在触发点，键盘唤起或调用 `openContextMenu()` 时锚定在触发区域；支持键盘漫游、字符跳转、过渡动画与碰撞检测。
-- **Item**：菜单命令项，支持单独配置 `disabled`、`value`、`textValue` 与 `closeOnCommit`。
+### 部件结构
 
-### 焦点与受控行为
+```text
+ContextMenuRoot
+├── ContextMenuTrigger
+└── ContextMenuContent
+    ├── ContextMenuItem
+    └── ContextMenuItem
+```
 
-- 按 `Escape` 或完成菜单项选择后，焦点会自动恢复至触发区域。
-- 传入 `open` 进入受控模式：菜单打开请求触发时仍会自动阻止原生右键菜单，实际显示状态由外部传入的 `open` 决定。
+- **无样式触发容器**：`Trigger` 保持无外框结构，允许调用方自由包裹文本、卡片或虚线交互区域；右键、长按或键盘唤起时自动抑制原生右键菜单。
+- **浮层与菜单项规范**：`Content` 采用 `rounded-base`、`2px` 边框与 `3px` 前景硬阴影；`Item` 在悬停、焦点或按压时切换主色高亮与 2px 黑框，无位移弹跳。
+
+## 示例
+
+### 基础菜单
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 危险操作与缩进对齐
+
+通过 `variant="destructive"` 与 `inset` 突出危险命令并保持左侧对齐。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 弹出方向
+
+使用 `side` 与 `sideOffset` 指定菜单展开方向，并在接近视口边缘时自动碰撞翻转。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
 ### Root
 
+传入 `open` 进入受控模式；暴露 `openChange` 事件以及 `openContextMenu()`、`close()`、`toggle()` 方法。
+
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
-    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
     { name: 'openEntryValue', type: 'string', default: "''" },
   ]}
 />
 
-传入 `open: boolean` 进入受控模式。
+### Trigger
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
 
-- **Trigger**：无独立属性
-- **Content**：支持 Transition 属性；`side`（默认 `'bottom'`）、`align`（默认 `'start'`）、`sideOffset`（默认 `0`）、`alignOffset`（默认 `0`）、`avoidCollisions`（默认 `true`）、`collisionPadding`（默认 `0`）、`excludeAnchorTranslation`（默认 `false`）
-- **Item**：`disabled?: boolean`（默认 `false`）、`value?: string`（默认 `''`）、`textValue?: string`（默认 `''`）、`closeOnCommit?: boolean`（默认继承 Root 的 `closeOnItemCommit`）
+### Content
+
+暴露 `focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '0' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### Item
+
+激活时触发 `select` 事件（payload：`{ value, reason }`）。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-CONTEXT-MENU.yaml', 'P-BASE-CONTEXT-MENU.yaml']}
+/>

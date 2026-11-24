@@ -11,7 +11,7 @@ export default definePrototype<CommandItemProps, CommandItemExposes>({
     const behavior = asCommandItem();
     def.feedback.style.use(
       tw(
-        'block min-w-0 cursor-pointer select-none px-[20px] py-[3px] text-[14px] font-normal leading-[20px] text-foreground whitespace-nowrap'
+        'flex min-w-0 items-center gap-[8px] cursor-pointer select-none px-[14px] py-[4px] text-[14px] font-normal leading-[20px] text-foreground'
       )
     );
     def.rule({
@@ -26,6 +26,10 @@ export default definePrototype<CommandItemProps, CommandItemExposes>({
         ),
       intent: (i) =>
         i.feedback.style.use(tw('bg-[linear-gradient(#08c,#0077b3)] text-primary-foreground')),
+    });
+    def.rule({
+      when: (w) => w.state(behavior.getState!('selected')!).eq(true),
+      intent: (i) => i.feedback.style.use(tw('font-bold')),
     });
     return behavior.render;
   },

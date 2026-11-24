@@ -1,0 +1,162 @@
+---
+title: 'Liquid Glass Dialog'
+description: '遵循半透明玻璃层次、同心圆角、显著性分级与无障碍回退策略的 Liquid Glass 模态对话框。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Liquid Glass Dialog 基于 [Base Dialog](../../base/dialog/) 构建，在悬浮面板上应用 `liquid-glass` 材质、细微边缘高光环、同心胶囊操作按钮与流畅的进出场过渡，并在减少透明度或高对比度环境下自动回退为高可读性不透明表面。
+
+## 预览
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## 安装
+
+当前仅在源码工作区中提供（`@proto.ui/prototypes-liquid-glass/dialog`）。可在工作区中使用 `proto-ui add <wc|react|vue|vue2> liquid-glass-dialog` 生成各宿主包装组件。
+
+## 用法
+
+```tsx
+import {
+  LiquidGlassDialogClose,
+  LiquidGlassDialogContent,
+  LiquidGlassDialogDescription,
+  LiquidGlassDialogMask,
+  LiquidGlassDialogRoot,
+  LiquidGlassDialogTitle,
+  LiquidGlassDialogTrigger,
+} from '@/components/proto-ui/liquid-glass';
+
+export function LiquidGlassDialogExample() {
+  return (
+    <LiquidGlassDialogRoot a11yLabel="Edit profile">
+      <LiquidGlassDialogTrigger>Open Dialog</LiquidGlassDialogTrigger>
+      <LiquidGlassDialogMask />
+      <LiquidGlassDialogContent>
+        <LiquidGlassDialogTitle>Edit profile</LiquidGlassDialogTitle>
+        <LiquidGlassDialogDescription>
+          Make changes to your profile here. Click save when you&apos;re done.
+        </LiquidGlassDialogDescription>
+        <div className="flex justify-end gap-2">
+          <LiquidGlassDialogClose prominence="regular">Cancel</LiquidGlassDialogClose>
+          <LiquidGlassDialogClose prominence="prominent">Save changes</LiquidGlassDialogClose>
+        </div>
+      </LiquidGlassDialogContent>
+    </LiquidGlassDialogRoot>
+  );
+}
+```
+
+### 组合结构
+
+```text
+LiquidGlassDialogRoot
+├── LiquidGlassDialogTrigger
+├── LiquidGlassDialogMask
+└── LiquidGlassDialogContent
+    ├── LiquidGlassDialogTitle
+    ├── LiquidGlassDialogDescription
+    └── LiquidGlassDialogClose
+```
+
+### 材质与交互规范
+
+- **避免玻璃叠玻璃**：仅 `Content` 浮层声明 `liquid-glass` 材质；内部的 `Close` 胶囊按钮始终渲染为清晰实色或高对比度表面，不在玻璃面板上重复叠加玻璃材质。
+- **显著性分级与同心圆角**：`Trigger` 支持 `regular` / `prominent`，`Close` 支持 `regular` / `prominent` / `destructive`；`rounded-full` 胶囊控件嵌套在 `rounded-2xl` 面板内边距中，保持同心圆角节奏。
+- **动态与无障碍回退**：进出场过渡（200 ms / 150 ms）遵循 `prefers-reduced-motion`；禁用态采用无阴影锁定样式而非降低不透明度，确保高对比度与不透明回退下仍清晰可读；需要强制不透明表面时可设置 `material="opaque"`。
+
+## 示例
+
+### 显著性与破坏性操作分级
+
+使用 `prominence="prominent"` 触发器与 `regular` / `destructive` 底部动作建立清晰的主次操作层次。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog-prominence"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 可滚动内容与固定底部
+
+长文本在玻璃面板内部区域滚动，标题与底部确认按钮保持稳定可见。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 不透明表面回退（`material="opaque"`）
+
+在密集阅读或复杂背景场景下显式切回不透明次级表面。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-liquid-glass-dialog-opaque"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## API
+
+### LiquidGlassDialogRoot
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined（受控模式）' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### LiquidGlassDialogContent
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+  ]}
+/>
+
+### LiquidGlassDialogTrigger / LiquidGlassDialogClose / LiquidGlassDialogMask
+
+<ApiPropsTable
+  headers={{ name: '部件 / 属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Trigger.prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Close.prominence', type: "'regular' | 'prominent' | 'destructive'", default: "'regular'" },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

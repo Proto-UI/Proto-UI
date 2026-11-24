@@ -263,19 +263,14 @@ export function setupMenuItemPaint<
       ),
     intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
   });
-  // Preserve New York's active/press extension. Pointer navigation reaches
-  // active through Base; hovered alone must not retain a second painted row
-  // after the keyboard moves focus while the pointer remains stationary.
-  // Modern profiles retain their upstream focus-only surface.
+  // Pointer navigation reaches active through Base; hovered alone must not
+  // retain a second painted row after keyboard focus moves while the pointer
+  // remains stationary. Apply active highlight consistently across all
+  // Shadcn style profiles while preserving New York's pressed surface tint.
   if (kind === 'dropdown' && states.active && states.pressed) {
     const { active, pressed } = states;
     cdef.rule({
-      when: (w) =>
-        w.all(
-          w.state(style).eq('new-york-v4'),
-          w.prop('variant').eq('default'),
-          w.state(active).eq(true)
-        ),
+      when: (w) => w.all(w.prop('variant').eq('default'), w.state(active).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
     cdef.rule({
@@ -290,7 +285,6 @@ export function setupMenuItemPaint<
     cdef.rule({
       when: (w) =>
         w.all(
-          w.state(style).eq('new-york-v4'),
           w.prop('variant').eq('destructive'),
           w.any(w.state(active).eq(true), w.state(pressed).eq(true))
         ),
@@ -299,7 +293,6 @@ export function setupMenuItemPaint<
     cdef.rule({
       when: (w) =>
         w.all(
-          w.state(style).eq('new-york-v4'),
           w.prop('variant').eq('destructive'),
           w.meta('colorScheme').eq('dark'),
           w.any(w.state(active).eq(true), w.state(pressed).eq(true))

@@ -1,0 +1,145 @@
+---
+title: 'Liquid Glass Hover Card'
+description: 'A floating Liquid Glass preview card with concentric corner radii, prominence hierarchy, and accessible opaque fallbacks.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Hover Card pairs a quiet non-glass link trigger with a layered translucent floating preview panel, offering regular and prominent surface hierarchy, concentric corner radii, and automatic opaque fallbacks for accessibility preferences.
+
+## Preview
+
+Hover or focus `@proto-ui` over the gradient backdrop to observe edge highlights, floating depth, and concentric inner content geometry.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Liquid Glass Hover Card is currently available from workspace source in Proto UI and is not yet distributed via the CLI. Import or adapt the workspace prototype directly for your target framework.
+
+## Usage
+
+```tsx
+import {
+  LiquidGlassHoverCardRoot,
+  LiquidGlassHoverCardTrigger,
+  LiquidGlassHoverCardContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassHoverCardRoot openDelay={150} closeDelay={200}>
+      <LiquidGlassHoverCardTrigger>@proto-ui</LiquidGlassHoverCardTrigger>
+      <LiquidGlassHoverCardContent variant="regular" material="auto" side="bottom" align="center">
+        Host-neutral interaction protocols layered over translucent Liquid Glass surfaces.
+      </LiquidGlassHoverCardContent>
+    </LiquidGlassHoverCardRoot>
+  );
+}
+```
+
+### Composition and material guidance
+
+```text
+LiquidGlassHoverCardRoot
+├── LiquidGlassHoverCardTrigger
+└── LiquidGlassHoverCardContent
+```
+
+- **No glass-on-glass stacking**: `Trigger` stays a lightweight non-glass link affordance while only the open `Content` surface requests Liquid Glass material.
+- **Concentric geometry & hierarchy**: `Content` pairs an outer `rounded-2xl` radius and `p-4` padding with `rounded-xl` nested detail blocks. Use `variant="prominent"` selectively for primary callout previews, or pass `material="opaque"` to opt out of optical glass.
+- **Accessibility fallbacks**: Reduced transparency, forced colors, and reduced motion automatically resolve to crisp opaque surfaces and static presentation; disabled triggers preserve text contrast instead of fading opacity.
+
+## Examples
+
+### Sides
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material and Prominence
+
+Compare `regular` floating glass, tinted `prominent` glass, and explicit `material="opaque"` fallback.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-hover-card-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+- **Exposed state & methods**: `open`, `openHoverCard(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Exposed events**: `openChange` (`{ open: boolean; reason: string | null }`)
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'variant', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '150' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-HOVER-CARD.yaml',
+    'P-LIQUID-GLASS-HOVER-CARD-TRIGGER.yaml',
+    'P-LIQUID-GLASS-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

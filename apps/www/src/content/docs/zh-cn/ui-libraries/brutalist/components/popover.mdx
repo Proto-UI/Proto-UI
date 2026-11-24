@@ -5,8 +5,9 @@ description: '用于展示少量交互内容的 Brutalist 风格非模态锚定�
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Popover 在触发元素附近展示非模态浮动面板，适合放置轻量操作、筛选控件或说明内容，不会锁定页面滚动或限制 `Tab` 焦点范围。
+Popover 在触发元素附近展示带有硬边阴影与 2px 黑框的 Brutalist 非模态浮动面板，适合放置快捷表单、筛选控件或轻量级导航内容，不锁定背景滚动或限制 `Tab` 键移动。
 
 ## 预览
 
@@ -14,62 +15,115 @@ Popover 在触发元素附近展示非模态浮动面板，适合放置轻量操
   demoId="demo-brutalist-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/popover` 导入组件原型并使用对应宿主 Adapter 适配。
+Brutalist Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-brutalist/popover` 导入原型并使用对应框架适配器：
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-brutalist/popover';
+```
 
 ## 用法
 
+```tsx
+<BrutalistPopover>
+  <BrutalistPopoverTrigger>Open Popover</BrutalistPopoverTrigger>
+  <BrutalistPopoverContent align="start">
+    <BrutalistPopoverTitle>Dimensions</BrutalistPopoverTitle>
+    <BrutalistPopoverDescription>Set the dimensions for the layer.</BrutalistPopoverDescription>
+  </BrutalistPopoverContent>
+</BrutalistPopover>
+```
+
 ### 组件结构
 
-Popover 由 `Root`、`Trigger`、`Content`、`Title`、`Description` 和 `Close` 六个部分组成：
+```text
+BrutalistPopoverRoot
+├── BrutalistPopoverTrigger
+└── BrutalistPopoverContent
+    ├── BrutalistPopoverTitle
+    ├── BrutalistPopoverDescription
+    └── BrutalistPopoverClose
+```
 
-- `Root`：管理弹层的展开与关闭状态。
-- `Trigger`：打开或切换弹层的锚点触发器。
-- `Content`：相对 `Trigger` 定位的弹层内容，支持 `side`、`align`、`sideOffset`、`alignOffset` 和 `collisionPadding`。
-- `Title` / `Description`：为弹层提供无障碍标题与描述关联。
-- `Close`：关闭当前弹层的按钮。
+- **Brutalist 视觉语法**：`Trigger` 与 `Close` 遵循 5px 圆角（`rounded-base`）、2px 黑色边框、4px 零模糊硬影及按压即时落位；`Content` 浮层使用 3px 零模糊前景影，无悬停或按压位移。
+- **定位与关闭**：支持 `side`、`align`、`sideOffset`、`alignOffset` 和 `collisionPadding`；点击外部、按下 `Escape`、点击 `Close` 或焦点移出弹层时请求关闭。
 
-### 定位、焦点与关闭
+## 示例
 
-- 点击外部区域、焦点移出 `Trigger` 与 `Content`、按 `Escape` 或点击 `Close` 都会请求关闭弹层。
-- 焦点在 `Trigger` 与经由 Portal 渲染的 `Content` 之间切换时仍视为停留在弹层内部。
-- 因焦点移出而关闭时，焦点保留在新的外部元素上而不会拉回 `Trigger`；此类纯焦点移出请求上报的 `focusReason` 为 `'programmatic'`。
+### 基础用法
 
-### 受控与非受控模式
+包含标题与说明的简洁弹出面板，使用 `align="start"` 与触发器左缘对齐。
 
-- 非受控模式通过 `Root` 的 `defaultOpen` 设置初始状态。
-- 受控模式传入 `open` 并监听 `openChange` 事件，由外部状态决定是否应用新值；即使拒绝了 `focus.outside` 关闭请求，`Content` 也会保持展开且不限制外部焦点，后续交互仍可再次请求关闭。
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 对齐方式
+
+使用 `align` 属性控制弹层对齐方式（`start`、`center`、`end`）。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-align"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+传入 `open` 并监听 `openChange` 事件，由外部状态同步展开与关闭。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ### 导航呈现
 
-在 `Trigger` 和 `Content` 上显式设置 `presentation="navigation"`，可让弹层使用锚点下方的可用区域并在内部滚动，适合承载导航链接列表（链接保持浏览器原生导航行为）。
+在 `Trigger` 和 `Content` 上显式设置 `presentation="navigation"`，让弹层使用锚点下方的可用区域并在内部滚动，承载原生导航链接列表。
 
 <PrototypePreviewer
   demoId="demo-brutalist-popover-navigation"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## API
 
-以下前三个属性（`defaultOpen`、`disabled`、`a11yLabel`）属于 `Root`（传入 `open` 进入受控模式），`presentation` 属于 `Content` 与 `Trigger`：
+`Root` 暴露只读状态 `open`、方法 `openPopover` / `close` / `toggle` 以及 `openChange` 事件。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
-    { name: 'presentation', type: "'default' | 'navigation'", default: 'default' },
+    { name: 'open (Root)', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '4' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'presentation (Trigger / Content)', type: "'default' | 'navigation'", default: "'default'" },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
   ]}
 />
 
-其余子部件属性默认值：
+## 参考
 
-- **Content**：额外接受 Transition 属性；`side` 默认 `'bottom'`，`align` 默认 `'center'`，`sideOffset` 默认 `4`，`alignOffset` 默认 `0`，`collisionPadding` 默认 `8`。
-- **Title**、**Description**、**Close**：无属性。
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

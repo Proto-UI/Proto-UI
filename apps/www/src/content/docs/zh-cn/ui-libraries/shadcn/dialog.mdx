@@ -12,11 +12,8 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 ## 预览
 
-`P-SHADCN-DIALOG` 及其继承的 `P-BASE-DIALOG` 协议仍处于 **early draft**。以下预览使用 `0.3.0-alpha.2` 工作区源码，覆盖 Web Components、React、Vue 3 与 Vue 2.6。接入应用时请选择匹配的 CLI、适配器和原型版本；待完成的检查见下方“兼容性与无障碍覆盖”。
-
 <div class="dialog-demo-container">
-
-<PrototypePreviewer
+  <PrototypePreviewer
     demoId="demo-shadcn-dialog"
     initialRuntime="wc"
     runtimes={['wc', 'react', 'vue', 'vue2']}
@@ -30,60 +27,181 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <InstallCommandCard command="npx @proto.ui/cli@0.2.0 add wc shadcn-dialog" manager="npm" />
 
-已发布的 `0.2.0` CLI 支持 `wc`、`react` 和 `vue`；把 `wc` 替换为 `react` 或 `vue` 可生成对应宿主的组件。命令从 `@proto.ui/prototypes-shadcn/dialog` 生成复合部件，同时提供带默认关闭图标的 `ShadcnDialogContent` 与无默认关闭图标的 `ShadcnDialogContentRaw`。
-
-Vue 2.6（`>=2.6.0 <2.7`）、Rhea 预设以及下文的 Mask 指针默认行为，需要匹配的 `0.3.0-alpha.2` 工作区 CLI、适配器和原型源码。请将这部分工作区预览与上方固定版本的稳定版安装区分开。
+将 `wc` 替换为 `react`、`vue` 或 `vue2` 即可生成对应框架的包装组件；命令会同时生成带默认关闭图标的 `ShadcnDialogContent` 与无默认关闭图标的 `ShadcnDialogContentRaw`。
 
 ## 用法
 
-### 部件结构
+```tsx
+import {
+  ShadcnButton,
+  ShadcnDialogContent,
+  ShadcnDialogDescription,
+  ShadcnDialogHeader,
+  ShadcnDialogMask,
+  ShadcnDialogRoot,
+  ShadcnDialogTitle,
+  ShadcnDialogTrigger,
+} from '@/components/proto-ui/shadcn';
 
-| 生成部件 | 职责 |
-| --- | --- |
-| `ShadcnDialogRoot` | 统一管理受控或非受控 `open`、`disabled`、`alert` 模式、兜底无障碍名称及开关方法。 |
-| `ShadcnDialogTrigger` | 触发打开的语义封装（默认无样式，可内嵌 `ShadcnButton` 作为可见触发按钮）。 |
-| `ShadcnDialogMask` | 模态遮罩层，自带 150 ms 离场过渡动画并阻止底层交互。 |
-| `ShadcnDialogContentRaw` | 居中对话框面板，自带 200 ms 离场过渡、焦点陷阱与关闭交互，不含默认关闭图标。 |
-| `ShadcnDialogContent` | CLI 在 `ContentRaw` 上生成的便捷封装，默认内含可替换的 `ShadcnDialogCloseIcon`。 |
-| `ShadcnDialogHeader` / `ShadcnDialogFooter` | 可选的头部与底部布局分组。 |
-| `ShadcnDialogTitle` / `ShadcnDialogDescription` | 自动通过 `aria-labelledby` / `aria-describedby` 关联到对话框面板。 |
-| `ShadcnDialogClose` | 触发关闭的语义封装（默认无样式，可内嵌按钮作为确认或取消操作）。 |
-| `ShadcnDialogCloseIcon` | 独立的右上角 `X` 关闭按钮，自带无障碍名称 `Close`。 |
+export function DialogExample() {
+  return (
+    <ShadcnDialogRoot>
+      <ShadcnDialogTrigger>
+        <ShadcnButton variant="outline">Open</ShadcnButton>
+      </ShadcnDialogTrigger>
+      <ShadcnDialogMask />
+      <ShadcnDialogContent>
+        <ShadcnDialogHeader>
+          <ShadcnDialogTitle>Are you absolutely sure?</ShadcnDialogTitle>
+          <ShadcnDialogDescription>
+            This action cannot be undone. This will permanently delete your account and remove your
+            data from our servers.
+          </ShadcnDialogDescription>
+        </ShadcnDialogHeader>
+      </ShadcnDialogContent>
+    </ShadcnDialogRoot>
+  );
+}
+```
 
-### 自定义默认关闭按钮
+### 组合结构
 
-`ShadcnDialogContent` 的默认关闭图标支持三种配置方式：
+```text
+ShadcnDialogRoot
+├── ShadcnDialogTrigger
+├── ShadcnDialogMask
+└── ShadcnDialogContent
+    ├── ShadcnDialogHeader
+    │   ├── ShadcnDialogTitle
+    │   └── ShadcnDialogDescription
+    ├── ShadcnDialogFooter
+    │   └── ShadcnDialogClose
+    └── ShadcnDialogCloseIcon
+```
 
-- **默认**：不传覆盖项时自动渲染 `ShadcnDialogCloseIcon`。
-- **替换**：直接传入 `ShadcnDialogCloseIcon` 子元素、React `close` 属性或 Vue `#close` 插槽即可替换默认按钮。
-- **隐藏**：传入 React `close={null}`、空 Vue `#close` 插槽，或在 Web Components 上添加 `data-pui-no-default-close` 属性；若完全不需要默认预设，可直接使用 `ShadcnDialogContentRaw`。
+### 部件职责与交互说明
 
-### 焦点、关闭与 Alert 模式
+- **打开与关闭**：`ShadcnDialogTrigger` 与 `ShadcnDialogClose` 默认无样式，内嵌 `ShadcnButton` 即可保持单次 `Tab` 停靠与按钮外观。
+- **自定义关闭图标**：`ShadcnDialogContent` 默认渲染右上角 `ShadcnDialogCloseIcon`；可通过子元素、React `close` 属性或 Vue `#close` 插槽替换，也可使用 `close={null}`、空 `#close` 插槽、`data-pui-no-default-close` 或 `ShadcnDialogContentRaw` 隐藏。
+- **焦点与关闭策略**：打开期间焦点限制在面板内循环，关闭后归还至触发器；按 `Escape` 或点击遮罩可关闭。设置 `alert={true}` 会切换为 `role="alertdialog"` 并禁止点击外部关闭。
+- **无障碍命名**：`Title` 与 `Description` 自动建立 `aria-labelledby` / `aria-describedby` 关联；缺少标题时可通过 `Root` 的 `a11yLabel` 提供兜底名称。
 
-- 打开期间 `Content` 会将焦点限制在对话框内循环，关闭后自动把焦点归还给触发按钮。
-- 普通对话框可通过 `Escape` 或点击外部遮罩关闭；在 `ShadcnDialogRoot` 上设置 `alert={true}` 会切换为 `role="alertdialog"`，保留 `Escape` 关闭但禁止点击外部关闭（此时建议提供 `Description` 说明核心信息）。
-- 缺少 `Title` 时，可通过 `Root` 的 `a11yLabel` 提供兜底无障碍名称。
-- `Mask` 与 `Content` 会分别在 150 ms 与 200 ms 离场过渡结束后再卸载节点；参与遮罩的 `Mask` 不会在点击时夺走已恢复的焦点。
+## 示例
 
-### 兼容性与无障碍覆盖
+### 自定义关闭按钮
 
-[当前 Dialog Content 测试覆盖](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-DIALOG-CONTENT-0001.yaml)记录了已检查的行为与待完成的浏览器验证。四种预览宿主的完整键盘流程、受控拒绝、响应式/主题/语言组合以及安装包集成仍有待验证项。屏幕阅读器行为需要使用应用实际的浏览器与辅助技术组合单独验证。
+替换或组合自定义关闭操作，例如分享链接弹窗。
 
-请组合独立的 Mask 与 Content 部件；当前不支持 upstream 的 `asChild` 和 `modal` 属性。Header 与 Footer 负责布局；应用持有校验与持久化，并决定操作何时成功、何时请求关闭。
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-custom-close"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 隐藏默认关闭按钮
+
+省略右上角关闭图标，仅保留键盘 `Escape`、点击遮罩或底部操作按钮关闭。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-no-close"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 固定底部操作栏
+
+内容较长时在主体区域内部滚动，让底部操作按钮始终保持可见。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-sticky-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### 可滚动内容
+
+长文本内容在对话框主体内平稳滚动，标题区保持固定。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### RTL 布局
+
+现代风格采用逻辑对齐属性（`end-*`、`text-start`），在 `dir="rtl"` 容器中自动镜像排布。
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-shadcn-dialog-rtl"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
 
 ## API
 
-传入 `open` 进入受控模式。以下属性均作用于 `ShadcnDialogRoot`：
+### ShadcnDialogRoot
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined（受控模式）' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'alert', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
   ]}
 />
+
+暴露方法与事件：`openDialog(reason?)`、`close(reason?)`、`toggle(reason?)`，以及 `openChange` 事件（载荷 `{ open, reason, focusReason }`）。
+
+### ShadcnDialogTrigger / ShadcnDialogClose / ShadcnDialogCloseIcon
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### ShadcnDialogMask
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'passthrough', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+### ShadcnDialogContent
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+  ]}
+/>
+
+`ShadcnDialogHeader`、`ShadcnDialogFooter`、`ShadcnDialogTitle` 与 `ShadcnDialogDescription` 均接受 `styleProfile` 以继承或覆盖当前样式预设。
 
 ## 参考
 

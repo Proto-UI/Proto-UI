@@ -5,6 +5,7 @@ import { setupPopoverCommandPaint } from './command-paint';
 
 export default definePrototype<PopoverTriggerProps, PopoverTriggerExposes>({
   name: 'shadcn-popover-trigger',
+  modules: asPopoverTrigger.modules,
   setup(def) {
     const behavior = asPopoverTrigger();
     def.props.define({
@@ -35,5 +36,6 @@ export default definePrototype<PopoverTriggerProps, PopoverTriggerExposes>({
         navigationRule: presentationRule('navigation'),
       }
     );
+    return behavior.render;
   },
 });

@@ -157,6 +157,53 @@ import w1ToolbarDisabledDemo from '../src/content/docs/demo_components/toolbar/d
 import w1ToolbarSizesDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-sizes.demo';
 import w1ToolbarVariantsDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-variants.demo';
 import w1ToolbarVerticalDemo from '../src/content/docs/demo_components/toolbar/demo-shadcn-toolbar-vertical.demo';
+import w2Demo0 from '../src/content/docs/demo_components/alert-dialog/demo-shadcn-alert-dialog-controlled.demo';
+import w2Demo1 from '../src/content/docs/demo_components/alert-dialog/demo-shadcn-alert-dialog-destructive.demo';
+import w2Demo2 from '../src/content/docs/demo_components/alert-dialog/demo-shadcn-alert-dialog-media.demo';
+import w2Demo3 from '../src/content/docs/demo_components/alert-dialog/demo-shadcn-alert-dialog-rtl.demo';
+import w2Demo4 from '../src/content/docs/demo_components/alert-dialog/demo-shadcn-alert-dialog-small.demo';
+import w2Demo5 from '../src/content/docs/demo_components/command/demo-shadcn-command-dialog.demo';
+import w2Demo6 from '../src/content/docs/demo_components/command/demo-shadcn-command-groups.demo';
+import w2Demo7 from '../src/content/docs/demo_components/command/demo-shadcn-command-scrollable.demo';
+import w2Demo8 from '../src/content/docs/demo_components/command/demo-shadcn-command-shortcuts.demo';
+import w2Demo9 from '../src/content/docs/demo_components/context-menu/demo-shadcn-context-menu-basic.demo';
+import w2Demo10 from '../src/content/docs/demo_components/context-menu/demo-shadcn-context-menu-destructive.demo';
+import w2Demo11 from '../src/content/docs/demo_components/context-menu/demo-shadcn-context-menu-keep-open.demo';
+import w2Demo12 from '../src/content/docs/demo_components/context-menu/demo-shadcn-context-menu-shortcuts.demo';
+import w2Demo13 from '../src/content/docs/demo_components/context-menu/demo-shadcn-context-menu-sides.demo';
+import w2Demo14 from '../src/content/docs/demo_components/dialog/demo-shadcn-dialog-custom-close.demo';
+import w2Demo15 from '../src/content/docs/demo_components/dialog/demo-shadcn-dialog-no-close.demo';
+import w2Demo16 from '../src/content/docs/demo_components/dialog/demo-shadcn-dialog-rtl.demo';
+import w2Demo17 from '../src/content/docs/demo_components/dialog/demo-shadcn-dialog-scrollable.demo';
+import w2Demo18 from '../src/content/docs/demo_components/dialog/demo-shadcn-dialog-sticky-footer.demo';
+import w2Demo19 from '../src/content/docs/demo_components/drawer/demo-shadcn-drawer-sides.demo';
+import w2Demo20 from '../src/content/docs/demo_components/drawer/demo-shadcn-drawer-sizing.demo';
+import w2Demo21 from '../src/content/docs/demo_components/dropdown-menu/demo-shadcn-dropdown-menu-basic.demo';
+import w2Demo22 from '../src/content/docs/demo_components/dropdown-menu/demo-shadcn-dropdown-menu-indicator.demo';
+import w2Demo23 from '../src/content/docs/demo_components/dropdown-menu/demo-shadcn-dropdown-menu-shortcuts.demo';
+import w2Demo24 from '../src/content/docs/demo_components/hover-card/demo-shadcn-hover-card-controlled.demo';
+import w2Demo25 from '../src/content/docs/demo_components/hover-card/demo-shadcn-hover-card-delays.demo';
+import w2Demo26 from '../src/content/docs/demo_components/hover-card/demo-shadcn-hover-card-disabled.demo';
+import w2Demo27 from '../src/content/docs/demo_components/hover-card/demo-shadcn-hover-card-sides.demo';
+import w2Demo28 from '../src/content/docs/demo_components/menubar/demo-shadcn-menubar-controlled.demo';
+import w2Demo29 from '../src/content/docs/demo_components/menubar/demo-shadcn-menubar-destructive.demo';
+import w2Demo30 from '../src/content/docs/demo_components/menubar/demo-shadcn-menubar-states.demo';
+import w2Demo31 from '../src/content/docs/demo_components/navigation-menu/demo-shadcn-navigation-menu-controlled.demo';
+import w2Demo32 from '../src/content/docs/demo_components/navigation-menu/demo-shadcn-navigation-menu-links-and-states.demo';
+import w2Demo33 from '../src/content/docs/demo_components/navigation-menu/demo-shadcn-navigation-menu-with-icons.demo';
+import w2Demo34 from '../src/content/docs/demo_components/popover/demo-shadcn-popover-align.demo';
+import w2Demo35 from '../src/content/docs/demo_components/popover/demo-shadcn-popover-basic.demo';
+import w2Demo36 from '../src/content/docs/demo_components/popover/demo-shadcn-popover-controlled.demo';
+import w2Demo37 from '../src/content/docs/demo_components/popover/demo-shadcn-popover-sides.demo';
+import w2Demo38 from '../src/content/docs/demo_components/toast/demo-shadcn-toast-action.demo';
+import w2Demo39 from '../src/content/docs/demo_components/toast/demo-shadcn-toast-persistent.demo';
+import w2Demo40 from '../src/content/docs/demo_components/toast/demo-shadcn-toast-promise.demo';
+import w2Demo41 from '../src/content/docs/demo_components/toast/demo-shadcn-toast-types.demo';
+import w2Demo42 from '../src/content/docs/demo_components/tooltip/demo-shadcn-tooltip-basic.demo';
+import w2Demo43 from '../src/content/docs/demo_components/tooltip/demo-shadcn-tooltip-disabled.demo';
+import w2Demo44 from '../src/content/docs/demo_components/tooltip/demo-shadcn-tooltip-shortcut.demo';
+import w2Demo45 from '../src/content/docs/demo_components/tooltip/demo-shadcn-tooltip-sides.demo';
+import w2MenubarProfilesDemo from '../src/content/docs/demo_components/menubar/demo-shadcn-menubar-profiles.demo';
 
 const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-button', demo0],
@@ -288,9 +335,69 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-toolbar-sizes', w1ToolbarSizesDemo],
   ['demo-shadcn-toolbar-variants', w1ToolbarVariantsDemo],
   ['demo-shadcn-toolbar-vertical', w1ToolbarVerticalDemo],
+  ['demo-shadcn-alert-dialog-controlled', w2Demo0],
+  ['demo-shadcn-alert-dialog-destructive', w2Demo1],
+  ['demo-shadcn-alert-dialog-media', w2Demo2],
+  ['demo-shadcn-alert-dialog-rtl', w2Demo3],
+  ['demo-shadcn-alert-dialog-small', w2Demo4],
+  ['demo-shadcn-command-dialog', w2Demo5],
+  ['demo-shadcn-command-groups', w2Demo6],
+  ['demo-shadcn-command-scrollable', w2Demo7],
+  ['demo-shadcn-command-shortcuts', w2Demo8],
+  ['demo-shadcn-context-menu-basic', w2Demo9],
+  ['demo-shadcn-context-menu-destructive', w2Demo10],
+  ['demo-shadcn-context-menu-keep-open', w2Demo11],
+  ['demo-shadcn-context-menu-shortcuts', w2Demo12],
+  ['demo-shadcn-context-menu-sides', w2Demo13],
+  ['demo-shadcn-dialog-custom-close', w2Demo14],
+  ['demo-shadcn-dialog-no-close', w2Demo15],
+  ['demo-shadcn-dialog-rtl', w2Demo16],
+  ['demo-shadcn-dialog-scrollable', w2Demo17],
+  ['demo-shadcn-dialog-sticky-footer', w2Demo18],
+  ['demo-shadcn-drawer-sides', w2Demo19],
+  ['demo-shadcn-drawer-sizing', w2Demo20],
+  ['demo-shadcn-dropdown-menu-basic', w2Demo21],
+  ['demo-shadcn-dropdown-menu-indicator', w2Demo22],
+  ['demo-shadcn-dropdown-menu-shortcuts', w2Demo23],
+  ['demo-shadcn-hover-card-controlled', w2Demo24],
+  ['demo-shadcn-hover-card-delays', w2Demo25],
+  ['demo-shadcn-hover-card-disabled', w2Demo26],
+  ['demo-shadcn-hover-card-sides', w2Demo27],
+  ['demo-shadcn-menubar-controlled', w2Demo28],
+  ['demo-shadcn-menubar-destructive', w2Demo29],
+  ['demo-shadcn-menubar-states', w2Demo30],
+  ['demo-shadcn-navigation-menu-controlled', w2Demo31],
+  ['demo-shadcn-navigation-menu-links-and-states', w2Demo32],
+  ['demo-shadcn-navigation-menu-with-icons', w2Demo33],
+  ['demo-shadcn-popover-align', w2Demo34],
+  ['demo-shadcn-popover-basic', w2Demo35],
+  ['demo-shadcn-popover-controlled', w2Demo36],
+  ['demo-shadcn-popover-sides', w2Demo37],
+  ['demo-shadcn-toast-action', w2Demo38],
+  ['demo-shadcn-toast-persistent', w2Demo39],
+  ['demo-shadcn-toast-promise', w2Demo40],
+  ['demo-shadcn-toast-types', w2Demo41],
+  ['demo-shadcn-tooltip-basic', w2Demo42],
+  ['demo-shadcn-tooltip-disabled', w2Demo43],
+  ['demo-shadcn-tooltip-shortcut', w2Demo44],
+  ['demo-shadcn-tooltip-sides', w2Demo45],
 ];
 
 const profileExamples = [
+  {
+    id: 'demo-shadcn-menubar-profiles',
+    page: 'menubar.mdx',
+    demo: w2MenubarProfilesDemo,
+    profiles: [
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-menubar-root', 'rhea'],
+      ['shadcn-menubar-root', 'new-york-v4'],
+      ['shadcn-menubar-root', 'nova'],
+      ['shadcn-menubar-root', 'maia'],
+      ['shadcn-menubar-root', 'lyra'],
+      ['shadcn-menubar-root', 'mira'],
+    ],
+  },
   {
     id: 'demo-shadcn-style-scope-nesting',
     page: 'style-scope.mdx',
@@ -425,7 +532,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(136);
+    expect(expected).toHaveLength(183);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

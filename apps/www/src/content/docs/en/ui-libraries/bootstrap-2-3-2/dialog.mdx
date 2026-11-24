@@ -1,0 +1,161 @@
+---
+title: 'Bootstrap 2.3.2 Dialog'
+description: 'A Bootstrap 2.3.2 modal dialog preserving the classic .modal slide-in transition, 6px border radius, and footer inset highlight.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Bootstrap 2.3.2 Dialog builds on [Base Dialog](../../base/dialog/) while preserving the authentic `.modal` 560px frame, 6px border radius, 300 ms top `-25% -> 10%` slide transition, 80% black backdrop, and `.modal-footer` `1px` white inset top highlight.
+
+## Preview
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2/dialog`). Generate runtime facades inside the workspace with `proto-ui add <wc|react|vue|vue2> bootstrap-2-3-2-dialog`.
+
+## Usage
+
+```tsx
+import {
+  BootstrapDialogClose,
+  BootstrapDialogCloseIcon,
+  BootstrapDialogContent,
+  BootstrapDialogDescription,
+  BootstrapDialogFooter,
+  BootstrapDialogHeader,
+  BootstrapDialogMask,
+  BootstrapDialogRoot,
+  BootstrapDialogTitle,
+  BootstrapDialogTrigger,
+} from '@/components/proto-ui/bootstrap-2-3-2';
+
+export function BootstrapDialogExample() {
+  return (
+    <BootstrapDialogRoot a11yLabel="Edit profile">
+      <BootstrapDialogTrigger>Open Dialog</BootstrapDialogTrigger>
+      <BootstrapDialogMask />
+      <BootstrapDialogContent>
+        <BootstrapDialogHeader>
+          <BootstrapDialogTitle>Edit profile</BootstrapDialogTitle>
+        </BootstrapDialogHeader>
+        <div className="px-[15px] py-[15px]">
+          <BootstrapDialogDescription>
+            Make changes to your profile here. Click save when you&apos;re done.
+          </BootstrapDialogDescription>
+        </div>
+        <BootstrapDialogFooter>
+          <BootstrapDialogClose>Close</BootstrapDialogClose>
+        </BootstrapDialogFooter>
+        <BootstrapDialogCloseIcon />
+      </BootstrapDialogContent>
+    </BootstrapDialogRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+BootstrapDialogRoot
+├── BootstrapDialogTrigger
+├── BootstrapDialogMask
+└── BootstrapDialogContent
+    ├── BootstrapDialogHeader
+    │   └── BootstrapDialogTitle
+    ├── BootstrapDialogDescription
+    ├── BootstrapDialogFooter
+    │   └── BootstrapDialogClose
+    └── BootstrapDialogCloseIcon
+```
+
+### Visual and behavioral details
+
+- **Classic motion**: `Content` runs Bootstrap 2.3.2's 300 ms opacity and `-25% -> 10%` top slide presence transition, paired with a 150 ms backdrop fade to 80% black opacity.
+- **Layering & chrome**: `Mask` (`z-40`) and `Content` (`z-50`) maintain predictable stacking; `Header` applies `9px 15px` padding and a hairline divider, while `Footer` restores the classic `inset 0 1px 0 #fff` top highlight.
+- **Accessibility**: Full focus trapping, trigger focus restoration, `Escape` and outside-press dismissal, and live `aria-labelledby` / `aria-describedby` links.
+
+## Examples
+
+### No Close Button
+
+Omit the top-right close icon and dismiss via `Escape`, backdrop click, or the footer action.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog-no-close"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Scrollable Content
+
+Scroll long copy inside a 15px padded modal body while keeping the header anchored.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog-scrollable"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+### Sticky Footer
+
+Keep primary and secondary modal footer actions visible below a scrollable checklist.
+
+<div class="dialog-demo-container">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-dialog-sticky-footer"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+    hasCode={true}
+  />
+</div>
+
+## API
+
+### BootstrapDialogRoot
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (controlled)' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'alert', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Other parts
+
+<ApiPropsTable
+  headers={{ name: 'Part / Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Trigger.disabled', type: 'boolean', default: 'false' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Content.focusEntry', type: "'auto' | 'manual'", default: "'auto'" },
+    { name: 'Close / CloseIcon.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-DIALOG.yaml', 'P-BASE-DIALOG.yaml']}
+/>

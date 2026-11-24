@@ -11,6 +11,7 @@ export default definePrototype<AlertDialogMaskProps, AlertDialogMaskExposes>({
   setup(def) {
     const behavior = asAlertDialogMask();
     const style = setupOverlayMask(def);
+    def.feedback.style.use(tw('z-40'));
     const { open } = behavior.stateHandles;
     def.rule({
       when: (w) => w.not(w.state(style).eq('new-york-v4')),
@@ -24,6 +25,6 @@ export default definePrototype<AlertDialogMaskProps, AlertDialogMaskExposes>({
       when: (w) => w.state(open).eq(false),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0')),
     });
-    behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
+    behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
   },
 });

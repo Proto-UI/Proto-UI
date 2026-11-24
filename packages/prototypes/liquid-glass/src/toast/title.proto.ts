@@ -9,6 +9,9 @@ export default definePrototype<ToastTitleProps, ToastTitleExposes>({
   name: 'liquid-glass-toast-title',
   setup(def) {
     const behavior = asToastTitle();
-    def.feedback.style.use(tw('font-semibold'));
+    def.feedback.style.use(
+      tw('font-heading font-semibold text-sm leading-5 tracking-tight text-current')
+    );
+    return behavior.render;
   },
 });

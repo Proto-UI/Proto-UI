@@ -895,6 +895,14 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/drawer');
     registerExactPrototype('brutalist-drawer-handle', module.drawerHandle);
   },
+  'brutalist-drawer-header': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/drawer');
+    registerExactPrototype('brutalist-drawer-header', module.drawerHeader);
+  },
+  'brutalist-drawer-footer': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/drawer');
+    registerExactPrototype('brutalist-drawer-footer', module.drawerFooter);
+  },
   'bootstrap-2-3-2-drawer-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/drawer');
     registerExactPrototype('bootstrap-2-3-2-drawer-root', module.drawerRoot);

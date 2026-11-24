@@ -20,6 +20,7 @@ export default definePrototype<CommandItemProps, CommandItemExposes>({
         w.all(
           w.state(style).eq('new-york-v4'),
           w.state(behavior.getState!('active')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false),
           w.prop('presentation').eq('default')
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
@@ -29,13 +30,18 @@ export default definePrototype<CommandItemProps, CommandItemExposes>({
         w.all(
           w.not(w.state(style).eq('new-york-v4')),
           w.prop('presentation').eq('default'),
-          w.state(behavior.getState!('active')!).eq(true)
+          w.state(behavior.getState!('active')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false)
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
       when: (w) =>
-        w.all(w.prop('presentation').eq('menu'), w.state(behavior.getState!('active')!).eq(true)),
+        w.all(
+          w.prop('presentation').eq('menu'),
+          w.state(behavior.getState!('active')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('border-input bg-input/50 text-foreground')),
     });
   },

@@ -5,7 +5,7 @@ import {
 } from '@proto.ui/prototypes-base/alert-dialog';
 
 import type { ShadcnAlertDialogActionProps } from './types';
-import { setupPassiveOverlayAction } from '../dialog/action-paint';
+import { setupAlertDialogButtonPaint } from './action-paint';
 
 // Passive family Button paint; the inherited AlertDialog command keeps sole action ownership.
 // Keep the valid borrowed getState pattern. Source collector coverage is a separate owner.
@@ -15,7 +15,7 @@ export default definePrototype<ShadcnAlertDialogActionProps, AlertDialogActionEx
     const behavior = asAlertDialogAction();
     const state = behavior.getState!;
     def.feedback.style.use(tw('select-none'));
-    setupPassiveOverlayAction(
+    setupAlertDialogButtonPaint(
       def,
       {
         hovered: state('hovered')!,

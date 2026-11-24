@@ -12,6 +12,7 @@ import { POPUP_OPEN_MOTION, POPUP_CLOSE_MOTION, POPUP_SIDE_MOTION } from './moti
 
 export default definePrototype<PopoverContentProps, PopoverContentExposes>({
   name: 'shadcn-popover-content',
+  modules: asPopoverContent.modules,
   setup(def) {
     const behavior = asPopoverContent();
     def.props.define({
@@ -62,12 +63,17 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       intent: (i) => i.feedback.style.use(POPOVER_NAVIGATION_SUPPORTED_TRANSLUCENCY),
     });
     const { open } = behavior.stateHandles;
-    // Concrete presentation conditions compose the shared pure motion recipes.
-    // Other popup authors retain the unchanged side-only setup helper.
+    // Concrete presentation conditions compose the shared pure motion recipes
+    // while honoring user reduced-motion preferences.
     const defaultMotionRule: typeof def.rule = (rule) =>
       def.rule({
         ...rule,
-        when: (w) => w.all(w.prop('presentation').eq('default'), rule.when(w)),
+        when: (w) =>
+          w.all(
+            w.prop('presentation').eq('default'),
+            w.not(w.meta('preference.reducedMotion').eq('reduce')),
+            rule.when(w)
+          ),
       });
     defaultMotionRule({
       when: (w) => w.state(open).eq(true),
@@ -84,12 +90,34 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
       });
     }
     def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('presentation').eq('default'),
+          w.meta('preference.reducedMotion').eq('reduce')
+        ),
+      intent: (i) => i.feedback.style.use(tw('animate-none')),
+    });
+    def.rule({
       when: (w) => w.all(w.prop('presentation').eq('navigation'), w.state(open).eq(true)),
       intent: (i) => i.feedback.style.use(tw('animate-none')),
     });
     def.rule({
-      when: (w) => w.all(w.prop('presentation').eq('navigation'), w.state(open).eq(false)),
+      when: (w) =>
+        w.all(
+          w.prop('presentation').eq('navigation'),
+          w.state(open).eq(false),
+          w.not(w.meta('preference.reducedMotion').eq('reduce'))
+        ),
       intent: (i) => i.feedback.style.use(POPUP_CLOSE_MOTION),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('presentation').eq('navigation'),
+          w.state(open).eq(false),
+          w.meta('preference.reducedMotion').eq('reduce')
+        ),
+      intent: (i) => i.feedback.style.use(tw('animate-none')),
     });
     // The existing zero-duration default remains a retention-policy gap; CSS
     // animation tokens alone do not establish a retained native leave frame.

@@ -1,6 +1,6 @@
 ---
 title: 'Drawer'
-description: 'An edge-attached modal panel with four placements, scrollable content, and draggable snap points.'
+description: 'An edge-attached modal drawer supporting four sides, scrollable content, custom sizing, and draggable snap points.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -15,81 +15,197 @@ A modal drawer that slides in from any of the four viewport edges, supporting co
   demoId="demo-shadcn-drawer"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Long content
+## Installation
 
-`Content` provides a vertical scroll area so tall drawers scroll smoothly inside the sheet:
+Currently available from workspace source (`@proto.ui/prototypes-shadcn/drawer`); not yet published in the 0.2.0 stable CLI release.
+
+## Usage
+
+```tsx
+import {
+  ShadcnButton,
+  ShadcnDrawerRoot,
+  ShadcnDrawerTrigger,
+  ShadcnDrawerMask,
+  ShadcnDrawerContent,
+  ShadcnDrawerHandle,
+  ShadcnDrawerHeader,
+  ShadcnDrawerTitle,
+  ShadcnDrawerDescription,
+  ShadcnDrawerFooter,
+  ShadcnDrawerClose,
+} from '../proto-ui/components/react';
+```
+
+```tsx
+<ShadcnDrawerRoot styleProfile="rhea">
+  <ShadcnDrawerTrigger styleProfile="rhea">
+    <ShadcnButton styleProfile="rhea" variant="outline">Open Drawer</ShadcnButton>
+  </ShadcnDrawerTrigger>
+  <ShadcnDrawerMask styleProfile="rhea" />
+  <ShadcnDrawerContent styleProfile="rhea" side="bottom">
+    <ShadcnDrawerHandle styleProfile="rhea" />
+    <ShadcnDrawerHeader styleProfile="rhea">
+      <ShadcnDrawerTitle styleProfile="rhea">Move Goal</ShadcnDrawerTitle>
+      <ShadcnDrawerDescription styleProfile="rhea">
+        Set your daily activity goal.
+      </ShadcnDrawerDescription>
+    </ShadcnDrawerHeader>
+    <div className="flex-1 overflow-y-auto px-4">{/* Content */}</div>
+    <ShadcnDrawerFooter styleProfile="rhea">
+      <ShadcnButton styleProfile="rhea">Submit</ShadcnButton>
+      <ShadcnDrawerClose styleProfile="rhea">
+        <ShadcnButton styleProfile="rhea" variant="outline">Cancel</ShadcnButton>
+      </ShadcnDrawerClose>
+    </ShadcnDrawerFooter>
+  </ShadcnDrawerContent>
+</ShadcnDrawerRoot>
+```
+
+### Composition
+
+```text
+DrawerRoot
+├── DrawerTrigger
+├── DrawerMask
+└── DrawerContent
+    ├── DrawerHandle
+    ├── DrawerHeader
+    │   ├── DrawerTitle
+    │   └── DrawerDescription
+    └── DrawerFooter
+        └── DrawerClose
+```
+
+- **Trigger and Close**: Under modern presets like `rhea`, `Trigger` and `Close` stay headless so you can nest a public `Button` directly inside them. Under `new-york-v4`, they retain outline button paint (with optional `wrap` for long labels).
+- **Extent bounds**: Use `minExtent` and `maxExtent` on `Content` with neutral units (`'logical'`, `'root-text'`, `'available'`, or `'available-minus-root-text'`). Vertical drawers fit their content height within the safe viewport cap; horizontal drawers default to a `20` `root-text` cap.
+- **Snapping and accessibility**: Passing a non-empty `snapPoints` array in `(0, 1]` enables named `separator` semantics on `Handle` with Arrow keys and `Home`/`End` resizing. Pressing `Escape` or clicking the backdrop dismisses the drawer and restores focus to the trigger.
+
+## Examples
+
+### Position
+
+Set `side` on `Content` to `'top'`, `'right'`, `'bottom'`, or `'left'`:
+
+<PrototypePreviewer
+  demoId="demo-shadcn-drawer-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Scrollable Content
+
+Wrap the body region in a `flex-1 overflow-y-auto` container so header and footer controls stay anchored while long content scrolls:
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-scroll"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-### Explicit half and full snap points
+### Snap Points
 
-Configure `snapPoints` to snap between height fractions via drag gestures or keyboard arrow keys:
+Configure `snapPoints` and `defaultSnapPoint` (or controlled `snapPoint` / `snapPointChange`) to snap between height fractions via drag gestures or arrow keys:
 
 <PrototypePreviewer
   demoId="demo-shadcn-drawer-snap"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
-## Usage
+### Custom Sizes & Locked Drag
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Constrain drawer dimensions with `maxExtent` and set `dragDismissible={false}` to prevent accidental swipe dismissal while keeping Close buttons, `Escape`, and outside clicks active:
 
-### Composition and triggers
-
-- **Trigger and Close**: Under Rhea, `Trigger` and `Close` stay headless; nest a public `Button` (such as an outline button, with `wrap` for long labels) directly inside them so the button supplies the physical focus/activation surface while forwarding the effective `disabled` state.
-- **Grid layouts**: `Root` renders a wrapper element. When placing it directly inside a CSS Grid, pass `hostStyle={{ display: 'contents' }}` in React (or `display: contents` on Web Components) to avoid an extra grid row.
-- **Visual structure**: Rhea `Content` wraps its inset popover surface (capped at 24px radius) with transparent `p-4` outer padding, and renders a 100px × `0.375rem` drag `Handle` with a `1rem` top margin.
-
-### Sizing (`minExtent` / `maxExtent`)
-
-Use `minExtent` and `maxExtent` on `Content` instead of raw CSS widths:
-
-- Accepted units are `logical`, `root-text`, `available`, and `available-minus-root-text` with a nonnegative finite `value` (for example, `maxExtent={{ unit: 'logical', value: 480 }}`).
-- Top and bottom drawers fit their content height by default (bounded by the safe available area); left and right drawers use fractional width capped at 20 `root-text` units unless overridden with `maxExtent`.
-- Invalid runtime extent updates are ignored while retaining the last valid sizing intent (`extentValid` becomes `false`).
-
-### Snap points and drag dismissal
-
-- **Content-fit mode**: When `snapPoints` is omitted or empty on top/bottom drawers, `Handle` acts as a pointer-only drag affordance.
-- **Explicit snaps**: Pass an array of fractions in `(0, 1]` (sorted and deduplicated automatically) and manage the active snap with `defaultSnapPoint` or controlled `snapPoint` / `snapPointChange`. In this mode, `Handle` also supports arrow keys and `Home`/`End`.
-- Set `dragDismissible={false}` to disable drag-to-close while keeping `Close`, `Escape`, and outside clicks active. If a controlled close request is rejected, drag preview settles back to the current open state.
+<PrototypePreviewer
+  demoId="demo-shadcn-drawer-sizing"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `open` selects controlled mode.
+### Root
+
+Pass `open` for controlled mode and subscribe to `openChange`. Exposes `openDrawer()`, `close()`, and `toggle()` methods.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
   ]}
 />
 
-These props belong to `Root`. Other part defaults:
+### Content
 
-- **Content**: `side` defaults to `'bottom'` (`'top' | 'right' | 'bottom' | 'left'`), plus `minExtent`, `maxExtent`, `snapPoints`, `snapPoint`, `defaultSnapPoint`, and `dragDismissible`.
-- **Trigger / Close**: `disabled` defaults to `false`.
-- **Handle**: `disabled` defaults to `false`; `a11yLabel` defaults to `'Resize drawer'`.
-- **Overlay**: `passthrough` defaults to `false`.
-- **Title / Description / Header / Footer**: No props.
+Exposes `open`, `snapPoint`, `dragging`, `dragProgress`, `offsetPercentage`, `extentValid`, `requestSnapPoint()`, and the `snapPointChange` event.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'snapPoints', type: 'number[]', default: '—' },
+    { name: 'snapPoint', type: 'number', default: '—' },
+    { name: 'defaultSnapPoint', type: 'number', default: '—' },
+    { name: 'minExtent', type: 'AvailableLayoutLength', default: "{ unit: 'logical', value: 0 }" },
+    {
+      name: 'maxExtent',
+      type: 'AvailableLayoutLength',
+      default: "vertical { unit: 'available-minus-root-text', value: 6 } / horizontal { unit: 'root-text', value: 20 }",
+    },
+    { name: 'dragDismissible', type: 'boolean', default: 'true' },
+    { name: 'dragDismissThreshold', type: 'number', default: '0.25' },
+    { name: 'enterDuration', type: 'number', default: '500' },
+    { name: 'leaveDuration', type: 'number', default: '500' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Mask
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'passthrough', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '500' },
+    { name: 'leaveDuration', type: 'number', default: '500' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+### Handle / Trigger / Close
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Handle.disabled', type: 'boolean', default: 'false' },
+    { name: 'Handle.a11yLabel', type: 'string', default: "'Resize drawer'" },
+    { name: 'Trigger / Close.disabled', type: 'boolean', default: 'false' },
+    { name: 'Trigger / Close.wrap', type: 'boolean', default: 'false' },
+    { name: 'styleProfile', type: 'ShadcnStyleProfile', default: "'inherit'" },
+  ]}
+/>
+
+`Header`, `Footer`, `Title`, and `Description` accept only the optional `styleProfile` prop.
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-DRAWER.yaml', 'P-BASE-DRAWER.yaml', 'P-SHADCN-BUTTON.yaml']}
+  files={[
+    'P-SHADCN-DRAWER.yaml',
+    'P-SHADCN-DRAWER-HEADER.yaml',
+    'P-SHADCN-DRAWER-FOOTER.yaml',
+    'P-SHADCN-DRAWER-MOTION.yaml',
+    'P-BASE-DRAWER.yaml',
+    'P-SHADCN-BUTTON.yaml',
+  ]}
 />
 
 <SpecEntityLinks directory="spec/contracts" files={['C-AS-TRIGGER-0001.yaml']} />

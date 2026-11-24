@@ -1,12 +1,13 @@
 ---
-title: 'NavigationMenu'
-description: 'A Brutalist-styled navigation menu with named disclosure panels and native destination links.'
+title: 'Navigation Menu'
+description: 'A Brutalist navigation bar with bold borders, hard-shadow disclosure panels, and native destination links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-NavigationMenu provides site- or app-level navigation with mutually exclusive disclosure panels and native anchor links.
+Brutalist Navigation Menu builds site- or app-level navigation following the Brutalist design contract (`rounded-base` 5px corners, 2px black borders, DM Sans typography, and a 3px hard-offset floating panel shadow) with mutually exclusive panels and real native anchor links.
 
 ## Preview
 
@@ -14,50 +15,172 @@ NavigationMenu provides site- or app-level navigation with mutually exclusive di
   demoId="demo-brutalist-navigation-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/navigation-menu` and adapt them for your target runtime.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/navigation-menu` and adapt them for your target runtime:
+
+```ts
+import {
+  navigationMenuRoot,
+  navigationMenuTrigger,
+  navigationMenuContent,
+  navigationMenuItem,
+  navigationMenuLink,
+} from '@proto.ui/prototypes-brutalist/navigation-menu';
+```
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  BrutalistNavigationMenuRoot,
+  BrutalistNavigationMenuTrigger,
+  BrutalistNavigationMenuContent,
+  BrutalistNavigationMenuItem,
+  BrutalistNavigationMenuLink,
+} from '../proto-ui/components/react';
 
-NavigationMenu is composed of `Root`, `Trigger`, `Content`, `Item`, and `Link`:
+export function BrutalistSiteNav() {
+  return (
+    <BrutalistNavigationMenuRoot a11yLabel="Main navigation">
+      <BrutalistNavigationMenuTrigger value="getting-started">
+        Getting started
+      </BrutalistNavigationMenuTrigger>
+      <BrutalistNavigationMenuContent value="getting-started" a11yLabel="Getting started">
+        <BrutalistNavigationMenuLink href="/docs" current>
+          Introduction
+        </BrutalistNavigationMenuLink>
+        <BrutalistNavigationMenuItem value="copy-theme" textValue="Copy theme CSS">
+          Copy theme CSS
+        </BrutalistNavigationMenuItem>
+      </BrutalistNavigationMenuContent>
+    </BrutalistNavigationMenuRoot>
+  );
+}
+```
 
-- `Root`: Renders a navigation landmark and manages the currently open panel via `value`.
-- `Trigger`: Disclosure button paired with a `Content` panel by `value`.
-- `Content`: Labelled region displaying the open panel's links and commands.
-- `Item`: Emits a command action when activated.
-- `Link`: Renders a native anchor supporting `href`, `target`, `rel`, and `current` (sets `aria-current` for the active page).
+### Composition
 
-### Link Behavior
+```text
+NavigationMenuRoot (navigation)
+├── NavigationMenuTrigger (button, paired by value)
+└── NavigationMenuContent (region, paired by value)
+    ├── NavigationMenuLink (native <a>)
+    └── NavigationMenuItem (command action)
+```
 
-- **Native browser semantics**: URL previews, `Enter` activation, and modifier/middle-click browsing are handled natively by the browser.
-- **Read-only `navigate` event**: After native activation, `Link` emits a read-only `navigate` event with `{ href, target, rel, modified }` for observation.
-- **Dismissal behavior**: A standard same-window activation closes the open panel unless `closeOnSelect` is `false`. Modified clicks, middle-clicks, and `_blank` targets keep the current page's panel open.
-- **Disabled links**: Setting `disabled` removes the link destination and blocks activation.
-- **Runtime rendering**: React, Vue, and Vue 2 render a native `<a>` root element; Web Components wrap your children inside an owned anchor element so focus, styles, and accessibility attributes stay aligned.
+### Native Links & Keyboard
+
+- **Native browser semantics**: URL previews, `Enter` activation, and modifier/middle-click tab opening are handled natively by the browser. React, Vue, and Vue 2 render a native `<a>` root; Web Components wrap children in an owned anchor element.
+- **Read-only `navigate` event**: After native activation, `Link` emits a read-only `navigate` event with `{ href, target, rel, modified }`.
+- **Dismissal & disabled links**: Ordinary same-window activations close the open panel unless `closeOnSelect={false}`; modified clicks, middle-clicks, and `_blank` targets keep the panel open. Disabled links remove `href` and block activation.
+- **Keyboard roving**: Arrow keys move across top-level triggers, `ArrowDown` / `ArrowUp` enter the panel at the first or last entry, and `Escape` closes the panel and returns focus to the trigger.
+
+## Examples
+
+### With Icon
+
+Combine icons and labels inside a Brutalist floating panel with high-contrast hover borders and fills.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu-with-icons"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Links, Current Page & Disabled
+
+Demonstrates current-page highlighting (`current`), persistent panels (`closeOnSelect={false}`), `_blank` navigation, and disabled triggers or links.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu-links-and-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled & Events
+
+Drive the active panel with `value` and `valueChange` while observing `Item.select` and `Link.navigate`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` to enter controlled mode):
+### NavigationMenuRoot
 
 <ApiPropsTable
-  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  headers={{ name: 'Prop / Expose', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: 'undefined (uncontrolled)' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'valueChange (event)', type: '{ value: string; reason: string }', default: '—' },
+    { name: 'requestValue (method)', type: '(value: string, reason?: string) => boolean', default: '—' },
+    { name: 'close (method)', type: '() => void', default: '—' },
   ]}
 />
 
-Other part props and defaults:
+### NavigationMenuTrigger
 
-- **Trigger**: `value` defaults to `''`; `disabled` defaults to `false`.
-- **Content**: `value` and `a11yLabel` default to `''`; `sideOffset` defaults to `4`.
-- **Item**: `value` and `textValue` default to `''`; `disabled` defaults to `false`; `closeOnSelect` defaults to `true`.
-- **Link**: `href` and `rel` default to `''`; `current` defaults to `false`; `target` defaults to `'_self'`.
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### NavigationMenuContent
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### NavigationMenuItem
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+### NavigationMenuLink
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'href', type: 'string', default: "''" },
+    { name: 'target', type: "'_self' | '_blank'", default: "'_self'" },
+    { name: 'rel', type: 'string', default: "''" },
+    { name: 'current', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'navigate (event)', type: '{ href: string; target: string; rel: string; modified: boolean }', default: '—' },
+    { name: 'select (event)', type: '{ value: string; menuValue: string }', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-NAVIGATION-MENU.yaml', 'P-BASE-NAVIGATION-MENU.yaml']}
+/>

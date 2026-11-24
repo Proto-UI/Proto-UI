@@ -16,9 +16,9 @@ export const DRAWER_CONTENT = {
   maia: tw('flex flex-col bg-transparent p-4 text-sm text-popover-foreground'),
   lyra: tw('bg-popover text-popover-foreground flex flex-col text-xs leading-relaxed rounded-none'),
   mira: tw('flex flex-col bg-transparent p-2 text-xs leading-relaxed text-popover-foreground'),
-  luma: tw('flex flex-col bg-transparent p-4 text-sm'),
+  luma: tw('flex flex-col bg-transparent p-4 text-sm text-popover-foreground'),
   sera: tw('bg-popover text-popover-foreground flex flex-col text-sm rounded-none'),
-  rhea: tw('flex flex-col bg-transparent p-4 text-sm'),
+  rhea: tw('flex flex-col bg-transparent p-4 text-sm text-popover-foreground'),
   'new-york-v4': tw('bg-background text-foreground flex flex-col'),
 } as const satisfies OverlayRecipes;
 

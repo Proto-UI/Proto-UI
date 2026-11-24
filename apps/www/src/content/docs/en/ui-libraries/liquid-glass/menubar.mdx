@@ -1,11 +1,13 @@
 ---
 title: 'Menubar'
-description: 'A keyboard-coordinated Liquid Glass menu bar with paired command panels.'
+description: 'A keyboard-coordinated Liquid Glass menu bar with concentric geometry, floating glass menu panels, and high-contrast opaque fallbacks.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Menubar organizes multiple command menus into a horizontal bar with a single roving Tab stop and seamless arrow-key switching between panels.
+A Liquid Glass horizontal menu bar with concentric corner radii (`rounded-2xl` outer containers with `p-1` padding and `rounded-xl` inner controls), applying optical glass material exclusively to open floating panels to avoid glass-on-glass stacking while preserving high-contrast opaque fallbacks.
 
 ## Preview
 
@@ -13,24 +15,146 @@ Liquid Glass Menubar organizes multiple command menus into a horizontal bar with
   demoId="demo-liquid-glass-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source and not yet included in the 0.2.0 stable release; import the prototypes from `@proto.ui/prototypes-liquid-glass/menubar` and adapt them for your target runtime.
 
 ## Usage
 
-- **Parts**: `Root`, `Trigger`, `Content`, `Item`.
-- **Panel pairing**: `Root.value` identifies the single open panel, matching a `Trigger.value` to its `Content.value`. Controlled `value` emits requests without mutating caller state.
-- **Keyboard navigation**: the bar uses one roving Tab stop. Left/Right move across top-level triggers, Up/Down enter and navigate menu items, and typeahead jumps to matching commands. Escape restores focus to the active trigger; outside clicks and item selection dismiss the panel.
+```tsx
+import {
+  LiquidGlassMenubarRoot,
+  LiquidGlassMenubarTrigger,
+  LiquidGlassMenubarContent,
+  LiquidGlassMenubarItem,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <LiquidGlassMenubarRoot a11yLabel="Workspace menu">
+      <LiquidGlassMenubarTrigger value="file">File</LiquidGlassMenubarTrigger>
+      <LiquidGlassMenubarContent value="file" a11yLabel="File menu">
+        <LiquidGlassMenubarItem value="new-tab">New Tab</LiquidGlassMenubarItem>
+        <LiquidGlassMenubarItem value="print">Print...</LiquidGlassMenubarItem>
+      </LiquidGlassMenubarContent>
+    </LiquidGlassMenubarRoot>
+  );
+}
+```
+
+### Composition & Material Hierarchy
+
+```text
+MenubarRoot (rounded-2xl p-1)
+├── MenubarTrigger (rounded-xl, prominent active fill)
+├── MenubarContent (rounded-2xl p-1, liquid-glass material when open)
+│   ├── MenubarItem (rounded-xl concentric highlight)
+│   └── MenubarItem
+└── ...
+```
+
+- `Root` and `Trigger` stay ordinary non-glass controls so glass is never stacked on glass; expanded triggers elevate into a prominent primary fill.
+- `Content` declares a `liquid-glass` material candidate with a subtle inset specular rim when open and `material="auto"`, or renders its complete opaque surface when `material="opaque"`.
+- `Item` uses concentric `rounded-xl` geometry and preserves opaque readable text when disabled rather than dimming the entire surface with `opacity-50`.
+
+### Keyboard and accessibility
+
+- The bar uses a single roving `Tab` stop; `ArrowLeft` and `ArrowRight` move across top-level triggers.
+- `ArrowDown` and `ArrowUp` open and navigate menu items vertically, with typeahead character jump.
+- Pressing `Escape` dismisses the panel and returns focus to its active trigger; outside clicks and command selection close the panel by default.
+
+## Examples
+
+### Destructive Actions
+
+Mark destructive commands with `variant="destructive"` for high-contrast red emphasis on focus.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inset, Disabled, and Persistent Items
+
+Use `closeOnSelect={false}` for toggleable menu options alongside `inset` alignment and readable opaque disabled states.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Material vs. Opaque Fallback
+
+Compare the default `material="auto"` glass surface with an explicit `material="opaque"` opt-out over a colorful backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-menubar-material"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part    | Prop    | Description                                                       |
-| ------- | ------- | ----------------------------------------------------------------- |
-| Root    | `value` | Identifier of the currently open panel (supports controlled mode) |
-| Trigger | `value` | Panel identifier paired with `Content`                            |
-| Content | `value` | Command panel paired with `Trigger`                               |
-| Item    | —       | Actionable menu command                                           |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: '— (controlled when provided)' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+Events & methods: `valueChange({ value, reason })`, `requestValue(value, reason?)`, `close()`.
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Content)' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Trigger)' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+Events & methods: `select({ value, menuValue })`, `focusSelf(options?)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

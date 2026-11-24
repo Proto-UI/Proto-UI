@@ -15,15 +15,22 @@ import {
 export interface DropdownTriggerProps extends BaseDropdownTriggerProps {
   /** Opaque retains the same command paint without requesting optical material. */
   material?: 'auto' | 'opaque';
+  /** Visual hierarchy following Apple Liquid Glass HIG regular vs prominent controls. */
+  prominence?: 'regular' | 'prominent';
+  /** Renders a trailing pull-down chevron indicator when true. */
+  indicator?: boolean;
 }
 
 export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
   name: 'liquid-glass-dropdown-trigger',
+  modules: asDropdownTrigger.modules,
   setup(def) {
     def.props.define({
       material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+      prominence: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
+      indicator: { type: 'boolean', empty: 'fallback' },
     });
-    def.props.setDefaults({ material: 'auto' });
+    def.props.setDefaults({ material: 'auto', prominence: 'regular', indicator: false });
     const behavior = asDropdownTrigger();
     const state = behavior.stateHandles;
     if (!state) throw new Error('Dropdown Trigger capture missing');
@@ -60,6 +67,11 @@ export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
       )
     );
     def.rule({
+      when: (w) => w.prop('prominence').eq('prominent'),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-primary bg-primary text-primary-foreground shadow-md')),
+    });
+    def.rule({
       when: (w) =>
         w.all(
           w.state(state.hovered).eq(true),
@@ -94,6 +106,26 @@ export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
       // Whole-host opacity composites both over an uncontrolled backdrop.
       intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED_FOCUSABLE)),
     });
-    return behavior.render;
+    return (renderer) => {
+      const props = renderer.read.props.get();
+      return [
+        renderer.r.slot(),
+        props.indicator === true
+          ? renderer.svg.root(
+              {
+                viewBox: '0 0 24 24',
+                width: 14,
+                height: 14,
+                fill: 'none',
+                stroke: 'currentColor',
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+              },
+              renderer.svg.path({ d: 'm6 9 6 6 6-6' })
+            )
+          : null,
+      ];
+    };
   },
 });

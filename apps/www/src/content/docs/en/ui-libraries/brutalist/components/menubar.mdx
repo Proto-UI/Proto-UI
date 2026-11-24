@@ -1,12 +1,13 @@
 ---
 title: 'Menubar'
-description: 'A Brutalist-styled menubar with roving keyboard navigation and independent command panels.'
+description: 'A Brutalist-styled horizontal menubar with roving keyboard navigation, hard-edge shadows, and independent command panels.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Menubar organizes a horizontal bar of mutually exclusive command menus with roving keyboard navigation, focus management, and command selection.
+A Brutalist horizontal menu bar combining `rounded-base` 5px corners, 2px black borders, DM Sans typography, and zero-blur hard shadows to organize mutually exclusive command panels.
 
 ## Preview
 
@@ -14,42 +15,99 @@ Menubar organizes a horizontal bar of mutually exclusive command menus with rovi
   demoId="demo-brutalist-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the prototypes directly from `@proto.ui/prototypes-brutalist/menubar` and adapt them for your target runtime.
+Currently available from workspace source and not yet included in the 0.2.0 stable release; import the prototypes directly from `@proto.ui/prototypes-brutalist/menubar` and adapt them for your target runtime.
 
 ## Usage
 
-### Anatomy
+```tsx
+import {
+  BrutalistMenubarRoot,
+  BrutalistMenubarTrigger,
+  BrutalistMenubarContent,
+  BrutalistMenubarItem,
+} from '../proto-ui/components/react';
 
-Menubar is composed of four parts: `Root`, `Trigger`, `Content`, and `Item`.
+export function Example() {
+  return (
+    <BrutalistMenubarRoot a11yLabel="Workspace menu">
+      <BrutalistMenubarTrigger value="file">File</BrutalistMenubarTrigger>
+      <BrutalistMenubarContent value="file" a11yLabel="File menu">
+        <BrutalistMenubarItem value="new-tab">New Tab</BrutalistMenubarItem>
+        <BrutalistMenubarItem value="print">Print...</BrutalistMenubarItem>
+      </BrutalistMenubarContent>
+    </BrutalistMenubarRoot>
+  );
+}
+```
 
-- `Root`: Manages the active panel value and coordinates keyboard navigation across the bar.
-- `Trigger`: Opens or switches to the menu panel matching its `value`.
-- `Content`: Renders the command panel paired with a `Trigger` by `value`.
-- `Item`: Represents a selectable command inside a panel.
+### Composition
 
-### Keyboard & Focus
+```text
+MenubarRoot
+├── MenubarTrigger (value="file")
+├── MenubarContent (value="file")
+│   ├── MenubarItem
+│   └── MenubarItem
+├── MenubarTrigger (value="edit")
+└── MenubarContent (value="edit")
+    └── MenubarItem
+```
+
+- `Root`: Framed bar container with 2px black border and 4px hard shadow managing active panel state and roving focus.
+- `Trigger`: Top-level menu button paired with `Content` by `value`, highlighting with `bg-main` and a black border when active.
+- `Content`: Floating menu panel following the design contract (`rounded-base`, 2px black border, and 3px foreground shadow).
+- `Item`: Flat interactive menu row supporting `inset` alignment and `variant="destructive"` styling.
+
+### Keyboard and accessibility
 
 - The bar participates as a single roving `Tab` stop; `ArrowLeft` and `ArrowRight` move between triggers.
 - `ArrowDown` and `ArrowUp` open a panel and move vertically through items, with typeahead character matching.
-- Pressing `Escape` dismisses the open panel and returns focus to its matching `Trigger`. Pressing outside or selecting an item also dismisses the panel unless `closeOnSelect` is set to `false` on the `Item`.
+- Pressing `Escape` dismisses the open panel and returns focus to its matching `Trigger`; outside clicks and command selection also close the menu unless `closeOnSelect={false}`.
 
-### Controlled vs. Uncontrolled
+## Examples
 
-- Use `defaultValue` on `Root` for uncontrolled state.
-- Pass `value` on `Root` for controlled mode; updates emit change requests so your state controls which panel is open.
+### Destructive Actions
+
+Highlight destructive commands with `variant="destructive"`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Inset, Disabled, and Persistent Items
+
+Use `closeOnSelect={false}` for toggleable options alongside `inset` and disabled items or triggers.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled State
+
+Control the open panel via `value` and `valueChange` with `loop={false}`.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-menubar-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root` (pass `value` to enter controlled mode):
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '— (controlled when provided)' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
@@ -57,8 +115,48 @@ The following props belong to `Root` (pass `value` to enter controlled mode):
   ]}
 />
 
-Other part props and defaults:
+Events & methods: `valueChange({ value, reason })`, `requestValue(value, reason?)`, `close()`.
 
-- **Trigger**: `value` defaults to `''`; `disabled` defaults to `false`.
-- **Content**: `value` and `a11yLabel` default to `''`; `sideOffset` defaults to `4`.
-- **Item**: `value` and `textValue` default to `''`; `disabled` defaults to `false`; `closeOnSelect` defaults to `true`.
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Content)' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: 'Required (pairs with Trigger)' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+Events & methods: `select({ value, menuValue })`, `focusSelf(options?)`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

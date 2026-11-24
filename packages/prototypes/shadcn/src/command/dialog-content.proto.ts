@@ -20,6 +20,21 @@ export type CommandDialogContentExposes = Pick<
   'open' | 'transitionState' | 'isPresent'
 >;
 
+const MODERN_DIALOG_BASE =
+  'top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/6)] translate-y-0 max-w-[min(28rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100vh)*2/3_-_1rem)] bg-popover text-popover-foreground shadow-xl ring-1 duration-100';
+
+const MODERN_DIALOG_PROFILES = [
+  ['vega', 'gap-4 rounded-xl text-sm ring-foreground/10'],
+  ['nova', 'gap-4 rounded-xl text-sm ring-foreground/10'],
+  ['maia', 'gap-4 rounded-[var(--pui-radius-4xl)] text-sm ring-foreground/10'],
+  ['lyra', 'gap-4 rounded-none text-xs ring-foreground/10'],
+  ['mira', 'gap-4 rounded-xl text-xs ring-foreground/10'],
+  ['luma', 'gap-6 rounded-[var(--pui-radius-4xl)] text-sm ring-foreground/5'],
+  ['sera', 'gap-4 rounded-none text-sm ring-foreground/10'],
+] as const;
+
+const MODERN_STYLE_IDS = ['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera', 'rhea'] as const;
+
 /** MIT visual reference: shadcn/ui3d98900e CommandDialog and style-rhea.css. */
 export default definePrototype<CommandDialogContentProps, CommandDialogContentExposes>({
   name: 'shadcn-command-dialog-content',
@@ -55,15 +70,23 @@ export default definePrototype<CommandDialogContentProps, CommandDialogContentEx
           )
         ),
     });
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.state(style).eq('rhea'),
-          w.prop('presentation').eq('default'),
-          w.meta('colorScheme').eq('dark')
-        ),
-      intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
-    });
+    for (const [profile, recipe] of MODERN_DIALOG_PROFILES) {
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.prop('presentation').eq('default')),
+        intent: (i) => i.feedback.style.use(tw(`${MODERN_DIALOG_BASE} ${recipe}`)),
+      });
+    }
+    for (const profile of ['rhea', 'luma'] as const) {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.prop('presentation').eq('default'),
+            w.meta('colorScheme').eq('dark')
+          ),
+        intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
+      });
+    }
     // Explicit website recipe: top15%/32rem; ordinary default above is unchanged.
     // Root-relative available-region bounds keep the authored footer in the panel.
     def.rule({
@@ -76,14 +99,16 @@ export default definePrototype<CommandDialogContentProps, CommandDialogContentEx
         ),
     });
     // Durations remain selected by the same public style profile and consumer.
-    for (const [profile, duration] of [
-      ['rhea', 'duration-100'],
-      ['new-york-v4', 'duration-200'],
-    ] as const)
+    for (const profile of MODERN_STYLE_IDS) {
       def.rule({
         when: (w) => w.all(w.prop('presentation').eq('menu'), w.state(style).eq(profile)),
-        intent: (i) => i.feedback.style.use(tw(duration)),
+        intent: (i) => i.feedback.style.use(tw('duration-100')),
       });
+    }
+    def.rule({
+      when: (w) => w.all(w.prop('presentation').eq('menu'), w.state(style).eq('new-york-v4')),
+      intent: (i) => i.feedback.style.use(tw('duration-200')),
+    });
     // P-SHADCN-COMMAND-DIALOG-MOTION: do not rely on a timer to suppress CSS motion.
     def.rule({
       when: (w) =>

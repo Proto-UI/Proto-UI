@@ -1,13 +1,13 @@
 ---
 title: 'Command'
-description: '支持实时搜索过滤并触发命令执行的内联命令面板。'
+description: '用于搜索过滤和快速执行操作的命令面板组件，支持内联与弹窗组合。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-内联展开的可搜索命令列表，按 `Enter` 或点击命令项即可发出执行意图。本页示例采用 **Shadcn Rhea** 风格。
+支持实时搜索过滤和键盘导航的命令面板，点击或按下 `Enter` 即可发出 `execute` 事件由应用执行操作。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,50 +15,120 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-command"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+当前仅在源码工作区 `@proto.ui/prototypes-shadcn/command` 提供，尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import {
+  commandRoot,
+  commandInputWrapper,
+  commandInput,
+  commandContent,
+  commandItem,
+  commandEmpty,
+  commandDialogContent,
+  commandDialogMask,
+} from '@proto.ui/prototypes-shadcn/command';
+import { inputShell } from '@proto.ui/prototypes-shadcn/input-shell';
+```
 
-### 部件结构
+### 部件组合结构
 
-由 `Root`、`Input`、`Content`、`Item` 与 `Empty` 组合而成（内联展示，无 `Trigger`）：
+```text
+CommandRoot
+├── CommandInputWrapper
+│   └── InputShell (focusIndicator="none")
+│       └── CommandInput
+└── CommandContent
+    ├── CommandItem
+    └── CommandEmpty
+```
 
-- 列表默认保持展开（`defaultOpen={true}`），输入查询词只会过滤列表而不会自动执行命令。
-- 点击或按 `Enter` 激活命令项时，组件触发携带选中项的 `execute` 事件，由应用层执行具体动作。
+- **内联默认展开**：`defaultOpen` 默认为 `true`，输入文本只会过滤候选列表而不会自动执行命令；点击或按 `Enter` 时通过 `execute` 事件通知应用层。
+- **弹窗组合**：可结合 `DialogRoot`、`DialogTrigger`、`CommandDialogMask` 与 `CommandDialogContent` 构成命令弹窗，按当前 `styleProfile` 传入对应 `enterDuration` / `leaveDuration`（Rhea 为 `100`，New York 为 `200`）。
+- **过滤与键盘行为**：按 `textValue` 与 `keywords` 忽略大小写与重音匹配，设置 `filter={false}` 可接入外部过滤；方向键移动高亮项时焦点保留在输入框中，IME 组合输入期间不触发执行。
 
-### 过滤与交互行为
+## 示例
 
-- **内置过滤**：依据 `textValue` 与 `keywords` 过滤，忽略大小写及重音；设置 `filter={false}` 可由外部自行提供过滤后的子项。
-- **空状态与禁用项**：`Empty` 根据实际匹配数量显隐；禁用项与重复 `value` 的项不可执行。
-- **键盘与输入法**：方向键移动高亮项时焦点保持在单行输入框中，IME 组合输入期间不触发执行。
-- **受控模式**：`open`、`value` 与 `inputValue` 各自独立支持受控。
+### 命令弹窗
+
+结合 `Dialog` 与 `CommandDialogContent` 构建居中浮层命令面板。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 快捷键提示与关键词搜索
+
+在 `CommandItem` 中组合右侧快捷键标签，并通过 `keywords` 扩展匹配词。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-shortcuts"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 分组与禁用项
+
+使用语义分组标题、分隔线和 `disabled` 命令项组织复杂工作区命令。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-groups"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 可滚动长列表
+
+在限高列表容器内展示大量分组命令，支持滚轮与方向键浏览。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-command-scrollable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `value`、`inputValue` 或 `open` 会使对应状态进入受控模式。由于命令列表默认内联展示，`defaultOpen` 默认为 `true`。
+### Root
+
+传入 `value`、`inputValue` 或 `open` 可独立切换为受控模式；`styleProfile` 可通过外层 `shadcn-style-scope` 或部件属性指定 9 套内置风格。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
     { name: 'filter', type: 'boolean', default: 'true' },
     { name: 'loop', type: 'boolean', default: 'true' },
     { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: "'new-york-v4'" },
+    { name: 'presentation', type: "'default' | 'menu'", default: "'default'" },
   ]}
 />
 
-以上属性属于 `Root`。其他部件属性默认值：
+### 其他部件与事件
 
+- **InputWrapper**：输入区外层容器，支持 `styleProfile` 与 `presentation`（`'default' | 'menu'`）。
 - **Input**：`placeholder`、`a11yLabel`、`name` 均默认为 `''`。
 - **Content**：`side="bottom"`、`align="start"`、`sideOffset={4}`、`collisionPadding={8}`。
 - **Item**：`value`、`textValue`、`keywords` 均默认为 `''`，`disabled` 默认为 `false`。
+- **Empty**：无独立属性，根据可见匹配数量自动显隐。
+- **DialogContent / DialogMask**：必填 `enterDuration: number` 与 `leaveDuration: number`；`DialogContent` 另支持 `styleProfile` 与 `presentation`。
+- **事件**：`Root` 触发 `execute`、`valueChange`、`inputValueChange` 与 `openChange`。
 
 ## 参考
 

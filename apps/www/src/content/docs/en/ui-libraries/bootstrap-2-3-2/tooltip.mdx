@@ -1,0 +1,162 @@
+---
+title: 'Bootstrap 2.3.2 Tooltip'
+description: 'A classic Bootstrap 2.3.2 tooltip featuring 11px white text on a 200px max-width black pill with a 150ms linear opacity fade.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Tooltip preserves the archived `#000` / `#fff` compact bubble (`max-width: 200px`, `8px` padding, `4px` radius, `11px` type) and `150ms` linear fade (`0 → 0.8` opacity), backed by Base Tooltip timing, focus, and accessibility semantics.
+
+## Preview
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Bootstrap 2.3.2 Tooltip is available from workspace source via `@proto.ui/prototypes-bootstrap-2-3-2/tooltip` (`tooltipGroup`, `tooltipRoot`, `tooltipTrigger`, `tooltipContent`) for use with any Proto UI host adapter.
+
+## Usage
+
+```tsx
+import {
+  BootstrapTooltipGroup,
+  BootstrapTooltipRoot,
+  BootstrapTooltipTrigger,
+  BootstrapTooltipContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BootstrapTooltipGroup>
+      <BootstrapTooltipRoot>
+        <BootstrapTooltipTrigger>Account</BootstrapTooltipTrigger>
+        <BootstrapTooltipContent side="top">View account settings</BootstrapTooltipContent>
+      </BootstrapTooltipRoot>
+    </BootstrapTooltipGroup>
+  );
+}
+```
+
+### Composition
+
+```text
+TooltipGroup (optional)
+└── TooltipRoot
+    ├── TooltipTrigger
+    └── TooltipContent
+```
+
+- `Group` coordinates cold hover delay (`700ms`), close delay (`100ms`), and warm sibling handoff (`300ms`).
+- `Trigger` remains chromeless with a classic focus outline; `Tab` focus opens immediately and `Escape` dismisses while preserving trigger focus.
+- `Content` renders in a portal with automatic `aria-describedby` / `role="tooltip"` wiring and disables transitions when reduced motion is preferred.
+
+## Examples
+
+### Side
+
+Use the `side` prop on `Content` to display the tooltip on `left`, `top`, `bottom`, or `right`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### With Keyboard Shortcut
+
+Display a brief action label alongside an inline keyboard shortcut badge.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip-shortcut"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled Button
+
+Wrap a disabled button inside `Trigger` so hovering or focusing still reveals why the control is disabled.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tooltip-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Group
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '100' },
+    { name: 'skipDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+### Root
+
+Pass `open` for controlled mode. `Root` inherits `Group` delays unless overridden.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: 'undefined' },
+    { name: 'closeDelay', type: 'number', default: 'undefined' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '150' },
+  ]}
+/>
+
+### Events, States & Methods
+
+- **Root**: Exposes read-only state `open`, event `openChange` (`{ open, reason }`), and methods `openTooltip(reason?)`, `close(reason?)`, `toggle(reason?)`.
+- **Trigger**: Exposes read-only states `disabled`, `hovered`, `focused`, `focusVisible`, and method `focusSelf(options?)`.
+- **Content**: Exposes read-only state `open` and Transition handles (`transitionState`, `isPresent`, `controls`).
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-TOOLTIP.yaml',
+    'P-BOOTSTRAP-2-3-2-TOOLTIP-GROUP.yaml',
+    'P-BOOTSTRAP-2-3-2-TOOLTIP-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT.yaml',
+    'P-BASE-TOOLTIP.yaml',
+  ]}
+/>

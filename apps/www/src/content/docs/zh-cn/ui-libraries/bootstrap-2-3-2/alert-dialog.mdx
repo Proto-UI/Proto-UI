@@ -4,8 +4,10 @@ description: '带明确说明、安全取消焦点与操作确认意图的 Boots
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-AlertDialog 用于需要用户明确确认的重要操作，打开时自动将焦点定位到安全的取消按钮，并阻止点击遮罩意外关闭。
+Bootstrap 2.3.2 AlertDialog 沿用经典 `.modal.fade` 与 `.modal-backdrop.fade` 样式与过渡，打开时自动将焦点定位到安全的取消按钮，并阻止点击遮罩意外关闭。
 
 ## 预览
 
@@ -13,30 +15,127 @@ AlertDialog 用于需要用户明确确认的重要操作，打开时自动将�
   demoId="demo-bootstrap-2-3-2-alert-dialog"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区 `@proto.ui/prototypes-bootstrap-2-3-2` 中提供，尚未进入 0.2.0 稳定版。
 
 ## 用法
 
-由 `Root`、`Trigger`、`Mask`、`Content`、`Title`、`Description`、`Cancel` 和 `Action` 组成：
+```tsx
+import {
+  BootstrapAlertDialogRoot,
+  BootstrapAlertDialogTrigger,
+  BootstrapAlertDialogMask,
+  BootstrapAlertDialogContent,
+  BootstrapAlertDialogTitle,
+  BootstrapAlertDialogDescription,
+  BootstrapAlertDialogFooter,
+  BootstrapAlertDialogCancel,
+  BootstrapAlertDialogAction,
+} from '../proto-ui/components/react';
 
-- **焦点与模态**：`Mask` 提供模态遮罩；`Content` 约束焦点在对话框内，不响应外部点击关闭，并在打开时优先聚焦 `Cancel`。
-- **确认与关闭**：点击 `Action` 会先触发 `action` 事件，再请求关闭对话框，实际业务操作由应用监听事件执行；按 `Escape` 或点击 `Cancel` 直接请求关闭。
-- **受控模式**：传入 `open` 进入受控模式，监听 `openChange` 后由父组件更新 `open`；非受控模式使用 `defaultOpen`。禁用状态下的按钮不会触发操作。
+export function Example() {
+  return (
+    <BootstrapAlertDialogRoot>
+      <BootstrapAlertDialogTrigger>Show Dialog</BootstrapAlertDialogTrigger>
+      <BootstrapAlertDialogMask />
+      <BootstrapAlertDialogContent>
+        <BootstrapAlertDialogTitle>Are you absolutely sure?</BootstrapAlertDialogTitle>
+        <BootstrapAlertDialogDescription>
+          This action cannot be undone. This will permanently delete your account.
+        </BootstrapAlertDialogDescription>
+        <BootstrapAlertDialogFooter>
+          <BootstrapAlertDialogCancel>Cancel</BootstrapAlertDialogCancel>
+          <BootstrapAlertDialogAction>Continue</BootstrapAlertDialogAction>
+        </BootstrapAlertDialogFooter>
+      </BootstrapAlertDialogContent>
+    </BootstrapAlertDialogRoot>
+  );
+}
+```
+
+### 部件组成
+
+由 `Root`、`Trigger`、`Mask`、`Content`、`Title`、`Description`、`Footer`、`Cancel` 和 `Action` 组成：
+
+- **焦点与模态**：`Mask` 提供 150ms 淡入淡出的 0.8 透明黑遮罩；`Content` 提供 300ms 下滑与淡入过渡、约束焦点在对话框内，不响应外部点击关闭，并在打开时优先聚焦 `Cancel`。
+- **Footer**：对应 Bootstrap `.modal-footer`，带顶部分隔线与次级灰底，右对齐排列 `Cancel` 与 `Action`。
+- **确认与关闭**：点击 `Action` 会先触发 `action` 事件再请求关闭；按 `Escape` 或点击 `Cancel` 直接请求关闭。支持在 `Trigger` 与 `Action` 上选择经典 Bootstrap 按钮变体（如 `variant="danger"`）。
+
+## 示例
+
+### 紧凑尺寸（Small）
+
+设置 `size="sm"` 使用 360px 紧凑宽度模态框。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 危险操作（Danger）
+
+在 `Trigger` 与 `Action` 上使用 `variant="danger"` 呈现经典的 Bootstrap 2.3.2 红色渐变 `.btn-danger` 样式。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态（Controlled）
+
+传入 `open` 并监听 `openChange` 与 `action` 事件，由父组件同步状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件                    | 属性 / 事件            | 说明                                          |
-| ----------------------- | ---------------------- | --------------------------------------------- |
-| `Root`                  | `open` / `defaultOpen` | 控制对话框的打开状态（受控或初始值）          |
-| `Root`                  | `openChange`           | 打开或关闭请求事件                            |
-| `Trigger`               | —                      | 触发打开对话框的按钮                          |
-| `Mask`                  | —                      | 模态背景遮罩层                                |
-| `Content`               | —                      | 对话框容器，承担焦点约束与 `alertdialog` 语义 |
-| `Title` / `Description` | —                      | 对话框标题与辅助说明文本                      |
-| `Cancel`                | —                      | 取消按钮，默认作为打开时的初始焦点目标        |
-| `Action`                | `action`               | 确认按钮，触发 `action` 事件后请求关闭        |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件 / 方法', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined（非受控）' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'openChange（事件）', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
+    { name: 'openAlertDialog / close / toggle（方法）', type: '(reason?: string) => void', default: '—' },
+  ]}
+/>
+
+### Content、Mask、Footer 与命令部件
+
+<ApiPropsTable
+  headers={{ name: '部件与属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Content.size', type: "'default' | 'sm'", default: "'default'（560px）" },
+    { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '300' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Footer', type: '被动容器（无独立属性）', default: '—' },
+    { name: 'Trigger.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'default'" },
+    { name: 'Action.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'primary'" },
+    { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.action（事件）', type: '{ reason: string }', default: '—' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-ALERT-DIALOG.yaml',
+    'P-BOOTSTRAP-2-3-2-ALERT-DIALOG-FOOTER.yaml',
+    'P-BASE-ALERT-DIALOG.yaml',
+  ]}
+/>

@@ -1,11 +1,13 @@
 ---
 title: 'Popover'
-description: '相对触发元素定位、支持外部点击与焦点离开关闭的 Liquid Glass 非模态弹层。'
+description: '相对触发元素定位、支持材质层级与无障碍回退的 Liquid Glass 非模态弹层。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Popover 用于承载与触发按钮关联的轻量交互内容。它是非模态弹层，打开时不会锁定页面滚动或限制 Tab 导航。
+Liquid Glass Popover 在触发按钮附近呈现半透明悬浮材质面板，支持常规与强调层级、同心圆角几何及降低透明度/高对比度/减少动态效果的自动回退，不锁定背景滚动或限制 `Tab` 导航。
 
 ## 预览
 
@@ -13,25 +15,117 @@ Liquid Glass Popover 用于承载与触发按钮关联的轻量交互内容。�
   demoId="demo-liquid-glass-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+Liquid Glass Popover 目前在工作区源码中提供，尚未进入 0.2.0 稳定版 CLI。可直接从 `@proto.ui/prototypes-liquid-glass/popover` 导入原型并使用对应框架适配器：
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-liquid-glass/popover';
+```
 
 ## 用法
 
-- **部件组成**：`Root`、`Trigger`、`Content`、`Title`、`Description`、`Close`。
-- **定位**：`Content` 相对 `Trigger` 锚定，支持 `side`、`align`、`sideOffset`、`alignOffset` 与 `collisionPadding`。
-- **关闭与焦点行为**：点击外部、按 Escape、点击 `Close` 或焦点移出 `Trigger` 与 `Content` 时请求关闭。焦点在 `Trigger` 与 Portal 内的 `Content` 之间移动仍视为内部操作；因焦点移出而关闭时会保留新外部控件上的焦点，不会抢回 `Trigger`。纯焦点移出请求的 `focusReason` 为 `'programmatic'`。
-- **受控模式**：传入 `open` 并监听 `openChange` 即可由外部控制开关（也可使用 `defaultOpen` 初始化非受控状态）。若拒绝关闭请求，内容会继续显示且不限制外部焦点。
+```tsx
+<LiquidGlassPopover>
+  <LiquidGlassPopoverTrigger>Open Popover</LiquidGlassPopoverTrigger>
+  <LiquidGlassPopoverContent align="start">
+    <LiquidGlassPopoverTitle>Dimensions</LiquidGlassPopoverTitle>
+    <LiquidGlassPopoverDescription>Set the dimensions for the layer.</LiquidGlassPopoverDescription>
+  </LiquidGlassPopoverContent>
+</LiquidGlassPopover>
+```
+
+### 组件结构
+
+```text
+LiquidGlassPopoverRoot
+├── LiquidGlassPopoverTrigger
+└── LiquidGlassPopoverContent
+    ├── LiquidGlassPopoverTitle
+    ├── LiquidGlassPopoverDescription
+    └── LiquidGlassPopoverClose
+```
+
+- **材质层级与禁止玻璃叠玻璃**：`Content` 仅在展开且 `material="auto"` 时声明 `liquid-glass` 材质；`Close` 采用同心圆角不透明控件（`rounded-xl` 嵌套在 `rounded-2xl` 外壳内），避免在玻璃浮层内部再次叠加玻璃材质控件。
+- **无障碍自动回退**：当用户开启系统“降低透明度”（`prefers-reduced-transparency: reduce`）或“强制颜色模式”（`forced-colors: active`）时，自动撤回半透明材质并切换为高对比度不透明表面；开启“减少动态效果”（`prefers-reduced-motion: reduce`）时禁用缩放与过渡动效。
+- **定位与关闭**：支持 `side`、`align`、`sideOffset`、`alignOffset` 与 `collisionPadding`；点击外部、按下 `Escape`、激活 `Close` 或焦点移出弹层均会请求关闭。
+
+## 示例
+
+### 基础用法
+
+展示在彩色渐变背景上方悬浮的 Liquid Glass 基础弹层。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 材质与强调层级
+
+对比 `prominence="regular"`（常规玻璃）、`prominence="prominent"`（强调玻璃）以及显式 `material="opaque"`（不透明回退）。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 对齐方式
+
+使用 `align` 属性控制弹层对齐方式（`start`、`center`、`end`）。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-align"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态
+
+传入 `open` 并监听 `openChange` 事件，由外部状态控制弹层的打开与关闭。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 事件 | 说明 |
-| --- | --- | --- |
-| Root | `open` / `defaultOpen` | 受控 / 非受控打开状态 |
-| Root | `openChange` | 打开或关闭请求事件 |
-| Content | `side` / `align` / `sideOffset` / `alignOffset` / `collisionPadding` | 相对 `Trigger` 的锚点定位与避障边距 |
-| Trigger / Title / Description / Close | — | 触发按钮、标题、说明与关闭按钮 |
+`Root` 暴露只读状态 `open`、方法 `openPopover` / `close` / `toggle` 以及 `openChange` 事件。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open (Root)', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '4' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'material (Content)', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence (Trigger / Content / Close)', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '0' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

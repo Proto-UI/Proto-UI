@@ -8,11 +8,20 @@ export { default as alertDialogAction } from './action.proto';
 export { default as alertDialogMask } from './mask.proto';
 export { default } from './root.proto';
 export type {
+  LiquidGlassAlertDialogMaterial,
+  LiquidGlassAlertDialogSize,
+  LiquidGlassAlertDialogProminence,
+  LiquidGlassAlertDialogContentProps,
+  LiquidGlassAlertDialogContentProps as AlertDialogContentProps,
+  LiquidGlassAlertDialogTriggerProps,
+  LiquidGlassAlertDialogTriggerProps as AlertDialogTriggerProps,
+  LiquidGlassAlertDialogActionProps,
+  LiquidGlassAlertDialogActionProps as AlertDialogActionProps,
+} from './types';
+export type {
   AlertDialogRootProps,
   AlertDialogRootExposes,
-  AlertDialogTriggerProps,
   AlertDialogTriggerExposes,
-  AlertDialogContentProps,
   AlertDialogContentExposes,
   AlertDialogTitleProps,
   AlertDialogTitleExposes,
@@ -20,7 +29,6 @@ export type {
   AlertDialogDescriptionExposes,
   AlertDialogCancelProps,
   AlertDialogCancelExposes,
-  AlertDialogActionProps,
   AlertDialogActionExposes,
   AlertDialogMaskProps,
   AlertDialogMaskExposes,

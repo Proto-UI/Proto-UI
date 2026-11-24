@@ -8,18 +8,16 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A floating card that previews rich content when hovering or focusing a trigger, with configurable open/close delays and collision-aware placement. The examples on this page use the **Shadcn Rhea** style preset.
+For sighted users to preview rich content available behind a link or handle, with configurable open/close delays and collision-aware placement. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
-The demo opens `@proto-ui` after 150ms and closes after 300ms, positioned at `side="bottom"` and `align="center"`:
+Hover or focus `@proto-ui` for 150ms to open the preview card. Moving the pointer into the card keeps it open; leaving closes it after 200ms.
 
 <PrototypePreviewer
   demoId="demo-shadcn-hover-card"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
-  codePanel={false}
 />
 
 ## Installation
@@ -32,15 +30,84 @@ Replace `wc` with `react` or `vue` to generate the local facade for your framewo
 
 ## Usage
 
-Compose `Hover Card` from `Root`, `Trigger`, and `Content`:
+```tsx
+import {
+  ShadcnHoverCardRoot,
+  ShadcnHoverCardTrigger,
+  ShadcnHoverCardContent,
+} from '../proto-ui/components/react';
 
-- **Root**: Manages open state (controlled `open` or uncontrolled `defaultOpen`) and `openDelay` / `closeDelay`.
-- **Trigger**: Requests opening on hover or focus; accepts its own `disabled` prop.
-- **Content**: Keeps the card open while hovered and supports placement, alignment, offsets, and viewport collision avoidance.
+export function Example() {
+  return (
+    <ShadcnHoverCardRoot openDelay={150} closeDelay={200}>
+      <ShadcnHoverCardTrigger>@proto-ui</ShadcnHoverCardTrigger>
+      <ShadcnHoverCardContent side="bottom" align="center">
+        Host-neutral interaction protocols for adaptable UI components.
+      </ShadcnHoverCardContent>
+    </ShadcnHoverCardRoot>
+  );
+}
+```
+
+### Composition
+
+```text
+ShadcnHoverCardRoot
+├── ShadcnHoverCardTrigger
+└── ShadcnHoverCardContent
+```
+
+- **Root**: Coordinates open state (controlled `open` or uncontrolled `defaultOpen`), `openDelay` / `closeDelay` timers, and shared `disabled` gating.
+- **Trigger**: Requests preview open on pointer hover or keyboard focus without overriding click navigation semantics.
+- **Content**: Renders an anchored portal panel with placement, alignment, offsets, collision avoidance, and a pointer hover bridge.
+
+## Examples
+
+### Sides
+
+Use the `side` and `align` props on `Content` to position the card relative to the trigger.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger Delays
+
+Configure `openDelay` and `closeDelay` on `Root` to balance responsiveness and accidental hover prevention.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-delays"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+Set `disabled` on `Root` or `Trigger` to prevent hover and focus from opening the preview card.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and handle `openChange` to synchronize card visibility with external state.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-hover-card-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `open` selects controlled mode. Delays must be finite numbers greater than or equal to `0`; invalid values fall back to the defaults.
+### Root
+
+Passing `open` enables controlled mode. Delays must be non-negative finite numbers; invalid values fall back to the defaults.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -50,18 +117,57 @@ Passing `open` selects controlled mode. Delays must be finite numbers greater th
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'openDelay', type: 'number', default: '700' },
     { name: 'closeDelay', type: 'number', default: '300' },
-    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: 'bottom' },
-    { name: 'align', type: "'start' | 'center' | 'end'", default: 'center' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+    },
+  ]}
+/>
+
+- **Exposed states**: `open: boolean`
+- **Exposed methods**: `openHoverCard(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Exposed events**: `openChange` (`{ open: boolean; reason: string | null }`)
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+    },
+  ]}
+/>
+
+- **Exposed states**: `disabled`, `hovered`, `focused`, `focusVisible`
+- **Exposed methods**: `focusSelf(options?)`
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
     { name: 'sideOffset', type: 'number', default: '4' },
     { name: 'alignOffset', type: 'number', default: '0' },
     { name: 'avoidCollisions', type: 'boolean', default: 'true' },
     { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '200' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    {
+      name: 'styleProfile',
+      type: "'inherit' | 'vega' | 'nova' | 'maia' | 'lyra' | 'mira' | 'luma' | 'sera' | 'rhea' | 'new-york-v4'",
+      default: "'new-york-v4'",
+    },
   ]}
 />
 
-- `open`, `defaultOpen`, `disabled`, `openDelay`, and `closeDelay` belong to `Root`. `Root` exposes `open`, `openHoverCard`, `close`, `toggle`, and `openChange`.
-- `side` through `collisionPadding` belong to `Content`.
-- `Trigger` accepts `disabled` (default `false`).
+- **Exposed states**: `open`, `isPresent`, `transitionState`
 
 ## References
 

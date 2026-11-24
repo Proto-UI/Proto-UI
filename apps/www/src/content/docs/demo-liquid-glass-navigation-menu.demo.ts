@@ -1,132 +1,166 @@
-import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
-export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'min-w-0 grid gap-4 p-4',
-    'children': [
+import type { DemoSpec, DemoNode } from '@/components/PrototypePreviewer/demo-types';
+
+function linkCard(href: string, title: string, description: string, current = false): DemoNode {
+  return {
+    kind: 'proto',
+    prototypeId: 'liquid-glass-navigation-menu-link',
+    props: current ? { href, current: true } : { href },
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'liquid-glass-navigation-menu-root',
-        'children': [
+        kind: 'box',
+        tag: 'span',
+        className: 'grid gap-0.5 text-left',
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-navigation-menu-trigger',
-            'children': ['File'],
-            'props': {
-              'value': 'file',
-            },
+            kind: 'box',
+            tag: 'span',
+            className: 'block text-sm font-medium leading-none',
+            children: [title],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-navigation-menu-content',
-            'children': [
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-navigation-menu-item',
-                'children': ['New document'],
-                'props': {
-                  'value': 'new',
-                  'textValue': 'New document',
-                },
-                'ref': 'new',
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-navigation-menu-item',
-                'children': ['Open document'],
-                'props': {
-                  'value': 'open',
-                  'textValue': 'Open document',
-                },
-                'ref': 'open',
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-navigation-menu-link',
-                'children': ['Jump to demo destination'],
-                'props': {
-                  'href': '#liquid-glass-navigation-demo-destination',
-                  'current': true,
-                },
-                'ref': 'docs',
-              },
-            ],
-            'props': {
-              'value': 'file',
-              'a11yLabel': 'File commands',
-            },
-          },
-          {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-navigation-menu-trigger',
-            'children': ['Edit'],
-            'props': {
-              'value': 'edit',
-            },
-          },
-          {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-navigation-menu-content',
-            'children': [
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-navigation-menu-item',
-                'children': ['Undo'],
-                'props': {
-                  'value': 'undo',
-                  'textValue': 'Undo',
-                },
-                'ref': 'undo',
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-navigation-menu-item',
-                'children': ['Redo'],
-                'props': {
-                  'value': 'redo',
-                  'textValue': 'Redo',
-                },
-                'ref': 'redo',
-              },
-            ],
-            'props': {
-              'value': 'edit',
-              'a11yLabel': 'Edit commands',
-            },
+            kind: 'box',
+            tag: 'span',
+            className: 'block text-xs leading-snug opacity-80',
+            children: [description],
           },
         ],
-        'props': {
-          'a11yLabel': 'Project commands',
-        },
-        'ref': 'root',
-      },
-      {
-        'kind': 'box',
-        'ref': 'status',
-        'attrs': {
-          'aria-live': 'polite',
-        },
-        'children': ['Select a command.'],
-      },
-      {
-        'kind': 'box',
-        'attrs': { 'id': 'liquid-glass-navigation-demo-destination' },
-        'children': ['Native link destination within this demo.'],
       },
     ],
-  },
-  setup({ refs, api }) {
-    for (const ref of ['new', 'open', 'undo', 'redo'])
-      api.setProps(ref, {
-        onSelect: (detail: { value: string }) => {
-          refs.status.textContent = detail.value + ' selected';
-        },
-      });
-    api.setProps('docs', {
-      onNavigate: (detail: { href: string }) => {
-        refs.status.textContent = 'Native navigation observed: ' + detail.href;
+  };
+}
+
+function triggerLabel(label: string) {
+  return [
+    label,
+    {
+      kind: 'box' as const,
+      tag: 'span' as const,
+      className: 'text-[10px] leading-none opacity-75',
+      attrs: { 'aria-hidden': 'true' },
+      children: ['▾'],
+    },
+  ];
+}
+
+export default {
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className:
+      'min-w-0 w-full rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6 flex items-center justify-center',
+    children: [
+      {
+        kind: 'proto',
+        prototypeId: 'liquid-glass-navigation-menu-root',
+        props: { a11yLabel: 'Main navigation' },
+        children: [
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-navigation-menu-trigger',
+            props: { value: 'getting-started' },
+            children: triggerLabel('Getting started'),
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-navigation-menu-content',
+            props: { value: 'getting-started', a11yLabel: 'Getting started links' },
+            children: [
+              {
+                kind: 'box',
+                className: 'grid gap-1 w-[300px] sm:w-[360px] p-1',
+                children: [
+                  linkCard(
+                    '#introduction',
+                    'Introduction',
+                    'Translucent floating navigation surfaces with concentric geometry.',
+                    true
+                  ),
+                  linkCard(
+                    '#materials',
+                    'Materials',
+                    'V2 liquid-glass material intent with opaque accessibility fallback.'
+                  ),
+                  linkCard(
+                    '#typography',
+                    'Typography',
+                    'Vibrant foreground hierarchy across light and dark backdrops.'
+                  ),
+                ],
+              },
+            ],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-navigation-menu-trigger',
+            props: { value: 'components' },
+            children: triggerLabel('Components'),
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-navigation-menu-content',
+            props: { value: 'components', a11yLabel: 'Component links' },
+            children: [
+              {
+                kind: 'box',
+                className: 'grid gap-1 sm:grid-cols-2 w-[300px] sm:w-[480px] p-1',
+                children: [
+                  linkCard(
+                    '#alert-dialog',
+                    'Alert Dialog',
+                    'Modal interruption elevated on a liquid-glass sheet.'
+                  ),
+                  linkCard(
+                    '#popover',
+                    'Popover',
+                    'Anchored floating glass card for contextual controls.'
+                  ),
+                  linkCard(
+                    '#tabs',
+                    'Tabs',
+                    'Segmented glass navigation switching active panels.'
+                  ),
+                  linkCard(
+                    '#tooltip',
+                    'Tooltip',
+                    'Compact contextual hint floating above controls.'
+                  ),
+                ],
+              },
+            ],
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-navigation-menu-trigger',
+            props: { value: 'resources' },
+            children: triggerLabel('Resources'),
+          },
+          {
+            kind: 'proto',
+            prototypeId: 'liquid-glass-navigation-menu-content',
+            props: { value: 'resources', a11yLabel: 'Documentation resources' },
+            children: [
+              {
+                kind: 'box',
+                className: 'grid gap-0.5 w-[220px] p-1',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-navigation-menu-link',
+                    props: { href: '#changelog' },
+                    children: ['Changelog'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-navigation-menu-item',
+                    props: { value: 'quick-search', textValue: 'Quick search' },
+                    children: ['Quick search'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
-    });
+    ],
   },
 } satisfies DemoSpec;

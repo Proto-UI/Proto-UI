@@ -3,20 +3,24 @@ import { bindDrawerCommandDisabled } from './drawer-command-disabled.shared';
 import type { DemoSpec } from '../../components/PrototypePreviewer/demo-types';
 
 export default withShadcnRheaDemo({
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'flex min-w-0 flex-wrap gap-4 p-4',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className: 'flex min-w-0 flex-wrap items-center justify-center gap-4 p-4',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'shadcn-drawer-root',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'shadcn-drawer-root',
+        ref: 'root',
+        props: {
+          a11yLabel: 'Daily activity goal',
+        },
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'shadcn-drawer-trigger',
-            'ref': 'trigger',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'shadcn-drawer-trigger',
+            ref: 'trigger',
+            children: [
               {
                 kind: 'proto',
                 prototypeId: 'shadcn-button',
@@ -27,18 +31,21 @@ export default withShadcnRheaDemo({
             ],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'shadcn-drawer-mask',
+            kind: 'proto',
+            prototypeId: 'shadcn-drawer-mask',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'shadcn-drawer-content',
-            'ref': 'panel',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'shadcn-drawer-content',
+            ref: 'panel',
+            props: {
+              side: 'bottom',
+            },
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-drawer-handle',
-                'props': { 'a11yLabel': 'Resize drawer' },
+                kind: 'proto',
+                prototypeId: 'shadcn-drawer-handle',
+                props: { a11yLabel: 'Resize drawer' },
               },
               {
                 kind: 'box',
@@ -49,16 +56,51 @@ export default withShadcnRheaDemo({
                     prototypeId: 'shadcn-drawer-header',
                     children: [
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'shadcn-drawer-title',
-                        'children': ['Drawer settings'],
+                        kind: 'proto',
+                        prototypeId: 'shadcn-drawer-title',
+                        children: ['Move Goal'],
                       },
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'shadcn-drawer-description',
-                        'children': [
-                          'This panel fits its content. Drag the handle outward to dismiss, or choose Close.',
+                        kind: 'proto',
+                        prototypeId: 'shadcn-drawer-description',
+                        children: ['Set your daily activity goal.'],
+                      },
+                    ],
+                  },
+                  {
+                    kind: 'box',
+                    className: 'flex items-center justify-center gap-4 px-4 py-3',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-button',
+                        ref: 'decrease',
+                        props: { variant: 'outline', size: 'icon' },
+                        children: ['-'],
+                      },
+                      {
+                        kind: 'box',
+                        className: 'flex-1 text-center',
+                        children: [
+                          {
+                            kind: 'box',
+                            ref: 'goal-value',
+                            className: 'text-4xl font-bold tracking-tight tabular-nums',
+                            children: ['350'],
+                          },
+                          {
+                            kind: 'box',
+                            className: 'text-xs uppercase tracking-wide text-muted-foreground',
+                            children: ['Calories / day'],
+                          },
                         ],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-button',
+                        ref: 'increase',
+                        props: { variant: 'outline', size: 'icon' },
+                        children: ['+'],
                       },
                     ],
                   },
@@ -67,16 +109,23 @@ export default withShadcnRheaDemo({
                     prototypeId: 'shadcn-drawer-footer',
                     children: [
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'shadcn-drawer-close',
-                        'ref': 'close',
-                        'children': [
+                        kind: 'proto',
+                        prototypeId: 'shadcn-button',
+                        ref: 'submit',
+                        props: { variant: 'default' },
+                        children: ['Submit'],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-drawer-close',
+                        ref: 'close',
+                        children: [
                           {
                             kind: 'proto',
                             prototypeId: 'shadcn-button',
                             ref: 'close-action',
                             props: { variant: 'outline', disabled: true },
-                            children: ['Close'],
+                            children: ['Cancel'],
                           },
                         ],
                       },
@@ -85,35 +134,33 @@ export default withShadcnRheaDemo({
                 ],
               },
             ],
-            'props': {
-              'side': 'bottom',
-            },
           },
         ],
-        'props': {
-          'a11yLabel': 'Drawer',
-        },
-        'ref': 'root',
-      },
-      {
-        'kind': 'box',
-        'ref': 'status',
-        'attrs': {
-          'aria-live': 'polite',
-        },
-        'children': ['Closed'],
       },
     ],
   },
   setup({ refs, api }) {
-    api.setProps('panel', {
-      onSnapPointChange: (detail: { snapPoint: number }) => {
-        refs.status.textContent = `Drawer extent: ${Math.round(detail.snapPoint * 100)}%`;
+    let goal = 350;
+    const renderGoal = () => {
+      if (refs['goal-value']) refs['goal-value'].textContent = String(goal);
+    };
+    api.setProps('decrease', {
+      onClick: () => {
+        goal = Math.max(200, goal - 10);
+        renderGoal();
       },
     });
-    api.setProps('root', {
-      onOpenChange: (detail: { open: boolean; reason: string }) => {
-        refs.status.textContent = `${detail.open ? 'Opened' : 'Closed'}: ${detail.reason}`;
+    api.setProps('increase', {
+      onClick: () => {
+        goal = Math.min(600, goal + 10);
+        renderGoal();
+      },
+    });
+    api.setProps('submit', {
+      onClick: () => {
+        const root = api.getPublicInstance?.('root');
+        const close = root?.getExposes?.()?.close as ((reason?: string) => void) | undefined;
+        close?.('submit');
       },
     });
     return bindDrawerCommandDisabled(api);

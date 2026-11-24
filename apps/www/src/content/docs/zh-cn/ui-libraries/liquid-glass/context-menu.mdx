@@ -1,11 +1,13 @@
 ---
 title: 'Context Menu'
-description: '支持右键、触摸长按与键盘快捷键唤起的 Liquid Glass 上下文菜单。'
+description: '支持右键、触摸长按与键盘快捷键唤起的 Liquid Glass 悬浮上下文菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Context Menu 在目标区域响应右键点击、触摸/触控笔长按（持续 600ms）以及 `ContextMenu` / `Shift+F10` 键盘快捷键，并阻止已处理请求的浏览器原生右键菜单。
+Liquid Glass Context Menu 将悬浮菜单置于内容层之上的控制层，仅在 `Content` 展开时声明 Liquid Glass 材质并搭配同心圆角（外层 `16px` + `4px` 内边距对应菜单项 `12px`），同时保留普通非玻璃 `Trigger` 避免玻璃叠玻璃，并在减少透明度、高对比度或减少动态效果偏好下自动回退至清晰不透明表面。
 
 ## 预览
 
@@ -13,28 +15,159 @@ Liquid Glass Context Menu 在目标区域响应右键点击、触摸/触控笔�
   demoId="demo-liquid-glass-context-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+该组件目前在源码工作区提供，尚未进入 0.2.0 稳定版 CLI 注册表。
 
 ## 用法
 
-- **部件组成**：`Root`、`Trigger`、`Content`、`Item`。
-- **触发与定位**：
-  - 右键点击或触摸/笔在移动容差内按住 600ms 时，菜单锚定在输入点（默认 `bottom`/`start`，无额外间距）；长按中途移动、松开、取消、禁用或卸载会自动取消。普通左键点击与滚动不受影响。
-  - 按下 `ContextMenu` 或 `Shift+F10`、或调用编程方法 `openContextMenu()` 时，菜单以触发区域作为后备锚点。
-- **键盘与关闭**：`Content` 支持上下方向键导航、首字母输入跳转（typeahead）、外部点击关闭以及 Escape / 选中命令后恢复触发器焦点。
-- **受控模式**：传入 `open` 时，菜单仍以请求方式通知调用方；若调用方延后打开，会自动复用最近有效的输入锚点。
+```tsx
+import {
+  LiquidGlassContextMenuContent,
+  LiquidGlassContextMenuItem,
+  LiquidGlassContextMenuRoot,
+  LiquidGlassContextMenuTrigger,
+} from '@/components/proto-ui';
+
+export function Example() {
+  return (
+    <LiquidGlassContextMenuRoot>
+      <LiquidGlassContextMenuTrigger className="h-36 w-72 border-dashed">
+        Right click here
+      </LiquidGlassContextMenuTrigger>
+      <LiquidGlassContextMenuContent>
+        <LiquidGlassContextMenuItem value="back">Back</LiquidGlassContextMenuItem>
+        <LiquidGlassContextMenuItem value="forward" disabled>Forward</LiquidGlassContextMenuItem>
+        <LiquidGlassContextMenuItem value="reload">Reload</LiquidGlassContextMenuItem>
+      </LiquidGlassContextMenuContent>
+    </LiquidGlassContextMenuRoot>
+  );
+}
+```
+
+### 部件结构
+
+```text
+ContextMenuRoot
+├── ContextMenuTrigger (ordinary surface)
+└── ContextMenuContent (Liquid Glass floating layer)
+    ├── ContextMenuItem (concentric rounded-xl)
+    └── ContextMenuItem (concentric rounded-xl)
+```
+
+- **层级与同心几何**：`Trigger` 保持普通内容表面，仅浮层 `Content` 在展开时进入 Liquid Glass 通道；禁用态不依赖降低不透明度，确保回退表面对比度稳定。
+- **动态与无障碍回退**：展开与收起动画遵循 `reducedMotion` 偏好自动停用；可通过 `material="opaque"` 显式关闭玻璃材质。
+
+## 示例
+
+### 基础菜单
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 危险操作与缩进对齐
+
+通过 `variant="destructive"` 与 `inset` 强调破坏性操作并对齐菜单项文字。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 弹出方向
+
+使用 `side` 与 `sideOffset` 控制菜单展开方向，并在接近视口边缘时自动碰撞翻转。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自动材质与不透明回退
+
+对比默认 `material="auto"`（支持环境下启用 Liquid Glass）与显式 `material="opaque"` 表面。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件                     | 属性 / 方法            | 说明                                   |
-| ------------------------ | ---------------------- | -------------------------------------- |
-| Root                     | `open` / `defaultOpen` | 受控 / 非受控打开状态                  |
-| Root                     | `disabled`             | 禁用菜单唤起                           |
-| Root                     | `closeOnItemCommit`    | 选中菜单项后是否自动请求关闭           |
-| Root                     | `openContextMenu()`    | 以触发区域为锚点以编程方式请求打开菜单 |
-| Trigger / Content / Item | —                      | 触发区域、浮层菜单容器与可执行菜单项   |
+### Root
+
+传入 `open` 进入受控模式；暴露 `openChange` 事件以及 `openContextMenu()`、`close()`、`toggle()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: '—' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+暴露 `focusFirst()`、`focusLast()`、`focusNext()`、`focusPrev()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'start'" },
+    { name: 'sideOffset', type: 'number', default: '0' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
+
+### Item
+
+激活时触发 `select` 事件（payload：`{ value, reason }`）。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-CONTEXT-MENU.yaml', 'P-BASE-CONTEXT-MENU.yaml']}
+/>

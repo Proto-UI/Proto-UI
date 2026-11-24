@@ -1,193 +1,182 @@
 export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'proto',
-    'prototypeId': 'brutalist-dropdown-root',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'proto',
+    prototypeId: 'brutalist-dropdown-root',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'brutalist-dropdown-trigger',
-        'children': ['Open menu'],
+        kind: 'proto',
+        prototypeId: 'brutalist-dropdown-trigger',
+        children: ['Open'],
       },
       {
-        'kind': 'proto',
-        'prototypeId': 'brutalist-dropdown-content',
-        'props': {
-          'align': 'start',
+        kind: 'proto',
+        prototypeId: 'brutalist-dropdown-content',
+        props: {
+          align: 'start',
         },
-        'children': [
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-group',
-            'children': [
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-group',
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-label',
-                'children': ['My Account'],
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-label',
+                children: ['My Account'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'ref': 'profileAction',
-                'props': {
-                  'value': 'profile',
-                  'textValue': 'Profile',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                ref: 'profileAction',
+                props: {
+                  value: 'profile',
+                  textValue: 'Profile',
                 },
-                'children': [
+                children: [
                   'Profile',
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'brutalist-dropdown-shortcut',
-                    'children': ['⇧⌘P'],
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-shortcut',
+                    children: ['⇧⌘P'],
                   },
                 ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'billing',
-                  'textValue': 'Billing',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'billing',
+                  textValue: 'Billing',
                 },
-                'children': [
+                children: [
                   'Billing',
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'brutalist-dropdown-shortcut',
-                    'children': ['⌘B'],
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-shortcut',
+                    children: ['⌘B'],
                   },
                 ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'settings',
-                  'textValue': 'Settings',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'settings',
+                  textValue: 'Settings',
                 },
-                'children': [
+                children: [
                   'Settings',
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'brutalist-dropdown-shortcut',
-                    'children': ['⌘S'],
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-shortcut',
+                    children: ['⌘S'],
                   },
                 ],
               },
             ],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-separator',
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-separator',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-group',
-            'props': {
-              'a11yLabel': 'Team actions',
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-group',
+            props: {
+              a11yLabel: 'Team actions',
             },
-            'children': [
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'team',
-                  'textValue': 'Team',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'team',
+                  textValue: 'Team',
                 },
-                'children': ['Team'],
+                children: ['Team'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'new-team',
-                  'textValue': 'New Team',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'new-team',
+                  textValue: 'New Team',
                 },
-                'children': [
+                children: [
                   'New Team',
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'brutalist-dropdown-shortcut',
-                    'children': ['⌘+T'],
+                    kind: 'proto',
+                    prototypeId: 'brutalist-dropdown-shortcut',
+                    children: ['⌘+T'],
                   },
                 ],
               },
             ],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-separator',
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-separator',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-group',
-            'props': {
-              'a11yLabel': 'Resources',
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-group',
+            props: {
+              a11yLabel: 'Resources',
             },
-            'children': [
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'github',
-                  'textValue': 'GitHub',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'github',
+                  textValue: 'GitHub',
                 },
-                'children': ['GitHub'],
+                children: ['GitHub'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'support',
-                  'textValue': 'Support',
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'support',
+                  textValue: 'Support',
                 },
-                'children': ['Support'],
+                children: ['Support'],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-item',
-                'props': {
-                  'value': 'api',
-                  'textValue': 'API',
-                  'disabled': true,
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-item',
+                props: {
+                  value: 'api',
+                  textValue: 'API',
+                  disabled: true,
                 },
-                'children': ['API'],
+                children: ['API'],
               },
             ],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-separator',
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-separator',
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-item',
-            'props': {
-              'value': 'logout',
-              'textValue': 'Log out',
+            kind: 'proto',
+            prototypeId: 'brutalist-dropdown-item',
+            props: {
+              value: 'logout',
+              textValue: 'Log out',
             },
-            'children': [
+            children: [
               'Log out',
               {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-dropdown-shortcut',
-                'children': ['⇧⌘Q'],
+                kind: 'proto',
+                prototypeId: 'brutalist-dropdown-shortcut',
+                children: ['⇧⌘Q'],
               },
             ],
           },
-          {
-            'kind': 'proto',
-            'prototypeId': 'brutalist-dropdown-item',
-            'ref': 'deleteAction',
-            'props': {
-              'value': 'delete',
-              'textValue': 'Delete',
-              'variant': 'destructive',
-            },
-            'children': ['Delete'],
-          },
         ],
-        'surfaceStyle': 'w-40',
+        surfaceStyle: 'w-44',
       },
     ],
   },

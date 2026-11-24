@@ -1,0 +1,146 @@
+---
+title: 'Bootstrap 2.3.2 Hover Card'
+description: '沿用归档 Bootstrap 2.3.2 链接配色与 Popover 浮层样式的悬停预览卡片组件。'
+---
+
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Hover Card 在 Base Hover Card 的延迟触发与防碰撞定位协议之上，还原归档版本的 `#08c` / `#005580` 链接视觉、276px 最大宽度、6px 圆角边框、经典投影以及 150ms 线性淡入淡出过渡。
+
+## 预览
+
+悬停或聚焦 `@proto-ui` 150ms 后展开经典 Bootstrap 2.3.2 浮层，指针移入内容区时保持打开。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-hover-card"
+  manager="npm"
+/>
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+
+## 用法
+
+```tsx
+import {
+  BootstrapHoverCardRoot,
+  BootstrapHoverCardTrigger,
+  BootstrapHoverCardContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BootstrapHoverCardRoot openDelay={150} closeDelay={250}>
+      <BootstrapHoverCardTrigger>@proto-ui</BootstrapHoverCardTrigger>
+      <BootstrapHoverCardContent side="bottom" align="center" sideOffset={6}>
+        Host-neutral interaction protocols rendered with Bootstrap 2.3.2 popover chrome.
+      </BootstrapHoverCardContent>
+    </BootstrapHoverCardRoot>
+  );
+}
+```
+
+### 结构组成与样式细节
+
+```text
+BootstrapHoverCardRoot
+├── BootstrapHoverCardTrigger
+└── BootstrapHoverCardContent
+```
+
+- 触发器在浅色主题下采用 Bootstrap 2.3.2 经典的 `#08c` 链接色与 `#005580` 悬停/聚焦下划线，并在深色宿主下自动切换为高对比度前景色。
+- 浮层面板保留归档 `.popover` 尺寸参数（`max-width: 276px`、`border-radius: 6px`、内层 `9px 14px` 留白）及 `150ms` 线性透明度过渡。
+
+## 示例
+
+### 方位（Sides）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 开合延迟（Delays）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card-delays"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 禁用状态（Disabled）
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+- **暴露状态与方法**：`open`、`openHoverCard(reason?)`、`close(reason?)`、`toggle(reason?)`
+- **暴露事件**：`openChange`（`{ open: boolean; reason: string | null }`）
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '150' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-HOVER-CARD.yaml',
+    'P-BOOTSTRAP-2-3-2-HOVER-CARD-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

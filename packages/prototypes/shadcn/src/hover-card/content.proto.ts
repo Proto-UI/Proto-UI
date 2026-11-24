@@ -3,7 +3,7 @@ import { asHoverCardContent } from '@proto.ui/prototypes-base/hover-card';
 import type { ShadcnHoverCardContentExposes, ShadcnHoverCardContentProps } from './types';
 import { setupOverlayDarkRing, setupOverlayPaint } from '../dialog/style';
 import { HOVER_CARD_PANEL } from './recipes';
-import { setupPopupMotion } from '../popover/motion';
+import { POPUP_CLOSE_MOTION, POPUP_OPEN_MOTION, POPUP_SIDE_MOTION } from '../popover/motion';
 
 const hoverCardContent = definePrototype<
   ShadcnHoverCardContentProps,
@@ -22,9 +22,23 @@ const hoverCardContent = definePrototype<
 
     // P-SHADCN-HOVER-CARD-CONTENT-CURRENT-VISUAL-SURFACE
     // All profiles use keyframes, not transitions of positioning or panel paint.
-    def.feedback.style.use(tw('z-50 outline-none transition-none'));
+    def.feedback.style.use(tw('z-50 outline-none transition-none text-start'));
 
-    setupPopupMotion(def, open);
+    // P-SHADCN-HOVER-CARD-CONTENT-OPEN-AND-SIDE-STYLES
+    def.rule({
+      when: (w) => w.state(open).eq(true),
+      intent: (i) => i.feedback.style.use(POPUP_OPEN_MOTION),
+    });
+    def.rule({
+      when: (w) => w.state(open).eq(false),
+      intent: (i) => i.feedback.style.use(POPUP_CLOSE_MOTION),
+    });
+    for (const [side, animation] of POPUP_SIDE_MOTION) {
+      def.rule({
+        when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq(side)),
+        intent: (i) => i.feedback.style.use(animation),
+      });
+    }
   },
 });
 

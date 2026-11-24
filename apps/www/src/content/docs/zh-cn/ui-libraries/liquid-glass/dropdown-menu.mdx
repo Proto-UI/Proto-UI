@@ -1,11 +1,13 @@
 ---
 title: 'Dropdown Menu'
-description: '支持动作分组、标签命名、分隔线、快捷键提示与玻璃材质的 Liquid Glass 下拉菜单。'
+description: '支持动作分组、同心圆角几何、触发器层级、材质回退与危险操作的 Liquid Glass 下拉菜单。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Dropdown Menu 用于展示按组组织的下拉命令列表，支持分组标签、分隔线、快捷键文本提示，以及在触发按钮与展开面板上呈现 Liquid Glass 光学材质。
+Liquid Glass Dropdown Menu 将下拉命令列表投影到浮动光学表面之上，支持同心圆角几何、`regular` / `prominent` 触发层级、`material="opaque"` 显式回退，以及基于 Base 协议的完整键盘导航。
 
 ## 预览
 
@@ -13,28 +15,162 @@ Liquid Glass Dropdown Menu 用于展示按组组织的下拉命令列表，支�
   demoId="demo-liquid-glass-dropdown-menu"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
-
-示例展示了包含账户与资源分组的 160px 菜单、禁用操作项以及独立的禁用触发按钮。
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可直接从 `@proto.ui/prototypes-liquid-glass/dropdown` 导入全部部件。
 
 ## 用法
 
-- **分组与装饰部件**：`Group` 与 `Label` 自动建立分组的无障碍命名关联；`Separator` 与 `Shortcut` 属于被动装饰部件，不进入键盘焦点队列。`Shortcut` 仅展示提示文字，不注册全局快捷键。
-- **触发器与面板材质**：`Trigger` 声明 `liquid-glass` 材质意图并随按压状态产生形变，`Content` 在展开时请求玻璃材质。当应用未提供合法可见 canvas 源、宿主不支持或对比度不安全时，自动保留高对比度不透明回退样式；若浮层传送（portal）到画布源之外，菜单面板同样会自动回退为不透明外观。
-- 悬停、键盘焦点、禁用与菜单项激活均由 Base Dropdown Menu 统一管理。
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/liquid-glass/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">
+        Profile
+        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem value="logout">Log out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+- **同心几何与材质层次**：菜单容器使用外层 `rounded-2xl` 配合 `p-2` 内边距与 `rounded-lg` 菜单项保持同心圆角关系；菜单项本身不重复叠加玻璃层，避免玻璃叠玻璃。
+- **材质自动回退与显式控制**：`Trigger` 与 `Content` 默认在可用画布背景上请求 `liquid-glass` 光学材质，并在无画布源、浮层传送至画布外或对比度偏好要求不透明时自动保持高对比度不透明表面；也可通过 `material="opaque"` 主动关闭玻璃材质。
+
+## 示例
+
+### 危险操作与缩进对齐
+
+为不可逆操作设置 `variant="destructive"`，并在混用图标项与纯文本项时通过 `inset` 保持对齐。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-dropdown-menu-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 触发器层级与指示图标
+
+使用 `prominence="regular"` 与 `prominence="prominent"` 区分常规菜单与主要操作入口，并可开启 `indicator` 显示下拉箭头。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-dropdown-menu-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不透明材质回退
+
+当触发器或浮层位于另一层玻璃工具栏内时，设置 `material="opaque"` 抑制玻璃叠加；禁用态触发器同样自动撤回光学材质并保持可读对比度。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-dropdown-menu-opaque"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件                 | 说明                                         |
-| -------------------- | -------------------------------------------- |
-| Root                 | 管理菜单打开状态与整体交互                   |
-| Trigger              | 菜单触发按钮，支持 `disabled` 与按压材质反馈 |
-| Content              | 下拉菜单容器，展开时启用玻璃材质并自动回退   |
-| Group / Label        | 将相关命令分组并提供实时无障碍组名称         |
-| Item                 | 可激活菜单命令项，支持禁用态                 |
-| Separator / Shortcut | 被动分组分隔线与快捷键文本提示               |
+### Root
+
+传入 `open` 进入受控模式，并暴露 `openChange` 事件与 `openDropdown()` / `close()` / `toggle()` 方法。
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
+    { name: 'openEntryValue', type: 'string', default: "''" },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'prominence', type: "'regular' | 'prominent'", default: "'regular'" },
+    { name: 'indicator', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'material', type: "'auto' | 'opaque'", default: "'auto'" },
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-LIQUID-GLASS-DROPDOWN-MENU.yaml',
+    'P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-LIQUID-GLASS-DROPDOWN-MENU-CONTENT.yaml',
+    'P-LIQUID-GLASS-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
+/>

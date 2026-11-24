@@ -14,6 +14,7 @@ export type {
   ToastCloseExposes,
 } from '@proto.ui/prototypes-base/toast';
 export type {
+  ToastType,
   ToastRootProps,
   ToastViewportProps,
   ToastTitleProps,

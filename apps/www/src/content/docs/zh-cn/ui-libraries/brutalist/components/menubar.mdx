@@ -5,8 +5,9 @@ description: '支持键盘导航与独立命令面板的 Brutalist 风格菜单�
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Menubar 用于在顶部或操作区组织一组互斥展开的命令菜单，提供完整的键盘导航、焦点管理与命令选择能力。
+Brutalist 风格的横向菜单栏，采用 5px 圆角（`rounded-base`）、2px 黑色边框、DM Sans 字体与零模糊硬阴影层级，在顶部或操作区组织一组互斥展开的命令面板。
 
 ## 预览
 
@@ -14,42 +15,99 @@ Menubar 用于在顶部或操作区组织一组互斥展开的命令菜单，提
   demoId="demo-brutalist-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/menubar` 导入组件原型并使用对应宿主 Adapter 适配。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版；可直接从 `@proto.ui/prototypes-brutalist/menubar` 导入组件原型并通过对应宿主 Adapter 适配。
 
 ## 用法
 
+```tsx
+import {
+  BrutalistMenubarRoot,
+  BrutalistMenubarTrigger,
+  BrutalistMenubarContent,
+  BrutalistMenubarItem,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BrutalistMenubarRoot a11yLabel="Workspace menu">
+      <BrutalistMenubarTrigger value="file">File</BrutalistMenubarTrigger>
+      <BrutalistMenubarContent value="file" a11yLabel="File menu">
+        <BrutalistMenubarItem value="new-tab">New Tab</BrutalistMenubarItem>
+        <BrutalistMenubarItem value="print">Print...</BrutalistMenubarItem>
+      </BrutalistMenubarContent>
+    </BrutalistMenubarRoot>
+  );
+}
+```
+
 ### 组件结构
 
-Menubar 由 `Root`、`Trigger`、`Content` 和 `Item` 四个部分组成：
+```text
+MenubarRoot
+├── MenubarTrigger (value="file")
+├── MenubarContent (value="file")
+│   ├── MenubarItem
+│   └── MenubarItem
+├── MenubarTrigger (value="edit")
+└── MenubarContent (value="edit")
+    └── MenubarItem
+```
 
-- `Root`：统一管理当前展开的面板状态和菜单栏范围的键盘协调。
-- `Trigger`：菜单栏中的触发按钮，通过 `value` 与对应的 `Content` 配对。
-- `Content`：展开后的命令面板容器，通过 `value` 对应触发器。
-- `Item`：面板中的具体命令项。
+- `Root`：带 2px 黑框与 4px 硬影的菜单栏容器，管理当前展开面板和游走焦点。
+- `Trigger`：菜单栏触发按钮，通过 `value` 与对应 `Content` 配对；聚焦或展开时切换至主色高亮与黑框。
+- `Content`：遵循设计契约的浮层面板（`rounded-base`、`border-2 border-black` 与 3px 前景硬影）。
+- `Item`：扁平交互命令项，支持 `inset` 缩进与 `variant="destructive"` 危险语义。
 
-### 键盘与焦点交互
+### 键盘与无障碍
 
-- 整个菜单栏作为单个 `Tab` 停靠点，使用 `ArrowLeft` / `ArrowRight` 在触发器之间切换。
-- 使用 `ArrowDown` / `ArrowUp` 打开面板并在命令项之间纵向移动，支持输入首字符快速跳转（typeahead）。
-- 按 `Escape` 关闭当前面板并将焦点恢复到对应的 `Trigger`；点击外部区域或选择命令项也会关闭面板（可在 `Item` 上设置 `closeOnSelect={false}` 保持展开）。
+- 整条菜单栏作为单个游走 `Tab` 停靠点，按 `ArrowLeft` / `ArrowRight` 切换触发器。
+- 按 `ArrowDown` / `ArrowUp` 打开面板并在命令项之间纵向移动，支持首字符快速跳转（typeahead）。
+- 按 `Escape` 关闭面板并将焦点交回对应 `Trigger`；点击外部或选择命令项后自动关闭（`closeOnSelect={false}` 可保持展开）。
 
-### 受控与非受控模式
+## 示例
 
-- 非受控模式：通过 `Root` 的 `defaultValue` 指定初始展开的面板。
-- 受控模式：向 `Root` 传入 `value` 并监听变更请求事件，由外部状态决定是否切换展开面板。
+### 危险操作与分组
+
+通过 `variant="destructive"` 呈现高对比度危险命令项。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缩进、禁用与常驻选项
+
+使用 `closeOnSelect={false}` 切换视图选项而不关闭面板，搭配 `inset` 缩进与禁用状态。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+传入 `value` 并响应 `valueChange` 控制当前打开的面板，设置 `loop={false}` 关闭循环跳转。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-menubar-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`（传入 `value` 进入受控模式）：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—（传入即进入受控模式）' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'loop', type: 'boolean', default: 'true' },
@@ -57,8 +115,48 @@ Menubar 由 `Root`、`Trigger`、`Content` 和 `Item` 四个部分组成：
   ]}
 />
 
-其余子部件属性默认值：
+事件与方法：`valueChange({ value, reason })`、`requestValue(value, reason?)`、`close()`。
 
-- **Trigger**：`value` 默认 `''`，`disabled` 默认 `false`。
-- **Content**：`value` 与 `a11yLabel` 默认 `''`，`sideOffset` 默认 `4`。
-- **Item**：`value` 与 `textValue` 默认 `''`，`disabled` 默认 `false`，`closeOnSelect` 默认 `true`。
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Content 配对）' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Trigger 配对）' },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+事件与方法：`select({ value, menuValue })`、`focusSelf(options?)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

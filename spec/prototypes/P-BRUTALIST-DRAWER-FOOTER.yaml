@@ -1,0 +1,30 @@
+id: P-BRUTALIST-DRAWER-FOOTER
+type: prototype
+title: Brutalist Drawer Footer passive structural part
+status: draft
+since: 0.3.0
+lifecycleRationale:
+  en: Draft structural part aligned with Base Drawer Footer and Brutalist visual grammar; independent review and browser/native evidence remain separate.
+  zh-CN: 与 Base Drawer Footer 及 Brutalist 视觉语法对齐的 draft 结构部件；独立审查及浏览器/native 证据另行推进。
+summary: Optional owner-scoped Brutalist drawer footer slot without independent interaction or State ownership.
+statement:
+  en: This part preserves children and claims the existing Drawer footer role within its logical Root using Brutalist spacing.
+  zh-CN: 本部件保留子内容，并在其逻辑 Root 内以 Brutalist 间距声明已有 Drawer footer role。
+criteria:
+  - id: P-BRUTALIST-DRAWER-FOOTER-STRUCTURE
+    text:
+      en: Follow C-DRAWER-STRUCTURE-0001 passive-slot, owner isolation and terminal cleanup requirements.
+      zh-CN: 遵守 C-DRAWER-STRUCTURE-0001 的被动 slot、owner 隔离与终止清理要求。
+sources:
+  - path: packages/prototypes/brutalist/src/drawer/footer.proto.ts
+dependsOn:
+  contracts: [C-DRAWER-STRUCTURE-0001]
+inherits:
+  prototypes: [P-BASE-DRAWER-FOOTER]
+verifies:
+  tests: [T-BRUTALIST-DRAWER-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0
+    change: introduced
+    summary: Cataloged Brutalist Drawer Footer passive structural part as draft.
+tags: [prototype, brutalist, drawer, footer, anatomy]

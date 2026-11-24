@@ -13,5 +13,6 @@ export default definePrototype<MenubarTriggerProps, MenubarTriggerExposes>({
       focusVisible: behavior.getState!('focusVisible')!,
       expanded: behavior.getState!('expanded')!,
     });
+    return behavior.render;
   },
 });

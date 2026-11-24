@@ -8,14 +8,18 @@ export { default } from './root.proto';
 export type {
   PopoverRootProps,
   PopoverRootExposes,
-  PopoverTriggerProps,
   PopoverTriggerExposes,
-  PopoverContentProps,
   PopoverContentExposes,
   PopoverTitleProps,
   PopoverTitleExposes,
   PopoverDescriptionProps,
   PopoverDescriptionExposes,
-  PopoverCloseProps,
   PopoverCloseExposes,
 } from '@proto.ui/prototypes-base/popover';
+export type {
+  LiquidGlassMaterialMode,
+  LiquidGlassProminence,
+  PopoverContentProps,
+  PopoverTriggerProps,
+  PopoverCloseProps,
+} from './types';

@@ -9,8 +9,10 @@ import { POPOVER_DESCRIPTION } from './recipes';
 
 export default definePrototype<PopoverDescriptionProps, PopoverDescriptionExposes>({
   name: 'shadcn-popover-description',
+  modules: asPopoverDescription.modules,
   setup(def) {
     const behavior = asPopoverDescription();
     setupOverlayPaint(def, POPOVER_DESCRIPTION, 'nova');
+    return behavior.render;
   },
 });

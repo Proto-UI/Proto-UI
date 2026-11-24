@@ -15,46 +15,181 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-alert-dialog"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+当前仅在源码工作区 `@proto.ui/prototypes-shadcn` 中提供，尚未进入 0.2.0 CLI 稳定版。
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import {
+  ShadcnAlertDialogRoot,
+  ShadcnAlertDialogTrigger,
+  ShadcnAlertDialogMask,
+  ShadcnAlertDialogContent,
+  ShadcnAlertDialogHeader,
+  ShadcnAlertDialogTitle,
+  ShadcnAlertDialogDescription,
+  ShadcnAlertDialogFooter,
+  ShadcnAlertDialogCancel,
+  ShadcnAlertDialogAction,
+} from '../proto-ui/components/react';
 
-### 部件结构
+export function Example() {
+  return (
+    <ShadcnAlertDialogRoot styleProfile="rhea">
+      <ShadcnAlertDialogTrigger variant="outline">Show Dialog</ShadcnAlertDialogTrigger>
+      <ShadcnAlertDialogMask />
+      <ShadcnAlertDialogContent>
+        <ShadcnAlertDialogHeader>
+          <ShadcnAlertDialogTitle>Are you absolutely sure?</ShadcnAlertDialogTitle>
+          <ShadcnAlertDialogDescription>
+            This action cannot be undone. This will permanently delete your account.
+          </ShadcnAlertDialogDescription>
+        </ShadcnAlertDialogHeader>
+        <ShadcnAlertDialogFooter>
+          <ShadcnAlertDialogCancel>Cancel</ShadcnAlertDialogCancel>
+          <ShadcnAlertDialogAction>Continue</ShadcnAlertDialogAction>
+        </ShadcnAlertDialogFooter>
+      </ShadcnAlertDialogContent>
+    </ShadcnAlertDialogRoot>
+  );
+}
+```
 
-`AlertDialog` 由以下部件组合而成：`Root`、`Trigger`、`Mask`、`Content`、`Header`、`Footer`、`Title`、`Description`、`Cancel`、`Action`。
+### 组合结构
 
-- **Root**：统一管理打开状态并固定启用 alert 模态语义。
-- **Mask**：提供模态背景遮罩层。
-- **Content**：将焦点限制在对话框内，阻止点击外部关闭，打开时优先将焦点移至 `Cancel`。采用 Shadcn Rhea 面板样式（`p-6`、`gap-6`、圆角上限 24px、popover 配色及阴影）。
-- **Header / Footer / Title / Description**：组织对话框头部、底部操作区以及无障碍标题与描述。
-- **Cancel / Action**：`Cancel` 与 `Escape` 键请求关闭；点击 `Action` 会先触发 `action` 事件，再请求关闭对话框，具体的业务或破坏性操作由应用层在事件回调中执行。禁用的按钮不会触发操作。
+```text
+AlertDialogRoot
+├── AlertDialogTrigger
+├── AlertDialogMask
+└── AlertDialogContent
+    ├── AlertDialogHeader
+    │   ├── AlertDialogTitle
+    │   └── AlertDialogDescription
+    └── AlertDialogFooter
+        ├── AlertDialogCancel
+        └── AlertDialogAction
+```
 
-### 受控与非受控
+- **Root**：管理打开状态并固定启用 `alertdialog` 模态语义。
+- **Trigger / Cancel / Action**：各自持有独立命令状态，支持 `variant`、`size`、`wrap` 与 `disabled`。点击 `Action` 会先发出 `action` 事件，再请求关闭对话框。
+- **Mask / Content**：提供模态遮罩、焦点锁定与 150ms 出入场过渡；打开时优先聚焦 `Cancel`，并阻止点击外部意外关闭。
+- **风格预设（`styleProfile`）**：支持 `vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea` 与 `new-york-v4`（`new-york` 兼容别名），省略时继承最近的 [Style Scope](../style-scope/)。
 
-- 通过 `defaultOpen` 设置初始打开状态。
-- 传入 `open` 进入受控模式：监听 `openChange` 事件并将新值传回 `Root` 即可更新显示状态。
+### 键盘与无障碍
+
+- `Escape` 或点击 `Cancel` 请求关闭并将焦点归还触发器。
+- `Tab` / `Shift + Tab` 在对话框内循环焦点。
+- 打开时默认优先聚焦安全的 `Cancel` 操作；禁用的按钮不会激活。
+
+## 示例
+
+### 紧凑尺寸（Small）
+
+在 `Content` 上设置 `size="sm"` 以使用更紧凑的确认面板，并配合 `Header` 的 `align="center"` 居中排版。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 图标媒体（Media）
+
+在 `Header` 中放置图标容器以突出当前操作主题。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-media"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 破坏性操作（Destructive）
+
+为 `Trigger` 与 `Action` 设置 `variant="destructive"`，并搭配紧凑确认面板提示高风险删除操作。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控状态（Controlled）
+
+传入 `open` 并监听 `openChange` 与 `action` 事件，由外部状态驱动显示与确认后的业务更新。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 从右到左（RTL）
+
+在容器与对话框内容中设置 `dir="rtl"`，`Header` 会通过逻辑对齐（`text-start`）自动适配阅读方向。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-传入 `open` 进入受控模式。与 `Dialog` 不同，`AlertDialog` 的 `Root` 不提供 `alert` 属性，而是始终保持 alert 确认模式。
+### Root
+
+与 `Dialog` 不同，`AlertDialog` 的 `Root` 始终保持 `alertdialog` 模式。
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件 / 方法', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined（非受控）' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → new-york-v4' },
+    { name: 'openChange（事件）', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
+    { name: 'openAlertDialog / close / toggle（方法）', type: '(reason?: string) => void', default: '—' },
+  ]}
+/>
+
+### Content 与 Mask
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'Content.size', type: "'default' | 'sm'", default: "'default'" },
+    { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Header.align', type: "'start' | 'center'", default: "'start'" },
   ]}
 />
 
-以上属性均作用于 `Root`。
+### Trigger、Cancel 与 Action
+
+<ApiPropsTable
+  headers={{ name: '属性 / 事件', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'variant', type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'", default: "Trigger/Cancel: 'outline'；Action: 'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg' | 'icon'", default: "'default'" },
+    { name: 'wrap', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.action（事件）', type: '{ reason: string }', default: '—' },
+  ]}
+/>
 
 ## 参考
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-ALERT-DIALOG.yaml', 'P-BASE-ALERT-DIALOG.yaml']}
+  files={[
+    'P-SHADCN-ALERT-DIALOG.yaml',
+    'P-SHADCN-ALERT-DIALOG-HEADER.yaml',
+    'P-SHADCN-ALERT-DIALOG-FOOTER.yaml',
+    'P-BASE-ALERT-DIALOG.yaml',
+  ]}
 />

@@ -4,19 +4,15 @@ export default {
     kind: 'proto',
     prototypeId: 'brutalist-dialog-root',
     children: [
-      { kind: 'proto', prototypeId: 'brutalist-dialog-trigger', children: ['Open dialog'] },
+      { kind: 'proto', prototypeId: 'brutalist-dialog-trigger', children: ['Edit Profile'] },
       { kind: 'proto', prototypeId: 'brutalist-dialog-mask' },
       {
         kind: 'proto',
         prototypeId: 'brutalist-dialog-content',
         children: [
           {
-            // Consumer composition reserves a scalable row for the optional,
-            // absolutely positioned CloseIcon. Content keeps p-6 and Header
-            // keeps its full inline width, including at 200% text/page scale.
-            // 1.5rem + 2.5rem starts the title below top-4 + size-9 (3.25rem).
             kind: 'box',
-            className: 'min-w-0 pt-10',
+            className: 'min-w-0 pe-12',
             children: [
               {
                 kind: 'proto',
@@ -25,12 +21,42 @@ export default {
                   {
                     kind: 'proto',
                     prototypeId: 'brutalist-dialog-title',
-                    children: ['Neo-Brutalist modal'],
+                    children: ['Edit profile'],
                   },
                   {
                     kind: 'proto',
                     prototypeId: 'brutalist-dialog-description',
-                    children: ['Flat overlay, hard panel shadow, 5px rounded corners.'],
+                    children: ["Make changes to your profile here. Click save when you're done."],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            kind: 'box',
+            className: 'grid gap-3',
+            children: [
+              {
+                kind: 'box',
+                className: 'grid gap-1.5',
+                children: [
+                  { kind: 'box', tag: 'span', className: 'text-sm font-medium', children: ['Name'] },
+                  {
+                    kind: 'box',
+                    className: 'rounded-base border-2 border-black bg-secondary-background px-3 py-2 text-sm',
+                    children: ['Pedro Duarte'],
+                  },
+                ],
+              },
+              {
+                kind: 'box',
+                className: 'grid gap-1.5',
+                children: [
+                  { kind: 'box', tag: 'span', className: 'text-sm font-medium', children: ['Username'] },
+                  {
+                    kind: 'box',
+                    className: 'rounded-base border-2 border-black bg-secondary-background px-3 py-2 text-sm',
+                    children: ['@peduarte'],
                   },
                 ],
               },
@@ -43,7 +69,19 @@ export default {
               {
                 kind: 'proto',
                 prototypeId: 'brutalist-dialog-close',
-                children: [{ kind: 'proto', prototypeId: 'brutalist-button', children: ['Close'] }],
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'brutalist-button',
+                    props: { variant: 'neutral' },
+                    children: ['Cancel'],
+                  },
+                ],
+              },
+              {
+                kind: 'proto',
+                prototypeId: 'brutalist-dialog-close',
+                children: [{ kind: 'proto', prototypeId: 'brutalist-button', children: ['Save changes'] }],
               },
             ],
           },

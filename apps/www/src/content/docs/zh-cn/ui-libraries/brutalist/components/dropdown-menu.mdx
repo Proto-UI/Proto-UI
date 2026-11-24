@@ -1,60 +1,193 @@
 ---
 title: 'Brutalist Dropdown Menu'
-description: '支持分组标签、分隔线、快捷键提示与危险操作变体的 Brutalist 下拉菜单组件。'
+description: '支持分组标签、分隔线、快捷键提示、缩进对齐与危险操作变体的 Brutalist 下拉菜单组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Dropdown Menu 继承 Base Dropdown 的完整触发、键盘导航与关闭语义，搭配圆角平面浮层、硬阴影触发按钮及高对比度菜单项样式。
+Brutalist Dropdown Menu 继承 Base Dropdown 的完整触发、键盘导航与关闭语义，搭配圆角描边浮层、硬阴影触发按钮及高对比度菜单项样式。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-dropdown-menu" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc brutalist-dropdown" manager="npm" />
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-dropdown`（生成 `Root`、`Trigger`、`Content`、`Item`）
-- **包导出**：从 `@proto.ui/prototypes-brutalist/dropdown` 导入全部部件（含 `Group`、`Label`、`Separator`、`Shortcut`）
+当前在源码工作区提供。CLI 默认生成 `Root`、`Trigger`、`Content` 与 `Item` 的封装；`Group`、`Label`、`Separator` 与 `Shortcut` 可直接从 `@proto.ui/prototypes-brutalist/dropdown` 导入使用。
 
 ## 用法
 
-- **分组与装饰部件**：`Group` 与 `Label` 自动建立菜单分组的无障碍命名关系；`Separator` 用于分隔菜单区块；`Shortcut` 用于展示键盘快捷键提示（仅作视觉标注，不注册全局快捷键）。
-- **菜单项变体与触发图标**：在 `Item` 上设置 `variant="destructive"` 高亮危险操作，设置 `inset` 对齐带图标的菜单项；在 `Trigger` 上开启 `indicator` 显示下拉箭头指示图标。
+```tsx
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/brutalist/dropdown-menu';
+```
+
+```tsx
+<DropdownMenu>
+  <DropdownMenuTrigger>Open</DropdownMenuTrigger>
+  <DropdownMenuContent align="start" className="w-44">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      <DropdownMenuItem value="profile">
+        Profile
+        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem value="billing">Billing</DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem value="logout">Log out</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+```
+
+- **分组与装饰部件**：`Group` 与 `Label` 自动建立菜单分组的无障碍命名关系；`Separator` 分隔区块；`Shortcut` 展示快捷键提示（仅作视觉标注，不注册全局快捷键）。
+- **视觉与定位**：触发按钮具备硬阴影与按压落位反馈，`Content` 默认启用 `excludeAnchorTranslation` 使浮层紧贴触发器的布局位置，避免抖动。
+
+## 示例
+
+### 危险操作
+
+为不可逆操作设置 `variant="destructive"`，在静止与高亮状态下均保持高对比度危险配色。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu-destructive"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 缩进对齐
+
+混用带图标与无图标菜单项时，可在 `Item` 和 `Label` 上设置 `inset` 保持文字对齐。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu-inset"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 触发器指示图标
+
+在 `Trigger` 上开启 `indicator` 并选择 `chevron-down` 或 `chevrons-up-down` 指示箭头。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-dropdown-menu-indicator"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-传入 `open: boolean` 进入受控模式。
+### Root
+
+传入 `open` 进入受控模式，并暴露 `openChange` 事件与 `openDropdown()` / `close()` / `toggle()` 方法。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: 'undefined' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'closeOnItemCommit', type: 'boolean', default: 'true' },
-    { name: 'openEntry', type: 'string', default: 'active-or-first' },
+    {
+      name: 'openEntry',
+      type: "'active-or-first' | 'first' | 'last' | 'value-or-first'",
+      default: "'active-or-first'",
+    },
     { name: 'openEntryValue', type: 'string', default: "''" },
-    { name: 'inset', type: 'boolean', default: 'false' },
-    { name: 'variant', type: "'default' | 'destructive'", default: 'default' },
+  ]}
+/>
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'indicator', type: 'boolean', default: 'false' },
-    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: 'chevron-down' },
+    { name: 'indicatorIcon', type: "'chevron-down' | 'chevrons-up-down'", default: "'chevron-down'" },
     { name: 'indicatorSize', type: 'number', default: '16' },
     { name: 'indicatorStrokeWidth', type: 'number', default: '2' },
   ]}
 />
 
-前五个属性属于 `Root`；`inset` 与 `variant` 属于 `Item`；`indicator`、`indicatorIcon`、`indicatorSize` 与 `indicatorStrokeWidth` 属于 `Trigger`。
+### Content
 
-### 其他部件属性
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'excludeAnchorTranslation', type: 'boolean', default: 'true' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '100' },
+  ]}
+/>
 
-- **Content**：支持 Transition 属性；`side`（默认 `'bottom'`）、`align`（默认 `'center'`）、`sideOffset`（默认 `4`）、`alignOffset`（默认 `0`）、`collisionPadding`（默认 `0`）、`avoidCollisions`（默认 `true`）、`excludeAnchorTranslation`（默认 `true`）
-- **Item**：`disabled?: boolean`（默认 `false`）、`value?: string`（默认 `''`）、`textValue?: string`（默认 `''`）、`closeOnCommit?: boolean`（默认继承 Root 的 `closeOnItemCommit`）
-- **Group**：`a11yLabel?: string`（默认 `''`）
-- **Label / Separator / Shortcut**：无独立属性
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnCommit', type: 'boolean', default: '继承 Root' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+### Group / Label / Separator / Shortcut
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Group.a11yLabel', type: 'string', default: "''" },
+    { name: 'Label.inset', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BRUTALIST-DROPDOWN-MENU.yaml',
+    'P-BRUTALIST-DROPDOWN-MENU-TRIGGER.yaml',
+    'P-BRUTALIST-DROPDOWN-MENU-CONTENT.yaml',
+    'P-BRUTALIST-DROPDOWN-MENU-ITEM.yaml',
+    'P-BASE-DROPDOWN-MENU.yaml',
+  ]}
+/>

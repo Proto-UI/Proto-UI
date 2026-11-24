@@ -1,0 +1,146 @@
+---
+title: 'Bootstrap 2.3.2 Hover Card'
+description: 'A hover preview card styled with archived Bootstrap 2.3.2 link ink and popover chrome over Base Hover Card.'
+---
+
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Hover Card pairs Base Hover Card's delayed open/close and collision-aware positioning with archived Bootstrap 2.3.2 `#08c` / `#005580` link colors, 276px max-width `.popover` shell geometry, and a 150ms linear opacity fade.
+
+## Preview
+
+Hover or focus `@proto-ui` for 150ms to open the Bootstrap 2.3.2 popover card. Moving into the card keeps it open while hovered.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+<InstallCommandCard
+  command="npx @proto.ui/cli@latest add wc bootstrap-2-3-2-hover-card"
+  manager="npm"
+/>
+
+Replace `wc` with `react`, `vue`, or `vue2` to generate the local facade for your framework.
+
+## Usage
+
+```tsx
+import {
+  BootstrapHoverCardRoot,
+  BootstrapHoverCardTrigger,
+  BootstrapHoverCardContent,
+} from '../proto-ui/components/react';
+
+export function Example() {
+  return (
+    <BootstrapHoverCardRoot openDelay={150} closeDelay={250}>
+      <BootstrapHoverCardTrigger>@proto-ui</BootstrapHoverCardTrigger>
+      <BootstrapHoverCardContent side="bottom" align="center" sideOffset={6}>
+        Host-neutral interaction protocols rendered with Bootstrap 2.3.2 popover chrome.
+      </BootstrapHoverCardContent>
+    </BootstrapHoverCardRoot>
+  );
+}
+```
+
+### Composition and styling
+
+```text
+BootstrapHoverCardRoot
+├── BootstrapHoverCardTrigger
+└── BootstrapHoverCardContent
+```
+
+- Trigger uses Bootstrap 2.3.2 `@linkColor` (`#08c`) and darkened `@linkColorHover` (`#005580`) with underline in light mode, automatically adapting hover/focus ink for dark hosts.
+- Content projects the archived `.popover` shell (`max-width: 276px`, `6px` border radius, `9px 14px` inner padding) with a `150ms` linear fade.
+
+## Examples
+
+### Sides
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Trigger Delays
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card-delays"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Disabled
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-hover-card-disabled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'openDelay', type: 'number', default: '700' },
+    { name: 'closeDelay', type: 'number', default: '300' },
+  ]}
+/>
+
+- **Exposed state & methods**: `open`, `openHoverCard(reason?)`, `close(reason?)`, `toggle(reason?)`
+- **Exposed events**: `openChange` (`{ open: boolean; reason: string | null }`)
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[{ name: 'disabled', type: 'boolean', default: 'false' }]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'side', type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'" },
+    { name: 'align', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset', type: 'number', default: '4' },
+    { name: 'alignOffset', type: 'number', default: '0' },
+    { name: 'avoidCollisions', type: 'boolean', default: 'true' },
+    { name: 'collisionPadding', type: 'number', default: '0' },
+    { name: 'enterDuration', type: 'number', default: '150' },
+    { name: 'leaveDuration', type: 'number', default: '150' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-HOVER-CARD.yaml',
+    'P-BOOTSTRAP-2-3-2-HOVER-CARD-TRIGGER.yaml',
+    'P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT.yaml',
+    'P-BASE-HOVER-CARD.yaml',
+    'P-BASE-HOVER-CARD-TRIGGER.yaml',
+    'P-BASE-HOVER-CARD-CONTENT.yaml',
+  ]}
+/>

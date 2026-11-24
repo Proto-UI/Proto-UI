@@ -1,209 +1,186 @@
 export default {
-  'type': 'demo',
-  'root': {
-    'kind': 'box',
-    'className': 'flex min-w-0 flex-wrap items-center gap-6',
-    'children': [
+  type: 'demo',
+  root: {
+    kind: 'box',
+    className:
+      'flex min-w-0 flex-wrap items-center justify-center gap-6 rounded-2xl bg-gradient-to-br from-sky-500/20 via-indigo-500/15 to-fuchsia-500/20 p-6',
+    children: [
       {
-        'kind': 'proto',
-        'prototypeId': 'liquid-glass-dropdown-root',
-        'children': [
+        kind: 'proto',
+        prototypeId: 'liquid-glass-dropdown-root',
+        children: [
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-dropdown-trigger',
-            'children': ['Open menu'],
+            kind: 'proto',
+            prototypeId: 'liquid-glass-dropdown-trigger',
+            children: ['Open'],
           },
           {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-dropdown-content',
-            'props': {
-              'align': 'start',
+            kind: 'proto',
+            prototypeId: 'liquid-glass-dropdown-content',
+            props: {
+              align: 'start',
             },
-            'children': [
+            children: [
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-group',
-                'children': [
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-group',
+                children: [
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-label',
-                    'children': ['My Account'],
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-label',
+                    children: ['My Account'],
                   },
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'profile',
-                      'textValue': 'Profile',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'profile',
+                      textValue: 'Profile',
                     },
-                    'children': [
+                    children: [
                       'Profile',
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'liquid-glass-dropdown-shortcut',
-                        'children': ['⇧⌘P'],
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-dropdown-shortcut',
+                        children: ['⇧⌘P'],
                       },
                     ],
                   },
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'billing',
-                      'textValue': 'Billing',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'billing',
+                      textValue: 'Billing',
                     },
-                    'children': [
+                    children: [
                       'Billing',
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'liquid-glass-dropdown-shortcut',
-                        'children': ['⌘B'],
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-dropdown-shortcut',
+                        children: ['⌘B'],
                       },
                     ],
                   },
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'settings',
-                      'textValue': 'Settings',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'settings',
+                      textValue: 'Settings',
                     },
-                    'children': [
+                    children: [
                       'Settings',
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'liquid-glass-dropdown-shortcut',
-                        'children': ['⌘S'],
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-dropdown-shortcut',
+                        children: ['⌘S'],
                       },
                     ],
                   },
                 ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-separator',
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-separator',
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-group',
-                'props': {
-                  'a11yLabel': 'Team actions',
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-group',
+                props: {
+                  a11yLabel: 'Team actions',
                 },
-                'children': [
+                children: [
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'team',
-                      'textValue': 'Team',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'team',
+                      textValue: 'Team',
                     },
-                    'children': ['Team'],
+                    children: ['Team'],
                   },
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'new-team',
-                      'textValue': 'New Team',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'new-team',
+                      textValue: 'New Team',
                     },
-                    'children': [
+                    children: [
                       'New Team',
                       {
-                        'kind': 'proto',
-                        'prototypeId': 'liquid-glass-dropdown-shortcut',
-                        'children': ['⌘+T'],
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-dropdown-shortcut',
+                        children: ['⌘+T'],
                       },
                     ],
                   },
                 ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-separator',
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-separator',
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-group',
-                'props': {
-                  'a11yLabel': 'Resources',
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-group',
+                props: {
+                  a11yLabel: 'Resources',
                 },
-                'children': [
+                children: [
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'github',
-                      'textValue': 'GitHub',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'github',
+                      textValue: 'GitHub',
                     },
-                    'children': ['GitHub'],
+                    children: ['GitHub'],
                   },
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'support',
-                      'textValue': 'Support',
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'support',
+                      textValue: 'Support',
                     },
-                    'children': ['Support'],
+                    children: ['Support'],
                   },
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-item',
-                    'props': {
-                      'value': 'api',
-                      'textValue': 'API',
-                      'disabled': true,
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-item',
+                    props: {
+                      value: 'api',
+                      textValue: 'API',
+                      disabled: true,
                     },
-                    'children': ['API'],
+                    children: ['API'],
                   },
                 ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-separator',
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-separator',
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-item',
-                'props': {
-                  'value': 'logout',
-                  'textValue': 'Log out',
+                kind: 'proto',
+                prototypeId: 'liquid-glass-dropdown-item',
+                props: {
+                  value: 'logout',
+                  textValue: 'Log out',
                 },
-                'children': [
+                children: [
                   'Log out',
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'liquid-glass-dropdown-shortcut',
-                    'children': ['⇧⌘Q'],
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-dropdown-shortcut',
+                    children: ['⇧⌘Q'],
                   },
                 ],
               },
             ],
-            'surfaceStyle': 'w-40',
-          },
-        ],
-      },
-      {
-        'kind': 'proto',
-        'prototypeId': 'liquid-glass-dropdown-root',
-        'children': [
-          {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-dropdown-trigger',
-            'props': { 'disabled': true },
-            'children': ['Disabled menu'],
-          },
-          {
-            'kind': 'proto',
-            'prototypeId': 'liquid-glass-dropdown-content',
-            'children': [
-              {
-                'kind': 'proto',
-                'prototypeId': 'liquid-glass-dropdown-item',
-                'props': { 'value': 'unavailable', 'textValue': 'Unavailable action' },
-                'children': ['Unavailable action'],
-              },
-            ],
+            surfaceStyle: 'w-44',
           },
         ],
       },

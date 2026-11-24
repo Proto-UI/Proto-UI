@@ -10,23 +10,34 @@ import { ALERT_PANEL } from './recipes';
 export default definePrototype<AlertDialogContentProps, AlertDialogContentExposes>({
   name: 'shadcn-alert-dialog-content',
   setup(def) {
+    def.props.define({
+      size: { type: 'enum', empty: 'fallback', options: ['default', 'sm'] },
+    });
+    def.props.setDefaults({ size: 'default' });
     const behavior = asAlertDialogContent();
     const style = setupOverlayPaint(def, ALERT_PANEL);
     setupOverlayDarkRing(def, style);
     def.feedback.style.use(
       tw(
-        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] -translate-x-1/2 -translate-y-1/2 w-full max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto grid'
+        'fixed z-50 left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] -translate-x-1/2 -translate-y-1/2 w-full max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto grid outline-none transition-opacity'
       )
     );
     def.rule({
-      when: (w) => w.state(style).eq('new-york-v4'),
+      when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('size').eq('default')),
       intent: (i) =>
         i.feedback.style.use(
           tw('max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]')
         ),
     });
     def.rule({
-      when: (w) => w.not(w.state(style).eq('new-york-v4')),
+      when: (w) => w.all(w.not(w.state(style).eq('new-york-v4')), w.prop('size').eq('default')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('max-w-[min(28rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]')
+        ),
+    });
+    def.rule({
+      when: (w) => w.prop('size').eq('sm'),
       intent: (i) =>
         i.feedback.style.use(
           tw('max-w-[min(20rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]')
@@ -41,8 +52,6 @@ export default definePrototype<AlertDialogContentProps, AlertDialogContentExpose
       when: (w) => w.state(open).eq(false),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
     });
-    // Existing zero-duration retention is preserved. Modern animation completion
-    // cannot be claimed until a lawful profile-selectable Transition default exists.
-    behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
+    behavior.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
   },
 });

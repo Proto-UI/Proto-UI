@@ -16,9 +16,10 @@ const hoverCardContent = definePrototype<
     const { open } = hoverCard.stateHandles;
 
     // P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR
+    // Floating overlay panel carries 3px zero-blur foreground shadow per Brutalist design contract.
     def.feedback.style.use(
       tw(
-        `w-64 p-4 text-sm leading-6 outline-none transition-none duration-200 ${BRUTALIST_PANEL_TOKENS}`
+        `z-50 w-64 p-4 text-sm leading-6 text-start shadow-[3px_3px_0_0_var(--pui-foreground)] outline-none transition-none duration-200 ${BRUTALIST_PANEL_TOKENS}`
       )
     );
 

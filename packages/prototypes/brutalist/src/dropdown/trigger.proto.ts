@@ -6,6 +6,7 @@ import {
   tw,
 } from '@proto.ui/core';
 import { asDropdownTrigger } from '@proto.ui/prototypes-base/dropdown';
+import { BRUTALIST_MOTION_HIT_TOKENS } from '../style';
 import type { BrutalistDropdownTriggerExposes, BrutalistDropdownTriggerProps } from './types';
 
 const TRIGGER_BASE_TOKENS = [
@@ -73,6 +74,7 @@ const dropdownTrigger = definePrototype<
   BrutalistDropdownTriggerExposes
 >({
   name: 'brutalist-dropdown-trigger',
+  modules: asDropdownTrigger.modules,
   setup(def) {
     // P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INDICATOR-PROP
     def.props.define({
@@ -108,12 +110,14 @@ const dropdownTrigger = definePrototype<
     // P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INTERACTION
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
+      intent: (i) =>
+        i.feedback.style.use(tw(`translate-x-1 translate-y-1 shadow-none ${BRUTALIST_MOTION_HIT_TOKENS}`)),
     });
 
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
+      intent: (i) =>
+        i.feedback.style.use(tw(`translate-x-1 translate-y-1 shadow-none ${BRUTALIST_MOTION_HIT_TOKENS}`)),
     });
 
     def.rule({

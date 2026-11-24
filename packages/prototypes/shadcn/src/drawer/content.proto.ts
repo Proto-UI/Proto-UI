@@ -10,12 +10,19 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
   setup(def) {
     const behavior = asDrawerContent();
     const style = setupOverlayPaint(def, DRAWER_CONTENT);
+    // Base snap.ts scopes this default maxExtent to vertical drawers; horizontal drawers keep 20 root-text.
     def.props.setDefaults({ maxExtent: { unit: 'available-minus-root-text', value: 6 } });
     const inset = def.feedback.style.declareDecoration();
     for (const profile of ['maia', 'mira', 'luma', 'rhea'] as const) {
       def.rule({
         when: (w) => w.state(style).eq(profile),
         intent: (i) => i.feedback.style.to(inset).use(DRAWER_INSET[profile]),
+      });
+    }
+    for (const profile of ['luma', 'rhea'] as const) {
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
+        intent: (i) => i.feedback.style.to(inset).use(tw('ring-1 ring-foreground/10')),
       });
     }
     // P-SHADCN-DRAWER-MOTION: fixed Vaul 1.1.2 presentation, separate safety bound.

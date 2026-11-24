@@ -9,5 +9,6 @@ export default definePrototype<MenubarContentProps, MenubarContentExposes>({
     const behavior = asMenubarContent();
     setupMenuSurface(def, 'menubar');
     setupMenuOpenPaint(def, behavior.getState!('open')!, false);
+    return behavior.render;
   },
 });

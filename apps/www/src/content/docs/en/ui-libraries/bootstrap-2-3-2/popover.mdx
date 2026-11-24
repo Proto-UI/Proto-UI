@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 anchored non-modal popover for lightweight inter
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Popover displays rich interactive content anchored to a trigger without locking background scroll or trapping Tab navigation.
+Bootstrap 2.3.2 Popover displays rich non-modal content anchored to a trigger with classic header framing and a 150ms linear fade transition, without locking background scroll or trapping `Tab` navigation.
 
 ## Preview
 
@@ -13,28 +15,106 @@ Popover displays rich interactive content anchored to a trigger without locking 
   demoId="demo-bootstrap-2-3-2-popover"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Bootstrap 2.3.2 Popover is currently available from the workspace source and not yet included in the 0.2.0 stable CLI release. Import the prototypes directly from `@proto.ui/prototypes-bootstrap-2-3-2/popover` and adapt them for your target runtime:
+
+```ts
+import {
+  popoverRoot,
+  popoverTrigger,
+  popoverContent,
+  popoverTitle,
+  popoverDescription,
+  popoverClose,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/popover';
+```
 
 ## Usage
 
-Compose `Root`, `Trigger`, `Content`, `Title`, `Description`, and `Close`:
+```tsx
+<BootstrapPopover>
+  <BootstrapPopoverTrigger>Open Popover</BootstrapPopoverTrigger>
+  <BootstrapPopoverContent>
+    <BootstrapPopoverTitle>Popover title</BootstrapPopoverTitle>
+    <BootstrapPopoverDescription>
+      And here is some helpful contextual information anchored to the right.
+    </BootstrapPopoverDescription>
+  </BootstrapPopoverContent>
+</BootstrapPopover>
+```
 
-- **Positioning**: `Content` anchors to `Trigger` and supports `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`.
-- **Dismissal and focus**: Outside clicks, focus leaving `Trigger` and `Content`, `Escape`, and `Close` all request dismissal. Moving focus between `Trigger` and portalled `Content` stays inside; when closed by moving focus to an outside control, focus remains on that outside control.
-- **Controlled state**: Pass `open` and handle `openChange` for controlled usage, or use `defaultOpen` for uncontrolled state. Refusing a focus-outside close keeps `Content` visible without trapping focus.
+### Composition
+
+```text
+BootstrapPopoverRoot
+├── BootstrapPopoverTrigger
+└── BootstrapPopoverContent
+    ├── BootstrapPopoverTitle
+    ├── BootstrapPopoverDescription
+    └── BootstrapPopoverClose
+```
+
+- **Classic defaults**: Preserves Bootstrap 2.3.2 defaults with `side="right"`, `sideOffset={10}`, a `276px` max-width shell, `6px` radius, `#ebebeb` title divider, and a `150ms` linear fade transition.
+- **Dismissal & focus**: Outside clicks, focus leaving `Trigger` and `Content`, `Escape`, and `Close` all request dismissal. When dismissed by focus moving outside, focus stays on that external control.
+
+## Examples
+
+### Basic
+
+Default right-anchored Bootstrap 2.3.2 popover with title and body description.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover-basic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Four Directions
+
+Place the popover on `top`, `right`, `bottom`, or `left` using `side`.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover-sides"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and handle `openChange` to synchronize open state with parent state.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` | Controlled or initial open state |
-| `Root` | `openChange` | Emitted on open/close requests |
-| `Trigger` | — | Anchor button toggling the popover |
-| `Content` | `side` / `align` / `sideOffset` / `alignOffset` / `collisionPadding` | Placement and collision padding options |
-| `Title` / `Description` | — | Accessible popover heading and description |
-| `Close` | — | Button requesting popover dismissal |
+`Root` exposes read-only state `open`, methods `openPopover`, `close`, and `toggle`, and the `openChange` event.
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open (Root)', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen (Root)', type: 'boolean', default: 'false' },
+    { name: 'disabled (Root / Trigger / Close)', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel (Root)', type: 'string', default: "''" },
+    { name: 'side (Content)', type: "'top' | 'right' | 'bottom' | 'left'", default: "'right'" },
+    { name: 'align (Content)', type: "'start' | 'center' | 'end'", default: "'center'" },
+    { name: 'sideOffset (Content)', type: 'number', default: '10' },
+    { name: 'alignOffset (Content)', type: 'number', default: '0' },
+    { name: 'collisionPadding (Content)', type: 'number', default: '8' },
+    { name: 'enterDuration / leaveDuration (Content)', type: 'number', default: '150' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-POPOVER.yaml', 'P-BASE-POPOVER.yaml']}
+/>

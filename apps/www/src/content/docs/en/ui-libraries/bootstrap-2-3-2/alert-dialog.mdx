@@ -4,8 +4,10 @@ description: 'A Bootstrap 2.3.2 modal confirmation dialog with safe cancel focus
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-AlertDialog interrupts the user for an important confirmation, focusing the safe cancel action by default and blocking accidental outside-click dismissal.
+Bootstrap 2.3.2 AlertDialog pairs classic `.modal.fade` and `.modal-backdrop.fade` chrome and motion with alert-dialog focus safety, focusing `Cancel` first and blocking outside-click dismissal.
 
 ## Preview
 
@@ -13,30 +15,127 @@ AlertDialog interrupts the user for an important confirmation, focusing the safe
   demoId="demo-bootstrap-2-3-2-alert-dialog"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source (`@proto.ui/prototypes-bootstrap-2-3-2`); not yet included in the 0.2.0 stable release.
 
 ## Usage
 
-Compose `Root`, `Trigger`, `Mask`, `Content`, `Title`, `Description`, `Cancel`, and `Action`:
+```tsx
+import {
+  BootstrapAlertDialogRoot,
+  BootstrapAlertDialogTrigger,
+  BootstrapAlertDialogMask,
+  BootstrapAlertDialogContent,
+  BootstrapAlertDialogTitle,
+  BootstrapAlertDialogDescription,
+  BootstrapAlertDialogFooter,
+  BootstrapAlertDialogCancel,
+  BootstrapAlertDialogAction,
+} from '../proto-ui/components/react';
 
-- **Modality and focus**: `Mask` renders the modal backdrop; `Content` traps focus, ignores outside clicks, and focuses `Cancel` first when available.
-- **Actions and dismissal**: Activating `Action` emits `action` before requesting close so application code runs the actual effect. `Escape` and `Cancel` request dismissal directly.
-- **Controlled state**: Pass `open` and listen to `openChange` for controlled usage, or use `defaultOpen` for uncontrolled state. Disabled actions do not activate.
+export function Example() {
+  return (
+    <BootstrapAlertDialogRoot>
+      <BootstrapAlertDialogTrigger>Show Dialog</BootstrapAlertDialogTrigger>
+      <BootstrapAlertDialogMask />
+      <BootstrapAlertDialogContent>
+        <BootstrapAlertDialogTitle>Are you absolutely sure?</BootstrapAlertDialogTitle>
+        <BootstrapAlertDialogDescription>
+          This action cannot be undone. This will permanently delete your account.
+        </BootstrapAlertDialogDescription>
+        <BootstrapAlertDialogFooter>
+          <BootstrapAlertDialogCancel>Cancel</BootstrapAlertDialogCancel>
+          <BootstrapAlertDialogAction>Continue</BootstrapAlertDialogAction>
+        </BootstrapAlertDialogFooter>
+      </BootstrapAlertDialogContent>
+    </BootstrapAlertDialogRoot>
+  );
+}
+```
+
+### Parts
+
+Compose `Root`, `Trigger`, `Mask`, `Content`, `Title`, `Description`, `Footer`, `Cancel`, and `Action`:
+
+- **Modality and motion**: `Mask` renders the 0.8-opacity backdrop with a 150ms linear fade; `Content` runs the 300ms Bootstrap modal drop-in and fade transition, traps focus, blocks outside-click dismissal, and focuses `Cancel` first.
+- **Footer**: Passive Bootstrap `.modal-footer` band with top divider and right-aligned action buttons.
+- **Actions and variants**: Activating `Action` emits `action` before requesting close; `Escape` and `Cancel` request dismissal directly. Both `Trigger` and `Action` accept classic Bootstrap button variants such as `variant="danger"`.
+
+## Examples
+
+### Small
+
+Set `size="sm"` on `Content` for a compact 360px modal width.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive
+
+Use `variant="danger"` on `Trigger` and `Action` for classic Bootstrap 2.3.2 `.btn-danger` styling.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and listen to `openChange` and `action` to manage dialog state externally.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Props / Events | Description |
-| --- | --- | --- |
-| `Root` | `open` / `defaultOpen` | Controlled or initial open state |
-| `Root` | `openChange` | Emitted when the dialog requests an open/close change |
-| `Trigger` | — | Opens the dialog |
-| `Mask` | — | Modal overlay backdrop |
-| `Content` | — | Dialog surface with alert semantics and focus trapping |
-| `Title` / `Description` | — | Accessible dialog heading and supporting text |
-| `Cancel` | — | Dismisses the dialog; preferred initial focus target |
-| `Action` | `action` | Emits `action` and requests close |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event / Method', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (uncontrolled)' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
+    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
+  ]}
+/>
+
+### Content, Mask, Footer & Commands
+
+<ApiPropsTable
+  headers={{ name: 'Part & Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'Content.size', type: "'default' | 'sm'", default: "'default' (560px)" },
+    { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '300' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Footer', type: 'Passive container (no props)', default: '—' },
+    { name: 'Trigger.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'default'" },
+    { name: 'Action.variant', type: "'default' | 'primary' | 'warning' | 'danger' | 'success' | 'info' | 'inverse'", default: "'primary'" },
+    { name: 'Trigger / Cancel / Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.action (event)', type: '{ reason: string }', default: '—' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={[
+    'P-BOOTSTRAP-2-3-2-ALERT-DIALOG.yaml',
+    'P-BOOTSTRAP-2-3-2-ALERT-DIALOG-FOOTER.yaml',
+    'P-BASE-ALERT-DIALOG.yaml',
+  ]}
+/>

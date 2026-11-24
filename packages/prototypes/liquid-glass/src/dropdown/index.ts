@@ -1,6 +1,7 @@
 export { default as dropdownGroup } from './group.proto';
 
 export { default as dropdownLabel } from './label.proto';
+export type { DropdownLabelProps } from './label.proto';
 
 export { default as dropdownSeparator } from './separator.proto';
 
@@ -13,5 +14,7 @@ export type { DropdownTriggerProps } from './trigger.proto';
 export type { DropdownTriggerExposes } from '@proto.ui/prototypes-base/dropdown';
 
 export { default as dropdownContent } from './content.proto';
+export type { DropdownContentProps } from './content.proto';
 
 export { default as dropdownItem } from './item.proto';
+export type { DropdownItemProps } from './item.proto';

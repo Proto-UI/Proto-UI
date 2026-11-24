@@ -6,7 +6,8 @@ export default definePrototype<MenubarRootProps, MenubarRootExposes>({
   name: 'shadcn-menubar-root',
   modules: asMenubarRoot.modules,
   setup(def) {
-    asMenubarRoot();
+    const behavior = asMenubarRoot();
     setupMenubarRootPaint(def);
+    return behavior.render;
   },
 });

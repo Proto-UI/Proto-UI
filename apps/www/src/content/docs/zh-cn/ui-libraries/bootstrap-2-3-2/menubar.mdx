@@ -4,8 +4,10 @@ description: '支持游走焦点与多面板键盘协调切换的 Bootstrap 2.3.
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Menubar 提供桌面应用风格的水平菜单栏，支持单一 Tab 入口、方向键快速切换菜单面板及首字母搜索。
+Bootstrap 2.3.2 风格的桌面应用水平菜单栏，还原经典 `.navbar-inner` 浅灰渐变顶栏、内凹展开触发态与 `.dropdown-menu` 蓝/红渐变高亮菜单项，同时提供完整的键盘游走焦点与暗色模式适配。
 
 ## 预览
 
@@ -13,26 +15,148 @@ Menubar 提供桌面应用风格的水平菜单栏，支持单一 Tab 入口、�
   demoId="demo-bootstrap-2-3-2-menubar"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版；可直接从 `@proto.ui/prototypes-bootstrap-2-3-2/menubar` 导入原型并通过对应框架 Adapter 使用。
 
 ## 用法
 
-由 `Root`、`Trigger`、`Content` 和 `Item` 组成：
+```tsx
+import {
+  Bootstrap232MenubarRoot,
+  Bootstrap232MenubarTrigger,
+  Bootstrap232MenubarContent,
+  Bootstrap232MenubarItem,
+} from '../proto-ui/components/react';
 
-- **面板配对**：`Root` 的 `value` 表示当前打开的面板标识，与对应的 `Trigger.value` 和 `Content.value` 匹配；受控模式下仅发出变更请求，由父组件更新 `value`。
-- **键盘导航**：整个菜单栏只占一个游走 Tab 焦点位；按左右方向键在菜单触发器间移动，按上下方向键进入菜单并浏览命令项，支持输入字符快速跳转。
-- **关闭与焦点恢复**：按 `Escape` 关闭当前面板并将焦点交回对应 `Trigger`；点击外部区域或激活命令项时自动关闭面板。
+export function Example() {
+  return (
+    <Bootstrap232MenubarRoot a11yLabel="Application menu">
+      <Bootstrap232MenubarTrigger value="file">File</Bootstrap232MenubarTrigger>
+      <Bootstrap232MenubarContent value="file" a11yLabel="File menu">
+        <Bootstrap232MenubarItem value="new-tab">New Tab</Bootstrap232MenubarItem>
+        <Bootstrap232MenubarItem value="print">Print...</Bootstrap232MenubarItem>
+      </Bootstrap232MenubarContent>
+    </Bootstrap232MenubarRoot>
+  );
+}
+```
+
+### 组件结构
+
+```text
+MenubarRoot
+├── MenubarTrigger (value="file")
+├── MenubarContent (value="file")
+│   ├── MenubarItem
+│   └── MenubarItem
+├── MenubarTrigger (value="edit")
+└── MenubarContent (value="edit")
+    └── MenubarItem
+```
+
+- `Root`：经典 Bootstrap 2.3.2 渐变工具栏表面，协调所有面板标识与游走焦点。
+- `Trigger`：顶层菜单按钮，通过 `value` 与对应 `Content` 配对，展开时呈现经典内阴影按压态。
+- `Content`：6px 圆角与柔和投影的下拉面板，默认 `sideOffset` 为 `2`。
+- `Item`：高亮时呈现经典 `#0088cc → #0077b3` 蓝色渐变，设置 `variant="destructive"` 时切换为危险红渐变。
+
+### 键盘与无障碍
+
+- 整条菜单栏占用一个游走 `Tab` 焦点位，按 `ArrowLeft` / `ArrowRight` 在触发器间移动。
+- 按 `ArrowDown` / `ArrowUp` 展开面板并在命令项间浏览，支持输入首字符快速定位。
+- 按 `Escape` 关闭当前面板并将焦点交回对应 `Trigger`；点击外部区域或激活命令项时自动关闭面板。
+
+## 示例
+
+### 危险操作
+
+在 `Item` 上设置 `variant="destructive"` 启用 Bootstrap 经典红色警告高亮。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-menubar-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 缩进、禁用与常驻选项
+
+使用 `closeOnSelect={false}` 切换选项而不关闭下拉面板，结合 `inset` 与禁用状态管理命令层级。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-menubar-states"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控模式
+
+通过 `value` 与 `valueChange` 由外部管理当前打开的菜单，并配合 `loop={false}` 关闭循环跳转。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-menubar-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件      | 属性    | 说明                              |
-| --------- | ------- | --------------------------------- |
-| `Root`    | `value` | 当前展开的菜单面板键（支持受控）  |
-| `Trigger` | `value` | 菜单栏按钮，与同值 `Content` 配对 |
-| `Content` | `value` | 对应的下拉命令面板                |
-| `Item`    | —       | 面板内的可执行命令项              |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '—（传入即进入受控模式）' },
+    { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'loop', type: 'boolean', default: 'true' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+事件与方法：`valueChange({ value, reason })`、`requestValue(value, reason?)`、`close()`。
+
+### Trigger
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Content 配对）' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+### Content
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: '必填（与 Trigger 配对）' },
+    { name: 'sideOffset', type: 'number', default: '2' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+### Item
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'string', default: "''" },
+    { name: 'textValue', type: 'string', default: "''" },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'closeOnSelect', type: 'boolean', default: 'true' },
+    { name: 'inset', type: 'boolean', default: 'false' },
+    { name: 'variant', type: "'default' | 'destructive'", default: "'default'" },
+  ]}
+/>
+
+事件与方法：`select({ value, menuValue })`、`focusSelf(options?)`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-MENUBAR.yaml', 'P-BASE-MENUBAR.yaml']}
+/>

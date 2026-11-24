@@ -15,46 +15,181 @@ A modal confirmation dialog for important or destructive actions, with safe init
   demoId="demo-shadcn-alert-dialog"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source (`@proto.ui/prototypes-shadcn`); not yet included in the 0.2.0 CLI stable release.
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import {
+  ShadcnAlertDialogRoot,
+  ShadcnAlertDialogTrigger,
+  ShadcnAlertDialogMask,
+  ShadcnAlertDialogContent,
+  ShadcnAlertDialogHeader,
+  ShadcnAlertDialogTitle,
+  ShadcnAlertDialogDescription,
+  ShadcnAlertDialogFooter,
+  ShadcnAlertDialogCancel,
+  ShadcnAlertDialogAction,
+} from '../proto-ui/components/react';
 
-### Anatomy
+export function Example() {
+  return (
+    <ShadcnAlertDialogRoot styleProfile="rhea">
+      <ShadcnAlertDialogTrigger variant="outline">Show Dialog</ShadcnAlertDialogTrigger>
+      <ShadcnAlertDialogMask />
+      <ShadcnAlertDialogContent>
+        <ShadcnAlertDialogHeader>
+          <ShadcnAlertDialogTitle>Are you absolutely sure?</ShadcnAlertDialogTitle>
+          <ShadcnAlertDialogDescription>
+            This action cannot be undone. This will permanently delete your account.
+          </ShadcnAlertDialogDescription>
+        </ShadcnAlertDialogHeader>
+        <ShadcnAlertDialogFooter>
+          <ShadcnAlertDialogCancel>Cancel</ShadcnAlertDialogCancel>
+          <ShadcnAlertDialogAction>Continue</ShadcnAlertDialogAction>
+        </ShadcnAlertDialogFooter>
+      </ShadcnAlertDialogContent>
+    </ShadcnAlertDialogRoot>
+  );
+}
+```
 
-Compose `AlertDialog` from `Root`, `Trigger`, `Mask`, `Content`, `Header`, `Footer`, `Title`, `Description`, `Cancel`, and `Action`:
+### Composition
 
-- **Root**: Manages open state with alert-dialog modality always enabled.
-- **Mask**: Renders the modal backdrop overlay.
-- **Content**: Traps focus inside the dialog, blocks dismissal on outside clicks, and focuses `Cancel` by default when opened. Uses the Shadcn Rhea panel styling (`p-6`, `gap-6`, `radius-4xl` capped at 24px, popover colors, and ring/shadow).
-- **Header / Footer / Title / Description**: Structure the heading, accessible description, and action bar.
-- **Cancel / Action**: `Cancel` and `Escape` request closing the dialog. `Action` emits an `action` event before requesting close; your application performs the actual operation in the handler. Disabled buttons do not activate.
+```text
+AlertDialogRoot
+├── AlertDialogTrigger
+├── AlertDialogMask
+└── AlertDialogContent
+    ├── AlertDialogHeader
+    │   ├── AlertDialogTitle
+    │   └── AlertDialogDescription
+    └── AlertDialogFooter
+        ├── AlertDialogCancel
+        └── AlertDialogAction
+```
 
-### Controlled and uncontrolled state
+- **Root**: Manages open state with `alertdialog` modality always enabled.
+- **Trigger / Cancel / Action**: Each retains its own Base command state and supports `variant`, `size`, `wrap`, and `disabled`. Activating `Action` emits `action` before requesting close.
+- **Mask / Content**: Provides the modal backdrop, focus trap, and 150ms enter/leave transitions; focuses `Cancel` first on open and blocks outside-click dismissal.
+- **Style presets (`styleProfile`)**: Supports `vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, and `new-york-v4` (`new-york` alias). When omitted, parts inherit from the nearest [Style Scope](../style-scope/).
 
-- Use `defaultOpen` for uncontrolled usage.
-- Pass `open` to control the dialog externally; listen to `openChange` and provide the next value to `Root`.
+### Keyboard & Accessibility
+
+- `Escape` and `Cancel` request dismissal and restore focus to the trigger.
+- `Tab` / `Shift + Tab` loops focus strictly within `Content`.
+- Initial focus targets the safe `Cancel` button by default; disabled commands do not activate.
+
+## Examples
+
+### Small
+
+Pass `size="sm"` on `Content` for a compact confirmation dialog, paired with `align="center"` on `Header`.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-small"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Media
+
+Place an icon badge inside `Header` to visually anchor the confirmation prompt.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-media"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Destructive
+
+Use `variant="destructive"` on `Trigger` and `Action` with a compact confirmation panel for irreversible actions.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-destructive"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+Pass `open` and listen to `openChange` and `action` so your application owns the dialog visibility and confirmed side effects.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Set `dir="rtl"` on the container and dialog content; `Header` uses logical alignment (`text-start`) to adapt automatically.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-alert-dialog-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-Passing `open` selects controlled mode. Unlike `Dialog`, this `Root` has no `alert` prop because alert modality is always active.
+### Root
+
+Unlike `Dialog`, `AlertDialog` `Root` always operates in `alertdialog` mode.
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event / Method', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean', default: 'undefined (uncontrolled)' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → scope → new-york-v4' },
+    { name: 'openChange (event)', type: '{ open: boolean; reason: string | null; focusReason: string | null }', default: '—' },
+    { name: 'openAlertDialog / close / toggle (methods)', type: '(reason?: string) => void', default: '—' },
+  ]}
+/>
+
+### Content & Mask
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'defaultOpen', type: 'boolean', default: 'false' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
-    { name: 'a11yLabel', type: 'string', default: "''" },
+    { name: 'Content.size', type: "'default' | 'sm'", default: "'default'" },
+    { name: 'Content.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Mask.passthrough', type: 'boolean', default: 'false' },
+    { name: 'Mask.enterDuration / leaveDuration', type: 'number', default: '150' },
+    { name: 'Header.align', type: "'start' | 'center'", default: "'start'" },
   ]}
 />
 
-These props belong to `Root`.
+### Trigger, Cancel & Action
+
+<ApiPropsTable
+  headers={{ name: 'Prop / Event', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'variant', type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'", default: "Trigger/Cancel: 'outline'; Action: 'default'" },
+    { name: 'size', type: "'default' | 'sm' | 'lg' | 'icon'", default: "'default'" },
+    { name: 'wrap', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.action (event)', type: '{ reason: string }', default: '—' },
+  ]}
+/>
 
 ## References
 
 <SpecEntityLinks
   directory="spec/prototypes"
-  files={['P-SHADCN-ALERT-DIALOG.yaml', 'P-BASE-ALERT-DIALOG.yaml']}
+  files={[
+    'P-SHADCN-ALERT-DIALOG.yaml',
+    'P-SHADCN-ALERT-DIALOG-HEADER.yaml',
+    'P-SHADCN-ALERT-DIALOG-FOOTER.yaml',
+    'P-BASE-ALERT-DIALOG.yaml',
+  ]}
 />

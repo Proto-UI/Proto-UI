@@ -15,14 +15,35 @@ Toast 用于以非打断方式展示限时实时通知，支持悬停或聚焦�
   demoId="demo-shadcn-toast"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn/toast` 导入组件原型并使用对应宿主 Adapter 适配。
+
+```ts
+import {
+  toastViewport,
+  toastRoot,
+  toastTitle,
+  toastDescription,
+  toastAction,
+  toastClose,
+} from '@proto.ui/prototypes-shadcn/toast';
+```
 
 ## 用法
+
+```tsx
+<ShadcnToastViewport a11yLabel="Notifications">
+  <ShadcnToastRoot defaultOpen={false} duration={5000}>
+    <ShadcnToastTitle>Event has been created</ShadcnToastTitle>
+    <ShadcnToastDescription>Sunday, December 03, 2023 at 9:00 AM</ShadcnToastDescription>
+    <ShadcnToastAction a11yLabel="Undo event creation">Undo</ShadcnToastAction>
+    <ShadcnToastClose>Dismiss</ShadcnToastClose>
+  </ShadcnToastRoot>
+</ShadcnToastViewport>
+```
 
 Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` 六个部件组成：
 
@@ -32,26 +53,90 @@ Toast 由 `Root`、`Viewport`、`Title`、`Description`、`Action` 和 `Close` �
 - 受控模式下（传入 `open`），超时后只会发出一次关闭请求并等待外部状态更新。
 - `Viewport` 提供无障碍区域命名（默认 `Notifications`）以及 `F8` 快捷键快速聚焦通知区域。多条通知的排队管理由应用层控制。
 
+## 示例
+
+### 状态类型
+
+使用 `type` 指定通知类型（`default`、`success`、`info`、`warning`、`error`、`loading`），并可搭配 `politeness="assertive"` 提升关键错误播报优先级。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-types"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 操作按钮
+
+通过 `Action` 触发应用层撤销或重试回调，激活后会先派发 `action` 事件，再请求关闭当前通知。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-action"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 异步状态
+
+在异步任务执行期间保持 `type="loading"` 且 `duration={0}`，任务完成后切换为结果通知。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-promise"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控与常驻
+
+传入 `open` 与 `duration={0}` 可由应用状态完全接管通知的打开与关闭。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast-persistent"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
 ## API
+
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'duration', type: 'number', default: '5000' },
     { name: 'paused', type: 'boolean', default: 'false' },
-    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
-    { name: 'a11yLabel', type: 'string', default: 'Notifications' },
-    { name: 'hotkey', type: 'string', default: 'F8' },
-    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'politeness', type: "'polite' | 'assertive'", default: "'polite'" },
+    {
+      name: 'type',
+      type: "'default' | 'success' | 'info' | 'warning' | 'error' | 'loading'",
+      default: "'default'",
+    },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '0' },
+    { name: 'leaveDuration', type: 'number', default: '0' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: "'reverse'" },
+    { name: 'styleProfile', type: 'ShadcnStyleId', default: '继承样式作用域' },
   ]}
 />
 
-属性归属说明：
+### Viewport、Action 与 Close
 
-- `defaultOpen`、`duration`（设为 `0` 时常驻）、`paused`、`politeness` 属于 `Root`（传入 `open` 进入受控模式）。
-- `a11yLabel`、`hotkey` 属于 `Viewport`。
-- `disabled` 属于 `Action` 与 `Close`。
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'Viewport.a11yLabel', type: 'string', default: "'Notifications'" },
+    { name: 'Viewport.hotkey', type: 'string', default: "'F8'" },
+    { name: 'Action.disabled', type: 'boolean', default: 'false' },
+    { name: 'Action.a11yLabel', type: 'string', default: '—' },
+    { name: 'Close.disabled', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+事件与暴露方法：
+
+- **事件**：`Root` 暴露 `openChange`（`{ open: boolean; reason: string }`）；`Action` 暴露 `action`（`void`）。
+- **方法**：`Root` 暴露 `openToast()`、`close(reason?)`、`pause()`、`resume()`；`Viewport` 暴露 `focusFirst()`。
 
 ## 参考
 

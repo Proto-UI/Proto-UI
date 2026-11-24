@@ -9,6 +9,7 @@ export default definePrototype<ToastDescriptionProps, ToastDescriptionExposes>({
   name: 'liquid-glass-toast-description',
   setup(def) {
     const behavior = asToastDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    def.feedback.style.use(tw('font-sans text-sm leading-5 text-muted-foreground'));
+    return behavior.render;
   },
 });

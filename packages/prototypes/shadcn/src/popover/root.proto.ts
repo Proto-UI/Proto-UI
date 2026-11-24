@@ -5,9 +5,11 @@ import { setupShadcnStyleScope } from '../style-scope';
 
 export default definePrototype<PopoverRootProps, PopoverRootExposes>({
   name: 'shadcn-popover-root',
+  modules: asPopoverRoot.modules,
   setup(def) {
     const behavior = asPopoverRoot();
     setupShadcnStyleScope(def);
     def.feedback.style.use(tw('relative inline-flex min-w-0'));
+    return behavior.render;
   },
 });
