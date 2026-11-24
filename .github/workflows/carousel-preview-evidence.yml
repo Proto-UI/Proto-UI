@@ -1,0 +1,144 @@
+name: Carousel preview evidence
+
+on:
+  # Browser evidence remains manual/callable under the repository CI cadence.
+  # The normal runtime inventory also discovers the documentation regression.
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: carousel-preview-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  carousel-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      ASTRO_TELEMETRY_DISABLED: '1'
+      PROTO_UI_CAROUSEL_EVIDENCE: ${{ runner.temp }}/carousel-preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Bind the selected source before setup
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_CAROUSEL_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { createHash } from 'node:crypto';
+          import { readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+          const report = {
+            head: git('rev-parse', 'HEAD'),
+            tree: git('rev-parse', 'HEAD^{tree}'),
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            workflowRef: process.env.GITHUB_WORKFLOW_REF,
+            node: process.version,
+            lockfileSha256: createHash('sha256').update(readFileSync('pnpm-lock.yaml')).digest('hex'),
+            selection: { sourceTests: 33, documentationCases: 10, nativeCapabilityCases: 4 },
+          };
+          writeFileSync(path.join(process.env.PROTO_UI_CAROUSEL_EVIDENCE, 'checkout.json'), JSON.stringify(report, null, 2) + '\n');
+          NODE
+      - name: Install locked dependencies and locate Chrome
+        id: setup
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CAROUSEL_CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CAROUSEL_CHROME" >> "$GITHUB_ENV"
+          "$CAROUSEL_CHROME" --version > "$PROTO_UI_CAROUSEL_EVIDENCE/browser.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Verify continuous Carousel and Shadcn profile source behavior
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/prototypes/base/test/carousel-continuous.test.ts \
+            packages/prototypes/shadcn/test/layout-profiles-r91.test.ts \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json \
+            --outputFile="$PROTO_UI_CAROUSEL_EVIDENCE/source-tests.json" \
+            2>&1 | tee "$PROTO_UI_CAROUSEL_EVIDENCE/source-tests.log"
+      - name: Exercise the actual documentation preview in four runtimes
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-shadcn-carousel.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json \
+            --outputFile="$PROTO_UI_CAROUSEL_EVIDENCE/documentation-tests.json" \
+            2>&1 | tee "$PROTO_UI_CAROUSEL_EVIDENCE/documentation-tests.log"
+      - name: Retain native drag, wheel, responsive and axis behavior
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        env:
+          PUI_CHROME_EXECUTABLE: ${{ env.CHROME_PATH }}
+          PUI_EVIDENCE_DIR: ${{ runner.temp }}/carousel-preview/capabilities
+          PUI_BROWSER_KINDS: carousel
+          PUI_BROWSER_FAMILIES: shadcn
+          PUI_BROWSER_RUNTIMES: wc,react,vue,vue2
+        run: |
+          set -euo pipefail
+          # The preceding docs suite generates these production styles.
+          test -s apps/www/src/styles/shadcn-theme.css
+          test -s apps/www/src/styles/proto-ui-tokens.generated.css
+          node --import tsx scripts/analysis/component-capabilities-browser.mjs \
+            2>&1 | tee "$PROTO_UI_CAROUSEL_EVIDENCE/capabilities.log"
+      - name: Require every selected terminal result
+        if: always()
+        run: |
+          node --input-type=module <<'NODE'
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          import path from 'node:path';
+          const root = process.env.PROTO_UI_CAROUSEL_EVIDENCE;
+          mkdirSync(root, { recursive: true });
+          const read = file => {
+            try { return JSON.parse(readFileSync(path.join(root, file), 'utf8')); }
+            catch (error) { return { unavailable: String(error) }; }
+          };
+          const source = read('source-tests.json');
+          const docs = read('documentation-tests.json');
+          const native = read('capabilities/report.json');
+          const checkout = read('checkout.json');
+          const docsSource = read('source.json');
+          const complete = (report, count) => report.success === true && report.numTotalTests === count && report.numPassedTests === count;
+          const nativeCases = native.cases ?? [];
+          const checks = {
+            sourceBinding: checkout.head === process.env.CANDIDATE_SHA &&
+              docsSource.revision === process.env.CANDIDATE_SHA &&
+              native.source?.head === process.env.CANDIDATE_SHA,
+            source: complete(source, 33),
+            documentation: complete(docs, 10),
+            native: nativeCases.length === 4 &&
+              nativeCases.every(item => item.status === 'passed' && item.family === 'shadcn' && item.kind === 'carousel') &&
+              JSON.stringify(nativeCases.map(item => item.runtime).sort()) === JSON.stringify(['react', 'vue', 'vue2', 'wc']),
+          };
+          writeFileSync(path.join(root, 'completion.json'), JSON.stringify({ head: process.env.CANDIDATE_SHA, checks }, null, 2) + '\n');
+          if (!Object.values(checks).every(Boolean)) {
+            console.error('Carousel evidence is incomplete or failed:', checks);
+            process.exitCode = 1;
+          }
+          NODE
+      - name: Preserve source-bound results and actual preview captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: carousel-preview-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/carousel-preview
+          if-no-files-found: warn
+          retention-days: 14
