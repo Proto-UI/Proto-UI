@@ -491,7 +491,18 @@ jobs:
     # preflight, and a red preflight no longer prevents the runtime phase.
     # Reserve time for that complete chain, teardown and evidence upload;
     # this total-job allowance does not change decoder or test timeouts.
-    timeout-minutes: 45
+    # 2026-11-24: the 0.3 sprint train grew this lane past its 45-minute
+    # allowance. Cycle 45254336687 (main 0fbb52ef8) was cancelled at exactly
+    # 45m00s; the same happened in cycles 45127247463, 45072751561 and
+    # 44991875129, while 45041678755 and 44951627713 failed just under the
+    # cap. The cancelled job's own log shows the chain reaching its runtime
+    # phase at 20:21:40Z after ~23 minutes of prerequisites and gates, then
+    # still running at 20:43:23Z when the job was cancelled: the lane needs
+    # roughly 55-70 minutes, so the 45-minute cap could only ever report a
+    # timeout. Give the lane 90 minutes so it can finish and report its real
+    # result. This is the same budget convention the browser lane already
+    # uses (a 900s shard deadline inside a 20-minute job allowance).
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
