@@ -1,8 +1,10 @@
 //! Evaluates the length forms the recorded vocabulary and themes use.
 //!
-//! The fixtures were surveyed rather than guessed: the only units present are
-//! `px`, `rem`, `em`, `%` and unitless, and the only functions over them are
-//! `calc`, `min` and `max`. Anything else is reported.
+//! The fixtures were surveyed rather than guessed: the units present are
+//! `px`, `rem`, `em`, `%`, `vw`, `vh`, `cqw` and unitless, and the functions
+//! over them are `calc`, `min` and `max`. Anything else is reported.
+//! Viewport and query container units need caller-supplied layout dimensions
+//! independent of the percentage basis.
 //!
 //! A percentage stays symbolic. `calc(100% - 1px)` is a real value with no
 //! single pixel answer until something supplies the basis it is a percentage
@@ -67,6 +69,19 @@ impl Default for LengthContext {
     }
 }
 
+/// Known dimensions in CSS pixels. Each field is optional, and zero is a
+/// known size. The default leaves every basis unknown.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct LayoutContext {
+    /// Viewport width for `vw`.
+    pub viewport_width_px: Option<f32>,
+    /// Viewport height for `vh`.
+    pub viewport_height_px: Option<f32>,
+    /// Effective width for `cqw`. If no eligible query container exists,
+    /// the caller supplies the CSS fallback of the small viewport width.
+    pub query_container_width_px: Option<f32>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LengthError {
     /// A unit or function this module does not implement.
@@ -75,18 +90,37 @@ pub enum LengthError {
     Malformed(String),
     /// `min`/`max` compared values whose order depends on a percentage basis.
     NeedsBasis(String),
-    /// Multiplication or division that is not by a unitless number.
+    /// A viewport unit needs a finite, nonnegative viewport dimension that
+    /// the caller has not supplied.
+    NeedsViewport(String),
+    /// `cqw` needs a finite, nonnegative effective query container width
+    /// that the caller has not supplied.
+    NeedsQueryContainerWidth(String),
+    /// Invalid typed arithmetic or a non-finite layout-relative result.
     InvalidArithmetic(String),
 }
 
 /// Evaluates one value. Any `var()` must already have been substituted.
+/// Layout dimensions are unknown. Use [`evaluate_with_layout`] when known.
 pub fn evaluate(value: &str, context: LengthContext) -> Result<Dimension, LengthError> {
+    evaluate_with_layout(value, context, LayoutContext::default())
+}
+
+/// Evaluates with caller-supplied layout dimensions. Percentage terms stay
+/// symbolic for the property's own basis.
+pub fn evaluate_with_layout(
+    value: &str,
+    context: LengthContext,
+    layout: LayoutContext,
+) -> Result<Dimension, LengthError> {
     let text = value.trim();
     let mut parser = Parser {
         input: text,
         position: 0,
         original: text,
         context,
+        layout,
+        used_layout_basis: false,
     };
     let result = parser.expression()?;
     parser.skip_whitespace();
@@ -94,6 +128,12 @@ pub fn evaluate(value: &str, context: LengthContext) -> Result<Dimension, Length
         return Err(LengthError::Malformed(text.to_string()));
     }
     match result {
+        Value::Length(dimension)
+            if parser.used_layout_basis
+                && !(dimension.px.is_finite() && dimension.percent.is_finite()) =>
+        {
+            Err(parser.invalid())
+        }
         Value::Length(dimension) => Ok(dimension),
         // CSS accepts a unitless zero only as a bare length token. Inside
         // calc()/min()/max(), zero retains number type just like any other
@@ -119,10 +159,11 @@ pub fn looks_like_length(value: &str) -> bool {
         Some(c) => c,
         None => return false,
     };
-    if !(first.is_ascii_digit() || first == '-' || first == '.') {
+    if !(first.is_ascii_digit() || first == '-' || first == '+' || first == '.') {
         return false;
     }
     // A bare number is only a length when it is zero; `700` is a font weight.
+    let text = text.strip_prefix('+').unwrap_or(text);
     let digits_end = text
         .find(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-'))
         .unwrap_or(text.len());
@@ -130,7 +171,7 @@ pub fn looks_like_length(value: &str) -> bool {
     if unit.is_empty() {
         return text.parse::<f32>().is_ok_and(|number| number == 0.0);
     }
-    matches!(unit, "px" | "rem" | "em" | "%")
+    matches!(unit, "px" | "rem" | "em" | "%" | "vw" | "vh" | "cqw")
 }
 
 /// A bare number and a length are different things: `calc(2px * 3)` is a
@@ -147,6 +188,8 @@ struct Parser<'a> {
     position: usize,
     original: &'a str,
     context: LengthContext,
+    layout: LayoutContext,
+    used_layout_basis: bool,
 }
 
 impl<'a> Parser<'a> {
@@ -350,9 +393,41 @@ impl<'a> Parser<'a> {
             "em" => Ok(Value::Length(Dimension::px(
                 magnitude * self.context.font_size_px,
             ))),
+            "vw" => self.layout_length(
+                magnitude,
+                self.layout.viewport_width_px,
+                LengthError::NeedsViewport,
+            ),
+            "vh" => self.layout_length(
+                magnitude,
+                self.layout.viewport_height_px,
+                LengthError::NeedsViewport,
+            ),
+            "cqw" => self.layout_length(
+                magnitude,
+                self.layout.query_container_width_px,
+                LengthError::NeedsQueryContainerWidth,
+            ),
             "%" => Ok(Value::Length(Dimension::percent(magnitude))),
             other => Err(LengthError::Unsupported(other.to_string())),
         }
+    }
+
+    fn layout_length(
+        &mut self,
+        magnitude: f32,
+        basis: Option<f32>,
+        missing: fn(String) -> LengthError,
+    ) -> Result<Value, LengthError> {
+        let basis = basis
+            .filter(|size| size.is_finite() && *size >= 0.0)
+            .ok_or_else(|| missing(self.original.to_string()))?;
+        let px = magnitude / 100.0 * basis;
+        if !px.is_finite() {
+            return Err(self.invalid());
+        }
+        self.used_layout_basis = true;
+        Ok(Value::Length(Dimension::px(px)))
     }
 }
 

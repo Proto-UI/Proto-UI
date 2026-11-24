@@ -1,13 +1,17 @@
 //! Colour parsing, checked against known conversions and against every colour
 //! the recorded fixtures actually contain.
 
-use proto_ui_style::color::{parse, parse_rgba, ColorError, ColorValue, Rgba};
+use proto_ui_style::color::{parse, parse_border_colors, parse_rgba, ColorError, ColorValue, Rgba};
 use proto_ui_style::{themes, vocabulary, ColorScheme, Substitution};
 
-const COLOR_PROPERTIES: [&str; 6] = [
+const COLOR_PROPERTIES: [&str; 10] = [
     "color",
     "background-color",
     "border-color",
+    "border-top-color",
+    "border-right-color",
+    "border-bottom-color",
+    "border-left-color",
     "fill",
     "stroke",
     "outline-color",
@@ -186,6 +190,53 @@ fn reports_rather_than_approximates_what_it_cannot_do() {
     assert!(matches!(parse("lab(50% 0)"), Err(ColorError::Malformed(_))));
 }
 
+#[test]
+fn expands_border_colors_in_css_edge_order() {
+    let top = parse("rgb(255 0 0 / 50%)").unwrap();
+    let right = ColorValue::CurrentColor;
+    let bottom = ColorValue::Rgba(Rgba::TRANSPARENT);
+    let left = parse("color-mix(in oklab, rgb(0, 0, 0) 25%, transparent)").unwrap();
+
+    assert_eq!(parse_border_colors("rgb(255 0 0 / 50%)"), Ok([top; 4]));
+    assert_eq!(
+        parse_border_colors("rgb(255 0 0 / 50%)\tcurrentColor"),
+        Ok([top, right, top, right])
+    );
+    assert_eq!(
+        parse_border_colors("rgb(255 0 0 / 50%) currentColor transparent"),
+        Ok([top, right, bottom, right])
+    );
+    assert_eq!(
+        parse_border_colors(concat!(
+            "rgb(255 0 0 / 50%) currentColor transparent ",
+            "color-mix(in oklab, rgb(0, 0, 0) 25%, transparent)"
+        )),
+        Ok([top, right, bottom, left])
+    );
+}
+
+#[test]
+fn rejects_invalid_border_color_components_and_counts() {
+    for value in [
+        "",
+        "#fff #fff #fff #fff #fff",
+        "#fff #12345 #000",
+        "#fff rgb(0 0 0",
+        "#fff rgb(0 0 0))",
+        "#fff rgb(0 0) #000",
+    ] {
+        assert!(
+            matches!(parse_border_colors(value), Err(ColorError::Malformed(_))),
+            "{value:?} must be malformed"
+        );
+    }
+    assert!(matches!(
+        parse_border_colors("#fff var(--pui-border) #000"),
+        Err(ColorError::Unsupported(_))
+    ));
+    assert!(parse("#fff #000").is_err());
+}
+
 /// Completeness: every colour a theme can actually produce must parse.
 ///
 /// This is the guard that matters. The unit cases above only prove the forms
@@ -224,7 +275,12 @@ fn parses_every_colour_a_theme_can_produce() {
                                 inherited_text_diagnostics += 1;
                                 continue;
                             }
-                            parse(&value).unwrap_or_else(|error| {
+                            let validated = if property == "border-color" {
+                                parse_border_colors(&value).map(|_| ())
+                            } else {
+                                parse(&value).map(|_| ())
+                            };
+                            validated.unwrap_or_else(|error| {
                                 panic!(
                                     "{language}/{scheme:?} {token} {property} = {value}: {error:?}"
                                 )

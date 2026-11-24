@@ -2,7 +2,10 @@
 
 use std::collections::BTreeSet;
 
-use proto_ui_style::length::{evaluate, looks_like_length, Dimension, LengthContext, LengthError};
+use proto_ui_style::length::{
+    evaluate, evaluate_with_layout, looks_like_length, Dimension, LayoutContext, LengthContext,
+    LengthError,
+};
 use proto_ui_style::{themes, vocabulary, ColorScheme, Substitution};
 
 fn px(value: &str) -> f32 {
@@ -27,6 +30,51 @@ fn evaluates_every_recorded_unit() {
     };
     assert_eq!(evaluate("1rem", context).unwrap().px, 16.0);
     assert_eq!(evaluate("1em", context).unwrap().px, 24.0);
+}
+
+#[test]
+fn viewport_units_and_containing_percentages_have_distinct_bases() {
+    let fonts = LengthContext::default();
+    let layout = LayoutContext {
+        viewport_width_px: Some(1200.0),
+        query_container_width_px: Some(300.0),
+        viewport_height_px: Some(800.0),
+    };
+    let value = evaluate_with_layout("calc(50% - 10vw + 5vh)", fonts, layout).unwrap();
+    assert_eq!(value.resolve(400.0), 120.0);
+    assert_eq!(value.resolve(600.0), 220.0);
+    assert_eq!(
+        evaluate_with_layout("calc(100vh - 2rem)", fonts, layout).unwrap(),
+        Dimension::px(768.0)
+    );
+    assert_eq!(
+        evaluate_with_layout("calc(100cqw - 2px)", fonts, layout).unwrap(),
+        Dimension::px(298.0)
+    );
+    assert!(matches!(
+        evaluate("1cqw", fonts),
+        Err(LengthError::NeedsQueryContainerWidth(_))
+    ));
+    let width_only = LayoutContext {
+        viewport_height_px: None,
+        ..layout
+    };
+    assert_eq!(
+        evaluate_with_layout("10vw", fonts, width_only).unwrap(),
+        Dimension::px(120.0)
+    );
+    assert!(matches!(
+        evaluate_with_layout("2vh", fonts, width_only),
+        Err(LengthError::NeedsViewport(_))
+    ));
+    assert!(matches!(
+        evaluate("2vw", fonts),
+        Err(LengthError::NeedsViewport(_))
+    ));
+    assert!(matches!(
+        evaluate_with_layout("calc(2vh +)", fonts, layout),
+        Err(LengthError::Malformed(_))
+    ));
 }
 
 #[test]
@@ -154,7 +202,7 @@ fn reports_what_it_cannot_answer_rather_than_guessing() {
 
     // A unit this module does not implement is distinguished from a typo.
     assert!(matches!(
-        evaluate("2vh", context),
+        evaluate("2ch", context),
         Err(LengthError::Unsupported(_))
     ));
     assert!(matches!(
@@ -175,6 +223,9 @@ fn tells_a_length_apart_from_a_keyword() {
         "-1px",
         "0.625rem",
         "-50%",
+        "1vw",
+        "1vh",
+        "1cqw",
         "calc(100% - 1px)",
         "min(8px, 12px)",
     ] {
@@ -205,11 +256,23 @@ const INVALID_ON_THE_WEB_TOO: [&str; 0] = [];
 
 // Valid CSS, but choosing the smaller value needs the real containing size.
 // This source inventory does not certify a native available-space projection.
-const NEEDS_LAYOUT_BASIS: [&str; 1] = ["min(32rem,calc(100% - 2rem))"];
+const NEEDS_LAYOUT_BASIS: [&str; 6] = [
+    "min(20rem,calc(100% - 2rem))",
+    "min(24rem,calc(100% - 2rem))",
+    "min(28rem,calc(100% - 2rem))",
+    "min(32rem,calc(100% - 2rem))",
+    "min(360px,100%)",
+    "min(560px,100%)",
+];
 
 #[test]
 fn evaluates_every_length_a_theme_can_produce() {
     let context = LengthContext::default();
+    let layout = LayoutContext {
+        viewport_width_px: Some(1280.0),
+        query_container_width_px: Some(640.0),
+        viewport_height_px: Some(720.0),
+    };
     let mut checked = 0usize;
     let mut invalid: BTreeSet<String> = BTreeSet::new();
     let mut needs_basis: BTreeSet<String> = BTreeSet::new();
@@ -228,7 +291,7 @@ fn evaluates_every_length_a_theme_can_produce() {
                     if !looks_like_length(&value) {
                         continue;
                     }
-                    match evaluate(&value, context) {
+                    match evaluate_with_layout(&value, context, layout) {
                         Ok(_) => checked += 1,
                         Err(LengthError::InvalidArithmetic(_)) => {
                             invalid.insert(value.clone());
