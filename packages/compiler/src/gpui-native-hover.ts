@@ -56,7 +56,7 @@ fn native_hover_flush(owner:&OwnerRef,window:&mut Window)->bool {
     let kind=if hover{"pointer.enter"}else{"pointer.leave"};
     let mut prevented=dispatch_root_route(owner,kind,event_fields(kind));
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}
-    if !hover{control_label_pointer_cancel(owner);prevented|=pointer_intent(owner,"press.cancel",event_fields("press.cancel"));}
+    if !hover{control_label_cancel(owner);prevented|=pointer_intent(owner,"press.cancel",event_fields("press.cancel"));}
     if !native_hover_current(owner,view,window)||owner.borrow().native_hover.observation!=observation{return prevented}
     let kind=if hover{"host:mouseenter"}else{"host:mouseleave"};
     prevented|=dispatch(owner,kind,false,event_fields(kind));
