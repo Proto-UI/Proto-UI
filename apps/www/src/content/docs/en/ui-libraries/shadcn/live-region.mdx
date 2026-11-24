@@ -15,22 +15,85 @@ A non-interactive ARIA live region that announces dynamic content updates to ass
   demoId="demo-shadcn-live-region"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `liveRegionRoot` from `@proto.ui/prototypes-shadcn` or `@proto.ui/prototypes-shadcn/live-region` and mount it with your framework adapter:
+
+```ts
+import { liveRegionRoot } from '@proto.ui/prototypes-shadcn/live-region';
+```
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { liveRegionRoot } from '@proto.ui/prototypes-shadcn/live-region';
+
+const LiveRegionRoot = AdaptToReact(liveRegionRoot);
+
+export function StatusAnnouncement({ message }: { message: string }) {
+  return (
+    <LiveRegionRoot politeness="polite" atomic>
+      {message}
+    </LiveRegionRoot>
+  );
+}
+```
 
 `Live Region` consists of a single `Root` part. Your children form the announcement payload — update the rendered text to deliver a new announcement:
 
-- `politeness="polite"` (default): Applies `role="status"` and `aria-live="polite"` for non-interruptive updates.
-- `politeness="assertive"`: Applies `role="alert"` and `aria-live="assertive"` for urgent messages.
-- `atomic={true}` (default): Sets `aria-atomic="true"` so the entire region is announced together when content changes.
+- `politeness="polite"` (default): Applies `role="status"` and `aria-live="polite"` for non-interruptive status updates.
+- `politeness="assertive"`: Applies `role="alert"` and `aria-live="assertive"` for urgent messages or validation errors.
+- `atomic={true}` (default): Sets `aria-atomic="true"` so the entire region is announced together; set `false` to announce only mutated descendant text.
+- `Root` applies only readable neutral ink and bounded width (`min-w-0 max-w-full text-foreground`), adds no borders, focus stops, events, or exposes, and pairs cleanly with [Async Region](../async-region/) or form error feedback.
 
-`Live Region` adds no focus stops, events, or exposes, and pairs cleanly with [Async Region](../async-region/) or form error feedback.
+## Examples
+
+### Atomic vs. Incremental Updates
+
+Use `atomic={true}` to re-read the entire sentence whenever progress changes, or `atomic={false}` to announce only the updated fragment.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-atomic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Politeness Switching
+
+Updating `politeness` or `atomic` on a mounted region synchronously updates `role`, `aria-live`, and `aria-atomic` while preserving its authored child text.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-dynamic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Async Save & Validation Feedback
+
+Combine a `polite` status region for background saves with an `assertive` region for validation errors without stealing keyboard focus.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-feedback"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Visually Hidden Announcements
+
+Wrap `Live Region` inside an `.sr-only` container for invisible screen-reader announcements such as clipboard copies or filtered result counts.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-sr-only"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -40,7 +103,7 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
   ]}
 />
 
-`Root` exposes no additional state or events.
+`Root` applies only neutral foreground ink and bounded width (`min-w-0 max-w-full text-foreground`) and exposes no additional state, events, or methods.
 
 ## References
 

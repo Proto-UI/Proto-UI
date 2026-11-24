@@ -9,7 +9,9 @@ export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   modules: asProgressValue.modules,
   setup(def) {
     const inherited = asProgressValue();
-    def.feedback.style.use(tw('text-[14px] leading-[20px] font-normal text-foreground'));
+    def.feedback.style.use(
+      tw('ms-auto text-[14px] leading-[20px] font-normal tabular-nums text-foreground')
+    );
     return inherited.render;
   },
 });

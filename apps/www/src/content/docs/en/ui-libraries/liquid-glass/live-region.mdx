@@ -1,0 +1,123 @@
+---
+title: 'Liquid Glass Live Region'
+description: 'A content-layer ARIA live region for Liquid Glass that announces dynamic status updates and alerts with neutral readable ink.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Live Region inherits ARIA live-region semantics from [Base Live Region](/en/ui-libraries/base/live-region/). It stays in the **content layer** with neutral readable foreground ink and bounded width rather than applying optical glass, preventing glass-on-content distortion and glass-on-glass stacking.
+
+## Preview
+
+This preview pairs un-glassed content-layer announcement surfaces with floating `prominent` and `regular` Liquid Glass action buttons over a tinted backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Liquid Glass Live Region is available from workspace source only and is not currently supported by the CLI. Import `liveRegionRoot` directly from `@proto.ui/prototypes-liquid-glass/live-region`:
+
+```ts
+import { liveRegionRoot } from '@proto.ui/prototypes-liquid-glass/live-region';
+```
+
+## Usage
+
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { liveRegionRoot } from '@proto.ui/prototypes-liquid-glass/live-region';
+
+const LiquidGlassLiveRegionRoot = AdaptToReact(liveRegionRoot);
+
+export function StatusAnnouncement({ message }: { message: string }) {
+  return (
+    <LiquidGlassLiveRegionRoot politeness="polite" atomic>
+      {message}
+    </LiquidGlassLiveRegionRoot>
+  );
+}
+```
+
+- `politeness="polite"` (default): Projects `role="status"` and `aria-live="polite"` for non-interruptive status updates.
+- `politeness="assertive"`: Projects `role="alert"` and `aria-live="assertive"` for urgent service alerts or form validation errors.
+- `atomic={true}` (default): Projects `aria-atomic="true"` so the full region is announced; set `false` to announce only changed descendant nodes.
+
+## Material Layering & Accessibility
+
+Following Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) Human Interface Guidelines, Liquid Glass belongs to floating navigation, controls, and overlays rather than underlying content:
+
+- **No glass on content or glass-on-glass stacking**: `Live Region` applies only `min-w-0 max-w-full text-foreground` with no optical material owner or `backdrop-*` tokens. When nested inside a Liquid Glass banner, toast, or sheet, it inherits surrounding vibrancy cleanly without stacking translucent layers.
+- **Concentric geometry & control hierarchy**: Pair concentric outer/inner corner radii around content surfaces with a single `prominent` Liquid Glass primary action and `regular` secondary controls.
+- **Accessibility fallbacks**: Under `prefers-reduced-transparency`, `prefers-contrast: more`, `prefers-reduced-motion`, or forced colors, surrounding Liquid Glass controls transition to high-contrast opaque fallbacks while `Live Region` stays legible with semantic foreground ink and zero extraneous motion.
+
+## Examples
+
+### Atomic vs. Incremental Updates
+
+Compare full-sentence announcements (`atomic={true}`) with incremental fragment announcements (`atomic={false}`).
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-atomic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Dynamic Politeness Switching
+
+Toggle `politeness` and `atomic` on a mounted live region to update its ARIA attributes synchronously while preserving authored child text.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-dynamic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Async Save & Validation Feedback
+
+Combine polite save status and assertive validation feedback in the content layer triggered by floating Liquid Glass controls.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-feedback"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Visually Hidden Announcements
+
+Wrap `Live Region` in `.sr-only` for invisible screen-reader confirmations such as copying an API key or filtering items.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-sr-only"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+`Root` is a content-layer semantic primitive; it declares no `material` prop and exposes no additional state, events, or methods.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
+/>

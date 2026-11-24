@@ -6,6 +6,7 @@ description: '为异步更新区域标记 aria-busy 语义状态而不附加多�
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
@@ -14,27 +15,90 @@ Brutalist Async Region 是一个单部件语义容器，用于在区域内容处
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-async-region" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-async-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前通过工作区包导出提供，不进入 `proto-ui add` CLI 注册表。可直接从 `@proto.ui/prototypes-brutalist` 或子路径导入：
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-async-region`
-- **包导出**：从 `@proto.ui/prototypes-brutalist` 或 `@proto.ui/prototypes-brutalist/async-region` 导入
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-brutalist/async-region';
+```
 
 ## 用法
 
-- 设置 `busy={true}` 会在容器上输出 `aria-busy="true"`，并通过 `getExposes().busy` 暴露相同状态。
-- 仅更新 `busy` 属性时，内部传入的子元素保持挂载且不丢失焦点；容器本身只提供 `min-w-0 max-w-full text-foreground` 的基础可读样式，不附加边框、阴影或加载动画。
-- 如需显示视觉加载提示，可在内部自行组合 `Spinner`、`Skeleton` 或 `Progress`；如需屏幕阅读器实时播报状态变化，请配合 `Live Region` 使用。
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-brutalist/async-region';
+
+const BrutalistAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
+
+export function ReleaseFeed() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <BrutalistAsyncRegionRoot busy={busy}>
+      <p>异步刷新期间保留现有内容与焦点。</p>
+    </BrutalistAsyncRegionRoot>
+  );
+}
+```
+
+- **语义边界**：设置 `busy={true}` 会在 `brutalist-async-region-root` 上同步输出 `aria-busy="true"`，并通过 `getExposes().busy` 暴露同一布尔状态。
+- **Brutalist 视觉约束**：遵循 [Brutalist 设计契约](/zh-cn/ui-libraries/brutalist/design-contract/)，语义容器自身仅提供 `block min-w-0 max-w-full font-sans text-foreground` 的块级基础排版与墨色，不额外叠加边框、硬阴影或加载动效；2px 黑框与 4px 阴影由外层卡片与操作按钮承载。
+- **按需组合**：可通过 `[aria-busy="true"]` 定制忙碌态表现，或按需搭配 `Spinner`、`Skeleton`、`Progress` 与 `Live Region` 使用。
+
+## 示例
+
+### 保持焦点的草稿刷新
+
+将 Brutalist 输入框放入 `Async Region` 中，刷新切换 `busy` 时输入焦点与草稿内容不会丢失。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-async-region-focus"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 搭配 Live Region 播报状态
+
+使用 `brutalist-async-region-root` 标记正在更新的指标卡片，并结合 `brutalist-live-region-root` 向辅助技术播报刷新进度与更新结果。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-async-region-live-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-### Root
+### Root（`brutalist-async-region-root`）
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
+/>
+
+### 暴露状态（`getExposes()`）
+
+<ApiPropsTable
+  headers={{ name: '状态句柄', type: '类型', default: '初始值' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-ASYNC-REGION.yaml', 'P-BASE-ASYNC-REGION.yaml']}
 />

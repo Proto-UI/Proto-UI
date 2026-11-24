@@ -1,13 +1,13 @@
 ---
 title: 'Progress'
-description: 'A bounded completion indicator supporting determinate and indeterminate states.'
+description: 'Displays an indicator showing the completion progress of a task in determinate or indeterminate mode.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Progress visualizes task completion across a bounded range, and supports an indeterminate state when completion percentage is unknown. The examples on this page use the **Shadcn Rhea** style preset.
+Progress displays task completion across a bounded numeric range and supports an indeterminate state when completion percentage is unknown. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,43 +15,112 @@ Progress visualizes task completion across a bounded range, and supports an inde
   demoId="demo-shadcn-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. After registering the package entry, import the parts from `@proto.ui/prototypes-shadcn/progress`:
+
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-shadcn/progress';
+```
 
 ## Usage
 
-After registering the package entry, import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from the `progress` subpath:
+Compose `Root`, `Track`, and `Indicator` for a minimal bar. To display an inline header row above the track, place `Label` and `Value` before `Track`:
 
-- `Root` manages the finite range and progress state.
-- `Label` provides the accessible name.
-- `Track` holds `Indicator` to visualize the current percentage.
-- `Value` displays `valueText`, or falls back to the normalized numeric value.
+```tsx
+<ShadcnProgressRoot styleProfile="rhea" value={56} valueText="56%" className="w-full max-w-sm">
+  <ShadcnProgressLabel styleProfile="rhea">Upload progress</ShadcnProgressLabel>
+  <ShadcnProgressValue styleProfile="rhea" />
+  <ShadcnProgressTrack styleProfile="rhea">
+    <ShadcnProgressIndicator styleProfile="rhea" />
+  </ShadcnProgressTrack>
+</ShadcnProgressRoot>
+```
 
-### Range and indeterminate state
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
 
-- Values clamp within `[min, max]`; when `min` equals `max`, the percentage is `0`.
-- Omit `value` or set `indeterminate={true}` to represent unknown progress; in this state, no current numeric value is reported to assistive technologies.
-- Progress is a read-only display with no keyboard tab stop. `Root` and its parts expose `value`, `percentage`, `indeterminate`, and `status`, updating together whenever props change.
+- **Range and indeterminate mode**: `value` clamps to `[min, max]` (equal bounds evaluate to `0%`). Omitting `value` or setting `indeterminate={true}` enters indeterminate mode and omits `aria-valuenow`.
+- **Style presets and RTL**: Supports `styleProfile` (`vega`, `nova`, `maia`, `lyra`, `mira`, `luma`, `sera`, `rhea`, `new-york-v4` / `new-york`, or `inherit`) plus `dir="ltr" | "rtl"` with logical inline-end alignment (`ms-auto`).
+- **Accessibility and exposed state**: Progress is a passive read-only display with no keyboard tab stop. Every part exposes synchronized `value`, `percentage`, `indeterminate`, and `status` states, with `--pui-percentage` driving smooth reduced-motion-aware width transitions.
+
+## Examples
+
+### Label
+
+Use `ProgressLabel` and `ProgressValue` to render an inline label and readout above the progress bar.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+A progress bar controlled interactively by a Slider.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Indeterminate
+
+Use `indeterminate` when the completion percentage is unknown, then transition smoothly back to a determinate value once progress is measurable.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL
+
+Pass `dir="rtl"` alongside localized labels and `valueText` for right-to-left scripts such as Arabic and Hebrew.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-The following props belong to `Root`:
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'value', type: 'number | undefined', default: 'omitted' },
+    { name: 'value', type: 'number | undefined', default: 'omitted (indeterminate)' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
     { name: 'indeterminate', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: 'inherited' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → nearest scope → luma' },
   ]}
 />
+
+### Sub-parts and exposed states
+
+- `ProgressLabel`, `ProgressTrack`, `ProgressIndicator`, and `ProgressValue` each accept an optional `styleProfile` override.
+- All parts expose synchronized read-only states: `value` (`number`), `percentage` (`number`, `0–100`), `indeterminate` (`boolean`), and `status` (`'indeterminate' | 'loading' | 'complete'`).
 
 ## References
 

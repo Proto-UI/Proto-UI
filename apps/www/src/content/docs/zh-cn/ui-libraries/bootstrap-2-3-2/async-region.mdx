@@ -1,0 +1,98 @@
+---
+title: 'Bootstrap 2.3.2 Async Region'
+description: '面向 Bootstrap 2.3.2 风格页面的异步忙碌区域语义容器，同步维护 aria-busy 并保持内容与焦点稳定。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Bootstrap 2.3.2 Async Region 为经典 Bootstrap 2.3.2 界面提供纯语义的 `aria-busy` 区域包装，由 [Base Async Region](/zh-cn/ui-libraries/base/async-region/) 统一驱动，不覆盖调用方已有的经典面板、Well 容器或焦点状态。
+
+## 预览
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-async-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 `0.2.0` 稳定版。可从子路径导入：
+
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/async-region';
+```
+
+## 用法
+
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/async-region';
+
+const BootstrapAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
+
+export function OrdersPanel() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <BootstrapAsyncRegionRoot busy={busy}>
+      <p>刷新订单列表期间保留现有内容与键盘焦点。</p>
+    </BootstrapAsyncRegionRoot>
+  );
+}
+```
+
+- **语义投射**：Bootstrap 2.3.2 历史版本本身不包含 Async Region 控件，因此 `bootstrap-2-3-2-async-region-root` 仅透传 Base 的 `busy` 状态与 `aria-busy` 属性，不向宿主注入额外视觉样式或 jQuery 插件接口。
+- **保留经典表面**：外层可继续使用 Bootstrap 2.3.2 的 `#f5f5f5` Well、`#ffffff` 面板、1px `#dddddd` 边框、4px 圆角与固定 14px 像素排版，并通过 `[aria-busy="true"]` 叠加需要的忙碌态反馈。
+- **焦点与交互不变**：切换 `busy` 不会卸载子节点或禁用内部控件；需要向屏幕阅读器播报状态时，可组合 `bootstrap-2-3-2-live-region-root`。
+
+## 示例
+
+### 保持焦点的草稿刷新
+
+将 Bootstrap 2.3.2 输入框置于 `Async Region` 内部，在切换刷新状态期间保留输入焦点与未提交文本。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-async-region-focus"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配 Live Region 播报状态
+
+结合经典信息提示条与 `bootstrap-2-3-2-live-region-root`，在更新内容区域时同步向屏幕阅读器播报刷新进度与完成状态。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-async-region-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root（`bootstrap-2-3-2-async-region-root`）
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
+/>
+
+### 暴露状态（`getExposes()`）
+
+<ApiPropsTable
+  headers={{ name: '状态句柄', type: '类型', default: '初始值' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-ASYNC-REGION.yaml', 'P-BASE-ASYNC-REGION.yaml']}
+/>

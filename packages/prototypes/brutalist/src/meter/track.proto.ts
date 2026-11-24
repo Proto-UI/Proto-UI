@@ -6,10 +6,13 @@ import {
 } from '@proto.ui/prototypes-base/meter';
 export default definePrototype<MeterPartProps, MeterPartExposes>({
   name: 'brutalist-meter-track',
+  modules: asMeterTrack.modules,
   setup(def) {
     const inherited = asMeterTrack();
     def.feedback.style.use(
-      tw('block h-3 w-full overflow-hidden rounded-none border-2 border-border bg-muted')
+      tw(
+        'block h-4 w-full overflow-hidden rounded-base border-2 border-black bg-secondary-background'
+      )
     );
     return inherited.render;
   },

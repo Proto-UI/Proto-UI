@@ -6,10 +6,13 @@ import {
 } from '@proto.ui/prototypes-base/progress';
 export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   name: 'brutalist-progress-track',
+  modules: asProgressTrack.modules,
   setup(def) {
     const inherited = asProgressTrack();
     def.feedback.style.use(
-      tw('block h-3 w-full overflow-hidden rounded-none border-2 border-border bg-muted')
+      tw(
+        'relative flex h-4 w-full items-center overflow-hidden rounded-base border-2 border-border bg-secondary-background'
+      )
     );
     return inherited.render;
   },

@@ -8,15 +8,20 @@ sidebar:
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Spinner is a visual loading indicator drawn as a 2px `currentColor` circular ring with an open arc and no fill or soft shadow, suited for inline button states and loading regions.
+Spinner is a visual-only loading indicator in the Brutalist family drawn as a 2px `currentColor` open-arc circular ring with no fill or soft shadow, suited for inline buttons, badges, and async status regions.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-spinner" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
@@ -25,15 +30,79 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 
 ## Usage
 
-- **Sizes**: `size` supports `'sm'` (16px), `'md'` (24px, default), and `'lg'` (32px); removing the prop restores `'md'`.
-- **Reduced motion**: Rotates linearly once every 1000ms by default. Under `prefers-reduced-motion: reduce`, rotation stops while the open arc remains visible as a non-color cue.
-- **Parent-owned semantics**: Spinner is `aria-hidden` and non-focusable. Compose it inside a parent Button or status/busy region that manages `aria-busy`, accessible text, timing, and focus continuity.
+```tsx
+import { BrutalistSpinnerRoot } from '../proto-ui/components/react';
+
+export function Example() {
+  return <BrutalistSpinnerRoot size="md" />;
+}
+```
+
+- **Sizes**: `size` accepts `'sm'` (16px), `'md'` (24px, default), and `'lg'` (32px); removing the prop restores `'md'`.
+- **Reduced motion**: Rotates linearly once every 1000ms by default. Under `prefers-reduced-motion: reduce`, rotation stops while the open arc remains visible as a non-color orientation cue.
+- **Parent-owned semantics**: Spinner is always contentless, `aria-hidden="true"`, roleless, and non-focusable. Compose it inside a parent Button, Badge, or `Async Region` that owns `aria-busy`, accessible text, timing, and focus continuity.
+
+## Examples
+
+### Size
+
+Use the `size` prop to switch between `'sm'` (16px), `'md'` (24px), and `'lg'` (32px).
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-sizes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### In Button
+
+Place a `size="sm"` Spinner inside `Brutalist Button` so it inherits `currentColor` while the button owns disabled state and accessible label text.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-button"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### With Badge
+
+Pair Spinner with `Brutalist Badge` tones (`accent`, `info`, `danger`) to indicate syncing, updating, or processing status.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-badge"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Async Region
+
+Compose Spinner inside an `Async Region` with `busy` enabled so the parent container owns `aria-busy` and exposes readable status text to assistive technology.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-async-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-The following prop belongs to `Root`:
+### Root
+
+Spinner exposes no imperative methods (`{}`) and defines the following prop on `Root`:
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'size', type: "'sm' | 'md' | 'lg'", default: 'md' }]}
 />
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-SPINNER.yaml']} />

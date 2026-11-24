@@ -6,29 +6,100 @@ description: 'An accessible Brutalist live region for polite or assertive screen
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Live Region is a single-part accessible announcement container that relays dynamic text updates to screen readers with clean, unboxed typography.
+Brutalist Live Region is a single-part accessible announcement container inheriting `role`, `aria-live`, and `aria-atomic` semantics from [Base Live Region](/en/ui-libraries/base/live-region/) with clean, unboxed typography.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-live-region" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Brutalist Live Region is not a `proto-ui add` CLI target — import it directly from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/live-region`:
 
-- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-live-region`
-- **Package exports**: import `Root` from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/live-region`
+```ts
+import { BrutalistLiveRegionRoot } from '@proto.ui/prototypes-brutalist/live-region';
+```
 
 ## Usage
 
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { BrutalistLiveRegionRoot } from '@proto.ui/prototypes-brutalist/live-region';
+
+const LiveRegionRoot = AdaptToReact(BrutalistLiveRegionRoot);
+
+export function StatusAnnouncement({ message }: { message: string }) {
+  return (
+    <LiveRegionRoot politeness="polite" atomic>
+      {message}
+    </LiveRegionRoot>
+  );
+}
+```
+
 - **Politeness level**: `politeness="polite"` (default) sets `role="status"` and `aria-live="polite"` for routine status updates; `politeness="assertive"` sets `role="alert"` and `aria-live="assertive"` for urgent alerts.
-- **Atomic updates**: `atomic` (default `true`) sets `aria-atomic` so the full announcement is read together. Update your children directly to deliver a new announcement.
-- The container stays out of the keyboard tab order and applies only `min-w-0 max-w-full text-foreground` so text remains readable in light and dark modes.
+- **Atomic updates**: `atomic` (default `true`) sets `aria-atomic` so the full announcement is read together; set `false` to announce only changed descendant nodes. Update your children directly to deliver a new announcement.
+- **Restrained presentation**: The container stays out of the keyboard tab order and applies only `min-w-0 max-w-full text-foreground` with no border, shadow, or notification chrome so text remains readable in light and dark modes.
+
+## Examples
+
+### Atomic vs. Incremental Updates
+
+Compare full-sentence announcements (`atomic={true}`) with changed-fragment announcements (`atomic={false}`).
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-atomic"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Dynamic Politeness Switching
+
+Switching `politeness` and `atomic` on a mounted live region updates its ARIA attributes immediately while preserving its authored children.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-dynamic"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Async Save & Validation Feedback
+
+Pair polite background save status with assertive form validation alerts inside Brutalist containers without disturbing keyboard focus.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-feedback"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Visually Hidden Announcements
+
+Wrap `Live Region` in `.sr-only` to announce background confirmations without changing visual layout.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-live-region-sr-only"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
@@ -40,4 +111,13 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
     { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
     { name: 'atomic', type: 'boolean', default: 'true' },
   ]}
+/>
+
+`Root` exposes no additional state, events, or methods.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
 />

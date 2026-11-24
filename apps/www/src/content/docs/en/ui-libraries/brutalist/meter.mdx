@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Meter displays a scalar measurement within a known range—such as storage usage, quota, or score—with threshold classification based on `low`, `high`, and `optimum`.
+Brutalist Meter displays a scalar measurement within a known range—such as storage usage, quota, or score—using 5px `rounded-base` geometry, 2px black borders, DM Sans medium typography, instant snap updates, and distinct `primary`, `canary`, and `destructive` status fills.
 
 ## Preview
 
@@ -15,28 +15,87 @@ Brutalist Meter displays a scalar measurement within a known range—such as sto
   demoId="demo-brutalist-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the meter parts from `@proto.ui/prototypes-brutalist/meter`:
 
-- **Package exports**: import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from `@proto.ui/prototypes-brutalist/meter`
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-brutalist/meter';
+```
 
 ## Usage
 
-### Parts
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-brutalist/meter';
 
-- **Root**: Manages `value`, finite bounds `min` and `max`, and optional `low`, `high`, and `optimum` thresholds. Values clamp to `[min, max]`, and equal bounds produce `0` percentage.
-- **Label**: Provides the accessible label for the meter.
-- **Track / Indicator**: Render the bar container and filled indicator proportional to the computed percentage.
-- **Value**: Displays `valueText` when set, otherwise the clamped numeric value.
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
 
-### Thresholds and accessibility
+export function BrutalistStorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
 
-- Setting `low`, `high`, and `optimum` classifies the current reading as `'optimal'`, `'suboptimal'`, or `'critical'` without modifying the underlying value.
-- Meter is a passive readout with no keyboard tab stop; `Root` and its parts stay synchronized and expose `value`, `percentage`, `indeterminate`, and `status`.
+### Parts and thresholds
+
+- **Root**: Manages `value`, finite `[min, max]` bounds, and optional `low`, `high`, and `optimum` thresholds. Values clamp to `[min, max]`, and equal bounds produce `0` percentage.
+- **Label / Value**: Preserve authored text casing with DM Sans 500 typography; `Value` uses `tabular-nums` and displays `valueText` or the clamped numeric reading.
+- **Track / Indicator**: The track uses `rounded-base`, `border-2 border-black`, and `bg-secondary-background`; the indicator maps `optimal` (`bg-primary`), `suboptimal` (`bg-canary`), and `critical` (`bg-destructive`) with instant snap updates.
+- Meter is a passive readout (`role="meter"`) with no keyboard tab stop; all parts stay synchronized and expose `value`, `percentage`, `indeterminate`, and `status`.
+
+## Examples
+
+### Threshold zones (`optimal` / `suboptimal` / `critical`)
+
+<PrototypePreviewer
+  demoId="demo-brutalist-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom range and formatted `valueText`
+
+<PrototypePreviewer
+  demoId="demo-brutalist-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Resource quota panel
+
+<PrototypePreviewer
+  demoId="demo-brutalist-meter-quota-card"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -45,19 +104,38 @@ Currently available from workspace source; not yet included in the 0.2.0 stable 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
-    { name: 'value', type: 'number', default: 'undefined' },
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
-    { name: 'low', type: 'number', default: 'undefined' },
-    { name: 'high', type: 'number', default: 'undefined' },
-    { name: 'optimum', type: 'number', default: 'undefined' },
   ]}
 />
 
 `Label`, `Track`, `Indicator`, and `Value` declare no props of their own.
 
+### Exposed states
+
+<ApiPropsTable
+  headers={{ name: 'State', type: 'Type', default: 'Notes' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: 'Current reading clamped to [min, max]' },
+    {
+      name: 'percentage',
+      type: 'State<number>',
+      default: 'Normalized percentage between 0 and 100',
+    },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Always false for Meter' },
+  ]}
+/>
+
 ## References
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-METER.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-METER.yaml', 'P-BASE-METER.yaml']}
+/>

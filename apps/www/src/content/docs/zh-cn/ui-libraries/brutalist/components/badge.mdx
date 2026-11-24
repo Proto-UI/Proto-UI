@@ -8,33 +8,112 @@ sidebar:
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Brutalist Badge 是用于标注角色、环境或分类信息的静态徽标组件，采用 5px 圆角、`2px` 黑色边框、无外影与平涂高对比度配色。
+Brutalist Badge 是用于标注角色、环境或分类信息的静态徽标组件，采用 5px 圆角（`rounded-base`）、`2px` 黑色边框、DM Sans 500 排版（`12px/16px`）、无外影与平涂高对比度配色。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-badge" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-badge"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，可通过 CLI 按目标适配器生成 `brutalist-badge`：
 
-- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-badge`
+<InstallCommandCard
+  manager="wc"
+  commands={{
+    wc: 'proto-ui add wc brutalist-badge',
+    react: 'proto-ui add react brutalist-badge',
+    vue: 'proto-ui add vue brutalist-badge',
+    vue2: 'proto-ui add vue2 brutalist-badge',
+  }}
+/>
 
 ## 用法
 
-- 通过 `tone` 选择配色风格：`accent`（默认）、`info` 或 `danger`，每种配色均内置对应的平涂背景与前景文字色。
-- Badge 是不可聚焦的静态标签，适合展示状态词、角色或环境标识。需要动态播报请使用 `Live Region`，需要交互点击请使用 `Button` 或 `Toggle`。
+```tsx
+import { BrutalistBadgeRoot } from '../proto-ui/components/react';
+```
+
+```tsx
+<BrutalistBadgeRoot tone="accent">Badge</BrutalistBadgeRoot>
+```
+
+- 通过 `tone` 选择配色风格：`accent`（默认，明黄 `canary`）、`info`（天蓝 `sky`）或 `danger`（珊瑚红 `coral`），每种配色均内置对应的平涂背景与黑色前景文字。
+- 徽标默认采用 `whitespace-nowrap` 与 `gap-1` 行内弹性布局，可直接组合文本与前置或后置图标标记。
+- Badge 是无 `role`、不可聚焦的被动静态标签，不附加悬停或按压位移。需要实时状态播报请使用 `Live Region`，需要交互点击请使用 `Button` 或 `Toggle`。
+
+## 示例
+
+### 默认
+
+省略 `tone` 时默认应用 `accent` 配色（`canary` 平涂背景搭配黑色前景文字）。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-badge-default"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 配色风格
+
+使用 `tone` 区分 `accent`、`info` 与 `danger` 三组高对比度色对，且当 `tone` 属性移除时自动恢复默认 `accent`。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-badge-tones"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 带图标
+
+可在徽标内部传入前置或后置装饰图标，图标建议标记 `aria-hidden="true"`，间距由组件内置的 `gap-1` 自动保持一致。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-badge-with-icon"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 角色与环境标注
+
+将徽标与普通元数据文本并列排布，用于展示成员角色、部署环境或版本生命周期标记。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-badge-roles"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
 ### Root
 
+`BrutalistBadgeRoot` 为纯样式被动原型，不声明事件、状态或暴露方法（`Exposes: {}`）。
+
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'tone', type: "'accent' | 'info' | 'danger'", default: 'accent' }]}
 />
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-BADGE.yaml']} />

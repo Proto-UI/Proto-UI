@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Brutalist Progress 用于展示任务的确定完成进度或不确定加载状态，采用清晰的粗边框轨道与高对比度填充条呈现。
+Brutalist Progress 用于展示任务的确定完成进度或不确定加载状态，采用 5px `rounded-base` 圆角、2px 黑色描边轨道与带分隔边的主色填充条呈现。
 
 ## 预览
 
@@ -15,28 +15,78 @@ Brutalist Progress 用于展示任务的确定完成进度或不确定加载状�
   demoId="demo-brutalist-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。注册包入口后可从 `@proto.ui/prototypes-brutalist/progress` 导入：
 
-- **包导出**：从 `@proto.ui/prototypes-brutalist/progress` 导入 `progressRoot`、`progressLabel`、`progressTrack`、`progressIndicator`、`progressValue`
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-brutalist/progress';
+```
 
 ## 用法
 
-### 部件组成
+将 `Label` 与 `Value` 置于 `Track` 之前即可在轨道上方自动形成左右对齐的标题行；标签默认采用 DM Sans `font-sans font-medium` 并保留原始大小写：
 
-- **Root**：管理当前进度 `value`、范围 `min` / `max`（默认 `0` / `100`）与 `indeterminate` 状态。数值自动约束在 `[min, max]` 内；当 `min` 与 `max` 相等时比例为 `0`。
-- **Label**：提供可读的进度条名称。
-- **Track / Indicator**：进度轨道与填充条，根据计算百分比渲染进度。
-- **Value**：展示 `valueText` 或当前进度数值。
+```tsx
+<BrutalistProgressRoot value={56} valueText="56%" className="w-full max-w-sm">
+  <BrutalistProgressLabel>Upload progress</BrutalistProgressLabel>
+  <BrutalistProgressValue />
+  <BrutalistProgressTrack>
+    <BrutalistProgressIndicator />
+  </BrutalistProgressTrack>
+</BrutalistProgressRoot>
+```
 
-### 不确定进度与无障碍
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
 
-- 省略 `value` 或将 `indeterminate` 设为 `true` 时，组件进入不确定进度状态，此时不会向辅助技术报告具体进度值。
-- Progress 为被动展示组件，不引入键盘停靠点；更新 `Root` 属性会自动同步所有子部件暴露的 `value`、`percentage`、`indeterminate` 与 `status`。
+- **范围与不确定态**：`value` 自动限制在 `[min, max]` 内（`min === max` 时百分比为 `0`）。省略 `value` 或将 `indeterminate` 设为 `true` 时进入不确定加载态，并向辅助技术隐藏具体当前数值。
+- **被动展示**：Progress 不引入键盘停靠点；更新 `Root` 属性会自动同步所有部件暴露的 `value`、`percentage`、`indeterminate` 与 `status`。
+
+## 示例
+
+### 标签与数值
+
+搭配 `ProgressLabel` 与 `ProgressValue` 在轨道上方同一行展示名称与百分比。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控进度（搭配 Slider）
+
+通过 Brutalist Slider 实时控制进度条数值。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不确定状态
+
+在未知任务总量时展示居中描边的不确定进度段，支持平滑切换回确定态。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
@@ -45,17 +95,21 @@ Brutalist Progress 用于展示任务的确定完成进度或不确定加载状�
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'value', type: 'number', default: 'undefined' },
+    { name: 'value', type: 'number | undefined', default: '省略（不确定态）' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
+    { name: 'indeterminate', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
-    { name: 'indeterminate', type: 'boolean', default: 'false' },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: '继承上下文' },
   ]}
 />
 
-`Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性。
+`Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性；所有部件同步暴露只读状态 `value`、`percentage`、`indeterminate` 与 `status`。
 
 ## 参考
 
-<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-PROGRESS.yaml']} />
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BRUTALIST-PROGRESS.yaml', 'P-BASE-PROGRESS.yaml']}
+/>

@@ -4,8 +4,10 @@ description: 'A Liquid Glass bounded numerical meter with optimal, suboptimal, a
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Meter displays a scalar measurement within a known range (such as disk usage or quota) and classifies readings as `optimal`, `suboptimal`, or `critical` using `low`, `high`, and `optimum` thresholds.
+Liquid Glass Meter displays a scalar measurement within a known range (such as disk usage, quota balance, or battery level) and classifies readings as `optimal`, `suboptimal`, or `critical` using `low`, `high`, and `optimum` thresholds. Following Apple's Liquid Glass layering guidance, the track and indicator render as crisp nonmaterial content-layer gauges rather than floating glass slabs.
 
 ## Preview
 
@@ -13,25 +15,128 @@ Liquid Glass Meter displays a scalar measurement within a known range (such as d
   demoId="demo-liquid-glass-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from the `meter` subpath.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the meter parts from `@proto.ui/prototypes-liquid-glass/meter`:
+
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-liquid-glass/meter';
+```
 
 ## Usage
 
-- **Parts**: `Root` manages bounds, `Label` names the meter, `Track` holds `Indicator`, and `Value` renders `valueText` or the canonical number.
-- **Clamping and thresholds**: values clamp to `[min, max]` (equal bounds yield `0%`). `low`, `high`, and `optimum` classify `status` without modifying the numeric value.
-- Meter is a passive readout with no Tab stop or editing events; updating props keeps every part synchronized.
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-liquid-glass/meter';
+
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
+
+export function LiquidGlassStorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
+
+### Material layering and anatomy
+
+- **Nonmaterial content-layer gauge**: Per Apple HIG Materials guidance, Liquid Glass belongs to the floating functional control and navigation layer above content. Meter's `Track` and `Indicator` remain nonmaterial content-layer elements with concentric capsule rounding (`rounded-full`), crisp borders, and high-contrast semantic fills—keeping readouts legible and preventing glass-on-glass stacking beside floating Liquid Glass controls.
+- **Bounds and parts**: `Root` clamps values to `[min, max]` (equal bounds yield `0%`); `Label` names the meter; `Value` formats `valueText` or the normalized number with `tabular-nums`; `Indicator` distinguishes `optimal`, `suboptimal`, and `critical` zones.
+- Meter is a passive readout (`role="meter"`) with no keyboard tab stop; every part exposes synchronized state as props update.
+
+## Examples
+
+### Threshold zones (`optimal` / `suboptimal` / `critical`)
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom range and formatted `valueText`
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Content-layer gauges with floating Liquid Glass controls
+
+Keep nonmaterial meters inside a readable content panel while placing actions in separate floating Liquid Glass buttons—never stacking glass on glass.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter-surface-layering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Exposed State | Defaults and notes |
-| --- | --- | --- |
-| Root | `value` | Measured value, clamped to `[min, max]` |
-| Root | `min`, `max` | `0`, `100` |
-| Root | `low`, `high`, `optimum` | Range thresholds classifying `status` as `optimal`, `suboptimal`, or `critical` |
-| Root | `ariaLabel`, `valueText` | Accessible label and formatted display text |
-| Root / Parts (exposed) | `value`, `percentage`, `indeterminate`, `status` | Clamped value, percentage, and derived classification |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+`Label`, `Track`, `Indicator`, and `Value` declare no props of their own and remain nonmaterial content-layer parts.
+
+### Exposed states
+
+<ApiPropsTable
+  headers={{ name: 'State', type: 'Type', default: 'Notes' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: 'Current reading clamped to [min, max]' },
+    {
+      name: 'percentage',
+      type: 'State<number>',
+      default: 'Normalized percentage between 0 and 100',
+    },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Always false for Meter' },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-METER.yaml', 'P-BASE-METER.yaml']}
+/>

@@ -71,7 +71,7 @@ export function setupProgressValuePaint<
   Exposes = Record<string, unknown>,
 >(def: DefHandle<Props, Exposes>) {
   const style = setupProgressStyle(def);
-  def.feedback.style.use(tw('ml-auto tabular-nums text-muted-foreground'));
+  def.feedback.style.use(tw('ms-auto tabular-nums text-muted-foreground'));
   def.rule({
     when: (w) => w.any(w.state(style).eq('lyra'), w.state(style).eq('mira')),
     intent: (i) => i.feedback.style.use(tw('text-xs')),

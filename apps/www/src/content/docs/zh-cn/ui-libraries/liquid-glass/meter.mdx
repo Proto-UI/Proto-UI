@@ -4,8 +4,10 @@ description: '展示有界度量值与最优区间分级的 Liquid Glass 仪表�
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Meter 用于展示有界数值的度量结果（如存储占用、密码强度或配额使用率），支持通过 `low`、`high`、`optimum` 自动将读数划分为 `optimal`、`suboptimal` 或 `critical` 状态。
+Liquid Glass Meter 用于展示有界数值的度量结果（如存储占用、配额使用率或电量状态），支持通过 `low`、`high`、`optimum` 自动划分 `optimal`、`suboptimal` 与 `critical` 状态。遵循 Apple Liquid Glass 分层准则，Meter 轨道与指示条作为清晰可读的非材质内容层计量元素呈现，而非叠加玻璃面板。
 
 ## 预览
 
@@ -13,25 +15,124 @@ Liquid Glass Meter 用于展示有界数值的度量结果（如存储占用、�
   demoId="demo-liquid-glass-meter"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `meter` 子路径导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator` 与 `meterValue`。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/meter` 导入各部件原型：
+
+```ts
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-liquid-glass/meter';
+```
 
 ## 用法
 
-- **部件组成**：`Root` 管理数值边界，`Label` 提供名称，`Track` 容纳 `Indicator`，`Value` 优先显示 `valueText` 或规范数值。
-- **范围与区间分级**：输入数值会自动限制在 `[min, max]` 之间（当 `min === max` 时比例为 `0`）。`low`、`high`、`optimum` 仅决定状态分级，不改写原始数值。
-- Meter 为纯被动展示组件，不引入额外键盘停靠点或编辑事件；更新属性时所有子部件同步刷新。
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import {
+  meterRoot,
+  meterLabel,
+  meterTrack,
+  meterIndicator,
+  meterValue,
+} from '@proto.ui/prototypes-liquid-glass/meter';
+
+const MeterRoot = AdaptToReact(meterRoot);
+const MeterLabel = AdaptToReact(meterLabel);
+const MeterTrack = AdaptToReact(meterTrack);
+const MeterIndicator = AdaptToReact(meterIndicator);
+const MeterValue = AdaptToReact(meterValue);
+
+export function LiquidGlassStorageMeter() {
+  return (
+    <MeterRoot value={32} min={0} max={100} low={50} high={80} optimum={20} valueText="32%">
+      <div className="flex items-center justify-between gap-2">
+        <MeterLabel>Storage used</MeterLabel>
+        <MeterValue />
+      </div>
+      <MeterTrack>
+        <MeterIndicator />
+      </MeterTrack>
+    </MeterRoot>
+  );
+}
+```
+
+### 层级设计与部件组成
+
+- **内容层非材质设计**：按照 Apple HIG Materials 规范，Liquid Glass 专用于内容层之上的浮动导航与交互控件；Meter 的 `Track` 与 `Indicator` 不申请玻璃材质，采用紧凑的同心胶囊轨道（`rounded-full`）、清晰边框与语义高对比填充，与上方的浮动 Liquid Glass 按钮自然分层，避免「玻璃叠玻璃」。
+- **部件与范围**：`Root` 将数值自动钳制在 `[min, max]`（`min === max` 时比例为 `0`）；`Label` 提供名称，`Value` 以等宽数字显示 `valueText` 或规范数值；`Indicator` 针对 `optimal`、`suboptimal`、`critical` 分别应用主色、告警过渡色与危险色填充。
+- Meter 为被动展示组件（`role="meter"`），不引入额外键盘焦点停靠点；属性变化时各子部件同步刷新暴露状态。
+
+## 示例
+
+### 阈值区间（`optimal` / `suboptimal` / `critical`）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter-thresholds"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义范围与格式化文本
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter-custom-range"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 内容层计量与浮动 Liquid Glass 控件协同
+
+将非材质内容层 Meter 放置在清晰可读的内容卡片中，并搭配独立的浮动 Liquid Glass 按钮执行操作，避免玻璃叠玻璃。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter-surface-layering"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 暴露状态 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `value` | 当前度量数值，自动限制在 `[min, max]` 范围内 |
-| Root | `min` / `max` | `0` / `100` |
-| Root | `low` / `high` / `optimum` | 区间阈值，用于将当前值归类为 `optimal`、`suboptimal` 或 `critical` |
-| Root | `ariaLabel` / `valueText` | 可访问名称与可读文本格式化值 |
-| Root / 部件（暴露状态） | `value` / `percentage` / `indeterminate` / `status` | 归一化数值、百分比与区间状态 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'undefined' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'low', type: 'number | undefined', default: 'undefined' },
+    { name: 'high', type: 'number | undefined', default: 'undefined' },
+    { name: 'optimum', type: 'number | undefined', default: 'undefined' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+  ]}
+/>
+
+`Label`、`Track`、`Indicator` 与 `Value` 不声明独立属性，且均保持非材质内容层渲染。
+
+### 暴露状态
+
+<ApiPropsTable
+  headers={{ name: '状态', type: '类型', default: '说明' }}
+  rows={[
+    { name: 'value', type: 'State<number>', default: '钳制在 [min, max] 内的当前数值' },
+    { name: 'percentage', type: 'State<number>', default: '0 到 100 之间的归一化百分比' },
+    { name: 'status', type: 'State<string>', default: "'optimal' | 'suboptimal' | 'critical'" },
+    { name: 'indeterminate', type: 'State<boolean>', default: 'Meter 恒为 false' },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-METER.yaml', 'P-BASE-METER.yaml']}
+/>

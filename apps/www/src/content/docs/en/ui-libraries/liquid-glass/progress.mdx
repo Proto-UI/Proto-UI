@@ -1,11 +1,13 @@
 ---
 title: 'Progress'
-description: 'A Liquid Glass progress bar supporting determinate ranges and indeterminate task states.'
+description: 'A Liquid Glass progress bar using concentric capsule geometry, translucent tracks, and prominence hierarchy.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Progress indicates task completion within a finite range or in an indeterminate state when completion percentage is unknown.
+Liquid Glass Progress visualizes task completion across a finite range or in an indeterminate state. Following layered content-vs-chrome guidance, it uses a translucent concentric capsule track with a subtle inset rim and high-contrast fill rather than stacking glass-on-glass inside content.
 
 ## Preview
 
@@ -13,25 +15,124 @@ Liquid Glass Progress indicates task completion within a finite range or in an i
   demoId="demo-liquid-glass-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## Installation
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release. Import `progressRoot`, `progressLabel`, `progressTrack`, `progressIndicator`, and `progressValue` from the `progress` subpath.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import the parts from `@proto.ui/prototypes-liquid-glass/progress`:
+
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-liquid-glass/progress';
+```
 
 ## Usage
 
-- **Parts**: `Root` manages bounds, `Label` names the bar, `Track` contains `Indicator`, and `Value` displays `valueText` or the canonical number.
-- **Determinate and indeterminate**: values clamp to `[min, max]` (equal bounds yield `0%`). Omitting `value` or passing `indeterminate={true}` represents unknown progress and omits the current accessible value.
-- Progress is a passive readout with no Tab stop; updating props synchronizes every part.
+Compose `Root`, `Label`, `Track`, `Indicator`, and `Value`. Place `Label` and `Value` before `Track` for an inline header row above the capsule track:
+
+```tsx
+<LiquidGlassProgressRoot
+  prominence="prominent"
+  value={74}
+  valueText="74%"
+  className="w-full max-w-sm"
+>
+  <LiquidGlassProgressLabel>Downloading system update</LiquidGlassProgressLabel>
+  <LiquidGlassProgressValue />
+  <LiquidGlassProgressTrack>
+    <LiquidGlassProgressIndicator />
+  </LiquidGlassProgressTrack>
+</LiquidGlassProgressRoot>
+```
+
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
+
+- **Layered prominence and concentric geometry**: Use `prominence` (`regular`, `prominent`, `destructive`) to distinguish standard, featured, and quota-warning progress bars. Track and indicator share concentric `rounded-full` capsule geometry with adaptive translucent tracks and inset hairlines that remain legible over light, dark, and colorful backdrops without stacking nested glass materials.
+- **Motion and accessibility**: Width updates use shared resident motion (`300ms`) that automatically respects reduced-motion preferences. Values clamp to `[min, max]`; omitting `value` or setting `indeterminate={true}` omits `aria-valuenow`. Progress is a passive readout with no Tab stop.
+
+## Examples
+
+### Label
+
+Inline `ProgressLabel` and `ProgressValue` aligned above the translucent capsule track.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence
+
+Compare `regular`, `prominent`, and `destructive` prominence levels over a colorful surface backdrop.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Controlled
+
+A Liquid Glass progress bar interactively driven by a Slider.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Indeterminate
+
+Display a centered indeterminate segment while progress is being calculated, then switch back to a determinate bar.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| Part | Prop / Exposed State | Defaults and notes |
-| --- | --- | --- |
-| Root | `value` | Current completion value; omit for indeterminate mode |
-| Root | `min`, `max` | `0`, `100` |
-| Root | `indeterminate` | `false`; marks progress as unknown |
-| Root | `ariaLabel`, `valueText` | Accessible label and human-readable value text |
-| Root / Parts (exposed) | `value`, `percentage`, `indeterminate`, `status` | Clamped value, percentage, and derived status |
+### Root
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: 'omitted (indeterminate)' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'indeterminate', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+    {
+      name: 'prominence',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'regular'",
+    },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: 'inherited' },
+  ]}
+/>
+
+### Sub-parts and exposed states
+
+- `ProgressTrack` and `ProgressIndicator` accept an optional `prominence` override (`'regular' | 'prominent' | 'destructive' | 'inherit'`, default `'inherit'`).
+- All parts expose synchronized read-only states: `value`, `percentage`, `indeterminate`, and `status`.
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-PROGRESS.yaml', 'P-BASE-PROGRESS.yaml']}
+/>

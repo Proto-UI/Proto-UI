@@ -1,13 +1,13 @@
 ---
 title: 'Progress'
-description: '用于展示任务完成比例或不确定状态的进度条组件。'
+description: '用于展示任务完成比例或不确定状态的 Shadcn 进度条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Progress 用于直观展示任务在有界范围内的完成进度，也支持不确定状态（indeterminate）。本页示例使用 **Shadcn Rhea** 风格。
+Progress 用于直观展示任务在有界范围内的完成进度，并支持未知进度的不确定状态（`indeterminate`）。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,43 +15,112 @@ Progress 用于直观展示任务在有界范围内的完成进度，也支持�
   demoId="demo-shadcn-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。注册包入口后可从 `@proto.ui/prototypes-shadcn/progress` 导入全部部件：
+
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-shadcn/progress';
+```
 
 ## 用法
 
-在完成包入口注册后，可从 `progress` 子路径导入 `progressRoot`、`progressLabel`、`progressTrack`、`progressIndicator` 和 `progressValue`：
+最小组合包含 `Root`、`Track` 和 `Indicator`；需要标签与数值显示时，将 `Label` 与 `Value` 放在 `Track` 之前以自动对齐同一标题行：
 
-- `Root` 统一管理数值区间与进度状态。
-- `Label` 为进度条提供可读名称。
-- `Track` 容纳 `Indicator`，以可视化方式呈现完成比例。
-- `Value` 显示 `valueText`，未设置时显示规范化后的数值。
+```tsx
+<ShadcnProgressRoot styleProfile="rhea" value={56} valueText="56%" className="w-full max-w-sm">
+  <ShadcnProgressLabel styleProfile="rhea">Upload progress</ShadcnProgressLabel>
+  <ShadcnProgressValue styleProfile="rhea" />
+  <ShadcnProgressTrack styleProfile="rhea">
+    <ShadcnProgressIndicator styleProfile="rhea" />
+  </ShadcnProgressTrack>
+</ShadcnProgressRoot>
+```
 
-### 数值范围与不确定状态
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
 
-- `value` 会自动限制在 `[min, max]` 范围内；当 `min` 等于 `max` 时，百分比为 `0`。
-- 省略 `value` 或将 `indeterminate` 设为 `true` 时，组件进入不确定进度状态，此时不会向辅助技术报告具体当前值。
-- Progress 为只读展示组件，不引入键盘焦点停靠点。`Root` 及各部件会随属性变化同步暴露 `value`、`percentage`、`indeterminate` 和 `status`。
+- **数值范围与不确定态**：`value` 自动限制在 `[min, max]` 之间（当 `min === max` 时百分比为 `0`）。省略 `value` 或设置 `indeterminate={true}` 时进入不确定进度态，此时不再向辅助技术报告具体当前值。
+- **风格预设与方向**：支持 `styleProfile`（`vega`、`nova`、`maia`、`lyra`、`mira`、`luma`、`sera`、`rhea`、`new-york-v4` / `new-york` 或 `inherit`），并支持 `dir="ltr" | "rtl"` 与逻辑末尾对齐（`ms-auto`）。
+- **无障碍与状态**：Progress 为只读展示组件，不引入键盘焦点停靠点。`Root` 及各部件同步暴露 `value`、`percentage`、`indeterminate` 与 `status`，并通过 `--pui-percentage` 驱动指示条宽度过渡。
+
+## 示例
+
+### 标签与数值
+
+搭配 `ProgressLabel` 与 `ProgressValue` 在轨道上方同一行展示名称与百分比。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控进度（搭配 Slider）
+
+通过外部状态将 Progress 与 Slider 双向联动。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不确定状态
+
+在尚无法预估任务总进度时使用 `indeterminate`，并在获得确切百分比后无缝切回确定态。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### RTL 布局
+
+通过 `dir="rtl"` 配合逻辑外边距与本地化 `valueText`，支持阿拉伯语与希伯来语等从右向左的书写方向。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-progress-rtl"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-以下属性属于 `Root`：
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'value', type: 'number | undefined', default: '省略' },
+    { name: 'value', type: 'number | undefined', default: '省略（不确定态）' },
     { name: 'min', type: 'number', default: '0' },
     { name: 'max', type: 'number', default: '100' },
     { name: 'indeterminate', type: 'boolean', default: 'false' },
     { name: 'ariaLabel', type: 'string', default: "''" },
     { name: 'valueText', type: 'string', default: "''" },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: '继承上下文' },
+    { name: 'styleProfile', type: 'ShadcnStyleChoice', default: 'inherit → 最近 scope → luma' },
   ]}
 />
+
+### 子部件与暴露状态
+
+- `ProgressLabel`、`ProgressTrack`、`ProgressIndicator`、`ProgressValue` 均支持可选的 `styleProfile` 覆盖。
+- 所有部件同步暴露只读状态 `value`（`number`）、`percentage`（`number`，`0–100`）、`indeterminate`（`boolean`）与 `status`（`'indeterminate' | 'loading' | 'complete'`）。
 
 ## 参考
 

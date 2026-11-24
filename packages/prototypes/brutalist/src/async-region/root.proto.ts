@@ -5,10 +5,10 @@ import type { BrutalistAsyncRegionRootExposes, BrutalistAsyncRegionRootProps } f
 // Semantic-only Proto extension; there is no upstream Neo async-region component
 // to pin. Base owns the governed busy fact, its aria-busy projection, and the
 // preservation of authored descendants, so this layer adds only the restrained
-// family ink and bounded width ordinary content chrome
+// family ink, DM Sans body font role, and block bounded width chrome
 // (P-BRUTALIST-ASYNC-REGION-VISUAL-GRAMMAR). Busy is not a loading widget: no
 // spinner, skeleton, progress, toast, timer, or second state machine is added.
-const ROOT_SURFACE_TOKENS = 'min-w-0 max-w-full text-foreground';
+const ROOT_SURFACE_TOKENS = 'block min-w-0 max-w-full font-sans text-foreground';
 
 const asyncRegionRoot = definePrototype<
   BrutalistAsyncRegionRootProps,

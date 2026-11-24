@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Marks a region of your UI with `aria-busy` semantics during asynchronous updates without imposing a built-in spinner or disturbing focus. The examples on this page use the **Shadcn Rhea** style preset.
+Marks a region of your UI with `aria-busy` semantics during asynchronous updates without imposing a built-in spinner or disturbing focus. While `shadcn-async-region-root` itself is a neutral semantic container, the accompanying controls on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
 
@@ -15,27 +15,97 @@ Marks a region of your UI with `aria-busy` semantics during asynchronous updates
   demoId="demo-shadcn-async-region"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the `0.2.0` stable CLI registry. Import the prototype directly from its workspace package entry:
+
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-shadcn/async-region';
+```
 
 ## Usage
 
-Currently available from workspace source; not yet included in the 0.2.0 stable release.
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-shadcn/async-region';
 
-`Async Region` consists of a single `Root` part:
+const ShadcnAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
 
-- Setting `busy={true}` reflects `aria-busy` on the region element and exposes the same state through `getExposes().busy`.
-- When updating props, your children stay mounted and preserve their focus.
-- Render your own loading indicator inside or beside the region as needed. To announce status updates to assistive technology, pair it with [Live Region](../live-region/) at the application layer.
+export function ActivityFeed() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <ShadcnAsyncRegionRoot busy={busy}>
+      <p>Existing feed items stay mounted while refreshing.</p>
+    </ShadcnAsyncRegionRoot>
+  );
+}
+```
+
+`Async Region` consists of a single `Root` (`shadcn-async-region-root`) part:
+
+- **Synchronized busy semantics**: Setting `busy={true}` synchronously reflects `aria-busy="true"` on the region element and exposes the same boolean through `getExposes().busy`, with neutral block layout and foreground ink (`block min-w-0 max-w-full text-foreground`).
+- **Preserved children and focus**: Prop-only transitions keep authored descendants mounted and focused. Setting `busy={true}` never makes the subtree inert or automatically disables inner controls.
+- **Consumer-owned loading UI**: No extra `data-busy` hook, skeleton, or spinner is injected. Style busy transitions via the standard `[aria-busy="true"]` attribute selector and compose your own loading indicators or [Live Region](../live-region/) announcements as needed.
+
+```css
+shadcn-async-region-root[aria-busy='true'] {
+  opacity: 0.65;
+}
+```
+
+## Examples
+
+### Focus-Preserving Refresh
+
+Keep an editable input inside `Async Region`. Even while toggling `busy` from an outside trigger, focus, caret position, and unsaved input stay uninterrupted.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region-focus"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Custom Loading Indicator & Selective Disable
+
+Because `busy={true}` does not disable descendants, your application can disable only the refresh trigger and render a custom status badge while in-region controls remain interactive.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region-indicator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Composed with Live Region
+
+`Async Region` marks busy state without creating a spoken announcement channel. Pair it with [Live Region](../live-region/) when assistive technology should announce refresh progress or completion.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root (`shadcn-async-region-root`)
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
 />
 
-`Root` exposes `busy` and reflects `aria-busy`.
+### Exposed State (`getExposes()`)
+
+<ApiPropsTable
+  headers={{ name: 'Handle', type: 'Type', default: 'Initial' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+> `shadcn-async-region-root` applies only neutral foreground ink and `aria-busy` semantics; it intentionally omits `styleProfile` and `data-busy` props/hooks.
 
 ## References
 

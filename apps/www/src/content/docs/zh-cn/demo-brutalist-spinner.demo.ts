@@ -13,7 +13,6 @@ export default {
             prototypeId: 'brutalist-spinner-root',
             ref: 'spinner-sm',
             props: { size: 'sm' },
-            children: [{ kind: 'box', ref: 'spinner-canary', children: ['SPINNER-CANARY'] }],
           },
           {
             kind: 'proto',
@@ -34,7 +33,8 @@ export default {
         prototypeId: 'base-async-region-root',
         ref: 'busy-region',
         props: { busy: true },
-        className: 'flex items-center gap-3 border px-3 py-2 text-sm',
+        className:
+          'flex items-center gap-3 rounded-[5px] border-2 border-black bg-[var(--pui-secondary-background)] px-3.5 py-2.5 text-sm font-medium text-[var(--pui-foreground)] shadow-[4px_4px_0_0_#000]',
         children: [
           {
             kind: 'proto',

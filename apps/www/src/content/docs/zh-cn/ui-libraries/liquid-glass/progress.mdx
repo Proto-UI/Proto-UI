@@ -1,11 +1,13 @@
 ---
 title: 'Progress'
-description: '展示确定百分比或不确定任务状态的 Liquid Glass 进度条组件。'
+description: '采用同心胶囊几何与半透明分层轨道的 Liquid Glass 进度条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Liquid Glass Progress 用于展示任务的完成进度，支持确定数值范围以及不确定状态（`indeterminate`）。
+Liquid Glass Progress 用于展示确定范围或不确定状态的任务完成进度。遵循内容层分层原则，进度条使用同心胶囊轨道、内嵌高光描边与高对比度主色填充，避免在内容区域内重复叠加玻璃材质。
 
 ## 预览
 
@@ -13,25 +15,124 @@ Liquid Glass Progress 用于展示任务的完成进度，支持确定数值范�
   demoId="demo-liquid-glass-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `progress` 子路径导入 `progressRoot`、`progressLabel`、`progressTrack`、`progressIndicator` 与 `progressValue`。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-liquid-glass/progress` 导入全部部件：
+
+```ts
+import {
+  progressRoot,
+  progressLabel,
+  progressTrack,
+  progressIndicator,
+  progressValue,
+} from '@proto.ui/prototypes-liquid-glass/progress';
+```
 
 ## 用法
 
-- **部件组成**：`Root` 管理进度范围，`Label` 提供名称，`Track` 容纳 `Indicator`，`Value` 显示 `valueText` 或规范数值。
-- **确定与不确定状态**：数值自动限制在 `[min, max]` 之间（上下界相等时比例为 `0`）。省略 `value` 或设置 `indeterminate={true}` 进入未知进度模式，并自动对辅助技术省略当前进度值。
-- Progress 为被动展示组件，不引入键盘停靠点；更新属性时所有部件同步刷新。
+由 `Root`、`Label`、`Track`、`Indicator` 与 `Value` 组成；将 `Label` 与 `Value` 放在 `Track` 之前即可在轨道上方对齐标题行：
+
+```tsx
+<LiquidGlassProgressRoot
+  prominence="prominent"
+  value={74}
+  valueText="74%"
+  className="w-full max-w-sm"
+>
+  <LiquidGlassProgressLabel>Downloading system update</LiquidGlassProgressLabel>
+  <LiquidGlassProgressValue />
+  <LiquidGlassProgressTrack>
+    <LiquidGlassProgressIndicator />
+  </LiquidGlassProgressTrack>
+</LiquidGlassProgressRoot>
+```
+
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
+
+- **层次与同心圆角**：支持 `prominence`（`regular`、`prominent`、`destructive`）区分常规、突出与配额预警层级。轨道与填充条共享同心全圆角（`rounded-full`），并通过基于前景色混合的半透明轨道与内嵌 1px 边缘描边在亮暗模式和彩色背景上保持清晰可读，不向内容层叠加第二层玻璃。
+- **动效与无障碍**：宽度过渡使用共享 resident motion（`300ms`），自动响应系统减少动效偏好。`value` 限制在 `[min, max]` 之间；省略 `value` 或设置 `indeterminate={true}` 时进入不确定态，不向辅助技术上报具体数值。Progress 为只读组件，不引入键盘焦点停靠点。
+
+## 示例
+
+### 标签与数值
+
+在半透明胶囊轨道上方同一行对齐展示标签与等宽百分比数值。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 视觉层级（Prominence）
+
+对比 `regular`、`prominent` 与 `destructive` 三种突出层级在多彩背景上的层次表现。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-prominence"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控进度（搭配 Slider）
+
+通过 Liquid Glass Slider 实时驱动进度条与数值显示。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不确定状态
+
+在任务准备阶段展示居中的不确定胶囊段，并可切换为确定百分比。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 暴露状态 | 默认值与说明 |
-| --- | --- | --- |
-| Root | `value` | 当前进度数值；省略时进入不确定状态 |
-| Root | `min` / `max` | `0` / `100` |
-| Root | `indeterminate` | `false`；设为 `true` 时表示进度未知 |
-| Root | `ariaLabel` / `valueText` | 可访问名称与格式化显示文本 |
-| Root / 部件（暴露状态） | `value` / `percentage` / `indeterminate` / `status` | 归一化进度值、百分比与状态 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: '省略（不确定态）' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'indeterminate', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+    {
+      name: 'prominence',
+      type: "'regular' | 'prominent' | 'destructive'",
+      default: "'regular'",
+    },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: '继承上下文' },
+  ]}
+/>
+
+### 子部件与暴露状态
+
+- `ProgressTrack` 与 `ProgressIndicator` 支持可选的 `prominence` 覆盖（`'regular' | 'prominent' | 'destructive' | 'inherit'`，默认 `'inherit'`）。
+- 全部部件同步暴露只读状态 `value`、`percentage`、`indeterminate` 与 `status`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-PROGRESS.yaml', 'P-BASE-PROGRESS.yaml']}
+/>

@@ -3,13 +3,15 @@ export default {
   root: {
     kind: 'proto',
     prototypeId: 'base-async-region-root',
-    className: 'rounded-md border bg-white px-4 py-3 text-sm',
+    className: 'rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground',
     props: { busy: true },
     children: [
       {
         kind: 'box',
         className: 'flex items-center gap-2',
-        children: [{ kind: 'box', className: 'text-slate-400', children: ['Loading results…'] }],
+        children: [
+          { kind: 'box', className: 'text-muted-foreground', children: ['Loading results…'] },
+        ],
       },
     ],
   },

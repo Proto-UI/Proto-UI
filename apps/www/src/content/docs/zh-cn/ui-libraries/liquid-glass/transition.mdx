@@ -1,0 +1,157 @@
+---
+title: 'Liquid Glass Transition'
+description: '保持自身透明、避免玻璃叠玻璃的五阶段显隐过渡容器，专为悬浮于彩色内容之上的 Liquid Glass 控件与浮层设计。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Transition 为悬浮于内容之上的 Liquid Glass 面板与控制条提供透明的五阶段显隐状态机（`closed → preparing → entering → entered → leaving`）。原型仅绑定端点透明度（`opacity-100` / `opacity-0`），自身不申请第二层玻璃材质，从而避免违反 Apple Liquid Glass 指南中的“玻璃叠玻璃”反模式。
+
+## 预览
+
+下方的浮层卡片悬浮在彩色渐变画布之上，展示同心圆角、半透明磨砂层次与柔和边缘高光；通过 `Enter`、`Leave` 与 `Complete` 观察过渡阶段与挂载状态的变化。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+当前仅以 Proto UI 工作区源码提供，尚未加入 `@proto.ui/cli` 安装目标。可直接从工作区源码导入：
+
+```ts
+import { transition } from '@proto.ui/prototypes-liquid-glass/transition';
+```
+
+## 用法
+
+```tsx
+import { useState } from 'react';
+import { LiquidGlassButton, LiquidGlassTransition } from '../proto-ui/components/react';
+
+export function FloatingGlassPanel() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/25 p-5">
+      <LiquidGlassTransition
+        open={open}
+        appear
+        className="block transition-opacity duration-300 ease-out motion-reduce:transition-none"
+      >
+        <div className="rounded-2xl border border-white/55 bg-white/70 p-4 shadow-lg backdrop-blur-xl">
+          Floating Liquid Glass overlay
+        </div>
+      </LiquidGlassTransition>
+      <div className="mt-4">
+        <LiquidGlassButton variant="prominent" onClick={() => setOpen((value) => !value)}>
+          Toggle Panel
+        </LiquidGlassButton>
+      </div>
+    </div>
+  );
+}
+```
+
+## 示例
+
+### 受控模式与 `transitionend` 同步
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 中途打断策略（`interrupt`）
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-interrupt"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 生命周期事件与 `appear`
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-lifecycle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 层级突出与无障碍回退（Regular / Prominent / Opaque）
+
+切换常规透明玻璃、强调染色浮层与高对比度不透明回退模式，配合 `LiquidGlassButton` 的 `variant` 与 `material="opaque"` 选项检验不同辅助功能偏好下的清晰可读性。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-accessibility"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 材质与无障碍
+
+设计取舍参考 Apple Human Interface Guidelines 的 [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 指南：
+
+- **禁止玻璃叠玻璃**：`liquid-glass-transition` 本身保持完全透明、不挂载材质载体，只作为悬浮玻璃表面的存在性与端点透明度协调层。
+- **同心圆角与层次**：外层浮层容器与内层徽章/控件保持同心圆角（如外层 `rounded-2xl` + 内边距 `p-4` 搭配内层 `rounded-xl`），同一视图组中只突出一个主要 `prominent` 操作。
+- **辅助功能回退**：当系统开启“减少透明度”或“增强对比度”时，悬浮表面与按钮应切换至高对比度不透明样式（如 `material="opaque"`）；开启“减弱动态效果”（`prefers-reduced-motion: reduce`）时，Transition 自动将兜底时长缩短为 `0ms` 并保留完整阶段与事件顺序。
+- **底层语义**：所有相位机、挂载与打断行为均由 [Base Transition](/zh-cn/ui-libraries/base/transition/) 统一提供。
+
+## API
+
+### Transition 属性
+
+传入 `open` 进入受控模式：
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: '非受控' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+### 暴露状态、事件与方法
+
+<ApiPropsTable
+  headers={{ name: '成员', type: '类型 / 签名', default: '说明' }}
+  rows={[
+    {
+      name: 'transitionState',
+      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      default: '当前感知过渡阶段',
+    },
+    { name: 'isPresent', type: 'boolean', default: '视图是否保持挂载' },
+    { name: 'beforeEnter / afterEnter', type: 'ExposeEvent<void>', default: '入场边界事件' },
+    { name: 'beforeLeave / afterLeave', type: 'ExposeEvent<void>', default: '离场边界事件' },
+    {
+      name: 'enter / leave / complete',
+      type: '() => void',
+      default: '手动推进状态机（亦挂载于 controls）',
+    },
+    {
+      name: 'retainClosedView',
+      type: '(retained: boolean) => void',
+      default: '控制 closed 阶段是否保留视图节点',
+    },
+  ]}
+/>
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
+/>

@@ -341,6 +341,24 @@ import w4Demo52 from '../src/content/docs/demo_components/virtual-list/demo-shad
 import w4Demo53 from '../src/content/docs/demo_components/message-scroller/demo-shadcn-message-scroller-disabled.demo';
 import w4Demo54 from '../src/content/docs/demo_components/message-scroller/demo-shadcn-message-scroller-group.demo';
 import w4Demo55 from '../src/content/docs/demo_components/message-scroller/demo-shadcn-message-scroller-live.demo';
+import w5Demo0 from '../src/content/docs/demo_components/progress/demo-shadcn-progress-controlled.demo';
+import w5Demo1 from '../src/content/docs/demo_components/progress/demo-shadcn-progress-indeterminate.demo';
+import w5Demo2 from '../src/content/docs/demo_components/progress/demo-shadcn-progress-label.demo';
+import w5Demo3 from '../src/content/docs/demo_components/progress/demo-shadcn-progress-rtl.demo';
+import w5Demo4 from '../src/content/docs/demo_components/meter/demo-shadcn-meter-custom-range.demo';
+import w5Demo5 from '../src/content/docs/demo_components/meter/demo-shadcn-meter-profiles.demo';
+import w5Demo6 from '../src/content/docs/demo_components/meter/demo-shadcn-meter-quota-card.demo';
+import w5Demo7 from '../src/content/docs/demo_components/meter/demo-shadcn-meter-thresholds.demo';
+import w5Demo8 from '../src/content/docs/demo_components/async-region/demo-shadcn-async-region-focus.demo';
+import w5Demo9 from '../src/content/docs/demo_components/async-region/demo-shadcn-async-region-indicator.demo';
+import w5Demo10 from '../src/content/docs/demo_components/async-region/demo-shadcn-async-region-live-region.demo';
+import w5Demo11 from '../src/content/docs/demo_components/live-region/demo-shadcn-live-region-atomic.demo';
+import w5Demo12 from '../src/content/docs/demo_components/live-region/demo-shadcn-live-region-dynamic.demo';
+import w5Demo13 from '../src/content/docs/demo_components/live-region/demo-shadcn-live-region-feedback.demo';
+import w5Demo14 from '../src/content/docs/demo_components/live-region/demo-shadcn-live-region-sr-only.demo';
+import w5Demo15 from '../src/content/docs/demo_components/transition/demo-shadcn-transition-controlled.demo';
+import w5Demo16 from '../src/content/docs/demo_components/transition/demo-shadcn-transition-interrupt.demo';
+import w5Demo17 from '../src/content/docs/demo_components/transition/demo-shadcn-transition-lifecycle.demo';
 const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-button', demo0],
   ['demo-button-default', demo1],
@@ -653,9 +671,38 @@ const demos: ReadonlyArray<readonly [string, DemoSpec]> = [
   ['demo-shadcn-message-scroller-disabled', w4Demo53],
   ['demo-shadcn-message-scroller-group', w4Demo54],
   ['demo-shadcn-message-scroller-live', w4Demo55],
+  ['demo-shadcn-progress-controlled', w5Demo0],
+  ['demo-shadcn-progress-indeterminate', w5Demo1],
+  ['demo-shadcn-progress-label', w5Demo2],
+  ['demo-shadcn-progress-rtl', w5Demo3],
+  ['demo-shadcn-meter-custom-range', w5Demo4],
+  ['demo-shadcn-meter-quota-card', w5Demo6],
+  ['demo-shadcn-meter-thresholds', w5Demo7],
+  ['demo-shadcn-async-region-focus', w5Demo8],
+  ['demo-shadcn-async-region-indicator', w5Demo9],
+  ['demo-shadcn-async-region-live-region', w5Demo10],
+  ['demo-shadcn-live-region-atomic', w5Demo11],
+  ['demo-shadcn-live-region-dynamic', w5Demo12],
+  ['demo-shadcn-live-region-feedback', w5Demo13],
+  ['demo-shadcn-live-region-sr-only', w5Demo14],
+  ['demo-shadcn-transition-controlled', w5Demo15],
+  ['demo-shadcn-transition-interrupt', w5Demo16],
+  ['demo-shadcn-transition-lifecycle', w5Demo17],
 ];
 
 const profileExamples = [
+  {
+    id: 'demo-shadcn-meter-profiles',
+    page: 'meter.mdx',
+    demo: w5Demo5,
+    profiles: [
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-style-scope', 'rhea'],
+      ['shadcn-style-scope', 'luma'],
+      ['shadcn-style-scope', 'lyra'],
+      ['shadcn-style-scope', 'sera'],
+    ],
+  },
   {
     id: 'demo-shadcn-input-shell-profiles',
     page: 'input-shell.mdx',
@@ -807,7 +854,7 @@ describe('ordinary Shadcn documentation demo policy', () => {
   it('covers every actual Shadcn page demo ID in each locale', () => {
     const ordinaryIds = demos.map(([id]) => id);
     const expected = [...ordinaryIds, ...profileExamples.map(({ id }) => id)].sort();
-    expect(expected).toHaveLength(319);
+    expect(expected).toHaveLength(337);
     for (const locale of ['en', 'zh-cn']) {
       const found = new Set<string>();
       const directory = resolve(

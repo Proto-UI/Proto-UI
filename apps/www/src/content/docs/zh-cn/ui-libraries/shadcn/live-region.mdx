@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-用于向辅助技术播报状态更新或紧急提示的 ARIA live region 组件，根据 `politeness` 与 `atomic` 自动配置无障碍角色与播报级别。本页示例采用 **Shadcn Rhea** 风格。
+用于向辅助技术播报状态更新或紧急提示的 ARIA live region 组件，根据 `politeness` 与 `atomic` 自动同步无障碍角色与播报级别。本页示例采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,22 +15,85 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-live-region"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-shadcn` 或 `@proto.ui/prototypes-shadcn/live-region` 导入 `liveRegionRoot`，再通过对应框架适配器挂载：
+
+```ts
+import { liveRegionRoot } from '@proto.ui/prototypes-shadcn/live-region';
+```
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { liveRegionRoot } from '@proto.ui/prototypes-shadcn/live-region';
 
-`Live Region` 由单一 `Root` 部件组成，传入的子元素文本即为播报内容——更新子元素即可触发播报：
+const LiveRegionRoot = AdaptToReact(liveRegionRoot);
 
-- `politeness="polite"`（默认）：设置 `role="status"` 与 `aria-live="polite"`，适用于非打断性的状态提示。
-- `politeness="assertive"`：设置 `role="alert"` 与 `aria-live="assertive"`，适用于需要立即播报的重要提醒。
-- `atomic={true}`（默认）：设置 `aria-atomic="true"`，使内容变化时整段播报而非仅播报差异部分。
+export function StatusAnnouncement({ message }: { message: string }) {
+  return (
+    <LiveRegionRoot politeness="polite" atomic>
+      {message}
+    </LiveRegionRoot>
+  );
+}
+```
 
-组件保持纯语义展示，不增加焦点、事件或额外暴露方法，常与 [Async Region](../async-region/) 或表单校验错误搭配使用。
+`Live Region` 由单一 `Root` 部件组成，传入的子元素文本即为播报载荷——更新子元素即可触发播报：
+
+- `politeness="polite"`（默认）：投射 `role="status"` 与 `aria-live="polite"`，适用于非打断性的常规状态更新。
+- `politeness="assertive"`：投射 `role="alert"` 与 `aria-live="assertive"`，适用于需要立即播报的紧急提醒或表单校验错误。
+- `atomic={true}`（默认）：投射 `aria-atomic="true"`，内容变化时整段播报；设为 `false` 时仅播报发生变化的子节点。
+- `Root` 仅提供中性可读前景色与有界宽度（`min-w-0 max-w-full text-foreground`），不附加边框、焦点、事件或额外暴露方法，常与 [Async Region](../async-region/) 或表单校验错误搭配使用。
+
+## 示例
+
+### 原子播报与增量播报
+
+设置 `atomic={true}` 会在任意子文本变化时重读整段内容；设置 `atomic={false}` 则只向屏幕阅读器播报实际变更的子片段。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-atomic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 动态切换播报级别
+
+在已挂载实例上切换 `politeness` 与 `atomic` 时，`role`、`aria-live` 与 `aria-atomic` 会同步更新，同时保留已渲染的子内容不变。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-dynamic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 异步保存与表单校验反馈
+
+将 `politeness="polite"` 用于后台保存状态，将 `politeness="assertive"` 用于即时校验错误提示，整个过程不会抢占用户当前的键盘焦点。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-feedback"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 仅屏幕阅读器可见的播报
+
+使用 `.sr-only` 包裹 `Live Region` 可实现不占用视觉版面的静默播报（例如复制成功、筛选结果计数更新）。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-live-region-sr-only"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -40,7 +103,7 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   ]}
 />
 
-`Root` 无额外暴露状态或事件。
+`Root` 仅附加中性前景与宽度约束（`min-w-0 max-w-full text-foreground`），无额外暴露状态、事件或方法。
 
 ## 参考
 

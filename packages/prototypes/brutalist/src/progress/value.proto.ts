@@ -6,9 +6,12 @@ import {
 } from '@proto.ui/prototypes-base/progress';
 export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   name: 'brutalist-progress-value',
+  modules: asProgressValue.modules,
   setup(def) {
     const inherited = asProgressValue();
-    def.feedback.style.use(tw('text-sm tabular-nums text-muted-foreground'));
+    def.feedback.style.use(
+      tw('ms-auto font-sans text-sm font-medium tabular-nums text-muted-foreground')
+    );
     return inherited.render;
   },
 });

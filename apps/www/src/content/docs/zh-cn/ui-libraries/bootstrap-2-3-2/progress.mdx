@@ -1,11 +1,13 @@
 ---
 title: 'Bootstrap 2.3.2 Progress'
-description: '支持确定进度与不确定加载态展示的 Bootstrap 2.3.2 进度条组件。'
+description: '支持经典语义配色、确定进度与不确定加载态展示的 Bootstrap 2.3.2 进度条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Bootstrap 2.3.2 Progress 用于展示任务的完成进度，同时支持明确数值进度与不确定（`indeterminate`）等待状态。
+Bootstrap 2.3.2 Progress 保留了经典 20px 高度、4px 圆角、内阴影轨道、纵向渐变填充与 600ms 宽度平滑过渡，同时完整复用 Base Progress 的确定进度与不确定态语义。
 
 ## 预览
 
@@ -13,12 +15,11 @@ Bootstrap 2.3.2 Progress 用于展示任务的完成进度，同时支持明确�
   demoId="demo-bootstrap-2-3-2-progress"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
 
 ## 安装
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `@proto.ui/prototypes-bootstrap-2-3-2/progress` 导入全部部件：
 
 ```ts
 import {
@@ -32,17 +33,102 @@ import {
 
 ## 用法
 
-由 `Root`、`Label`、`Track`、`Indicator` 和 `Value` 组成：
+由 `Root`、`Label`、`Track`、`Indicator` 与 `Value` 组成；将 `Label` 和 `Value` 放在 `Track` 之前可在轨道上方水平对齐显示：
 
-- **确定与不确定进度**：`Root` 将 `value` 钳制在 `min`（默认 `0`）至 `max`（默认 `100`）之间；当 `min === max` 时比例为 `0`。省略 `value` 或设置 `indeterminate={true}` 进入不确定进度态，此时不向辅助技术上报具体进度百分比。
-- **只读展示**：`Label` 提供无障碍名称，`Track` 与 `Indicator` 渲染进度条，`Value` 优先显示 `valueText` 或规范数值。作为被动显示组件，不引入键盘焦点停靠点。
+```tsx
+<Bootstrap232ProgressRoot variant="success" value={60} valueText="60%" className="w-full max-w-sm">
+  <Bootstrap232ProgressLabel>Upload progress</Bootstrap232ProgressLabel>
+  <Bootstrap232ProgressValue />
+  <Bootstrap232ProgressTrack>
+    <Bootstrap232ProgressIndicator />
+  </Bootstrap232ProgressTrack>
+</Bootstrap232ProgressRoot>
+```
+
+```text
+ProgressRoot
+├── ProgressLabel
+├── ProgressValue
+└── ProgressTrack
+    └── ProgressIndicator
+```
+
+- **经典语义变体**：`Root` 与 `Indicator` 支持 `default`、`info`、`success`、`warning` 与 `danger` 五种 Bootstrap 2.3.2 渐变配色，并沿用 `600ms ease` 宽度过渡（自动遵循系统减少动效偏好）。
+- **确定与不确定态**：`value` 限制在 `[min, max]` 之间（`min === max` 时比例为 `0`）。省略 `value` 或将 `indeterminate` 设为 `true` 时进入不确定加载态，不向辅助技术上报具体当前值。
+- **只读无障碍**：Progress 为被动展示组件，不引入键盘焦点停靠点；全部部件同步暴露 `value`、`percentage`、`indeterminate` 与 `status`。
+
+## 示例
+
+### 语义变体（Contextual Variants）
+
+展示 Bootstrap 2.3.2 经典的 `default`、`info`、`success`、`warning` 与 `danger` 渐变进度条。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-variants"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 标签与数值
+
+在经典 20px 渐变轨道上方同一行对齐标题与完成百分比。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-label"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 受控进度（搭配 Slider）
+
+通过 Slider 交互式调节进度数值，体验 600ms 宽度过渡效果。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 不确定状态
+
+在未知完成进度时展示不确定态，并在需要时切回确定百分比。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-progress-indeterminate"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
 
-| 部件 | 属性 / 状态 | 说明 |
-| --- | --- | --- |
-| `Root` | `value` / `min` / `max` | 当前进度与范围上下界（默认 `0`–`100`） |
-| `Root` | `indeterminate` | 设为 `true`（或省略 `value`）表示不确定进度 |
-| `Root` | `ariaLabel` / `valueText` | 可访问名称与自定义进度文本 |
-| 全部部件 | `value` / `percentage` / `indeterminate` / `status` | 同步暴露的只读进度状态 |
-| `Label` / `Track` / `Indicator` / `Value` | — | 名称、轨道、进度填充条与数值显示部件 |
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'value', type: 'number | undefined', default: '省略（不确定态）' },
+    { name: 'min', type: 'number', default: '0' },
+    { name: 'max', type: 'number', default: '100' },
+    { name: 'indeterminate', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+    { name: 'valueText', type: 'string', default: "''" },
+    {
+      name: 'variant',
+      type: "'default' | 'info' | 'success' | 'warning' | 'danger'",
+      default: "'default'",
+    },
+    { name: 'dir', type: "'ltr' | 'rtl' | undefined", default: '继承上下文' },
+  ]}
+/>
+
+### Indicator 与暴露状态
+
+- `ProgressIndicator` 支持可选的 `variant`（`'default' | 'info' | 'success' | 'warning' | 'danger' | 'inherit'`，默认 `'inherit'`）以局部覆盖 `Root` 的配色变体。
+- 全部部件同步暴露只读状态 `value`、`percentage`、`indeterminate` 与 `status`。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-BOOTSTRAP-2-3-2-PROGRESS.yaml', 'P-BASE-PROGRESS.yaml']}
+/>

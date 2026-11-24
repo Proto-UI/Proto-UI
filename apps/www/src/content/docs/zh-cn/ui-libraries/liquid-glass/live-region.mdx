@@ -1,0 +1,123 @@
+---
+title: 'Liquid Glass Live Region'
+description: '位于内容层的 Liquid Glass 纯语义 ARIA 实时区域组件，以高可读性前景文本向屏幕阅读器播报动态更新。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Live Region 继承 [Base Live Region](/zh-cn/ui-libraries/base/live-region/) 的无障碍播报语义，位于界面的**内容层**，仅提供高可读性的中性前景色与有界宽度，不叠加玻璃光学材质，避免内容区玻璃化或在玻璃容器内形成玻璃叠玻璃。
+
+## 预览
+
+下方示例展示了分层视觉结构：实时播报文本位于不透明的内容层卡片内，操作按钮作为浮层控件使用 `prominent` 与 `regular` Liquid Glass 按钮悬浮于柔和背景之上。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## 安装
+
+Liquid Glass Live Region 当前仅在工作区源码中提供，不支持通过 CLI 安装。请直接从 `@proto.ui/prototypes-liquid-glass/live-region` 导入 `liveRegionRoot`：
+
+```ts
+import { liveRegionRoot } from '@proto.ui/prototypes-liquid-glass/live-region';
+```
+
+## 用法
+
+```tsx
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { liveRegionRoot } from '@proto.ui/prototypes-liquid-glass/live-region';
+
+const LiquidGlassLiveRegionRoot = AdaptToReact(liveRegionRoot);
+
+export function StatusAnnouncement({ message }: { message: string }) {
+  return (
+    <LiquidGlassLiveRegionRoot politeness="polite" atomic>
+      {message}
+    </LiquidGlassLiveRegionRoot>
+  );
+}
+```
+
+- `politeness="polite"`（默认）：投射 `role="status"` 与 `aria-live="polite"`，适用于后台同步、通知计数等非打断性状态播报。
+- `politeness="assertive"`：投射 `role="alert"` 与 `aria-live="assertive"`，适用于服务告警或关键表单校验错误。
+- `atomic={true}`（默认）：投射 `aria-atomic="true"`；设为 `false` 时仅播报实际发生变化的子文本节点。
+
+## 材质层级与无障碍
+
+遵循 Apple [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) 人机界面指南，Liquid Glass 材质专属于浮层导航、工具栏与操作控件，而不应用于底层内容：
+
+- **禁止内容层玻璃化与玻璃叠玻璃**：`Live Region` 作为语义内容容器仅应用 `min-w-0 max-w-full text-foreground`，不声明光学材质 owner 或 `backdrop-*` 效果。当它被放入 Liquid Glass 浮层横幅、Toast 或 Sheet 中时，不会产生非法的玻璃叠玻璃伪影。
+- **同心圆角与控件层级**：组合布局时保持外层舞台与内层内容卡片的同心圆角比例，并用 `prominent` 按钮突出单一主操作，其余次要操作保持 `regular` 常规玻璃态。
+- **无障碍偏好回退**：在系统开启减少透明度（`prefers-reduced-transparency`）、增强对比度（`prefers-contrast: more`）、减弱动态效果（`prefers-reduced-motion`）或强制颜色模式时，周边 Liquid Glass 控件自动回退到高对比度不透明表面，而 `Live Region` 依托语义前景色始终保持清晰可读且无多余动效。
+
+## 示例
+
+### 原子播报与增量播报
+
+对比 `atomic={true}` 整句重读与 `atomic={false}` 仅播报变更片段的行为差异。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-atomic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 动态切换播报级别
+
+在挂载后的实例上切换 `politeness` 与 `atomic`，同步更新 ARIA 语义而不重建子内容。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-dynamic"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 异步保存与表单校验反馈
+
+在内容层组合 `polite` 保存状态与 `assertive` 校验提示，配合浮层 Liquid Glass 操作按钮触发更新。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-feedback"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 仅屏幕阅读器可见的播报
+
+通过 `.sr-only` 包裹实时区域，在不增加视觉层级的场景下向屏幕阅读器播报复制或筛选结果。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-live-region-sr-only"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## API
+
+### Root
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'politeness', type: "'polite' | 'assertive'", default: 'polite' },
+    { name: 'atomic', type: 'boolean', default: 'true' },
+  ]}
+/>
+
+`Root` 属于内容层纯语义部件，不声明 `material` 属性，亦无额外暴露状态、事件或方法。
+
+## 参考
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-LIVE-REGION.yaml', 'P-BASE-LIVE-REGION.yaml']}
+/>

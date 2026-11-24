@@ -7,7 +7,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-为异步加载或刷新中的内容区域声明标准 `aria-busy` 语义，同时完整保留自定义加载界面与焦点状态。本页示例采用 **Shadcn Rhea** 风格。
+为异步加载或刷新中的内容区域声明标准 `aria-busy` 语义，同时完整保留自定义加载界面与焦点状态。`shadcn-async-region-root` 本身是纯语义容器，本页示例中的配套控件采用 **Shadcn Rhea** 风格。
 
 ## 预览
 
@@ -15,27 +15,97 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   demoId="demo-shadcn-async-region"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  codePanel={false}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 `0.2.0` 稳定版 CLI 注册表。可直接从包路径导入原型并通过对应适配器挂载：
+
+```ts
+import { asyncRegionRoot } from '@proto.ui/prototypes-shadcn/async-region';
+```
 
 ## 用法
 
-当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+```tsx
+import { useState } from 'react';
+import { AdaptToReact } from '@proto.ui/adapter-react';
+import { asyncRegionRoot } from '@proto.ui/prototypes-shadcn/async-region';
 
-`Async Region` 由单一 `Root` 部件组成，用于标记正在进行异步更新的区域：
+const ShadcnAsyncRegionRoot = AdaptToReact(asyncRegionRoot);
 
-- 设置 `busy={true}` 时，组件会在区域元素上同步设置 `aria-busy`，并通过 `getExposes().busy` 暴露同一状态。
-- 仅更新属性时，传入的子元素会保持挂载且不丢失当前焦点。
-- 组件专注于忙碌状态语义，本身不渲染骨架屏或加载指示器；需要向屏幕阅读器播报加载进度或结果时，请在应用层搭配 [Live Region](../live-region/) 使用。
+export function ActivityFeed() {
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <ShadcnAsyncRegionRoot busy={busy}>
+      <p>现有列表内容在刷新期间保持挂载。</p>
+    </ShadcnAsyncRegionRoot>
+  );
+}
+```
+
+`Async Region` 由单一 `Root`（`shadcn-async-region-root`）部件组成：
+
+- **语义同步**：设置 `busy={true}` 时，组件会在宿主元素上同步反映 `aria-busy="true"`，并通过 `getExposes().busy` 暴露同一只读状态句柄；默认提供 `block min-w-0 max-w-full text-foreground` 的中性基础排版与块级布局。
+- **挂载与焦点保留**：仅更新 `busy` 属性时，内部子元素保持挂载且不会打断当前键盘焦点，也不会将区域设为 `inert` 或自动禁用后代控件。
+- **自定义加载样式**：组件不额外注入 `data-busy` 属性、骨架屏或动画。需要为忙碌态添加样式时，可直接匹配原生属性选择器 `[aria-busy="true"]`，或在应用层按需组合 `Spinner`、`Skeleton` 与 [Live Region](../live-region/)。
+
+```css
+shadcn-async-region-root[aria-busy='true'] {
+  opacity: 0.65;
+}
+```
+
+## 示例
+
+### 保持焦点的草稿刷新
+
+将可编辑输入框放在 `Async Region` 内部。即使外层触发刷新并切换 `busy` 状态，光标位置与未保存文本依然完整保留。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region-focus"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 自定义加载指示器与局部禁用
+
+`busy={true}` 不会禁用内部子控件。应用可以只禁用发起刷新的按钮并渲染自定义的刷新徽章，同时让区域内的下载收据等操作继续可用。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region-indicator"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### 搭配 Live Region 播报状态
+
+`Async Region` 专注于区域忙碌语义而不建立播报通道。需要向屏幕阅读器播报刷新开始或完成结果时，请与 [Live Region](../live-region/) 组合使用。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-async-region-live-region"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
 
 ## API
+
+### Root（`shadcn-async-region-root`）
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
 />
 
-`Root` 暴露 `busy` 状态并同步设置 `aria-busy`。
+### 暴露状态（`getExposes()`）
+
+<ApiPropsTable
+  headers={{ name: '状态句柄', type: '类型', default: '初始值' }}
+  rows={[{ name: 'busy', type: 'ExposeState<boolean>', default: 'false' }]}
+/>
+
+> `shadcn-async-region-root` 仅承载中性前景色与 `aria-busy` 语义，不声明 `styleProfile` 或 `data-busy` 额外属性。
 
 ## 参考
 

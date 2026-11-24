@@ -1,0 +1,165 @@
+---
+title: 'Liquid Glass Transition'
+description: 'A transparent five-phase presence container with endpoint opacity designed for floating Liquid Glass overlays without glass-on-glass stacking.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+<DraftProjectionStyle />
+
+Liquid Glass Transition coordinates a transparent five-phase presence lifecycle (`closed → preparing → entering → entered → leaving`) for floating Liquid Glass surfaces over rich backdrop content. It binds endpoint opacity (`opacity-100` / `opacity-0`) without adding a material carrier of its own, preventing glass-on-glass stacking.
+
+## Preview
+
+The floating translucent surface rests above a colorful gradient canvas with concentric radii and crisp edge highlights. Use `Enter`, `Leave`, and `Complete` to inspect the live five-phase strip and presence badge.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in `@proto.ui/cli` add targets. Import directly from workspace source:
+
+```ts
+import { transition } from '@proto.ui/prototypes-liquid-glass/transition';
+```
+
+## Usage
+
+```tsx
+import { useState } from 'react';
+import { LiquidGlassButton, LiquidGlassTransition } from '../proto-ui/components/react';
+
+export function FloatingGlassPanel() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className="rounded-2xl bg-gradient-to-br from-sky-500/25 via-indigo-500/20 to-fuchsia-500/25 p-5">
+      <LiquidGlassTransition
+        open={open}
+        appear
+        className="block transition-opacity duration-300 ease-out motion-reduce:transition-none"
+      >
+        <div className="rounded-2xl border border-white/55 bg-white/70 p-4 shadow-lg backdrop-blur-xl">
+          Floating Liquid Glass overlay
+        </div>
+      </LiquidGlassTransition>
+      <div className="mt-4">
+        <LiquidGlassButton variant="prominent" onClick={() => setOpen((value) => !value)}>
+          Toggle Panel
+        </LiquidGlassButton>
+      </div>
+    </div>
+  );
+}
+```
+
+## Examples
+
+### Controlled Mode & `transitionend` Sync
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-controlled"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Interruption Policies (`interrupt`)
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-interrupt"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Lifecycle Events & `appear`
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-lifecycle"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+### Prominence Hierarchy & Accessibility Fallbacks
+
+Compare regular translucent glass, a prominent tinted floating surface, and a high-contrast opaque fallback paired with `LiquidGlassButton`'s `material="opaque"` opt-out.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-transition-accessibility"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Material & Accessibility
+
+Design choices follow Apple Human Interface Guidelines for [Materials](https://developer.apple.com/design/human-interface-guidelines/materials):
+
+- **Never stack glass on glass**: `liquid-glass-transition` stays transparent with no material carrier of its own, wrapping floating glass controls and panels cleanly.
+- **Concentric geometry & prominence**: Match nested radii concentrically (`rounded-2xl` outer container + inner padding + `rounded-xl` inner pill) and reserve `prominent` tinting for a single primary action or overlay in a group.
+- **Accessibility fallbacks**: Pair floating surfaces with high-contrast opaque fallbacks (`material="opaque"`) for Reduce Transparency and Increase Contrast preferences. Under `prefers-reduced-motion: reduce`, Transition collapses fallback waits to `0ms` while keeping phase and event ordering intact.
+- **Shared semantics**: All phase sequencing, presence retention, and interruption behavior is inherited from [Base Transition](/en/ui-libraries/base/transition/).
+
+## API
+
+### Transition Props
+
+Pass `open` for controlled mode:
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'open', type: 'boolean | undefined', default: 'uncontrolled' },
+    { name: 'defaultOpen', type: 'boolean', default: 'false' },
+    { name: 'appear', type: 'boolean', default: 'false' },
+    { name: 'enterDuration', type: 'number', default: '300' },
+    { name: 'leaveDuration', type: 'number', default: '200' },
+    { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
+  ]}
+/>
+
+### Exposed States, Events & Methods
+
+<ApiPropsTable
+  headers={{ name: 'Member', type: 'Type / Signature', default: 'Description' }}
+  rows={[
+    {
+      name: 'transitionState',
+      type: "'closed' | 'preparing' | 'entering' | 'entered' | 'leaving'",
+      default: 'Current perceptual phase',
+    },
+    { name: 'isPresent', type: 'boolean', default: 'Whether view resources stay mounted' },
+    {
+      name: 'beforeEnter / afterEnter',
+      type: 'ExposeEvent<void>',
+      default: 'Enter boundary signals',
+    },
+    {
+      name: 'beforeLeave / afterLeave',
+      type: 'ExposeEvent<void>',
+      default: 'Leave boundary signals',
+    },
+    {
+      name: 'enter / leave / complete',
+      type: '() => void',
+      default: 'Drive the phase machine (also on controls)',
+    },
+    {
+      name: 'retainClosedView',
+      type: '(retained: boolean) => void',
+      default: 'Retain or detach the closed view',
+    },
+  ]}
+/>
+
+## References
+
+<SpecEntityLinks
+  directory="spec/prototypes"
+  files={['P-LIQUID-GLASS-TRANSITION.yaml', 'P-BASE-TRANSITION.yaml']}
+/>

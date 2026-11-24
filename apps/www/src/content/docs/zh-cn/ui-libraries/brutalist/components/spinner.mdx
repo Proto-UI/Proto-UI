@@ -8,15 +8,20 @@ sidebar:
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Spinner 是一个纯视觉加载指示器，采用 2px `currentColor` 开口圆环设计，无背景填充和柔和阴影，可在按钮内联或状态区域中使用。
+Spinner 是 Brutalist 家族的纯视觉加载指示器，采用 2px `currentColor` 开口圆环设计，无背景填充和柔和阴影，适合内联在按钮、徽标或异步状态区域中使用。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-spinner" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
@@ -25,15 +30,79 @@ Spinner 是一个纯视觉加载指示器，采用 2px `currentColor` 开口圆�
 
 ## 用法
 
+```tsx
+import { BrutalistSpinnerRoot } from '../proto-ui/components/react';
+
+export function Example() {
+  return <BrutalistSpinnerRoot size="md" />;
+}
+```
+
 - **尺寸档位**：`size` 支持 `'sm'`（16px）、`'md'`（24px，默认值）与 `'lg'`（32px）；移除该属性会恢复为 `'md'`。
 - **动态与无障碍偏好**：默认以 1000ms 为周期线性旋转；当用户开启 `prefers-reduced-motion: reduce` 时停止旋转，并保留开口弧段作为非颜色视觉提示。
-- **状态归属**：Spinner 默认设置 `aria-hidden` 且不可聚焦。将其放在按钮内或加载文案旁时，由父级按钮或状态区域统一管理加载态、`aria-busy`、可访问文本与焦点衔接。
+- **状态归属**：Spinner 始终为无内容节点，默认设置 `aria-hidden="true"`、无 `role` 且不可聚焦。将其放在按钮、徽标或状态区域中时，由父级按钮或 `Async Region` 统一管理加载态、`aria-busy`、可访问文案与焦点衔接。
+
+## 示例
+
+### 尺寸
+
+使用 `size` 属性切换 `'sm'`（16px）、`'md'`（24px）与 `'lg'`（32px）三种尺寸档位。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-sizes"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 按钮内联
+
+将 `size="sm"` 的 Spinner 放入 `Brutalist Button` 中，通过 `currentColor` 自动匹配按钮前景色，并由按钮管理禁用态与加载文案。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-button"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 搭配徽标
+
+将 Spinner 嵌入不同配色 `tone` 的 `Brutalist Badge` 中，用于展示同步、更新或处理中状态。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-badge"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 异步状态区域
+
+搭配 `Async Region`（设置 `busy`）呈现卡片式处理中提示，由父级容器统一向辅助技术暴露忙碌状态与可读文本。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-spinner-async-region"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-以下属性属于 `Root`：
+### Root
+
+Spinner 不暴露命令式方法（exposes 为空），仅在 `Root` 上提供以下属性：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[{ name: 'size', type: "'sm' | 'md' | 'lg'", default: 'md' }]}
 />
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-SPINNER.yaml']} />

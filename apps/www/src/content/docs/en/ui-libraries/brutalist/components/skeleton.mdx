@@ -1,36 +1,128 @@
 ---
 title: Skeleton
-description: 'A static 5px rounded black-bordered placeholder surface in the Brutalist family.'
+description: 'Use to show a static Brutalist placeholder surface while content is loading.'
 sidebar:
   order: 8
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Skeleton renders a static, 5px rounded neutral placeholder surface with a black border and no shadow or built-in shimmer, providing layout shape feedback while content loads.
+Use Skeleton to show a static placeholder while content is loading. It renders a 5px rounded neutral surface with a `2px` black border, no outer shadow, and no built-in shimmer so layout geometry stays crisp and consumer-owned.
 
 ## Preview
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-skeleton" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## Installation
 
-Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-skeleton`, or import directly from `@proto.ui/prototypes-brutalist/skeleton`.
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-skeleton` (replace `react` with `wc`, `vue`, or `vue2` for your target runtime), or import directly from `@proto.ui/prototypes-brutalist/skeleton`:
+
+<InstallCommandCard
+  manager="pnpm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add react brutalist-skeleton',
+    npm: 'npx @proto.ui/cli@latest add react brutalist-skeleton',
+    yarn: 'yarn dlx @proto.ui/cli@latest add react brutalist-skeleton',
+    bun: 'bunx @proto.ui/cli@latest add react brutalist-skeleton',
+  }}
+/>
 
 ## Usage
 
-- Place Skeleton inside a parent loading region and size it via layout styles to match the expected content shape.
-- Skeleton is excluded from the accessibility tree; let the parent container manage `aria-busy`, status announcements, placeholder replacement timing, and focus continuity.
-- If you add custom motion, respect `prefers-reduced-motion`.
+```tsx
+import { BrutalistSkeletonRoot } from '../proto-ui/components/react';
+
+export function Example() {
+  return <BrutalistSkeletonRoot className="h-5 w-48 rounded-full" />;
+}
+```
+
+- **Consumer-owned sizing**: Skeleton emits no width or height tokens of its own; pass layout utilities such as `h-4 w-48` or `h-12 w-12 rounded-full` to match the incoming content shape.
+- **Visual-only semantics**: Skeleton is contentless, non-focusable, and excluded from the accessibility tree (`aria-hidden="true"`). Let the parent loading region manage `aria-busy`, status announcements, replacement timing, and focus continuity.
+- **Static motion contract**: No built-in pulse animation is applied. If you layer custom motion in your application, respect `prefers-reduced-motion`.
+
+## Examples
+
+### Avatar
+
+Combine a circular placeholder with stacked text lines for user profile headers.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-avatar"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Card
+
+Compose Skeleton blocks inside Brutalist Card regions to mirror a loading media card.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Text
+
+Stack full-width and shortened bars to represent loading paragraph lines.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-text"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Form
+
+Mirror stacked labels, input controls, and a submit button while form data loads.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-form"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### Table
+
+Align multi-column horizontal bars across rows for loading list and table views.
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-`Root` renders a single styled placeholder surface and declares no props:
+### Root
+
+`BrutalistSkeletonRoot` renders a single contentless, passive, `aria-hidden="true"` placeholder surface and declares no props of its own. Control size and overrides via host `class` / `className`:
 
 <ApiPropsTable headers={{ name: 'Prop', type: 'Type', default: 'Default' }} rows={[]} />
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-SKELETON.yaml']} />

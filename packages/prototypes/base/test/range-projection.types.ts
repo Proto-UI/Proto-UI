@@ -69,7 +69,7 @@ function f0MeterExposed(e: ProtoAdapterExposes<typeof f0Meter.meterRoot>) {
 void f0MeterExposed;
 import * as f1Progress from '../../brutalist/src/progress';
 type f1ProgressRootProps = Assert<
-  Equal<PropsOf<typeof f1Progress.progressRoot>, ProgressRootProps>
+  Equal<Omit<PropsOf<typeof f1Progress.progressRoot>, 'dir'>, ProgressRootProps>
 >;
 const f1ProgressGood: PropsOf<typeof f1Progress.progressRoot> = { value: 25, min: 0, max: 100 };
 void f1ProgressGood;
@@ -127,7 +127,7 @@ function f1MeterExposed(e: ProtoAdapterExposes<typeof f1Meter.meterRoot>) {
 void f1MeterExposed;
 import * as f2Progress from '../../bootstrap-2-3-2/src/progress';
 type f2ProgressRootProps = Assert<
-  Equal<PropsOf<typeof f2Progress.progressRoot>, ProgressRootProps>
+  Equal<Omit<PropsOf<typeof f2Progress.progressRoot>, 'variant' | 'dir'>, ProgressRootProps>
 >;
 const f2ProgressGood: PropsOf<typeof f2Progress.progressRoot> = { value: 25, min: 0, max: 100 };
 void f2ProgressGood;
@@ -185,7 +185,7 @@ function f2MeterExposed(e: ProtoAdapterExposes<typeof f2Meter.meterRoot>) {
 void f2MeterExposed;
 import * as f3Progress from '../../liquid-glass/src/progress';
 type f3ProgressRootProps = Assert<
-  Equal<PropsOf<typeof f3Progress.progressRoot>, ProgressRootProps>
+  Equal<Omit<PropsOf<typeof f3Progress.progressRoot>, 'prominence' | 'dir'>, ProgressRootProps>
 >;
 const f3ProgressGood: PropsOf<typeof f3Progress.progressRoot> = { value: 25, min: 0, max: 100 };
 void f3ProgressGood;

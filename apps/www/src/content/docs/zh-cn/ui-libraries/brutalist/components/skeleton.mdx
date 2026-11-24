@@ -1,36 +1,128 @@
 ---
 title: Skeleton
-description: '静态 5px 圆角黑边中性表面的 Brutalist 风格骨架屏占位组件。'
+description: '用于在内容加载前展示静态占位轮廓的 Brutalist 风格骨架屏组件。'
 sidebar:
   order: 8
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
+import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
 <BrutalistPageStyle />
 
-Skeleton 是一个纯视觉占位表面，采用静态 5px 圆角中性底色与黑色边框，不带阴影或内置闪烁动画，用于在内容加载前勾勒布局形状。
+Skeleton 用于在内容加载前展示静态占位轮廓。它采用 5px 圆角中性表面与 `2px` 黑色边框，不带外阴影与内置闪烁动画，由外层布局决定宽高与圆角形态。
 
 ## 预览
 
 <div class="brutalist-demo-frame">
-  <PrototypePreviewer demoId="demo-brutalist-skeleton" initialRuntime="wc" />
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
 </div>
 
 ## 安装
 
-已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-skeleton` 添加，或从 `@proto.ui/prototypes-brutalist/skeleton` 导入。
+已包含在 `@proto.ui/prototypes-brutalist@0.2.0` 中。可通过 CLI 目标 `brutalist-skeleton` 添加（将命令中的 `react` 替换为 `wc`、`vue` 或 `vue2` 以匹配目标框架），或直接从 `@proto.ui/prototypes-brutalist/skeleton` 导入：
+
+<InstallCommandCard
+  manager="pnpm"
+  commands={{
+    pnpm: 'pnpm dlx @proto.ui/cli@latest add react brutalist-skeleton',
+    npm: 'npx @proto.ui/cli@latest add react brutalist-skeleton',
+    yarn: 'yarn dlx @proto.ui/cli@latest add react brutalist-skeleton',
+    bun: 'bunx @proto.ui/cli@latest add react brutalist-skeleton',
+  }}
+/>
 
 ## 用法
 
-- 将 Skeleton 放在父级加载区域内，通过外层样式控制宽高与圆角形态，以匹配真实内容的布局轮廓。
-- Skeleton 默认从无障碍树中隐藏；加载态（`aria-busy`）、状态播报、内容替换时机与焦点衔接应由父级容器统一管理。
-- 如需为占位块添加自定义动画，请配合 `prefers-reduced-motion` 偏好设置。
+```tsx
+import { BrutalistSkeletonRoot } from '../proto-ui/components/react';
+
+export function Example() {
+  return <BrutalistSkeletonRoot className="h-5 w-48 rounded-full" />;
+}
+```
+
+- **由消费端控制尺寸**：Skeleton 本身不声明宽高，通过外层布局与 `className`（如 `h-4 w-48`、`h-12 w-12 rounded-full`）贴合目标内容的形状。
+- **纯视觉占位语义**：Skeleton 不渲染子节点且默认设置 `aria-hidden="true"`、不可聚焦；加载态（`aria-busy`）、状态播报、内容替换时机与焦点衔接应由父级加载区域统一管理。
+- **静态动效契约**：默认不附带脉冲闪烁动画；如需自行扩展过渡或动画，请遵循 `prefers-reduced-motion`。
+
+## 示例
+
+### 头像
+
+配合 `rounded-full` 与文本行组合，展示用户头像及标题信息加载轮廓。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-avatar"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 卡片
+
+将 Skeleton 组合在 Brutalist Card 的头部与内容区中，预览卡片加载态结构。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-card"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 文本段落
+
+通过不同宽度的横向占位条模拟多行正文段落。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-text"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 表单
+
+组合标签、输入框与操作按钮高度的占位块，对应表单加载结构。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-form"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+### 表格
+
+按列宽组合多行水平占位条，对应列表或数据表格加载态。
+
+<div class="brutalist-demo-frame">
+  <PrototypePreviewer
+    demoId="demo-brutalist-skeleton-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
 
 ## API
 
-`Root` 渲染单个样式化占位表面，不声明任何属性：
+### Root
+
+`BrutalistSkeletonRoot` 渲染单个无内容、对无障碍树隐藏（`aria-hidden="true"`）的静态占位表面，不声明额外组件属性；尺寸与附加样式通过宿主元素的 `class` / `className` 传入：
 
 <ApiPropsTable headers={{ name: '属性', type: '类型', default: '默认值' }} rows={[]} />
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BRUTALIST-SKELETON.yaml']} />

@@ -14,8 +14,8 @@ export default definePrototype<AsyncRegionRootProps, AsyncRegionRootExposes>({
     // and authored-content/focus preservation. No announcement, focus, input,
     // or material channel is added here (P-BASE-ASYNC-REGION-* boundary).
     const behavior = asAsyncRegionRoot();
-    // Restrained ordinary content treatment: bounded neutral ink and width only.
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground'));
+    // Restrained ordinary content treatment: block layout bounds and neutral ink only, no glass material.
+    def.feedback.style.use(tw('block min-w-0 max-w-full text-foreground'));
     return behavior.render;
   },
 });
