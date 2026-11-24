@@ -108,6 +108,19 @@ const ownedProcesses = new Set();
 const cleanupReceipts = [];
 let cleanupFailed = false;
 
+function retainCleanupReceipt(receipt) {
+  const { snapshots, ...summary } = receipt;
+  console.error(`[test:runtime] process cleanup ${JSON.stringify(summary)}`);
+  if (selection) {
+    try {
+      writeJson(path.join(evidenceDirectory, `cleanup-${evidenceId}.json`), cleanupReceipts);
+    } catch (error) {
+      cleanupFailed = true;
+      console.error(`[test:runtime] unable to retain cleanup evidence: ${error.message}`);
+    }
+  }
+}
+
 function trackChild(child, label) {
   const tree = ownProcessTree(child, { label });
   let stopped;
@@ -115,16 +128,7 @@ function trackChild(child, label) {
     stopped ??= tree.stop().then((receipt) => {
       cleanupReceipts.push(receipt);
       if (receipt.errors.length || receipt.remaining.length) cleanupFailed = true;
-      const { snapshots, ...summary } = receipt;
-      console.error(`[test:runtime] process cleanup ${JSON.stringify(summary)}`);
-      if (selection) {
-        try {
-          writeJson(path.join(evidenceDirectory, `cleanup-${evidenceId}.json`), cleanupReceipts);
-        } catch (error) {
-          cleanupFailed = true;
-          console.error(`[test:runtime] unable to retain cleanup evidence: ${error.message}`);
-        }
-      }
+      retainCleanupReceipt(receipt);
       return receipt;
     });
     return stopped;
@@ -235,6 +239,20 @@ async function stopOwnedProcesses() {
   await Promise.all([...ownedProcesses].map((stop) => stop()));
 }
 
+async function beforeDeadline(operation, deadline) {
+  let timer;
+  try {
+    return await Promise.race([
+      operation.then(() => true),
+      new Promise((resolve) => {
+        timer = setTimeout(() => resolve(false), Math.max(0, deadline - Date.now()));
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function runVitest(args, baseUrl) {
   if (shuttingDown) throw new Error('Runtime runner is shutting down.');
   return new Promise((resolve, reject) => {
@@ -273,11 +291,9 @@ async function runVitest(args, baseUrl) {
       windowsHide: true,
     });
     const stop = trackChild(child, 'vitest');
+    const closed = new Promise((done) => child.once('close', done));
     // A surviving worker can hold inherited stdout/stderr open after Vitest
     // exits. Begin cleanup on exit, before waiting for the close/pipe drain.
-    child.once('exit', () => {
-      void stop();
-    });
     const inspect = observeReadinessFailures(() =>
       reportServerSnapshot('browser readiness failed while the server wrapper may still be running')
     );
@@ -290,17 +306,46 @@ async function runVitest(args, baseUrl) {
       inspect(chunk);
     });
     child.on('error', reject);
-    child.on('close', async (code, signal) => {
-      await stop();
+    const finish = async (code, signal) => {
+      const receipt = await stop();
       if (signal || code !== 0)
         reportServerSnapshot(`Vitest exited: code=${code}; signal=${signal}`);
-      // Wait for both captured pipes and their forwarded writes before the
-      // runner can exit, so its diagnostic tap cannot truncate Vitest output.
-      await Promise.all([
-        new Promise((done) => process.stdout.write('', done)),
-        new Promise((done) => process.stderr.write('', done)),
-      ]);
-      resolve({ exitCode: code, signal });
+      // An observation failure must not leave a pipe-owning unknown descendant
+      // keeping this wrapper alive forever. Give close and forwarded output
+      // one bounded drain, then close only our own local read handles.
+      const drainStartedAt = new Date().toISOString();
+      const deadline = Date.now() + 2_000;
+      const childPipesClosed = await beforeDeadline(closed, deadline);
+      if (!childPipesClosed) {
+        child.stdout.destroy();
+        child.stderr.destroy();
+      }
+      const forwardedOutputDrained = await beforeDeadline(
+        Promise.all([
+          new Promise((done) => process.stdout.write('', done)),
+          new Promise((done) => process.stderr.write('', done)),
+        ]),
+        deadline
+      );
+      receipt.childExitCode = code;
+      receipt.childSignal = signal;
+      receipt.outputDrain = {
+        startedAt: drainStartedAt,
+        finishedAt: new Date().toISOString(),
+        timeoutMs: 2_000,
+        childPipesClosed,
+        forwardedOutputDrained,
+      };
+      if (!childPipesClosed || !forwardedOutputDrained) {
+        receipt.errors.push('Vitest output did not drain within the post-exit cleanup bound.');
+        receipt.verified = false;
+        cleanupFailed = true;
+      }
+      retainCleanupReceipt(receipt);
+      resolve({ exitCode: cleanupFailed && code === 0 ? 1 : code, signal });
+    };
+    child.once('exit', (code, signal) => {
+      void finish(code, signal).catch(reject);
     });
   });
 }

@@ -19,3 +19,14 @@ The process-table observer verifies the private group and descendants actually o
 - The actual runner with installed Vitest executed `packages/core/test/reserved-slot.test.ts`: **2/2 passed**. Its cleanup receipt observed the ordinary Vitest workers and esbuild, then no live owned process.
 
 These are bounded runner and consumer-smoke results. They do not replace the complete final-source browser/regression cycles or release rehearsal. The governing release condition remains the original #1178/current-source regression acceptance, including two valid full scheduled recovery cycles. Button lifecycle copy and GitHub governance-snapshot refresh are separate active repair slices.
+
+## Independent review corrections
+
+Independent review of `88c65d5af33d694121259ceea972338afde0f9bc` found two further defects, both retained as failed intermediate evidence:
+
+- A numeric PGID could be reacquired after its entire original group vanished. A controlled process-table probe, with signals intercepted rather than sent to the OS, showed that a different process start identity could receive TERM through the reused group number. The repair now binds the direct child while its process handle is live, requires a continuously observed identity to retain group ownership, and retires disappeared identities. It never reacquires a vanished group by number. The existing leader-first and already-exited-leader positive cases remain required.
+- If `ps` failed while a real descendant kept inherited output pipes open, the direct Vitest child could exit but the wrapper still waited forever for `close`. The repair now finishes from direct-child `exit`, awaits bounded process cleanup, then gives pipe closure and forwarded-output flush one two-second drain bound. On expiry it closes only its own local read handles, retains the failed cleanup/output receipt and exits nonzero. It does not kill processes whose ownership could not be established. The controlled failure test confirms that the unknown descendant remains alive for the test harness to clean up.
+
+These corrections do not raise a suite or test timeout. The process tests distinguish real OS execution from the safe, controlled PID-reuse table; the latter does not claim actual operating-system PID reuse. The test reader also keeps its output pipe open after reading the first identity line, so this scenario measures descendant-held pipes rather than an artificially disconnected output consumer.
+
+After both review corrections, the complete runner controls pass **145/145**, with no skipped or cancelled tests. This includes the original five process cases and both review regressions. The installed-Vitest `reserved-slot` smoke passes **2/2** again; its final receipt records both closed child pipes and drained forwarded output. Formatting, syntax and diff checks pass. These results supersede the earlier candidate for this bounded slice, while retaining its failed review findings above.

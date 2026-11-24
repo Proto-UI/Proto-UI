@@ -40,9 +40,13 @@ export function ownProcessTree(
   { label, graceMs = 5_000, killWaitMs = 2_000, sampleMs = 500 } = {}
 ) {
   const pid = child.pid;
-  const known = new Map();
+  const observed = new Map();
+  let known = new Map();
+  let rootBound = false;
+  let groupContinuous = false;
   const snapshots = [];
   const observationErrors = [];
+  const identityErrors = new Set();
   let peakRssKiB = 0;
   let inFlight = null;
   let stopping = null;
@@ -53,9 +57,28 @@ export function ownProcessTree(
       .then((table) => {
         const owned = new Map(
           table
-            .filter((row) => row.pgid === pid || known.get(row.pid)?.started === row.started)
+            .filter((row) => known.get(row.pid)?.started === row.started)
             .map((row) => [row.pid, row])
         );
+        // Bind the root while its direct ChildProcess handle still owns the
+        // live PID. A number that reappears after exit is not a new grant.
+        if (!rootBound && child.exitCode === null && child.signalCode === null) {
+          const root = table.find((row) => row.pid === pid && row.pgid === pid);
+          if (root) {
+            rootBound = true;
+            groupContinuous = true;
+            owned.set(root.pid, root);
+          }
+        }
+        if (!rootBound && table.some((row) => row.pgid === pid))
+          identityErrors.add(
+            'Cannot bind the exited producer to this process-group identity; refusing signals.'
+          );
+        // Membership is useful only while at least one previously owned
+        // identity anchors that group. A vanished group cannot be reacquired
+        // by its numeric PGID, even if an unrelated leader uses the same PID.
+        groupContinuous &&= [...owned.values()].some((row) => row.pgid === pid);
+        if (groupContinuous) for (const row of table) if (row.pgid === pid) owned.set(row.pid, row);
         let changed;
         do {
           changed = false;
@@ -66,7 +89,8 @@ export function ownProcessTree(
             }
           }
         } while (changed);
-        for (const row of owned.values()) known.set(row.pid, row);
+        known = owned;
+        for (const row of owned.values()) observed.set(row.pid, row);
         // Zombies have already stopped executing and cannot hold browser sockets
         // or memory. Their eventual wait()/reaping belongs to their OS parent.
         const live = [...owned.values()].filter((row) => !row.state.startsWith('Z'));
@@ -104,7 +128,7 @@ export function ownProcessTree(
         signals: [],
         errors: [],
         verified: false,
-        verificationScope: 'private process group and observed descendant identities',
+        verificationScope: 'continuously anchored private group and observed descendant identities',
         remaining: [],
       };
       if (!pid) {
@@ -129,7 +153,9 @@ export function ownProcessTree(
         const signal = (rows, name) => {
           // Only this child's private group may receive a negative-PID signal.
           // Descendants that moved groups receive identity-checked PID signals.
-          const targets = new Set(rows.map((row) => (row.pgid === pid ? -pid : row.pid)));
+          const targets = new Set(
+            rows.map((row) => (groupContinuous && row.pgid === pid ? -pid : row.pid))
+          );
           for (const target of targets) {
             try {
               process.kill(target, name);
@@ -157,6 +183,7 @@ export function ownProcessTree(
             live = await wait(killWaitMs);
           }
           receipt.remaining = live;
+          receipt.errors.push(...identityErrors);
           receipt.verified = live.length === 0 && receipt.errors.length === 0;
         } catch (error) {
           receipt.errors.push(error.message);
@@ -167,7 +194,7 @@ export function ownProcessTree(
         finishedAt: new Date().toISOString(),
         peakRssKiB,
         observationErrors,
-        observedPids: [...known.keys()],
+        observedPids: [...observed.keys()],
         snapshots,
       };
     })();
