@@ -224,3 +224,8 @@ internal/records/evidence/2026-11-24-sprint2-compiler-local/manifest.json
 internal/records/evidence/2026-11-24-sprint2-distribution/manifest.json
 internal/records/evidence/2026-11-24-sprint2-distribution/receipts/pinned-cli.json
 internal/records/evidence/2026-11-24-sprint2-hook-boundary/current-core-observation.json
+
+# Imported GPUI preparation receipts retain the exact bytes bound by their manifests.
+internal/records/evidence/2026-11-24-gpui-dependency-preparation/
+# Retained original Sprint 6 hosted archive manifest is byte-bound by its receipt.
+internal/records/evidence/2026-11-24-sprint6-main-reconciliation/hosted-041-evidence-manifest.json

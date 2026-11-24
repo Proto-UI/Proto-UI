@@ -85,6 +85,12 @@ function accordionLayout(reserve: number, inset = 0) {
   mount.append(item);
   scope.append(canvas, mount, destination);
   document.body.append(scope);
+  // Happy DOM leaves the border shorthand's border-image-source at `initial`.
+  // Inject only the fixture's known no-image computed fact; all other computed
+  // styles and the production unknown/painted-border refusals remain observable.
+  const borderImageSource = vi
+    .spyOn(window.getComputedStyle(item), 'borderImageSource', 'get')
+    .mockReturnValue('none');
   const width = 414 - inset * 2;
   const height = 50;
   const sourceHeight = 148 + reserve + inset * 2;
@@ -112,6 +118,7 @@ function accordionLayout(reserve: number, inset = 0) {
   return {
     subject,
     item,
+    borderImageSource,
     lease,
     subjectRect,
     destinationRect,
@@ -201,6 +208,28 @@ describe('Accordion tight negative retains actual destination overlap', () => {
     expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset)).toMatchObject({
       valid: true,
     });
+  });
+  it('keeps unknown and image ancestor border sources unavailable', () => {
+    const f = accordionLayout(48);
+    expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset).valid).toBe(true);
+    for (const source of ['initial', 'url("fixture-border.png")']) {
+      f.borderImageSource.mockReturnValue(source);
+      expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset)).toMatchObject({
+        valid: false,
+        reason: 'source-ancestor-outline-unsupported',
+      });
+    }
+  });
+  it('keeps painted border intersections rejected while admitting actual inset clearance', () => {
+    for (const inset of [0, 40]) {
+      const f = accordionLayout(48, inset);
+      f.item.style.borderColor = 'rgb(120, 120, 120)';
+      f.item.style.borderRadius = '0px';
+      expect(inspectCanvasBackdrop(f.subject, f.lease.current(), 0).valid).toBe(true);
+      expect(inspectCanvasBackdrop(f.subject, f.lease.current(), f.outset)).toMatchObject(
+        inset === 0 ? { valid: false, reason: 'source-painted-ancestor-border' } : { valid: true }
+      );
+    }
   });
   it('diagnoses the ancestor-border coverage gap separately from opaque ancestor rejection', () => {
     const f = accordionLayout(48);

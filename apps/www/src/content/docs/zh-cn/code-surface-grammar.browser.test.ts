@@ -1157,12 +1157,10 @@ for (const locale of ['en', 'zh-cn']) {
         expect(await node.evaluate((node) => node.isConnected)).toBe(true);
       const activeSource = visible();
       expect(
-        await activeSource
-          .locator('pre')
-          .evaluate((node) => ({
-            fontSize: getComputedStyle(node).fontSize,
-            lineHeight: getComputedStyle(node).lineHeight,
-          }))
+        await activeSource.locator('pre').evaluate((node) => ({
+          fontSize: getComputedStyle(node).fontSize,
+          lineHeight: getComputedStyle(node).lineHeight,
+        }))
       ).toEqual({ fontSize: '14px', lineHeight: '21px' });
       const sourceScroll = await activeSource
         .locator('[data-code-scroll-ready] [data-code-scroll-viewport]')

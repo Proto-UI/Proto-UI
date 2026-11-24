@@ -12,6 +12,7 @@ import {
   liquidMaterialSubjectSelector,
 } from './liquid-material-observation';
 import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
+import { observeOwnedMaterialPaint } from './material-paint-observation';
 
 // Each case gets a fresh context and a terminal receipt, including failed states.
 // This is official sandboxed browser evidence, not native/packed/full Finf admission.
@@ -1694,9 +1695,11 @@ async function accordionJourney(
       const rect = el.getBoundingClientRect();
       return { width: rect.width, height: rect.height };
     });
-    expect(await trigger.evaluate((el) => getComputedStyle(el).backgroundImage)).toMatch(
-      /data:image\/png/
-    );
+    const paint = await trigger.evaluate(observeOwnedMaterialPaint);
+    expect(paint.committed).toBe(true);
+    expect(paint.carrier).toBe('contact-v1');
+    expect(paint.geometryMatches).toBe(true);
+    expect(paint.image).toMatch(/data:image\/png/);
     const original = await item.getAttribute('style');
     try {
       // Restore only the old painted-ancestor defect; do not alter admission guards.

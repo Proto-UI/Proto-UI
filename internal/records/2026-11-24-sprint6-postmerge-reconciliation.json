@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "kind": "sprint6-hosted-terminal-and-postmerge-followup",
+  "repository": "Proto-UI/Proto-UI",
+  "authorization": {
+    "source": "current-user",
+    "request": "Continue Sprint 6 integration even when work is 0.4 scope; avoid main drift.",
+    "effect": "0.4 scope no longer delays ordinary implementation or integration.",
+    "unchanged": "No contribution-rights, native DCO, independent-review, strict-budget, physical-acceptance or release-promotion waiver."
+  },
+  "originalIntegration": {
+    "observedAt": "2026-11-24T10:19:00Z",
+    "repository": "Proto-UI/Proto-UI",
+    "pullRequest": 1712,
+    "url": "https://github.com/Proto-UI/Proto-UI/pull/1712",
+    "state": "closed",
+    "merged": true,
+    "head": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "mergeCommit": "248f8270dd3458d1fcbc507e618337f98b9fde96",
+    "mergedAt": "2026-11-24T09:56:34Z",
+    "mergedBy": "cyjin-yl",
+    "attribution": "Observed external parallel integration; this follow-up invocation did not execute the merge.",
+    "observedAtPrecision": "Approximate retrieval minute; exact GitHub mergedAt retained."
+  },
+  "followup": {
+    "base": "952722e5b619c60ddf797543fba11eea6c06d812",
+    "sourceMerge": "62f82c9d71f4d24a7f0ceb298499d91f6c73998d",
+    "mergeParents": [
+      "e70d65ba78edda42c79d92c77e885a94278bfccd",
+      "952722e5b619c60ddf797543fba11eea6c06d812"
+    ],
+    "conflicts": [],
+    "preserved": "All new main GPUI, Compiler, Bootstrap styles and website source changes; 37 imported GPUI raw evidence files preserved byte-for-byte.",
+    "formatterOnly": "Normal commit hook normalized 10 lines of chain formatting in code-surface-grammar.browser.test.ts without changing assertions or behavior.",
+    "freshHostedStatus": "not-dispatched at this historical checkpoint"
+  },
+  "repairs": [
+    {
+      "commit": "1f118343560009102f5cf5c541f22994c52cca88",
+      "problem": "Generic appendChild fixture comparison caused four TypeScript diagnostics.",
+      "change": "Object.is preserves exact Node identity without invalid generic narrowing.",
+      "evidence": "internal/records/2026-11-24-sprint6-portal-fixture-types.json",
+      "originalFileTests": 15
+    },
+    {
+      "commit": "68572676752b86a3527547bf9c56f13098aead29",
+      "problem": "Current main omitted historical CLI Rule site-observation API and complete local-helper replay.",
+      "change": "Restore same-AST site API and closed-local replay; keep full cross-file inventory and unknown-call boundaries unchanged.",
+      "evidence": "internal/records/2026-11-24-sprint6-cli-site-reconciliation.json",
+      "focusedTestsPassed": 83
+    },
+    {
+      "commit": "5ef36bb2223149df8eed4b378f6a994371ffa78a",
+      "problem": "Seven Liquid fixtures lacked reservation capability; four HappyDOM layout positives reported unsupported border-image initial.",
+      "change": "Bind fixtures to real reservation and no-image border contracts; retain production guards and add negative controls.",
+      "evidence": "internal/records/2026-11-24-sprint6-liquid-fixtures.json",
+      "affectedCompleteGroupTestsPassed": 113
+    },
+    {
+      "commit": "e70d65ba78edda42c79d92c77e885a94278bfccd",
+      "problem": "One real Accordion page source measured 512 x 2174 at DPR 1, exceeding existing source side/area budgets.",
+      "change": "Use four existing declarative materialStage areas by complete example, preserving the original interactive tree, refs, controlled owner and nested refusal.",
+      "evidence": "internal/records/2026-11-24-sprint6-bounded-liquid-stages.json",
+      "preMainStageGroupTestsPassed": 64,
+      "nativeOnRepairedSource": "unrun at this historical checkpoint"
+    }
+  ],
+  "originalHostedEvidence": {
+    "head": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "bootstrap": {
+      "run": 45365822387,
+      "attempt": 1,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45365822387",
+      "conclusion": "failure",
+      "browserJob": "success",
+      "nativeMotionTests": {
+        "passed": 142,
+        "total": 142,
+        "files": 11
+      },
+      "controlsTests": {
+        "passed": 83,
+        "total": 83
+      },
+      "navbar": {
+        "cells": 38,
+        "journeys": 12
+      },
+      "button": {
+        "cells": 96,
+        "journeys": 8
+      },
+      "sourceValidation": "18 TypeScript diagnostics: four Portal fixture and 14 inherited CLI diagnostics.",
+      "publicPackages": {
+        "build": "47/47",
+        "manifests": "47/47",
+        "policyControls": "28/28",
+        "executionControls": "10/10",
+        "reactConsumer": "passed",
+        "cliConsumer": "passed",
+        "strictBudget": "failed: five entries over unchanged ceilings"
+      },
+      "visualReview": "Four sampled PNGs actually inspected. Still images do not establish animation, physical timing, IME/AT or full family acceptance."
+    },
+    "liquid": {
+      "run": 45365833929,
+      "attempt": 1,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45365833929",
+      "conclusion": "failure",
+      "originalSelectedTests": {
+        "total": 965,
+        "passed": 954,
+        "failed": 11
+      },
+      "nativeBrowser": {
+        "material": 6,
+        "portal": 55,
+        "toggle": 13,
+        "allPassed": true
+      },
+      "independentControls": {
+        "total": 94,
+        "passed": 94
+      },
+      "unselectedFamilies": ["hover", "prominent-tint", "tint-stage", "visible-refraction"],
+      "limitation": "Main 952 adds a new Portal browser case, so old 55/55 cannot certify the follow-up file."
+    },
+    "reservation": {
+      "run": 45368595551,
+      "attempt": 1,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/45368595551",
+      "conclusion": "failure",
+      "originalFourHosts": "All four reached original nested refusal assertion and failed; top-level optical admission was also unavailable.",
+      "actualScope": "512 x 2174 visible canvas at DPR 1. 512 x 1250 was an old backing bitmap in the same DOM, not a separate historical baseline."
+    }
+  },
+  "historicalTypeResults": {
+    "cliRepairCandidate": "CLI build, website generation, public type contracts and workspace types passed before fixture/stage commits.",
+    "stageCandidate": "CLI build, website generation and public contracts passed; workspace typecheck ended SIGKILL (-9), with no TypeScript diagnostics. This is incomplete, not a pass."
+  },
+  "budgetStatus": {
+    "numericEdit": false,
+    "affectedEntries": {
+      "core root": {
+        "gzip": 12967,
+        "ceiling": 12800
+      },
+      "runtime root": {
+        "gzip": 106822,
+        "ceiling": 104300
+      },
+      "adapter-react root": {
+        "gzip": 179944,
+        "ceiling": 173380
+      },
+      "adapter-vue root": {
+        "gzip": 178760,
+        "ceiling": 172180
+      },
+      "adapter-web-component root": {
+        "gzip": 216252,
+        "ceiling": 208740
+      }
+    },
+    "measuredHead": "041277b4ec781e0ce737edeaf6911c5a15f9e9b8",
+    "attribution": "Real already-merged capability cost; no duplicated Runtime, accidental prototype/demo/test roots or duplicate dist/source closure. Vue baseline already exceeded its ceiling by 78 bytes.",
+    "followupComparison": "Read-only audit found zero intersections between 041-to-62f changed paths and the 3840 distinct actual input paths for all nine entries; measurement controls and package manifests unchanged. This supports historical attribution, but is not a fresh measurement."
+  },
+  "review": {
+    "local": "Fresh read-only review found no correctness finding in Portal, CLI and Accordion source; fixture author self-check explicitly excluded from independent credit. Root had independently reviewed both fixture edits.",
+    "githubApproval": "No approval manufactured or inferred from subagent findings or the original owner's COMMENT review."
+  },
+  "archive": {
+    "path": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/hosted-041-evidence.tar.gz",
+    "sha256": "39a6597c90e5fc8b577eeac1008d915374fbdc9a12668fd4c79643fa111d632a",
+    "bytes": 5081582,
+    "members": 368,
+    "manifest": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/hosted-041-evidence-manifest.json",
+    "manifestSha256": "b1b00bebbf6bb61575e98c5133a75ee94318584157d1b485adb592eda18dad23",
+    "scope": "All retained text receipts and four actually inspected Bootstrap PNGs. Full original artifact ZIPs remain separately digest-bound; archive does not contain all screenshots."
+  },
+  "remaining": "Fresh merged-source validation and native reservation; standalone evidence-backed numeric budget transaction; exact candidate hosted checks and native DCO; ordinary independent review. Physical performance, OS IME/AT, complete optical comparison, all families and non-Web backends remain separate open criteria.",
+  "mergedSourceValidation": {
+    "head": "62f82c9d71f4d24a7f0ceb298499d91f6c73998d",
+    "selectedFiles": 6,
+    "totalTests": 176,
+    "passedTests": 176,
+    "failedTests": 0,
+    "pendingTests": 0,
+    "todoTests": 0,
+    "steps": [
+      {
+        "label": "merged-stage-consumers",
+        "command": [
+          "corepack",
+          "pnpm@10.32.1",
+          "exec",
+          "vitest",
+          "run",
+          "apps/www/src/content/docs/accordion-demo-layout.test.ts",
+          "apps/www/src/components/PrototypePreviewer/demo-material-stages.test.ts",
+          "apps/www/src/components/PrototypePreviewer/projection-composition.material-stages.test.ts",
+          "apps/www/src/components/PrototypePreviewer/runtime-preview-surface.test.ts",
+          "apps/www/src/components/PrototypePreviewer/preview-material-scene.test.ts",
+          "packages/cli/test/proto-style-css.test.ts",
+          "--maxWorkers=1",
+          "--minWorkers=1",
+          "--no-file-parallelism",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/466206816961/s6-evidence/postmerge-validation/merged-stage-consumers.json"
+        ],
+        "startedAt": "2026-11-24T10:25:25.097383+00:00",
+        "endedAt": "2026-11-24T10:25:40.753598+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "styles-preset-check",
+        "command": ["corepack", "pnpm@10.32.1", "check:styles:preset"],
+        "startedAt": "2026-11-24T10:25:40.754130+00:00",
+        "endedAt": "2026-11-24T10:29:36.045595+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "cli-build",
+        "command": ["node", "scripts/build/public-packages.mjs", "--package", "@proto.ui/cli"],
+        "startedAt": "2026-11-24T10:29:36.046793+00:00",
+        "endedAt": "2026-11-24T10:29:39.331810+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "website-generate",
+        "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+        "startedAt": "2026-11-24T10:29:39.332355+00:00",
+        "endedAt": "2026-11-24T10:30:44.534816+00:00",
+        "exitCode": -9
+      },
+      {
+        "label": "type-contracts",
+        "command": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "internal/contracts/types/tsconfig.json",
+          "--noEmit"
+        ],
+        "startedAt": "2026-11-24T10:30:44.535280+00:00",
+        "endedAt": "2026-11-24T10:30:58.869322+00:00",
+        "exitCode": 0
+      },
+      {
+        "label": "coverage-binding-check",
+        "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+        "startedAt": "2026-11-24T10:30:58.869835+00:00",
+        "endedAt": "2026-11-24T10:30:59.967091+00:00",
+        "exitCode": 1
+      }
+    ],
+    "notes": [
+      "Product inputs remained byte-identical during execution. Only .prettierignore gained the exact hosted archive manifest preservation path; new evidence records were untracked.",
+      "Website generator ended SIGKILL (-9) without diagnostics. Hosted fresh build/generation and workspace types remain required; no workspace typecheck was retried locally.",
+      "Public type contracts are their own passed check and do not certify completion of the website generator.",
+      "Coverage check reports inherited website consumer row-set and candidate pin drift; bounded explicit migration is being reconciled separately."
+    ],
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/postmerge-validation.tar.gz",
+    "archiveSha256": "1d1553b4a16cd80e361839e77495036aa78d85f2e2ad6c21141ef30a8349bbae",
+    "archiveBytes": 42166
+  },
+  "coverageMigration": {
+    "candidate": "62f82c9d71f4d24a7f0ceb298499d91f6c73998d",
+    "migration": {
+      "websiteRowsBefore": 78,
+      "websiteRowsAfter": 79,
+      "allConsumerRowsBefore": 141,
+      "allConsumerRowsAfter": 142,
+      "addedIds": ["www.docs.code-panel-scroll"],
+      "removedIds": [],
+      "renamedIds": [],
+      "oldConsumerRowsDeepEqual": 141,
+      "newCanonicalState": "blocked",
+      "newCanonicalIssues": [1323],
+      "issueObservation": "Canonical row reference/index only; no live issue state was queried or claimed."
+    },
+    "candidateBinding": {
+      "beforeRevision": "b388a8947d77117d526b890bc1c74f3d00486fe6",
+      "afterRevision": "62f82c9d71f4d24a7f0ceb298499d91f6c73998d",
+      "sourceBindingsObject": "62f82c9d71f4d24a7f0ceb298499d91f6c73998d",
+      "historicalMain": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "baseMainUnchanged": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "changedSourceBindingCount": 11,
+      "proof": "All 11 changed bindings were compared against actual bytes at their advertised old and new Git objects; details in invariants.json."
+    },
+    "acceptancePreservation": "All original consumer objects, all historical top-level sections other than row/count/binding derivations, and all non-binding candidate fields are deeply equal. Finf checklist bytes unchanged.",
+    "tests": {
+      "command": "node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs",
+      "passed": 124,
+      "failed": 0,
+      "skipped": 0,
+      "todo": 0,
+      "exitCode": 0
+    },
+    "refreshAndCheck": "passed",
+    "archive": "internal/records/evidence/2026-11-24-sprint6-main-reconciliation/postmerge-coverage-repair.tar.gz",
+    "archiveSha256": "96422d19d9b461faa0669ee5fc1619f66be77fcd5d6d40e10599a079370572a6",
+    "archiveBytes": 1447743
+  }
+}
