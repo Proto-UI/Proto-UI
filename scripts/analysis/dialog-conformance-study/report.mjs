@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { applyVariant, readPlan, sha256, studyDirectory, studyFiles } from './source-variant.mjs';
+import { applyPreparation, applyVariant, checkInputs, readPlan, sha256, studyDirectory, studyFiles } from './source-variant.mjs';
 
 const requireFact = (condition, message) => { if (!condition) throw new Error(message); };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -9,7 +9,7 @@ const failed = (checks) => checks.filter((check) => check.status === 'failed');
 
 // Inputs here are normalized observations, not source-derived expected answers.
 export function classifyCell(plan, variant, baseline, cell) {
-  const result = { variantId: variant.id, kind: variant.kind, verdict: 'unresolved', reason: null };
+  const result = { variantId: variant.id, kind: variant.kind, cohort: variant.cohort ?? 'public-calibration', verdict: 'unresolved', reason: null };
   if (!baseline.ready || !cell.ready)
     return { ...result, reason: !baseline.ready ? `baseline: ${baseline.reason}` : cell.reason };
   if (failed(baseline.existing).length || baseline.oracle.some((item) => item.error || item.cleanupError))
@@ -34,6 +34,7 @@ export function classifyCell(plan, variant, baseline, cell) {
   const diagnostics = newFailures.filter((item) => criterion.existingCheckFragments.some((fragment) => item.fullName.includes(fragment)));
   return {
     ...details, verdict: diagnostics.length ? 'caught' : 'missed', criterion: criterion.criterion,
+    responsibility: criterion.responsibility ?? 'selected-criterion',
     firstDivergence: target.firstDivergence, criterionLinkedExistingDiagnostics: diagnostics,
     unrelatedExistingFailures: newFailures.filter((item) => !diagnostics.includes(item)),
   };
@@ -42,21 +43,36 @@ export function classifyCell(plan, variant, baseline, cell) {
 export function summarize(plan, cells) {
   const baseline = cells.baseline ?? { ready: false, reason: 'Missing baseline.' };
   const outcomes = plan.variants.map((variant) => classifyCell(plan, variant, baseline, cells[variant.id] ?? { ready: false, reason: 'Cell not executed or unavailable.' }));
-  const count = (kind, verdict) => outcomes.filter((item) => item.kind === kind && item.verdict === verdict).length;
-  const caught = count('injected-broken', 'caught');
-  const missed = count('injected-broken', 'missed');
-  const falseAlarms = count('legal-customization', 'false-alarm');
-  const acceptedLegal = count('legal-customization', 'accepted-control');
+  const summarizeGroup = (members) => {
+    const count = (kind, verdict) => members.filter((item) => item.kind === kind && item.verdict === verdict).length;
+    const caught = count('injected-broken', 'caught');
+    const missed = count('injected-broken', 'missed');
+    const falseAlarms = count('legal-customization', 'false-alarm');
+    const acceptedLegal = count('legal-customization', 'accepted-control');
+    return {
+      detection: { caught, missed, denominator: caught + missed, rate: caught + missed ? caught / (caught + missed) : null },
+      falseAlarms: { rejectedLegal: falseAlarms, acceptedLegal, denominator: falseAlarms + acceptedLegal, rate: falseAlarms + acceptedLegal ? falseAlarms / (falseAlarms + acceptedLegal) : null },
+      exclusions: members.filter((item) => ['unresolved', 'baseline-failure', 'ineffective-mutation'].includes(item.verdict)),
+    };
+  };
+  const heldOut = outcomes.filter((item) => item.cohort === 'held-out');
+  const byResponsibility = Object.fromEntries([...new Set(outcomes.map((item) => item.responsibility).filter(Boolean))]
+    .map((responsibility) => [responsibility, summarizeGroup(outcomes.filter((item) => item.responsibility === responsibility))]));
   return {
     schemaVersion: 1, studyId: plan.studyId, visibility: plan.visibility,
     expectationReview: plan.expectationReview, outcomes,
-    detection: { caught, missed, denominator: caught + missed, rate: caught + missed ? caught / (caught + missed) : null },
-    falseAlarms: { rejectedLegal: falseAlarms, acceptedLegal, denominator: falseAlarms + acceptedLegal, rate: falseAlarms + acceptedLegal ? falseAlarms / (falseAlarms + acceptedLegal) : null },
-    exclusions: outcomes.filter((item) => ['unresolved', 'baseline-failure', 'ineffective-mutation'].includes(item.verdict)),
-    heldOut: { status: 'not-provided', denominator: null },
+    ...summarizeGroup(outcomes),
+    publicCalibration: summarizeGroup(outcomes.filter((item) => item.cohort === 'public-calibration')),
+    heldOut: heldOut.length ? {
+      status: 'independently-authored-after-check-freeze',
+      visibility: 'Public after handoff; checker was not adapted. No formal model or secure-isolation claim.',
+      ...summarizeGroup(heldOut),
+    } : { status: 'not-provided', denominator: null },
+    byResponsibility,
+    ruleDisputes: outcomes.filter((item) => item.reason?.includes('disagrees with the oracle')),
     repairs: { status: 'not-run', failed: null, neutral: null, cost: null },
-    untested: ['Native mutation input/paint', 'Assistive technology', 'Other Adapter/host profiles', 'Generated Dialog', 'Paired Agent repair/maintenance and repeated-run variance'],
-    interpretation: 'Public calibration, pending independent expectation review. No causal improvement, real product bug, stable conformance or Issue completion follows from these classifications.',
+    untested: ['Early-entry traversal (two failures retained outside settled-entry scoring)', 'Native mutation input/paint', 'Assistive technology', 'Other Adapter/host profiles', 'Generated Dialog', 'Paired Agent repair/maintenance and repeated-run variance'],
+    interpretation: 'Bounded discrimination of the existing 28 checks, using five separately recorded observations and a reviewed settled-entry precondition. Application task coverage is reported separately from component contract obligations. No causal improvement, real product bug or stable conformance follows from intentional mutants.',
   };
 }
 
@@ -70,11 +86,23 @@ export function loadCell(directory, plan, variant) {
   requireFact(manifest.studyId === plan.studyId && manifest.variantId === variant.id && execution.variantId === variant.id && manifest.kind === variant.kind, 'Cell identity mismatch.');
   const planBytes = fs.readFileSync(path.join(directory, 'sources', studyDirectory, 'plan.json'));
   requireFact(manifest.planSha256 === sha256(planBytes) && same(JSON.parse(planBytes), plan), 'Plan changed between cells.');
-  const expectedInputs = [...Object.keys(plan.inputs), ...studyFiles].sort();
+  const expectedInputs = [...new Set([...Object.keys(plan.inputs), ...studyFiles])].sort();
   requireFact(same(Object.keys(manifest.inputs).sort(), expectedInputs), 'Source inventory differs from frozen scope.');
   for (const [relative, hash] of Object.entries(manifest.inputs)) {
     requireFact(sha256(fs.readFileSync(path.join(directory, 'sources', relative))) === hash, `Source snapshot mismatch: ${relative}`);
     if (plan.inputs[relative]) requireFact(hash === plan.inputs[relative], `Frozen input mismatch: ${relative}`);
+  }
+  checkInputs(path.join(directory, 'sources'), plan);
+  const expectedPreparations = (plan.checkPreparations ?? []).map(({ path: relative }) => {
+    const original = fs.readFileSync(path.join(directory, 'sources', relative), 'utf8');
+    const prepared = fs.readFileSync(path.join(directory, 'prepared', relative), 'utf8');
+    requireFact(prepared === applyPreparation(original, relative, plan), `Prepared check snapshot mismatch: ${relative}`);
+    return { path: relative, beforeSha256: sha256(original), afterSha256: sha256(prepared) };
+  });
+  requireFact(same(manifest.preparations ?? [], expectedPreparations), 'Preparation manifest differs.');
+  if (expectedPreparations.length) {
+    const receipt = json('preparations.json');
+    requireFact(receipt.variantId === variant.id && same(receipt.files, expectedPreparations), 'Prepared checks were not transformed as frozen.');
   }
   requireFact(execution.spawnError === null && execution.signal === null && same(execution.sourceDrift, []), 'Runner failure, signal or source drift.');
   requireFact(integrity.phase === 'process-exit' && integrity.finishedCalls === 1 && integrity.closeStarted && integrity.closeFinished && !integrity.processTimedOut && !integrity.cancelled, 'Missing complete process-exit receipt.');

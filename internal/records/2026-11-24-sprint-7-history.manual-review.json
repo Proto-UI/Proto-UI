@@ -1,0 +1,505 @@
+[
+  {
+    "number": 2,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "de112a93aabeca1c791eaf7738fc94cd29d77c40f940f221da2874ce24d74aac",
+    "discussionSha256": "fad4971de88766167790a51e09e52926e5ea22ff1f990453072fa6ac09a8c3bf",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/2",
+    "commentIds": [2307118031],
+    "conclusion": "DONE records the level-0 Transition result only; no current #1018 acceptance is inferred.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 3,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "1c767c74ba76ea622d0f790d44e9dd3f54fd46e5ad51107d8931213a5e5896e5",
+    "discussionSha256": "059e4100be46460d835ce52b71406093dce41495ec7c15d900381a2c0949a675",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/3",
+    "commentIds": [5673875673],
+    "conclusion": "The late 2026 WC Button evidence is explicitly bounded to its new head and draft scope; it cannot prove the 2024 task or all projections complete.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 4,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "2a266b1c774324be9f38e4e521eada245bfa4b6a31d857b3056289323e1c6328",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/4",
+    "commentIds": [],
+    "conclusion": "Body/discussion contain no behavioral acceptance. Native timeline does recover PR #29 and closing commit bda72af9; the old wording about an unavailable implementation version must be read as a body/discussion limit, not absence of the native closing association. Focus and cleanup acceptance remain unavailable.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 5,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "7d09d23ebf1f4531fa12eaabd43212d8b85e877a7a97847dd12df21d7e7d8248",
+    "discussionSha256": "d477718af37d840e2d9685b8f4cc42fd3b1a7fa54784eb3080cc5944320c49ef",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/5",
+    "commentIds": [2292912941],
+    "conclusion": "The Tabs DONE state has no retained original execution receipt; preserve that terminal state without product reacceptance.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 7,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "da3172bb55f6435f9512f7fc45bbf763601efe3277e1f0d11c970bb39e8c1715",
+    "discussionSha256": "5fffb09151d6b2b27d89c71c9a5514cd5ed518784a3e3458b0ddca3ce5d171de",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/7",
+    "commentIds": [2292912138],
+    "conclusion": "The Context DONE state supplies no original execution receipt; current Context behavior is not certified.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 23,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "5ae9a134d27dd79d7383b0f0d492516c96d78929cb3b2787cc15b21d322c5959",
+    "discussionSha256": "b10cc249052f10f9ee06effc97759ffcfe71eac7cd84d4c67787ca6a94c9a9ad",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/23",
+    "commentIds": [2394975003],
+    "conclusion": "The router DONE state is historical disposition, with original technical evidence still unavailable.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 24,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "4e1aa3c6e2a5c6d8251388f3ca09df175e885792725cf795ccba9a88b811d0d5",
+    "discussionSha256": "6145e72510e157d95ecc6ef8d6d4d62a62df39be4452491a06318a6b9ff56b8b",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/24",
+    "commentIds": [2323797013],
+    "conclusion": "The highlight DONE state is historical disposition, not current behavioral evidence.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 25,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "8d4b7fe6d3bd9c55c0fb8f0e1ab5178ebd6e9df1e158ff7309e1d81ae0692510",
+    "discussionSha256": "ff6a40fdaac1d743fc9c924dba5979a22d1d35bdbbcbc7066747fd9aeaaa6d8e",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/25",
+    "commentIds": [4146335765],
+    "conclusion": "The maintainer's 2026-03-28 refactor/removal disposition supports historical closure, without reconstructing missing original execution evidence.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 26,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "a1af24075031fed4bb38e53293e75a1a363d57fd54813bbc296571a4adc8465a",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/26",
+    "commentIds": [],
+    "conclusion": "The API-table requirements remain preserved; historical closure has no recovered complete technical receipt.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 27,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e31973a25ee85856cc1ba635b8815765cfba94385ead71b858bb3d38625d9139",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/27",
+    "commentIds": [],
+    "conclusion": "The CLI scope remains preserved; the thread supplies no complete original acceptance result.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 30,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "86c459b135e00001cdbf76cc9a9daa854abe7e771509aaf22e3ae7311ff8123c",
+    "discussionSha256": "d18e623561d0748b77d4208d97a15cde202e1547b95b5574205ddb58321e2f82",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/30",
+    "commentIds": [2367253961],
+    "conclusion": "The Select DONE state is retained without inventing original execution results.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 31,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "dca21b74bb0d97de251bfd714e310939774522cd4b128e12b2c2ad2eb453cc9e",
+    "discussionSha256": "2e551d73b52beccf7e12b80f869442ad8ff9eeb6b2a99cd96f9ec22c5a8ee179",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/31",
+    "commentIds": [3848057432, 3848945887, 3854952159, 3860302419, 3860394508],
+    "conclusion": "The maintainer explicitly stopped the obsolete game-UI direction and the contributor agreed to redirect to #145; this is withdrawal/redirection, not completed components.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 37,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "6d013bb75bda7a9a4b40047825de3e77b1e9c89bdf7cebcc11768db0a100cc83",
+    "discussionSha256": "04fbaf03d6c68da71ee185da7e27cdee7940fe3b95829acca8af5c0f0f0e328a",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/37",
+    "commentIds": [4146343928],
+    "conclusion": "The maintainer changed direction and priority; that decision supports deferral/closure without disproving the original bug.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 43,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "c2943af44b3b201b1421de9f45f2232b460c4c76acab71a140e0cfe46737bf7b",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/43",
+    "commentIds": [],
+    "conclusion": "The original Form requirements remain preserved; no original complete execution evidence was recovered.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 48,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "d622583ad5160dc17f71e47ef7e8ca4ed1c4216c18bef477727e26d2559b9d32",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/48",
+    "commentIds": [2380355351, 2394962989, 2395021335, 2398776102, 4146336438],
+    "conclusion": "The maintainer's refactor/removal disposition is supported by the discussion; no current product acceptance follows.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 50,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "dbc9f9231c72dacff73686bfdb86827bbccebae7c688bf5777150d5cf9bd1659",
+    "discussionSha256": "426e19aba90565b344044dcc6ff721c160bfabbad651a5919ecaff6ac1163de2",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/50",
+    "commentIds": [2382372625],
+    "conclusion": "The Anatomy DONE state lacks an original acceptance receipt and is kept as historical terminal state only.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 60,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "2364fc60584a6e35c60f3b729a064fdca2177b0884da01d0733f630b12fa3c24",
+    "discussionSha256": "ebfe660684b2afd42923e90f206863f1076363e1f3a1498e9332ea7697c00a45",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/60",
+    "commentIds": [2401867390],
+    "conclusion": "The WC motion thread promises a requirements document; it does not supply completed motion acceptance.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 67,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/67",
+    "commentIds": [],
+    "conclusion": "The title-only task and terminal state contain no sufficient implementation or acceptance explanation.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 72,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/72",
+    "commentIds": [],
+    "conclusion": "The title-only task and terminal state contain no sufficient implementation or acceptance explanation.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 75,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "f757038020da0cee0f94a9eb990ebf8f7f9009c0245fd4c70a372fc6675e08c9",
+    "discussionSha256": "e19b2e5212557d65a2b0fdedea3bf9924ec58ed8e2ac8ed4ff745f8acdd57d0c",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/75",
+    "commentIds": [2808974586, 2808974981],
+    "conclusion": "The two memory-leak statements remain distinct author claims; no heap snapshot or independent leak proof is present.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 82,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "bea8983a1d585c37cef73652c5118e92bc76c3447823921fe007ed8d1c1bc6d6",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/82",
+    "commentIds": [2788170682],
+    "conclusion": "The new-kernel functional-programming claim is historical direction and outcome text, not a current reconstruction or runtime acceptance.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 88,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/88",
+    "commentIds": [],
+    "conclusion": "The title-only body has a native #91 closing association; it still lacks the original behavioral acceptance conditions and receipts.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 120,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "0b59720cb25923c98a018c51587f42303a16672b9eabda60e7f62828c05c6b45",
+    "discussionSha256": "cc1961a1ccd61ea2d581773e54c4ac25da8102024376b18df79ca36805437398",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/120",
+    "commentIds": [3290098904, 4146355085],
+    "conclusion": "The C++ renderer direction was explicitly withdrawn in 2026; the old bounty offer is historical and creates no present payment or execution action.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 121,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "9cc99d46659ccb356debfd242d7cd4fa88256cfe2ae2b3a90b3d7b89f0b42410",
+    "discussionSha256": "e4d12bae65125838d23a9c66ab20178070cf4b4807243bbad4238bc5c9fe4c4a",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/121",
+    "commentIds": [3326389043],
+    "conclusion": "The contributor credit is supported, but it supplies no complete technical acceptance evidence.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 123,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "9b05dff2b4cc160b92b9f3ad1b86d67bb6aee0362a8a16a76d6e75e20740f8bd",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/123",
+    "commentIds": [],
+    "conclusion": "All five original unchecked conditions remain preserved; closure supplies no executed results.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 124,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "476281c0147694058c58b544f34ab726c8501fc9d994aa8474eee47049370c0e",
+    "discussionSha256": "c0da3e5cd5d6883cccb267ddcbd6fb4592182b1faf2f6acbffa64a3505e4cbe9",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/124",
+    "commentIds": [3328074702, 3328093690],
+    "conclusion": "The contributor claim, maintainer acknowledgement and #127 closing association are retained separately; they do not prove all original validation.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 125,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "295d0f50ec309f67e44052d2dd6a7ea08c38b2ed3257a46794a987394000adef",
+    "discussionSha256": "92ceee50a85b03d3c667e930318fb22c0519e59c4289196d33a046365eb21419",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/125",
+    "commentIds": [3326477725, 3759371857, 3759787083],
+    "conclusion": "The Starlight Image scope, next-www claim and #141 closing association are retained without inventing complete original acceptance.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 126,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "845c3f86dcc249420dd92d23045e658f848eeb18d439b435e1235a303c60c927",
+    "discussionSha256": "c655c162bce6ccaf597d62c63e3f3ccedad839597c5cfcc0518c1b272583ead1",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/126",
+    "commentIds": [
+      3326485694, 3326578532, 3326602153, 3327641685, 3328018097, 3649034137, 4092388587,
+      4095594413, 5086865097
+    ],
+    "conclusion": "The thread first attributes Tailwind trouble to the environment, then the maintainer identifies a dirty dependency path; preserve that correction, the CSS path closure and released assignee.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 128,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "ee21456d603381c18fb39179663501c9f80f7f0d9c61617b9a33a6a2aba19c93",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/128",
+    "commentIds": [],
+    "conclusion": "The stated WC phase is not a promise that all four hosts were completed.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 129,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "253d8fe7f4a8c35995127f6657917dab2a2ae7fe7b945d20bc439c09516f1150",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/129",
+    "commentIds": [],
+    "conclusion": "The two-to-three-sample documentation scope is preserved; no complete implementation receipt is supplied.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 130,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "5bb4547aa041aabd7e1e61c0405d09df29df64bfc8bfa02fe9e4ab717fa614ee",
+    "discussionSha256": "7894ba898187306f002e8faf9575b4dd03d66b37e7da6fcf6065fa7cc5ba1c19",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/130",
+    "commentIds": [4146349931],
+    "conclusion": "The resolved minimal React Adapter scope is bounded and cannot establish all-host parity.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 131,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "bd01f3c66b7dbcfc00262f5d15986754c2a0c2c18907d73de1a09aa9602c21f2",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/131",
+    "commentIds": [],
+    "conclusion": "The original behavioral MUST/SHOULD criteria and two-Adapter scope remain intact; a types-only reading would be insufficient.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 132,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "91963455b7b83fb6a1ecad52739d06492fdba3cfaef0f858b9c92abf3d400ed8",
+    "discussionSha256": "943547b6ea74b17a1ce0fb8f7f45ff3900a21f8c37e6889186ad29fea25ad7b3",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/132",
+    "commentIds": [3580148738, 3580169738, 3580171402, 3594908859],
+    "conclusion": "The five checked localization cases are supported by maintainer comment 3594908859; this is i18n acceptance only, not all Select behavior.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 133,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "3f7f018e4e9501b336c028844ca39a9d962b8a217325ed934b5315a510c42766",
+    "discussionSha256": "5ea0d8964305f84a46a94653d0fe144d170130ea897a6ea2802a7b406aa6fe20",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/133",
+    "commentIds": [4146352686],
+    "conclusion": "The resolved-in-March and closed-in-May history is preserved alongside original unchecked conditions and explicit non-goals.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 140,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e3384ddaef35904761f3e0aba94d49a2c04cc3e6eab5dbc2c9eee52b9415ff3d",
+    "discussionSha256": "3ae4fe1d7d385c776b9ef15c745f05bc1299b02ad9a448a20660a8922da3442c",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/140",
+    "commentIds": [3764888122, 3764891747],
+    "conclusion": "The conceptual three-role/three-flow/five-minute-reader scope excludes API invention; #144 confirms the document's wrong-directory placement, so conceptual completion and placement remain distinct.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 144,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "677562620c0dc93db731958b0704fec36411a668dc56d6cb0d43865f54be22da",
+    "discussionSha256": "1b8a3c85642c4cb3e321a9bad731ce69c02fe45c4c41d9380928dc5f7214d91a",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/144",
+    "commentIds": [3821660862, 3821675846],
+    "conclusion": "ASCII/SVG/build are required while dark-mode and English are optional; optional items must not become new closure gates.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 145,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "7913afea491a93296b68ad059e27a7a411d2c372eeab2e0a0f88afc62b24ec41",
+    "discussionSha256": "07968a7d041e0b9c83f111cff30c37c1fc9681a83c3f7da38f5a44930d359172",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/145",
+    "commentIds": [3860348153, 3860579506, 5086864302],
+    "conclusion": "The Wiki term hover/focus/pin/Escape/bilingual result and released previous assignee are supported, without implying all Markdown renderer requirements were accepted.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 154,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "d7389a339517d321683c41d2241dd49ee712a9b90312162dbf1b62ae6821d643",
+    "discussionSha256": "7bb15f2ee41fd5e2aed59db149b36fb866c536ddd9557225ea90955fb23fb528",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/154",
+    "commentIds": [3940307567],
+    "conclusion": "Function JSON, default children, WC/React/Vue, SSR compatibility and setProps remain original conditions; the claim and #155 closing association are not full validation.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 187,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "d58515b293840c418e4f2eb8bedf701923d7dfad2e6aed76390f6de77cbc3531",
+    "discussionSha256": "3af5fdabcdb77a013cf7b29daa14eb1cbec9c2e61910f1450e73c8c6d8e87d1d",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/187",
+    "commentIds": [4240408991],
+    "conclusion": "The CLI default, parallel WC script and manual npm fallback are explicit decisions; those decisions do not by themselves complete the documentation/implementation criterion.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 188,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "444815a2e41376edb28e41c622bd2d4b5f90ec99e8ce82225aa8d29254312506",
+    "discussionSha256": "81400e3be43268075719828d703376143dbf451e6ff7bbc2b1298870a56f0978",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/188",
+    "commentIds": [4241184940],
+    "conclusion": "The five original v0 package choices and internal/advanced exclusions are supported; they are not substituted with the current release package inventory.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 189,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "e963cae64ced0cfff19eec9d551f3978402bd5b4d6e6205189e29468bee3e286",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/189",
+    "commentIds": [],
+    "conclusion": "The original v0 prototype-list evidence is missing and remains missing; the current catalog is not used as a replacement.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 190,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "6a8118140964f9f3a577919de4929f1fe83b74abddcb12fbf4fec59fb7f979f7",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/190",
+    "commentIds": [],
+    "conclusion": "The original export/package scan closure lacks a complete source-bound receipt; preserve its original v0 scope.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 191,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "b69696890065a23e3b257f6388893d7804f4498474d302ef7a4045ddf6a7bf32",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/191",
+    "commentIds": [],
+    "conclusion": "The original README closure lacks a complete source-bound receipt; preserve its original v0 scope.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 192,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "cae210fe250ed40c99642c7fb8cdca2030e48fa29e9a4fbe05de0cb28375209f",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/192",
+    "commentIds": [],
+    "conclusion": "The original exports closure lacks a complete source-bound receipt; preserve its original v0 scope.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 193,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "5abaeb3d858c9b98d998c5c2ca1ec7b6e37d9541b88498725ab051dd28fcf7e7",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/193",
+    "commentIds": [],
+    "conclusion": "The original dry-run closure lacks a complete source-bound receipt; no current packaging run is substituted.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 194,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "bfacedd8bd75366e61584f8dc80c29a4ec01fd89299751f724f4a012d4715067",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/194",
+    "commentIds": [],
+    "conclusion": "The original English documentation closure lacks a complete source-bound receipt; preserve its original conditions.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 195,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "cba6cbc6ba141d151e6b6d8375091ffd5b13616929269dc7ebd0f4cda062a5cf",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/195",
+    "commentIds": [],
+    "conclusion": "The original Chinese documentation closure lacks a complete source-bound receipt; preserve its original conditions.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 196,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "8a1faa2acb8c71efe7cd9aea3b36bbec021712d7fba20a65fcf1bf444d436c60",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/196",
+    "commentIds": [],
+    "conclusion": "The original clean Button consumer closure lacks a complete source-bound receipt; current consumer runs are not retroactive proof.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 197,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "372de80f18f56404183421f771ab6f83d817ab484e71d10e08aefabac85765eb",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/197",
+    "commentIds": [],
+    "conclusion": "The original clean Dialog consumer closure lacks a complete source-bound receipt; current consumer runs are not retroactive proof.",
+    "technicalAcceptance": false
+  },
+  {
+    "number": 198,
+    "reviewer": "Codex /root/history_acceptance",
+    "bodySha256": "1933ccaed3c64bc1413016693644c6f9af9bce446cc96adc3997b88f7d3677e0",
+    "discussionSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "source": "https://github.com/Proto-UI/Proto-UI/issues/198",
+    "commentIds": [],
+    "conclusion": "The original promise-alignment closure lacks a complete source-bound receipt; the old release boundary remains intact.",
+    "technicalAcceptance": false
+  }
+]

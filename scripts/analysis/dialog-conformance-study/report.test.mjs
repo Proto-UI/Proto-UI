@@ -97,3 +97,27 @@ test('check identity changes are unresolved even if aggregate pass/fail counts m
   cell.existing[0].fullName = 'substituted check';
   assert.equal(classifyCell(plan, plan.variants[1], baseline(), cell).verdict, 'unresolved');
 });
+
+test('public calibration and held-out denominators retain component and application responsibilities', () => {
+  const combined = structuredClone(plan);
+  combined.cases[0].responsibility = 'component-contract';
+  combined.cases.push({ id: 'ACTION', criterion: 'consumer-action', responsibility: 'application-task', existingCheckFragments: [] });
+  combined.variants.push({ id: 'heldout-action', kind: 'injected-broken', cohort: 'held-out', caseId: 'ACTION', patch: { path: 'consumer' } });
+  const control = baseline();
+  control.oracle.push({ id: 'ACTION', finished: true, firstDivergence: null, error: null, cleanupError: null });
+  const productDefect = structuredClone(control);
+  productDefect.transformed = true;
+  productDefect.existing[0].status = 'failed';
+  productDefect.oracle[0] = broken({ mappedFailure: true }).oracle[0];
+  const actionDefect = structuredClone(control);
+  actionDefect.transformed = true;
+  actionDefect.oracle[1].firstDivergence = { step: 'Cancel', actual: ['save'], expected: ['cancel'] };
+  actionDefect.oracle[1].error = 'observed application task violation';
+  const legal = structuredClone(control);
+  legal.transformed = true;
+  const result = summarize(combined, { baseline: control, broken: productDefect, legal, 'heldout-action': actionDefect });
+  assert.deepEqual(result.publicCalibration.detection, { caught: 1, missed: 0, denominator: 1, rate: 1 });
+  assert.deepEqual(result.heldOut.detection, { caught: 0, missed: 1, denominator: 1, rate: 0 });
+  assert.equal(result.byResponsibility['component-contract'].detection.caught, 1);
+  assert.equal(result.byResponsibility['application-task'].detection.missed, 1);
+});
