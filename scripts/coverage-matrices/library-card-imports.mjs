@@ -55,11 +55,17 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
       './style',
     ]),
   }),
-  // Exact optical host transport: an owned reservation part and its outline.
-  // This grants no shell interaction or unbounded DOM discovery authority.
+  // Exact lazy geometry consumer of the shared physical lease owner.
+  // Its source admission does not permit geometry in a public shell bundle.
   'packages/adapters/base/src/material/paint-reservation.ts': Object.freeze({
-    sourceSha256: '531a999fa3ff7683ae7d940809447b9306018ad889b5c297b373426c119e8e2d',
-    specifiers: Object.freeze(['./border-outline', '@proto.ui/core', '@proto.ui/module-feedback']),
+    sourceSha256: '09845878f6672da933ac8a1cf4bc529962ea6cbfe7ed4e010737a283ba382622',
+    specifiers: Object.freeze(['../platform/web-material-paint-reservation', './border-outline']),
+  }),
+  // The reviewed synchronous ref/lease owner keeps the original public callback
+  // and one private registry. No optical geometry or additional raw API is admitted.
+  'packages/adapters/base/src/platform/web-material-paint-reservation.ts': Object.freeze({
+    sourceSha256: 'dc3e8851ed9ed863b59072d4ae21122710dc09e13d3d389774d0b52cd595f7c8',
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-feedback']),
   }),
   // Promote the existing contact-carrier edge to a complete source binding.
   // The two new helpers preserve bounded canvas admission and all-step cleanup.

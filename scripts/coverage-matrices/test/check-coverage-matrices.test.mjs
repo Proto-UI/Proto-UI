@@ -19376,7 +19376,14 @@ for (const [relative, allowed] of [
   ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
   ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
-  ['packages/adapters/base/src/material/paint-reservation.ts', '@proto.ui/module-feedback'],
+  [
+    'packages/adapters/base/src/material/paint-reservation.ts',
+    '../platform/web-material-paint-reservation',
+  ],
+  [
+    'packages/adapters/base/src/platform/web-material-paint-reservation.ts',
+    '@proto.ui/module-feedback',
+  ],
   ['packages/adapters/base/src/material/source.ts', '../host/synchronous-steps'],
   ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
   ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
