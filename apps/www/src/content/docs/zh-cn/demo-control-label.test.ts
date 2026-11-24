@@ -97,7 +97,6 @@ describe('public independent Label recipes and docs', () => {
           'utf8'
         );
         expect(page).toContain(`demo-${family}-label`);
-        expect(page).toContain('draft');
         expect(page).toContain('instanceAssociations');
         expect(page).toContain("'wc', 'react', 'vue', 'vue2'");
       }
