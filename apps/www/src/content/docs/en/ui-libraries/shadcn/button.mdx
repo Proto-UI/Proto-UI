@@ -1,7 +1,7 @@
 ---
 title: 'Button'
 desp: 'Prototype: Button'
-description: 'A Shadcn-styled button with variants, sizes, and consistent behavior across frameworks.'
+description: 'A Shadcn-styled action button with variants, sizes, and workspace previews for four Web frameworks.'
 ---
 
 import InstallCommandCard from '@/components/InstallCommandCard.astro';
@@ -11,9 +11,11 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { getButtonExampleFiles as exampleFiles } from '@/content/docs/demo_components/button/button-usage';
 
-Buttons trigger actions with consistent semantics across Web Components, React, Vue 3, and Vue 2. The examples on this page use the **Shadcn Rhea** style preset.
+Shadcn Button adds visual variants and sizes to Base Button. The examples on this page use the **Shadcn Rhea** style preset.
 
 ## Preview
+
+`P-SHADCN-BUTTON` and `P-BASE-BUTTON` are **early draft**: the protocol is still evolving. The previews use workspace source for Web Components, React, Vue 3, and Vue 2.6; choose the matching package and host version in the installation section. [Current Button test coverage](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-BUTTON-0001.yaml) records the checked behavior and remaining browser work.
 
 <PrototypePreviewer
   demoId="demo-button"
@@ -36,7 +38,7 @@ First [initialize your application](/en/start-here/quick-start/), then add the b
   manager="npm"
 />
 
-Replace `wc` with `react` or `vue` for those hosts. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named `styleProfile` presets shown below are currently available from workspace source.
+Replace `wc` with `react` or `vue` for those hosts. The CLI installs the matching `@proto.ui/prototypes-shadcn` and adapter packages and generates the local facade. Vue 2.6 (`>=2.6.0 <2.7`) and the named `styleProfile` presets shown below require matching workspace CLI, adapter, and prototype source. The published 0.2.0 CLI supports `wc`, `react`, and `vue`.
 
 ## Usage
 
