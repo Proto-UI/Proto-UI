@@ -1,11 +1,15 @@
 ---
-title: brutalist Meter
-description: A bounded numerical measurement with shared Base semantics.
+title: 'Brutalist Meter'
+description: 'Display a scalar measurement within a known range with optimal, suboptimal, and critical thresholds.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Brutalist Meter displays a scalar measurement within a known range—such as storage usage, quota, or score—with threshold classification based on `low`, `high`, and `optimum`.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-brutalist-meter"
@@ -14,17 +18,29 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+## Installation
 
-Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. low/high/optimum classify the measured value as optimal, suboptimal or critical; they do not change the numerical value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+- **Package exports**: import `meterRoot`, `meterLabel`, `meterTrack`, `meterIndicator`, and `meterValue` from `@proto.ui/prototypes-brutalist/meter`
 
-Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
+## Usage
+
+### Parts
+
+- **Root**: Manages `value`, finite bounds `min` and `max`, and optional `low`, `high`, and `optimum` thresholds. Values clamp to `[min, max]`, and equal bounds produce `0` percentage.
+- **Label**: Provides the accessible label for the meter.
+- **Track / Indicator**: Render the bar container and filled indicator proportional to the computed percentage.
+- **Value**: Displays `valueText` when set, otherwise the clamped numeric value.
+
+### Thresholds and accessibility
+
+- Setting `low`, `high`, and `optimum` classifies the current reading as `'optimal'`, `'suboptimal'`, or `'critical'` without modifying the underlying value.
+- Meter is a passive readout with no keyboard tab stop; `Root` and its parts stay synchronized and expose `value`, `percentage`, `indeterminate`, and `status`.
 
 ## API
 
-Meter is workspace source. There is no public `proto-ui add` target. Parts do not add props of their own.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -40,7 +56,7 @@ Meter is workspace source. There is no public `proto-ui add` target. Parts do no
   ]}
 />
 
-These props belong to Root.
+`Label`, `Track`, `Indicator`, and `Value` declare no props of their own.
 
 ## References
 

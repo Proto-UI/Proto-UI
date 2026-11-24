@@ -125,6 +125,163 @@ function fixture(restore: FocusScopeConfig['restore'] = 'previous') {
 }
 
 describe('FocusScope restore policy', () => {
+  it('keeps the mounted parent boundary while a nested retained scope has no physical entry', () => {
+    const f = fixture();
+    try {
+      const nested = f.entry('nested', f.scope.instance, { ...f.scopeConfig, restore: 'none' });
+      f.entry('nested-child', nested.instance);
+      f.userFocus(f.trigger);
+      f.center.activateScope(f.scope);
+      f.center.activateScope(nested);
+      f.center.detach(nested.instance);
+
+      expect(f.center.isTopActiveScope(f.scope)).toBe(true);
+      expect(f.center.isScopeActive(nested)).toBe(true);
+      expect(f.center.requestFocus(f.destination)).toBe(false);
+      expect(f.center.deactivateScope(nested)).toBe(true);
+      expect(f.center.isTopActiveScope(f.scope)).toBe(true);
+      expect(f.center.requestFocus(f.destination)).toBe(false);
+      f.center.deactivateScope(f.scope);
+      expect(document.activeElement).toBe(f.trigger.element);
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it.each(['previous', 'none'] as const)(
+    '%s deactivates an active logical scope after its physical view detaches',
+    (restore) => {
+      const f = fixture(restore);
+      try {
+        const pending = f.entry('pending', f.scope.instance);
+        f.userFocus(f.trigger);
+        f.center.activateScope(f.scope, { reason: 'pointer' });
+        pending.setPending(true);
+        f.center.detach(f.scope.instance);
+        f.scope.element.remove();
+        if (restore === 'none') f.userFocus(f.destination);
+        // Outside focus notification also clears old pending work; enqueue
+        // after it so close must perform the retained-scope cancellation.
+        pending.setPending(true);
+
+        expect(f.center.isScopeActive(f.scope)).toBe(true);
+        expect(f.center.deactivateScope(f.scope, { reason: 'keyboard', preventScroll: true })).toBe(
+          true
+        );
+        expect(f.center.isScopeActive(f.scope)).toBe(false);
+        expect(pending.hasPendingFocus()).toBe(false);
+        expect(f.inside.getFacts().focused).toBe(false);
+        expect(f.requests.map((request) => request.name)).toEqual(
+          restore === 'previous' ? ['inside', 'trigger'] : ['inside']
+        );
+        expect(document.activeElement).toBe(
+          restore === 'previous' ? f.trigger.element : f.destination.element
+        );
+        if (restore === 'previous')
+          expect(f.requests.at(-1)?.options).toEqual({ reason: 'keyboard', preventScroll: true });
+        f.userFocus(f.destination);
+        expect(f.center.deactivateScope(f.scope)).toBe(false);
+        expect(document.activeElement).toBe(f.destination.element);
+      } finally {
+        f.cleanup();
+      }
+    }
+  );
+
+  it('does not revive a detached scope after terminal removal', () => {
+    const f = fixture();
+    try {
+      f.userFocus(f.trigger);
+      f.center.activateScope(f.scope);
+      f.center.detach(f.scope.instance);
+      f.center.remove(f.scope.instance);
+      f.userFocus(f.destination);
+
+      expect(f.center.deactivateScope(f.scope, { reason: 'keyboard' })).toBe(false);
+      expect(f.center.isScopeActive(f.scope)).toBe(false);
+      expect(document.activeElement).toBe(f.destination.element);
+      expect(f.requests.map((request) => request.name)).toEqual(['inside']);
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('stops detached close restoration when its active-state callback removes the owner', () => {
+    const f = fixture();
+    try {
+      f.userFocus(f.trigger);
+      f.center.activateScope(f.scope);
+      f.center.detach(f.scope.instance);
+      f.userFocus(f.destination);
+      f.scope.onActive = (active) => {
+        if (!active) f.center.remove(f.scope.instance);
+      };
+
+      expect(f.center.deactivateScope(f.scope, { reason: 'keyboard' })).toBe(true);
+      expect(document.activeElement).toBe(f.destination.element);
+      expect(f.requests.map((request) => request.name)).toEqual(['inside']);
+      expect(f.center.isScopeActive(f.scope)).toBe(false);
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('preserves a newer activation from the detached close notification', () => {
+    const f = fixture();
+    try {
+      f.userFocus(f.trigger);
+      f.center.activateScope(f.scope);
+      f.center.detach(f.scope.instance);
+      f.scope.onActive = (active) => {
+        if (!active) f.center.activateScope(f.scope, { entry: 'manual' });
+      };
+
+      f.center.deactivateScope(f.scope, { reason: 'keyboard' });
+      expect(f.center.isScopeActive(f.scope)).toBe(true);
+      expect(f.center.requestFocus(f.destination)).toBe(false);
+      expect(f.inside.getFacts().focused).toBe(true);
+      expect(f.requests.map((request) => request.name)).toEqual(['inside']);
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('preserves a newer focus transfer from the detached close notification', () => {
+    const f = fixture();
+    try {
+      f.userFocus(f.trigger);
+      f.center.activateScope(f.scope);
+      f.center.detach(f.scope.instance);
+      f.scope.onActive = (active) => {
+        if (!active) f.userFocus(f.destination);
+      };
+
+      f.center.deactivateScope(f.scope, { reason: 'keyboard' });
+      expect(f.center.isScopeActive(f.scope)).toBe(false);
+      expect(document.activeElement).toBe(f.destination.element);
+      expect(f.destination.getFacts().focused).toBe(true);
+      expect(f.requests.map((request) => request.name)).toEqual(['inside']);
+    } finally {
+      f.cleanup();
+    }
+  });
+
+  it('keeps a detached active record through a top-scope lookup until semantic close', () => {
+    const f = fixture();
+    try {
+      f.userFocus(f.trigger);
+      f.center.activateScope(f.scope);
+      f.center.detach(f.scope.instance);
+      expect(f.center.isTopActiveScope(f.scope)).toBe(false);
+      expect(f.center.isScopeActive(f.scope)).toBe(true);
+      expect(f.center.deactivateScope(f.scope, { reason: 'keyboard' })).toBe(true);
+      expect(document.activeElement).toBe(f.trigger.element);
+      expect(f.requests.map((request) => request.name)).toEqual(['inside', 'trigger']);
+    } finally {
+      f.cleanup();
+    }
+  });
+
   it('none preserves the outside destination and releases the ordinary request gate', () => {
     const f = fixture('none');
     try {

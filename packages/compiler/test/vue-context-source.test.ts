@@ -116,6 +116,45 @@ async function settle(): Promise<void> {
 }
 
 describe('Vue3 generated Context composition', () => {
+  it.each(['subscribe', 'trySubscribe', 'trySubscribeAncestor'] as const)(
+    'preserves %s when an ordinary helper receives the Context key',
+    async (operation) => {
+      const build = project();
+      const Provider = build(provider, `key-parameter-provider-${operation}`);
+      const Consumer = build(
+        `import {definePrototype, type ContextKey} from '@proto.ui/core';
+        import {KEY} from './keys';
+        export default definePrototype({name:'key-parameter-consumer',setup(def){
+          const changes=def.state.numberDiscrete('changes',0);
+          const observe=(key:ContextKey<{value:number}>)=>{
+            def.context.${operation}(key);
+            def.context.${operation}(key,(run)=>{changes.set(changes.get()+1);run.update();});
+          };
+          observe(KEY);
+          return (r)=>r.el('output',{},changes.get());
+        }});`,
+        `key-parameter-consumer-${operation}`
+      );
+      const seed = Vue.ref(2);
+      const host = document.createElement('div');
+      const app = Vue.createApp({
+        setup() {
+          return () => Vue.h(Provider, { seed: seed.value }, { default: () => Vue.h(Consumer) });
+        },
+      });
+      app.mount(host);
+      try {
+        await settle();
+        expect(host.querySelector('output')?.textContent).toBe('0');
+        seed.value = 9;
+        await settle();
+        expect(host.querySelector('output')?.textContent).toBe('1');
+      } finally {
+        app.unmount();
+      }
+    }
+  );
+
   it('resolves real wrapper/slot ancestry, shadows by key identity and disposes subscriptions', async () => {
     expect(Vue.version).toBe('3.5.31');
     const build = project(),

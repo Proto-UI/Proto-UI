@@ -1,80 +1,76 @@
 ---
 title: '为什么你通常不需要新写一个原型？'
-description: '先区分维护、组合、设计语言投射与新的 Base semantic subject。'
+description: '在动手写代码前，区分维护已有原型、组件组合、风格化定制与新增 Base 协议。'
 ---
 
-Proto UI 提供 Prototype authoring API，不代表贡献者应该频繁增加新的协议身份。更稳妥的起点是：
+在 Proto UI 中，大多数需求都不需要新增一个全新的交互协议。动手前最好的第一步是：
 
-> 先找到适用的 `P-*` / `T-*` 实体，再判断问题属于维护、组合、设计语言投射，还是一个真正全新 Base semantic identity 的 candidate。
+> 先找到对应的 `P-*` 与 `T-*` 规范实体，判断你的需求属于**维护已有原型**、**应用层组合**、**设计语言风格化**，还是真正需要一个新的 **Base 协议**。
 
-这是一篇边界判断指南。已有受治理 subject 直接进入维护、投射或实现。对于全新的 Base subject，唯一未决语义决定是 Proto UI 是否准入这个独立 identity；research、candidate P/T graph、draft entity、实现探针和 executable evidence 都可以先推进，并为这项决定提供依据。准入前把 candidate 明确保持为 draft，之后沿[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)继续交付。
+如果目标已经存在于规范目录中，可以直接进入维护、风格化或实现流程；如果确实需要引入全新的 Base 身份，可以先以 `draft` 状态推进调研、候选规范、原型探针与测试，再完成准入后按[实现受治理的 Base Semantic Slice](/zh-cn/build/prototypes/implementing-an-approved-base-slice/)交付。
 
-## 先确认你面对的是哪类工作
+## 先判断你面对的是哪类工作
 
-### 维护已有 Prototype
+### 1. 维护已有原型
 
-如果适用的 `P-*` 已经存在，而问题是行为、测试、导出、CLI、文档或 Demo 与实体不一致，应走[维护已有 Prototype](/zh-cn/build/prototypes/maintaining-an-existing-prototype/)。
+如果对应的 `P-*` 实体已经存在，当前问题是交互行为、测试、包导出、CLI、文档或 Demo 与规范不一致，请直接走[维护已有 Prototype](/zh-cn/build/prototypes/maintaining-an-existing-prototype/)。
 
-### 组合已有能力
+### 2. 组合已有组件
 
-如果目标只是把现有组件或 Prototype 组合成更高层体验，组合通常属于宿主、框架或编译层。`K-PROTOTYPE-COMPOSITION-0001` 明确指出，core template language 不提供 prototype-to-prototype composition。
+如果你只是想把多个现有组件拼装成更高层的业务界面（例如带搜索框的弹窗或工具栏），这类组合应当放在宿主、框架或编译层完成。根据 `K-PROTOTYPE-COMPOSITION-0001`，Proto UI 的核心模板语言聚焦于单个原型内部结构，不直接嵌套另一个原型。
 
-不要为了获得一个方便的目录名或组合入口而制造新的 Base identity。
+保持组合留在应用层，不需要为了“方便引入”而新建一个 Base 身份。
 
-### 投射设计语言
+### 3. 构建设计语言风格层
 
-如果 Base 已经拥有 state、event、focus、a11y 或 context 语义，而变化主要是：
+当 Base 已经覆盖了状态、事件、焦点、无障碍或上下文协议，而你需要新增的主要是：
 
-- variant、size 或视觉 anatomy；
-- style token 与 rule；
-- 上游设计系统兼容边界；
-- 明确的视觉或 API 增量；
+- `variant`、`size` 或视觉结构（Visual Anatomy）；
+- 样式 Token 与状态规则（`Rule`）；
+- 上游设计系统的 API 适配与兼容范围；
+- 明确的视觉或接口增量；
 
-那么它更可能是 Base projection 或 styled-only Prototype。完整流程见[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)。
+那么你需要的是一层基于 Base 的风格化实现，或者一个纯样式（styled-only）原型。完整交付流程见[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)。
 
-### 提议新的 Base semantic subject
+### 4. 提议全新的 Base 交互协议
 
-只有在对象拥有独立、可测试、跨宿主稳定的信息通路时，才值得进入 proposal：
+只有当一个交互模式拥有独立、可测试且跨宿主稳定的信息通路时，才适合作为新的 Base 原型：
 
-- 输入事实与 owner 明确；
-- observable output 与同步规则明确；
-- 现有 Base protocol 或 composition 无法无损表达；
-- 不拥有的视觉、业务、布局、Form 或 announcement 责任有清楚的负向边界；
-- 每项保留的准则都能映射到 substantive executable evidence。
+- 输入事实与状态归属（owner）清晰；
+- 对外可观察输出与同步规则明确；
+- 现有 Base 协议或组件组合无法无损表达；
+- 与视觉、业务、布局、表单或播报等外部职责的边界清晰；
+- 每条核心规则都可以落到具体的可执行测试（`T-*`）。
 
-熟悉的组件名、某个设计系统已有同名目录，或 styled library 想要继承点，都不是 Base admission 证据。
+## 正确理解 `asHook` 的角色
 
-## `asHook` 能解决什么，不能证明什么
+`asHook` 是某个具体交互协议的复用入口，是否提供取决于该协议的实际复用需求，而不是每个原型都必须成对导出。
 
-`asHook` 是某个 protocol 的 authoring entry，而不是“需要复用时就自动抽一个”的通用要求。
+- `P-BASE-BUTTON` 将 `base-button` 与 `asButton` 定义为同一 Button 协议的两个入口，并在 [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts) 中共享 `setupButton`，避免语义分叉。
+- `P-SHADCN-BUTTON` 则只提供直接原型入口，无需额外导出 `asHook`。
 
-`P-BASE-BUTTON` 把 `base-button` 与 `asButton` 编目为同一 Button protocol 的两个 authoring entries；[Button 源码](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/src/button/button.proto.ts)让两者共享 `setupButton`。与此同时，`P-SHADCN-BUTTON` 明确只有 direct entry，不额外提供 authored asHook。
+使用和编写 `asHook` 时，记住三条原则：
 
-因此：
+- 优先确认该 `asHook` 属于你要复用的 `P-*` 协议；
+- 保持协议专用钩子（如 `asButton`）只服务于自身协议，避免把它当成另一个 Base 协议的底层积木；
+- 只在存在真实复用场景时提供 `asHook`，不为文件对称而增加空封装。
 
-- 使用现有 protocol-specific asHook 时，先确认它确实属于适用 P 实体；
-- 不要把 `asButton` 之类的协议钩子当成其他 Base protocol 的通用行为 substrate；
-- 不要仅为了文件或 API 对称增加空 asHook；
-- direct prototype 与 authored asHook 是否同时存在，由实体边界和真实 authoring surface 决定。
+## 动手前的快速检查
 
-## 一条可执行的判断线
+开始编码前，按顺序问自己五个问题：
 
-在写代码前依次回答：
+1. 是否已有对应的 `P-*` / `T-*` 实体，属于修复或补充？
+2. 能否直接在宿主或框架层组合现有组件完成？
+3. 是否只是在已有 Base 语义之上叠加设计语言样式？
+4. 如果确实是新的 Base 协议，当前是否已明确标记为 `draft` 候选或已确认准入？
+5. 状态归属、接口边界、关联规范与测试方案是否已经明确？
 
-1. 是否已有适用的 P/T，可以按 maintenance 处理？
-2. 是否只是宿主或框架层的 composition？
-3. 是否只是已有 Base 语义上的 design-language delta？
-4. 如果真是新 Base subject，Issue 是否已记录 admission 决定，或者当前工作是否明确标记为 candidate draft？
-5. lifecycle、criteria、relations、sources 与 evidence 是否都已经明确？
+前三个问题为“是”时，直接进入对应的现有工作流；只有在确认需要新 Base 协议时，再从候选规范与最小原型探针入手。
 
-前三个答案会让已有受治理工作直接进入对应路径。如果只剩 Base admission 未决，就从 candidate graph、draft entity、实现探针和证据开始，而不是把新 identity 提前写成已经受治理。
-
-## Lifecycle 提醒
-
-本文引用的 `P-BASE-BUTTON` 与 `P-SHADCN-BUTTON` 当前均为 `draft`。它们描述当前编目方向，不应仅因相关包已经发布 0.2.0 就被写成稳定协议保证。
+> 注：本页提及的 `P-BASE-BUTTON` 与 `P-SHADCN-BUTTON` 目前处于 `draft` 生命周期阶段，具体接口细节请以最新规范文件为准。
 
 ## 下一步
 
-- 想理解单体 authoring entry 的结构，读[编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/)
-- 已有受治理或候选复合边界，读[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
-- 主要目标是新的设计语言，读[基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)
+- 了解单体原型与 `asHook` 的最小结构：[编写一个定制的单体原型](/zh-cn/build/prototypes/writing-a-custom-primitive-prototype/)
+- 了解多部件复合组件的建模方式：[编写一个定制的复合原型](/zh-cn/build/prototypes/writing-a-compound-prototype/)
+- 了解如何基于 Base 打造风格化组件库：[基于 Base 长出一个带风格的原型库](/zh-cn/build/prototypes/building-a-styled-library-on-top-of-base/)

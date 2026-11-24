@@ -1,11 +1,13 @@
 ---
 title: 'Collapsible'
-description: 'Bootstrap 2.3.2 Collapsible: Root, Trigger, Content and inherited Base disclosure semantics.'
+description: '由 Root、Trigger 和 Content 组成的 Bootstrap 2.3.2 单项折叠展开组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Bootstrap 2.3.2 Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI 原型，各自消费对应的 Base Collapsible hook。Root 仍是唯一展开状态 owner；本体系只增加表现。当前为独立维护的 draft 设计投影。
+Bootstrap 2.3.2 Collapsible 提供可展开/收起的单项内容区，借鉴归档 Bootstrap 2.3.2 的圆角与边框间距，并使用独立的 Base Collapsible 交互语义。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-collapsible"
@@ -15,29 +17,11 @@ Bootstrap 2.3.2 Collapsible 包含 Root、Trigger、Content 三个真实 Proto U
   codePanel={false}
 />
 
-通过预览工具栏的本体系真实 Select 选择 WC、React、Vue、Vue 2；页眉的 Runtime 偏好仍可用，并同步当前选择。
+可通过预览工具栏中的真实 Select 切换 WC、React、Vue 和 Vue 2，页眉中的 Runtime 偏好会自动同步。示例中依次展示了默认收起（关闭时卸载内容）、保持挂载隐藏内容、禁用但保持展开，以及受控确认展开四种场景。
 
-## 体验协议
+## 安装
 
-Demo 在四种 Web Adapter 中使用真实库原型。第一个 disclosure 初始关闭并 detach Content view；第二个初始打开，关闭后保留隐藏 view；第三个禁用但保持展开；第四个收到请求后仍然关闭，直到激活 **Accept**。这个接受按钮是独立的应用操作，不是 Trigger 内的第二个交互 owner。
-
-## 三个 part，一个状态 owner
-
-- Root：`open?`、`defaultOpen?`、`disabled?`；公开 `open`、请求方法 `openCollapsible`、`close`、`toggle` 和携带 `{ open, reason }` 的 `openChange`。
-- Trigger：`disabled?`；继承 expanded、effective disabled、hover、press、focused、focus-visible、button accessibility、自然 Tab 顺序、Enter/Space 激活与受保护的 `focusSelf`。
-- Content：`keepMounted?`；继承派生 `open`/`hidden`、role-neutral content 与 L1 view presence。关闭不销毁逻辑实例；不承诺 detached native child/view state 保留。
-
-Root 的自身 anatomy domain 必须恰有一个 Trigger 和一个 Content。嵌套与相邻 disclosure 独立持有状态。受控请求只有在 owner 提供新 `open` 后才改变 canonical expansion；忽略请求就保持原状。disabled 抑制请求，但不会关闭已经展开的内容。此处没有 heading 前置条件、Accordion selection、方向键导航、region landmark、自动 focus movement 或 Overlay。
-
-## 表现与窄屏
-
-原型使用有界宽度、可收缩布局、长词换行、可缩放内边距，不设固定内容高度。focus 与 disabled 外观消费 Base state。外围需保留 focus ring 的空间；Neobrutalist 还需容纳硬阴影及移动后的 pointer envelope。Demo 包含长标签与连续长词，browser acceptance 覆盖 320px、200% 根文字尺寸与明暗主题。源码或 synthetic DOM 通过不代表这些实际绘制与原生输入已通过。
-
-视觉参考明确限定 Bootstrap 2.3.2：4px group 圆角、8px/15px Trigger 间距、9px/15px Content 间距与顶边框。此处使用独立 Base disclosure 语义，不引入 jQuery Collapse plugin、Accordion group ownership 或其高度动画。15px/9px 参考值按 16px 根字号表达为 0.9375rem/0.5625rem，使留白跟随文字缩放。Apache 2.0 署名与许可证保留在源码包中。
-
-## 使用
-
-此包仍是 private、未发布的 workspace source。在工作区导入源码原型并选择 Adapter。内部 facade generation 必须显式使用 workspace source mode；公开 installed-consumer CLI 会拒绝此项。该源码入口不代表 registry 发布。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
 ```ts
 import {
@@ -47,12 +31,21 @@ import {
 } from '@proto.ui/prototypes-bootstrap-2-3-2/collapsible';
 ```
 
-适配导出的原型时保留三 part composition。[Base 协议](/zh-cn/ui-libraries/base/collapsible/) 说明共享请求与生命周期保证。
+## 用法
 
-## 证据与参考
+- **三部件结构**：在每个 `Root` 内放置一个 `Trigger` 和一个 `Content`；嵌套或相邻的 `Collapsible` 各自独立维护状态。
+- **状态由 Root 统一管理**：传入 `open` 进入受控模式，收到 `openChange` 事件（载荷为 `{ open, reason }`）后由父组件决定是否更新 `open`；禁用状态会阻止新的切换请求，但不会自动关闭已展开的内容。
+- **内容挂载控制**：关闭时默认卸载内容节点；设置 `keepMounted` 可保留隐藏的 DOM 节点。
+- **布局与缩放**：支持长标签与长单词自动换行，间距以 `rem` 表达以跟随字号缩放，外层容器建议为焦点环留出足够边距。
 
-四 Adapter synthetic DOM 与 compiler mappings，和已注册 browser journeys、截图、GPUI native execution、独立稳定准入是分开的证据。未执行的宿主证据仍是验收缺口。
+更多共享请求与生命周期细则请参考 [Base Collapsible](/zh-cn/ui-libraries/base/collapsible/)。
 
-- [实现源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/bootstrap-2-3-2/src/collapsible)
-- [Bootstrap 2.3.2 reference](https://github.com/twbs/bootstrap/blob/v2.3.2/less/accordion.less)
-- [可执行证据映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)
+## API
+
+| 部件 | 属性 / 方法 / 事件 | 说明 |
+| --- | --- | --- |
+| `Root` | `open` / `defaultOpen` / `disabled` | 受控或初始展开状态及禁用开关 |
+| `Root` | `openCollapsible()` / `close()` / `toggle()` | 编程式发起展开、收起或切换请求 |
+| `Root` | `openChange` | 状态变更请求事件，载荷为 `{ open, reason }` |
+| `Trigger` | `disabled` / `focusSelf()` | 按钮触发器，支持自然 Tab 顺序与 `Enter`/`Space` 激活 |
+| `Content` | `keepMounted` | 默认 `false`；设为 `true` 时收起后保留隐藏节点 |

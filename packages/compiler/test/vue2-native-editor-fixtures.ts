@@ -27,13 +27,23 @@ export function physicalRootInput(kind: 'image' | 'text'): PrototypeIR {
 export function editingInput(lineMode: 'single' | 'multiline', controlled: boolean): PrototypeIR {
   const parsed = parsePrototype(
     `import {definePrototype} from '@proto.ui/core';
-      import {asTextControl} from '@proto.ui/hooks';
+      import {asTextControl,asFocusable} from '@proto.ui/hooks';
       import {declareTextControl} from '@proto.ui/module-text-control';
       export default definePrototype({name:'native-editor-lease',
         modules:[declareTextControl({content:'plain-text',lineMode:${JSON.stringify(lineMode)},engine:'host'})],
         setup(def){
           def.props.define({value:{type:'string',default:'seed'},seed:{type:'string',default:'seed'},hint:{type:'string',default:'before'},present:{type:'boolean',default:true}});
           const editor=asTextControl();
+          ${
+            controlled
+              ? `const focus=asFocusable();
+          def.expose.event('editCandidate',{payload:'json'});
+          editor.on('input',(run,event)=>{
+            focus.setDisabled(false);
+            run.expose.emit('editCandidate',event.value);
+          });`
+              : ''
+          }
           def.lifecycle.onCreated(run=>editor.sync({valueMode:${JSON.stringify(controlled ? 'controlled' : 'uncontrolled')},value:run.props.get().value,defaultValue:run.props.get().seed,placeholder:run.props.get().hint}));
           def.props.watch(['value','seed','hint','present'],(run,next)=>{
             editor.sync({value:next.value,defaultValue:next.seed,placeholder:next.hint});

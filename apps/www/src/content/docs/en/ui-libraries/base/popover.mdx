@@ -1,13 +1,15 @@
 ---
 title: 'Popover'
-description: 'An anchored non-modal dialog for small interactive content.'
+description: 'An anchored non-modal floating layer for compact interactive content.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-An anchored non-modal dialog for small interactive content.
+A non-modal floating panel anchored to a trigger element, suited for compact forms, filters, or contextual actions.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-popover"
@@ -16,17 +18,21 @@ An anchored non-modal dialog for small interactive content.
   codePanel={false}
 />
 
-Content is positioned against Trigger, with side, align, sideOffset, alignOffset and collisionPadding. It is not modal and does not lock background scrolling or trap Tab. Outside press, focus moving beyond Trigger and Content, Escape and Close request dismissal. Moving focus between Trigger and portalled content stays inside. A focus-outside close leaves focus on the outside control; it does not restore focus to Trigger.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value. Refusing a focus.outside request keeps Content present and does not trap focus. A later interaction can request dismissal again. Focus-only requests report focusReason as programmatic because the neutral focus observation does not identify an input device.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Trigger, Content, Title, Description, Close.
+## Usage
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+Compose `Root`, `Trigger`, `Content`, `Title`, `Description`, and `Close`:
+
+- **Positioning and non-modal behavior**: `Content` positions relative to `Trigger` with `side`, `align`, `sideOffset`, `alignOffset`, and `collisionPadding`. Because it is non-modal, background scrolling stays active and `Tab` focus is not trapped.
+- **Dismissal and focus**: Outside press, focus leaving `Trigger` and `Content`, `Escape`, and `Close` all request dismissal. Moving focus between `Trigger` and portalled `Content` counts as internal interaction; closing due to focus leaving keeps focus on the newly focused outside element instead of pulling it back to `Trigger`.
+- **Controlled and uncontrolled**: Use `defaultOpen` for uncontrolled state, or pass `open` and handle `openChange` for controlled state (focus-only dismissal requests report `focusReason` as `'programmatic'`). If a controlled handler declines a `focus.outside` request, `Content` stays visible without trapping focus and later interactions can still request dismissal. Disabled triggers do not activate.
 
 ## API
 
-Popover is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -37,7 +43,12 @@ Popover is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-These props belong to Root. Content accepts the Transition props and defaults `side` to `bottom`, `align` to `center`, `sideOffset` to `4`, `alignOffset` to `0` and `collisionPadding` to `8`. Trigger, Title, Description and Close have no props.
+Pass `open` to control the open state.
+
+### Part Props
+
+- **Content**: Accepts `Transition` props plus `side` (default `'bottom'`), `align` (default `'center'`), `sideOffset` (default `4`), `alignOffset` (default `0`), and `collisionPadding` (default `8`).
+- **Trigger**, **Title**, **Description**, **Close**: No additional props.
 
 ## References
 

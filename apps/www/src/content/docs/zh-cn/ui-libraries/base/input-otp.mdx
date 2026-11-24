@@ -1,11 +1,15 @@
 ---
-title: base Input Otp
-description: 可移植输入原子草稿。
+title: 'Input OTP'
+description: '基于单一原生输入与按位只读槽位的一次性验证码输入组件，支持粘贴、自动填充与表单集成。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+Base Input OTP 提供用于一次性验证码的输入组件：底层保留单个原生文本输入框以完整支持选区、粘贴、删除、`one-time-code` 自动填充及输入法组合，视觉上按槽位（`Slot`）逐位展示。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-input-otp"
@@ -14,21 +18,31 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanumeric 过滤、disabled/readOnly、name、ariaLabel。唯一真实 Input 由 TextControl 处理选择、粘贴、删除与组合输入，并声明 one-time-code 自动填充；组合结束后过滤和限长。Slot 是按索引被动显示且对辅助技术隐藏，不制造额外编辑器或 Tab 停靠点；可编辑 Input 聚焦时，active 由 TextControl 的真实插入点或选区决定；未知选区、失焦、disabled 和 readOnly 不显示活动槽，不能用值长度代替光标。valueChange 为提案；每个接受的完整代码发一次 completed，不执行验证或获取短信。
+## 安装
 
-在 Field/FormField 内用 Control 替代 Input，桥接 FieldLabel、规范字符串校验、IME 取消、Form 序列化及复位。独立 Input 保留原有命名。OTP Control 在所有者回调结束后为已接受的规范值变化启动校验；受控拒绝或过滤后无变化不触发自动 change 校验，manual 与配置的 blur 校验仍可使用。同一回调批次只校验最新快照，reset、策略中断和卸载会取消排队工作。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-部件: root, input, control, slot, separator. 四个视觉家族继承同一 Base 行为。
+## 用法
 
-当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+### 组合结构
+
+组件由 `Root`、`Input`（或表单内的 `Control`）、`Slot` 和 `Separator` 组成：
+
+- **`Root`**：统一管理验证码值（`value` / `defaultValue`）、位数 `length`（`1`–`32`，默认 `6`）、字符过滤模式 `pattern`（`'numeric'` 或 `'alphanumeric'`）以及 `disabled`、`readOnly`、`name` 和 `ariaLabel`。
+- **`Input`**：底层单行编辑器，在输入法组合完成后自动过滤非法字符并截断到指定长度。当输入值变更时发出 `valueChange`；每次形成完整的有效验证码时触发一次 `completed` 事件。
+- **`Slot`**：按 `index` 展示对应字符的被动只读视图（对辅助技术隐藏，不增加额外 Tab 停靠点）。当可编辑的输入框持有焦点时，高亮槽位跟随真实光标或选区位置。
+- **`Control`（表单集成）**：在 `Field` / `FormField` 内用 `Control` 替代 `Input`，即可自动接入 `FieldLabel`、字符串校验、表单序列化和重置。
 
 ## API
 
-Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。Input 的 `placeholder` 可选，没有默认值。
+### Root Props
+
+传入 `value` 进入受控模式。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
     { name: 'length', type: 'number', default: '6' },
     { name: 'pattern', type: "'numeric' | 'alphanumeric'", default: 'numeric' },
@@ -39,7 +53,11 @@ Input OTP 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `v
   ]}
 />
 
-这些属性属于 Root。Slot 的 `index` 默认 `0`。
+### 其他组件属性
+
+- **Input**：可选 `placeholder`（无默认值）。
+- **Slot**：`index` 默认为 `0`。
+- **Control、Separator**：无额外属性。
 
 ## 参考
 

@@ -4,6 +4,12 @@ import { NATIVE_PART_RELATIONSHIPS_SOURCE } from './part-relationships.template'
 /** Compiler-owned DOM capability implementation. Specialization consumes its TypeScript AST. */
 export const DOM_MODULE_TEMPLATE = String.raw`// Standalone full DOM capability lowering. No Proto Runtime/Adapter or semantic-IR interpreter.
 import { autoUpdate, computePosition, offset, flip, shift, size, type Middleware, type Placement } from '@floating-ui/dom';
+import { createWebAxisInputHost } from '../host-web/axis-input-v1';
+import { createWebAvailableSpaceHost } from '../host-web/available-space-v1';
+import { availableLayoutStates, readAvailableLayout } from '../host-web/available-layout-model-v1';
+import { OverlayTargetAlignment } from '../target-alignment/overlay-binding-v1';
+import { createTargetAlignmentLease } from '../target-alignment/host-v1';
+import type { OverlayTargetAlignmentBinding, AnchoredPositionConnection } from '../target-alignment/declarations-v1';
 export type NativeConfig = Readonly<Record<string, unknown>>;
 export type NativeStateEvent<T> = { type: 'next'; prev: T; next: T; reason?: unknown } | { type: 'disconnect'; reason: 'unmount' };
 export type NativeObserved<T> = { get(): T; watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
@@ -26,15 +32,15 @@ export interface NativeAnatomyOrder {
   version(family: NativeAnatomyFamily): number; parts(family: NativeAnatomyFamily): readonly NativeAnatomyPart[]; partsOf(family: NativeAnatomyFamily, role: string): readonly NativeAnatomyPart[];
   indexOfSelf(family: NativeAnatomyFamily, role: string): number; prevOfSelf(family: NativeAnatomyFamily, role: string): NativeAnatomyPart | null; nextOfSelf(family: NativeAnatomyFamily, role: string): NativeAnatomyPart | null;
 }
-export interface NativeAnatomy<Run = unknown> extends NativeAnatomyOrder { claim(family: NativeAnatomyFamily, declaration: { role: string; profile?: string }): void; has(family: NativeAnatomyFamily, role: string): boolean; subscribeParts(family: NativeAnatomyFamily, role: string, callback: (run: Run, parts: readonly NativeAnatomyPart[]) => void): () => void; readonly order: NativeAnatomyOrder }
+export interface NativeAnatomy<Run = unknown> extends NativeAnatomyOrder { claim(family: NativeAnatomyFamily, declaration: { role: string; profile?: string }): void; has(family: NativeAnatomyFamily, role: string): boolean; descendantsOf(family: NativeAnatomyFamily, ancestor: NativeAnatomyPart, role: string): readonly NativeAnatomyPart[]; subscribeParts(family: NativeAnatomyFamily, role: string, callback: (run: Run, parts: readonly NativeAnatomyPart[]) => void): () => void; readonly order: NativeAnatomyOrder }
 export type NativeCollectionSnapshot = Readonly<Record<string, unknown> & {index: number; total: number; first: boolean; last: boolean}>;
 export interface NativeCollection { readonly count: NativeOwnedState<number>; configure(config: NativeConfig): void; getItems(): readonly NativeCollectionSnapshot[]; getCount(): number }
 export interface NativeCollectionItem { readonly collectionIndex: NativeOwnedState<number>; readonly collectionTotal: NativeOwnedState<number>; readonly collectionFirst: NativeOwnedState<boolean>; readonly collectionLast: NativeOwnedState<boolean>; configure(config: NativeConfig): void; getSnapshot(): NativeCollectionSnapshot }
 export interface NativeBoundary<Run = unknown> { configure(config: NativeConfig): void; observe(type: string): void; setStackActive(active: boolean): void; registerRegion(target: unknown, options?: NativeConfig): () => void; unregisterRegion(target: unknown): void; classify(sample?: NativeConfig): 'inside' | 'outside' | 'unknown'; notify(sample?: NativeConfig): 'inside' | 'outside' | 'unknown'; subscribeOutside(callback: (event: NativeConfig) => void): () => void }
-export interface NativeHitParticipation { configure(config: NativeConfig): void; registerRegion(target: unknown, options?: NativeConfig): () => void; unregisterRegion(target: unknown): void }
+export interface NativeHitParticipation { configure(config: NativeConfig): void; registerSelfRegion(options?: NativeConfig): () => void; registerRegion(target: unknown, options?: NativeConfig): () => void; unregisterRegion(target: unknown): void }
 export type NativePositionSnapshot = Readonly<{side: string; align: string; strategy: string}>;
 export interface NativePositioning { connect(connection: NativeConfig): void; update(config: NativeConfig): void; requestUpdate(): void; disconnect(): void; getSnapshot(): NativePositionSnapshot | null }
-export interface NativeOverlay { readonly open: NativeObserved<boolean>; configure(config: NativeConfig): void; isOpen(): boolean; openOverlay(reason?: string): void; close(reason?: string): void; toggle(reason?: string): void; updatePosition(config: NativeConfig): void; registerTrigger(target: unknown): void; registerAnchor(target: unknown): void; registerAnchorPart(part: NativeAnatomyPart | null): void; registerContent(target: unknown): void; getPositionSnapshot(): NativePositionSnapshot | null; keepMounted(): void; bindPresence(binding: NativeConfig): void }
+export interface NativeOverlay { readonly open: NativeObserved<boolean>; configure(config: NativeConfig): void; isOpen(): boolean; openOverlay(reason?: string): void; close(reason?: string): void; toggle(reason?: string): void; updatePosition(config: NativeConfig): void; registerTrigger(target: unknown): void; registerAnchor(target: unknown): void; registerAnchorPart(part: NativeAnatomyPart | null): void; registerContent(target: unknown): void; registerTargetAlignment(binding: OverlayTargetAlignmentBinding | null): void; getPositionSnapshot(): NativePositionSnapshot | null; keepMounted(): void; bindPresence(binding: NativeConfig): void }
 export interface NativeScrollAxis { position: NativeObserved<number>; visibleRatio: NativeObserved<number>; canScrollBefore: NativeObserved<boolean>; canScrollAfter: NativeObserved<boolean>; atEnd: NativeObserved<boolean> }
 export type NativeScrollAxisSnapshot = Readonly<{position: number; visibleRatio: number; canScrollBefore: boolean; canScrollAfter: boolean; atEnd: boolean}>;
 export type NativeScrollSnapshot = Readonly<{axes: string; horizontal: NativeScrollAxisSnapshot; vertical: NativeScrollAxisSnapshot; scrolling: boolean; projection: string; endFollow: Readonly<{state: string; requestStatus: string}>}>;
@@ -56,12 +62,19 @@ export type NativeTableCell = Readonly<{ ref: object; kind: 'column-header' | 'r
 export type NativeTableRow = Readonly<{ ref: object; index: number; cells: readonly NativeTableCell[] }>;
 export type NativeTableDiagnostic = Readonly<{ code: string; ref?: object; row?: number; headerKey?: string }>;
 export type NativeTableSnapshot = Readonly<{ root: object; caption: object | undefined; rowCount: number; columnCount: number; rows: readonly NativeTableRow[]; valid: boolean; diagnostics: readonly NativeTableDiagnostic[] }>;
-export interface NativeAccessibleExtension { readonly objectRef: object; part(family: NativeAnatomyFamily, declaration: { key: string | { get(): unknown } }): void; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
+export interface NativeAccessibleExtension { readonly objectRef: object; part(family: NativeAnatomyFamily, declaration: { key: string | { get(): unknown } }): void; id(value: string | { get(): string | null | undefined }): void; name(value: string | { get(): string | null | undefined }): void; nameFromContent(): void; description(value: string | { get(): string | null | undefined }): void; relation(kind: string, target: NativeConfig): void; tree(config: NativeConfig): void; level(value: number | { get(): number }): void }
 export type NativeControlLabelAnatomyPair = Readonly<{ family: NativeAnatomyFamily; labelRole: string; targetRole: string }>;
 export type NativeControlLabelRequest = Readonly<{ source: 'pointer' | 'accessibility'; isCurrent(): boolean }>;
 export type NativeControlLabelHandle = Readonly<{ sync(options: Readonly<{ naming: boolean; activation: boolean }>): void }>;
 export type NativeControlLabel<Run = unknown> = Readonly<{ label(pair?: NativeControlLabelAnatomyPair): NativeControlLabelHandle; target(activate: (run: Run, request: NativeControlLabelRequest) => void, pair?: NativeControlLabelAnatomyPair): NativeControlLabelHandle }>;
-export type NativeModuleCapability<Kind extends string, Run = unknown> = Kind extends 'control-label' ? NativeControlLabel<Run> : Kind extends 'control-label-handle' ? NativeControlLabelHandle : Kind extends 'control-label-request' ? NativeControlLabelRequest : Kind extends 'binding-disposer' ? () => void : Kind extends 'collection-snapshot' ? NativeConfig : Kind extends 'collection-snapshot-list' ? readonly NativeConfig[] : Kind extends 'focus-entry' ? NativeFocusEntry : Kind extends 'focus-roving' ? NativeFocusRoving : Kind extends 'focus-scope' ? NativeFocusScope : Kind extends 'anatomy-family' ? NativeAnatomyFamily : Kind extends 'anatomy-part' ? NativeAnatomyPart : Kind extends 'anatomy-parts' ? readonly NativeAnatomyPart[] : Kind extends 'anatomy-order' ? NativeAnatomyOrder : Kind extends 'collection' ? NativeCollection : Kind extends 'collection-item' ? NativeCollectionItem : Kind extends 'boundary' ? NativeBoundary<Run> : Kind extends 'hit-participation' ? NativeHitParticipation : Kind extends 'positioning' ? NativePositioning : Kind extends 'overlay' ? NativeOverlay : Kind extends 'scroll' ? NativeScroll : Kind extends 'scroll-axis' ? NativeScrollAxis : Kind extends 'scroll-follow' ? NativeScroll['endFollow'] : Kind extends 'text-control' ? NativeTextControl<Run> : Kind extends 'image-view' ? NativeImageView<Run> : Kind extends 'table-structure' ? NativeTableStructure : Kind extends 'table-states' ? NativeTableStructure['states'] : Kind extends 'table-snapshot' ? NativeTableSnapshot : Kind extends 'table-row' ? NativeTableRow : Kind extends 'table-cell' ? NativeTableCell : Kind extends 'table-diagnostic' ? NativeTableDiagnostic : Kind extends 'table-row-list' ? readonly NativeTableRow[] : Kind extends 'table-cell-list' ? readonly NativeTableCell[] : Kind extends 'table-diagnostic-list' ? readonly NativeTableDiagnostic[] : Kind extends 'a11y-ref-list' ? readonly object[] : Kind extends 'subscription-disposer' ? () => void : Kind extends 'host-target' ? Element : Kind extends 'focus-scope-key' | 'focus-roving-key' | 'a11y-ref' ? object : NativeConfig;
+export type NativeLinkSnapshot = Readonly<{ href: string; target: string; rel: string; disabled: boolean }>;
+export type NativeLinkEvent = Readonly<{ href: string; target: string; rel: string; modified: boolean }>;
+export type NativeLink<Run> = { sync(config: NativeConfig): void; snapshot(): NativeLinkSnapshot | null; on(type: string, callback: (run: Run, event: NativeLinkEvent) => void): () => void };
+export type NativeAxisInputCancelReason = 'host-cancel' | 'lost-ownership' | 'target-detached' | 'target-replaced' | 'disposed' | 'disabled' | 'configuration-changed' | 'invalid-geometry' | 'basis-changed';
+export type NativeAxisInputSample = Readonly<{phase: 'start' | 'move' | 'end'; position: number; delta: number; totalDelta: number}> | Readonly<{phase: 'cancel'; reason: NativeAxisInputCancelReason}>;
+export type NativeAxisInputBinding = Readonly<{anatomy: NativeAnatomyFamily; inputRole: string; geometryRole: string; travelRole?: string; deltaBasisRole?: string}>;
+export interface NativeAxisInput<Run = unknown> { configure(binding: NativeAxisInputBinding): void; on(callback: (run: Run, sample: NativeAxisInputSample) => void): void; sync(patch: NativeConfig): void }
+export type NativeModuleCapability<Kind extends string, Run = unknown> = Kind extends 'control-label' ? NativeControlLabel<Run> : Kind extends 'control-label-handle' ? NativeControlLabelHandle : Kind extends 'control-label-request' ? NativeControlLabelRequest : Kind extends 'binding-disposer' ? () => void : Kind extends 'collection-snapshot' ? NativeConfig : Kind extends 'collection-snapshot-list' ? readonly NativeConfig[] : Kind extends 'focus-entry' ? NativeFocusEntry : Kind extends 'focus-roving' ? NativeFocusRoving : Kind extends 'focus-scope' ? NativeFocusScope : Kind extends 'anatomy-family' ? NativeAnatomyFamily : Kind extends 'anatomy-part' ? NativeAnatomyPart : Kind extends 'anatomy-parts' ? readonly NativeAnatomyPart[] : Kind extends 'anatomy-order' ? NativeAnatomyOrder : Kind extends 'collection' ? NativeCollection : Kind extends 'collection-item' ? NativeCollectionItem : Kind extends 'boundary' ? NativeBoundary<Run> : Kind extends 'hit-participation' ? NativeHitParticipation : Kind extends 'positioning' ? NativePositioning : Kind extends 'overlay' ? NativeOverlay : Kind extends 'scroll' ? NativeScroll : Kind extends 'scroll-axis' ? NativeScrollAxis : Kind extends 'scroll-follow' ? NativeScroll['endFollow'] : Kind extends 'text-control' ? NativeTextControl<Run> : Kind extends 'image-view' ? NativeImageView<Run> : Kind extends 'native-link' ? NativeLink<Run> : Kind extends 'axis-input' ? NativeAxisInput<Run> : Kind extends 'table-structure' ? NativeTableStructure : Kind extends 'table-states' ? NativeTableStructure['states'] : Kind extends 'table-snapshot' ? NativeTableSnapshot : Kind extends 'table-row' ? NativeTableRow : Kind extends 'table-cell' ? NativeTableCell : Kind extends 'table-diagnostic' ? NativeTableDiagnostic : Kind extends 'table-row-list' ? readonly NativeTableRow[] : Kind extends 'table-cell-list' ? readonly NativeTableCell[] : Kind extends 'table-diagnostic-list' ? readonly NativeTableDiagnostic[] : Kind extends 'a11y-ref-list' ? readonly object[] : Kind extends 'subscription-disposer' ? () => void : Kind extends 'host-target' ? Element : Kind extends 'focus-scope-key' | 'focus-roving-key' | 'a11y-ref' ? object : NativeConfig;
 export interface NativeModuleCapabilities<Run = unknown> {
   hasAuthoredControlLabelName?(): boolean;
   beginControlLabelName?(): () => void;
@@ -69,14 +82,18 @@ export interface NativeModuleCapabilities<Run = unknown> {
   subscribeControlLabelAnatomy?(callback: () => void): () => void;
   anatomy: NativeAnatomy<Run>; accessible: NativeAccessibleExtension; positioning: NativePositioning;
   asFocusEntry(): NativeFocusEntry; asFocusRoving(): NativeFocusRoving; asFocusScope(): NativeFocusScope; asCollection(): NativeCollection; asCollectionItem(): NativeCollectionItem;
-  asBoundary(): NativeBoundary<Run>; asHitParticipation(): NativeHitParticipation; asOverlay(): NativeOverlay; asScrollSurface(): NativeScroll; asTextControl(): NativeTextControl<Run>; asImageView(): NativeImageView<Run>; asTableStructure(role: string): NativeTableStructure;
+  asBoundary(): NativeBoundary<Run>; asHitParticipation(config?: NativeConfig): NativeHitParticipation; asOverlay(): NativeOverlay; asScrollSurface(): NativeScroll; asTextControl(): NativeTextControl<Run>; asImageView(): NativeImageView<Run>; asTableStructure(role: string): NativeTableStructure;
+  asNativeLink(): NativeLink<Run>;
+  asAxisInput(): NativeAxisInput<Run>;
   configureFocusable(config: NativeConfig): void; setFocusDisabled(value: boolean): void; setNavParticipation(value: string): void; setRovingStatus(status: NativeConfig): void; canFocus(): boolean; focus(options?: NativeFocusRequest): void; blur(): void;
   rootTag(): string | null; rootProperties(): Readonly<Record<string, string | number | boolean | null>>; projectAttributes(): Readonly<Record<string, string | null>>; portalTarget(): HTMLElement | null;
-  adoptControlState(): void; mount(): void; unmount(): void; refresh(): void; dispose(): void;
+  /** Host rendering policy; independent of physical attachment and without author authority. */
+  viewPolicy(): Readonly<{ retainWhenDetached: boolean; portal: boolean }>;
+  adoptControlState(): void; commitHost(): void; mount(): void; unmount(): void; refresh(): void; dispose(): void;
 }
 export interface NativeAdapterModuleOptions<Run> {
   ensureSetup(operation: string): void; ensureRuntime(operation: string): void; ensureEvent(operation: string): void;
-  isAlive(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T; getRun(): Run; getResolvedProps(): Readonly<Record<string, unknown>>; getRoot(): HTMLElement | null; getHost?(): HTMLElement | null;
+  isAlive(): boolean; isSetupComplete?(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T; getRun(): Run; getResolvedProps(): Readonly<Record<string, unknown>>; getRoot(): HTMLElement | null; getHost?(): HTMLElement | null;
   declarations: readonly { id: string; config: NativeConfig }[]; getLogicalParent(): object | null; identity: object;
   registerObservedState?<T extends boolean | string | number>(state: NativeObserved<T>): void;
   getExposes?(): Readonly<Record<string, unknown>>; setPresent?(value: boolean): void; requestHostUpdate?(): void; baseFocus?(): NativeFocusBase; getAccessibleRole?(): string | null;
@@ -114,8 +131,23 @@ const parts = new WeakMap<NativeAnatomyPart, Owner>();
 const targets = new WeakMap<HTMLElement, Owner>();
 const boundaryStacks = new WeakMap<Document, Owner[]>();
 const boundarySampleOwners = new WeakMap<object, Owner | null>();
+type NativeBoundaryPointerSequence = { members: Set<Owner>; sample?: NativeConfig; outside: Set<Owner>; dispatches: number };
+const boundaryPointerScopes = new WeakMap<Document, NativeBoundaryPointerSequence>();
+function nativeBoundaryOwner(document: Document, sample?: NativeConfig): Owner | null {
+  const native = sample?.nativeEvent;
+  const identity = native && (typeof native === 'object' || typeof native === 'function') ? native as object : sample;
+  if (identity && boundarySampleOwners.has(identity)) return boundarySampleOwners.get(identity) ?? null;
+  const stack = boundaryStacks.get(document) ?? [];
+  let selected: Owner | null = null;
+  for (let index = stack.length - 1; index >= 0; index--) {
+    const participant = stack[index], target = participant.target();
+    if (participant.alive() && target?.isConnected && target.ownerDocument === document) { selected = participant; break; }
+  }
+  if (identity) boundarySampleOwners.set(identity, selected);
+  return selected;
+}
 const modalLocks = new WeakMap<HTMLElement, { owners: Set<object>; overflow: string; overflowPriority: string; padding: string; paddingPriority: string }>();
-const hitClaims = new WeakMap<HTMLElement, { owners: Map<object, string>; value: string; priority: string }>();
+const hitClaims = new WeakMap<HTMLElement, { owners: Map<object, string>; value: string; priority: string; projectedValue?: string; projectedPriority?: string }>();
 const hostIds = new WeakMap<object, string>();
 let nextHostId = 1;
 type NativeTableCellInput = { ref: object; kind: 'headerCell' | 'cell'; headerKey?: string; headerKind?: unknown; headers: readonly string[]; rowSpan?: number; columnSpan?: number };
@@ -286,7 +318,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   let entryRootLease: HTMLElement | null = null;
   const nativeNotifications: (() => void)[] = [];
   let nativeNotifying = false;
-  const observed = <T extends boolean | string | number>(initial: T) => {
+  const observed = <T extends boolean | string | number>(initial: T, retained = false) => {
     let value = initial;
     const listeners = new Set<(event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void>();
     const handle: NativeObserved<T> = Object.freeze({
@@ -295,11 +327,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void) { alive(); const registration = (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => callback(event); listeners.add(registration); return () => listeners.delete(registration); },
     });
     terminalCleanups.push(() => listeners.clear());
-    return { handle, set(next: T) {
+    return { handle, set(next: T, reason: unknown = 'native-module') {
       if (Object.is(value, next)) return;
       const prev = value; value = next; const epoch = generation, viewRoot = root;
-      const event = { type: 'next' as const, prev, next, reason: 'native-module' };
-      ${emitRecordedNotification({ queue: 'nativeNotifications', draining: 'nativeNotifying', subscribers: 'listeners', alive: '!disposed && options.isAlive()', deliver: 'if (viewRoot !== null && viewRoot === root && epoch === generation && ready() && (options.isReady?.() ?? true)) options.invoke(() => subscriber(event))' })}
+      if (!(options.isSetupComplete?.() ?? true)) return;
+      const event = { type: 'next' as const, prev, next, reason };
+      ${emitRecordedNotification({ queue: 'nativeNotifications', draining: 'nativeNotifying', subscribers: 'listeners', alive: '!disposed && options.isAlive()', deliver: 'if (retained || viewRoot !== null && viewRoot === root && epoch === generation && ready() && (options.isReady?.() ?? true)) options.invoke(() => subscriber(event))' })}
     } };
   };
   const scopeActive = observed<boolean>(false), hasFocused = observed<boolean>(false), rovingActive = observed<boolean>(false), rovingHasFocused = observed<boolean>(false);
@@ -320,8 +353,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function declare(name: string) { setup('hook.' + name); hooks.add(name); }
   function listen(target: EventTarget, type: string, callback: (event: Event) => void, listenerOptions?: AddEventListenerOptions) {
     const epoch = generation;
-    const guarded = (event: Event) => { if (epoch === generation && ready() && (options.isReady?.() ?? true)) callback(event); };
-    target.addEventListener(type, guarded, listenerOptions); cleanups.push(() => target.removeEventListener(type, guarded, listenerOptions));
+    let live = true;
+    const guarded = (event: Event) => { if (live && epoch === generation && ready() && (options.isReady?.() ?? true)) callback(event); };
+    const release = () => { if (!live) return; live = false; target.removeEventListener(type, guarded, listenerOptions); const index = cleanups.indexOf(release); if (index >= 0) cleanups.splice(index, 1); };
+    target.addEventListener(type, guarded, listenerOptions); cleanups.push(release);
+    return release;
   }
   function styleProperty(target: HTMLElement, name: string, value: string) {
     const current = target.style.getPropertyValue(name);
@@ -335,7 +371,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function focusCandidates(roving: boolean, logical = false): Owner[] {
     const found: Owner[] = [];
     for (const candidate of owners.values()) {
-      if (candidate === owner || !candidate.alive() || !candidate.focusDeclared || candidate.focusConfig.disabled || (!(logical && roving) && candidate.focusConfig.navParticipation === 'none')) continue;
+      // Sequential Tab participation does not exclude a member from its roving group.
+      if (candidate === owner || !candidate.alive() || !candidate.focusDeclared || candidate.focusConfig.disabled || (!roving && candidate.focusConfig.navParticipation === 'none')) continue;
       const target = candidate.target();
       if (!logical && (!target?.isConnected || target.closest('[hidden],[inert],[data-pui-view-detached]'))) continue;
       if (roving) {
@@ -517,6 +554,16 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       && ancestor(participant, current => current.claims.get(family)?.role === 'root') === rootOwner) found.push(participant);
     return ordered ? found.sort(hostOrder) : found;
   }
+  function currentAnatomyPart(family: NativeAnatomyFamily, part: NativeAnatomyPart): Owner | null {
+    const participant = parts.get(part), rootOwner = domain(family, false);
+    return rootOwner && participant?.alive() && participant.claims.get(family)?.part === part &&
+      ancestor(participant, candidate => candidate.claims.get(family)?.role === 'root') === rootOwner ? participant : null;
+  }
+  function anatomyDescendants(family: NativeAnatomyFamily, part: NativeAnatomyPart, role: string): readonly NativeAnatomyPart[] {
+    const participant = currentAnatomyPart(family, part);
+    if (!participant) return [];
+    return anatomyOwners(family, role, true).filter((candidate) => candidate !== participant && descends(candidate, participant)).map((candidate) => candidate.claims.get(family)!.part);
+  }
   const anatomyVersions = new Map<object, { members: readonly Owner[]; version: number }>();
   const anatomyOrder: NativeAnatomyOrder = {
     version(family) { alive(); const members = anatomyOwners(family, undefined, true); const previous = anatomyVersions.get(family); if (!previous) { anatomyVersions.set(family, { members, version: 0 }); return 0; } if (members.length !== previous.members.length || members.some((member, index) => member !== previous.members[index])) { previous.members = members; ++previous.version; } return previous.version; },
@@ -532,17 +579,133 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       setup('anatomy.claim');
       if (!family?.roles[declaration.role] || claims.has(family)) throw new Error('[Anatomy] invalid/duplicate family role claim.');
       if (declaration.profile && (declaration.role !== 'root' || !family.profiles?.[declaration.profile])) throw new Error('[Anatomy] invalid root profile.');
-      const part: NativeAnatomyPart = Object.freeze({ role: declaration.role, hasExpose(key: string) { return Object.hasOwn(owner.exposes(), key); }, getExpose(key: string) { return owner.exposes()[key] ?? null; }, hasHook(name: string) { return hooks.has(name); } });
+      const exposesAvailable = (): boolean => owner.alive() && claims.get(family)?.part === part;
+      const part: NativeAnatomyPart = Object.freeze({ role: declaration.role, hasExpose(key: string) { return exposesAvailable() && Object.hasOwn(owner.exposes(), key); }, getExpose(key: string) { return exposesAvailable() ? owner.exposes()[key] ?? null : null; }, hasHook(name: string) { return hooks.has(name); } });
       claims.set(family, { family, ...declaration, part }); parts.set(part, owner);
     },
     has(family, role) { alive(); return domain(family, false) !== null && anatomyOwners(family, role).length > 0; },
     parts(family) { alive(); return anatomyOwners(family).map(participant => participant.claims.get(family)!.part); },
     partsOf(family, role) { alive(); return anatomyOwners(family, role).map(participant => participant.claims.get(family)!.part); },
+    descendantsOf(family, part, role) {
+      alive();
+      if (options.isSetupComplete?.() === false) throw new Error('[Anatomy] descendantsOf is runtime-only.');
+      return anatomyDescendants(family, part, role);
+    },
     subscribeParts(family, role, callback) {
       setup('anatomy.subscribeParts');
       let previous: readonly NativeAnatomyPart[] = [];
       const changed = () => { if (!domain(family, false)) return; const next = anatomyOrder.partsOf(family, role); if (next.length === previous.length && next.every((part, index) => part === previous[index])) return; previous = next; callback(options.getRun(), next); };
       topologySubscribers.add(changed); return () => { setup('anatomy.subscribeParts.off'); topologySubscribers.delete(changed); };
+    },
+  };
+  // Axis samples are host facts. Domain quantization, preview, commit and keyboard
+  // policy continue to execute in the authored source that registered this input.
+  type AxisHost = ReturnType<typeof createWebAxisInputHost>;
+  type AxisConfig = Parameters<AxisHost['attach']>[0]['config'];
+  type AxisTargets = { domain: Owner; input: HTMLElement; geometry: HTMLElement; travel?: HTMLElement;
+    deltaBasis?: readonly HTMLElement[]; owners: readonly Owner[]; parts: readonly NativeAnatomyPart[] };
+  let axisDeclared = false, axisBinding: NativeAxisInputBinding | null = null;
+  let axisConfig: AxisConfig = {axis:'horizontal',direction:'ltr',disabled:true,readOnly:false,reverse:false,contactBasis:'preserve-start',activation:'immediate'};
+  let axisHost: AxisHost | null = null, axisLease: ReturnType<AxisHost['attach']> | null = null;
+  let axisTargets: AxisTargets | null = null, axisEpoch = 0, axisDelivery = 0, axisActive = false;
+  const axisListeners: ((run: Run, sample: NativeAxisInputSample) => void)[] = [];
+  function axisAncestor(participant: Owner, family: NativeAnatomyFamily, role: string, rootOwner: Owner): Owner | null {
+    const visited = new Set<Owner>();
+    let current: Owner | undefined = participant;
+    while (current && !visited.has(current)) {
+      visited.add(current);
+      if (current.claims.get(family)?.role === role) return current;
+      if (current === rootOwner) return null;
+      const parent = current.parent(); current = parent ? owners.get(parent) : undefined;
+    }
+    return null;
+  }
+  function resolveAxisTargets(): AxisTargets | null {
+    const binding = axisBinding;
+    if (!binding || !ready() || claims.get(binding.anatomy)?.role !== binding.inputRole) return null;
+    const rootOwner = domain(binding.anatomy, false);
+    if (!rootOwner) return null;
+    const geometryOwner = axisAncestor(owner, binding.anatomy, binding.geometryRole, rootOwner);
+    const input = owner.target(), geometry = geometryOwner?.target();
+    if (!geometryOwner || !input?.isConnected || !geometry?.isConnected || input.ownerDocument !== geometry.ownerDocument) return null;
+    const participants = [owner, geometryOwner];
+    let travel: HTMLElement | undefined, deltaBasis: HTMLElement[] | undefined;
+    if (binding.travelRole !== undefined) {
+      const candidates = anatomyOwners(binding.anatomy, binding.travelRole, true).filter(participant => axisAncestor(participant, binding.anatomy, binding.geometryRole, rootOwner) === geometryOwner);
+      if (candidates.length !== 1) return null;
+      const target = candidates[0].target();
+      if (!target?.isConnected || target.ownerDocument !== input.ownerDocument) return null;
+      participants.push(candidates[0]); travel = target;
+    }
+    if (binding.deltaBasisRole !== undefined) {
+      const candidates = anatomyOwners(binding.anatomy, binding.deltaBasisRole, true).filter(participant => axisAncestor(participant, binding.anatomy, binding.geometryRole, rootOwner) === geometryOwner);
+      if (!candidates.length) return null;
+      const targets = candidates.map(participant => participant.target());
+      if (targets.some(target => !target?.isConnected || target.ownerDocument !== input.ownerDocument)) return null;
+      participants.push(...candidates); deltaBasis = targets as HTMLElement[];
+    }
+    return {domain:rootOwner,input,geometry,travel,deltaBasis,owners:participants,parts:participants.map(participant => participant.claims.get(binding.anatomy)!.part)};
+  }
+  function sameAxisTargets(next: AxisTargets | null): boolean {
+    return !!next && !!axisTargets && next.domain === axisTargets.domain && next.input === axisTargets.input && next.geometry === axisTargets.geometry && next.travel === axisTargets.travel &&
+      next.owners.length === axisTargets.owners.length && next.owners.every((participant,index) => participant === axisTargets!.owners[index] && next.parts[index] === axisTargets!.parts[index]) &&
+      (next.deltaBasis?.length ?? 0) === (axisTargets.deltaBasis?.length ?? 0) && (next.deltaBasis?.every((target,index) => target === axisTargets!.deltaBasis?.[index]) ?? true);
+  }
+  function dispatchAxis(sample: NativeAxisInputSample) {
+    if (disposed || !options.isAlive() || !axisListeners.length) return;
+    const delivery = ++axisDelivery, epoch = axisEpoch;
+    options.invoke(() => { for (const listener of [...axisListeners]) {
+      if (delivery !== axisDelivery || epoch !== axisEpoch || disposed || !options.isAlive()) break;
+      listener(options.getRun(), sample);
+    } });
+  }
+  function disconnectAxis(reason: NativeAxisInputCancelReason): number {
+    const epoch = ++axisEpoch, lease = axisLease, active = axisActive;
+    axisLease = null; axisTargets = null; axisActive = false;
+    lease?.dispose();
+    if (active) dispatchAxis(Object.freeze({phase:'cancel',reason}));
+    return epoch;
+  }
+  function receiveAxis(epoch: number) {
+    return (sample: NativeAxisInputSample) => {
+      if (epoch !== axisEpoch || !ready() || !(options.isReady?.() ?? true)) return;
+      if (!sameAxisTargets(resolveAxisTargets())) { refreshAxis(); return; }
+      if (sample.phase === 'start') { if (axisActive || axisConfig.disabled || axisConfig.readOnly) return; axisActive = true; }
+      else { if (!axisActive) return; if (sample.phase === 'end' || sample.phase === 'cancel') axisActive = false; }
+      dispatchAxis(sample);
+    };
+  }
+  function refreshAxis() {
+    if (!axisDeclared || disposed) return;
+    const targets = resolveAxisTargets();
+    const binding = targets && {inputTarget:targets.input,geometryTarget:targets.geometry,travelTarget:targets.travel,deltaBasisTargets:targets.deltaBasis,config:axisConfig,onSample:receiveAxis(axisEpoch)};
+    if (axisLease && binding && sameAxisTargets(targets)) { axisLease.update(binding); return; }
+    const epoch = disconnectAxis(targets ? 'target-replaced' : root ? 'target-detached' : 'disposed');
+    if (!targets || !binding || epoch !== axisEpoch || !ready()) return;
+    axisTargets = targets;
+    axisHost ??= createWebAxisInputHost();
+    const lease = axisHost.attach({...binding,onSample:receiveAxis(epoch)});
+    if (epoch !== axisEpoch || !ready()) lease.dispose(); else axisLease = lease;
+  }
+  const axisInput: NativeAxisInput<Run> = {
+    configure(binding) {
+      setup('axisInput.configure');
+      if (axisBinding) throw new Error('[AxisInput] Input anatomy may be configured only once.');
+      for (const role of [binding.inputRole,binding.geometryRole,binding.travelRole,binding.deltaBasisRole])
+        if (role !== undefined && !binding.anatomy.roles[role]) throw new Error('[AxisInput] Input and geometry roles must belong to the anatomy family.');
+      axisBinding = Object.freeze({...binding});
+      topologySubscribers.add(refreshAxis);
+    },
+    on(listener) { setup('axisInput.on'); axisListeners.push(listener); },
+    sync(patch) {
+      runtime('axisInput.sync');
+      for (const key of ['disabled','readOnly','reverse']) if (patch[key] !== undefined && typeof patch[key] !== 'boolean') throw new TypeError('[AxisInput] Invalid boolean input policy.');
+      if (patch.axis !== undefined && patch.axis !== 'horizontal' && patch.axis !== 'vertical' || patch.direction !== undefined && patch.direction !== 'ltr' && patch.direction !== 'rtl' ||
+        patch.activation !== undefined && patch.activation !== 'immediate' && patch.activation !== 'directional' || patch.contactBasis !== undefined && patch.contactBasis !== 'preserve-start' && patch.contactBasis !== 'cancel-on-extent-change') throw new TypeError('[AxisInput] Invalid input policy.');
+      const next = {...axisConfig};
+      for (const key of Object.keys(next) as (keyof AxisConfig)[]) if (patch[key] !== undefined) (next as Record<string,unknown>)[key] = patch[key];
+      if ((Object.keys(next) as (keyof AxisConfig)[]).every(key => next[key] === axisConfig[key])) return;
+      axisConfig = Object.freeze(next); refreshAxis();
     },
   };
   let collectionConfig: NativeConfig | null = null, itemConfig: NativeConfig | null = null;
@@ -637,9 +800,15 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     topologySubscribers.add(syncCollection);
     return collectionItem;
   }
-  let boundaryObserved = false, stackActive = true;
+  let boundaryObserved = false, boundaryFocusObserved = false, stackActive = false, boundaryRevision = 0;
+  let boundaryStackDocument: Document | null = null;
+  let boundaryPointerScope: Document | null = null, boundaryPointerSequence: NativeBoundaryPointerSequence | null = null;
   let boundaryConfig: NativeConfig = {};
-  const boundaryRegions = new Map<object, { target: unknown; config: NativeConfig }>(), hitRegions = new Map<object, { target: unknown; config: NativeConfig }>();
+  const boundaryRegions = new Map<object, { target: unknown; config: NativeConfig }>();
+  let boundaryRootReplacement: { target: unknown } | null = null;
+  let hitRegions = new Map<object, { target: unknown; config: NativeConfig }>();
+  const hitSelfTarget = Object.freeze({});
+  let hitRetired = false;
   const outsideListeners = new Set<(event: NativeConfig) => void>();
   let hitConfig: NativeConfig = { mode: 'participating' };
   const hitApplied = new Set<HTMLElement>();
@@ -647,45 +816,82 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const sampleTarget = sample?.target ?? (sample?.nativeEvent as Event | undefined)?.target;
     if ([...boundaryRegions.values()].some(region => Object.is(region.target, sampleTarget))) return 'inside';
     if (!sampleTarget || typeof sampleTarget !== 'object' || typeof (sampleTarget as Node).nodeType !== 'number') return 'unknown';
-    let known = !!root;
-    const boundaryRoot = options.getHost?.() ?? root;
+    const boundaryRoot = boundaryRootReplacement ? targetOf(boundaryRootReplacement.target) : options.getHost?.() ?? root;
+    let count = boundaryRoot ? 1 : 0, allKnown = true;
     if (boundaryRoot && contains(boundaryRoot, sampleTarget as Node)) return 'inside';
     for (const region of boundaryRegions.values()) {
+      count++;
       const target = targetOf(region.target);
-      if (!target) { known = false; continue; }
-      known = true;
+      if (!target) { allKnown = false; continue; }
       if (contains(target, sampleTarget as Node)) return 'inside';
     }
-    return known ? 'outside' : 'unknown';
+    return count > 0 && allKnown ? 'outside' : 'unknown';
   }
-  function notifyOutside(sample?: NativeConfig) {
-    const classification = classify(sample);
+  function notifyOutside(sample?: NativeConfig, observation?: 'pointer.press' | 'focus.move', ownerSample = sample) {
     if (!ready() || !(options.isReady?.() ?? true)) return 'unknown';
+    const epoch = generation, revision = boundaryRevision;
+    const selected = stackActive ? nativeBoundaryOwner(root!.ownerDocument, ownerSample) : null;
+    const classification = classify(sample);
+    if (epoch !== generation || revision !== boundaryRevision || !ready() || !(options.isReady?.() ?? true)) return 'unknown';
     if (classification !== 'outside') return classification;
-    const native = sample?.nativeEvent;
-    const identity = native && typeof native === 'object' ? native as object : sample;
-    const stack = boundaryStacks.get(root!.ownerDocument) ?? [];
-    let selected = identity && boundarySampleOwners.has(identity) ? boundarySampleOwners.get(identity)! : stack[stack.length - 1] ?? null;
-    if (identity && !boundarySampleOwners.has(identity)) boundarySampleOwners.set(identity, selected);
     if (stackActive && selected && selected !== owner) return 'unknown';
-    const event = Object.freeze({ classification, sample }), epoch = generation;
-    for (const callback of [...outsideListeners]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (outsideListeners.has(callback)) options.invoke(() => callback(event)); }
+    // Claim this press before an outside subscriber can synchronously focus or
+    // close/reopen another owner in the same input scope.
+    if (observation === 'pointer.press') boundaryPointerSequence?.outside.add(owner);
+    const event = Object.freeze({ classification, ...(observation ? { observation } : {}), sample });
+    for (const callback of [...outsideListeners]) { if (epoch !== generation || revision !== boundaryRevision || !ready() || !(options.isReady?.() ?? true)) break; if (outsideListeners.has(callback)) options.invoke(() => callback(event)); }
     return classification;
   }
+  function leaveBoundaryPointerScope() {
+    const scope = boundaryPointerScope, sequence = boundaryPointerSequence;
+    boundaryPointerScope = null; boundaryPointerSequence = null;
+    if (!scope || !sequence) return;
+    sequence.members.delete(owner);
+    if (!sequence.members.size && !sequence.dispatches && boundaryPointerScopes.get(scope) === sequence) boundaryPointerScopes.delete(scope);
+  }
+  function enterBoundaryPointerScope(document: Document) {
+    leaveBoundaryPointerScope();
+    let sequence = boundaryPointerScopes.get(document);
+    if (!sequence) { sequence = { members: new Set(), outside: new Set(), dispatches: 0 }; boundaryPointerScopes.set(document, sequence); }
+    boundaryPointerScope = document; boundaryPointerSequence = sequence; sequence.members.add(owner);
+  }
+  function withBoundaryPointerScope(callback: (sequence: NativeBoundaryPointerSequence) => void) {
+    const scope = boundaryPointerScope, sequence = boundaryPointerSequence;
+    if (!scope || !sequence || !ready()) return;
+    sequence.dispatches++;
+    try { callback(sequence); }
+    finally { sequence.dispatches--; if (!sequence.members.size && !sequence.dispatches && boundaryPointerScopes.get(scope) === sequence) boundaryPointerScopes.delete(scope); }
+  }
+  function sampleBoundaryFocus(native: Event, document: Document): NativeConfig | null {
+    const FocusEventType = document.defaultView?.FocusEvent;
+    if (!FocusEventType || !(native instanceof FocusEventType) || native.type !== 'focusin') return null;
+    const target = native.composedPath()[0] ?? native.target;
+    if (!isElement(target) || target.ownerDocument !== document) return null;
+    let active = document.activeElement;
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+    if (!active || (active !== target && !contains(target, active))) return null;
+    return Object.freeze({ type: 'focusin', target: active, nativeEvent: native });
+  }
+  function retireBoundaryStack() {
+    const document = boundaryStackDocument; boundaryStackDocument = null;
+    if (!document) return;
+    const stack = boundaryStacks.get(document), index = stack?.indexOf(owner) ?? -1;
+    if (index >= 0) stack!.splice(index, 1);
+  }
   function reconcileStack() {
-    if (!root) return;
-    const stack = boundaryStacks.get(root.ownerDocument) ?? [];
-    const index = stack.indexOf(owner), active = stackActive && (__nativeFeature('overlay') && hooks.has('asOverlay') ? overlayOpen.handle.get() : hooks.has('asBoundary'));
-    if (!active && index >= 0) stack.splice(index, 1);
-    if (active && index < 0) stack.push(owner);
-    boundaryStacks.set(root.ownerDocument, stack);
+    const document = root?.ownerDocument ?? boundaryStackDocument;
+    if (boundaryStackDocument && (boundaryStackDocument !== document || !stackActive)) retireBoundaryStack();
+    if (!document || !stackActive) return;
+    const stack = boundaryStacks.get(document) ?? [];
+    if (!stack.includes(owner)) stack.push(owner);
+    boundaryStacks.set(document, stack); boundaryStackDocument = document;
   }
   const boundary: NativeBoundary<Run> = {
     configure(config) { setup('boundary.configure'); if (config.meta && typeof config.meta !== 'object') throw new TypeError('[Boundary] metadata must be a record.'); boundaryConfig = { ...boundaryConfig, ...config }; },
-    observe(type) { setup('boundary.observe'); if (type !== 'pointer.press') throw new Error('[Boundary] only pointer.press observation is portable.'); boundaryObserved = true; reconcileStack(); },
-    setStackActive(value) { alive(); stackActive = value; reconcileStack(); },
-    registerRegion(target, config = {}) { alive(); const token = {}; boundaryRegions.set(token, { target, config }); return () => { boundaryRegions.delete(token); }; },
-    unregisterRegion(target) { alive(); for (const [token, region] of boundaryRegions) if (Object.is(region.target, target)) boundaryRegions.delete(token); },
+    observe(type) { setup('boundary.observe'); if (type === 'pointer.press') boundaryObserved = true; else if (type === 'focus.move') boundaryFocusObserved = true; else throw new Error('[Boundary] unsupported observation.'); },
+    setStackActive(value) { alive(); if (value) retireBoundaryStack(); stackActive = value; reconcileStack(); },
+    registerRegion(target, config = {}) { alive(); const token = {}; boundaryRegions.set(token, { target, config }); boundaryRevision++; return () => { if (boundaryRegions.delete(token)) boundaryRevision++; }; },
+    unregisterRegion(target) { alive(); for (const [token, region] of boundaryRegions) if (Object.is(region.target, target)) { boundaryRegions.delete(token); boundaryRevision++; } },
     classify(sample) { alive(); return classify(sample); },
     notify(sample) { alive(); return notifyOutside(sample); },
     subscribeOutside(callback) { alive(); outsideListeners.add(callback); return () => { outsideListeners.delete(callback); }; },
@@ -695,16 +901,21 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (!claims) return;
     claims.owners.delete(options.identity);
     if (!claims.owners.size) {
-      if (claims.value) target.style.setProperty('pointer-events', claims.value, claims.priority); else target.style.removeProperty('pointer-events');
+      restoreHit(target, claims);
       hitClaims.delete(target); target.removeAttribute('data-pui-hit-participation');
     }
     hitApplied.delete(target);
+  }
+  function restoreHit(target: HTMLElement, claims: { value: string; priority: string; projectedValue?: string; projectedPriority?: string }) {
+    if (claims.projectedValue === undefined || target.style.getPropertyValue('pointer-events') !== claims.projectedValue || target.style.getPropertyPriority('pointer-events') !== claims.projectedPriority) return;
+    if (claims.value) target.style.setProperty('pointer-events', claims.value, claims.priority); else target.style.removeProperty('pointer-events');
+    claims.projectedValue = undefined; claims.projectedPriority = undefined;
   }
   function projectHit() {
     if (!ready()) return;
     const next = new Map<HTMLElement, string>();
     if (hooks.has('asHitParticipation')) next.set(root!, String(hitConfig.mode));
-    for (const region of hitRegions.values()) { const target = targetOf(region.target); if (target) next.set(target, String(region.config.mode ?? hitConfig.mode)); }
+    for (const region of hitRegions.values()) { const target = region.target === hitSelfTarget ? root : targetOf(region.target); if (target) next.set(target, String(region.config.mode)); }
     for (const [target, mode] of next) for (const [identity, other] of hitClaims.get(target)?.owners ?? [])
       if (identity !== options.identity && other !== mode) throw new Error('[HitParticipation] conflicting modes on a shared target.');
     for (const target of [...hitApplied]) if (!next.has(target)) releaseHit(target);
@@ -713,14 +924,48 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (!claims) { claims = { owners: new Map(), value: target.style.getPropertyValue('pointer-events'), priority: target.style.getPropertyPriority('pointer-events') }; hitClaims.set(target, claims); }
       claims.owners.set(options.identity, mode); hitApplied.add(target);
       target.setAttribute('data-pui-hit-participation', mode);
-      if (mode === 'participating') { if (claims.value) target.style.setProperty('pointer-events', claims.value, claims.priority); else target.style.removeProperty('pointer-events'); }
-      else target.style.setProperty('pointer-events', 'none');
+      if (mode === 'participating') restoreHit(target, claims);
+      else {
+        const value = target.style.getPropertyValue('pointer-events'), priority = target.style.getPropertyPriority('pointer-events');
+        if (claims.projectedValue !== undefined && (value !== claims.projectedValue || priority !== claims.projectedPriority)) { claims.value = value; claims.priority = priority; }
+        target.style.setProperty('pointer-events', 'none'); claims.projectedValue = 'none'; claims.projectedPriority = '';
+      }
     }
   }
+  function selfHitMode(): string {
+    let mode = String(hitConfig.mode);
+    for (const region of hitRegions.values()) if (region.target === hitSelfTarget || root && targetOf(region.target) === root) mode = String(region.config.mode);
+    return mode;
+  }
+  function replaceHitRegions(next: Map<object, { target: unknown; config: NativeConfig }>) {
+    const previous = hitRegions; hitRegions = next;
+    try { projectHit(); }
+    catch (error) { hitRegions = previous; throw error; }
+  }
+  function registerHitRegion(target: unknown, config: NativeConfig = {}) {
+    alive();
+    if (hitRetired) throw new Error('[HitParticipation] self region owner is disposed.');
+    // Snapshot caller fields once before choosing the current declarations: a
+    // getter may acquire another lease or retire this owner synchronously.
+    const role = config.role, mode = config.mode, inset = config.staticHitInset, meta = config.meta;
+    alive();
+    if (hitRetired) throw new Error('[HitParticipation] self region owner is disposed.');
+    if (mode !== undefined && !['participating','disabled','passthrough'].includes(String(mode))) throw new Error('[HitParticipation] invalid mode.');
+    if (inset != null) throw new Error('[HitParticipation] native source v1 does not support staticHitInset.');
+    const token = {}, snapshot = Object.freeze({ role, mode: mode ?? hitConfig.mode, meta });
+    const next = new Map(hitRegions); next.set(token, { target, config: snapshot });
+    replaceHitRegions(next);
+    return () => {
+      if (!hitRegions.has(token)) return;
+      const next = new Map(hitRegions); next.delete(token);
+      replaceHitRegions(next);
+    };
+  }
   const hit: NativeHitParticipation = {
-    configure(config) { setup('hitParticipation.configure'); if (config.mode && !['participating','disabled','passthrough'].includes(String(config.mode))) throw new Error('[HitParticipation] invalid mode.'); hitConfig = { ...hitConfig, ...config }; },
-    registerRegion(target, config = {}) { alive(); const token = {}; hitRegions.set(token, { target, config }); projectHit(); return () => { hitRegions.delete(token); if (!disposed && options.isAlive()) projectHit(); }; },
-    unregisterRegion(target) { alive(); for (const [token, region] of hitRegions) if (Object.is(region.target, target)) hitRegions.delete(token); projectHit(); },
+    configure(config) { setup('hitParticipation.configure'); const mode = config.mode, inset = config.staticHitInset, debugLabel = config.debugLabel, meta = config.meta; if (mode !== undefined && !['participating','disabled','passthrough'].includes(String(mode))) throw new Error('[HitParticipation] invalid mode.'); if (inset != null) throw new Error('[HitParticipation] native source v1 does not support staticHitInset.'); hitConfig = Object.freeze({ mode: mode ?? hitConfig.mode, debugLabel: debugLabel ?? hitConfig.debugLabel, meta: meta ? Object.freeze({ ...(hitConfig.meta as Record<string, unknown> | undefined), ...(meta as Record<string, unknown>) }) : hitConfig.meta }); },
+    registerSelfRegion(config) { return registerHitRegion(hitSelfTarget, config); },
+    registerRegion: registerHitRegion,
+    unregisterRegion(target) { alive(); const next = new Map(hitRegions); for (const [token, region] of next) if (Object.is(region.target, target)) next.delete(token); replaceHitRegions(next); },
   };
   let explicitId: string | { get(): string | null | undefined } | undefined, accessibleName: string | { get(): string | null | undefined } | undefined, accessibleDescription: string | { get(): string | null | undefined } | undefined, accessibleLevel: number | { get(): number } | undefined;
   let accessibleTree: NativeConfig = {};
@@ -775,6 +1020,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     },
     id(value) { setup('accessible.id'); explicitId = value; watchAccessible('id', value); const current = readValue(value); if (typeof current === 'string' && current) hostIds.set(options.identity, current); },
     name(value) { setup('accessible.name'); accessibleName = value; watchAccessible('name', value); },
+    nameFromContent() { setup('accessible.nameFromContent'); accessibleName = undefined; watchAccessible('name', undefined); },
     description(value) { setup('accessible.description'); accessibleDescription = value; watchAccessible('description', value); },
     relation(kind, spec) {
       setup('accessible.relation');
@@ -870,12 +1116,75 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   }
   const textDeclaration = options.declarations.find(declaration => declaration.id === 'text-control' || declaration.id === '@proto.ui/text-control/declaration');
   const imageDeclaration = options.declarations.find(declaration => declaration.id === 'image-view' || declaration.id === '@proto.ui/image-view/declaration');
+  const nativeLinkDeclaration = options.declarations.find(declaration => declaration.id === '@proto.ui/native-link/declaration');
   if (__nativeFeature('text') && __nativeFeature('image') && textDeclaration && imageDeclaration) throw new Error('[Modules] one physical Root cannot be both a text control and an image.');
+  if (__nativeFeature('native-link') && nativeLinkDeclaration && (__nativeFeature('text') && textDeclaration || __nativeFeature('image') && imageDeclaration)) throw new Error('[NativeLink] one physical Root cannot combine native navigation with text or image control.');
   if (__nativeFeature('text') && textDeclaration && (textDeclaration.config.content !== 'plain-text' || textDeclaration.config.engine !== 'host' || !['single','multiline'].includes(String(textDeclaration.config.lineMode))))
     throw new Error('[TextControl] unsupported physical declaration.');
   const textListeners = new Map<string, Set<(run: Run, event: NativeTextEvent) => void>>();
+  let nativeLinkDeclared = false;
+  let nativeLinkConfig: NativeLinkSnapshot = Object.freeze({ href: '', target: '', rel: '', disabled: false });
+  const nativeLinkListeners = new Set<(run: Run, event: NativeLinkEvent) => void>();
+  const nativeLinkTasks = new Set<ReturnType<typeof setTimeout>>();
+  function normalizeNativeLink(config: NativeConfig): NativeLinkSnapshot {
+    let href = typeof config.href === 'string' ? config.href.trim() : '';
+    if (/[\u0000-\u001f\u007f]/.test(href)) href = '';
+    const scheme = /^([a-z][a-z\d+.-]*):/i.exec(href)?.[1].toLowerCase();
+    if (scheme && !['http', 'https', 'mailto', 'tel', 'sms', 'ftp', 'ftps'].includes(scheme)) href = '';
+    let target = typeof config.target === 'string' ? config.target : '';
+    if (/[\u0000-\u0020\u007f<>]/.test(target)) target = '';
+    const rel = (typeof config.rel === 'string' ? config.rel : '').split(/\s+/).filter(Boolean);
+    if (target.toLowerCase() === '_blank' && !rel.some(token => token.toLowerCase() === 'noopener')) rel.push('noopener');
+    return Object.freeze({ href, target, rel: rel.join(' '), disabled: config.disabled === true });
+  }
+  const nativeLink: NativeLink<Run> = {
+    sync(config) {
+      runtime('nativeLink.sync');
+      const next = normalizeNativeLink(config);
+      if (next.href !== nativeLinkConfig.href || next.target !== nativeLinkConfig.target || next.rel !== nativeLinkConfig.rel || next.disabled !== nativeLinkConfig.disabled) nativeLinkConfig = next;
+      projectModuleAttributes(); requestPresentation();
+    },
+    snapshot() { alive(); return nativeLinkDeclared ? nativeLinkConfig : null; },
+    on(type, callback) {
+      setup('nativeLink.on');
+      if (type !== 'navigate') throw new Error('[NativeLink] only navigate observations are supported.');
+      nativeLinkListeners.add(callback);
+      return () => { setup('nativeLink.off'); nativeLinkListeners.delete(callback); };
+    },
+  };
+  function attachNativeLink() {
+    if (!nativeLinkDeclared || !root) return;
+    const anchor = root, epoch = generation;
+    if (anchor.localName !== 'a') throw new Error('[NativeLink] renderer did not bind the required anchor Root.');
+    const current = () => epoch === generation && root === anchor && targets.get(anchor) === owner && ready();
+    const activate = (native: Event) => {
+      const event = native as MouseEvent;
+      if (!current()) return;
+      const nearest = event.composedPath().find(node => (node as Element)?.localName === 'a');
+      if (nearest && nearest !== anchor) return;
+      if (nativeLinkConfig.disabled || !nativeLinkConfig.href) { event.preventDefault(); return; }
+      if (event.defaultPrevented || (event.type === 'click' ? event.button !== 0 : event.button !== 1)) return;
+      const config = nativeLinkConfig;
+      const observation = Object.freeze({ href: config.href, target: config.target, rel: config.rel, modified: event.button === 1 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey });
+      const task = setTimeout(() => {
+        nativeLinkTasks.delete(task);
+        if (!current() || event.defaultPrevented || nativeLinkConfig !== config) return;
+        options.invoke(() => {
+          for (const listener of [...nativeLinkListeners]) {
+            if (!current()) break;
+            if (nativeLinkListeners.has(listener)) listener(options.getRun(), observation);
+          }
+        });
+      }, 0);
+      nativeLinkTasks.add(task);
+    };
+    listen(anchor, 'click', activate);
+    listen(anchor, 'auxclick', activate);
+  }
   let textDeclared = false, textInitialized = false, textValue = '', textComposing = false, textMode = 'uncontrolled', textEpoch = 0;
   const textCleanups: (() => void)[] = [];
+  let textEventGeneration = 0;
+  let textCallbackPrelude: { epoch: number } | null = null;
   let textPatch: NativeConfig = {};
   let queueTextSelection: (() => void) | null = null;
   let textObservation: { epoch: number; lease: number; ownerValue: string } | null = null;
@@ -893,30 +1202,30 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       return Object.freeze({ start: canonicalText(source.slice(0, start)).length, end: canonicalText(source.slice(0, end)).length, direction: direction as NativeTextSelection['direction'] });
     } catch { return null; }
   }
-  function restoreTextValue(target: HTMLInputElement | HTMLTextAreaElement) {
-    if (target.value === textValue || textComposing) return;
+  function restoreTextValue(target: HTMLInputElement | HTMLTextAreaElement, initialize = false) {
+    if ((!initialize && target.value === textValue) || textComposing || textCallbackPrelude?.epoch === generation) return;
     const selection = readTextSelection(target, target.value);
     const top = target.scrollTop, left = target.scrollLeft;
     target.value = textValue;
     if (selection) target.setSelectionRange(Math.min(selection.start, textValue.length), Math.min(selection.end, textValue.length), selection.direction);
     target.scrollTop = top; target.scrollLeft = left;
   }
-  function applyText(restoreValue = false) {
+  function applyText(restoreValue = false, initialize = false) {
     if (!ready() || !textDeclared) return;
     if (root!.localName !== 'input' && root!.localName !== 'textarea') throw new Error('[TextControl] renderer did not bind the required physical Root.');
     const target = root as HTMLInputElement | HTMLTextAreaElement;
     if (target.localName === 'input' && !['text','search','tel','password'].includes((target as HTMLInputElement).type)) throw new Error('[TextControl] incompatible input sanitization.');
     for (const [key, value] of Object.entries(textPatch)) {
       if (['value','valueMode','defaultValue'].includes(key)) continue;
-      if (['disabled','readOnly','required'].includes(key)) { Reflect.set(target, key, value); continue; }
-      if (key === 'rows' && target.localName === 'textarea') { Reflect.set(target, key, Math.max(1, Math.trunc(Number(value)))); continue; }
-      if (key === 'minLength' || key === 'maxLength') { if (Number(value) < 0) target.removeAttribute(key.toLowerCase()); else Reflect.set(target, key, Math.trunc(Number(value))); continue; }
-      if (['placeholder','name','autoComplete','inputMode','enterKeyHint','wrap'].includes(key)) { if (value === '') target.removeAttribute(key.toLowerCase()); else target.setAttribute(key.toLowerCase(), String(value)); }
+      if (['disabled','readOnly','required'].includes(key) && typeof value === 'boolean') { Reflect.set(target, key, value); continue; }
+      if (key === 'rows' && target.localName === 'textarea' && typeof value === 'number' && Number.isFinite(value)) { Reflect.set(target, key, Math.max(1, Math.trunc(value))); continue; }
+      if ((key === 'minLength' || key === 'maxLength') && typeof value === 'number' && Number.isFinite(value)) { if (value < 0) target.removeAttribute(key.toLowerCase()); else Reflect.set(target, key, Math.trunc(value)); continue; }
+      if (['placeholder','name','autoComplete','inputMode','enterKeyHint','wrap'].includes(key) && typeof value === 'string') { if (value === '') target.removeAttribute(key.toLowerCase()); else target.setAttribute(key.toLowerCase(), value); }
     }
     if (typeof textPatch.defaultValue === 'string' && target.defaultValue !== textPatch.defaultValue) target.defaultValue = canonicalText(textPatch.defaultValue);
     // Observations may refresh semantic state while an editing callback owns a
     // native candidate. Attribute refresh must not commit or reject that candidate.
-    if (restoreValue) restoreTextValue(target);
+    if (restoreValue) restoreTextValue(target, initialize);
     queueTextSelection?.();
   }
   const textControl: NativeTextControl<Run> = {
@@ -932,8 +1241,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (textDeclaration?.config.lineMode === 'single' && (patch.rows !== undefined || patch.wrap !== undefined)) throw new Error('[TextControl] rows/wrap require multiline declaration.');
       if (!textInitialized) { textMode = String(patch.valueMode ?? 'uncontrolled'); if (!['controlled','uncontrolled'].includes(textMode)) throw new Error('[TextControl] invalid value mode.'); textValue = canonicalText(String(textMode === 'controlled' ? patch.value ?? '' : patch.defaultValue ?? '')); textInitialized = true; }
       textPatch = { ...textPatch, ...patch, valueMode: textMode,
-        ...(typeof patch.value === 'string' ? { value: canonicalText(patch.value) } : {}),
-        ...(typeof patch.defaultValue === 'string' ? { defaultValue: canonicalText(patch.defaultValue) } : {}) };
+        value: typeof patch.value === 'string' ? canonicalText(patch.value) : textPatch.value,
+        defaultValue: typeof patch.defaultValue === 'string' ? canonicalText(patch.defaultValue) : textPatch.defaultValue };
       if (textMode === 'controlled') textValue = String(textPatch.value ?? '');
       // A real canonical transition retires the prior candidate window, even if
       // a later explicit transition returns to its original string value.
@@ -942,10 +1251,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     },
     resetValue(value) {
       runtime('textControl.resetValue');
-      if (!textDeclared || !textInitialized || !ready() || value !== undefined && typeof value !== 'string') return false;
+      if (!textDeclared || !textInitialized || !ready() || !(options.isReady?.() ?? true) || value !== undefined && typeof value !== 'string') return false;
       const controlled = textMode === 'controlled';
       if (!controlled) textValue = canonicalText(value ?? String(textPatch.defaultValue ?? ''));
-      textComposing = false;
+      ++textEventGeneration; textCallbackPrelude = null; textComposing = false;
       attachText(); requestPresentation();
       return !controlled;
     },
@@ -954,7 +1263,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function attachText() {
     retireText();
     if (!textDeclared || !ready()) return;
-    applyText(true);
+    applyText(true, true);
     const target = root as HTMLInputElement | HTMLTextAreaElement, epoch = generation, lease = textEpoch;
     let lastSelection: string | undefined, selectionQueued = false;
     const current = () => lease === textEpoch && epoch === generation && ready() && root === target && (options.isReady?.() ?? true);
@@ -987,6 +1296,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     });
     for (const type of ['input','change','compositionstart','compositionupdate','compositionend']) bind(target, type, native => {
       const editing = native as InputEvent;
+      const eventGeneration = ++textEventGeneration;
       if (type === 'compositionstart' || type === 'input' && editing.isComposing) textComposing = true;
       if (type === 'compositionend') textComposing = false;
       const source = target.value, value = canonicalText(source);
@@ -995,9 +1305,31 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       const previous = textObservation;
       const observation = textMode === 'controlled' && ['input','change','compositionend'].includes(type) && value !== textValue ? { epoch, lease, ownerValue: textValue } : null;
       if (observation) textObservation = observation;
-      try { for (const callback of [...textListeners.get(type) ?? []]) { if (!current()) break; options.invoke(() => callback(options.getRun(), event)); } }
-      finally { if (observation && textObservation === observation) textObservation = previous; }
-      if (textMode === 'controlled' && (type === 'compositionend' || (type === 'input' || type === 'change') && !textComposing)) queueMicrotask(() => { if (current()) applyText(true); });
+      const eventCurrent = () => current() && eventGeneration === textEventGeneration;
+      const inCurrentCallback = (callback: () => void) => {
+        const previousPrelude = textCallbackPrelude, prelude = { epoch };
+        // Reconcile pending Props without letting the callback prelude overwrite
+        // the native candidate. The observation window then owns the candidate.
+        if (type !== 'change') textCallbackPrelude = prelude;
+        const release = () => { if (textCallbackPrelude === prelude) textCallbackPrelude = previousPrelude; };
+        try { options.invoke(() => { release(); if (eventCurrent()) callback(); }); }
+        finally { release(); }
+      };
+      try {
+        inCurrentCallback(() => {
+          const listeners = textListeners.get(type);
+          for (const callback of [...listeners ?? []]) {
+            if (!eventCurrent()) break;
+            if (listeners?.has(callback)) callback(options.getRun(), event);
+          }
+        });
+        if (textMode === 'controlled' && (type === 'compositionend' || (type === 'input' || type === 'change') && !event.composing)) queueMicrotask(() => {
+          if (eventCurrent()) inCurrentCallback(() => applyText(true));
+        });
+      } finally {
+        if (observation && textObservation === observation) textObservation = previous;
+        if (eventCurrent()) textComposing = event.composing;
+      }
     });
     queueTextSelection();
   }
@@ -1124,7 +1456,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const moved = previous && (followAxis === 'horizontal' ? left !== previous.left && width === previous.width && scrollWidth === previous.scrollWidth : top !== previous.top && height === previous.height && scrollHeight === previous.scrollHeight);
     const arrivedAtEnd = followAxis === 'horizontal' ? Math.max(0, scrollWidth - width) - left <= 1 : Math.max(0, scrollHeight - height) - top <= 1;
     lastScrollGeometry = { left, top, width, height, scrollWidth, scrollHeight };
-    if (readerArrival && moved && arrivedAtEnd && (readerArrival === 'command' || readerArrivals.size > 0 || Date.now() < readerArrivalUntil)) explicitlyPaused = false;
+    if (readerArrival && moved && arrivedAtEnd && (readerArrival === 'command' || readerArrivals.size > 0 || Date.now() < readerArrivalUntil)) {
+      explicitlyPaused = false;
+      // A proved reader arrival retires the older departure window. Immediate
+      // content growth must remain following rather than look like new input.
+      readerIntent = 0;
+    }
     horizontal.update(left, width, scrollWidth, current); if (!current()) return;
     vertical.update(top, height, scrollHeight, current); if (!current()) return;
     if (follow?.mode === 'while-at-end') {
@@ -1136,12 +1473,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     }
     if (current()) projectChrome();
   }
-  function cancelScrollEnd(binding: ScrollBinding, axis: 'horizontal' | 'vertical') {
+  function cancelScrollEnd(binding: ScrollBinding, axis: 'horizontal' | 'vertical', rejected = true) {
     const work = scrollEndWork;
     if (!work || work.binding !== binding || work.axis !== axis) return;
     scrollEndWork = null;
     if (work.frame !== null) binding.surface.ownerDocument.defaultView?.cancelAnimationFrame(work.frame);
-    if (currentScrollBinding(binding)) setScrollRequestStatus('rejected');
+    if (rejected && currentScrollBinding(binding)) setScrollRequestStatus('rejected');
   }
   function revealScroll(request: NativeConfig, binding: ScrollBinding): NativeScrollRequestOutcome {
     let version = scrollCommandVersion;
@@ -1205,6 +1542,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     else throw new Error('[Scroll] invalid request kind.');
     if (!Number.isFinite(next)) throw new Error('[Scroll] request coordinate must be finite.');
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    if (scrollCommandVersion !== version) return {kind:'dispatched'};
+    // A newer same-axis command supersedes automatic initial/layout work.
+    // Cancellation observers may themselves deliver a newer command.
+    cancelScrollEnd(binding, horizontalAxis ? 'horizontal' : 'vertical', request.kind !== 'to-end');
+    if (!currentView()) return {kind:'rejected',reason:'unavailable'};
+    if (scrollCommandVersion !== version) return {kind:'dispatched'};
     const statusVersion = scrollRequestStatusVersion;
     if (horizontalAxis) surface.scrollLeft = Math.max(0, Math.min(range, next)); else surface.scrollTop = Math.max(0, Math.min(range, next));
     if (!currentView()) return {kind:'rejected',reason:'unavailable'};
@@ -1241,23 +1584,26 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (scrollCommandVersion === version) scrollFacts();
     return currentScrollBinding(binding) ? {kind:'dispatched'} : {kind:'rejected',reason:'unavailable'};
   }
-  function endFollowContentChanged() {
+  function endFollowContentChanged(initial = false) {
     const binding = scrollBinding;
-    if (!binding || !currentScrollBinding(binding) || scrollAttachment) return;
+    if (!binding || !currentScrollBinding(binding) || scrollAttachment && !initial) return;
     const follow = scrollConfig.endFollow as NativeConfig;
-    if (follow?.mode !== 'while-at-end' || explicitlyPaused || followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
+    if (follow?.mode !== 'while-at-end' || explicitlyPaused || !initial && followState.handle.get() !== 'following' || readerContacts || Date.now() < readerIntent) { scrollFacts(); return; }
     const view = binding.surface.ownerDocument.defaultView;
     if (!view || scrollEndWork) return;
     const axis = follow.axis === 'horizontal' ? 'horizontal' : 'vertical';
     const work: ScrollEndWork = { binding, axis, frame: null };
     scrollEndWork = work;
+    if (initial) followState.set('pending');
+    if (scrollEndWork !== work || !currentScrollBinding(binding)) return;
     setScrollRequestStatus('pending');
     if (scrollEndWork !== work || !currentScrollBinding(binding)) return;
     work.frame = view.requestAnimationFrame(() => {
       if (scrollEndWork !== work) return;
       scrollEndWork = null;
       if (!currentScrollBinding(binding)) return;
-      if (readerContacts || Date.now() < readerIntent || followState.handle.get() !== 'following') { setScrollRequestStatus('rejected'); return; }
+      const state = followState.handle.get();
+      if (readerContacts || Date.now() < readerIntent || state !== 'following' && !(initial && state === 'pending')) { setScrollRequestStatus('rejected'); return; }
       options.invoke(() => applyScroll({ kind: 'to-end', axis }));
     });
   }
@@ -1398,6 +1744,10 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       // requests belong to this transaction; reveal never joins its queue.
       scrollProjection.set(projection); if (!acquiring()) return;
       scrollFacts(); if (!acquiring()) return;
+      // Canonical while-at-end acquisition schedules its first movement even
+      // when the initial content already overflows. Install it before FIFO
+      // command drain so a queued pause or position request can cancel it.
+      endFollowContentChanged(true); if (!acquiring()) return;
       // Keep the transaction active while draining: commands issued by fact
       // subscribers append after every already queued command.
       for (const request of attachment.requests) { if (!current()) break; if (request.kind === 'pause-following') pauseScrollFollowing(true); else applyScroll(request, true); }
@@ -1407,6 +1757,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   }
   let positionConnection: NativeConfig | null = null, positionSnapshot: NativePositionSnapshot | null = null, positionGeneration = 0;
   let removePosition: (() => void) | null = null;
+  let alignmentPosition: { lease: ReturnType<typeof createTargetAlignmentLease> | null; epoch: number } | null = null;
   const positionDefaults = { side: 'bottom', align: 'start', sideOffset: 0, alignOffset: 0, strategy: 'absolute', avoidCollisions: true, collisionBoundary: 'clippingAncestors', collisionPadding: 0 };
   const positionBaselines = new Map<HTMLElement, { position: string; left: string; top: string; side: string | null; align: string | null; variables: Map<string, string> }>();
   function positioningTarget() {
@@ -1415,6 +1766,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   }
   async function positionNow() {
     if (!ready() || !positionConnection) return;
+    if (__nativeFeature('target-alignment') && positionConnection.targetAlignment) { syncAlignmentPosition(); return; }
     const connection = positionConnection, target = positioningTarget(); if (!target) return;
     const { anchor, floating } = target;
     const config: NativeConfig = { ...positionDefaults, ...connection.config as NativeConfig };
@@ -1447,9 +1799,28 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     const onResolved = connection.onResolved;
     if (typeof onResolved === 'function' && current() && (options.isReady?.() ?? true)) options.invoke(() => onResolved(positionSnapshot));
   }
-  function stopPosition() { ++positionGeneration; removePosition?.(); removePosition = null; }
+  function syncAlignmentPosition() {
+    const connection = positionConnection;
+    if (!ready() || !connection?.targetAlignment) return;
+    const epoch = generation;
+    if (removePosition) { ++positionGeneration; const remove = removePosition; removePosition = null; remove(); }
+    const slot = alignmentPosition ?? { lease: null, epoch };
+    alignmentPosition = slot;
+    const callback = connection.onAlignment;
+    const current = () => alignmentPosition === slot && slot.epoch === generation && epoch === generation && ready() && positionConnection === connection;
+    const native = { ...connection, config: { ...positionDefaults, ...connection.config as NativeConfig }, onAlignment(status: Parameters<OverlayTargetAlignmentBinding['onAlignment']>[0]) {
+      if (current() && typeof callback === 'function' && (options.isReady?.() ?? true)) options.invoke(() => { if (current()) callback(status); });
+    } } as AnchoredPositionConnection;
+    if (slot.lease) { slot.lease.update(native); return; }
+    // Native attachment can report synchronously and retire or replace this view.
+    const lease = createTargetAlignmentLease(native);
+    if (current()) slot.lease = lease;
+    else lease.dispose();
+  }
+  function stopPosition() { ++positionGeneration; const remove = removePosition; removePosition = null; remove?.(); if (__nativeFeature('target-alignment')) { const alignment = alignmentPosition; alignmentPosition = null; alignment?.lease?.dispose(); } }
   function attachPosition() {
     stopPosition(); if (!ready() || !positionConnection) return;
+    if (__nativeFeature('target-alignment') && positionConnection.targetAlignment) { syncAlignmentPosition(); return; }
     const target = positioningTarget(); if (!target) return;
     removePosition = autoUpdate(target.anchor, target.floating, () => { void positionNow(); }, { animationFrame: false });
   }
@@ -1460,12 +1831,83 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     disconnect() { alive(); stopPosition(); positionConnection = null; positionSnapshot = null; },
     getSnapshot() { alive(); return positionSnapshot; },
   };
-  let overlayConfig: NativeConfig = { defaultOpen: false, closeOnEscape: true, closeOnOutsidePress: true, closeOnFocusOutside: false, closeOnAnchorPress: false, closeOnTriggerPress: false, placement: 'bottom', align: 'start', sideOffset: 0, alignOffset: 0, anchored: true, strategy: 'absolute', avoidCollisions: true, collisionBoundary: 'clippingAncestors', collisionPadding: 0, entry: 'first', restore: 'trigger', portal: false, modal: false, layerOffset: 0 };
-  const overlayOpen = observed<boolean>(false);
+  let overlayConfig: NativeConfig = { defaultOpen: false, closeOnEscape: false, closeOnOutsidePress: false, closeOnFocusOutside: false, closeOnAnchorPress: false, closeOnTriggerPress: false, placement: 'bottom', align: 'start', sideOffset: 4, alignOffset: 0, anchored: false, availableSpace: false, strategy: 'absolute', avoidCollisions: true, collisionBoundary: 'clippingAncestors', collisionPadding: 0, entry: 'content', restore: 'trigger', portal: false, modal: false, layerOffset: 0 };
+  const overlayOpen = observed<boolean>(false, true);
   let overlayTrigger: unknown = null, overlayAnchor: unknown = null, overlayContent: unknown = null, overlayKeepMounted = false;
   let overlayPresence: NativeConfig | null = null, modalBody: HTMLElement | null = null, previousOverlayFocus: HTMLElement | null = null;
+  let overlayRevision = 0;
+  let overlayAlignment: OverlayTargetAlignment | null = null, overlayAlignmentRevision = 0, overlayAlignmentRetired = false;
+  let reconcilingOverlay = false, reconcileOverlayAgain = false;
   const overlayRegions: Record<string, object> = { trigger: {}, anchor: {}, content: {} };
-  let overlayMaterialized = false;
+  let overlayMaterialized = false, overlayFocusCaptured = false;
+  function alignmentBinding() {
+    if (!overlayAlignment) overlayAlignment = new OverlayTargetAlignment({
+      subscribeTargets(_family, callback) {
+        const changed = () => { if (!disposed && options.isAlive() && (options.isSetupComplete?.() ?? true)) options.invoke(() => callback(undefined)); };
+        topologySubscribers.add(changed); return () => { topologySubscribers.delete(changed); };
+      },
+      isCurrentPart: (family, part) => currentAnatomyPart(family, part) !== null,
+      resolvePartInstance: (part) => parts.get(part)?.identity ?? null,
+      resolveSelfInstance: () => options.identity,
+      resolveSelfRole: (family) => claims.get(family)?.role ?? null,
+      resolvePartTarget: (part) => parts.get(part)?.target() ?? null,
+      resolveAncestorInstance(family, part, role) {
+        const participant = currentAnatomyPart(family, part), rootOwner = domain(family, false);
+        if (!participant || !rootOwner) return null;
+        let parent = participant.parent(); const visited = new Set<object>();
+        while (parent && !visited.has(parent)) {
+          visited.add(parent); const candidate = owners.get(parent);
+          if (!candidate?.alive()) return null;
+          if (candidate.claims.get(family)?.role === role) return candidate.identity;
+          if (candidate === rootOwner) return null;
+          parent = candidate.parent();
+        }
+        return null;
+      },
+      descendantsOf: anatomyDescendants,
+    }, {
+      replaceImplicitRoot(target) { const lease = { target }; boundaryRootReplacement = lease; boundaryRevision++; return () => { if (boundaryRootReplacement === lease) { boundaryRootReplacement = null; boundaryRevision++; } }; },
+    }, () => { if (overlayViewActive()) reconcileOverlay(); });
+    return overlayAlignment;
+  }
+  type AvailableHost = ReturnType<typeof createWebAvailableSpaceHost>;
+  type AvailableBinding = Parameters<typeof readAvailableLayout>[0];
+  let availableHost: AvailableHost | null = null, availableLease: ReturnType<AvailableHost['attach']> | null = null;
+  let availableTarget: HTMLElement | null = null, availableBinding: AvailableBinding | undefined;
+  let availableEpoch = 0;
+  const availableWatches: (() => void)[] = [];
+  function releaseAvailable() {
+    ++availableEpoch;
+    for (const off of availableWatches.splice(0)) off();
+    const lease = availableLease; availableLease = null; availableTarget = null;
+    lease?.dispose();
+  }
+  function overlayViewActive() { return overlayPresence ? Boolean(readValue(overlayPresence.present)) : overlayOpen.handle.get(); }
+  function reconcileAvailable(content: HTMLElement | null) {
+    if (!ready() || !overlayConfig.availableSpace || !overlayViewActive() || !content) { releaseAvailable(); return; }
+    if (availableLease && availableTarget === content) {
+      if (availableBinding) availableLease.updateLayout?.(readAvailableLayout(availableBinding));
+      else availableLease.requestUpdate();
+      return;
+    }
+    releaseAvailable();
+    const epoch = availableEpoch, viewEpoch = generation, binding = availableBinding;
+    availableHost ??= createWebAvailableSpaceHost();
+    const lease = availableHost.attach({target:content,boundary:'root-content',viewEpoch,
+      ...(binding ? {layout:readAvailableLayout(binding)} : {})});
+    if (epoch !== availableEpoch || !ready() || generation !== viewEpoch) { lease.dispose(); return; }
+    availableLease = lease; availableTarget = content;
+    if (!binding) return;
+    const current = () => epoch === availableEpoch && viewEpoch === generation && ready() && availableLease === lease && availableBinding === binding;
+    try {
+      for (const state of availableLayoutStates(binding)) {
+        if (!options.subscribeState) throw new Error('[Positioning] layout State observation unavailable.');
+        const off = options.subscribeState(state, () => { if (!current()) return; const frame = readAvailableLayout(binding); if (current()) lease.updateLayout?.(frame); });
+        if (!current()) { off(); return; }
+        availableWatches.push(off);
+      }
+    } catch (error) { if (epoch === availableEpoch) releaseAvailable(); throw error; }
+  }
   function unlockModal() {
     if (!modalBody) return;
     const body = modalBody; modalBody = null;
@@ -1491,62 +1933,128 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     lock.owners.add(options.identity);
   }
   function overlayPositionConfig() { return { ...overlayConfig, side: overlayConfig.placement }; }
+  let overlayCloseReason: string | undefined;
+  function restoreOverlayFocus() {
+    if (!overlayMaterialized) return;
+    // Retire this entry before native focus dispatch can reopen the overlay.
+    overlayMaterialized = false;
+    overlayFocusCaptured = false;
+    // Current-focus dismissal observes a completed handoff; it must preserve
+    // that destination rather than restoring the old entry focus.
+    if (overlayConfig.restore === 'none' || overlayCloseReason === 'focus.outside') return;
+    const restore = overlayConfig.restore === 'previous' ? previousOverlayFocus : targetOf(overlayTrigger);
+    if (restore?.isConnected && !restore.closest('[hidden],[inert]')) restore.focus();
+  }
   function reconcileOverlay() {
+    if (reconcilingOverlay) { reconcileOverlayAgain = true; return; }
+    reconcilingOverlay = true;
+    try { do { reconcileOverlayAgain = false; reconcileOverlayPass(); } while (reconcileOverlayAgain && ready()); }
+    finally { reconcilingOverlay = false; }
+  }
+  function reconcileOverlayPass() {
     if (!ready() || !hooks.has('asOverlay')) return;
+    const epoch = generation, revision = overlayRevision, alignmentRevision = overlayAlignmentRevision;
     const open = overlayOpen.handle.get();
     reconcileStack();
-    if (!open) {
+    if (__nativeFeature('available-space')) reconcileAvailable(targetOf(overlayContent) ?? root);
+    // Presence owns the physical view lifetime, including its leaving interval.
+    // Semantic open owns dismissal and focus; it cannot retire geometry or modal
+    // leases while the bound presentation still displays that view.
+    if (!overlayViewActive()) {
+      if (__nativeFeature('target-alignment')) overlayAlignment?.clearPhysical();
       stopPosition(); unlockModal();
-      if (overlayMaterialized && overlayConfig.restore !== 'none') {
-        const restore = overlayConfig.restore === 'previous' ? previousOverlayFocus : targetOf(overlayTrigger);
-        if (restore?.isConnected && !restore.closest('[hidden],[inert]')) restore.focus();
-      }
-      overlayMaterialized = false; return;
+      restoreOverlayFocus(); return;
     }
-    if (overlayConfig.modal) lockModal();
+    if (overlayConfig.modal) lockModal(); else unlockModal();
+    if (__nativeFeature('target-alignment')) overlayAlignment?.syncSurface();
     const content = targetOf(overlayContent) ?? root!, anchor = targetOf(overlayAnchor) ?? targetOf(overlayTrigger);
     if (overlayConfig.anchored && anchor) {
       const config = overlayPositionConfig();
-      const changed = positionConnection?.anchor !== anchor || positionConnection?.floating !== content;
-      positionConnection = { anchor, floating: content, config };
-      if (changed || !removePosition) attachPosition();
+      const alignment = __nativeFeature('target-alignment') ? overlayAlignment?.resolve() : null;
+      const changed = positionConnection?.anchor !== anchor || positionConnection?.floating !== content || !!positionConnection?.targetAlignment !== !!alignment;
+      positionConnection = { anchor, floating: content, config, ...(alignment ?? {}) };
+      if (__nativeFeature('target-alignment') && alignment && !changed && alignmentPosition) syncAlignmentPosition();
+      else if (changed || !removePosition) attachPosition();
     }
-    styleProperty(content, 'z-index', String(1000 + (boundaryStacks.get(root!.ownerDocument)?.indexOf(owner) ?? 0) * 2 + Number(overlayConfig.layerOffset ?? 0)));
+    if (!ready() || epoch !== generation || revision !== overlayRevision || alignmentRevision !== overlayAlignmentRevision) return;
+    // Leaving retains its already committed layer after the semantic candidate
+    // has left the dismissal stack.
+    if (open) styleProperty(content, 'z-index', String(1000 + (boundaryStacks.get(root!.ownerDocument)?.indexOf(owner) ?? 0) * 2 + Number(overlayConfig.layerOffset ?? 0)));
+    if (!open) { restoreOverlayFocus(); return; }
     if (!overlayMaterialized) {
       overlayMaterialized = true;
-      previousOverlayFocus = content.ownerDocument.activeElement as HTMLElement | null;
+      // A framework portal relocation replaces the physical root while retaining
+      // the same logical opening. It must not replace the original restore target.
+      if (!overlayFocusCaptured) {
+        previousOverlayFocus = content.ownerDocument.activeElement as HTMLElement | null;
+        overlayFocusCaptured = true;
+      }
       if (overlayConfig.entry === 'content') content.focus();
       else if (overlayConfig.entry !== 'manual') navigate(overlayConfig.entry === 'selected' ? 'selected' : 'first', undefined, owner.rovingDeclared);
     }
   }
   function setOverlayOpen(value: boolean, reason?: string) {
-    if (overlayOpen.handle.get() === value) return;
-    overlayOpen.set(value);
+    if (overlayOpen.handle.get() === value) { if (value) reconcileOverlay(); return; }
+    const revision = ++overlayRevision;
+    overlayCloseReason = value ? undefined : reason;
+    overlayOpen.set(value, reason);
+    // A controlled owner can synchronously refuse dismissal or replace its view
+    // from an open observation. The superseded request owns no later effects.
+    if (revision !== overlayRevision || disposed || !options.isAlive()) return;
+    if (value) retireBoundaryStack();
+    stackActive = value; reconcileStack();
+    if (!value && !overlayMaterialized) overlayFocusCaptured = false;
     if (overlayPresence) {
       const callback = value ? overlayPresence.enter : overlayPresence.leave;
       if (typeof callback !== 'function') throw new Error('[Overlay] presence binding requires enter/leave controls.');
       callback();
     } else if (!overlayKeepMounted) options.setPresent?.(value);
+    if (revision !== overlayRevision || disposed || !options.isAlive()) return;
     reconcileOverlay(); projectModuleAttributes(); requestPresentation();
   }
   const overlay: NativeOverlay = {
     open: overlayOpen.handle,
-    configure(config) { setup('overlay.configure'); overlayConfig = { ...overlayConfig, ...config }; if (config.defaultOpen !== undefined) overlayOpen.set(Boolean(config.defaultOpen)); },
+    configure(config) {
+      setup('overlay.configure');
+      const layout = config.availableLayout ?? overlayConfig.availableLayout;
+      if (layout && !(config.availableSpace ?? overlayConfig.availableSpace)) throw new Error('[Overlay] availableLayout requires availableSpace.');
+      if (__nativeFeature('available-space') && config.availableLayout !== undefined) {
+        const binding = config.availableLayout as AvailableBinding;
+        if (readAvailableLayout(binding, true).status === 'invalid') throw new TypeError('[Positioning] Invalid available layout binding.');
+        availableBinding = binding;
+      }
+      overlayConfig = { ...overlayConfig, ...config };
+      if (config.defaultOpen !== undefined) { overlayOpen.set(Boolean(config.defaultOpen)); stackActive = Boolean(config.defaultOpen); }
+    },
     isOpen() { alive(); return overlayOpen.handle.get(); },
     openOverlay(reason) { runtime('overlay.openOverlay'); setOverlayOpen(true, reason); },
     close(reason) { runtime('overlay.close'); setOverlayOpen(false, reason); },
     toggle(reason) { runtime('overlay.toggle'); setOverlayOpen(!overlayOpen.handle.get(), reason); },
     updatePosition(config) { alive(); overlayConfig = { ...overlayConfig, ...config }; if (positionConnection) { positionConnection = { ...positionConnection, config: overlayPositionConfig() }; void positionNow(); } },
-    registerTrigger(target) { alive(); overlayTrigger = target; boundaryRegions.set(overlayRegions.trigger, { target, config: { role: 'trigger' } }); reconcileOverlay(); },
-    registerAnchor(target) { alive(); overlayAnchor = target; boundaryRegions.set(overlayRegions.anchor, { target, config: { role: 'anchor' } }); reconcileOverlay(); },
-    registerAnchorPart(part) { alive(); overlayAnchor = part; boundaryRegions.set(overlayRegions.anchor, { target: part, config: { role: 'anchor' } }); reconcileOverlay(); },
-    registerContent(target) { alive(); overlayContent = target; boundaryRegions.set(overlayRegions.content, { target, config: { role: 'content' } }); reconcileOverlay(); },
+    registerTrigger(target) { alive(); overlayTrigger = target; boundaryRegions.set(overlayRegions.trigger, { target, config: { role: 'trigger' } }); boundaryRevision++; reconcileOverlay(); },
+    registerAnchor(target) { alive(); overlayAnchor = target; boundaryRegions.set(overlayRegions.anchor, { target, config: { role: 'anchor' } }); boundaryRevision++; reconcileOverlay(); },
+    registerAnchorPart(part) { alive(); overlayAnchor = part; boundaryRegions.set(overlayRegions.anchor, { target: part, config: { role: 'anchor' } }); boundaryRevision++; reconcileOverlay(); },
+    registerContent(target) { alive(); overlayContent = target; if (!(__nativeFeature('target-alignment') && overlayAlignment?.hasBinding())) { boundaryRegions.set(overlayRegions.content, { target, config: { role: 'content' } }); boundaryRevision++; } reconcileOverlay(); },
+    registerTargetAlignment(binding) {
+      runtime('overlay.registerTargetAlignment');
+      if (overlayAlignmentRetired) throw new Error('[Overlay] target alignment owner is terminally disposed.');
+      ++overlayAlignmentRevision;
+      alignmentBinding().set(binding);
+      if (boundaryRegions.delete(overlayRegions.content)) boundaryRevision++;
+      if (!binding && overlayContent) { boundaryRegions.set(overlayRegions.content, { target: overlayContent, config: { role: 'content' } }); boundaryRevision++; }
+      reconcileOverlay();
+    },
     getPositionSnapshot() { alive(); return positionSnapshot; },
     keepMounted() { setup('overlay.keepMounted'); if (overlayPresence) throw new Error('[Overlay] cannot keep mounted after binding Presence.'); overlayKeepMounted = true; },
     bindPresence(binding) {
       setup('overlay.bindPresence'); if (overlayPresence === binding) return; if (overlayPresence || overlayKeepMounted) throw new Error('[Overlay] presence already bound or keepMounted declared.'); overlayPresence = binding;
       const present = binding.present;
-      const update = () => { if (!disposed && options.isAlive() && (options.isReady?.() ?? true)) options.invoke(() => options.setPresent?.(Boolean(readValue(present)))); };
+      const update = () => {
+        if (!disposed && options.isAlive() && (options.isSetupComplete?.() ?? true)) options.invoke(() => {
+          options.setPresent?.(Boolean(readValue(present)));
+          if (!disposed && options.isAlive()) { reconcileOverlay(); requestPresentation(); }
+        });
+      };
       if (present && typeof present === 'object' && 'get' in present) {
         if (options.watchState) terminalCleanups.push(options.watchState(present as { get(): unknown }, update));
         else if ('watch' in present && typeof present.watch === 'function') terminalCleanups.push(present.watch(update));
@@ -1559,7 +2067,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (!(options.isReady?.() ?? true)) return;
     if (__nativeFeature('overlay') && hooks.has('asOverlay') && !overlayInitialized) { overlayInitialized = true; options.invoke(() => { if (!overlayKeepMounted && !overlayPresence) options.setPresent?.(overlayOpen.handle.get()); }); }
   }
-  function rootTag(): string | null { alive(); return __nativeFeature('text') && textDeclaration ? textDeclaration.config.lineMode === 'single' ? 'input' : 'textarea' : __nativeFeature('image') && imageDeclaration ? 'img' : null; }
+  function rootTag(): string | null { alive(); return __nativeFeature('text') && textDeclaration ? textDeclaration.config.lineMode === 'single' ? 'input' : 'textarea' : __nativeFeature('image') && imageDeclaration ? 'img' : __nativeFeature('native-link') && nativeLinkDeclaration ? 'a' : null; }
   function adoptControlState(): void {
     alive(); if (root) throw new Error('[Modules] adopt control state before the first view mount.');
     const target = options.getRoot(); if (!target) throw new Error('[Modules] hydration requires the adopted physical Root.');
@@ -1616,7 +2124,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (provider) { const members = [...owners.values()].filter(candidate => candidate.focusDeclared && !candidate.focusConfig.disabled && ancestor(candidate, entry => entry !== candidate && entry.rovingDeclared) === provider).sort(hostOrder); const selected = members.find(candidate => candidate.active) ?? members.find(candidate => candidate.selected) ?? members[0]; result.tabindex = focusConfig.disabled || selected !== owner ? '-1' : '0'; }
     }
     if (__nativeFeature('overlay') && hooks.has('asOverlay')) { result['data-pui-overlay-open'] = String(overlayOpen.handle.get()); if (overlayConfig.modal) result['aria-modal'] = String(overlayOpen.handle.get()); if (overlayKeepMounted) { result['data-pui-view-detached'] = overlayOpen.handle.get() ? null : ''; if (!overlayOpen.handle.get()) { result.hidden = ''; result['aria-hidden'] = 'true'; } } }
-    if (__nativeFeature('hit') && hooks.has('asHitParticipation')) result['data-pui-hit-participation'] = String(hitConfig.mode);
+    if (__nativeFeature('hit') && hooks.has('asHitParticipation')) result['data-pui-hit-participation'] = selfHitMode();
+    if (__nativeFeature('native-link') && nativeLinkDeclared) {
+      result.href = !nativeLinkConfig.disabled && nativeLinkConfig.href ? nativeLinkConfig.href : null;
+      result.target = nativeLinkConfig.target || null; result.rel = nativeLinkConfig.rel || null;
+      result['aria-disabled'] = nativeLinkConfig.disabled ? 'true' : options.getAttributeBaseline?.('aria-disabled') ?? null;
+      result.tabindex = nativeLinkConfig.disabled ? '-1' : options.getAttributeBaseline?.('tabindex') ?? null;
+    }
     return result;
   }
   const attributeBaselines = new Map<string, { baseline: string | null; projected: string | null }>();
@@ -1635,12 +2149,16 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function refresh() {
     if (disposed || !options.isAlive()) return;
     if (__nativeFeature('overlay')) reconcileLogicalState();
+    if (__nativeFeature('axis-input')) refreshAxis();
     if (__nativeFeature('table')) refreshTable(false);
     if (!ready()) { requestPresentation(); return; }
     projectModuleAttributes();
     if (__nativeFeature('part-relationships')) partRelationships?.refresh(root);
     if (__nativeFeature('hit')) projectHit();
-    if (__nativeFeature('text')) applyText();
+    // Other modules can refresh during a text callback, before its owner accepts
+    // the edit. Only TextControl synchronization and its host/event boundaries
+    // may project values; an unrelated refresh must not rewind the native caret.
+    if (__nativeFeature('text')) applyText(false, false);
     if (__nativeFeature('image')) applyImage();
     if (__nativeFeature('overlay')) reconcileOverlay();
     if (__nativeFeature('scope') && owner.scopeDeclared) { const focused = root!.ownerDocument.activeElement; hasFocused.set(!!focused && contains(root!, focused)); scopeActive.set(owner.scopeActive); }
@@ -1650,13 +2168,22 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('scope') && ownedEntry) fulfillOwnedEntry();
     requestPresentation();
   }
-  function portalTarget(): HTMLElement | null { return __nativeFeature('overlay') && ready() && hooks.has('asOverlay') && overlayConfig.portal && overlayOpen.handle.get() ? root!.ownerDocument.body : null; }
+  function viewPolicy(): Readonly<{ retainWhenDetached: boolean; portal: boolean }> {
+    const declared = __nativeFeature('overlay') && hooks.has('asOverlay');
+    return { retainWhenDetached: declared && overlayPresence !== null, portal: declared && overlayConfig.portal === true };
+  }
+  function portalTarget(): HTMLElement | null { return __nativeFeature('overlay') && ready() && hooks.has('asOverlay') && overlayConfig.portal && overlayViewActive() ? root!.ownerDocument.body : null; }
   function unmount() {
     const previous = root;
+    if (__nativeFeature('boundary')) leaveBoundaryPointerScope();
     if (__nativeFeature('part-relationships')) partRelationships?.unmount();
     if (__nativeFeature('scope')) releaseEntryRoot();
+    if (__nativeFeature('axis-input')) disconnectAxis('disposed');
+    if (__nativeFeature('available-space')) releaseAvailable();
+    if (__nativeFeature('target-alignment')) overlayAlignment?.clearPhysical();
     ++generation;
     if (__nativeFeature('image')) imageRequest = null;
+    if (__nativeFeature('native-link')) { for (const task of nativeLinkTasks) clearTimeout(task); nativeLinkTasks.clear(); }
     if (__nativeFeature('positioning')) stopPosition();
     if (__nativeFeature('overlay')) unlockModal();
     root = null;
@@ -1674,7 +2201,6 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('scroll')) for (const cleanup of chromeCleanups.splice(0)) try { cleanup(); } catch (error) { failures.push(error); }
     if (__nativeFeature('hit')) for (const target of [...hitApplied]) releaseHit(target);
     if (previous) {
-      if (__nativeFeature('boundary')) { const stack = boundaryStacks.get(previous.ownerDocument); const index = stack?.indexOf(owner) ?? -1; if (index >= 0) stack!.splice(index, 1); }
       if (__nativeFeature('scroll')) { previous.ownerDocument.defaultView?.clearTimeout(scrollTimer); scrollTimer = undefined; }
       for (const [name, ownership] of attributeBaselines) if (previous.getAttribute(name) === ownership.projected) { if (ownership.baseline === null) previous.removeAttribute(name); else previous.setAttribute(name, ownership.baseline); }
       for (const [name, ownership] of propertyBaselines) if (previous.style.getPropertyValue(name) === ownership.projected) { if (ownership.value) previous.style.setProperty(name, ownership.value); else previous.style.removeProperty(name); }
@@ -1684,7 +2210,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (__nativeFeature('positioning')) positionBaselines.clear();
     if (__nativeFeature('scroll')) for (const [target, snapshot] of chromeTargets) { target.style.width = snapshot.width; target.style.height = snapshot.height; target.style.transform = snapshot.transform; target.style.display = snapshot.display; if (snapshot.size) target.style.setProperty('--proto-ui-scroll-thumb-size', snapshot.size); else target.style.removeProperty('--proto-ui-scroll-thumb-size'); if (snapshot.offset) target.style.setProperty('--proto-ui-scroll-thumb-offset', snapshot.offset); else target.style.removeProperty('--proto-ui-scroll-thumb-offset'); }
     if (__nativeFeature('scroll')) { chromeTargets.clear(); readerContacts = 0; readerPoints.clear(); readerArrivals.clear(); readerIntent = 0; readerArrivalUntil = 0; lastScrollGeometry = null; }
-    if (__nativeFeature('text')) { retireText(); textComposing = false; }
+    if (__nativeFeature('text')) { retireText(); textComposing = false; textCallbackPrelude = null; ++textEventGeneration; }
     if (__nativeFeature('overlay')) overlayMaterialized = false;
     if (previous) {
       if (options.isAlive() && (options.isReady?.() ?? true)) {
@@ -1716,20 +2242,39 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
         const backward = orientation !== 'vertical' && event.key === (rtl ? 'ArrowRight' : 'ArrowLeft') || orientation !== 'horizontal' && event.key === 'ArrowUp';
         if (forward || backward || event.key === 'Home' || event.key === 'End') { options.invoke(() => navigate(event.key === 'Home' ? 'first' : event.key === 'End' ? 'last' : forward ? 'next' : 'prev', undefined, rovingNavigation)); event.preventDefault(); }
       });
-      if (__nativeFeature('boundary')) listen(doc, 'pointerdown', native => {
-        const sample = Object.freeze({ type: 'pointer.press', target: native.target, nativeEvent: native });
-        if (boundaryObserved) notifyOutside(sample);
-        if (__nativeFeature('overlay') && hooks.has('asOverlay') && overlayOpen.handle.get()) {
-          const stack = boundaryStacks.get(doc) ?? [], selected = boundarySampleOwners.has(native) ? boundarySampleOwners.get(native) : stack[stack.length - 1];
-          if (!boundarySampleOwners.has(native)) boundarySampleOwners.set(native, selected ?? null);
-          if (selected === owner && overlayConfig.closeOnOutsidePress && classify(sample) === 'outside') options.invoke(() => setOverlayOpen(false, 'outside.press'));
-          else if (selected === owner && (overlayConfig.closeOnTriggerPress && targetOf(overlayTrigger)?.contains(native.target as Node) || overlayConfig.closeOnAnchorPress && targetOf(overlayAnchor)?.contains(native.target as Node))) options.invoke(() => setOverlayOpen(false, 'trigger.press'));
-        }
-      }, { capture: true });
-      if (__nativeFeature('overlay')) listen(doc, 'keydown', native => { const event = native as KeyboardEvent; if (event.key !== 'Escape' || !overlayOpen.handle.get() || !overlayConfig.closeOnEscape) return; const stack = boundaryStacks.get(doc) ?? []; if (stack[stack.length - 1] !== owner) return; options.invoke(() => setOverlayOpen(false, 'escape')); event.preventDefault(); }, { capture: true });
-      if (__nativeFeature('overlay')) listen(doc, 'focusin', native => { if (overlayOpen.handle.get() && overlayConfig.closeOnFocusOutside && classify({ target: native.target, nativeEvent: native }) === 'outside') options.invoke(() => setOverlayOpen(false, 'focus.outside')); });
+      if (__nativeFeature('boundary') && (boundaryObserved || boundaryFocusObserved || __nativeFeature('overlay') && hooks.has('asOverlay'))) {
+        enterBoundaryPointerScope(doc);
+        listen(doc, 'pointerdown', native => withBoundaryPointerScope(sequence => {
+          if (!sequence.sample || sequence.sample.nativeEvent !== native) {
+            sequence.sample = Object.freeze({ type: 'pointerdown', target: native.target, nativeEvent: native });
+            sequence.outside.clear();
+          }
+          const sample = sequence.sample, selected = nativeBoundaryOwner(doc, sample);
+          const epoch = generation, revision = __nativeFeature('overlay') ? overlayRevision : 0;
+          const overlayOutside = __nativeFeature('overlay') && hooks.has('asOverlay') && overlayOpen.handle.get() && overlayConfig.closeOnOutsidePress;
+          const classification = boundaryObserved || overlayOutside ? notifyOutside(sample, 'pointer.press') : classify(sample);
+          if (!ready() || epoch !== generation || sequence !== boundaryPointerSequence) return;
+          if (__nativeFeature('overlay') && revision === overlayRevision && hooks.has('asOverlay') && overlayOpen.handle.get() && selected === owner) {
+            if (overlayConfig.closeOnOutsidePress && classification === 'outside') options.invoke(() => setOverlayOpen(false, 'outside.press'));
+            else if (overlayConfig.closeOnTriggerPress && targetOf(overlayTrigger)?.contains(native.target as Node) || overlayConfig.closeOnAnchorPress && targetOf(overlayAnchor)?.contains(native.target as Node)) options.invoke(() => setOverlayOpen(false, 'trigger.press'));
+          }
+        }), { capture: true });
+        const endPointer = () => { if (boundaryPointerSequence) { boundaryPointerSequence.sample = undefined; boundaryPointerSequence.outside.clear(); } };
+        for (const type of ['pointerup', 'pointercancel', 'keydown']) listen(doc, type, endPointer, { capture: true });
+        if (doc.defaultView) listen(doc.defaultView, 'blur', endPointer);
+        if (boundaryFocusObserved || __nativeFeature('overlay') && overlayConfig.closeOnFocusOutside) listen(doc, 'focusin', native => withBoundaryPointerScope(sequence => {
+          const epoch = generation, revision = boundaryRevision, overlayVersion = __nativeFeature('overlay') ? overlayRevision : 0;
+          const sample = sampleBoundaryFocus(native, doc);
+          if (!sample || !ready() || epoch !== generation || revision !== boundaryRevision || sequence !== boundaryPointerSequence) return;
+          if (sequence.sample && sequence.outside.has(owner)) return;
+          const classification = notifyOutside(sample, 'focus.move', sequence.sample ?? sample);
+          if (__nativeFeature('overlay') && ready() && epoch === generation && overlayVersion === overlayRevision && hooks.has('asOverlay') && overlayOpen.handle.get() && overlayConfig.closeOnFocusOutside && classification === 'outside') options.invoke(() => setOverlayOpen(false, 'focus.outside'));
+        }), { capture: true });
+      }
+      if (__nativeFeature('overlay')) listen(doc, 'keydown', native => { const event = native as KeyboardEvent; if (event.key !== 'Escape' || !overlayOpen.handle.get() || !overlayConfig.closeOnEscape) return; if (nativeBoundaryOwner(doc, { nativeEvent: native }) !== owner) return; options.invoke(() => setOverlayOpen(false, 'escape')); event.preventDefault(); }, { capture: true });
       if (__nativeFeature('text')) attachText();
       if (__nativeFeature('image')) attachImage();
+      if (__nativeFeature('native-link')) attachNativeLink();
       if (__nativeFeature('scroll')) { attachScroll(); if (mountEpoch !== generation || root !== candidate) return; }
       if (__nativeFeature('positioning')) attachPosition();
       if (__nativeFeature('boundary')) reconcileStack();
@@ -1749,11 +2294,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     asFocusScope() { declare('asFocusScope'); owner.scopeDeclared = true; registerFacts(scope.active); registerFacts(scope.hasFocused); return scope; },
     asFocusRoving() { declare('asFocusRoving'); owner.rovingDeclared = true; registerFacts(roving.active); registerFacts(roving.hasFocused); return roving; },
     asCollection() { declare('asCollection'); return declareCollection(); }, asCollectionItem() { declare('asCollectionItem'); return declareCollectionItem(); },
-    asBoundary() { declare('asBoundary'); return boundary; }, asHitParticipation() { declare('asHitParticipation'); return hit; },
+    asBoundary() { declare('asBoundary'); return boundary; }, asHitParticipation(config) { declare('asHitParticipation'); if (config) hit.configure(config); return hit; },
     asOverlay() { declare('asOverlay'); registerFacts(overlay.open); return overlay; },
     asScrollSurface() { declare('asScrollSurface'); registerFacts(scroll.axes); registerFacts(scroll.scrolling); registerFacts(scroll.projection); registerFacts(scroll.endFollow.state); registerFacts(scroll.endFollow.requestStatus); for (const axis of [scroll.horizontal, scroll.vertical]) { registerFacts(axis.position); registerFacts(axis.visibleRatio); registerFacts(axis.canScrollBefore); registerFacts(axis.canScrollAfter); registerFacts(axis.atEnd); } return scroll; },
     asTextControl() { declare('asTextControl'); if (!textDeclaration) throw new Error('[TextControl] asTextControl requires its static physical declaration.'); textDeclared = true; return textControl; },
     asImageView() { declare('asImageView'); if (!imageDeclaration) throw new Error('[ImageView] asImageView requires its static physical declaration.'); imageDeclared = true; return imageView; },
+    asNativeLink() { declare('asNativeLink'); if (!nativeLinkDeclaration) throw new Error('[NativeLink] asNativeLink requires its static physical declaration.'); if (nativeLinkDeclared) throw new Error('[NativeLink] only one native link may be declared per owner.'); nativeLinkDeclared = true; return nativeLink; },
+    asAxisInput() { declare('asAxisInput'); if (axisDeclared) throw new Error('[AxisInput] One input may be declared per instance.'); axisDeclared = true; return axisInput; },
     asTableStructure(role) { declare('asTableStructure'); return declareTable(role); },
     configureFocusable(config) { setup('focus.configure'); owner.focusDeclared = true; hooks.add('asFocusable'); Object.assign(focusConfig, config); },
     setFocusDisabled(value) { runtime('focus.setDisabled'); focusConfig.disabled = value; if (value) pendingFocus = null; announceTopology(); },
@@ -1762,9 +2309,13 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     canFocus,
     focus(request) { runtime('focus.focus'); requestFocus(request); },
     blur() { runtime('focus.blur'); ++scopeActivation; cancelOwnedEntry(); pendingFocus = null; if (ready()) root!.blur(); },
-    rootTag, rootProperties, projectAttributes, portalTarget, adoptControlState, refresh, mount, unmount,
+    rootTag, rootProperties, projectAttributes, portalTarget, viewPolicy, adoptControlState,
+    commitHost() { if (__nativeFeature('text')) applyText(); },
+    refresh, mount, unmount,
     dispose() {
       if (disposed) return;
+      if (__nativeFeature('hit')) hitRetired = true;
+      if (__nativeFeature('target-alignment')) { overlayAlignmentRetired = true; overlayAlignment?.dispose(); overlayAlignment = null; }
       if (__nativeFeature('scope')) { ++scopeActivation; cancelOwnedEntry(); }
       const rootOwner = logicalRoot(owner);
       const failures: unknown[] = [];
@@ -1774,10 +2325,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (__nativeFeature('scope') || __nativeFeature('roving') || __nativeFeature('scroll') || __nativeFeature('overlay')) nativeNotifications.length = 0;
       owners.delete(options.identity); claims.clear(); hooks.clear(); topologySubscribers.clear();
       if (__nativeFeature('table')) tableRecords.delete(owner);
-      if (__nativeFeature('boundary')) { outsideListeners.clear(); boundaryRegions.clear(); }
+      if (__nativeFeature('boundary')) { retireBoundaryStack(); outsideListeners.clear(); boundaryRegions.clear(); boundaryRootReplacement = null; }
       if (__nativeFeature('hit')) hitRegions.clear();
       if (__nativeFeature('text')) textListeners.clear();
       if (__nativeFeature('image')) imageListeners.clear();
+      if (__nativeFeature('native-link')) nativeLinkListeners.clear();
+      if (__nativeFeature('axis-input')) axisListeners.length = 0;
       if (__nativeFeature('scope')) { const scopeIndex = activeScopes.indexOf(owner); if (scopeIndex >= 0) { activeScopes.splice(scopeIndex, 1); ++scopeRevision; } }
       if (__nativeFeature('a11y')) { for (const off of accessibleSubscriptions.values()) try { off(); } catch (error) { failures.push(error); }
       accessibleSubscriptions.clear(); }

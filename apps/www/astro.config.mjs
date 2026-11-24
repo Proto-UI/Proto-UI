@@ -490,6 +490,18 @@ export default defineConfig({
                   slug: 'ui-libraries/base/input',
                 },
                 {
+                  label: 'Native File Input',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Native File Input', 'zh-CN': '原生文件输入' },
+                  slug: 'ui-libraries/base/native-file-input',
+                },
+                {
+                  label: 'Selectable Row',
+                  badge: earlyDraftBadge,
+                  translations: { en: 'Selectable Row', 'zh-CN': '可选列表行' },
+                  slug: 'ui-libraries/base/selectable-row',
+                },
+                {
                   label: 'Label',
                   translations: { en: 'Label', 'zh-CN': 'Label' },
                   slug: 'ui-libraries/base/label',
@@ -1642,7 +1654,7 @@ export default defineConfig({
                 {
                   label: 'Dropdown Menu',
                   badge: earlyDraftBadge,
-                  translations: { en: 'Dropdown Menu', 'zh-CN': '下拉菜单' },
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/bootstrap-2-3-2/dropdown-menu',
                 },
                 {
@@ -1864,7 +1876,7 @@ export default defineConfig({
                 {
                   label: 'Dropdown Menu',
                   badge: earlyDraftBadge,
-                  translations: { en: 'Dropdown Menu', 'zh-CN': '下拉菜单' },
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
                   slug: 'ui-libraries/liquid-glass/dropdown-menu',
                 },
                 {

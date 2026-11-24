@@ -189,6 +189,15 @@ The source resolver reads the entry's declared authoring closure without executi
 
 Output parent directories are a **caller prerequisite**. The artifact root itself is created exclusively. An absent parent fails without creating ancestors; an existing root, symlink, conflicting artifact or concurrent competing writer is rejected under the existing create-only contract. `diff` never writes user edits, and `watch` creates immutable session/revision directories. Keep the compiler build immutable and make consumer edits only in its generated source. The original compiler map is historical after an edit; the normal target rebuild supplies the current executable-to-edited-source map.
 
+For a clean installation check from the same source checkout, select the built compiler and the explicit registry mode:
+
+```sh
+NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/release-family-smoke.mjs
+NATIVE_CONSUMER_COMPILER=/absolute/pinned/index.js NATIVE_CONSUMER_DEPENDENCIES=registry node scripts/compiler/pinned-cli-smoke.mjs
+```
+
+Each consumer starts without installed packages, resolves only its exact manifest declarations into a new lockfile, then runs `npm ci --ignore-scripts` with its own cache. The first command builds and mounts the full Base/Shadcn/Brutalist Button sources across the four Web source profiles in Happy DOM; the second checks the editable CLI workflow and non-overwrite boundaries. Copying an existing installed payload remains a separately labeled offline mode. Watch retains the identity of its original session directory and terminates with an output conflict if that path is replaced by another directory or symlink; it does not adopt the replacement as a new owner. These checks do not claim native-browser, hardware, screen-reader or full application acceptance.
+
 ### Executed evidence and measured costs
 
 The private verification runs compile and mount three-component/Context assemblies in physically isolated consumers for all four Web source profiles, type-check generated TypeScript and helpers, rebuild and execute a consumer-owned template edit, reject an introduced syntax error, and verify the physical dependency tree and artifact hashes. These Web consumer measurements do not exercise GPUI. Vue 2 JavaScript component bodies are not `checkJs`-validated. A separate offline private-package rehearsal executes the bundled compiler JavaScript API in plain Node and records tarball integrity, bundled compile-time inputs, dependencies, BOM and licenses; this is not an official package or public declaration-file release.

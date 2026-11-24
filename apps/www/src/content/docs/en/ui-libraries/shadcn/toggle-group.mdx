@@ -1,15 +1,15 @@
 ---
-title: 'ToggleGroup'
-description: 'Independent single or multiple pressed-value selection with roving focus.'
+title: 'Toggle Group'
+description: 'Single- or multi-select toggle buttons with roving keyboard focus.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Toggle Group organizes a set of toggle buttons into a keyboard-navigable group supporting either single or multiple active values. The examples on this page use the **Shadcn Rhea** style preset.
 
-Independent single or multiple pressed-value selection with roving focus.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-toggle-group"
@@ -18,15 +18,23 @@ Independent single or multiple pressed-value selection with roving focus.
   codePanel={false}
 />
 
-value/defaultValue are arrays. multiple=false keeps at most one value; clicking it again clears selection. Controlled valueChange requests never mutate the owner. Disabled, readOnly and duplicate-valued items do not commit. Arrow navigation changes focus without selecting.
+## Installation
 
-Parts: Root, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Toggle Group consists of `Root` and `Item`:
+
+- Both `value` and `defaultValue` are string arrays (`readonly string[]`).
+- With `multiple={false}` (default), at most one item stays active, and pressing the active item again clears selection. Set `multiple={true}` to allow multiple active items.
+- Pass `value` for controlled mode—interactions emit `valueChange` requests without mutating your state directly.
+- Disabled, read-only, and duplicate-valued items do not commit changes.
+- Arrow keys move roving focus across items without toggling them; `Space` or `Enter` toggles the focused item.
 
 ## API
 
-Toggle Group is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` for controlled mode; each `Item` requires a unique `value`):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -40,8 +48,6 @@ Toggle Group is workspace source. There is no public `proto-ui add` target. Pass
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />
-
-These props belong to Root. Item requires `value`.
 
 ## References
 

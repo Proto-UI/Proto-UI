@@ -1,22 +1,22 @@
 ---
 title: '图标列表'
-description: 'Lucide 图标列表，支持逐图标复制原型代码。'
+description: '浏览全部已启用的 Lucide 图标，并按需复制原型代码片段。'
 ---
 
 import LucideIconGallery from '@/components/LucideIconGallery.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-当前页面收录 Proto UI 已启用的 Lucide 图标。每个图标卡片支持：
+浏览 Proto UI 中已启用的全部 Lucide 图标。每张图标卡片在进入视口时按需加载模块，并支持一键复制 `asHook` 或内联 `render` 片段。
 
-- 复制 `asHook` 使用片段。
-- 复制内联 `render` 片段。
-- 图标卡片进入视口后才按需加载对应模块。
+## 预览
 
 <LucideIconGallery locale="zh-cn" />
 
-## 使用图标
+## 用法
 
-固定 glyph 原型接受 `size`、`strokeWidth`、`stroke` 与 `fill`，按名称选择的入口还接受 `name`。卡片片段面向 Prototype 编写，不是完整宿主应用。[Lucide 图标库指南](../)提供精确包名、完整 WC/React/Vue/Vue 2 源码示例、默认值、装饰性可见性与当前可访问名称边界。
+固定图标原型支持 `size`、`strokeWidth`、`stroke` 与 `fill` 属性；按名称选择的入口额外支持 `name` 属性。卡片内提供的是面向原型编写的代码片段。
+
+如需查看完整安装包名、Web Components / React / Vue / Vue 2 宿主集成示例、属性默认值与无障碍说明，请参阅 [Lucide 图标库指南](../)。
 
 ## 参考
 

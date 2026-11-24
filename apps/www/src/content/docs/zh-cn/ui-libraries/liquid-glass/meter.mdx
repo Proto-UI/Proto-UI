@@ -1,9 +1,13 @@
 ---
-title: liquid-glass Meter
-description: 基于 Base 共享语义的有界数值展示。
+title: 'Meter'
+description: '展示有界度量值与最优区间分级的 Liquid Glass 仪表条组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Meter 用于展示有界数值的度量结果（如存储占用、密码强度或配额使用率），支持通过 `low`、`high`、`optimum` 自动将读数划分为 `optimal`、`suboptimal` 或 `critical` 状态。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-meter"
@@ -12,10 +16,22 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-当前为 Draft 功能实现。Root 拥有有界有限数值；Label 提供名称，Track 容纳 Indicator，Value 显示 valueText 或规范数值。四个视觉家族只投影样式。
+## 安装
 
-Props：value、min（0）、max（100）、ariaLabel、valueText。数值限制在合法范围内；上下界相等时比例为零。low、high、optimum 将测量值划分为 optimal、suboptimal、critical，不改变数值本身。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可从 `meter` 子路径导入 `meterRoot`、`meterLabel`、`meterTrack`、`meterIndicator` 与 `meterValue`。
 
-Root 及部件暴露 value、percentage、indeterminate、status。被动显示不引入键盘停靠点，不伪造输入。更新 Props 同步所有部件。
+## 用法
 
-包入口统一注册后，可从 meter 子路径导入 meterRoot、meterLabel、meterTrack、meterIndicator、meterValue。现有源码测试仅为阶段性证据；完整 Adapter、Compiler、GPUI、原生绘制、辅助技术、包消费及独立验收尚未完成，不据此勾选 Finf。
+- **部件组成**：`Root` 管理数值边界，`Label` 提供名称，`Track` 容纳 `Indicator`，`Value` 优先显示 `valueText` 或规范数值。
+- **范围与区间分级**：输入数值会自动限制在 `[min, max]` 之间（当 `min === max` 时比例为 `0`）。`low`、`high`、`optimum` 仅决定状态分级，不改写原始数值。
+- Meter 为纯被动展示组件，不引入额外键盘停靠点或编辑事件；更新属性时所有子部件同步刷新。
+
+## API
+
+| 部件 | 属性 / 暴露状态 | 默认值与说明 |
+| --- | --- | --- |
+| Root | `value` | 当前度量数值，自动限制在 `[min, max]` 范围内 |
+| Root | `min` / `max` | `0` / `100` |
+| Root | `low` / `high` / `optimum` | 区间阈值，用于将当前值归类为 `optimal`、`suboptimal` 或 `critical` |
+| Root | `ariaLabel` / `valueText` | 可访问名称与可读文本格式化值 |
+| Root / 部件（暴露状态） | `value` / `percentage` / `indeterminate` / `status` | 归一化数值、百分比与区间状态 |

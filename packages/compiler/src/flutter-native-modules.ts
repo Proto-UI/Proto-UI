@@ -273,8 +273,8 @@ class NativeAnatomyPart {
   NativeAnatomyPart(this.owner, this.role);
   final NativeOwner<Object?> owner;
   final String role;
-  bool hasExpose(String name) { owner.ensureAlive(); return owner._exposeNames.contains(name); }
-  Object? getExpose(String name) { owner.ensureAlive(); return owner.publicExposure(name); }
+  bool hasExpose(String name) { if (!owner.alive || owner.disposing) return false; owner.ensureAlive(); return owner._exposeNames.contains(name); }
+  Object? getExpose(String name) { if (!owner.alive || owner.disposing) return null; owner.ensureAlive(); return owner.publicExposure(name); }
   bool hasHook(String name) { owner.ensureAlive(); return owner.hookNames.contains(name); }
   NativeHostTarget get target => owner.hostTarget;
 }

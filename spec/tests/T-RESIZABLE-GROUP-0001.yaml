@@ -22,6 +22,14 @@ cases:
 verifies:
   contracts: [C-RESIZABLE-GROUP-0001]
 implementations:
+  - id: resizable-request-lifetime
+    path: packages/prototypes/base/test/resizable-request-lifetime.test.ts
+    status: passing
+    kind: runtime-test
+    required: true
+    consumesCases: [T-RESIZABLE-GROUP-0001-CASE-CONSUMER]
+    notes:
+      - Detached controlled prop updates may synchronize logical state but cannot reacquire a command lease until the same instance mounts again. Does not stand in for physical pointer or separator assistive technology evidence.
   - id: resizable-model
     path: packages/prototypes/base/test/resizable-model.test.ts
     status: passing

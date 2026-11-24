@@ -26,7 +26,10 @@ function setup(def: DefHandle<NumberFieldPartProps>) {
   const sync = (run: RunHandle<NumberFieldPartProps>) => {
     const c = run.context.read(NUMBER_FIELD_CONTEXT);
     disabled.set(
-      c.disabled || c.readOnly || c.composing || (c.value !== null && c.value >= c.max),
+      c.disabled ||
+        c.readOnly ||
+        c.composing ||
+        (c.value !== null && c.max !== null && c.value >= c.max),
       'reason: number step availability'
     );
     focus.setDisabled(disabled.get());

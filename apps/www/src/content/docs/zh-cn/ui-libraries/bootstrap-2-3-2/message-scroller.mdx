@@ -1,18 +1,33 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: '支持底部自动跟随新消息与手动回底的 Bootstrap 2.3.2 消息流滚动容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Message Scroller 复用 Scroll Surface 的 end-follow。读者位于末端时跟随追加；离开末端后可以通过 Jump to latest 显式恢复。newContentCount 由应用提供，不推断未读业务事实。跳转不会主动请求焦点。
+Message Scroller 面向聊天和实时日志流场景：当用户停留在列表底部时自动跟随新消息滚动，向上回看历史时暂停跟随，并提供“Jump to latest”操作显式回到最新内容。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
-
-Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-message-scroller"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **自动跟随与回底**：仅当视口位于末端时自动跟随追加内容；用户主动滚动离开底部后保持当前位置，点击“Jump to latest”即可平滑回底并恢复跟随，且不会抢夺当前键盘焦点。
+- **新消息计数**：未读或新增条目数通过 `newContentCount` 由应用显式传入，组件不自行推断业务未读状态。
+- **无障碍命名**：通过 `Root` 的 `a11yLabel` 为滚动区域命名，默认为 `'Messages'`。
+
+## API
+
+| 部件   | 属性              | 默认值       | 说明                         |
+| ------ | ----------------- | ------------ | ---------------------------- |
+| `Root` | `a11yLabel`       | `'Messages'` | 滚动区域的可访问名称         |
+| `Root` | `newContentCount` | —            | 由应用提供的新增消息数量提示 |

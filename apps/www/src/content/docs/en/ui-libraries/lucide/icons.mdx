@@ -1,22 +1,22 @@
 ---
 title: 'Icons'
-description: 'Lucide icon catalog with per-icon copyable prototype snippets.'
+description: 'Browse all enabled Lucide icons and copy per-icon prototype snippets.'
 ---
 
 import LucideIconGallery from '@/components/LucideIconGallery.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-This page lists the currently enabled Lucide icons in Proto UI. Each card supports:
+Browse all enabled Lucide icons in Proto UI. Each card lazy-loads its module as it enters the viewport and provides copy-ready `asHook` and inline `render` snippets.
 
-- Copying an `asHook` usage snippet.
-- Copying an inline `render` snippet.
-- Lazy loading icon module code only when the card enters the viewport.
+## Preview
 
 <LucideIconGallery locale="en" />
 
-## Use an icon
+## Usage
 
-Fixed-glyph prototypes accept `size`, `strokeWidth`, `stroke` and `fill`; the name-based entry also accepts `name`. Gallery fragments are Prototype-authoring snippets rather than complete host applications. Follow the [Lucide library guide](../) for exact package names, full WC/React/Vue/Vue 2 source examples, defaults, decorative visibility and the current accessible-name boundary.
+Fixed-glyph prototypes accept `size`, `strokeWidth`, `stroke`, and `fill`; the name-based entry also accepts `name`. Card snippets are intended for prototype authoring inside a setup or render callback.
+
+See the [Lucide Icon Library guide](../) for package installation, full Web Components / React / Vue / Vue 2 examples, prop defaults, and accessibility guidance.
 
 ## References
 

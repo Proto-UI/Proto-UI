@@ -29,6 +29,7 @@ export function gpuiExpressionChildren(value: ExpressionIR): readonly Expression
     case 'authored-hook':
       return value.arguments ?? [];
     case 'object-spread':
+    case 'array-spread':
       return value.parts.map((part) => part.value);
     case 'binary':
       return [value.left, value.right];
@@ -39,7 +40,12 @@ export function gpuiExpressionChildren(value: ExpressionIR): readonly Expression
     case 'record':
       return value.entries.map((entry) => entry.value);
     case 'rule':
-      return [value.receiver, ...value.states.map((state) => state.value)];
+      return [
+        value.receiver,
+        ...value.states.map((state) => state.value),
+        ...(value.styles ?? []).map((style) => style.value),
+        ...(value.targets ?? []).map((target) => target.value),
+      ];
     case 'function':
     case 'literal':
     case 'undefined':
@@ -157,11 +163,24 @@ export function gpuiLexicalNames(input: PrototypeIR): PrototypeIR {
           ...value,
           parts: value.parts.map((part) => ({ ...part, value: child(part.value) })),
         };
+      case 'array-spread':
+        return {
+          ...value,
+          parts: value.parts.map((part) => ({ ...part, value: child(part.value) })),
+        };
       case 'rule':
         return {
           ...value,
           receiver: child(value.receiver),
           states: value.states.map((state) => ({ ...state, value: child(state.value) })),
+          ...(value.styles
+            ? { styles: value.styles.map((style) => ({ ...style, value: child(style.value) })) }
+            : {}),
+          ...(value.targets
+            ? {
+                targets: value.targets.map((target) => ({ ...target, value: child(target.value) })),
+              }
+            : {}),
         };
       case 'literal':
       case 'undefined':
@@ -190,6 +209,22 @@ export function gpuiLexicalNames(input: PrototypeIR): PrototypeIR {
           then: body(value.then, scope),
           otherwise: body(value.otherwise, scope),
         };
+      if (value.kind === 'while')
+        return {
+          ...value,
+          condition: expression(value.condition, scope),
+          body: body(value.body, scope),
+        };
+      if (value.kind === 'for-of') {
+        const loop = new Map(scope);
+        loop.set(value.name, name(value));
+        return {
+          ...value,
+          name: name(value),
+          iterable: expression(value.iterable, scope),
+          body: body(value.body, loop),
+        };
+      }
       const caught = new Map(scope);
       if (value.catch?.name) caught.set(value.catch.name, value.catch.name);
       return {

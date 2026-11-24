@@ -1,16 +1,35 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: '支持层级展开收起、单选与完整键盘导航的 Bootstrap 2.3.2 树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，parentKey 指向父项；重复标识、缺失父项和环路均拒绝。方向键、Home/End 与首字母移动焦点；左右键展开、折叠或定位父子项。value 与 expandedKeys 支持受控请求。
+Tree 用于展示嵌套层级数据，提供节点展开/收起、单选以及符合树视图习惯的方向键与首字母导航。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-tree"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+- **显式层级结构**：每个节点通过树内唯一的 `nodeKey` 标识，并用 `parentKey` 指向父节点；若存在重复键、缺失父节点或循环引用，将忽略非法配置并保持当前状态。
+- **键盘导航**：上下方向键、`Home` / `End` 与首字母输入移动焦点；右方向键展开折叠节点或移至首个子节点，左方向键收起展开节点或返回父节点。
+- **受控状态**：`value`（当前选中节点）和 `expandedKeys`（展开节点集合）均支持受控模式，由父组件响应变更请求并更新。
+
+## API
+
+| 属性           | 说明                             |
+| -------------- | -------------------------------- |
+| `nodeKey`      | 节点在当前树中的唯一标识         |
+| `parentKey`    | 指向父节点的 `nodeKey`           |
+| `value`        | 当前选中节点键（支持受控）       |
+| `expandedKeys` | 当前展开的节点键集合（支持受控） |

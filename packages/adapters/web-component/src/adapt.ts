@@ -693,11 +693,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       };
 
       const setViewDetached = (detached: boolean) => {
+        // A native attribute reaction can synchronously reopen this view.
+        // Stop old delivery before it can enable the current gate again.
+        if (detached) currentEventGate?.disable();
         thisEl.toggleAttribute(PUI_VIEW_DETACHED_ATTR, detached);
-        if (detached) {
-          currentEventGate?.disable();
-          return;
-        }
+        if (detached) return;
         const gate = currentEventGate;
         schedule(() => {
           if (
@@ -1356,15 +1356,43 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           initialPresent = snapshot.present;
           return;
         }
-        const wasConcealing = this._portalConceal.cancel();
-        // The shared marker projects not-present intent immediately. The
-        // existing conceal barrier retains the portal projection through a
-        // rendering opportunity before releasing or reparenting its nodes.
-        if (!snapshot.present) setViewDetached(true);
         const requestVersion = ++latestIntentVersion;
-        if (snapshot.present && wasConcealing && owner.hasView) {
-          // The retained epoch never unmounted. Reveal it immediately so a
-          // newer open/focus request is not queued behind the canceled barrier.
+        const wasConcealing = this._portalConceal.cancel();
+        if (
+          ownerResourcesReleased ||
+          this._terminalDisposing ||
+          requestVersion !== latestIntentVersion
+        )
+          return;
+        if (!snapshot.present) {
+          currentEventGate?.disable();
+          // The shared marker immediately projects not-present intent. The
+          // existing barrier only delays physical retirement.
+          setViewDetached(true);
+          if (
+            ownerResourcesReleased ||
+            this._terminalDisposing ||
+            requestVersion !== latestIntentVersion
+          )
+            return;
+          // Keep the owned conceal lease and its cleanup/reentry protection
+          // while the existing rendering barrier retains the portal projection.
+          if (isWebComponentPortaled(thisEl)) this._portalConceal.conceal();
+          if (
+            ownerResourcesReleased ||
+            this._terminalDisposing ||
+            requestVersion !== latestIntentVersion
+          )
+            return;
+        }
+        if (
+          snapshot.present &&
+          owner.hasView &&
+          (wasConcealing || thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR))
+        ) {
+          // Marker-first close can reenter before concealment starts. The
+          // retained epoch never unmounted, so project the newer present intent
+          // immediately instead of queuing it behind the old retirement.
           setViewDetached(false);
           return;
         }

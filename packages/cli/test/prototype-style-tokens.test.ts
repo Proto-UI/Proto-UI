@@ -42,6 +42,13 @@ describe('collectProtoStyleTokens', () => {
     expect(tokens).not.toContain('dark:data-[checked]:bg-primary');
   });
 
+  it('delivers the Shadcn Accordion content formatting context through its projected capture', async () => {
+    const tokens = await collectProtoStyleTokensFromFiles([
+      path.resolve(process.cwd(), 'packages/prototypes/shadcn/src/accordion/content.proto.ts'),
+    ]);
+    expect(tokens).toContain('data-[open]:block');
+  });
+
   let dir: string;
 
   beforeEach(async () => {
@@ -51,6 +58,156 @@ describe('collectProtoStyleTokens', () => {
   afterEach(async () => {
     await rm(dir, { recursive: true, force: true });
   });
+
+  it.each([
+    ['fresh true record', '{ enabled: true }', '', true],
+    ['fresh false record', '{ enabled: false }', '', false],
+    ['same-named static key', '{ enabled: true }', 'const data = { options: [] };', true],
+    [
+      'shadowed nested parameter',
+      '{ enabled: true }',
+      'const deferred = (options) => external(options);',
+      true,
+    ],
+    ['unknown member', '{ enabled: external }', '', false],
+    ['getter member', '{ get enabled() { return true; } }', '', false],
+    ['spread member', '{ ...external, enabled: true }', '', false],
+    ['record binding can escape', 'held', '', false],
+    ['member write', '{ enabled: true }', 'options.enabled = false;', false],
+    ['parameter escape', '{ enabled: true }', 'external(options);', false],
+    ['parameter alias', '{ enabled: true }', 'const alias = options; external(alias);', false],
+    ['arguments alias write', '{ enabled: true }', 'arguments[1].enabled = false;', false],
+    [
+      'destructured property write',
+      '{ enabled: true }',
+      '({ enabled: options.enabled } = external);',
+      false,
+    ],
+    ['destructured tuple write', '{ enabled: true }', '[options.enabled] = external;', false],
+  ])(
+    'bounds conditional child registration through %s',
+    async (_name, argument, action, proven) => {
+      await writeFile(
+        path.join(dir, 'facts.ts'),
+        `import { defineAsHook } from '@proto.ui/core';
+       declare const external: any; const held = { enabled: true };
+       const useChild = defineAsHook({ name: 'child', setup(d) { d.state.bool('ready', false); } });
+       function install(def, options) { ${action} if (options.enabled) useChild(); }
+       export const useParent = defineAsHook({ name: 'parent', setup(def) { install(def, ${argument}); } });`
+      );
+      const entry = path.join(dir, 'entry.proto.ts');
+      await writeFile(
+        entry,
+        `import { definePrototype, tw } from '@proto.ui/core'; import { useParent } from './facts';
+       export default definePrototype({ name: 'consumer', setup(def) {
+         const parent = useParent(); const child = parent.getAsHookHandle('child');
+         def.rule({ when: w => w.state(child.stateHandles.ready).eq(true), intent: i => i.feedback.style.use(tw('block')) });
+       } });`
+      );
+      expect((await collectProtoStyleTokensFromFiles([entry])).includes('data-[ready]:block')).toBe(
+        proven
+      );
+    }
+  );
+
+  it.each([
+    [
+      'capture with a deferred callback',
+      'return { ...result, read: () => external() };',
+      true,
+      true,
+    ],
+    ['capture with an extra value', 'return { ...result, extra: external };', true, true],
+    ['capture after an opaque spread', 'return { ...external, ...result };', true, true],
+    ['opaque spread after capture', 'return { ...result, ...external };', false, false],
+    ['state bag overwritten', 'return { ...result, stateHandles: external };', false, true],
+    [
+      'state bag restored last',
+      'return { ...result, stateHandles: external, ...result };',
+      true,
+      true,
+    ],
+    ['accessor overwritten', 'return { ...result, getState: external };', true, false],
+    ['computed overwrite', 'return { ...result, [external]: external };', false, false],
+    [
+      'eager getter replaces the captured bag',
+      'const extra = { get poison() { result.stateHandles = external; return 0; } }; return { ...extra, ...result };',
+      false,
+      false,
+    ],
+    [
+      'eager getter replaces the captured accessor',
+      'const extra = { get poison() { result.getState = external; return 0; } }; return { ...extra, ...result };',
+      false,
+      false,
+    ],
+    [
+      'direct getter read replaces the captured bag',
+      'const extra = { get poison() { result.stateHandles = external; return 0; } }; const seen = extra.poison; return { ...result };',
+      false,
+      false,
+    ],
+    [
+      'direct getter read replaces the captured accessor',
+      'const extra = { get poison() { result.getState = external; return 0; } }; const seen = extra["poison"]; return { ...result };',
+      false,
+      false,
+    ],
+    [
+      'unread getter stays deferred',
+      'const extra = { get poison() { result.stateHandles = external; return 0; } }; return { ...result, extra };',
+      true,
+      true,
+    ],
+    [
+      'eager computed getter name',
+      'const extra = { get [external(result)]() { return 0; } }; return { ...result, extra };',
+      false,
+      false,
+    ],
+    [
+      'eager computed method name',
+      'const extra = { [external(result)]() {} }; return { ...result, extra };',
+      false,
+      false,
+    ],
+    [
+      'result mutated before spread',
+      'result.stateHandles = external; return { ...result };',
+      false,
+      false,
+    ],
+    ['result escapes before spread', 'external(result); return { ...result };', false, false],
+  ])(
+    'keeps projected capture spread proof bounded: %s',
+    async (_name, projection, proven, getterProven) => {
+      await writeFile(
+        path.join(dir, 'facts.ts'),
+        `import { defineAsHook } from '@proto.ui/core';
+       declare const external: any;
+       export const asFacts = defineAsHook({ name: 'spread-facts',
+         setup(def) { def.state.bool('expanded', false); },
+         projectHandle(result) { ${projection} }
+       });`
+      );
+      const entry = path.join(dir, 'entry.proto.ts');
+      await writeFile(
+        entry,
+        `import { definePrototype, tw } from '@proto.ui/core';
+       import { asFacts } from './facts';
+       export default definePrototype({ name: 'spread-consumer', setup(def) {
+         const inherited = asFacts();
+         def.rule({ when: w => w.state(inherited.stateHandles.expanded).eq(true),
+           intent: i => i.feedback.style.use(tw('block')) });
+         def.rule({ when: w => w.state(inherited.getState('expanded')).eq(true),
+           intent: i => i.feedback.style.use(tw('opacity-50')) });
+       }});`
+      );
+      const tokens = await collectProtoStyleTokensFromFiles([entry]);
+      expect(tokens.includes('data-[expanded]:block')).toBe(proven);
+      expect(tokens.includes('data-[expanded]:opacity-50')).toBe(getterProven);
+    }
+  );
 
   it('collects lowered state styles through imported helper parameters and forwarding aliases', async () => {
     await writeFile(

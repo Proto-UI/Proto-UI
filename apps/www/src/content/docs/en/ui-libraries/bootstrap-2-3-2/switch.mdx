@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Switch'
-description: 'A Bootstrap 2.3.2 design-language extension over Base Switch.'
+description: 'A Bootstrap 2.3.2 design-language extension switch built over Base Switch.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-This Switch is a design-language extension, not an original Bootstrap 2.3.2 component. Its Root / Thumb anatomy borrows the archived raised-control language while preserving Base Switch semantics.
+Bootstrap 2.3.2 Switch is a design-language extension, not an original Bootstrap 2.3.2 component. It adapts the archived raised-control look into a `Root` / `Thumb` anatomy while inheriting Base Switch semantics and keeping the classic light palette.
 
-Base Switch owns the persistent on/off `checked` value, controlled and uncontrolled ownership, activation, disabled behavior, and focus. Thumb reads the nearest Root context and owns no independent value or events.
+## Preview
 
-Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2. Activate the first two switches and verify that the disabled switch stays unchanged.
+Toggle the first two switches and verify the disabled switch stays unchanged across runtimes.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-switch"
@@ -22,10 +22,20 @@ Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2
   codePanel={false}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+
+## Usage
+
+- **Root manages the state**: Supports controlled `checked` and uncontrolled `defaultChecked`, activation, disabled state, and keyboard focus.
+- **Thumb**: Place inside `Root` to automatically reflect the current on/off state.
+
 ## API
 
-- Root: `checked` / `defaultChecked` and `disabled`
-- Root emits the inherited `checkedChange` signal
-- Thumb: derived display inside its Root
-
-This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).
+| Part    | Props / Events               | Description                                     |
+| ------- | ---------------------------- | ----------------------------------------------- |
+| `Root`  | `checked` / `defaultChecked` | Controlled or initial on/off state              |
+| `Root`  | `disabled`                   | Prevents toggling when enabled                  |
+| `Root`  | `checkedChange`              | Emitted when the switch requests a state change |
+| `Thumb` | —                            | Derived visual thumb placed inside `Root`       |

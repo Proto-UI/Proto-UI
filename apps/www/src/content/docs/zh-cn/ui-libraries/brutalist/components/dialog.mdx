@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Dialog'
-description: '工业风 Dialog 与关闭控件合约'
+description: '具备硬边框面板、高对比度关闭控件与完整焦点管理的 Brutalist 模态对话框组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,27 +9,29 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-# Dialog
+Brutalist Dialog 在完整继承 [Base Dialog](/zh-cn/ui-libraries/base/dialog/) 语义、焦点管理与遮罩行为的基础上，采用高对比度的硬边框海报式面板和独立强调色关闭按钮。
 
-面板保持 Base Dialog 语义和命令连接，并使用工业海报式处理。
-
-- 触发器使用天空蓝色块与硬阴影。
-- 右上角 X 是独立金丝雀黄色方形控件，不是无边框图标；其 glyph 取金丝雀填充的配对前景，因此在两个主题下都可读。
-- Hover 变珊瑚红并保持 4px 硬阴影；Pressed 移除阴影。
-- footer dismiss 动作保留明确关闭语义，不伪装成普通文本链接。Close 自身不带 control surface、只拥有 dismissal，因此 footer 动作组合一个 Button child，组合后保持单一 tab stop。
-- 保留硬轮廓 Focus 和可访问名称 `Close`。
+## 预览
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-dialog" initialRuntime="wc" />
 </div>
 
-## Draft 工作区继承
+## 安装
 
-当前工作区还继承有界的 [Base Mask 指针默认行为](/zh-cn/ui-libraries/base/dialog/)：participating Mask 阻止自身 root-scoped 指针默认动作夺走已恢复焦点，passthrough 不阻止，关闭策略仍归 Content。这项 draft 修订与先前发布的家族版本分开，不新增风格化 Dialog props。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+- **CLI 目标**：`proto-ui add <react|vue|vue2|wc> brutalist-dialog`
+
+## 用法
+
+- **触发器与关闭按钮**：触发按钮使用天蓝色块与硬阴影；右上角关闭按钮（可访问名称 `Close`）为独立金丝雀黄圆角控件，悬停切换为珊瑚红，按压时移除阴影并保持清晰硬焦点轮廓。
+- **底部关闭操作**：`Close` 部件仅负责关闭语义，不自带按钮外观；在弹窗底部组合 `Button` 子元素即可获得标准按钮样式并保持单一 `Tab` 停靠点。
+- **遮罩交互**：非穿透 `Mask`（默认 `passthrough={false}`）会阻止指针默认行为夺走已恢复的焦点，点击外部的关闭策略由 `Content` 统一控制。
 
 ## API
 
-Dialog 是工作区源码。当前工作区 CLI 目标为 `brutalist-dialog`。CLI 与依赖包必须来自同一版本；安装前确认所选发布版包含该家族。传入 `open` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -41,4 +43,10 @@ Dialog 是工作区源码。当前工作区 CLI 目标为 `brutalist-dialog`。C
   ]}
 />
 
-这些属性属于 Root。Mask 接受 `passthrough`（`false`）以及 Transition 属性。Content 的 `focusEntry` 默认 `auto`，同样接受 Transition 属性。Trigger、Title、Description 与 Close 没有属性。
+传入 `open: boolean` 进入受控模式。
+
+### 其他部件属性
+
+- **Mask**：`passthrough?: boolean`（默认 `false`）及 Transition 属性
+- **Content**：`focusEntry`（默认 `'auto'`）及 Transition 属性
+- **Trigger / Title / Description / Close**：无独立属性

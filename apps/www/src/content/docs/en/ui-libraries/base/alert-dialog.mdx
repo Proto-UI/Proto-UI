@@ -1,13 +1,15 @@
 ---
 title: 'AlertDialog'
-description: 'A modal decision with a primary message, safe cancel target and explicit action intent.'
+description: 'A modal confirmation dialog that traps focus, prioritizes the safe cancel action, and requires an explicit decision.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-A modal decision with a primary message, safe cancel target and explicit action intent.
+Base AlertDialog interrupts the user for an explicit confirmation before a sensitive or irreversible action. It blocks outside dismissal and focuses the cancel action by default to prevent accidental confirmation.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-alert-dialog"
@@ -16,28 +18,48 @@ A modal decision with a primary message, safe cancel target and explicit action 
   codePanel={false}
 />
 
-Root fixes alert semantics. Mask owns modality; Content traps focus, blocks outside dismissal and starts at Cancel when available. Action emits action before requesting close. Application code owns the effect; no destructive operation is performed by the prototype. Escape and Cancel request dismissal.
+## Installation
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+## Usage
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+### Anatomy
+
+Compose `Root`, `Trigger`, `Mask`, `Content`, `Title`, `Description`, `Cancel`, and `Action`:
+
+- `Root` manages open state with alertdialog semantics.
+- `Mask` renders the modal backdrop; `Content` traps focus, blocks outside-click dismissal, and focuses `Cancel` first when available.
+- Activating `Action` emits the `action` event before requesting close; your application handles the underlying side effect.
+- Pressing `Escape` or activating `Cancel` requests dismissal.
+
+### Controlled and uncontrolled state
+
+- Pass `open` for controlled mode: listen to `openChange` and supply the next boolean value to commit state changes.
+- Omit `open` for uncontrolled mode and optionally pass `defaultOpen`.
+- Setting `disabled` prevents command activation.
 
 ## API
 
-Alert Dialog is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+### Root Props
+
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'a11yLabel', type: 'string', default: "''" },
   ]}
 />
 
-These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content also accepts the Transition props. Trigger, Title, Description, Cancel and Action have no props.
+### Other parts
+
+- **Mask**: accepts `passthrough` (default `false`) plus the Transition props.
+- **Content**: accepts the Transition props.
+- **Trigger, Title, Description, Cancel, Action**: no props.
 
 ## References
 

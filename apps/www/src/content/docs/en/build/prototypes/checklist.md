@@ -1,80 +1,76 @@
 ---
 title: 'Prototype Author Checklist'
-description: 'Check contribution readiness, spec ownership, evidence, and delivery before opening a Prototype pull request.'
+description: 'Review contribution path, spec ownership, boundaries, tests, and website demos before opening a Prototype pull request.'
 ---
 
-## 1. Which contribution path am I following?
+Run through this checklist before starting work or opening a pull request to keep specs, code, tests, and docs aligned.
 
-- Am I maintaining an existing P, projecting Base, or implementing a governed or candidate Base slice?
-- Does the issue state the current governed direction, the candidate scope, and the evidence needed next?
-- For an existing governed subject, am I continuing implementation or projection rather than waiting for another blanket approval?
-- For a genuinely new Base subject, is the admission decision recorded? If it is unresolved, are research, the candidate graph, draft entities, implementation probes, and tests continuing without claiming admission?
+## 1. Confirm the contribution path
 
-## 2. Did I start from applicable spec entities?
+- You know whether you are maintaining an existing `P-*`, building a styled component over Base, or implementing a new Base semantic slice.
+- The issue states the scope and expected validation clearly.
+- Any brand-new Base identity remains marked `draft` until admission is decided.
 
-- Did I find the applicable `P-*` and `T-*` entities?
-- Did I read lifecycle, criteria, relations, sources, revisions, and mapped tests?
-- Did I avoid treating a legacy contract, old record, or current implementation as higher authority than the applicable P entity?
-- If sources conflict, did I identify the drift explicitly?
+## 2. Start from applicable spec entities
 
-## 3. Do I really need a new Prototype?
+- You located the applicable `P-*` and `T-*` entities.
+- You checked their lifecycle status, criteria, inheritance, sources, and mapped test paths.
+- When code and spec conflict, you treat the `P-*` entity as the baseline and resolve the drift explicitly.
 
-- Is this a new interaction or semantic subject rather than a new style?
-- Can existing Prototypes or `asHook`s already express it?
-- Is this composition rather than an independent protocol?
+## 3. Confirm a new Prototype is needed
 
-## 4. Is the boundary correct?
+- The work models a distinct interaction subject, not just a new visual theme.
+- Existing Prototypes and `asHook`s cannot express it cleanly.
+- It belongs as an independent protocol rather than host-level component composition.
 
-- Does the subject own an independent input-fact-to-observable-output path?
-- Are Parts split by responsibility rather than DOM or visual regions?
-- Did I avoid creating an identity that owns only a name or empty inheritance point?
+If any answer is no, revisit [Why You Usually Do Not Need a New Prototype](/en/build/prototypes/when-not-to-write-a-new-prototype/).
 
-## 5. Is this protocol semantics or host implementation?
+## 4. Check component boundaries
 
-- Did I keep host-specific behavior out of the Prototype?
-- Did I avoid treating one Web Adapter technique as cross-host meaning?
-- Am I hiding an Adapter parity problem in Prototype or CSS logic?
+- The Prototype owns an independent, testable input-to-output interaction path.
+- Parts are split by responsibility rather than visual wrappers, without cramming unrelated duties into one Prototype or inventing empty identities.
 
-## 6. If compound, is the family explicit?
+When unsure about boundaries, read [Chapter 3: Component Boundaries](/en/whitepaper/3-component-boundary/).
 
-- Are anatomy roles, cardinality, and relations justified?
-- Are Root, Part, and shared ownership separate?
-- Does context contain shared protocol meaning rather than miscellaneous host or style details?
+## 5. Keep interaction semantics host-neutral
 
-## 7. If projected, does it faithfully inherit Base?
+- Host- or framework-specific behavior stays out of the Prototype.
+- Adapter-specific details are not leaked into cross-host protocols, and Prototype workarounds are not used to hide Adapter parity gaps.
 
-- Does the derived P define delta criteria and connect Base through `inherits.prototypes`?
-- Does implementation consume the Base `asHook` instead of rebuilding ownership?
-- Is every negative patch explicit in the P entity?
-- Are unsupported upstream APIs and compatibility limits documented?
-- Should a subject with no Base protocol be styled-only rather than creating an empty Base identity?
+## 6. Compound family structure
 
-## 8. Do authoring entries match the cataloged protocol?
+- `Anatomy` roles, cardinality, and containment relations are clear and justified.
+- Root, Part, and shared responsibilities are cleanly separated under explicit state owners.
+- `Context` carries only shared protocol facts, free of host objects or theme-private styling details.
 
-- Does the applicable P entity require a direct Prototype, an authored asHook, or both?
-- When direct and authored-asHook entries express one protocol, do they share implementation and remain in one P entity?
-- Did I avoid adding an asHook merely for API symmetry?
-- Did I avoid using one protocol-specific authored asHook as another Base protocol's behavior substrate?
-- Does any configurable authored asHook stay within an explicitly governed contract?
+## 7. Styled library inheritance
 
-## 9. Does the website demo represent installed usage?
+- The styled layer adds `variant`, `size`, tokens, and style `Rule`s while reusing Base interaction behavior via its `asHook`.
+- The derived `P-*` entity links to Base through `inherits.prototypes` and documents only its delta criteria.
+- Any setup-time negative patch is declared in the spec and backed by tests.
+- Unsupported upstream APIs and compatibility limits are clearly documented.
+- Visual-only components without a Base interaction protocol use `styled-only` directly instead of creating empty Base identities.
 
-- Does every new public Prototype identity or anatomy family have a reachable page connected to the website documentation entry point?
-- Does the pull request provide a local preview route that maintainers can open directly?
-- Does the demo consume the real public package export and provide applicable Web Component, React, and Vue previews?
-- Does an autonomous Prototype work through its own anatomy, triggers, state, events, and default behavior?
-- Did I avoid page state, unrelated Button callbacks, private CSS, or scripts added only to make the demo work?
-- If the Prototype has no natural trigger or its public controls must be demonstrated, is external orchestration minimal and limited to public APIs?
-- Does the demo source and pull request say which exception code is not installed with the package and must be recreated by consumers?
-- Is the internal Demo Matrix treated as supplementary evidence rather than a replacement for the website page?
+## 8. Authoring entries and `asHook`s
 
-## 10. Is evidence coherent?
+- Direct Prototype and `asHook` exports match the applicable `P-*` entity.
+- When both direct and `asHook` entries exist for one protocol, they share one core implementation and live in the same `P-*` entity.
+- No empty `asHook` was added for symmetry alone, and no protocol-specific `asHook` is reused as a substrate for an unrelated Base protocol.
+- Any configurable `asHook` stays within an explicit contract.
 
-- Does every new or changed P criterion have a substantive `T-*` case?
-- Do T cases anchor exact criteria and map real executable paths?
-- Do focused tests verify positive results and required absence assertions?
-- Do package exports, CLI, the website page, demos, and three-Adapter previews form a complete delivery surface?
-- Were generated files updated through their generator?
-- Does the pull request record the commands and manual validation actually performed?
+## 9. Website demos reflect real usage
 
-Docs-only and demo-only fixes do not need artificial P/T entities. Any change to normative semantics or observable guarantees must update the applicable entities, evidence, and affected projections as one coherent change.
+- Every new public Prototype or compound family includes a reachable website page connected to library navigation and notes the local preview route in the PR.
+- The demo imports the real public package export and covers applicable Web Component, React, and Vue previews.
+- Autonomous components work via their own Anatomy, triggers, states, events, and defaults without extra page state, unrelated button callbacks, or private CSS workarounds.
+- When a component has no natural trigger or demonstrates imperative controls, external glue stays minimal, uses public APIs only, and explains in the demo source and PR what consumers need to wire up themselves.
+
+## 10. Tests and delivery closure
+
+- Every new or changed `P-*` criterion maps to a concrete `T-*` case and executable test path.
+- Focused unit tests verify both expected behavior and explicit absence assertions.
+- Package exports, CLI facades, website docs, demos, and three-Adapter previews stay in sync.
+- All generated files were updated through their generators.
+- The PR lists the check commands and manual verification actually performed.
+
+> Pure doc or demo fixes that do not alter public semantics do not need new `P-*`/`T-*` entities. Any change to normative behavior or observable guarantees should update specs, tests, and docs together in one PR.

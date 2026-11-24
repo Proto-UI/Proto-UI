@@ -1,15 +1,15 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: 'An unstyled hierarchical tree view with single selection, branch expansion, RTL keyboard navigation, and scoped ARIA relations.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Tree owns single selection and expansion of a complete authored hierarchy. nodeKey is unique, parentKey identifies its parent, and invalid cycles or missing parents fail closed. Arrow keys, Home/End and first-letter navigation move focus; Left/Right collapse, expand or navigate to parent/child. Controlled value and expandedKeys are request-only.
+An unstyled tree view for explicit hierarchical data, supporting single selection, branch expansion and collapse, direction-aware keyboard navigation, and automatically cleaned up ARIA relationships.
 
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-tree"
@@ -17,17 +17,22 @@ This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package con
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Direction and branch relationships
+## Installation
 
-Set Root `direction="rtl"` to exchange the horizontal navigation keys: Left expands or moves to a child, and Right collapses or moves to its parent. The LTR default uses the opposite mapping. Up/Down, Home/End and typeahead keep logical visible order. Shadcn and Brutalist Group indentation follows the writing direction.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Give each `TreeGroup` the same `nodeKey` as its owning branch Item, and place that branch’s child Items inside the Group with `parentKey` pointing to the branch. Item controls Group, and Group is labelled by Item, through scoped keyed relationships. A removed, missing or ambiguous target does not leave a dangling relationship. Collapsing a branch hides its Group without deleting the authored hierarchy. If focus was inside the collapsed branch, the visible ancestor receives focus; focus outside this Tree stays outside.
+## Usage
 
-`readOnly` prevents selection changes while allowing navigation and expansion. Controlled `value` and `expandedKeys` remain committed until the application accepts their requests. Inserting, moving or removing authored Items updates the hierarchy without emitting a user selection request.
+Compose `Root`, `Item`, `Group`, and `Toggle`:
+
+- **Keys and branch hierarchy**: Each node declares a tree-unique `nodeKey` and optional `parentKey` (duplicate keys, missing parents, and cycles are ignored without corrupting valid state). Give each `TreeGroup` the same `nodeKey` as its owning branch `Item` and place child items inside it with `parentKey` pointing to that branch.
+- **Keyboard navigation and RTL**: `ArrowUp`/`ArrowDown`, `Home`/`End`, and typeahead move focus in logical visible order. In LTR mode, `ArrowRight` expands or enters a child and `ArrowLeft` collapses or returns to the parent; setting `direction="rtl"` swaps horizontal keys automatically (and styled group indentation follows writing direction).
+- **Collapse and focus safety**: Scoped `aria-controls` and `aria-labelledby` links between `Item` and `Group` are maintained and cleaned up automatically. Collapsing a branch hides its `Group` while preserving the hierarchy; if focus was inside the collapsed branch, focus moves to the nearest visible ancestor without disturbing focus outside the tree.
+- **Controlled and read-only**: Pass `value` or `expandedKeys` for controlled mode. `readOnly` blocks selection changes while keeping navigation and expansion enabled. Adding, moving, or removing items updates the hierarchy without emitting synthetic user selection events.
 
 ## API
 
-Tree is workspace source. There is no public `proto-ui add` target. Passing `value` or `expandedKeys` selects controlled mode for that fact.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,7 +46,13 @@ Tree is workspace source. There is no public `proto-ui add` target. Passing `val
   ]}
 />
 
-These props belong to Root. Item defaults `nodeKey`, `parentKey`, and `textValue` to `''`, and `disabled` to `false`. Group accepts `nodeKey`. Toggle adds the Button props.
+Pass `value` or `expandedKeys` to control selection or expanded branches.
+
+### Part Props
+
+- **Item**: `nodeKey` (default `''`), `parentKey` (default `''`), `textValue` (default `''`), `disabled` (default `false`).
+- **Group**: `nodeKey`.
+- **Toggle**: Also accepts `Button` props.
 
 ## References
 

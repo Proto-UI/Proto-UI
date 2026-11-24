@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Switch'
-description: 'Mechanical Neo-Brutalist switch states and interaction contract'
+description: 'A mechanical Brutalist-styled switch with a 2px-bordered capsule track and crisp circular thumb.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,27 +9,34 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-# Switch
+Switch toggles a setting between on and off states. Its Brutalist presentation pairs a 2px black-bordered capsule track with a white circular thumb and no drop shadow for crisp, mechanical feedback.
 
-The [reference Switch](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/switch.tsx) uses a capsule and a white circular thumb, each with a 2px black border and no shadow. At a 16px root font size, the track is 24×48px and the thumb is 16px.
-
-- Off: neutral track; On: main blue track. The thumb stays white
-- Only the thumb moves, 1.25rem between endpoints (20px with symmetric 6px outer insets at a 16px root font size)
-- The 150ms spatial Thumb transition becomes instantaneous under reduced motion
-- Press does not flash coral, shift the track, or add an extra shadow
-- Keyboard focus retains an offset ring; disabled preserves shape and blocks activation
-
-The prototype uses physical left/right placement so the same measured geometry remains bounded in an RTL parent; this is not a claim of mirrored RTL switch semantics. The visible caption is inside the Switch root, so Base derives its accessible name from the same text across all four Web runtimes. Clicking the caption follows the same activation path; the disabled example remains inert. DM Sans typography comes from the prototype, with host fallback for unsupported glyphs.
-
-Dragging is temporarily unsupported: `draggable` accepts only `false` or omission; a raw `true` input falls back to `false`. Tap and keyboard activation remain available. The next drag extension must use the same declared endpoints for input and direct thumb presentation while preserving these reference dimensions.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />
 </div>
 
+## Installation
+
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-switch`, or import directly from `@proto.ui/prototypes-brutalist/switch`.
+
+## Usage
+
+### Visual & Motion Details
+
+- **Geometry & colors**: At a 16px root font size, the track is `24×48px` and the white circular thumb is `16px`. The track switches from neutral (off) to main blue (on) while the thumb travels `1.25rem` (20px with symmetric 6px outer insets).
+- **State feedback**: The `150ms` thumb transition becomes instantaneous under `prefers-reduced-motion: reduce`. Pressing does not shift the track or add shadow; keyboard focus displays an offset ring; `disabled` preserves geometry and blocks activation.
+- **Labelling & layout**: Place the visible caption inside `Root` to supply the accessible name and click target (DM Sans typography with host fallback). Physical left/right thumb coordinates keep geometry bounded even inside RTL parents.
+
+### Interaction Notes
+
+- Supports click and keyboard activation, as well as controlled mode via `checked`.
+- Pointer dragging is not enabled yet: `draggable` defaults to `false`, and passing `true` falls back to `false` while click and keyboard toggling continue to work normally.
+
 ## API
 
-Switch is workspace source. For this workspace version, the CLI target is `brutalist-switch`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `checked` selects controlled mode.
+The following props belong to `Root` (pass `checked` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,4 +48,6 @@ Switch is workspace source. For this workspace version, the CLI target is `bruta
   ]}
 />
 
-These props belong to Root. Thumb has no props.
+Other parts:
+
+- **Thumb**: No props.

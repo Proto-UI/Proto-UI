@@ -3,7 +3,7 @@ type: test
 title: Finite numeric Rule gte and explicit compiler boundary
 status: draft
 since: 0.3.0-alpha.1
-summary: One pure comparison preserves dependency identity, runtime withdrawal and unsupported compiler diagnostics.
+summary: One pure comparison preserves dependency identity, runtime withdrawal and explicit compiler admission boundaries.
 cases:
   - id: T-RULE-FINITE-GTE-0001-CASE-NUMERIC
     title: Exact finite numeric boundary and pure data recording
@@ -14,9 +14,9 @@ cases:
     covers: [C-RULE-WHEN-0001-FINITE-GTE, C-RULE-WHEN-0001-C]
     expectation: generic-runtime-style-contribution-recomputes-with-eq-unchanged
   - id: T-RULE-FINITE-GTE-0001-CASE-COMPILER
-    title: Compiler profiles reject unadmitted source and serialized operators explicitly
+    title: Compiler admits finite numeric predicates and rejects malformed serialized thresholds
     covers: [C-RULE-WHEN-0001-FINITE-GTE]
-    expectation: unsupported-source-and-portable-plan-never-reinterpret-or-drop-gte
+    expectation: finite-numeric-source-and-portable-plan-no-coercion-and-invalid-threshold-diagnostics
 implementations:
   - id: rule-finite-gte-module
     kind: module-test
@@ -37,6 +37,9 @@ implementations:
     required: true
     consumesCases: [T-RULE-FINITE-GTE-0001-CASE-COMPILER]
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Replaces the former rejection boundary with checked finite numeric source/plan evaluation and malformed-threshold coverage.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Red/green runtime gte tests plus explicit current compiler rejection boundary.

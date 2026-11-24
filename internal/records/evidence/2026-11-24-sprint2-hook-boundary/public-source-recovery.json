@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "1576544cf0435eb07c478ddcecb35960dcfd0db5",
+  "sourceTree": "abf6443baf245953b26ba3609b46256836449a9b",
+  "scope": "Seven exact publicly committed historical inputs recovered from existing local Git objects. Not the full 13091-member private source archive or its original compressed bytes. No product execution or full Hook contract acceptance.",
+  "archive": "public-source-1576544.tar.gz",
+  "archiveBytes": 60219,
+  "archiveSha256": "396e816bca1378fc326a4399b602059ad3adc6b0eaefc06a0bfdf515b748e723",
+  "members": [
+    {
+      "path": "scripts/release/hook-closeout-container.mjs",
+      "gitBlob": "6b6bcc7d2873241968915a836c93fc33931dc922",
+      "mode": "100644",
+      "bytes": 47095,
+      "sha256": "6548b5e88d2abab2a81d3ff89c9e8a9d8eb0c2fad55c85b0eabb455abcf4732e"
+    },
+    {
+      "path": "scripts/release/consumer-smoke/hook-closeout.mjs",
+      "gitBlob": "68e0b29912940b3846531608fe23feb6528946c3",
+      "mode": "100644",
+      "bytes": 13117,
+      "sha256": "1a9e8009cf973613c5c21193a2e2880fc452dd5fa1b2a7b3fa4e0f56317f3464"
+    },
+    {
+      "path": "scripts/release/consumer-smoke/hook-closeout.proto.ts.txt",
+      "gitBlob": "36f0ef48ad1167f8fd7cd5c9490078a6fc95d833",
+      "mode": "100644",
+      "bytes": 1326,
+      "sha256": "5eec905534391f164462bac3fb27ba21c17fce4138c586b7c9ef24d53f9e669c"
+    },
+    {
+      "path": "scripts/release/consumer-smoke/hook-closeout.types.ts.txt",
+      "gitBlob": "4e0639fd366cc1e405ac3d38cb8175722ba7ca65",
+      "mode": "100644",
+      "bytes": 621,
+      "sha256": "fec7812b8268e8e8d401a0ca39badbcc661f94bdce01cc56afd200fe2ce703ce"
+    },
+    {
+      "path": "apps/www/src/content/docs/en/specifications/as-hook.mdx",
+      "gitBlob": "61663588610215d44c643cd82fa7c8cbb2081377",
+      "mode": "100644",
+      "bytes": 28387,
+      "sha256": "1db7db23ee0de4a586ca6b4e7878b39df84b239b86a0c717c303e7b2d4d06389"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/specifications/as-hook.mdx",
+      "gitBlob": "2460f1c5ab9e4dddb840e1f45c1c84ff1d75ba35",
+      "mode": "100644",
+      "bytes": 26605,
+      "sha256": "ecf29e59a9d6598c4849d504d5718f9a901c71e6cde35723f7384c1eeb81bb91"
+    },
+    {
+      "path": "internal/records/2026-11-11-issue-1154-container-preparation.json",
+      "gitBlob": "9d26cf4217378d9ade6a2541f969a28f98bd0afb",
+      "mode": "100644",
+      "bytes": 123024,
+      "sha256": "757b6ba88622fc8c6b8967a2f8fe9500a350084f06af6602af021c6db5d3eba2"
+    }
+  ],
+  "memberReadback": true,
+  "originalPrivateArchiveSha256": "fd2794add510b12157453eb19ebb63fbd99f91138c68a69c97003888f170877e",
+  "originalPrivateArchiveRecovered": false,
+  "originalHookContractPathPresentInCommit": false
+}

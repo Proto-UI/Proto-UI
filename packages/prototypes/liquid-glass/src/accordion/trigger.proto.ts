@@ -17,6 +17,7 @@ export default definePrototype<AccordionTriggerProps, AccordionTriggerExposes>({
     const state = asAccordionTrigger().stateHandles!;
     def.feedback.material.declare({
       version: 2,
+      paintReservation: 'required',
       shape: { kind: 'rounded-rect', geometry: 'style' },
       source: { kind: 'in-app-backdrop' },
       fallback: { fill: 'style', foreground: 'style' },

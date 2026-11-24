@@ -1,19 +1,15 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: 'A hierarchical tree view with branch expansion, keyboard navigation, and RTL support.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Tree displays nested hierarchies—such as file browsers or document outlines—with single selection, expandable branches, and full keyboard navigation. The examples on this page use the **Shadcn Rhea** style preset.
 
-Tree owns single selection and expansion of a complete authored hierarchy. nodeKey is unique, parentKey identifies its parent, and invalid cycles or missing parents fail closed. Arrow keys, Home/End and first-letter navigation move focus; Left/Right collapse, expand or navigate to parent/child. Controlled value and expandedKeys are request-only.
-
-This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
-
-Shadcn Root and Item accept `appearance="embedded"` for file navigation inside an existing surface. Set it explicitly on both parts; the default appearance is unchanged. Embedded rows use a quiet selected surface, retain keyboard focus and disabled semantics, and wrap enlarged text. This is a family presentation option, not a new selection or expansion owner.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-tree"
@@ -21,17 +17,31 @@ Shadcn Root and Item accept `appearance="embedded"` for file navigation inside a
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Direction and branch relationships
+## Installation
 
-Set Root `direction="rtl"` to exchange the horizontal navigation keys: Left expands or moves to a child, and Right collapses or moves to its parent. The LTR default uses the opposite mapping. Up/Down, Home/End and typeahead keep logical visible order. Shadcn and Brutalist Group indentation follows the writing direction.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Give each `TreeGroup` the same `nodeKey` as its owning branch Item, and place that branch’s child Items inside the Group with `parentKey` pointing to the branch. Item controls Group, and Group is labelled by Item, through scoped keyed relationships. A removed, missing or ambiguous target does not leave a dangling relationship. Collapsing a branch hides its Group without deleting the authored hierarchy. If focus was inside the collapsed branch, the visible ancestor receives focus; focus outside this Tree stays outside.
+## Usage
 
-`readOnly` prevents selection changes while allowing navigation and expansion. Controlled `value` and `expandedKeys` remain committed until the application accepts their requests. Inserting, moving or removing authored Items updates the hierarchy without emitting a user selection request.
+Tree consists of `Root`, `Item`, `Group` (`TreeGroup`), and `Toggle`:
+
+- Give each `Item` a unique `nodeKey` and set `parentKey` to its parent branch's key. Invalid configurations such as duplicate keys, missing parents, or cycles are ignored so the active tree stays valid.
+- Place child items inside a `TreeGroup` whose `nodeKey` matches its branch `Item`; Tree automatically links and cleans up `aria-controls` and `aria-labelledby` attributes as nodes mount and unmount.
+- Collapsing a branch hides its `TreeGroup` without removing the underlying hierarchy. If focus was inside the collapsed branch, focus moves to the visible ancestor without stealing focus from outside the tree.
+
+### Embedded appearance and writing direction
+
+- For file navigation inside a sidebar or existing surface, set `appearance="embedded"` on both `Root` and `Item` to enable a subtle selected background and text wrapping at enlarged font sizes.
+- Setting `direction="rtl"` on `Root` mirrors group indentation and swaps Left/Right keyboard mappings (Left expands or enters children; Right collapses or moves to the parent). Up/Down, `Home`/`End`, and first-letter typeahead continue following visual order.
+
+### Controlled and read-only
+
+- Pass `value` or `expandedKeys` for controlled selection or expansion; inserting, moving, or removing items updates the hierarchy without emitting spurious selection events.
+- `readOnly` blocks selection changes while keeping navigation and branch expansion enabled.
 
 ## API
 
-Tree is workspace source. There is no public `proto-ui add` target. Passing `value` or `expandedKeys` selects controlled mode for that fact.
+The following props belong to `Root` (pass `value` or `expandedKeys` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -45,7 +55,11 @@ Tree is workspace source. There is no public `proto-ui add` target. Passing `val
   ]}
 />
 
-These props belong to Root. Item defaults `nodeKey`, `parentKey`, and `textValue` to `''`, and `disabled` to `false`. Group accepts `nodeKey`. Toggle adds the Button props.
+Other part props:
+
+- `Item`: `nodeKey`, `parentKey`, and `textValue` default to `''`; `disabled` defaults to `false` (also supports `appearance="embedded"`).
+- `Group`: accepts `nodeKey`.
+- `Toggle`: accepts Button props.
 
 ## References
 

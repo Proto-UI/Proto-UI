@@ -1,79 +1,75 @@
 ---
 title: '基于 Base 长出一个带风格的原型库'
-description: '理解 Base projection、styled-only identity 与设计语言 delta。'
+description: '理解基于 Base 的风格化组件、styled-only 身份、Rule 样式规则与负向补丁边界。'
 ---
 
-这篇是设计思路导论。准备提交完整投射时，请直接使用[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)中的 P/T、provenance、测试、导出、CLI、Demo 和验证流程。
+本文介绍在 Proto UI 中构建风格化组件库的核心设计思路。如果你准备提交完整的风格组件 PR，请同时配合[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)中的规范、测试、导出与 Demo 交付流程。
 
-## 先判断是 projection 还是 styled-only
+## 先区分继承 Base 还是 styled-only
 
-### Base projection
+### 基于 Base 继承
 
-当 Base 已拥有 state、events、focus、a11y、context 或 positioning protocol 时，derived P 通过 `inherits.prototypes` 连接 Base，并在实现中消费对应 asHook。derived layer 只增加已编目的设计语言 delta，不建立第二个语义 owner。
+当组件需要复用 Base 已有的状态、事件、焦点、无障碍、Context 或定位协议时，风格层在规范中通过 `inherits.prototypes` 声明继承关系，并在源码中调用对应的 Base `asHook`。风格层只负责叠加视觉与设计语言增量，交互状态仍由 Base 统一管理。
 
 ### Styled-only
 
-如果对象只拥有设计语言 props、视觉规则、内容模型或 visual anatomy，又没有独立 Base 信息通路，它可以成为 formal styled-only P。不要为了获得继承入口而创建空 Base identity。
+当组件只包含设计语言属性、样式规则、内容布局或视觉结构（Visual Anatomy），本身没有独立的跨宿主交互协议时，直接声明为 `styled-only` 即可，不需要为了“有地方可继承”而在 Base 中造一个空壳协议。
 
-Base admission 需要独立、跨宿主、可测试的 input-fact-to-observable-output path；组件目录名或流行设计系统中的同名对象并不是证据。
+## 示例：Shadcn Button 的结构
 
-## Shadcn Button 的当前形状
+`P-SHADCN-BUTTON` 展示了一个紧凑的风格化原型结构：
 
-`P-SHADCN-BUTTON` 当前声明一个 direct Prototype：
+- 在规范中通过 `inherits.prototypes` 继承 `P-BASE-BUTTON`；
+- 在 [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts) 中调用 `asButton()` 复用底层按钮交互；
+- 新增 6 种 `variant`、4 种 `size` 与对应的视觉 Token；
+- 基于继承来的 `hovered`、`focusVisible`、`pressed`、`disabled` 状态与 `colorScheme` 元信息编写样式 `Rule`；
+- 明确说明暂不支持上游 `asChild` 属性，保持兼容边界透明；
+- 只导出直接原型入口，无需额外提供 `asHook`。
 
-- 通过 `inherits.prototypes` 指向 `P-BASE-BUTTON`；
-- 在 [button.proto.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/shadcn/src/button/button.proto.ts) 中调用 `asButton()`；
-- 增加六种 `variant`、四种 `size` 与 visual tokens；
-- 根据 inherited `hovered`、`focusVisible`、`pressed`、`disabled` 和 `colorScheme` meta 投射视觉规则；
-- 明确不提供上游 `asChild`，并把其他 parity 差异留在 compatibility open question；
-- 本层不额外提供 authored asHook。
+> 注：`P-BASE-BUTTON` 与 `P-SHADCN-BUTTON` 当前均处于 `draft` 阶段，具体属性和规则请以对应规范文件为准。
 
-旧指南曾把 `invalid` 与 `expanded` 写成当前 Shadcn Button rule 输入；当前实现和 passing P criteria 并没有这项保证，不能继续这样描述。
+## 风格层 `P-*` 实体应记录什么
 
-`P-BASE-BUTTON` 与 `P-SHADCN-BUTTON` 目前均为 `draft`。npm 0.2.0 的发布状态不会自动把这些实体提升为 active。
+一份清晰易评审的风格层 `P-*` 规范只需聚焦**增量与差异**：
 
-## Derived P 应该写什么
+- 上游设计系统的来源仓库、路径、版本与许可证信息；
+- `inherits.prototypes` 继承关系或 `styled-only` 分类；
+- 新增的 `variant`、`size`、样式 Token、视觉 Anatomy 与兼容范围；
+- 明确的 setup 期负向补丁（negative patch）及其替代行为；
+- 明确不支持的上游 API；
+- 关联的 `T-*` 测试用例与实际源码路径。
 
-一个可审查的设计语言 P 应聚焦 delta：
+无需在风格层重复抄写 Base 的基础准则，也只记录已经实现的兼容能力。
 
-- 精确 upstream repository、path、revision 与 provenance；
-- `inherits.prototypes` 或 styled-only classification；
-- variants、sizes、tokens、visual anatomy 与 compatibility boundary；
-- 明确的 setup-time negative patch 及其替代语义；
-- 当前不支持的 upstream API；
-- substantive `T-*` evidence 与真实 source paths。
+## 源码如何复用 Base
 
-不要复制所有 Base criteria，也不要承诺尚未实现的 upstream parity。
+实现风格组件时，通常先调用所属 Base 的 `asHook`，再按需叠加：
 
-## 实现应怎样复用 Base
+- 设计语言专属 props；
+- `feedback.style` 样式 Token；
+- 基于 Base 状态或元信息的样式 `Rule`；
+- 规范中声明的视觉 Anatomy；
+- 风格库自己的类型定义与包导出入口。
 
-通常先调用 owning Base asHook，再增加：
-
-- design-language props；
-- `feedback.style` tokens；
-- 基于 Base state 或 meta 的 rules；
-- 必要且已编目的 visual anatomy；
-- derived types 与 public entries。
-
-如果实现重新持有 Base value、event request、focus、a11y、dismissal 或 positioning，就应暂停并返回 Issue，而不是让 style layer 成为第二套语义真相。
+让 Base 继续管理值、事件请求、焦点、无障碍、关闭策略与定位；如果发现风格层开始自己维护一份重复的状态，应回到规范检查归属边界，保持单一数据源。
 
 ## 负向补丁与兼容边界
 
-Derived Prototype 可以在 setup 期放弃或替换某项 inherited guarantee，但必须在自己的 P criterion 中明确：
+如果风格组件需要在 `setup` 阶段放弃或替换某项继承自 Base 的能力，请在对应的 `P-*` 准则中写明：
 
-- 放弃了哪项 Base capability；
-- 用什么语义替代；
-- 对外兼容影响是什么；
-- 哪些 absence assertions 防止能力悄悄回来。
+- 放弃或替换了哪项 Base 能力；
+- 替代后的公开行为是什么；
+- 对下游使用者的兼容影响；
+- 用来验证旧能力确实关闭的断言测试。
 
-Runtime flag 不能伪装成 setup-time negative patch。
+这类能力裁剪必须在 `setup` 阶段静态声明，避免用运行时开关替代。
 
-## Host 与 Adapter 表述
+## 宿主与 Adapter 预览说明
 
-当前 Web Component、React 与 Vue 预览共同提供的是一个 Web host profile 的跨 Adapter evidence。设计语言页面可以比较三套 Adapter 的 Web 行为，但不能据此宣称非 Web host conformance 或“所有宿主 API 完全一致”。
+目前官网提供 Web Component、React 与 Vue 预览，方便在 Web 环境下对比三套 Adapter 的渲染与交互表现；涉及其他非 Web 宿主时，请按对应宿主文档核对具体支持范围。
 
 ## 下一步
 
-- 完整交付流程：读[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)
-- 选择源码与证据：读[参考实现应该怎么看](/zh-cn/build/prototypes/reference-patterns/)
-- 提交前检查：使用[原型作者检查清单](/zh-cn/build/prototypes/checklist/)
+- 完整交付流程：[从 Base 投射风格化 Prototype](/zh-cn/build/prototypes/projecting-base-into-a-design-language/)
+- 从规范进入源码与测试：[参考实现应该怎么看](/zh-cn/build/prototypes/reference-patterns/)
+- 提交前逐项核对：[原型作者检查清单](/zh-cn/build/prototypes/checklist/)

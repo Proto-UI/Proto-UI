@@ -1,16 +1,32 @@
 ---
-title: 'Virtual-List (WIP)'
-description: 'virtual-list composition and explicit implementation boundary.'
+title: 'Virtual List'
+description: 'A Bootstrap 2.3.2 virtualized list that renders only visible items and supports variable item heights.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Virtual List separates a complete stable logical key sequence from physical views. Item-count overscan, maximum materialized count, revisions and generation-bound commits live in a host-neutral model. The explicit virtual-list/web entry measures variable item extents, owns spacers and Web nodes, preserves keyed views, scrolls to a key and disposes listeners. This demo uses that Web host boundary; it is not native GPUI or Compiler conformance. App-owned content is created only for the bounded visible range.
+Virtual List decouples a stable logical key sequence from rendered DOM nodes, mounting only items in the visible viewport plus an overscan buffer for smooth scrolling over large datasets.
 
-WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-virtual-list"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+- **Bounded rendering model**: The host-neutral core tracks stable logical keys, item-count `overscan`, and a maximum materialized item cap so application content is created only for the visible window.
+- **Web integration**: The `virtual-list/web` entry measures variable item heights, manages scroll spacers, reuses keyed nodes, scrolls to any key on demand, and cleans up listeners on teardown.
+
+## API
+
+| Capability / Entry | Description |
+| --- | --- |
+| Core model | Tracks stable logical keys, item-count `overscan`, and max materialized count |
+| `virtual-list/web` | Measures variable extents, manages spacers, supports scroll-to-key, and cleans up listeners |

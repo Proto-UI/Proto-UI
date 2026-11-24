@@ -1,11 +1,13 @@
 ---
 title: 'Combobox'
-description: 'Editable search with committed option identity.'
+description: 'A Liquid Glass searchable combobox that keeps committed option identity separate from input text.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Editable search with committed option identity.
+Liquid Glass Combobox combines an editable search field with a popup listbox. Unlike Autocomplete, `Root.value` always represents a committed option key while `inputValue` tracks editable text—unmatched input is never silently accepted as a selection.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-combobox"
@@ -14,10 +16,21 @@ Editable search with committed option identity.
   codePanel={false}
 />
 
-Root.value is a selected item key. inputValue is independent editable text. Unmatched text is never silently accepted as an option.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty, Trigger.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+- **Parts**: `Root`, `Input`, `Content`, `Item`, `Empty`, `Trigger`.
+- **Independent state**: `open`, `value` (selected key), and `inputValue` (search query) can each be controlled independently with their respective change requests.
+- **Filtering and keyboard**: built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively; set `filter={false}` to render caller-filtered items. Focus stays in `Input` during arrow navigation, IME composition never selects, `Empty` tracks actual matches, and disabled or duplicate-valued items cannot commit.
+
+## API
+
+| Part | Prop | Description |
+| --- | --- | --- |
+| Root | `value`, `inputValue`, `open` | Independently controllable option key, search text, and popup visibility |
+| Root | `filter` | Set to `false` to provide pre-filtered items |
+| Item | `textValue`, `keywords`, `disabled` | Option label, search keywords, and disabled flag |
+| Empty | — | Rendered when no items match the current query |

@@ -1,7 +1,6 @@
 ---
 title: 'Dialog'
-desp: 'Dialog'
-description: 'Dialog base prototype'
+description: 'An unstyled modal dialog providing focus trapping, backdrop masking, dismissal handling, and accessible title/description linking.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -10,6 +9,10 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import DialogDemoStyles from '@/components/PrototypePreviewer/DialogDemoStyles.astro';
 
 <DialogDemoStyles />
+
+Base Dialog provides the unstyled building blocks for modal windows, managing open state, focus trapping, backdrop masking, dismissal policies, and ARIA labelling.
+
+## Preview
 
 <div class="dialog-demo-container">
   <PrototypePreviewer
@@ -20,31 +23,37 @@ import DialogDemoStyles from '@/components/PrototypePreviewer/DialogDemoStyles.a
   />
 </div>
 
-The Dialog family provides protocol-layer building blocks for modal windows. Root owns the open state; this page does not introduce a non-modal `modal` switch.
+## Installation
 
-- **dialog-root**: Holds the `open` state and provides context to all child parts.
-- **dialog-trigger**: Opens or toggles the dialog on click.
-- **dialog-mask**: Renders the backdrop mask and follows the open state for enter/leave transitions.
-- **dialog-content**: Handles focus trapping, overlay dismissal strategies (ESC, outside press), and enter/leave transitions.
-- **dialog-title**: Semantic title automatically linked to content via `aria-labelledby`.
-- **dialog-description**: Semantic description automatically linked to content via `aria-describedby`.
-- **dialog-close**: Closes the dialog on click.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. In the workspace, the CLI target is `base-dialog`.
 
-Pass `alert` to `dialog-root` to turn it into an alert dialog: it sets `role="alertdialog"` and disables outside-press dismissal while keeping ESC close.
+## Usage
 
-## Draft workspace Mask behavior
+### Anatomy
 
-The workspace revision of `P-BASE-DIALOG-MASK-DEFAULT-ACTION` keeps Content as the independent focus/dismissal owner. A participating Mask requests default-action prevention for its root-scoped `pointer.down`, so the background pointer default cannot overwrite Content's close-time focus restoration. A Mask with `passthrough=true` does not request this prevention. Mask does not take over dismissal, propagation or keyboard handling, and does not promise to distinguish arbitrary native descendants that lack an independent interaction owner inside it.
+- **`dialog-root`**: manages `open` state and provides shared context to child parts.
+- **`dialog-trigger`**: opens or toggles the dialog on activation.
+- **`dialog-mask`**: renders the backdrop overlay and follows open transitions. By default, it prevents default pointer-down actions on the backdrop so background interactions do not interfere with close-time focus restoration; set `passthrough={true}` to opt out.
+- **`dialog-content`**: manages focus trapping, dismissal (`Escape` and outside press), and enter/leave transitions.
+- **`dialog-title`**: automatically links to `dialog-content` via `aria-labelledby`.
+- **`dialog-description`**: automatically links to `dialog-content` via `aria-describedby`.
+- **`dialog-close`**: requests closing the dialog when activated.
 
-This is the draft workspace behavior introduced by [PR #777](https://github.com/Proto-UI/Proto-UI/pull/777), not a claim about the previously published 0.2 package. A decorative [Surface](/en/ui-libraries/base/surface/) can consume existing Transition facts for paint; it must not become another Dialog, focus or dismissal owner.
+### Alert mode and styling
+
+- Set `alert={true}` on `dialog-root` to apply `role="alertdialog"` and disable outside-press dismissal while keeping `Escape` dismissal.
+- For decorative visual layers, compose [Surface](/en/ui-libraries/base/surface/) to consume existing transition states.
 
 ## API
 
-Dialog is workspace source. For this workspace version, the CLI target is `base-dialog`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` selects controlled mode.
+### Root Props
+
+Passing `open` selects controlled mode.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'false' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'alert', type: 'boolean', default: 'false' },
@@ -52,7 +61,11 @@ Dialog is workspace source. For this workspace version, the CLI target is `base-
   ]}
 />
 
-These props belong to Root. Mask accepts `passthrough` (`false`) plus the Transition props. Content defaults `focusEntry` to `auto` and also accepts the Transition props. Trigger, Title, Description and Close have no props.
+### Other parts
+
+- **Mask**: `passthrough` defaults to `false`, plus Transition props.
+- **Content**: `focusEntry` defaults to `'auto'`, plus Transition props.
+- **Trigger, Title, Description, Close**: no props.
 
 ## References
 

@@ -89,7 +89,7 @@ for (const profile of nativeOwnerProfiles)
         expect(api.readFlag()).toBe(true);
         expect(api.hasState).toBe(true);
         expect(owner.compiled.ir.hooks[0].capture?.states).toEqual([
-          { name: 'flag', type: 'state:boolean' },
+          { name: 'flag', type: 'state:boolean', definite: true },
         ]);
       }
     );

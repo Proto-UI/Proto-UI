@@ -1,11 +1,13 @@
 ---
 title: 'Tabs'
-description: 'Liquid Glass Tabs：四个真实 Base 协议投影。'
+description: '具备分段玻璃外观与下划线变体的 Liquid Glass 选项卡组件，继承 Base Tabs 语义。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Root、List、Trigger、Content 分别消费 [Base Tabs 协议](/zh-cn/ui-libraries/base/tabs/)。Root 独占选中值；方向键和 Home/End 在可用标签间移动；手动模式下 Enter/Space 才激活。受控请求须等待 owner 更新 value。
+Liquid Glass Tabs 由 `Root`、`List`、`Trigger`、`Content` 四个部件组成，继承 [Base Tabs](/zh-cn/ui-libraries/base/tabs/) 协议。默认呈现圆角分段材质样式（自动支持不透明回退），并额外提供透明背景细下划线变体（`appearance="underline"`）。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-tabs"
@@ -13,10 +15,30 @@ Root、List、Trigger、Content 分别消费 [Base Tabs 协议](/zh-cn/ui-librar
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-从 `@proto.ui/prototypes-liquid-glass/tabs` 导入 `tabsRoot`、`tabsList`、`tabsTrigger`、`tabsContent`。当前仍是私有 draft workspace 源码，不表示公开发布或 native/Compiler 已贯通。
+## 安装
 
-List 与 Trigger 的 `appearance="underline"` 提供 Runtime Box 的透明背景、文字宽细下划线；默认仍保留本家外观。Root 接收 `value`/`defaultValue`、`activationMode`、`orientation`；Trigger 接收 `value`/`disabled`；Content 接收 `value`/`keepMounted`。Runtime 使用手动激活，因此方向键移动不会重挂示例。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-源码与模拟 DOM 证据不替代绑定新提交的原生截图、窄屏几何及独立视觉验收；这些浏览器检查仍待执行。
+```ts
+import {
+  tabsRoot,
+  tabsList,
+  tabsTrigger,
+  tabsContent,
+} from '@proto.ui/prototypes-liquid-glass/tabs';
+```
 
-默认圆角材质分段样式是本家独立创作，使用既有 material 声明及普通样式 fallback；不是 Apple 官方 Tabs 复刻。
+## 用法
+
+- **状态与导航**：选中值由 `Root` 统一管理。方向键与 `Home` / `End` 在可用选项卡之间移动焦点；在手动激活模式下，按 Enter / Space 才切换选中面板（适合避免方向键浏览时频繁重挂内容）。受控模式下需由调用方更新 `value`。
+- **外观变体**：默认使用 Liquid Glass 分段外观；在 `List` 与 `Trigger` 上传入 `appearance="underline"` 可切换为透明背景、与文字等宽的细下划线样式。
+
+## API
+
+| 部件    | 属性                                | 说明                                             |
+| ------- | ----------------------------------- | ------------------------------------------------ |
+| Root    | `value` / `defaultValue`            | 受控 / 非受控当前选中选项卡标识                  |
+| Root    | `activationMode` / `orientation`    | 自动或手动键盘激活模式 / 水平或垂直排布          |
+| List    | `appearance`                        | 默认分段样式；设为 `'underline'` 使用下划线外观  |
+| Trigger | `value` / `disabled` / `appearance` | 选项卡标识、禁用态与外观变体                     |
+| Content | `value` / `keepMounted`             | 对应选项卡标识；设为 `true` 时切换后保留隐藏节点 |

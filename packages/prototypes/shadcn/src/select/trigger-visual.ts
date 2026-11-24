@@ -2,6 +2,7 @@ import {
   delay,
   tw,
   type DefHandle,
+  type DelayTask,
   type RenderFn,
   type RendererHandle,
   type RunHandle,
@@ -125,7 +126,7 @@ export function setupSelectTriggerVisual(
     if (smRadius)
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.prop('size').eq('sm')),
-        intent: (i) => i.feedback.style.use(tw(smRadius)),
+        intent: (i) => i.feedback.style.use(smRadius),
       });
   }
   def.rule({
@@ -176,7 +177,7 @@ export function setupSelectTriggerVisual(
     if (dark)
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
-        intent: (i) => i.feedback.style.use(tw(dark)),
+        intent: (i) => i.feedback.style.use(dark),
       });
     if (darkHover)
       def.rule({
@@ -186,7 +187,7 @@ export function setupSelectTriggerVisual(
             w.meta('colorScheme').eq('dark'),
             w.state(hovered).eq(true)
           ),
-        intent: (i) => i.feedback.style.use(tw(darkHover)),
+        intent: (i) => i.feedback.style.use(darkHover),
       });
   }
   def.rule({
@@ -262,7 +263,7 @@ export function setupSelectTriggerVisual(
             w.state(invalid).eq(true),
             w.not(w.meta('colorScheme').eq('dark'))
           ),
-        intent: (i) => i.feedback.style.use(tw(recipe.light)),
+        intent: (i) => i.feedback.style.use(recipe.light),
       });
       def.rule({
         when: (w) =>
@@ -271,7 +272,7 @@ export function setupSelectTriggerVisual(
             w.state(invalid).eq(true),
             w.meta('colorScheme').eq('dark')
           ),
-        intent: (i) => i.feedback.style.use(tw(recipe.dark)),
+        intent: (i) => i.feedback.style.use(recipe.dark),
       });
     }
     def.rule({
@@ -291,7 +292,7 @@ export function setupSelectTriggerVisual(
   def.props.watch(['appearance'], validate);
   def.lifecycle.onCreated(validate);
   def.lifecycle.onUpdated(validate);
-  let task: { cancel(): void } | null = null;
+  let task: DelayTask | null = null;
   let renderedStyle = style.get();
   const scheduleGlyph = (run: RunHandle<ShadcnSelectTriggerProps>) => {
     validate(run);

@@ -1,16 +1,14 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: '支持自动滚底跟随与手动回到底部的 Brutalist 风格消息滚动容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
-Message Scroller 复用 Scroll Surface 的 end-follow。读者位于末端时跟随追加；离开末端后可以通过 Jump to latest 显式恢复。newContentCount 由应用提供，不推断未读业务事实。跳转不会主动请求焦点。
+Message Scroller 面向聊天与实时消息流场景，复用 Scroll Surface 的末端跟随能力：当用户停留在列表底部时自动跟随新消息，向上翻阅历史记录后可通过跳转按钮回到最新内容。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
-
-Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-brutalist-message-scroller"
@@ -18,9 +16,30 @@ Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。可直接从 `@proto.ui/prototypes-brutalist/message-scroller` 导入组件原型并使用对应宿主 Adapter 适配。
+
+## 用法
+
+### 组件结构
+
+Message Scroller 由 `Root`、`Viewport` 和 `Jump` 组成：
+
+- `Root`：管理末端跟随状态、新消息计数与滚动区域的无障碍名称。
+- `Viewport`：承载消息列表内容的可滚动视图容器。
+- `Jump`：用户离开底部时用于快速返回最新消息的按钮（接受 Button 属性）。
+
+### 关键行为
+
+- **末端自动跟随**：只有当用户当前位于底部时，追加的新内容才会触发自动滚底；用户主动向上浏览时不会强行拉回。
+- **新消息计数**：`newContentCount` 由应用层按自身业务规则传入，组件不会自行猜测未读数量。
+- **焦点保持**：点击 `Jump` 回到底部时不会主动抢占或移动当前焦点。
+- **无障碍名称**：通过 `Root` 的 `a11yLabel` 为滚动区域提供无障碍名称，默认值为 `'Messages'`。
+
 ## API
 
-Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 没有属性。Jump 接受 Button 的属性。
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -30,5 +49,7 @@ Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Vi
   ]}
 />
 
-这些属性属于 Root。
+其余子部件：
 
+- **Viewport**：无属性。
+- **Jump**：接受 Button 的属性。

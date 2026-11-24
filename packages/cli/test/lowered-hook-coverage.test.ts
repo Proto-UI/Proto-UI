@@ -6,7 +6,10 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { createExposeStateWebNameMap } from '../../modules/expose-state-web/src/utils';
-import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
+import {
+  scanRuleStateReads,
+  scanRuleStateReadInventory,
+} from '../src/services/lowered-hook-coverage';
 import type { RuleStateScan } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
 import type { HookSourceState } from '../src/services/hook-source-summary';
@@ -42,15 +45,6 @@ async function prototypeSourceFiles(): Promise<string[]> {
   return files;
 }
 
-/**
- * A `rule` call's callee is named `rule`, so a file whose text lacks that word
- * cannot contain one however the call is punctuated — `def.rule?.({})` and
- * `def.rule /* note *\/ ({})` both keep it. Matching the word rather than the
- * call shape keeps the scanned set identical to production while not building a
- * TypeScript AST for every type and index module under `src`.
- */
-const RULE_CALL = /\brule\b/;
-
 /** A real intent: the variant is a prefix on tokens, so a stub yields nothing. */
 const rule = (condition: string) =>
   `def.rule({ when: (w) => ${condition}, intent: (i) => i.feedback.style.use(tw('bg-primary')) });`;
@@ -63,6 +57,117 @@ const rule = (condition: string) =>
 const SELECTABLE_ATTRIBUTE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 describe('lowered hook coverage', () => {
+  it('keeps helper argument provenance separate for known, unknown and overlapping callers', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'lowered-rule-source-closure-'));
+    try {
+      const sources = {
+        'facts.ts': `import { defineAsHook } from '@proto.ui/core';
+          export const asFirst = defineAsHook({ name: 'first', setup(d) { d.state.bool('first', false); }, projectHandle(r) { return { ready: r.stateHandles.first }; } });
+          export const asSecond = defineAsHook({ name: 'second', setup(d) { d.state.bool('second', false); }, projectHandle(r) { return { ready: r.stateHandles.second }; } });`,
+        'paint.ts': `import { tw } from '@proto.ui/core';
+          export function paint(def, state) { def.rule({ when: w => w.state(state.ready).eq(true), intent: i => i.feedback.style.use(tw('block')) }); }`,
+        'captured.ts': `import { tw } from '@proto.ui/core';
+          export function paintCaptured(def, first, bag) { def.rule({ when: w => w.state(bag.ready).eq(true), intent: i => i.feedback.style.use(tw('block')) }); }`,
+        'cycle.ts': `export function first(value) { if (value) second(false); } function second(value) { if (value) first(false); }`,
+        'barrel.ts': `export { paint as decorate } from './paint';`,
+        'first.proto.ts': `import { definePrototype } from '@proto.ui/core'; import { asFirst } from './facts'; import { decorate } from './barrel';
+          export default definePrototype({ name: 'one', setup(def) { decorate(def, asFirst()); } });`,
+        'second.proto.ts': `import { definePrototype } from '@proto.ui/core'; import { asSecond } from './facts'; import { paint } from './paint';
+          export default definePrototype({ name: 'two', setup(def) { paint(def, asSecond()); } });`,
+        'unknown.proto.ts': `import { definePrototype } from '@proto.ui/core'; import { paint } from './paint';
+          declare const external: any;
+          export default definePrototype({ name: 'unknown', setup(def) { paint(def, external); } });`,
+        'overlap.proto.ts': `import { definePrototype } from '@proto.ui/core'; import { asFirst } from './facts'; import { paint } from './paint';
+          declare const external: any; declare const choose: boolean;
+          export default definePrototype({ name: 'overlap', setup(def) { let state = asFirst(); if (choose) state = external; paint(def, state); } });`,
+        'captured.proto.ts': `import { definePrototype } from '@proto.ui/core'; import { asFirst, asSecond } from './facts'; import { paintCaptured } from './captured';
+          export default definePrototype({ name: 'captured', setup(def) { const first = asFirst(); const bag = { ready: first.ready }; paintCaptured(def, asSecond(), bag); } });`,
+        'cycle.proto.ts': `import { definePrototype } from '@proto.ui/core'; import { first } from './cycle';
+          export default definePrototype({ name: 'cycle', setup(def) { first(true); } });`,
+      };
+      for (const [name, text] of Object.entries(sources))
+        await writeFile(path.join(dir, name), text);
+      const files = Object.keys(sources).map((name) => path.join(dir, name));
+      const inventory = scanRuleStateReadInventory(files);
+      const forEntry = (name: string) =>
+        inventory.evaluated.filter((row) => row.entryFile === path.join(dir, name));
+      for (const name of ['first', 'second']) {
+        const rows = forEntry(`${name}.proto.ts`);
+        expect(rows).toHaveLength(1);
+        expect(rows[0].rule.file).toBe(path.join(dir, 'paint.ts'));
+        expect(rows[0].callPath).toHaveLength(1);
+        expect(rows[0].usages.map(({ hook, state }) => ({ hook, state }))).toEqual([
+          { hook: name === 'first' ? 'asFirst' : 'asSecond', state: name },
+        ]);
+        expect(rows[0].usages[0].provenance?.declaration.file).toBe(path.join(dir, 'facts.ts'));
+        expect(rows[0].unresolved).toEqual([]);
+      }
+      for (const name of ['unknown', 'overlap']) {
+        expect(forEntry(`${name}.proto.ts`).flatMap((row) => row.usages)).toEqual([]);
+        expect(forEntry(`${name}.proto.ts`).flatMap((row) => row.unresolved)).toEqual([
+          { expression: 'state.ready', reason: 'subject' },
+        ]);
+      }
+      // A caller-owned AST may not resolve its free name against the callee's
+      // same-named parameter. Keep that unsupported capture unknown.
+      expect(forEntry('captured.proto.ts').flatMap((row) => row.usages)).toEqual([]);
+      expect(forEntry('captured.proto.ts').flatMap((row) => row.unresolved)).toEqual([
+        { expression: 'bag.ready', reason: 'subject' },
+      ]);
+      expect(forEntry('cycle.proto.ts')).toEqual([]);
+      expect(
+        inventory.observations.some(
+          (row) => row.declarationOnly && row.rule.file === path.join(dir, 'paint.ts')
+        )
+      ).toBe(true);
+      expect(forEntry('paint.ts')).toEqual([]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it.each([
+    ['direct caller', '', false],
+    ['higher-order caller', 'forward(def, external, paint);', true],
+    ['escaped callback', 'external(paint, def);', true],
+    ['escaped namespace', 'external(namespace, def);', true],
+  ])('keeps unverified helper debt for %s', async (_name, extraCall, pending) => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'lowered-rule-open-caller-'));
+    try {
+      const sources = {
+        'facts.ts': `import { defineAsHook } from '@proto.ui/core'; export const asFirst = defineAsHook({ name:'first', setup(d){d.state.bool('first',false);}, projectHandle(r){return {ready:r.stateHandles.first};} });`,
+        'paint.ts': `import { tw } from '@proto.ui/core'; export function paint(def,state){ def.rule({when:w=>w.state(state.ready).eq(true), intent:i=>i.feedback.style.use(tw('block'))}); }`,
+        'forward.ts': `export function forward(def,state,invoke){invoke(def,state);}`,
+        'known.proto.ts': `import {definePrototype} from '@proto.ui/core';import {asFirst} from './facts';import {paint} from './paint'; const alias=paint; export {alias};
+          export default definePrototype({name:'known',setup(def){alias(def,asFirst()); const unrelated=(paint)=>paint;}});`,
+        'unknown.proto.ts': `import {definePrototype} from '@proto.ui/core';import {paint} from './paint';import {forward} from './forward';${_name === 'escaped namespace' ? "import * as namespace from './paint';" : ''} declare const external:any;
+          export default definePrototype({name:'unknown',setup(def){${extraCall}}});`,
+      };
+      for (const [name, content] of Object.entries(sources))
+        await writeFile(path.join(dir, name), content);
+      const inventory = scanRuleStateReadInventory(
+        Object.keys(sources).map((name) => path.join(dir, name))
+      );
+      expect(
+        inventory.evaluated.some(
+          (row) =>
+            row.entryFile === path.join(dir, 'known.proto.ts') &&
+            row.usages.some((usage) => usage.state === 'first')
+        )
+      ).toBe(true);
+      expect(inventory.evaluated.some((row) => row.unresolved.length > 0)).toBe(pending);
+      if (pending)
+        expect(
+          inventory.evaluated.some(
+            (row) =>
+              row.entryFile === path.join(dir, 'unknown.proto.ts') && row.unresolved.length > 0
+          )
+        ).toBe(true);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   describe('PR925 source provenance regressions', () => {
     const expectSourceUsages = (
       scan: ReturnType<typeof scanRuleStateReads>,
@@ -5628,12 +5733,9 @@ describe('lowered hook coverage', () => {
     const exposed: Array<{ file: string; state: string; exposedAs: string; attribute: string }> =
       [];
 
-    const sourceSummary = createHookSourceSummaryContext();
-    for (const absolute of await prototypeSourceFiles()) {
-      const file = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
-      const text = await readFile(absolute, 'utf8');
-      if (!RULE_CALL.test(text)) continue;
-      const scan = scanRuleStateReads(text, absolute, sourceSummary);
+    const inventory = scanRuleStateReadInventory(await prototypeSourceFiles());
+    for (const scan of inventory.evaluated) {
+      const file = path.relative(REPO_ROOT, scan.entryFile).split(path.sep).join('/');
       for (const usage of scan.usages)
         found.push({ file, hook: usage.hook, state: usage.state, provenance: usage.provenance });
       for (const miss of scan.unresolved) blind.push(`${file}: ${miss.reason} ${miss.expression}`);

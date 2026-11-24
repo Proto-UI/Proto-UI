@@ -1,11 +1,13 @@
 ---
 title: 'NavigationMenu'
-description: 'Named navigation disclosures with native destination links.'
+description: 'A Bootstrap 2.3.2 navigation menu combining disclosure panels with native anchor links.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Named navigation disclosures with native destination links.
+NavigationMenu organizes site navigation into named disclosure panels while rendering real native links so URL previews, `Enter` navigation, and middle/modifier-click tabs work natively.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-navigation-menu"
@@ -14,12 +16,25 @@ Named navigation disclosures with native destination links.
   codePanel={false}
 />
 
-Root is a navigation landmark, Trigger is a disclosure button and Content is a labelled region. Root.value identifies one open panel. Item emits a command; Link projects a real anchor with href, target, rel and current-page semantics. The browser owns URL previews, Enter activation, modifier/middle-click browsing and navigation. Link does not synthesize Space activation or call an application router.
+## Installation
 
-Parts: Root, Trigger, Content, Item, Link.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
 
-Link emits a read-only navigate observation containing href, target, rel and modified after native activation. It is not a cancellable routing request. A normal same-window activation closes the open panel unless closeOnSelect=false; modified/middle-button or \_blank activation keeps the current page’s panel open. Disabled Link removes its destination and prevents activation. Current=true identifies the current page with aria-current.
+Compose `Root`, `Trigger`, `Content`, `Item`, and `Link`:
 
-React/Vue/Vue2 use a native anchor root. Web Components retain caller content in an owned local anchor, and focus/style/accessibility projection follows that physical surface. The demo uses a same-document destination and only observes the navigation. Real-browser/packed/compiler/native acceptance remains pending beyond source-runtime checks.
+- **Landmark structure**: `Root` provides a `navigation` landmark and tracks the single open panel via `value`. `Trigger` toggles the panel and `Content` renders a labelled region.
+- **Commands and native links**: Use `Item` for menu commands and `Link` for real `<a>` destinations supporting `href`, `target`, `rel`, and `current` (`aria-current`). Disabled links clear their target and block activation.
+- **Navigation observation**: After native link activation, `Link` emits a read-only `navigate` event (`{ href, target, rel, modified }`). Normal same-window clicks close the panel unless `closeOnSelect={false}`, while modifier/middle-clicks and `_blank` links keep the panel open.
+
+## API
+
+| Part | Props / Events | Description |
+| --- | --- | --- |
+| `Root` | `value` | Key of the currently open navigation panel |
+| `Trigger` | — | Disclosure button for a navigation panel |
+| `Content` | — | Labelled panel region |
+| `Item` | — | Command action inside a panel |
+| `Link` | `href` / `target` / `rel` / `current` / `disabled` / `closeOnSelect` | Native anchor props; `current={true}` marks the current page |
+| `Link` | `navigate` | Read-only event emitted with `{ href, target, rel, modified }` after activation |

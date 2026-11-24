@@ -1,11 +1,13 @@
 ---
 title: 'Toolbar'
-description: 'Keyboard-roving commands with an accessible toolbar name and separator.'
+description: 'A Liquid Glass command toolbar with roving keyboard focus, accessible naming, and cross-axis separators.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Keyboard-roving commands with an accessible toolbar name and separator.
+Liquid Glass Toolbar groups action buttons and visual dividers under a single roving Tab stop with arrow-key navigation.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-toolbar"
@@ -14,8 +16,19 @@ Keyboard-roving commands with an accessible toolbar name and separator.
   codePanel={false}
 />
 
-Root owns disabled, orientation, loop and a11yLabel. Button emits action with its value on enabled activation. Only one enabled command participates in Tab; arrows move within the toolbar. Separator follows the cross axis.
+## Installation
 
-Parts: Root, Button, Separator.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+- **Parts**: `Root`, `Button`, `Separator`.
+- **Navigation and actions**: only one enabled command participates in Tab order while arrow keys navigate across enabled commands (configured by `orientation` and `loop`). Activating an enabled `Button` emits `action` with its `value`. `Separator` aligns along the cross axis.
+
+## API
+
+| Part | Prop / Event | Description |
+| --- | --- | --- |
+| Root | `disabled`, `orientation`, `loop`, `a11yLabel` | Toolbar disable state, axis, focus looping, and accessible name |
+| Button | `value`, `action` | Command identifier and activation event |
+| Separator | — | Passive divider rendered along the cross axis |

@@ -106,7 +106,8 @@ self.element.prepaint(id,inspector,bounds,layout,window,cx)
 }
 fn paint(&mut self,id:Option<&GlobalElementId>,inspector:Option<&InspectorElementId>,bounds:Bounds<Pixels>,layout:&mut Self::RequestLayoutState,prepaint:&mut Self::PrepaintState,window:&mut Window,cx:&mut App){self.element.paint(id,inspector,bounds,layout,prepaint,window,cx)}
 fn a11y_role(&self)->Option<gpui::Role>{let owner=self.owner.upgrade()?;if crate::gpui_native_owner::control_label_is_label(&owner){return Some(gpui::Role::Label)}if !owner.borrow().accessible{return self.element.a11y_role()}self.role.or_else(||self.element.a11y_role()).or(Some(gpui::Role::GenericContainer))}
-fn a11y_synthetic_children(&mut self,prepaint:&mut Self::PrepaintState,builder:&mut gpui::A11ySubtreeBuilder){self.element.a11y_synthetic_children(prepaint,builder);let Some(owner)=self.owner.upgrade()else{return};let merge=resolved(&owner.borrow().modules.accessible_tree.member("mergeChildren",true));if !merge.nullish()&&merge.bool(){builder.parent_node().clear_children();builder.parent_node().set_label(text_content(&owner.borrow().projection,&owner.borrow().slot));}}
+// Authored child merging must not remove the TextRuns required by platform text APIs.
+fn a11y_synthetic_children(&mut self,prepaint:&mut Self::PrepaintState,builder:&mut gpui::A11ySubtreeBuilder){self.element.a11y_synthetic_children(prepaint,builder);let Some(owner)=self.owner.upgrade()else{return};let merge=resolved(&owner.borrow().modules.accessible_tree.member("mergeChildren",true));if !merge.nullish()&&merge.bool(){builder.parent_node().clear_children();builder.parent_node().set_label(text_content(&owner.borrow().projection,&owner.borrow().slot));}crate::gpui_native_owner::text_accessible_children(&owner,builder);}
 fn write_a11y_info(&self,node:&mut gpui::accesskit::Node){
 self.element.write_a11y_info(node);
 let Some(owner_ref)=self.owner.upgrade()else{return};

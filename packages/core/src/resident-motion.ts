@@ -1,5 +1,5 @@
 /** Setup-only persistent style interpolation. This is not presence or State. */
-export type ResidentMotionProperty = 'translate' | 'background-color';
+export type ResidentMotionProperty = 'translate' | 'background-color' | 'width';
 export type ResidentMotionDeclaration = Readonly<{
   properties: readonly ResidentMotionProperty[];
   durationMs: number;
@@ -27,7 +27,7 @@ export function snapshotResidentMotion(
   if (
     !properties.length ||
     new Set(properties).size !== properties.length ||
-    properties.some((p) => p !== 'translate' && p !== 'background-color') ||
+    properties.some((p) => p !== 'translate' && p !== 'background-color' && p !== 'width') ||
     typeof durationMs !== 'number' ||
     !Number.isFinite(durationMs) ||
     durationMs < 0 ||

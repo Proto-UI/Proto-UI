@@ -19,6 +19,28 @@ const HISTORICAL_CONTEXT =
   /\b(?:historical|archived|previous|former|preceding|prerelease evidence)\b|历史|归档|此前|先前|候选阶段|历史证据/i;
 const DEVELOPMENT_CONTEXT =
   /\b(?:draft|workspace|development train|unpublished)\b|草案|工作区|开发中|未发布/i;
+const UI_LIBRARY_PROSE_RULES = [
+  { pattern: /\bFinf\b/gi, label: 'internal codename "Finf"' },
+  { pattern: /\bsocket\s+EPERM\b/gi, label: 'internal environment error "socket EPERM"' },
+  { pattern: /\bsynthetic[-\s]DOM\b/gi, label: 'internal testing jargon "synthetic-DOM"' },
+  { pattern: /不宣称/g, label: 'defensive disclaimer "不宣称"' },
+  { pattern: /不伪报/g, label: 'defensive disclaimer "不伪报"' },
+  { pattern: /不混称/g, label: 'defensive disclaimer "不混称"' },
+  {
+    pattern: /不代表[^。！？\n]{0,40}验收/g,
+    label: 'defensive acceptance disclaimer ("不代表…验收")',
+  },
+  { pattern: /验收缺口/g, label: 'internal audit phrase "验收缺口"' },
+  {
+    pattern: /\bdoes\s+not\s+claim[^.\n]{0,60}(?:parity|completion|acceptance)\b/gi,
+    label: 'defensive acceptance/parity disclaimer ("does not claim ...")',
+  },
+  { pattern: /\bnot\s+a\s+claim\s+of\b/gi, label: 'defensive disclaimer "not a claim of"' },
+  { pattern: /\brendered\s+parity\b/gi, label: 'internal audit phrase "rendered parity"' },
+  { pattern: /\bvisual\s+parity\b/gi, label: 'internal audit phrase "visual parity"' },
+];
+const COMMIT_SHA_PATTERN = /\b[0-9a-f]{40}\b/gi;
+const HAN_CHARACTER_PATTERN = /[\u4e00-\u9fff]/;
 
 function relative(root, file) {
   return path.relative(root, file).split(path.sep).join('/');
@@ -349,6 +371,113 @@ export function checkSpecLifecycleProjection({ documents }) {
   return errors;
 }
 
+function stripFencedCodeBlocks(text) {
+  const lines = text.split('\n');
+  let activeFence = null;
+  return lines
+    .map((line) => {
+      const trimmed = line.replace(/\r$/, '');
+      if (activeFence) {
+        const closePattern = new RegExp(
+          `^[ \\t]{0,3}${activeFence.char}{${activeFence.length},}[ \\t]*$`
+        );
+        if (closePattern.test(trimmed)) activeFence = null;
+        return '';
+      }
+      const openMatch = /^[ \t]{0,3}(`{3,}|~{3,})(.*)$/.exec(trimmed);
+      if (openMatch) {
+        const marker = openMatch[1];
+        const info = openMatch[2];
+        if (marker[0] === '`' && info.includes('`')) return line;
+        activeFence = { char: marker[0], length: marker.length };
+        return '';
+      }
+      return line;
+    })
+    .join('\n');
+}
+
+function extractFrontmatter(text) {
+  const match = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(text);
+  if (!match) return null;
+  try {
+    const data = parseYaml(match[1]);
+    if (!data || typeof data !== 'object') return null;
+    const descMatch = /^description\s*:/m.exec(match[1]);
+    const descLine = descMatch ? lineNumber(match[1], descMatch.index) + 1 : 2;
+    return { data, descLine };
+  } catch {
+    return null;
+  }
+}
+
+export function checkUiLibraryProse({ documents }) {
+  const errors = [];
+  for (const document of documents) {
+    const normalizedFile = document.file.split(path.sep).join('/');
+    const isDesignContract = path.posix.basename(normalizedFile) === 'design-contract.mdx';
+    const isZhCnUiLibrary =
+      document.locale === 'zh-cn' || /(?:^|\/)zh-cn\/ui-libraries\//.test(normalizedFile);
+
+    if (isZhCnUiLibrary) {
+      const frontmatter = extractFrontmatter(document.text);
+      if (
+        frontmatter &&
+        Object.hasOwn(frontmatter.data, 'description') &&
+        frontmatter.data.description !== undefined &&
+        !HAN_CHARACTER_PATTERN.test(String(frontmatter.data.description))
+      ) {
+        errors.push(
+          `${document.file}:${frontmatter.descLine}: zh-cn ui-libraries frontmatter description must contain Chinese text (per internal/governance/prototype-docs-style-guide.md).`
+        );
+      }
+    }
+
+    const lines = stripFencedCodeBlocks(document.text).split('\n');
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index];
+      const lineNo = index + 1;
+      for (const rule of UI_LIBRARY_PROSE_RULES) {
+        for (const match of line.matchAll(rule.pattern)) {
+          errors.push(
+            `${document.file}:${lineNo}: ui-libraries prose contains ${rule.label} ("${match[0]}"). Rewrite for human readers per internal/governance/prototype-docs-style-guide.md.`
+          );
+        }
+      }
+      if (!isDesignContract) {
+        for (const match of line.matchAll(COMMIT_SHA_PATTERN)) {
+          errors.push(
+            `${document.file}:${lineNo}: ui-libraries prose contains a 40-char commit SHA ("${match[0]}"). Remove internal commit hashes outside design-contract.mdx per internal/governance/prototype-docs-style-guide.md.`
+          );
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+async function loadUiLibraryDocuments(root, locales) {
+  const documents = [];
+  for (const locale of locales) {
+    const directory = path.join(root, 'apps/www/src/content/docs', locale, 'ui-libraries');
+    let files;
+    try {
+      files = await walk(directory, (file) => /\.mdx?$/.test(file));
+    } catch (error) {
+      if (error?.code === 'ENOENT') continue;
+      throw error;
+    }
+    for (const file of files) {
+      documents.push({
+        locale,
+        file: relative(root, file),
+        text: await fs.readFile(file, 'utf8'),
+      });
+    }
+  }
+  return documents;
+}
+
 async function loadCatalog(root) {
   const files = await walk(path.join(root, 'spec/prototypes'), (file) => /\.ya?ml$/.test(file));
   return Promise.all(files.map(async (file) => parseYaml(await fs.readFile(file, 'utf8'))));
@@ -435,6 +564,9 @@ export async function runPublicDocsCheck({ root = DEFAULT_ROOT, policy = publicD
       exceptions: policy.scaffolding.exceptions,
     })
   );
+
+  const uiLibraryDocuments = await loadUiLibraryDocuments(root, policy.locales);
+  errors.push(...checkUiLibraryProse({ documents: uiLibraryDocuments }));
 
   errors.push(
     ...checkLibraryInventory({

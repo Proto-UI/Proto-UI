@@ -1,13 +1,15 @@
 ---
-title: shadcn Input Otp
-description: Draft portable input atoms.
+title: 'Input OTP'
+description: 'A one-time password input with paste support, live caret highlighting, character filtering, and form validation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+A segmented one-time password input backed by a single real text control so pasting, deletion, caret selection, and `one-time-code` autofill work naturally. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-input-otp"
@@ -16,17 +18,26 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-Root owns value/defaultValue, length (1–32, default 6), numeric/alphanumeric filtering, disabled/readOnly, name and ariaLabel. One real Input preserves selection, paste, deletion and composition through TextControl; it requests one-time-code autocomplete. Input commits after composition, strips disallowed characters and bounds length. Slots are passive indexed, aria-hidden readouts; they never create additional editors or tab stops. A focused, editable Input projects its actual TextControl caret or selected range to active slots. Unknown selection, blur, disabled and readOnly have no active slot; the value length is never a substitute for a caret. valueChange is a request; completed emits once for each accepted complete code, not an authentication action. Server verification, SMS retrieval and per-cell focus are outside this implementation.
+## Usage
 
-Use Control instead of Input inside Field/FormField to bridge FieldLabel, canonical string validation, IME cancellation, Form serialization and reset. Standalone Input retains its existing naming. OTP Control validates an accepted canonical change after owner callbacks. A rejected controlled candidate or a normalized no-op does not start automatic change validation; manual and configured blur validation still work. Same-turn accepted edits validate the latest snapshot once, and reset, policy interruption or unmount cancels queued work.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: root, input, control, slot, separator. All four styled families inherit Base behavior.
+### Anatomy
 
-Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.
+Compose `Input OTP` from `Root`, `Input` (standalone) or `Control` (inside a form), `Slot`, and `Separator`:
+
+- **Root**: Manages `value` / `defaultValue`, `length` (`1`–`32`, default `6`), `pattern` (`'numeric'` or `'alphanumeric'`), `disabled`, `readOnly`, `name`, and `ariaLabel`.
+- **Input / Control**: Provides the single underlying text editor, stripping disallowed characters and clamping length after IME composition finishes. Use `Input` standalone, or replace it with `Control` inside a [Field](../field/) or [Form](../form/) for label focus, validation, serialization, and reset.
+- **Slot / Separator**: Passive, `aria-hidden` readouts indexed by `index` without extra tab stops. While editable and focused, active slot highlights track the real caret or selection range (clearing on blur, `disabled`, or `readOnly`).
+
+### Events and validation
+
+- In controlled mode (`value` provided), edits emit `valueChange` proposals. `completed` fires once each time a complete valid code is accepted.
+- Inside a form, `Control` triggers automatic `onChange` validation only after an accepted value change; rejected or filtered no-op edits skip redundant validation, and reset or unmount cancels queued checks.
 
 ## API
 
-Input OTP is workspace source. There is no public `proto-ui add` target. Passing `value` selects controlled mode. Input `placeholder` is optional and has no default.
+Passing `value` selects controlled mode. `Input` accepts an optional `placeholder` with no default.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -41,7 +52,7 @@ Input OTP is workspace source. There is no public `proto-ui add` target. Passing
   ]}
 />
 
-These props belong to Root. Slot defaults `index` to `0`.
+These props belong to `Root`. `Slot` defaults `index` to `0`.
 
 ## References
 

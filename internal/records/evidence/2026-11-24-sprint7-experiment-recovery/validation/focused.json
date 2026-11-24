@@ -1,0 +1,33 @@
+{
+  "name": "focused",
+  "command": [
+    "node",
+    "--test",
+    "scripts/analysis/invisible-consumption/test/asset-binding.test.mjs",
+    "scripts/analysis/invisible-consumption/test/study.test.mjs",
+    "scripts/benchmark/test/benchmark.test.mjs",
+    "scripts/benchmark/test/discovery-study.test.mjs",
+    "scripts/benchmark/test/round0-exchange.test.mjs"
+  ],
+  "cwd": "/tmp/proto-ui-s7-recovery-456f",
+  "startedAt": "2026-11-24T02:31:06.325287+00:00",
+  "finishedAt": "2026-11-24T02:31:25.394140+00:00",
+  "elapsedSeconds": 19.068860057996062,
+  "exitCode": 1,
+  "error": null,
+  "sourceBase": "8b052eb9cdb707ab7a4c8b7660c9442a7e3ee489",
+  "candidateTree": "acba1d91555093786477c61049e7011ee015c187",
+  "inputCommit": "4e5e50e159573a627d5e75037b23513ad8f5f164",
+  "logs": [
+    {
+      "path": "focused.stdout.log",
+      "bytes": 15906,
+      "sha256": "4a915c53903be18622aba7f12a59b80ea3c3a6156467f7ce31cc6a166b63b49c"
+    },
+    {
+      "path": "focused.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

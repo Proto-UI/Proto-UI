@@ -211,6 +211,17 @@ criteria:
         - id: P-BASE-BUTTON
           anchors:
             - P-BASE-BUTTON-PROP-DISABLED
+  - id: P-BASE-CHECKBOX-REQUIRED
+    text:
+      zh-CN: 'Checkbox root 接受 `required?: boolean`，默认 false，并将初始化及后续 Props 更新同步到同一个公开 `required` state。direct prototype 与 asCheckboxRoot 都暴露该事实，可访问 required 由该 state 投影。required 不修改 checked/indeterminate，不限制取消勾选，也不创建 hidden input、提交或自动 Field/Form 校验；这些职责仍由显式组合承担。'
+      en: 'Checkbox root accepts required?: boolean, defaults it to false, and synchronizes initialization and subsequent Props updates to one public required state. Both the direct prototype and asCheckboxRoot expose that fact, and accessible required is projected from that state. Required neither changes checked/indeterminate nor prevents unchecking, and it creates no hidden input, submission or automatic Field/Form validation; those responsibilities remain with explicit composition.'
+    dependsOn:
+      contracts:
+        - C-PROPS-0001
+        - C-PROPS-0003
+        - C-STATE-0001
+        - C-EXPOSE-STATE-0001
+        - C-A11Y-0001
   - id: P-BASE-CHECKBOX-PROP-NO-EVENT-CALLBACK
     text:
       zh-CN: Checkbox props 不包含 `onCheckedChange` 之类事件回调；Checkbox checked value change 通过 expose event 发出 `checkedChange` signal。
@@ -508,8 +519,9 @@ criteria:
         - C-A11Y-0001
   - id: P-BASE-CHECKBOX-FORM-INTEGRATION-DEFERRED
     text:
-      zh-CN: 普通 Checkbox 不拥有 `name`、`form`、`required`、validation、hidden input 或提交行为。显式 FieldCheckbox 的 boolean 值、required 与 Form 接入由 P-BASE-FIELD-CHOICES 定义；普通根只新增保留 focus 的 readOnly 与初始 checked/mixed reset，不通过祖先自动变成字段。
-      en: Ordinary Checkbox does not own name/form/required, validation, hidden inputs or submission. P-BASE-FIELD-CHOICES defines the explicit FieldCheckbox boolean value, required and Form integration; ordinary roots only add focus-preserving readOnly and initial checked/mixed reset, without ancestor-based field registration.
+      zh-CN: Checkbox 是 form-relevant input control；`required` 控件事实按 P-BASE-CHECKBOX-REQUIRED 提供。`name`、`value`、`form`、原生约束校验、hidden input 与提交行为仍不由原子 Checkbox 自动提供；它们保持显式 Field/Form 或宿主组合边界，不得以 required 事实存在宣称完整表单接入。
+      en: Checkbox is a form-relevant input control; its required control fact is provided by P-BASE-CHECKBOX-REQUIRED. The atomic Checkbox still does not automatically provide name, value, form, native constraint validation, hidden input or submission. Those remain explicit Field/Form or host composition boundaries; the required fact does not establish complete form integration.
+      # Explicit FieldCheckbox keeps its separately defined Field registration and reset owner.
     dependsOn:
       contracts:
         - C-PROPS-0001
@@ -564,11 +576,11 @@ openQuestions:
       - form and collection integration
   - id: P-BASE-CHECKBOX-Q-FORM-INTEGRATION
     question:
-      zh-CN: Checkbox 的 `name`、`value`、`form`、`required`、validation、hidden input 与提交行为应归属于 Checkbox root core、Form protocol capability，还是 adapter/host capability？
-      en: Should Checkbox `name`, `value`, `form`, `required`, validation, hidden input, and submission behavior belong to Checkbox root core, Form protocol capabilities, or adapter/host capabilities?
+      zh-CN: Checkbox 的 `name`、`value`、`form`、消费 required 事实的 validation、hidden input 与提交行为应归属于 Form protocol capability，还是 adapter/host capability？
+      en: Should Checkbox name, value, form, validation consuming the required fact, hidden input and submission behavior belong to Form protocol capabilities or adapter/host capabilities?
     context:
-      zh-CN: 0.3 的显式 FieldCheckbox 接入已由 P-BASE-FIELD-CHOICES 有界定义；native form、hidden input 和其他完整宿主保证继续开放。
-      en: P-BASE-FIELD-CHOICES now defines the bounded 0.3 explicit FieldCheckbox integration; native forms, hidden inputs and full host guarantees remain open.
+      zh-CN: Checkbox 已拥有 required 控件事实；P-BASE-FIELD-CHOICES 定义 0.3 显式 FieldCheckbox 的 boolean 值、required 合并、readOnly 与 reset 接入。普通根不自动安装 Field 桥或创建原生表单节点；完整 native form、hidden input 和提交保证继续开放。
+      en: Checkbox owns the required control fact; P-BASE-FIELD-CHOICES defines the 0.3 explicit FieldCheckbox boolean value, requirement merging, readOnly and reset integration. Ordinary roots do not install a Field bridge or create native form nodes automatically; full native-form, hidden-input and submission guarantees remain open.
     blocks:
       - checkbox form integration
       - form protocol design
@@ -662,6 +674,9 @@ revisions:
   - version: 0.3.0-alpha.2
     change: clarified
     summary: Preserve the activation-start boolean request and retire its old checked stage when a mixed callback commits a newer canonical owner decision; ordinary mixed confirmation remains valid.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Added an owned required Prop/state shared by direct and asHook entries and accessibility, while retaining explicit Field/Form validation and submission ownership.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.

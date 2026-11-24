@@ -92,9 +92,10 @@ export function acceptsContextValue(type: DataSchema, value: unknown, checked = 
 }
 export type ContextScope = {
   provide<T>(key: object, value: T): void;
-  subscribe<T>(key: object, mode: 'required' | 'optional', callback?: (next: T | null, prev: T | null) => void): () => void;
+  subscribe<T>(key: object, mode: 'required' | 'optional', callback?: (next: T | null, prev: T | null) => void, origin?: 'self' | 'ancestor'): () => void;
   read<T>(key: object): T;
   tryRead<T>(key: object): T | null;
+  tryReadAncestor<T>(key: object): T | null;
   update<T>(key: object, next: T | ((prev: T) => T)): void;
   tryUpdate<T>(key: object, next: T | ((prev: T) => T)): boolean;
   dispose(): void;
@@ -110,13 +111,16 @@ type RecordEntry = {
   validate(key: object, value: unknown): boolean;
   providers: Map<object, unknown>;
   subscriptions: Map<object, { mode: 'required' | 'optional'; callbacks: Callback[] }>;
+  ancestorSubscriptions: Map<object, { mode: 'required' | 'optional'; callbacks: Callback[] }>;
 };
 const live = new Map<ContextScope, RecordEntry>();
-const notifications: { record: RecordEntry; provider: RecordEntry; key: object; callback: Callback; next: unknown; prev: unknown }[] = [];
+const notifications: { record: RecordEntry; provider: RecordEntry; key: object; origin: 'self' | 'ancestor'; callback: Callback; next: unknown; prev: unknown }[] = [];
 let dispatching = false;
-function resolve(record: RecordEntry, key: object): RecordEntry | null {
-  let current: RecordEntry | undefined = record;
-  const visited = new Set<ContextScope>();
+function resolve(record: RecordEntry, key: object, origin: 'self' | 'ancestor' = 'self'): RecordEntry | null {
+  if (!record.isAlive()) return null;
+  const parent = origin === 'ancestor' ? record.getParent() : null;
+  let current: RecordEntry | undefined = origin === 'ancestor' ? parent === null ? undefined : live.get(parent) : record;
+  const visited = new Set<ContextScope>(origin === 'ancestor' ? [record.scope] : []);
   while (current) {
     if (visited.has(current.scope)) throw new Error('[Context] cyclic logical scope ancestry.');
     visited.add(current.scope);
@@ -138,8 +142,8 @@ export function createContextScope(options: {
   function ensureAlive() {
     if (disposed || !options.isAlive()) throw new Error('[Context] scope is invalid after terminal disposal.');
   }
-  function subscribed(key: object, mode?: 'required' | 'optional') {
-    const subscription = record.subscriptions.get(key);
+  function subscribed(key: object, mode?: 'required' | 'optional', origin: 'self' | 'ancestor' = 'self') {
+    const subscription = (origin === 'ancestor' ? record.ancestorSubscriptions : record.subscriptions).get(key);
     if (!subscription || mode && subscription.mode !== mode)
       throw new Error('[Context] operation requires a declared ' + (mode ?? '') + ' subscription.');
     return subscription;
@@ -158,10 +162,12 @@ export function createContextScope(options: {
     bound.providers.set(key, value);
     // Snapshot each transition before dispatch; nested writes append, never overwrite next/prev.
     for (const participant of live.values()) {
-      const subscription = participant.subscriptions.get(key);
-      if (!subscription || !participant.isAlive() || resolve(participant, key) !== bound) continue;
-      for (const callback of subscription.callbacks) if (callback.active)
-        notifications.push({ record: participant, provider: bound, key, callback, next: value, prev });
+      for (const origin of ['self', 'ancestor'] as const) {
+        const subscription = (origin === 'ancestor' ? participant.ancestorSubscriptions : participant.subscriptions).get(key);
+        if (!subscription || !participant.isAlive() || resolve(participant, key, origin) !== bound) continue;
+        for (const callback of subscription.callbacks) if (callback.active)
+          notifications.push({ record: participant, provider: bound, key, origin, callback, next: value, prev });
+      }
     }
     if (dispatching) return;
     dispatching = true;
@@ -172,8 +178,14 @@ export function createContextScope(options: {
         const task = notifications[index];
         if (!task.callback.active || !live.has(task.record.scope) || !task.record.isAlive()) continue;
         try {
-          if (resolve(task.record, task.key) !== task.provider) continue;
-          task.record.invoke(() => task.callback.call(task.next, task.prev));
+          if (resolve(task.record, task.key, task.origin) !== task.provider) continue;
+          task.record.invoke(() => {
+            // A target dispatcher may defer a callback. Reconcile the current
+            // owner and ancestry inside that callback as well as before enqueue.
+            if (!task.callback.active || !live.has(task.record.scope) || !task.record.isAlive()
+              || resolve(task.record, task.key, task.origin) !== task.provider) return;
+            task.callback.call(task.next, task.prev);
+          });
         } catch (error) {
           if (!failed) { failed = true; failure = error; }
         }
@@ -188,15 +200,17 @@ export function createContextScope(options: {
       if (!options.validate(key, value)) throw new TypeError('[Context] invalid checked Context value.');
       record.providers.set(key, value);
     },
-    subscribe<T>(key: object, mode: 'required' | 'optional', callback?: (next: T | null, prev: T | null) => void) {
+    subscribe<T>(key: object, mode: 'required' | 'optional', callback?: (next: T | null, prev: T | null) => void, origin: 'self' | 'ancestor' = 'self') {
       ensureAlive();
       if (mode !== 'required' && mode !== 'optional') throw new Error('[Context] invalid subscription mode.');
+      if (origin !== 'self' && origin !== 'ancestor' || origin === 'ancestor' && mode !== 'optional') throw new Error('[Context] invalid subscription origin.');
       if (mode === 'required') provider(key);
-      let subscription = record.subscriptions.get(key);
+      const subscriptions = origin === 'ancestor' ? record.ancestorSubscriptions : record.subscriptions;
+      let subscription = subscriptions.get(key);
       if (subscription && subscription.mode !== mode) throw new Error('[Context] subscription mode mismatch.');
       if (!subscription) {
         subscription = { mode, callbacks: [] };
-        record.subscriptions.set(key, subscription);
+        subscriptions.set(key, subscription);
       }
       const entry: Callback | undefined = callback ? { active: true, call: (next, prev) => callback(next as T, prev as T) } : undefined;
       if (entry) subscription.callbacks.push(entry);
@@ -204,6 +218,7 @@ export function createContextScope(options: {
     },
     read<T>(key: object): T { ensureAlive(); subscribed(key, 'required'); return provider(key).providers.get(key) as T; },
     tryRead<T>(key: object): T | null { ensureAlive(); subscribed(key, 'optional'); return resolve(record, key)?.providers.get(key) as T ?? null; },
+    tryReadAncestor<T>(key: object): T | null { ensureAlive(); subscribed(key, 'optional', 'ancestor'); return resolve(record, key, 'ancestor')?.providers.get(key) as T ?? null; },
     update(key, next) {
       ensureAlive();
       if (!record.providers.has(key)) subscribed(key);
@@ -221,14 +236,16 @@ export function createContextScope(options: {
       disposed = true;
       live.delete(scope);
       record.providers.clear();
-      for (const subscription of record.subscriptions.values()) {
-        for (const callback of subscription.callbacks) callback.active = false;
-        subscription.callbacks.length = 0;
+      for (const subscriptions of [record.subscriptions, record.ancestorSubscriptions]) {
+        for (const subscription of subscriptions.values()) {
+          for (const callback of subscription.callbacks) callback.active = false;
+          subscription.callbacks.length = 0;
+        }
+        subscriptions.clear();
       }
-      record.subscriptions.clear();
     },
   };
-  record = { ...options, scope, providers: new Map(), subscriptions: new Map() };
+  record = { ...options, scope, providers: new Map(), subscriptions: new Map(), ancestorSubscriptions: new Map() };
   live.set(scope, record);
   return Object.freeze(scope);
 }

@@ -1,0 +1,44 @@
+{
+  "collectionWindow": {
+    "completedBefore": "2026-11-23T20:50:10Z",
+    "exactPerCallTimesCaptured": false
+  },
+  "pr": {
+    "url": "https://github.com/Proto-UI/Proto-UI/pull/1727",
+    "number": 1727,
+    "state": "closed",
+    "merged": true,
+    "mergeable": false,
+    "draft": false,
+    "body": "## Current verification and review readiness — 2026-11-23\n\nThis bounded protocol recovery and stale-build-authority repair is **Ready for review** at `13730fabc31c1fbc2a00798eeefde07911b672b2`. This continuation independently re-ran the original Python suites (**9 + 7 = 16/16**, no skips), checked all four source hashes against the prior independent review, and repeated the public-document check (**305 bilingual routes / 435 maintained documents / zero errors**). The real dispatch controls still reject observation before server creation after all five recorded failed rebuild transitions and accept observation only after a subsequent full success.\n\n- [x] **Recover the four original protocol source files and preserve their provenance.**\n- [x] **Revoke stale build authority on every attempted rebuild and retain the original failing controls.**\n- [x] **Re-execute all 16 offline protocol controls on the published source.**\n- [x] **Public-document validation and exact reviewed-source hash comparison.**\n- [x] **Native DCO and live Ready state verified for this head.**\n- [ ] Formal independent GitHub approval and integration remain pending.\n\nActual model/API/browser/install/consumer/participant runs still equal **0**; the frozen-stage and original experimental acceptance conditions remain open in #750/#734. The Vercel failure is the recorded daily-deployment quota; it remains visible and has not been relabeled. Full scheduled execution jobs were skipped by the existing PR policy and are not counted as passing. First missing-dependency setup failures were retained before the successful fixed-toolchain rerun.\n\nAgent: ChatGPT Codex, acting on the current user's request to finish the drafts. The original body and all its acceptance boundaries are preserved below.\n\n<details>\n<summary>Preserved earlier Draft record</summary>\n\n## Why\n\nThe original Sprint 7 worktree held four uncommitted experimental protocol files. Their build/observe state machine also retained an earlier successful build after a failed rebuild at the same revision. This PR preserves the source and repairs that demonstrated defect under the user's existing Sprint continuation.\n\nThis relates to #750 and #734. Their existing experiment scope, release deferral and acceptance criteria remain unchanged.\n\n## Changes\n\n1. **Original-source checkpoint `69bf36be7237d34e8c387c8422b039ea37677003`:** recover four files / 35,356 unchanged source bytes, their provenance, 15 original offline controls, independent review and actual documentation-check receipts. These files were previously uncommitted; no original commit or author is invented.\n2. **Repair `13730fabc31c1fbc2a00798eeefde07911b672b2`:** clear `built_revision` when a legal rebuild starts, before typecheck or bundler work. Only the existing complete-success path restores observation authority. The original fixed commands, file capabilities, finish semantics and provider transport are unchanged.\n\nBoth commits are additive on main `38afc8942bfd245e12eaa661298c2feddbc63af8`. The original checkpoint records remain byte-for-byte unchanged.\n\n## Actual regression and verification\n\n| Evidence | Actual result |\n| --- | --- |\n| Same new test against the original broker Git blob | **Exit 1, five failed subcases:** stale observer path reached after typecheck failure/timeout, bundler failure/timeout, or a deadline exception |\n| Repaired offline controls | **9 + 7 = 16 passed**, 0 skips |\n| Independent rerun and source review | **16 passed**, exact source/Git blobs matched; PROTOCOL-BUILD-001 closed for the reviewed source |\n| Public documentation check | **305 bilingual routes, 435 maintained documents, 0 errors** |\n| Published Git readback | Exact tested source, parent/tree and original-record preservation verified; isolated worktree clean |\n\nFull receipts, the lossless original failure log and independent sidecars are in [the repair record](https://github.com/Proto-UI/Proto-UI/tree/13730fabc31c1fbc2a00798eeefde07911b672b2/internal/records/evidence/2026-11-22-sprint7-protocol-build-revision). The [original checkpoint](https://github.com/Proto-UI/Proto-UI/tree/69bf36be7237d34e8c387c8422b039ea37677003/internal/records/evidence/2026-11-22-sprint7-protocol-checkpoint) retains the prior state and checks.\n\nThe new test invokes the real dispatch state machine with command, server and thread test doubles. It rejects observe **before server creation** after each failure, then verifies that a subsequent complete success restores the observer path.\n\n## Remaining execution work\n\nActual **model / API / browser / install / consumer-build / consumer-observation / participant runs remain 0**. The four-file import closure supports these offline tests. A live consumer run still needs a separately frozen and reviewed task, starter, genuine distribution, dependency lock, runtime and stage-local builder/observer scripts.\n\nFinish/exit-0 semantics and provider authentication remain unverified. These controls do not establish a complete sandbox, all artifact freshness properties, full experimental result, consumer admission or comparative advantage. The other 17 experimental scripts and knowledge-consumer/Dialog calibration changes remain outside this restoration.\n\nImplemented with Codex. This Draft PR records source and evidence review; no merge, deployment, formal GitHub approval, experiment acceptance or issue closure is claimed.\n\n<!-- sprint7-protocol-repair-13730fabc31c1fbc2a00798eeefde07911b672b2 -->\n</details>\n",
+    "title": "fix(experiments): recover protocols and revoke stale build authority",
+    "base": "main",
+    "base_sha": "ba72474cb8c47ea9339f3de7c7b35efaa7dcf09a",
+    "head": "chore/sprint7-experiment-protocols-20261122",
+    "head_sha": "ebbb0cdc4139149a9b3bc659e72edd97d855f26c",
+    "head_repo_id": 840178061,
+    "head_repo_full_name": "Proto-UI/Proto-UI",
+    "merge_commit_sha": "14653b61411f32ac4df66e2dd88c863a38da1a4b",
+    "user": {
+      "login": "cyjin-yl",
+      "name": "cyjin-yl",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+      "id": 19223209
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-11-22T19:18:53Z",
+    "updated_at": "2026-11-23T11:40:02Z",
+    "closed_at": "2026-11-23T11:30:32Z",
+    "merged_at": "2026-11-23T11:30:32Z",
+    "commits": 3,
+    "changed_files": 38,
+    "additions": 1952,
+    "deletions": 0,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/pull/1727",
+    "display_title": "fix(experiments): recover protocols and revoke stale build authority"
+  }
+}

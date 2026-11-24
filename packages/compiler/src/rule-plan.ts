@@ -10,7 +10,7 @@ import type {
   RuleValue,
 } from './rule-declarations';
 import { RULE_META_TYPES, type RuleMetaKey } from './rule-declarations';
-import type { StylePlan } from './style-plan';
+import type { StylePlan, StyleTokenHandle } from './style-plan';
 
 export interface RulePlan {
   kind: 'rule.plan';
@@ -25,6 +25,7 @@ export interface RuleEvaluationContext {
   /** Portable identity -> current value, not handles/getter callbacks. */
   states: Readonly<Record<string, Primitive>>;
   meta?: Readonly<Partial<Record<RuleMetaKey, Primitive>>>;
+  styles?: Readonly<Record<string, StyleTokenHandle>>;
 }
 export interface RuleEvaluation {
   activeRuleIds: readonly number[];
@@ -120,7 +121,8 @@ function validateCondition(value: unknown, fallback: SourceSpan, dependencies: S
     case 'false':
       record(value, ['type', 'span'], [], span);
       return;
-    case 'eq': {
+    case 'eq':
+    case 'gte': {
       record(value, ['type', 'left', 'right', 'span'], [], span);
       const left = record(raw.left, ['type', 'span'], ['key', 'id'], span);
       const leftSpan = sourceLocation(left.span, span);
@@ -139,6 +141,11 @@ function validateCondition(value: unknown, fallback: SourceSpan, dependencies: S
         );
       if (raw.right !== null && !['boolean', 'string', 'number'].includes(typeof raw.right))
         fail('Rule comparisons require concrete finite primitive literals.', span);
+      if (
+        (typeof raw.right === 'number' && !Number.isFinite(raw.right)) ||
+        (raw.type === 'gte' && typeof raw.right !== 'number')
+      )
+        fail('Rule gte requires a finite numeric threshold.', span);
       const key = dependencyKey(raw.left as RuleValue);
       if (!dependencies.has(key))
         fail('Rule condition reads a signal missing from its dependency list.', leftSpan);
@@ -232,7 +239,7 @@ export function lowerRulePlan(
       const intent = record(raw.intent, ['kind', 'ops'], [], span);
       if (intent.kind !== 'ops') fail('Expected the existing Rule ops intent shape.', span);
       for (const operation of array(intent.ops, span)) {
-        const op = record(operation, ['kind', 'id', 'handles', 'span'], [], span);
+        const op = record(operation, ['kind', 'id', 'handles', 'span'], ['target'], span);
         const opSpan = sourceLocation(op.span, span);
         if (op.kind !== 'feedback.style.use')
           fail(
@@ -242,7 +249,17 @@ export function lowerRulePlan(
         const id = name(op.id, opSpan);
         if (operationIds.has(id)) fail('Rule intent operation IDs must be unique.', opSpan);
         operationIds.add(id);
+        if (op.target !== undefined) name(record(op.target, ['id'], [], opSpan).id, opSpan);
         for (const handle of array(op.handles, opSpan)) {
+          if (
+            handle &&
+            typeof handle === 'object' &&
+            (handle as Record<string, unknown>).kind === 'reference'
+          ) {
+            const reference = record(handle, ['kind', 'id'], [], opSpan);
+            name(reference.id, opSpan);
+            continue;
+          }
           const style = record(handle, ['kind', 'tokens'], [], opSpan);
           if (style.kind !== 'tw')
             fail('Rule v0 style intents support tw token handles only.', opSpan);
@@ -295,7 +312,7 @@ function readSignal(value: RuleValue, context: RuleEvaluationContext): Primitive
         : context.states;
   const key = value.type === 'state' ? value.id : value.key;
   // Prototype members are not authored prop/state values (including a key named "constructor").
-  return Object.hasOwn(values, key) ? values[key] : undefined;
+  return values && Object.hasOwn(values, key) ? values[key] : undefined;
 }
 
 function evaluateCondition(condition: RuleCondition, context: RuleEvaluationContext): boolean {
@@ -306,6 +323,10 @@ function evaluateCondition(condition: RuleCondition, context: RuleEvaluationCont
       return false;
     case 'eq':
       return readSignal(condition.left, context) === condition.right;
+    case 'gte': {
+      const value = readSignal(condition.left, context);
+      return typeof value === 'number' && Number.isFinite(value) && value >= condition.right;
+    }
     case 'not':
       return !evaluateCondition(condition.expr, context);
     case 'all':
@@ -333,12 +354,25 @@ export function evaluateRulePlan(
   const contributions: StylePlan['contributions'][number][] = [];
   for (const rule of plan.rules) {
     const enabled = evaluateCondition(rule.when, context);
+    const operations = rule.intent.ops.map((operation) => ({
+      ...operation,
+      handles: operation.handles.map((handle): StyleTokenHandle => {
+        if (handle.kind === 'tw') return handle;
+        const value =
+          context.styles && Object.hasOwn(context.styles, handle.id)
+            ? context.styles[handle.id]
+            : undefined;
+        if (!value || value.kind !== 'tw')
+          throw new TypeError(`Missing checked Rule style binding ${handle.id}.`);
+        return value;
+      }),
+    }));
     contributions.push({
       id: `rule:${rule.id}`,
       scope: 'host',
       layer: 'rule',
       enabled,
-      intents: rule.intent.ops.map((operation) => ({
+      intents: operations.map((operation) => ({
         kind: operation.kind,
         handles: operation.handles,
       })),
@@ -346,7 +380,7 @@ export function evaluateRulePlan(
     });
     if (!enabled) continue;
     activeRuleIds.push(rule.id);
-    for (const operation of rule.intent.ops)
+    for (const operation of operations)
       for (const handle of operation.handles) tokens.push(...handle.tokens);
   }
   const merged = mergeTwTokensV0(tokens).tokens;

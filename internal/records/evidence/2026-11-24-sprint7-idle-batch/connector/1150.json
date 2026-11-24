@@ -1,0 +1,53 @@
+{
+  "collectionTimeNote": "Connector calls ran after the recorded 2026-11-23 20:45:30 UTC clock and before the separate native 20:46:24 UTC read; exact per-call clocks were not captured.",
+  "issue": {
+    "id": 6140749528,
+    "url": "https://github.com/Proto-UI/Proto-UI/issues/1150",
+    "title": "[Finf v2][887-followup][idle-review-loop] 筛选三小时空闲事项并逐项独立评审合入验证闭环",
+    "issue_number": 1150,
+    "body": "## 来源\n\n拆自 #1091（2026-11-01 全量 Issue 梳理，Finf v2 #890 清零）。父 Issue 保留为追踪入口，本 Issue 为有界执行切片，不是父 Issue 的重复。\n## 范围（原 checklist 逐项保留）\n\n- [ ] 筛选当前满足三小时空闲的事项 — 历史状态 pending\n- [ ] 逐项实现独立评审合入并验证闭环 — 历史状态 pending\n\n## 验收与验证边界\n\n每项须原 source key / 完整条件、适用 spec 与 lifecycle、允许改变和排除项、当前 owner/claim、真实 CI/DCO 与原生证据。不以历史证据冒充当前 head 验收。 旧三小时无人接管授权不继承，不能据此自动接管或操作生产。",
+    "state": "open",
+    "user": {
+      "login": "cyjin-yl",
+      "name": "cyjin-yl",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+      "id": 19223209
+    },
+    "assignees": null,
+    "labels": null,
+    "milestone": null,
+    "state_reason": "reopened",
+    "comments": 1,
+    "created_at": "2026-10-31T23:00:04Z",
+    "updated_at": "2026-11-06T12:44:02Z",
+    "closed_at": null,
+    "display_url": "https://github.com/Proto-UI/Proto-UI/issues/1150",
+    "display_title": "[Finf v2][887-followup][idle-review-loop] 筛选三小时空闲事项并逐项独立评审合入验证闭环"
+  },
+  "comments": [
+    {
+      "url": "https://github.com/Proto-UI/Proto-UI/issues/1150#issuecomment-6684401829",
+      "body": "Deferred to 0.4. Process checklist: select items idle for 3+ hours and run independent-review-merge-verification loops — adjacent-session workflow tracking, not 0.3 product code.",
+      "user": {
+        "login": "cyjin-yl",
+        "name": "cyjin-yl",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+        "id": 19223209
+      },
+      "id": 6684401829,
+      "pull_request_review_id": null,
+      "in_reply_to_id": null,
+      "created_at": null,
+      "updated_at": null,
+      "review": null,
+      "side": null,
+      "line": null,
+      "start_line": null,
+      "path": null,
+      "body_html": "<p dir=\"auto\">Deferred to 0.4. Process checklist: select items idle for 3+ hours and run independent-review-merge-verification loops — adjacent-session workflow tracking, not 0.3 product code.</p>"
+    }
+  ],
+  "serializedAt": "2026-11-23T20:47:45.839884+00:00"
+}

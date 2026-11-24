@@ -1,0 +1,60 @@
+---
+title: 'Native File Input'
+description: '为原生文件选择输入提供统一可用性、必填、命名与焦点策略的控件。'
+---
+
+import NativeFileInputPreview from '@/components/NativeFileInputPreview.astro';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+为原生 `<input type="file">` 提供共享的可用性、必填状态、无障碍命名与焦点策略，同时将文件选择与系统文件选择器完全交由浏览器处理。
+
+## 预览
+
+预览通过 React Adapter 将 `nativeFileInput` 挂载到真实的 `input[type="file"]` 上，第一个示例为必填且支持多选，第二个示例为禁用状态（仅读取本地 `FileList`，不会上传文件）。
+
+<NativeFileInputPreview locale="zh-cn" />
+
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+```ts
+import { nativeFileInput, asNativeFileInput } from '@proto.ui/prototypes-base/native-file-input';
+```
+
+该子路径同时导出默认原型、`NativeFileInputProps`、`NativeFileInputExposes` 与 `NativeFileInputAsHookContract`，包根导出同名命名入口；原型与 Hook 共享同一套实现。
+
+## 用法
+
+### 绑定原生文件输入
+
+宿主需要提供一个实际的 `<input type="file">` 元素作为根节点，并将 `disabled` 与 `required` 同时传递给原型与该原生输入元素，使辅助功能、焦点策略与浏览器行为指向同一个目标。
+
+`accept`、`multiple`、系统选择器调起、原生 `change` 事件与清空输入均由宿主直接控制；已选文件从原生输入的 `files` 属性读取（该控件不声明文本值或 `valueChange` 事件）。
+
+### 焦点与命名
+
+- `ariaLabel` 为控件设置无障碍名称，同时保留文件输入本身的原生语义角色。
+- `focusSelf(options?)` 和 `blurSelf()` 遵循共享 Focus 协议；禁用状态下会拒绝 `focusSelf()` 并退出常规焦点序列，重新启用后恢复参与，但不会自动打开选择器。
+- 关联的 `ControlLabel` 可以将焦点移至启用状态的输入，但不会合成点击或自动触发系统文件选择器。
+
+## API
+
+<ApiPropsTable
+  headers={{ name: '属性', type: '类型', default: '默认值' }}
+  rows={[
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'required', type: 'boolean', default: 'false' },
+    { name: 'ariaLabel', type: 'string', default: "''" },
+  ]}
+/>
+
+移除已传入的属性后会恢复默认值。
+
+- **暴露状态**：`disabled`、`required`、`focused`、`focusVisible`。
+- **暴露方法**：`focusSelf(options?)`、`blurSelf()`。
+
+## 参考
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-NATIVE-FILE-INPUT.yaml']} />

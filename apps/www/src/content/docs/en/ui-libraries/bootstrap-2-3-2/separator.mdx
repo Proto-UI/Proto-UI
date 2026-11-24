@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Separator'
-description: 'Bootstrap 2.3.2 rule styling with Base separation semantics.'
+description: 'A horizontal or vertical divider styled with archived Bootstrap 2.3.2 rules over Base Separator.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Separator carries the archived divider language while Base owns orientation and decorative semantics. `orientation` defaults to `horizontal`; `decorative` defaults to `true`.
+Bootstrap 2.3.2 Separator renders horizontal and vertical dividers using the archived Bootstrap 2.3.2 light palette while Base Separator manages orientation and decorative accessibility semantics.
 
-Decorative separators are hidden from the accessibility tree without a role. Setting `decorative={false}` exposes the `separator` role and matching `aria-orientation`. The vertical treatment is a design-language adaptation of the archived horizontal rule.
+## Preview
 
-The prototype is contentless and passive: it has no focus, tab stop, event, activation, or mutable value. Length and spacing come from the surrounding composition. Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2.
+Inspect horizontal, vertical, and semantic separators across Web Components, React, Vue 3, and Vue 2.
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-separator"
@@ -22,10 +22,18 @@ The prototype is contentless and passive: it has no focus, tab stop, event, acti
   codePanel={false}
 />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release. [Browse the implemented subset](../).
+
+## Usage
+
+- **Decorative vs. semantic**: Decorative separators (`decorative={true}`, the default) are hidden from the accessibility tree. Set `decorative={false}` to expose the `separator` role and matching `aria-orientation`.
+- **Layout**: Separator is passive with no Tab stop or children; its length and spacing come from your surrounding layout. Vertical styling adapts the archived horizontal rule.
+
 ## API
 
-- `orientation`: `horizontal` / `vertical`
-- `decorative`: `true` by default; set `false` for semantic separation
-- The demo includes horizontal, vertical, and semantic examples
-
-This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).
+| Prop | Values | Default | Description |
+| --- | --- | --- | --- |
+| `orientation` | `'horizontal'` \| `'vertical'` | `'horizontal'` | Divider orientation |
+| `decorative` | `boolean` | `true` | Set `false` to expose semantic `separator` accessibility |

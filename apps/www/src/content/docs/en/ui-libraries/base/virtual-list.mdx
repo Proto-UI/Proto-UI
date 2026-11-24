@@ -1,15 +1,15 @@
 ---
-title: 'Virtual-List (WIP)'
-description: 'virtual-list composition and explicit implementation boundary.'
+title: 'Virtual List'
+description: 'A virtualized list separating a stable logical key sequence from bounded viewport item rendering.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Virtual List separates a complete stable logical key sequence from physical views. Item-count overscan, maximum materialized count, revisions and generation-bound commits live in a host-neutral model. The explicit virtual-list/web entry measures variable item extents, owns spacers and Web nodes, preserves keyed views, scrolls to a key and disposes listeners. This demo uses that Web host boundary; it is not native GPUI or Compiler conformance. App-owned content is created only for the bounded visible range.
+Decouples a complete logical key sequence (`itemKeys`) from physical view nodes so application content is created and reused only for the visible range plus overscan, including variable-height rows.
 
-WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-virtual-list"
@@ -17,15 +17,21 @@ WIP functional source. Full runtime/Compiler/native, packaging, browser and visu
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Materializer ownership and retirement
+## Installation
 
-Each logical collection admits one materializer lease. `attachWebVirtualList` acquires that lease before adding spacers, rows or listeners; attaching a second host fails without disturbing the current one. Dispose the first host before attaching its replacement. The portable model exposes `acquireMaterializer(onRetired)` for other host implementations; Web callers do not acquire a second lease around `attachWebVirtualList`.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root unmount or disposal retires its materializer: pending generations become stale, owned views and observers are removed, and late refresh, scroll, measurement or repeated disposal from the old host cannot revoke a replacement. Initial rendering or observer setup failure also releases the lease, so the same logical collection can be retried. These owner rules complement the generation-bound request/commit protocol; they do not supply a non-Web materializer or establish native accessibility acceptance.
+## Usage
+
+Compose `Root`, `Viewport`, and `Content`:
+
+- **Logical model and Web materialization**: `Root` manages `itemKeys`, item-count `overscanItems`, `maxMaterializedItems`, revisions, and generation-bound commits. On Web, `attachWebVirtualList` from `@proto.ui/prototypes-base/virtual-list/web` measures variable item sizes, maintains spacer elements and keyed DOM views, supports scrolling to a key, and cleans up observers on dispose.
+- **Single materializer lease**: Each logical collection holds at most one active materializer lease. `attachWebVirtualList` acquires the lease before attaching spacers, rows, or listeners; attaching a second host fails without disturbing the active one, so dispose the existing host before attaching a replacement. Custom hosts can acquire a lease via `acquireMaterializer(onRetired)` (Web callers do not need to call it separately around `attachWebVirtualList`).
+- **Retirement and retry**: Unmounting or disposing `Root` retires the active materializer—invalidating in-flight generations, cleaning up views and observers, and ensuring late refresh, scroll, measurement, or duplicate dispose calls from a retired host cannot revoke a newer replacement. If initial rendering or observer setup fails, the lease is released so the collection can be retried.
 
 ## API
 
-Virtual List is workspace source. There is no public `proto-ui add` target. Viewport and Content have no props.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -37,7 +43,7 @@ Virtual List is workspace source. There is no public `proto-ui add` target. View
   ]}
 />
 
-These props belong to Root.
+`Viewport` and `Content` take no props.
 
 ## References
 

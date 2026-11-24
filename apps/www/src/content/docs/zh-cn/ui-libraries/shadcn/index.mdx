@@ -1,38 +1,37 @@
 ---
 title: 'Shadcn'
-description: '浏览 Proto UI 的 Shadcn 投射，按明确的交付与 style 边界选择示例。'
+description: '浏览 Proto UI 提供的 Shadcn 风格组件库，涵盖跨框架安装方式与全部组件目录。'
 ---
 
 import PrototypeDocumentationIndex from '@/components/PrototypeDocumentationIndex.astro';
 
-这是 Proto UI 维护的非官方 Shadcn 投射。交互由 Base 拥有，风格家族提供呈现与明确记录的视觉输入。它不是官方 shadcn/ui 发行包。
+Proto UI 独立维护的 Shadcn 风格组件库：底层交互与无障碍行为由 Base 协议统一提供，视觉层呈现 Shadcn 风格并支持在 Web Components、React、Vue 3 与 Vue 2 之间复用。
 
 ## 安装与使用
 
-在已有应用中，已发布 0.2.0 的用法为：
+在已有应用中，先初始化项目并添加所需组件（以 0.2.0 稳定版为例）：
 
 ```sh
 npx @proto.ui/cli@0.2.0 init
 npx @proto.ui/cli@0.2.0 add wc shadcn-button
 ```
 
-使用 pnpm 时执行：
+使用 pnpm：
 
 ```sh
 pnpm dlx @proto.ui/cli@0.2.0 init
 pnpm dlx @proto.ui/cli@0.2.0 add wc shadcn-button
 ```
 
-CLI 按自身精确版本安装 `@proto.ui/prototypes-shadcn` 与所选 Adapter，并生成本地宿主 facade。应用应导入一次生成的样式表。[快速开始](/zh-cn/start-here/quick-start/)说明应用设置，[Button](./button/)把预览与宿主代码配对。稳定版 React、Vue 3 分别使用 `react`、`vue`。Vue 2.6 与当前命名 style profile 需要配套的工作区 0.3 源码；`@latest` 不能证明已经交付这些能力。
+将 `wc` 替换为 `react` 或 `vue` 即可为对应框架生成本地组件封装，并在应用入口导入一次生成的 `proto-ui-style.css`。完整配置步骤请参阅[快速开始](/zh-cn/start-here/quick-start/)，跨框架完整示例请参阅 [Button](./button/)。Vue 2.6 支持以及新增的命名风格预设（如 **Shadcn Rhea**）目前在源码工作区提供。
 
-## 选择家族
+## 组件目录
 
-以下索引对应当前工作区导出，也包含 draft 增量。各家族页拥有其 anatomy、props、events 与受支持宿主边界。Profile 支持逐组件决定：某个 style ID 存在，不表示每个组件均实现了对应视觉配方。下面的协议源码链接明确保留尚未闭合的公开 Usage 条件。
+下方列出当前工作区中的全部 Shadcn 风格组件，各组件页均包含实时预览、部件结构、属性说明与支持范围：
 
 <PrototypeDocumentationIndex library="shadcn" />
 
-## 来源与兼容性
+## 设计说明
 
-网站的源码预览与已发布 0.2.0 包分别记录。以各页的固定上游引用、兼容性省略与生命周期为准，当前配方不会改写旧证据。例如 Button 的视觉 `link` variant 保留命令语义，原生导航由 anchor 拥有。
-
-参阅[文档覆盖与历史证据](/zh-cn/build/prototypes/documentation-coverage/)及 [#1042](https://github.com/Proto-UI/Proto-UI/issues/1042) 中保留的完整验收条件。
+- 各组件的交互状态、键盘导航与无障碍语义均与对应的 Base 原型保持一致。例如 [Button](./button/) 的 `link` 变体保留按钮操作语义，页面跳转请直接使用原生 `<a>` 标签。
+- 不同组件的风格预设支持范围以各组件页说明为准，需要整体切换局部区域风格时可搭配 [Style Scope](./style-scope/) 使用。

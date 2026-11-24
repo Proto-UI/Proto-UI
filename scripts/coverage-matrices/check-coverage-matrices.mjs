@@ -178,7 +178,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The feedback presence projector is reached by the website's presence
   // projection. Its imports stay inside Core and the motion sampler it owns.
   'packages/modules/feedback/src/presence/projector.ts': Object.freeze({
-    sourceSha256: '3a5c3749050071ad5308800c2619c36e37ac56462a5ee34c718971655531e87c',
+    sourceSha256: '1f9ca6863c9973cebde1dfd27a1bdbe3dbcb320326a0a938c5720cd25c8b0025',
     specifiers: Object.freeze(['@proto.ui/core', '../motion/sampler', './sink']),
   }),
   // The authored Form demo consumes only the public Field request type.
@@ -192,6 +192,15 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // Post-admission body drift is invisible to this gate and stays source-review
   // debt under #420; the affected sources and their owning rows are enumerated
   // in internal/website/self-hosting-coverage-matrix.md.
+  // Exact native-input Adapter demonstration. Its file-name status and file
+  // option bridge remain a blocked authored composition, not runtime infrastructure.
+  'apps/www/src/components/native-file-input-preview.ts': Object.freeze({
+    sourceSha256: '55496ad2bc9c90579b5017c271f3f0b60653c698dd1f12833e188410db1b0cf8',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-react',
+      '@proto.ui/prototypes-base/native-file-input',
+    ]),
+  }),
   // Exact legacy runtime-selection composition; its owning row stays blocked.
   'apps/www/src/components/PrototypePreviewer/runtime-tabs.ts': Object.freeze({
     sourceSha256: 'f4d21125f8019fcf35e75580a77b1950e8a6b69f877a39ef868c07943cfe2178',
@@ -339,6 +348,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/liquidgl-kernel.generated']),
   }),
   'packages/adapters/base/src/material/source.ts': Object.freeze({
+    sourceSha256: '0da5ec24126268949824ee048ecf8e9ed2da3d9ffff767c2f1a86f5e60a05450',
+    companionSource: Object.freeze({
+      path: 'packages/adapters/base/src/host/synchronous-steps.ts',
+      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+    }),
+    specifiers: Object.freeze(['../host/synchronous-steps']),
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/contact-carrier']),
   }),
   'packages/adapters/base/src/material/contact-carrier.ts': Object.freeze({
@@ -8921,6 +8936,8 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
           WEBSITE_INTEGRATED_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256,
           WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256,
+          WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256,
         ].includes(configSha)
       ) {
         inputs.push(...WEBSITE_RETRY_VIRTUAL_HELPERS);
@@ -9787,6 +9804,14 @@ const WEBSITE_BROWSER_COMPILER_RETRY_VIRTUAL_CONFIG_SHA256 =
 // combines both sprints' module-graph changes on top of the train.
 const WEBSITE_MERGED_RETRY_VIRTUAL_CONFIG_SHA256 =
   'ea20b9f9fb07bf0114bf331388e9af7e9dc9684bc0e8975055d2de8ab04ee0ae';
+// Sprint 2 adds only the draft Native File Input and Selectable Row sidebar
+// entries to that merged configuration. Retry/Worker imports and owners match.
+const WEBSITE_SPRINT2_RETRY_VIRTUAL_CONFIG_SHA256 =
+  '26e4307893b07f9f17e5c22c38842d0992391d68603c1c9db506f07a556c668d';
+// Integrated visual changes only the two existing zh-CN Dropdown Menu labels.
+// Keep the same four Retry import owners and exact helper digests.
+const WEBSITE_VISUAL_LABELS_RETRY_VIRTUAL_CONFIG_SHA256 =
+  'c0a7f33cceaf8b66e31592b7d266b6cd63d28c032467f6b833eb0e989577f1ee';
 const WEBSITE_RETRY_VIRTUAL_HELPERS = [
   [
     'apps/www/src/utils/proto-ui-source.mjs',
@@ -12929,6 +12954,17 @@ function validateWebsiteSourceBindings(
         continue;
       }
     }
+    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
+      // The compiler browser sources are not derived from a Website Path cell,
+      // so their reviewed owner is asserted here instead of by the grouped
+      // binding rule. Keep the exact host validation below independent so
+      // a wrong owner retains both diagnostics without bypassing source checks.
+      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
+        issues.push(
+          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
+        );
+      }
+    }
     if (Object.hasOwn(BROWSER_COMPILER_INTERACTIVE_SOURCES, sourcePath)) {
       const expected = BROWSER_COMPILER_INTERACTIVE_SOURCES[sourcePath];
       try {
@@ -12982,17 +13018,6 @@ function validateWebsiteSourceBindings(
       } catch {
         issues.push(
           `${relativePath}:${binding.line}: exact optical host source, digest and owner remain unverified`
-        );
-        continue;
-      }
-    }
-    if (WEBSITE_COMPILER_BROWSER_SOURCES.includes(sourcePath)) {
-      // The compiler browser sources are not derived from a Website Path cell,
-      // so their reviewed owner is asserted here instead of by the grouped
-      // binding rule.
-      if (binding.ownerIds.length !== 1 || binding.ownerIds[0] !== WEBSITE_COMPILER_BROWSER_OWNER) {
-        issues.push(
-          `${relativePath}:${binding.line}: compiler browser source \`${sourcePath}\` must name exactly the matrix Path owner \`${WEBSITE_COMPILER_BROWSER_OWNER}\``
         );
         continue;
       }

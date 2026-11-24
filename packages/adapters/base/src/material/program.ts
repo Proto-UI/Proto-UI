@@ -509,9 +509,16 @@ export function createWebOpticalProgram(
         throw new Error('gpu-frame-failed');
       }
       const readbackStarted = performance.now();
-      if (readback?.length !== width * height * 4) {
-        readback = new Uint8Array(width * height * 4);
+      const readbackBytes = width * height * 4;
+      if (!readback || readback.buffer.byteLength < readbackBytes) {
+        readback = new Uint8Array(readbackBytes);
         metrics.readbackAllocations++;
+      } else if (readback.length !== readbackBytes) {
+        // The document program alternates differently sized surfaces. Retain
+        // one backing store up to the already-admitted 4 MiB output limit,
+        // but expose only the current frame to GL and the full contrast scan.
+        // Stale bytes outside this view are never part of a smaller frame.
+        readback = new Uint8Array(readback.buffer, 0, readbackBytes);
       }
       const pixels = readback;
       g.readPixels(0, 0, width, height, g.RGBA, g.UNSIGNED_BYTE, pixels);

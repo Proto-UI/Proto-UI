@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Textarea'
-description: 'Source-aligned draft Neo Textarea projection over Base Textarea'
+description: 'A Brutalist-styled multiline text input wrapping a native textarea with a 5px rounded neutral surface and crisp ink borders.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,41 +9,33 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) and its inherited Base protocol remain `draft`; that is historical release information. The preview below is the successor draft recipe and does not claim a new release or an active protocol guarantee.
+Textarea styles a native `<textarea>` with a 5px rounded flat neutral surface, ink text and borders, and no outer shadow while preserving native editing, IME composition, and accessibility semantics.
 
-`brutalist-textarea-root` is a direct visual composition over Base Textarea. It keeps the same single physical native `<textarea>` and adds no new interaction, state, event, accessibility, or ownership protocol.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-textarea" initialRuntime="wc" />
 </div>
 
-## Inherited Behavior
+## Installation
 
-All behavior comes from `base-textarea-root`: defined controlled/uncontrolled value ownership, normalized `valueChange` and `change` signals, normalized IME composition events, composition-safe controlled restoration, native textarea prop projection, physical focus/blur methods, and textbox name/description accessibility projection.
+Included in `@proto.ui/prototypes-brutalist@0.2.0`. Add it via the CLI target `brutalist-textarea`, or import directly from `@proto.ui/prototypes-brutalist/textarea`.
 
-The Brutalist prototype therefore retains Base's contentless ownership boundary. It does not add children, form submission ownership, rich-text editing, status/live-region semantics, or any second physical control.
+## Usage
 
-## Visual Delta
+### Input Behavior & Styling
 
-The entire delta is visual:
+- **Native editing semantics**: Supports controlled (`value`) and uncontrolled (`defaultValue`) modes, normalized `valueChange` and `change` events, IME composition-safe controlled value restoration, `focus()` and `blur()` methods, and accessible naming via `ariaLabel`, `labelledBy`, and `describedBy`.
+- **Visual details**: Ships with an 80px minimum height, 12px horizontal / 8px vertical padding, `text-sm` line height, DM Sans 500 typography, and static accent text selection. Native resizing remains browser- or CSS-controlled without automatic height measurement.
 
-- native resizing remains host- or consumer-owned, with no automatic height measurement
-- 5px rounded geometry
-- an 80px minimum height, 12px horizontal / 8px vertical padding and text-sm line height
-- static main/main-foreground text selection
-- a flat neutral surface
-- ink text and border
-- DM Sans 500 text without an outer shadow
+### Reset & Form Composition
 
-These styles are applied directly to the Base-backed native textarea. They do not create another protocol layer or change the normalized event payloads.
-
-## Reset and Field composition
-
-The current 0.3 source exposes `resetValue()`: an uncontrolled editor restores its instance creation value; a controlled editor proposes that value and waits for its owner. Explicit reset remains available while readOnly or disabled and retires composition. Import `fieldTextarea` from `@proto.ui/prototypes-brutalist/field` for the same multiline editor with Field label, description, error and validation ownership. See the [versioned Form recipe](../../form/).
+- In current workspace source, `resetValue()` restores the creation-time value in uncontrolled mode (or proposes it in controlled mode), remains callable while `readOnly` or `disabled`, and retires any active IME composition.
+- To wire up Form labels, descriptions, error messages, and validation, import `fieldTextarea` from `@proto.ui/prototypes-brutalist/field`. See the [Form recipe](../../form/) for a full example.
 
 ## API
 
-Textarea is workspace source. For this workspace version, the CLI target is `brutalist-textarea`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `value` selects controlled mode.
+The following props belong to `Root` (pass `value` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -64,13 +56,3 @@ Textarea is workspace source. For this workspace version, the CLI target is `bru
     { name: 'describedBy', type: 'string', default: "''" },
   ]}
 />
-
-These props belong to Root.
-
-## References
-
-- Prototype: [P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml)
-- Base protocol: [P-BASE-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TEXTAREA.yaml)
-- Source: [packages/prototypes/brutalist/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/textarea)
-
-The recipe follows [Neo 3306a802 Textarea](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/textarea.tsx). Placeholder/invalid styling remains outside the current projection; fresh browser pixels and native-host evidence remain pending.

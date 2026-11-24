@@ -7,18 +7,26 @@ import type {
   MaterialSlot,
   MaterialCandidate,
   MaterialIntentFrame,
+  MaterialPaintReservation,
+  MaterialPaintReservationDeclaration,
 } from '@proto.ui/core';
 import type { ModuleFacade, ModuleHooks, ModuleScope } from '@proto.ui/core';
 
 export type FeedbackRuntimeStyleDisposer = (options?: { flush?: boolean }) => void;
 
 export interface FeedbackFacade extends ModuleFacade {
+  /** Runtime State identity bridge; not exposed on author def/run. */
+  motion: { registerSource(source: object): void };
   presence: import('@proto.ui/core').PresenceOwnerRuntime & {
     owner(): import('@proto.ui/core').PresenceOwnerDeclaration<any>;
     /** Runtime setup registry bridge; not exposed on author def/run. */
     registerSource(source: object): void;
   };
   material: {
+    reserve(declaration: MaterialPaintReservationDeclaration): MaterialPaintReservation;
+    /** Internal template admission; never exposed through run. */
+    hasReservations(): boolean;
+    validateReservationTemplate(targets: readonly MaterialPaintReservation[]): void;
     /** Setup-only single owned slot and whole candidate contributions. */
     declare(slot: MaterialSlot): () => void;
     use(candidate: MaterialCandidate): () => void;

@@ -1,6 +1,6 @@
 ---
 title: 'Liquid Glass Toggle'
-description: 'Persistent Base active state with regular glass and readable fallback.'
+description: 'A two-state Liquid Glass toggle button with persistent active semantics and readable fallback.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -9,11 +9,13 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-This draft is a Proto design-language extension of [Base Toggle](/en/ui-libraries/base/toggle/). It is not an Apple Toggle replica or a claim of exact Apple optical parity.
+Liquid Glass Toggle inherits persistent selection semantics and keyboard behavior from [Base Toggle](/en/ui-libraries/base/toggle/). Inactive buttons use neutral `regular` glass (`secondary` fill and foreground), while active buttons switch to a tinted glass treatment driven by `primary` and `primary-foreground`.
 
-Inactive controls request neutral regular glass with the secondary theme fill and foreground. Active selection requests regular style-fill tint from its governed primary fill, paired with the primary foreground. A small decorative currentColor check occupies the same reserved space in both states, supplying non-color selection feedback without imposing underline. Equal leading/trailing reserves center the label or icon itself; compact symmetric padding avoids the former trailing-only whitespace bias. The 1px selection border and outer geometry remain stable across selection. Transient pointer pressing deforms the material independently of persistent active selection.
+A small decorative `currentColor` check mark uses symmetric reserved space in both states so labels and icons stay centered, outer geometry remains stable, and active selection stays recognizable without relying on color or optics alone. Transient press deformation stays independent of the persistent `active` state.
 
-Use the page runtime selector for Web Components, React, Vue 3 and Vue 2. Bold starts inactive; Italic starts active. Click, Space and Enter request active changes. Unavailable keeps its active state while disabled. The status only observes the real Base activeChange signal.
+## Preview
+
+Use the page runtime selector to switch between Web Components, React, Vue 3, and Vue 2. Bold starts inactive, Italic starts active, and Unavailable stays active while disabled. Click, Space, or Enter requests an `activeChange`.
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -54,25 +56,30 @@ Use the page runtime selector for Web Components, React, Vue 3 and Vue 2. Bold s
 
 <AdapterPanelScript />
 
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+## Usage
+
+### Material and accessibility
+
+- The shared Web material provider samples only the explicit visible canvas supplied by the application, never arbitrary DOM.
+- When the backdrop source is unavailable or overlapping, when the button is disabled or uses `material="opaque"`, or when reduced transparency, increased contrast, or forced colors are active, the toggle falls back cleanly to its opaque color pair (`primary`/`primary-foreground` when active, `secondary`/`secondary-foreground` when inactive) while keeping the check mark visible.
+- Reduced motion disables elastic press deformation while preserving static optics.
+- Leave space between adjacent glass controls for expanded optical paint (the preview uses a `32px` gap; wider controls may need more) so surfaces do not overlap.
+- Provide an explicit accessible name (such as `aria-labelledby`) for icon-only toggles. Design choices follow Apple's [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) and [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/) guidance.
+
 ## API
 
-- active?: boolean: controlled selection. activeChange requests the next value; the owner may reject or apply it later.
-- defaultActive?: boolean: initial uncontrolled selection, default false.
-- disabled?: boolean: default false. Suppresses activation, clears transient interaction and preserves active selection.
-- material?: 'auto' | 'opaque': default auto. Opaque opts out of optical enhancement.
-- activeChange: `{ active: boolean }`. The Previewer uses onActiveChange to observe this outward signal; it is not a Toggle semantic prop.
-- role="button" and aria-pressed reflect persistent active; exposed pressed is the transient pointer state. Focus and keyboard behavior come directly from Base Toggle.
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `active` | `boolean` | — | Controlled selection state; `activeChange` proposes updates for the caller to apply |
+| `defaultActive` | `boolean` | `false` | Initial uncontrolled selection state |
+| `disabled` | `boolean` | `false` | Suppresses activation, clears transient press state, and preserves `active` |
+| `material` | `'auto' \| 'opaque'` | `'auto'` | Set to `'opaque'` to opt out of optical enhancement |
 
-## Material and accessibility
+### Events and states
 
-The shared Web provider samples only the visible application-owned canvas supplied by the Previewer. It does not capture arbitrary DOM or browser-compositor content. Missing, revoked or overlapping source paint, unknown preferences, reduced transparency, increased contrast and forced colors retain opaque fallback; reduced motion uses static optics. Disabled controls and material="opaque" also use fallback. Fallback retains the current state’s complete opaque color pair: primary/primary-foreground when active, secondary/secondary-foreground when inactive. Unsupported tint profiles also fall back instead of silently showing neutral glass. Selection remains identifiable by its check when optical paint is unavailable; forced colors remain under the user agent’s control.
-
-Leave room for each control’s expanded optical paint. This demo uses a 32px gap; wider controls may need more space. Overlapping paint is deliberately rejected, not treated as supported stacked glass.
-
-[Apple's Materials guidance](https://developer.apple.com/design/human-interface-guidelines/materials) describes adapting materials to transparency and contrast preferences; [Meet Liquid Glass](https://developer.apple.com/videos/play/wwdc2025/219/) also discusses reduced motion. This prototype follows its own strict shared-provider gates and keeps readable theme fill/foreground instead of simulating unsupported optics.
-
-The package is private and unreleased. This selected-tint slice remains a draft pending exact-head browser evidence for all four Web adapters. Evidence must pair decoded content pixels with the same frozen foreground and receipt, require nonempty samples with at least 4.5 contrast, and separately compare fixed-source neutral/tinted and tinted/zero-refraction GPU output. A transparent host background or changing image hash is not optical contrast or tint evidence. The direct-program diagnostic is algorithm-only and does not replace provider or public-page acceptance. The additional coarse-pattern challenge measures inner-content amplitude, spatial structure and response to equal-histogram source reordering; flat fills, noise and the retired narrow tint envelope are negative controls. These are engineering criteria, not Apple numerical thresholds.
-
-The shared prototype provides the same non-color check for text and icon-only content; icon-only consumers still need an explicit accessible name. The fixture uses the existing aria-labelledby relation. This marker is a Proto choice, not an Apple requirement or a Web mapping of Apple’s Differentiate Without Color setting. Full Compiler, GPUI/Flutter/Qt, native Apple rendering and group/morph parity remain outside this delivery.
-
-[Apple’s Liquid Glass tint guidance](https://developer.apple.com/videos/play/wwdc2025/219/?time=1023) preserves the material’s relationship with its background; selected tint is not an instruction to replace glass with a solid fill. Whole-image color counts or passing interaction tests do not establish that appearance.
+- `activeChange`: payload `{ active: boolean }`. In host adapters, listen via `onActiveChange`.
+- Accessibility and exposed state: `role="button"` and `aria-pressed` reflect persistent `active`, while exposed `pressed` tracks transient pointer press. Focus and keyboard handling come from Base Toggle.

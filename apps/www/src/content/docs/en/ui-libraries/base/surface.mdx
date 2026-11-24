@@ -1,13 +1,17 @@
 ---
 title: 'Surface'
-description: 'Base passive visual surface with consumer-owned semantic and interaction facts.'
+description: 'A passive visual surface container with standardized variant, radius, border, elevation, and state props.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-`base-surface-root` is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Base normalizes the input vocabulary and remains visually neutral. Family projections own fill, border, radius, elevation and state feedback.
+A passive visual container that standardizes surface variants, corner radius, borders, elevation, and visual interaction states while letting styled components own the actual paint.
+
+## Preview
+
+The preview passes explicit passive visual states to illustrate surface presentation without adding button or focus behavior.
 
 <PrototypePreviewer
   demoId="demo-base-surface"
@@ -15,9 +19,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-The demo passes explicit passive states into real package prototypes. The focus and press samples are visual facts, not clickable or focusable controls. Outer spacing and the inner content padding belong to the example. No event handler is added to make a Surface pretend to be a Button.
+## Installation
 
-## Use Surface
+Currently available from workspace source; not yet included in the 0.2.0 stable release (workspace CLI target: `base-surface`). Import `surfaceRoot` (along with `SurfaceRootProps`, `SurfaceRootExposes`, `asSurfaceRoot`, and `SurfaceRootAsHookContract`) from `@proto.ui/prototypes-base/surface` or the package root.
+
+## Usage
 
 ```tsx
 import * as React from 'react';
@@ -35,46 +41,21 @@ export function Summary() {
 }
 ```
 
-The `/surface` subpath and package root export `surfaceRoot`; `SurfaceRootProps` and `SurfaceRootExposes` describe the shared contract. Base additionally exports `asSurfaceRoot` and `SurfaceRootAsHookContract` for family authoring. Do not put a Surface inside an interactive owner and give it another role, tab stop or activation handler. When using a native anchor, retain navigation, keyboard behavior, target and download on that anchor.
+### Passive visual inputs
 
-## Inputs
+- Pass `hovered`, `focusVisible`, `pressed`, and `current` from an enclosing interactive component. `Surface` itself adds no event listeners, tab stops, accessible roles, or activation handlers.
+- Removing a prop restores its default value. Content layout and padding belong to the caller; set `tone="inherit"` on nested styled `Text` elements when they should inherit the enclosing `Surface` foreground color.
+- When you need real button or link semantics, use `Button` or a native `<a>` element rather than attaching click handlers to `Surface`.
 
-| Prop | Values | Default |
-| --- | --- | --- |
-| `variant` | `transparent`, `outline`, `secondary`, `muted`, `accent`, `solid`, `scrim` | `outline` |
-| `radius` | `default`, `none`, `sm`, `md`, `lg`, `xl`, `full` | `default` |
-| `border` | `all`, `bottom`, `none` | `all` |
-| `elevation` | `none`, `raised` | `none` |
-| `transitionState` | `closed`, `entering`, `entered`, `leaving` | `entered` |
-| `fade` | boolean | `false` |
-| `hovered` | boolean | `false` |
-| `focusVisible` | boolean | `false` |
-| `pressed` | boolean | `false` |
-| `current` | boolean | `false` |
+### Following an existing Transition
 
-`hovered`, `focusVisible`, `pressed` and `current` are facts supplied by the existing semantic owner. Surface does not detect pointer, focus, keyboard, selection or navigation state itself. It owns no exposed state, event, method, accessible role or native property. `current` is a presentation input, not an `aria-current` implementation. A caller that needs a real Button should compose the governed Button protocol.
-
-Removing an input restores its default. Base normalizes `secondary` without paint; each styled projection chooses its secondary surface independently of elevation. Default radius and paint are family-specific; a shared prop vocabulary does not imply identical appearance. Content and layout remain consumer-owned. Use Text with `tone="inherit"` when a styled Text child must retain the enclosing Surface foreground.
-
-## Observe an existing Transition
-
-`fade` opts into family-owned opacity presentation. In a styled projection, `fade=true` makes `closed` and `leaving` map to opacity zero, while `entering` and `entered` map to opacity one. The `transitionState` is a fact from the existing [Transition owner](/en/ui-libraries/base/transition/); Surface creates no second clock, scheduling policy, phase events or completion signal. With `fade=false`, phase input does not enable this opacity mapping.
-
-The Web `surface-fade` token consumes `--pui-surface-transition-duration`, defaulting to `0ms`. A Web composition can forward the existing owner's resolved duration through this variable; it must validate finite, non-negative milliseconds. There is no universal 220ms default and no Surface duration prop. Reduced-motion handling and starting opacity are bounded Web style behavior, not proof that native targets support dynamic CSS variables.
-
-`scrim` selects the family's conventional dimming paint. It adds no material sampling, blur or refraction. Opacity zero is not an instruction to disable, make inert, unmount or remove semantic ownership: the existing Dialog/Transition or other semantic owner still gates interaction, presence and focus. Surface does not manage any of those responsibilities.
-
-## Host and Compiler boundary
-
-Surface uses the ordinary public Prototype, Props and Feedback paths. The bounded conformance slice exercises Web Components, React, Vue 3 and Vue 2. The source-built CLI registers `<family>-surface` for those four facade targets, and the Web style compiler consumes the actual family tokens; `gpui` facade generation is explicitly unsupported. Its supported Web adapter and compiler evidence must be read separately: successfully displaying a Web projection is not proof of complete native support or arbitrary Prototype AOT. No host-specific material backend, screenshot capture, navigation service or code renderer is hidden in Surface. Unsupported target or style diagnostics must remain explicit instead of being treated as equivalent output.
-
-## Authority
-
-`P-BASE-SURFACE` and `T-SURFACE-0001` govern this draft slice. Source: `packages/prototypes/base/src/surface/`.
+- Set `fade={true}` to map `transitionState` (supplied by [Transition](/en/ui-libraries/base/transition/)) to opacity in styled components: `closed` and `leaving` map to `0`, while `entering` and `entered` map to `1`.
+- On Web, pass a finite non-negative duration via the `--pui-surface-transition-duration` CSS variable (defaults to `0ms`).
+- `variant="scrim"` applies a standard backdrop dimming surface. Zero opacity is purely visual; presence, inertness, and focus management remain with the enclosing `Dialog` or `Transition`.
 
 ## API
 
-Surface is workspace source. For this workspace version, the CLI target is `base-surface`. Use matching CLI and package versions; check the chosen release's availability before installing.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -103,8 +84,6 @@ Surface is workspace source. For this workspace version, the CLI target is `base
     { name: 'current', type: 'boolean', default: 'false' },
   ]}
 />
-
-These props belong to Root.
 
 ## References
 

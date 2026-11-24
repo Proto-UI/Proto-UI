@@ -1,13 +1,15 @@
 ---
-title: shadcn Fieldset
-description: Draft portable fieldset atoms.
+title: 'Fieldset'
+description: 'Groups related form fields, propagates disabled state to nested fields, and links group labels and descriptions.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+Groups related form fields under one accessible `group` container, propagates `disabled` down through nested groups, and automatically links its legend and description. The examples on this page use the **Shadcn Rhea** style preset.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-shadcn-fieldset"
@@ -16,45 +18,33 @@ Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching exampl
   codePanel={false}
 />
 
-## Draft definition and ownership
+## Usage
 
-C-FIELDSET-0001 defines this passive group separately from C-FIELD-0001, which explicitly excludes Fieldset. P-SHADCN-FIELDSET, P-SHADCN-FIELDSET-LEGEND and P-SHADCN-FIELDSET-DESCRIPTION are draft since 0.3.0-alpha.1; catalog presence is not stable admission. T-BASE-FIELDSET-0001 records the acceptance plan and its limits.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Root owns group semantics and effective disabled: local disabled OR the enclosing Fieldset policy. Nested groups do not hide ancestors, and re-enabling an ancestor preserves local restrictions. Participating Fields consume that policy and own their own validation invalidation. Fieldset does not discover arbitrary controls or own values, editors, validation, submission, reset or an extra focus target.
+### Anatomy
 
-## Public API and nested policy
+Compose `Fieldset` from `Root`, `Legend`, and `Description`:
 
-Root Props: disabled?: boolean (default false), ariaLabel?: string (default empty string). Legend and Description have no declared Props. All three expose read-only effective disabled state; change policy through Root Props, not the exposed state.
+- **Root**: Unboxed vertical flex container (`gap-4`) declaring the `group` role and effective `disabled` policy.
+- **Legend**: Optional medium-weight group title automatically linked via `aria-labelledby`.
+- **Description**: Optional muted help text automatically linked via `aria-describedby`.
 
-For outer → middle → inner Roots:
+Both `Legend` and `Description` are passive and add no tab stops. Provide at most one `Legend` and one `Description` per group (duplicate parts are ignored), and nested groups never borrow each other's labels or descriptions.
 
-- With only outer disabled, all three are disabled.
-- Set middle disabled, then enable outer: middle and inner remain disabled.
-- Enable middle too: inner enables unless its own disabled remains true.
+### Nested disabled inheritance
 
-## Parts and accessible relationships
+Effective `disabled` combines a `Root`'s own `disabled` prop with any enclosing `Fieldset`. For `outer` → `middle` → `inner`:
 
-- Root accepts disabled and ariaLabel, exposes effective disabled, and renders its children.
-- Legend is optional passive naming content; Description is optional passive help content. Each exposes inherited disabled. Neither adds a tab stop or activation behavior.
-- Root declares group role and scoped labelledBy/describedBy Anatomy relationships. A11y and the host project those relationships; authors do not manufacture DOM IDs. Native accessible-name computation, including ariaLabel with Legend, still needs assistive-technology acceptance.
-- A group permits at most one Legend and one Description. Duplicate exact relationship targets fail closed rather than selecting the first. Complete terminal/remount acceptance remains open. Nested groups must not borrow each other's naming or description targets.
-- The portable definition does not adopt the native HTML first-Legend disabled exemption. A participating Field inside Legend inherits disabled too.
+- Disabling `outer` disables all three.
+- Disabling `middle` and then re-enabling `outer` keeps `middle` and `inner` disabled.
+- Re-enabling `middle` re-enables `inner` unless `inner` has `disabled={true}`.
 
-## Evidence boundary
-
-Base and the four visual families share the same semantic atoms. Synthetic WebComponent tests cover policy and scoped relationship cases; family smoke tests and source-token checks are narrower evidence, not full Adapter or pixel acceptance. Type checks cover public projection compatibility. Native keyboard, assistive technology, cross-Adapter/Compiler composition, GPUI, generated CSS/visual and package-consumer acceptance remain open. No Finf completion is claimed.
-
-## Family presentation
-
-- Root: Unboxed flexible vertical grouping with gap-4 and min-width shrink safety.
-- Legend: Medium-weight base text with bottom spacing; no uppercase transformation.
-- Description: Small normal-weight muted wrapping help text.
-
-These are draft presentation criteria, not a pixel-parity claim.
+Participating [Field](../field/) components inside the group (including any placed inside `Legend`) inherit the effective disabled state automatically. Form submission and reset belong to [Form](../form/).
 
 ## API
 
-Fieldset is workspace source. There is no public `proto-ui add` target. Legend and Description have no props.
+`Legend` and `Description` take no props; all three parts expose read-only effective `disabled` state controlled via `Root` props.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -64,7 +54,7 @@ Fieldset is workspace source. There is no public `proto-ui add` target. Legend a
   ]}
 />
 
-These props belong to Root.
+These props belong to `Root`.
 
 ## References
 

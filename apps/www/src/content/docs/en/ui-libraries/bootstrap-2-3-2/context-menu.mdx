@@ -1,11 +1,13 @@
 ---
 title: 'ContextMenu'
-description: 'A context-triggered command menu with keyboard access.'
+description: 'A Bootstrap 2.3.2 context menu triggered by right-click, touch/pen long-press, or keyboard shortcuts.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-A context-triggered command menu with keyboard access.
+ContextMenu opens a command menu on right-click, touch/pen long-press, or `ContextMenu` / `Shift+F10`, with keyboard navigation and typeahead search built in.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-context-menu"
@@ -14,12 +16,26 @@ A context-triggered command menu with keyboard access.
   codePanel={false}
 />
 
-Root supports open/defaultOpen, disabled and closeOnItemCommit. Trigger opens on context.menu or ContextMenu/Shift+F10 and suppresses the native context menu for that handled request; ordinary left click does not open it. Content inherits real Overlay/Focus/Transition navigation, typeahead and controlled dismissal. Right-click and accepted touch/pen holds open at their input point. ContextMenu/Shift+F10 uses the trigger region. The shared host keeps position geometry private and supplies only an opaque input-origin association; no DOM coordinates enter portable props, state or JSON context.
+## Installation
 
-Parts: Root, Trigger, Content, Item.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+## Usage
 
-A touch/pen contact must remain held for 600 ms within the host movement tolerance. Movement, release, cancellation, disabled state and disposal cancel a pending hold. Accepted keyboard/long-press input suppresses its duplicate native context menu; an accepted hold also suppresses its compatibility click. Ordinary clicks and scrolling are left to the host. Default placement is bottom/start with no gap.
+Compose `Root`, `Trigger`, `Content`, and `Item`:
 
-Controlled open requests remain requests: the native context menu is prevented when the enabled Root accepts delivery, while the owner may keep open=false. A later owner-open uses the latest live input anchor; programmatic openContextMenu uses the trigger fallback. Escape and selection restore the original trigger according to the existing focus policy. Shared source-runtime coverage does not establish compiler/native admission or real-device long-press acceptance.
+- **Opening and anchoring**: Right-click and touch/pen long-press (`600ms` within movement tolerance) open at the pointer position; `ContextMenu`, `Shift+F10`, and programmatic `openContextMenu()` anchor to the trigger region (default `bottom`/`start`). Regular left clicks and scrolling pass through normally.
+- **Native menu suppression**: When an enabled `Root` handles a request, it suppresses the browser context menu (and compatibility click for long-press). Moving, releasing, disabling, or unmounting cancels a pending hold.
+- **Controlled state**: Supply `open` to control visibility externally. Pressing `Escape` or selecting an item closes the menu and restores focus to `Trigger`.
+
+## API
+
+| Part | Props / Methods | Description |
+| --- | --- | --- |
+| `Root` | `open` / `defaultOpen` | Controlled or initial open state |
+| `Root` | `disabled` | Disables opening the menu |
+| `Root` | `closeOnItemCommit` | Controls whether choosing an item closes the menu |
+| `Root` | `openContextMenu()` | Opens the menu anchored to the trigger |
+| `Trigger` | — | Region listening for context menu, long-press, and keyboard shortcuts |
+| `Content` | — | Floating menu panel with keyboard navigation and typeahead |
+| `Item` | — | Individual menu command |

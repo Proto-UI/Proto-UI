@@ -1,17 +1,15 @@
 ---
-title: 'Message-Scroller (WIP)'
-description: 'message-scroller functional composition and current verification limits.'
+title: 'Message Scroller'
+description: '支持末尾自动跟随与稳定阅读位置恢复的消息滚动容器。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Message Scroller 复用 Scroll Surface 的 end-follow。读者位于末端时跟随追加；离开末端后可以通过 Jump to latest 显式恢复。newContentCount 由应用提供，不推断未读业务事实。跳转不会主动请求焦点。
+面向消息流和对话列表的滚动容器，支持在底部自动跟随新消息、离开底部后显式跳转回最新位置，以及可选的稳定 key 阅读锚点恢复。
 
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
-
-Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-message-scroller"
@@ -19,9 +17,36 @@ Root 的 a11yLabel 为滚动区域提供无障碍名称，默认值是 Messages�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
+
+## 用法
+
+由 `Root`、`Viewport` 和 `Jump` 组成：
+
+- **末尾跟随**：当阅读位置位于底部时，新追加的内容会自动跟随滚到底部；离开底部后停止自动跟随，用户可通过 `Jump` 按钮显式回到最新位置（跳转不会主动抢占焦点）。
+- **未读计数与命名**：`newContentCount` 由应用直接传入，用于展示新增条数；通过 `Root` 的 `a11yLabel` 为滚动区域提供无障碍名称（默认 `'Messages'`）。
+
+### 稳定 key 阅读组合
+
+`@proto.ui/prototypes-base/message-scroller` 提供可选 Hook `asMessageScrollerReading`。在自定义原型中，将其组合在 Base 或 Shadcn `Viewport` **之后**，它会复用同一个 Scroll Surface 并关闭通用的 `preserve-visible`，由单一控制器负责稳定 key 位置恢复。
+
+支持的配置项：
+
+- `readingCapture`：锚点捕获策略，默认 `'first-crossing'`（选择首个底部越过 inset 的条目），也可选 `'visible-preferred'`（优先选择视口内首个可见的 `primary` 条目，再回退到首个可见条目）。
+- `readingInset`：捕获边界偏移量，默认 `0`。
+- `readingPredecessor`：精确 key 缺失时是否回退到已保存的前驱条目，默认 `true`。
+
+宿主通过 `MessageReadingFrame` 提供当前帧信息：挂载 `epoch`、`scrollOffset`、`viewportSize`，以及按顺序排列的相对视口条目 `{ key, start, end, primary }`。锚点结构为 `{ key, previousKey, index, offset, scrollOffset }`。恢复时依次匹配精确 `key`、已保存的前驱（若启用）、已保存的绝对位置，不会使用 `index` 充当替代身份。滚动通过 `Scroll.request({ kind: 'by', ... })` 发出，边界裁剪与执行时机由宿主处理。
+
+初始恢复 hint 在空内容、延迟加载、缺失 key 回退与零高度精确命中期间保持有效，直到收到明确的用户输入才退休。选区恢复由宿主提供选区身份、偏移、长度、端点可用性和前缀一致信息，Hook 会跳过已改写文本、现有非折叠选区和重复恢复记录，并避免程序恢复触发的 `selectionchange` 被误判为用户输入。DOM 测量、`Range` 操作、指纹编码与持久化存储仍由应用管理。
+
+此外，模块导出的纯函数 `captureMessageReadingAnchor`、`resolveMessageReadingAnchor`、`planMessageReadingRestore` 和 `messageSelectionRestoreEligible` 与该 Hook 采用一致的策略。
+
 ## API
 
-Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Viewport 没有属性。Jump 接受 Button 的属性。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -31,7 +56,20 @@ Message Scroller 是工作区源码，没有公开的 `proto-ui add` 目标。Vi
   ]}
 />
 
-这些属性属于 Root。
+`Viewport` 无额外属性；`Jump` 接受与 `Button` 相同的属性。
+
+### `asMessageScrollerReading` 方法与状态
+
+| 公开方法 / 状态 | 职责 |
+| --- | --- |
+| `beginReading(following, anchor)` | 仅初始化一次阅读会话与可选恢复 hint。 |
+| `syncReadingFollowing(following)`、`resumeReading()` | 同步外部阅读模式变更或显式回到末尾；组合此 Hook 时 `Jump` 会调用 `resumeReading`。 |
+| `readingInput(input, frame)` | 处理 pointer/key/wheel、内容 focus、selection 或 backfill 事实，决定暂停跟随与 hint 退休。 |
+| `captureReading(frame)`、`observeReadingScroll(frame)` | 捕获当前阅读位置并处理滚动回报，不覆盖仍有效的初始 hint。 |
+| `restoreReading(frame)`、`commitReadingRestore(ticket, actualFrame)` | 发出恢复请求并确认真实 offset；通过 ticket 与挂载 epoch 过滤过期回报，避免异步滚动重复记录锚点。 |
+| `readingAnchorForPersistence(frame)` | 仅当历史阅读位置可以替换旧 hint 时返回可持久化的锚点。 |
+| `planSelectionRestore(facts)`、`commitSelectionRestore(ticket)` | 判定选区恢复资格并对成功的宿主 `Range` 操作去重。 |
+| `readingMode`、`restoringReading`、`getReadingEpoch()` | 暴露当前阅读模式、恢复状态与测量 epoch。 |
 
 ## 参考
 

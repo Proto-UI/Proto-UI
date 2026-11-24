@@ -1,0 +1,52 @@
+id: P-BASE-SELECTABLE-ROW
+type: prototype
+title: Base Selectable Row separates selection proposals from activation
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: This bounded row is extracted from Shenko's file browser. Compiler source generation is available; independent input, remount and assistive-technology evidence is still required. Double activation is explicitly a Web host extension and has no portable double-press guarantee.
+summary: One controlled row projects accepted selection and proposes selection or activation of an opaque item key.
+statement:
+  en: Selectable Row owns row-local press, keyboard, focus and accessibility semantics. Its consumer supplies itemKey, selected, disabled and activatable, accepts selection proposals, and performs activation effects. It owns no filesystem, route, collection, grid navigation or multi-selection policy.
+criteria:
+  - id: P-BASE-SELECTABLE-ROW-CONTROLLED
+    text:
+      en: selected is accepted owner state, defaulting to false. Pointer press or Space proposes selectionChange with the current opaque string value without optimistically changing selected. Removing selected restores its false default. The event does not carry a host element or application object.
+  - id: P-BASE-SELECTABLE-ROW-ACTIVATION
+    text:
+      en: Enter emits activate only when activatable is true and does not also propose selection. The explicit host:dblclick extension emits the same activation proposal on Web. The row does not synthesize clicks, infer a double-press interval, navigate or interpret the key. No double activation behavior is claimed for hosts that do not deliver this extension.
+  - id: P-BASE-SELECTABLE-ROW-KEYBOARD
+    text:
+      en: Enabled focused rows prevent Space's scrolling default; activatable focused rows also prevent Enter's default. Repeated keyboard press commits do not repeat selection or activation. Arrow movement, roving tab order, range selection and collection shortcuts belong to a separate collection owner.
+  - id: P-BASE-SELECTABLE-ROW-AVAILABILITY
+    text:
+      en: disabled suppresses selection, activation and focusSelf, removes normal focus participation and projects disabled. Re-enabling restores focus participation without replaying previous input. Accepted selection remains independent of disabled.
+  - id: P-BASE-SELECTABLE-ROW-PROJECTION
+    text:
+      en: The row projects role row, selected and disabled through accessibility, exposes selected, disabled, focused and focusVisible, and preserves authored children through its default slot. It does not add a button role, an extra grid owner, copied labels or a visual design-language policy.
+  - id: P-BASE-SELECTABLE-ROW-ENTRIES
+    text:
+      en: The package root and /selectable-row subpath export selectableRow, asSelectableRow and their props/expose types. Both authoring entries execute the same setup; consumers must not duplicate its keyboard or selection state in a host wrapper.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-PROPS-0001
+    - C-EVENT-TYPE-0002
+    - C-LIFECYCLE-0008
+verifies:
+  tests: [T-SELECTABLE-ROW-0001]
+sources:
+  - path: packages/prototypes/base/src/selectable-row/root.proto.ts
+  - path: packages/prototypes/base/src/selectable-row/types.ts
+  - path: packages/prototypes/base/src/selectable-row/index.ts
+openQuestions:
+  - id: P-BASE-SELECTABLE-ROW-Q-EVIDENCE
+    question:
+      en: Have exact-head consumer, lifecycle and assistive-technology observations independently established the declared row semantics, including the bounded Web double-activation path?
+    blocks:
+      - activation:P-BASE-SELECTABLE-ROW
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Extracted controlled row selection and distinct activation for compiler consumers while retaining explicit Web extension and collection-policy boundaries.
+tags: [prototype, base, selection, row]

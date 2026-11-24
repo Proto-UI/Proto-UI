@@ -1,0 +1,72 @@
+id: T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001
+type: test
+title: Intrinsic block-size declarations, sampling and host leases
+status: draft
+since: 0.3.0-alpha.2
+lifecycleRationale:
+  en: Executable source and host protocol coverage; actual native captures and independent backend admission are recorded separately.
+summary: Separates immutable declaration, measured retargeting, native lease lifetime and actual browser geometry evidence.
+cases:
+  - id: T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-DECLARATION
+    title: Intrinsic sentinel and nonnegative sizes preserve immutable grammar
+    covers: [C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-DECLARATION]
+    expectation: immutable-matching-valid-block-size-endpoints
+  - id: T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-SAMPLING
+    title: Growth, shrinkage, reversal and bounded fallback
+    covers:
+      [
+        C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-MEASUREMENT,
+        C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-OWNERSHIP,
+        C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-FALLBACK,
+      ]
+    expectation: acknowledged-continuous-samples-and-current-owner-settlement
+  - id: T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-NATIVE
+    title: Four actual Web hosts measure authored content and retain exit
+    covers:
+      [
+        C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-MEASUREMENT,
+        C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-OWNERSHIP,
+        C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-FALLBACK,
+      ]
+    expectation: native-frame-heights-and-restored-semantic-sizing
+verifies:
+  contracts: [C-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001]
+  hostCaps: [HC-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001]
+implementations:
+  - id: declaration
+    kind: module-test
+    status: passing
+    path: packages/core/test/presence-presentation-declaration.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-DECLARATION]
+  - id: neutral-sampler
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/presence-block-size.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-SAMPLING]
+  - id: source-host-leases
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/web-presence-block-size.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-SAMPLING]
+    notes:
+      [
+        Geometry inputs are injected protocol facts in this test; they are not native layout evidence.,
+      ]
+  - id: native-four-web
+    kind: adapter-test
+    status: active
+    path: scripts/analysis/bootstrap-collapse-browser.mjs
+    required: true
+    consumesCases: [T-FEEDBACK-INTRINSIC-BLOCK-SIZE-0001-CASE-NATIVE]
+    notes:
+      [
+        Implemented runner requires a current-source executed receipt. A Chromium launch failure is not a product or geometry result.,
+      ]
+revisions:
+  - version: 0.3.0-alpha.2
+    change: introduced
+    summary: Define distinct source, host protocol and real browser evidence for the intrinsic size channel.
+tags: [motion, layout, conformance]

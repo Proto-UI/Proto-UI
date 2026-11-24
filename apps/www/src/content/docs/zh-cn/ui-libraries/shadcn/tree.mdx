@@ -1,19 +1,15 @@
 ---
-title: 'Tree (WIP)'
-description: 'tree functional composition and current verification limits.'
+title: 'Tree'
+description: '支持层级展开折叠、键盘导航与双向文字方向的树形视图组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Tree 用于展示和浏览层级结构数据（如文件目录或大纲列表），支持单项选择、分支展开折叠以及完整的键盘导航。本页示例使用 **Shadcn Rhea** 风格。
 
-Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，parentKey 指向父项；重复标识、缺失父项和环路均拒绝。方向键、Home/End 与首字母移动焦点；左右键展开、折叠或定位父子项。value 与 expandedKeys 支持受控请求。
-
-当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
-
-Shadcn Root 与 Item 可显式设置 `appearance="embedded"`，用于已有表面内的文件导航。两个部分分别设置，默认外观保持不变。嵌入态采用较轻的选中背景，保留键盘焦点与禁用语义，并允许放大文字换行；它只是设计族外观选项，不新增选择或展开负责人。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-tree"
@@ -21,17 +17,31 @@ Shadcn Root 与 Item 可显式设置 `appearance="embedded"`，用于已有表�
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## 方向与分支关系
+## 安装
 
-Root 设置 `direction="rtl"` 后，左右导航键交换：左键展开或进入子项，右键折叠或返回父项；默认 LTR 的映射相反。上下键、Home/End 与首字母导航继续遵循逻辑可见顺序。Shadcn 与 Brutalist Group 的缩进跟随文字方向。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-每个 `TreeGroup` 的 `nodeKey` 与所属分支 Item 相同；把子 Item 放入 Group，并用 `parentKey` 指向该分支。Item 与 Group 通过作用域内的 key 建立 controls／labelled-by 关系。目标被移除、缺失或有歧义时，关系会撤回，不留下悬空引用。折叠隐藏 Group，但保留完整逻辑层级；原焦点在折叠分支内时移到可见祖先，树外焦点不被抢走。
+## 用法
 
-`readOnly` 阻止选择变更，仍允许导航和展开。受控 `value`、`expandedKeys` 在应用接受请求前保持已提交值。插入、移动或移除 Item 会更新层级，不伪造用户选择事件。
+Tree 由 `Root`、`Item`、`Group`（`TreeGroup`）和 `Toggle` 组成：
+
+- 每个 `Item` 使用树内唯一的 `nodeKey`，并通过 `parentKey` 指向父节点；若出现重复 key、缺失父节点或循环引用，非法节点配置会被忽略并保持当前有效结构。
+- 将分支子项放入与父 `Item` 共享相同 `nodeKey` 的 `TreeGroup` 中，组件会自动维护 `aria-controls` / `aria-labelledby` 关联并在节点卸载时清理。
+- 折叠分支时仅隐藏 `TreeGroup` 而保留完整层级；若折叠前焦点位于分支内部，焦点会自动回到可见祖先节点，而不会抢走树外的焦点。
+
+### 嵌入式外观与文字方向
+
+- 在侧边栏或现有卡片表面内展示文件导航时，可在 `Root` 和 `Item` 上同时设置 `appearance="embedded"`，启用更柔和的选中底色并支持放大字号时的自动换行。
+- 在 `Root` 上设置 `direction="rtl"` 会自动镜像缩进方向与左右方向键映射（左键展开/进入子项，右键折叠/返回父项）；上下方向键、`Home` / `End` 和首字母跳转继续按逻辑可见顺序工作。
+
+### 受控与只读
+
+- 传入 `value` 或 `expandedKeys` 可分别进入受控模式，组件发出变更请求并在外部更新后提交。动态增删或移动节点会更新层级而不会伪造用户选择事件。
+- 设置 `readOnly` 会阻止修改选中项，同时保留键盘导航与展开/折叠功能。
 
 ## API
 
-Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 或 `expandedKeys` 会使对应事实进入受控模式。
+以下属性属于 `Root`（传入 `value` 或 `expandedKeys` 可分别进入受控模式）：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -45,7 +55,11 @@ Tree 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value`
   ]}
 />
 
-这些属性属于 Root。Item 的 `nodeKey`、`parentKey`、`textValue` 默认 `''`，`disabled` 默认 `false`。Group 接受 `nodeKey`。Toggle 额外接受 Button 的属性。
+其他部件属性：
+
+- `Item`：`nodeKey`、`parentKey`、`textValue` 默认 `''`，`disabled` 默认 `false`（支持 `appearance="embedded"`）。
+- `Group`：接受 `nodeKey`。
+- `Toggle`：接受 Button 属性。
 
 ## 参考
 

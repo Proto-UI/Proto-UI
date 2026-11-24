@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2 Switch'
-description: '基于 Base Switch 的 Bootstrap 2.3.2 设计语言扩展。'
+description: '基于 Base Switch 的 Bootstrap 2.3.2 设计语言扩展开关组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,11 +8,11 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-此 Switch 是设计语言扩展（design-language extension），不是 Bootstrap 2.3.2 的原版组件。Root / Thumb anatomy 借用归档版本的凸起控件语言，交互语义保持由 Base Switch 拥有。
+Bootstrap 2.3.2 Switch 是一项设计语言扩展（design-language extension），不是 Bootstrap 2.3.2 的原版组件。它借鉴归档版本的立体凸起控件风格构建 `Root` / `Thumb` 结构，同时完整保留 Base Switch 的交互语义与经典浅色配色。
 
-Base Switch 拥有持久的 on/off `checked` 值、受控与非受控值归属、激活、禁用与焦点。Thumb 读取最近 Root 的 context，不拥有独立的值或事件。
+## 预览
 
-通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。可切换前两个开关，并检查禁用开关保持不变。
+可切换前两个开关，并观察第三个禁用开关保持不可交互。
 
 <PrototypePreviewer
   demoId="demo-bootstrap-2-3-2-switch"
@@ -22,10 +22,20 @@ Base Switch 拥有持久的 on/off `checked` 值、受控与非受控值归属�
   codePanel={false}
 />
 
+## 安装
+
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。[查看已实现的子集](../)。
+
+## 用法
+
+- **状态由 Root 统一管理**：支持受控 `checked` 与非受控 `defaultChecked`，处理点击、键盘激活、焦点和禁用状态。
+- **Thumb**：放置在 `Root` 内部，自动跟随开关状态滑动展示，无需额外绑定属性。
+
 ## API
 
-- Root：`checked` / `defaultChecked`、`disabled`
-- Root 继承 `checkedChange` 信号
-- Thumb：放在对应 Root 内的派生展示部件
-
-这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。
+| 部件    | 属性 / 事件                  | 说明                           |
+| ------- | ---------------------------- | ------------------------------ |
+| `Root`  | `checked` / `defaultChecked` | 受控或初始开关状态             |
+| `Root`  | `disabled`                   | 禁用开关交互                   |
+| `Root`  | `checkedChange`              | 开关状态变更事件               |
+| `Thumb` | —                            | 放置在 `Root` 内的滑块指示部件 |

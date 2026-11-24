@@ -1,5 +1,4 @@
 // @vitest-environment happy-dom
-import { readFileSync } from 'node:fs';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,7 +6,7 @@ import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { button } from '@proto.ui/prototypes-base';
 import { createReactAdapter } from '@proto.ui/adapter-react';
-import { compilePrototype } from '../src/compile';
+import { compileFile } from '../src/compile';
 import {
   compareTraces,
   type IdentityNormalization,
@@ -26,13 +25,11 @@ import { writeCaseEvidence } from './case-evidence';
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
 
-const source = readFileSync(
-  path.resolve(
-    fileURLToPath(import.meta.url),
-    '../../../prototypes/base/src/button/button.proto.ts'
-  ),
-  'utf8'
+const sourceFile = path.resolve(
+  fileURLToPath(import.meta.url),
+  '../../../prototypes/base/src/button/button.proto.ts'
 );
+const repositoryRoot = path.resolve(fileURLToPath(import.meta.url), '../../../../');
 const journeySteps: readonly JourneyStep[] = Object.freeze([
   { id: 'hover', action: { kind: 'pointer-enter' } },
   { id: 'down', action: { kind: 'pointer-down' } },
@@ -139,7 +136,7 @@ const ownerIdentities: Record<'reference' | 'candidate', IdentityNormalization> 
 
 describe('simulated-host same-source Adapter/generated differential journey', () => {
   it('executes the unchanged prototype and emitted module with equal semantic traces and passing oracles', async () => {
-    const compilation = compilePrototype(source, { fileName: 'button.proto.ts' });
+    const compilation = await compileFile(sourceFile, { root: repositoryRoot });
     if (!compilation.ok) throw new Error(JSON.stringify(compilation.diagnostics));
 
     const referenceClicks = vi.fn();
@@ -186,7 +183,7 @@ describe('simulated-host same-source Adapter/generated differential journey', ()
   });
 
   it('detects an injected emitted-code semantic defect end to end, not as a code-string difference', async () => {
-    const compilation = compilePrototype(source, { fileName: 'button.proto.ts' });
+    const compilation = await compileFile(sourceFile, { root: repositoryRoot });
     if (!compilation.ok) throw new Error(JSON.stringify(compilation.diagnostics));
     const original = compilation.value.output.code;
     const mutant = original.replace(

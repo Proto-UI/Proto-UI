@@ -1,13 +1,15 @@
 ---
-title: 'ToggleGroup'
-description: '带游走焦点的单选或多选按下状态组。'
+title: 'Toggle Group'
+description: '支持单选或多选切换与漫游焦点导航的按钮组组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-带游走焦点的单选或多选按下状态组。
+将一组可切换的按下态按钮组织在一起，支持单选或多选模式及方向键漫游焦点导航。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-base-toggle-group"
@@ -16,15 +18,20 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-value/defaultValue 为数组。multiple=false 最多保留一个值，再次点击可以清除。受控 valueChange 不修改调用方状态。禁用、只读以及重复值选项不能提交；箭头导航仅移动焦点。
+## 安装
 
-组成: Root, Item.
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。
+## 用法
+
+由 `Root` 与 `Item` 组成：
+
+- **单选与多选**：`value` / `defaultValue` 统一为字符串数组。默认 `multiple={false}` 时最多保留一个选中值，再次点击已选项可取消选中；开启 `multiple={true}` 可同时激活多项。
+- **受控模式与交互**：传入 `value` 进入受控模式，`valueChange` 仅发出候选值数组而不修改外部状态。方向键在选项间移动焦点但不自动切换选中态；禁用、只读或组内重复值的选项不会提交变更。
 
 ## API
 
-Toggle Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入 `value` 进入受控模式。
+### Root
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -39,7 +46,11 @@ Toggle Group 是工作区源码，没有公开的 `proto-ui add` 目标。传入
   ]}
 />
 
-这些属性属于 Root。Item 的 `value` 默认 `''`，`disabled` 默认 `false`。
+传入 `value` 可受控管理选中值列表。
+
+### 其他部件属性
+
+- **Item**：`value`（默认 `''`）、`disabled`（默认 `false`）。
 
 ## 参考
 

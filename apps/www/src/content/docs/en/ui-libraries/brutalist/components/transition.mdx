@@ -1,6 +1,6 @@
 ---
 title: 'Transition'
-description: 'Draft Brutalist flat/fade presence over the Base Transition protocol.'
+description: 'A Brutalist-styled presence transition with a five-phase lifecycle and clean flat fade opacity.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,29 +9,28 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-This draft atom is the standalone Brutalist Transition. Base owns the exact phase machine (`closed → preparing → entering → entered → leaving`), presence and ViewIntent sequencing, the `enter`/`leave`/`complete` controls, interruption policy, fallback completion and the reduced-motion duration collapse.
+Transition manages mounting and a five-phase presence lifecycle (`closed → preparing → entering → entered → leaving`) with Brutalist flat fade presentation and no extra slide, zoom, or shadow choreography.
 
-The Brutalist layer is presentation-only and keeps the family flat/fade boundary: the borrowed `transitionState` binds endpoint opacity only (`opacity-0` while closed, preparing or leaving; `opacity-100` while entering or entered). No zoom, slide, translate, shadow or invented choreography is admitted, and no timer, host animation engine, semantic or native anchor owner is added. The authored slot stays transparent.
-
-Import Transition from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/transition` anatomy subpath. This family intentionally has no `proto-ui add brutalist-transition` registry entry and creates no separate publication or release promise.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-transition" initialRuntime="wc" />
 </div>
 
-## Suggested acceptance path
+## Installation
 
-1. Confirm the demo card starts present and drives Enter, Leave and Complete through the real exposed controls.
-2. Confirm `transitionState` reports the live phase and `isPresent` retains the authored content until leaving completes.
-3. Confirm the host style binds endpoint opacity only and carries no motion tokens.
-4. Repeat with `prefers-reduced-motion: reduce` and confirm phases still complete without sustained motion.
-5. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+Currently available from workspace source; not yet included in the 0.2.0 stable release. Import Transition from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/transition` (workspace CLI target: `brutalist-transition`).
 
-The related catalog entities are `draft`; this page records the current direction rather than a stable Transition guarantee.
+## Usage
+
+- **Lifecycle & presence**: Exposes live `transitionState` and `isPresent` along with `enter`, `leave`, and `complete` controls. Content stays mounted while leaving and unmounts once the `closed` phase is reached.
+- **Flat fade styling**: Binds endpoint opacity only (`opacity-0` during `closed`, `preparing`, and `leaving`; `opacity-100` during `entering` and `entered`) while keeping the content slot transparent.
+- **Interruption & reduced motion**: Configure mid-transition behavior via `interrupt` (`'reverse'`, `'wait'`, or `'immediate'`). Under `prefers-reduced-motion: reduce`, durations collapse so phases complete immediately.
+- **Controlled vs. uncontrolled**: Use `defaultOpen` for uncontrolled state or pass `open` for controlled mode; set `appear={true}` to animate on initial mount.
 
 ## API
 
-Transition is workspace source. For this workspace version, the CLI target is `brutalist-transition`. Use matching CLI and package versions; check the chosen release's availability before installing. Passing `open` selects controlled mode.
+The following props belong to `Root` (pass `open` for controlled mode):
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -43,5 +42,3 @@ Transition is workspace source. For this workspace version, the CLI target is `b
     { name: 'interrupt', type: "'reverse' | 'wait' | 'immediate'", default: 'reverse' },
   ]}
 />
-
-These props belong to Root.

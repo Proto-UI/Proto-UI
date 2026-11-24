@@ -9,10 +9,8 @@ import {
 // rgba(0,0,0,.3) border over #999, box-shadow 0 3px 7px rgba(0,0,0,.3), padding-box clip,
 // outline none; .modal.fade fades in with opacity .3s linear and slides top from -25%
 // (https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/modals.less).
-// The available-region clamps retain the surface within the Proto overlay. Only the
-// opacity channel is declared below: the source's containing-block-relative top
-// -25% -> 10% movement and separate ease-out timing need a neutral presence coordinate
-// and per-channel easing capability. An ownBox translation is not that movement.
+// The available-region clamps retain the surface within the Proto overlay. Top
+// uses the positioning containing block, independently of the panel's own height.
 export default definePrototype<DialogContentProps, DialogContentExposes>({
   name: 'bootstrap-2-3-2-dialog-content',
   setup(def) {
@@ -22,12 +20,17 @@ export default definePrototype<DialogContentProps, DialogContentExposes>({
         'fixed left-[50%] top-[10%] -translate-x-1/2 w-[560px] max-w-[min(560px,var(--proto-ui-available-region-width,100%))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_20%)] overflow-y-auto bg-background text-foreground border border-border rounded-[6px] shadow-[0_3px_7px_rgb(0_0_0/30%)] bg-clip-padding outline-none'
       )
     );
-    behavior.asTransition.configure({ enterDuration: 300, leaveDuration: 300 });
+    behavior.asTransition.configure({
+      enterDuration: 300,
+      leaveDuration: 300,
+      completion: { kind: 'presentation', timeoutMs: 1000 },
+    });
     def.feedback.style.presence({
       owner: behavior.asTransition.presentationOwner,
-      closed: { opacity: 0 },
-      entered: { opacity: 1 },
+      closed: { opacity: 0, top: { px: 0, rootText: 0, containingBlock: -0.25 } },
+      entered: { opacity: 1, top: { px: 0, rootText: 0, containingBlock: 0.1 } },
       easing: [0, 0, 1, 1],
+      channelEasing: { top: [0, 0, 0.58, 1] },
     });
   },
 });

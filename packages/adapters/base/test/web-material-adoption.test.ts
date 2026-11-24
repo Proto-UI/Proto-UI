@@ -19,14 +19,20 @@ const images = vi.hoisted(() => ({
     return vi.fn();
   }),
 }));
-vi.mock('../src/material/contact-carrier', () => ({
+vi.mock('../src/material/contact-carrier', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/material/contact-carrier')>()),
   inspectContactCarrier: () => null,
   contactCarrierBounds: (element: Element) => element.getBoundingClientRect(),
   createContactCarrier: () => ({ valid: () => true, release() {} }),
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: gpu.create }));
 vi.mock('../src/material/image-prepare', () => ({
-  prepareOpticalImage: images.prepare,
+  createOpticalImageCache: (doc: Document) => ({
+    prepare: (source: string, ready: () => void, failed: () => void) =>
+      images.prepare(doc, source, ready, failed),
+    clear() {},
+    dispose() {},
+  }),
   inspectOpticalImageResources: () => ({}),
 }));
 

@@ -14,6 +14,7 @@ export const asNumberFieldControl = defineAsHook<
       value: State<number>;
       empty: State<boolean>;
       readOnly: State<boolean>;
+      required: State<boolean>;
       focused: ObservedStateHandle<boolean, NumberFieldPartProps>;
     };
     asHooks: { 'as-field-control': import('../field').FieldControlBindingHandles };

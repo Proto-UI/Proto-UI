@@ -18,6 +18,7 @@ import {
 import { FOCUS_INSTANCE_TOKEN_CAP, FOCUS_PARENT_CAP } from '@proto.ui/module-focus';
 import {
   EFFECTS_CAP,
+  MATERIAL_PAINT_RESERVATION_CAP,
   VISUAL_FEEDBACK_SINK_CAP,
   type VisualFeedbackFrame,
   type FeedbackPort,
@@ -95,6 +96,7 @@ async function fixture(withSink = true) {
           ],
         ]);
         wiring.attach('feedback', [
+          [MATERIAL_PAINT_RESERVATION_CAP, true],
           [
             EFFECTS_CAP,
             {
@@ -159,6 +161,7 @@ describe('Accordion explicit material consumer, without native paint claims', ()
     try {
       expect(f.frames.at(-1)?.material.slot).toEqual({
         version: 2,
+        paintReservation: 'required',
         shape: { kind: 'rounded-rect', geometry: 'style' },
         source: { kind: 'in-app-backdrop' },
         fallback: { fill: 'style', foreground: 'style' },

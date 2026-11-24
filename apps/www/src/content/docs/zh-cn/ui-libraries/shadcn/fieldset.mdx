@@ -1,13 +1,15 @@
 ---
-title: shadcn Fieldset
-description: 可移植 fieldset 原子草稿。
+title: 'Fieldset'
+description: '用于逻辑分组相关表单字段、向下传递禁用策略并自动关联分组标题与描述的组件。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+将相关表单字段组织为同一语义分组，统一向下传递禁用状态，并自动关联分组标题与辅助描述。本页示例采用 **Shadcn Rhea** 风格。
+
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-fieldset"
@@ -16,45 +18,33 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   codePanel={false}
 />
 
-## Draft 定义与所有权
+## 用法
 
-C-FIELDSET-0001 独立定义此被动分组；C-FIELD-0001 明确排除 Fieldset，不能替代它。P-SHADCN-FIELDSET、P-SHADCN-FIELDSET-LEGEND 与 P-SHADCN-FIELDSET-DESCRIPTION 从 0.3.0-alpha.1 起为 draft；编目不等于稳定准入。T-BASE-FIELDSET-0001 记录验收计划与边界。
+当前仅在源码工作区提供，尚未进入 0.2.0 稳定版。
 
-Root 拥有分组语义与 effective disabled：本地 disabled 或外层 Fieldset 策略。嵌套分组不遮蔽祖先，重新启用祖先保留本地限制。参与的 Field 消费此策略并自行拥有校验失效处理。Fieldset 不猜测任意控件，也不拥有值、编辑器、校验、提交、重置或额外焦点目标。
+### 部件结构
 
-## 公开 API 与嵌套策略
+`Fieldset` 由 `Root`、`Legend` 与 `Description` 三个部件组成：
 
-Root Props：disabled?: boolean（默认 false）、ariaLabel?: string（默认空字符串）。Legend 与 Description 没有声明 Props。三者都暴露只读 effective disabled 状态；通过 Root Props 改变策略，不写 expose 状态。
+- **Root**：无外框竖排分组容器（`gap-4`），声明 `group` 角色并管理有效禁用状态。
+- **Legend**：可选的分组标题，自动关联为组的 `aria-labelledby`。
+- **Description**：可选的弱化色帮助说明，自动关联为组的 `aria-describedby`。
 
-以 outer → middle → inner 三层 Root 为例：
+`Legend` 与 `Description` 均为纯展示部件，不增加焦点顺序；每组最多放置一个 `Legend` 与一个 `Description`（重复声明时忽略重复配置并保持当前状态），且嵌套分组不会借用彼此的标题或描述。
 
-- 只有 outer disabled 时，三层都 disabled。
-- 设 middle disabled 后启用 outer：middle 与 inner 仍 disabled。
-- 再启用 middle：inner 随之启用，除非其本地 disabled 仍为 true。
+### 嵌套禁用策略
 
-## 部件与无障碍关系
+`Root` 的有效禁用状态由自身的 `disabled` 与外层 `Fieldset` 策略共同决定。以 `outer` → `middle` → `inner` 三层嵌套为例：
 
-- Root 接受 disabled 与 ariaLabel，暴露 effective disabled 并渲染子内容。
-- Legend 是可选的被动命名内容；Description 是可选的被动帮助内容。两者暴露继承 disabled，不添加 Tab 停靠或激活行为。
-- Root 声明 group 角色及限定域的 labelledBy/describedBy Anatomy 关系。A11y 与宿主投射关系，作者不手工编写 DOM ID。原生名称计算，包括 ariaLabel 与 Legend 同时存在时的结果，仍需辅助技术验收。
-- 每组最多一个 Legend 和一个 Description。重复精确关系目标 fail closed，不选择第一个；完整终止/重挂载验收仍待补；嵌套分组不得借用彼此名称或描述目标。
-- 可移植定义不采用原生 HTML first-Legend disabled 豁免；Legend 内参与的 Field 也继承 disabled。
+- 仅禁用 `outer` 时，三层均处于禁用状态；
+- 同时禁用 `middle` 后再重新启用 `outer`，`middle` 与 `inner` 仍保持禁用；
+- 再启用 `middle`，`inner` 恢复启用（除非 `inner` 自身 `disabled={true}`）。
 
-## 证据边界
-
-Base 与四个视觉 family 共享语义 atoms。synthetic WebComponent 测试覆盖策略和限定域关系用例；family smoke 与源码 token 检查仅为较窄证据，不代表完整 Adapter 或像素验收。类型检查覆盖公开投影兼容。原生键盘、辅助技术、跨 Adapter/Compiler 组合、GPUI、生成 CSS/视觉与包消费验收仍未完成，不据此勾选 Finf。
-
-## Family 外观
-
-- Root: 无外框的弹性竖排分组，gap-4 并允许最小宽度收缩。
-- Legend: 中等字重正文尺寸与底部间距；不转换为大写。
-- Description: 小号正常字重、弱化色且可换行的帮助文本。
-
-这些是 draft 外观标准，不是像素一致性声明。
+组内所有参与的 [Field](../field/)（包括放在 `Legend` 内的字段）都会自动继承有效禁用状态并据此更新校验；表单提交与重置由 [Form](../form/) 负责。
 
 ## API
 
-Fieldset 是工作区源码，没有公开的 `proto-ui add` 目标。Legend 与 Description 没有属性。
+`Legend` 与 `Description` 无额外属性；三者均暴露只读的有效 `disabled` 状态，状态变更统一通过 `Root` 的属性驱动。
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
@@ -64,7 +54,7 @@ Fieldset 是工作区源码，没有公开的 `proto-ui add` 目标。Legend 与
   ]}
 />
 
-这些属性属于 Root。
+以上属性属于 `Root`。
 
 ## 参考
 

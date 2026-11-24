@@ -831,7 +831,8 @@ function initSession<Props extends PropsBaseType>(
     if (viewDisposed) return;
     viewDisposed = true;
     state.viewDisposed = true;
-    if (state.viewGeneration === physicalGeneration) state.viewGeneration += 1;
+    const retiredGeneration =
+      state.viewGeneration === physicalGeneration ? ++state.viewGeneration : null;
     if (state.decorationView?.generation === physicalGeneration) {
       state.decorationView.stage.retire();
       state.decorationView = undefined;
@@ -861,6 +862,17 @@ function initSession<Props extends PropsBaseType>(
       // Publish invalidation after releasing old bindings. A pending request
       // can synchronously call user-controlled focus and throw here.
       releaseNativeReadiness,
+      () => {
+        // Vue can coalesce a detach/reopen into the same DOM node. Its next
+        // physical epoch must not inherit the retired initialization cache.
+        // A replacement epoch owns its own cache even on the same element.
+        if (
+          retiredGeneration !== null &&
+          state.viewGeneration === retiredGeneration &&
+          state.lastInitRoot === rootEl
+        )
+          state.lastInitRoot = null;
+      },
     ];
     let failed = false;
     let firstError: unknown;

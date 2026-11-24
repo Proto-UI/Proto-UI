@@ -1,6 +1,6 @@
 ---
 title: 'Async Region'
-description: 'Draft Brutalist Async Region presentation over the Base Async Region protocol.'
+description: 'A semantic container that projects aria-busy for asynchronously updating content without adding loading chrome.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -9,32 +9,32 @@ import ApiPropsTable from '@/components/ApiPropsTable.astro';
 
 <BrutalistPageStyle />
 
-This draft family contains a single Root. Base Async Region owns the governed busy semantics: the `busy` prop (default `false`) projects `aria-busy` on the region element and exposes the same fact through `getExposes().busy`. Busy is a semantic fact, not a loading widget — the projection adds no spinner, skeleton, progress, toast, timer, or replacement state machine. Authored descendants stay mounted and keep focus across prop-only transitions; for announcements, compose with Live Region at the application layer. The region declares no focus, event, command, or accessible-name override channel.
+Brutalist Async Region is a single-part semantic container that sets `aria-busy` on a region during asynchronous updates while keeping your children mounted and focused.
 
-The Brutalist layer is presentation-only and semantic-first: it consumes `asAsyncRegionRoot()` once, preserves every inherited owner, and adds only the restrained family surface `min-w-0 max-w-full text-foreground` so payload content stays readable and bounded. There is no upstream Neo async-region component to pin; no border, shadow, motion, or interaction chrome is invented here.
-
-Import the Root from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/async-region` anatomy subpath. This family intentionally has no `proto-ui add brutalist-async-region` registry entry and creates no separate publication or release promise.
+## Preview
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-async-region" initialRuntime="wc" />
 </div>
 
-## Suggested acceptance path
+## Installation
 
-1. Toggle `busy` on and confirm the region projects `aria-busy="true"` and `getExposes().busy` reads `true` while the authored payload stays mounted.
-2. Toggle `busy` off and confirm `aria-busy` returns to `"false"` with no remount and no visual loading chrome.
-3. Confirm the region stays out of the tab order and exposes no interaction or command surface.
-4. Repeat in Web Components, React, Vue, and Vue 2, in both Light and Dark.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-The related catalog entities are `draft`; this page records the current direction rather than a stable Async Region guarantee.
+- **CLI target**: `proto-ui add <react|vue|vue2|wc> brutalist-async-region`
+- **Package exports**: import from `@proto.ui/prototypes-brutalist` or `@proto.ui/prototypes-brutalist/async-region`
+
+## Usage
+
+- Setting `busy={true}` sets `aria-busy="true"` on the region element and exposes the same boolean through `getExposes().busy`.
+- When updating `busy`, your children stay mounted and keep focus. The Brutalist layer applies only `min-w-0 max-w-full text-foreground` without adding borders, shadows, or built-in loading visuals.
+- Compose with `Spinner`, `Skeleton`, or `Progress` for visual loading indicators, and pair with `Live Region` when status updates should be announced to screen readers.
 
 ## API
 
-Async Region is workspace source. For this workspace version, the CLI target is `brutalist-async-region`. Use matching CLI and package versions; check the chosen release's availability before installing.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[{ name: 'busy', type: 'boolean', default: 'false' }]}
 />
-
-These props belong to Root.

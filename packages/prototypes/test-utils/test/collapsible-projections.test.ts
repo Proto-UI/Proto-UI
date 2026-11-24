@@ -72,9 +72,15 @@ for (const [family, entries, visualToken] of families) {
         expect(styleContains(content, 'font-medium')).toBe(true);
       }
       if (family === 'bootstrap-2-3-2') {
-        // Historical pixel units, not rem-projected equivalents.
+        // Historical padding belongs to the inner body. The height-animation
+        // owner must have no padding that would keep a closed frame nonzero.
         expect(styleContains(trigger, 'px-[15px]')).toBe(true);
-        expect(styleContains(content, 'py-[9px]')).toBe(true);
+        expect(styleContains(content, 'py-[9px]')).toBe(false);
+        const body = content.querySelector('div');
+        expect(body).not.toBeNull();
+        expect(styleContains(body!, 'px-[15px]')).toBe(true);
+        expect(styleContains(body!, 'py-[9px]')).toBe(true);
+        expect(body!.textContent).toBe('A very long content word '.repeat(30));
       }
       trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await flush();

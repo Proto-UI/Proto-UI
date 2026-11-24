@@ -14,6 +14,17 @@ statement:
 
 
 criteria:
+  - id: P-BASE-BUTTON-FOCUS-RETAINED-VISIBILITY
+    text:
+      en: The opt-in asFocusRetainedVisibility authored hook is exported from the Button family and composes with the caller's existing singleton asFocusable target. Its requestedVisible boolean prop defaults to false. It contributes hidden feedback only while both the request and the observed focused fact are false; withdrawing the request must preserve an already focused target until focus leaves, and a true request must remain visible after blur. The hook neither requests nor fabricates focus, changes disabled or navigation policy, owns activation, nor changes the ordinary Button protocol without opt-in. Consumers retain the same mounted owner and provide the visibility request and domain action; host measurement, React focus handlers and render-time owner creation must not reimplement this policy.
+      zh-CN: Button family 公开可选的 authored hook asFocusRetainedVisibility，与调用者既有的 singleton asFocusable target 组合。其 requestedVisible 布尔 prop 默认为 false；只有请求与 observed focused fact 均为 false 时才贡献 hidden feedback。撤回请求后，已聚焦的 target 必须保留到焦点离开；请求为 true 时失焦仍保持显示。此 Hook 不请求或伪造焦点，不修改 disabled 或导航策略，不拥有 activation，也不改变未显式采用时的普通 Button 协议。消费者保留同一个已挂载 owner，提供显示请求与业务动作，不得用宿主测量、React focus handler 或 render 期创建 owner 重写该策略。
+    dependsOn:
+      contracts:
+        - C-AS-HOOK-0001
+        - C-AS-FOCUSABLE-0001
+        - C-PROPS-0003
+        - C-RULE-WHEN-0001
+        - C-RULE-INTENT-FEEDBACK-STYLE-0001
   - id: P-BASE-BUTTON-EXTERNAL-LABEL
     text:
       en: The command target opts into C-CONTROL-LABEL-0001 through the dedicated InstanceAssociations.controlLabel channel. An independent Label may name an icon-only target through its actual semantic identity. Label activation requests the existing command or toggle operation exactly once and retains disabled, controlled selection, focus and lifecycle ownership; Toggle Group Root remains the selection owner. No generic host attribute forwarding or label Prop is introduced.
@@ -310,6 +321,9 @@ sources:
       - asButton
       - base-button
   - path: packages/prototypes/base/src/button/types.ts
+  - path: packages/prototypes/base/src/button/focus-retained-visibility.proto.ts
+    sections:
+      - asFocusRetainedVisibility
   - path: packages/prototypes/base/test/as-button.test.ts
     sections:
       - tracks hovered/focused/pressed and gates click emission when disabled
@@ -351,6 +365,9 @@ verifies:
   tests:
     - T-BASE-BUTTON-0001
 revisions:
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Define opt-in focus-retained visibility over the existing focus target and Rule feedback, without changing ordinary Button props or claiming new browser acceptance.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Admit bounded independent Label target participation without a new naming Prop or activation owner.

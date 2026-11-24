@@ -1,13 +1,15 @@
 ---
 title: 'Command'
-description: 'An inline searchable list of executable commands.'
+description: 'An inline searchable command palette that filters items and emits an execute event on activation.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-An inline searchable list of executable commands.
+Base Command renders an inline, searchable list of executable commands. Pressing `Enter` or clicking an item emits `execute` with the selected command for your application to handle.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-command"
@@ -16,23 +18,39 @@ An inline searchable list of executable commands.
   codePanel={false}
 />
 
-The list stays inline and open. Enter or pointer activation emits execute with the selected command. The application owns the action; query state does not execute anything.
+## Installation
 
-The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Parts: Root, Input, Content, Item, Empty.
+## Usage
 
-Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.
+### Anatomy
+
+Compose `Root`, `Input`, `Content`, `Item`, and `Empty`:
+
+- The command list stays inline and open by default (`defaultOpen={true}`); typing filters items without executing them.
+- Built-in filtering matches `textValue` and `keywords` case- and diacritic-insensitively. Set `filter={false}` to filter items yourself.
+- `Empty` reflects whether any items match; disabled and duplicate-valued items cannot execute.
+
+### Controlled state and keyboard behavior
+
+- `value`, `inputValue`, and `open` can each be controlled independently.
+- `Input` keeps focus during arrow-key navigation, and active IME composition never triggers command execution.
 
 ## API
 
-Command is workspace source. There is no public `proto-ui add` target. Passing `value`, `inputValue`, or `open` selects controlled mode for that fact.
+### Root Props
+
+Pass `value`, `inputValue`, or `open` to control the corresponding state.
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
   rows={[
+    { name: 'value', type: 'string', default: '—' },
     { name: 'defaultValue', type: 'string', default: "''" },
+    { name: 'inputValue', type: 'string', default: '—' },
     { name: 'defaultInputValue', type: 'string', default: "''" },
+    { name: 'open', type: 'boolean', default: '—' },
     { name: 'defaultOpen', type: 'boolean', default: 'true' },
     { name: 'disabled', type: 'boolean', default: 'false' },
     { name: 'readOnly', type: 'boolean', default: 'false' },
@@ -42,7 +60,12 @@ Command is workspace source. There is no public `proto-ui add` target. Passing `
   ]}
 />
 
-These props belong to Root. Input defaults `placeholder`, `a11yLabel` and `name` to `''`. Content defaults `side` to `bottom`, `align` to `start`, `sideOffset` to `4` and `collisionPadding` to `8`. Item defaults `value`, `textValue` and `keywords` to `''` and `disabled` to `false`. Empty has no props.
+### Other parts
+
+- **Input**: `placeholder`, `a11yLabel`, and `name` default to `''`.
+- **Content**: `side` defaults to `'bottom'`, `align` to `'start'`, `sideOffset` to `4`, and `collisionPadding` to `8`.
+- **Item**: `value`, `textValue`, and `keywords` default to `''`; `disabled` defaults to `false`.
+- **Empty**: no props.
 
 ## References
 

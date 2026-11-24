@@ -1,0 +1,65 @@
+---
+title: 'Selectable Row'
+description: 'A controlled selectable row that separates selection proposals from activation.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+import ApiPropsTable from '@/components/ApiPropsTable.astro';
+import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
+
+A controlled row primitive for lists, file browsers, and tables that handles press, keyboard, focus, and `row` accessibility semantics while keeping selection and activation distinct.
+
+## Preview
+
+Press `Tab` to focus an enabled row and `Space` to propose selection. Press `Enter` (or double-click on Web) on the **Assets** row to trigger an activation request.
+
+<PrototypePreviewer
+  demoId="demo-base-selectable-row"
+  initialRuntime="react"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## Installation
+
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
+
+```ts
+import { selectableRow, asSelectableRow } from '@proto.ui/prototypes-base/selectable-row';
+```
+
+This subpath also exports the default prototype, `SelectableRowProps`, `SelectableRowExposes`, and `SelectableRowAsHookContract`, while the package root re-exports the named entries. The prototype and hook share the same setup.
+
+## Usage
+
+### Controlled selection and separate activation
+
+- `selected` is controlled by the caller: pointer press and `Space` emit `selectionChange` with `{ value: itemKey }` without mutating `selected` locally.
+- When `activatable` is `true`, `Enter` emits `activate` with `{ value: itemKey }` without proposing selection. On Web, double-clicking (`host:dblclick`) also emits `activate`.
+- Enabled focused rows prevent default page scrolling on `Space`; activatable focused rows also prevent default behavior on `Enter`. Auto-repeated keydown events do not re-emit selection or activation.
+
+### Focus, accessibility, and collection coordination
+
+- Renders `role="row"` with the current `selected` and `disabled` states while preserving your children in the default slot.
+- `disabled` suppresses selection, activation, and `focusSelf()` and removes the row from normal focus order, while preserving any externally selected state.
+- Arrow-key navigation, roving tab order, range selection, and multi-select belong to the enclosing collection.
+
+## API
+
+<ApiPropsTable
+  headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
+  rows={[
+    { name: 'itemKey', type: 'string', default: "''" },
+    { name: 'selected', type: 'boolean', default: 'false' },
+    { name: 'disabled', type: 'boolean', default: 'false' },
+    { name: 'activatable', type: 'boolean', default: 'false' },
+  ]}
+/>
+
+- **Exposed states**: `selected`, `disabled`, `focused`, `focusVisible`.
+- **Exposed methods**: `focusSelf()`.
+- **Events**: `selectionChange`, `activate`, each carrying `{ value: string }`.
+
+## References
+
+<SpecEntityLinks directory="spec/prototypes" files={['P-BASE-SELECTABLE-ROW.yaml']} />

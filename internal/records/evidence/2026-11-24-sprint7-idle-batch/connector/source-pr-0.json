@@ -1,0 +1,44 @@
+{
+  "collectionWindow": {
+    "completedBefore": "2026-11-23T20:50:10Z",
+    "exactPerCallTimesCaptured": false
+  },
+  "pr": {
+    "url": "https://github.com/Proto-UI/dcbot/pull/5",
+    "number": 5,
+    "state": "closed",
+    "merged": true,
+    "mergeable": false,
+    "draft": false,
+    "body": "## Problem and result\n\nProduction currently runs `2d024921d3c71e1b719bb5fcb9acdb51d250f41b`. The repair carried by #2 remains unmerged. This PR ports its scoped webhook/report/preview fixes onto current main, retaining current Pully branding, command/configuration paths and newer mirror/PR-state behavior.\n\nRefs Proto-UI/Proto-UI#1151 and #2. The original condition is production installation plus authenticated readback; this PR does not claim those operations have happened.\n\n## Changes\n\n- Recover GitHub App deliveries with original GUID/time, scoped installation/repository GETs, bounded resume and no checkpoint advancement for incomplete scans.\n- Wait for pending original input; defer fact-free reports; persist canonical input hashes and bilingual editions; reuse existing thread IDs across retries and media failures.\n- Restore the normal report-agent path with bounded complete JSON, pagination, citation admission and historical comment cutoffs; distinguish current review context from period evidence.\n- Carry bounded read-only inventory / authenticated post verification and explicit historical repair modes. No historical `-apply` operation has been run.\n- Preserve Pully/legacy preview compatibility with absent-only fallback, including explicit empty-header rejection.\n- Resolve current PR terminal facts **before** input hashing, then feed the same snapshot into one-shot, agent and operator generation. Preserve a corrected edition if the resolver becomes unavailable.\n\n## Source and provenance\n\nOriginal source remains intact on #2 at `81d1fbcaf5e7c0007348e86ba404d7009a3bc9ae`. The port retains its source attribution in the commit message; original cyjin-yl authorship is not reassigned or re-certified. This Codex contribution is the scoped integration, composition fix and verification.\n\nThe original tracking source is `41ef0d32`, `2026-10-11T13:08:00.890Z`, pointer `/data/phases/2/tasks/11`, preserved in Proto-UI's adjacent-source reconciliation record.\n\n## Verification\n\nIsolated Docker environment: Go 1.25.14, Node 20.19.2, two CPUs / 4 GiB; no production database or credential mounts.\n\n- `go test -p 2 ./...` — passed.\n- `go vet -p 2 ./...` — passed.\n- Both `cmd/proto-pulse` and `cmd/pully-report-repair` build with `-trimpath -buildvcs=false`.\n- Negative control: retaining the new public-runner tests while restoring the old hash/generation composition fails both generator modes and the legacy-edition correction assertion. The repaired source passes; the negative control is not a setup/compile failure.\n- Current production health/ready, running executable hash, deployment ref, image and active feature flags have been read without mutation.\n\nThe root integration reviewer examined recovery, pending-input/hash/cache behavior, original-input scoping, historical JSON boundaries and header precedence. The review then identified the failed-original-input omission documented below; the new revision fixes it. The root reviewer completed an independent final-head review of f66f969d1ce23e8c5455057f42855ae5e0ec53d0, including the full five-file correction and both negative controls, and reported no P0/P1. This is an agent review statement, not a fabricated GitHub APPROVED review.\n\n## Deployment boundaries\n\nProduction timers automatically follow main, so merge/deployment must be coordinated. The existing configuration has `PULLY_PROGRESS_AGENT=1`, Pulse enabled and 25-day report lookback; this candidate restores a previously absent agent path and starts original-delivery recovery, so activation has real normal-bot effects.\n\nAfter independent final-head/gate readback, deploy only to the existing bot repository/channel/configuration with a consistent SQLite backup and prior-image rollback. Verify the running artifact and actual existing reports through authenticated GET-only readback. The live Cloudflare edge is a separate reviewed compatibility deployment. No extra manual Discord message or historical `-apply` is authorized by this PR.\n\nThis PR alone does not close Proto-UI/Proto-UI#1151.\n\n\n## Independent review correction: failed original inputs\n\nThe first candidate incorrectly let a delivery become report-ready after its twelfth processing failure. The new revision keeps this as an explicit unavailable-input error and preserves the failed payload across retention. The existing report-repair CLI can inspect one delivery by default; `-retry-delivery ID -apply` explicitly requeues only that failed ID after the cause is fixed. It does not mark the input complete or send a message itself; normal worker success is still required.\n\nA real SQLite/public-runner regression now covers 12 failures with another valid completed fact, zero inference/publication while incomplete, restart and retention, single-ID retry, original GUID/time/payload preservation, successful completion and cached retry. Negative controls separately restore the old failed-input exclusion and old failed-retention rule; each fails the corresponding substantive assertion. Full tests/vet and both builds pass on the repaired candidate. No production retry or historical repair was executed.\n\n\n## Final review and deployment execution\n\nThe independent root review accepted f66f969d1ce23e8c5455057f42855ae5e0ec53d0 after the failed-input correction. The automatic Codex review reported a usage limit; it is retained as unavailable, not represented as passed. Normal merge is attempted with the exact expected head and GitHub server gates; no administrative override is used. Production rollout and GET-only readback are recorded separately after execution.\n",
+    "title": "fix(progress): deliver recovery and stable editions on current Pully",
+    "base": "main",
+    "base_sha": "2d024921d3c71e1b719bb5fcb9acdb51d250f41b",
+    "head": "fix/sprint7-recovery-delivery-20261122",
+    "head_sha": "f66f969d1ce23e8c5455057f42855ae5e0ec53d0",
+    "head_repo_id": 1330854457,
+    "head_repo_full_name": "Proto-UI/dcbot",
+    "merge_commit_sha": "37d252f92cfeb5713b82b4e0002f375e9c02b2d9",
+    "user": {
+      "login": "cyjin-yl",
+      "name": "cyjin-yl",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/19223209?v=4",
+      "id": 19223209
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-11-22T10:56:51Z",
+    "updated_at": "2026-11-22T11:32:46Z",
+    "closed_at": "2026-11-22T11:32:46Z",
+    "merged_at": "2026-11-22T11:32:46Z",
+    "commits": 2,
+    "changed_files": 45,
+    "additions": 6038,
+    "deletions": 126,
+    "display_url": "https://github.com/Proto-UI/dcbot/pull/5",
+    "display_title": "fix(progress): deliver recovery and stable editions on current Pully"
+  }
+}

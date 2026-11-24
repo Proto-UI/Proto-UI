@@ -11,13 +11,14 @@ export const BOOTSTRAP_BROWSER_SUITE =
 export const BOOTSTRAP_EVIDENCE_SUITES = Object.freeze([
   'packages/prototypes/bootstrap-2-3-2/test/controls.test.ts',
   'apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts',
+  'apps/www/src/content/docs/zh-cn/native-composition-evidence.test.ts',
   'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts',
   BOOTSTRAP_BROWSER_SUITE,
 ]);
 const runtimes = ['wc', 'react', 'vue', 'vue2'];
 const themes = ['light', 'dark'];
 // Inventory of the original fifteen journeys, not replacement behavior oracles.
-export const BOOTSTRAP_BROWSER_CASES = Object.freeze([
+export const BOOTSTRAP_ORIGINAL_BROWSER_CASES = Object.freeze([
   ...themes.flatMap((theme) => [
     `renders source-owned paint for all eight parts in ${theme}`,
     ...runtimes.map(
@@ -30,6 +31,20 @@ export const BOOTSTRAP_BROWSER_CASES = Object.freeze([
       `${runtime}: native singleton editors, controlled values, readonly and disabled recovery`
   ),
   'updates semantic/decorative separators, remains readable on mobile, and disposes every real host',
+]);
+
+export const BOOTSTRAP_COMPOSITION_BROWSER_CASES = Object.freeze(
+  runtimes.flatMap((runtime) =>
+    ['input', 'textarea'].flatMap((kind) =>
+      ['uncontrolled', 'controlled'].map(
+        (owner) => `${runtime}/${kind}/${owner}: native CDP composition preserves editor and owner`
+      )
+    )
+  )
+);
+export const BOOTSTRAP_BROWSER_CASES = Object.freeze([
+  ...BOOTSTRAP_ORIGINAL_BROWSER_CASES,
+  ...BOOTSTRAP_COMPOSITION_BROWSER_CASES,
 ]);
 
 export function assertBootstrapEvidence({ manifest, report }, expected) {
@@ -50,7 +65,7 @@ export function assertBootstrapEvidence({ manifest, report }, expected) {
   assert.deepEqual(
     manifest.results.map((result) => result.name).sort(),
     [...BOOTSTRAP_BROWSER_CASES].sort(),
-    'All fifteen original browser journeys must appear exactly once'
+    'Every original browser journey and composition combination must appear exactly once'
   );
   for (const result of manifest.results) {
     assert.equal(result.status, 'pass', `Bootstrap journey did not pass: ${result.name}`);
@@ -58,7 +73,7 @@ export function assertBootstrapEvidence({ manifest, report }, expected) {
   }
 
   // Reuse the shared strict browser report gate: no skipped, todo, failed or
-  // missing suites, including the existing three supporting test files.
+  // missing suites, including all original supporting tests and the shared composition oracle.
   assertVitestReport(
     report,
     { phase: 'browser', suites: BOOTSTRAP_EVIDENCE_SUITES },
@@ -71,7 +86,7 @@ export function assertBootstrapEvidence({ manifest, report }, expected) {
   assert.deepEqual(
     browser.assertionResults.map((result) => result.title).sort(),
     [...BOOTSTRAP_BROWSER_CASES].sort(),
-    'Vitest must execute the original fifteen Bootstrap browser journeys'
+    'Vitest must execute all original and composition Bootstrap browser journeys'
   );
   assert.equal(
     report.numTotalTests,

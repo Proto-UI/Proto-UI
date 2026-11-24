@@ -1,6 +1,6 @@
 ---
 title: 'Text'
-description: 'Shadcn 被动文本内容与可复用排版输入。'
+description: '提供统一字号、字重、字体族、行高与色彩语义的排版组件。'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
@@ -8,9 +8,9 @@ import InstallCommandCard from '@/components/InstallCommandCard.astro';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+Text 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的排版属性体系，以 Shadcn 主题令牌控制字号、行高、字距与文字颜色，不接管文档标题层级或交互语义。本页示例使用 **Shadcn Rhea** 风格。
 
-`shadcn-text-root` 是 draft 可复用 Text 原子。它通过 `asTextRoot()` 继承 [Base Text](/zh-cn/ui-libraries/base/text/) 的输入词汇和内容槽，由 Shadcn 主题拥有排版与文字颜色。这是 Proto UI 自己的 Text 投射，不承诺与上游同名文本组件 API 等价。
+## 预览
 
 <PrototypePreviewer
   demoId="demo-shadcn-text"
@@ -18,9 +18,15 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-示例使用真实包原型。外层 stack 只提供演示布局，每个 Text 实例拥有自己的内容与适用呈现；示例没有添加点击处理或编辑状态。
+## 安装
 
-## 使用 Text
+<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
+
+将命令中的 `wc` 替换为 `react`、`vue` 或 `vue2`，即可生成对应框架的组件封装。
+
+## 用法
+
+从 `@proto.ui/prototypes-shadcn/text`（或包根）导入 `shadcnTextRoot`（也提供 `textRoot` 和 `ShadcnTextRoot` 别名），并在适配时按需配置 Web 宿主元素标签：
 
 ```tsx
 import * as React from 'react';
@@ -40,68 +46,44 @@ export function SectionTitle() {
 }
 ```
 
-同一 subpath 与包根还导出 `textRoot` 和 `ShadcnTextRoot` 别名；家族类型别名保留 Base 输入契约。
+### 语义边界与颜色继承
 
-`rootTag: 'span'` 是 Web Adapter 配置，不是 Text prop。外层原生 `h1`、`p`、`label` 或 `a` 继续拥有文档或交互语义；标签的 `htmlFor`/`for` 留在原生 label，链接的 `href`、target、download 留在原生 anchor。Text 不创建第二个焦点停靠点，也不合成激活事件。
+- `rootTag: 'span'` 属于 Web Adapter 配置项而非组件属性。标题层级、段落、表单标签（`htmlFor` / `for`）和链接（`href`、`target`、`download`）仍由外层原生 `h1`、`p`、`label` 或 `a` 元素负责。
+- 在深色或高对比度表面（如 `Surface` 的 `solid` / `accent` 变体）内部，可设置 `tone="inherit"` 让文字继承外层容器的前景色。
 
-## 输入
+### 行高与字距细节
 
-| Prop         | Values                                                     | Default   |
-| ------------ | ---------------------------------------------------------- | --------- |
-| `size`       | `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, `5xl` | `base`    |
-| `tone`       | `default`, `muted`, `inherit`                              | `default` |
-| `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
-| `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
-| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
-| `emphasis`   | `normal`, `italic`                                         | `normal`  |
-| `decoration` | `none`, `underline`, `line-through`                        | `none`    |
-
-`tone="inherit"` 保留外层语义 owner 或 Surface 的前景色，适合 solid/accent 表面的对比关系。移除 prop 后恢复默认值。单一匿名槽保留作者提供的文本和子内容，没有暴露的 state、method 或 event。页面角色、文案、标题层级、`asChild`、`tag`、`href`、`for`、内容解析器、编辑器及自动响应式断点都不属于此 API。
-
-`leading="size"` 保留所选字号内建的行框，不额外添加 leading 覆盖。Shadcn 和 Brutalist 中，`xs`、`sm`、`base`、`lg`、`xl`、`2xl`、`3xl`、`4xl`、`5xl` 的行高分别为 `1rem`、`1.25rem`、`1.5rem`、`1.75rem`、`1.75rem`、`2rem`、`2.25rem`、`2.5rem`、`1`。例如根字号为 16px 时，`size="base"` 为 16/24，`size="lg"` 为 18/28；省略 size 恢复 `base`。初始非法 size 也回退到 `base`；已有合法值后再传入空值或非法值，按既有 Props 契约保留上一个合法值。`leading="tighter"` 选择 `1.1`，`tracking="tighter"` 选择 `-0.05em`。既有 `normal` 默认值不变。这些是有限视觉语义，不接受数字或任意 CSS 输入。Base 只规范化输入；本次密度扩展只验证 Shadcn 和 Brutalist，不代表全部家族或原生平台等价。
-
-Shadcn action 组合保留既有优先级：`actionProfile="rhea"` 或 `"luma"` 仍选择 `1.25rem` 行高，包括同时传入 `leading="size"` 或 `"tighter"` 的情况。
-
-## Adapter 与 Compiler 边界
-
-已实现的 Web profile 通过 Web Components、React、Vue 3、Vue 2 验证，包括属性变化/移除、内容保留与原生 owner 组合。Web compiler 的 source-closure 和生成 facade 检查与 Adapter 证据分开，不代表任意 Prototype AOT 或原生平台等价。
-
-CLI 拒绝不支持的 GPUI target。原生 GPUI 排版映射仍缺少 `font-style`、`letter-spacing`、`text-decoration-line`；这些是明确诊断的限制，不是等价画面。GPUI 当前对 `tone="inherit"` 报告 `UnsupportedValue(color, inherit)`。未知样式 token 报告 `Unsupported Proto UI style tokens`，不会静默成功。真实浏览器视觉验收及各目标执行证据，应与源码、DOM 测试分别陈述。
-
-密度取值对照 [固定版本 shadcn page-header 源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/components/page-header.tsx) 及其 [MIT 许可证](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/LICENSE.md)：标题使用 `lg:leading-[1.1]`、`xl:tracking-tighter`，说明文字沿用 `text-base`、`sm:text-lg` 的字号内建行框。这是可复用排版选项的参考依据，不代表上游存在 Text 组件，也不引入页面专属 Text API。
-
-## 依据
-
-`P-SHADCN-TEXT`、`T-TEXT-0001`治理此 slice。源码为 `packages/prototypes/shadcn/src/text/`，编目生命周期仍为 draft。
-
-## 安装
-
-<InstallCommandCard command="npx @proto.ui/cli@latest add wc shadcn-text" manager="npm" />
-
-把 `wc` 换成 `react`、`vue` 或 `vue2`，即可生成对应宿主的 facade。
+- 设置 `leading="size"` 时，使用所选字号内建的行高刻度：`xs` (`1rem`)、`sm` (`1.25rem`)、`base` (`1.5rem`)、`lg` (`1.75rem`)、`xl` (`1.75rem`)、`2xl` (`2rem`)、`3xl` (`2.25rem`)、`4xl` (`2.5rem`)、`5xl` (`1`)。
+- `leading="tighter"` 对应 `1.1`，`tracking="tighter"` 对应 `-0.05em`。
+- 省略属性或移除属性会恢复默认值；若传入非法字号，初始化时回退到 `base`，已有合法值后更新非法值则会保留上一个有效值。
+- 在 Shadcn 操作按钮组合中，`actionProfile="rhea"` 或 `"luma"` 固定采用 `1.25rem` 行高。
 
 ## API
+
+以下属性属于 `Root`：
 
 <ApiPropsTable
   headers={{ name: '属性', type: '类型', default: '默认值' }}
   rows={[
-    { name: 'size', type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'", default: 'base' },
+    {
+      name: 'size',
+      type: "'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl'",
+      default: 'base',
+    },
     { name: 'tone', type: "'default' | 'muted' | 'inherit'", default: 'default' },
     { name: 'weight', type: "'normal' | 'medium' | 'semibold' | 'bold'", default: 'normal' },
     { name: 'font', type: "'body' | 'heading' | 'mono'", default: 'body' },
-    { name: 'leading', type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'", default: 'normal' },
+    {
+      name: 'leading',
+      type: "'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed'",
+      default: 'normal',
+    },
     { name: 'tracking', type: "'normal' | 'tight' | 'tighter'", default: 'normal' },
     { name: 'emphasis', type: "'normal' | 'italic'", default: 'normal' },
     { name: 'decoration', type: "'none' | 'underline' | 'line-through'", default: 'none' },
   ]}
 />
 
-这些属性属于 Root。Text 不合成宿主角色。
-
 ## 参考
 
-<SpecEntityLinks
-  directory="spec/prototypes"
-  files={['P-SHADCN-TEXT.yaml', 'P-BASE-TEXT.yaml']}
-/>
+<SpecEntityLinks directory="spec/prototypes" files={['P-SHADCN-TEXT.yaml', 'P-BASE-TEXT.yaml']} />

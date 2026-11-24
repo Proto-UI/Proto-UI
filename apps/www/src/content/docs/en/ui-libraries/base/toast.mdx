@@ -1,13 +1,15 @@
 ---
 title: 'Toast'
-description: 'Timed live notifications with pause, dismiss and explicit action intent.'
+description: 'Timed live notifications with pause on hover or focus, keyboard dismissal, and action buttons.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import ApiPropsTable from '@/components/ApiPropsTable.astro';
 import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 
-Timed live notifications with pause, dismiss and explicit action intent.
+A transient live notification with auto-dismiss timing, automatic pause on hover or focus, a viewport focus hotkey, and optional action triggers.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-base-toast"
@@ -16,15 +18,21 @@ Timed live notifications with pause, dismiss and explicit action intent.
   codePanel={false}
 />
 
-Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast Action/Close pause the remaining duration. Controlled open emits one timeout request until the owner changes state. Close, focused Escape and Action request dismissal; action side effects belong to the app. Viewport provides the F8 focus shortcut. No global queue or external notification transport is implied.
+## Installation
 
-Parts: Root, Viewport, Title, Description, Action, Close.
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
-Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.
+## Usage
+
+Compose `Root`, `Viewport`, `Title`, `Description`, `Action`, and `Close`:
+
+- **Timing and pause**: `Root` stays open for `5000ms` by default (set `duration={0}` to keep it open indefinitely). Hovering the toast or focusing `Action`/`Close` pauses the remaining timer until interaction leaves.
+- **Dismissal and actions**: `Close`, pressing `Escape` while focused, and `Action` all request dismissal while leaving action side effects to your application. In controlled mode (`open`), timeout emits one dismissal request until the caller updates `open`.
+- **Shortcuts and politeness**: `Viewport` provides a focus shortcut (`F8` by default, configurable via `hotkey`), and `politeness` (`'polite'` or `'assertive'`) sets the live-region announcement priority.
 
 ## API
 
-Toast is workspace source. There is no public `proto-ui add` target. Passing `open` selects controlled mode.
+### Root
 
 <ApiPropsTable
   headers={{ name: 'Prop', type: 'Type', default: 'Default' }}
@@ -40,7 +48,14 @@ Toast is workspace source. There is no public `proto-ui add` target. Passing `op
   ]}
 />
 
-These props belong to Root. Viewport defaults `a11yLabel` to `Notifications` and `hotkey` to `F8`. Title and Description have no props. Action defaults `disabled` to `false`; `a11yLabel` has no default. Close defaults `disabled` to `false`.
+Pass `open` to control visibility.
+
+### Part Props
+
+- **Viewport**: `a11yLabel` (default `'Notifications'`), `hotkey` (default `'F8'`).
+- **Action**: `disabled` (default `false`), `a11yLabel` (optional).
+- **Close**: `disabled` (default `false`).
+- **Title**, **Description**: No additional props.
 
 ## References
 

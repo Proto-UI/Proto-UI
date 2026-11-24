@@ -1,11 +1,13 @@
 ---
 title: 'Text'
-description: 'LiquidGlass passive Text with the complete Base typography vocabulary.'
+description: 'Passive Liquid Glass typography primitive covering all eight Base text axes.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-`liquid-glass-text-root` directly consumes `asTextRoot()`, retaining all eight independent Base presentation axes, defaults and content slots. This real family Text prototype also renders toolbar labels. It introduces no heading, link, label, button, focus, selection or editing owner.
+Liquid Glass Text builds on [Base Text](/en/ui-libraries/base/text/) (via `asTextRoot()`) with all eight independent typography axes and a content slot. It handles typography presentation only, leaving heading levels, links, labels, buttons, and editing semantics to native elements or interactive controls.
+
+## Preview
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-text"
@@ -13,25 +15,32 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-## Inputs
+## Installation
 
-- `size`: xs, sm, base, lg, xl, 2xl, 3xl, 4xl, 5xl (default base)
-- `tone`: default, muted, inherit (default default)
-- `weight`: normal, medium, semibold, bold (default normal)
-- `font`: body, heading, mono (default body)
-- `leading`: tight, snug, normal, relaxed (default normal)
-- `tracking`: normal, tight (default normal)
-- `emphasis`: normal, italic (default normal)
-- `decoration`: none, underline, line-through (default none)
-
-Explicit leading takes precedence over composite size line-height; removing props restores defaults. `tone="inherit"` follows the surrounding owner ink. Text never sets user-select: document content retains natural selection and text inside a control follows that actual control’s policy. Native h1, p, label, a and button elements retain semantics, for/href and input behavior.
-
-## Workspace source
+Currently available from workspace source; not yet included in the 0.2.0 stable release.
 
 ```ts
 import { textRoot, LiquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
 ```
 
-The package remains private/unreleased; its CLI Text entry requires workspace source mode for WC, React, Vue and Vue 2 facades. The family theme provides body/heading/mono font stacks and default/muted ink without bundling third-party fonts. Real four-Adapter synthetic-DOM checks and compiler mappings are separate evidence; they do not prove native paint or GPUI typography parity. The GPUI CLI host remains explicitly unsupported.
+## Usage
 
-[Base Text](/en/ui-libraries/base/text/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/text)
+- An explicit `leading` prop takes precedence over the composite line-height implied by `size`; removing any prop restores its default.
+- Set `tone="inherit"` when placing Text inside a surface or control whose foreground color you want to preserve.
+- Text never overrides `user-select`: document prose stays naturally selectable, while text inside interactive controls inherits the control's selection behavior.
+- Wrap or pair with native `h1`, `p`, `label`, `a`, or `button` elements when semantic roles or navigation are needed.
+
+The Liquid Glass theme defines `body`, `heading`, and `mono` font stacks along with `default` and `muted` ink colors without bundling third-party font files.
+
+## API
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `size` | `'xs' \| 'sm' \| 'base' \| 'lg' \| 'xl' \| '2xl' \| '3xl' \| '4xl' \| '5xl'` | `'base'` | Font size scale |
+| `tone` | `'default' \| 'muted' \| 'inherit'` | `'default'` | Text color tone |
+| `weight` | `'normal' \| 'medium' \| 'semibold' \| 'bold'` | `'normal'` | Font weight |
+| `font` | `'body' \| 'heading' \| 'mono'` | `'body'` | Font family stack |
+| `leading` | `'tight' \| 'snug' \| 'normal' \| 'relaxed'` | `'normal'` | Line height; overrides the composite size line-height when set |
+| `tracking` | `'normal' \| 'tight'` | `'normal'` | Letter spacing |
+| `emphasis` | `'normal' \| 'italic'` | `'normal'` | Font style |
+| `decoration` | `'none' \| 'underline' \| 'line-through'` | `'none'` | Text decoration |

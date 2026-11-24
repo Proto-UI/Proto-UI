@@ -15,6 +15,33 @@ const valid = () => ({
   easing: [0.32, 0.72, 0, 1],
 });
 describe('presence presentation declaration snapshots', () => {
+  it('snapshots the named intrinsic-size extension and rejects invalid size data without getters', () => {
+    const declaration = {
+      ...valid(),
+      closed: { blockSize: 0 },
+      entered: { blockSize: 'intrinsic' },
+    };
+    const result = snapshotPresencePresentation(declaration as any);
+    declaration.closed.blockSize = 9;
+    expect(result.closed.blockSize).toBe(0);
+    expect(result.entered.blockSize).toBe('intrinsic');
+    expect(Object.isFrozen(result.closed)).toBe(true);
+    for (const blockSize of [-1, Infinity, NaN, 'auto', '120px', null])
+      expect(() =>
+        snapshotPresencePresentation({ ...declaration, closed: { blockSize } } as any)
+      ).toThrow('Invalid');
+    let reads = 0;
+    const closed = Object.defineProperty({}, 'blockSize', {
+      get() {
+        reads++;
+        return 0;
+      },
+    });
+    expect(() => snapshotPresencePresentation({ ...declaration, closed } as any)).toThrow(
+      'Invalid'
+    );
+    expect(reads).toBe(0);
+  });
   it('deeply snapshots typed data but preserves symbolic owner identity', () => {
     const input = valid();
     const result = snapshotPresencePresentation(input as any);

@@ -1,0 +1,101 @@
+name: Compiler whole-library profile inventory
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# The scheduled owner is ci.yml. Manual diagnosis shares this non-cancelling
+# lane; no pull-request fan-out or separate regression cron is introduced.
+concurrency:
+  group: compiler-library-inventory-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        slot: [0, 1, 2, 3]
+    steps:
+      - name: Prepare evidence directory before checkout or installation
+        run: mkdir -p "$RUNNER_TEMP/compiler-library-shard"
+      - uses: actions/checkout@v4
+        id: checkout
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.3'
+      - name: Bind the shard to its source, run and actual attempt
+        run: node scripts/ci/compiler-library-inventory.mjs init "$RUNNER_TEMP/compiler-library-shard" "${{ matrix.slot }}"
+      - name: Install the exact declared workspace without install scripts
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts 2>&1 | tee "$RUNNER_TEMP/compiler-library-shard/install.log"
+      - name: Compile every selected entry through every implemented public profile
+        id: execute
+        timeout-minutes: 75
+        run: |
+          set -euo pipefail
+          node scripts/compiler/library-profile-inventory.mjs \
+            --output "$RUNNER_TEMP/compiler-library-shard/inventory" \
+            --shard "${{ matrix.slot }}/4" --heap-mb 1536 \
+            2>&1 | tee "$RUNNER_TEMP/compiler-library-shard/inventory.log"
+      - name: Retain actual producer outcome even after failure
+        if: ${{ always() && steps.checkout.outcome == 'success' }}
+        env:
+          INVENTORY_JOB_STATUS: ${{ job.status }}
+          INVENTORY_CI_STEPS: ${{ toJSON(steps) }}
+        run: node scripts/ci/compiler-library-inventory.mjs finish "$RUNNER_TEMP/compiler-library-shard"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compiler-library-${{ github.sha }}-${{ github.run_id }}-shard-${{ matrix.slot }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compiler-library-shard
+          if-no-files-found: error
+          retention-days: 30
+
+  complete-inventory:
+    if: always()
+    needs: inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.3'
+      - name: Install the same locked source and compiler metadata readers
+        timeout-minutes: 8
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - uses: actions/download-artifact@v4
+        if: always()
+        with:
+          pattern: compiler-library-${{ github.sha }}-${{ github.run_id }}-shard-*-attempt-*
+          merge-multiple: false
+          path: ${{ runner.temp }}/compiler-library-inputs
+      - name: Require the complete authored denominator and all terminal receipts
+        if: always()
+        env:
+          INVENTORY_CI_NEEDS: ${{ toJSON(needs) }}
+        run: node scripts/ci/compiler-library-inventory.mjs gate "$RUNNER_TEMP/compiler-library-inputs" "$RUNNER_TEMP/compiler-library-gate"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compiler-library-gate-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compiler-library-gate
+          if-no-files-found: error
+          retention-days: 30

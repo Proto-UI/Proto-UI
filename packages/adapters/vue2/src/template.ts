@@ -1,5 +1,6 @@
 import {
   collectWebOwnedDecorationTargets,
+  createWebMaterialPaintReservationRef,
   type WebOwnedDecorationStage,
 } from '@proto.ui/adapter-base';
 import {
@@ -96,6 +97,24 @@ function renderChild(
   }
 
   const t = child.type;
+  if (t && typeof t === 'object' && t.kind === 'paint-reservation') {
+    const ref = createWebMaterialPaintReservationRef(t.target);
+    const kids: any[] = [];
+    for (const k of toArray(child.children ?? null))
+      pushRendered(kids, renderChild(runtime, k, opt, ctx));
+    return runtime.h(
+      'div',
+      {
+        attrs: { 'data-pui-material-reservation': '' },
+        hook: {
+          insert: (vnode: any) => ref(vnode.elm),
+          postpatch: (_old: any, vnode: any) => ref(vnode.elm),
+          destroy: () => ref(null),
+        },
+      },
+      kids
+    );
+  }
   if (t && typeof t === 'object' && t.kind === 'decoration') {
     if (!opt.decoration) throw new Error('[Template] owned-decoration unsupported');
     const ref = opt.decoration.ref(t.target);
