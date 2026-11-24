@@ -2361,6 +2361,31 @@ fn replaced_members_of_public_records_receive_the_owner_lifetime_guard(cx: &mut 
 }
 
 #[gpui::test]
+fn array_identity_observation_uses_native_value_variants(cx: &mut TestAppContext) {
+    let window = open(cx, json!({}));
+    window.update(cx, |_, window, cx| {
+        let entity = scalars::CompiledComponent::create(json!({}), None, window, cx).unwrap();
+        let predicate = exposed(&entity.read(cx).handle().owner, "isArray");
+        let values = [
+            (Value::Array(Rc::new(vec![])), true),
+            (Value::Array(Rc::new(vec![Value::number(1.)])), true),
+            (Value::Json(json!([])), true),
+            (Value::Json(json!([1, 2])), true),
+            (record(vec![("0", Value::number(1.)), ("length", Value::number(1.))]), false),
+            (Value::Json(json!({"0": 1, "length": 1})), false),
+            (Value::string("[]"), false),
+            (Value::number(1.), false),
+            (Value::boolean(false), false),
+            (Value::Json(Json::Null), false),
+            (Value::Undefined, false),
+        ];
+        for (input, expected) in values {
+            assert_eq!(predicate.call(vec![input]).unwrap().data(), json!(expected));
+        }
+    }).unwrap();
+}
+
+#[gpui::test]
 fn scalar_conversion_matches_the_ecmascript_operator_reference(cx: &mut TestAppContext) {
     // JavaScript has one Number domain. serde_json's integer-versus-float
     // storage tag is not an authored distinction; compare Node's exact bits.
