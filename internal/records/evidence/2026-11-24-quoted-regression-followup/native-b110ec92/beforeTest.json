@@ -1,0 +1,128 @@
+{
+  "phase": "beforeTest",
+  "observedAt": "2026-11-24T13:00:11.306Z",
+  "expectedSha": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+  "source": {
+    "status": 0,
+    "stdout": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3\n",
+    "stderr": "",
+    "error": null
+  },
+  "status": {
+    "status": 0,
+    "stdout": "",
+    "stderr": "",
+    "error": null
+  },
+  "dirty": false,
+  "runId": "45398259913",
+  "runAttempt": "1",
+  "event": "workflow_dispatch",
+  "ref": "refs/heads/fix/contents-wheel-followup-20261124",
+  "node": "v24.22.3",
+  "platform": "linux",
+  "arch": "x64",
+  "os": "7.0.0-1017-azure",
+  "chromePath": "/usr/bin/google-chrome",
+  "chrome": {
+    "status": 0,
+    "stdout": "Google Chrome 157.0.8103.78 \n",
+    "stderr": "",
+    "error": null
+  },
+  "sourceFiles": [
+    {
+      "path": ".github/workflows/browser-suite-repair-evidence.yml",
+      "bytes": 18995,
+      "sha256": "e801829655de84593104b60fd5e0f51a5342973472b9401594927fe5d8f3f443"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "bytes": 270989,
+      "sha256": "eae18430bd967c94def36809b6d3305fa156a96548b08215a18dfe8a43923c07"
+    },
+    {
+      "path": "apps/www/package.json",
+      "bytes": 2970,
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "path": "apps/www/scripts/generate-website-prototype-tokens.mjs",
+      "bytes": 1646,
+      "sha256": "63e7dc2b1892fb1b7e1424a2c2e40e2b58c9c11618347bd09218b64290d8f920"
+    },
+    {
+      "path": "apps/www/scripts/prepare-homepage-composition-fonts.sh",
+      "bytes": 7109,
+      "sha256": "105ba726bdb77425ece17da47c3d5780b3733a0ec228e8e0ab4001da0fc871eb"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+      "bytes": 30579,
+      "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.ts",
+      "bytes": 8309,
+      "sha256": "1ad810bd1748eb566ff455c972850bc4eed2b4d2f2851cdea510f77d7ad1a136"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/contents-wheel-evidence.browser.test.ts",
+      "bytes": 7370,
+      "sha256": "b0d1c3426db0dbc47ba35e3f1e81fdd2ca7ae235f5e5095f44f97ab7d90457b1"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts",
+      "bytes": 123530,
+      "sha256": "26a5298f760604803719fbe220adb7ccfaa7f0e2a8477c52cc83a47b9bef2fe4"
+    },
+    {
+      "path": "apps/www/src/styles/site-contents-command.css",
+      "bytes": 784,
+      "sha256": "70807ef33ce6f3212fcb68735f30196dd5cf96cdf82d17d7b7c5cc4e97ba1748"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/floating-ui-host.ts",
+      "bytes": 28348,
+      "sha256": "f9fc1f2cb64e08ce452b693ae054f439430e3abb6f98d31013c59ea5d44b9715"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/owned-style-lease.ts",
+      "bytes": 3302,
+      "sha256": "6529e87ddbf38b3f379d51bfa26b22fedff225c67c196425c29d7f9d7d421f8f"
+    },
+    {
+      "path": "packages/modules/positioning/src/web/root-space-observer.ts",
+      "bytes": 4042,
+      "sha256": "d26b44d0f6f1cf9102f39c7835219eedc2b0d7ea72902cfe990daef1c9d174b5"
+    },
+    {
+      "path": "packages/modules/positioning/test/floating-ui-host.test.ts",
+      "bytes": 25859,
+      "sha256": "46cbe728958f3f4e03c8b007221b0d65037d3814d57cc3bd61087a02e435d3e4"
+    }
+  ],
+  "generatedFiles": [
+    {
+      "path": "apps/www/src/styles/shadcn-theme.css",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/shadcn-theme.css'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-style.css",
+      "bytes": 294,
+      "sha256": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-tokens.generated.css",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-tokens.generated.css'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.js",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.js'"
+    },
+    {
+      "path": "apps/www/src/styles/proto-ui-shadow-style.generated.d.ts",
+      "error": "Error: ENOENT: no such file or directory, open 'apps/www/src/styles/proto-ui-shadow-style.generated.d.ts'"
+    }
+  ]
+}

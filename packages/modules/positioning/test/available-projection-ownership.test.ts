@@ -7,6 +7,7 @@ import { createFloatingUiAnchoredPositionHost } from '../src';
 const pending = vi.hoisted(() => [] as Array<{ applySize(): void; finish(x: number): void }>);
 const cleanup = vi.hoisted(() => vi.fn());
 vi.mock('@floating-ui/dom', () => ({
+  platform: {},
   autoUpdate: vi.fn((_anchor, _floating, update) => {
     void update();
     return cleanup;

@@ -1,6 +1,7 @@
 import { createWebInputOriginAnchor } from '../src/web/input-origin-anchor';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConfig } from '@proto.ui/core';
+import { platform as domPlatform } from '@floating-ui/dom';
 import { createFloatingUiAnchoredPositionHost } from '../src';
 
 const rect = (x: number, y: number, width: number, height: number): DOMRect =>
@@ -312,6 +313,178 @@ describe('module-positioning: relevant scroll observation', () => {
     });
     return { lease, onResolved };
   }
+
+  function overflowingPanel(anchorY: number, avoidCollisions = false) {
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, anchorY, 50, 20));
+    // Explicit host-unit layout facts. No native wheel or browser clamping is
+    // simulated: these tests observe the cap's synchronous ownership boundary.
+    const naturalHeight = 1000;
+    const height = () => {
+      const cap = Number.parseFloat(floating.style.getPropertyValue('--proto-ui-available-height'));
+      return Number.isFinite(cap) ? Math.min(naturalHeight, Math.max(0, cap)) : naturalHeight;
+    };
+    floating.getBoundingClientRect = () => rect(0, 0, 100, height());
+    Object.defineProperties(floating, {
+      offsetWidth: { configurable: true, value: 100 },
+      offsetHeight: { configurable: true, get: height },
+      clientWidth: { configurable: true, value: 100 },
+      clientHeight: { configurable: true, get: height },
+      scrollWidth: { configurable: true, value: 100 },
+      scrollHeight: { configurable: true, value: naturalHeight },
+    });
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: { ...baseConfig, avoidCollisions },
+    });
+    return { anchor, floating, lease, height };
+  }
+
+  it('keeps an overflowing panel capped while its reference moves', async () => {
+    const panel = overflowingPanel(100);
+    try {
+      await flush();
+      const cap = panel.floating.style.getPropertyValue('--proto-ui-available-height');
+      expect(cap).toBe('644px');
+      setRect(panel.anchor, rect(100, 96, 50, 20));
+      window.dispatchEvent(new Event('scroll'));
+      expect(panel.floating.style.getPropertyValue('--proto-ui-available-height')).toBe(cap);
+      await flush();
+      expect(panel.floating.style.top).toBe('120px');
+      expect(panel.height()).toBe(648);
+    } finally {
+      panel.lease.dispose();
+    }
+  });
+
+  it('reconsiders the natural size and side when a capped panel reference crosses the viewport', async () => {
+    const panel = overflowingPanel(600, true);
+    try {
+      await flush();
+      expect(panel.floating.dataset.side).toBe('top');
+      expect(panel.height()).toBe(596);
+      setRect(panel.anchor, rect(100, 100, 50, 20));
+      window.dispatchEvent(new Event('scroll'));
+      expect(panel.floating.style.getPropertyValue('--proto-ui-available-height')).toBe('596px');
+      await flush();
+      expect(panel.floating.dataset.side).toBe('bottom');
+      expect(panel.floating.style.top).toBe('124px');
+      expect(panel.height()).toBe(644);
+    } finally {
+      panel.lease.dispose();
+    }
+  });
+
+  it('uses the current viewport after a capped panel resize', async () => {
+    const panel = overflowingPanel(100);
+    try {
+      await flush();
+      Object.defineProperty(document.documentElement, 'clientHeight', {
+        configurable: true,
+        value: 400,
+      });
+      window.dispatchEvent(new Event('resize'));
+      await flush();
+      expect(panel.floating.style.top).toBe('124px');
+      expect(panel.height()).toBe(276);
+      expect(panel.floating.style.getPropertyValue('--proto-ui-available-height')).toBe('276px');
+    } finally {
+      panel.lease.dispose();
+    }
+  });
+
+  it('does not certify old natural dimensions when placement CSS changes the overflowing content', async () => {
+    const stylesheet = document.createElement('style');
+    stylesheet.textContent = '.placement-intrinsic-panel[data-side="top"] { padding-top: 200px; }';
+    document.head.append(stylesheet);
+    const anchor = document.createElement('button');
+    const floating = document.createElement('div');
+    floating.className = 'placement-intrinsic-panel';
+    document.body.append(anchor, floating);
+    setRect(anchor, rect(100, 600, 50, 20));
+    const measurements: number[] = [];
+    const naturalHeight = () =>
+      1000 + (Number.parseFloat(getComputedStyle(floating).paddingTop) || 0);
+    const height = () => {
+      const natural = naturalHeight();
+      const cap = Number.parseFloat(floating.style.getPropertyValue('--proto-ui-available-height'));
+      if (Number.isFinite(cap)) return Math.min(natural, Math.max(0, cap));
+      measurements.push(natural);
+      return natural;
+    };
+    floating.getBoundingClientRect = () => rect(0, 0, 100, height());
+    Object.defineProperties(floating, {
+      offsetWidth: { configurable: true, value: 100 },
+      clientWidth: { configurable: true, value: 100 },
+      scrollWidth: { configurable: true, value: 100 },
+      offsetHeight: { configurable: true, get: height },
+      clientHeight: { configurable: true, get: height },
+      scrollHeight: { configurable: true, get: naturalHeight },
+    });
+    const lease = createFloatingUiAnchoredPositionHost().attach({
+      anchor,
+      floating,
+      config: { ...baseConfig, avoidCollisions: true },
+    });
+    try {
+      await flush();
+      expect(floating.dataset.side).toBe('top');
+      expect(getComputedStyle(floating).paddingTop).toBe('200px');
+      expect(floating.scrollHeight).toBe(1200);
+      measurements.length = 0;
+      window.dispatchEvent(new Event('scroll'));
+      // The owned data-side write changed actual layout. It must not bind the
+      // old 1000px measurement to the new 1200px content's cache certificate.
+      expect(floating.style.getPropertyValue('--proto-ui-available-height')).toBe('');
+      await flush();
+      expect(measurements).toContain(1200);
+      expect(floating.dataset.side).toBe('top');
+    } finally {
+      lease.dispose();
+      stylesheet.remove();
+    }
+  });
+
+  it('rejects a natural-size certificate when its reference size changes across a measurement await', async () => {
+    let panel: ReturnType<typeof overflowingPanel> | undefined;
+    const measurements: number[] = [];
+    let changed = false;
+    const original = domPlatform.getElementRects;
+    const measurement = vi.spyOn(domPlatform, 'getElementRects').mockImplementation(async function (
+      this: typeof domPlatform,
+      input
+    ) {
+      const result = await original.call(this, input);
+      measurements.push(result.floating.height);
+      if (!changed && panel) {
+        changed = true;
+        // An independent input changes after this real platform measurement,
+        // without a floating subtree mutation or an intervening RO delivery.
+        setRect(panel.anchor, rect(100, 100, 80, 20));
+      }
+      return result;
+    });
+    try {
+      panel = overflowingPanel(100);
+      await flush();
+      expect(changed).toBe(true);
+      expect(panel.anchor.offsetWidth).toBe(80);
+      expect(panel.height()).toBe(644);
+      measurements.length = 0;
+      window.dispatchEvent(new Event('scroll'));
+      await flush();
+      // Re-read natural layout under the new input; do not bind the prior
+      // 50px-reference measurement to an end-of-solve 80px-reference snapshot.
+      expect(measurements[0]).toBe(1000);
+      expect(panel.floating.style.top).toBe('124px');
+    } finally {
+      panel?.lease.dispose();
+      measurement.mockRestore();
+    }
+  });
 
   it.each(['floating', 'descendant', 'unrelated', 'reference'] as const)(
     'retains its available-space cap during %s scrolling',

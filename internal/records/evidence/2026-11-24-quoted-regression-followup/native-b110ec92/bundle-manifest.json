@@ -1,0 +1,62 @@
+{
+  "head": "b110ec92f5b1c5d256c79b831c0b86b9caaec3e3",
+  "runId": 45398259913,
+  "selection": "One original ZIP plus complete decoded job log and terminal/summary metadata; extracted members not duplicated",
+  "entries": [
+    {
+      "path": "identity.json",
+      "bytes": 456,
+      "sha256": "7125969f975b164046f32fe12780b66b68073c3c79476945f0598fb96065484a"
+    },
+    {
+      "path": "run-final.json",
+      "bytes": 14995,
+      "sha256": "f57ba4809e57d923bb6adab4b363a89632e8a464910fce42a6befdf3692d74e1"
+    },
+    {
+      "path": "jobs-final.json",
+      "bytes": 10723,
+      "sha256": "ef1e1398f3060849f1867131b4a4dcb34a1cce62656974e1a7170fe59e88de58"
+    },
+    {
+      "path": "artifacts-final.json",
+      "bytes": 977,
+      "sha256": "951b0a2d4a810df06830d8b88e081dac3d881f3dbfab63eee59431fed6936cc7"
+    },
+    {
+      "path": "artifact-14922293422.zip",
+      "bytes": 736357,
+      "sha256": "481c083413e3781b43aded9c0cda781ecaa00e1b0b2a314fe790a453b11612da"
+    },
+    {
+      "path": "artifact-manifest.json",
+      "bytes": 11733,
+      "sha256": "cf3203c1c1b7e37f63e5f95932b06f35a3a46f4c0fc5f6087bfdb75f404e44f0"
+    },
+    {
+      "path": "job-138459735307.log.gz",
+      "bytes": 15224,
+      "sha256": "01eaa4de46b91670b2fd0b7fedc0d09030badc73707870b1bf741cf588bbd382"
+    },
+    {
+      "path": "log-provenance.json",
+      "bytes": 196,
+      "sha256": "b99dd66bf3786b8ebb0ed8d6da4a12f60bee3f93fe5c6e7eff3583b09cab7dcf"
+    },
+    {
+      "path": "result-summary.json",
+      "bytes": 27516,
+      "sha256": "06182198f66b66717ee6bba95c5608783cbdf8323252699b51e48c5962591cd1"
+    },
+    {
+      "path": "result-report.md",
+      "bytes": 3641,
+      "sha256": "7568327365f4211477618245cb142528c904c2ca6df819ffaadd94c083eeec0d"
+    },
+    {
+      "path": "wheel-observations.json",
+      "bytes": 9104,
+      "sha256": "598005883d2930c5b13f1f01fcc13cb55debeb607f69f4cc2b4789242439bdc5"
+    }
+  ]
+}

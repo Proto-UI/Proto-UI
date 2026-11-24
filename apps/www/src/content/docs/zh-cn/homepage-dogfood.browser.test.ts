@@ -1273,6 +1273,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               expect(after.sameDialog).toBe(true);
               expect(after.sameSurface).toBe(true);
               expect(after.ready).toBe(true);
+              expect(after.top).not.toBe(scrolling.top);
+              expect(direction * (after.top - scrolling.top)).toBeGreaterThan(0);
               expect(after.documentY).toBe(scrolling.documentY);
               expect(
                 after.wheels.some(

@@ -141,6 +141,9 @@ jobs:
             'packages/modules/positioning/src/web/owned-style-lease.ts',
             'packages/modules/positioning/src/web/root-space-observer.ts',
             'packages/modules/positioning/test/floating-ui-host.test.ts',
+            'packages/modules/positioning/test/floating-ui-host-intrinsic-invalidation.test.ts',
+            'packages/modules/positioning/test/available-projection-ownership.test.ts',
+            'packages/modules/positioning/test/lease-generation.test.ts',
           ].map(hashFile);
           // Actual outputs of apps-www generate:proto-ui-style, including the
           // ignored CSS/Shadow artifacts that git status cannot account for.

@@ -12,10 +12,13 @@ import {
   computePosition,
   flip,
   offset,
+  platform as domPlatform,
   shift,
   size,
+  type Dimensions,
   type Middleware,
   type Placement,
+  type Platform,
 } from '@floating-ui/dom';
 import type {
   AnchoredPositionAlign,
@@ -108,6 +111,240 @@ function observePositionScroll(reference: HTMLElement, floating: HTMLElement, up
       disposed = true;
       for (const root of roots) root.removeEventListener('scroll', onScroll, true);
       roots.clear();
+    },
+  };
+}
+
+const positioningStyleOutputs = new Set([
+  'position',
+  'left',
+  'top',
+  '--proto-ui-anchor-width',
+  '--proto-ui-anchor-height',
+  '--proto-ui-available-width',
+  '--proto-ui-available-height',
+]);
+
+function authoredPositionStyle(element: HTMLElement): string {
+  const values: string[] = [];
+  for (let index = 0; index < element.style.length; index++) {
+    const name = element.style.item(index);
+    if (!positioningStyleOutputs.has(name))
+      values.push(
+        `${name}:${element.style.getPropertyValue(name)}!${element.style.getPropertyPriority(name)}`
+      );
+  }
+  return values.sort().join(';');
+}
+
+/** Reuse measured natural dimensions only while their bounded input facts stay current. */
+function observeIntrinsicSize(reference: HTMLElement, floating: HTMLElement) {
+  const document = floating.ownerDocument;
+  const view = document.defaultView;
+  let revision = 0;
+  let disposed = false;
+  let authored = authoredPositionStyle(floating);
+  let projectedSide = floating.dataset.side;
+  let projectedAlign = floating.dataset.align;
+  const invalidate = () => {
+    revision++;
+    cache = null;
+  };
+  const mutations = (records: MutationRecord[]) => {
+    for (const record of records) {
+      if (record.target === floating && record.type === 'attributes') {
+        if (record.attributeName === 'style') {
+          const next = authoredPositionStyle(floating);
+          if (next === authored) continue;
+          authored = next;
+        } else if (record.attributeName === 'data-side' && floating.dataset.side === projectedSide)
+          continue;
+        else if (record.attributeName === 'data-align' && floating.dataset.align === projectedAlign)
+          continue;
+      }
+      invalidate();
+    }
+  };
+  const observer =
+    typeof view?.MutationObserver === 'function' ? new view.MutationObserver(mutations) : null;
+  observer?.observe(floating, {
+    subtree: true,
+    childList: true,
+    characterData: true,
+    attributes: true,
+  });
+  floating.addEventListener('load', invalidate, true);
+  document.fonts?.addEventListener('loadingdone', invalidate);
+  document.fonts?.addEventListener('loadingerror', invalidate);
+  const basis = () => {
+    const anchor = reference.getBoundingClientRect();
+    const root = document.documentElement;
+    const viewport = view?.visualViewport;
+    const style = view?.getComputedStyle(floating);
+    const intrinsicStyle = JSON.stringify([
+      style?.font,
+      style?.fontFamily,
+      style?.fontSize,
+      style?.fontWeight,
+      style?.lineHeight,
+      style?.letterSpacing,
+      style?.whiteSpace,
+      style?.boxSizing,
+      style?.padding,
+      style?.borderWidth,
+      style?.display,
+      style?.minWidth,
+      style?.minHeight,
+      style?.direction,
+      style?.writingMode,
+    ]);
+    const ancestors: string[] = [];
+    for (let node = composedParent(floating); node; node = composedParent(node)) {
+      if (node.nodeType !== 1) continue;
+      const element = node as Element;
+      ancestors.push(
+        JSON.stringify([
+          element
+            .getAttributeNames()
+            .sort()
+            .map((name) => `${name}=${element.getAttribute(name)}`),
+          element.clientWidth,
+          element.clientHeight,
+          view?.getComputedStyle(element).transform,
+        ])
+      );
+    }
+    const context = JSON.stringify([
+      anchor.width,
+      anchor.height,
+      reference.offsetWidth,
+      reference.offsetHeight,
+      root.clientWidth,
+      root.clientHeight,
+      document.body?.clientWidth,
+      viewport?.width,
+      viewport?.height,
+      viewport?.scale,
+      viewport?.offsetLeft,
+      viewport?.offsetTop,
+      authoredPositionStyle(floating),
+      ancestors,
+      intrinsicStyle,
+    ]);
+    return {
+      offsetParent: floating.offsetParent,
+      context,
+      intrinsicStyle,
+      scrollWidth: floating.scrollWidth,
+      scrollHeight: floating.scrollHeight,
+      values: JSON.stringify([
+        anchor.width,
+        anchor.height,
+        reference.offsetWidth,
+        reference.offsetHeight,
+        floating.offsetWidth,
+        floating.offsetHeight,
+        floating.clientWidth,
+        floating.clientHeight,
+        floating.scrollWidth,
+        floating.scrollHeight,
+        root.clientWidth,
+        root.clientHeight,
+        document.body?.clientWidth,
+        viewport?.width,
+        viewport?.height,
+        viewport?.scale,
+        viewport?.offsetLeft,
+        viewport?.offsetTop,
+        authoredPositionStyle(floating),
+        ancestors,
+        intrinsicStyle,
+      ]),
+      overflowing:
+        floating.scrollHeight > floating.clientHeight ||
+        floating.scrollWidth > floating.clientWidth,
+    };
+  };
+  let cache: { dimensions: Dimensions; revision: number; basis: ReturnType<typeof basis> } | null =
+    null;
+  return {
+    begin(reuse: boolean) {
+      mutations(observer?.takeRecords() ?? []);
+      const current = basis();
+      const previous = cache;
+      const dimensions =
+        reuse &&
+        observer &&
+        !disposed &&
+        document.fonts?.status !== 'loading' &&
+        previous?.revision === revision &&
+        previous.basis.overflowing &&
+        current.overflowing &&
+        previous.basis.offsetParent === current.offsetParent &&
+        previous.basis.values === current.values
+          ? previous.dimensions
+          : undefined;
+      if (!dimensions) cache = null;
+      return { dimensions, revision, authored: authoredPositionStyle(floating), basis: current };
+    },
+    measurementContext() {
+      const current = basis();
+      return { context: current.context, offsetParent: current.offsetParent };
+    },
+    projected(side: string, align: string) {
+      projectedSide = side;
+      projectedAlign = align;
+    },
+    commit(
+      dimensions: Dimensions | undefined,
+      input: { revision: number; authored: string; basis: ReturnType<typeof basis> },
+      measuredUnder: { context: string; offsetParent: Element | null } | undefined
+    ) {
+      mutations(observer?.takeRecords() ?? []);
+      const current = basis();
+      if (
+        !disposed &&
+        dimensions &&
+        measuredUnder &&
+        measuredUnder.context === current.context &&
+        measuredUnder.offsetParent === current.offsetParent &&
+        input.revision === revision &&
+        input.authored === authoredPositionStyle(floating) &&
+        input.basis.intrinsicStyle === current.intrinsicStyle &&
+        input.basis.scrollWidth === current.scrollWidth &&
+        input.basis.scrollHeight === current.scrollHeight
+      )
+        cache = { dimensions, revision, basis: current };
+      else cache = null;
+    },
+    dispose() {
+      disposed = true;
+      cache = null;
+      observer?.disconnect();
+      floating.removeEventListener('load', invalidate, true);
+      document.fonts?.removeEventListener('loadingdone', invalidate);
+      document.fonts?.removeEventListener('loadingerror', invalidate);
+    },
+  };
+}
+
+/** Only the first rect measurement uses natural size; size() must read the real capped box. */
+function intrinsicPlatform(
+  initial: Dimensions | undefined,
+  beforeMeasurement: () => void,
+  measured: (size: Dimensions) => void
+): Platform {
+  let first = true;
+  return {
+    ...domPlatform,
+    async getElementRects(input) {
+      if (first) beforeMeasurement();
+      const rects = await domPlatform.getElementRects.call(this, input);
+      if (!first) return rects;
+      first = false;
+      const dimensions = initial ?? { width: rects.floating.width, height: rects.floating.height };
+      measured(dimensions);
+      return { ...rects, floating: { ...rects.floating, ...dimensions } };
     },
   };
 }
@@ -388,6 +625,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
       let strategyPin: { target: HTMLElement; styles: ReturnType<typeof ownStyles> } | null = null;
       let projectedSize: ReturnType<typeof ownStyles> | null = null;
       let scrollObservation: ReturnType<typeof observePositionScroll> | null = null;
+      let intrinsicObservation: ReturnType<typeof observeIntrinsicSize> | null = null;
       const retireProjectedSize = () => {
         const previous = projectedSize;
         projectedSize = null;
@@ -416,7 +654,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         return resolveWebInputOriginAnchor(anchor);
       };
 
-      const position = async () => {
+      const position = async (reuseIntrinsic = false) => {
         const current = connection;
         const { anchor, floating, config } = current;
         const version = ++generation;
@@ -442,15 +680,27 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           return;
         }
         scrollObservation?.refresh();
+        const ownIntrinsic = intrinsicObservation;
+        const intrinsicInput = ownIntrinsic?.begin(
+          reuseIntrinsic && !!projectedSize?.isCurrent() && !current.sizeMatch
+        );
+        let naturalDimensions = intrinsicInput?.dimensions;
+        let measurementContext:
+          | ReturnType<NonNullable<typeof ownIntrinsic>['measurementContext']>
+          | undefined;
         // Available-space variables are outputs of the last solve. Measuring
         // through that cap can make an overflowing preferred side appear to
         // fit forever after content/font/viewport changes. Release only our
         // claims before measuring intrinsic geometry; authored values and any
         // replacement owner's writes remain intact. Each solve then owns a
         // fresh projection, guarded by the existing computation generation.
-        retireProjectedSize();
+        // Geometry-only refreshes may reuse independently measured natural
+        // dimensions. Keeping the live cap avoids clamping native scrolling;
+        // the first Floating UI rect read still sees the natural size for flip.
+        if (!naturalDimensions) retireProjectedSize();
         if (!isCurrent()) return;
-        const ownProjection = ownStyles(floating);
+        const ownProjection =
+          naturalDimensions && projectedSize ? projectedSize : ownStyles(floating);
         projectedSize = ownProjection;
         if (!strategyPin || strategyPin.target !== floating) {
           retireStrategyPin();
@@ -532,6 +782,19 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config, isCurrent, ownProjection),
+          ...(ownIntrinsic
+            ? {
+                platform: intrinsicPlatform(
+                  naturalDimensions,
+                  () => {
+                    measurementContext = ownIntrinsic.measurementContext();
+                  },
+                  (measured) => {
+                    naturalDimensions = measured;
+                  }
+                ),
+              }
+            : {}),
         });
         if (!isCurrent()) return;
         retireStrategyPin();
@@ -542,8 +805,11 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           top: `${result.y}px`,
         });
         const resolved = fromPlacement(result.placement);
+        ownIntrinsic?.projected(resolved.side, resolved.align);
         floating.dataset.side = resolved.side;
         floating.dataset.align = resolved.align;
+        if (isCurrent() && ownIntrinsic === intrinsicObservation && intrinsicInput)
+          ownIntrinsic?.commit(naturalDimensions, intrinsicInput, measurementContext);
         current.onResolved?.({ ...resolved, strategy: result.strategy });
       };
 
@@ -576,9 +842,20 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           if (connection.sizeMatch) void position();
           return;
         }
-        const stopAuto = autoUpdate(reference.reference, floating, position, {
-          animationFrame: false,
-        });
+        const ownIntrinsic = connection.sizeMatch
+          ? null
+          : observeIntrinsicSize(reference.element, floating);
+        intrinsicObservation = ownIntrinsic;
+        const stopAuto = autoUpdate(
+          reference.reference,
+          floating,
+          () => {
+            void position(true);
+          },
+          {
+            animationFrame: false,
+          }
+        );
         const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
           void position();
         });
@@ -591,7 +868,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         // Native scroll is not composed, so observe the relevant shadow roots
         // as well as the document; a composed event is handled only once.
         const ownScroll = observePositionScroll(reference.element, floating, () => {
-          void position();
+          void position(true);
         });
         scrollObservation = ownScroll;
         const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
@@ -608,6 +885,8 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           stopInvalidation?.();
           ownScroll.dispose();
           if (scrollObservation === ownScroll) scrollObservation = null;
+          ownIntrinsic?.dispose();
+          if (intrinsicObservation === ownIntrinsic) intrinsicObservation = null;
         };
       };
 
@@ -617,6 +896,15 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
         update(next) {
           if (disposed) return;
           generation += 1;
+          const sameConfig = (
+            Object.keys({ ...connection.config, ...next.config }) as Array<
+              keyof AnchoredPositionConfig
+            >
+          ).every((key) =>
+            key === 'excludeAnchorTranslation'
+              ? (connection.config[key] === true) === (next.config[key] === true)
+              : Object.is(connection.config[key], next.config[key])
+          );
           const targetsChanged =
             !Object.is(connection.anchor, next.anchor) ||
             !Object.is(connection.floating, next.floating) ||
@@ -634,7 +922,7 @@ function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
           // when its element identities stay equal. Reentrant config/status
           // handoffs must not leave the prior synchronous size writer current.
           if (targetsChanged || next.sizeMatch) restart();
-          else void position();
+          else void position(sameConfig);
         },
         requestUpdate() {
           void position();
