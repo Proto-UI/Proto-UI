@@ -144,3 +144,6 @@ internal/records/2026-11-24-props-update-analysis-evidence/
 
 # Preserve original React Portal native receipts, manifests and captures.
 internal/records/evidence/2026-11-24-react-portal-origin-native/
+
+# Preserve original Scroll Reveal source-gate receipts and logs.
+internal/records/evidence/2026-11-24-scroll-reveal-source-gate/

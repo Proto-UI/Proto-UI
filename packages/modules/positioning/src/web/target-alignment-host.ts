@@ -1,4 +1,5 @@
 import { ownStyles } from './owned-style-lease';
+import { observeRootSpace } from './root-space-observer';
 import {
   createBorderBoxSizeLease,
   hasBorderBoxInlineClipping,
@@ -189,7 +190,8 @@ export function createTargetAlignmentLease(
       const reference = targets.blockReference.getBoundingClientRect();
       // Floating layout uses CSSOM offset precision, not the Surface's animated paint bounds.
       // Keep the neutral Frame origin and reference viewport fractions.
-      const origin = frame.getBoundingClientRect().left - layoutInlineStart(frame);
+      const frameBox = frame.getBoundingClientRect();
+      const origin = frameBox.left - layoutInlineStart(frame);
       const surfaceLeft = origin + layoutInlineStart(targets.surface);
       const surfaceWidth = targets.surface.offsetWidth;
       if (targets.blockTarget.offsetHeight <= 0 || reference.height <= 0) {
@@ -209,7 +211,8 @@ export function createTargetAlignmentLease(
       const minimumOuterInlineSpan = sizeTargets.length
         ? (sizing?.reference as HTMLElement).offsetWidth + Math.max(...(gutters as number[]))
         : undefined;
-      const direction = view.getComputedStyle(frame).direction === 'rtl' ? 'rtl' : 'ltr';
+      const frameStyle = view.getComputedStyle(frame);
+      const direction = frameStyle.direction === 'rtl' ? 'rtl' : 'ltr';
       const matchedTarget = sizeTargets.includes(targets.blockTarget);
       const targetLeft = origin + layoutInlineStart(targets.blockTarget);
       const inlineStartInset = matchedTarget
@@ -217,14 +220,32 @@ export function createTargetAlignmentLease(
           ? surfaceLeft + surfaceWidth - targetLeft - targets.blockTarget.offsetWidth
           : targetLeft - surfaceLeft
         : undefined;
-      // CSS fixed `left`/`right` resolve against the layout viewport.
-      // `innerWidth` includes a classic scrollbar; using it as the RTL
-      // containing-block width parks the popup one scrollbar away from the
-      // anchor (header select never matches its reference and stays unstable).
-      // A zero client box is an environment without layout (unit tests), not a
-      // scrollbar, so keep the window size there.
+      // Resolved fixed insets expose the neutral Frame's containing block.
+      // Root clientWidth excludes a classic scrollbar but does not describe
+      // both reserved gutters: viewport rects then have a nonzero origin and
+      // a different width from the space used by CSS left/right. Keep the
+      // reference, Surface and collision bounds in that same local space.
+      const pixels = (value: string) =>
+        value.endsWith('px') ? Number.parseFloat(value) : Number.NaN;
+      const left = pixels(frameStyle.left);
+      const right = pixels(frameStyle.right);
+      const marginLeft = pixels(frameStyle.marginLeft);
+      const marginRight = pixels(frameStyle.marginRight);
+      const fixedWidth = left + frameBox.width + right + marginLeft + marginRight;
+      const fixedOrigin = frameBox.left - left - marginLeft;
+      const hasFixedSpace =
+        frameBox.width > 0 &&
+        Number.isFinite(fixedWidth) &&
+        fixedWidth > 0 &&
+        Number.isFinite(fixedOrigin);
       const layoutRoot = doc.documentElement;
-      const viewportWidth = layoutRoot.clientWidth > 0 ? layoutRoot.clientWidth : view.innerWidth;
+      // Environments without layout do not resolve auto insets to pixels.
+      const inlineOrigin = hasFixedSpace ? fixedOrigin : 0;
+      const viewportWidth = hasFixedSpace
+        ? fixedWidth
+        : layoutRoot.clientWidth > 0
+          ? layoutRoot.clientWidth
+          : view.innerWidth;
       const viewportHeight =
         layoutRoot.clientHeight > 0 ? layoutRoot.clientHeight : view.innerHeight;
       const result = solveTargetAlignment(
@@ -232,15 +253,15 @@ export function createTargetAlignmentLease(
           direction,
           viewport: { width: viewportWidth, height: viewportHeight },
           reference: {
-            left: reference.left,
-            right: reference.right,
+            left: reference.left - inlineOrigin,
+            right: reference.right - inlineOrigin,
             top: reference.top,
             width: reference.width,
             height: reference.height,
           },
           surface: {
-            left: surfaceLeft,
-            right: surfaceLeft + surfaceWidth,
+            left: surfaceLeft - inlineOrigin,
+            right: surfaceLeft + surfaceWidth - inlineOrigin,
             width: surfaceWidth,
             clientHeight: targets.surface.clientHeight,
             borderTop: css(paint.borderTopWidth),
@@ -468,7 +489,11 @@ export function createTargetAlignmentLease(
     targets.scrollport.addEventListener('scroll', onScroll);
     doc.addEventListener('scroll', onOuterScroll, true);
     view.addEventListener('resize', position);
+    // Root/body gutters can move an unchanged reference without a window
+    // resize or any observed part resizing. Share the active root-space lease.
+    const stopRoot = observeRootSpace(doc, position);
     stop = () => {
+      stopRoot();
       for (const observer of observers) observer.disconnect();
       targets.scrollport.removeEventListener('scroll', onScroll);
       doc.removeEventListener('scroll', onOuterScroll, true);

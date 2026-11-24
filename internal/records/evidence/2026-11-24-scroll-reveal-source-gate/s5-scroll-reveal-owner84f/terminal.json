@@ -1,0 +1,31 @@
+{
+  "head": "84f40b077fd1fa64af04c6259942a4286153d8d4",
+  "startedAt": "2026-11-24T03:59:49.263056+00:00",
+  "command": [
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/compiler/test/scroll-reveal-consumers.test.ts",
+    "--maxWorkers=1",
+    "--minWorkers=1",
+    "--reporter=default",
+    "--reporter=json",
+    "--outputFile.json=/var/tmp/proto-ui-native-evidence-456f/s5-scroll-reveal-owner84f/vitest.json"
+  ],
+  "exitCode": 0,
+  "timedOut": false,
+  "outerTimeoutSeconds": 300,
+  "elapsedMs": 21408,
+  "headAfter": "84f40b077fd1fa64af04c6259942a4286153d8d4",
+  "trackedStatusAfter": "",
+  "report": {
+    "success": true,
+    "numTotalTests": 28,
+    "numPassedTests": 28,
+    "numFailedTests": 0,
+    "numPendingTests": 0
+  },
+  "failures": []
+}
