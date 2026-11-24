@@ -261,13 +261,13 @@ jobs:
             packages/compiler/test/owner-hydration-matrix.browser.test.ts \
             --maxWorkers=1 --minWorkers=1 \
             2>&1 | tee "$PUI_EVIDENCE_DIR/owner-retirement-browser.log"
-      - name: Verify native input direction during the original trusted event
+      - name: Verify native input direction and scope during the original trusted event
         run: |
           set -euo pipefail
           CHROME_PATH="$PUI_CHROME_EXECUTABLE" corepack pnpm@10.32.1 exec vitest run \
             packages/adapters/web-component/test/shadow-closeout.browser.test.ts \
             --pool=forks --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
-            -t 'reprojects entry during native dir=auto (input|textarea) input without an attribute change' \
+            -t 'reprojects entry during native dir=auto (input|textarea) input without an attribute change|reprojects entry during native input in an @scope (start|end) selector' \
             --reporter=default --reporter=json --outputFile="$PUI_EVIDENCE_DIR/wc-native-dir-auto.json" \
             2>&1 | tee "$PUI_EVIDENCE_DIR/wc-native-dir-auto.log"
           node --input-type=module <<'JS'
@@ -276,11 +276,14 @@ jobs:
           import path from 'node:path';
           const report = JSON.parse(await readFile(path.join(process.env.PUI_EVIDENCE_DIR, 'wc-native-dir-auto.json'), 'utf8'));
           assert.equal(report.success, true);
-          assert.equal(report.numPassedTests, 2);
+          assert.equal(report.numPassedTests, 4);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.testResults.length, 1);
           const assertions = report.testResults[0].assertionResults;
-          const expected = ['input', 'textarea'].map((kind) => `reprojects entry during native dir=auto ${kind} input without an attribute change`);
+          const expected = [
+            ...['input', 'textarea'].map((kind) => `reprojects entry during native dir=auto ${kind} input without an attribute change`),
+            ...['start', 'end'].map((kind) => `reprojects entry during native input in an @scope ${kind} selector`),
+          ];
           for (const title of expected) {
             const matching = assertions.filter((entry) => entry.title === title);
             assert.equal(matching.length, 1, title);
@@ -290,9 +293,9 @@ jobs:
           await writeFile(path.join(process.env.PUI_EVIDENCE_DIR, 'wc-native-dir-auto-execution.json'), JSON.stringify({
             head: process.env.CANDIDATE_SHA,
             selected: expected,
-            passed: 2,
+            passed: 4,
             filteredOrSkipped: assertions.filter((entry) => entry.status !== 'passed').length,
-            scope: 'Only the two original native dir=auto cases; other Shadow cases were filtered and are not claimed as passed.'
+            scope: 'The two original native dir=auto cases and two native input-dependent scope cases; other Shadow cases were filtered and are not claimed as passed.'
           }, null, 2) + '\n');
           JS
       - name: Build once and run the cold bilingual four-target production journey

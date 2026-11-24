@@ -137,8 +137,23 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
       expect(actualMountedEpochs).toEqual([2]);
       expect(mounted).toBe(1);
       expect(host.parentElement).toBe(document.body);
+      // A newly acquired surface is published with its projection. Every host
+      // that reads the surface's geometry after the projection (the anchored
+      // position solve, the presence projector) must observe a rendered,
+      // correctly sized box, so the display guard never survives the turn that
+      // projected it. The transition guard is withdrawn before the display
+      // suppression, so the browser still applies authored @starting-style to
+      // that first render.
+      expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
+      expect(host.hasAttribute('data-pui-portal-preparing')).toBe(false);
+      expect(frames.size).toBe(0);
+      // A later relocation of this already presented view is still covered by
+      // the theme guard, without hiding the retained layout again. The reveal
+      // barrier settles that guard for two layouts.
+      portal.unmount(host);
+      portal.mount(host);
       expect(host.getAttribute('data-pui-view-revealing')).toBe('portal');
-      expect(host.hasAttribute('data-pui-portal-preparing')).toBe(true);
+      expect(host.hasAttribute('data-pui-portal-preparing')).toBe(false);
 
       for (let frame = 0; frame < 2; frame++) {
         const callbacks = [...frames.values()];
@@ -146,12 +161,6 @@ describe('WC portal first rendering across mounted diagnostic reentry', () => {
         callbacks.forEach((callback) => callback(0));
       }
       expect(host.hasAttribute('data-pui-view-revealing')).toBe(false);
-      expect(host.hasAttribute('data-pui-portal-preparing')).toBe(false);
-      // A later relocation of this already presented view is still covered by
-      // the theme guard, without hiding the retained layout again.
-      portal.unmount(host);
-      portal.mount(host);
-      expect(host.getAttribute('data-pui-view-revealing')).toBe('portal');
       expect(host.hasAttribute('data-pui-portal-preparing')).toBe(false);
     }
   );
