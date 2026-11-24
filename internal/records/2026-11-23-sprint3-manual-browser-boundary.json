@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "Reconcile follow-up controls to current main manual-only browser scope",
+  "capturedAt": "2026-11-23T16:53:27.430044+00:00",
+  "sourceHead": "12dfa075efb509b545338507db4f64f1cf37539e",
+  "main": "9c99a8738c02c6127881594848a1a525150e9e9d",
+  "mainChange": "PR1740 removes the reusable browser_acceptance input and retains its existing workflow_dispatch input. Preserve this integrated policy. The root historical a12 record describes the preceding policy and is not rewritten.",
+  "repair": "Only update CI control expectations and mutations. Keep exact Adapter-only reusable schema; check manual browser is optional boolean default false; reject adding browser back to reusable input, default-on, required/string, unconditional execution, native coupling, source-check omission and write permissions.",
+  "red": {
+    "head": "12dfa075efb509b545338507db4f64f1cf37539e",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "--test",
+      "scripts/ci/test/ci-scheduling-policy.test.mjs"
+    ],
+    "exitCode": 1,
+    "log": "/home/agent/s3-ready-v4-evidence/main-9c99/inherited-policy-mismatch.log",
+    "sha256": "d793b4a32607dd13ff974260f17f9da11711547f6b24b959b2fead14752c2c38",
+    "capturedAt": "2026-11-23T16:50:25.551648+00:00"
+  },
+  "green": {
+    "head": "12dfa075efb509b545338507db4f64f1cf37539e",
+    "dirtyPatchSha256": "be0468d406c3a5a9f92f6f3980f435754279a6897b3cd7cb20a9034ace82e517",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "--test",
+      "scripts/ci/test/ci-scheduling-policy.test.mjs",
+      "scripts/ci/test/cycle-job-inventory.test.mjs",
+      "scripts/ci/test/cycle-report.test.mjs",
+      "scripts/ci/test/release-source-ledger-checkpoints.test.mjs"
+    ],
+    "exitCode": 0,
+    "log": "/home/agent/s3-ready-v4-evidence/main-9c99/current-main-ci-audit.log",
+    "sha256": "7ff0a06f35534e2c9a7a71e3249f41ebea023ddc14c0bb0744244719dc030ac7",
+    "capturedAt": "2026-11-23T16:51:48.389540+00:00"
+  },
+  "counts": {
+    "greenTests": 80,
+    "greenPass": 80,
+    "greenFail": 0,
+    "skipped": 0
+  },
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-manual-browser-boundary/raw.json.gz",
+    "bytes": 5267,
+    "sha256": "b26c9516eb92f5764a72aa5a93750f41fedcc33989a35bf8a2a9a94969d532c1",
+    "uncompressedSha256": "b339a98028d9af8700ed53ed880716601b1aed51969d472510c1fca3d18456a8"
+  },
+  "scope": "Current-main scheduling controls only. Does not claim compiler cleanup, native or production build acceptance. Existing original failures stay failed."
+}

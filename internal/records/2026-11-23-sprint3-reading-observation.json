@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "Bind whitepaper reading geometry to actual capture ownership",
+  "date": "2026-11-23",
+  "pullRequest": 1713,
+  "parent": "a12dc1831b2b834d724cb24237c8a91ddf123fef",
+  "original": {
+    "head": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+    "run": 45202118055,
+    "job": 137788069831,
+    "artifact": 14834711490,
+    "artifactBytes": 57056959,
+    "artifactSha256": "3bca453efe6e447ccfbccce3b93561b8ebe85255b50d66719c283e99d7de351c",
+    "observations": "Five generated/legacy profiles failed the original far-edge equation; authored capture began at19m47 and the whole job was cancelled at its original20min deadline. The complete original artifact was retained.",
+    "example": "First desktop zh/light switch capture observed initial image/viewport y66, wheel scrollY10 and end image y58, a2px mismatch. Mobile metadata also read image and viewport at different positions.",
+    "uncertainty": "Specific font, animation or layout contribution to2px movement is not established; changing CSS or loosening the1px criterion is not justified."
+  },
+  "repair": {
+    "owner": "Evidence collector observation/capture, not product rendering",
+    "behavior": [
+      "Wait for current mounted document fonts and no active subtree animation; obtain image, viewport, scroll and diagnostic layout in one frame and require two consecutive equal frames.",
+      "Bind original before-PNG source to the PNG; read again after capture and fail if viewport, image identity or layout changed. Preserve both packets, the original PNG and bounded first/last trace; never retry or replace earlier evidence to erase movement.",
+      "Keep all original generated/legacy/authored profiles, native wheel/keyboard/fit interactions and original1px andx=100000 negative checks.",
+      "Increase only the whitepaper capture job from20 to40 minutes to fit the measured original complete case inventory."
+    ]
+  },
+  "controls": {
+    "files": 8,
+    "tests": 70,
+    "pass": 70,
+    "fail": 0,
+    "skipped": 0,
+    "terminal": {
+      "exitCode": 0,
+      "head": "f96babfbeac4f04d8934e112a47762b0b688433f",
+      "logSha256": "fa8fe4865b63643f8eed4c8fe86d145e0848344663e1877db268479f904bbbfa"
+    },
+    "scope": "Nine new serialized-callback controls plus all original61 controls. These exercise DOM/RAF fixtures and actual Node deadlines; they are not fresh Chromium product acceptance."
+  },
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-reading-observation/raw.json.gz",
+    "sha256": "f68098a9a8c1fa0376f93f9983f6f5355ef981ac1a6c371ab12cf071be856769",
+    "bytes": 314922
+  },
+  "remaining": "New exact-head production capture, original receipt verifier, all actual PNG visual review and independent review."
+}

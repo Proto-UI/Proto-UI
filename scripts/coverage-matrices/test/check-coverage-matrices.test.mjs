@@ -96,6 +96,53 @@ for (const mode of ['file', 'directory', 'ancestor-directory']) {
   });
 }
 
+for (const scenario of ['exact', 'foreign-owner', 'unlisted-compiler-source']) {
+  test(`compiler browser source binding: ${scenario}`, () => {
+    const root = createRoot();
+    const panel = 'apps/www/src/components/PrototypePreviewer/browser-compiler-panel.ts';
+    const client = 'packages/compiler/src/browser/client.ts';
+    const engine = 'packages/compiler/src/browser/engine.ts';
+    fs.mkdirSync(path.dirname(path.join(root, panel)), { recursive: true });
+    fs.mkdirSync(path.dirname(path.join(root, client)), { recursive: true });
+    fs.writeFileSync(
+      path.join(root, panel),
+      `import { createBrowserCompilerClient } from '../../../../../packages/compiler/src/browser/client';\nexport const panel = createBrowserCompilerClient;\n`
+    );
+    fs.writeFileSync(
+      path.join(root, client),
+      "export function createBrowserCompilerClient() {\n  addEventListener('message', () => {});\n  return { compile: () => Promise.resolve(null) };\n}\n"
+    );
+    let boundSource = client;
+    let boundOwners = ['www.demo.raw-adapter-runtimes'];
+    if (scenario === 'foreign-owner') boundOwners = ['www.shell.primary-nav'];
+    if (scenario === 'unlisted-compiler-source') {
+      fs.writeFileSync(
+        path.join(root, engine),
+        "export function createBrowserCompilerEngine() {\n  addEventListener('message', () => {});\n  return { compile: () => null };\n}\n"
+      );
+      boundSource = engine;
+    }
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[boundSource, boundOwners]] });
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'exact') {
+      assert.doesNotMatch(message, /source binding must name exactly one/);
+      assert.doesNotMatch(message, /is missing a reviewed Source-scan binding/);
+      assert.doesNotMatch(message, /is not bound to a matrix row/);
+      assert.doesNotMatch(
+        message,
+        /compiler browser source .* must name exactly the matrix Path owner/
+      );
+    } else if (scenario === 'foreign-owner') {
+      assert.match(
+        message,
+        /compiler browser source `packages\/compiler\/src\/browser\/client\.ts` must name exactly the matrix Path owner `www\.demo\.raw-adapter-runtimes`/
+      );
+    } else {
+      assert.match(message, /source binding must name exactly one/);
+    }
+  });
+}
+
 test('resource closure review: regular nested assets preserve unchanged and changed controls', () => {
   const root = createRoot();
   const implementationPath = 'apps/www/src/components/override/Search.astro';
@@ -19686,7 +19733,16 @@ for (const scenario of ['exact', 'changed-source', 'foreign-owner', 'unlisted-im
   });
 }
 
-for (const reviewed of ['packages/core/src/internal.ts', 'packages/compiler/src/shader-plan.ts']) {
+for (const reviewed of [
+  'packages/core/src/internal.ts',
+  'packages/core/src/spec/owned-template-blueprint.ts',
+  'packages/core/src/spec/template.ts',
+  'packages/core/src/spec/svg-tags.ts',
+  'packages/compiler/src/shader-plan.ts',
+  'packages/compiler/src/gpui-source.ts',
+  'packages/compiler/src/ir-validation.ts',
+  'packages/compiler/src/targets.ts',
+]) {
   for (const scenario of [
     'exact',
     'changed-source',
@@ -19727,6 +19783,61 @@ for (const reviewed of ['packages/core/src/internal.ts', 'packages/compiler/src/
           issue.includes('raw Proto UI import') && issue.includes(`in \`${owner}\` escapes`)
       );
       assert.equal(rejected, scenario !== 'exact');
+    });
+  }
+}
+
+for (const source of [
+  'packages/compiler/src/browser/client.ts',
+  'packages/compiler/src/browser/worker.ts',
+]) {
+  for (const scenario of [
+    'exact',
+    'wrong-owner',
+    'extra-owner',
+    'changed-bytes',
+    'renewed-fingerprint',
+    'adjacent-path',
+    'symlink',
+    'ancestor-symlink',
+    'missing',
+  ]) {
+    test(`browser compiler host source binding: ${path.basename(source)} ${scenario}`, () => {
+      const root = createRoot();
+      const relative = scenario === 'adjacent-path' ? source.replace('.ts', '-foreign.ts') : source;
+      const target = path.join(root, relative);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${source}`, import.meta.url), target);
+      if (scenario === 'renewed-fingerprint')
+        fs.appendFileSync(target, '\n// Unreviewed bytes before rebinding\n');
+      const owners =
+        scenario === 'wrong-owner'
+          ? ['www.demo.code-panel']
+          : scenario === 'extra-owner'
+            ? ['www.demo.raw-adapter-runtimes', 'www.demo.code-panel']
+            : ['www.demo.raw-adapter-runtimes'];
+      writeValidMatrices(root, {}, {}, { websiteBindings: [[relative, owners]] });
+      if (scenario === 'changed-bytes')
+        fs.appendFileSync(target, '\n// Unreviewed bytes after binding\n');
+      if (scenario === 'symlink') {
+        fs.renameSync(target, target + '.copy');
+        fs.symlinkSync(target + '.copy', target);
+      }
+      if (scenario === 'ancestor-symlink') {
+        const parent = path.dirname(target);
+        fs.renameSync(parent, parent + '-copy');
+        fs.symlinkSync(parent + '-copy', parent, 'dir');
+      }
+      if (scenario === 'missing') fs.unlinkSync(target);
+      const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+      if (scenario === 'exact') assert.equal(message, '');
+      else if (scenario === 'adjacent-path')
+        assert.match(message, /source binding must name exactly one/);
+      else
+        assert.match(
+          message,
+          /exact browser compiler host source, digest and runtime owner remain unverified/
+        );
     });
   }
 }

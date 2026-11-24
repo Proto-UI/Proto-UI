@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { WebComponentAdapterElement } from '@proto.ui/adapter-web-component';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { installRenderingOpportunities } from '../../test-utils/rendering-opportunities';
 import { selectContent, selectItem, selectRoot, selectTrigger, selectValue } from '../src/select';
@@ -25,12 +26,13 @@ function createSelect(options?: {
   trigger?: Record<string, unknown>;
   value?: Record<string, unknown>;
   content?: Record<string, unknown>;
+  contentElement?: WebComponentAdapterElement<typeof selectContent>;
   items?: Array<Record<string, unknown>>;
 }) {
   const root = document.createElement('base-select-root') as any;
   const trigger = document.createElement('base-select-trigger') as any;
   const value = document.createElement('base-select-value') as any;
-  const content = document.createElement('base-select-content') as any;
+  const content = options?.contentElement ?? (document.createElement('base-select-content') as any);
   const items = (
     options?.items ?? [
       { value: 'alpha', textValue: 'Alpha' },
@@ -610,8 +612,25 @@ describe('prototypes/base: select', () => {
     // T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     vi.useFakeTimers();
     const frame = installRenderingOpportunities();
+    const lifecycle: Array<{ type: string; epoch?: number }> = [];
+    // Keep the authored prototype intact; this fixture owns its diagnostic sink.
+    const TracedContent = AdaptToWebComponent(selectContent, {
+      registerAs: 'base-select-conceal-content',
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (
+            event.type === 'mount.mounted' ||
+            event.type === 'unmount.begin' ||
+            event.type === 'unmount.done' ||
+            event.type === 'instance.dispose.done'
+          )
+            lifecycle.push(event);
+        },
+      },
+    });
     try {
       const { root, trigger, content, items } = createSelect({
+        contentElement: new TracedContent(),
         content: { side: 'top', align: 'end', sideOffset: 12, alignOffset: 3 },
       });
       await settle();
@@ -624,6 +643,10 @@ describe('prototypes/base: select', () => {
       expect(content.style.position).toBe('fixed');
       expect(content.dataset.side).toBe('top');
       expect(content.dataset.align).toBe('end');
+      expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual([{ type: 'mount.mounted', epoch: expect.any(Number) }]);
+      const mounted = lifecycle.slice();
+      const epoch = mounted[0]?.epoch;
 
       trigger.click();
       await settle();
@@ -632,13 +655,16 @@ describe('prototypes/base: select', () => {
       // existing two-frame barrier separately retires the physical Portal.
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(document.body);
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-      expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual(mounted);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(root);
       expect([...content.querySelectorAll('base-select-item')]).toEqual(items);
+      expect(lifecycle).toEqual([
+        ...mounted,
+        { type: 'unmount.begin', epoch },
+        { type: 'unmount.done', epoch },
+      ]);
     } finally {
       frame.restore();
     }

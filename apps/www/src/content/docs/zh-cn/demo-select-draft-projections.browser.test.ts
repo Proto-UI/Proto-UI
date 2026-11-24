@@ -172,9 +172,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
   for (const family of families)
     for (const runtime of RUNTIMES)
       for (const theme of ['light', 'dark'] as const) {
-        it(
-          `${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`,
-          async () => {
+        it(`${family}/${runtime}/${theme}: full selection flow, own toolbar, RTL portal and narrow long labels`, async () => {
           const { context, page, previewer } = await openRoute(browser, baseUrl, route(family), {
             width: 1440,
             height: 1000,
@@ -518,9 +516,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           } finally {
             await context.close();
           }
-          },
-          120_000
-        );
+        }, 120_000);
       }
 });
 
@@ -563,13 +559,15 @@ describe.sequential('actual family Text selection and typography', () => {
           expect(await page.evaluate(() => getSelection()?.toString())).toContain(
             'A reusable Text atom'
           );
+          // This demo requests public size=3xl. Bootstrap uses the standard
+          // 1.875rem token here; its documented exception belongs only to 2xl.
           expect(
             await text.evaluate(
               (node) =>
                 Number.parseFloat(getComputedStyle(node).fontSize) /
                 Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
             )
-          ).toBe(family === 'bootstrap-2-3-2' ? 1.96875 : 1.875);
+          ).toBe(1.875);
           expect(await text.evaluate((node) => node.getAttribute('role'))).toBeNull();
           expect(await text.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
           const trigger = runtimeSelectTrigger(previewer);

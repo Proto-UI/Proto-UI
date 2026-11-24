@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "capturedAt": "2026-11-23T19:03:54.233539+00:00",
+  "scope": "issue.1098.002/.003/.004 bounded repair; remaining acceptance retained",
+  "base": "81c103bd462b73910f7279122fab5f282d172d56",
+  "executionMode": "human-assisted",
+  "modeSource": "current-user",
+  "environment": {
+    "node": "v24.22.3",
+    "vitest": "2.1.9",
+    "environment": "happy-dom 15.11.7",
+    "parallelism": "--no-file-parallelism"
+  },
+  "source": [
+    {
+      "path": "packages/prototypes/base/src/number-field/root.proto.ts",
+      "baseSha256": "607493090d0f8b50116a4607830efff88caa7fbc34658c5f59467769d950ac88",
+      "candidateSha256": "134b86bdf7e09821ab8b7e48eab948c6bce544db73c386e758251c428c2c927c",
+      "bytes": 16424
+    },
+    {
+      "path": "packages/prototypes/base/src/number-field/format.ts",
+      "baseSha256": "ec4f77e83463a6ad7c07657ba88055a376e590b4bb3c197ae19216485e007ee3",
+      "candidateSha256": "63d3d070d50810530a418a2e30454291515852f456f4e17fe11fd53779af6067",
+      "bytes": 7603
+    },
+    {
+      "path": "packages/prototypes/base/src/progress/root.proto.ts",
+      "baseSha256": "f31e0fc1eb0590b1c26fbe35471c46b73019ad4d77c795af9beef040b5530edc",
+      "candidateSha256": "48e5985ef96dd0d83d887c00e8de82faf50720c2244d0664b8a220b70e1a1204",
+      "bytes": 4195
+    },
+    {
+      "path": "packages/prototypes/base/src/meter/root.proto.ts",
+      "baseSha256": "574ca9db69ecf0b5d8e0b4c1806d9efdf6bc639d1a45d7e4156d2412548a135f",
+      "candidateSha256": "661e5073e39caded8aff466f0db9d5fb823f8d2dfd4a19949138289063067eb2",
+      "bytes": 4574
+    },
+    {
+      "path": "packages/prototypes/base/test/number-field-format.test.ts",
+      "baseSha256": "39ef8fce231cbe923537529e5ad66a517bb0c496085b099ecf1e3c6ed665e05d",
+      "candidateSha256": "aef9af8927116f0017d1ef3e7f9c645e21f19a3699a760fb6d03f5cea4fb96f0",
+      "bytes": 5541
+    },
+    {
+      "path": "packages/prototypes/base/test/number-field-supersession.test.ts",
+      "baseSha256": null,
+      "candidateSha256": "551566a42edf9b1395b5c35ce8c63c12ca398c04d97a820b303cf7b08d308873",
+      "bytes": 2957
+    },
+    {
+      "path": "packages/prototypes/base/test/range-owner-supersession.test.ts",
+      "baseSha256": null,
+      "candidateSha256": "fa35a8589d9ca05a78f2db09843962ea947ef4b2767256c781d9b0782f290d8e",
+      "bytes": 1732
+    }
+  ],
+  "commands": [
+    {
+      "artifact": "number-field-red.log",
+      "tests": 2,
+      "passed": 0,
+      "failed": 2,
+      "result": "actual assertion failures; original command captured terminal log, no structured JSON"
+    },
+    {
+      "artifact": "number-field-green.json",
+      "selectedFiles": [
+        "packages/prototypes/base/test/number-field-capabilities.test.ts",
+        "packages/prototypes/base/test/number-field-editing.test.ts",
+        "packages/prototypes/base/test/number-field-format.test.ts",
+        "packages/prototypes/base/test/number-field-supersession.test.ts"
+      ],
+      "tests": 95,
+      "passed": 95,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Do not add earlier subset results to the final nine-file selection."
+    },
+    {
+      "artifact": "range-owner-probe.json",
+      "selectedFiles": ["packages/prototypes/base/test/range-owner-supersession.test.ts"],
+      "tests": 2,
+      "passed": 0,
+      "failed": 2,
+      "pending": 0,
+      "success": false,
+      "overlap": "Do not add earlier subset results to the final nine-file selection."
+    },
+    {
+      "artifact": "range-owner-green.json",
+      "selectedFiles": [
+        "packages/prototypes/base/test/progress-contract.test.ts",
+        "packages/prototypes/base/test/range-owner-supersession.test.ts"
+      ],
+      "tests": 25,
+      "passed": 25,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Do not add earlier subset results to the final nine-file selection."
+    },
+    {
+      "artifact": "range-part-probe.json",
+      "selectedFiles": ["packages/prototypes/base/test/range-owner-supersession.test.ts"],
+      "tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Do not add earlier subset results to the final nine-file selection."
+    },
+    {
+      "artifact": "value-input-final.json",
+      "selectedFiles": [
+        "packages/prototypes/base/test/number-field-capabilities.test.ts",
+        "packages/prototypes/base/test/number-field-editing.test.ts",
+        "packages/prototypes/base/test/number-field-format.test.ts",
+        "packages/prototypes/base/test/number-field-supersession.test.ts",
+        "packages/prototypes/base/test/numeric-family-projections.test.ts",
+        "packages/prototypes/base/test/numeric-inputs.test.ts",
+        "packages/prototypes/base/test/numeric-parts-public.test.ts",
+        "packages/prototypes/base/test/progress-contract.test.ts",
+        "packages/prototypes/base/test/range-owner-supersession.test.ts"
+      ],
+      "tests": 158,
+      "passed": 158,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Do not add earlier subset results to the final nine-file selection."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 exec tsc -p packages/prototypes/base/test/tsconfig.numeric-parts-public.json --pretty false",
+      "exitCode": 0,
+      "log": "numeric-types.log"
+    },
+    {
+      "command": "node locale-roundtrip-probe.mjs <number-field/format.ts>",
+      "baselineExitCode": 1,
+      "candidateExitCode": 0,
+      "artifacts": ["locale-baseline.json", "locale-candidate.json", "locale-exits.json"]
+    },
+    {
+      "artifact": "range-compatibility.json",
+      "selectedFiles": [
+        "packages/prototypes/base/test/range-finite-arithmetic.test.ts",
+        "packages/prototypes/base/test/range-readout.test.ts"
+      ],
+      "tests": 37,
+      "passed": 37,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Disjoint from the final nine-file selection."
+    },
+    {
+      "artifact": "locale-review-red.json",
+      "stage": "Before currency-symbol repair",
+      "selectedFiles": ["packages/prototypes/base/test/number-field-format.test.ts"],
+      "tests": 50,
+      "passed": 46,
+      "failed": 4,
+      "pending": 0,
+      "success": false,
+      "overlap": "Overlaps earlier selections; do not sum runs as independent coverage."
+    },
+    {
+      "artifact": "locale-review-green.json",
+      "stage": "After currency-symbol repair; before accounting-pattern repair",
+      "selectedFiles": [
+        "packages/prototypes/base/test/number-field-capabilities.test.ts",
+        "packages/prototypes/base/test/number-field-editing.test.ts",
+        "packages/prototypes/base/test/number-field-format.test.ts",
+        "packages/prototypes/base/test/number-field-supersession.test.ts"
+      ],
+      "tests": 100,
+      "passed": 100,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Overlaps earlier selections; do not sum runs as independent coverage."
+    },
+    {
+      "artifact": "value-input-reviewed-final.json",
+      "stage": "Eleven files after currency-symbol repair; before accounting-pattern repair",
+      "selectedFiles": [
+        "packages/prototypes/base/test/number-field-capabilities.test.ts",
+        "packages/prototypes/base/test/number-field-editing.test.ts",
+        "packages/prototypes/base/test/number-field-format.test.ts",
+        "packages/prototypes/base/test/number-field-supersession.test.ts",
+        "packages/prototypes/base/test/numeric-family-projections.test.ts",
+        "packages/prototypes/base/test/numeric-inputs.test.ts",
+        "packages/prototypes/base/test/numeric-parts-public.test.ts",
+        "packages/prototypes/base/test/progress-contract.test.ts",
+        "packages/prototypes/base/test/range-finite-arithmetic.test.ts",
+        "packages/prototypes/base/test/range-owner-supersession.test.ts",
+        "packages/prototypes/base/test/range-readout.test.ts"
+      ],
+      "tests": 199,
+      "passed": 199,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Overlaps earlier selections; do not sum runs as independent coverage."
+    },
+    {
+      "artifact": "locale-accounting-green.json",
+      "stage": "Final formatter after accounting-pattern repair",
+      "selectedFiles": ["packages/prototypes/base/test/number-field-format.test.ts"],
+      "tests": 51,
+      "passed": 51,
+      "failed": 0,
+      "pending": 0,
+      "success": true,
+      "overlap": "Overlaps earlier selections; do not sum runs as independent coverage."
+    },
+    {
+      "artifact": "locale-accounting-red.json",
+      "exitCode": 1,
+      "observations": 2,
+      "passed": 0,
+      "failed": 2,
+      "source": "locale-before-accounting-format.ts"
+    },
+    {
+      "command": "corepack pnpm@10.32.1 exec tsc -p packages/prototypes/base/test/tsconfig.numeric-parts-public.json --pretty false",
+      "exitCode": 0,
+      "log": "numeric-types-reviewed.log",
+      "stage": "Final reviewed product source"
+    },
+    {
+      "command": "node --import tsx --input-type=module < value-format-review-probe.mjs",
+      "independentReviewer": "props_policy",
+      "baselineArtifact": "value-format-review.json",
+      "candidateArtifact": "value-format-review-green.json",
+      "observations": 360,
+      "baselinePassed": 359,
+      "candidatePassed": 360,
+      "baselineExitCode": 1,
+      "candidateExitCode": 0,
+      "stage": "Independent accounting-pattern regression and final formatter acceptance"
+    }
+  ],
+  "limitations": [
+    "Synchronous callbacks and simulated DOM are not native browser layout/physical IME/AT evidence.",
+    "No Compiler/IR changes; asAxisInput remains explicitly unsupported in packages/compiler/src/hook-admission.ts.",
+    "Existing native 20/20 and both owner records retain their original e8171371 source identity; these repairs require final-source native integration checks.",
+    "Full Issue #1098 remains open for the original range/selection/host/AT/physical input conditions."
+  ],
+  "intermediateFormatterSources": [
+    {
+      "path": "locale-before-review-format.ts",
+      "sha256": "92c2d4db319d1e835bbc72251bcd2b3d728a7ac16b7ba7ac2b1b7b08ed9be295"
+    },
+    {
+      "path": "locale-before-accounting-format.ts",
+      "sha256": "1dec58e716797c9f8dbbbcb40b561c4b5fe33e320b0d0fece4b9192325a53f91"
+    }
+  ],
+  "review": {
+    "scope": "Four product files and focused tests; local engineering review only",
+    "reviewers": ["lifecycle_audit", "props_policy"],
+    "findings": [
+      "de-AT/fr-CH currency symbols: reproduced and fixed",
+      "en-IN accounting grouping: reproduced and fixed"
+    ],
+    "finalResult": "No remaining blocker identified within bounded source/format review; no native/AT/GitHub approval claim."
+  },
+  "archive": {
+    "path": "raw-evidence.zip",
+    "sha256": "a60cfc406402e101f7a50045b1f9c1edd8698a8b241d781e27342fb64ade5450",
+    "bytes": 235957,
+    "entries": 41
+  }
+}

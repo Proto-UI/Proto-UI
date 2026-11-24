@@ -33,12 +33,14 @@ function createSelect(options?: {
   trigger?: Record<string, unknown>;
   value?: Record<string, unknown>;
   content?: Record<string, unknown>;
+  contentElement?: WebComponentAdapterElement<typeof selectContent>;
   items?: Array<Record<string, unknown>>;
 }) {
   const root = document.createElement(selectRoot.name) as SelectRootElement;
   const trigger = document.createElement(selectTrigger.name) as SelectTriggerElement;
   const value = document.createElement(selectValue.name) as SelectValueElement;
-  const content = document.createElement(selectContent.name) as SelectContentElement;
+  const content =
+    options?.contentElement ?? (document.createElement(selectContent.name) as SelectContentElement);
   const itemProps = options?.items ?? [
     { value: 'alpha', textValue: 'Alpha' },
     { value: 'beta', textValue: 'Beta' },
@@ -287,8 +289,26 @@ describe('prototypes/brutalist: select', () => {
     // T-BRUTALIST-SELECT-0001-CASE-6
     vi.useFakeTimers();
     const frame = installRenderingOpportunities();
+    const lifecycle: Array<{ type: string; epoch?: number }> = [];
+    // Keep the authored prototype intact; this fixture owns its diagnostic sink.
+    const TracedContent = AdaptToWebComponent(selectContent, {
+      registerAs: 'brutalist-select-conceal-content',
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (
+            event.type === 'mount.mounted' ||
+            event.type === 'unmount.begin' ||
+            event.type === 'unmount.done' ||
+            event.type === 'instance.dispose.done'
+          )
+            lifecycle.push(event);
+        },
+      },
+    });
     try {
-      const { root, trigger, content, items } = createSelect();
+      const { root, trigger, content, items } = createSelect({
+        contentElement: new TracedContent(),
+      });
       await flush();
       expect(content.getExposes().transitionState.get()).toBe('closed');
       expect(content.getExposes().isPresent.get()).toBe(false);
@@ -299,6 +319,9 @@ describe('prototypes/brutalist: select', () => {
       expect(content.getExposes().transitionState.get()).toBe('entering');
       expect(content.getExposes().isPresent.get()).toBe(true);
       expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual([{ type: 'mount.mounted', epoch: expect.any(Number) }]);
+      const mounted = lifecycle.slice();
+      const epoch = mounted[0]?.epoch;
       expect(content.style.position).toBe('fixed');
       expect(content.dataset.side).toBe('right');
       for (const token of [
@@ -337,17 +360,20 @@ describe('prototypes/brutalist: select', () => {
       await vi.advanceTimersByTimeAsync(1);
       await flush();
       expect(content.getExposes().transitionState.get()).toBe('closed');
-      // Keep the 150/100ms clocks. C-HOST-VIEW-ATTACHMENT-0001 projects
-      // not-present now; physical Portal retirement owns a separate barrier.
+      // Keep the 150/100ms semantic clocks above. The marker follows the closed
+      // intent now; the physical portal retains both conceal opportunities.
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(document.body);
-      expect(await frame()).toBeGreaterThan(0);
-      expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-      expect(content.parentElement).toBe(document.body);
+      expect(lifecycle).toEqual(mounted);
       expect(await frame()).toBeGreaterThan(0);
       expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
       expect(content.parentElement).toBe(root);
       expect([...content.querySelectorAll(selectItem.name)]).toEqual(items);
+      expect(lifecycle).toEqual([
+        ...mounted,
+        { type: 'unmount.begin', epoch },
+        { type: 'unmount.done', epoch },
+      ]);
     } finally {
       frame.restore();
     }

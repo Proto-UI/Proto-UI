@@ -6,11 +6,11 @@ since: 0.1.0
 summary: Applying `raw props` through the controller may update props state and trigger watchers, but should not itself imply render commit.
 statement:
   zh-CN: >-
-    `controller.applyRawProps(nextRaw)` 是 runtime/controller 层用于向 Props channel 应用新的 `raw props snapshot` 的动作，不是原型作者通过 `def.props` 或 `run.props` 使用的 API。该动作必须走 Props channel 的 raw/resolved resolution 与 watcher dispatch 语义，因此可以触发 raw 或 resolved watcher；但它不得隐式触发 render commit。`run.update()` 与 runtime render commit 的正向调度规则属于更上游的 core runtime/update 契约，本契约只保留该断口。
+    `controller.applyRawProps(nextRaw)` 是 runtime/controller 层用于向 Props channel 应用新的 `raw props snapshot` 的动作，不是原型作者通过 `def.props` 或 `run.props` 使用的 API。该动作必须走 Props channel 的 raw/resolved resolution 与 watcher dispatch 语义，因此可以触发 raw 或 resolved watcher；但它不得隐式触发 render commit。`run.update()` 与 runtime render commit 的正向调度归属由已有的 `C-LIFECYCLE-0003` 承接，已接受 update cycle 的顺序继续由其依赖 `C-LIFECYCLE-0002` 定义。这一责任绑定不改变两条 lifecycle 契约的 draft 状态，也不将其全部方向提升为本契约的 active 保证；本契约的五条 active criteria 保持 Props 通路与 render commit 的既有边界。
 
 
   en: >-
-    `controller.applyRawProps(nextRaw)` is a runtime/controller action for applying a new `raw props snapshot` to the Props channel. It is not a prototype-author API exposed through `def.props` or `run.props`. This action must use the Props channel's raw/resolved resolution and watcher-dispatch semantics, so it may trigger raw or resolved watchers; however, it must not implicitly trigger a render commit. Positive scheduling rules for `run.update()` and runtime render commits belong to a higher-level core runtime/update contract; this contract keeps that gap explicit.
+    `controller.applyRawProps(nextRaw)` is a runtime/controller action for applying a new `raw props snapshot` to the Props channel. It is not a prototype-author API exposed through `def.props` or `run.props`. This action must use the Props channel's raw/resolved resolution and watcher-dispatch semantics, so it may trigger raw or resolved watchers; however, it must not implicitly trigger a render commit. The existing `C-LIFECYCLE-0003` owns positive scheduling for `run.update()` and runtime render commits; its dependency `C-LIFECYCLE-0002` defines the order of an accepted update cycle. This ownership binding does not change either lifecycle contract's draft status or promote all of its direction into this contract's active guarantees. The five active criteria here retain the existing boundary between the Props channel and render commit.
 
 
 criteria:
@@ -35,8 +35,8 @@ criteria:
       zh-CN: '`applyRawProps` 本身不得隐式触发 render commit。'
       en: '`applyRawProps` itself must not implicitly trigger a render commit.'
     rationale:
-      zh-CN: Props 输入变化只更新 Props channel 并派发 watcher；原型作者层的 `run.update()` 与 runtime 层的 render commit 是不同 API，其正向触发规则应由 core runtime/update 契约承接。
-      en: Props input changes update the Props channel and dispatch watchers; prototype-author-level `run.update()` and runtime-level render commit are separate APIs, and their positive triggering rules should be owned by a core runtime/update contract.
+      zh-CN: Props 输入变化只更新 Props channel 并派发 watcher；原型作者层的 `run.update()` 与 runtime 层的 render commit 是不同 API，其正向触发责任由 `C-LIFECYCLE-0003` 承接。显式 runtime/controller 或 host update 入口与 Props 通路行为分开；宿主策略的选择和兼容不改变 `applyRawProps` 自身的边界。
+      en: Props input changes update the Props channel and dispatch watchers; prototype-author-level `run.update()` and runtime-level render commit are separate APIs whose positive triggering responsibility belongs to `C-LIFECYCLE-0003`. Explicit runtime/controller or host update entry points remain separate from Props channel behavior; host policy selection and compatibility do not change the boundary of `applyRawProps` itself.
 sources:
   - path: internal/contracts/props/base-text/05.runtime-integration.v0.zh-CN.md
     sections:
@@ -48,16 +48,12 @@ dependsOn:
     - C-PROPS-0011
     - C-PROPS-0012
     - C-PROPS-0013
-openQuestions:
-  - id: C-PROPS-0014-Q-CORE-UPDATE-OWNER
-    question:
-      zh-CN: 应建立哪条 core/runtime 契约来承接 `run.update()` 与“Props 变化不隐含视图更新”的语义？
-      en: Which core/runtime contract should own `run.update()` and the rule that Props changes do not imply view updates?
-    context:
-      zh-CN: '`applyRawProps` 的 props state update 和 watcher dispatch 属于 Props 通路；render commit 调度是否发生则属于更上游的 runtime update 语义。'
-      en: '`applyRawProps` state updates and watcher dispatch belong to the Props channel; whether render commit scheduling happens belongs to higher-level runtime update semantics.'
-    blocks:
-      - C-PROPS-0014
+relates:
+  contracts:
+    - id: C-LIFECYCLE-0003
+      since: 0.3.0-alpha.2
+    - id: C-COMPILER-OBSERVABLES-0001
+      since: 0.3.0-alpha.2
 revisions:
   - version: 0.1.0
     change: introduced
@@ -65,6 +61,9 @@ revisions:
   - version: 0.1.0
     change: revised
     summary: Promoted `applyRawProps` runtime/controller behavior to active criteria while keeping core update/render commit ownership open.
+  - version: 0.3.0-alpha.2
+    change: revised
+    summary: Resolved C-PROPS-0014-Q-CORE-UPDATE-OWNER by binding positive update-flow ownership to the existing C-LIFECYCLE-0003 and its C-LIFECYCLE-0002 ordering dependency. Retained all five active criteria, lifecycle draft statuses and existing host/profile compatibility; this ownership resolution is not lifecycle promotion.
 tags:
   - props
   - runtime

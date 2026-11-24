@@ -55,7 +55,9 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
     );
     def.rule({
       when: (w) => w.state(style).eq('new-york-v4'),
-      intent: (i) => i.feedback.style.use(tw('gap-2 rounded-sm pl-2 pr-8 py-1.5 text-sm')),
+      // The row reserves its inline-end space for the check indicator with
+      // logical inline padding, so the same reservation holds in an RTL row.
+      intent: (i) => i.feedback.style.use(tw('gap-2 rounded-sm ps-2 pe-8 py-1.5 text-sm')),
     });
     for (const profile of SELECT_TRANSLUCENT_STYLES)
       def.rule({

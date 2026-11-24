@@ -55,6 +55,10 @@ export function invalidateHeapFlow(
   original: ValueType,
   writtenReadonlyFields: ReadonlySet<string> = new Set()
 ): ValueType {
+  // An unrefined declaration has no heap observation to discard. Rebuilding
+  // it can otherwise change an empty object facade into a data record and
+  // make a captured lexical read disagree with its unchanged storage type.
+  if (current === original) return current;
   return joinValueTypes(
     valueAlternatives(current).map((member) => {
       const fields = objectFields(member);

@@ -157,6 +157,16 @@ test('owned runner paths fit actual Unix browser sockets and retain the source f
     );
     assert.ok(values.TMPDIR.startsWith(runner + path.sep));
     assert.ok(existsSync(values.TMPDIR));
+    const runnerSocket = path.join(
+      '/home/runner/work/_temp',
+      path.relative(runner, values.TMPDIR),
+      'com.google.Chrome.XXXXXX',
+      'SingletonSocket'
+    );
+    assert.ok(
+      Buffer.byteLength(runnerSocket, 'utf8') < 108,
+      'Chromium singleton socket exceeds the Linux pathname budget: ' + runnerSocket
+    );
     // Chromium uses a Unix-domain socket beneath TMPDIR. Reserve its real
     // singleton suffix; Linux sockaddr_un must also retain the trailing NUL.
     const chromeDirectory = path.join(values.TMPDIR, 'com.google.Chrome.XXXXXX');
@@ -269,7 +279,10 @@ test('actual video installation and non-fallback CJK font resolution remain requ
     environment,
     /node apps\/www\/node_modules\/playwright-core\/cli\.js install ffmpeg/
   );
-  assert.match(environment, /apt-get install -y --no-install-recommends fonts-noto-cjk fontconfig/);
+  assert.match(
+    environment,
+    /timeout --signal=TERM --kill-after=5s 220s bash apps\/www\/scripts\/prepare-homepage-composition-fonts\.sh/
+  );
   assert.match(environment, /dpkg-query/);
   const match = environment.match(/(for CJK_LANGUAGE in zh-cn ja ko; do[\s\S]*?\n\s*done)/);
   assert.ok(match, 'execute and preserve the actual family-selection loop');

@@ -1,0 +1,36 @@
+{
+  "kind": "sprint5-browser-execution-evidence",
+  "source": "0b7b212d3193ea5c7ae219c0501036ee1255e3f2",
+  "files": [
+    {
+      "path": "owner-receipt.md",
+      "bytes": 2959,
+      "sha256": "caeaa263066c3928946ac22be226b5b4c333e089024fe45815425f1e3d8e0287"
+    },
+    {
+      "path": "owner-receipt.json",
+      "bytes": 15317,
+      "sha256": "a053f584f9cad06747c3dc8005251ba114ec01d9ca8330de8dcc29faa6baed51"
+    },
+    {
+      "path": "owner-raw.tar.gz",
+      "bytes": 68478,
+      "sha256": "ea57527093c90a7ebe634a2dd2ba6d6f7e0190c889a0444016dd99f4902db861"
+    },
+    {
+      "path": "production-setup-receipt.md",
+      "bytes": 2550,
+      "sha256": "6cf9d990c6b6ae01061bf3bcb6f97080fa2b9591d214fbdef639082244ab6561"
+    },
+    {
+      "path": "production-setup-receipt.json",
+      "bytes": 2974,
+      "sha256": "3c52c432d9a6c817c07e384fe4f8e7a71c46ae4767d1e403abca77d09e8d90d7"
+    },
+    {
+      "path": "production-setup-raw.tar.gz",
+      "bytes": 117333,
+      "sha256": "e5db80fc0aa74cdb7c8a4a5a60cf86034920f6dfefd0086a77df7089e28923a6"
+    }
+  ]
+}

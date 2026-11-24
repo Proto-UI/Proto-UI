@@ -1,8 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
+import { fileURLToPath } from 'node:url';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
-import { compilePrototype } from '../src/compile';
+import { compileFile, compilePrototype } from '../src/compile';
 import type { PrototypeIR } from '../src/ir';
 
 import { captureFacadeSource as source } from './fixtures/capture-facade';
@@ -24,6 +25,29 @@ function walk(value: unknown, visit: (record: Record<string, any>) => void): voi
 }
 
 describe('checked public capture facade', () => {
+  it.each(['gpui-source-v1', 'web-component-source-v1'] as const)(
+    'compiles the complete official Input and its asInputRoot delegate for %s',
+    async (profile) => {
+      const root = fileURLToPath(new URL('../../../', import.meta.url));
+      for (const entry of [
+        'packages/prototypes/base/src/input/root.proto.ts',
+        'packages/compiler/test/fixtures/gpui-control-label/input-delegate.proto.ts',
+      ]) {
+        const result = await compileFile(entry, { root, profile });
+        expect(result.ok, JSON.stringify(result.ok ? null : result.diagnostics)).toBe(true);
+        if (result.ok) {
+          expect(validateIR(JSON.parse(JSON.stringify(result.value.ir)))).toMatchObject({
+            ok: true,
+          });
+          if (entry.endsWith('input-delegate.proto.ts'))
+            expect(
+              result.value.ir.hooks.find((hook) => hook.name === 'as-input-root')
+            ).toHaveProperty('projectHandle');
+        }
+      }
+    }
+  );
+
   it('preserves direct capture ownership and typed getter copies in source-free IR', () => {
     const ir = parsed();
     expect(ir.hooks.find((hook) => hook.name === 'facade-parent')?.capture?.states).toEqual([]);

@@ -1,3 +1,4 @@
+import type { WebShaderHostOptions } from '@proto.ui/adapter-base';
 import { diagnoseHostProps } from './host-prop-diagnostics';
 import type { EventPort } from '@proto.ui/module-event';
 import {
@@ -129,6 +130,7 @@ export interface ReactAdapterOptions<Props extends PropsBaseType> {
   /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   residentMotion?: WebResidentMotionOptions;
+  shader?: WebShaderHostOptions;
   schedule?: (task: () => void) => void;
   getProps?: (props: ReactAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -290,10 +292,22 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       // mount. Relocating the mount keeps createPortal's container identity and
       // therefore does not replace the physical host or its event capabilities.
       const portalMountRef = runtime.useRef<HTMLElement | null>(null);
+      // Resolve the author's actual Document from the origin marker before
+      // committing content. While this is null the render emits only that
+      // marker, never an inline copy of the portaled subtree. Guessing the
+      // ambient document would route iframe content to the wrong body and
+      // acquire view capabilities again when the real document arrives.
       const [portalDocument, setPortalDocument] = runtime.useState<Document | null>(null);
       runtime.useLayoutEffect(() => {
         const origin = portalOriginRef.current;
-        if (origin?.isConnected && !portalMountRef.current) setPortalDocument(origin.ownerDocument);
+        // A live physical epoch keeps its original document and destination.
+        // An adopted origin is reconciled only after that portal is retired.
+        if (
+          origin?.isConnected &&
+          !portalMountRef.current &&
+          origin.ownerDocument !== portalDocument
+        )
+          setPortalDocument(origin.ownerDocument);
       });
       const portalProjectionRef = runtime.useRef<{
         host: HTMLElement;
@@ -888,6 +902,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           rawPropsSource,
           effectsPort,
           residentMotion: opt.residentMotion,
+          shader: opt.shader,
           visualFeedbackSink: createVisualSink
             ? createDeferredViewVisualSink(
                 () => createVisualSink!(rootEl, effectsPort),
@@ -1229,8 +1244,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         typeof runtime.createPortal === 'function' &&
         typeof document !== 'undefined';
       if (portalEnabled && portalDocument && !portalMountRef.current) {
-        // The first author marker commits before the portal host is created.
-        // Allocate in its actual Document, including same-origin iframe roots.
+        // Origin-first allocation keeps the first physical content root and
+        // its owner document stable for the lifetime of this portal epoch.
         const mount = portalDocument.createElement('div');
         mount.dataset.puiPortalMount = '';
         mount.style.display = 'contents';

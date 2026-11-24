@@ -82,11 +82,14 @@ export function emitVueSource(
   const profile = ssr ? 'vue-ssr-v1' : 'vue-source-v1';
   const admitted = checkTargetOperations(ir, TARGET_PROFILES['vue-source-v1']);
   if (!admitted.ok) return admitted;
+  const shaderPlans = admitted.value.shaderPlans;
   const supportPlan = planNativeSupport(ir, admitted.value);
   const controlLabel = admitted.value.operations.includes('hook.asControlLabel');
   const componentName = options.componentName ?? 'CompiledComponent';
   if (
     !validIdentifier(componentName) ||
+    (admitted.value.shaderScenes &&
+      ['createComponent', 'createShaderHost', 'WebShaderHostOptions'].includes(componentName)) ||
     [
       'GeneratedProps',
       'GeneratedResolvedProps',
@@ -128,7 +131,9 @@ export function emitVueSource(
     admitted.value.operations,
     prefix,
     admitted.value.ruleMetaKeys,
-    admitted.value.shaderKernels
+    admitted.value.shaderKernels,
+    false,
+    admitted.value.shaderScenes
   );
   const hasAuthoredHooks = admitted.value.authoredHooks.length > 0;
   const publicCalls =
@@ -541,7 +546,12 @@ export function emitVueSource(
           typeName
         );
         if (optional !== undefined) return optional;
-        const atom = emitNativeHostAtom(node, (item) => expression(item, depth), prefix);
+        const atom = emitNativeHostAtom(
+          node,
+          (item) => expression(item, depth),
+          prefix,
+          shaderPlans
+        );
         if (atom !== undefined) return atom;
         if (hasAuthoredHooks && node.operation.startsWith('hook.'))
           return emitPrivilegedHookCall({
@@ -648,15 +658,21 @@ export function emitVueSource(
             // checked callback signature supplies each value's static type.
             const callbackArgs =
               callback?.kind === 'function'
-                ? callback.function.parameters.map((parameter, index) =>
-                    index === 0
-                      ? n('RunValue')
-                      : `${index === 1 ? 'next' : 'prev'} as ${typeName(parameter.type)}`
-                  )
+                ? [
+                    n('RunValue'),
+                    ...callback.function.parameters
+                      .slice(1, 3)
+                      .map(
+                        (parameter, index) =>
+                          `${index === 0 ? 'next' : 'prev'} as ${typeName(parameter.type)}`
+                      ),
+                  ]
+                    .slice(0, callback.function.parameters.length)
+                    .join(', ')
                 : [];
             const invocation =
               callback?.kind === 'function'
-                ? `(${args[1]})(${callbackArgs.join(', ')})`
+                ? `(${args[1]})(${callbackArgs})`
                 : `Reflect.apply(${args[1]}, undefined, [${n('RunValue')}, next, prev])`;
             return `${n('Scope')}.subscribe(${args[0]}, '${node.operation === 'context.subscribe' ? 'required' : 'optional'}', ${callback ? `(next, prev) => ${invocation}` : 'undefined'}${node.operation === 'context.trySubscribeAncestor' ? ", 'ancestor'" : ''})`;
           }
@@ -919,7 +935,7 @@ const ${n('SlotView')} = ${n('Vue')}.defineComponent({
   setup(props) { return () => props.read!(); },
 });
 
-export const ${componentName} = ${n('Vue')}.defineComponent({
+${atoms.shaderScenes ? 'export function createComponent(shaderHost?: WebShaderHostOptions) {\nreturn' : `export const ${componentName} =`} ${n('Vue')}.defineComponent({
   name: ${JSON.stringify(ir.name)}, inheritAttrs: false,
   props: { instanceAssociations: { type: Object as ${n('Vue')}.PropType<Readonly<{controlLabel?: object | null}>>, default: undefined } },
   emits: ${JSON.stringify(exposes.filter((entry) => entry.kind === 'event').map((entry) => entry.name))},
@@ -1088,7 +1104,7 @@ ${
     const ${n('DefValue')}: ${n('Def')} = Object.freeze({ feedback: Object.freeze({ style: ${n('Style')} }) });`
     : ''
 }
-    ${atoms.owner({ setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
+    ${atoms.owner({ shaderHost: atoms.shaderScenes ? 'shaderHost' : undefined, setup: `${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed')`, runtime: `${n('Alive')}(); if (${n('Setup')} || !${n('CallbackScope')}) throw new Error('Operation requires an owned runtime callback')`, alive: `!${n('Disposed')}`, invoke: `${n('Invoke')}('timer', callback)`, invokeRun: `${n('Invoke')}('event', () => callback(${n('RunValue')}))`, document: `${n('RootElement')}?.ownerDocument ?? (typeof document === 'undefined' ? undefined : document)`, run: n('Run'), root: `${n('RootElement')} ?? null`, prepare: usesStyle ? `${n('Style')}.refresh();` : '' })}
 ${
   hasAuthoredHooks
     ? `    const ${n('Authored')} = ${n('CreateAuthored')}({ setup() { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('Setup capability is closed'); }, borrow(value) {
@@ -1719,6 +1735,7 @@ ${
     return () => ${n('Present')}.value && !${n('Disposing')} ? ${n('Vue')}.h(${n('View')}, { revision: ${n('Revision')}.value }) : null;
   },
 });
+${atoms.shaderScenes ? `}\nexport const ${componentName} = createComponent();` : ''}
 ${
   ssr
     ? `${ownerInitialDataGuard(n('InitialData'))}
@@ -1782,11 +1799,33 @@ export function hydrate(container: Element, handoff: GeneratedHandoff, options: 
   const app = ${n('Vue')}.createSSRApp({ render: () => ${n('Vue')}.h(${componentName}, props, options.slots) });
   app.provide(${n('SessionKey')}, session);
   const unmount = app.unmount.bind(app);
-  app.unmount = () => { try { unmount(); } finally { ${n('Close')}(session); } };
+  let mounting = true, mounted = false, retiring = false, retired = false;
+  const retire = () => {
+    if (retired) return;
+    // A native mounted hook may request terminal disposal before Vue marks
+    // its app mounted. Close logical work now and finish native retirement
+    // immediately after the framework mount stack returns.
+    if (mounting) { ${n('Close')}(session); return; }
+    retired = true; retiring = true;
+    try { if (mounted) unmount(); }
+    catch (error) { session.failure ??= { value: error }; }
+    try { ${n('Close')}(session); }
+    catch (error) { session.failure ??= { value: error }; }
+    finally { retiring = false; }
+    if (session.failure) throw session.failure.value;
+  };
+  app.unmount = retire;
   try {
     options.configureApp?.(app);
     const consumerError = app.config.errorHandler;
-    app.config.errorHandler = (error, instance, info) => { session.failure ??= { value: error }; consumerError?.(error, instance, info); throw error; };
+    app.config.errorHandler = (error, instance, info) => {
+      session.failure ??= { value: error };
+      try { consumerError?.(error, instance, info); }
+      catch { /* Preserve the initiating framework failure. */ }
+      // Complete native mounting/retirement so every acquired child scope is
+      // reachable by app.unmount, even when a mounted or cleanup hook fails.
+      if (!mounting && !retiring) throw error;
+    };
     const consumerWarning = app.config.warnHandler;
     app.config.warnHandler = (message, instance, trace) => {
       if (/hydration/i.test(message)) { session.failure ??= { value: new Error('[Vue SSR] hydration mismatch: ' + message) }; options.onMismatch?.(message); console.warn('[Vue SSR] explicit hydration recovery: ' + message); }
@@ -1794,11 +1833,16 @@ export function hydrate(container: Element, handoff: GeneratedHandoff, options: 
       if (!consumerWarning && !/hydration/i.test(message)) console.warn(message);
     };
     app.mount(container);
+    mounted = true; mounting = false;
+    // Deferred logical startup can fail after hydrate returns. Its request
+    // closure must retire the actual native subtree as well as Proto owners.
+    if (session.closed) retire();
+    else session.owners.add(retire);
     for (const saved of controls) { saved.node.value = saved.value; if (saved.start !== null && saved.end !== null) saved.node.setSelectionRange(saved.start, saved.end, saved.direction ?? undefined); }
     if (session.failure) throw session.failure.value;
     session.hydrating = false;
   }
-  catch (error) { try { ${n('Close')}(session); } catch { /* Preserve initial adoption failure. */ } throw error; }
+  catch (error) { mounting = false; try { retire(); } catch { /* Preserve initial adoption failure. */ } throw error; }
   return app;
 }`
     : ''

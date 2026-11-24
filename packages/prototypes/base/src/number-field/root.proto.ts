@@ -99,7 +99,9 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     editRevision: 0,
   });
   let run: RunHandle<NumberFieldRootProps> | null = null;
-  let viewEpoch = 0;
+  // Mount retirement and explicit reset both invalidate suspended commands.
+  // A reset can run synchronously from State/Context/event observers.
+  let commandEpoch = 0;
   let format = createNumberFieldFormat();
   let draftFormat: NumberFieldFormat = format;
   let draftEdited = false;
@@ -109,7 +111,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   let scrubProposal: number | undefined;
   const canonical = () => (empty.get() ? null : value.get());
   const live = (current: typeof run, epoch: number) =>
-    !!run && run === current && viewEpoch === epoch;
+    !!run && run === current && commandEpoch === epoch;
   const normalize = (v: number) => {
     const p = run?.props.get();
     return normalizeNumberFieldValue(
@@ -122,7 +124,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   };
   const accept = (next: number | null, reason: string) => {
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     if (next !== null) value.set(normalize(next), reason);
     if (!live(current, epoch)) return;
     empty.set(next === null, reason);
@@ -140,7 +142,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   const publish = () => {
     if (!run) return;
     const current = run,
-      epoch = viewEpoch,
+      epoch = commandEpoch,
       p = run.props.get();
     disabled.set(
       !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
@@ -186,7 +188,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     if (!run || disabled.get() || readOnly.get() || (next !== null && !Number.isFinite(next)))
       return false;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     next = next === null ? null : normalize(next);
     if (next === canonical() && !replaceProposal) return false;
     if (!run.props.isProvided('value')) accept(next, 'reason: number accepted value');
@@ -201,7 +203,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   const cancelScrub = (restore = true, notify = true) => {
     if (!run || !dragging.get()) return false;
     const current = run,
-      epoch = viewEpoch,
+      epoch = commandEpoch,
       start = scrubStart;
     scrubProposal = undefined;
     dragging.set(false, 'reason: number scrub cancelled');
@@ -222,7 +224,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.expose.method('getValue', canonical);
   def.expose.method('requestValue', (next) => {
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     if (composing.get()) return false;
     cancelScrub();
     if (!live(current, epoch)) return false;
@@ -235,7 +237,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   const commit = () => {
     if (!run || disabled.get() || readOnly.get() || composing.get()) return;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     if (draftEdited) {
       const parsed = draftFormat.parse(draft.get());
       if (parsed.kind === 'number') request(parsed.value);
@@ -250,7 +252,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.expose.method('requestInput', (text, isComposing = false) => {
     if (!run || disabled.get() || readOnly.get() || typeof text !== 'string') return false;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     cancelScrub();
     if (!live(current, epoch)) return false;
     if (!composing.get()) draftFormat = format;
@@ -278,7 +280,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.expose.method('stepBy', (direction) => {
     if (!run || !Number.isFinite(direction) || direction === 0 || composing.get()) return false;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     cancelScrub();
     if (!live(current, epoch)) return false;
     const changed = request(
@@ -302,7 +304,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     )
       return false;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     scrubStart = canonical();
     scrubProposal = undefined;
     dragging.set(true, 'reason: number scrub start');
@@ -323,7 +325,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
       return false;
     if (totalDelta === 0 && scrubProposal === undefined) return false;
     const current = run,
-      epoch = viewEpoch,
+      epoch = commandEpoch,
       p = run.props.get();
     const next = normalize(
       (scrubStart ?? normalize(0)) + totalDelta * finite(p.scrubSteps, 100) * finite(p.step, 1)
@@ -342,7 +344,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.expose.method('endScrub', () => {
     if (!run || !dragging.get()) return false;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     const changed = scrubProposal !== undefined && canonical() !== scrubStart;
     scrubProposal = undefined;
     dragging.set(false, 'reason: number scrub end');
@@ -358,8 +360,9 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.context.trySubscribe(FIELD_CONTEXT, () => publish());
   def.expose.method('resetValue', () => {
     if (!run) return false;
+    commandEpoch++;
     const current = run,
-      epoch = viewEpoch;
+      epoch = commandEpoch;
     cancelScrub(false);
     if (!live(current, epoch)) return false;
     editRevision++;
@@ -392,7 +395,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   });
   def.props.watchAll((current, next, previous) => {
     run = current;
-    const epoch = viewEpoch;
+    const epoch = commandEpoch;
     const valueChanged = next.value !== previous.value;
     const policyChanged =
       next.min !== previous.min ||
@@ -440,7 +443,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     composing.set(false, 'reason: number view retires composition');
     editRevision++;
     canonicalDraft('reason: number view canonical text');
-    viewEpoch++;
+    commandEpoch++;
     run = null;
   });
   def.lifecycle.onBeforeDispose(() => {

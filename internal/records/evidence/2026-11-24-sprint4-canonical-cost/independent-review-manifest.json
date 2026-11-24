@@ -1,0 +1,27 @@
+{
+  "archive": "independent-review.tar.gz",
+  "bytes": 15872,
+  "sha256": "423c90967db641d10877813d31a543bbf9181164168a12c74b5cb32e2b08866f",
+  "files": [
+    {
+      "path": "canonical-package-budget-independent-review.json",
+      "bytes": 47705,
+      "sha256": "3ba2d503e8a81ebb0cb1732f614922dc9b1daa7ef9faa351f416e7a058bcc633"
+    },
+    {
+      "path": "canonical-package-budget-independent-review.md",
+      "bytes": 8875,
+      "sha256": "7c0f2054bd7f95a8b44ce4a382303ea70156039c3830fc986876a4efee5ff5fe"
+    },
+    {
+      "path": "canonical-package-budget-independent-review.manifest.json",
+      "bytes": 687,
+      "sha256": "d1b679d9d35c61ee4bedbda4c961c423bbb331a0d09dbdbdfe3f15e19c7a2339"
+    },
+    {
+      "path": "audit-canonical-package-budget.py",
+      "bytes": 16750,
+      "sha256": "138578bb40c810af92824a49328a734ae6246a8d3f1ecea7a3fb4872c7ee3c85"
+    }
+  ]
+}

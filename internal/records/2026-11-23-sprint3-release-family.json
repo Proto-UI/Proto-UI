@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-23",
+  "kind": "Sprint 3 release family export expectation repair",
+  "pullRequest": 1713,
+  "parent": "9cd4d10d1953a3c030e679d8d11061660e202ed9",
+  "sourceOwner": "scripts/release/test/prototype-family-boundary.test.mjs",
+  "cause": "The original strict family-export fixture expected authored proto only for Transition, while all sixteen declared Base family subpaths already expose their package-local source condition. The canonical rehearsal stopped at step 06 with 244 passed / 1 failed.",
+  "scope": "Derive the expected Base proto source paths from the fixed reviewed BASE_FAMILIES list, not from the actual manifest. Preserve exact runtime/default/type entries, sideEffects=false, all six cases and Shadcn/Brutalist expectations. No manifest, public guarantee or lifecycle changes.",
+  "canonicalFailure": {
+    "head": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+    "run": 45202101258,
+    "job": 137788019950,
+    "artifact": 14834170072,
+    "zipSha256": "7231215500c0cfc463f1e5ec40f9458c2483374dbb006f711b40e4f5b37089d0",
+    "step06Sha256": "3b39491248f3ae50f383558c07c3820e386019b9d9c810f647d3d258b58f5850",
+    "laterStages": "7–15 not run"
+  },
+  "red": {
+    "head": "9cd4d10d1953a3c030e679d8d11061660e202ed9",
+    "command": ["node", "--test", "scripts/release/test/prototype-family-boundary.test.mjs"],
+    "node": "v24.22.3",
+    "exitCode": 1,
+    "elapsedSeconds": 34.26027536392212,
+    "logSha256": "faf21ce6c35fe1e8947931ca81e5dbd77530f2c598444a0924cf5ebf8d606bd7"
+  },
+  "green": {
+    "head": "9cd4d10d1953a3c030e679d8d11061660e202ed9",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "--test",
+      "scripts/release/test/prototype-family-boundary.test.mjs",
+      "scripts/release/test/proto-source-package.test.mjs"
+    ],
+    "node": "v24.22.3",
+    "exitCode": 0,
+    "elapsedSeconds": 39.13515615463257,
+    "logSha256": "19a4be90daa541b6e1898110550508e555c6d4c2bf4ba5ba5958a35dc8b40129",
+    "testSha256": "658c0c8f84b1b704979dad48ca5bb9306bfb9b4a809c9cddeed8c74ff03c0d99"
+  },
+  "results": {
+    "red": "All six original cases: five pass, one fail, exit 1.",
+    "green": "All six original cases plus the complete eight-case authored-source packaging file: fourteen pass, zero skipped, exit 0.",
+    "executionBinding": "Green ran at the recorded parent with the stated test content hash; this is not final clean-head CI."
+  },
+  "broaderAcceptance": "Fresh final-head fifteen-stage rehearsal and other Sprint 3 lanes remain required. Historical failure remains failed.",
+  "rawEvidence": {
+    "path": "internal/records/evidence/2026-11-23-sprint3-release-family/raw.json.gz",
+    "bytes": 1668,
+    "sha256": "e49a9229efd54cefc1d7b26dc91ceced1d2b572da89949891bcba91f5f802c5a",
+    "decodedSha256": "b61376c6c29e8e42d8b1aeb5276a83e597e56f19b6e79be594664bda0c53ab81"
+  }
+}

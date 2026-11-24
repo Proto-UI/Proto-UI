@@ -5,6 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { generalCheckPlan, executeGeneralChecks } from './general-ci.mjs';
+import { generalJobPlan, assertGeneralCheckEvidence } from './general-check-plan.mjs';
+import YAML from 'yaml';
 import { assertRuntimeSource, createCiPlan, runtimeRoot } from './runtime-ci.mjs';
 import { RUNTIME_TEST_INCLUDES } from './runtime-inventory.mjs';
 import {
@@ -129,6 +131,164 @@ test('a failed source-binding check and a spawn error do not suppress later test
   await assert.rejects(
     executeGeneralChecks([], async () => ({})),
     /empty/
+  );
+});
+
+test('independent governance and general jobs retain every original check and required local inputs', () => {
+  const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+  const full = generalCheckPlan(manifest, sha);
+  const governance = generalJobPlan(manifest, 'governance', sha);
+  const general = generalJobPlan(manifest, 'general');
+  assert.deepEqual(
+    governance,
+    full.filter((step) => !step.id.startsWith('test:runtime:'))
+  );
+  assert.deepEqual(
+    general.slice(2),
+    full.filter((step) => step.id.startsWith('test:runtime:'))
+  );
+  assert.deepEqual(
+    general[0],
+    full.find((step) => step.id === 'build:packages')
+  );
+  assert.deepEqual(general[1], {
+    id: 'prepare:runtime-styles',
+    args: ['pnpm@10.32.1', '--filter', 'apps-www', 'generate:proto-ui-style'],
+  });
+  assert.deepEqual(
+    [...new Set([...governance, ...general].map((step) => step.id))].sort(),
+    [...full.map((step) => step.id), 'prepare:runtime-styles'].sort()
+  );
+  assert.equal(
+    [...governance, ...general].filter((step) => step.id === 'build:packages').length,
+    2,
+    'Each isolated job builds its own package graph'
+  );
+  assert.throws(() => generalJobPlan(manifest, 'governance'), /Exact/);
+  assert.throws(() => generalJobPlan(manifest, 'unknown', sha), /Unknown/);
+});
+
+test('a failed isolated preparation still runs controls and the whole runtime command', async () => {
+  const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+  const steps = generalJobPlan(manifest, 'general');
+  const reached = [];
+  const result = await executeGeneralChecks(steps, async (step) => {
+    reached.push(step.id);
+    return { exitCode: step.id === 'prepare:runtime-styles' ? 17 : 0, signal: null };
+  });
+  assert.deepEqual(reached, [
+    'build:packages',
+    'prepare:runtime-styles',
+    'test:runtime:controls',
+    'test:runtime:execute',
+  ]);
+  assert.equal(result.passed, false);
+  assert.deepEqual(result.results.at(-1).args, ['scripts/test/run-runtime-tests.mjs']);
+});
+
+test('governance evidence rejects omissions, forged aggregate success, changed commands and missing clocks', () => {
+  const manifest = JSON.parse(readFileSync(path.join(runtimeRoot, 'package.json'), 'utf8'));
+  const steps = generalJobPlan(manifest, 'governance', sha);
+  const valid = {
+    job: 'governance',
+    specBase: sha,
+    steps,
+    sourceStable: true,
+    passed: true,
+    results: steps.map((step) => ({
+      ...step,
+      passed: true,
+      exitCode: 0,
+      signal: null,
+      startedAt: '2026-11-23T00:00:00.000Z',
+      finishedAt: '2026-11-23T00:00:01.000Z',
+      logFile: `${step.id.replaceAll(':', '-')}.log`,
+    })),
+  };
+  assert.doesNotThrow(() => assertGeneralCheckEvidence(valid, 'governance', manifest, sha));
+  for (const mutate of [
+    (r) => r.results.pop(),
+    (r) => r.results.push(r.results[0]),
+    (r) => r.results.reverse(),
+    (r) => {
+      r.results[0].args = ['echo', 'success'];
+    },
+    (r) => {
+      r.results[0].exitCode = 1;
+    },
+    (r) => {
+      r.results[0].signal = 'SIGTERM';
+    },
+    (r) => {
+      r.results[0].passed = false;
+    },
+    (r) => {
+      r.results[0].error = 'interrupted';
+    },
+    (r) => {
+      delete r.results[0].finishedAt;
+    },
+    (r) => {
+      r.sourceStable = false;
+    },
+    (r) => {
+      r.specBase = 'b'.repeat(40);
+    },
+  ]) {
+    const changed = structuredClone(valid);
+    mutate(changed);
+    assert.throws(() => assertGeneralCheckEvidence(changed, 'governance', manifest, sha));
+  }
+});
+
+test('separate 45-minute jobs remain independent and both block Tests and the cycle', () => {
+  const { jobs } = YAML.parse(
+    readFileSync(path.join(runtimeRoot, '.github/workflows/ci.yml'), 'utf8')
+  );
+  const governance = jobs['test-governance'];
+  const general = jobs['test-general'];
+  assert.equal(general.needs, 'test-plan');
+  assert.deepEqual(governance.needs, ['test-plan', 'cycle-plan']);
+  for (const [job, name] of [
+    [governance, 'governance'],
+    [general, 'general'],
+  ]) {
+    assert.equal(job['timeout-minutes'], 45);
+    assert.equal(job.env.PROTO_UI_GENERAL_JOB, name);
+    assert.equal(job.env.PROTO_UI_RUNTIME_SLOT, name);
+    assert.equal(job['continue-on-error'], undefined);
+    assert.equal(job.if, "${{ github.event_name != 'pull_request' }}");
+    assert.equal(
+      job.steps.filter((step) => step.run?.includes('node scripts/test/general-ci.mjs')).length,
+      1
+    );
+    for (const receipt of job.steps.filter(
+      (step) =>
+        step.run?.includes('runtime-ci.mjs finish') || step.uses === 'actions/upload-artifact@v4'
+    ))
+      assert.equal(receipt.if, 'always()');
+  }
+  assert.ok(
+    governance.steps.some((step) => step.run?.includes('decode-video-evidence.integration.mjs'))
+  );
+  assert.deepEqual(jobs.test.needs, [
+    'cycle-plan',
+    'test-plan',
+    'test-governance',
+    'test-general',
+    'test-browser',
+  ]);
+  for (const job of ['test-governance', 'test-general'])
+    assert.ok(jobs['cycle-report'].needs.includes(job));
+  const runtime = readFileSync(
+    path.join(runtimeRoot, 'scripts/test/runtime-test-plan.mjs'),
+    'utf8'
+  );
+  assert.match(runtime, /'--minWorkers=1'/);
+  assert.match(runtime, /'--maxWorkers=2'/);
+  assert.throws(
+    () => generalJobPlan({ scripts: { test: 'echo pass' } }, 'general'),
+    /Unrecognized/
   );
 });
 

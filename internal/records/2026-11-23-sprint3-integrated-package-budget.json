@@ -1,0 +1,839 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded numeric package-budget transaction",
+  "date": "2026-11-23",
+  "pullRequest": 1713,
+  "scope": "Four whole-entry ceilings for the already inherited implementation union in PR1713. This is an integrated cross-Sprint cost record, not a claim that Sprint3 alone caused the growth or that all dependency PRs have merged.",
+  "capabilityAuthority": {
+    "definitions": [
+      {
+        "id": "C-TEXT-CONTROL-SELECTION-0001",
+        "status": "draft",
+        "scope": "Selection facts, observation and current candidate lifetime; packages/core/src/text-control.ts and module text-control impl/web.",
+        "path": "spec/contracts/C-TEXT-CONTROL-SELECTION-0001.yaml"
+      },
+      {
+        "id": "C-AXIS-INPUT-ORIGIN-0001",
+        "status": "draft",
+        "scope": "Origin role/index and owner/contact attribution, fact/lease/consumer boundaries; axis input and shared web gesture hosts.",
+        "path": "spec/contracts/C-AXIS-INPUT-ORIGIN-0001.yaml"
+      },
+      {
+        "id": "C-SCROLL-END-FOLLOW-0001",
+        "status": "draft",
+        "scope": "Reader contact arrival and pause/resume/lifetime semantics; Scroll module and Web host ownership.",
+        "path": "spec/contracts/C-SCROLL-END-FOLLOW-0001.yaml"
+      },
+      {
+        "id": "C-LIFECYCLE-REQUEST-0001",
+        "status": "draft",
+        "scope": "One-time construction rollback and cleanup ownership; retain initiating errors; Runtime instance/kernel/session.",
+        "path": "spec/contracts/C-LIFECYCLE-REQUEST-0001.yaml"
+      },
+      {
+        "id": "C-LIFECYCLE-0008",
+        "status": "active",
+        "scope": "WC physical disconnection versus logical view-intent/style lifetime; adapt.ts.",
+        "path": "spec/contracts/C-LIFECYCLE-0008.yaml"
+      }
+    ],
+    "implementationRecords": [
+      "internal/records/2026-11-22-sprint2-shared-input.zh-CN.md",
+      "internal/records/2026-11-22-sprint-7-scroll-pause.md",
+      "internal/records/2026-11-22-sprint5-request-owner-review-fixes.md",
+      "internal/records/2026-11-22-sprint3-contrast-and-wc-followup.md"
+    ],
+    "boundary": "The user authorized continuing this inherited Sprint3 candidate; definitions independently describe the capability direction. Draft entities remain draft and records are implementation provenance, never normative authority. No new capability, lifecycle promotion, stable-admission decision or dependency-PR acceptance is made here."
+  },
+  "baseline": {
+    "source": {
+      "head": "9ecfeef2bfc418c4246ad4bb2f9adc669afa0049",
+      "tree": "8826e2eb56c5c723a10d5c7ea187d825b1051287",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7606,
+      "fingerprintSha256": "f8923f89bc5eab89df2d564c43801b531dde5ae0d56d23e51f1b2364a14f2ee3",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "9ecfeef2bfc418c4246ad4bb2f9adc669afa0049"
+    },
+    "run": 45027817094,
+    "job": 137224601142,
+    "artifact": 14755904646,
+    "reportPath": "internal/records/evidence/2026-11-23-sprint4-package-budget/candidate-before.json.gz",
+    "decodedSha256": "f817df70ca383a2f49eae873dfcb3d54627fac932ea9f94890d3f8c58b14b278",
+    "storedSha256": "6ab485bfb5f6f2e52b8b05e2aba744fb96b6c360693ec19968ea03bf8670a725",
+    "role": "Canonical measured cost used by the existing Sprint4 ceiling transaction; not main and not represented as merged."
+  },
+  "candidateBefore": {
+    "source": {
+      "head": "1658768483ba5d81e4502a64945fe5c0a21dda1d",
+      "tree": "496aa5aea4861860af1e10deb1d90b18c5c68d07",
+      "workingTreeClean": true,
+      "measuredSourceMatchesHead": true,
+      "scope": [
+        "packages",
+        "scripts/analysis",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "tsconfig.json",
+        "internal/coverage-matrices/prototype-coverage-matrix.json"
+      ],
+      "fileCount": 7779,
+      "fingerprintSha256": "1f750bee94577aa0e8e17c666a9127f62fc7762a3b2aa6ead70810761327e660",
+      "statusSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stableDuringMeasurement": true,
+      "requireClean": true,
+      "expectedSha": "1658768483ba5d81e4502a64945fe5c0a21dda1d"
+    },
+    "run": 45202101258,
+    "job": 137788020534,
+    "artifact": 14833046035,
+    "zipSha256": "57f420a95a0cd59166582820c48e6eb077d73b127f27f4656348a268055ee28e",
+    "reportPath": "internal/records/evidence/2026-11-23-sprint3-integrated-budget/candidate-before.json.gz",
+    "decodedSha256": "0b2c275b20efa5f7d5f9e277e50fb73100ed82277c6e4a69a1274702d43063da",
+    "storedSha256": "7eb53d3065da340ee7152c86f03cdae9d5ec8bfa0b67df0737823be686fa8bb5",
+    "result": "Strict 5/9 passed, 4/9 failed; original exit 1. Prior failures remain failed."
+  },
+  "candidateForNumericEdit": {
+    "head": "fda7aec59b753c7b984eae183682c0afc94b1466",
+    "binding": "The preview-retirement and export-fixture commits after165 do not change any retained measured input. Validation independently hashed all3737 retained paths across the nine entries and matched165. Fresh final-head canonical CI remains required."
+  },
+  "environment": {
+    "node": "v24.22.3",
+    "zlib": "1.3.2.1-motley-285e94b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9,
+    "external": [
+      "prompts",
+      "prompts/*",
+      "typescript",
+      "typescript/*",
+      "@proto.ui/host-protocol",
+      "@proto.ui/host-protocol/*",
+      "react",
+      "react/*",
+      "vue",
+      "vue/*",
+      "@floating-ui/dom",
+      "@floating-ui/dom/*",
+      "lucide-static",
+      "lucide-static/*",
+      "node:*"
+    ],
+    "externalSha256": "6a8bd56596b933f9a9d941db2a9e325789b44886af2648d6a9795f022787c253"
+  },
+  "rows": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "baseline": {
+        "minifiedBytes": 8790,
+        "minifiedSha256": "2b414528e3d152045a398e487d4e4e74c3b66d511c83902062a224f0473c95cd",
+        "gzipBytes": 2941
+      },
+      "candidate": {
+        "minifiedBytes": 8790,
+        "minifiedSha256": "d91dfa4646f9f97812d6eae320710d9bbf10c7b0d3d179822cc4e91eadb66582",
+        "gzipBytes": 2941,
+        "budget": 3000,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "proposedCeiling": 3000,
+      "ceilingChanged": false,
+      "resultingHeadroom": 59
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "baseline": {
+        "minifiedBytes": 4087536,
+        "minifiedSha256": "3e54074a7d48e4f08259b7ddcdf455341cd07c55624ae2bbb3a291a59f68b00e",
+        "gzipBytes": 637384
+      },
+      "candidate": {
+        "minifiedBytes": 4087536,
+        "minifiedSha256": "3e54074a7d48e4f08259b7ddcdf455341cd07c55624ae2bbb3a291a59f68b00e",
+        "gzipBytes": 637384,
+        "budget": 700000,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "proposedCeiling": 700000,
+      "ceilingChanged": false,
+      "resultingHeadroom": 62616
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "baseline": {
+        "minifiedBytes": 39223,
+        "minifiedSha256": "fd2cde5f75ec7aa47e51161b9d7cecfd407ae7f80dccb884c37a4dc919f412fc",
+        "gzipBytes": 12486
+      },
+      "candidate": {
+        "minifiedBytes": 39585,
+        "minifiedSha256": "3e320d5fe756ef3acb960cb6b96fe73d79e69ce9ad431ec95aeed4bf574ce0ac",
+        "gzipBytes": 12596,
+        "budget": 12600,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 110,
+      "minifiedGrowth": 362,
+      "proposedCeiling": 12600,
+      "ceilingChanged": false,
+      "resultingHeadroom": 4
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "baseline": {
+        "minifiedBytes": 397240,
+        "minifiedSha256": "94f86d90f18a5147bd2a1642b032dfd851029fb7080f0011e6eea5f322daae58",
+        "gzipBytes": 102972
+      },
+      "candidate": {
+        "minifiedBytes": 400896,
+        "minifiedSha256": "d49588cb06e460bc5947fc98a45917ecb95e7f8b78286c6450949c6dc4ee7caa",
+        "gzipBytes": 103895,
+        "budget": 103100,
+        "pass": false,
+        "overBudgetBytes": 795
+      },
+      "gzipGrowth": 923,
+      "minifiedGrowth": 3656,
+      "proposedCeiling": 104000,
+      "ceilingChanged": true,
+      "resultingHeadroom": 105
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "baseline": {
+        "minifiedBytes": 598483,
+        "minifiedSha256": "05a3516492f80dbbe6c00dc35ef7a75b462e2643be6e4f65489db330c55b0598",
+        "gzipBytes": 170364
+      },
+      "candidate": {
+        "minifiedBytes": 604836,
+        "minifiedSha256": "1540ad7d7afcc37649b53346779cf919f3d569368defc76cef8a5a75e36187db",
+        "gzipBytes": 172055,
+        "budget": 170600,
+        "pass": false,
+        "overBudgetBytes": 1455
+      },
+      "gzipGrowth": 1691,
+      "minifiedGrowth": 6353,
+      "proposedCeiling": 172200,
+      "ceilingChanged": true,
+      "resultingHeadroom": 145
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "baseline": {
+        "minifiedBytes": 593853,
+        "minifiedSha256": "121a6dd278b84567ee385da92ce9a32e748b038c4a252079cee9bc0f837443ef",
+        "gzipBytes": 169119
+      },
+      "candidate": {
+        "minifiedBytes": 600328,
+        "minifiedSha256": "b2cc9f7fed2eb410c7c240988717aabffcc1c40fd0866d44f4dd0ca980ef6985",
+        "gzipBytes": 170870,
+        "budget": 169400,
+        "pass": false,
+        "overBudgetBytes": 1470
+      },
+      "gzipGrowth": 1751,
+      "minifiedGrowth": 6475,
+      "proposedCeiling": 171000,
+      "ceilingChanged": true,
+      "resultingHeadroom": 130
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "baseline": {
+        "minifiedBytes": 697960,
+        "minifiedSha256": "ecee1fa96bce99759be05879714cb439af3e7a2becda22b939125d38663b8aa7",
+        "gzipBytes": 203745
+      },
+      "candidate": {
+        "minifiedBytes": 704575,
+        "minifiedSha256": "2fe2d07975f3cd527cf5fd458080bcf5a725c798f87ef03858e9173b294856ff",
+        "gzipBytes": 205477,
+        "budget": 204000,
+        "pass": false,
+        "overBudgetBytes": 1477
+      },
+      "gzipGrowth": 1732,
+      "minifiedGrowth": 6615,
+      "proposedCeiling": 205600,
+      "ceilingChanged": true,
+      "resultingHeadroom": 123
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "baseline": {
+        "minifiedBytes": 18253,
+        "minifiedSha256": "edf469a8ac0247fdf86956560c158a56df25d2d2849a5328f0df1beab0a118b0",
+        "gzipBytes": 5337
+      },
+      "candidate": {
+        "minifiedBytes": 18253,
+        "minifiedSha256": "ace8524bfb92a085fc60176f0ad40613a7cbf59415a7e8535064e398e4c0ef73",
+        "gzipBytes": 5337,
+        "budget": 6000,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "proposedCeiling": 6000,
+      "ceilingChanged": false,
+      "resultingHeadroom": 663
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "baseline": {
+        "minifiedBytes": 34628,
+        "minifiedSha256": "e4eb33381e55f6d9b7293d67b0c2a2343b09de8c0f4c8fb449d50c985ea71a5f",
+        "gzipBytes": 7871
+      },
+      "candidate": {
+        "minifiedBytes": 34628,
+        "minifiedSha256": "e4eb33381e55f6d9b7293d67b0c2a2343b09de8c0f4c8fb449d50c985ea71a5f",
+        "gzipBytes": 7871,
+        "budget": 7900,
+        "pass": true,
+        "overBudgetBytes": 0
+      },
+      "gzipGrowth": 0,
+      "minifiedGrowth": 0,
+      "proposedCeiling": 7900,
+      "ceilingChanged": false,
+      "resultingHeadroom": 29
+    }
+  ],
+  "closureAudit": [
+    {
+      "entry": "runtime root",
+      "inputCountBefore": 292,
+      "inputCountAfter": 292,
+      "addedInputs": [],
+      "removedInputs": [],
+      "duplicatePaths": 0,
+      "duplicateRetainedSourceHashes": [],
+      "retainedCompiler": [],
+      "retainedOutsideRepositoryPackages": [],
+      "changedRetainedSources": [
+        {
+          "path": "packages/core/src/a11y.ts",
+          "oldSourceSha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+          "sourceSha256": "6915c5303dc2d6c445453c30336c0371addc947e1e19bad9ca22dfd73a261c48",
+          "oldRetainedBytes": 138,
+          "retainedBytes": 138,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/core/src/text-control.ts",
+          "oldSourceSha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+          "sourceSha256": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1",
+          "oldRetainedBytes": 135,
+          "retainedBytes": 458,
+          "retainedDelta": 323
+        },
+        {
+          "path": "packages/modules/axis-input/src/create.ts",
+          "oldSourceSha256": "e1f1ce56e49df5ac3a674d3fcd820fe4a0cee1502e765909c71559241883f896",
+          "sourceSha256": "3e8fdfce353beaf25bbbdc8345365fddfe653cbca4267224966ad7bf7428d13b",
+          "oldRetainedBytes": 6724,
+          "retainedBytes": 7702,
+          "retainedDelta": 978
+        },
+        {
+          "path": "packages/modules/scroll/src/caps.ts",
+          "oldSourceSha256": "fe5560f112713857da3f2dfcc386b73f82f59a93dd238514a0b26ab27ec99e08",
+          "sourceSha256": "79aa77c1ea28083dc6d141d1c501c650df2365ac5db01a53547865ffd3b9c185",
+          "oldRetainedBytes": 41,
+          "retainedBytes": 41,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/modules/scroll/src/impl.ts",
+          "oldSourceSha256": "9d21a2fe08ca4217ae376537664539a85abd17792bb956ecca7a4bbcf5ec1450",
+          "sourceSha256": "e6df86a151248bd0fa355023d66514fa72f504a59a8db913324fac1d38fe7bcd",
+          "oldRetainedBytes": 15716,
+          "retainedBytes": 16431,
+          "retainedDelta": 715
+        },
+        {
+          "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+          "oldSourceSha256": "60ae8ff2274daf3844dd585fb108209e062a577e7b94ceb3fc834e210e5497d2",
+          "sourceSha256": "d0b6db9d88bf270d4d37e12465bd630e44308589809708e0992419004d070931",
+          "oldRetainedBytes": 112,
+          "retainedBytes": 112,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/modules/text-control/src/impl.ts",
+          "oldSourceSha256": "eb084965afe1308f7bfa2ccd032f44f8f798554b44bc72e7b83dd21e85010b2c",
+          "sourceSha256": "44afdbec10b397c833e735abd9aee7ffdbcdee21e20125f836cf5ba1bcb7e6aa",
+          "oldRetainedBytes": 4713,
+          "retainedBytes": 5591,
+          "retainedDelta": 878
+        },
+        {
+          "path": "packages/runtime/src/instance/instance.ts",
+          "oldSourceSha256": "137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b",
+          "sourceSha256": "b4bf27ac468e1d4f1b2ba906ca29650412dea142810a5fc5eab5ecca82182c70",
+          "oldRetainedBytes": 1259,
+          "retainedBytes": 1803,
+          "retainedDelta": 544
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+          "sourceSha256": "82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a",
+          "oldRetainedBytes": 6714,
+          "retainedBytes": 6755,
+          "retainedDelta": 41
+        },
+        {
+          "path": "packages/runtime/src/kernel/kernel.ts",
+          "oldSourceSha256": "cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026",
+          "sourceSha256": "714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122",
+          "oldRetainedBytes": 2912,
+          "retainedBytes": 3094,
+          "retainedDelta": 182
+        }
+      ]
+    },
+    {
+      "entry": "adapter-react root",
+      "inputCountBefore": 341,
+      "inputCountAfter": 341,
+      "addedInputs": [],
+      "removedInputs": [],
+      "duplicatePaths": 0,
+      "duplicateRetainedSourceHashes": [],
+      "retainedCompiler": [],
+      "retainedOutsideRepositoryPackages": [],
+      "changedRetainedSources": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "oldSourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+          "sourceSha256": "eb83f2c9fdbdf4421f03e9484035576e1bdc0c4969346a76e6b708ffaca05fb0",
+          "oldRetainedBytes": 6455,
+          "retainedBytes": 6747,
+          "retainedDelta": 292
+        },
+        {
+          "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+          "oldSourceSha256": "72f39b9419b4c168ed138846eaaeb61c4a667e9536987cb1904ddf3bdad3bd83",
+          "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+          "oldRetainedBytes": 5358,
+          "retainedBytes": 5663,
+          "retainedDelta": 305
+        },
+        {
+          "path": "packages/core/src/a11y.ts",
+          "oldSourceSha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+          "sourceSha256": "6915c5303dc2d6c445453c30336c0371addc947e1e19bad9ca22dfd73a261c48",
+          "oldRetainedBytes": 138,
+          "retainedBytes": 138,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/core/src/text-control.ts",
+          "oldSourceSha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+          "sourceSha256": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1",
+          "oldRetainedBytes": 135,
+          "retainedBytes": 458,
+          "retainedDelta": 323
+        },
+        {
+          "path": "packages/modules/axis-input/src/create.ts",
+          "oldSourceSha256": "e1f1ce56e49df5ac3a674d3fcd820fe4a0cee1502e765909c71559241883f896",
+          "sourceSha256": "3e8fdfce353beaf25bbbdc8345365fddfe653cbca4267224966ad7bf7428d13b",
+          "oldRetainedBytes": 6726,
+          "retainedBytes": 7704,
+          "retainedDelta": 978
+        },
+        {
+          "path": "packages/modules/scroll/src/caps.ts",
+          "oldSourceSha256": "fe5560f112713857da3f2dfcc386b73f82f59a93dd238514a0b26ab27ec99e08",
+          "sourceSha256": "79aa77c1ea28083dc6d141d1c501c650df2365ac5db01a53547865ffd3b9c185",
+          "oldRetainedBytes": 41,
+          "retainedBytes": 41,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/modules/scroll/src/impl.ts",
+          "oldSourceSha256": "9d21a2fe08ca4217ae376537664539a85abd17792bb956ecca7a4bbcf5ec1450",
+          "sourceSha256": "e6df86a151248bd0fa355023d66514fa72f504a59a8db913324fac1d38fe7bcd",
+          "oldRetainedBytes": 15718,
+          "retainedBytes": 16433,
+          "retainedDelta": 715
+        },
+        {
+          "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+          "oldSourceSha256": "60ae8ff2274daf3844dd585fb108209e062a577e7b94ceb3fc834e210e5497d2",
+          "sourceSha256": "d0b6db9d88bf270d4d37e12465bd630e44308589809708e0992419004d070931",
+          "oldRetainedBytes": 17511,
+          "retainedBytes": 18342,
+          "retainedDelta": 831
+        },
+        {
+          "path": "packages/modules/scroll/src/web/reader-contact-session.ts",
+          "oldSourceSha256": "f6b00c854e3f9ba97c76787d8534601c7cbb1b2db78a47013da1c53695c8fe35",
+          "sourceSha256": "49ed7625227b8fcaa19cfbaac7f5003cd8167323f084ebef3a0befacb1599dbc",
+          "oldRetainedBytes": 1166,
+          "retainedBytes": 1405,
+          "retainedDelta": 239
+        },
+        {
+          "path": "packages/modules/text-control/src/impl.ts",
+          "oldSourceSha256": "eb084965afe1308f7bfa2ccd032f44f8f798554b44bc72e7b83dd21e85010b2c",
+          "sourceSha256": "44afdbec10b397c833e735abd9aee7ffdbcdee21e20125f836cf5ba1bcb7e6aa",
+          "oldRetainedBytes": 4714,
+          "retainedBytes": 5592,
+          "retainedDelta": 878
+        },
+        {
+          "path": "packages/modules/text-control/src/web.ts",
+          "oldSourceSha256": "53e83857f29b45027975763d468d47fb34b60f770035e6653a8afe593ed242f6",
+          "sourceSha256": "32d41628746add1a10e3ac4cfb0af64551f5b97b0511604baf4d9fb295020f59",
+          "oldRetainedBytes": 2986,
+          "retainedBytes": 3992,
+          "retainedDelta": 1006
+        },
+        {
+          "path": "packages/runtime/src/instance/instance.ts",
+          "oldSourceSha256": "137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b",
+          "sourceSha256": "b4bf27ac468e1d4f1b2ba906ca29650412dea142810a5fc5eab5ecca82182c70",
+          "oldRetainedBytes": 1259,
+          "retainedBytes": 1803,
+          "retainedDelta": 544
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+          "sourceSha256": "82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a",
+          "oldRetainedBytes": 6709,
+          "retainedBytes": 6754,
+          "retainedDelta": 45
+        },
+        {
+          "path": "packages/runtime/src/kernel/kernel.ts",
+          "oldSourceSha256": "cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026",
+          "sourceSha256": "714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122",
+          "oldRetainedBytes": 2899,
+          "retainedBytes": 3086,
+          "retainedDelta": 187
+        }
+      ]
+    },
+    {
+      "entry": "adapter-vue root",
+      "inputCountBefore": 340,
+      "inputCountAfter": 340,
+      "addedInputs": [],
+      "removedInputs": [],
+      "duplicatePaths": 0,
+      "duplicateRetainedSourceHashes": [],
+      "retainedCompiler": [],
+      "retainedOutsideRepositoryPackages": [],
+      "changedRetainedSources": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "oldSourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+          "sourceSha256": "eb83f2c9fdbdf4421f03e9484035576e1bdc0c4969346a76e6b708ffaca05fb0",
+          "oldRetainedBytes": 6455,
+          "retainedBytes": 6747,
+          "retainedDelta": 292
+        },
+        {
+          "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+          "oldSourceSha256": "72f39b9419b4c168ed138846eaaeb61c4a667e9536987cb1904ddf3bdad3bd83",
+          "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+          "oldRetainedBytes": 5358,
+          "retainedBytes": 5663,
+          "retainedDelta": 305
+        },
+        {
+          "path": "packages/core/src/a11y.ts",
+          "oldSourceSha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+          "sourceSha256": "6915c5303dc2d6c445453c30336c0371addc947e1e19bad9ca22dfd73a261c48",
+          "oldRetainedBytes": 138,
+          "retainedBytes": 138,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/core/src/text-control.ts",
+          "oldSourceSha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+          "sourceSha256": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1",
+          "oldRetainedBytes": 135,
+          "retainedBytes": 458,
+          "retainedDelta": 323
+        },
+        {
+          "path": "packages/modules/axis-input/src/create.ts",
+          "oldSourceSha256": "e1f1ce56e49df5ac3a674d3fcd820fe4a0cee1502e765909c71559241883f896",
+          "sourceSha256": "3e8fdfce353beaf25bbbdc8345365fddfe653cbca4267224966ad7bf7428d13b",
+          "oldRetainedBytes": 6726,
+          "retainedBytes": 7704,
+          "retainedDelta": 978
+        },
+        {
+          "path": "packages/modules/scroll/src/caps.ts",
+          "oldSourceSha256": "fe5560f112713857da3f2dfcc386b73f82f59a93dd238514a0b26ab27ec99e08",
+          "sourceSha256": "79aa77c1ea28083dc6d141d1c501c650df2365ac5db01a53547865ffd3b9c185",
+          "oldRetainedBytes": 41,
+          "retainedBytes": 41,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/modules/scroll/src/impl.ts",
+          "oldSourceSha256": "9d21a2fe08ca4217ae376537664539a85abd17792bb956ecca7a4bbcf5ec1450",
+          "sourceSha256": "e6df86a151248bd0fa355023d66514fa72f504a59a8db913324fac1d38fe7bcd",
+          "oldRetainedBytes": 15718,
+          "retainedBytes": 16433,
+          "retainedDelta": 715
+        },
+        {
+          "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+          "oldSourceSha256": "60ae8ff2274daf3844dd585fb108209e062a577e7b94ceb3fc834e210e5497d2",
+          "sourceSha256": "d0b6db9d88bf270d4d37e12465bd630e44308589809708e0992419004d070931",
+          "oldRetainedBytes": 17511,
+          "retainedBytes": 18294,
+          "retainedDelta": 783
+        },
+        {
+          "path": "packages/modules/scroll/src/web/reader-contact-session.ts",
+          "oldSourceSha256": "f6b00c854e3f9ba97c76787d8534601c7cbb1b2db78a47013da1c53695c8fe35",
+          "sourceSha256": "49ed7625227b8fcaa19cfbaac7f5003cd8167323f084ebef3a0befacb1599dbc",
+          "oldRetainedBytes": 1166,
+          "retainedBytes": 1405,
+          "retainedDelta": 239
+        },
+        {
+          "path": "packages/modules/text-control/src/impl.ts",
+          "oldSourceSha256": "eb084965afe1308f7bfa2ccd032f44f8f798554b44bc72e7b83dd21e85010b2c",
+          "sourceSha256": "44afdbec10b397c833e735abd9aee7ffdbcdee21e20125f836cf5ba1bcb7e6aa",
+          "oldRetainedBytes": 4714,
+          "retainedBytes": 5592,
+          "retainedDelta": 878
+        },
+        {
+          "path": "packages/modules/text-control/src/web.ts",
+          "oldSourceSha256": "53e83857f29b45027975763d468d47fb34b60f770035e6653a8afe593ed242f6",
+          "sourceSha256": "32d41628746add1a10e3ac4cfb0af64551f5b97b0511604baf4d9fb295020f59",
+          "oldRetainedBytes": 2986,
+          "retainedBytes": 3992,
+          "retainedDelta": 1006
+        },
+        {
+          "path": "packages/runtime/src/instance/instance.ts",
+          "oldSourceSha256": "137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b",
+          "sourceSha256": "b4bf27ac468e1d4f1b2ba906ca29650412dea142810a5fc5eab5ecca82182c70",
+          "oldRetainedBytes": 1259,
+          "retainedBytes": 1803,
+          "retainedDelta": 544
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+          "sourceSha256": "82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a",
+          "oldRetainedBytes": 6710,
+          "retainedBytes": 6754,
+          "retainedDelta": 44
+        },
+        {
+          "path": "packages/runtime/src/kernel/kernel.ts",
+          "oldSourceSha256": "cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026",
+          "sourceSha256": "714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122",
+          "oldRetainedBytes": 2885,
+          "retainedBytes": 3086,
+          "retainedDelta": 201
+        }
+      ]
+    },
+    {
+      "entry": "adapter-web-component root",
+      "inputCountBefore": 368,
+      "inputCountAfter": 368,
+      "addedInputs": [],
+      "removedInputs": [],
+      "duplicatePaths": 0,
+      "duplicateRetainedSourceHashes": [],
+      "retainedCompiler": [],
+      "retainedOutsideRepositoryPackages": [],
+      "changedRetainedSources": [
+        {
+          "path": "packages/adapters/base/src/gestures/web-axis-input-host.ts",
+          "oldSourceSha256": "a409d1d36266f6f633f57529031bed7a15543f916772576e3475e22477f9abe4",
+          "sourceSha256": "eb83f2c9fdbdf4421f03e9484035576e1bdc0c4969346a76e6b708ffaca05fb0",
+          "oldRetainedBytes": 6455,
+          "retainedBytes": 6747,
+          "retainedDelta": 292
+        },
+        {
+          "path": "packages/adapters/base/src/gestures/web-move-gesture-host.ts",
+          "oldSourceSha256": "72f39b9419b4c168ed138846eaaeb61c4a667e9536987cb1904ddf3bdad3bd83",
+          "sourceSha256": "f868abbb2ad2866b9e09d22a24c1b52a31fdf7774be48f7c95940d477f95df95",
+          "oldRetainedBytes": 5355,
+          "retainedBytes": 5663,
+          "retainedDelta": 308
+        },
+        {
+          "path": "packages/adapters/web-component/src/adapt.ts",
+          "oldSourceSha256": "27614be38937ef2c6ac474bc5623075dce4a52ef7b50ab17a19b431ee677330d",
+          "sourceSha256": "81160f0e947a7b2c34b6178be373314e9e2e484c763de280609539787adb30cd",
+          "oldRetainedBytes": 20712,
+          "retainedBytes": 20889,
+          "retainedDelta": 177
+        },
+        {
+          "path": "packages/core/src/a11y.ts",
+          "oldSourceSha256": "9d6ae15a2631821539a7fd080aee75ec2f82dabbbbb070803fd122b3a2c9a9a1",
+          "sourceSha256": "6915c5303dc2d6c445453c30336c0371addc947e1e19bad9ca22dfd73a261c48",
+          "oldRetainedBytes": 138,
+          "retainedBytes": 138,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/core/src/text-control.ts",
+          "oldSourceSha256": "2654c882681e1d49352f9963225f420eddb3b00e4b3aca163aedc19f48640e35",
+          "sourceSha256": "03cef97966a595e243919f3e3efe553b21ba3cd8687d0d36b3300a000b2aecc1",
+          "oldRetainedBytes": 135,
+          "retainedBytes": 458,
+          "retainedDelta": 323
+        },
+        {
+          "path": "packages/modules/axis-input/src/create.ts",
+          "oldSourceSha256": "e1f1ce56e49df5ac3a674d3fcd820fe4a0cee1502e765909c71559241883f896",
+          "sourceSha256": "3e8fdfce353beaf25bbbdc8345365fddfe653cbca4267224966ad7bf7428d13b",
+          "oldRetainedBytes": 6726,
+          "retainedBytes": 7704,
+          "retainedDelta": 978
+        },
+        {
+          "path": "packages/modules/scroll/src/caps.ts",
+          "oldSourceSha256": "fe5560f112713857da3f2dfcc386b73f82f59a93dd238514a0b26ab27ec99e08",
+          "sourceSha256": "79aa77c1ea28083dc6d141d1c501c650df2365ac5db01a53547865ffd3b9c185",
+          "oldRetainedBytes": 42,
+          "retainedBytes": 42,
+          "retainedDelta": 0
+        },
+        {
+          "path": "packages/modules/scroll/src/impl.ts",
+          "oldSourceSha256": "9d21a2fe08ca4217ae376537664539a85abd17792bb956ecca7a4bbcf5ec1450",
+          "sourceSha256": "e6df86a151248bd0fa355023d66514fa72f504a59a8db913324fac1d38fe7bcd",
+          "oldRetainedBytes": 15718,
+          "retainedBytes": 16433,
+          "retainedDelta": 715
+        },
+        {
+          "path": "packages/modules/scroll/src/web/create-bound-web-scroll-host.ts",
+          "oldSourceSha256": "7de4889115ce80b879c15789f0a9d33e9bcfa950b070f2a54a40b3fd0dd59839",
+          "sourceSha256": "0db9767e8c84d0ce751c8adcf5802ab42f5d83a7f232e10ecfbf08faffd9c1eb",
+          "oldRetainedBytes": 2202,
+          "retainedBytes": 2258,
+          "retainedDelta": 56
+        },
+        {
+          "path": "packages/modules/scroll/src/web/create-web-scroll-host.ts",
+          "oldSourceSha256": "60ae8ff2274daf3844dd585fb108209e062a577e7b94ceb3fc834e210e5497d2",
+          "sourceSha256": "d0b6db9d88bf270d4d37e12465bd630e44308589809708e0992419004d070931",
+          "oldRetainedBytes": 17521,
+          "retainedBytes": 18383,
+          "retainedDelta": 862
+        },
+        {
+          "path": "packages/modules/scroll/src/web/reader-contact-session.ts",
+          "oldSourceSha256": "f6b00c854e3f9ba97c76787d8534601c7cbb1b2db78a47013da1c53695c8fe35",
+          "sourceSha256": "49ed7625227b8fcaa19cfbaac7f5003cd8167323f084ebef3a0befacb1599dbc",
+          "oldRetainedBytes": 1166,
+          "retainedBytes": 1405,
+          "retainedDelta": 239
+        },
+        {
+          "path": "packages/modules/text-control/src/impl.ts",
+          "oldSourceSha256": "eb084965afe1308f7bfa2ccd032f44f8f798554b44bc72e7b83dd21e85010b2c",
+          "sourceSha256": "44afdbec10b397c833e735abd9aee7ffdbcdee21e20125f836cf5ba1bcb7e6aa",
+          "oldRetainedBytes": 4714,
+          "retainedBytes": 5592,
+          "retainedDelta": 878
+        },
+        {
+          "path": "packages/modules/text-control/src/web.ts",
+          "oldSourceSha256": "53e83857f29b45027975763d468d47fb34b60f770035e6653a8afe593ed242f6",
+          "sourceSha256": "32d41628746add1a10e3ac4cfb0af64551f5b97b0511604baf4d9fb295020f59",
+          "oldRetainedBytes": 2986,
+          "retainedBytes": 3992,
+          "retainedDelta": 1006
+        },
+        {
+          "path": "packages/runtime/src/instance/instance.ts",
+          "oldSourceSha256": "137f3d76dfa2c04cc34c742d1cf06a9e80fcaa3bbcb8dbd10d2105ade046b77b",
+          "sourceSha256": "b4bf27ac468e1d4f1b2ba906ca29650412dea142810a5fc5eab5ecca82182c70",
+          "oldRetainedBytes": 1259,
+          "retainedBytes": 1803,
+          "retainedDelta": 544
+        },
+        {
+          "path": "packages/runtime/src/instance/session.ts",
+          "oldSourceSha256": "70b5f8c47a06596a01e3e5963f202199cf428da3fc724c662b8d1087d0b093c0",
+          "sourceSha256": "82057d6da9b00125b024a525f058b83dce3040359c35bca67a36dcc84a211d1a",
+          "oldRetainedBytes": 6699,
+          "retainedBytes": 6741,
+          "retainedDelta": 42
+        },
+        {
+          "path": "packages/runtime/src/kernel/kernel.ts",
+          "oldSourceSha256": "cce6afa8e677df14e56b8d34b393d21ea71167f59b9eca79d700d03890854026",
+          "sourceSha256": "714d6eaf8d150254cde88bc9e1c72cca7870ef000e7756e5224dd9d04ee38122",
+          "oldRetainedBytes": 2883,
+          "retainedBytes": 3082,
+          "retainedDelta": 199
+        }
+      ]
+    }
+  ],
+  "attribution": "Dominant retained minified growth follows the catalogued text-selection observation, axis origin, scroll reader/pause and request cleanup implementations plus WC physical lifetime. Input sets are unchanged; no added eager dependency, duplicate retained source, second Runtime closure or retained compiler input was found. The same Runtime included once in each distinct adapter entry is not a duplicated Runtime within one bundle. Minified attribution is not additive gzip attribution. No safe semantics-preserving removal was identified from these source changes; this transaction does not trim governed behavior to chase compressed bytes.",
+  "headroomDecision": "Use ceilings104000/172200/171000/205600 for the measured runtime/react/vue/WC costs103895/172055/170870/205477: margins105/145/130/123bytes (all at most0.102%). Each margin is smaller than the prior transaction margin128/236/281/255bytes against its own baseline. This bounds ordinary nonsemantic compression-layout movement without provisioning another capability. The other five ceilings, including Core with four bytes remaining, stay unchanged. Any later integrated overrun still fails and needs its own evidence.",
+  "controlArtifacts": "Four control entry sizes are unchanged. Lucide X and Base Button minified hashes changed, while Lucide root and Shadcn Button hashes match. The rows preserve both hashes; no unverified cause of hash movement is asserted.",
+  "strictBoundary": "Only the four numeric literals and provenance comment change. Entry list, external boundary, bundle/minify/tree shaking/ESM/browser/es2020/gzip9 settings, diagnostic profiles and strict pass/fail remain intact. Finf advisory policy is not used.",
+  "rollback": "Revert only this numeric commit if its capability integration is removed; do not alter prior records or relabel original failures. Re-measure the actual remaining union before selecting another ceiling.",
+  "validation": "Pending fresh canonical blocking measurement on the final pushed candidate, independent review and all non-size gates. This record is a proposal backed by an actual measured integrated candidate; it is not a final-head pass or Ready/merge approval."
+}

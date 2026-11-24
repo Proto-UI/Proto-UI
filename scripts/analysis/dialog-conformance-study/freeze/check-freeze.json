@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "issue": 754,
+  "frozenAt": "2026-11-23T19:06:09.472560+00:00",
+  "subjectHead": "d0eb81d3c61c3d3e93e46c4151e78031273d6116",
+  "checkInputs": {
+    "packages/prototypes/base/test/dialog.test.ts": "54c66d742733cf32e20157e3970c4d6438e810cf385d50c7f78e0bd54f12c00f",
+    "packages/prototypes/base/test/dialog-controlled-dismissal.test.ts": "553ca2e7daa8df7ad7263d85ab37f24d5c3e4f3db8c51dd882b8e2d9d8590893",
+    "packages/adapters/web-component/test/dialog-overlay.test.ts": "4540776b40b48a4ac065453e00a2f3cad1c03015406be3d80505a7f3a3069444",
+    "scripts/analysis/dialog-conformance-study/oracle.test.ts": "d30f2dcdf3f48e0caf72533284c0289b56bc9b9803e5d75b849018af2f4d6bff"
+  },
+  "fixtureInputs": {
+    "packages/prototypes/base/src/dialog/root.proto.ts": "e2337afde52cb9db59a1fcc1cd4282aa34edcd62bf7dbfebf307573bba620378",
+    "packages/prototypes/base/src/dialog/content.proto.ts": "51c706e4a05a962318b5ac38eeb9b83002230ea1e0c9f9c3ae59de37f0539e95",
+    "vitest.config.ts": "43563eda536aabd24631da3eeda8e207d278e72d8b213773e9720aac2acfe6d3",
+    "scripts/test/dialog-run-integrity-reporter.mjs": "d26d77c9a57a8997394a21b70dee15cf7408c25e3d7bd7e22f48e5b1e6e4c6fa",
+    "scripts/analysis/dialog-conformance-study/fixture.ts": "4ffa5ae99f8791b9e677298fa4e779a8f5e54293a77f7031758853d6af326d11"
+  },
+  "planSha256": "4dc377e5b8e3480c70de7bdf0fded3d33645e728b2ad15a9d63ed876cb98d7a5",
+  "scope": "Settled-entry synthetic WC discrimination; original early-entry 26/28 failures preserved separately; fixed five observation expectations.",
+  "heldOut": "Not yet authored. Independent root will supply new variants after this freeze; no formal model/blind-discovery claim."
+}

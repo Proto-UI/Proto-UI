@@ -49,6 +49,26 @@ const SHADCN_FAMILIES = new Set([
   'toggle',
   'tooltip',
 ]);
+const SHADCN_PROTO_FAMILIES = new Set([
+  'button',
+  'checkbox',
+  'dialog',
+  'input',
+  'select',
+  'separator',
+  'switch',
+  'tabs',
+  'textarea',
+  'toggle',
+  'scroll-area',
+  'label',
+  'collapsible',
+  'drawer',
+  'toggle-group',
+  'number-field',
+  'message-scroller',
+  'data-table',
+]);
 const BRUTALIST_FAMILIES = new Set([
   'badge',
   'button',
@@ -72,16 +92,15 @@ test('prototype packages expose side-effect-free family entry points', () => {
   assertFamilyExports(
     BASE_ROOT,
     BASE_FAMILIES,
-    Object.fromEntries([...BASE_FAMILIES].map((family) => [family, `./src/${family}/index.ts`]))
+    Object.fromEntries(
+      [...BASE_FAMILIES].map((family) => [family, './src/' + family + '/index.ts'])
+    )
   );
   assertFamilyExports(
     SHADCN_ROOT,
-    SHADCN_FAMILIES,
+    new Set([...SHADCN_FAMILIES, ...SHADCN_PROTO_FAMILIES]),
     Object.fromEntries(
-      ['button', 'dialog', 'scroll-area', 'select', 'switch', 'tabs', 'toggle'].map((family) => [
-        family,
-        `./src/${family}/index.ts`,
-      ])
+      [...SHADCN_PROTO_FAMILIES].map((family) => [family, './src/' + family + '/index.ts'])
     )
   );
   assertFamilyExports(BRUTALIST_ROOT, BRUTALIST_FAMILIES);

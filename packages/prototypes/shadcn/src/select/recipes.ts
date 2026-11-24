@@ -159,18 +159,22 @@ export const SELECT_SURFACE_STYLE: Record<SelectTranslucentStyle, StyleHandle> =
 
 /** cn-select-item geometry per pinned recipe; state colors stay rule-driven. */
 export const SELECT_ITEM_SURFACE: Record<SelectTranslucentStyle, string> = {
-  vega: 'gap-2 rounded-sm py-1.5 pr-8 pl-2 text-sm',
-  nova: 'gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm',
-  maia: 'gap-2.5 rounded-xl py-2 pr-8 pl-3 text-sm',
-  lyra: 'gap-2 rounded-none py-2 pr-8 pl-2 text-xs',
+  vega: 'gap-2 rounded-sm py-1.5 pe-8 ps-2 text-sm',
+  nova: 'gap-1.5 rounded-md py-1 pe-8 ps-1.5 text-sm',
+  maia: 'gap-2.5 rounded-xl py-2 pe-8 ps-3 text-sm',
+  lyra: 'gap-2 rounded-none py-2 pe-8 ps-2 text-xs',
   mira: 'min-h-7 gap-2 rounded-md px-2 py-1 text-xs leading-relaxed',
-  luma: 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 pr-8 pl-3 text-sm font-medium',
-  sera: 'gap-2.5 rounded-none py-2 pr-8 pl-3 text-sm',
-  rhea: 'min-h-7 gap-2 rounded-[var(--pui-radius-xl)] py-1.5 pr-8 pl-2 text-sm',
+  luma: 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 pe-8 ps-3 text-sm font-medium',
+  sera: 'gap-2.5 rounded-none py-2 pe-8 ps-3 text-sm',
+  rhea: 'min-h-7 gap-2 rounded-[var(--pui-radius-xl)] py-1.5 pe-8 ps-2 text-sm',
 };
 
+// The indicator owns the inline-end edge of the row. A physical edge
+// would keep the check beside the text in an RTL row, where the text
+// starts at the inline end and the reserved space would be measured
+// on the wrong side of the matched Trigger width.
 const ITEM_INDICATOR_BASE =
-  'pointer-events-none absolute right-2 flex shrink-0 items-center justify-center';
+  'pointer-events-none absolute end-2 flex shrink-0 items-center justify-center';
 /** Immutable recipe handles are shared between renders; Mira leaves sizing to the inner SVG. */
 export const SELECT_ITEM_INDICATOR_STYLE: Readonly<Record<ShadcnStyleId, StyleHandle>> = {
   'new-york-v4': tw(ITEM_INDICATOR_BASE, 'size-3.5'),

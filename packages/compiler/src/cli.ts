@@ -795,6 +795,7 @@ export async function runCompilerCli(
         requirements: compilation.ir.requirements,
         dependencies: compilation.output.dependencies,
         provenance: compilation.output.provenance,
+        analysis: compilation.analysis,
       };
       if (json)
         stdout(
@@ -812,6 +813,15 @@ export async function runCompilerCli(
               (dependency) => `  ${dependency.name}@${dependency.version} [${dependency.role}]`
             ),
             'Dependency roles describe this emitted profile, not support for every capability of its framework.',
+            ...(explanation.analysis
+              ? [
+                  `Props update analysis: ${explanation.analysis.propsUpdates.status} (${explanation.analysis.propsUpdates.policy} policy)`,
+                  ...explanation.analysis.propsUpdates.advisories.map(
+                    (advisory) =>
+                      `  ${advisory.span.file}:${advisory.span.line}:${advisory.span.column}: ${advisory.code}: ${advisory.message}`
+                  ),
+                ]
+              : []),
           ].join('\n') + '\n'
         );
     } else {
@@ -820,7 +830,11 @@ export async function runCompilerCli(
           JSON.stringify({
             ok: true,
             command,
-            result: { name: compilation.ir.name, profile: compilation.output.profile },
+            result: {
+              name: compilation.ir.name,
+              profile: compilation.output.profile,
+              analysis: compilation.analysis,
+            },
             diagnostics: [],
           }) + '\n'
         );

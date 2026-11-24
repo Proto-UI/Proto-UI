@@ -1,0 +1,52 @@
+{
+  "archive": "transaction-inputs-originals.tar.gz",
+  "bytes": 10888,
+  "sha256": "f927783baaf296c77c6c6e51233980b1e6dddd281f420d6b25bcd9330764c3f7",
+  "files": [
+    {
+      "path": "workflow/capability-envelope.json",
+      "bytes": 1206,
+      "sha256": "19983b5eae004be4d5a945f922d8cc4bdbf516cc20aafdea8b1936c4032bdbfd"
+    },
+    {
+      "path": "workflow/authority-map.json",
+      "bytes": 2404,
+      "sha256": "df770cf7e7e3e8ee5a12bd003c3339509cbfbb8937ad73fa2b9381ba97e72ad8"
+    },
+    {
+      "path": "workflow/candidate-before.json",
+      "bytes": 3675,
+      "sha256": "dbd057f45f51dc66472d8a45c44b54f8d2dac867ff44042b551472a4f47a7420"
+    },
+    {
+      "path": "workflow/evidence-before.json",
+      "bytes": 12366,
+      "sha256": "a389fd9384aac9576c0a6a968d674abcd04254981d2230366233e7e7ac236642"
+    },
+    {
+      "path": "workflow/implementation-authorization.json",
+      "bytes": 805,
+      "sha256": "068fa128e95b38535552fb472505eb48470ffe4cae8d7eb51d69b50618818eaf"
+    },
+    {
+      "path": "workflow/validate-to-budget.json",
+      "bytes": 1869,
+      "sha256": "a8c8bf5d2887259a662278f7e9e33a514655eefabe6cfa0d188c567ada00da04"
+    },
+    {
+      "path": "workflow/live-authority-observation.json",
+      "bytes": 510,
+      "sha256": "44bc4c3545fc551880d4d6a33baf2e55bc7fc1bd6352510284c7d1d5e5158517"
+    },
+    {
+      "path": "independent/receipt.json",
+      "bytes": 4778,
+      "sha256": "c5e1a6a0552297042a4273c4a2da16b07eacd1c49cd770c1f5a95ad75e5a7150"
+    },
+    {
+      "path": "independent/audit-prebudget-continuation.py",
+      "bytes": 8080,
+      "sha256": "f9a7cb86b06e2a667f66314e85a8a53045b454caf8dc62c6f97b5df42e1b1443"
+    }
+  ]
+}

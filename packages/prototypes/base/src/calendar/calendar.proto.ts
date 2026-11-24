@@ -510,14 +510,21 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       return requestSelection(next, [...c.values], c.range, reason, next);
     }
   );
+  let syncRevision = 0;
   const sync = (run: RunHandle<CalendarRootProps>, created = false) => {
     owner = run;
+    const revision = ++syncRevision,
+      epoch = viewEpoch;
+    const isCurrent = () => owner === run && viewEpoch === epoch && syncRevision === revision;
     const p = run.props.get();
     if (created || run.props.isProvided('value'))
       value.set(
         (run.props.isProvided('value') ? p.value : p.defaultValue) ?? '',
         'calendar owner value'
       );
+    // A public State observer may synchronously replace Props or retire this
+    // view. The old snapshot must not overwrite that owner's selection/policy.
+    if (!isCurrent()) return;
     if (created || run.props.isProvided('values'))
       values = normalizeCalendarValues(
         (run.props.isProvided('values') ? p.values : p.defaultValues) ?? []
@@ -538,9 +545,13 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
         (selectedDate.slice(0, 7) || p.today?.slice(0, 7) || '1970-01');
       month.set(parseDate(`${candidate}-01`) ? candidate : '1970-01', 'calendar owner month');
     }
+    if (!isCurrent()) return;
     label.set(p.a11yLabel ?? 'Calendar', 'calendar accessible name');
+    if (!isCurrent()) return;
     disabled.set(!!p.disabled, 'calendar disabled');
+    if (!isCurrent()) return;
     direction.set(p.direction ?? 'ltr', 'calendar direction');
+    if (!isCurrent()) return;
     publish(run);
   };
   def.lifecycle.onCreated((run) => sync(run, true));

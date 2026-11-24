@@ -1,0 +1,71 @@
+{
+  "localParent": "2480898dc88b4bb5c55d66c0c724ed5a6d564c65",
+  "publicParent": "15963a323d9a6d8a0f61aae32942e2172128bdab",
+  "resolutions": [
+    {
+      "path": ".github/workflows/compiler-browser-acceptance.yml",
+      "choices": ["ours"],
+      "resolvedSha256": "4df8adc6608dae428ad4a4734793fe9e2119f9579d7d9f6e51f6363e37534ae3"
+    },
+    {
+      "path": ".github/workflows/sprint3-followup-evidence.yml",
+      "choices": ["theirs", "ours"],
+      "resolvedSha256": "6ed5fc77a404306b6ed1e5a6087ab143ec58f020192185445caaff1745561e10"
+    },
+    {
+      "path": "scripts/release/test/prototype-family-boundary.test.mjs",
+      "choices": ["theirs"],
+      "resolvedSha256": "a464b2ecbd153c1c6b2269a72d43bcef510fd5fa9d5aa47fc0c90789826a2f8d"
+    },
+    {
+      "path": "scripts/analysis/package-budgets.mjs",
+      "choices": ["both"],
+      "resolvedSha256": "ad4bd72b12d98eb358d1aed6e4b72a7701e901f10f785ed2af471124245d6e21"
+    },
+    {
+      "path": "scripts/test/sprint3-followup-workflow.test.mjs",
+      "choices": ["both"],
+      "resolvedSha256": "b44f1a4edda034c72f7daf2f175e59fd6723d521ac282349767dda6e6b59df39"
+    }
+  ],
+  "decisions": [
+    "Keep the pinned verified font acquisition helper with its bounded deadline over the concurrent APT retry alternative.",
+    "Retain public short unique directories for both direct and installed jobs; retain both observed-runner path proof and the stronger real kernel socket control.",
+    "Retain public concatenated Base export expectation, semantically equal to our fixed-list template literal.",
+    "Both numeric record references remain historical; four ceilings are identical, with newer integrated Anatomy cost retained in the public record.",
+    "Keep compiler job35min from our original165 acceptance envelope, rather than silently reduce to20min during concurrent reconciliation. Its font step5min and new owner controls remain."
+  ],
+  "validation": "Pending merged source controls and fresh full CI; no old receipt is relabelled.",
+  "date": "2026-11-23",
+  "pullRequest": 1713,
+  "kind": "ordinary parallel Sprint3 source reconciliation",
+  "remoteObservation": {
+    "head": "15963a323d9a6d8a0f61aae32942e2172128bdab",
+    "base": "f8460c23001fd4c48e4dca5bbd19150a4d0e7710",
+    "draft": false,
+    "observedAt": "2026-11-23T15:55:17Z",
+    "actorBoundary": "Ready was already set by a parallel continuation; this work neither claims that mutation nor treats it as current CI/merge approval."
+  },
+  "preservation": "Both full histories and source evidence remain. Public15963 adds200paths relative9cd, largely evidence, plus reviewed compiler/worker/source resolver, Anatomy live-host, original consumer observations and source/license corrections. No foreign archive or authored commit is discarded.",
+  "remaining": "Exact combined production/native/release/visual acceptance and fresh independent review. The165 historical numeric source and newer6a2 canonical cost are not interchangeable. All actual old failures stay failed.",
+  "focusedControls": {
+    "command": [
+      "node",
+      "--test",
+      "scripts/test/sprint3-font-preparation.test.mjs",
+      "scripts/analysis/test/package-budget-policy.test.mjs",
+      "scripts/analysis/test/package-budget-evidence.test.mjs",
+      "scripts/compiler/browser-repository-root.test.mjs",
+      "scripts/test/sprint3-followup-workflow.test.mjs"
+    ],
+    "exitCode": 1,
+    "elapsedSeconds": 3.218032121658325,
+    "logSha256": "e07279c72b2c8ad8e0c567a1e82b9167308fb8b5a80a7b1361700dd6e314975b",
+    "source": "actual resolved two-parent merge worktree2480898+15963, not yet committed",
+    "result": "49 passed,1 failed,0skip:real Unix socket bind is denied EPERM by this local execution environment. Retain the public real bind test unchanged;formal Linux CI must execute it.",
+    "storedLog": {
+      "path": "internal/records/evidence/2026-11-23-sprint3-parallel-reconciliation/controls.log.gz",
+      "sha256": "feb3c58e20dce33c9bf1894f29681932237f3e740d68e7b334aab27c9fb6b01a"
+    }
+  }
+}

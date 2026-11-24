@@ -146,6 +146,23 @@ for (const name of ['ordinary', 'plain', 'validation', 'roundtrip', 'scalars'])
     name,
     emit(name, readFileSync(path.join(fixture, `${name}.proto.ts`), 'utf8')),
   ]);
+const externalScrollEntry = path.join(fixture, 'external-scroll.proto.ts');
+const externalScroll = await compileFile(externalScrollEntry, {
+  root: repository,
+  profile: 'gpui-source-v1',
+  nativeSdkPath: '../transition/.proto-ui/gpui-native',
+});
+if (!externalScroll.ok)
+  throw new Error(`external_scroll: ${JSON.stringify(externalScroll.diagnostics)}`);
+dependencies.push([
+  'external_scroll',
+  retainModule(
+    'external_scroll',
+    readFileSync(externalScrollEntry, 'utf8'),
+    externalScroll.value.ir,
+    externalScroll.value.output
+  ),
+]);
 dependencies.push([
   'scroll_reader',
   emit('scroll_reader', readFileSync(path.join(fixture, 'scroll-reader.proto.ts'), 'utf8')),
@@ -153,6 +170,10 @@ dependencies.push([
 dependencies.push([
   'public_mutation',
   emit('public_mutation', readFileSync(path.join(fixture, 'public-mutation.proto.ts'), 'utf8')),
+]);
+dependencies.push([
+  'external_scroll',
+  emit('external_scroll', readFileSync(path.join(fixture, 'external-scroll.proto.ts'), 'utf8')),
 ]);
 const hookOnceSource = readFileSync(path.join(fixture, 'hook-once.proto.ts'), 'utf8');
 for (const [name, exportName] of [

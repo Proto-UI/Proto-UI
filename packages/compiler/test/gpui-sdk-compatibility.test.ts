@@ -68,6 +68,31 @@ afterEach(async () => {
 
 describe('shared GPUI SDK compatibility', () => {
   it.each([false, true])(
+    'emits one ControlLabel owner and one module field (workspace=%s)',
+    (workspace) => {
+      const owner = component(undefined, workspace).output.supportingFiles!.find((file) =>
+        file.path.endsWith('gpui-native-owner.rs')
+      )!.contents;
+      // A syntactically valid TypeScript concatenation can duplicate an entire
+      // Rust source fragment. Check the artifact consumers actually compile.
+      // The native Cargo lanes remain the compile and behavior oracle.
+      for (const name of [
+        'ControlLabelRef',
+        'ControlLabelGroup',
+        'InstanceAssociations',
+        'ControlLabelModule',
+        'ControlLabelRequest',
+        'ControlLabelPointer',
+      ]) {
+        expect(owner.match(new RegExp(`\\bstruct ${name}\\b`, 'g')) ?? [], name).toHaveLength(1);
+      }
+      const modules = owner.match(/pub struct Modules\s*\{([^}]+)\}/)?.[1];
+      expect(modules, 'the emitted native module owner').toBeDefined();
+      expect(modules!.match(/\bcontrol_label\s*:/g) ?? []).toHaveLength(1);
+    }
+  );
+
+  it.each([false, true])(
     'requires a separate opt-in for native text selection notification (workspace=%s)',
     (workspace) => {
       const files = component(undefined, workspace).output.supportingFiles!;

@@ -60,8 +60,22 @@ export function createNumberFieldFormat(
       ...options,
     });
     const resolved = formatter.resolvedOptions();
+    // Numeric symbols and group widths can depend on style, not only locale:
+    // fr-CH currency uses a different decimal separator, and Bengali percent
+    // uses groups of three rather than its decimal 3/2 pattern. Probe the
+    // selected style with an explicit fraction so display rounding cannot hide
+    // the editing separator (including percent's integer-scaled probe).
     const symbols = new Intl.NumberFormat(resolved.locale, {
+      style: resolved.style,
+      ...(resolved.style === 'currency'
+        ? {
+            currency: resolved.currency,
+            currencyDisplay: resolved.currencyDisplay,
+            currencySign: resolved.currencySign,
+          }
+        : {}),
       useGrouping: true,
+      minimumFractionDigits: 1,
       maximumFractionDigits: 2,
     }).formatToParts(-1234567890123.45);
     const decimal = clean(symbols.find((part) => part.type === 'decimal')?.value ?? '.');

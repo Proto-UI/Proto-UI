@@ -50,7 +50,11 @@ function setup(def: DefHandle<ProgressRootProps, ProgressRootExposes>) {
     status: '',
     valueText: '',
   });
+  let syncRevision = 0;
   const sync = (run: RunHandle<ProgressRootProps>) => {
+    // Public State observers can synchronously replace props or retire the view.
+    // Only the latest synchronization may continue publishing derived facts.
+    const revision = ++syncRevision;
     const p = run.props.get(),
       bounds = range(p.min, p.max),
       value = clamp(finite(p.value, bounds.min), bounds.min, bounds.max);
@@ -63,16 +67,30 @@ function setup(def: DefHandle<ProgressRootProps, ProgressRootExposes>) {
       status,
       valueText: p.valueText || (indeterminate ? '' : String(value)),
     };
-    for (const key of Object.keys(states) as (keyof typeof states)[])
+    for (const key of Object.keys(states) as (keyof typeof states)[]) {
       states[key].set(next[key] as never, 'reason: progress range synchronization');
+      if (revision !== syncRevision) return;
+    }
     label.set(p.ariaLabel ?? '', 'reason: progress name');
+    if (revision !== syncRevision) return;
     valueMin.set(bounds.min, 'reason: progress minimum');
+    if (revision !== syncRevision) return;
     valueMax.set(bounds.max, 'reason: progress maximum');
+    if (revision !== syncRevision) return;
     valueNow.set(indeterminate ? '' : String(value), 'reason: progress current value');
+    if (revision !== syncRevision) return;
     valueText.set(next.valueText, 'reason: progress value text');
+    if (revision !== syncRevision) return;
     run.context.update(PROGRESS_CONTEXT, next);
   };
   def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
+  def.lifecycle.onUnmounted(() => {
+    syncRevision++;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    syncRevision++;
+  });
   def.props.watchAll(sync);
   return (r: RendererHandle<any>) => r.slot();
 }

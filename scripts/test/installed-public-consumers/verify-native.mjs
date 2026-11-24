@@ -495,9 +495,13 @@ async function tooltipCase(page, row, group, screenshot) {
 export async function assertSelectCommit(root, value) {
   await until(() => root.getAttribute('data-value'), 'vue', 'native Enter commits Vue');
   assert.equal(await root.getAttribute('data-text-value'), 'Vue');
-  // Root attributes may commit before the framework's rendered child text.
-  // Observe the same public value through the existing bounded polling owner.
-  await until(() => value.textContent(), 'Vue', 'native committed value is displayed');
+  // Exposed semantic state can project before the host commits rendered children.
+  await until(
+    () => value.textContent(),
+    'Vue',
+    'committed selection reaches rendered Select Value'
+  );
+  assert.equal(await value.textContent(), 'Vue');
   assert.equal(await root.getAttribute('data-value'), 'vue');
   assert.equal(await root.getAttribute('data-text-value'), 'Vue');
 }

@@ -1,0 +1,67 @@
+{
+  "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "startedAt": "2026-11-24T03:25:56.944Z",
+  "scope": "One complete unchanged eight-case public Base Tooltip file on an owned production build; not the complete Sprint 3 profile.",
+  "source": {
+    "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+    "tree": "3a4e220c6c5dc5b66bcd902540cd75cdb0ba8337",
+    "trackedStatus": "",
+    "lockSha256": "6e21c4b8444ca5e4a2e427287a76a346137b65d76403579942269bfea1fc7fe8",
+    "node": "v24.22.3",
+    "pnpm": "10.32.1",
+    "chrome": "Google Chrome for Testing 145.0.7632.6",
+    "runnerSha256": "72d915e463f1c2da0f95a019ee948eaf0e5a39957fecc55cd0ff5fde3a329e59",
+    "nativeTestSha256": "9305d3fdd577ba652a415d0982158c808074f119059a9a97bb95e1c9c1883020"
+  },
+  "cliBuild": {
+    "exitCode": 0,
+    "signal": null,
+    "stopReason": null,
+    "spawnError": null,
+    "ioError": null,
+    "elapsedMs": 3685
+  },
+  "docsBuild": {
+    "exitCode": 0,
+    "signal": null,
+    "stopReason": null,
+    "spawnError": null,
+    "ioError": null,
+    "elapsedMs": 245913
+  },
+  "preview": {
+    "owner": "This bounded runner and its exclusive loopback listener",
+    "head": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+    "origin": "http://127.0.0.1:40113",
+    "probePath": "/en/ui-libraries/base/tooltip/",
+    "probeSha256": "6b0cb3b19896d23388ac2c731b62d3d636a89c55b7c8b0412fcd151f31c5e167",
+    "distManifestSha256": "67efa8f2b7bf3ebdddc0394dd0aeb404941611858ad1762f2bcfcaf705998a77"
+  },
+  "native": {
+    "exitCode": 1,
+    "signal": null,
+    "stopReason": null,
+    "spawnError": null,
+    "ioError": null,
+    "elapsedMs": 5935
+  },
+  "problems": [
+    "numPassedTests: expected 8, received 0.",
+    "numPendingTests: expected 0, received 8.",
+    "Vitest did not report success.",
+    "The complete case inventory did not pass.",
+    "AssertionError [ERR_ASSERTION]: Native producer failed or interrupted\n    at file:///var/tmp/proto-ui-native-evidence-456f/run-production-base-tooltip8.mjs:41:57\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)"
+  ],
+  "counts": {
+    "success": false,
+    "numTotalTests": 8,
+    "numPassedTests": 0,
+    "numFailedTests": 0,
+    "numPendingTests": 8
+  },
+  "result": "failed",
+  "previewRetired": true,
+  "headAfter": "cd684a20ba60c1f382c88eeaea5b25eb29a0f6c5",
+  "trackedStatusAfter": "",
+  "finishedAt": "2026-11-24T03:30:13.536Z"
+}

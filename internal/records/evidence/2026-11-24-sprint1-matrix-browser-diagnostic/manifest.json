@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "archive": "raw-evidence.zip",
+  "bytes": 146117,
+  "sha256": "498143c25d6f3ade469ed3081a82b1bfc0359a4575ae0bdf39579e360f629f96",
+  "entryCount": 37,
+  "sourceAndRuns": {
+    "schema": 1,
+    "checkoutShaAtSnapshot": "f14bdf350b0fed011b4817a60f691fc884436982",
+    "workingTree": "shared dirty diagnostic candidate; source snapshots identify exact files, not a clean-head native pass",
+    "node": "v24.22.3",
+    "vitest": "2.1.9",
+    "playwrightCore": "1.58.2",
+    "source": [
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.ts",
+        "sha256": "c395360bed75a4603a7db75cbd1b8512e8d7cc9b72c02d3b64f9c40fc5439148"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+        "sha256": "cf3a972468f07b0d1761a36c8ceaa1340cacf72af6102de2b6752470b9d6279d"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.ts",
+        "sha256": "a45d7fef32fe7d1ea560ac42ae205e7ea6c731918a64790f5792cf0799b037e5"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+        "sha256": "6d7cb38a547eefd74669bf39b6e2db33da97f079330f7363f523117664c8c427"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts",
+        "sha256": "8c9d5ca64e22f93aeed4b13945a2bd3eb9bf6f2cd2230b2b18ed0911a1b77a61"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-matrix-activation.ts",
+        "sha256": "4ed8116369f2fee3872be81dabdaf4c6ad22de3bf74694f5091066637687dcb5"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/browser-harness.ts",
+        "sha256": "3033dd603ba75486310cb6f466e72e5e3b02bef111c406b1f68fcf2987247c71"
+      }
+    ],
+    "commands": [
+      {
+        "id": "browser-diagnostic-first",
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+          "--no-file-parallelism",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-diagnostic-first.json"
+        ],
+        "exitCode": 0,
+        "report": "browser-diagnostic-first.json",
+        "log": "browser-diagnostic-first.log",
+        "total": 35,
+        "passed": 35,
+        "failed": 0,
+        "pending": 0,
+        "interpretation": "source-bound selected control or full diagnostic suite"
+      },
+      {
+        "id": "browser-detach-red",
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "--no-file-parallelism",
+          "--testNamePattern=already-started bounded cleanup",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-detach-red.json"
+        ],
+        "exitCode": 1,
+        "report": "browser-detach-red.json",
+        "log": "browser-detach-red.log",
+        "total": 12,
+        "passed": 0,
+        "failed": 1,
+        "pending": 11,
+        "interpretation": "fake-clock/filesystem interference; not a valid detach timing control"
+      },
+      {
+        "id": "browser-detach-red-final",
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "--no-file-parallelism",
+          "--testNamePattern=already-started bounded cleanup",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-detach-red-final.json"
+        ],
+        "exitCode": 1,
+        "report": "browser-detach-red-final.json",
+        "log": "browser-detach-red-final.log",
+        "total": 12,
+        "passed": 0,
+        "failed": 1,
+        "pending": 11,
+        "interpretation": "fake-clock/filesystem interference; not a valid detach timing control"
+      },
+      {
+        "id": "browser-diagnostic-green",
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+          "--no-file-parallelism",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-diagnostic-green.json"
+        ],
+        "exitCode": 0,
+        "report": "browser-diagnostic-green.json",
+        "log": "browser-diagnostic-green.log",
+        "total": 36,
+        "passed": 36,
+        "failed": 0,
+        "pending": 0,
+        "interpretation": "source-bound selected control or full diagnostic suite"
+      },
+      {
+        "id": "browser-detach-real-red",
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "--config",
+          "/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-before-detach.config.mts",
+          "--no-file-parallelism",
+          "--testNamePattern=already-started bounded cleanup",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-detach-real-red.json"
+        ],
+        "exitCode": 1,
+        "report": "browser-detach-real-red.json",
+        "log": "browser-detach-real-red.log",
+        "total": 12,
+        "passed": 0,
+        "failed": 1,
+        "pending": 11,
+        "interpretation": "source-bound selected control or full diagnostic suite"
+      },
+      {
+        "id": "browser-diagnostic-final-green",
+        "command": [
+          "node",
+          "node_modules/vitest/vitest.mjs",
+          "run",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+          "--no-file-parallelism",
+          "--reporter=json",
+          "--outputFile=/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-diagnostic-final-green.json"
+        ],
+        "exitCode": 0,
+        "report": "browser-diagnostic-final-green.json",
+        "log": "browser-diagnostic-final-green.log",
+        "total": 36,
+        "passed": 36,
+        "failed": 0,
+        "pending": 0,
+        "interpretation": "source-bound selected control or full diagnostic suite"
+      },
+      {
+        "id": "browser-diagnostic-types-final",
+        "command": [
+          "node",
+          "node_modules/typescript/bin/tsc",
+          "-p",
+          "/workspace/scratch/62ffef219b8e/matrix-diagnosis/browser-tsconfig.json",
+          "--noEmit"
+        ],
+        "exitCode": 0,
+        "log": "browser-diagnostic-types-final.log"
+      },
+      {
+        "id": "browser-diagnostic-format-final",
+        "command": [
+          "node",
+          "node_modules/prettier/bin/prettier.cjs",
+          "--check",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-browser-diagnostic.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts",
+          "apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts"
+        ],
+        "exitCode": 0,
+        "log": "browser-diagnostic-format-final.log"
+      }
+    ],
+    "primaryLocalDocumentation": [
+      {
+        "path": "apps/www/node_modules/playwright-core/types/types.d.ts",
+        "sha256": "af3c4dcb64b945e01285bc0494e1cfa384fac43b08713a56fc3043c8f861553a"
+      },
+      {
+        "path": "apps/www/node_modules/playwright-core/types/protocol.d.ts",
+        "sha256": "99a323dc5a6e506c78b69913b32beba93453bcd87aae8b507520234f387a4c30"
+      },
+      {
+        "path": "apps/www/node_modules/playwright-core/lib/server/chromium/crBrowser.js",
+        "sha256": "f614dfd5875ea41bcd98d1f16b789c41e24c50298d32d63aa06731cbc580736e"
+      }
+    ],
+    "primaryWebCheck": {
+      "url": "https://chromium.googlesource.com/chromium/src/+/main/base/trace_event/trace_config_category_filter.cc",
+      "observedBlob": "470dbbb42f78c3975920b95cc7143394339ccf5e",
+      "finding": "Explicitly included categories take priority over excluded wildcard; this is category selection only, not evidence the current browser produced trace events."
+    },
+    "review": {
+      "reviewer": "/root/props_policy",
+      "sourceSha256": "c395360bed75a4603a7db75cbd1b8512e8d7cc9b72c02d3b64f9c40fc5439148",
+      "scope": "Independent read of CPU/Trace sessions, late setup/response retirement, idempotent finish and shared bounded cleanup, stop/flush admission, absolute180s owner limit. No blocker found. Did not rerun36 or open native browser; no formal GitHub approval."
+    },
+    "unchangedAcceptance": {
+      "originalInitializationLimitMs": 60000,
+      "historicalPreviewDenominator": 1308,
+      "observed333fPreviewInventory": 1364,
+      "activationByteIdenticalTo333f": true
+    },
+    "nativeNewDiagnostic": "not yet executed; unit mocks do not establish browser support, retained native samples, cause or readiness"
+  },
+  "originalArtifact": {
+    "file": "matrix-333f.zip",
+    "bytes": 54180,
+    "sha256": "0e32de1e728f6912978baa77ac722e28fbf40524af93cd94fdb88223ae404a40"
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "kind": "sprint1-general-ci-partition",
+  "scope": "Original cancelled general evidence plus bounded scheduling/source-receipt implementation controls. No new full-runtime pass claimed.",
+  "archive": {
+    "path": "raw-evidence.zip",
+    "bytes": 1256142,
+    "sha256": "df39ce6141f83bcda70817c02646fbd3307e9cc1ca7ad5b47968059d630f1d4c",
+    "entries": 29
+  },
+  "originalLog": {
+    "compressedBytes": 1127474,
+    "compressedSha256": "0a1a37ab36342d7141943536d0f082442a3eb79e0a68fc07689e8a10e8d1c353",
+    "rawBytes": 10560569,
+    "rawSha256": "555e36a4002190c628e4c124e2c536c3fbe78efccae9d5532a9f1218da568be2",
+    "lineCount": 90077
+  },
+  "source": {
+    "head": "6ccb36ad473b72e75b3b86ee9ea5a5989b73ac5b",
+    "dirtyWorktree": true,
+    "ownedSources": {
+      ".github/workflows/ci.yml": "8177172d45d19969a25dc48cc4b5858a75f191c1719f51c229ac31ce4650dbcb",
+      "scripts/test/general-check-plan.mjs": "486dd84d2bc78ef1fd5b7d7f0fe67e3b7e0696d1c4303a23c6053464aa5619cf",
+      "scripts/test/general-ci.mjs": "e5d12a096bf7a23d4cc44bba567fdcbab98e520e19fea3b9431963da7bb4bdac",
+      "scripts/test/runtime-ci.mjs": "ecd2c5cc4d8eb004f83a59f56f0f4f304bc744a6cf100eca4011c61f743e29f0",
+      "scripts/test/regression-baseline.test.mjs": "f28daac9d51911e62b03b3fbad00a5aa20b4110acd73b4388f6fe43cb0232253",
+      "scripts/test/run-runtime-tests.test.mjs": "bedf8d3c3ee6cf1261db9da963de7814ec28b7e8953f988c6fb0f78c56dc1e6a"
+    },
+    "supportingSources": {
+      "package.json": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b",
+      "apps/www/package.json": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6",
+      "scripts/test/runtime-test-plan.mjs": "0a88f1950a5ebb3f0fe19f7672afaf7591e21c9a36b269d38f1710a706b3c25e",
+      "scripts/test/runtime-inventory.mjs": "106326052611384cb1120ce04fdc8db6c84b4bfa6cfb50dc0a15f898a6a22d96",
+      "scripts/test/runtime-observation.mjs": "8b9512a724177f442aa3227af91ae9e22b3b92a99e4604e6110db34953b7d990",
+      "apps/www/test/helpers/generated-stylesheet.ts": "47116dc5adecfd4652a5e7dd81f58fb29dec0e9b7278c84b0c69db77b5475758",
+      "scripts/ci/check-ci-schedule.mjs": "b4d5ccbb24aed597c1cea3c916d2d5cc88285ba6b4a28c47a108c248b4e09132",
+      "scripts/ci/cycle-job-inventory.mjs": "95ea6d4163f36d5c61670cbc7d21b8a39c2c8e86bd192fff5c276142324fc5d0",
+      "scripts/ci/cycle-report.mjs": "856b71feac5ee32f66555f2d32c067583767f4671d42e2161bc61d889e2fd52d"
+    },
+    "note": "Exact local source snapshot; not a clean published commit or full CI receipt. Tests bound to reviewed hashes; final YAML has the two documented comment-only clarifications."
+  },
+  "entries": [
+    {
+      "path": "old81-general.log.gz",
+      "bytes": 1127474,
+      "sha256": "0a1a37ab36342d7141943536d0f082442a3eb79e0a68fc07689e8a10e8d1c353"
+    },
+    {
+      "path": "old81-general-readback.json",
+      "bytes": 10859,
+      "sha256": "bf5eed9156ba139d63b9c210b8110ea382a024347a0780e63367b67c2f5ae1c5"
+    },
+    {
+      "path": "old81-general-quantified.json",
+      "bytes": 5981,
+      "sha256": "f6b81695f2ac4b6d4305176938d16b5d0471bef06147857fcbe5343bc6fbdbe8"
+    },
+    {
+      "path": "old81-general-selection.json",
+      "bytes": 129186,
+      "sha256": "38b995f94a91bd59faba3ff92ad2be083ba7615de5fa77ea34b42b42d80fb15d"
+    },
+    {
+      "path": "old81-archive-verified.json",
+      "bytes": 252,
+      "sha256": "4e84208b8146eded9c0fc10b7608f45e1ef0936ad37272285aa633b266187c10"
+    },
+    {
+      "path": "controls-first.tap",
+      "bytes": 19290,
+      "sha256": "41e41ee08270ab0f89f0abf8da9214d8509add5ffa72951557158f28cca00989"
+    },
+    {
+      "path": "commands.json",
+      "bytes": 1231,
+      "sha256": "1ed483001d5100745806a52447d4b81066fd6981b12e0ba6e64add23b6868dab"
+    },
+    {
+      "path": "command-inventory.json",
+      "bytes": 7720,
+      "sha256": "63dc15a19edca69cc87bac5e29c48d14e3379fcc58db4e9610ae5d8941841bf0"
+    },
+    {
+      "path": "runtime-inventory-snapshot.json",
+      "bytes": 143585,
+      "sha256": "22f215e09b1e32e637684b2e204749450c69678cd079264255286fd402bcef82"
+    },
+    {
+      "path": "inventory-comparison.json",
+      "bytes": 1358,
+      "sha256": "b1a762d4a2c2b7612b785b2c699c518816fa33817fd5d7b3303961fb2d1bb577"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 1194,
+      "sha256": "23f67baebb36b306780415eb662b51db715201a42bea5eb546a88d67e4e8675d"
+    },
+    {
+      "path": "reviewed-ci.yml",
+      "bytes": 46767,
+      "sha256": "37c5583a714ff547c265571ef83b8b229a6bb1c322c5c2679d7dd41029174457"
+    },
+    {
+      "path": "source-snapshot.json",
+      "bytes": 1929,
+      "sha256": "61d87c7de56216188461dc22bd03197c7dbc669ef90a6ce907d9dfae05df4b7d"
+    },
+    {
+      "path": "changes.patch",
+      "bytes": 32948,
+      "sha256": "068ff8c79b077d369fbfec8b1700ad2a9f8f09ad0f5531ea4294a7d847924cf7"
+    },
+    {
+      "path": "source/.github/workflows/ci.yml",
+      "bytes": 46831,
+      "sha256": "8177172d45d19969a25dc48cc4b5858a75f191c1719f51c229ac31ce4650dbcb"
+    },
+    {
+      "path": "source/apps/www/package.json",
+      "bytes": 2970,
+      "sha256": "b9098c9bdfe94c513c7520ace0c63c1137b19f3b6284c1f06a157afda51b6db6"
+    },
+    {
+      "path": "source/apps/www/test/helpers/generated-stylesheet.ts",
+      "bytes": 1716,
+      "sha256": "47116dc5adecfd4652a5e7dd81f58fb29dec0e9b7278c84b0c69db77b5475758"
+    },
+    {
+      "path": "source/package.json",
+      "bytes": 11274,
+      "sha256": "d026b1c052fd938af98c09c06436bc2efdc60da34c87fda0bfd358735b47332b"
+    },
+    {
+      "path": "source/scripts/ci/check-ci-schedule.mjs",
+      "bytes": 11748,
+      "sha256": "b4d5ccbb24aed597c1cea3c916d2d5cc88285ba6b4a28c47a108c248b4e09132"
+    },
+    {
+      "path": "source/scripts/ci/cycle-job-inventory.mjs",
+      "bytes": 2412,
+      "sha256": "95ea6d4163f36d5c61670cbc7d21b8a39c2c8e86bd192fff5c276142324fc5d0"
+    },
+    {
+      "path": "source/scripts/ci/cycle-report.mjs",
+      "bytes": 17437,
+      "sha256": "856b71feac5ee32f66555f2d32c067583767f4671d42e2161bc61d889e2fd52d"
+    },
+    {
+      "path": "source/scripts/test/general-check-plan.mjs",
+      "bytes": 4254,
+      "sha256": "486dd84d2bc78ef1fd5b7d7f0fe67e3b7e0696d1c4303a23c6053464aa5619cf"
+    },
+    {
+      "path": "source/scripts/test/general-ci.mjs",
+      "bytes": 4960,
+      "sha256": "e5d12a096bf7a23d4cc44bba567fdcbab98e520e19fea3b9431963da7bb4bdac"
+    },
+    {
+      "path": "source/scripts/test/regression-baseline.test.mjs",
+      "bytes": 16339,
+      "sha256": "f28daac9d51911e62b03b3fbad00a5aa20b4110acd73b4388f6fe43cb0232253"
+    },
+    {
+      "path": "source/scripts/test/run-runtime-tests.test.mjs",
+      "bytes": 81628,
+      "sha256": "bedf8d3c3ee6cf1261db9da963de7814ec28b7e8953f988c6fb0f78c56dc1e6a"
+    },
+    {
+      "path": "source/scripts/test/runtime-ci.mjs",
+      "bytes": 13580,
+      "sha256": "ecd2c5cc4d8eb004f83a59f56f0f4f304bc744a6cf100eca4011c61f743e29f0"
+    },
+    {
+      "path": "source/scripts/test/runtime-inventory.mjs",
+      "bytes": 421,
+      "sha256": "106326052611384cb1120ce04fdc8db6c84b4bfa6cfb50dc0a15f898a6a22d96"
+    },
+    {
+      "path": "source/scripts/test/runtime-observation.mjs",
+      "bytes": 3573,
+      "sha256": "8b9512a724177f442aa3227af91ae9e22b3b92a99e4604e6110db34953b7d990"
+    },
+    {
+      "path": "source/scripts/test/runtime-test-plan.mjs",
+      "bytes": 33049,
+      "sha256": "0a88f1950a5ebb3f0fe19f7672afaf7591e21c9a36b269d38f1710a706b3c25e"
+    }
+  ]
+}

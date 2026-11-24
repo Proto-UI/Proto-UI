@@ -114,13 +114,36 @@ describe.each(['document', 'shadow'] as const)('Brutalist resident Switch %s', (
               };
             };
             (window as any).switchSubject = { root, thumb, sample, surface, p };
-            (window as any).trace = async (duration: number) => {
+            // The resident motion paints its settled geometry inside the frame
+            // that completes the animation. This trace callback is registered
+            // before the motion's own frame callback, so a fixed wall-clock
+            // window can end on that completion frame and never observe the
+            // settled Thumb. Sample until the observed position stops moving,
+            // bounded by a ceiling so a stalled motion cannot wait forever.
+            (window as any).trace = async (duration: number, ceiling = 1000) => {
               const start = performance.now(),
-                samples = [sample()];
-              do {
+                samples = [sample()],
+                minimum = start + duration,
+                limit = minimum + ceiling;
+              let moving = false,
+                stable = 0;
+              while (true) {
+                if (moving ? performance.now() >= limit : performance.now() >= minimum) break;
                 await new Promise(requestAnimationFrame);
-                samples.push(sample());
-              } while (performance.now() - start < duration);
+                const next = sample();
+                samples.push(next);
+                const previous = samples[samples.length - 2]!;
+                if (next.x !== previous.x || next.checked !== previous.checked) {
+                  moving = true;
+                  stable = 0;
+                  continue;
+                }
+                if (!moving) continue;
+                stable += 1;
+                // Unchanged frames after the motion began mean the resident
+                // motion settled and its final geometry is painted.
+                if (stable >= 3) break;
+              }
               return samples;
             };
           },

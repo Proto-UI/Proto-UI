@@ -6,6 +6,8 @@ import { fileURLToPath, URL as NodeURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import * as Vue from 'vue';
 import { parsePrototype } from '../src/parser';
+import { compileFile } from '../src/compile';
+import type { ExpressionIR } from '../src/ir';
 import { emitVueSource } from '../src/vue-source';
 
 const floatingUi = createRequire(
@@ -51,6 +53,25 @@ export default definePrototype({name:'optional',setup(def){
   def.props.watch(['write'],(run,next)=>{run.expose.emit('result',run.context.tryUpdate(OTHER,{value:next.write}));});
   return (r)=>{const value=r.read.context.tryRead(OTHER);return r.el('aside',{},value?.value ?? 'disconnected');};
 }});`;
+
+function capturedContextSource(operation: 'subscribe' | 'trySubscribe'): string {
+  const read = operation === 'subscribe' ? 'read' : 'tryRead';
+  return `import {definePrototype,defineHook} from '@proto.ui/core';import {KEY} from './keys';
+const listen=defineHook({name:'captured-context',mode:'once',setup(def){
+  const value=def.state.numberDiscrete('value',-1);
+  def.expose.state('value',value);def.expose.event('changed',{payload:'json'});
+  def.context.${operation}(KEY,(run,next,prev)=>{
+    value.set(next?.value ?? -1);
+    run.expose.emit('changed',{next:next?.value ?? -1,prev:prev?.value ?? -1});
+    run.update();
+  });
+  def.lifecycle.onCreated((run)=>{value.set(run.context.${read}(KEY)?.value ?? -1);});
+}});
+export default definePrototype({name:'captured-context-consumer',setup(){
+  listen();listen();
+  return (r)=>r.el('output',{},r.read.context.${read}(KEY)?.value ?? -1);
+}});`;
+}
 
 // Every emitted source module in this project is evaluated once, including shared key modules.
 function project(): (source: string, name: string) => Vue.Component {
@@ -300,5 +321,186 @@ describe('Vue3 generated Context composition', () => {
     } finally {
       app.unmount();
     }
+  });
+
+  it.each(['subscribe', 'trySubscribe'] as const)(
+    'retains captured %s keys, delivery and disposal in real Vue owners',
+    async (operation) => {
+      const build = project();
+      const Provider = build(provider, 'captured-provider');
+      const Consumer = build(capturedContextSource(operation), 'captured-consumer');
+      const seed = Vue.ref(2),
+        show = Vue.ref(true),
+        handle = Vue.shallowRef<Handle>();
+      const transitions: unknown[] = [];
+      const host = document.createElement('div');
+      const app = Vue.createApp({
+        setup() {
+          return () =>
+            Vue.h(
+              Provider,
+              { seed: seed.value },
+              {
+                default: () =>
+                  show.value
+                    ? Vue.h(Consumer, {
+                        ref: handle,
+                        onChanged: (value: unknown) => transitions.push(value),
+                      })
+                    : null,
+              }
+            );
+        },
+      });
+      app.mount(host);
+      try {
+        await settle();
+        expect(handle.value!.getExposes().value.get()).toBe(2);
+        expect(host.querySelector('output')?.textContent).toBe('2');
+        seed.value = 3;
+        await settle();
+        expect(transitions).toEqual([{ next: 3, prev: 2 }]);
+        expect(handle.value!.getExposes().value.get()).toBe(3);
+        const retired = handle.value!.getExposes().value;
+        show.value = false;
+        await settle();
+        expect(() => retired.get()).toThrow(/disposed/);
+        seed.value = 4;
+        await settle();
+        expect(transitions).toEqual([{ next: 3, prev: 2 }]);
+        show.value = true;
+        await settle();
+        expect(handle.value!.getExposes().value.get()).toBe(4);
+        seed.value = 5;
+        await settle();
+        expect(transitions).toEqual([
+          { next: 3, prev: 2 },
+          { next: 5, prev: 4 },
+        ]);
+      } finally {
+        app.unmount();
+      }
+      const missing = Vue.createApp(Consumer);
+      const errors: unknown[] = [];
+      missing.config.errorHandler = (error) => errors.push(error);
+      const disconnected = document.createElement('div');
+      missing.mount(disconnected);
+      try {
+        await settle();
+        if (operation === 'subscribe')
+          expect(
+            errors.some(
+              (error) => error instanceof Error && /provider|Context|context/.test(error.message)
+            )
+          ).toBe(true);
+        else {
+          expect(errors).toEqual([]);
+          expect(disconnected.querySelector('output')?.textContent).toBe('-1');
+        }
+      } finally {
+        missing.unmount();
+      }
+    }
+  );
+
+  it('generates the unchanged public Shadcn Button with its declared Context subscription', async () => {
+    const result = await compileFile('packages/prototypes/shadcn/src/button/button.proto.ts', {
+      root: fileURLToPath(new NodeURL('../../../', import.meta.url)),
+      profile: 'vue-source-v1',
+    });
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    const key = result.value.ir.contextKeys.find((entry) => entry.name === 'shadcn-style-scope');
+    expect(key).toBeDefined();
+    const subscriptions: Extract<ExpressionIR, { kind: 'operation' }>[] = [];
+    const seen = new WeakSet<object>();
+    const visit = (value: unknown): void => {
+      if (!value || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      const operation = value as ExpressionIR;
+      if (operation.kind === 'operation' && operation.operation === 'context.trySubscribe')
+        subscriptions.push(operation);
+      Object.values(value).forEach(visit);
+    };
+    visit(result.value.ir);
+    expect(
+      subscriptions.some(
+        (operation) =>
+          operation.arguments[0]?.kind === 'context-key' && operation.arguments[0].keyId === key!.id
+      )
+    ).toBe(true);
+    const output = result.value.output;
+    const keyArtifact = output.supportingFiles?.find(
+      (file) =>
+        file.path.startsWith('.proto-ui/context/key-') &&
+        file.contents.includes(JSON.stringify(key!.id))
+    );
+    expect(keyArtifact).toBeDefined();
+    const source = ts.createSourceFile('Button.ts', output.code, ts.ScriptTarget.Latest, true);
+    const keyImport = source.statements.find(
+      (statement) =>
+        ts.isImportDeclaration(statement) &&
+        ts.isStringLiteral(statement.moduleSpecifier) &&
+        statement.moduleSpecifier.text.replace(/^\.\//, '') ===
+          keyArtifact!.path.replace(/\.ts$/, '')
+    );
+    if (!keyImport || !ts.isImportDeclaration(keyImport))
+      throw new Error('Missing generated Shadcn Context key import');
+    const bindings = keyImport.importClause?.namedBindings;
+    if (!bindings || !ts.isNamedImports(bindings))
+      throw new Error('Missing generated Context key binding');
+    const keyBinding = bindings.elements.find(
+      (entry) => (entry.propertyName ?? entry.name).text === 'key'
+    )?.name.text;
+    expect(keyBinding).toBeDefined();
+    const emittedSubscriptions: ts.CallExpression[] = [];
+    const inspect = (node: ts.Node): void => {
+      if (
+        ts.isCallExpression(node) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === 'subscribe' &&
+        node.arguments[0] &&
+        ts.isIdentifier(node.arguments[0]) &&
+        node.arguments[1] &&
+        ts.isStringLiteral(node.arguments[1]) &&
+        node.arguments[1].text === 'optional'
+      ) {
+        const temporary = node.arguments[0].text;
+        let block: ts.Node | undefined = node.parent;
+        while (block && !ts.isBlock(block)) block = block.parent;
+        if (
+          block &&
+          ts.isBlock(block) &&
+          block.statements.some(
+            (statement) =>
+              ts.isVariableStatement(statement) &&
+              statement.declarationList.declarations.some(
+                (declaration) =>
+                  ts.isIdentifier(declaration.name) &&
+                  declaration.name.text === temporary &&
+                  declaration.initializer &&
+                  ts.isIdentifier(declaration.initializer) &&
+                  declaration.initializer.text === keyBinding
+              )
+          )
+        )
+          emittedSubscriptions.push(node);
+      }
+      ts.forEachChild(node, inspect);
+    };
+    inspect(source);
+    expect(emittedSubscriptions).toHaveLength(1);
+  });
+
+  it('still rejects an absent Context declaration before capture emission', () => {
+    const parsed = parsePrototype(capturedContextSource('subscribe'), {
+      fileName: 'invalid-captured-context.proto.ts',
+      files,
+    });
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    parsed.value.contextKeys = [];
+    expect(emitVueSource(parsed.value)).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI2002' }],
+    });
   });
 });
