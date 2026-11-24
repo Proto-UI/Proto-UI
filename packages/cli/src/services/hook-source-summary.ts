@@ -610,6 +610,37 @@ function isFunctionLike(node: ts.Node): node is ts.FunctionLikeDeclaration {
   return ts.isFunctionLike(node);
 }
 
+function isValueIdentifier(node: ts.Node): node is ts.Identifier {
+  if (!ts.isIdentifier(node)) return false;
+  const parent = node.parent;
+  if (!parent) return true;
+  if (ts.isPropertyAccessExpression(parent) && parent.name === node) return false;
+  if (ts.isBindingElement(parent) && parent.propertyName === node) return false;
+  if (
+    (ts.isVariableDeclaration(parent) ||
+      ts.isParameter(parent) ||
+      ts.isBindingElement(parent) ||
+      ts.isPropertyAssignment(parent) ||
+      ts.isPropertyDeclaration(parent) ||
+      ts.isMethodDeclaration(parent) ||
+      ts.isFunctionDeclaration(parent) ||
+      ts.isClassDeclaration(parent) ||
+      ts.isGetAccessorDeclaration(parent) ||
+      ts.isSetAccessorDeclaration(parent)) &&
+    parent.name === node
+  )
+    return false;
+  if (
+    (ts.isLabeledStatement(parent) ||
+      ts.isBreakStatement(parent) ||
+      ts.isContinueStatement(parent)) &&
+    parent.label === node
+  )
+    return false;
+  // A shorthand property is a value read, unlike an ordinary static key.
+  return true;
+}
+
 /**
  * `def.expose.state(key, handle)`. The runtime's named-state collection reads
  * these views from the same capture frame as the raw `def.state` entries, so a
@@ -1841,7 +1872,16 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
 
   const unknownRegistrationLiteral = Symbol('unproved registration literal');
   type UnprovedRegistrationLiteral = typeof unknownRegistrationLiteral;
-  type RegistrationLiteral = SetupLiteral | null | undefined | UnprovedRegistrationLiteral;
+  type RegistrationRecord = Readonly<{
+    kind: 'own-primitive-members';
+    members: ReadonlyMap<string, SetupLiteral | null>;
+  }>;
+  type RegistrationLiteral =
+    | SetupLiteral
+    | null
+    | undefined
+    | UnprovedRegistrationLiteral
+    | RegistrationRecord;
   const registrationLiteral = (
     node: ts.Node
   ): SetupLiteral | null | UnprovedRegistrationLiteral => {
@@ -2495,6 +2535,71 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         nativeValue(node.arguments[0], module, env)
       );
     };
+    const readonlyRecordParameters = new WeakMap<ts.ParameterDeclaration, boolean>();
+    const inlineRecordArgument = (
+      argument: ts.Expression | undefined,
+      parameter: ts.ParameterDeclaration,
+      helper: { fn: ts.FunctionLikeDeclaration; module: Module }
+    ): RegistrationRecord | null => {
+      if (!argument || !ts.isIdentifier(parameter.name) || parameter.dotDotDotToken) return null;
+      const object = unwrap(argument);
+      if (!ts.isObjectLiteralExpression(object) || hasDynamicRuleSource(helper.module.source))
+        return null;
+      const members = new Map<string, SetupLiteral | null>();
+      for (const property of object.properties) {
+        if (!ts.isPropertyAssignment(property) || ts.isComputedPropertyName(property.name))
+          return null;
+        const name = propertyName(property.name);
+        const value = registrationLiteral(property.initializer);
+        if (name === null || name === '__proto__' || members.has(name) || value === unknownLiteral)
+          return null;
+        members.set(name, value);
+      }
+      let readonly = readonlyRecordParameters.get(parameter);
+      if (readonly === undefined) {
+        const key = binding(parameter.name, helper.module);
+        readonly = !!key && !!helper.fn.body;
+        let observed = false;
+        const outer = (node: ts.Node): ts.Node => {
+          let current = node;
+          while (current.parent && unwrap(current.parent) === node) current = current.parent;
+          return current;
+        };
+        const visit = (node: ts.Node): void => {
+          if (!readonly || ts.isTypeNode(node)) return;
+          // The arguments object could alias the fresh record without naming
+          // this parameter. Deferred closures and direct eval are not admitted.
+          if (ts.isIdentifier(node) && node.text === 'arguments') {
+            readonly = false;
+            return;
+          }
+          if (isValueIdentifier(node) && binding(node, helper.module) === key) {
+            observed = true;
+            const reference = outer(node);
+            const access = reference.parent;
+            const condition = access ? outer(access) : undefined;
+            const holder = condition?.parent;
+            // This deliberately small proof admits direct own-member branch
+            // reads only. Writes, aliases, argument escapes and captures fail.
+            readonly =
+              ts.findAncestor(node, isFunctionLike) === helper.fn &&
+              !!access &&
+              ts.isPropertyAccessExpression(access) &&
+              !access.questionDotToken &&
+              access.expression === reference &&
+              !!holder &&
+              ((ts.isConditionalExpression(holder) && holder.condition === condition) ||
+                (ts.isIfStatement(holder) && holder.expression === condition));
+          }
+          ts.forEachChild(node, visit);
+        };
+        for (const entry of helper.fn.parameters) if (entry.initializer) visit(entry.initializer);
+        if (helper.fn.body) visit(helper.fn.body);
+        readonly = readonly && observed;
+        readonlyRecordParameters.set(parameter, readonly);
+      }
+      return readonly ? { kind: 'own-primitive-members', members } : null;
+    };
     const literal = (node: ts.Node | undefined, module: Module, env: Environment): Literal => {
       if (!node) return undefined;
       const value = unwrap(node);
@@ -2502,6 +2607,13 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       if (constant !== unknownLiteral) return constant;
       if (ts.isIdentifier(value) && value.text === 'undefined' && !binding(value, module))
         return undefined;
+      if (ts.isPropertyAccessExpression(value)) {
+        const owner = literal(value.expression, module, env);
+        if (owner !== null && typeof owner === 'object') {
+          const name = value.name.text;
+          return owner.members.has(name) ? owner.members.get(name)! : unknownLiteral;
+        }
+      }
       const key = ts.isIdentifier(value) ? binding(value, module) : undefined;
       return key && env.has(key) ? env.get(key)! : unknownLiteral;
     };
@@ -3105,6 +3217,15 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
               const key = binding(parameter.name, helper.module);
               if (key) {
                 let value = index < argumentValues.length ? argumentValues[index] : undefined;
+                if (
+                  helperCertain &&
+                  !opaque &&
+                  !node.questionDotToken &&
+                  !node.arguments.some(ts.isSpreadElement) &&
+                  value === unknownLiteral
+                ) {
+                  value = inlineRecordArgument(node.arguments[index], parameter, helper) ?? value;
+                }
                 let origin = argumentOrigins[index] ?? 'authored';
                 let held = parameter.dotDotDotToken ? undefined : argumentSources[index];
                 if (value === undefined && parameter.initializer) {
@@ -4641,36 +4762,6 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         if (binding && !hasBindingWrite(parameter.name, module))
           activeBindings.add(symbolKey(binding));
       }
-      const isValueIdentifier = (node: ts.Node): node is ts.Identifier => {
-        if (!ts.isIdentifier(node)) return false;
-        const parent = node.parent;
-        if (!parent) return true;
-        if (ts.isPropertyAccessExpression(parent) && parent.name === node) return false;
-        if (ts.isBindingElement(parent) && parent.propertyName === node) return false;
-        if (
-          (ts.isVariableDeclaration(parent) ||
-            ts.isParameter(parent) ||
-            ts.isBindingElement(parent) ||
-            ts.isPropertyAssignment(parent) ||
-            ts.isPropertyDeclaration(parent) ||
-            ts.isMethodDeclaration(parent) ||
-            ts.isFunctionDeclaration(parent) ||
-            ts.isClassDeclaration(parent) ||
-            ts.isGetAccessorDeclaration(parent) ||
-            ts.isSetAccessorDeclaration(parent)) &&
-          parent.name === node
-        )
-          return false;
-        if (
-          (ts.isLabeledStatement(parent) ||
-            ts.isBreakStatement(parent) ||
-            ts.isContinueStatement(parent)) &&
-          parent.label === node
-        )
-          return false;
-        // A shorthand property is a value read, unlike an ordinary static key.
-        return true;
-      };
       const isActiveStateFacadeExpression = (expression: ts.Node): boolean => {
         const value = unwrap(expression);
         if (ts.isIdentifier(value)) {
