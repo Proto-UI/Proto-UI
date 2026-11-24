@@ -1,0 +1,29 @@
+{
+  "retainedAt": "2026-11-24T12:44:01.230270+00:00",
+  "sourceSha256": "bf80bf18243267232bd8a516da3d1873e0754d91ac060ecc43ff63291ea694f0",
+  "focusedTypeResult": "passed; exit 0",
+  "command": "NODE_OPTIONS=--max-old-space-size=2048 corepack pnpm@10.32.1 exec tsc -p /workspace/scratch/40da939bdb35/recovered-evidence/mobile-inert-tsconfig.json --pretty false",
+  "nativeSiteJourney": "not yet executed on this correction",
+  "archive": {
+    "path": "internal/records/evidence/2026-11-24-release-followup/mobile-inert-oracle-validation.tar.gz",
+    "bytes": 1379,
+    "sha256": "4640e3aca20f871993a4d371fd4ae2ef01847c78b72e2429b04d9d22e90f28b2"
+  },
+  "files": [
+    {
+      "path": "review.json",
+      "bytes": 1580,
+      "sha256": "3f65218177f62784f72057236708b0d7ba524c0ec1f852b17faf594e31130d1f"
+    },
+    {
+      "path": "mobile-inert-tsconfig.json",
+      "bytes": 579,
+      "sha256": "26f20a199db75844e7576acf21d3265828895a4cd1b03aba7171cb290eae44dc"
+    },
+    {
+      "path": "mobile-inert-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

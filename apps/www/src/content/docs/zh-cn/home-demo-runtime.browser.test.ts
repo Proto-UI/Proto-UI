@@ -715,6 +715,21 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         const home = page.locator(HOME_SELECTOR);
         const stage = home.locator('[data-home-gallery-stage]');
         const toggle = home.locator('[data-home-gallery-layout-toggle]');
+        const mainButton = home.getByRole('button', {
+          name: '主要',
+          exact: true,
+          includeHidden: true,
+        });
+        const retainedButton = await mainButton.elementHandle();
+        expect(retainedButton).not.toBeNull();
+        const accessibility = await context.newCDPSession(page);
+        await accessibility.send('Accessibility.enable');
+        const nativeMainButtons = async () => {
+          const { nodes } = await accessibility.send('Accessibility.getFullAXTree');
+          return nodes.filter(
+            (node) => !node.ignored && node.role?.value === 'button' && node.name?.value === '主要'
+          );
+        };
         expect(await toggle.textContent()).toBe('打开交互演示');
         const sample = () =>
           stage.evaluate((node) => {
@@ -755,12 +770,23 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         });
         expect(initial.fade).toContain('linear-gradient');
         expect(await toggle.getAttribute('aria-expanded')).toBe('false');
-        expect(await home.getByRole('button', { name: '主要', exact: true }).count()).toBe(0);
+        // Playwright 1.58's role selector does not implement inert ancestry.
+        // The native AX tree and actual focus behavior establish this boundary.
+        expect(await nativeMainButtons()).toHaveLength(0);
+        await mainButton.evaluate((button) => {
+          if (!(button instanceof HTMLElement)) throw new Error('Expected an HTML button');
+          button.focus();
+        });
+        expect(await stage.evaluate((node) => node.matches(':focus-within'))).toBe(false);
         await toggle.press('Enter');
         expect(await toggle.getAttribute('aria-expanded')).toBe('true');
         expect((await sample()).inert).toBe(false);
-        const mainButton = home.getByRole('button', { name: '主要', exact: true });
+        expect(await nativeMainButtons()).toHaveLength(1);
+        expect(
+          await mainButton.evaluate((button, retained) => button === retained, retainedButton)
+        ).toBe(true);
         await mainButton.focus();
+        expect(await stage.evaluate((node) => node.matches(':focus-within'))).toBe(true);
         expect((await sample()).fadeVisible).toBe(false);
         await mainButton.press('Enter');
         await expect
@@ -775,6 +801,9 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         expect(await toggle.textContent()).toBe('查看桌面缩略图');
         await toggle.press('Enter');
         expect((await sample()).inert).toBe(true);
+        expect(await nativeMainButtons()).toHaveLength(0);
+        await retainedButton?.dispose();
+        await accessibility.detach();
       } finally {
         await context.close();
       }

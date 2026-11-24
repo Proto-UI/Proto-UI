@@ -39,7 +39,7 @@ The Surface correction materializes the existing fresh canvas props with an obje
 
 Both current wheel callbacks narrow the sole returned node with `instanceof Element`, passing null otherwise. The separate [wheel diagnostic record](2026-11-24-homepage-original-verdict-diagnostic.md) retains the old failure, the source differences in the current native oracle, 23 passing host-model controls and the before/after actual Playwright-type fixture. Those controls do not establish native default scrolling.
 
-The complete original local `check:types` command on `b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8` ran from 12:07:18Z to 12:10:09Z. Website style generation completed; the Workspace checker then exhausted its explicit 2,048 MiB V8 heap and exited 134. The log explicitly says heap out of memory. This is an interrupted type result, not a remaining type diagnostic or a full-chain success. Generated coverage records were being refreshed, but production and type source files did not change during that attempt. A final complete type check remains required with sufficient resources.
+The complete original local `check:types` command on `b57e7af30b97a087ae0c3ec9fa75e10c7ca268d8` ran from 12:07:18Z to 12:10:09Z. Website style generation completed; the Workspace checker then exhausted its explicit 2,048 MiB V8 heap and exited 134. The log explicitly says heap out of memory. This is an interrupted type result, not a remaining type diagnostic or a full-chain success. Generated coverage records were being refreshed, but production and type source files did not change during that attempt. That observation required the complete controlled retry recorded next.
 
 ### Complete controlled retry
 
@@ -48,6 +48,12 @@ The original full `corepack pnpm@10.32.1 -s check:types` command then passed wit
 The retry began at `337be07287ba4770e1020d300d7d25b4792d06de` and finished at `4294c6dd1c06d9bc1573b748eab593403c85d092`. Only records and coverage ledgers changed between those commits. The measured 9,859 package/website/type/config source files retained SHA-256 `0229425947fa39b9221612a47ea24a1395f482047c44d285f624c401e4c234e5` before and after the command. This is a full successful source-stable type check, not a claim that the entire repository stayed at one commit during execution.
 
 The [original retry log and receipt](evidence/2026-11-24-release-followup/complete-types-6144.tar.gz) are 3,888 bytes, SHA-256 `2daf1cb20857abce90e15afc30af476e148aea81205c3a894990d9bf5bcfbaf4`. Further production-source integration needs its affected checks; this receipt does not cover later main `9c8b8b07070dad92f19f3242a812414200ea2c03` CLI changes.
+
+## Complete coverage after the reviewed source bindings
+
+After the Accordion source renewal, the official `prototype-coverage.mjs --write --refresh-candidate d52a6a69df1c1a03d8579d9f5839d252492c515b` regenerated the portfolio. The original complete `corepack pnpm@10.32.1 -s check:coverage-matrices` then exited zero: both matrices passed, with 5,172 tests passed, zero failed, and one intentional portable placeholder skipped. The command took 599,127 ms. Its unchanged Linux media integration counterpart, `node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs`, was not executed locally and remains a separate gate.
+
+The generated portfolio retains 142 consumer rows, 71 comparison rows, 22 Base projection rows and 101 migrated links. Existing blocked and draft dispositions remain. The [complete original output](evidence/2026-11-24-release-followup/coverage-after-binding.tar.gz) is 79,376 bytes, SHA-256 `42df5c2567ca14cfa4ad0e29db9ffef1a5435d26425a2d99b4771a3ecb3ef540`. This receipt predates the following native colour-parser and mobile-oracle changes and does not establish acceptance for later main integrations.
 
 ## Retention and open acceptance
 
