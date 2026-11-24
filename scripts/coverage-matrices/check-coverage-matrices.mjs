@@ -178,7 +178,7 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   // The feedback presence projector is reached by the website's presence
   // projection. Its imports stay inside Core and the motion sampler it owns.
   'packages/modules/feedback/src/presence/projector.ts': Object.freeze({
-    sourceSha256: '3a5c3749050071ad5308800c2619c36e37ac56462a5ee34c718971655531e87c',
+    sourceSha256: '1f9ca6863c9973cebde1dfd27a1bdbe3dbcb320326a0a938c5720cd25c8b0025',
     specifiers: Object.freeze(['@proto.ui/core', '../motion/sampler', './sink']),
   }),
   // The authored Form demo consumes only the public Field request type.
@@ -348,6 +348,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/liquidgl-kernel.generated']),
   }),
   'packages/adapters/base/src/material/source.ts': Object.freeze({
+    sourceSha256: '0da5ec24126268949824ee048ecf8e9ed2da3d9ffff767c2f1a86f5e60a05450',
+    companionSource: Object.freeze({
+      path: 'packages/adapters/base/src/host/synchronous-steps.ts',
+      sha256: '1fc559c9ad68a7a03e2d5511362e41b95e492f245d0eb4a7f1cc16e3b3f5734b',
+    }),
+    specifiers: Object.freeze(['../host/synchronous-steps']),
     resolvedPaths: Object.freeze(['packages/adapters/base/src/material/contact-carrier']),
   }),
   'packages/adapters/base/src/material/contact-carrier.ts': Object.freeze({

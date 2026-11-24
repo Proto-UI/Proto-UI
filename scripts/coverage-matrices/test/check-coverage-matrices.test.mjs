@@ -19354,6 +19354,7 @@ for (const [relative, allowed] of [
   ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
   ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
   ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
+  ['packages/adapters/base/src/material/source.ts', '../host/synchronous-steps'],
   ['packages/adapters/base/src/material/contact-motion.ts', '../events/pointer-contact'],
   ['packages/adapters/base/src/material/program-inputs.ts', './style-tint-profile'],
   [
@@ -19368,6 +19369,16 @@ for (const [relative, allowed] of [
     const target = path.join(root, relative);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     const bytes = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const helper = 'packages/adapters/base/src/host/synchronous-steps.ts';
+    const companion =
+      relative === 'packages/adapters/base/src/material/sink.ts' ||
+      relative === 'packages/adapters/base/src/material/source.ts'
+        ? path.join(root, helper)
+        : null;
+    if (companion) {
+      fs.mkdirSync(path.dirname(companion), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+    }
     const importer = path.join(root, 'apps/www/src/components/CardImportProbe.ts');
     fs.mkdirSync(path.dirname(importer), { recursive: true });
     fs.writeFileSync(
@@ -19377,6 +19388,15 @@ for (const [relative, allowed] of [
     fs.writeFileSync(target, bytes);
     const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
     assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    if (companion) {
+      const helperIssue = 'raw Proto UI import `../host/synchronous-steps` in `' + relative + '`';
+      assert.ok(!validationMessage(root).includes(helperIssue), 'exact helper remains admitted');
+      fs.appendFileSync(companion, '\n// unreviewed helper bytes\n');
+      assert.ok(validationMessage(root).includes(helperIssue), 'changed helper is rejected');
+      fs.unlinkSync(companion);
+      assert.ok(validationMessage(root).includes(helperIssue), 'missing helper is rejected');
+      fs.copyFileSync(new URL(`../../../${helper}`, import.meta.url), companion);
+    }
     fs.writeFileSync(target, bytes + '\n// unreviewed bytes\n');
     assert.ok(collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
     fs.writeFileSync(target, bytes + "\nimport '@proto.ui/adapter-react';\n");
