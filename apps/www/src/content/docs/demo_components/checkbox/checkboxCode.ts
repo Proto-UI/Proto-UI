@@ -91,7 +91,7 @@ const shadcnSnippets = {
   <wc-shadcn-label-root style-profile="rhea">Sync workspace preferences</wc-shadcn-label-root>
 </div>
     `),
-    'demo-shadcn-checkbox-group': formatCode(`
+    'demo-shadcn-checkbox-with-group': formatCode(`
 <div class="flex flex-col gap-3">
   <wc-shadcn-checkbox-root style-profile="rhea" default-checked>
     <wc-shadcn-checkbox-indicator style-profile="rhea"></wc-shadcn-checkbox-indicator>
@@ -276,7 +276,7 @@ export function CheckboxControlledDemo() {
   );
 }
     `),
-    'demo-shadcn-checkbox-group': formatCode(`
+    'demo-shadcn-checkbox-with-group': formatCode(`
 import {
   ShadcnCheckboxIndicator,
   ShadcnCheckboxRoot,
@@ -493,7 +493,7 @@ const indeterminate = ref(true);
   </div>
 </template>
     `),
-    'demo-shadcn-checkbox-group': formatCode(`
+    'demo-shadcn-checkbox-with-group': formatCode(`
 <script setup lang="ts">
 import {
   ShadcnCheckboxIndicator,
@@ -729,7 +729,7 @@ export default {
 };
 </script>
     `),
-    'demo-shadcn-checkbox-group': formatCode(`
+    'demo-shadcn-checkbox-with-group': formatCode(`
 <template>
   <div class="flex flex-col gap-3">
     <div class="flex items-center gap-3">
@@ -1123,13 +1123,13 @@ const otherEntries = {
   'demo-brutalist-checkbox-description': brutalistDesc,
   'demo-brutalist-checkbox-disabled': brutalistDisabled,
   'demo-brutalist-checkbox-invalid': brutalistInvalid,
-  'demo-brutalist-checkbox-group': brutalistGroup,
+  'demo-brutalist-checkbox-with-group': brutalistGroup,
   'demo-brutalist-checkbox-table': brutalistTable,
   'demo-bootstrap-2-3-2-checkbox': bootstrapHero,
   'demo-bootstrap-2-3-2-checkbox-description': bootstrapDesc,
   'demo-bootstrap-2-3-2-checkbox-disabled': bootstrapDisabled,
   'demo-bootstrap-2-3-2-checkbox-controlled': bootstrapControlled,
-  'demo-bootstrap-2-3-2-checkbox-group': bootstrapGroup,
+  'demo-bootstrap-2-3-2-checkbox-with-group': bootstrapGroup,
   'demo-bootstrap-2-3-2-checkbox-table': bootstrapTable,
   'demo-liquid-glass-checkbox': liquidHero,
   'demo-liquid-glass-checkbox-description': liquidDesc,
