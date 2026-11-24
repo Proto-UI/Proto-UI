@@ -321,6 +321,7 @@ function bindPhaseSync(
   const { host, refs, api } = ctx;
   const theme = FAMILY_THEMES[family];
   let lastPhase: TransitionPhase | null = null;
+  let lastPresent: boolean | null = null;
   let rafId = 0;
 
   const animateEntryIfNeeded = (phase: TransitionPhase) => {
@@ -328,7 +329,7 @@ function bindPhaseSync(
     if (!surface) return;
     if (theme.manualOpacity) {
       if (phase === 'leaving' || phase === 'closed' || phase === 'preparing') {
-        surface.style.opacity = '0';
+        if (surface.style.opacity !== '0') surface.style.opacity = '0';
         return;
       }
       if (phase === 'entering' && lastPhase !== 'entering' && !prefersReducedMotion()) {
@@ -339,7 +340,7 @@ function bindPhaseSync(
         });
         return;
       }
-      surface.style.opacity = '1';
+      if (surface.style.opacity !== '1') surface.style.opacity = '1';
       return;
     }
 
@@ -354,34 +355,44 @@ function bindPhaseSync(
         surface.style.opacity = '1';
       });
     } else if (phase === 'entered' || prefersReducedMotion()) {
-      surface.style.opacity = '';
+      if (surface.style.opacity !== '') surface.style.opacity = '';
     }
   };
 
   const sync = () => {
     const { phase, isPresent } = readTransitionSnapshot(api);
+    if (phase === lastPhase && isPresent === lastPresent) return;
 
     for (const p of PHASES) {
       const chip = refs[PHASE_REF[p]];
       if (!chip) continue;
-      chip.className = `${theme.chipBaseClass} ${
+      const nextClass = `${theme.chipBaseClass} ${
         p === phase ? theme.chipActiveClass : theme.chipIdleClass
       }`;
+      if (chip.className !== nextClass) chip.className = nextClass;
     }
 
     if (refs.presenceBadge) {
-      refs.presenceBadge.textContent = isPresent ? 'Mounted' : 'Detached';
-      refs.presenceBadge.className = isPresent
-        ? theme.presenceMountedClass
-        : theme.presenceDetachedClass;
+      const nextText = isPresent ? 'Mounted' : 'Detached';
+      if (refs.presenceBadge.textContent !== nextText) {
+        refs.presenceBadge.textContent = nextText;
+      }
+      const nextBadgeClass = isPresent ? theme.presenceMountedClass : theme.presenceDetachedClass;
+      if (refs.presenceBadge.className !== nextBadgeClass) {
+        refs.presenceBadge.className = nextBadgeClass;
+      }
     }
 
     if (refs.emptyHint) {
-      refs.emptyHint.style.opacity = isPresent ? '0' : '1';
+      const nextOpacity = isPresent ? '0' : '1';
+      if (refs.emptyHint.style.opacity !== nextOpacity) {
+        refs.emptyHint.style.opacity = nextOpacity;
+      }
     }
 
     animateEntryIfNeeded(phase);
     lastPhase = phase;
+    lastPresent = isPresent;
     hooks?.onSync?.(phase, isPresent);
   };
 
@@ -399,10 +410,10 @@ function bindPhaseSync(
 
   sync();
 
+  const observeTarget = refs.transition ?? host;
   const mo = new MutationObserver(() => sync());
-  mo.observe(host, {
-    subtree: true,
-    childList: true,
+  mo.observe(observeTarget, {
+    subtree: observeTarget === host,
     attributes: true,
     attributeFilter: ['data-transition-state', 'data-pui-style', 'data-pui-view-detached'],
   });
