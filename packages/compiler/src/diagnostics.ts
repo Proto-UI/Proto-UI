@@ -1,41 +1,57 @@
-import type { CompilerDiagnostic, SourceSpan } from './ir';
-
-/** Diagnostic-only sentinel; it is never a valid authored/IR source span. */
-export function unknownDiagnosticSpan(file = '<unknown>'): SourceSpan {
-  return { file, start: -1, end: -1, line: 0, column: 0, endLine: 0, endColumn: 0 };
+export interface SourceSpan {
+  readonly file: string;
+  readonly line: number;
+  readonly column: number;
+  readonly endLine?: number;
+  readonly endColumn?: number;
 }
 
-export function isUnknownDiagnosticSpan(span: SourceSpan): boolean {
-  return (
-    span.start === -1 &&
-    span.end === -1 &&
-    span.line === 0 &&
-    span.column === 0 &&
-    span.endLine === 0 &&
-    span.endColumn === 0
-  );
+export type DiagnosticSeverity = 'error' | 'warning' | 'info';
+
+export type DiagnosticCategory =
+  | 'input'
+  | 'typecheck'
+  | 'frontend'
+  | 'ir'
+  | 'llvm'
+  | 'codegen'
+  | 'io';
+
+export interface CompilerDiagnostic {
+  readonly code: string;
+  readonly severity: DiagnosticSeverity;
+  readonly category: DiagnosticCategory;
+  readonly message: string;
+  readonly span?: SourceSpan;
 }
 
-/** Preserve the original exception evidence without assuming every failure is an Error. */
-export function unexpectedFailureEvidence(error: unknown): string {
-  return error instanceof Error
-    ? (error.stack ?? `${error.name}: ${error.message}`)
-    : String(error);
+export type CompileResult<T> =
+  | { readonly ok: true; readonly value: T; readonly diagnostics: readonly CompilerDiagnostic[] }
+  | { readonly ok: false; readonly diagnostics: readonly CompilerDiagnostic[] };
+
+export function ok<T>(value: T, diagnostics: readonly CompilerDiagnostic[] = []): CompileResult<T> {
+  return { ok: true, value, diagnostics };
 }
 
-/** A checked compiler rejection, as distinct from an unexpected implementation exception. */
-export class CompilerRejection extends Error {
-  constructor(readonly diagnostic: CompilerDiagnostic) {
-    super(diagnostic.message);
-    this.name = 'CompilerRejection';
-  }
+export function err<T = never>(diagnostics: readonly CompilerDiagnostic[]): CompileResult<T> {
+  return { ok: false, diagnostics };
 }
 
-export function reject(
+export function diagnostic(
   code: string,
+  category: DiagnosticCategory,
   message: string,
-  span: SourceSpan,
-  category: CompilerDiagnostic['category'] = 'unsupported-input'
-): never {
-  throw new CompilerRejection({ code, category, message, span });
+  span?: SourceSpan,
+  severity: DiagnosticSeverity = 'error'
+): CompilerDiagnostic {
+  return span ? { code, severity, category, message, span } : { code, severity, category, message };
+}
+
+export function formatDiagnostic(d: CompilerDiagnostic): string {
+  const loc = d.span ? `${d.span.file}:${d.span.line}:${d.span.column} ` : '';
+  return `${loc}${d.severity}[${d.code}/${d.category}]: ${d.message}`;
+}
+
+export function formatDiagnostics(list: readonly CompilerDiagnostic[]): string {
+  return list.map(formatDiagnostic).join('\n');
 }

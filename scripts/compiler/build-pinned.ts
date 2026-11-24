@@ -2,20 +2,52 @@
 /** Supported build-time CLI/JavaScript artifact from a clean, immutable source pin. */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFile, realpath } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build, version as esbuildVersion } from 'esbuild';
 import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
-import {
-  IR_VERSION,
-  TARGET_PROFILES,
-  writeArtifactSet,
-  type CompilerBuildIdentity,
-  type OutputArtifact,
-} from '../../packages/compiler/src/index';
+import { PROTO_IR_VERSION } from '../../packages/compiler/src/index';
+
+const IR_VERSION = PROTO_IR_VERSION;
+const TARGET_PROFILES = ['react', 'llvm-ir', 'wasm32'] as const;
+
+interface CompilerBuildIdentity {
+  readonly schema: 'proto-ui.compiler-build.v2';
+  readonly revision: string;
+  readonly lockSha256: string;
+  readonly profilesSha256: string;
+  readonly node: string;
+  readonly typescript: string;
+  readonly esbuild: string;
+}
+
+interface OutputArtifact {
+  readonly path: string;
+  readonly contents: string;
+  readonly kind: 'source' | 'source-map' | 'manifest';
+}
+
+async function writeArtifactSet(
+  artifacts: readonly OutputArtifact[],
+  destination: string
+): Promise<{ ok: true; value: { files: string[] } } | { ok: false; diagnostics: string[] }> {
+  if (existsSync(destination)) {
+    return { ok: false, diagnostics: [`Refusing to overwrite existing output: ${destination}`] };
+  }
+  await mkdir(destination, { recursive: true });
+  const written: string[] = [];
+  for (const artifact of artifacts) {
+    const outPath = path.join(destination, artifact.path);
+    await mkdir(path.dirname(outPath), { recursive: true });
+    await writeFile(outPath, artifact.contents, 'utf8');
+    written.push(artifact.path);
+  }
+  return { ok: true, value: { files: written } };
+}
 
 const root = await realpath(fileURLToPath(new URL('../../', import.meta.url)));
 const require = createRequire(import.meta.url);
@@ -63,7 +95,7 @@ async function main() {
     throw new Error('The lockfile must declare TypeScript integrity.');
   const profiles = json({ irVersion: IR_VERSION, profiles: TARGET_PROFILES });
   const identity: CompilerBuildIdentity = Object.freeze({
-    schema: 'proto-ui.compiler-build.v1',
+    schema: 'proto-ui.compiler-build.v2',
     revision,
     lockSha256: hash(lock),
     profilesSha256: hash(profiles),

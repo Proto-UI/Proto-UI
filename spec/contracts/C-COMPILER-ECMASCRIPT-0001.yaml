@@ -37,13 +37,9 @@ criteria:
 references:
   contracts: [C-COMPILER-OBSERVABLES-0001]
 sources:
-  - path: packages/compiler/src/ecmascript-values.ts
-  - path: packages/compiler/src/source-ecmascript.ts
-  - path: packages/compiler/src/native-value-lowering.ts
   - path: packages/prototypes/base/src/number-field/format.ts
   - path: packages/prototypes/base/src/drawer/snap.ts
   - path: packages/prototypes/base/src/drawer/content.proto.ts
-  - path: packages/compiler/test/number-format-source-consumer.ts
   - path: packages/prototypes/base/test/number-field-format.test.ts
 openQuestions:
   - id: C-COMPILER-ECMASCRIPT-0001-Q-EVIDENCE

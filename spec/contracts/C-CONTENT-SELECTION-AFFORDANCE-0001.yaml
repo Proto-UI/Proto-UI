@@ -55,7 +55,6 @@ references:
     - P-SHADCN-TOGGLE
     - P-SHADCN-CHECKBOX
 sources:
-  - path: packages/compiler/src/gpui-native-selection.ts
   - path: packages/cli/src/legacy/type.ts
   - path: packages/prototypes/brutalist/src/theme.ts
   - path: packages/core/src/spec/feedback/semantic-merge.ts

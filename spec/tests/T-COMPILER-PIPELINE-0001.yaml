@@ -1,0 +1,114 @@
+id: T-COMPILER-PIPELINE-0001
+type: test
+title: Proto UI v2 compiler SSA IR, LLVM 22/WASM execution, 3-tier React, Base corpus, and CLI tests
+status: draft
+since: 0.3.0
+lifecycleRationale: >-
+  Maps the executable Vitest evidence suite created for the #1809 clean-slate v2 compiler rebuild across SSA IR invariants, real LLVM 22 verification/WASM execution, React 19 happy-dom execution, the full 184-file Base prototype corpus, and CLI subcommands. Remains draft alongside D-COMPILER-ARCH-0001 and C-COMPILER-PIPELINE-0001 in 0.4 experimental scope.
+
+summary: Executable verification suite covering v2 Proto SSA IR, optimization passes, real LLVM 22 verification and wasm32 execution, 3-tier React runtime behavior, 100% Base corpus coverage, and CLI behavior.
+cases:
+  - id: T-COMPILER-PIPELINE-0001-CASE-SSA-OPT
+    title: SSA builder, capability bitmask, verifier rejection, and optimization passes converge cleanly
+    covers:
+      - D-COMPILER-ARCH-0001-C
+      - C-COMPILER-PIPELINE-0001-SSA-IR
+      - C-COMPILER-PIPELINE-0001-OPT
+    expectation: constant-folding-algebraic-simplification-dead-block-pruning-dce-and-malformed-ssa-rejection
+  - id: T-COMPILER-PIPELINE-0001-CASE-LLVM-WASM
+    title: LLVM 22 verifies, optimizes, emits bitcode/asm/obj, and compiles executable wasm32 kernels under 8-byte slot ABI
+    covers:
+      - D-COMPILER-ARCH-0001-D
+      - C-COMPILER-PIPELINE-0001-LLVM-ABI
+    expectation: opt-verify-o2-llvm-as-llc-wasm-ld-native-webassembly-execution-and-malformed-ir-rejection
+  - id: T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
+    title: 3-tier React components mount and interact in React 19 happy-dom with zero String.raw runtimes
+    covers:
+      - D-COMPILER-ARCH-0001-A
+      - D-COMPILER-ARCH-0001-E
+      - C-COMPILER-PIPELINE-0001-THIN-EMIT
+    expectation: static-zero-runtime-reactive-usestate-protocol-shared-runtime-and-zero-string-raw
+  - id: T-COMPILER-PIPELINE-0001-CASE-BASE-CORPUS
+    title: 100% of official Base .proto.ts files and Shadcn Button compile fast, thin, and LLVM-verified
+    covers:
+      - D-COMPILER-ARCH-0001-B
+      - D-COMPILER-ARCH-0001-E
+      - C-COMPILER-PIPELINE-0001-FRONTEND
+      - C-COMPILER-PIPELINE-0001-THIN-EMIT
+    expectation: full-base-corpus-coverage-under-35-lines-and-sampled-llvm-verify
+  - id: T-COMPILER-PIPELINE-0001-CASE-CLI
+    title: CLI info, check, ir, llvm --optimize, and compile --wasm produce structured outputs and expected diagnostics
+    covers:
+      - C-COMPILER-PIPELINE-0001-DIAGNOSTICS
+    expectation: deterministic-cli-subcommands-and-structured-diagnostics
+implementations:
+  - id: compiler-ssa-ir-unit
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/ssa-ir.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-SSA-OPT
+  - id: compiler-llvm-wasm-pipeline
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/llvm-pipeline.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-LLVM-WASM
+    notes:
+      - Exercises real LLVM 22 opt, llvm-as, llc, and wasm-ld when installed on the host and executes compiled wasm32 rule/state/helper kernels via native WebAssembly.instantiate.
+  - id: compiler-react-codegen-execution
+    kind: runtime-test
+    status: passing
+    path: packages/compiler/test/react-codegen.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-THIN-REACT
+    notes:
+      - Mounts compiled Tier 0 static, Tier 1 reactive, and Tier 2 protocol components (base/button, base/toggle, base/switch) in React 19 + happy-dom and asserts zero String.raw occurrences across packages/compiler/src.
+  - id: compiler-base-shadcn-corpus
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/base-corpus.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-BASE-CORPUS
+    notes:
+      - Compiles all 184 .proto.ts files in packages/prototypes/base/src (212 prototypes, 214 authored hooks) plus Shadcn Button, asserting thin output (< 35 LOC per Base prototype), fast warm compile, and LLVM 22 opt verification on complex families.
+  - id: compiler-cli-e2e
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/cli.test.ts
+    required: true
+    consumesCases:
+      - T-COMPILER-PIPELINE-0001-CASE-CLI
+verifies:
+  decisions:
+    - id: D-COMPILER-ARCH-0001
+      anchors:
+        - D-COMPILER-ARCH-0001-A
+        - D-COMPILER-ARCH-0001-B
+        - D-COMPILER-ARCH-0001-C
+        - D-COMPILER-ARCH-0001-D
+        - D-COMPILER-ARCH-0001-E
+  contracts:
+    - id: C-COMPILER-PIPELINE-0001
+      anchors:
+        - C-COMPILER-PIPELINE-0001-FRONTEND
+        - C-COMPILER-PIPELINE-0001-SSA-IR
+        - C-COMPILER-PIPELINE-0001-OPT
+        - C-COMPILER-PIPELINE-0001-LLVM-ABI
+        - C-COMPILER-PIPELINE-0001-THIN-EMIT
+        - C-COMPILER-PIPELINE-0001-DIAGNOSTICS
+revisions:
+  - version: 0.3.0
+    change: introduced
+    summary: Mapped the five executable Vitest suites validating the #1809 v2 compiler pipeline (SSA IR, LLVM 22/WASM, 3-tier React, full Base corpus, and CLI).
+tags:
+  - compiler
+  - ssa
+  - llvm
+  - wasm
+  - react
+  - 0.4-scope

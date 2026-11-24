@@ -1,10 +1,11 @@
 import { build } from 'esbuild';
 import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import ts from 'typescript';
 import { buildBrowserCompiler } from './build-browser.mjs';
-import { FileSourceGraph } from '../../packages/compiler/src/source-loader';
 import {
   assertSameInputFiles,
   browserRepositoryRoot as root,
@@ -102,7 +103,7 @@ export async function buildBrowserTargets() {
   const react = await facade('react.mjs');
   const reactDom = await facade('react-dom.mjs');
   const reactClient = await facade('react-client.mjs');
-  const vue = await bundleTarget(compilerRequire.resolve('vue/dist/vue.runtime.esm-bundler.js'));
+  const vue = await bundleTarget(wwwRequire.resolve('vue/dist/vue.runtime.esm-bundler.js'));
   const vue2 = await bundleTarget(wwwRequire.resolve('vue2-runtime/dist/vue.runtime.esm.js'));
   const floatingRequire = createRequire(
     path.join(root, 'packages/modules/positioning/package.json')
@@ -125,7 +126,7 @@ export async function buildBrowserTargets() {
   const versions = {
     react: await version(compilerRequire, 'react'),
     'react-dom': await version(compilerRequire, 'react-dom'),
-    vue: await version(compilerRequire, 'vue'),
+    vue: await version(wwwRequire, 'vue'),
     '@floating-ui/dom': await version(floatingRequire, '@floating-ui/dom'),
   };
   const targetInputs: Record<string, Record<string, string>> = {};
@@ -219,27 +220,62 @@ export function browserSourceRegistrations(): Promise<BrowserSourceRegistration[
   ).then((text): BrowserSourceRegistration[] => JSON.parse(text).prototypes));
 }
 
+function resolveRelativeSource(fromFile: string, specifier: string): string | undefined {
+  if (!specifier.startsWith('.')) return undefined;
+  const base = path.resolve(path.dirname(fromFile), specifier);
+  const candidates = [
+    base,
+    `${base}.ts`,
+    `${base}.tsx`,
+    `${base}.mts`,
+    `${base}.js`,
+    path.join(base, 'index.ts'),
+    path.join(base, 'index.tsx'),
+  ];
+  return candidates.find((candidate) => existsSync(candidate));
+}
+
 export async function readBrowserSource(id: string): Promise<BrowserSourceAsset> {
   const registration = (await browserSourceRegistrations()).find((row) => row.id === id);
   if (!registration?.entry) throw new Error(`No canonical source binding for ${id}.`);
-  const graph = new FileSourceGraph(root);
-  const snapshot = await graph.load(await graph.entry(registration.entry));
-  if (snapshot.failures.length) throw snapshot.failures[0];
-  const source = snapshot.files[snapshot.entry];
-  const files = Object.fromEntries(
-    Object.entries(snapshot.files).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+
+  const entryAbs = path.resolve(root, registration.entry);
+  const entryRel = path.relative(root, entryAbs).split(path.sep).join('/');
+  const visited = new Map<string, string>();
+  const sourceImports: Record<string, string> = {};
+  const queue = [entryAbs];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const rel = path.relative(root, current).split(path.sep).join('/');
+    if (visited.has(rel)) continue;
+    const text = await readFile(current, 'utf8');
+    visited.set(rel, text);
+    const info = ts.preProcessFile(text, true, true);
+    for (const imp of info.importedFiles) {
+      const resolved = resolveRelativeSource(current, imp.fileName);
+      if (resolved) {
+        queue.push(resolved);
+      } else if (!imp.fileName.startsWith('.')) {
+        sourceImports[imp.fileName] = imp.fileName;
+      }
+    }
+  }
+
+  const source = visited.get(entryRel) ?? '';
+  const files: Record<string, string> = Object.fromEntries(
+    [...visited.entries()].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   );
-  const sourceImports = { ...snapshot.sourceImports };
   return {
     format: 1,
     id,
-    entry: snapshot.entry,
+    entry: entryRel,
     exportName: registration.exportName ?? 'default',
     source,
     files,
     sourceImports,
     sourceGraphSha256: createHash('sha256')
-      .update(JSON.stringify({ entry: snapshot.entry, files, sourceImports }))
+      .update(JSON.stringify({ entry: entryRel, files, sourceImports }))
       .digest('hex'),
   };
 }

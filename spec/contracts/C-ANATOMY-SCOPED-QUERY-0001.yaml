@@ -23,8 +23,6 @@ verifies:
 sources:
   - path: packages/modules/anatomy/src/impl.ts
   - path: packages/core/src/handles.ts
-  - path: packages/compiler/src/operations.ts
-  - path: packages/compiler/src/native-support/dom-modules.template.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

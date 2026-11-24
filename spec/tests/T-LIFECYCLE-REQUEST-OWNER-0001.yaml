@@ -95,8 +95,7 @@ implementations:
       - Descriptor validation assumes trusted in-process objects or decoded wire data; it cannot sandbox Proxy traps.
   - id: generated-server-request
     kind: runtime-test
-    status: passing
-    path: packages/compiler/test/request-owner-ssr.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-GENERATED
@@ -106,6 +105,7 @@ implementations:
       - Uses actual emitted artifacts with React DOM server, Vue 3 server-renderer, matching Vue 2.6.14 and vue-server-renderer 2.6.14, and the generated WC server port. No authored-source execution or mocked renderer. All four canonical SSR profiles still reject with PUI4001.
       - This is source-shaped server conformance, not Shenko application acceptance, full hydration, assistive technology, streaming SSR or arbitrary State migration.
       - Held real Vue 3 async setup and Vue 2 serverPrefetch journeys independently complete a concurrent request, abort the held request with false, then resolve or reject its actual serializer. A late native render cannot start a generated logical child. This is a bounded isolation witness, not complete Context/capability closure.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: complete-target-initialization
     kind: runtime-test
     status: missing
@@ -116,31 +116,31 @@ implementations:
       - Existing target experiments and the browser Worker revision lane provide narrower evidence. Complete per-target adoption, application-controlled input, trust and source/compiler/helper/revision binding remain required before target admission.
   - id: generated-wc-retirement
     kind: runtime-test
-    status: passing
-    path: packages/compiler/test/owner-hydration-retirement.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-WC-RETIREMENT
     notes:
       - Executes actual emitted SSR and browser modules in happy-dom. Unmounted and beforeDispose reconnects retain distinct State identities and update the replacement's visible output; explicit terminal disposal stays terminal. Physical browser evidence and full target initialization remain separate.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: generated-vue-adoption-retirement
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/vue-owner-hydration.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-VUE-ADOPTION-RETIREMENT
     notes:
       - Executes actual emitted SSR and hydration with Vue 3 native slot children in happy-dom. Rejected hydration, a falsy mounted error with subsequent cleanup errors, deferred logical startup failure, and terminal disposal inside a native mounted hook retire native effect scopes and event listeners. A fresh application from explicitly selected original input succeeds after rejection. Physical adoption and the complete target matrix remain separate.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: generated-react-adoption-retirement
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/react-owner-hydration.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-LIFECYCLE-REQUEST-OWNER-0001-CASE-REACT-ADOPTION-RETIREMENT
     notes:
       - Executes actual emitted SSR and hydration with a native React Suspense child in happy-dom. Recoverable hydration rejection retires real effects and event listeners; accepted updates retain State identity and explicit reinitialization creates a fresh State. Checks the complete emitted artifact closure with strict TypeScript. Physical browser and full target acceptance remain separate.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
 verifies:
   contracts:
     - id: C-LIFECYCLE-REQUEST-0001

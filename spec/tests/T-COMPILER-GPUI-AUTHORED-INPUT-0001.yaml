@@ -67,48 +67,49 @@ cases:
 implementations:
   - id: native-hover-view-ownership
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/src/gpui-native-hover.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-HOVER]
     notes:
       - Execute the emitted SDK library tests with test-support. TestAppContext supplies physical mouse and draw observations; this is not an operating-system input claim.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: generated-native-output-delivery
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/delivery.rs
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-OUTPUT]
     notes:
       - Both the ordinary producer and the focused produce-delivery.mjs compile the same authored validation source. The consumer observes actual generated component entries and GPUI Entity observers; it never patches emitted Rust or drives the missing notification itself.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: checked-json-source-provenance
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/json-boundary-provenance.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: generated-web-json-getter-copy
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/json-boundary-getter-consumer.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA]
     notes:
       - Executes actual emitted React, Vue 3, Vue 2 and WC source in happy-dom. A local unsafe backing record is copied through safe scalar getters; actual emitted events retain finite fields, integer-key getter order, once-only copying and terminal owner guards. This bounded Web witness is not GPUI execution, physical browser acceptance or application trust.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: checked-authored-inputs
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/gpui-authored-inputs.test.ts
+    status: missing
     required: true
     consumesCases:
       [
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-CONDITION,
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
       ]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: generated-native-inputs
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs
+    status: missing
     required: true
     consumesCases:
       [
@@ -117,10 +118,11 @@ implementations:
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-TEXT,
         T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-DATA,
       ]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: native-editor-leases
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/src/gpui-native-text.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -131,17 +133,18 @@ implementations:
       [
         Execute the generated SDK library tests with the test-support feature; never patch emitted Rust.,
         The actual AccessKit consumer validates text ranges. TestAppContext supplies physical view and input leases but has no platform AT channel; these tests do not establish OS Text interface delivery or character extents.,
+        Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.,
       ]
   - id: generated-native-sequential-focus
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-a11y-value/sequential_focus.rs
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-AUTHORED-INPUT-0001-CASE-SEQUENTIAL]
     notes:
       - The ordinary tab-focus and tab-scope authored fixtures are compiled afresh. Native test execution and its exact source receipt are required separately; fixture authorship alone is not passing evidence or operating-system keyboard acceptance.
       - The separate-App regression retains live owners with colliding App-local window identifiers and dispatches real keys. Current-App event fan-out and host driving must not invoke or update the other App's Entity; no fixture exception or weaker identity assertion is used.
       - Repeated Props updates and host driving on the same physical epoch/window/handle must not notify the App focus registry. A real detach/reattach registers the replacement binding, after which steady-state updates remain silent. The executable assertion observes native registry effects rather than a machine-dependent time limit; current target eligibility is still checked at dispatch.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
 verifies:
   contracts:
     - id: C-EVENT-TYPE-0003

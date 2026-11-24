@@ -1,23 +1,25 @@
 import { expect, it } from 'vitest';
-import { compilePrototype } from '../../../compiler/src/compile';
+import { compilePrototype } from '../../../compiler/src';
 
 const source = `import { definePrototype } from '@proto.ui/core';
 import { asNativeLink } from '@proto.ui/hooks';
 import { declareNativeLink } from '@proto.ui/module-native-link';
-export default definePrototype({ name: 'unsupported-native-link', modules: [declareNativeLink()],
-  setup(def) { const link = asNativeLink(); def.lifecycle.onCreated(() => link.sync({ href: '/safe' })); return () => 'Link'; }
+export default definePrototype({
+  name: 'native-link-boundary',
+  modules: [declareNativeLink()],
+  setup(def) {
+    const link = asNativeLink();
+    def.lifecycle.onCreated(() => link.sync({ href: '/safe' }));
+    return () => 'Link';
+  },
 });`;
-it.each([
-  'react-dom-source-v1',
-  'vue-source-v1',
-  'vue2-source-v1',
-  'web-component-source-v1',
-  'gpui-source-v1',
-  'qt-source-v1',
-  'flutter-source-v1',
-])('does not manufacture native-link Compiler support for %s', (profile) => {
-  const result = compilePrototype(source, { profile });
-  expect(result.ok).toBe(false);
-  expect('value' in result).toBe(false);
-  if (!result.ok) expect(result.diagnostics.length).toBeGreaterThan(0);
+
+it('extracts nativeLink capability cleanly and stays in Tier-2 protocol wrapper (v2 / #1809)', () => {
+  const result = compilePrototype(source, { llvm: { verify: true } });
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  const proto = result.value.ir.prototypes[0];
+  expect(proto.tier).toBe('protocol');
+  expect(proto.capabilities).toContain('nativeLink');
+  expect(result.value.primary!.react.code.split('\n').length).toBeLessThan(35);
 });

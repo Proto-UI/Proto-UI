@@ -10,7 +10,7 @@ This maintained contributor guide prepares a later change of GPUI source. It doe
 
 ## Source identity and API capability
 
-[gpui-dependency.ts](../../packages/compiler/src/gpui-dependency.ts) is the pure, Node-independent owner of the current default source and its derived Cargo/profile strings. Changing a location here does not establish host compatibility.
+The historical v1 module `packages/compiler/src/gpui-dependency.ts` owned the legacy default source and its derived Cargo/profile strings prior to the clean-slate 0.4 compiler rebuild ([#1809](https://github.com/Proto-UI/Proto-UI/issues/1809), see [v2 compilation spec](v2-compilation-spec.md)). Changing a GPUI source location does not establish host compatibility.
 
 | Source | Identity to retain | State of this preparation |
 | --- | --- | --- |

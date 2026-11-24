@@ -1,26 +1,25 @@
-import type { CompilerDiagnostic, GeneratedModule, PrototypeIR } from '../ir';
-import type { CompileOptions } from '../memory';
+import type { CompilerDiagnostic } from '../diagnostics';
 
 export const BROWSER_COMPILER_LIMITS = Object.freeze({
   inputBytes: 256 * 1024,
-  outputCharacters: 8 * 1024 * 1024,
-  memoryBytes: 128 * 1024 * 1024,
-  stackBytes: 2 * 1024 * 1024,
-  initializationMs: 30_000,
-  compilationMs: 30_000,
-  workerResponseMs: 35_000,
+  outputCharacters: 2 * 1024 * 1024,
+  initializationMs: 10_000,
+  compilationMs: 10_000,
+  workerResponseMs: 15_000,
 });
 
 export interface BrowserCompileRequest {
   format: 1;
   revision: string;
   source: string;
-  /** Closed virtual graph and an explicit versioned target; no host filesystem options. */
-  options: Omit<CompileOptions, 'nativeSdkPath' | 'gpuiDependency' | 'profile' | 'fileName'> & {
-    profile: NonNullable<CompileOptions['profile']>;
+  options: {
+    profile: string | { profile?: string; [key: string]: unknown };
     fileName: string;
+    files?: Readonly<Record<string, string>>;
+    sourceImports?: Readonly<Record<string, string>>;
+    exportName?: string;
+    componentName?: string;
   };
-  /** Transpile only checked generated Web source for the isolated preview. */
   preview?: boolean;
 }
 
@@ -29,10 +28,19 @@ export interface BrowserPreviewArtifact {
   entry: string;
   modules: Record<string, string>;
   styles: string[];
-  /** Checked outward event names for ordinary target listener wiring. */
   events: string[];
-  /** Applies only to the preview copies, never to canonical generated source. */
   executionBudget: '100000-checkpoints-per-task-v1';
+}
+
+export interface BrowserGeneratedModule {
+  code: string;
+  profile: string;
+  supportingFiles?: readonly {
+    path: string;
+    contents: string;
+    kind: 'source' | 'style' | 'declaration';
+  }[];
+  dependencies: readonly { name: string; version: string; role: string }[];
 }
 
 export type BrowserCompileResult =
@@ -40,8 +48,8 @@ export type BrowserCompileResult =
       ok: true;
       revision: string;
       requestSha256: string;
-      source: PrototypeIR['source'];
-      output: GeneratedModule;
+      source: { file: string; exportName: string; sha256: string };
+      output: BrowserGeneratedModule;
       preview?: BrowserPreviewArtifact;
     }
   | {
@@ -49,7 +57,7 @@ export type BrowserCompileResult =
       revision: string;
       requestSha256: string;
       phase: 'compile';
-      diagnostics: CompilerDiagnostic[];
+      diagnostics: readonly CompilerDiagnostic[];
     }
   | {
       ok: false;
@@ -70,16 +78,9 @@ export type BrowserCompileResult =
 
 export interface BrowserCompilerBuild {
   format: 1;
-  /** Digest of the actual trusted compiler bundle, distinct from authored source identity. */
   compilerSha256: string;
   typescriptVersion: string;
-  execution: 'quickjs-wasm';
-}
-
-export interface CompilerWorkerRequest {
-  type: 'compile';
-  id: number;
-  request: BrowserCompileRequest;
+  execution: 'worker-js' | 'quickjs-wasm';
 }
 
 export interface CompilerWorkerResponse {
@@ -90,16 +91,3 @@ export interface CompilerWorkerResponse {
   build: BrowserCompilerBuild;
   elapsedMs: number;
 }
-
-export type CompilerWorkerInput =
-  | CompilerWorkerRequest
-  | {
-      type: 'initialize';
-      bundle: string;
-      build: BrowserCompilerBuild;
-    };
-
-export type CompilerWorkerOutput =
-  | CompilerWorkerResponse
-  | { type: 'ready'; build: BrowserCompilerBuild }
-  | { type: 'initialization-error'; message: string };

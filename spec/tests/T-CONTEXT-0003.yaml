@@ -120,12 +120,12 @@ implementations:
       - Historical implementation ID retained. Web source profiles now admit strict-ancestor operations; GPUI, Qt and Flutter continue to reject missing native implementations explicitly.
   - id: context-ancestor-compiler-web-consumer
     kind: fixture
-    status: passing
-    path: packages/compiler/test/react-context-source.test.ts
+    status: missing
     required: true
     consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
     notes:
       - Actual generated React owners distinguish self and strict-ancestor providers, reject stale deliveries after rebinding, retain write authority and clean up subscriptions. Happy DOM evidence does not establish native-browser geometry or non-Web conformance.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: context-module-catalog
     kind: module-test
     status: passing

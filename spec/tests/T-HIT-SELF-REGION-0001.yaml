@@ -33,10 +33,11 @@ implementations:
     consumesCases: [T-HIT-SELF-REGION-0001-CASE-LEASE]
   - id: self-region-compiler-boundary
     kind: module-test
-    status: passing
-    path: packages/compiler/test/self-hit-region-boundary.test.ts
+    status: missing
     required: true
     consumesCases: [T-HIT-SELF-REGION-0001-CASE-COMPILER]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: self-region-native-four-web
     kind: adapter-test
     status: planned

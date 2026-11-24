@@ -32,8 +32,6 @@ sources:
   - path: packages/hooks/src/as-native-link.ts
   - path: packages/modules/native-link/src/create.ts
   - path: packages/modules/native-link/src/web.ts
-  - path: packages/compiler/src/native-support/dom-modules.template.ts
-  - path: packages/compiler/test/native-link-source.test.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

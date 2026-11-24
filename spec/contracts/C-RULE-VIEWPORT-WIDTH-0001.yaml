@@ -29,7 +29,6 @@ openQuestions:
 sources:
   - path: packages/modules/rule-meta/src/caps.ts
   - path: packages/adapters/base/src/platform/web-viewport-source.ts
-  - path: packages/compiler/src/native-rule-meta.ts
 revisions:
   - version: 0.3.0-alpha.2
     change: revised

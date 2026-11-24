@@ -49,8 +49,7 @@ implementations:
       - T-MOVE-GESTURE-0001-CASE-BOUNDARY
   - id: gpui-native-move-consumer
     kind: fixture
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-ordinary-values/consumer.rs
+    status: missing
     required: true
     consumesCases:
       - T-MOVE-GESTURE-0001-CASE-LIFECYCLE
@@ -59,6 +58,7 @@ implementations:
     notes:
       - The checked-in move_gesture_* tests exercise actual generated owners through GPUI framework dispatch, including early attachment, local samples, continuation outside initial bounds, release ordering, cancellation and restart, cross-window isolation, duplicate ownership refusal, replacement and disposal. No fresh passing execution is claimed by this record.
       - The producer and README bind the default SDK to GPUI 62e5991dd0f0c8a3af8d5e7e9c4652490d468db8; this spec change does not change that pin. Physical touch-device input, pen, thresholds, velocity, keyboard movement and general recognizer competition require separate evidence.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: gpui-native-direct-touch-claim
     kind: fixture
     status: planned

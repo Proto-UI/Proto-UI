@@ -37,9 +37,6 @@ dependsOn:
     - C-AS-TRANSITION-0001
 sources:
   - path: packages/core/src/presence-presentation.ts
-  - path: packages/compiler/src/native-support/web-presence.ts
-  - path: packages/compiler/src/native-async.ts
-  - path: packages/compiler/src/react-source.ts
 verifies:
   tests:
     - T-FEEDBACK-PRESENCE-PRESENTATION-0001

@@ -35,8 +35,7 @@ cases:
 implementations:
   - id: generated-react-dom
     kind: module-test
-    status: passing
-    path: packages/compiler/test/react-rule-meta-source.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -45,6 +44,8 @@ implementations:
         T-RULE-COMPILER-META-0001-CASE-BOUNDARY,
         T-RULE-COMPILER-META-0001-CASE-INSTALLED,
       ]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
 verifies:
   contracts:
     - id: C-RULE-COLOR-SCHEME-0001

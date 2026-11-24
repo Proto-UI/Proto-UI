@@ -1,28 +1,10 @@
 // @vitest-environment happy-dom
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createNumberFieldFormat } from '../src/number-field/format';
 import type { NumberFieldFormatOptions } from '../src/number-field/types';
-import { mountNumberFieldFormatter } from '../../../compiler/test/number-format-source-consumer';
-import { validateIR } from '../../../compiler/src/ir-validation';
-import { checkTargetOperations, TARGET_PROFILES } from '../../../compiler/src/targets';
-
-let compiled: Awaited<ReturnType<typeof mountNumberFieldFormatter>>;
-beforeAll(async () => {
-  compiled = await mountNumberFieldFormatter();
-  expect(validateIR(JSON.parse(JSON.stringify(compiled.owner.compiled.ir))).ok).toBe(true);
-  expect(
-    checkTargetOperations(compiled.owner.compiled.ir, TARGET_PROFILES['gpui-source-v1']).ok
-  ).toBe(false);
-  expect(compiled.owner.compiled.output.code).not.toMatch(
-    /(?:from\s*|import\s*\()['"]@proto\.ui\//
-  );
-});
-afterAll(async () => {
-  await compiled?.owner.dispose();
-});
 
 function formats(locale?: string, options?: NumberFieldFormatOptions) {
-  return [createNumberFieldFormat(locale, options), compiled.create(locale, options)];
+  return [createNumberFieldFormat(locale, options)];
 }
 
 describe('Number Field locale grammar', () => {

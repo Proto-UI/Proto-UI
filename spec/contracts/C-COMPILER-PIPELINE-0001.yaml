@@ -1,0 +1,72 @@
+id: C-COMPILER-PIPELINE-0001
+type: contract
+title: Proto UI v2 compilation pipeline, SSA IR invariants, LLVM Slot ABI, and 3-tier thin React output
+status: draft
+since: 0.3.0
+lifecycleRationale: >-
+  Defines the normative 0.4-scope compilation contract for the rebuilt private @proto.ui/compiler pipeline (#1809), covering TypeScript frontend extraction, Proto SSA IR verification and optimization, LLVM IR and 8-byte slot WASM ABI, 3-tier React emission, and structured diagnostics. Kept draft pending broader multi-target backends and independent review admission.
+
+summary: Normative behavioral boundaries for the v2 compiler pipeline from TypeScript prototype source through verified Proto SSA IR and LLVM IR/WASM to 3-tier thin React components.
+statement:
+  zh-CN: >-
+    `@proto.ui/compiler` v2 管线必须将合法的 Proto UI TypeScript 原型源码确定性地转换为经结构校验和优化的 Proto SSA IR（`PROTO_IR_VERSION = 2`）、合法的 Opaque-Pointer LLVM IR（`.ll`）以及按能力闭包分层的薄型 React 组件。规则谓词、状态转移内核与纯标量辅助函数在 LLVM/WASM 边界上遵循统一的 8 字节对齐槽 ABI（`props` / `states` 槽数组）；所有前后端错误须通过结构化诊断码显式报告并快速失败。
+
+  en: >-
+    The `@proto.ui/compiler` v2 pipeline must deterministically transform valid Proto UI TypeScript prototype sources into structurally verified and optimized Proto SSA IR (`PROTO_IR_VERSION = 2`), valid opaque-pointer LLVM IR (`.ll`), and capability-tiered thin React components. Lowered rule predicates, state transition kernels, and pure scalar helpers obey a uniform 8-byte aligned slot ABI across the LLVM/WASM boundary; all pipeline errors fail closed with structured diagnostic codes.
+
+criteria:
+  - id: C-COMPILER-PIPELINE-0001-FRONTEND
+    text:
+      zh-CN: 前端必须通过缓存 `ts.Program` 与 `ts.TypeChecker` 抽取 `definePrototype` / `defineAsHook` / `defineHook` 声明，递归收敛 authored hook、传入 `def` 的局部 helper 及回调内 `run.context.*` 访问，并计算精确的 64-bit `capabilityMask`。
+      en: The frontend must extract `definePrototype`, `defineAsHook`, and `defineHook` declarations via a cached `ts.Program` and `ts.TypeChecker`, transitively traversing authored hooks, local helpers receiving `def`, and callback `run.context.*` accesses to compute an exact 64-bit `capabilityMask`.
+  - id: C-COMPILER-PIPELINE-0001-SSA-IR
+    text:
+      zh-CN: Proto SSA IR 必须满足单赋值、显式基本块终结、目标标签存在与静态操作数/返回类型一致等结构不变量；任何非法 SSA 函数必须被 `verifySsaFunction` / `verifyModuleIR` 拒绝并返回 `PUI_IR0xx` 诊断。
+      en: Proto SSA IR must uphold single-assignment, explicit block termination, valid branch target labels, and operand/return type consistency; malformed SSA functions must be rejected by `verifySsaFunction` / `verifyModuleIR` with `PUI_IR0xx` diagnostics.
+  - id: C-COMPILER-PIPELINE-0001-OPT
+    text:
+      zh-CN: 目标无关优化 Pass（常量折叠、代数化简、不可达块裁剪、反向活跃性 DCE）必须在保持语义与副作用指令（`store_state`/`call`/`host_op`）的前提下收敛，且优化后 IR 必须重新通过结构校验。
+      en: Target-independent optimization passes (constant folding, algebraic simplification, dead-block pruning, and backward liveness DCE) must preserve semantics and side-effecting instructions (`store_state`, `call`, `host_op`) and re-pass structural verification.
+  - id: C-COMPILER-PIPELINE-0001-LLVM-ABI
+    text:
+      zh-CN: LLVM 发射器必须产出可通过 `opt -passes=verify` 校验的 Opaque-Pointer `.ll`，导出 `<protoSym>_capabilities`、规则谓词/位图与状态转移内核，遵循统一 8 字节对齐槽 ABI（slot `k` 偏移 `8 * k`），并可通过 `opt`/`llc`/`wasm-ld` 编译为可在 `WebAssembly.instantiate` 执行的 `.wasm` 二进制；非法 LLVM IR 必须返回 `PUI_LLVM002`。
+      en: The LLVM emitter must produce opaque-pointer `.ll` accepted by `opt -passes=verify`, exporting `<protoSym>_capabilities`, rule predicate/mask functions, and state transition kernels under the uniform 8-byte aligned slot ABI (slot `k` at byte offset `8 * k`), compilable via `opt`/`llc`/`wasm-ld` to executable `.wasm`; malformed LLVM IR must fail with `PUI_LLVM002`.
+  - id: C-COMPILER-PIPELINE-0001-THIN-EMIT
+    text:
+      zh-CN: React 代码生成器必须严格输出三层薄产物：`static` 零 Proto 运行时导入、`reactive` 使用原生 `React.useState` 且零 Proto kernel 导入、`protocol` 输出紧凑强类型包装并委托 `@proto.ui/compiler/runtime`；编译器源码中不得包含 `String.raw` 嵌入式运行时，且官方 `packages/prototypes/base/src/**/*.proto.ts` 语料全部可薄型编译并通过执行验证。
+      en: The React emitter must emit strictly tiered thin output (`static` with zero Proto runtime imports, `reactive` with native `React.useState` and zero Proto kernel imports, and `protocol` as a compact strictly typed wrapper over `@proto.ui/compiler/runtime`), with zero `String.raw` embedded runtimes in compiler source and full compilation coverage across `packages/prototypes/base/src/**/*.proto.ts`.
+  - id: C-COMPILER-PIPELINE-0001-DIAGNOSTICS
+    text:
+      zh-CN: 编译器 API 与 CLI（`info`、`check`、`ir`、`llvm`、`compile`）必须返回结构化诊断与确定性退出码，缺失原型声明时返回 `PUI_FE002`，在工具链不可用或校验失败时显式报错而不静默跳过。
+      en: Compiler APIs and CLI subcommands (`info`, `check`, `ir`, `llvm`, `compile`) must emit structured diagnostics and deterministic exit codes, report `PUI_FE002` when no prototype is found (unless hook-only is permitted), and fail explicitly on verification or toolchain errors.
+dependsOn:
+  decisions:
+    - D-COMPILER-ARCH-0001
+sources:
+  - path: internal/compiler/v2-compilation-spec.md
+  - path: packages/compiler/src/frontend/extract.ts
+  - path: packages/compiler/src/ir/verify.ts
+  - path: packages/compiler/src/ir/passes.ts
+  - path: packages/compiler/src/llvm/emit.ts
+  - path: packages/compiler/src/llvm/toolchain.ts
+  - path: packages/compiler/src/targets/react.ts
+  - path: packages/compiler/src/runtime/index.ts
+openQuestions:
+  - id: C-COMPILER-PIPELINE-0001-Q-NON-REACT-TARGETS
+    question:
+      zh-CN: 当前仅 React 与 LLVM/WASM 后端具备完整端到端执行验证；Vue 3、Web Components 与 GPUI 原生后端的薄型契约与消费者证据尚待 0.4 后续批次补齐。
+      en: Only React and LLVM/WASM backends have full end-to-end execution evidence today; thin Vue 3, Web Components, and native GPUI consumer contracts remain for follow-up 0.4 slices.
+    blocks:
+      - activation:C-COMPILER-PIPELINE-0001
+revisions:
+  - version: 0.3.0
+    change: introduced
+    summary: Defined the v2 compiler pipeline contract for TS TypeChecker extraction, Proto SSA IR verification/optimization, LLVM 8-byte slot ABI/WASM execution, 3-tier thin React codegen, and CLI diagnostics (#1809).
+tags:
+  - compiler
+  - pipeline
+  - ssa
+  - llvm
+  - wasm
+  - react
+  - 0.4-scope

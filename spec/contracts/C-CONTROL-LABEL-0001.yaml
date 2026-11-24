@@ -97,7 +97,6 @@ references:
       P-BASE-NUMBER-FIELD,
     ]
 sources:
-  - path: packages/compiler/src/gpui-native-control-label.ts
   - path: packages/modules/control-label/src/anatomy-pair.ts
   - path: packages/modules/control-label/test/anatomy-pair.test.ts
   - path: packages/core/src/control-label.ts

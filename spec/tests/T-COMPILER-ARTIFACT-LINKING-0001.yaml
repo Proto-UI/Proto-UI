@@ -32,8 +32,7 @@ cases:
 implementations:
   - id: artifact-linking
     kind: module-test
-    status: needs-review
-    path: packages/compiler/src/artifact-linking.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -42,10 +41,11 @@ implementations:
         T-COMPILER-ARTIFACT-LINKING-0001-CASE-ABI,
         T-COMPILER-ARTIFACT-LINKING-0001-CASE-PROVENANCE,
       ]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: linked-consumers
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/artifact-linking-consumer.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -57,10 +57,10 @@ implementations:
     notes:
       - Tests use independently compiled, written and read libraries followed by the public linker and ordinary ESM imports; they do not merge support files in a test loader.
       - Execution uses happy-dom with the actual framework packages; this is not native-browser acceptance or SSR hydration evidence.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: published-artifact-migration
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/native-support-published-migration.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -70,6 +70,7 @@ implementations:
     notes:
       - Fixed old compiler CLI captures remain byte-exact; new output is compiled independently and linked through the production migration API of the compiler library.
       - Ordinary Vue2 imports exercise old/current pairing in both directions, association rebinding and repeated mount; this remains simulated-DOM evidence.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
 verifies:
   contracts:
     - id: C-COMPILER-ARTIFACT-LINKING-0001

@@ -6,30 +6,37 @@ since: 0.3.0-alpha.1
 lifecycleRationale: >-
   Human-directed compiler repair defines explicit source profile policy without promoting the private compiler or claiming universal Adapter equivalence.
 
+
 summary: Versioned artifact metadata separates channel behavior from host update policy and support ABI.
 statement:
   en: >-
     A compiler target identifies observable semantics as well as operations and dependencies. Props receipt, state/context mutation, update intent, commit acknowledgement, owner lifetime and nominal identity must be reviewable in the generated artifact. An Adapter comparison identifies its exact options; a matching policy is not itself conformance evidence.
 
+
   zh-CN: >-
     编译目标须声明可观察语义以及操作与依赖。Props 接收、State/Context 写入、update intent、commit 确认、owner 生命周期和 nominal identity 必须可从产物审查。Adapter 比较须标明具体选项；策略相同本身不构成一致性证据。
+
 
 criteria:
   - id: C-COMPILER-OBSERVABLES-0001-PROPS
     text: >-
       The explicit props policy updates the full raw/resolved channel and dispatches watchers without a host render request. The host policy adds an explicit host-owned update request after a changed post-initial input. Initial hydration and identical input snapshots do not add update cycles. State and Context writes remain explicit-update channels under either policy.
 
+
   - id: C-COMPILER-OBSERVABLES-0001-COMPATIBILITY
     text: >-
       Existing v1 defaults remain observable: React Runtime and Vue 2 source use host props updates; React DOM, Vue 3, Web Component and GPUI source use explicit updates. Callers select another admitted policy with propsUpdatePolicy. Unsupported policy/target combinations diagnose before generation. No silent profile fallback occurs.
+
 
   - id: C-COMPILER-OBSERVABLES-0001-LIFETIME
     text: >-
       Accepted update intents may coalesce, updated follows the actual host commit, repeatable view detach retains the owner, and terminal disposal invalidates retained public handles. Framework-native children use ordinary slots and imports. Shared nominal identities require an explicit artifact link, not equal debug names.
 
+
   - id: C-COMPILER-OBSERVABLES-0001-EVIDENCE
     text: >-
       Emitted provenance records proto-ui-observables-v1 and selected policy. Each supported Web source consumer is exercised through the actual compilation and artifact writer APIs. Independent expected traces distinguish input receipt, state notification, DOM commit, duplicate updates and disposal. Adapter comparison metadata records the comparison configuration and does not assert equivalence.
+
 
 dependsOn:
   contracts:
@@ -41,9 +48,7 @@ relates:
   decisions:
     - D-ADAPTER-PROFILE-0001
 sources:
-  - path: packages/compiler/src/observable-semantics.ts
-  - path: packages/compiler/src/targets.ts
-  - path: packages/compiler/test/observable-consumer.test.ts
+  - path: internal/compiler/v2-compilation-spec.md
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

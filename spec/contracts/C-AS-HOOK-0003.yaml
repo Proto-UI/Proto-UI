@@ -57,10 +57,6 @@ sources:
     sections:
       - defineAsHook
       - normalizeAsHookRender
-  - path: packages/compiler/src/parser-module.ts
-    sections:
-      - static defineAsHook forwarding to an admitted definePrototype source descriptor
-      - inherited Module declarations and original setup source ownership
   - path: packages/runtime/test/contract/as-hook.v0.contract.test.ts
     sections:
       - AS-HOOK-0500

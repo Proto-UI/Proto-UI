@@ -29,25 +29,27 @@ cases:
 implementations:
   - id: checked-numeric-schema
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/gpui-a11y-value.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: direct-source-target-admission
     kind: module-test
-    status: needs-review
-    path: packages/compiler/test/numeric-a11y-emitter-admission.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-SCHEMA]
+    notes:
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: native-numeric-bridge
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/fixtures/gpui-a11y-value/consumer.rs
+    status: missing
     required: true
     consumesCases: [T-COMPILER-GPUI-A11Y-VALUE-0001-CASE-NATIVE]
     notes:
       - Compile the authored source with produce.mjs and execute cargo test; generated Rust is never patched.
       - The SDK bridge call shares the real callback implementation but does not simulate the private GPUI Window action dispatcher or prove OS delivery.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: runtime-numeric-request
     kind: runtime-test
     status: needs-review

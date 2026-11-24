@@ -169,13 +169,13 @@ implementations:
       - 'Foreign identity, complete frame validation, rejected rebind and terminal cleanup.'
   - id: owned-decoration-compiler-rejection
     kind: runtime-test
-    status: active
-    path: packages/compiler/test/owned-decoration-rejection.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
     notes:
       - 'Unsupported portable source/serialized addressing rejects; legal host control remains accepted.'
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: owned-decoration-native-browser-planned
     kind: adapter-test
     status: planned

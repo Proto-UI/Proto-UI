@@ -42,7 +42,6 @@ verifies:
   tests:
     - T-CONTROL-LABEL-0001
 sources:
-  - path: packages/compiler/src/gpui-native-control-label.ts
   - path: packages/modules/control-label/src/create.ts
   - path: packages/modules/control-label/src/registry.ts
   - path: packages/modules/control-label/src/caps.ts

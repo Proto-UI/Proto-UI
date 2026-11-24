@@ -63,9 +63,6 @@ sources:
   - path: packages/modules/a11y/src/web.ts
   - path: packages/adapters/web-component/src/commit.ts
   - path: packages/adapters/base/src/platform/web-owned-decoration-stage.ts
-  - path: packages/compiler/src/native-support/web-decoration.ts
-  - path: packages/compiler/src/native-style.ts
-  - path: packages/compiler/src/react-source.ts
 dependsOn:
   contracts:
     - C-FEEDBACK-STYLE-0001

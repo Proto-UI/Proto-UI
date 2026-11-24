@@ -65,8 +65,7 @@ cases:
 implementations:
   - id: scalar-conversions
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/scalar-conversions.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -77,10 +76,10 @@ implementations:
     notes:
       - Thirteen cases passed locally, including actual generated Rust execution with Cargo; this is not a GPUI Window execution.
       - The language-support dependency is resolved into a lockfile before testing with --locked; prepared offline runners may set CARGO_NET_OFFLINE.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: scalar-rounding
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/scalar-round.test.ts
+    status: missing
     required: true
     consumesCases:
       [
@@ -90,14 +89,15 @@ implementations:
       ]
     notes:
       - The recorded fourteen-case run includes emitted Rust bit comparisons for ties, signed zero and precision boundaries; full native component admission remains separate.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: string-coercion
     kind: runtime-test
-    status: needs-review
-    path: packages/compiler/test/string-coercion.test.ts
+    status: missing
     required: true
     consumesCases: [T-COMPILER-SCALAR-0001-CASE-NEGATIVE, T-COMPILER-SCALAR-0001-CASE-WEB-STRING]
     notes:
       - Twenty-five cases passed after replacing the stale blanket GPUI rejection with bounded scalar success and explicit opaque/structured negatives; direct Qt/Flutter String rejection remains covered.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: mounted-gpui-scalar-boundaries
     kind: runtime-test
     status: missing

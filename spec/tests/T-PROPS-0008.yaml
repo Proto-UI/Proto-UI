@@ -73,9 +73,8 @@ cases:
 implementations:
   - id: compiler-native-dom-raw-watchers
     kind: runtime-test
-    status: passing
-    path: packages/compiler/test/raw-props-watch-consumer.test.ts
-    required: true
+    status: missing
+    required: false
     consumesCases:
       - T-PROPS-0008-CASE-GET-RAW
       - T-PROPS-0008-CASE-UNDECLARED-KEYS
@@ -89,6 +88,7 @@ implementations:
       - Executes actual generated React, Vue and Web Component owners through ordinary framework imports; covers Object.is diffs, callback snapshot identity, raw-all/keyed/resolved order and the specific escape-hatch diagnostic.
       - A native Web Component notification synchronously disposes its owner; the remaining raw and resolved callbacks must not run.
       - GPUI registration admission and Vue2 deferred diagnostics are checked separately; this suite does not establish native GPUI event delivery or cross-target runtime disposer semantics.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: module-props-watch-raw
     kind: module-test
     status: passing

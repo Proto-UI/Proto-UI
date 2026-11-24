@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { compilePrototype } from '../../packages/compiler/src/memory';
+import { compilePrototype } from '../../packages/compiler/src/index';
 import { readBrowserSource } from '../compiler/browser-assets';
 import {
   browserEvidenceRecord,
@@ -346,16 +346,10 @@ try {
         fileName: source.entry,
         exportName: source.exportName,
         files: source.files,
-        sourceImports: source.sourceImports,
-        profile,
       });
       if (!expected.ok) throw new Error(JSON.stringify(expected.diagnostics));
-      const expectedFiles = new Map([
-        ['entry.ts', expected.value.output.code],
-        ...(expected.value.output.supportingFiles ?? []).map(
-          (file) => [file.path, file.contents] as const
-        ),
-      ]);
+      const expectedCode = expected.value.primary?.react.code ?? '';
+      const expectedFiles = new Map<string, string>([['entry.ts', expectedCode]]);
       if ((await panel.locator('[data-generated-source]').getAttribute('open')) === null)
         await panel.locator('[data-generated-source] > summary').click();
       const actualFiles = await panel
@@ -403,7 +397,7 @@ try {
         revision: await panel.getAttribute('data-compiler-revision'),
         requestSha256: await panel.getAttribute('data-request-sha256'),
         targetSha256: await panel.getAttribute('data-target-sha256'),
-        generatedEntrySha256: createHash('sha256').update(expected.value.output.code).digest('hex'),
+        generatedEntrySha256: createHash('sha256').update(expectedCode).digest('hex'),
       });
     });
   }

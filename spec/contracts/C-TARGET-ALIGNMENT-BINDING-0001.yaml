@@ -38,8 +38,6 @@ dependsOn:
 sources:
   - path: packages/modules/positioning/src/web/target-alignment-host.ts
   - path: packages/modules/overlay/src/target-alignment-binding.ts
-  - path: packages/compiler/src/native-support/web-target-alignment.ts
-  - path: packages/compiler/src/native-support/dom-modules.template.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

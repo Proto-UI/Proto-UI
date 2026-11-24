@@ -1,25 +1,22 @@
 // @vitest-environment node
 import { expect, it } from 'vitest';
-import { parsePrototype } from '../../../compiler/src/parser';
-import { checkTargetOperations, resolveTargetProfile } from '../../../compiler/src/targets';
+import { compilePrototype } from '../../../compiler/src';
 
-it('does not claim compiler/native lowering for the experimental source input hook', () => {
-  const parsed = parsePrototype(
-    `import {definePrototype} from '@proto.ui/core';
-import {asContextMenuInput} from '@proto.ui/hooks';
-export default definePrototype({name:'context-input-admission',setup(){asContextMenuInput();}});`,
-    { fileName: 'entry.proto.ts' }
+it('records experimental context menu input hook without inventing static lowering (v2 / #1809)', () => {
+  const result = compilePrototype(
+    `import { definePrototype } from '@proto.ui/core';
+import { asContextMenuInput } from '@proto.ui/hooks';
+export default definePrototype({
+  name: 'context-input-admission',
+  setup() {
+    asContextMenuInput();
+  },
+});`,
+    { fileName: 'entry.proto.ts', llvm: { verify: true } }
   );
-  for (const profile of [
-    'react-dom-source-v1',
-    'vue-source-v1',
-    'vue2-source-v1',
-    'web-component-source-v1',
-    'gpui-source-v1',
-  ]) {
-    const target = resolveTargetProfile(profile);
-    expect(target.ok, profile).toBe(true);
-    const admitted = parsed.ok && target.ok && checkTargetOperations(parsed.value, target.value).ok;
-    expect(admitted, profile).toBe(false);
-  }
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  const proto = result.value.ir.prototypes[0];
+  expect(proto.tier).toBe('protocol');
+  expect(proto.hooks.some((h) => h.name === 'asContextMenuInput')).toBe(true);
 });

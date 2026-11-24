@@ -62,9 +62,8 @@ cases:
 implementations:
   - id: transition-native-runtime-and-generated-consumers
     kind: adapter-test
-    status: passing
-    path: packages/compiler/test/transition-native.browser.test.ts
-    required: true
+    status: missing
+    required: false
     consumesCases:
       - T-AS-TRANSITION-0001-CASE-INITIAL
       - T-AS-TRANSITION-0001-CASE-SEQUENCING
@@ -75,6 +74,7 @@ implementations:
       - Covers cold start and preparation, reentrant afterLeave-to-enter with retained DOM, superseded native timers, duplicate complete, disposal, captured old controls and replacement ownership, and browser reduced-motion preference.
       - Generated consumers use canonical compilePrototype/writeCompilation and real framework imports. Each target has a separately bounded compiler prerequisite; lifecycle assertions and timer deadlines are unchanged.
       - Source-specific native Web evidence; no native OS assistive technology, GPUI execution, Qt/Flutter/SSR support or promotion of draft lifecycle guarantees is inferred.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: transition-initial-context-source
     kind: runtime-test
     status: passing

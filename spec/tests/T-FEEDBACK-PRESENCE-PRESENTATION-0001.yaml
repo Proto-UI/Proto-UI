@@ -131,8 +131,7 @@ implementations:
     exercises: [P-BOOTSTRAP-2-3-2-DIALOG-CONTENT, P-BOOTSTRAP-2-3-2-ALERT-DIALOG]
   - id: presence-native-declaration-and-owner
     kind: module-test
-    status: passing
-    path: packages/compiler/test/native-presence-presentation.test.ts
+    status: missing
     required: true
     consumesCases:
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-SNAPSHOT
@@ -141,6 +140,7 @@ implementations:
       - T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE
     notes:
       - Ordinary four-Web imports of actual authored asTransition and direct generated host controls use a deterministic DOM-model clock. They do not establish physical browser frames or the original Drawer evidence.
+      - Legacy v1 compiler implementation removed in clean-slate 0.4 rebuild (#1809); tracked as pathless missing evidence debt pending v2 coverage.
   - id: presence-native-and-runtime-browser
     kind: workspace-check
     status: planned
