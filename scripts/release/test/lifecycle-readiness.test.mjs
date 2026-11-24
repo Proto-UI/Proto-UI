@@ -26,10 +26,6 @@ const version = readFileSync(path.join(root, 'VERSION'), 'utf8').trim();
 const plan = JSON.parse(
   readFileSync(path.join(root, 'internal/releases', version, 'lifecycle-dispositions.json'), 'utf8')
 );
-const ids = plan.slices
-  .flatMap((slice) => slice.entities)
-  .slice(0, 2)
-  .join(',');
 
 function assertCurrentDraftDispositions(data) {
   // Read the authored inventory independently of the report producer. A disposition
@@ -60,24 +56,24 @@ function assertCurrentDraftDispositions(data) {
   }
 }
 
-test('release lifecycle CLI distinguishes scoped review from full-inventory completion', () => {
-  assert.notEqual(ids, '', 'the authored plan must provide a nonempty review scope');
-  const scoped = report(['--check', '--entities', ids, '--json']);
+test('release lifecycle CLI accepts the reviewed alpha.2 scope and rejects its incomplete inventory', () => {
+  const partial = ['--version', '0.3.0-alpha.2', '--check'];
+  const ids = ['C-CONTROL-LABEL-0001', 'M-CONTROL-LABEL-0001'];
+  const scoped = report([...partial, '--entities', ids.join(','), '--json']);
   assert.equal(scoped.status, 0, scoped.stderr);
   const data = JSON.parse(scoped.stdout);
   assert.equal(data.basis, 'current-catalog');
-  assertCurrentDraftDispositions(data);
+  assert.equal(data.version, '0.3.0-alpha.2');
   assert.ok(data.unreviewedEntities.length > 0);
-  assert.equal(
-    data.rows
-      .filter((row) => ids.split(',').includes(row.entityId))
-      .every((row) => row.status === 'draft'),
-    true
-  );
-  const full = report(['--check']);
+  for (const id of ids) {
+    const row = data.rows.find((candidate) => candidate.entityId === id);
+    assert.equal(row?.draftAtVersion, true, id);
+    assert.equal(row.disposition.id, 'alpha.2-control-label-compiler-repair');
+  }
+  const full = report(partial);
   assert.equal(full.status, 1);
   assert.match(full.stderr, /has no authored release disposition/);
-  const wrongScope = report(['--check', '--entities', 'C-ABSENT-0001']);
+  const wrongScope = report([...partial, '--entities', 'C-ABSENT-0001']);
   assert.equal(wrongScope.status, 1);
   assert.match(wrongScope.stderr, /outside the report scope/);
 });
