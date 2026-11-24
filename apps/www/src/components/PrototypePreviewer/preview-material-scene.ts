@@ -111,6 +111,8 @@ function createScene(
       releases.push(() => attachedScopes.delete(scope));
     }
     attribute(scope, 'data-material-scene', 'visible-app-canvas');
+    const runtimeBox = presentation === 'preview' && parent.closest('.pui-runtime-box');
+    const previewRadius = THEME.light['radius-xl'];
     const scopeStyles = {
       position: 'relative',
       isolation: 'isolate',
@@ -188,6 +190,7 @@ function createScene(
     let resolution: MediaQueryList | undefined;
     let resolutionRatio: number | undefined;
     let lastSourceSignature = '';
+    let roundedPaintAvailable: boolean | undefined;
     const originalMinHeight = scope.style.getPropertyValue('min-height');
     const originalMinPriority = scope.style.getPropertyPriority('min-height');
     let lastMinHeight: string | undefined;
@@ -280,18 +283,55 @@ function createScene(
         for (const listener of [...paletteListeners]) listener();
       }
       const rect = canvas.getBoundingClientRect();
+      const matte = roundedPaintAvailable ? opaquePreviewMatte(scope, win) : null;
       const signature = JSON.stringify([
         rect.width,
         rect.height,
         win.devicePixelRatio,
         dark,
         phase,
+        matte,
       ]);
       if (!force && signature === lastSourceSignature && lease.current()) return;
       lastSourceSignature = signature;
       lease.draw((ctx, width, height) => {
         if (presentation === 'preview') {
-          paintPreviewBackdrop(ctx, width, height, dark, phase);
+          const paintMatte =
+            roundedPaintAvailable === undefined && runtimeBox && typeof ctx.roundRect === 'function'
+              ? opaquePreviewMatte(scope, win)
+              : matte;
+          if (
+            roundedPaintAvailable === undefined &&
+            runtimeBox &&
+            typeof ctx.roundRect === 'function'
+          ) {
+            // Describe the drawn stage; never clip its interactive subtree.
+            style(scope, 'border-radius', previewRadius);
+          }
+          roundedPaintAvailable = Boolean(runtimeBox && typeof ctx.roundRect === 'function');
+          if (paintMatte) {
+            // Paint the area outside the rounded design in the same opaque page
+            // color. This is still the visible sampled canvas: CSS-clipping the
+            // finished canvas would leave invisible corner pixels in the lease.
+            ctx.fillStyle = paintMatte;
+            ctx.fillRect(0, 0, width, height);
+            ctx.save();
+            try {
+              const radius = Math.min(
+                parseFloat(previewRadius) * win.devicePixelRatio,
+                width / 2,
+                height / 2
+              );
+              ctx.beginPath();
+              ctx.roundRect(0, 0, width, height, radius);
+              ctx.clip();
+              paintPreviewBackdrop(ctx, width, height, dark, phase);
+            } finally {
+              ctx.restore();
+            }
+          } else {
+            paintPreviewBackdrop(ctx, width, height, dark, phase);
+          }
           return;
         }
         ctx.fillStyle = dark ? '#182238' : '#e9eef8';
@@ -495,6 +535,25 @@ function createScene(
     }
     throw primary;
   }
+}
+
+/** Only a provably flat opaque ancestor can supply the corners of this paint.
+ * Keep the original rectangular source on unknown/blended page backgrounds. */
+function opaquePreviewMatte(scope: HTMLElement, win: Window): string | null {
+  for (let node = scope.parentElement; node; node = node.parentElement) {
+    const css = win.getComputedStyle(node);
+    if (
+      (css.backgroundImage && css.backgroundImage !== 'none') ||
+      (css.opacity && css.opacity !== '1') ||
+      (css.mixBlendMode && css.mixBlendMode !== 'normal')
+    )
+      return null;
+    const color = css.backgroundColor;
+    if (!color || color === 'transparent' || /^rgba\([^)]*,\s*0\)$/.test(color)) continue;
+    // Accept common absolute opaque CSS colors; any explicit alpha is unknown.
+    return /^(?:rgb|oklch|oklab|lab|lch|color)\([^/]+\)$/i.test(color) ? color : null;
+  }
+  return null;
 }
 
 /** Low-frequency landscape-like layers give refraction a real spatial signal

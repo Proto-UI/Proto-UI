@@ -6,7 +6,7 @@ since: 0.3.0-alpha.1
 lifecycleRationale: Draft all-Base coverage increment. Source/unit availability is not release, browser paint, Compiler or native conformance admission.
 summary: A genuine asCheckboxIndicator projection; Base retains checkbox semantics and this part contributes only appearance.
 statement:
-  en: The authored Prototype invokes asCheckboxIndicator once. An independently authored 14px line glyph chooses mixed before checked and omits the glyph when unchecked. It is aria-hidden, pointer-transparent, and does not copy Glyphicons.
+  en: The authored Prototype invokes asCheckboxIndicator once. An independently authored 12px line glyph chooses mixed before checked and omits the glyph when unchecked. It is aria-hidden, pointer-transparent, and does not copy Glyphicons.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR-BASE
     text:
@@ -16,7 +16,7 @@ criteria:
       en: The indicator derives checked and indeterminate from the nearest same-domain Base Checkbox root; it owns no value props, activation, outward change signal or focus target.
   - id: P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR-VISUAL
     text:
-      en: An independently authored 14px line glyph chooses mixed before checked and omits the glyph when unchecked. It is aria-hidden, pointer-transparent, and does not copy Glyphicons.
+      en: An independently authored 12px line glyph chooses mixed before checked and omits the glyph when unchecked. It is aria-hidden, pointer-transparent, and does not copy Glyphicons.
   - id: P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR-CLOSURE
     text:
       en: All component appearance is declared by Prototype feedback and Rules and closes through the source-derived finite physical token renderer. No website-only component CSS may supply missing default intent.

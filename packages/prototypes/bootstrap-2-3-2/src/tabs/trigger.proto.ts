@@ -20,7 +20,7 @@ export default definePrototype<FamilyTabsTriggerProps, TabsTriggerExposes>({
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'inline-flex flex-none items-center justify-center px-[12px] py-[8px] mr-[2px] mb-[-1px] border border-transparent rounded-t-[4px] text-[14px] leading-[20px] text-[#08c] outline-none'
+            'inline-flex flex-none items-center justify-center px-[12px] py-[8px] mr-[2px] mb-[-1px] border border-transparent rounded-t-[4px] text-[14px] leading-[20px] text-[#08c] select-none outline-none'
           )
         ),
     });
