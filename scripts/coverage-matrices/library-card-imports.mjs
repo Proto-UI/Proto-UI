@@ -2,6 +2,8 @@
 // strings only; no family/directory exemption or stable lifecycle promotion.
 // Owner: www.gallery.ui-library-cards. Shared server closure is separately
 // owned by www.build.style-generation through startup-prerender-imports.mjs.
+// Source/edge reconciliation at main 248f8270d is recorded in
+// internal/records/2026-11-24-main-website-boundary-repair.json.
 export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   'packages/adapters/base/src/material/geometry-watch.ts': Object.freeze({
     sourceSha256: '258a99fb6f4f40aaa0276bef7c633126fb1c295af83f19a2bb3b55d20a8a6966',
@@ -24,14 +26,16 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/module-feedback/internal/shared-policy']),
   }),
   'packages/adapters/base/src/material/sink.ts': Object.freeze({
-    sourceSha256: '6e7d8dd7c421a8a3cd6d10be55dd6a4fe83b50d68feecb538981071dc7e62159',
+    sourceSha256: '6ad0b1c37967d3ac6aff3de80fc9492f99b727887fd1987e0f013e819931f2fe',
     specifiers: Object.freeze([
+      '../host/synchronous-steps',
       './initial-paint-bridge',
       './paint-mutations',
       '../events/pointer-contact',
       './contact-motion',
       './contact-carrier',
       './contact-profile',
+      './paint-reservation',
       './style-tint-profile',
       './image-prepare',
       './geometry-watch',
@@ -45,6 +49,22 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
       './source-refresh-task',
       './program-pool',
       './style',
+    ]),
+  }),
+  // Exact optical host transport: an owned reservation part and its outline.
+  // This grants no shell interaction or unbounded DOM discovery authority.
+  'packages/adapters/base/src/material/paint-reservation.ts': Object.freeze({
+    sourceSha256: '531a999fa3ff7683ae7d940809447b9306018ad889b5c297b373426c119e8e2d',
+    specifiers: Object.freeze(['./border-outline', '@proto.ui/core', '@proto.ui/module-feedback']),
+  }),
+  // Promote the existing contact-carrier edge to a complete source binding.
+  // The two new helpers preserve bounded canvas admission and all-step cleanup.
+  'packages/adapters/base/src/material/source.ts': Object.freeze({
+    sourceSha256: '6ff1e20429691dcfcff2be4685ceb685321df7e0156e6c8dada2c4c1d05aed1d',
+    specifiers: Object.freeze([
+      '../host/synchronous-steps',
+      './border-outline',
+      './contact-carrier',
     ]),
   }),
   'packages/adapters/base/src/material/initial-paint-experiment.ts': Object.freeze({
