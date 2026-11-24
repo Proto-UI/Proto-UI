@@ -304,7 +304,11 @@ export function scanRuleStateReadInventory(
             ts.isIdentifier(parent.name)
               ? sourceSummary.resolveSourceFunction(parent.name, source)
               : null;
-          if (!direct && (!alias || functionKey(alias) !== functionKey(helper)))
+          // Core's configured setup reference is not an opaque callback. The
+          // summary accepts it only when every reference stays in canonical
+          // registrations; the setup's actual Rule observations remain intact.
+          const configured = sourceSummary.isClosedAuthoredSetupReference(node, source);
+          if (!direct && !configured && (!alias || functionKey(alias) !== functionKey(helper)))
             markUnclosed(source, node, helper);
         }
       }

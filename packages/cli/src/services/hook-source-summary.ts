@@ -141,6 +141,12 @@ export type HookSourceSummaryContext = {
    * does not.
    */
   isAuthoredSetup(node: ts.Node, source: ts.SourceFile): boolean;
+  /**
+   * Classify a local function value whose every reference is a canonical Core
+   * setup registration. This closes the reference, not the setup's Rule reads
+   * or its runtime capabilities; ordinary calls and escaped values still fail.
+   */
+  isClosedAuthoredSetupReference(node: ts.Node, source: ts.SourceFile): boolean;
   isCanonicalPrototypeSetupProperty(property: ts.ObjectLiteralElementLike): boolean;
   /** Verify the actual lexical producer declaration, not a same-named shadow. */
   isSameSourceBinding(
@@ -6436,6 +6442,15 @@ function createHookSourceSummaryContextInternal(
         ?.declaration === property,
     isAuthoredProducerCall: (node, source) => producerForCall(node, source) !== null,
     isAuthoredSetup,
+    isClosedAuthoredSetupReference: (node, source) => {
+      const setup = functionFor(node, moduleForSource(source));
+      return (
+        !!setup &&
+        setup.module.source === source &&
+        isAuthoredSetup(setup.fn, source) &&
+        hasOnlyAuthoredSetupReferences(setup.fn, source)
+      );
+    },
     isCanonicalPrototypeSetupProperty: (property) =>
       ts.isObjectLiteralExpression(property.parent) &&
       configProperty(property.parent, 'setup') === property &&
