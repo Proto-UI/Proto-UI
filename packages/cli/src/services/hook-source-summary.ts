@@ -649,37 +649,6 @@ function isFunctionLike(node: ts.Node): node is ts.FunctionLikeDeclaration {
   return ts.isFunctionLike(node);
 }
 
-function isValueIdentifier(node: ts.Node): node is ts.Identifier {
-  if (!ts.isIdentifier(node)) return false;
-  const parent = node.parent;
-  if (!parent) return true;
-  if (ts.isPropertyAccessExpression(parent) && parent.name === node) return false;
-  if (ts.isBindingElement(parent) && parent.propertyName === node) return false;
-  if (
-    (ts.isVariableDeclaration(parent) ||
-      ts.isParameter(parent) ||
-      ts.isBindingElement(parent) ||
-      ts.isPropertyAssignment(parent) ||
-      ts.isPropertyDeclaration(parent) ||
-      ts.isMethodDeclaration(parent) ||
-      ts.isFunctionDeclaration(parent) ||
-      ts.isClassDeclaration(parent) ||
-      ts.isGetAccessorDeclaration(parent) ||
-      ts.isSetAccessorDeclaration(parent)) &&
-    parent.name === node
-  )
-    return false;
-  if (
-    (ts.isLabeledStatement(parent) ||
-      ts.isBreakStatement(parent) ||
-      ts.isContinueStatement(parent)) &&
-    parent.label === node
-  )
-    return false;
-  // A shorthand property is a value read, unlike an ordinary static key.
-  return true;
-}
-
 /**
  * `def.expose.state(key, handle)`. The runtime's named-state collection reads
  * these views from the same capture frame as the raw `def.state` entries, so a
@@ -2958,7 +2927,6 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         );
       });
     };
->>>>>>> theirs
     const runFunction = (
       fn: ts.FunctionLikeDeclaration,
       module: Module,

@@ -402,7 +402,6 @@ test('the actual Shadcn source package retains shared helpers, types and notices
     );
   assert.ok(readFileSync(path.join(root, result.filename)).length > 0);
 });
->>>>>>> origin/main
 test('ordinary runtime exports never imply a source publication', (t) => {
   const { pkg } = fixture(t);
   delete pkg.manifest.exports['.'].proto;
